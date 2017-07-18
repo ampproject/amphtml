@@ -834,6 +834,17 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         .to.deep.equal(['translateY(0px)', 'translateY(100px)']);
   });
 
+  it('should resolve index() for multiple targets', () => {
+    const requests = scan({
+      selector: '.target',
+      delay: 'calc(100ms * index())',
+      keyframes: {},
+    });
+    expect(requests).to.have.length(2);
+    expect(requests[0].timing.delay).to.equal(0);
+    expect(requests[1].timing.delay).to.equal(100);
+  });
+
   it('should be able to resolve animation with args', () => {
     const builder = new Builder(win, doc, 'https://acme.org/',
         vsync, /* resources */ null);
@@ -1041,6 +1052,51 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         });
       });
     });
+
+    it('should propagate vars and index by selector from parent', () => {
+      animation2Spec = {
+        duration: 2000,
+        keyframes: {},
+      };
+      return scanner.resolveRequests({
+        selector: '.target',
+        animation: 'animation2',
+        delay: 'calc((index() + 1) * 1s)',
+        subtargets: [
+          {index: 0, '--y': '11px'},
+          {index: 1, '--y': '12px'},
+        ],
+      }).then(requests => {
+        expect(requests).to.have.length(2);
+        expect(requests[0].timing.delay).to.equal(1000);
+        expect(requests[0].vars).to.deep.equal({'--y': '11px'});
+        expect(requests[1].timing.delay).to.equal(2000);
+        expect(requests[1].vars).to.deep.equal({'--y': '12px'});
+      });
+    });
+
+    it('should propagate vars and index by selector from child', () => {
+      animation2Spec = {
+        delay: 'calc((index() + 1) * 1s)',
+        subtargets: [
+          {index: 0, '--y': '11px'},
+          {index: 1, '--y': '12px'},
+        ],
+        duration: 2000,
+        keyframes: {},
+      };
+      return scanner.resolveRequests({
+        selector: '.target',
+        animation: 'animation2',
+        delay: 100,
+      }).then(requests => {
+        expect(requests).to.have.length(2);
+        expect(requests[0].timing.delay).to.equal(1000);
+        expect(requests[0].vars).to.deep.equal({'--y': '11px'});
+        expect(requests[1].timing.delay).to.equal(2000);
+        expect(requests[1].vars).to.deep.equal({'--y': '12px'});
+      });
+    });
   });
 
   describe('CSS evaluations', () => {
@@ -1100,7 +1156,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     it('should evaluate CSS for non-normalized values', () => {
       target1.style.fontSize = '10px';
       target1.style.width = '110px';
-      css.withTarget(target1, () => {
+      css.withTarget(target1, 0, () => {
         expect(css.resolveCss('10em')).to.equal('100px');
         expect(css.resolveCss('translateX(10em)'))
             .to.equal('translatex(100px)');
@@ -1122,7 +1178,8 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       expect(() => css.resolveCss('calc(10em + 10px)'))
           .to.throw(/target is specified/);
       target1.style.fontSize = '10px';
-      expect(css.withTarget(target1, () => css.resolveCss('calc(10em + 10px)')))
+      expect(css.withTarget(target1, 0,
+          () => css.resolveCss('calc(10em + 10px)')))
           .to.equal('110px');
     });
 
@@ -1180,7 +1237,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       // With element.
       warnStub.reset();
       stub.reset();
-      expect(css.withTarget(target1, () => css.getVar('--var1')).num_)
+      expect(css.withTarget(target1, 0, () => css.getVar('--var1')).num_)
           .to.equal(10);
       expect(stub).to.be.calledWith(target1, '--var1');
       expect(warnStub).to.have.callCount(0);
@@ -1192,7 +1249,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         // No element, but predefined vars.
         expect(css.getVar('--var1').num_).to.equal(11);
         // Predefined vars override the element.
-        expect(css.withTarget(target1, () => css.getVar('--var1')).num_)
+        expect(css.withTarget(target1, 0, () => css.getVar('--var1')).num_)
             .to.equal(11);
 
         expect(stub).to.not.be.called;
@@ -1235,15 +1292,23 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       expect(css.getViewportSize()).to.equal(size);
     });
 
+    it('should resolve current index', () => {
+      expect(() => css.getCurrentIndex()).to.throw(/target is specified/);
+      expect(css.withTarget(target1, 0, () => css.getCurrentIndex()))
+          .to.equal(0);
+      expect(css.withTarget(target1, 11, () => css.getCurrentIndex()))
+          .to.equal(11);
+    });
+
     it('should resolve current and root font size', () => {
       doc.documentElement.style.fontSize = '12px';
       expect(css.getRootFontSize()).to.equal(12);
 
       target1.style.fontSize = '16px';
       expect(() => css.getCurrentFontSize()).to.throw(/target is specified/);
-      expect(css.withTarget(target1, () => css.getCurrentFontSize()))
+      expect(css.withTarget(target1, 0, () => css.getCurrentFontSize()))
           .to.equal(16);
-      expect(css.withTarget(target2, () => css.getCurrentFontSize()))
+      expect(css.withTarget(target2, 0, () => css.getCurrentFontSize()))
           .to.equal(12);
     });
 
@@ -1251,7 +1316,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       target1.style.width = '11px';
       target1.style.height = '12px';
       expect(() => css.getCurrentElementSize()).to.throw(/target is specified/);
-      expect(css.withTarget(target1, () => css.getCurrentElementSize()))
+      expect(css.withTarget(target1, 0, () => css.getCurrentElementSize()))
           .to.deep.equal({width: 11, height: 12});
     });
 
@@ -1265,14 +1330,14 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       // Normal selectors search whole DOM and don't need context.
       expect(css.getElementSize('#target1', null))
           .to.deep.equal({width: 11, height: 12});
-      expect(css.withTarget(target2,
+      expect(css.withTarget(target2, 0,
           () => css.getElementSize('#target1', null)))
           .to.deep.equal({width: 11, height: 12});
 
       // Closest selectors always need a context node.
       expect(() => css.getElementSize('#target1', 'closest'))
           .to.throw(/target is specified/);
-      expect(css.withTarget(child,
+      expect(css.withTarget(child, 0,
           () => css.getElementSize('.parent', 'closest')))
           .to.deep.equal({width: 11, height: 12});
     });
