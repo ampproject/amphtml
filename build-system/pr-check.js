@@ -280,7 +280,7 @@ const command = {
     timedExecOrDie(
         `${gulp} test --nobuild --saucelabs --integration --compiled`);
   },
-  runVisualDiffTests: function(opt_pass=false) {
+  runVisualDiffTests: function(opt_pass) {
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     let cmd = 'ruby build-system/tasks/visual-diff.rb';
     if (opt_pass) {
