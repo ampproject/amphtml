@@ -48,10 +48,12 @@ describes.sandboxed('amp-ad-network-cloudflare-impl', {}, () => {
   let cloudflareImpl;
   let el;
   let doc;
+  let win;
 
   beforeEach(() => {
     return createIframePromise().then(f => {
       doc = f.doc;
+      win = f.win;
       el = doc.createElement('amp-ad');
       el.setAttribute('type', 'cloudflare');
       el.setAttribute('data-cf-network', 'cloudflare');
@@ -59,7 +61,7 @@ describes.sandboxed('amp-ad-network-cloudflare-impl', {}, () => {
           'https://firebolt.cloudflaredemo.com/a4a-ad.html');
       initializeElement(el, doc);
       sandbox.stub(
-          AmpAdNetworkCloudflareImpl.prototype, 'getSigningServiceNames',
+        AmpAdNetworkCloudflareImpl.prototype, 'getSigningServiceNames',
           () => {
             return ['cloudflare','cloudflare-dev'];
           });
