@@ -20,6 +20,10 @@ import {
   resetSharedState,
 } from '../amp-ad-network-adsense-impl';
 import {
+  ADSENSE_A4A_EXPERIMENT_NAME,
+  ADSENSE_EXPERIMENT_FEATURE,
+} from '../adsense-a4a-config';
+import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
 import {Services} from '../../../../src/services';
@@ -42,7 +46,6 @@ import {
   ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsHoldoutBranches,
 } from '../../../../ads/google/adsense-amp-auto-ads';
-import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 
 function createAdsenseImplElement(attributes, opt_doc, opt_tag) {
   const doc = opt_doc || document;
@@ -689,7 +692,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
 
     it('should return true if in experiment', () => {
-      impl.element.setAttribute(EXPERIMENT_ATTRIBUTE, '117152655');
+      forceExperimentBranch(impl.win, ADSENSE_A4A_EXPERIMENT_NAME,
+          ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST);
       expect(impl.delayAdRequestEnabled()).to.be.true;
     });
 

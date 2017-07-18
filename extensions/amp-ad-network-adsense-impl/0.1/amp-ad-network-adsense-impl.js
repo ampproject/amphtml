@@ -22,8 +22,11 @@
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
+  experimentFeatureEnabled,
+  ADSENSE_EXPERIMENT_FEATURE,
+} from './adsense-a4a-config';
+import {
   isInManualExperiment,
-  isInExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {isExperimentOn} from '../../../src/experiments';
 import {
@@ -131,7 +134,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return isInExperiment(this.element, '117152655');
+    return experimentFeatureEnabled(
+        this.win, ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST);
   }
 
   /** @override */
