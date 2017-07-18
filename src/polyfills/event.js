@@ -15,29 +15,36 @@
  */
 
 /**
+ *@constructor
+  */
+function Event(name, params) {
+  params = params || {bubbles: false, cancelable: false};
+  const evt = self.document.createEvent('Event');
+  evt.initEvent(
+      name,
+      params.bubbles,
+      params.cancelable
+  );
+  return evt;
+}
+
+/**
  * Sets the Event polyfill if it does not exist.
  * @param {!Window} win
  */
 export function install(win) {
   // win.Event is a function on Edge, Chrome, FF, Safari but
   // is an object on IE 11.
-  if (typeof win.Event === 'function') {
-    return;
+  if (typeof win.Event !== 'function') {
+
+    // supports >= IE 9. Below IE 9, window.Event.prototype is undefined
+    Event.prototype = win.Event.prototype;
+
+    win.Object.defineProperty(win, 'Event', {
+      configurable: false,
+      enumerable: false,
+      value: Event,
+      writable: false,
+    });
   }
-
-  function Event(name, params) {
-    params = params || {bubbles: false, cancelable: false};
-    const evt = win.document.createEvent('Event');
-    evt.initEvent(
-        name,
-        params.bubbles,
-        params.cancelable
-    );
-    return evt;
-  }
-
-  // supports >= IE 9. Below IE 9, window.Event.prototype is undefined
-  Event.prototype = win.Event.prototype;
-
-  win.Event = Event;
 }
