@@ -21,12 +21,9 @@ import {toggleExperiment} from '../../src/experiments';
 import {
   VideoInterface,
   VideoEvents,
-  VideoAnalyticsType,
+  VideoAnalyticsEvents,
 } from '../../src/video-interface';
-import {
-  assertTrackingVideo,
-  supportsAutoplay,
-} from '../../src/service/video-manager-impl';
+import {supportsAutoplay} from '../../src/service/video-manager-impl';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
@@ -89,15 +86,16 @@ export function runVideoPlayerIntegrationTests(
         const pauseButton = createButton(r, 'pause');
         const muteButton = createButton(r, 'mute');
         const unmuteButton = createButton(r, 'unmute');
+
         return listenOncePromise(r.video, VideoEvents.LOAD)
-            .then(() => {
-              const promise = listenOncePromise(r.video, VideoEvents.MUTED);
-              muteButton.click();
-              return promise;
-            })
             .then(() => {
               const promise = listenOncePromise(r.video, VideoEvents.PLAYING);
               playButton.click();
+              return promise;
+            })
+            .then(() => {
+              const promise = listenOncePromise(r.video, VideoEvents.MUTED);
+              muteButton.click();
               return promise;
             })
             .then(() => {
@@ -136,7 +134,7 @@ export function runVideoPlayerIntegrationTests(
     this.timeout(TIMEOUT);
     let video;
 
-    it.skip('should trigger play analytics when the video plays', function() {
+    it('should trigger play analytics when the video plays', function() {
       let playButton;
 
       return getVideoPlayer(
@@ -152,13 +150,9 @@ export function runVideoPlayerIntegrationTests(
         viewport.scrollIntoView(video);
         return promise;
       }).then(() => {
-        const promise = listenOncePromise(video, VideoEvents.ANALYTICS);
+        const promise = listenOncePromise(video, VideoAnalyticsEvents.PLAY);
         playButton.click();
         return promise;
-      }).then(event => {
-        const eventData = getData(event);
-        const type = eventData['type'];
-        expect(type).to.equal(VideoAnalyticsType.PLAY);
       });
     });
 
@@ -175,13 +169,9 @@ export function runVideoPlayerIntegrationTests(
         pauseButton = createButton(r, 'pause');
         return listenOncePromise(video, VideoEvents.PLAYING);
       }).then(() => {
-        const promise = listenOncePromise(video, VideoEvents.ANALYTICS);
+        const promise = listenOncePromise(video, VideoAnalyticsEvents.PAUSE);
         pauseButton.click();
         return promise;
-      }).then(event => {
-        const eventData = getData(event);
-        const type = eventData['type'];
-        expect(type).to.equal(VideoAnalyticsType.PAUSE);
       });
     });
 
@@ -199,17 +189,9 @@ export function runVideoPlayerIntegrationTests(
         pauseButton = createButton(r, 'pause');
         return promise;
       }).then(() => {
-        const sessionPromise = new Promise(resolve => {
-          listen(video, VideoEvents.ANALYTICS, event => {
-            const eventData = getData(event);
-            const type = eventData['type'];
-            if (type === VideoAnalyticsType.SESSION) {
-              resolve();
-            }
-          });
-        });
+        const promise = listenOncePromise(video, VideoAnalyticsEvents.PAUSE);
         pauseButton.click();
-        return sessionPromise;
+        return promise;
       });
     });
 
@@ -230,10 +212,7 @@ export function runVideoPlayerIntegrationTests(
       }).then(() => {
         // scroll to the bottom, make video fully visible
         viewport.setScrollTop(0);
-        return listenOncePromise(video, VideoEvents.ANALYTICS);
-      }).then(event => {
-        const eventData = getData(event);
-        expect(eventData['type']).to.equal(VideoAnalyticsType.SESSION_VISIBLE);
+        return listenOncePromise(video, VideoAnalyticsEvents.SESSION_VISIBLE);
       });
     });
 
@@ -244,20 +223,23 @@ export function runVideoPlayerIntegrationTests(
             autoplay: true,
           }
       ).then(r => {
+        // TODO(cvializ): Better way to detect which classes implement methods
+        // needed for tracking?
+        const tagName = r.video.tagName;
+        if (tagName !== 'AMP-VIDEO' &&
+            tagName !== 'AMP-TEST-FAKE-VIDEOPLAYER') {
+          this.skip();
+          return;
+        }
+
         video = r.video;
-        return listenOncePromise(video, VideoEvents.ENDED, true);
-      }).then(() => {
-        return listenOncePromise(video, VideoEvents.ANALYTICS);
-      }).then(event => {
-        const eventData = getData(event);
-        expect(eventData['type']).to.equal(VideoAnalyticsType.ENDED);
+        return listenOncePromise(video, VideoAnalyticsEvents.ENDED);
       });
     });
 
-    it.skip('should include current time, play state, etc.', function() {
+    it('should include current time, play state, etc.', function() {
       let playButton;
       let pauseButton;
-      let timer;
 
       return getVideoPlayer(
           {
@@ -266,19 +248,18 @@ export function runVideoPlayerIntegrationTests(
           }
       ).then(r => {
         video = r.video;
-        timer = Services.timerFor(r.video.implementation_.win);
         playButton = createButton(r, 'play');
         pauseButton = createButton(r, 'pause');
         return listenOncePromise(video, VideoEvents.LOAD);
       }).then(() => {
+        const promise = listenOncePromise(video, VideoEvents.PLAYING);
         playButton.click();
-        return timer.promise(1000);
+        return promise;
       }).then(() => {
         pauseButton.click();
-        return listenOncePromise(video, VideoEvents.ANALYTICS);
+        return listenOncePromise(video, VideoAnalyticsEvents.PAUSE);
       }).then(event => {
-        const eventData = getData(event);
-        const details = eventData['details'];
+        const details = getData(event);
         const playedRanges = JSON.parse(details.playedRangesJson);
         expect(details.autoplay).to.be.a('boolean');
         expect(details.currentTime).to.be.a('number');
@@ -286,27 +267,9 @@ export function runVideoPlayerIntegrationTests(
         expect(details.height).to.be.a('number');
         expect(details.id).to.be.a('string');
         expect(details.playedTotal).to.be.a('number');
-        expect(playedRanges[0][0]).to.be.a('number');
+        expect(playedRanges).to.be.an('array');
         expect(details.state).to.be.a('string');
         expect(details.width).to.be.a('number');
-      });
-    });
-
-    beforeEach(function() {
-      this.timeout(TIMEOUT);
-
-      // Skip analytics tests if the video implementation
-      // doesn't support analytics.
-      return getVideoPlayer(
-          {
-            outsideView: false,
-            autoplay: false,
-          }
-      ).then(r => {
-        video = r.video;
-        if (!assertTrackingVideo(video.implementation_)) {
-          this.skip();
-        }
       });
     });
 
@@ -505,8 +468,7 @@ export function runVideoPlayerIntegrationTests(
       });
 
       // TODO(aghassemi, #9379): Flaky on Safari 9.
-      it.skip('should play/pause when video ' +
-          'enters/exits viewport', () => {
+      it('should play/pause when video enters/exits viewport', function() {
         let video;
         let viewport;
         return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
@@ -622,15 +584,18 @@ export function runVideoPlayerIntegrationTests(
           sizer.position = 'relative';
           sizer.style.height = '200vh';
 
+          const builtPromise = new Promise(resolve => {
+            return listen(video, VideoEvents.REGISTERED, () => {
+              resolve({video, fixture});
+            });
+          });
+
           fixture.doc.body.appendChild(sizer);
           fixture.doc.body.appendChild(video);
           fixtureGlobal = fixture;
           videoGlobal = video;
-          return poll('video built', () => {
-            return video.implementation_ && video.implementation_.play;
-          }, /* opt_onError */ undefined, /* opt_timeout */ 5000).then(() => {
-            return {video, fixture};
-          });
+
+          return builtPromise;
         });
   }
 
