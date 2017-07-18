@@ -342,9 +342,7 @@ describes.sandboxed('AMP GWD runtime', {}, () => {
 
           expect(triggeredAmpEventNames)
               .to.deep.equal(['foo123event-1', 'foo123event-2']);
-          expect(triggeredEvents.map((event) => event.type))
-              .to.deep.equal(['gwd.timelineEvent', 'gwd.timelineEvent']);
-          expect(triggeredEvents.map((event) => event.detail.eventName))
+          expect(triggeredEvents.map((event) => event.eventName))
               .to.deep.equal(['event-1', 'event-2']);
         });
 
