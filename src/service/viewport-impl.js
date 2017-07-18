@@ -416,22 +416,39 @@ export class Viewport {
    * @param {!Element} element
    * @param {number=} duration
    * @param {string=} curve
+   * @param {string=} pos (takes one of 'top', 'bottom', 'center')
    * @return {!Promise}
    */
-  animateScrollIntoView(element, duration = 500, curve = 'ease-in') {
-    const elementTop = this.binding_.getLayoutRect(element).top;
-    const newScrollTop = Math.max(0, elementTop - this.paddingTop_);
+  animateScrollIntoView(element,
+                        duration = 500,
+                        curve = 'ease-in',
+                        pos = 'top') {
+    const elementRect = this.binding_.getLayoutRect(element);
+    let offset;
+    switch (pos) {
+      case 'bottom':
+        offset = -this.getHeight() + elementRect.height;
+        break;
+      case 'center':
+        offset = -this.getHeight() / 2 + elementRect.height / 2;
+        break;
+      default:
+        offset = 0;
+        break;
+    }
+    const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
+    const newScrollTop = Math.max(0, calculatedScrollTop);
     const curScrollTop = this.getScrollTop();
     if (newScrollTop == curScrollTop) {
       return Promise.resolve();
     }
     /** @const {!TransitionDef<number>} */
     const interpolate = numeric(curScrollTop, newScrollTop);
-    // TODO(erwinm): the duration should not be a constant and should
-    // be done in steps for better transition experience when things
-    // are closer vs farther.
-    return Animation.animate(this.ampdoc.getRootNode(), pos => {
-      this.binding_.setScrollTop(interpolate(pos));
+    // TODO(aghassemi, #10463): the duration should not be a constant and should
+    // be proportional to the distance to be scrolled for better transition
+    // experience when things are closer vs farther.
+    return Animation.animate(this.ampdoc.getRootNode(), position => {
+      this.binding_.setScrollTop(interpolate(position));
     }, duration, curve).then();
   }
 

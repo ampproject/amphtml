@@ -22,6 +22,7 @@ import {computedStyle, getStyle, toggle} from '../style';
 import {dev, user} from '../log';
 import {isProtocolValid} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
+import {tryFocus} from '../dom';
 
 /**
  * @param {!Element} element
@@ -34,6 +35,10 @@ function isShowable(element) {
 
 /** @const {string} */
 const TAG = 'STANDARD-ACTIONS';
+
+/** @const {Array<string>} */
+const PERMITTED_POSITIONS = ['top','bottom','center'];
+
 
 /**
  * This service contains implementations of some of the most typical actions,
@@ -58,6 +63,9 @@ export class StandardActions {
     /** @const @private {!./url-replacements-impl.UrlReplacements} */
     this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
 
+    /** @const @private {!./viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(ampdoc);
+
     this.installActions_(this.actions_);
   }
 
@@ -76,6 +84,10 @@ export class StandardActions {
     actionService.addGlobalMethodHandler('show', this.handleShow.bind(this));
     actionService.addGlobalMethodHandler(
         'toggleVisibility', this.handleToggle.bind(this));
+    actionService.addGlobalMethodHandler(
+        'scrollTo', this.handleScrollTo.bind(this));
+    actionService.addGlobalMethodHandler(
+        'focus', this.handleFocus.bind(this));
   }
 
   /**
@@ -172,6 +184,47 @@ export class StandardActions {
     const node = invocation.target;
     const win = (node.ownerDocument || node).defaultView;
     win.print();
+  }
+
+  /**
+   * Handles the `scrollTo` action where given an element, we smooth scroll to
+   * it with the given animation duraiton
+   * @param {!./action-impl.ActionInvocation} invocation
+   */
+  handleScrollTo(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
+      return;
+    }
+    const node = dev().assertElement(invocation.target);
+
+    // Duration for scroll animation
+    const duration = invocation.args
+                     && invocation.args['duration']
+                     && invocation.args['duration'] >= 0 ?
+                        invocation.args['duration'] : 500;
+
+    // Position in the viewport at the end
+    const pos = (invocation.args
+                && invocation.args['position']
+                && PERMITTED_POSITIONS.includes(invocation.args['position'])) ?
+                invocation.args['position'] : 'top';
+
+    // Animate the scroll
+    this.viewport_.animateScrollIntoView(node, duration, 'ease-in', pos);
+  }
+
+  /**
+   * Handles the `focus` action where given an element, we give it focus
+   * @param {!./action-impl.ActionInvocation} invocation
+   */
+  handleFocus(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
+      return;
+    }
+    const node = dev().assertElement(invocation.target);
+
+    // Set focus
+    tryFocus(node);
   }
 
   /**
