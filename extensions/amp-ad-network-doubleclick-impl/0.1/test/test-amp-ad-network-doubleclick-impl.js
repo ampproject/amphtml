@@ -1297,8 +1297,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           }));
       impl.populateAdUrlState();
       return impl.executeRtc_().then(result => {
-        expect(result.rtcTotalTime).to.equal(-1);
-        expect(result.success).to.be.undefined;
+        expect(result.artc).to.equal(-1);
+        expect(result.ati).to.equal(3);
       }).catch(() => {
         // Should not error.
         expect(true).to.be.false;

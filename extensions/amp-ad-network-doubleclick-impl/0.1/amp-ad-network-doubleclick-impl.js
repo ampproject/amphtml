@@ -359,16 +359,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return Promise.all(
       [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
         const pageLevelParameters = values[0];
-        const parameters = Object.assign(
+        let parameters = Object.assign(
             this.getBlockParameters_(), pageLevelParameters);
-        if (values[1]) {
-          const rtcTotalTime = values[1]['rtcTotalTime'];
-          const rtcSuccess = values[1]['success'];
-          if (rtcTotalTime) {
-            parameters['artc'] = rtcTotalTime;
-            parameters['ard'] = parseUrl(rtcConfig['endpoint']).hostname;
-            parameters['ati'] = rtcSuccess ? 2 : 3;
-          }
+        if (values[1] && values[1]['artc']) {
+          parameters = Object.assign(parameters, values[1]);
         }
         return googleAdUrl(
             this, DOUBLECLICK_BASE_URL, startTime, parameters, ['108809080']);
@@ -610,31 +604,30 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 'Bad response');
           } else if (!r.rtcResponse && r.success) {
             return Promise.resolve({
-              rtcTotalTime: r.rtcTotalTime,
-              success: true,
+              artc: r.rtcTotalTime,
+              ati: 2,
+              ard: parseUrl(rtcConfig['endpoint']).hostname,
             });
           }
 
           const rtcResponse = r.rtcResponse;
-          if (!!rtcResponse['targeting']) {
-            this.jsonTargeting_['targeting'] =
-                !!this.jsonTargeting_['targeting'] ?
-                deepMerge(this.jsonTargeting_['targeting'],
-                    rtcResponse['targeting']) :
-                              rtcResponse['targeting'];
-          }
-          if (!!rtcResponse['categoryExclusions']) {
-            this.jsonTargeting_['categoryExclusions'] =
-                !!this.jsonTargeting_['categoryExclusions'] ?
-                deepMerge(this.jsonTargeting_['categoryExclusions'],
-                    rtcResponse['categoryExclusions']) :
-                              rtcResponse['categoryExclusions'];
-          }
+          const mergeHelper = key => {
+            if (!!rtcResponse[key]) {
+              this.jsonTargeting_[key] =
+                  !!this.jsonTargeting_[key] ?
+                  deepMerge(this.jsonTargeting_[key],
+                      rtcResponse[key]) :
+                                rtcResponse[key];
+            }
+          };
+          mergeHelper('targeting');
+          mergeHelper('categoryExclusions');
           // rtcTotalTime is only the time that the rtc callout took,
           // does not include the time to merge.
           return Promise.resolve({
-            rtcTotalTime: r.rtcTotalTime,
-            success: true,
+            artc: r.rtcTotalTime,
+            ati: 2,
+            ard: parseUrl(rtcConfig['endpoint']).hostname,
           });
         }).catch(err => {
           const errMessage = (!!err && !!err.message) ?
@@ -661,7 +654,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       rtcTotalTime = -1;
     }
     return String(rtcConfig['sendAdRequestOnFailure']) !== 'false' ?
-        Promise.resolve({rtcTotalTime}) : Promise.reject(errMessage);
+        Promise.resolve({
+          artc: rtcTotalTime,
+          ati: 3,
+          ard: parseUrl(rtcConfig['endpoint']).hostname,
+        }) : Promise.reject(errMessage);
   };
 
   /** @override */
