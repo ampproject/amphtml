@@ -15,7 +15,7 @@
  */
 
 import {registerServiceBuilderForDoc} from '../service';
-import {viewportForDoc, vsyncFor} from '../services';
+import {Services} from '../services';
 import {getMode} from '../mode';
 import {dev} from '../log';
 import {
@@ -24,6 +24,7 @@ import {
   layoutRectsOverlap,
   layoutRectFromDomRect,
   layoutRectLtwh,
+  layoutRectsRelativePos,
 } from '../layout-rect';
 import {serializeMessage} from '../../src/3p-frame-messaging';
 import {parseJson, tryParseJson} from '../../src/json.js';
@@ -45,6 +46,7 @@ export const POSITION_HIGH_FIDELITY = 'position-high-fidelity';
  * @typedef {{
  *  positionRect: ?../layout-rect.LayoutRectDef,
  *  viewportRect: !../layout-rect.LayoutRectDef,
+ *  relativePos: string,
  * }}
  */
 export let PositionInViewportEntryDef;
@@ -69,10 +71,10 @@ class AbstractPositionObserver {
     this.entries_ = [];
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(ampdoc.win);
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     /** @private {!./viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(ampdoc);
+    this.viewport_ = Services.viewportForDoc(ampdoc);
 
   }
 
@@ -92,13 +94,21 @@ class AbstractPositionObserver {
           Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0,
       trigger(position) {
         const prePos = entry.position;
+
         if (prePos
             && layoutRectEquals(prePos.positionRect, position.positionRect)
             && layoutRectEquals(prePos.viewportRect, position.viewportRect)) {
           // position doesn't change, do nothing.
           return;
         }
+
+        // Add the relative position of the element to its viewport
+        position.relativePos = layoutRectsRelativePos(
+            position.positionRect, position.viewportRect
+        );
+
         if (layoutRectsOverlap(position.positionRect, position.viewportRect)) {
+          // Update position
           entry.position = position;
           // Only call handler if entry element overlap with viewport.
           try {
@@ -225,9 +235,7 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
       }
       timeout = setTimeout(stopScroll.bind(this), 500);
     }));
-    this.unlisteners_.push(this.viewport_.onChanged(() => {
-      // TODO (@zhouyx, #9208): Consider doing this only when event.relayoutAll
-      // is true.
+    this.unlisteners_.push(this.viewport_.onResize(() => {
       this.vsync_.measure(() => {
         this.pass_(true);
       });

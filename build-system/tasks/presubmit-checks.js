@@ -130,16 +130,6 @@ var forbiddenTerms = {
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',
   },
-  'documentStateFor': {
-    message: privateServiceFactory,
-    whitelist: [
-      'src/custom-element.js',
-      'src/style-installer.js',
-      'src/service/document-state.js',
-      'src/service/viewer-impl.js',
-      'src/service/vsync-impl.js',
-    ],
-  },
   'iframePing': {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
@@ -181,6 +171,13 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/service/crypto-impl.js',
+      'src/runtime.js',
+    ],
+  },
+  'installDocumentStateService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/document-state.js',
       'src/runtime.js',
     ],
   },
@@ -656,6 +653,22 @@ var forbiddenTermsSrcInclusive = {
       'dist.3p/current/integration.js',
     ],
   },
+  'decodeURIComponent\\(': {
+    message: 'decodeURIComponent throws for malformed URL components. Please ' +
+        'use tryDecodeUriComponent from src/url.js',
+    whitelist: [
+      '3p/integration.js',
+      'dist.3p/current/integration.js',
+      'examples/pwa/pwa.js',
+      'validator/engine/parse-url.js',
+      'validator/engine/validator.js',
+      'validator/webui/webui.js',
+      'extensions/amp-pinterest/0.1/util.js',
+      'src/url.js',
+      'src/url-try-decode-uri-component.js',
+      'src/utils/bytes.js',
+    ],
+  },
   // Super complicated regex that says "find any querySelector method call that
   // is passed as a variable anything that is not a string, or a string that
   // contains a space.
@@ -676,6 +689,8 @@ var forbiddenTermsSrcInclusive = {
       'src/service/crypto-impl.js',
       'src/shadow-embed.js',
       'src/analytics.js',
+      'src/extension-analytics.js',
+      'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
@@ -720,6 +735,9 @@ var forbiddenTermsSrcInclusive = {
   },
   '\\.getTime\\(\\)': {
     message: 'Unless you do weird date math (whitelist), use Date.now().',
+    whitelist: [
+      'extensions/amp-timeago/0.1/amp-timeago.js',
+    ],
   },
   '\\.expandStringSync\\(': {
     message: requiresReviewPrivacy,

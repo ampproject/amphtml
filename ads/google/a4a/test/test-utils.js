@@ -18,13 +18,11 @@ import {
   additionalDimensions,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
-  extractGoogleAdCreativeAndSignature,
   EXPERIMENT_ATTRIBUTE,
   googleAdUrl,
   mergeExperimentIds,
 } from '../utils';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
@@ -67,50 +65,6 @@ function noopMethods(impl, doc, sandbox) {
 }
 
 describe('Google A4A utils', () => {
-
-  describe('#extractGoogleAdCreativeAndSignature', () => {
-    it('should return body and signature', () => {
-      const creative = 'some test data';
-      const headerData = {
-        'X-AmpAdSignature': 'AQAB',
-      };
-      const headers = {
-        has: h => { return h in headerData; },
-        get: h => { return headerData[h]; },
-      };
-      return expect(extractGoogleAdCreativeAndSignature(creative, headers))
-          .to.eventually.deep.equal({
-            creative,
-            signature: base64UrlDecodeToBytes('AQAB'),
-          });
-    });
-
-    it('should return body and signature and size', () => {
-      const creative = 'some test data';
-      const headerData = {
-        'X-AmpAdSignature': 'AQAB',
-      };
-      const headers = {
-        has: h => { return h in headerData; },
-        get: h => { return headerData[h]; },
-      };
-      return expect(extractGoogleAdCreativeAndSignature(creative, headers))
-          .to.eventually.deep.equal({
-            creative,
-            signature: base64UrlDecodeToBytes('AQAB'),
-          });
-    });
-
-    it('should return null when no signature header is present', () => {
-      const creative = 'some test data';
-      const headers = {
-        has: unused => { return false; },
-        get: h => { throw new Error('Tried to get ' + h); },
-      };
-      return expect(extractGoogleAdCreativeAndSignature(creative, headers))
-          .to.eventually.deep.equal({creative, signature: null});
-    });
-  });
 
   //TODO: Add tests for other utils functions.
 
@@ -278,36 +232,6 @@ describe('Google A4A utils', () => {
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
-    });
-
-    it('should have the correct ifi numbers', function() {
-      // When ran locally, this test tends to exceed 2000ms timeout.
-      this.timeout(5000);
-      // Reset counter for purpose of this test.
-      delete window['ampAdGoogleIfiCounter'];
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        doc.win = window;
-        const elem = createElementWithAttributes(doc, 'amp-a4a', {
-          'type': 'adsense',
-          'width': '320',
-          'height': '50',
-        });
-        const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], [], []).then(url1 => {
-            expect(url1).to.match(/ifi=1/);
-            return googleAdUrl(impl, '', 0, [], [], []).then(url2 => {
-              expect(url2).to.match(/ifi=2/);
-              return googleAdUrl(impl, '', 0, [], [], []).then(url3 => {
-                expect(url3).to.match(/ifi=3/);
-              });
-            });
-          });
-        });
-      });
     });
 
     it('should set ad position', function() {

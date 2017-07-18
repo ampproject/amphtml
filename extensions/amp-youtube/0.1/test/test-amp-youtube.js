@@ -21,7 +21,7 @@ import {
 import '../amp-youtube';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {adopt} from '../../../../src/runtime';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import * as sinon from 'sinon';
 
@@ -30,7 +30,7 @@ adopt(window);
 describe('amp-youtube', function() {
   this.timeout(5000);
   let sandbox;
-  const timer = timerFor(window);
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -266,7 +266,7 @@ describe('amp-youtube', function() {
             return p;
           })
           .then(() => {
-            const p = listenOncePromise(yt, VideoEvents.PLAY);
+            const p = listenOncePromise(yt, VideoEvents.PLAYING);
             sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
             return p;
           })

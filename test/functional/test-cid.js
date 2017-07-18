@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-import {ampdocServiceFor} from '../../src/ampdoc';
-import {
-  extensionsFor,
-  timerFor,
-  viewerForDoc,
-} from '../../src/services';
+import {Services} from '../../src/services';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
@@ -27,8 +22,8 @@ import {
   isOptedOutOfCid,
 } from '../../src/service/cid-impl';
 import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
-import {cryptoFor} from '../../src/crypto';
 import {installDocService} from '../../src/service/ampdoc-impl';
+import {installDocumentStateService} from '../../src/service/document-state';
 import {parseUrl} from '../../src/url';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
@@ -66,7 +61,7 @@ describe('cid', () => {
   let storageGetStub;
 
   const hasConsent = Promise.resolve();
-  const timer = timerFor(window);
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     let call = 1;
@@ -110,12 +105,13 @@ describe('cid', () => {
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
-    ampdoc = ampdocServiceFor(fakeWin).getAmpDoc();
+    installDocumentStateService(fakeWin);
+    ampdoc = Services.ampdocServiceFor(fakeWin).getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
 
     installExtensionsService(fakeWin);
-    const extensions = extensionsFor(fakeWin);
+    const extensions = Services.extensionsFor(fakeWin);
     // stub extensions service to provide crypto-polyfill
     sandbox.stub(extensions, 'loadExtension', extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
@@ -125,7 +121,7 @@ describe('cid', () => {
 
     installViewerServiceForDoc(ampdoc);
     storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
-    viewer = viewerForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
     });
@@ -147,7 +143,7 @@ describe('cid', () => {
 
     cid = cidServiceForDocForTesting(ampdoc);
     installCryptoService(fakeWin);
-    crypto = cryptoFor(fakeWin);
+    crypto = Services.cryptoFor(fakeWin);
   });
 
   afterEach(() => {

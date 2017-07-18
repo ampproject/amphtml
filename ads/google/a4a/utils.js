@@ -14,30 +14,21 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
 import {isCanary} from '../../../src/experiments';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin, parseUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
-import {
-  resourcesForDoc,
-  viewerForDoc,
-  viewportForDoc,
-} from '../../../src/services';
-import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
 import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
-
-/** @const {string} */
-const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -139,38 +130,25 @@ export function isReportingEnabled(ampElement) {
 export function googleBlockParameters(a4a, opt_experimentIds) {
   const adElement = a4a.element;
   const win = a4a.win;
-  win['ampAdGoogleIfiCounter'] = win['ampAdGoogleIfiCounter'] || 1;
   const slotRect = a4a.getPageLayoutBox();
   const iframeDepth = iframeNestingDepth(win);
-  // Detect container types.
-  const containerTypeSet = {};
-  for (let el = adElement.parentElement, counter = 0;
-      el && counter < 20; el = el.parentElement, counter++) {
-    const tagName = el.tagName.toUpperCase();
-    if (ValidAdContainerTypes[tagName]) {
-      containerTypeSet[ValidAdContainerTypes[tagName]] = true;
-    }
-  }
-  const pfx =
-      (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
-       || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']])
-      ? '1' : '0';
+  const enclosingContainers = getEnclosingContainerTypes(adElement);
+  const pfx = enclosingContainers.includes(
+      ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) ||
+      enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
   let eids = adElement.getAttribute('data-experiment-id');
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
   }
-  const containerTypeArray = Object.keys(containerTypeSet);
   return {
-    'ifi': win['ampAdGoogleIfiCounter']++,
     'adf': domFingerprint(adElement),
     'nhd': iframeDepth,
     'eid': eids,
     'adx': slotRect.left,
     'ady': slotRect.top,
     'oid': '2',
-    pfx,
-    'rc': a4a.fromResumeCallback ? 1 : null,
-    'act': containerTypeArray.length ? containerTypeArray.join() : null,
+    'pfx': pfx ? '1' : '0',
+    'act': enclosingContainers.length ? enclosingContainers.join() : null,
   };
 }
 
@@ -181,7 +159,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */
 export function groupAmpAdsByType(win, type, groupFn) {
-  return resourcesForDoc(win.document).getMeasuredResources(win,
+  return Services.resourcesForDoc(win.document).getMeasuredResources(win,
       r => r.element.tagName == 'AMP-AD' &&
         r.element.getAttribute('type') == type)
       .then(resources => {
@@ -202,15 +180,15 @@ export function groupAmpAdsByType(win, type, groupFn) {
  * @return {!Promise<!Object<string,null|number|string>>}
  */
 export function googlePageParameters(win, doc, startTime, output = 'html') {
-  const referrerPromise = viewerForDoc(doc).getReferrerUrl();
+  const referrerPromise = Services.viewerForDoc(doc).getReferrerUrl();
   return getOrCreateAdCid(doc, 'AMP_ECID_GOOGLE', '_ga')
       .then(clientId => referrerPromise.then(referrer => {
-        const documentInfo = documentInfoForDoc(doc);
+        const documentInfo = Services.documentInfoForDoc(doc);
         // Read by GPT for GA/GPT integration.
         win.gaGlobal = win.gaGlobal ||
         {cid: clientId, hid: documentInfo.pageViewId};
         const screen = win.screen;
-        const viewport = viewportForDoc(doc);
+        const viewport = Services.viewportForDoc(doc);
         const viewportRect = viewport.getRect();
         const viewportSize = viewport.getSize();
         return {
@@ -272,27 +250,6 @@ export function truncAndTimeUrl(baseUrl, parameters, startTime) {
   return buildUrl(
       baseUrl, parameters, MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'})
     + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
-}
-
-/**
- * @param {!ArrayBuffer} creative
- * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
- * @return {!Promise<!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef>}
- */
-export function extractGoogleAdCreativeAndSignature(
-    creative, responseHeaders) {
-  let signature = null;
-  try {
-    if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
-      signature =
-        base64UrlDecodeToBytes(dev().assertString(
-            responseHeaders.get(AMP_SIGNATURE_HEADER)));
-    }
-  } finally {
-    return Promise.resolve(/** @type {
-          !../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */ (
-          {creative, signature}));
-  }
 }
 
 /**
@@ -393,7 +350,8 @@ function elapsedTimeWithCeiling(time, start) {
 export function getCorrelator(win, opt_cid, opt_nodeOrDoc) {
   if (!win.ampAdPageCorrelator) {
     win.ampAdPageCorrelator = makeCorrelator(
-        opt_cid, documentInfoForDoc(opt_nodeOrDoc || win.document).pageViewId);
+        opt_cid,
+        Services.documentInfoForDoc(opt_nodeOrDoc || win.document).pageViewId);
   }
   return win.ampAdPageCorrelator;
 }
@@ -563,4 +521,23 @@ export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
       `&met.a4a.${slotId}=visibilityCsi.${deltaTime}`;
   config['triggers']['continuousVisible']['request'].push('visibilityCsi');
   return config;
+}
+
+/**
+ * Returns an array of two-letter codes representing the amp-ad containers
+ * enclosing the given ad element.
+ *
+ * @param {!Element} adElement
+ * @return {!Array<string>}
+ */
+export function getEnclosingContainerTypes(adElement) {
+  const containerTypeSet = {};
+  for (let el = adElement.parentElement, counter = 0;
+      el && counter < 20; el = el.parentElement, counter++) {
+    const tagName = el.tagName.toUpperCase();
+    if (ValidAdContainerTypes[tagName]) {
+      containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+    }
+  }
+  return Object.keys(containerTypeSet);
 }

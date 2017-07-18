@@ -16,8 +16,14 @@
 
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
+import {
+  PlayingStates,
+  VideoAnalyticsDetailsDef,
+  VideoAnalyticsEvents,
+} from '../../../src/video-interface';
+import {dev, user} from '../../../src/log';
+import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {user} from '../../../src/log';
 import {startsWith} from '../../../src/string';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
@@ -397,6 +403,81 @@ export class IniLoadTracker extends EventTracker {
       signals.whenSignal(CommonSignals.INI_LOAD),
       signals.whenSignal(CommonSignals.LOAD_END),
     ]);
+  }
+}
+
+
+/**
+ * Tracks video session events
+ */
+export class VideoEventTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+
+    /** @private @const {!Observable<!Event>} */
+    this.sessionObservable_ = new Observable();
+
+    /** @private @const */
+    this.boundOnSession_ = e => {
+      this.sessionObservable_.fire(e);
+    };
+
+    Object.keys(VideoAnalyticsEvents).forEach(key => {
+      this.root.getRoot().addEventListener(
+          VideoAnalyticsEvents[key], this.boundOnSession_);
+    });
+  }
+
+  /** @override */
+  dispose() {
+    Object.keys(VideoAnalyticsEvents).forEach(key => {
+      this.root.getRoot().removeEventListener(
+          VideoAnalyticsEvents[key], this.boundOnSession_);
+    });
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    const videoSpec = config['videoSpec'] || {};
+    const selector = config['selector'] || videoSpec['selector'];
+    const selectionMethod = config['selectionMethod'] || null;
+    const targetReady =
+        this.root.getElement(context, selector, selectionMethod);
+
+    const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
+    const excludeAutoplay = videoSpec['exclude-autoplay'];
+    const on = config['on'];
+
+    return this.sessionObservable_.add(event => {
+      const type = event.type;
+      const details = /** @type {!VideoAnalyticsDetailsDef} */ (getData(event));
+      const isVisibleType = type === VideoAnalyticsEvents.SESSION_VISIBLE;
+      const normalizedType =
+          isVisibleType ? VideoAnalyticsEvents.SESSION : type;
+
+      if (normalizedType !== on) {
+        return;
+      }
+
+      if (isVisibleType && !endSessionWhenInvisible) {
+        return;
+      }
+
+      if (excludeAutoplay && details['state'] === PlayingStates.PLAYING_AUTO) {
+        return;
+      }
+
+      const el = dev().assertElement(event.target,
+          'No target specified by video session event.');
+      targetReady.then(target => {
+        if (target.contains(el)) {
+          listener(new AnalyticsEvent(target, normalizedType, details));
+        }
+      });
+    });
   }
 }
 

@@ -49,6 +49,24 @@ export class VideoInterface {
   isInteractive() {}
 
   /**
+   * Current playback time in seconds at time of trigger
+   * @return {number}
+   */
+  getCurrentTime() {}
+
+  /**
+   * Total duration of the video in seconds
+   * @return {number}
+   */
+  getDuration() {}
+
+  /**
+   * Get a 2d array of start and stop times that the user has watched.
+   * @return {!Array<Array<number>>}
+   */
+  getPlayedRanges() {}
+
+  /**
    * Plays the video..
    *
    * @param {boolean} unusedIsAutoplay Whether the call to the `play` method is
@@ -105,10 +123,10 @@ export class VideoInterface {
    *
    * @param {string} unusedMethod
    * @param {function(!./service/action-impl.ActionInvocation)} unusedHandler
-   * @param {ActionTrust} minTrust
+   * @param {ActionTrust} unusedMinTrust
    * @public
    */
-  registerAction(unusedMethod, unusedHandler, minTrust) {}
+  registerAction(unusedMethod, unusedHandler, unusedMinTrust) {}
 }
 
 
@@ -162,6 +180,16 @@ export const VideoAttributes = {
  */
 export const VideoEvents = {
   /**
+   * registered
+   *
+   * Fired when the video player element is built and has been registered with
+   * the video manager.
+   *
+   * @event registered
+   */
+  REGISTERED: 'registered',
+
+  /**
    * load
    *
    * Fired when the video player is loaded and calls to methods such as `play()`
@@ -172,13 +200,13 @@ export const VideoEvents = {
   LOAD: 'load',
 
   /**
-   * play
+   * playing
    *
-   * Fired when the video plays.
+   * Fired when the video begins playing.
    *
-   * @event play
+   * @event playing
    */
-  PLAY: 'play',
+  PLAYING: 'playing',
 
   /**
    * pause
@@ -194,7 +222,7 @@ export const VideoEvents = {
    *
    * Fired when the video is muted.
    *
-   * @event play
+   * @event muted
    */
   MUTED: 'muted',
 
@@ -203,7 +231,7 @@ export const VideoEvents = {
    *
    * Fired when the video is unmuted.
    *
-   * @event pause
+   * @event unmuted
    */
   UNMUTED: 'unmuted',
 
@@ -223,7 +251,121 @@ export const VideoEvents = {
    *
    * Fired when the video's src changes.
    *
-   * @event reload
+   * @event reloaded
    */
   RELOAD: 'reloaded',
+
+  /**
+   * ended
+   *
+   * Fired when the video ends.
+   *
+   * @event ended
+   */
+  ENDED: 'ended',
 };
+
+
+/**
+ * Playing States
+ *
+ * Internal playing states used to distinguish between video playing on user's
+ * command and videos playing automatically
+ *
+ * @constant {!Object<string, string>}
+ */
+export const PlayingStates = {
+  /**
+   * playing_manual
+   *
+   * When the video user manually interacted with the video and the video
+   * is now playing
+   *
+   * @event playing_manual
+   */
+  PLAYING_MANUAL: 'playing_manual',
+
+  /**
+   * playing_auto
+   *
+   * When the video has autoplay and the user hasn't interacted with it yet
+   *
+   * @event playing_auto
+   */
+  PLAYING_AUTO: 'playing_auto',
+
+  /**
+   * paused
+   *
+   * When the video is paused.
+   *
+   * @event paused
+   */
+  PAUSED: 'paused',
+};
+
+
+/** @enum {string} */
+export const VideoAnalyticsEvents = {
+  /**
+   * video-ended
+   *
+   * Indicates that a video ended.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-ended
+   */
+  ENDED: 'video-ended',
+
+  /**
+   * video-pause
+   *
+   * Indicates that a video paused.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-pause
+   */
+  PAUSE: 'video-pause',
+
+  /**
+   * video-play
+   *
+   * Indicates that a video began to play.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-play
+   */
+  PLAY: 'video-play',
+
+  /**
+   * video-session
+   *
+   * Indicates that some segment of the video played.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-session
+   */
+  SESSION: 'video-session',
+
+  /**
+   * video-session-visible
+   *
+   * Indicates that some segment of the video played in the viewport.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-session-visible
+   */
+  SESSION_VISIBLE: 'video-session-visible',
+};
+
+
+/**
+ * @typedef {{
+ *   autoplay: boolean,
+ *   currentTime: number,
+ *   duration: number,
+ *   height: number,
+ *   id: string,
+ *   playedRangesJson: string,
+ *   playedTotal: number,
+ *   muted: boolean,
+ *   state: string,
+ *   width: number
+ * }}
+ */
+export let VideoAnalyticsDetailsDef;

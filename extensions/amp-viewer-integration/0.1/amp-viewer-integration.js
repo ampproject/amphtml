@@ -20,14 +20,14 @@ import {
   parseMessage,
 } from './messaging/messaging';
 import {TouchHandler} from './touch-handler';
-import {getAmpDoc} from '../../../src/ampdoc';
+import {getAmpdoc} from '../../../src/service';
 import {isIframed} from '../../../src/dom';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
-import {viewerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';
@@ -68,7 +68,7 @@ export class AmpViewerIntegration {
    */
   init() {
     dev().fine(TAG, 'handshake init()');
-    const viewer = viewerForDoc(this.win.document);
+    const viewer = Services.viewerForDoc(this.win.document);
     this.isWebView_ = viewer.getParam('webview') == '1';
     this.isHandShakePoll_ = viewer.hasCapability('handshakepoll');
     const origin = viewer.getParam('origin') || '';
@@ -77,7 +77,7 @@ export class AmpViewerIntegration {
       return Promise.resolve();
     }
 
-    const ampdoc = getAmpDoc(this.win.document);
+    const ampdoc = getAmpdoc(this.win.document);
 
     if (this.isWebView_ || this.isHandShakePoll_) {
       const source = isIframed(this.win) ? this.win.parent : null;

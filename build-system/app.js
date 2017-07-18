@@ -1027,17 +1027,6 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
 });
 
 /**
- * Validator JS binary. Requires that validator/build.py was run.
- */
-app.get('/validator/dist/validator_minified.js', (req, res) => {
-  fs.readFileAsync(pc.cwd() + req.path).then(file => {
-    res.setHeader('Content-Type', 'text/javascript');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.end(file);
-  });
-});
-
-/**
  * @param {string} mode
  * @param {string} file
  * @param {string=} hostName

@@ -28,7 +28,6 @@ import {
 import {isExperimentOn} from '../../../src/experiments';
 import {
   additionalDimensions,
-  extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
   isReportingEnabled,
@@ -42,17 +41,16 @@ import {
 } from '../../../ads/google/a4a/google-data-reporter';
 import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
-import {stringHash32} from '../../../src/crypto';
+import {stringHash32} from '../../../src/string';
 import {dev} from '../../../src/log';
-import {extensionsFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   computedStyle,
   setStyles,
 } from '../../../src/style';
-import {viewerForDoc} from '../../../src/services';
 import {AdsenseSharedState} from './adsense-shared-state';
-import {insertAnalyticsElement} from '../../../src/analytics';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
@@ -113,7 +111,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = null;
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
-    this.extensions_ = extensionsFor(this.win);
+    this.extensions_ = Services.extensionsFor(this.win);
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
@@ -148,7 +146,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (adClientId.substring(0, 3) != 'ca-') {
       adClientId = 'ca-' + adClientId;
     }
-    const visibilityState = viewerForDoc(this.getAmpDoc())
+    const visibilityState = Services.viewerForDoc(this.getAmpDoc())
         .getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
@@ -171,6 +169,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const sharedStateParams = sharedState.addNewSlot(
         format, this.uniqueSlotId_, adClientId);
     const viewportSize = this.getViewport().getSize();
+    this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     const parameters = {
       'client': adClientId,
       format,
@@ -191,6 +190,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'dff': computedStyle(this.win, this.element)['font-family'],
       'prev_fmts': sharedStateParams.prevFmts || null,
       'brdim': additionalDimensions(this.win, viewportSize),
+      'ifi': this.win['ampAdGoogleIfiCounter']++,
+      'rc': this.fromResumeCallback ? 1 : null,
     };
 
     const experimentIds = [];
@@ -204,7 +205,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  extractCreativeAndSignature(responseText, responseHeaders) {
+  extractSize(responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
@@ -212,11 +213,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
     }
-    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
-  }
-
-  /** @override */
-  extractSize(unusedResponseHeaders) {
     return this.size_;
   }
 

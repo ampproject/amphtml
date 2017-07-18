@@ -18,7 +18,7 @@ import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
 import {
-  ShadowDomWriter,
+  createShadowDomWriter,
   createShadowRoot,
   importShadowBody,
   installStylesForShadowRoot,
@@ -35,7 +35,7 @@ import {
   registerExtension,
   stubLegacyElements,
 } from './service/extensions-impl';
-import {ampdocServiceFor} from './ampdoc';
+import {Services} from './services';
 import {startupChunk} from './chunk';
 import {cssText} from '../build/css';
 import {dev, user, initLogConstructor, setReportError} from './log';
@@ -54,9 +54,9 @@ import {installActionServiceForDoc} from './service/action-impl';
 import {installCidService} from './service/cid-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
+import {installDocumentStateService} from './service/document-state';
 import {installGlobalClickListenerForDoc} from './service/document-click';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
-import {extensionsFor} from './services';
 import {installHistoryServiceForDoc} from './service/history-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
@@ -83,14 +83,9 @@ import {
   toggleExperiment,
 } from './experiments';
 import {parseUrl} from './url';
-import {platformFor} from './services';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
-import {resourcesForDoc} from './services';
 import {setStyle} from './style';
-import {timerFor} from './services';
-import {viewerForDoc} from './services';
-import {viewportForDoc} from './services';
 import {waitForBody} from './dom';
 import * as config from './config';
 
@@ -110,12 +105,13 @@ const elementsForTesting = {};
  */
 export function installRuntimeServices(global) {
   installCryptoService(global);
+  installBatchedXhrService(global);
+  installDocumentStateService(global);
   installPlatformService(global);
+  installTemplatesService(global);
   installTimerService(global);
   installVsyncService(global);
   installXhrService(global);
-  installBatchedXhrService(global);
-  installTemplatesService(global);
 }
 
 
@@ -181,7 +177,7 @@ function adoptShared(global, opts, callback) {
 
   installExtensionsService(global);
   /** @const {!./service/extensions-impl.Extensions} */
-  const extensions = extensionsFor(global);
+  const extensions = Services.extensionsFor(global);
   installRuntimeServices(global);
   stubLegacyElements(global);
 
@@ -299,7 +295,7 @@ function adoptShared(global, opts, callback) {
    */
   function installAutoLoadExtensions() {
     if (!getMode().test && isExperimentOn(global, 'amp-lightbox-viewer-auto')) {
-      extensionsFor(global).loadExtension('amp-lightbox-viewer');
+      Services.extensionsFor(global).loadExtension('amp-lightbox-viewer');
     }
   }
 
@@ -365,7 +361,7 @@ function adoptShared(global, opts, callback) {
 
   // For iOS we need to set `cursor:pointer` to ensure that click events are
   // delivered.
-  if (platformFor(global).isIos()) {
+  if (Services.platformFor(global).isIos()) {
     setStyle(global.document.documentElement, 'cursor', 'pointer');
   }
 }
@@ -381,16 +377,16 @@ export function adopt(global) {
     registerElement: prepareAndRegisterElement,
     registerServiceForDoc: prepareAndRegisterServiceForDoc,
   }, global => {
-    const viewer = viewerForDoc(global.document);
+    const viewer = Services.viewerForDoc(global.document);
 
     global.AMP.viewer = viewer;
 
     if (getMode().development) {
       global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-      global.AMP.resources = resourcesForDoc(global.document);
+      global.AMP.resources = Services.resourcesForDoc(global.document);
     }
 
-    const viewport = viewportForDoc(global.document);
+    const viewport = Services.viewportForDoc(global.document);
 
     global.AMP.viewport = {};
     global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
@@ -412,9 +408,9 @@ export function adoptShadowMode(global) {
 
     const manager = new MultidocManager(
         global,
-        ampdocServiceFor(global),
+        Services.ampdocServiceFor(global),
         extensions,
-        timerFor(global));
+        Services.timerFor(global));
 
     /**
      * Registers a shadow root document via a fully fetched document.
@@ -511,7 +507,7 @@ function registerElementClass(global, name, implementationClass, opt_css) {
  * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
  */
 function prepareAndRegisterServiceForDoc(global, extensions, name, ctor) {
-  const ampdocService = ampdocServiceFor(global);
+  const ampdocService = Services.ampdocServiceFor(global);
   const ampdoc = ampdocService.getAmpDoc();
   registerServiceForDoc(ampdoc, name, ctor);
 
@@ -614,7 +610,7 @@ class MultidocManager {
 
     // Instal doc services.
     installAmpdocServices(ampdoc, initParams || Object.create(null));
-    const viewer = viewerForDoc(ampdoc);
+    const viewer = Services.viewerForDoc(ampdoc);
 
     /**
      * Sets the document's visibility state.
@@ -668,7 +664,7 @@ class MultidocManager {
 
     if (getMode().development) {
       amp.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-      amp.resources = resourcesForDoc(ampdoc);
+      amp.resources = Services.resourcesForDoc(ampdoc);
     }
 
     // Start building the shadow doc DOM.
@@ -746,7 +742,7 @@ class MultidocManager {
         (amp, shadowRoot, ampdoc) => {
           // Start streaming.
           let renderStarted = false;
-          const writer = new ShadowDomWriter(this.win);
+          const writer = createShadowDomWriter(this.win);
           amp.writer = writer;
           writer.onBody(doc => {
             // Install extensions.
@@ -917,7 +913,7 @@ class MultidocManager {
         return;
       }
       // Broadcast message asynchronously.
-      const viewer = viewerForDoc(shadowRoot.AMP.ampdoc);
+      const viewer = Services.viewerForDoc(shadowRoot.AMP.ampdoc);
       this.timer_.delay(() => {
         viewer.receiveMessage('broadcast',
             /** @type {!JsonObject} */ (data),
@@ -935,7 +931,8 @@ class MultidocManager {
     const amp = shadowRoot.AMP;
     delete shadowRoot.AMP;
     const ampdoc = /** @type {!./service/ampdoc-impl.AmpDoc} */ (amp.ampdoc);
-    setViewerVisibilityState(viewerForDoc(ampdoc), VisibilityState.INACTIVE);
+    setViewerVisibilityState(
+        Services.viewerForDoc(ampdoc), VisibilityState.INACTIVE);
     disposeServicesForDoc(ampdoc);
   }
 
@@ -1063,7 +1060,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   // assumes it as not-present.
   scriptInHead.removeAttribute('custom-element');
   scriptInHead.setAttribute('i-amphtml-loaded-new-version', fnOrStruct.n);
-  extensionsFor(win).loadExtension(fnOrStruct.n,
+  Services.extensionsFor(win).loadExtension(fnOrStruct.n,
       /* stubbing not needed, should have already happened. */ false);
   return true;
 }
@@ -1090,5 +1087,5 @@ function maybePumpEarlyFrame(win, cb) {
     cb();
     return;
   }
-  timerFor(win).delay(cb, 1);
+  Services.timerFor(win).delay(cb, 1);
 }

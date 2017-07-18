@@ -22,6 +22,8 @@ import {poll} from '../../../../../testing/iframe';
 import {registerExtendedTemplate} from
     '../../../../../src/service/template-impl';
 
+/** @const {number} */
+const RENDER_TIMEOUT = 15000;
 
 describes.realWin('AmpForm Integration', {
   amp: {
@@ -145,7 +147,9 @@ describes.realWin('AmpForm Integration', {
     });
   });
 
-  describeChrome.run('Submit xhr-POST', () => {
+  describeChrome.run('Submit xhr-POST', function() {
+    this.timeout(RENDER_TIMEOUT);
+
     it('should submit and render success', () => {
       const form = getForm({
         id: 'form1',
@@ -207,7 +211,9 @@ describes.realWin('AmpForm Integration', {
     });
   });
 
-  describeChrome.run('Submit xhr-GET', () => {
+  describeChrome.run('Submit xhr-GET', function() {
+    this.timeout(RENDER_TIMEOUT);
+
     it('should submit and render success', () => {
       const form = getForm({
         id: 'form1',

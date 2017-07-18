@@ -85,6 +85,17 @@ export class FakeWindow {
     Object.defineProperty(this.document, 'readyState', {
       get: () => this.readyState,
     });
+    if (!this.document.fonts) {
+      this.document.fonts = {};
+    }
+    Object.defineProperty(this.document.fonts, 'ready', {
+      get: () => Promise.resolve(),
+    });
+    let fontStatus = 'loaded';
+    Object.defineProperty(this.document.fonts, 'status', {
+      get: () => fontStatus,
+      set: val => fontStatus = val,
+    });
 
     EventListeners.intercept(this.document);
     EventListeners.intercept(this.document.documentElement);

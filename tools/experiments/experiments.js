@@ -204,13 +204,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
   },
   {
-    id: 'amp-bind',
-    name: 'AMP extension for dynamic content',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-bind/amp-bind.md',
-  },
-  {
     id: 'web-worker',
     name: 'Web worker for background processing',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
@@ -248,10 +241,6 @@ const EXPERIMENTS = [
     name: 'Use slot width/height attribute for AdSense size format',
   },
   {
-    id: 'dc-use-attr-for-format',
-    name: 'Use slot width/height attribute for DoubleClick size format',
-  },
-  {
     id: 'ad-loader-v1',
     name: 'New ad loader version 1',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
@@ -276,12 +265,6 @@ const EXPERIMENTS = [
   {
     id: 'amp-ima-video',
     name: 'IMA-integrated Video Player',
-  },
-  {
-    id: 'amp-ad-exit',
-    name: 'Enable amp-ad-exit component',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9502',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/amp-ad-exit.md',
   },
   {
     id: 'amp-sidebar 1.0',
