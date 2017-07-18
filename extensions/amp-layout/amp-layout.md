@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>A generic, multi-purpose container element that brings AMP's powerful [layouts](https://www.ampproject.org/docs/guides/responsive/control_layout#the-layout-attribute) to any element.</td>
+    <td>A generic, multi-purpose container element that brings AMP's powerful <a href="https://www.ampproject.org/docs/guides/responsive/control_layout#the-layout-attribute">layouts </a> to any element.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -29,6 +29,10 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+  </tr> 
 </table>
 
 ## Overview
