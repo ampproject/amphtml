@@ -17,7 +17,7 @@
 const FINAL_URL_RE = /^(data|https)\:/i;
 const DEG_TO_RAD = 2 * Math.PI / 360;
 const GRAD_TO_RAD = Math.PI / 200;
-const VAR_CSS_RE = /(calc|var|url|rand|width|height)\(/i;
+const VAR_CSS_RE = /(calc|var|url|rand|index|width|height)\(/i;
 const NORM_CSS_RE = /\d(%|em|rem|vw|vh|vmin|vmax|s|deg|grad)/i;
 const INFINITY_RE = /^(infinity|infinite)$/i;
 
@@ -55,6 +55,13 @@ export class CssContext {
    * @return {?CssNode}
    */
   getVar(unusedVarName) {}
+
+  /**
+   * Returns the current target's index in the context of other selected
+   * targets.
+   * @return {number}
+   */
+  getCurrentIndex() {}
 
   /**
    * Returns the current font size.
@@ -757,6 +764,32 @@ export class CssRandNode extends CssNode {
     // Formula: rand(A, B) = A * (1 - R) + B * R
     const num = min * (1 - rand) + max * rand;
     return left.createSameUnits(num);
+  }
+}
+
+
+/**
+ * AMP-specific `index()` function. Returns 0-based index of the current
+ * target in a list of all selected targets.
+ */
+export class CssIndexNode extends CssNode {
+  constructor() {
+    super();
+  }
+
+  /** @override */
+  css() {
+    throw noCss();
+  }
+
+  /** @override */
+  isConst() {
+    return false;
+  }
+
+  /** @override */
+  calc(context) {
+    return new CssNumberNode(context.getCurrentIndex());
   }
 }
 
