@@ -20,14 +20,14 @@ import {dev, user} from '../../../src/log';
 import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill'; // eslint-disable-line max-len
 
 /**
- * - continuousTimeMin: The amount of continuous time, in milliseconds, that
- *   the creative must be on screen for in oreder to be considered "visible".
  * - visibilePercentageMin: The percentage of pixels that need to be on screen
  *   for the creative to be considered "visible".
+ * - continuousTimeMin: The amount of continuous time, in milliseconds, that
+ *   the creative must be on screen for in order to be considered "visible".
  *
  * @typedef {{
- *   continuousTimeMin: number,
  *   visiblePercentageMin: number,
+ *   continuousTimeMin: number,
  * }}
  */
 export let RefreshConfig;
