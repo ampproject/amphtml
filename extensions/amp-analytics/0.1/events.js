@@ -28,6 +28,7 @@ import {startsWith} from '../../../src/string';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
+const TAG = 'analytics-events';
 
 /**
  * @interface
@@ -449,7 +450,10 @@ export class VideoEventTracker extends EventTracker {
 
     const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
     const excludeAutoplay = videoSpec['exclude-autoplay'];
+    const interval = videoSpec['interval'];
     const on = config['on'];
+
+    let intervalCounter = 0;
 
     return this.sessionObservable_.add(event => {
       const type = event.type;
@@ -468,6 +472,19 @@ export class VideoEventTracker extends EventTracker {
 
       if (excludeAutoplay && details['state'] === PlayingStates.PLAYING_AUTO) {
         return;
+      }
+
+      if (normalizedType === VideoAnalyticsEvents.SECONDS_PLAYED) {
+        if (interval) {
+          intervalCounter++;
+          if (intervalCounter % interval !== 0) {
+            return;
+          }
+        } else {
+          user().error(TAG, 'video-seconds-played requires interval spec ' +
+              'with non-zero value');
+          return;
+        }
       }
 
       const el = dev().assertElement(event.target,

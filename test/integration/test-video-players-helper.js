@@ -274,6 +274,41 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
+    it('should trigger video-seconds-played when visible and playing', () => {
+      let video;
+      let timer;
+      let pauseButton;
+
+      return getVideoPlayer(
+          {
+            outsideView: true,
+            autoplay: true,
+          }
+      ).then(r => {
+        timer = Services.timerFor(r.video.implementation_.win);
+        video = r.video;
+        pauseButton = createButton(r, 'pause');
+        return Promise.race([
+          listenOncePromise(video, VideoAnalyticsEvents.SECONDS_PLAYED).then(
+              () => Promise.reject('Triggered video-seconds-played')),
+          timer.promise(2000),
+        ]);
+      }).then(() => {
+        const viewport = video.implementation_.getViewport();
+        viewport.scrollIntoView(video);
+        return listenOncePromise(video, VideoAnalyticsEvents.SECONDS_PLAYED);
+      }).then(() => {
+        pauseButton.click();
+        return listenOncePromise(video, VideoEvents.PAUSE);
+      }).then(() => {
+        return Promise.race([
+          listenOncePromise(video, VideoAnalyticsEvents.SECONDS_PLAYED).then(
+              () => Promise.reject('Triggered video-seconds-played')),
+          timer.promise(2000),
+        ]);
+      });
+    });
+
     afterEach(cleanUp);
   });
 
