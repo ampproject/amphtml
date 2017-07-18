@@ -50,9 +50,7 @@ const TAG = 'AMP-AD';
  *    transition back into the INITIAL state.
  * 4. The element will remain in REFRESH_PENDING state until the refresh
  *    interval expires.
- * 5. Once the interval expires, the element will enter the REFRESHED state.
- *    The element will remain in this state until reset() is called on the
- *    element, at which point it will return to the INITIAL state.
+ * 5. Once the interval expires, the element will return to the INITIAL state.
  *
  * @enum {string}
  */
@@ -73,12 +71,6 @@ const RefreshLifecycleState = {
    * refresh interval for the element has begun.
    */
   REFRESH_PENDING: 'refresh_pending',
-
-  /**
-   * The refresh interval has elapsed; the element is in the process of being
-   * refreshed.
-   */
-  REFRESHED: 'refreshed',
 };
 
 /**
@@ -217,7 +209,6 @@ export class RefreshManager {
           }
           break;
         case RefreshLifecycleState.REFRESH_PENDING:
-        case RefreshLifecycleState.REFRESHED:
         default:
           break;
       }
@@ -237,13 +228,6 @@ export class RefreshManager {
         this.getIntersectionObserverWithThreshold_(
             this.config_.visiblePercentageMin).observe(this.element_);
         break;
-      case RefreshLifecycleState.REFRESHED:
-        this.getIntersectionObserverWithThreshold_(
-            this.config_.visiblePercentageMin).unobserve(this.element_);
-        this.getIntersectionObserverWithThreshold_(
-            this.config_.visiblePercentageMin).observe(this.element_);
-        this.state_ = RefreshLifecycleState.INITIAL;
-        break;
       case RefreshLifecycleState.REFRESH_PENDING:
       case RefreshLifecycleState.VIEW_PENDING:
       default:
@@ -261,7 +245,9 @@ export class RefreshManager {
   startRefreshTimer_() {
     return new Promise(resolve => {
       this.refreshTimeoutId_ = this.timer_.delay(() => {
-        this.state_ = RefreshLifecycleState.REFRESHED;
+        this.state_ = RefreshLifecycleState.INITIAL;
+        this.getIntersectionObserverWithThreshold_(
+            this.config_.visiblePercentageMin).unobserve(this.element_);
         this.a4a_.refresh(() => this.initiateRefreshCycle());
         resolve(true);
       }, /** @type {number} */ (this.refreshInterval_));
@@ -275,11 +261,9 @@ export class RefreshManager {
    * @return {!RefreshConfig}
    */
   convertAndSanitizeConfiguration_(config) {
-    if (config['visiblePercentageMin'] < 0 ||
-        config['visiblePercentageMin'] > 100) {
-      dev().error(TAG,
-          'visiblePercentageMin for refresh must be in the range [0, 100]');
-    }
+    dev().assert(config['visiblePercentageMin'] >= 0 &&
+        config['visiblePercentageMin'] <= 100,
+        'visiblePercentageMin for refresh must be in the range [0, 100]');
     // Convert seconds to milliseconds.
     config['continuousTimeMin'] *= 1000;
     config['visiblePercentageMin'] /= 100;
