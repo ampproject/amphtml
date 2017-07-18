@@ -639,6 +639,18 @@ export function isJsonScriptTag(element) {
             element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
 }
 
+/**
+ * Whether the page's direction is right to left or not.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isRTL(doc) {
+  const dir = doc.body.getAttribute('dir')
+                 || doc.documentElement.getAttribute('dir')
+                 || 'ltr';
+  return dir == 'rtl';
+}
+
 
 /**
  * Escapes an ident (ID or a class name) to be used as a CSS selector.

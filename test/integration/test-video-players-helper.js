@@ -22,6 +22,7 @@ import {
   VideoInterface,
   VideoEvents,
   VideoAnalyticsEvents,
+  PlayingStates,
 } from '../../src/video-interface';
 import {supportsAutoplay} from '../../src/service/video-manager-impl';
 import {
@@ -350,7 +351,7 @@ export function runVideoPlayerIntegrationTests(
         }).then(() => {
           expect(insideElement).to.have.class(DOCK_CLASS);
           expect(st.getStyle(insideElement, 'transform')).to.equal(
-              st.scale(DOCK_SCALE) + ' ' + st.translate(st.px(20), st.px(20))
+              st.translate(st.px(300), st.px(680)) + ' ' + st.scale(DOCK_SCALE)
           );
         });
       });
@@ -381,6 +382,14 @@ export function runVideoPlayerIntegrationTests(
             return !video.querySelector('i-amphtml-video-mask');
           });
         }).then(() => {
+          const vidManager = Services.videoManagerForDoc(
+              video.implementation_.getAmpDoc()
+          );
+          return poll('wait for video to be playing manually', () => {
+            const curState = vidManager.getPlayingState(video.implementation_);
+            return curState == PlayingStates.PLAYING_MANUAL;
+          });
+        }).then(() => {
           viewport.setScrollTop(FRAME_HEIGHT);
           return poll('wait for video/iframe', () => {
             return !!video.querySelector('video, iframe');
@@ -394,7 +403,7 @@ export function runVideoPlayerIntegrationTests(
         }).then(() => {
           expect(insideElement).to.have.class(DOCK_CLASS);
           expect(st.getStyle(insideElement, 'transform')).to.equal(
-              st.scale(DOCK_SCALE) + ' ' + st.translate(st.px(20), st.px(20))
+              st.translate(st.px(300), st.px(20)) + ' ' + st.scale(DOCK_SCALE)
           );
         });
       });
