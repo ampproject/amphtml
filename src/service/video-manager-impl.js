@@ -1,3 +1,4 @@
+
 /**
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
@@ -26,7 +27,7 @@ import {isFiniteNumber} from '../types';
 import {mapRange} from '../utils/math';
 import {
   PlayingStates,
-  VideoAnalyticsType,
+  VideoAnalyticsEvents,
   VideoAttributes,
   VideoEvents,
 } from '../video-interface';
@@ -115,6 +116,7 @@ export class VideoManager {
     this.maybeInstallVisibilityObserver_(entry);
     this.maybeInstallPositionObserver_(entry);
     this.entries_.push(entry);
+    video.element.dispatchCustomEvent(VideoEvents.REGISTERED);
   }
 
   /**
@@ -148,13 +150,6 @@ export class VideoManager {
    * @private
    */
   maybeInstallVisibilityObserver_(entry) {
-    // TODO(aghassemi): Remove this later. For now, the visibility observer
-    // only matters for autoplay videos so no point in monitoring arbitrary
-    // videos yet.
-    if (!entry.hasAutoplay && !assertTrackingVideo(entry.video)) {
-      return;
-    }
-
     listen(entry.video.element, VideoEvents.VISIBILITY, () => {
       entry.updateVisibility();
     });
@@ -283,13 +278,13 @@ class VideoEntry {
     this.actionSessionManager_ = new VideoSessionManager();
 
     this.actionSessionManager_.onSessionEnd(
-        () => this.analyticsEvent_(VideoAnalyticsType.SESSION));
+        () => analyticsEvent(this, VideoAnalyticsEvents.SESSION));
 
     /** @private @const */
     this.visibilitySessionManager_ = new VideoSessionManager();
 
     this.visibilitySessionManager_.onSessionEnd(
-        () => this.analyticsEvent_(VideoAnalyticsType.SESSION_VISIBLE));
+        () => analyticsEvent(this, VideoAnalyticsEvents.SESSION_VISIBLE));
 
     /** @private @const {function(): !Promise<boolean>} */
     this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, ampdoc.win,
@@ -331,7 +326,6 @@ class VideoEntry {
 
     listen(element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(element, VideoEvents.PLAYING, () => this.videoPlayed_());
-    listen(element, VideoEvents.ENDED, () => this.videoEnded_());
     listen(element, VideoEvents.MUTED, () => this.muted_ = true);
     listen(element, VideoEvents.UNMUTED, () => this.muted_ = false);
 
@@ -363,7 +357,7 @@ class VideoEntry {
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
     }
-    this.analyticsEvent_(VideoAnalyticsType.PLAY);
+    analyticsEvent(this, VideoAnalyticsEvents.PLAY);
   }
 
   /**
@@ -371,10 +365,10 @@ class VideoEntry {
    * @private
    */
   videoPaused_() {
-    const trackingVideo = assertTrackingVideo(this.video);
-    if (trackingVideo &&
-        trackingVideo.getCurrentTime() !== trackingVideo.getDuration()) {
-      this.analyticsEvent_(VideoAnalyticsType.PAUSE);
+    if (this.video.getCurrentTime() === this.video.getDuration()) {
+      analyticsEvent(this, VideoAnalyticsEvents.ENDED);
+    } else {
+      analyticsEvent(this, VideoAnalyticsEvents.PAUSE);
     }
     this.isPlaying_ = false;
 
@@ -386,16 +380,6 @@ class VideoEntry {
       // reset the flag
       this.pauseCalledByAutoplay_ = false;
     }
-  }
-
-  /**
-   * Callback for when the video ends
-   * @private
-   */
-  videoEnded_() {
-    this.isPlaying_ = false;
-    this.analyticsEvent_(VideoAnalyticsType.ENDED);
-    this.actionSessionManager_.endSession();
   }
 
   /**
@@ -903,31 +887,13 @@ class VideoEntry {
     return this.userInteractedWithAutoPlay_;
   }
 
-  /**
-   * @param {string} eventType
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
-   * @private
-   */
-  analyticsEvent_(eventType, opt_vars) {
-    const trackingVideo = assertTrackingVideo(this.video);
-    if (trackingVideo) {
-      const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
-          this.getAnalyticsDetails_(trackingVideo);
-
-      detailsPromise.then(details => {
-        trackingVideo.element.dispatchCustomEvent(
-            VideoEvents.ANALYTICS, {type: eventType, details});
-      });
-    }
-  }
 
   /**
    * Collects a snapshot of the current video state for video analytics
-   * @param {!../video-interface.VideoInterfaceWithAnalytics} video
    * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>}
-   * @private
    */
-  getAnalyticsDetails_(video) {
+  getAnalyticsDetails() {
+    const video = this.video;
     return this.boundSupportsAutoplay_().then(supportsAutoplay => {
       const {width, height} = this.video.element.getLayoutBox();
       const autoplay = this.hasAutoplay && supportsAutoplay;
@@ -949,22 +915,6 @@ class VideoEntry {
         'width': width,
       };
     });
-  }
-}
-
-/**
- * Asserts that a video is a tracking video
- * @param {!../video-interface.VideoInterface} video
- * @return {?../video-interface.VideoInterfaceWithAnalytics}
- * @private visible for testing
- */
-export function assertTrackingVideo(video) {
-  const trackingVideo =
-      /** @type {?../video-interface.VideoInterfaceWithAnalytics} */ (video);
-  if (trackingVideo.supportsAnalytics && trackingVideo.supportsAnalytics()) {
-    return trackingVideo;
-  } else {
-    return null;
   }
 }
 
@@ -1032,6 +982,23 @@ export function supportsAutoplay(win, isLiteViewer) {
 
   const supportsAutoplay = !detectionElement.paused;
   return supportsAutoplayCache_ = Promise.resolve(supportsAutoplay);
+}
+
+/**
+ * @param {!VideoEntry} entry
+ * @param {!VideoAnalyticsEvents} eventType
+ * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+ * @private
+ */
+function analyticsEvent(entry, eventType, opt_vars) {
+  const video = entry.video;
+  const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
+      entry.getAnalyticsDetails();
+
+  detailsPromise.then(details => {
+    video.element.dispatchCustomEvent(
+        eventType, details);
+  });
 }
 
 /**
