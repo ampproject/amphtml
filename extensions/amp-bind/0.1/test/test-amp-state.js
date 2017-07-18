@@ -17,7 +17,7 @@
 import '../amp-bind';
 import {Services} from '../../../../src/services';
 
-describes.realWin('AmpState', {
+describes.functional('AmpState', {
   amp: {
     runtimeOn: true,
     extensions: ['amp-bind:0.1'],

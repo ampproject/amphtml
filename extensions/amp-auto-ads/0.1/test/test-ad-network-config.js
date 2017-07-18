@@ -25,7 +25,7 @@ import {
   AdSenseAmpAutoAdsHoldoutBranches,
 } from '../../../../ads/google/adsense-amp-auto-ads';
 
-describes.realWin('ad-network-config', {
+describes.functional('ad-network-config', {
   amp: {
     canonicalUrl: 'https://foo.bar/baz',
     runtimeOn: true,

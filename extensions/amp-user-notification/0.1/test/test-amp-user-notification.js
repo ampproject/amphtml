@@ -21,7 +21,7 @@ import {
 import {getServiceForDoc} from '../../../../src/service';
 
 
-describes.realWin('amp-user-notification', {
+describes.functional('amp-user-notification', {
   amp: {
     ampdoc: 'single',
     extensions: ['amp-user-notification'],

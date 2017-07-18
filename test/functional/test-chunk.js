@@ -88,7 +88,7 @@ describe('chunk', () => {
     });
   }
 
-  describes.fakeWin('visible no amp', {
+  describes.unit('visible no amp', {
     amp: false,
   }, env => {
 
@@ -101,7 +101,7 @@ describe('chunk', () => {
     basicTests(env);
   });
 
-  describes.fakeWin('invisible no amp', {
+  describes.unit('invisible no amp', {
     amp: false,
   }, env => {
 
@@ -127,7 +127,7 @@ describe('chunk', () => {
     basicTests(env);
   });
 
-  describes.fakeWin('with viewer', {
+  describes.unit('with viewer', {
     amp: true,
   }, env => {
 
@@ -288,7 +288,7 @@ describe('chunk', () => {
     });
   });
 
-  describes.realWin('realWin', {
+  describes.functional('realWin', {
     amp: true,
   }, env => {
     beforeEach(() => {
@@ -299,7 +299,7 @@ describe('chunk', () => {
     basicTests(env);
   });
 
-  describes.realWin('realWin noIdleCallback', {
+  describes.functional('realWin noIdleCallback', {
     amp: true,
   }, env => {
     beforeEach(() => {

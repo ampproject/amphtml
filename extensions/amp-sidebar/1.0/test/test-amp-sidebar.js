@@ -30,7 +30,7 @@
 
  adopt(window);
 
- describes.realWin('amp-sidebar 1.0 version', {
+ describes.functional('amp-sidebar 1.0 version', {
    win: { /* window spec */
      location: '...',
      historyOff: false,

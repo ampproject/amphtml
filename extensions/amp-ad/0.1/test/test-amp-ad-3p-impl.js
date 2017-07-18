@@ -38,7 +38,7 @@ function createAmpAd(win) {
   return new AmpAd3PImpl(ampAdElement);
 }
 
-describes.realWin('amp-ad-3p-impl', {
+describes.functional('amp-ad-3p-impl', {
   amp: {
     canonicalUrl: 'https://canonical.url',
   },

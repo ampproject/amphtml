@@ -15,7 +15,7 @@
  */
 import '../amp-timeago';
 
-describes.realWin('amp-timeago', {
+describes.functional('amp-timeago', {
   amp: {
     extensions: ['amp-timeago'],
   },

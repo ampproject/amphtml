@@ -28,7 +28,7 @@ import {parseUrl} from '../../src/url';
 import * as sinon from 'sinon';
 
 
-describes.fakeWin('History', {
+describes.unit('History', {
   win: {
     location: '#first',
   },
@@ -460,7 +460,7 @@ describe('HistoryBindingVirtual', () => {
   });
 });
 
-describes.fakeWin('Local Hash Navigation', {
+describes.unit('Local Hash Navigation', {
   win: {
     location: '#first',
   },
@@ -531,7 +531,7 @@ describes.fakeWin('Local Hash Navigation', {
   });
 });
 
-describes.fakeWin('Get and update fragment', {}, env => {
+describes.unit('Get and update fragment', {}, env => {
 
   let sandbox;
   let history;

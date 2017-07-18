@@ -140,7 +140,7 @@ describe('getElementServiceIfAvailable()', () => {
 });
 
 
-describes.realWin('in single ampdoc', {
+describes.functional('in single ampdoc', {
   amp: {
     ampdoc: 'single',
   },
@@ -330,7 +330,7 @@ describes.realWin('in single ampdoc', {
   });
 });
 
-describes.fakeWin('in embed scope', {amp: true}, env => {
+describes.unit('in embed scope', {amp: true}, env => {
   let win;
   let embedWin;
   let nodeInEmbedWin;

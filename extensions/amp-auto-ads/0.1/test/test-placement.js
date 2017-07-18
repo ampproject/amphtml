@@ -18,7 +18,7 @@ import {AdTracker} from '../ad-tracker';
 import {Services} from '../../../../src/services';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 
-describes.realWin('placement', {
+describes.functional('placement', {
   amp: {
     runtimeOn: true,
     ampdoc: 'single',

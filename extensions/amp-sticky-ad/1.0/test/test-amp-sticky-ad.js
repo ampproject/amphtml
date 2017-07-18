@@ -20,7 +20,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import {poll} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
 
-describes.realWin('amp-sticky-ad 1.0 version', {
+describes.functional('amp-sticky-ad 1.0 version', {
   win: { /* window spec */
     location: '...',
     historyOff: false,
@@ -328,7 +328,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
 });
 
 
-describes.realWin('amp-sticky-ad 1.0 with real ad child', {
+describes.functional('amp-sticky-ad 1.0 with real ad child', {
   win: { /* window spec */
     location: '...',
     historyOff: false,

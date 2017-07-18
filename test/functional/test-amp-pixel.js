@@ -19,7 +19,7 @@ import {
 } from '../../src/service/url-replacements-impl';
 import {VariableSource} from '../../src/service/variable-source';
 
-describes.realWin('amp-pixel', {amp: true}, env => {
+describes.functional('amp-pixel', {amp: true}, env => {
   let win;
   let whenFirstVisiblePromise, whenFirstVisibleResolver;
   let pixel;
@@ -134,7 +134,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
 });
 
 
-describes.realWin('amp-pixel in embed', {
+describes.functional('amp-pixel in embed', {
   amp: {
     ampdoc: 'fie',
   },

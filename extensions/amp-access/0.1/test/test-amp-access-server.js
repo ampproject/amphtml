@@ -19,7 +19,7 @@ import {removeFragment} from '../../../../src/url';
 import * as lolex from 'lolex';
 
 
-describes.realWin('AccessServerAdapter', {amp: true}, env => {
+describes.functional('AccessServerAdapter', {amp: true}, env => {
   let win;
   let document;
   let ampdoc;

@@ -432,7 +432,7 @@ describe('toggleExperiment', () => {
   });
 });
 
-describes.realWin('meta override', {}, env => {
+describes.functional('meta override', {}, env => {
 
   let win;
 
@@ -468,7 +468,7 @@ describes.realWin('meta override', {}, env => {
   });
 });
 
-describes.fakeWin('url override', {}, env => {
+describes.unit('url override', {}, env => {
 
   let win;
 
@@ -806,7 +806,7 @@ describe('experiment branch tests', () => {
   });
 });
 
-describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
+describes.functional('isExperimentOnForOriginTrial', {amp: true}, env => {
 
   let win;
   let sandbox;

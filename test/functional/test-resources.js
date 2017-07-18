@@ -541,7 +541,7 @@ describe('Resources', () => {
   });
 });
 
-describes.fakeWin('Resources startup', {
+describes.unit('Resources startup', {
   win: {
     readyState: 'loading',
   },
@@ -645,7 +645,7 @@ describes.fakeWin('Resources startup', {
   });
 });
 
-describes.realWin('getElementLayoutBox', {}, env => {
+describes.functional('getElementLayoutBox', {}, env => {
   let win;
   let sandbox;
   let resources;
@@ -1637,7 +1637,7 @@ describe('Resources discoverWork', () => {
   });
 });
 
-describes.realWin('Resources scrollHeight', {
+describes.functional('Resources scrollHeight', {
   amp: {
     runtimeOn: true,
   },

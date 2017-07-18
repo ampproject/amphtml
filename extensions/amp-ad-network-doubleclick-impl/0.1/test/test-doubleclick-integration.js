@@ -22,7 +22,7 @@ import {
 
 // Still under construction.
 describes.sandboxed('A4A integration', {}, () => {
-  describes.realWin('doubleclick', {allowExternalResources: false}, env => {
+  describes.functional('doubleclick', {allowExternalResources: false}, env => {
     // Note: May need a separate realWin test for checking cross-domain
     // rendering, including SafeFrame and NameFrame.
     let fixture;

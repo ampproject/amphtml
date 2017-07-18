@@ -25,7 +25,7 @@ import * as sinon from 'sinon';
 const NOOP = () => {};
 
 
-describes.fakeWin('inabox-host:FrameOverlayManager', {}, env => {
+describes.unit('inabox-host:FrameOverlayManager', {}, env => {
 
   let win;
   let addEventListenerSpy;

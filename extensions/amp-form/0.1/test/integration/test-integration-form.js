@@ -25,7 +25,7 @@ import {registerExtendedTemplate} from
 /** @const {number} */
 const RENDER_TIMEOUT = 15000;
 
-describes.realWin('AmpForm Integration', {
+describes.functional('AmpForm Integration', {
   amp: {
     runtimeOn: true,
     ampdoc: 'single',

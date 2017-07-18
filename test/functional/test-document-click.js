@@ -30,7 +30,7 @@ describes.sandboxed('ClickHandler', {}, () => {
     };
   });
 
-  describes.fakeWin('non-embed', {
+  describes.unit('non-embed', {
     win: {
       location: 'https://www.google.com/some-path?hello=world#link',
     },
@@ -353,7 +353,7 @@ describes.sandboxed('ClickHandler', {}, () => {
     });
   });
 
-  describes.realWin('fie embed', {
+  describes.functional('fie embed', {
     amp: {
       ampdoc: 'fie',
     },

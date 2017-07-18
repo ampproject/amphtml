@@ -18,7 +18,7 @@ import '../amp-carousel';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 
-describes.realWin('test-scrollable-carousel', {ampCss: true}, env => {
+describes.functional('test-scrollable-carousel', {ampCss: true}, env => {
   let sandbox;
   let win;
 

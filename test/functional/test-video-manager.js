@@ -39,7 +39,7 @@ describe('Fake Video Player Integration Tests', () => {
   });
 });
 
-describes.fakeWin('VideoManager', {
+describes.unit('VideoManager', {
   amp: {
     ampdoc: 'single',
   },

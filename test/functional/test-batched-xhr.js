@@ -28,7 +28,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
     };
   }
 
-  describes.fakeWin('#fetch', getPolyfillWin(), env => {
+  describes.unit('#fetch', getPolyfillWin(), env => {
     const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
     const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
     const mockXhr = {
@@ -87,7 +87,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
     });
   });
 
-  describes.fakeWin('#fetchJson', getPolyfillWin(), env => {
+  describes.unit('#fetchJson', getPolyfillWin(), env => {
     const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
     const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
     const mockXhr = {
@@ -136,7 +136,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
     });
   });
 
-  describes.realWin('#fetchDocument', getPolyfillWin(), env => {
+  describes.functional('#fetchDocument', getPolyfillWin(), env => {
     const TEST_CONTENT = '<b>Hello, world';
     const TEST_RESPONSE_TEXT = '<!doctype html><html><body>' + TEST_CONTENT;
     let xhr;
@@ -181,7 +181,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
     });
   });
 
-  describes.fakeWin('#fetchText', getPolyfillWin(), env => {
+  describes.unit('#fetchText', getPolyfillWin(), env => {
     const TEST_RESPONSE = 'Hello, world!';
     const mockXhr = {
       status: 200,

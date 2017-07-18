@@ -18,7 +18,7 @@ import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import * as sinon from 'sinon';
 
-describes.realWin('inabox-host:messaging', {}, env => {
+describes.functional('inabox-host:messaging', {}, env => {
 
   let win;
   let host;

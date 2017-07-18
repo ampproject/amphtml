@@ -905,7 +905,7 @@ describes.sandboxed('DOM', {}, env => {
   });
 });
 
-describes.realWin('DOM', {
+describes.functional('DOM', {
   amp: { /* amp spec */
     ampdoc: 'single',
   },

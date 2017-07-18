@@ -114,7 +114,7 @@ describe('Styles', () => {
     });
   });
 
-  describes.realWin('installStyles', {}, env => {
+  describes.functional('installStyles', {}, env => {
     let win;
     let doc;
 

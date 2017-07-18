@@ -172,7 +172,7 @@ function getJsTestExtensionFile(name) {
 
 import {${className}} from '../${name}';
 
-describes.realWin('${name}', {
+describes.functional('${name}', {
   amp: {
     extensions: ['${name}'],
   }

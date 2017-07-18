@@ -25,7 +25,7 @@ import {loadPromise} from '../../../../src/event-helper';
 import {installTimerService} from '../../../../src/service/timer-impl';
 
 
-describes.realWin('amp-install-serviceworker', {
+describes.functional('amp-install-serviceworker', {
   amp: {
     runtimeOn: false,
     ampdoc: 'single',
@@ -266,7 +266,7 @@ describes.realWin('amp-install-serviceworker', {
 });
 
 
-describes.fakeWin('url rewriter', {
+describes.unit('url rewriter', {
   win: {
     location: 'https://example.com/thisdoc.amp.html',
   },

@@ -19,7 +19,7 @@ import {AdStrategy} from '../ad-strategy';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 import {AdTracker} from '../ad-tracker';
 
-describes.realWin('amp-strategy', {
+describes.functional('amp-strategy', {
   amp: {
     runtimeOn: true,
     ampdoc: 'single',

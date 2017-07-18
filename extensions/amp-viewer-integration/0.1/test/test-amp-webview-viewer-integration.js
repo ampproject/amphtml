@@ -53,7 +53,7 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
     });
   });
 
-  describes.fakeWin('webview window init', {
+  describes.unit('webview window init', {
     amp: {
       params: {
         webview: '1',

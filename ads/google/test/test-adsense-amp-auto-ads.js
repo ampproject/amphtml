@@ -24,7 +24,7 @@ import {
   toggleExperiment,
 } from '../../../src/experiments';
 
-describes.realWin('adsense-amp-auto-ads', {}, env => {
+describes.functional('adsense-amp-auto-ads', {}, env => {
   let win;
   let sandbox;
   let accurateRandomStub;

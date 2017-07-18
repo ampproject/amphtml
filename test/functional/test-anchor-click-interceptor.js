@@ -22,7 +22,7 @@ import {
 } from '../../src/service/url-replacements-impl';
 import {createElementWithAttributes} from '../../src/dom';
 
-describes.realWin('anchor-click-interceptor', {amp: true}, env => {
+describes.functional('anchor-click-interceptor', {amp: true}, env => {
 
   let doc;
   let ampdoc;

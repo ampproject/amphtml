@@ -24,7 +24,7 @@ import {
 } from '../amp-app-banner';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 
-describes.realWin('amp-app-banner', {amp: true}, () => {
+describes.functional('amp-app-banner', {amp: true}, () => {
 
   let vsync;
   let platform;

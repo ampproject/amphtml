@@ -27,7 +27,7 @@ import {
   AdSenseAmpAutoAdsHoldoutBranches,
 } from '../../../../ads/google/adsense-amp-auto-ads';
 
-describes.realWin('amp-auto-ads', {
+describes.functional('amp-auto-ads', {
   amp: {
     runtimeOn: true,
     ampdoc: 'single',

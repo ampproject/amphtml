@@ -17,7 +17,7 @@
 import {AccessOtherAdapter} from '../amp-access-other';
 
 
-describes.realWin('AccessOtherAdapter', {amp: true}, env => {
+describes.functional('AccessOtherAdapter', {amp: true}, env => {
   let ampdoc;
   let validConfig;
   let context;

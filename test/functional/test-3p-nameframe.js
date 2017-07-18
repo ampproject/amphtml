@@ -15,7 +15,7 @@
  */
 
 describes.sandboxed('alt nameframe', {}, () => {
-  describes.realWin('nameframe', {allowExternalResources: true}, env => {
+  describes.functional('nameframe', {allowExternalResources: true}, env => {
     let fixture;
     let win;
     let doc;

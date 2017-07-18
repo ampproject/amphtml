@@ -31,7 +31,7 @@ import {macroTask} from '../../testing/yield';
 import * as sinon from 'sinon';
 
 
-describes.realWin('extension-analytics', {
+describes.functional('extension-analytics', {
   amp: true,
 }, env => {
   let timer;

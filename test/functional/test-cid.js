@@ -687,7 +687,7 @@ describe('getProxySourceOrigin', () => {
   });
 });
 
-describes.realWin('cid', {amp: true}, env => {
+describes.functional('cid', {amp: true}, env => {
   let cid;
   let win;
   let ampdoc;
@@ -755,7 +755,7 @@ describes.realWin('cid', {amp: true}, env => {
   });
 });
 
-describes.fakeWin('cid optout:', {amp: true}, env => {
+describes.unit('cid optout:', {amp: true}, env => {
   let storageGetStub;
   let storageSetStub;
   let viewerSendMessageStub;

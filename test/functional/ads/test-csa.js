@@ -50,7 +50,7 @@ function getAds(type) {
   }
 }
 
-describes.fakeWin('amp-ad-csa-impl', {}, () => {
+describes.unit('amp-ad-csa-impl', {}, () => {
   let sandbox;
   let win;
 

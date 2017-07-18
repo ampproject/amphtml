@@ -17,13 +17,59 @@
 /**
  * @fileoverview
  *
- * describes.js helps save you from writing a lot of boilerplate test code.
- * It also helps avoid mutating global state in tests by providing mock globals
- * like FakeWindow.
+ * describes.js helps you write good tests for AMP.
+ *
+ * It does this in several ways:
+ *
+ *   - Avoids boilerplate with unit/functional/integration test scaffolds.
+ *   - Assists testing interactions with AMP runtime (e.g. extension lifecycle).
+ *   - Helps prevent flaky tests by mocking globals like `window`.
+ *
+ *
+ * DO I NEED DESCRIBES?
+ *
+ * Probably.
+ *
+ * - YES, if you want to test a new AMP extension or a new class that requires
+ *   handling browser state.
+ *
+ * - NO, if you want to test util functions (e.g. Math, string) or behaviors
+ *   that are completely independent from AMP _AND_ browser APIs.
+ *
+ *
+ * WRITE A TEST IN THREE STEPS
+ *
+ * 1. Decide what kind of test you want to write.
+ *
+ *    * Use describes.unit() by default (fast and least flaky)
+ *    * Use describes.functional() if you need a real DOM
+ *    * Use describes.integration() for end-to-end tests with compiled code
+ *
+ * 2. Decide which mocks and behaviors you need for your test by configuring
+ *    the second `spec` parameter. For example:
+ *
+ *    // This test will have the AMP runtime (resource scheduling, layout)
+ *    // running in FIE mode (friendly iframe embed) with the 'amp-carousel'
+ *    // extension installed.
+ *    describes.functional('My test', {
+ *      amp: {
+ *        runtimeOn: true,
+ *        ampdoc: 'fie',
+ *        extensions: ['amp-carousel'],
+ *      },
+ *    }, env => {
+ *      // My test code here.
+ *    });
+ *
+ * 3. Write your test. The configuration of `spec` object above affects the
+ *    returned `env` object available (see details below).
+ *
+ *
+ * HOW IT WORKS
  *
  * `describes` is a global test variable that wraps and augments Mocha's test
  * methods. For each test method, it takes an additional `spec` parameter and
- * returns an `env` object containing mocks, etc. that help testing.
+ * returns an `env` object containing mocks, etc.
  *
  * For example, a typical Mocha test may look like:
  *
@@ -48,22 +94,15 @@
  * operation (that actually all support `env.sandbox`):
  *
  * 1. `sandboxed()` just helps you set up and tear down a sinon sandbox.
- *    Use this to save some sinon boilerplate code.
- *
- * 2. `fakeWin()` provides a fake Window (fake-dom.js#FakeWindow) in `env.win`.
- *    Use this when you're testing APIs that don't heavily depend on the DOM.
- *
- * 3. `realWin()` provides a real Window in an embedded iframe in `env.win`.
- *    Use this when you're testing APIs that need a real DOM.
- *
+ * 2. `unit()` provides a fake Window (fake-dom.js#FakeWindow) in `env.win`.
+ * 3. `functional()` provides a real Window in an embedded iframe in `env.win`.
  * 4. `integration()` also provides a real Window in an embedded iframe, but
- *    the iframe contains an AMP doc where you can specify its <body> markup.
- *    Use this to save boilerplate for setting up the DOM of the iframe.
+ *    installs the AMP runtime in the iframe directly from the local binary.
  *
  * The returned `env` object contains different objects depending on (A) the
  * mode of operation and (B) the `spec` object you provide it.
  *
- * - `fakeWin()` and `realWin()` both read `spec.amp`, which configures
+ * - `unit()` and `functional()` both read `spec.amp`, which configures
  *   the AMP runtime on the returned window (see AmpTestSpec). You can also
  *   pass `false` to `spec.amp` to disable the AMP runtime if you just need
  *   a plain, non-AMP window.
@@ -75,7 +114,7 @@
  *   innerHTML of the embedded iframe's AMP document's <body>.
  *
  * The are more advanced usages of the various `spec` and returned `env`
- * objects. See the type definitions for `sandboxed`, `fakeWin`, `realWin`,
+ * objects. See the type definitions for `sandboxed`, `unit`, `functional`,
  * and `integration` below.
  */
 
@@ -194,7 +233,7 @@ export const sandboxed = describeEnv(spec => []);
  *   amp: (!AmpTestEnv|undefined),
  * })} fn
  */
-export const fakeWin = describeEnv(spec => [
+export const unit = describeEnv(spec => [
   new FakeWinFixture(spec),
   new AmpFixture(spec),
 ]);
@@ -213,7 +252,7 @@ export const fakeWin = describeEnv(spec => [
  *   amp: (!AmpTestEnv|undefined),
  * })} fn
  */
-export const realWin = describeEnv(spec => [
+export const functional = describeEnv(spec => [
   new RealWinFixture(spec),
   new AmpFixture(spec),
 ]);

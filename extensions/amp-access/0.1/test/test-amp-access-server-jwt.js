@@ -22,7 +22,7 @@ import * as lolex from 'lolex';
 import * as sinon from 'sinon';
 
 
-describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
+describes.functional('AccessServerJwtAdapter', {amp: true}, env => {
   let win;
   let ampdoc;
   let clock;

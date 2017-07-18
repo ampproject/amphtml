@@ -63,7 +63,7 @@ const EXIT_CONFIG = {
   },
 };
 
-describes.realWin('amp-ad-exit', {
+describes.functional('amp-ad-exit', {
   amp: {
     ampdoc: 'single',
     extensions: ['amp-ad-exit'],

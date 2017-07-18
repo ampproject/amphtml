@@ -35,7 +35,7 @@ describe('web components', () => {
   });
 });
 
-describes.realWin('Web Components spec', {}, env => {
+describes.functional('Web Components spec', {}, env => {
   let win;
 
   beforeEach(() => {

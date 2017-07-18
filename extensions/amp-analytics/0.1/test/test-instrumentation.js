@@ -35,7 +35,7 @@ import {
 } from '../../../../src/service/resources-impl';
 import {Services} from '../../../../src/services';
 
-describes.realWin('InstrumentationService', {amp: 1}, env => {
+describes.functional('InstrumentationService', {amp: 1}, env => {
   let win;
   let ampdoc;
   let service;
@@ -234,7 +234,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
 });
 
 
-describes.realWin('InstrumentationService in FIE', {
+describes.functional('InstrumentationService in FIE', {
   amp: {ampdoc: 'fie'},
 }, env => {
   let win;

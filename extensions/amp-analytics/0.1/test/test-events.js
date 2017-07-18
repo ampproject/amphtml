@@ -27,7 +27,7 @@ import {Signals} from '../../../../src/utils/signals';
 import * as sinon from 'sinon';
 
 
-describes.realWin('Events', {amp: 1}, env => {
+describes.functional('Events', {amp: 1}, env => {
   let win;
   let ampdoc;
   let root;

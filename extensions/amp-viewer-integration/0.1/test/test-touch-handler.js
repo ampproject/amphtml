@@ -52,7 +52,7 @@ function fakeTouchEvent(type) {
   };
 }
 
-describes.fakeWin('TouchHandler', {}, env => {
+describes.unit('TouchHandler', {}, env => {
   describe('TouchHandler Unit Tests', function() {
     let win;
     let sandbox;

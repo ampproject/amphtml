@@ -35,7 +35,7 @@ import {
   upgradeOrRegisterElement,
 } from '../../src/custom-element';
 
-describes.realWin('CustomElement register', {amp: 1}, env => {
+describes.functional('CustomElement register', {amp: 1}, env => {
 
   class ConcreteElement extends BaseElement {}
 
@@ -71,7 +71,7 @@ describes.realWin('CustomElement register', {amp: 1}, env => {
 });
 
 
-describes.realWin('CustomElement', {amp: true}, env => {
+describes.functional('CustomElement', {amp: true}, env => {
   let win, doc;
   let resources;
   let resourcesMock;
@@ -1267,7 +1267,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 });
 
 
-describes.realWin('CustomElement Service Elements', {amp: true}, env => {
+describes.functional('CustomElement Service Elements', {amp: true}, env => {
   let win, doc;
   let StubElementClass;
   let element;
@@ -1426,7 +1426,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
 });
 
 
-describes.realWin('CustomElement Loading Indicator', {amp: true}, env => {
+describes.functional('CustomElement Loading Indicator', {amp: true}, env => {
   let win, doc;
   let ElementClass;
   let clock;
@@ -1727,7 +1727,7 @@ describes.realWin('CustomElement Loading Indicator', {amp: true}, env => {
 });
 
 
-describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
+describes.functional('CustomElement Overflow Element', {amp: true}, env => {
   let win, doc;
   let ElementClass;
   let element;
