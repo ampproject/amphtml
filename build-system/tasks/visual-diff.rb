@@ -213,7 +213,7 @@ end
 
 # Launches a webserver, loads test pages, and generates Percy snapshots.
 def main()
-  if ARGV.include? '--pass'
+  if ARGV.include? '--skip'
     createEmptyBuild()
     exit
   end

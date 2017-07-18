@@ -280,11 +280,11 @@ const command = {
     timedExecOrDie(
         `${gulp} test --nobuild --saucelabs --integration --compiled`);
   },
-  runVisualDiffTests: function(opt_pass) {
+  runVisualDiffTests: function(opt_skip) {
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     let cmd = 'ruby build-system/tasks/visual-diff.rb';
-    if (opt_pass) {
-      cmd += ' --pass';
+    if (opt_skip) {
+      cmd += ' --skip';
     }
     timedExec(cmd);
   },
@@ -402,7 +402,7 @@ function main(argv) {
       }
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
-      command.runVisualDiffTests(true /*pass*/);
+      command.runVisualDiffTests(/* opt_skip */ true);
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();
