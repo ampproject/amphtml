@@ -41,6 +41,7 @@ matrix:
     - env: BUILD_SHARD="pre_build_checks_and_unit_tests"
       before_script:
         - pip install --user protobuf
+        - gem env
         - gem install percy-capybara
         - gem install phantomjs
         - gem install poltergeist
@@ -58,3 +59,6 @@ cache:
   yarn: true
   directories:
   - node_modules
+  - .gem
+  pip: true
+  bundler: true
