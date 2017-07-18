@@ -15,14 +15,14 @@
  */
 'use strict';
 
-var gulp = require('gulp-help')(require('gulp'));
 const ava = require('gulp-ava');
+const gulp = require('gulp-help')(require('gulp'));
 
 /**
  * Runs ava tests.
  */
 function runAvaTests() {
-	return gulp.src([
+  return gulp.src([
     'csvify-size/test.js',
     'get-zindex/test.js',
     'prepend-global/test.js'
