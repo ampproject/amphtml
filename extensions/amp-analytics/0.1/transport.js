@@ -208,7 +208,7 @@ export class Transport {
     }));
     const frame = createElementWithAttributes(win.document, 'iframe',
         /** @type {!JsonObject} */ ({
-          sandbox: 'allow-scripts allow-same-origin',
+          sandbox: 'allow-scripts',
           name: frameName,
           src: frameUrl,
           'data-amp-3p-sentinel': sentinel,
