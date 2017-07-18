@@ -63,7 +63,6 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isObject} from '../../../src/types';
 import {
-  extensionsFor,
   timerFor,
   xhrFor,
   Services,

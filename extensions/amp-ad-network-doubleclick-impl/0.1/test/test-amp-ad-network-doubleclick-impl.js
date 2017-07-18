@@ -26,8 +26,6 @@ import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
 import {
-  ampdocServiceFor,
-  extensionsFor,
   timerFor,
   Services,
 } from '../../../../src/services';

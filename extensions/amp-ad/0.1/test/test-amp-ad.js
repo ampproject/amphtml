@@ -172,7 +172,7 @@ describe('Ad loader', () => {
           ampAdElement.setAttribute('type', 'zort');
           const zortInstance = {};
           const zortConstructor = function() { return zortInstance; };
-          const extensions = extensionsFor(fixture.win);
+          const extensions = Services.extensionsFor(fixture.win);
           const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
               .withArgs('amp-ad-network-zort-impl')
               .returns(Promise.resolve(zortConstructor));
@@ -201,7 +201,7 @@ describe('Ad loader', () => {
           ampAdElement.setAttribute('type', 'zort');
           const zortInstance = {};
           const zortConstructor = function() { return zortInstance; };
-          const extensions = extensionsFor(fixture.win);
+          const extensions = Services.extensionsFor(fixture.win);
           const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
               .withArgs('amp-ad-network-zort-impl')
               .returns(Promise.resolve(zortConstructor));
