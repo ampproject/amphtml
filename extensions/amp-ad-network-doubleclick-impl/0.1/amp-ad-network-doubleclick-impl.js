@@ -388,7 +388,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         const pageLevelParameters = values[0];
         let parameters = Object.assign(
             this.getBlockParameters_(), pageLevelParameters);
-        if (values[1] && values[1]['artc']) {
+        if (!!values[1]) {
           parameters = Object.assign(parameters, values[1]);
         }
         return googleAdUrl(
@@ -575,8 +575,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * model.
    * The targeting info from the RTC updates the targeting info on
    * this object within mergeRtc.
-   * @return {?Promise<?number|?string>} The time the RTC callout took
-   *   (if successful) or an error message if rejecting.
+   * @return {?Promise<?Object>} An object of parameters to add to
+   *   the ad request url.
    * @private
    */
   executeRtc_() {
@@ -648,8 +648,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Merges the RTC response into the jsonTargeting of this.
    * If it can't merge, or there is no response, potentially
    * rejects.
-   * @return {Promise<?number|?string>} Resolves if ad request is
-   *     to be sent, potentially including the time the RTC took,
+   * @return {Promise<?Object>} Resolves if ad request is
+   *     to be sent, with object of params to add to request,
    *     otherwise rejects with a reject message if we have one.
    */
   mergeRtc() {
@@ -995,5 +995,3 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
-
-
