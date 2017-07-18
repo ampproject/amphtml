@@ -359,14 +359,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return Promise.all(
       [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
         const pageLevelParameters = values[0];
-        const rtcTotalTime = values[1]['rtcTotalTime'];
-        const rtcSuccess = values[1]['success'];
         const parameters = Object.assign(
             this.getBlockParameters_(), pageLevelParameters);
-        if (rtcTotalTime) {
-          parameters['artc'] = rtcTotalTime;
-          parameters['ard'] = parseUrl(rtcConfig['endpoint']).hostname;
-          parameters['ati'] = rtcSuccess ? 2 : 3;
+        if (values[1]) {
+          const rtcTotalTime = values[1]['rtcTotalTime'];
+          const rtcSuccess = values[1]['success'];
+          if (rtcTotalTime) {
+            parameters['artc'] = rtcTotalTime;
+            parameters['ard'] = parseUrl(rtcConfig['endpoint']).hostname;
+            parameters['ati'] = rtcSuccess ? 2 : 3;
+          }
         }
         return googleAdUrl(
             this, DOUBLECLICK_BASE_URL, startTime, parameters, ['108809080']);
