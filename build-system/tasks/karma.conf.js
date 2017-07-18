@@ -50,8 +50,8 @@ module.exports = {
     icon: {
       success : '✔',
       failure : '✖',
-      ignore  : '?'
-    }
+      ignore  : '?',
+    },
   },
 
   port: 9876,
