@@ -25,10 +25,7 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
-import {
-  timerFor,
-  Services,
-} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
@@ -1259,7 +1256,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       impl = new AmpAdNetworkDoubleclickImpl(element);
 
       xhrMock.returns(
-          timerFor(window).promise(1200).then(() => {
+          Services.timerFor(window).promise(1200).then(() => {
             return Promise.resolve({
               redirected: false,
               status: 200,
@@ -1289,7 +1286,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       impl = new AmpAdNetworkDoubleclickImpl(element);
 
       xhrMock.returns(
-          timerFor(window).promise(1200).then(() => {
+          Services.timerFor(window).promise(1200).then(() => {
             return Promise.resolve({
               redirected: false,
               status: 200,
