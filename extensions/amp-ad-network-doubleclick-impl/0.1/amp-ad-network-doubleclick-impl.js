@@ -62,11 +62,7 @@ import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isObject} from '../../../src/types';
-import {
-  timerFor,
-  xhrFor,
-  Services,
-} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {setStyles} from '../../../src/style';
@@ -558,16 +554,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // perspective of each slot. I.e. if the top slot on the page
     // calls out for the RTC, which returns after 5 seconds, and
     // then a slot way down on the page asks for it later.
-    rtcPromise = timerFor(window).timeoutPromise(
+    rtcPromise = Services.timerFor(window).timeoutPromise(
         RTC_TIMEOUT,
-        xhrFor(this.win).fetchJson(
+        Services.xhrFor(this.win).fetchJson(
             endpoint, {credentials: 'include'}).then(res => {
               rtcTotalTime = Date.now() - startTime;
               if (!disableSWR) {
                 // Repopulate the cache.
                 const headers = new Headers();
                 headers.append('Cache-Control', 'max-age=0');
-                xhrFor(this.win).fetchJson(endpoint, {
+                Services.xhrFor(this.win).fetchJson(endpoint, {
                   credentials: 'include',
                   headers,
                 }).catch(err => {
