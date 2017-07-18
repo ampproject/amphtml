@@ -444,9 +444,9 @@ export class Viewport {
     }
     /** @const {!TransitionDef<number>} */
     const interpolate = numeric(curScrollTop, newScrollTop);
-    // TODO(aghassemi): the duration should not be a constant and should
+    // TODO(aghassemi, #10463): the duration should not be a constant and should
     // be proportional to the distance to be scrolled for better transition
-    // experience when things are closer vs farther (#10463).
+    // experience when things are closer vs farther.
     return Animation.animate(this.ampdoc.getRootNode(), position => {
       this.binding_.setScrollTop(interpolate(position));
     }, duration, curve).then();
