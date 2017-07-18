@@ -402,6 +402,7 @@ function main(argv) {
       }
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
+      // TEST CHANGE, DO NOT MERGE.
       command.runVisualDiffTests(/* opt_skip */ true);
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
