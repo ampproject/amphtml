@@ -305,6 +305,8 @@ function runAllCommands() {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
+    // Revert after a golden version of the blank page has been established.
+    command.runVisualDiffTests(/* opt_skip */ true);
     command.runVisualDiffTests();
     command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
