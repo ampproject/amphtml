@@ -15,7 +15,6 @@
  */
 
 import {dev} from '../log';
-import {toArray} from '../types';
 
 /**
  * Interpret a byte array as a UTF-8 string.
@@ -111,7 +110,11 @@ export function stringToBytes(str) {
  * @return {string}
  */
 export function bytesToString(bytes) {
-  return String.fromCharCode.apply(String, toArray(bytes));
+  const array = new Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) {
+    array[i] = String.fromCharCode(bytes[i]);
+  }
+  return array.join('');
 };
 
 /**
