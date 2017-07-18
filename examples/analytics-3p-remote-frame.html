@@ -31,10 +31,15 @@
       };
 
       // Load the script specified in the iframe’s name attribute:
-      script = document.createElement('script');
-      script.src = JSON.parse(window.name).scriptSrc;
-      document.head.appendChild(script);
-      // The script will be loaded, and will call onNewAmpAnalyticsInstance()
+      const url = JSON.parse(window.name).scriptSrc;
+      if (url && url.startsWith('https://3p.ampproject.net/')) {
+        script = document.createElement('script');
+        script.src = url;
+        document.head.appendChild(script);
+        // The script will be loaded, and will call onNewAmpAnalyticsInstance()
+      } else {
+        console.log('Received invalid URL - risk of XSS! ' + url);
+      }
     </script>
   </head>
   <!-- The frame will not be visible, so there is no need for a body tag. -->
