@@ -15,9 +15,16 @@
  */
 
 /**
- *@constructor
-  */
+ * @constructor
+ */
 function Event(name, params) {
+  if (!name) {
+    throw new TypeError(
+      "Failed to construct 'Event': 1 argument required but only 0 present",
+      'event.js',
+      20
+    );
+  }
   params = params || {bubbles: false, cancelable: false};
   const evt = self.document.createEvent('Event');
   evt.initEvent(

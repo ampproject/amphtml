@@ -29,23 +29,23 @@ describes.fakeWin('Event', {}, env => {
   });
 
   it('should require a type argument', () => {
-    expect(() => new Event()).to.throw(TypeError);
+    expect(() => new env.win.Event()).to.throw(TypeError);
   });
 
   it('should be configurable', () => {
-    const ev = new Event('event', {bubbles: true, cancelable: true});
+    const ev = new env.win.Event('event', {bubbles: true, cancelable: true});
     expect(ev.bubbles).to.be.true;
     expect(ev.cancelable).to.be.true;
   });
 
   it('should be able to be dispatched', () => {
-    const ev = new Event('event');
+    const ev = new env.win.Event('event');
     const elm = document.createElement('p');
     expect(() => elm.dispatchEvent(ev)).to.not.throw();
   });
 
   it('should trigger listeners', () => {
-    const ev = new Event('event');
+    const ev = new env.win.Event('event');
     const elm = document.createElement('p');
     let flag = false;
     elm.addEventListener('event', () => {
