@@ -87,7 +87,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       // To trigger CSS styling.
       element.setAttribute('data-a4a-upgrade-type',
           'amp-ad-network-adsense-impl');
-      initializeElement(element, doc);
+      initializeElement(element, fixture.doc);
       // Used to test styling which is targetted at first iframe child of
       // amp-ad.
       const iframe = fixture.doc.createElement('iframe');
