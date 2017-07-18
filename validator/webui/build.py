@@ -110,7 +110,7 @@ def InstallNodeDependencies():
   logging.info('installing AMP Validator webui dependencies ...')
   subprocess.check_call(
       ['npm', 'install'],
-      stdout=(open(os.devnull, 'wb') if os.environ['TRAVIS'] else sys.stdout))
+      stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('... done')
 
 
