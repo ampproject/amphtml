@@ -257,9 +257,7 @@ export class FixedLayer {
     let hasTransferables = false;
     return this.vsync_.runPromise({
       measure: state => {
-        const autoTops = [];
-        const oldTops = [];
-        const elements = this.elements_;
+        const autoTopMap = {};
 
         // Notice that this code intentionally breaks vsync contract.
         // Unfortunately, there's no way to reliably test whether or not
@@ -268,24 +266,20 @@ export class FixedLayer {
         // `style.top = auto`.
 
         // 1. Set all style top to `auto` and calculate the auto-offset.
-        for (let i = 0; i < elements.length; i++) {
-          const fe = elements[i];
-          oldTops.push(getStyle(fe.element, 'top'));
+        this.elements_.forEach(fe => {
           setStyle(fe.element, 'top', 'auto');
-        }
-
-        for (let i = 0; i < elements.length; i++) {
-          autoTops.push(elements[i].element./*OK*/offsetTop);
-        }
+        });
+        this.elements_.forEach(fe => {
+          autoTopMap[fe.id] = fe.element./*OK*/offsetTop;
+        });
 
         // 2. Reset style top.
-        for (let i = 0; i < elements.length; i++) {
-          setStyle(elements[i].element, 'top', oldTops[i]);
-        }
+        this.elements_.forEach(fe => {
+          setStyle(fe.element, 'top', '');
+        });
 
         // 3. Calculated fixed/sticky info.
-        for (let i = 0; i < elements.length; i++) {
-          const fe = elements[i];
+        this.elements_.forEach(fe => {
           const element = fe.element;
           const styles = computedStyle(this.ampdoc.win, element);
           const position = styles.position || '';
@@ -309,7 +303,7 @@ export class FixedLayer {
               top: '',
               zIndex: '',
             };
-            continue;
+            return;
           }
 
           // Calculate top, assuming that it could implicitly be `auto`.
@@ -319,7 +313,7 @@ export class FixedLayer {
           // `offsetTop` with `style.top = 'auto'` and without.
           let top = styles.top;
           const currentOffsetTop = element./*OK*/offsetTop;
-          const isImplicitAuto = currentOffsetTop == autoTops[i];
+          const isImplicitAuto = currentOffsetTop == autoTopMap[fe.id];
           if ((top == 'auto' || isImplicitAuto) && top != '0px' ||
               // This is workaround for http://crbug.com/703816 in Chrome where
               // `getComputedStyle().top` returns `0px` instead of `auto`.
@@ -359,7 +353,7 @@ export class FixedLayer {
             zIndex: styles.zIndex,
             transform: styles.transform,
           };
-        }
+        });
       },
       mutate: state => {
         if (hasTransferables && this.transfer_) {
