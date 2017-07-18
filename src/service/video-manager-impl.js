@@ -389,6 +389,7 @@ class VideoEntry {
     /** @private {?PositionInViewportEntryDef} */
     this.dockLastPosition_ = null;
 
+    /** @private {boolean} */
     this.dockPreviouslyInView_ = false;
 
     this.hasDocking = element.hasAttribute(VideoAttributes.DOCK);
@@ -468,6 +469,11 @@ class VideoEntry {
         this.video.element,
         'video, iframe'
     );
+
+    // Just in case the video's size changed during layout
+    this.vsync_.measure(() => {
+      this.initialRect_ = this.video.element.getLayoutBox();
+    });
 
     this.updateVisibility();
     if (this.isVisible_) {

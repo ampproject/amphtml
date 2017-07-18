@@ -22,6 +22,7 @@ import {
   VideoInterface,
   VideoEvents,
   VideoAnalyticsEvents,
+  PlayingStates,
 } from '../../src/video-interface';
 import {supportsAutoplay} from '../../src/service/video-manager-impl';
 import {
@@ -379,6 +380,14 @@ export function runVideoPlayerIntegrationTests(
           video.querySelector('i-amphtml-video-mask').click();
           return poll('wait for mask to hide', () => {
             return !video.querySelector('i-amphtml-video-mask');
+          });
+        }).then(() => {
+          const vidManager = Services.videoManagerForDoc(
+              video.implementation_.getAmpDoc()
+          );
+          return poll('wait for video to be playing manually', () => {
+            const curState = vidManager.getPlayingState(video.implementation_);
+            return curState == PlayingStates.PLAYING_MANUAL;
           });
         }).then(() => {
           viewport.setScrollTop(FRAME_HEIGHT);
