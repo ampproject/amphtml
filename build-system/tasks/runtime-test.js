@@ -124,11 +124,13 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
 
   if (argv.testnames) {
     c.reporters = ['mocha'];
+    c.mochaReporter.output = 'full';
   }
 
   if (argv.files) {
     c.files = [].concat(config.commonTestPaths, argv.files);
     c.reporters = ['mocha'];
+    c.mochaReporter.output = 'full';
   } else if (argv.integration) {
     c.files = config.integrationTestPaths;
   } else if (argv.randomize || argv.glob || argv.a4a) {
