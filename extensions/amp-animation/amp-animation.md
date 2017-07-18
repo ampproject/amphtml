@@ -354,7 +354,7 @@ Another way to specify keyframes is in the document's stylesheet (`<style>` tag)
 CSS `@keyframes` are mostly equivalent to inlining keyframes definition in the JSON per [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument). However, there are some nuances:
  - For broad-platform support, vendor prefixes, e.g. `@-ms-keyframes {}` or `-moz-transform` may be needed. Vendor prefixes are not needed and not allowed in the JSON format, but in CSS they could be necessary.
  - Platforms that do not support `calc()` and `var()` will not be able to take advantage of `amp-animation` polyfills when keyframes are specified in CSS. It's thus recommended to always include fallback values in CSS.
- - CSS extensions such as [`width()`, `height()` and `rand()`](#css-extensions) cannot be used in CSS.
+ - CSS extensions such as [`width()`, `height()`, `rand()` and `index()`](#css-extensions) cannot be used in CSS.
 
 
 #### Whitelisted properties for keyframes
@@ -508,6 +508,18 @@ Animation components can specify their own variables as `--var-name` fields. The
 
 `amp-animation` provides several CSS extensions for typical animations needs: `rand()`, `width()`, and `height()`. These functions can be used everywhere where CSS values can be used within `amp-animation`, including timing and keyframes values.
 
+#### CSS `index()` extension
+
+The `index()` function returns an index of the current target element in the animation effect. This is most relevant when multiple targets are animated with the same effect using `selector` property. The first target matched by the selector will have index `0`, the second will have index `1` and so on.
+
+Among other things, this property can be combined with `calc()` expressions and be used to create staggered effect. For instance:
+```
+{
+  "selector": ".class-x",
+  "delay": "calc(200ms * index())"
+}
+```
+
 #### CSS `rand()` extension
 
 The `rand()` function returns a random CSS value. There are two forms.
@@ -515,14 +527,14 @@ The `rand()` function returns a random CSS value. There are two forms.
 The form without arguments simply returns the random number between 0 and 1.
 ```
 {
-  "animation-delay": "calc(10s * rand())"
+  "delay": "calc(10s * rand())"
 }
 ```
 
 The second form has two arguments and returns the random value between these two arguments.
 ```
 {
-  "animation-delay": "rand(5s, 10s)"
+  "delay": "rand(5s, 10s)"
 }
 ```
 
