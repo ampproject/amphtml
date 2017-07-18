@@ -46,6 +46,8 @@ import {
   groupAmpAdsByType,
   addCsiSignalsToAmpAnalyticsConfig,
   QQID_HEADER,
+  getEnclosingContainerTypes,
+  ValidAdContainerTypes,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -70,6 +72,10 @@ import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
 import {isSecureUrl, parseUrl} from '../../../src/url';
+import {
+  RefreshManager,
+  DATA_ATTR_NAME,
+} from '../../amp-a4a/0.1/refresh-manager';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -150,7 +156,7 @@ const BLOCK_SRA_COMBINERS_ = [
   },
   instances => {
     return {'prev_iu_szs': instances.map(instance =>
-      `${instance.size_.width}x${instance.size_.height}`).join()};
+      `${instance.initialSize_.width}x${instance.initialSize_.height}`).join()};
   },
   // Although declared at a block-level, this is actually page level so
   // return true if ANY indicate TFCD.
@@ -214,8 +220,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?string} */
     this.qqid_ = null;
 
-    /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
-    this.size_ = null;
+    /** @private {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} */
+    this.initialSize_ = null;
+
+    /** @private {?{width: number, height: number}} */
+    this.returnedSize_ = null;
 
     /** @private {?Element} */
     this.ampAnalyticsElement_ = null;
@@ -244,6 +253,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {!Promise<?../../../src/service/xhr-impl.FetchResponse>} */
     this.sraResponsePromise_ = sraInitializer.promise;
+
+    /** @private {?RefreshManager} */
+    this.refreshManager_ = null;
+
+    /** @private {number} */
+    this.refreshCount_ = 0;
+
+    /** @private {number} */
+    this.ifi_ = 0;
   }
 
   /** @override */
@@ -284,9 +302,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {!Object<string,string|boolean|number>}
    */
   getBlockParameters_() {
-    dev().assert(this.size_);
+    dev().assert(this.initialSize_);
     dev().assert(this.jsonTargeting_);
-    let sizeStr = `${this.size_.width}x${this.size_.height}`;
+    let sizeStr = `${this.initialSize_.width}x${this.initialSize_.height}`;
     const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
@@ -297,13 +315,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // dimensions in an array.
       const dimensions = getMultiSizeDimensions(
           multiSizeDataStr,
-          this.size_.width,
-          this.size_.height,
-          multiSizeValidation == 'true');
+          this.initialSize_.width,
+          this.initialSize_.height,
+          multiSizeValidation == 'true',
+          /* Use strict mode only in non-refresh case */ !this.isRefreshing);
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
           .join('|');
     }
+    const rc = (this.refreshCount_ && this.fromResumeCallback)
+        ? this.refreshCount_ + 1
+        : (this.fromResumeCallback ? 1 : this.refreshCount_ || null);
+    this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
+    this.ifi_ = (this.isRefreshing && this.ifi_) ||
+        this.win['ampAdGoogleIfiCounter']++;
     return Object.assign({
       'iu': this.element.getAttribute('data-slot'),
       'co': this.jsonTargeting_ &&
@@ -316,6 +341,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
           (this.jsonTargeting_ &&
             this.jsonTargeting_['categoryExclusions']) || null),
+      'ifi': this.ifi_,
+      rc,
     }, googleBlockParameters(this));
   }
 
@@ -329,19 +356,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('data-override-height')) ||
       Number(this.element.getAttribute('height'));
-    this.size_ = width && height
+    this.initialSize_ = width && height
         ? {width, height}
         // width/height could be 'auto' in which case we fallback to measured.
         : this.getIntersectionElementLayoutBox();
     this.jsonTargeting_ =
       tryParseJson(this.element.getAttribute('json')) || {};
-    this.adKey_ =
-      this.generateAdKey_(`${this.size_.width}x${this.size_.height}`);
+    this.adKey_ = this.generateAdKey_(
+        `${this.initialSize_.width}x${this.initialSize_.height}`);
   }
 
   /** @override */
   getAdUrl() {
-    if (this.iframe) {
+    if (this.iframe && !this.isRefreshing) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
       return '';
     }
@@ -382,7 +409,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);
     if (size) {
-      this.size_ = size;
+      this.returnedSize_ = size;
       this.handleResize_(size.width, size.height);
     } else {
       const width = Number(this.element.getAttribute('width'));
@@ -413,8 +440,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  unlayoutCallback() {
-    super.unlayoutCallback();
+  tearDownSlot() {
+    super.tearDownSlot();
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
@@ -434,6 +461,30 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraResponseRejector = sraInitializer.rejector;
     this.sraResponsePromise_ = sraInitializer.promise;
     this.qqid_ = null;
+  }
+
+  /** @override */
+  layoutCallback() {
+    const superReturnValue = super.layoutCallback();
+    if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
+      user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
+    }
+    this.refreshManager_ = this.useSra ||
+        getEnclosingContainerTypes(this.element).filter(container =>
+            container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
+            container != ValidAdContainerTypes['AMP-STICKY-AD']).length
+            ? null
+            : this.refreshManager_ || new RefreshManager(this, {
+              visiblePercentageMin: 50,
+              continuousTimeMin: 1,
+            });
+    return superReturnValue;
+  }
+
+  /** @override */
+  refresh(refreshEndCallback) {
+    this.refreshCount_++;
+    return super.refresh(refreshEndCallback);
   }
 
   /**
@@ -461,12 +512,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.ampAnalyticsElement_ =
           insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
+    if (this.isRefreshing) {
+      dev().assert(this.refreshManager_);
+      this.refreshManager_.initiateRefreshCycle();
+      this.isRefreshing = false;
+      this.isRelayoutNeededFlag = false;
+    }
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
 
-    // Force size of frame to match available space as min-height/width are
-    // set to 0 to ensure centering.
-    const size = this.getIntersectionElementLayoutBox();
+    // Force size of frame to match creative or, if creative size is unknown,
+    // the slot. This ensures that the creative is centered in the former case,
+    // and not truncated in the latter.
+    const size = this.returnedSize_ || this.getIntersectionElementLayoutBox();
     setStyles(dev().assertElement(this.iframe), {
       width: `${size.width}px`,
       height: `${size.height}px`,
@@ -937,3 +995,5 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
+
+
