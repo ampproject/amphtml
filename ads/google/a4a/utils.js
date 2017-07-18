@@ -14,30 +14,21 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
 import {isCanary} from '../../../src/experiments';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin, parseUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
-import {
-  resourcesForDoc,
-  viewerForDoc,
-  viewportForDoc,
-} from '../../../src/services';
-import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
 import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
-
-/** @const {string} */
-const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -181,7 +172,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */
 export function groupAmpAdsByType(win, type, groupFn) {
-  return resourcesForDoc(win.document).getMeasuredResources(win,
+  return Services.resourcesForDoc(win.document).getMeasuredResources(win,
       r => r.element.tagName == 'AMP-AD' &&
         r.element.getAttribute('type') == type)
       .then(resources => {
@@ -202,15 +193,15 @@ export function groupAmpAdsByType(win, type, groupFn) {
  * @return {!Promise<!Object<string,null|number|string>>}
  */
 export function googlePageParameters(win, doc, startTime, output = 'html') {
-  const referrerPromise = viewerForDoc(doc).getReferrerUrl();
+  const referrerPromise = Services.viewerForDoc(doc).getReferrerUrl();
   return getOrCreateAdCid(doc, 'AMP_ECID_GOOGLE', '_ga')
       .then(clientId => referrerPromise.then(referrer => {
-        const documentInfo = documentInfoForDoc(doc);
+        const documentInfo = Services.documentInfoForDoc(doc);
         // Read by GPT for GA/GPT integration.
         win.gaGlobal = win.gaGlobal ||
         {cid: clientId, hid: documentInfo.pageViewId};
         const screen = win.screen;
-        const viewport = viewportForDoc(doc);
+        const viewport = Services.viewportForDoc(doc);
         const viewportRect = viewport.getRect();
         const viewportSize = viewport.getSize();
         return {
@@ -272,27 +263,6 @@ export function truncAndTimeUrl(baseUrl, parameters, startTime) {
   return buildUrl(
       baseUrl, parameters, MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'})
     + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
-}
-
-/**
- * @param {!ArrayBuffer} creative
- * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
- * @return {!Promise<!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef>}
- */
-export function extractGoogleAdCreativeAndSignature(
-    creative, responseHeaders) {
-  let signature = null;
-  try {
-    if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
-      signature =
-        base64UrlDecodeToBytes(dev().assertString(
-            responseHeaders.get(AMP_SIGNATURE_HEADER)));
-    }
-  } finally {
-    return Promise.resolve(/** @type {
-          !../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */ (
-          {creative, signature}));
-  }
 }
 
 /**
@@ -393,7 +363,8 @@ function elapsedTimeWithCeiling(time, start) {
 export function getCorrelator(win, opt_cid, opt_nodeOrDoc) {
   if (!win.ampAdPageCorrelator) {
     win.ampAdPageCorrelator = makeCorrelator(
-        opt_cid, documentInfoForDoc(opt_nodeOrDoc || win.document).pageViewId);
+        opt_cid,
+        Services.documentInfoForDoc(opt_nodeOrDoc || win.document).pageViewId);
   }
   return win.ampAdPageCorrelator;
 }

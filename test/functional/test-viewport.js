@@ -15,7 +15,7 @@
  */
 
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
-import {ampdocServiceFor} from '../../src/ampdoc';
+import {Services} from '../../src/services';
 import {
   installViewportServiceForDoc,
   Viewport,
@@ -29,17 +29,12 @@ import {
 } from '../../src/service/viewport-impl';
 import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
+import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {loadPromise} from '../../src/event-helper';
-import {
-  platformFor,
-  viewerForDoc,
-  viewportForDoc,
-  vsyncFor,
-} from '../../src/services';
 import {setParentWindow} from '../../src/service';
 import {whenDocumentReady} from '../../src/document-ready';
 import * as sinon from 'sinon';
@@ -96,9 +91,9 @@ describes.fakeWin('Viewport', {}, env => {
     installTimerService(windowApi);
     installVsyncService(windowApi);
     installPlatformService(windowApi);
-
     installDocService(windowApi, /* isSingleDoc */ true);
-    ampdoc = ampdocServiceFor(windowApi).getAmpDoc();
+    installDocumentStateService(windowApi);
+    ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
     installViewerServiceForDoc(ampdoc);
 
     binding = new ViewportBindingDef();
@@ -122,7 +117,7 @@ describes.fakeWin('Viewport', {}, env => {
     viewport.getSize();
 
     // Use window since Animation by default will use window.
-    const vsync = vsyncFor(window);
+    const vsync = Services.vsyncFor(window);
     vsyncTasks = [];
     sandbox.stub(vsync, 'canAnimate').returns(true);
     sandbox.stub(vsync, 'createAnimTask', (unusedContextNode, task) => {
@@ -204,7 +199,7 @@ describes.fakeWin('Viewport', {}, env => {
           }
           return null;
         });
-        const platform = platformFor(ampdoc.win);
+        const platform = Services.platformFor(ampdoc.win);
         isIos = true;
         sandbox.stub(platform, 'isIos', () => isIos);
       });
@@ -476,6 +471,10 @@ describes.fakeWin('Viewport', {}, env => {
     viewportSize.width = 112;
     viewport.resize_();
     expect(resizeEvent).to.not.equal(null);
+    expect(resizeEvent.height).to.equal(viewportSize.height);
+    expect(resizeEvent.width).to.equal(viewportSize.width);
+    // Width changed, relayoutAll should be true
+    expect(resizeEvent.relayoutAll).to.be.true;
   });
 
   it('should dispatch onResize on height resize', () => {
@@ -486,6 +485,22 @@ describes.fakeWin('Viewport', {}, env => {
     viewportSize.height = 223;
     viewport.resize_();
     expect(resizeEvent).to.not.equal(null);
+    expect(resizeEvent.height).to.equal(viewportSize.height);
+    expect(resizeEvent.width).to.equal(viewportSize.width);
+    // Only height changed, relayoutAll should be false
+    expect(resizeEvent.relayoutAll).to.be.false;
+  });
+
+  it('should not dispatch onResize if size does not actually change', () => {
+    let resizeEvent = null;
+    viewport.onResize(event => {
+      resizeEvent = event;
+    });
+    viewport.size_ = {width: 200, height: 200};
+    viewportSize.width = 200;
+    viewportSize.height = 200;
+    viewport.resize_();
+    expect(resizeEvent).to.equal(null);
   });
 
   it('should not do anything if padding is not changed', () => {
@@ -1129,7 +1144,8 @@ describe('Viewport META', () => {
       installVsyncService(windowApi);
       installPlatformService(windowApi);
       installDocService(windowApi, /* isSingleDoc */ true);
-      ampdoc = ampdocServiceFor(windowApi).getAmpDoc();
+      installDocumentStateService(windowApi);
+      ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
       installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
       viewport = new Viewport(ampdoc, binding, viewer);
@@ -1232,7 +1248,8 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     installPlatformService(win);
     installVsyncService(win);
     installDocService(win, /* isSingleDoc */ true);
-    ampdoc = ampdocServiceFor(win).getAmpDoc();
+    installDocumentStateService(win);
+    ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
     binding = new ViewportBindingNatural_(ampdoc, viewer);
     binding.connect();
   });
@@ -1385,8 +1402,9 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {ampCss: true}, env => {
     child.style.height = '300px';
     win.document.body.appendChild(child);
     installDocService(win, /* isSingleDoc */ true);
+    installDocumentStateService(win);
     installVsyncService(win);
-    const ampdoc = ampdocServiceFor(win).getAmpDoc();
+    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc);
 
@@ -1841,20 +1859,22 @@ describe('createViewport', () => {
     it('should bind to "natural" when not iframed', () => {
       win.parent = win;
       installDocService(win, /* isSingleDoc */ true);
-      const ampDoc = ampdocServiceFor(win).getAmpDoc();
+      installDocumentStateService(win);
+      const ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
       installViewportServiceForDoc(ampDoc);
-      const viewport = viewportForDoc(ampDoc);
+      const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
     });
 
     it('should bind to "naturual" when iframed', () => {
       win.parent = {};
       installDocService(win, /* isSingleDoc */ true);
-      const ampDoc = ampdocServiceFor(win).getAmpDoc();
+      installDocumentStateService(win);
+      const ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
       installViewportServiceForDoc(ampDoc);
-      const viewport = viewportForDoc(ampDoc);
+      const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
     });
   });
@@ -1872,15 +1892,16 @@ describe('createViewport', () => {
       installTimerService(win);
       installVsyncService(win);
       installDocService(win, /* isSingleDoc */ true);
-      ampDoc = ampdocServiceFor(win).getAmpDoc();
+      installDocumentStateService(win);
+      ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
-      viewer = viewerForDoc(ampDoc);
+      viewer = Services.viewerForDoc(ampDoc);
     });
 
     it('should bind to "natural" when not iframed', () => {
       win.parent = win;
       installViewportServiceForDoc(ampDoc);
-      const viewport = viewportForDoc(ampDoc);
+      const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
     });
 
@@ -1888,7 +1909,7 @@ describe('createViewport', () => {
       win.parent = {};
       sandbox.stub(viewer, 'isEmbedded', () => true);
       installViewportServiceForDoc(ampDoc);
-      const viewport = viewportForDoc(ampDoc);
+      const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNaturalIosEmbed_);
     });
@@ -1897,7 +1918,7 @@ describe('createViewport', () => {
       win.parent = {};
       sandbox.stub(viewer, 'isEmbedded', () => false);
       installViewportServiceForDoc(ampDoc);
-      const viewport = viewportForDoc(ampDoc);
+      const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNatural_);
     });
@@ -1906,7 +1927,7 @@ describe('createViewport', () => {
       getMode(win).development = true;
       sandbox.stub(viewer, 'isEmbedded', () => false);
       installViewportServiceForDoc(ampDoc);
-      const viewport = viewportForDoc(ampDoc);
+      const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNaturalIosEmbed_);
     });
@@ -1916,7 +1937,7 @@ describe('createViewport', () => {
       getMode(win).test = true;
       sandbox.stub(viewer, 'isEmbedded', () => false);
       installViewportServiceForDoc(ampDoc);
-      const viewport = viewportForDoc(ampDoc);
+      const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNaturalIosEmbed_);
     });
@@ -1926,7 +1947,7 @@ describe('createViewport', () => {
       getMode(win).development = true;
       sandbox.stub(viewer, 'isEmbedded', () => false);
       installViewportServiceForDoc(ampDoc);
-      const viewport = viewportForDoc(ampDoc);
+      const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNatural_);
     });

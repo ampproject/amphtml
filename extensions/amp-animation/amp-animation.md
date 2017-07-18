@@ -78,14 +78,14 @@ will be removed in the near future.
 Each animation component is a [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect)
 and is comprised of:
  - Target element(s) referenced by a selector
- - Conditions, such as media query
+ - Conditions: media query and supports condition
  - Timing properties
  - Keyframes
 
 ```text
 {
   "selector": "#target-id",
-  "media": "(min-width:300px)",
+  // Conditions
   // Variables
   // Timing properties
   // Subtargets
@@ -101,11 +101,19 @@ Conditions can specify whether this animation component is included in the final
 
 #### Media query
 
-Media query can be specified using the `media` property. This attribute can contain any expression allowed
-for [Window.matchMedia](https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia) API.
+Media query can be specified using the `media` property. This property can contain any expression allowed
+for [Window.matchMedia](https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia) API and corresponds to `@media` CSS rule.
 
 If value is specified for an animation component, the animation component will only be included if the
 media query will match the current environment.
+
+#### Supports condition
+
+Supports condition can be specified using the `supports` property. This property can contain any expression allowed
+for [CSS.supports](https://developer.mozilla.org/en-US/docs/Web/API/CSS/supports) API and corresponds to `@supports` CSS rule.
+
+If value is specified for an animation component, the animation component will only be included if the
+supports condition will match the current environment.
 
 
 ### Variables

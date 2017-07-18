@@ -42,21 +42,22 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
 | `gulp build`<sup>[[1]](#footnote-1)</sup>                               | Builds the AMP library.                                               |
 | `gulp build --fortesting`<sup>[[1]](#footnote-1)</sup>                  | Builds the AMP library and will read the AMP_TESTING_HOST environment variable to write out an override AMP_CONFIG. |
-| `gulp build --css-only`<sup>[[1]](#footnote-1)</sup>                    | Builds only the embedded css into js files for the AMP library.       |
+| `gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.                                                 |
 | `gulp clean`                                                            | Removes build output.                                                 |
-| `gulp css`                                                              | Recompile css to build directory.                                     |
+| `gulp css`<sup>[[1]](#footnote-1)</sup>                                 | Recompiles css to build directory and builds the embedded css into js files for the AMP library. |
 | `gulp extensions`                                                       | Build AMP Extensions.                                                 |
 | `gulp watch`<sup>[[1]](#footnote-1)</sup>                               | Watches for changes in files, re-build.                               |
 | `gulp test`<sup>[[1]](#footnote-1)</sup>                                | Runs tests in Chrome.                                                 |
 | `gulp test --verbose`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Chrome with logging enabled.                            |
 | `gulp test --nobuild`                                                   | Runs tests without re-build.                                          |
 | `gulp test --watch`<sup>[[1]](#footnote-1)</sup>                        | Watches for changes in files, runs corresponding test(s) in Chrome.   |
-| `gulp test --watch --verbose`<sup>[[1]](#footnote-1)</sup>              | Same as "watch" with logging enabled.                                 |
+| `gulp test --watch --verbose`<sup>[[1]](#footnote-1)</sup>              | Same as `watch`, with logging enabled.                                 |
 | `gulp test --saucelabs`<sup>[[1]](#footnote-1)</sup>                    | Runs test on saucelabs (requires [setup](#testing-on-sauce-labs)).                |
 | `gulp test --safari`<sup>[[1]](#footnote-1)</sup>                       | Runs tests in Safari.                                                 |
 | `gulp test --firefox`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Firefox.                                                |
 | `gulp test --files=<test-files-path-glob>`<sup>[[1]](#footnote-1)</sup> | Runs specific test files.                                             |
 | `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default. |
+| `gulp serve --quiet`                                                    | Same as `serve`, with logging silenced. |
 | `gulp check-types`                                                      | Verifies that there are no errors associated with Closure typing. Run automatically upon push.  |
 | `gulp dep-check`                                                        | Runs a dependency check on each module. Run automatically upon push.  |
 | `gulp presubmit`                                                        | Run validation against files to check for forbidden and required terms. Run automatically upon push.  |
@@ -64,6 +65,8 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.                     |
 | `npm run ava`<sup>[[1]](#footnote-1)</sup>                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 | `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
+| `ruby build-system/tasks/visual-diff.rb`                                | Runs all visual diff tests locally. Requires `gulp build` to have been run. Also requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables. |
+| `ruby build-system/tasks/visual-diff.rb --percy_debug --phantomjs_debug --webserver_debug`  | Same as above, with additional logging. Debug flags can be used independently.  |
 
 <a id="footnote-1">[1]</a> On Windows, this command must be run as administrator.
 

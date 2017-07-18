@@ -22,8 +22,13 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {getData, listen} from '../../../src/event-helper';
-import {videoManagerForDoc} from '../../../src/services';
-import {parseQueryString} from '../../../src/url';
+import {Services} from '../../../src/services';
+import {
+    parseQueryString,
+    addParamsToUrl,
+    addParamToUrl,
+} from '../../../src/url';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 
 /**
  * Player events reverse-engineered from the Dailymotion API
@@ -137,7 +142,7 @@ class AmpDailymotion extends AMP.BaseElement {
         this.element);
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
@@ -153,8 +158,7 @@ class AmpDailymotion extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     dev().assert(this.videoid_);
-    iframe.src = 'https://www.dailymotion.com/embed/video/' +
-     encodeURIComponent(this.videoid_ || '') + '?' + this.getQuery_();
+    iframe.src = this.getIframeSrc_();
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -169,14 +173,6 @@ class AmpDailymotion extends AMP.BaseElement {
     this.hasAutoplay_ = this.element.hasAttribute('autoplay');
 
     return this.loadPromise(this.iframe_);
-  }
-
-  /** @private */
-  addQueryParam_(param, query) {
-    const val = this.element.getAttribute(`data-${param}`);
-    if (val) {
-      query.push(`${encodeURIComponent(param)}=${encodeURIComponent(val)}`);
-    }
   }
 
   /** @private */
@@ -204,7 +200,7 @@ class AmpDailymotion extends AMP.BaseElement {
         this.playerState_ = DailymotionEvents.PAUSE;
         break;
       case DailymotionEvents.PLAY:
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
         this.playerState_ = DailymotionEvents.PLAY;
         break;
       case DailymotionEvents.VOLUMECHANGE:
@@ -247,14 +243,12 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @private */
-  getQuery_() {
-    const query = [
-      'api=1',
-      'html=1',
-      'app=amp',
-    ];
+  getIframeSrc_() {
 
-    const settings = [
+    let iframeSrc = 'https://www.dailymotion.com/embed/video/' +
+       encodeURIComponent(this.videoid_ || '') + '?api=1&html=1&app=amp';
+
+    const explicitParamsAttributes = [
       'mute',
       'endscreen-enable',
       'sharing-enable',
@@ -264,11 +258,17 @@ class AmpDailymotion extends AMP.BaseElement {
       'info',
     ];
 
-    settings.forEach(setting => {
-      this.addQueryParam_(setting, query);
+    explicitParamsAttributes.forEach(explicitParam => {
+      const val = this.element.getAttribute(`data-${explicitParam}`);
+      if (val) {
+        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
+      }
     });
 
-    return query.join('&');
+    const implicitParams = getDataParamsFromAttributes(this.element);
+    iframeSrc = addParamsToUrl(iframeSrc, implicitParams);
+
+    return iframeSrc;
   }
 
   /** @override */

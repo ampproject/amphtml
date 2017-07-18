@@ -17,15 +17,11 @@
 import {ActionTrust} from '../action-trust';
 import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Layout, getLayoutClass} from '../layout';
-import {actionServiceForDoc, urlReplacementsForDoc} from '../services';
-import {bindForDoc} from '../services';
+import {Services} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
 import {dev, user} from '../log';
-import {historyForDoc} from '../services';
 import {isProtocolValid} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
-import {resourcesForDoc} from '../services';
-import {vsyncFor} from '../services';
 
 /**
  * @param {!Element} element
@@ -54,20 +50,20 @@ export class StandardActions {
     this.ampdoc = ampdoc;
 
     /** @const @private {!./action-impl.ActionService} */
-    this.actions_ = actionServiceForDoc(ampdoc);
+    this.actions_ = Services.actionServiceForDoc(ampdoc);
 
     /** @const @private {!./resources-impl.Resources} */
-    this.resources_ = resourcesForDoc(ampdoc);
+    this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @const @private {!./url-replacements-impl.UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
 
     this.installActions_(this.actions_);
   }
 
   /** @override */
   adoptEmbedWindow(embedWin) {
-    this.installActions_(actionServiceForDoc(embedWin.document));
+    this.installActions_(Services.actionServiceForDoc(embedWin.document));
   }
 
   /**
@@ -100,6 +96,9 @@ export class StandardActions {
       case 'goBack':
         this.handleAmpGoBack_(invocation);
         return;
+      case 'print':
+        this.handleAmpPrint_(invocation);
+        return;
     }
     throw user().createError('Unknown AMP action ', invocation.method);
   }
@@ -112,7 +111,7 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
       return;
     }
-    bindForDoc(invocation.target).then(bind => {
+    Services.bindForDoc(invocation.target).then(bind => {
       const args = invocation.args;
       const objectString = args[OBJECT_STRING_ARGS_KEY];
       if (objectString) {
@@ -159,7 +158,20 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
       return;
     }
-    historyForDoc(this.ampdoc).goBack();
+    Services.historyForDoc(this.ampdoc).goBack();
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpPrint_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return;
+    }
+    const node = invocation.target;
+    const win = (node.ownerDocument || node).defaultView;
+    win.print();
   }
 
   /**
@@ -197,7 +209,7 @@ export class StandardActions {
       return;
     }
 
-    vsyncFor(ownerWindow).measure(() => {
+    Services.vsyncFor(ownerWindow).measure(() => {
       if (computedStyle(ownerWindow, target).display == 'none' &&
           !isShowable(target)) {
 

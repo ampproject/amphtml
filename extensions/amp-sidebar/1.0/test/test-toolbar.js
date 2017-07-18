@@ -17,7 +17,7 @@
 
  import {adopt} from '../../../../src/runtime';
  import {createIframePromise} from '../../../../testing/iframe';
- import {timerFor, vsyncFor} from '../../../../src/services';
+ import {Services} from '../../../../src/services';
  import * as sinon from 'sinon';
  import {Toolbar} from '../toolbar';
 
@@ -41,8 +41,8 @@
        const toolbarContainerElement = iframe.doc.createElement('div');
        const toolbars = [];
        iframe.win.document.body.appendChild(toolbarContainerElement);
-       vsync = vsyncFor(iframe.win);
-       timer = timerFor(iframe.win);
+       vsync = Services.vsyncFor(iframe.win);
+       timer = Services.timerFor(iframe.win);
        // Stub our toolbar operations, doing this here as it will
        // Ease testing our media queries
        sandbox.stub(vsync,
@@ -137,47 +137,6 @@
          });
          expect(toolbarElements[0].parentElement.style.display)
              .to.be.equal('');
-       });
-     });
-   });
-
-   it('toolbar header should add "top" styling to body \
-   for matching window size for DEFAULT_TOOLBAR_MEDIA', () => {
-     return getToolbars([{}]).then(obj => {
-       const toolbars = obj.toolbars;
-       const toolbarElements = Array.prototype
-              .slice.call(obj.toolbarContainerElement.ownerDocument
-              .getElementsByClassName(TOOLBAR_ELEMENT_CLASS), 0);
-       resizeIframeToWidth(obj.iframe, '4000px', () => {
-         expect(toolbarElements.length).to.be.above(0);
-         toolbars.forEach(toolbar => {
-           toolbar.onLayoutChange();
-         });
-         expect(obj.iframe.win.document.body.style.top.indexOf('calc'))
-             .to.be.above(-1);
-       });
-     });
-   });
-
-   it('toolbar header should restore original "top" styling to body \
-   for non-matching window size for DEFAULT_TOOLBAR_MEDIA', () => {
-     return getToolbars([{}]).then(obj => {
-       const toolbars = obj.toolbars;
-       const toolbarElements = Array.prototype
-              .slice.call(obj.toolbarContainerElement.ownerDocument
-              .getElementsByClassName(TOOLBAR_ELEMENT_CLASS), 0);
-       resizeIframeToWidth(obj.iframe, '4000px', () => {
-         toolbars.forEach(toolbar => {
-           toolbar.onLayoutChange();
-         });
-         resizeIframeToWidth(obj.iframe, '200px', () => {
-           expect(toolbarElements.length).to.be.above(0);
-           toolbars.forEach(toolbar => {
-             toolbar.onLayoutChange();
-           });
-           expect(obj.iframe.win.document.body.style.top.indexOf('calc'))
-               .to.be.below(0);
-         });
        });
      });
    });

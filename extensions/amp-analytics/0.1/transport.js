@@ -21,7 +21,7 @@ import {
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
-import {timerFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 
@@ -134,7 +134,7 @@ export function sendRequestUsingIframe(win, request) {
   const iframe = win.document.createElement('iframe');
   setStyle(iframe, 'display', 'none');
   iframe.onload = iframe.onerror = () => {
-    timerFor(win).delay(() => {
+    Services.timerFor(win).delay(() => {
       removeElement(iframe);
     }, 5000);
   };

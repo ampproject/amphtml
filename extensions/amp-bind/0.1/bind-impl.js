@@ -17,10 +17,7 @@
 import {BindExpressionResultDef} from './bind-expression';
 import {BindingDef} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
-import {
-  resourcesForDoc,
-  viewerForDoc,
-} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
 import {dict, deepMerge} from '../../../src/utils/object';
@@ -131,10 +128,10 @@ export class Bind {
     this.scope_ = dict();
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
-    this.resources_ = resourcesForDoc(ampdoc);
+    this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.ampdoc);
+    this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
     const bodyPromise = (opt_win)
         ? waitForBodyPromise(opt_win.document)
@@ -692,24 +689,24 @@ export class Bind {
         // Once the user interacts with these elements, the JS properties
         // underlying these attributes must be updated for the change to be
         // visible to the user.
-        const updateElementProperty =
+        const updateProperty =
             element.tagName == 'INPUT' && property in element;
         const oldValue = element.getAttribute(property);
 
-        let attributeChanged = false;
+        let mutated = false;
         if (typeof newValue === 'boolean') {
-          if (updateElementProperty && element[property] !== newValue) {
-            // Property value *must* be read before the attribute is changed.
+          if (updateProperty && element[property] !== newValue) {
+            // Property value _must_ be read before the attribute is changed.
             // Before user interaction, attribute updates affect the property.
             element[property] = newValue;
-            attributeChanged = true;
+            mutated = true;
           }
           if (newValue && oldValue !== '') {
             element.setAttribute(property, '');
-            attributeChanged = true;
+            mutated = true;
           } else if (!newValue && oldValue !== null) {
             element.removeAttribute(property);
-            attributeChanged = true;
+            mutated = true;
           }
         } else if (newValue !== oldValue) {
           // TODO(choumx): Perform in worker with URL API.
@@ -727,14 +724,14 @@ export class Bind {
           // Rewriting can fail due to e.g. invalid URL.
           if (rewrittenNewValue !== undefined) {
             element.setAttribute(property, rewrittenNewValue);
-            if (updateElementProperty) {
+            if (updateProperty) {
               element[property] = rewrittenNewValue;
             }
-            attributeChanged = true;
+            mutated = true;
           }
         }
 
-        if (attributeChanged) {
+        if (mutated) {
           return {name: property, value: newValue};
         }
         break;

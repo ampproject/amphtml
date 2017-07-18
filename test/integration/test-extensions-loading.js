@@ -55,7 +55,9 @@ function testLoadOrderFixture(fixtureName, testElements) {
 }
 
 const t = describe.configure().retryOnSaucelabs();
-t.run('test extensions loading in multiple orders', () => {
+t.run('test extensions loading in multiple orders', function() {
+  this.timeout(15000);
+
   it('one extension, extension loads first, all scripts in header', () => {
     return testLoadOrderFixture(
         'test/fixtures/script-load-extension-head-v0-head.html',

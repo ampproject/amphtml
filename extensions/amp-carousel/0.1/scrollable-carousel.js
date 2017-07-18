@@ -17,7 +17,7 @@
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
-import {timerFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {numeric} from '../../../src/transition';
 import {dev} from '../../../src/log';
 
@@ -128,7 +128,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   waitForScroll_(startingScrollLeft) {
-    this.scrollTimerId_ = timerFor(this.win).delay(() => {
+    this.scrollTimerId_ = Services.timerFor(this.win).delay(() => {
       // TODO(yuxichen): test out the threshold for identifying fast scrolling
       if (Math.abs(startingScrollLeft - this.pos_) < 30) {
         dev().fine(TAG, 'slow scrolling: ' + startingScrollLeft + ' - '

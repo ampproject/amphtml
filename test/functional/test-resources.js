@@ -20,6 +20,7 @@ import {Resource, ResourceState} from '../../src/service/resource';
 import {VisibilityState} from '../../src/visibility-state';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
+import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
@@ -554,7 +555,7 @@ describes.fakeWin('Resources startup', {
   beforeEach(() => {
     win = env.win;
     clock = sandbox.useFakeTimers();
-    resources = new Resources(new AmpDocSingle(win));
+    resources = Services.resourcesForDoc(win.document.body);
     resources.relayoutAll_ = false;
     schedulePassStub = sandbox.stub(resources, 'schedulePass');
   });
@@ -566,16 +567,10 @@ describes.fakeWin('Resources startup', {
     win.eventListeners.fire({type: 'load'});
     win.document.eventListeners.fire({type: 'readystatechange'});
     return resources.ampdoc.whenReady().then(() => {
-      expect(resources.relayoutAll_).to.be.true;
-      // Reset to make sure it is set again on load.
-      resources.relayoutAll_ = false;
-      return loadPromise(win).then(() => {
-        // Skip a microtask.
-        return Promise.race([Promise.resolve()]);
-      });
+      return loadPromise(win);
     }).then(() => {
       expect(resources.relayoutAll_).to.be.true;
-      expect(schedulePassStub).to.be.calledTwice;
+      expect(schedulePassStub).to.have.been.called;
     });
   });
 
@@ -583,18 +578,70 @@ describes.fakeWin('Resources startup', {
     win.readyState = 'complete';
     win.document.eventListeners.fire({type: 'readystatechange'});
     return resources.ampdoc.whenReady().then(() => {
-      return;
       expect(resources.relayoutAll_).to.be.false;
       expect(schedulePassStub).to.not.be.called;
-      clock.tick(4000);
-      // Skip a microtask.
-      return Promise.resolve().then(() => {
-        return Promise.race([Promise.resolve()]);
-      }).then(() => {
-        expect(resources.relayoutAll_).to.be.true;
-        expect(schedulePassStub).to.be.calledOnce;
-      });
+      clock.tick(3100);
+    }).then(() => {
+      expect(resources.relayoutAll_).to.be.true;
+      expect(schedulePassStub).to.have.been.called;
     });
+  });
+
+  it('should run a full reload pass on document.fonts.ready', () => {
+    win.readyState = 'interactive';
+    win.document.eventListeners.fire({type: 'readystatechange'});
+    win.document.fonts.status = 'loading';
+    return resources.ampdoc.whenReady().then(() => {
+
+    }).then(() => {
+      // This is the regular remeasure on doc-ready.
+      expect(resources.relayoutAll_).to.be.true;
+      resources.relayoutAll_ = false;
+      return win.document.fonts.ready;
+    }).then(() => {
+      // Wait one micro task.
+      return Promise.resolve();
+    }).then(() => {
+      expect(resources.relayoutAll_).to.be.true;
+      // Remeasure on doc-ready and fonts-ready.
+      expect(schedulePassStub).to.have.been.calledTwice;
+    });
+  });
+
+  it('should not remeasure if fonts load before doc-ready', () => {
+    win.readyState = 'interactive';
+    win.document.eventListeners.fire({type: 'readystatechange'});
+    win.document.fonts.status = 'loaded';
+    return resources.ampdoc.whenReady().then(() => {
+
+    }).then(() => {
+      // This is the regular remeasure on doc-ready.
+      expect(resources.relayoutAll_).to.be.true;
+      resources.relayoutAll_ = false;
+      return win.document.fonts.ready;
+    }).then(() => {
+      // Wait one micro task.
+      return Promise.resolve();
+    }).then(() => {
+      expect(resources.relayoutAll_).to.be.false;
+      // Only remeasure on doc-ready.
+      expect(schedulePassStub).to.have.been.calledOnce;
+    });
+  });
+
+  it('should run a full reload when a new element is connected', () => {
+    expect(resources.relayoutAll_).to.be.false;
+    expect(schedulePassStub).to.not.be.called;
+    const el = win.document.createElement('amp-img');
+    el.isBuilt = () => { return true; };
+    el.isUpgraded = () => { return true; };
+    el.isRelayoutNeeded = () => { return true; };
+    el.updateLayoutBox = () => {};
+    win.document.body.appendChild(el);
+    resources.add(el);
+    expect(resources.relayoutAll_).to.be.false;
+    clock.tick(1000);
+    expect(resources.relayoutAll_).to.be.true;
   });
 });
 

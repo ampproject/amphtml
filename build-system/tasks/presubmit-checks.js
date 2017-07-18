@@ -130,16 +130,6 @@ var forbiddenTerms = {
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',
   },
-  'documentStateFor': {
-    message: privateServiceFactory,
-    whitelist: [
-      'src/custom-element.js',
-      'src/style-installer.js',
-      'src/service/document-state.js',
-      'src/service/viewer-impl.js',
-      'src/service/vsync-impl.js',
-    ],
-  },
   'iframePing': {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
@@ -181,6 +171,13 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/service/crypto-impl.js',
+      'src/runtime.js',
+    ],
+  },
+  'installDocumentStateService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/document-state.js',
       'src/runtime.js',
     ],
   },
@@ -692,6 +689,8 @@ var forbiddenTermsSrcInclusive = {
       'src/service/crypto-impl.js',
       'src/shadow-embed.js',
       'src/analytics.js',
+      'src/extension-analytics.js',
+      'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',

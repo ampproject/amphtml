@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {ampdocServiceFor} from '../../../../src/ampdoc';
+import {Services} from '../../../../src/services';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {
+  installDocumentStateService,
+} from '../../../../src/service/document-state';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
-import {viewerForDoc} from '../../../../src/services';
 import {vsyncForTesting} from '../../../../src/service/vsync-impl';
 import {installDynamicClassesForTesting} from '../amp-dynamic-css-classes';
 
@@ -63,7 +65,8 @@ describe('dynamic classes are inserted at runtime', () => {
 
   function setup(embeded, userAgent, referrer) {
     installDocService(mockWin, /* isSingleDoc */ true);
-    const ampdocService = ampdocServiceFor(mockWin);
+    installDocumentStateService(mockWin);
+    const ampdocService = Services.ampdocServiceFor(mockWin);
     const ampdoc = ampdocService.getAmpDoc();
     installPlatformService(mockWin);
 
@@ -73,7 +76,7 @@ describe('dynamic classes are inserted at runtime', () => {
     };
 
     installViewerServiceForDoc(ampdoc);
-    viewer = viewerForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
     viewer.isEmbedded = () => !!embeded;
 
     if (userAgent !== undefined) {

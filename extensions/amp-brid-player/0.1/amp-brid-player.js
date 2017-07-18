@@ -20,7 +20,7 @@ import {
     installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
@@ -125,7 +125,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     });
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @override */
@@ -230,7 +230,7 @@ class AmpBridPlayer extends AMP.BaseElement {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
         this.playerReadyResolver_(this.iframe_);
       } else if (params[3] == 'play') {
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       } else if (params[3] == 'pause') {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
       }
