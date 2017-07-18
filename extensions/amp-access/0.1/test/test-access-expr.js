@@ -53,6 +53,14 @@ describe('evaluateAccessExpr', () => {
     expect(evaluateAccessExpr('num <= 1', {num: 1})).to.be.true;
   });
 
+  it('should evaluate negative numerics', () => {
+    expect(evaluateAccessExpr('num = -1', {num: -1})).to.be.true;
+    expect(evaluateAccessExpr('num = -1', {num: 0})).to.be.false;
+    expect(evaluateAccessExpr('num < -1', {num: -1})).to.be.false;
+    expect(evaluateAccessExpr('num < -1', {num: -2})).to.be.true;
+    expect(evaluateAccessExpr('num > -1', {num: 0})).to.be.true;
+  });
+
   it('should evaluate numeric expressions over mistamtching type', () => {
     expect(evaluateAccessExpr('num = 1', {})).to.be.false;
     expect(evaluateAccessExpr('num > 1', {})).to.be.false;
@@ -277,6 +285,9 @@ describe('evaluateAccessExpr', () => {
     }).to.throw();
     expect(() => {
       evaluateAccessExpr('num-a = 10', {'num-a': 10});
+    }).to.throw();
+    expect(() => {
+      evaluateAccessExpr('num-1 = 10', {'num-1': 10});
     }).to.throw();
   });
 });
