@@ -122,14 +122,14 @@ export class GwdAnimation extends AMP.BaseElement {
    * Handles `gwd.timelineEvent` events dispatched by the runtime service, which
    * indicate that the animation has reached a GWD event marker. Triggers a
    * custom event via the doc action service.
-   * @param {!Event} event
+   * @param {!Event} event The `gwd.timelineEvent` event.
    * @private
    */
   onGwdTimelineEvent_(event) {
     actionServiceForDoc(this.getAmpDoc()).trigger(
         this.element,
         `${this.timelineEventPrefix_}${event.detail.eventName}`,
-        event,
+        event.detail,
         ActionTrust.HIGH);
   }
 
