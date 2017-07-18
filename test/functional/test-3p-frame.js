@@ -117,6 +117,7 @@ describe('3p-frame', () => {
     div.setAttribute('data-foo', 'foo');
     div.setAttribute('data-bar', 'bar');
     div.setAttribute('foo', 'nope');
+    div.setAttribute('data-vars-bar', 'nope');
     let obj = {};
     addDataAndJsonAttributes_(div, obj);
     expect(obj).to.deep.equal({

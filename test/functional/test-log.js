@@ -25,8 +25,6 @@ import {
   user,
   duplicateErrorIfNecessary,
 } from '../../src/log';
-import {adopt} from '../../src/runtime';
-import {toggleExperiment} from '../../src/experiments';
 import * as sinon from 'sinon';
 
 describe('Logging', () => {
@@ -673,27 +671,6 @@ describe('Logging', () => {
       expect(duplicate.stack).to.equal(error.stack);
       expect(duplicate.args).to.equal(error.args);
       expect(duplicate.associatedElement).to.equal(error.associatedElement);
-    });
-  });
-
-  describe('user error reporting', () => {
-    adopt(window);
-    let log;
-    const tag = 'ERROR';
-    const error = new Error('user error');
-
-    beforeEach(() => {
-      log = new Log(win, RETURNS_FINE);
-      sandbox = sinon.sandbox.create();
-      log.analyticsEvent_ = sandbox.spy();
-      toggleExperiment(window, 'user-error-reporting', true);
-    });
-
-    it('should trigger triggerAnalyticsEvent with correct arguments', () => {
-      log.reportErrorToAnalytics(tag, error);
-      expect(log.analyticsEvent_).to.have.been.called;
-      expect(log.analyticsEvent_).to.have.been.calledWith(
-          'user-error', {errorName: tag, errorMessage: error.message});
     });
   });
 });

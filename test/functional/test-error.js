@@ -31,7 +31,6 @@ import {
 } from '../../src/experiments';
 import * as sinon from 'sinon';
 
-
 describes.fakeWin('installErrorReporting', {}, env => {
   let win;
   let rejectedPromiseError;
@@ -539,3 +538,4 @@ describe('detectJsEngineFromStack', () => {
     });
   });
 });
+

@@ -17,9 +17,6 @@
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
-import {isExperimentOn} from './experiments';
-import {ampdocServiceFor} from './services';
-import {triggerAnalyticsEvent} from './analytics';
 
 /** @const Time when this JS loaded.  */
 const start = Date.now();
@@ -92,9 +89,6 @@ export class Log {
 
     /** @private @const {string} */
     this.suffix_ = opt_suffix || '';
-
-    /** @private @const {boolean} */
-    this.isUserError_ = !!opt_suffix;
   }
 
   /**
@@ -216,46 +210,8 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       // reportError is installed globally per window in the entry point.
-      self.reportError(error);
-      if (this.isUserError_) {
-        this.reportErrorToAnalytics(unusedTag, error);
-      }
+      self.reportError(error, null, unusedTag, this.win);
     }
-  }
-
-  /**
-   * @param {string} unusedTag
-   * @param {!Error} error
-   */
-  reportErrorToAnalytics(unusedTag, error) {
-    if (isExperimentOn(this.win, 'user-error-reporting')) {
-      /**
-       * @param {!Window} win
-       */
-      const vars = {
-        'errorName': unusedTag,
-        'errorMessage': error.message,
-      };
-      this.analyticsEvent_('user-error', vars);
-    }
-  }
-
-  /**
-   * @param {string} eventType
-   * @param {!Object<string, string>} vars A map of vars and their values.
-   * @private
-   */
-  analyticsEvent_(eventType, vars) {
-    triggerAnalyticsEvent(this.getRootElement_(), eventType, vars);
-  }
-
-  /**
-   * @return {!Element}
-   * @private
-   */
-  getRootElement_() {
-    const root = ampdocServiceFor(this.win).getAmpDoc().getRootNode();
-    return dev().assertElement(root.documentElement || root.body || root);
   }
 
   /**

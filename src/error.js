@@ -24,6 +24,7 @@ import {
   USER_ERROR_SENTINEL,
   isUserErrorMessage,
   duplicateErrorIfNecessary,
+  dev,
 } from './log';
 import {isProxyOrigin} from './url';
 import {isCanary, experimentTogglesOrNull} from './experiments';
@@ -31,6 +32,9 @@ import {makeBodyVisible} from './style-installer';
 import {startsWith} from './string';
 import {urls} from './config';
 import {AmpEvents} from './amp-events';
+import {triggerAnalyticsEvent} from './analytics';
+import {isExperimentOn} from './experiments';
+import {ampdocServiceFor} from './services';
 
 /**
  * @const {string}
@@ -95,9 +99,12 @@ let detectedJsEngine;
  * elements instead of stringification.
  * @param {*} error
  * @param {!Element=} opt_associatedElement
+ * @param {string=} opt_unusedTag
+ * @param {!Window=} opt_win
  * @return {!Error}
  */
-export function reportError(error, opt_associatedElement) {
+export function reportError(
+    error, opt_associatedElement, opt_unusedTag, opt_win) {
   try {
     // Convert error to the expected type.
     let isValidError;
@@ -109,6 +116,11 @@ export function reportError(error, opt_associatedElement) {
         const origError = error;
         error = new Error(tryJsonStringify(origError));
         error.origError = origError;
+      }
+      if (isUserErrorMessage(error.message) && !!opt_win) {
+        const win = /** @type {!Window} */ (opt_win);
+        const tag = opt_unusedTag || 'ERROR';
+        reportErrorToAnalytics(tag, error, win);
       }
     } else {
       error = new Error('Unknown error');
@@ -472,4 +484,37 @@ export function detectJsEngineFromStack() {
   }
 
   return 'unknown';
+}
+
+/**
+ * @param {string} unusedTag
+ * @param {!Error} error
+ */
+export function reportErrorToAnalytics(unusedTag, error, win) {
+  if (isExperimentOn(win, 'user-error-reporting')) {
+    const vars = {
+      'errorName': unusedTag,
+      'errorMessage': error.message,
+    };
+    analyticsEvent('user-error', vars, win);
+  }
+}
+
+/**
+ * @param {string} eventType
+ * @param {!Object<string, string>} vars A map of vars and their values.
+ * @param {!Window} win
+ */
+function analyticsEvent(eventType, vars, win) {
+  triggerAnalyticsEvent(getRootElement(win), eventType, vars);
+}
+
+/**
+ * @param {!Window} win
+ * @return {!Element}
+ * @private
+ */
+function getRootElement(win) {
+  const root = ampdocServiceFor(win).getAmpDoc().getRootNode();
+  return dev().assertElement(root.documentElement || root.body || root);
 }
