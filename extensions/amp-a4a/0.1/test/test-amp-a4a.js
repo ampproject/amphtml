@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {MockA4AImpl, TEST_URL} from './utils';
+import {MockA4AImpl, TEST_URL, initializeElement} from './utils';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
   AmpA4A,
@@ -26,7 +26,6 @@ import {
   assignAdUrlToError,
 } from '../amp-a4a';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {Signals} from '../../../../src/utils/signals';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
@@ -120,23 +119,7 @@ describe('amp-a4a', () => {
       'height': opt_rect ? String(opt_rect.height) : '50',
       'type': 'adsense',
     });
-    element.getAmpDoc = () => {
-      const ampdocService = Services.ampdocServiceFor(doc.defaultView);
-      return ampdocService.getAmpDoc(element);
-    };
-    element.isBuilt = () => {return true;};
-    element.getLayoutBox = () => {
-      return opt_rect || layoutRectLtwh(0, 0, 200, 50);
-    };
-    element.getPageLayoutBox = () => {
-      return element.getLayoutBox.apply(element, arguments);
-    };
-    element.getIntersectionChangeEntry = () => {return null;};
-    const signals = new Signals();
-    element.signals = () => signals;
-    element.renderStarted = () => {
-      signals.signal('render-start');
-    };
+    initializeElement(element, doc, opt_rect);
     doc.body.appendChild(element);
     return element;
   }

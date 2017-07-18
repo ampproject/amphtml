@@ -31,6 +31,7 @@ import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-
 import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {initializeElement} from '../../../amp-a4a/0.1/test/utils';
 import {createIframePromise} from '../../../../testing/iframe';
 import {upgradeOrRegisterElement} from '../../../../src/custom-element';
 import {
@@ -86,6 +87,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       // To trigger CSS styling.
       element.setAttribute('data-a4a-upgrade-type',
           'amp-ad-network-adsense-impl');
+      initializeElement(element, doc);
       // Used to test styling which is targetted at first iframe child of
       // amp-ad.
       const iframe = fixture.doc.createElement('iframe');
