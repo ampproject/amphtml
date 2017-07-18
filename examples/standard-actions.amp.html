@@ -35,6 +35,9 @@
       background: #f0f0f0;
       padding: 10px;
     }
+    .spacer {
+      height: 100vh;
+    }
     </style>
 </head>
 <body>
@@ -67,6 +70,11 @@
   <button on="tap:normal-element.show">Show</button>
   <button on="tap:normal-element.hide">Hide</button>
   <button on="tap:normal-element.toggleVisibility">Toggle Visibility</button>
+  <button on="tap:normal-element2.scrollTo">ScrollTo</button>
+  <button on="tap:normal-element2.scrollTo('position' = 'bottom')">ScrollTo Bottom</button>
+  <button on="tap:normal-element2.scrollTo('position' = 'center')">ScrollTo Center</button>
+  <button on="tap:normal-element2.scrollTo('duration' = 5000)">ScrollTo Slowly</button>
+  <button on="tap:input-element.focus">Focus</button>
 </div>
 
 <amp-img src="https://ampbyexample.com/img/amp.jpg" layout="responsive" width="1080" height="610" id="img-on-viewport"></amp-img>
@@ -74,5 +82,19 @@
 <div id="normal-element" hidden>
   I was initially hidden.
 </div>
+
+<div class="spacer">
+</div>
+
+<div id="normal-element2">
+  You have to scroll to see me.
+</div>
+
+
+<input type="text" id="input-element">
+
+<div class="spacer">
+</div>
+
 
 </html>

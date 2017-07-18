@@ -26,6 +26,7 @@ describes.sandboxed('StandardActions', {}, () => {
   let standardActions;
   let mutateElementStub;
   let deferMutateStub;
+  let scrollStub;
   let ampdoc;
 
   function createElement() {
@@ -72,11 +73,20 @@ describes.sandboxed('StandardActions', {}, () => {
     expect(element.expand).to.be.calledOnce;
   }
 
+  function expectAmpElementToHaveBeenScrolledIntoView(element) {
+    expect(scrollStub).to.be.calledOnce;
+    expect(scrollStub.firstCall.args[0]).to.equal(element);
+  }
+
   beforeEach(() => {
     ampdoc = new AmpDocSingle(window);
     standardActions = new StandardActions(ampdoc);
     mutateElementStub = stubMutate('mutateElement');
     deferMutateStub = stubMutate('deferMutate');
+    scrollStub = sandbox.stub(
+        standardActions.viewport_,
+        'animateScrollIntoView');
+
   });
 
   describe('"hide" action', () => {
@@ -159,6 +169,40 @@ describes.sandboxed('StandardActions', {}, () => {
       const invocation = {target: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenHidden(element);
+    });
+  });
+
+  describe('"scrollTo" action', () => {
+    it('should handle normal element', () => {
+      const element = createElement();
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleScrollTo(invocation);
+      expectAmpElementToHaveBeenScrolledIntoView(element);
+    });
+
+    it('should handle AmpElement', () => {
+      const element = createAmpElement();
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleScrollTo(invocation);
+      expectAmpElementToHaveBeenScrolledIntoView(element);
+    });
+  });
+
+  describe('"focus" action', () => {
+    it('should handle normal element', () => {
+      const element = createElement();
+      const invocation = {target: element, satisfiesTrust: () => true};
+      const focusStub = sandbox.stub(element, 'focus');
+      standardActions.handleFocus(invocation);
+      expect(focusStub).to.be.calledOnce;
+    });
+
+    it('should handle AmpElement', () => {
+      const element = createAmpElement();
+      const invocation = {target: element, satisfiesTrust: () => true};
+      const focusStub = sandbox.stub(element, 'focus');
+      standardActions.handleFocus(invocation);
+      expect(focusStub).to.be.calledOnce;
     });
   });
 
@@ -282,7 +326,7 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(stub).to.be.calledOnce;
 
       // Global actions.
-      expect(embedActions.addGlobalMethodHandler).to.be.calledThrice;
+      expect(embedActions.addGlobalMethodHandler).to.have.callCount(5);
       expect(embedActions.addGlobalMethodHandler.args[0][0]).to.equal('hide');
       expect(embedActions.addGlobalMethodHandler.args[0][1]).to.be.function;
       expect(embedActions.addGlobalMethodHandler.args[1][0]).to.equal('show');
@@ -290,6 +334,12 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(embedActions.addGlobalMethodHandler.args[2][0]).to
           .equal('toggleVisibility');
       expect(embedActions.addGlobalMethodHandler.args[2][1]).to.be.function;
+      expect(embedActions.addGlobalMethodHandler.args[3][0]).to
+          .equal('scrollTo');
+      expect(embedActions.addGlobalMethodHandler.args[3][1]).to.be.function;
+      expect(embedActions.addGlobalMethodHandler.args[4][0]).to
+          .equal('focus');
+      expect(embedActions.addGlobalMethodHandler.args[4][1]).to.be.function;
       embedActions.addGlobalMethodHandler.args[0][1]();
       expect(hideStub).to.be.calledOnce;
     });
