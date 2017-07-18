@@ -18,10 +18,10 @@ import {AmpAdNetworkCloudflareImpl} from '../amp-ad-network-cloudflare-impl';
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import * as sinon from 'sinon';
 import {cloudflareIsA4AEnabled} from '../cloudflare-a4a-config';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
-import {initializeElement} from '../../../amp-a4a/0.1/test/utils';
 import * as vendors from '../vendors';
 
 describe('cloudflare-a4a-config', () => {
@@ -43,42 +43,35 @@ describe('cloudflare-a4a-config', () => {
   });
 });
 
-describes.sandboxed('amp-ad-network-cloudflare-impl', {}, () => {
+describe('amp-ad-network-cloudflare-impl', () => {
 
+  let sandbox;
   let cloudflareImpl;
   let el;
-  let doc;
-  let win;
 
   beforeEach(() => {
-    return createIframePromise().then(f => {
-      doc = f.doc;
-      win = f.win;
-      el = doc.createElement('amp-ad');
-      el.setAttribute('type', 'cloudflare');
-      el.setAttribute('data-cf-network', 'cloudflare');
-      el.setAttribute('src',
-          'https://firebolt.cloudflaredemo.com/a4a-ad.html');
-      initializeElement(el, doc);
-      sandbox.stub(
-        AmpAdNetworkCloudflareImpl.prototype, 'getSigningServiceNames',
-          () => {
-            return ['cloudflare','cloudflare-dev'];
-          });
-      sandbox.stub(vendors, 'NETWORKS', {
-        cloudflare: {
-          base: 'https://firebolt.cloudflaredemo.com',
-        },
+    sandbox = sinon.sandbox.create();
+    el = document.createElement('amp-ad');
+    el.setAttribute('type', 'cloudflare');
+    el.setAttribute('data-cf-network', 'cloudflare');
+    el.setAttribute('src',
+        'https://firebolt.cloudflaredemo.com/a4a-ad.html');
+    sandbox.stub(AmpAdNetworkCloudflareImpl.prototype, 'getSigningServiceNames',
+        () => {
+          return ['cloudflare','cloudflare-dev'];
+        });
+    sandbox.stub(vendors, 'NETWORKS', {
+      cloudflare: {
+        base: 'https://firebolt.cloudflaredemo.com',
+      },
 
-        'cf-test': {
-          base: 'https://cf-test.com',
-          src:
-          'https://cf-test.com/path/ad?width=SLOT_WIDTH&height=SLOT_HEIGHT',
-        },
-      });
-      doc.body.appendChild(el);
-      cloudflareImpl = new AmpAdNetworkCloudflareImpl(el);
+      'cf-test': {
+        base: 'https://cf-test.com',
+        src: 'https://cf-test.com/path/ad?width=SLOT_WIDTH&height=SLOT_HEIGHT',
+      },
     });
+    document.body.appendChild(el);
+    cloudflareImpl = new AmpAdNetworkCloudflareImpl(el);
   });
 
   afterEach(() => {
@@ -90,9 +83,8 @@ describes.sandboxed('amp-ad-network-cloudflare-impl', {}, () => {
       expect(cloudflareImpl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
-      el = doc.createElement('amp-ad-network-cloudflare-impl');
+      el = document.createElement('amp-ad-network-cloudflare-impl');
       el.setAttribute('type', 'cloudflare');
-      initializeElement(el, doc);
       cloudflareImpl = new AmpAdNetworkCloudflareImpl(el);
       expect(cloudflareImpl.isValidElement()).to.be.false;
     });
@@ -121,7 +113,7 @@ describes.sandboxed('amp-ad-network-cloudflare-impl', {}, () => {
       el.setAttribute('src', 'https://firebolt.cloudflaredemo.com/'
         + 'ad?width=SLOT_WIDTH&height=SLOT_HEIGHT');
       expect(cloudflareImpl.getAdUrl()).to.equal(
-          'https://firebolt.cloudflaredemo.com/_a4a/ad?width=200&height=50');
+          'https://firebolt.cloudflaredemo.com/_a4a/ad?width=0&height=0');
     });
 
     function parseQuery(query) {
@@ -159,9 +151,9 @@ describes.sandboxed('amp-ad-network-cloudflare-impl', {}, () => {
       expect(url.substring(0, base.length)).to.equal(base);
       expect(parseQuery(url.substring(base.length))).to.deep.equal({
         another: 'more',
-        height: '50',
+        height: '0',
         key: 'value',
-        width: '200',
+        width: '0',
       });
     });
   });

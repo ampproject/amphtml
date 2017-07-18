@@ -15,9 +15,6 @@
  */
 
 import {AmpA4A} from '../amp-a4a';
-import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
 
 /** @type {string} @private */
 export const TEST_URL = 'http://iframe.localhost:' + location.port +
@@ -48,24 +45,4 @@ export class MockA4AImpl extends AmpA4A {
   getPreconnectUrls() {
     return ['https://googleads.g.doubleclick.net'];
   }
-}
-
-export function initializeElement(element, doc, opt_rect) {
-  element.getAmpDoc = () => {
-    const ampdocService = Services.ampdocServiceFor(doc.defaultView);
-    return ampdocService.getAmpDoc(element);
-  };
-  element.isBuilt = () => {return true;};
-  element.getLayoutBox = () => {
-    return opt_rect || layoutRectLtwh(0, 0, 200, 50);
-  };
-  element.getPageLayoutBox = () => {
-    return element.getLayoutBox.apply(element, arguments);
-  };
-  element.getIntersectionChangeEntry = () => {return null;};
-  const signals = new Signals();
-  element.signals = () => signals;
-  element.renderStarted = () => {
-    signals.signal('render-start');
-  };
 }
