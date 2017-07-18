@@ -371,8 +371,10 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
     });
 
-    afterEach(() =>
-        toggleExperiment(window, 'dc-use-attr-for-format', false));
+    afterEach(() => {
+      toggleExperiment(window, 'dc-use-attr-for-format', false);
+      window['ampAdGoogleIfiCounter'] = 0;
+    });
 
     it('returns the right URL', () => {
       new AmpAd(element).upgradeCallback();
@@ -486,7 +488,55 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               // Ensure that "auto" doesn't appear anywhere here:
               expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
         });
+    it('should have the correct ifi numbers - no refresh', function() {
+      // When ran locally, this test tends to exceed 2000ms timeout.
+      this.timeout(5000);
+      // Reset counter for purpose of this test.
+      delete window['ampAdGoogleIfiCounter'];
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url1 => {
+        expect(url1).to.match(/ifi=1/);
+        return impl.getAdUrl().then(url2 => {
+          expect(url2).to.match(/ifi=2/);
+          return impl.getAdUrl().then(url3 => {
+            expect(url3).to.match(/ifi=3/);
+          });
+        });
+      });
+    });
+    it('has correct rc and ifi after refresh', () => {
+      // We don't really care about the behavior of the following methods, so
+      // we'll just stub them out so that refresh() can run without tripping any
+      // unrelated errors.
+      sandbox.stub(AmpA4A.prototype, 'initiateAdRequest',
+          () => impl.adPromise_ = Promise.resolve());
+      const tearDownSlotMock = sandbox.stub(AmpA4A.prototype, 'tearDownSlot');
+      tearDownSlotMock.returns(undefined);
+      const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
+      destroyFrameMock.returns(undefined);
+      impl.mutateElement = func => func();
+      impl.togglePlaceholder = sandbox.spy();
+      impl.getAmpDoc = () => impl.win.document;
+      impl.getResource = () => {
+        return {
+          layoutCanceled: () => {},
+        };
+      };
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url1 => {
+        expect(url1).to.not.match(/(\?|&)rc=[0-9]+(&|$)/);
+        expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
+        return impl.refresh(() => {}).then(() => {
+          return impl.getAdUrl().then(url2 => {
+            expect(url2).to.match(/(\?|&)rc=1(&|$)/);
+            expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
+          });
+        });
+      });
+    });
   });
+
+
 
   describe('#unlayoutCallback', () => {
     it('should call #resetSlot, remove child iframe, but keep other children',
@@ -568,6 +618,24 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       fixture.doc.body.appendChild(element);
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       expect(impl.useSra).to.be.false;
+    });
+
+    it('should force refresh off when enabled', () => {
+      const metaElement = createElementWithAttributes(fixture.doc, 'meta', {
+        name: 'amp-ad-doubleclick-sra',
+      });
+      fixture.doc.head.appendChild(metaElement);
+      const element = createElementWithAttributes(
+          fixture.doc, 'amp-ad', {
+            type: 'doubleclick',
+            height: 320,
+            width: 50,
+          });
+      fixture.doc.body.appendChild(element);
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(impl.useSra).to.be.true;
+      impl.layoutCallback();
+      expect(impl.refreshManager_).to.be.null;
     });
 
     it('should be enabled if meta tag present', () => {
