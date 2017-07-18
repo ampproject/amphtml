@@ -131,10 +131,14 @@ def InstallNodeDependencies():
   # Install the project dependencies specified in package.json into
   # node_modules.
   logging.info('installing AMP Validator engine dependencies ...')
-  subprocess.check_call(['npm', 'install'], stdout=open(os.devnull, 'wb'))
+  subprocess.check_call(
+      ['npm', 'install'],
+      stdout=(open(os.devnull, 'wb') if os.environ['TRAVIS'] else sys.stdout))
   logging.info('installing AMP Validator nodejs dependencies ...')
   subprocess.check_call(
-      ['npm', 'install'], stdout=open(os.devnull, 'wb'), cwd='nodejs')
+      ['npm', 'install'],
+      cwd='nodejs',
+      stdout=(open(os.devnull, 'wb') if os.environ['TRAVIS'] else sys.stdout))
   logging.info('... done')
 
 
