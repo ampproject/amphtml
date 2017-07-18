@@ -46,6 +46,8 @@ import {
   groupAmpAdsByType,
   addCsiSignalsToAmpAnalyticsConfig,
   QQID_HEADER,
+  getEnclosingContainerTypes,
+  ValidAdContainerTypes,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -67,6 +69,10 @@ import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {isCancellation} from '../../../src/error';
+import {
+  RefreshManager,
+  DATA_ATTR_NAME,
+} from '../../amp-a4a/0.1/refresh-manager';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -231,6 +237,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {!Promise<?../../../src/service/xhr-impl.FetchResponse>} */
     this.sraResponsePromise_ = sraInitializer.promise;
+
+    /** @private {?RefreshManager} */
+    this.refreshManager_ = null;
+
+    /** @private {number} */
+    this.refreshCount_ = 0;
+
+    /** @private {number} */
+    this.ifi_ = 0;
   }
 
   /** @override */
@@ -286,11 +301,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           multiSizeDataStr,
           this.initialSize_.width,
           this.initialSize_.height,
-          multiSizeValidation == 'true');
+          multiSizeValidation == 'true',
+          /* Use strict mode only in non-refresh case */ !this.isRefreshing);
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
           .join('|');
     }
+    const rc = (this.refreshCount_ && this.fromResumeCallback)
+        ? this.refreshCount_ + 1
+        : (this.fromResumeCallback ? 1 : this.refreshCount_ || null);
+    this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
+    this.ifi_ = (this.isRefreshing && this.ifi_) ||
+        this.win['ampAdGoogleIfiCounter']++;
     return Object.assign({
       'iu': this.element.getAttribute('data-slot'),
       'co': this.jsonTargeting_ &&
@@ -303,6 +325,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
           (this.jsonTargeting_ &&
             this.jsonTargeting_['categoryExclusions']) || null),
+      'ifi': this.ifi_,
+      rc,
     }, googleBlockParameters(this));
   }
 
@@ -328,7 +352,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    if (this.iframe) {
+    if (this.iframe && !this.isRefreshing) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
       return '';
     }
@@ -390,8 +414,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  unlayoutCallback() {
-    super.unlayoutCallback();
+  tearDownSlot() {
+    super.tearDownSlot();
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
@@ -411,6 +435,30 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraResponseRejector = sraInitializer.rejector;
     this.sraResponsePromise_ = sraInitializer.promise;
     this.qqid_ = null;
+  }
+
+  /** @override */
+  layoutCallback() {
+    const superReturnValue = super.layoutCallback();
+    if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
+      user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
+    }
+    this.refreshManager_ = this.useSra ||
+        getEnclosingContainerTypes(this.element).filter(container =>
+            container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
+            container != ValidAdContainerTypes['AMP-STICKY-AD']).length
+            ? null
+            : this.refreshManager_ || new RefreshManager(this, {
+              visiblePercentageMin: 50,
+              continuousTimeMin: 1,
+            });
+    return superReturnValue;
+  }
+
+  /** @override */
+  refresh(refreshEndCallback) {
+    this.refreshCount_++;
+    return super.refresh(refreshEndCallback);
   }
 
   /**
@@ -437,6 +485,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
       this.ampAnalyticsElement_ =
           insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+    }
+    if (this.isRefreshing) {
+      dev().assert(this.refreshManager_);
+      this.refreshManager_.initiateRefreshCycle();
+      this.isRefreshing = false;
+      this.isRelayoutNeededFlag = false;
     }
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
@@ -754,3 +808,5 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
+
+

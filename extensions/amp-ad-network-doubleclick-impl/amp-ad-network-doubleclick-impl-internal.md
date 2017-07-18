@@ -72,4 +72,52 @@ Below the term `primary size` refers to the width and height pair specified by t
 - `data-multi-size` A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. Each individual size must be a number (the width) followed by a lowercase 'x' followed by a number (the height). Each dimension specified this way must not be larger than its counterpart in the primary size. Further, each dimension must be no less than 2/3rds of the corresponding primary dimension, unless `data-mutli-size-validation` is set to false.
 - `data-multi-size-validation` If set to false, this will allow secondary sizes (those specified in the `data-multi-size` attribute) to be less than 2/3rds of the corresponding primary size. By default this is assumed to be true.
 
+### AMP Ad Refresh
 
+AMP Ad Refresh permits amp-ad tags using Fast Fetch to undergo periodic refresh events. Each such event re-issues a new ad request and attempts to display the returned creative.
+
+#### Network-level Configuration
+
+Networks wishing to opt-in to this feature must add a refresh configuration object to `refreshConfigs` in ads/_a4a-config.js. The configuration must specify the following parameters:
+
+<table>
+  <tr>
+    <td>Parameter</td>
+    <td>Description</td>
+    <td>Permitted Values</td>
+  <tr>
+    <td>visiblePercentageMin</td>
+    <td>The minimum ratio of creative pixels that must be on screen before the refresh timer is started.</td>
+    <td>Must be an integer between 0 and 100, inclusive.</td>
+  </tr>
+  <tr>
+    <td>continuousTimeMin</td>
+    <td>The amount of continuous time, in seconds, that the creative must be on screen before the refresh timer is started.</td>
+    <td>Any positive numerical value.</td>
+  </tr>
+</table>
+
+For convenience, ada/_a4a-config.js contains a default configuration object.
+
+#### Page-level Configuration
+
+Refresh may be enabled across all eligible slots for a set of opted-in network on a page by adding the following metadata tag:
+
+`<meta name="amp-ad-refresh" content=”network1=refresh_interval1,network2=refresh_interval2,...">`
+
+Where `refresh_interval` is the time, in seconds, in between refresh cycles. This value must be numeric and no less than 30. Individual slots may be opted-out of refresh by adding `data-enable-refresh=false` to the slot.
+
+#### Slot-level Configuration
+
+An individual slot is eligible to be refreshed if it is configured as:
+
+```
+<amp-ad 
+ ...
+ data-enable-refresh=refresh_interval>
+```
+If `refresh_interval` is set to false, then this slot will not be refresh-enabled, even if page-level configurations are set.
+
+#### SRA Compatibility
+
+Refresh is currently not supported for SRA enabled slots. If a slot is enabled for both, refresh will be disabled, and an error will be logged to the user's console.

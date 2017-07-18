@@ -234,36 +234,6 @@ describe('Google A4A utils', () => {
       sandbox = sinon.sandbox.create();
     });
 
-    it('should have the correct ifi numbers', function() {
-      // When ran locally, this test tends to exceed 2000ms timeout.
-      this.timeout(5000);
-      // Reset counter for purpose of this test.
-      delete window['ampAdGoogleIfiCounter'];
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        doc.win = window;
-        const elem = createElementWithAttributes(doc, 'amp-a4a', {
-          'type': 'adsense',
-          'width': '320',
-          'height': '50',
-        });
-        const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], [], []).then(url1 => {
-            expect(url1).to.match(/ifi=1/);
-            return googleAdUrl(impl, '', 0, [], [], []).then(url2 => {
-              expect(url2).to.match(/ifi=2/);
-              return googleAdUrl(impl, '', 0, [], [], []).then(url3 => {
-                expect(url3).to.match(/ifi=3/);
-              });
-            });
-          });
-        });
-      });
-    });
-
     it('should set ad position', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
