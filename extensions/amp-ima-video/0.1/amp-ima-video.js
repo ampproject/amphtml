@@ -75,6 +75,7 @@ class AmpImaVideo extends AMP.BaseElement {
         'The data-tag attribute is required for <amp-video-ima> and must be ' +
             'https');
 
+    // Handle <source> and <track> children
     const sourceElements = this.element.getElementsByTagName('source');
     const trackElements = this.element.getElementsByTagName('track');
     const childElements =
@@ -92,6 +93,13 @@ class AmpImaVideo extends AMP.BaseElement {
       });
       this.element.setAttribute(
           'data-child-elements', JSON.stringify(children));
+    }
+
+    // Handle IMASetting JSON
+    const scriptElement = this.element.getElementsByTagName('script')[0];
+    if (scriptElement.type == 'application/json') {
+      this.element.setAttribute(
+          'data-ima-settings', scriptElement.innerHTML);
     }
   }
 

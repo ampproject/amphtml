@@ -160,6 +160,9 @@ let adsManagerWidthOnLoad, adsManagerHeightOnLoad;
 // Initial video dimensions.
 let videoWidth, videoHeight;
 
+// IMASettings provided via <script> tag in parent element.
+let imaSettings;
+
 /**
  * Loads the IMA SDK library.
  */
@@ -330,6 +333,9 @@ export function imaVideo(global, data) {
       videoPlayer.appendChild(htmlToElement(child));
     });
   }
+  if (data.imaSettings) {
+    imaSettings = JSON.parse(data.imaSettings);
+  }
 
   contentDiv.appendChild(videoPlayer);
   wrapperDiv.appendChild(contentDiv);
@@ -378,12 +384,37 @@ export function imaVideo(global, data) {
           false);
     });
 
+    // Handle settings that need to be set before the AdDisplayContainer is
+    // created.
+    if (imaSettings.locale) {
+      global.google.ima.settings.setLocale(imaSettings.locale);
+    }
+    if (imaSettings.vpaidMode) {
+      global.google.ima.settings.setVpaidMode(imaSettings.vpaidMode);
+    }
+
+
     adDisplayContainer =
         new global.google.ima.AdDisplayContainer(adContainerDiv, videoPlayer);
 
     adsLoader = new global.google.ima.AdsLoader(adDisplayContainer);
     adsLoader.getSettings().setPlayerType('amp-ima');
     adsLoader.getSettings().setPlayerVersion('0.1');
+    // Propogate settings provided via child script tag.
+    // locale and vpaidMode are set above, as they must be set before we create
+    // an AdDisplayContainer.
+    // playerType and playerVersion are used by the developers to track usage,
+    // so we do not want to allow users to overwrite those values.
+    const skippedSettings =
+        ['locale', 'vpaidMode', 'playerType', 'playerVersion'];
+    for (const setting in imaSettings) {
+      if (!skippedSettings.includes(setting)) {
+        // Change e.g. 'ppid' to 'setPpid'.
+        const methodName =
+            'set' + setting.charAt(0).toUpperCase() + setting.slice(1);
+        adsLoader.getSettings()[methodName](imaSettings[setting]);
+      }
+    }
     adsLoader.addEventListener(
         global.google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
         onAdsManagerLoaded.bind(null, global),
