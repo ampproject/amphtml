@@ -1003,7 +1003,7 @@ function checkForbiddenAndRequiredTerms() {
       if (missingRequirements) {
         util.log(util.colors.blue(
             'Adding these terms (e.g. by adding a required LICENSE ' +
-          'to the file)'));
+            'to the file)'));
       }
       if (forbiddenFound || missingRequirements) {
         process.exit(1);
