@@ -72,7 +72,7 @@ export class ViewerCidApi {
    * @return {boolean}
    */
   isScopeOptedInForCidApi_(scope) {
-    const optInMeta = this.ampdoc_.win.document.head.querySelector(
+    const optInMeta = this.ampdoc_.win.document.head./*OK*/querySelector(
         `meta[name=${GOOGLE_CLIENT_ID_API_META_NAME}]`);
     if (!optInMeta || !optInMeta.hasAttribute('content')) {
       return false;
