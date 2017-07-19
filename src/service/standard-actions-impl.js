@@ -18,7 +18,7 @@ import {ActionTrust} from '../action-trust';
 import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Layout, getLayoutClass} from '../layout';
 import {actionServiceForDoc, urlReplacementsForDoc} from '../services';
-import {bindForDoc} from '../services';
+import {bindForDocOrNull} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
 import {dev, user} from '../log';
 import {historyForDoc} from '../services';
@@ -115,7 +115,8 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
       return;
     }
-    bindForDoc(invocation.target).then(bind => {
+    bindForDocOrNull(invocation.target).then(bind => {
+      user().assert(bind, 'AMP-BIND is not installed.');
       const args = invocation.args;
       const objectString = args[OBJECT_STRING_ARGS_KEY];
       if (objectString) {

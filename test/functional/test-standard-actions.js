@@ -17,7 +17,7 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
 import {StandardActions} from '../../src/service/standard-actions-impl';
-import {bindForDoc, historyForDoc} from '../../src/services';
+import {bindForDocOrNull, historyForDoc} from '../../src/services';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {setParentWindow} from '../../src/service';
 
@@ -228,7 +228,7 @@ describes.sandboxed('StandardActions', {}, () => {
         satisfiesTrust: () => true,
       };
       standardActions.handleAmpTarget(invocation);
-      return bindForDoc(ampdoc).then(() => {
+      return bindForDocOrNull(ampdoc).then(() => {
         expect(spy).to.be.calledOnce;
         expect(spy).to.be.calledWith('{foo: 123}');
       });

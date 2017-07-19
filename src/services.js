@@ -24,9 +24,9 @@ import {
 import {
   getElementService,
   getElementServiceForDoc,
-  getElementServiceForDocInEmbedScope,
   getElementServiceIfAvailable,
   getElementServiceIfAvailableForDoc,
+  getElementServiceIfAvailableForDocInEmbedScope,
 } from './element-service';
 
 
@@ -95,11 +95,12 @@ export function batchedXhrFor(window) {
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<!../extensions/amp-bind/0.1/bind-impl.Bind>}
+ * @return {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>}
  */
-export function bindForDoc(nodeOrDoc) {
-  return /** @type {!Promise<!../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
-      getElementServiceForDocInEmbedScope(nodeOrDoc, 'bind', 'amp-bind'));
+export function bindForDocOrNull(nodeOrDoc) {
+  return /** @type {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
+      getElementServiceIfAvailableForDocInEmbedScope(
+          nodeOrDoc, 'bind', 'amp-bind'));
 }
 
 /**

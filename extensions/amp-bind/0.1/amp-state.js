@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {bindForDoc, viewerForDoc} from '../../../src/services';
+import {bindForDocOrNull, viewerForDoc} from '../../../src/services';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -148,7 +148,8 @@ export class AmpState extends AMP.BaseElement {
     const id = user().assert(this.element.id, '<amp-state> must have an id.');
     const state = Object.create(null);
     state[id] = json;
-    bindForDoc(this.element).then(bind => {
+    bindForDocOrNull(this.element).then(bind => {
+      dev().assert(bind, 'Bind service can not be found.');
       bind.setState(state,
           /* opt_skipEval */ isInit, /* opt_isAmpStateMutation */ !isInit);
     });

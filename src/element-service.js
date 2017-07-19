@@ -139,29 +139,9 @@ export function getElementServiceIfAvailableForDoc(
 }
 
 /**
- * Returns a promise for a service in the closest embed scope of `nodeOrDoc`.
- * If no embed-scope service is found, falls back to top-level service.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @param {string} id of the service.
- * @param {string} extension Name of the custom element that provides
- *     the implementation of this service.
- * @return {!Promise<!Object>}
- */
-export function getElementServiceForDocInEmbedScope(
-    nodeOrDoc, id, extension) {
-  return getElementServiceIfAvailableForDocInEmbedScope(
-      nodeOrDoc, id, extension)
-      .then(service => {
-        if (service) {
-          return service;
-        }
-        // Fallback to ampdoc.
-        return getElementServiceForDoc(nodeOrDoc, id, extension);
-      });
-}
-
-/**
- * Same as `getElementServiceForDocInEmbedScope` but without top-level fallback.
+ * Returns a promise for service for the given id in the embed scope of
+ * a given node, if it exists. Otherwise, falls back to ampdoc scope IFF
+ * the given node is in the top-level window.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @param {string} extension Name of the custom element that provides
@@ -184,6 +164,9 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
     // a promise from the wrong service holder which would never resolve.
     if (win !== topWin) {
       return getElementServicePromiseOrNull(win, id, extension);
+    } else {
+      // Fallback to ampdoc IFF the given node is _not_ FIE.
+      return getElementServiceIfAvailableForDoc(nodeOrDoc, id, extension);
     }
   }
   return /** @type {!Promise<?Object>} */ (Promise.resolve(null));
