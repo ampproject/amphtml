@@ -317,11 +317,11 @@ export class GlobalVariableSource extends VariableSource {
     this.set('TIMESTAMP_FORMATTED', () => {
       const current = new Date();
       const year = current.getFullYear();
-      const month = this.formatNum(current.getMonth() + 1);
-      const date = this.formatNum(current.getDate());
-      const hour = this.formatNum(current.getHours());
-      const min = this.formatNum(current.getMinutes());
-      const sec = this.formatNum(current.getSeconds());
+      const month = this.formatNum_(current.getMonth() + 1);
+      const date = this.formatNum_(current.getDate());
+      const hour = this.formatNum_(current.getHours());
+      const min = this.formatNum_(current.getMinutes());
+      const sec = this.formatNum_(current.getSeconds());
       const time = year + '-' + month + '-' + date + ' ' +
           hour + ':' + min + ':' + sec;
       return time;
@@ -571,8 +571,9 @@ export class GlobalVariableSource extends VariableSource {
      * Format number to have 2 digits if number is smaller than 10
      * @param num
      * @returns {string} after formatted
+     * @private
      */
-  formatNum(num) {
+  formatNum_(num) {
     return (num < 10 ? ('0' + num) : num);
   };
 }

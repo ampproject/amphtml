@@ -1322,14 +1322,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
   describe('formatted timestamp', () => {
     it('should return correct formatted timestamp', () => {
       const fakeTime = 1499979336612;
-      const offset_ = new Date(fakeTime).getTimezoneOffset() * 60000;
-      sandbox.useFakeTimers(fakeTime + offset_);
-      return expandAsync(
-          '?tsf=TIMESTAMP_FORMATTED').then(res => {
-            expect(encodeURIComponent('2017-07-13 20:55:36'))
-                .to.equal('2017-07-13%2020%3A55%3A36');
-            expect(res).to.equal('?tsf=2017-07-13%2020%3A55%3A36');
-          });
+      // Offset to make sure the fake time is the same with all browser timezones
+      const offset = new Date(fakeTime).getTimezoneOffset() * 60000;
+      sandbox.useFakeTimers(fakeTime + offset);
+      return expect(expandAsync('?tsf=TIMESTAMP_FORMATTED'))
+          .to.eventually.equal(
+          '?tsf=' + encodeURIComponent('2017-07-13 20:55:36'));
     });
   });
 });
