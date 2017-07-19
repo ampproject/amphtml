@@ -41,7 +41,8 @@ import {
   getTimingDataAsync,
 } from './variable-source';
 import {isProtocolValid} from '../url';
-
+import {padStart} from '../string';
+;
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
@@ -567,14 +568,14 @@ export class GlobalVariableSource extends VariableSource {
     });
   }
 
-    /**
-     * Format number to have 2 digits if number is smaller than 10
-     * @param num
-     * @returns {string} after formatted
-     * @private
-     */
+  /**
+   * Format number to have 2 digits if number is smaller than 10
+   * @param num
+   * @returns {string} after formatted
+   * @private
+   */
   formatNum_(num) {
-    return (num < 10 ? ('0' + num) : num);
+    return padStart(num.toString(), 2, '0');
   };
 }
 

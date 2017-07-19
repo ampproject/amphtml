@@ -109,3 +109,26 @@ export function stringHash32(str) {
   // Convert from 32-bit signed to unsigned.
   return String(hash >>> 0);
 };
+
+/**
+ * Pads the current string with another string
+ * so that the returned string reaches the given length.
+ * The default value to pad with is " " if opt_padStr is not parsed
+ * @param {string} str
+ * @param {number} length
+ * @param {string=} opt_padStr
+ * @return {string}
+ */
+export function padStart(str, length, opt_padStr) {
+  const padStr = opt_padStr || ' ';
+  let res = '';
+  if (length < str.length) {
+    return str;
+  }
+  for (let i = 0; i < length - str.length; i++) {
+    res = padStr.concat(res);
+  }
+  return res + str;
+}
+
+
