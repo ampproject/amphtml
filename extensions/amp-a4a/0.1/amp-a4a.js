@@ -354,7 +354,8 @@ export class AmpA4A extends AMP.BaseElement {
             err && err.message);
       });
       if (typeof jsonConfig == 'object' && !Array.isArray(jsonConfig)) {
-        this.jsonConfig_ = jsonConfig;
+        this.jsonConfig_ =
+            /** @type {!Object<string, ?JsonObject>} */ (jsonConfig);
       } else {
         user().error(
             TAG, this.element.getAttribute('type'),

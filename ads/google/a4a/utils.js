@@ -154,7 +154,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
 
 /**
  * @param {!Window} win
- * @param {string} type matching typing attribute.
+ * @param {?string} type matching typing attribute.
  * @param {!function(!Element):string} groupFn
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */

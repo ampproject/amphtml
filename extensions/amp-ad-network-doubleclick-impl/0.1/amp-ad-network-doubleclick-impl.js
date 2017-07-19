@@ -790,9 +790,12 @@ function serializeTargeting_(targeting, categoryExclusions) {
 function serializeItem_(key, value) {
   let serializedValue;
   if (typeof value == 'string') {
-    serializedValue = encodeURIComponent(value);
-  } else if (Array.isArray(value) && value.every(e => typeof e == 'string')) {
-    serializedValue = value.map(encodeURIComponent).join();
+    serializedValue = encodeURIComponent(/** @type {string} */ (value));
+  } else if (
+      Array.isArray(value) && /** @type {!Array<?JsonObject>} */
+                              (value).every(e => typeof e == 'string')) {
+    serializedValue =
+        /** @type {!Array<string>} */ (value).map(encodeURIComponent).join();
   } else {
     user().error(TAG, 'Invalid targeting value', value);
   }
