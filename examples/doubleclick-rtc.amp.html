@@ -1,0 +1,58 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Doubleclick RTC</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    amp-ad {
+      border: 1px solid #ccc;
+      max-width: 500px;
+    }
+  </style>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script type="application/json" id="amp-rtc">
+    {
+    "endpoint": "http://localhost:8080/"
+    }
+  </script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h2> NOTE: Must disable check that isSecureUrl for testing </h2>
+  <h2>Doubleclick with RTC</h2>
+    <amp-ad width="320" height="50"
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      json='{"targeting":{"food":["burgers","chicken"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+  </amp-ad>
+      <amp-ad width="320" height="50"
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+  </amp-ad>
+      <amp-ad width="320" height="50"
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      json='{"targeting":{"sport":["croquet"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+  </amp-ad>
+  <amp-ad width="320" height="50"
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      json='{"targeting":{"pizza_styles":["nyc", "neopolitan"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+  </amp-ad>
+  <amp-ad width="320" height="50"
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+  </amp-ad>
+  <amp-ad width="320" height="50"
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+  </amp-ad>
+
+
+</body>
+</html>
