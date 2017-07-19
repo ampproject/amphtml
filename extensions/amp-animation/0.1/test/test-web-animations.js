@@ -27,7 +27,7 @@ import {user} from '../../../../src/log';
 import * as sinon from 'sinon';
 
 
-describes.realWin('MeasureScanner', {amp: 1}, env => {
+describes.functional('MeasureScanner', {amp: 1}, env => {
   let win, doc;
   let vsync;
   let resources;

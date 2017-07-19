@@ -62,7 +62,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
 
 
-    describes.realWin('amp-viewer-integration', {
+    describes.functional('amp-viewer-integration', {
       amp: {
         location: 'https://cdn.ampproject.org/c/s/www.example.com/path',
         params: {

@@ -20,7 +20,7 @@ import * as sinon from 'sinon';
 import * as mode from '../../../../src/mode';
 
 
-describes.realWin('AccessClientAdapter', {
+describes.functional('AccessClientAdapter', {
   amp: true,
 }, env => {
   let win;

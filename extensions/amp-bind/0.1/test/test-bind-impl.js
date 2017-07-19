@@ -104,7 +104,7 @@ describe('Bind', function() {
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
 
-  describes.realWin('in FIE', {
+  describes.functional('in FIE', {
     amp: {
       ampdoc: 'fie',
       runtimeOn: false,
@@ -168,7 +168,7 @@ describe('Bind', function() {
     });
   }); // in FIE
 
-  describes.realWin('in shadow ampdoc', {
+  describes.functional('in shadow ampdoc', {
     amp: {
       ampdoc: 'shadow',
       runtimeOn: false,
@@ -194,7 +194,7 @@ describe('Bind', function() {
     });
   }); // in shadow ampdoc
 
-  describes.realWin('in single ampdoc', {
+  describes.functional('in single ampdoc', {
     amp: {
       ampdoc: 'single',
       runtimeOn: false,

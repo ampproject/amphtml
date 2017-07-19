@@ -33,7 +33,7 @@ import {loadPromise} from '../../src/event-helper';
 
 
 describes.sandboxed('Extensions', {}, () => {
-  describes.fakeWin('registerExtension', {}, env => {
+  describes.unit('registerExtension', {}, env => {
     let windowApi;
     let extensions;
 
@@ -294,7 +294,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
   });
 
-  describes.realWin('loadExtension', {
+  describes.functional('loadExtension', {
     amp: true,
     fakeRegisterElement: true,
   }, env => {
@@ -380,7 +380,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
   });
 
-  describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
+  describes.functional('installExtensionsInChildWindow', {amp: true}, env => {
     let parentWin;
     let extensions;
     let extensionsMock;

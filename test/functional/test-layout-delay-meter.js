@@ -19,7 +19,7 @@ import {Services} from '../../src/services';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import * as lolex from 'lolex';
 
-describes.realWin('layout-delay-meter', {
+describes.functional('layout-delay-meter', {
   amp: {
     ampdoc: 'single',
   },

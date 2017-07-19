@@ -93,7 +93,7 @@ describe('#getLifecycleReporter', () => {
   });
 });
 
-describes.fakeWin('#setGoogleLifecycleVarsFromHeaders', {amp: true}, env => {
+describes.unit('#setGoogleLifecycleVarsFromHeaders', {amp: true}, env => {
   const headerData = {};
   const headerMock = {
     get: h => { return h in headerData ? headerData[h] : null; },
@@ -129,7 +129,7 @@ describes.fakeWin('#setGoogleLifecycleVarsFromHeaders', {amp: true}, env => {
 });
 
 describes.sandboxed('#googleLifecycleReporterFactory', {}, () => {
-  describes.fakeWin('default parameters', {amp: true}, env => {
+  describes.unit('default parameters', {amp: true}, env => {
     let mockReporter;
     let emitPingStub;
     beforeEach(() => {

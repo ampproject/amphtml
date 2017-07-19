@@ -29,7 +29,7 @@ import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
 
-describes.fakeWin('AccessService', {
+describes.unit('AccessService', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {
@@ -352,7 +352,7 @@ describes.fakeWin('AccessService', {
 });
 
 
-describes.fakeWin('AccessService adapter context', {
+describes.unit('AccessService adapter context', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {
@@ -461,7 +461,7 @@ describes.fakeWin('AccessService adapter context', {
 });
 
 
-describes.fakeWin('AccessService authorization', {
+describes.unit('AccessService authorization', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {
@@ -768,7 +768,7 @@ describes.fakeWin('AccessService authorization', {
 });
 
 
-describes.fakeWin('AccessService applyAuthorizationToElement_', {
+describes.unit('AccessService applyAuthorizationToElement_', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {
@@ -912,7 +912,7 @@ describes.fakeWin('AccessService applyAuthorizationToElement_', {
 });
 
 
-describes.fakeWin('AccessService pingback', {
+describes.unit('AccessService pingback', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {
@@ -1252,7 +1252,7 @@ describes.fakeWin('AccessService pingback', {
 });
 
 
-describes.fakeWin('AccessService login', {
+describes.unit('AccessService login', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {
@@ -1611,7 +1611,7 @@ describes.fakeWin('AccessService login', {
 });
 
 
-describes.fakeWin('AccessService analytics', {
+describes.unit('AccessService analytics', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {

@@ -26,7 +26,7 @@ import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
 
-describes.realWin('analytics', {
+describes.functional('analytics', {
   amp: true,
 }, env => {
   let sandbox;

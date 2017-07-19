@@ -24,7 +24,7 @@ import {installTimerService} from '../../src/service/timer-impl';
 import {getAdCid} from '../../src/ad-cid';
 import * as lolex from 'lolex';
 
-describes.realWin('ad-cid', {}, env => {
+describes.functional('ad-cid', {}, env => {
   const cidScope = 'cid-in-ads-test';
   const config = adConfig['_ping_'];
   let sandbox;

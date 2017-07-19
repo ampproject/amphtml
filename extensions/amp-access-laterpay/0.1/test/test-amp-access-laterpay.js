@@ -18,7 +18,7 @@ import {LaterpayVendor} from '../laterpay-impl';
 
 const TAG = 'amp-access-laterpay';
 
-describes.fakeWin('LaterpayVendor', {
+describes.unit('LaterpayVendor', {
   amp: true,
   location: 'https://pub.com/doc1',
 }, env => {

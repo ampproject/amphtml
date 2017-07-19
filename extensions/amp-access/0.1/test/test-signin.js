@@ -19,7 +19,7 @@ import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 
 
-describes.realWin('SignInProtocol', {amp: true}, env => {
+describes.functional('SignInProtocol', {amp: true}, env => {
 
   const ORIGIN = 'https://example.com';
   const AUTHORITY = 'https://authority.example.net';

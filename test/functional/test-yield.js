@@ -17,7 +17,7 @@
 import * as lolex from 'lolex';
 import {macroTask} from '../../testing/yield';
 
-describes.realWin('yield', {}, env => {
+describes.functional('yield', {}, env => {
 
   let win;
   let clock;

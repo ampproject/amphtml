@@ -21,7 +21,7 @@ import {Services} from '../../../../src/services';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as bytes from '../../../../src/utils/bytes';
 
-describes.fakeWin('amp-share-tracking', {
+describes.unit('amp-share-tracking', {
   amp: {
     ampdoc: 'single',
     extensions: ['amp-share-tracking'],

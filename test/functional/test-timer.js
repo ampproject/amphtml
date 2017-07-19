@@ -17,7 +17,7 @@
 import {Timer} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
-describes.fakeWin('Timer', {}, env => {
+describes.unit('Timer', {}, env => {
 
   let sandbox;
   let windowMock;

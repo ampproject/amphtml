@@ -16,7 +16,7 @@
 
 import {ValidationBubble} from '../validation-bubble';
 
-describes.realWin('validation-bubble', {amp: true}, env => {
+describes.functional('validation-bubble', {amp: true}, env => {
   it('should append a dom element to the document', () => {
     const ampdoc = env.ampdoc;
     const document = ampdoc.getRootNode();

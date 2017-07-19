@@ -44,7 +44,7 @@ describes.repeated('', {
   'shadow ampdoc': {ampdoc: 'shadow'},
 }, (name, variant) => {
 
-  describes.realWin('amp-form', {
+  describes.functional('amp-form', {
     amp: {
       runtimeOn: false,
       ampdoc: variant.ampdoc,
@@ -1452,7 +1452,7 @@ describes.repeated('', {
       });
     });
 
-    describes.fakeWin('XHR', {
+    describes.unit('XHR', {
       amp: {
         ampdoc: 'single',
       },

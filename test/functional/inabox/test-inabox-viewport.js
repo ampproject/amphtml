@@ -28,7 +28,7 @@ import {
 
 const NOOP = () => {};
 
-describes.fakeWin('inabox-viewport', {amp: {}}, env => {
+describes.unit('inabox-viewport', {amp: {}}, env => {
 
   let win;
   let binding;

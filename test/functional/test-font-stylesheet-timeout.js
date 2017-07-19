@@ -19,7 +19,7 @@ import {
 } from '../../src/font-stylesheet-timeout';
 
 
-describes.realWin('font-stylesheet-timeout', {
+describes.functional('font-stylesheet-timeout', {
   amp: true,
 }, env => {
   let clock;

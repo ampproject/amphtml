@@ -32,7 +32,7 @@ import {
 import * as sinon from 'sinon';
 
 
-describes.fakeWin('installErrorReporting', {}, env => {
+describes.unit('installErrorReporting', {}, env => {
   let win;
   let rejectedPromiseError;
   let rejectedPromiseEvent;

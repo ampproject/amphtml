@@ -18,7 +18,7 @@ import {liveListManagerForDoc, LiveListManager} from '../live-list-manager';
 import {Services} from '../../../../src/services';
 
 
-describes.fakeWin('LiveListManager', {amp: true}, env => {
+describes.unit('LiveListManager', {amp: true}, env => {
   const jitterOffset = 1000;
   let win, doc;
   let ampdoc;

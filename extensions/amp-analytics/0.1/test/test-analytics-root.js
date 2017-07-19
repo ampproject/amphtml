@@ -30,7 +30,7 @@ import {
 } from '../visibility-manager';
 
 
-describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
+describes.functional('AmpdocAnalyticsRoot', {amp: 1}, env => {
   let win;
   let ampdoc;
   let resources, viewport;
@@ -402,7 +402,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 });
 
 
-describes.realWin('EmbedAnalyticsRoot', {
+describes.functional('EmbedAnalyticsRoot', {
   amp: {ampdoc: 'fie'},
 }, env => {
   let win;

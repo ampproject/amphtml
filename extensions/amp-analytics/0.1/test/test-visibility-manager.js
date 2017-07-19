@@ -64,7 +64,7 @@ class IntersectionObserverStub {
 }
 
 
-describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
+describes.unit('VisibilityManagerForDoc', {amp: true}, env => {
   let win;
   let ampdoc;
   let clock;
@@ -618,7 +618,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 });
 
 
-describes.realWin('EmbedAnalyticsRoot', {
+describes.functional('EmbedAnalyticsRoot', {
   amp: {ampdoc: 'fie'},
 }, env => {
   let parentWin;
@@ -834,7 +834,7 @@ describes.realWin('EmbedAnalyticsRoot', {
 });
 
 
-describes.realWin('VisibilityManager integrated', {amp: true}, env => {
+describes.functional('VisibilityManager integrated', {amp: true}, env => {
   let win, doc;
   let ampdoc;
   let viewer;

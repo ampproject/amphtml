@@ -229,7 +229,7 @@ describe('ad-tracker', () => {
   });
 });
 
-describes.realWin('getExistingAds', {}, env => {
+describes.functional('getExistingAds', {}, env => {
   let win;
   let doc;
 

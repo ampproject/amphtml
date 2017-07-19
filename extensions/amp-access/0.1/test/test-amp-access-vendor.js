@@ -18,7 +18,7 @@ import {AccessVendor} from '../access-vendor';
 import {AccessVendorAdapter} from '../amp-access-vendor';
 
 
-describes.realWin('AccessVendorAdapter', {amp: true}, env => {
+describes.functional('AccessVendorAdapter', {amp: true}, env => {
   let ampdoc;
   let validConfig;
 

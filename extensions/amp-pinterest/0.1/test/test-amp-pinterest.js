@@ -19,7 +19,7 @@ import {adopt} from '../../../../src/runtime';
 
 adopt(window);
 
-describes.realWin('amp-pinterest', {
+describes.functional('amp-pinterest', {
   amp: {
     runtimeOn: false,
     ampdoc: 'single',

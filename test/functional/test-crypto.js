@@ -24,7 +24,7 @@ import {
 } from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
 
-describes.realWin('crypto-impl', {}, env => {
+describes.functional('crypto-impl', {}, env => {
 
   let win;
   let crypto;

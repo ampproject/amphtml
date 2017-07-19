@@ -16,7 +16,7 @@
 
 import {AmpAnim} from '../amp-anim';
 
-describes.realWin('amp-anim', {
+describes.functional('amp-anim', {
   amp: {
     ampdoc: 'single',
     extensions: ['amp-anim'],

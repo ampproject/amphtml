@@ -28,7 +28,7 @@ import {EXPERIMENT_ATTRIBUTE} from '../utils';
 
 describe('all-traffic-experiments-tests', () => {
 
-  describes.realWin('#googleAdsIsA4AEnabled', {
+  describes.functional('#googleAdsIsA4AEnabled', {
     amp: {
       runtimeOn: true,
       ampdoc: 'single',

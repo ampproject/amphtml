@@ -26,7 +26,7 @@ import {
 import {ValidationBubble} from '../validation-bubble';
 
 
-describes.realWin('form-validators', {amp: true}, env => {
+describes.functional('form-validators', {amp: true}, env => {
   let sandbox;
   const emailTypeValidationMsg = 'Yo! That email does not look so.. email-y';
 

@@ -297,7 +297,7 @@ describes.sandboxed('StandardActions', {}, () => {
     });
   });
 
-  describes.fakeWin('adoptEmbedWindow', {}, env => {
+  describes.unit('adoptEmbedWindow', {}, env => {
     let embedWin;
     let embedActions;
     let hideStub;

@@ -56,7 +56,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
   }
 
 
-  describes.realWin('in top-level doc', {
+  describes.functional('in top-level doc', {
     amp: {
       ampdoc: 'single',
       extensions: ['amp-animation'],
@@ -524,7 +524,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
   });
 
 
-  describes.realWin('in FIE', {
+  describes.functional('in FIE', {
     amp: {
       ampdoc: 'fie',
       extensions: ['amp-animation'],

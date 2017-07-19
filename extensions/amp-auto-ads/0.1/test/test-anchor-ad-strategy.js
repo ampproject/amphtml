@@ -19,7 +19,7 @@ import {waitForChild} from '../../../../src/dom';
 import {Services} from '../../../../src/services';
 import {AnchorAdStrategy} from '../anchor-ad-strategy';
 
-describes.realWin('anchor-ad-strategy', {
+describes.functional('anchor-ad-strategy', {
   amp: {
     runtimeOn: true,
     ampdoc: 'single',

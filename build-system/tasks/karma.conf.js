@@ -170,7 +170,7 @@ module.exports = {
     mocha: {
       reporter: 'html',
       // Longer timeout on Travis; fail quickly at local.
-      timeout: process.env.TRAVIS ? 10000 : 2000,
+      timeout: process.env.TRAVIS ? 10000 : 5000,
     },
     captureConsole: false,
   },

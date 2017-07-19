@@ -84,7 +84,7 @@ describe('VariableSource', () => {
     });
   });
 
-  describes.fakeWin('getTimingData', {}, env => {
+  describes.unit('getTimingData', {}, env => {
     let win;
 
     beforeEach(() => {

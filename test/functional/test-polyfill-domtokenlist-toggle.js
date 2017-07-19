@@ -19,7 +19,7 @@ import {toArray} from '../../src/types';
 import * as sinon from 'sinon';
 
 
-describes.fakeWin('DOMTokenList.toggle on non-IE', {
+describes.unit('DOMTokenList.toggle on non-IE', {
   win: {
     navigator: {
       userAgent: 'Chrome',
@@ -56,7 +56,7 @@ describes.fakeWin('DOMTokenList.toggle on non-IE', {
 
 });
 
-describes.fakeWin('DOMTokenList.toggle On IE', {
+describes.unit('DOMTokenList.toggle On IE', {
   win: {
     navigator: {
       userAgent: 'MSIE',

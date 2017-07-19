@@ -24,7 +24,7 @@ import {installTimerService} from '../../../../src/service/timer-impl';
 import {macroTask} from '../../../../testing/yield';
 import * as lolex from 'lolex';
 
-describes.realWin('concurrent-load', {}, env => {
+describes.functional('concurrent-load', {}, env => {
 
   describe('getAmpAdRenderOutsideViewport', () => {
     it('should return null if ' +

@@ -436,7 +436,7 @@ describes.sandboxed('shadow-embed', {}, () => {
     });
   });
 
-  describes.fakeWin('ShadowDomWriterStreamer', {amp: true}, env => {
+  describes.unit('ShadowDomWriterStreamer', {amp: true}, env => {
     let win;
     let writer;
     let onBodySpy, onBodyChunkSpy;
@@ -528,7 +528,7 @@ describes.sandboxed('shadow-embed', {}, () => {
     });
   });
 
-  describes.fakeWin('ShadowDomWriterBulk', {amp: true}, env => {
+  describes.unit('ShadowDomWriterBulk', {amp: true}, env => {
     let win;
     let writer;
     let onBodySpy, onBodyChunkSpy;

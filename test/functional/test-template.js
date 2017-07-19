@@ -22,7 +22,7 @@ import {
 import {resetServiceForTesting} from '../../src/service';
 import {Services} from '../../src/services';
 
-describes.fakeWin('Template', {}, env => {
+describes.unit('Template', {}, env => {
   let templates;
   let doc;
   let win;
@@ -261,7 +261,7 @@ describes.fakeWin('Template', {}, env => {
 });
 
 
-describes.fakeWin('BaseTemplate', {}, env => {
+describes.unit('BaseTemplate', {}, env => {
 
   let templateElement;
   let win;

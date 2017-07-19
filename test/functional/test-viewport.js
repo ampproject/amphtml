@@ -43,7 +43,7 @@ import * as sinon from 'sinon';
 const NOOP = () => {};
 
 
-describes.fakeWin('Viewport', {}, env => {
+describes.unit('Viewport', {}, env => {
   let clock;
   let viewport;
   let binding;
@@ -842,7 +842,7 @@ describes.fakeWin('Viewport', {}, env => {
     bindingMock.verify();
   });
 
-  describes.realWin('top-level styles', {amp: 1}, env => {
+  describes.functional('top-level styles', {amp: 1}, env => {
     let win;
     let root;
 
@@ -1226,7 +1226,7 @@ describe('Viewport META', () => {
 });
 
 
-describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
+describes.functional('ViewportBindingNatural', {ampCss: true}, env => {
   let binding;
   let win;
   let ampdoc;
@@ -1388,7 +1388,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   });
 });
 
-describes.realWin('ViewportBindingNaturalIosEmbed', {ampCss: true}, env => {
+describes.functional('ViewportBindingNaturalIosEmbed', {ampCss: true}, env => {
   let binding;
   let win;
 
@@ -1626,7 +1626,7 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {ampCss: true}, env => {
 });
 
 
-describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
+describes.functional('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   let win;
   let binding;
   let child;
@@ -1844,7 +1844,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
 
 describe('createViewport', () => {
 
-  describes.fakeWin('in Android', {
+  describes.unit('in Android', {
     win: {navigator: {userAgent: 'Android'}},
   }, env => {
     let win;
@@ -1879,7 +1879,7 @@ describe('createViewport', () => {
     });
   });
 
-  describes.fakeWin('in iOS', {
+  describes.unit('in iOS', {
     win: {navigator: {userAgent: 'iPhone'}},
   }, env => {
     let win;

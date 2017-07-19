@@ -35,7 +35,7 @@ function expectMatchesAll(address, matchList) {
 }
 
 describe('BaseLifecycleReporter', () => {
-  describes.fakeWin('', {}, env => {
+  describes.unit('', {}, env => {
     let doc;
     beforeEach(() => {
       doc = env.win.document;

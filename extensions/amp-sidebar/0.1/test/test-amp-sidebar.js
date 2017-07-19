@@ -25,7 +25,7 @@ import '../amp-sidebar';
 
 adopt(window);
 
-describes.realWin('amp-sidebar 0.1 version', {
+describes.functional('amp-sidebar 0.1 version', {
   win: { /* window spec */
     location: '...',
     historyOff: false,

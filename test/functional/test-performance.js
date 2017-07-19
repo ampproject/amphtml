@@ -21,7 +21,7 @@ import * as lolex from 'lolex';
 import * as sinon from 'sinon';
 
 
-describes.realWin('performance', {amp: true}, env => {
+describes.functional('performance', {amp: true}, env => {
   let sandbox;
   let perf;
   let clock;
@@ -621,7 +621,7 @@ describes.realWin('performance', {amp: true}, env => {
   });
 });
 
-describes.realWin('performance with experiment', {amp: true}, env => {
+describes.functional('performance with experiment', {amp: true}, env => {
 
   let win;
   let perf;

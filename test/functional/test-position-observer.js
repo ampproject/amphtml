@@ -19,7 +19,7 @@ import {
   PositionObserverFidelity,
 } from '../../src/service/position-observer-impl';
 
-describes.realWin('PositionObserver', {amp: 1}, env => {
+describes.functional('PositionObserver', {amp: 1}, env => {
   let win;
   let ampdoc;
   beforeEach(() => {

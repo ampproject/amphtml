@@ -123,7 +123,7 @@ function createFixture() {
 }
 
 
-describes.realWin('3P Ad', {
+describes.functional('3P Ad', {
   amp: {
     runtimeOn: true,
   },
@@ -145,7 +145,7 @@ describes.realWin('3P Ad', {
 });
 
 
-describes.realWin('3P Ad (with AmpContext experiment)', {
+describes.functional('3P Ad (with AmpContext experiment)', {
   amp: {
     runtimeOn: true,
   },

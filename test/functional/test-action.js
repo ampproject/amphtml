@@ -914,7 +914,7 @@ describes.sandboxed('Action global target', {}, () => {
 });
 
 
-describes.fakeWin('Core events', {amp: true}, env => {
+describes.unit('Core events', {amp: true}, env => {
   let sandbox;
   let window;
   let document;

@@ -19,7 +19,7 @@ import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import * as adHelper from '../../../../src/ad-helper';
 
-describes.realWin('amp-ad-ui handler', {
+describes.functional('amp-ad-ui handler', {
   amp: {
     ampdoc: 'single',
   },
