@@ -280,6 +280,11 @@ const EXPERIMENTS = [
         'amp-ad-network-doubleclick-impl/' +
         'amp-ad-network-doubleclick-impl-internal.md',
   },
+  {
+    id: 'user-error-reporting',
+    name: 'Report error to publishers',
+    spec: 'https://github.com/ampproject/amphtml/issues/6415',
+  },
 ];
 
 if (getMode().localDev) {
