@@ -45,7 +45,7 @@ export class ViewerCidApi {
   /**
    * Returns scoped CID retrieved from the Viewer.
    * @param {!string} scope
-   * @return {!Promise<?string|undefined>}
+   * @return {!Promise<?JsonObject|string|undefined>}
    */
   getScopedCid(scope) {
     return this.viewer_.sendMessageAwaitResponse('cid', dict({

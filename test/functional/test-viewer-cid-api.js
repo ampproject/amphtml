@@ -60,8 +60,8 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
   describe('getScopedCid', () => {
     function verifyClientIdApiInUse(used) {
       viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
-        scope: 'AMP_ECID_GOOGLE',
-        clientIdApi: used,
+        'scope': 'AMP_ECID_GOOGLE',
+        'clientIdApi': used,
       })).returns(Promise.resolve('client-id-from-viewer'));
       return expect(api.getScopedCid('AMP_ECID_GOOGLE'))
           .to.eventually.equal('client-id-from-viewer');
@@ -87,8 +87,8 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
       viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
-        scope: 'NON_WHITELISTED_SCOPE',
-        clientIdApi: false,
+        'scope': 'NON_WHITELISTED_SCOPE',
+        'clientIdApi': false,
       })).returns(Promise.resolve('client-id-from-viewer'));
       return expect(api.getScopedCid('NON_WHITELISTED_SCOPE'))
           .to.eventually.equal('client-id-from-viewer');
@@ -98,8 +98,8 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
       viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
-        scope: 'AMP_ECID_GOOGLE',
-        clientIdApi: true,
+        'scope': 'AMP_ECID_GOOGLE',
+        'clientIdApi': true,
       })).returns(Promise.resolve());
       return expect(api.getScopedCid('AMP_ECID_GOOGLE'))
           .to.eventually.be.undefined;
@@ -109,8 +109,8 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
       viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
-        scope: 'AMP_ECID_GOOGLE',
-        clientIdApi: true,
+        'scope': 'AMP_ECID_GOOGLE',
+        'clientIdApi': true,
       })).returns(Promise.reject('Client API error'));
       return expect(api.getScopedCid('AMP_ECID_GOOGLE'))
           .to.eventually.be.rejectedWith(/Client API error/);
