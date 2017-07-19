@@ -37,73 +37,97 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     api = new ViewerCidApi(env.ampdoc);
   });
 
-  describe('getScopedCidFromViewer', () => {
-    it('should call Viewer API', () => {
-      api.getScopedCid('some-scope');
-      expect(viewerMock.sendMessageAwaitResponse).to.be.calledWith('cid', dict({
-        scope: 'some-scope',
-        clientIdApi: true,
-      }));
+  describe('isSupported', () => {
+    it('should return true if cap=cid ', () => {
+      viewerMock.hasCapability.withArgs('cid').returns(true);
+      expect(api.isSupported()).to.be.true;
+      expect(viewerMock.hasCapability).to.be.calledWith('cid');
+    });
+
+    it('should return true if cap=cid ', () => {
+      viewerMock.hasCapability.withArgs('cid').returns(false);
+      expect(api.isSupported()).to.be.false;
+      expect(viewerMock.hasCapability).to.be.calledWith('cid');
     });
   });
 
-  describe('shouldGetScopedCidFromViewer', () => {
-    it('should resolve to true if everything great', () => {
-      viewerMock.hasCapability.withArgs('cid').returns(true);
-      viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
+  describe('getScopedCid', () => {
 
+    function verifyClientIdApiInUse(used) {
+      viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
+        scope: 'AMP_ECID_GOOGLE',
+        clientIdApi: used,
+      })).returns(Promise.resolve('client-id-from-viewer'));
+      return expect(api.getScopedCid('AMP_ECID_GOOGLE'))
+          .to.eventually.equal('client-id-from-viewer');
+    }
+
+    it('should use client ID API from api if everything great', () => {
+      viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
-      return expect(api.shouldGetScopedCid('AMP_ECID_GOOGLE'))
-          .to.eventually.be.true;
+      return verifyClientIdApiInUse(true);
     });
 
-    it('should resolve to false if Viewer does not support CID API', () => {
-      viewerMock.hasCapability.withArgs('cid').returns(false);
+    it('should not use client ID API if no opt in meta tag', () => {
       viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
 
-      ampdoc.win.document.head.innerHTML +=
-          '<meta name="amp-google-client-id-api" content="googleanalytics">';
-      return expect(api.shouldGetScopedCid('AMP_ECID_GOOGLE'))
-          .to.eventually.be.false;
+      return verifyClientIdApiInUse(false);
     });
 
-    it('should resolve to false if no opt in meta tag', () => {
-      viewerMock.hasCapability.withArgs('cid').returns(true);
-      viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
-
-      return expect(api.shouldGetScopedCid('AMP_ECID_GOOGLE'))
-          .to.eventually.be.false;
-    });
-
-    it('should resolve to false if Viewer origin not whitelisted', () => {
-      viewerMock.hasCapability.withArgs('cid').returns(true);
+    it('should not use client ID API if Viewer origin not whitelisted', () => {
       viewerMock.getViewerOrigin.returns(Promise.resolve('www.amazon.com'));
 
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
-      return expect(api.shouldGetScopedCid('AMP_ECID_GOOGLE'))
-          .to.eventually.be.false;
+      return verifyClientIdApiInUse(false);
     });
 
-    it('should resolve to false if vendor not whitelisted', () => {
-      viewerMock.hasCapability.withArgs('cid').returns(true);
+    it('should not use client ID API if vendor not whitelisted', () => {
       viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
 
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="abodeanalytics">';
-      return expect(api.shouldGetScopedCid('AMP_ECID_GOOGLE'))
-          .to.eventually.be.false;
+      return verifyClientIdApiInUse(false);
     });
 
-    it('should resolve to false if scope not whitelisted', () => {
-      viewerMock.hasCapability.withArgs('cid').returns(true);
+    it('should not use client ID API if scope not whitelisted', () => {
       viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
 
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
-      return expect(api.shouldGetScopedCid('NON_WHITELISTED_SCOPE'))
-          .to.eventually.be.false;
+      viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
+        scope: 'NON_WHITELISTED_SCOPE',
+        clientIdApi: false,
+      })).returns(Promise.resolve('client-id-from-viewer'));
+      return expect(api.getScopedCid('NON_WHITELISTED_SCOPE'))
+          .to.eventually.equal('client-id-from-viewer');
+    });
+
+    it('should return undefined if Viewer returns undefined', () => {
+      viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
+
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" content="googleanalytics">';
+      viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
+        scope: 'AMP_ECID_GOOGLE',
+        clientIdApi: true,
+      })).returns(Promise.resolve());
+      return expect(api.getScopedCid('AMP_ECID_GOOGLE'))
+          .to.eventually.be.undefined;
+    });
+
+    it('should reject if Viewer rejects', () => {
+      viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
+
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" content="googleanalytics">';
+      viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
+        scope: 'AMP_ECID_GOOGLE',
+        clientIdApi: true,
+      })).returns(Promise.reject('Client API error'));
+      return expect(api.getScopedCid('AMP_ECID_GOOGLE'))
+          .to.eventually.be.rejectedWith(/Client API error/);
     });
   });
 });

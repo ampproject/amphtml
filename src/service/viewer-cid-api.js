@@ -24,6 +24,9 @@ const CID_API_SCOPE_WHITELIST = {
   'googleanalytics': 'AMP_ECID_GOOGLE',
 };
 
+/**
+ * Exposes CID API if provided by the Viewer.
+ */
 export class ViewerCidApi {
 
   constructor(ampdoc) {
@@ -32,22 +35,32 @@ export class ViewerCidApi {
   }
 
   /**
+   * Returns true if Viewer supports CID API.
+   * @returns {boolean}
+   */
+  isSupported() {
+    return this.viewer_.hasCapability('cid');
+  }
+
+  /**
+   * Returns scoped CID retrieved from the Viewer.
    * @param {!string} scope
    * @return {!Promise<?string>}
    */
   getScopedCid(scope) {
-    return this.viewer_.sendMessageAwaitResponse('cid', dict({
-      scope,
-      clientIdApi: true,
-    }));
+    return this.shouldUseCidApi_(scope).then(clientIdApi => {
+      return this.viewer_.sendMessageAwaitResponse('cid', dict({
+        scope,
+        clientIdApi,
+      }));
+    });
   }
 
   /**
    * @return {!Promise<boolean>}
    */
-  shouldGetScopedCid(scope) {
-    if (!this.viewer_.hasCapability('cid')
-        || !this.isScopeOptedInForCidApi_(scope)) {
+  shouldUseCidApi_(scope) {
+    if (!this.isScopeOptedInForCidApi_(scope)) {
       return Promise.resolve(false);
     }
 

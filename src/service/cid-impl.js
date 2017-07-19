@@ -175,17 +175,13 @@ export class Cid {
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
     const scope = getCidStruct.scope;
-    return this.viewerCidApi_.shouldGetScopedCid(scope)
-        .then(should => {
-          if (should) {
-            return this.viewerCidApi_.getScopedCid(scope);
-          } else {
-            return getBaseCid(this, persistenceConsent)
-                .then(baseCid => {
-                  return Services.cryptoFor(this.ampdoc.win).sha384Base64(
-                      baseCid + getProxySourceOrigin(url) + scope);
-                });
-          }
+    if (this.viewerCidApi_.isSupported()) {
+      return this.viewerCidApi_.getScopedCid(scope);
+    }
+    return getBaseCid(this, persistenceConsent)
+        .then(baseCid => {
+          return Services.cryptoFor(this.ampdoc.win).sha384Base64(
+              baseCid + getProxySourceOrigin(url) + scope);
         });
   }
 }
