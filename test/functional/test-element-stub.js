@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../../src/dom';
+
 describes.realWin('test-element-stub', {amp: true}, env => {
 
   let doc;
@@ -23,18 +25,15 @@ describes.realWin('test-element-stub', {amp: true}, env => {
   });
 
   function insertElement(name) {
-    const testElement = doc.createElement(name);
-    testElement.setAttribute('width', '300');
-    testElement.setAttribute('height', '250');
-    testElement.setAttribute('type', '_ping_');
-    testElement.setAttribute('data-aax_size', '300*250');
-    testElement.setAttribute('data-aax_pubname', 'abc123');
-    testElement.setAttribute('data-aax_src', '302');
-    const link = doc.createElement('link');
-    link.setAttribute('rel', 'canonical');
-    link.setAttribute('href', 'blah');
-    doc.head.appendChild(link);
-    doc.getElementById('parent').appendChild(testElement);
+    const testElement = createElementWithAttributes(doc, name, {
+      width: '300',
+      height: '250',
+      type: '_ping_',
+      'data-aax_size': '300*250',
+      'data-aax_pubname': 'abc123',
+      'data-aax_src': '302',
+    });
+    doc.body.appendChild(testElement);
   }
 
   it('insert script for amp-ad when script is not included', () => {
