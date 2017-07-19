@@ -175,10 +175,10 @@ export class Cid {
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
     const scope = getCidStruct.scope;
-    return this.viewerCidApi_.shouldGetScopedCidFromViewer(scope)
+    return this.viewerCidApi_.shouldGetScopedCid(scope)
         .then(should => {
           if (should) {
-            return this.viewerCidApi_.getScopedCidFromViewer(scope);
+            return this.viewerCidApi_.getScopedCid(scope);
           } else {
             return getBaseCid(this, persistenceConsent)
                 .then(baseCid => {

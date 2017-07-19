@@ -35,7 +35,7 @@ export class ViewerCidApi {
    * @param {!string} scope
    * @return {!Promise<?string>}
    */
-  getScopedCidFromViewer(scope) {
+  getScopedCid(scope) {
     return this.viewer_.sendMessageAwaitResponse('cid', dict({
       scope,
       clientIdApi: true,
@@ -45,7 +45,7 @@ export class ViewerCidApi {
   /**
    * @return {!Promise<boolean>}
    */
-  shouldGetScopedCidFromViewer(scope) {
+  shouldGetScopedCid(scope) {
     if (!this.viewer_.hasCapability('cid')
         || !this.isScopeOptedInForCidApi_(scope)) {
       return Promise.resolve(false);

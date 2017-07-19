@@ -39,7 +39,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
 
   describe('getScopedCidFromViewer', () => {
     it('should call Viewer API', () => {
-      api.getScopedCidFromViewer('some-scope');
+      api.getScopedCid('some-scope');
       expect(viewerMock.sendMessageAwaitResponse).to.be.calledWith('cid', dict({
         scope: 'some-scope',
         clientIdApi: true,
@@ -54,7 +54,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
 
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
-      return expect(api.shouldGetScopedCidFromViewer('AMP_ECID_GOOGLE'))
+      return expect(api.shouldGetScopedCid('AMP_ECID_GOOGLE'))
           .to.eventually.be.true;
     });
 
@@ -64,7 +64,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
 
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
-      return expect(api.shouldGetScopedCidFromViewer('AMP_ECID_GOOGLE'))
+      return expect(api.shouldGetScopedCid('AMP_ECID_GOOGLE'))
           .to.eventually.be.false;
     });
 
@@ -72,7 +72,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
       viewerMock.hasCapability.withArgs('cid').returns(true);
       viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
 
-      return expect(api.shouldGetScopedCidFromViewer('AMP_ECID_GOOGLE'))
+      return expect(api.shouldGetScopedCid('AMP_ECID_GOOGLE'))
           .to.eventually.be.false;
     });
 
@@ -82,7 +82,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
 
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
-      return expect(api.shouldGetScopedCidFromViewer('AMP_ECID_GOOGLE'))
+      return expect(api.shouldGetScopedCid('AMP_ECID_GOOGLE'))
           .to.eventually.be.false;
     });
 
@@ -92,7 +92,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
 
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="abodeanalytics">';
-      return expect(api.shouldGetScopedCidFromViewer('AMP_ECID_GOOGLE'))
+      return expect(api.shouldGetScopedCid('AMP_ECID_GOOGLE'))
           .to.eventually.be.false;
     });
 
@@ -102,7 +102,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
 
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
-      return expect(api.shouldGetScopedCidFromViewer('NON_WHITELISTED_SCOPE'))
+      return expect(api.shouldGetScopedCid('NON_WHITELISTED_SCOPE'))
           .to.eventually.be.false;
     });
   });
