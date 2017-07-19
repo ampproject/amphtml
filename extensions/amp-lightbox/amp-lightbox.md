@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 The `amp-lightbox` component defines the child elements that will be displayed in a full-viewport overlay. It is triggered to take up the viewport when the user taps or clicks on an element with `on` attribute that targets `amp-lightbox` element’s `id`.
@@ -88,15 +90,15 @@ The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to t
 
 ## Attributes
 
-**id** (required)
+##### id (required)
 
 A unique identifer for the lightbox.
 
-**layout**
+##### layout
 
 Must be set to `nodisplay`.
 
-**scrollable**
+##### scrollable
 
 When `scrollable` attribute is present, the content of the lightbox can scroll
 when overflowing the height of the lightbox.
