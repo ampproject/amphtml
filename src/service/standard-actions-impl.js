@@ -123,7 +123,8 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
       return;
     }
-    Services.bindForDoc(invocation.target).then(bind => {
+    Services.bindForDocOrNull(invocation.target).then(bind => {
+      user().assert(bind, 'AMP-BIND is not installed.');
       const args = invocation.args;
       const objectString = args[OBJECT_STRING_ARGS_KEY];
       if (objectString) {
