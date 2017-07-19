@@ -17,20 +17,18 @@
 import {masterFrameAccessibleTypes} from '../../../ads/_config';
 import {masterSelection} from '../../../3p/ampcontext-integration';
 
-describe('ampcontext-integration', () => {
-  describe('#masterSelection', () => {
-    it('should allow sharing between configured networks', () => {
-      const win1 = masterSelection(window, 'adsense');
-      expect(win1.name).to.equal('frame_google_network_master');
+describes.fakeWin('#masterSelect', {}, env => {
+  it('should allow sharing between configured networks', () => {
+    const win1 = masterSelection(env, 'adsense');
+    expect(win1.name).to.equal('frame_google_network_master');
 
-      const win2 = masterSelection(window, 'doubleclick');
-      expect(win2.name).to.equal('frame_google_network_master');
+    const win2 = masterSelection(env, 'doubleclick');
+    expect(win2.name).to.equal('frame_google_network_master');
 
-      const win3 = masterSelection(window, 'DoubleClick');
-      expect(win3.name).to.equal('frame_google_network_master');
+    const win3 = masterSelection(env, 'DoubleClick');
+    expect(win3.name).to.equal('frame_google_network_master');
 
-      const win4 = masterSelection(window, 'fake_network');
-      expect(win4.name).to.equal('frame_fake_network_master');
-    });
+    const win4 = masterSelection(env, 'fake_network');
+    expect(win4.name).to.equal('frame_fake_network_master');
   });
 });
