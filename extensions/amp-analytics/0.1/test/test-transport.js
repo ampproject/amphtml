@@ -21,7 +21,7 @@ import * as sinon from 'sinon';
 
 adopt(window);
 
-describe('amp-analytics.transport', () => {
+describes.realWin('amp-analytics.transport', {amp: true}, env => {
 
   let sandbox;
   const transport = new Transport('foo');
@@ -66,7 +66,7 @@ describe('amp-analytics.transport', () => {
 
   it('prefers cross-domain iframe over beacon, xhrpost, and image', () => {
     setupStubs(true, true, true, true);
-    transport.sendRequest(window, 'https://example.com/test', {
+    transport.sendRequest(env.win, 'https://example.com/test', {
       iframe: 'https://example.com/test',
     });
     assertCallCounts(1, 0, 0, 0);
@@ -74,7 +74,7 @@ describe('amp-analytics.transport', () => {
 
   it('prefers beacon over xhrpost and image', () => {
     setupStubs(true, true, true, true);
-    transport.sendRequest(window, 'https://example.com/test', {
+    transport.sendRequest(env.win, 'https://example.com/test', {
       beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(0, 1, 0, 0);
@@ -82,7 +82,7 @@ describe('amp-analytics.transport', () => {
 
   it('prefers xhrpost over image', () => {
     setupStubs(true, true, true, true);
-    transport.sendRequest(window, 'https://example.com/test', {
+    transport.sendRequest(env.win, 'https://example.com/test', {
       beacon: false, xhrpost: true, image: true,
     });
     assertCallCounts(0, 0, 1, 0);
@@ -90,7 +90,7 @@ describe('amp-analytics.transport', () => {
 
   it('reluctantly uses image if nothing else is enabled', () => {
     setupStubs(true, true, true, true);
-    transport.sendRequest(window, 'https://example.com/test', {
+    transport.sendRequest(env.win, 'https://example.com/test', {
       image: true,
     });
     assertCallCounts(0, 0, 0, 1);
@@ -98,7 +98,7 @@ describe('amp-analytics.transport', () => {
 
   it('falls back to xhrpost when enabled and beacon is not available', () => {
     setupStubs(false, false, false, true);
-    transport.sendRequest(window, 'https://example.com/test', {
+    transport.sendRequest(env.win, 'https://example.com/test', {
       beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(0, 1, 1, 0);
@@ -106,7 +106,7 @@ describe('amp-analytics.transport', () => {
 
   it('falls back to image when beacon not found and xhr disabled', () => {
     setupStubs(false, false, false, true);
-    transport.sendRequest(window, 'https://example.com/test', {
+    transport.sendRequest(env.win, 'https://example.com/test', {
       beacon: true, xhrpost: false, image: true,
     });
     assertCallCounts(0, 1, 0, 1);
@@ -114,7 +114,7 @@ describe('amp-analytics.transport', () => {
 
   it('falls back to image when beacon and xhr are not available', () => {
     setupStubs(false, false, false, false);
-    transport.sendRequest(window, 'https://example.com/test', {
+    transport.sendRequest(env.win, 'https://example.com/test', {
       beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(0, 1, 1, 1);
@@ -122,7 +122,7 @@ describe('amp-analytics.transport', () => {
 
   it('must create xframe before sending message to it', () => {
     expect(() => {
-      transport.sendRequest(window, 'https://example.com/test', {
+      transport.sendRequest(env.win, 'https://example.com/test', {
         iframe: 'https://example.com/test',
       });
     }).to.throw(/send message to non-existent/);
@@ -131,22 +131,22 @@ describe('amp-analytics.transport', () => {
   it('reuses cross-domain iframe', () => {
     const url = 'https://example.com/test';
     sandbox.spy(transport, 'createCrossDomainIframe');
-    transport.processCrossDomainIframe(window, url);
+    transport.processCrossDomainIframe(env.win, url);
     expect(transport.createCrossDomainIframe.calledOnce).to.be.true;
     expect(Transport.hasCrossDomainIframe(transport.getType())).to.be.true;
 
-    transport.processCrossDomainIframe(window, url);
+    transport.processCrossDomainIframe(env.win, url);
     expect(transport.createCrossDomainIframe.calledOnce).to.be.true;
   });
 
   it('enqueues event messages correctly', () => {
     const url = 'https://example.com/test';
     const config = {iframe: url};
-    transport.processCrossDomainIframe(window, url);
-    transport.sendRequest(window, 'hello, world!', config);
+    transport.processCrossDomainIframe(env.win, url);
+    transport.sendRequest(env.win, 'hello, world!', config);
     const queue = Transport.getFrameData(transport.getType()).queue;
     expect(queue.messagesFor(transport.getId()).length).to.equal(1);
-    transport.sendRequest(window, 'hello again, world!', config);
+    transport.sendRequest(env.win, 'hello again, world!', config);
     expect(queue.messagesFor(transport.getId()).length).to.equal(2);
   });
 
@@ -155,8 +155,8 @@ describe('amp-analytics.transport', () => {
     const url2 = 'https://example.com/test2';
     const transport2 = new Transport('bar');
 
-    transport.processCrossDomainIframe(window, url1);
-    transport2.processCrossDomainIframe(window, url2);
+    transport.processCrossDomainIframe(env.win, url1);
+    transport2.processCrossDomainIframe(env.win, url2);
     const frame1 = Transport.getFrameData(transport.getType());
     const frame2 = Transport.getFrameData(transport2.getType());
     expectAllUnique([transport.getId(), transport2.getId(),
@@ -169,59 +169,63 @@ describe('amp-analytics.transport', () => {
     const url2 = 'https://example.com/usageCountTest2';
     const transport2 = new Transport('bar');
 
-    transport.processCrossDomainIframe(window, url1);
-    transport2.processCrossDomainIframe(window, url2);
+    transport.processCrossDomainIframe(env.win, url1);
+    transport2.processCrossDomainIframe(env.win, url2);
     const frame1 = Transport.getFrameData(transport.getType());
     const frame2 = Transport.getFrameData(transport2.getType());
     expect(frame1.usageCount).to.equal(1);
     expect(frame2.usageCount).to.equal(1);
-    expect(window.document.getElementsByTagName('IFRAME').length).to.equal(2);
+    expect(env.win.document.getElementsByTagName('IFRAME').length).to.equal(2);
 
     // Mark the iframes as used multiple times each.
-    transport.processCrossDomainIframe(window, url1);
-    transport.processCrossDomainIframe(window, url1);
-    transport2.processCrossDomainIframe(window, url2);
-    transport2.processCrossDomainIframe(window, url2);
-    transport2.processCrossDomainIframe(window, url2);
+    transport.processCrossDomainIframe(env.win, url1);
+    transport.processCrossDomainIframe(env.win, url1);
+    transport2.processCrossDomainIframe(env.win, url2);
+    transport2.processCrossDomainIframe(env.win, url2);
+    transport2.processCrossDomainIframe(env.win, url2);
     expect(frame1.usageCount).to.equal(3);
     expect(frame2.usageCount).to.equal(4);
 
     // Stop using the iframes, make sure usage counts go to zero and they are
     // removed from the DOM.
-    Transport.markCrossDomainIframeAsDone(window.document, transport.getType());
+    Transport.markCrossDomainIframeAsDone(env.win.document,
+        transport.getType());
     expect(frame1.usageCount).to.equal(2);
-    Transport.markCrossDomainIframeAsDone(window.document, transport.getType());
-    Transport.markCrossDomainIframeAsDone(window.document, transport.getType());
+    Transport.markCrossDomainIframeAsDone(env.win.document,
+        transport.getType());
+    Transport.markCrossDomainIframeAsDone(env.win.document,
+        transport.getType());
     expect(frame1.usageCount).to.equal(0);
     expect(frame2.usageCount).to.equal(4); // (Still)
-    expect(window.document.getElementsByTagName('IFRAME').length).to.equal(1);
-    Transport.markCrossDomainIframeAsDone(window.document,
+    expect(env.win.document.getElementsByTagName('IFRAME').length).to.equal(1);
+    Transport.markCrossDomainIframeAsDone(env.win.document,
         transport2.getType());
-    Transport.markCrossDomainIframeAsDone(window.document,
+    Transport.markCrossDomainIframeAsDone(env.win.document,
         transport2.getType());
-    Transport.markCrossDomainIframeAsDone(window.document,
+    Transport.markCrossDomainIframeAsDone(env.win.document,
         transport2.getType());
-    Transport.markCrossDomainIframeAsDone(window.document,
+    Transport.markCrossDomainIframeAsDone(env.win.document,
         transport2.getType());
     expect(frame2.usageCount).to.equal(0);
-    expect(window.document.getElementsByTagName('IFRAME').length).to.equal(0);
+    expect(env.win.document.getElementsByTagName('IFRAME').length).to.equal(0);
   });
 
   it('does not send a request when no transport methods are enabled', () => {
     setupStubs(true, true, true, true);
-    transport.sendRequest(window, 'https://example.com/test', {});
+    transport.sendRequest(env.win, 'https://example.com/test', {});
     assertCallCounts(0, 0, 0, 0);
   });
 
   it('asserts that urls are https', () => {
     expect(() => {
-      transport.sendRequest(window, 'http://example.com/test');
+      transport.sendRequest(env.win, 'http://example.com/test');
     }).to.throw(/https/);
   });
 
   it('should NOT allow __amp_source_origin', () => {
     expect(() => {
-      transport.sendRequest(window, 'https://twitter.com?__amp_source_origin=1');
+      transport.sendRequest(env.win,
+          'https://twitter.com?__amp_source_origin=1');
     }).to.throw(/Source origin is not allowed in/);
   });
 
