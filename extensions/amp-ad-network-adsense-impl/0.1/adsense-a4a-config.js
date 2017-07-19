@@ -31,6 +31,7 @@ import {
   forceExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 
 /** @const {!string}  @private */
@@ -64,8 +65,10 @@ export const URL_EXPERIMENT_MAPPING = {
  * @returns {boolean}
  */
 export function adsenseIsA4AEnabled(win, element) {
+  const jsonAttribute = element.getAttribute('json');
+  const json = jsonAttribute && tryParseJson(jsonAttribute);
   if (!isGoogleAdsA4AValidEnvironment(win) ||
-      !element.getAttribute('data-ad-client')) {
+      !((json && json['adClient']) || 'adClient' in element.dataset)) {
     return false;
   }
   // See if in holdback control/experiment.
@@ -102,6 +105,7 @@ export function adsenseIsA4AEnabled(win, element) {
     ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL].includes(experimentId);
 }
 
+<<<<<<< HEAD
 /**
  * @param {!Window} win
  * @param {!ADSENSE_EXPERIMENT_FEATURE} feature
@@ -109,4 +113,11 @@ export function adsenseIsA4AEnabled(win, element) {
  */
 export function experimentFeatureEnabled(win, feature) {
   return getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) == feature;
+=======
+  // TODO(@taymonbeal, #10524): unify this with methods in AmpA4A
+      googleAdsIsA4AEnabled(
+          win, element, ADSENSE_A4A_EXPERIMENT_NAME, externalBranches,
+          internalBranches,
+          ADSENSE_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH);
+>>>>>>> Apply JSON agnosticism to config checkers and fix numerous test problems
 }

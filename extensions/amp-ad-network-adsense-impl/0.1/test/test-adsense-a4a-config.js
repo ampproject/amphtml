@@ -63,6 +63,15 @@ describe('adsense-a4a-config', () => {
       expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.false;
     });
 
+    it('should enable a4a when adClient is in JSON', () => {
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html');
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('json', '{"adClient":"ca-pub-somepub"}');
+      testFixture.doc.body.appendChild(elem);
+      expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.false;
+    });
+
     Object.keys(URL_EXPERIMENT_MAPPING).forEach(expFlagValue => {
       it(`exp flag=${expFlagValue} should set eid attribute`, () => {
         mockWin.location = parseUrl(

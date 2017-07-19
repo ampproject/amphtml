@@ -31,6 +31,7 @@ import {
   forceExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 
 /** @const {string} */
@@ -72,7 +73,7 @@ export const URL_EXPERIMENT_MAPPING = {
 };
 
 /** @const {string} */
-export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
+const BETA_PROPERTY = 'useBetaA4aImplementation';
 
 /** @const {string} */
 export const BETA_EXPERIMENT_ID = '2077831';
@@ -83,11 +84,15 @@ export const BETA_EXPERIMENT_ID = '2077831';
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element) {
-  if (element.hasAttribute('useSameDomainRenderingUntilDeprecated') ||
+  // TODO(@taymonbeal, #10524): unify this with methods in AmpA4A
+  const jsonAttribute = element.getAttribute('json');
+  const json = jsonAttribute && tryParseJson(jsonAttribute);
+  if ((json && json['useSameDomainRenderingUntilDeprecated']) ||
+      'useSameDomainRenderingUntilDeprecated' in element.dataset ||
       !isGoogleAdsA4AValidEnvironment(win)) {
     return false;
   }
-  if (element.hasAttribute(BETA_ATTRIBUTE)) {
+  if ((json && json[BETA_PROPERTY]) || BETA_PROPERTY in element.dataset) {
     addExperimentIdToElement(BETA_EXPERIMENT_ID, element);
     dev().info(TAG, `beta forced a4a selection ${element}`);
     return true;
