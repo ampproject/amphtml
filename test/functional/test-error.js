@@ -546,18 +546,18 @@ describes.fakeWin('user error reporting', {amp: true}, env => {
   let win;
   sandbox = env.sandbox;
   const error = new Error('ERROR','user error');
-  let analyticsEventSpy_;
+  let analyticsEventSpy;
 
   beforeEach(() => {
     win = env.win;
-    analyticsEventSpy_ = sandbox.spy(analytics, 'triggerAnalyticsEvent');
+    analyticsEventSpy = sandbox.spy(analytics, 'triggerAnalyticsEvent');
     toggleExperiment(window, 'user-error-reporting', true);
   });
 
   it('should trigger triggerAnalyticsEvent with correct arguments', () => {
     reportErrorToAnalytics(error, win);
-    expect(analyticsEventSpy_).to.have.been.called;
-    expect(analyticsEventSpy_).to.have.been.calledWith(
+    expect(analyticsEventSpy).to.have.been.called;
+    expect(analyticsEventSpy).to.have.been.calledWith(
         sinon.match.any,
         'user-error',
         {errorName: error.name, errorMessage: error.message});
