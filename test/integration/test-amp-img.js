@@ -45,6 +45,7 @@ describe.configure().retryOnSaucelabs().run('Rendering of amp-img', function() {
 
   it('should resize and load more elements', () => {
     const p = fixture.awaitEvent(AmpEvents.LOAD_START, 11).then(function() {
+      expect(1).to.equal(2);
       expect(fixture.doc.querySelectorAll('amp-img img[src]'))
           .to.have.length(11);
       fixture.iframe.height = 2000;
