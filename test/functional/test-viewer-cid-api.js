@@ -38,21 +38,26 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
   });
 
   describe('isSupported', () => {
-    it('should return true if Viewer has CID capability', () => {
+    it('should return true if Viewer is trusted and has CID capability', () => {
+      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
       viewerMock.hasCapability.withArgs('cid').returns(true);
-      expect(api.isSupported()).to.be.true;
-      expect(viewerMock.hasCapability).to.be.calledWith('cid');
+      return expect(api.isSupported()).to.eventually.be.true;
     });
 
     it('should return false if Viewer has no CID capability', () => {
+      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
       viewerMock.hasCapability.withArgs('cid').returns(false);
-      expect(api.isSupported()).to.be.false;
-      expect(viewerMock.hasCapability).to.be.calledWith('cid');
+      return expect(api.isSupported()).to.eventually.be.false;
+    });
+
+    it('should return false if Viewer is not trusted', () => {
+      viewerMock.isTrustedViewer.returns(Promise.resolve(false));
+      viewerMock.hasCapability.withArgs('cid').returns(true);
+      return expect(api.isSupported()).to.eventually.be.false;
     });
   });
 
   describe('getScopedCid', () => {
-
     function verifyClientIdApiInUse(used) {
       viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
         scope: 'AMP_ECID_GOOGLE',
@@ -63,37 +68,22 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     }
 
     it('should use client ID API from api if everything great', () => {
-      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
       return verifyClientIdApiInUse(true);
     });
 
     it('should not use client ID API if no opt in meta tag', () => {
-      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
-
-      return verifyClientIdApiInUse(false);
-    });
-
-    it('should not use client ID API if Viewer origin not whitelisted', () => {
-      viewerMock.isTrustedViewer.returns(Promise.resolve(false));
-
-      ampdoc.win.document.head.innerHTML +=
-          '<meta name="amp-google-client-id-api" content="googleanalytics">';
       return verifyClientIdApiInUse(false);
     });
 
     it('should not use client ID API if vendor not whitelisted', () => {
-      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
-
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="abodeanalytics">';
       return verifyClientIdApiInUse(false);
     });
 
     it('should not use client ID API if scope not whitelisted', () => {
-      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
-
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
       viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
@@ -105,8 +95,6 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     });
 
     it('should return undefined if Viewer returns undefined', () => {
-      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
-
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
       viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
@@ -118,8 +106,6 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     });
 
     it('should reject if Viewer rejects', () => {
-      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
-
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
       viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({

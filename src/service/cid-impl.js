@@ -175,14 +175,16 @@ export class Cid {
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
     const scope = getCidStruct.scope;
-    if (this.viewerCidApi_.isSupported()) {
-      return this.viewerCidApi_.getScopedCid(scope);
-    }
-    return getBaseCid(this, persistenceConsent)
-        .then(baseCid => {
-          return Services.cryptoFor(this.ampdoc.win).sha384Base64(
-              baseCid + getProxySourceOrigin(url) + scope);
-        });
+    return this.viewerCidApi_.isSupported().then(supported => {
+      if (supported) {
+        return this.viewerCidApi_.getScopedCid(scope);
+      }
+      return getBaseCid(this, persistenceConsent)
+          .then(baseCid => {
+            return Services.cryptoFor(this.ampdoc.win).sha384Base64(
+                baseCid + getProxySourceOrigin(url) + scope);
+          });
+    });
   }
 }
 

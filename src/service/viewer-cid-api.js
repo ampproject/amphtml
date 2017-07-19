@@ -33,38 +33,25 @@ export class ViewerCidApi {
   }
 
   /**
-   * Returns true if Viewer supports CID API.
-   * @returns {boolean}
+   * Resolves to true if Viewer is trusted and supports CID API.
+   * @returns {!Promise<boolean>}
    */
   isSupported() {
-    return this.viewer_.hasCapability('cid');
+    return this.viewer_.isTrustedViewer().then(trusted => {
+      return trusted && this.viewer_.hasCapability('cid');
+    });
   }
 
   /**
    * Returns scoped CID retrieved from the Viewer.
    * @param {!string} scope
-   * @return {!Promise<?string>}
+   * @return {!Promise<?string|undefined>}
    */
   getScopedCid(scope) {
-    return this.shouldUseCidApi_(scope).then(clientIdApi => {
-      return this.viewer_.sendMessageAwaitResponse('cid', dict({
-        scope,
-        clientIdApi,
-      }));
-    });
-  }
-
-  /**
-   * @return {!Promise<boolean>}
-   */
-  shouldUseCidApi_(scope) {
-    if (!this.isScopeOptedInForCidApi_(scope)) {
-      return Promise.resolve(false);
-    }
-
-    // Semantically, we should be checking if it's a Viewer of Google origin
-    // Right now isTrustedViewer does the same check.
-    return this.viewer_.isTrustedViewer();
+    return this.viewer_.sendMessageAwaitResponse('cid', dict({
+      'scope': scope,
+      'clientIdApi': this.isScopeOptedInForCidApi_(scope),
+    }));
   }
 
   /**
