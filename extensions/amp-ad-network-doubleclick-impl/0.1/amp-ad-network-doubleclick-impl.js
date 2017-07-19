@@ -766,7 +766,7 @@ function getPageLevelParameters_(win, doc, startTime, isSra) {
 }
 
 /**
- * @param {!JsonObject} targeting
+ * @param {?JsonObject} targeting
  * @param {(?JsonValue|undefined)} categoryExclusions
  * @return {?string}
  * @private
