@@ -47,6 +47,11 @@ module.exports = {
   reporters: process.env.TRAVIS ? ['super-dots', 'mocha'] : ['progress'],
 
   superDotsReporter: {
+    color: {
+      success : 'green',
+      failure : 'red',
+      ignore  : 'yellow'
+    },
     icon: {
       success : '✔',
       failure : '✖',
@@ -56,6 +61,16 @@ module.exports = {
 
   mochaReporter: {
     output: 'minimal',
+    colors: {
+      success: 'green',
+      error: 'red',
+      info: 'yellow',
+    },
+    symbols: {
+      success : '✔',
+      error: '✖',
+      info: '?',
+    },
   },
 
   port: 9876,
