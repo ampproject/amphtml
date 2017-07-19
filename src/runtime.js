@@ -39,7 +39,7 @@ import {Services} from './services';
 import {startupChunk} from './chunk';
 import {cssText} from '../build/css';
 import {dev, user, initLogConstructor, setReportError} from './log';
-import {reportError} from './error';
+import {reportErrorForWin} from './error';
 import {
   disposeServicesForDoc,
   registerServiceBuilder,
@@ -90,7 +90,7 @@ import {waitForBody} from './dom';
 import * as config from './config';
 
 initLogConstructor();
-setReportError(reportError);
+setReportError(reportErrorForWin.bind(null, self));
 
 
 /** @const @private {string} */
