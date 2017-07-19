@@ -220,7 +220,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     if (exitCode) {
       var error = new Error(
           util.colors.red('Karma test failed (error code: ' + exitCode + ')'));
-      done(error);
+      process.exit(1);
     } else {
       done();
     }
