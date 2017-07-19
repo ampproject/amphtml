@@ -31,7 +31,6 @@ import {
   toggleExperiment,
 } from '../../src/experiments';
 import * as sinon from 'sinon';
-import {adopt} from '../../src/runtime';
 import * as analytics from '../../src/analytics';
 
 describes.fakeWin('installErrorReporting', {}, env => {
