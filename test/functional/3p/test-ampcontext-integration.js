@@ -19,24 +19,16 @@ import {masterSelection} from '../../../3p/ampcontext-integration';
 
 describe('#masterSelect', () => {
   it('should allow sharing between configured networks', () => {
-    masterFrameAccessibleTypes['network1'] = ['network2'];
-    masterFrameAccessibleTypes['network2'] = ['network1'];
-    masterFrameAccessibleTypes['network3'] = ['network1', 'network2'];
+    const win1 = masterSelection(window, 'adsense');
+    expect(win1.name).to.equal('frame_google_network_master');
 
-    const win1 = masterSelection(window, 'network1');
-    expect(win1.name).to.equal('frame_network1,network2_master');
+    const win2 = masterSelection(window, 'doubleclick');
+    expect(win2.name).to.equal('frame_google_network_master');
 
-    const win2 = masterSelection(window, 'network2');
-    expect(win2.name).to.equal('frame_network1,network2_master');
+    const win3 = masterSelection(window, 'DoubleClick');
+    expect(win3.name).to.equal('frame_google_network_master');
 
-    const win3 = masterSelection(window, 'network3');
-    expect(win3.name).to.equal('frame_network1,network2,network3_master');
-
-    const win4 = masterSelection(window, 'network4');
-    expect(win4.name).to.equal('frame_network4_master');
-
-    for (let i = 1; i <= 4; i++) {
-      delete masterFrameAccessibleTypes[`network${i}`];
-    }
+    const win4 = masterSelection(window, 'fake_network');
+    expect(win4.name).to.equal('frame_fake_network_master');
   });
 });

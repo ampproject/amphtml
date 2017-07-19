@@ -17,7 +17,7 @@ import {AbstractAmpContext} from './ampcontext';
 import {computeInMasterFrame} from './3p';
 import {dev, user} from '../src/log';
 import {dict} from '../src/utils/object';
-import {masterFrameAccessibleTypes} from '../ads/_config';
+import {adConfig} from '../ads/_config';
 
 
 /**
@@ -31,10 +31,10 @@ import {masterFrameAccessibleTypes} from '../ads/_config';
  */
 export function masterSelection(win, type) {
   type = type.toLowerCase();
-  const allowedTypes = (masterFrameAccessibleTypes[type] || [])
-      .concat([type]);
-  // Sort to ensure consistency across types.
-  const masterName = `frame_${allowedTypes.sort().join()}_master`;
+  // The master has a special name.
+  const masterName = 'frame_' +
+      (adConfig[type] && adConfig[type]['masterFrameAccessibleType'] || type) +
+      '_master';
   let master;
   try {
     // Try to get the master from the parent. If it does not

@@ -114,7 +114,7 @@ export const adConfig = {
     clientIdScope: 'AMP_ECID_GOOGLE',
     clientIdCookieName: '_ga',
     remoteHTMLDisabled: true,
-    masterFrameAccessibleTypes: ['doubleclick'],
+    masterFrameAccessibleType: 'google_network',
   },
 
   adsnative: {
@@ -281,6 +281,7 @@ export const adConfig = {
     clientIdScope: 'AMP_ECID_GOOGLE',
     clientIdCookieName: '_ga',
     renderStartImplemented: true,
+    masterFrameAccessibleType: 'google_network',
   },
 
   eas: {
@@ -751,14 +752,3 @@ export const adConfig = {
   },
 
 };
-
-
-/**
- * Specifies which networks can share master frames.
- * @type {!Object<string, !Array<string>>}
- */
-export const masterFrameAccessibleTypes = {
-  adsense: ['doubleclick'],
-  doubleclick: ['adsense'],
-};
-
