@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
@@ -245,7 +246,7 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
 
     function verifyCss(iframe) {
       expect(iframe).to.be.ok;
-      const style = env.win.getComputedStyle(iframe);
+      const style = window.getComputedStyle(iframe);
       expect(style.top).to.equal('50%');
       expect(style.left).to.equal('50%');
       // We expect these set, but the exact dimensions will be determined by the
@@ -267,6 +268,9 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
         width: '300',
         height: '150',
       });
+      // Need to call upgradeCallback on AmpAd element to ensure upgrade
+      // attribute is set such that CSS is applies.
+      new AmpAd(element).upgradeCallback();
       expect(impl.element.getAttribute('width')).to.equal('300');
       expect(impl.element.getAttribute('height')).to.equal('150');
       verifyCss(impl.iframe);
@@ -275,6 +279,9 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
       createImplTag({
         layout: 'fixed',
       });
+      // Need to call upgradeCallback on AmpAd element to ensure upgrade
+      // attribute is set such that CSS is applies.
+      new AmpAd(element).upgradeCallback();
       expect(impl.element.getAttribute('width')).to.be.null;
       expect(impl.element.getAttribute('height')).to.be.null;
       verifyCss(impl.iframe);
@@ -284,6 +291,9 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
         width: '300',
         layout: 'fixed',
       });
+      // Need to call upgradeCallback on AmpAd element to ensure upgrade
+      // attribute is set such that CSS is applies.
+      new AmpAd(element).upgradeCallback();
       expect(impl.element.getAttribute('width')).to.equal('300');
       expect(impl.element.getAttribute('height')).to.be.null;
       verifyCss(impl.iframe);
@@ -293,6 +303,9 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
         height: '150',
         layout: 'fixed',
       });
+      // Need to call upgradeCallback on AmpAd element to ensure upgrade
+      // attribute is set such that CSS is applies.
+      new AmpAd(element).upgradeCallback();
       expect(impl.element.getAttribute('width')).to.be.null;
       expect(impl.element.getAttribute('height')).to.equal('150');
       verifyCss(impl.iframe);
