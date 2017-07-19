@@ -422,14 +422,18 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
     it('handles tagForChildDirectedTreatment', () => {
       element.setAttribute('json', '{"tagForChildDirectedTreatment": 1}');
-      return new AmpAdNetworkDoubleclickImpl(element).getAdUrl().then(url => {
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.upgradeCallback();
+      return impl.getAdUrl().then(url => {
         expect(url).to.match(/&tfcd=1&/);
       });
     });
 
     it('handles categoryExclusions without targeting', () => {
       element.setAttribute('json', '{"categoryExclusions": "sports"}');
-      return new AmpAdNetworkDoubleclickImpl(element).getAdUrl().then(url => {
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.upgradeCallback();
+      return impl.getAdUrl().then(url => {
         expect(url).to.match(/&scp=excl_cat%3Dsports&/);
       });
     });

@@ -69,7 +69,7 @@ describe('adsense-a4a-config', () => {
       const elem = testFixture.doc.createElement('div');
       elem.setAttribute('json', '{"adClient":"ca-pub-somepub"}');
       testFixture.doc.body.appendChild(elem);
-      expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.false;
+      expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.true;
     });
 
     Object.keys(URL_EXPERIMENT_MAPPING).forEach(expFlagValue => {
