@@ -23,6 +23,7 @@ import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {setStyles, toggle} from '../../../src/style';
 import {removeFragment, parseUrl} from '../../../src/url';
+import {toArray} from '../../../src/types';
 import {Toolbar} from './toolbar';
 
 /** @const */
@@ -99,13 +100,14 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.setAttribute('side', this.side_);
     }
 
+    const ampdoc = this.getAmpDoc();
     // Get the toolbar attribute from the child navs
     const toolbarElements =
-    Array.prototype.slice
-      .call(this.element.querySelectorAll('nav[toolbar]'), 0);
+      toArray(this.element.querySelectorAll('nav[toolbar]'));
     toolbarElements.forEach(toolbarElement => {
       try {
-        this.toolbars_.push(new Toolbar(toolbarElement, this.win, this.vsync_));
+        this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
+          ampdoc));
       } catch (e) {
         user().error(TAG, 'Failed to instantiate toolbar', e);
       }
