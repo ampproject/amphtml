@@ -16,7 +16,6 @@
 
 import {
   doubleclickIsA4AEnabled,
-  BETA_ATTRIBUTE,
   BETA_EXPERIMENT_ID,
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
   DOUBLECLICK_EXPERIMENT_FEATURE,
@@ -56,11 +55,24 @@ describe('doubleclick-a4a-config', () => {
   });
 
   describe('#doubleclickIsA4AEnabled', () => {
+    const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
+
     it('should enable a4a when requested and on CDN', () => {
       mockWin.location = parseUrl(
           'https://cdn.ampproject.org/some/path/to/content.html');
       const elem = testFixture.doc.createElement('div');
       elem.setAttribute(BETA_ATTRIBUTE, 'true');
+      testFixture.doc.body.appendChild(elem);
+      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
+          BETA_EXPERIMENT_ID);
+    });
+
+    it('should enable a4a when requested via JSON', () => {
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html');
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('json', '{"useBetaA4aImplementation":true}');
       testFixture.doc.body.appendChild(elem);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
@@ -85,13 +97,25 @@ describe('doubleclick-a4a-config', () => {
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
     });
 
-    it('should not enable a4a if useSameDomainRenderingUntilDeprecated', () => {
-      const elem = testFixture.doc.createElement('div');
-      elem.setAttribute('useSameDomainRenderingUntilDeprecated', 'true');
-      testFixture.doc.body.appendChild(elem);
-      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-    });
+    it('should not enable if data-use-same-domain-rendering-until-deprecated',
+        () => {
+          const elem = testFixture.doc.createElement('div');
+          elem.setAttribute(
+              'data-use-same-domain-rendering-until-deprecated', 'true');
+          testFixture.doc.body.appendChild(elem);
+          expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
+          expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
+        });
+
+    it('should not enable a4a if useSameDomainRenderingUntilDeprecated in JSON',
+        () => {
+          const elem = testFixture.doc.createElement('div');
+          elem.setAttribute(
+              'json', '{"useSameDomainRenderingUntilDeprecated":true}');
+          testFixture.doc.body.appendChild(elem);
+          expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
+          expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
+        });
 
     it('should honor beta over url experiment id', () => {
       mockWin.location = parseUrl(

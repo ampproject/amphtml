@@ -31,6 +31,7 @@ import {
   forceExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 
 /** @const {!string}  @private */
@@ -64,8 +65,11 @@ export const URL_EXPERIMENT_MAPPING = {
  * @returns {boolean}
  */
 export function adsenseIsA4AEnabled(win, element) {
+  // TODO(@taymonbeal, #10524): unify this with methods in AmpA4A
+  const jsonAttribute = element.getAttribute('json');
+  const json = jsonAttribute && tryParseJson(jsonAttribute);
   if (!isGoogleAdsA4AValidEnvironment(win) ||
-      !element.getAttribute('data-ad-client')) {
+      !((json && json['adClient']) || 'adClient' in element.dataset)) {
     return false;
   }
   // See if in holdback control/experiment.

@@ -422,7 +422,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
     it('handles tagForChildDirectedTreatment', () => {
       element.setAttribute('json', '{"tagForChildDirectedTreatment": 1}');
-      new AmpAd(element).upgradeCallback();
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.upgradeCallback();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(/&tfcd=1&/);
       });
@@ -430,7 +431,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
     it('handles categoryExclusions without targeting', () => {
       element.setAttribute('json', '{"categoryExclusions": "sports"}');
-      new AmpAd(element).upgradeCallback();
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.upgradeCallback();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(/&scp=excl_cat%3Dsports&/);
       });
@@ -706,7 +708,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         categoryExclusions: 'sports',
         targeting: {foo: 'bar', names: ['x', 'y', 'z']},
       };
-      targeting1[TFCD] = 'some_tfcd';
+      targeting1[TFCD] = 0;
       const config1 = {
         type: 'doubleclick',
         height: 320,
@@ -725,7 +727,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         categoryExclusions: 'food',
         targeting: {hello: 'world'},
       };
-      targeting2[TFCD] = 'some_other_tfcd';
+      targeting2[TFCD] = 1;
       const config2 = {
         type: 'doubleclick',
         height: 300,
@@ -748,7 +750,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'foo=bar&names=x,y,z&excl_cat=sports|hello=world&excl_cat=food',
         co: '1',
         adtest: 'on',
-        tfcd: 'some_tfcd',
+        tfcd: 0,
         eid: MANUAL_EXPERIMENT_ID,
       });
     });

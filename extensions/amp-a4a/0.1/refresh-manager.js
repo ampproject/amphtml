@@ -34,6 +34,7 @@ export let RefreshConfig;
 
 export const MIN_REFRESH_INTERVAL = 30;
 export const DATA_ATTR_NAME = 'data-enable-refresh';
+export const DATA_JS_NAME = 'enableRefresh';
 export const DATA_MANAGER_ID_NAME = 'data-amp-ad-refresh-id';
 export const METATAG_NAME = 'amp-ad-enable-refresh';
 
@@ -337,5 +338,3 @@ export class RefreshManager {
     return this.isRefreshable_;
   }
 }
-
-

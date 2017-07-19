@@ -128,7 +128,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    return !!this.element.getAttribute('data-ad-client') &&
+    return !!this.getStringData('adClient') &&
         isGoogleAdsA4AValidEnvironment(this.win) && this.isAmpAdElement();
   }
 
@@ -144,7 +144,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
     const global = this.win;
-    let adClientId = this.element.getAttribute('data-ad-client');
+    let adClientId = this.getStringData('adClient');
     // Ensure client id format: lower case with 'ca-' prefix.
     adClientId = adClientId.toLowerCase();
     if (adClientId.substring(0, 3) != 'ca-') {
@@ -152,7 +152,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     }
     const visibilityState = Services.viewerForDoc(this.getAmpDoc())
         .getVisibilityState();
-    const adTestOn = this.element.getAttribute('data-adtest') ||
+    const adTestOn = this.getStringData('adtest') ||
         isInManualExperiment(this.element);
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
@@ -179,15 +179,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       format,
       'w': this.size_.width,
       'h': this.size_.height,
-      'iu': this.element.getAttribute('data-ad-slot'),
+      'iu': this.getStringData('adSlot'),
       'adtest': adTestOn ? 'on' : null,
       adk,
       'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
       'ctypes': this.getCtypes_(),
-      'host': this.element.getAttribute('data-ad-host'),
-      'to': this.element.getAttribute('data-tag-origin'),
+      'host': this.getStringData('adHost'),
+      'to': this.getStringData('tagOrigin'),
       'pv': sharedStateParams.pv,
-      'channel': this.element.getAttribute('data-ad-channel'),
+      'channel': this.getStringData('adChannel'),
       'vis': visibilityStateCodes[visibilityState] || '0',
       'wgl': global['WebGLRenderingContext'] ? '1' : '0',
       'asnt': this.sentinel,
@@ -227,7 +227,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   adKey_(format) {
     const element = this.element;
-    const slot = element.getAttribute('data-ad-slot') || '';
+    const slot = this.getStringData('adSlot') || '';
     const string = `${slot}:${format}:${domFingerprintPlain(element)}`;
     return stringHash32(string);
   }

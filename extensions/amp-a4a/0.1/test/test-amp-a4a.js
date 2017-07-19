@@ -2291,6 +2291,148 @@ describe('amp-a4a', () => {
     });
   });
 
+  describe('#getData methods', () => {
+    let a4aElement;
+    let userErrorStub;
+
+    beforeEach(() => createIframePromise().then(fixture => {
+      setupForAdTesting(fixture);
+      a4aElement = createA4aElement(fixture.doc);
+      userErrorStub = sandbox.stub(user(), 'error');
+    }));
+
+    it('should return a string defined as a data- attribute', () => {
+      a4aElement.setAttribute('data-foo', 'bar');
+      expect(new MockA4AImpl(a4aElement).getStringData('foo')).to.equal('bar');
+    });
+
+    it('should return a string defined as a JSON property', () => {
+      a4aElement.setAttribute('json', '{"foo":"bar"}');
+      expect(new MockA4AImpl(a4aElement).getStringData('foo')).to.equal('bar');
+    });
+
+    it('should prefer a JSON string property over a data- attribute', () => {
+      a4aElement.setAttribute('data-foo', 'bar');
+      a4aElement.setAttribute('json', '{"foo":"baz"}');
+      expect(new MockA4AImpl(a4aElement).getStringData('foo')).to.equal('baz');
+    });
+
+    it('should return null for an absent string property', () => {
+      expect(new MockA4AImpl(a4aElement).getStringData('foo')).to.be.null;
+    });
+
+    it('should error for a non-string JSON property', () => {
+      a4aElement.setAttribute('json', '{"foo":null}');
+      new MockA4AImpl(a4aElement).getStringData('foo');
+      expect(userErrorStub).to.be.called;
+    });
+
+    it('should return a number defined as a data- attribute', () => {
+      a4aElement.setAttribute('data-foo', '2');
+      expect(new MockA4AImpl(a4aElement).getNumberData('foo')).to.equal(2);
+    });
+
+    it('should return a number defined as a JSON property', () => {
+      a4aElement.setAttribute('json', '{"foo":2}');
+      expect(new MockA4AImpl(a4aElement).getNumberData('foo')).to.equal(2);
+    });
+
+    it('should return null for an absent number property', () => {
+      expect(new MockA4AImpl(a4aElement).getNumberData('foo')).to.be.null;
+    });
+
+    it('should error for a non-number data- attribute', () => {
+      a4aElement.setAttribute('data-foo', 'bar');
+      new MockA4AImpl(a4aElement).getNumberData('foo');
+      expect(userErrorStub).to.be.called;
+    });
+
+    it('should error for a non-number JSON property', () => {
+      a4aElement.setAttribute('json', '{"foo":"2"}');
+      new MockA4AImpl(a4aElement).getNumberData('foo');
+      expect(userErrorStub).to.be.called;
+    });
+
+    it('should return a boolean defined as a data- attribute', () => {
+      a4aElement.setAttribute('data-foo', '');
+      expect(new MockA4AImpl(a4aElement).getBooleanData('foo')).to.be.true;
+    });
+
+    it('should return a boolean defined as a JSON property', () => {
+      a4aElement.setAttribute('json', '{"foo":true}');
+      expect(new MockA4AImpl(a4aElement).getBooleanData('foo')).to.be.true;
+    });
+
+    it('should prefer a JSON boolean property over a data- attribute', () => {
+      a4aElement.setAttribute('data-foo', 'true');
+      a4aElement.setAttribute('json', '{"foo":false}');
+      expect(new MockA4AImpl(a4aElement).getBooleanData('foo')).to.be.false;
+    });
+
+    it('should return false for an absent boolean property', () => {
+      expect(new MockA4AImpl(a4aElement).getBooleanData('foo')).to.be.false;
+    });
+
+    it('should error for a non-boolean JSON property', () => {
+      a4aElement.setAttribute('json', '{"foo":null}');
+      new MockA4AImpl(a4aElement).getBooleanData('foo');
+      expect(userErrorStub).to.be.called;
+    });
+
+    it('should return an object defined as a JSON property', () => {
+      a4aElement.setAttribute('json', '{"foo":{"bar":"baz"}}');
+      expect(new MockA4AImpl(a4aElement).getObjectData('foo')).to.deep.equal({
+        'bar': 'baz',
+      });
+    });
+
+    it('should return null for an absent object property', () => {
+      expect(new MockA4AImpl(a4aElement).getObjectData('foo')).to.be.null;
+    });
+
+    it('should error for a non-object data- attribute', () => {
+      a4aElement.setAttribute('data-foo', '{"bar":"baz"}');
+      new MockA4AImpl(a4aElement).getObjectData('foo');
+      expect(userErrorStub).to.be.called;
+    });
+
+    it('should error for a non-object JSON property', () => {
+      a4aElement.setAttribute('json', '{"foo":true}');
+      new MockA4AImpl(a4aElement).getObjectData('foo');
+      expect(userErrorStub).to.be.called;
+    });
+
+    it('should error for an array-object JSON property', () => {
+      a4aElement.setAttribute('json', '{"foo":["bar","baz"]}');
+      new MockA4AImpl(a4aElement).getObjectData('foo');
+      expect(userErrorStub).to.be.called;
+    });
+
+    it('should return an untyped value defined as a data- attribute', () => {
+      a4aElement.setAttribute('data-foo', 'bar');
+      expect(new MockA4AImpl(a4aElement).getUntypedData('foo')).to.equal('bar');
+    });
+
+    it('should return an untyped value defined as a JSON property', () => {
+      a4aElement.setAttribute('json', '{"foo":["bar","baz"]}');
+      expect(new MockA4AImpl(a4aElement).getUntypedData('foo')).to.deep.equal([
+        'bar', 'baz',
+      ]);
+    });
+
+    it('should prefer a JSON untyped property over a data- attribute', () => {
+      a4aElement.setAttribute('data-foo', 'quux');
+      a4aElement.setAttribute('json', '{"foo":["bar","baz"]}');
+      expect(new MockA4AImpl(a4aElement).getUntypedData('foo')).to.deep.equal([
+        'bar', 'baz',
+      ]);
+    });
+
+    it('should return undefined for an absent untyped property', () => {
+      expect(new MockA4AImpl(a4aElement).getUntypedData('foo')).to.be.undefined;
+    });
+  });
+
   // TODO(tdrl): Other cases to handle for parsing JSON metadata:
   //   - Metadata tag(s) missing
   //   - JSON parse failure
