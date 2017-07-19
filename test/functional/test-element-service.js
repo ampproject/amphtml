@@ -24,7 +24,6 @@ import {
   getElementServiceIfAvailable,
   getElementServiceForDoc,
   getElementServiceIfAvailableForDoc,
-  getElementServiceForDocInEmbedScope,
   getElementServiceIfAvailableForDocInEmbedScope,
 } from '../../src/element-service';
 import {
@@ -377,38 +376,23 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
     });
   });
 
-  it('should return null if win is top window', () => {
+  it('should return ampdoc-scope service if node in top window', () => {
     markElementScheduledForTesting(win, 'amp-foo');
-    // Use `registerServiceBuilder` since `installServiceInEmbedScope` will
-    // fail for top windows.
-    registerServiceBuilder(win, 'foo', () => service);
+    registerServiceBuilderForDoc(nodeInTopWin, 'foo', () => service,
+        /* opt_instantiate */ true);
     return getElementServiceIfAvailableForDocInEmbedScope(
         nodeInTopWin, 'foo', 'amp-foo').then(returned => {
-          expect(returned).to.be.null;
+          expect(returned).to.equal(service);
         });
   });
 
-  it('"if available" should not fall back to top window\'s service', () => {
+  it('should NOT return ampdoc-scope service if node in embed window', () => {
     markElementScheduledForTesting(win, 'amp-foo');
-    // Use `registerServiceBuilder` since `installServiceInEmbedScope` will
-    // fail for top windows.
-    registerServiceBuilder(win, 'foo', () => service,
+    registerServiceBuilderForDoc(nodeInTopWin, 'foo', () => service,
         /* opt_instantiate */ true);
     return getElementServiceIfAvailableForDocInEmbedScope(
         nodeInEmbedWin, 'foo', 'amp-foo').then(returned => {
           expect(returned).to.be.null;
-        });
-  });
-
-  it('should fall back to top window\'s service', () => {
-    markElementScheduledForTesting(win, 'amp-foo');
-    // Use `registerServiceBuilder` since `installServiceInEmbedScope` will
-    // fail for top windows.
-    registerServiceBuilderForDoc(env.ampdoc, 'foo', () => service,
-        /* opt_instantiate */ true);
-    return getElementServiceForDocInEmbedScope(
-        nodeInEmbedWin, 'foo', 'amp-foo').then(returned => {
-          expect(returned).to.equal(service);
         });
   });
 });
