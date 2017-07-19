@@ -1216,7 +1216,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
     });
 
-    it('should only send two RTC callouts per page', () => {
+    it('should send two RTC callouts per page with SWR', () => {
       const rtcResponse = {
         targeting: {'food': {
           'kids': ['chicken fingers', 'pizza']},
@@ -1245,6 +1245,42 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           });
       return mockRtcExecution(rtcResponse, secondElement).then(() => {
         expect(xhrMock).to.be.calledTwice;
+      });
+    });
+
+    it('should send one RTC callout per page with SWR disabled', () => {
+      setRtcConfig({
+        'endpoint': 'https://example-publisher.com/rtc/',
+        'disableStaleWhileRevalidate': true,
+      });
+      const rtcResponse = {
+        targeting: {'food': {
+          'kids': ['chicken fingers', 'pizza']},
+          'sports': 'baseball'},
+        categoryExclusions: {'age': '18-25'}};
+      let contextualTargeting =
+      '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
+      element = createElementWithAttributes(document, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+        'layout': 'fixed',
+        'json': contextualTargeting,
+      });
+      mockRtcExecution(rtcResponse, element);
+
+      contextualTargeting =
+      '{"targeting": {"food": {"adults": "wine"}}}';
+      const secondElement = createElementWithAttributes(
+          document, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+            'layout': 'fixed',
+            'json': contextualTargeting,
+          });
+      return mockRtcExecution(rtcResponse, secondElement).then(() => {
+        expect(xhrMock).to.be.calledOnce;
       });
     });
 

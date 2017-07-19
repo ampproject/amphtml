@@ -94,6 +94,12 @@ let rtcPromise = null;
 /** @private {?JsonObject|undefined} */
 let rtcConfig = null;
 
+/** @private {Object} */
+const RTC_ATI_ENUM = {
+  RTC_SUCCESS: 2,
+  RTC_FAILURE: 3,
+};
+
 /** @private @const {!Object<string,string>} */
 const PAGE_LEVEL_PARAMS_ = {
   'gdfp_req': '1',
@@ -385,14 +391,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const rtcRequestPromise = this.executeRtc_();
     return Promise.all(
       [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
-        const pageLevelParameters = values[0];
-        let parameters = Object.assign(
-            this.getBlockParameters_(), pageLevelParameters);
-        if (!!values[1]) {
-          parameters = Object.assign(parameters, values[1]);
-        }
         return googleAdUrl(
-            this, DOUBLECLICK_BASE_URL, startTime, parameters, ['108809080']);
+            this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
+                this.getBlockParameters_(),
+                /* RTC Parameters */ values[1],
+                /* pageLevelParameters */ values[0]), ['108809080']);
       });
   }
 
@@ -591,13 +594,28 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     rtcConfig = tryParseJson(ampRtcPageElement.textContent);
     if (!isObject(rtcConfig) || !(endpoint = rtcConfig['endpoint']) ||
         typeof endpoint != 'string' || !isSecureUrl(endpoint)) {
-      user().warn(TAG,
+      user().warn(TAG, 'Sending ad request without RTC callout,' +
           `invalid RTC config: ${ampRtcPageElement.textContent}`);
       return Promise.resolve();
     }
     let rtcTotalTime;
+    /*
+     *  disableSWR should be set to true if the endpoint is not
+     *  returning cache headers.
+     */
     const disableSWR = (
-        rtcConfig['disableStaleWhileRevalidate'] === true);
+        String(rtcConfig['disableStaleWhileRevalidate']) == 'true');
+    const headers = new Headers();
+    headers.append('Cache-Control', 'max-age=0');
+    const init = {
+      credentials: 'include',
+    };
+    // If stale-while-revalidate is disabled, our first RTC callout
+    // needs to bypass cache, so include the header that will
+    // bypass.
+    if (disableSWR) {
+      init.headers = headers;
+    }
     const startTime = Date.now();
     // Because we are wrapping the RTC request in the timeout,
     // we are guaranteeing that if the RTC is slow to return and
@@ -611,12 +629,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     rtcPromise = Services.timerFor(window).timeoutPromise(
         RTC_TIMEOUT,
         Services.xhrFor(this.win).fetchJson(
-            endpoint, {credentials: 'include'}).then(res => {
+            endpoint, init).then(res => {
               rtcTotalTime = Date.now() - startTime;
               if (!disableSWR) {
                 // Repopulate the cache.
-                const headers = new Headers();
-                headers.append('Cache-Control', 'max-age=0');
                 Services.xhrFor(this.win).fetchJson(endpoint, {
                   credentials: 'include',
                   headers,
@@ -678,13 +694,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                                 rtcResponse[key];
             }
           };
-          mergeHelper('targeting');
-          mergeHelper('categoryExclusions');
+          ['targeting', 'categoryExclusions'].forEach(key => {
+            mergeHelper(key);
+          });
           // rtcTotalTime is only the time that the rtc callout took,
           // does not include the time to merge.
           return Promise.resolve({
             artc: r.rtcTotalTime,
-            ati: 2,
+            ati: RTC_ATI_ENUM.RTC_SUCCESS,
             ard: parseUrl(rtcConfig['endpoint']).hostname,
           });
         }).catch(err => {
@@ -714,7 +731,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return String(rtcConfig['sendAdRequestOnFailure']) !== 'false' ?
         Promise.resolve({
           artc: rtcTotalTime,
-          ati: 3,
+          ati: RTC_ATI_ENUM.RTC_FAILURE,
           ard: parseUrl(rtcConfig['endpoint']).hostname,
         }) : Promise.reject(errMessage);
   };
