@@ -94,7 +94,7 @@ let rtcPromise = null;
 /** @private {?JsonObject|undefined} */
 let rtcConfig = null;
 
-/** @private {Object} */
+/** @private @enum {number} */
 const RTC_ATI_ENUM = {
   RTC_SUCCESS: 2,
   RTC_FAILURE: 3,
@@ -599,27 +599,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return Promise.resolve();
     }
     let rtcTotalTime;
-    /*
-     *  disableSWR should be set to true if the endpoint is not
-     *  returning cache headers.
-     */
-    const disableSWR = (
-        rtcConfig['disableStaleWhileRevalidate'] === true);
-    if (rtcConfig['disableStaleWhileRevalidate'] != undefined &&
-    typeof rtcConfig['disableStaleWhileRevalidate'] != 'boolean') {
-      user().warn('RTC disableStaleWhileRevalidate must be a boolean.');
-    }
-    const headers = new Headers();
-    headers.append('Cache-Control', 'max-age=0');
-    const init = {
-      credentials: 'include',
-    };
-    // If stale-while-revalidate is disabled, our first RTC callout
-    // needs to bypass cache, so include the header that will
-    // bypass.
-    if (disableSWR) {
-      init.headers = headers;
-    }
     const startTime = Date.now();
     // Because we are wrapping the RTC request in the timeout,
     // we are guaranteeing that if the RTC is slow to return and
@@ -633,9 +612,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     rtcPromise = Services.timerFor(window).timeoutPromise(
         RTC_TIMEOUT,
         Services.xhrFor(this.win).fetchJson(
-            endpoint, init).then(res => {
+            endpoint, {credentials: 'include'}).then(res => {
               rtcTotalTime = Date.now() - startTime;
-              if (!disableSWR) {
+              /*
+              *  disableSWR should be set to true if the endpoint is not
+              *  returning cache headers.
+              */
+              verifyRtcConfigMember('disableStaleWhileRevalidate', 'boolean');
+              if (rtcConfig['disableStaleWhileRevalidate'] !== true) {
+                const headers = new Headers();
+                headers.append('Cache-Control', 'max-age=0');
                 // Repopulate the cache.
                 Services.xhrFor(this.win).fetchJson(endpoint, {
                   credentials: 'include',
@@ -681,9 +667,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             return this.shouldSendRequestWithoutRtc(
                 'Bad response');
           } else if (!r.rtcResponse && r.success) {
+            // Empty response, no need to merge
             return Promise.resolve({
               artc: r.rtcTotalTime,
-              ati: 2,
+              ati: RTC_ATI_ENUM.RTC_SUCCESS,
               ard: parseUrl(rtcConfig['endpoint']).hostname,
             });
           }
@@ -732,6 +719,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (errMessage.match(/^timeout/)) {
       rtcTotalTime = -1;
     }
+    verifyRtcConfigMember('sendAdRequestOnFailure', 'boolean');
     return rtcConfig['sendAdRequestOnFailure'] !== false ?
         Promise.resolve({
           artc: rtcTotalTime,
@@ -941,6 +929,19 @@ function constructSRARequest_(win, doc, instances) {
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
             Object.assign(blockParameters, pageLevelParameters), startTime);
       });
+}
+
+/**
+ * @param {string} member
+ * @param {string} expectedType
+ */
+function verifyRtcConfigMember(member, expectedType) {
+  if (rtcConfig[member] != undefined &&
+    typeof rtcConfig[member] != expectedType) {
+    const type = typeof rtcConfig[member];
+    user().warn(
+        `RTC ${member} must be a ${expectedType}, instead was ${type}`);
+  }
 }
 
 /**
