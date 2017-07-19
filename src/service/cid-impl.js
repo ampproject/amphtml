@@ -38,6 +38,7 @@ import {getCryptoRandomBytesArray} from '../utils/bytes';
 import {Services} from '../services';
 import {parseJson, tryParseJson} from '../json';
 import {user, rethrowAsync} from '../log';
+import {ViewerCidApi} from './viewer-cid-api';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
@@ -90,6 +91,11 @@ export class Cid {
      * @private {!Object<string, !Promise<string>>}
      */
     this.externalCidCache_ = Object.create(null);
+
+    /**
+     * @private {!ViewerCidApi}
+     */
+    this.viewerCidApi_ = new ViewerCidApi(ampdoc);
   }
 
   /**
@@ -168,30 +174,19 @@ export class Cid {
     if (!isProxyOrigin(url)) {
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
-    const viewer = Services.viewerForDoc(this.ampdoc);
-    if (viewer.hasCapability('cid')) {
-      return this.getScopedCidFromViewer_(getCidStruct.scope);
-    }
-    return getBaseCid(this, persistenceConsent)
-        .then(baseCid => {
-          return Services.cryptoFor(this.ampdoc.win).sha384Base64(
-              baseCid + getProxySourceOrigin(url) + getCidStruct.scope);
+    const scope = getCidStruct.scope;
+    return this.viewerCidApi_.shouldGetScopedCidFromViewer(scope)
+        .then(should => {
+          if (should) {
+            return this.viewerCidApi_.getScopedCidFromViewer(scope);
+          } else {
+            return getBaseCid(this, persistenceConsent)
+                .then(baseCid => {
+                  return Services.cryptoFor(this.ampdoc.win).sha384Base64(
+                      baseCid + getProxySourceOrigin(url) + scope);
+                });
+          }
         });
-  }
-
-  /**
-   * @param {!string} scope
-   * @return {!Promise<?string>}
-   */
-  getScopedCidFromViewer_(scope) {
-    const viewer = Services.viewerForDoc(this.ampdoc);
-    return viewer.isTrustedViewer().then(trusted => {
-      if (!trusted) {
-        rethrowAsync('Ignore CID API from Untrustful Viewer.');
-        return;
-      }
-      return viewer.sendMessageAwaitResponse('cid', dict({'scope': scope}));
-    });
   }
 }
 
