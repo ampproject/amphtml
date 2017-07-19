@@ -31,7 +31,7 @@ describes.realWin('amp-analytics.iframe-transport-message-queue', {amp: true},
         frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
         frame.setAttribute('name', 'some_name');
         frame.setAttribute('src', 'https://www.google.com');
-        frame.src = 'https://www.google.com'
+        frame.src = 'https://www.google.com';
         frame.sentinel = '42';
         queue = new IframeTransportMessageQueue(env.win, frame);
       });
