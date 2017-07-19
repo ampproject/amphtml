@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
@@ -53,7 +55,7 @@ Examples:
 
 ## Attributes
 
-**autoplay**
+##### autoplay
 
 If this attribute is present, and the browser supports autoplay:
 
@@ -63,24 +65,23 @@ If this attribute is present, and the browser supports autoplay:
 * when the user taps the video, the video is unmuted
 * if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused. 
 
-
-**data-partner**
+##### data-partner
 
 The Brid.tv partner id.
 
-**data-player**
+##### data-player
 
 The Brid.tv player id. Specific to every partner.
 
-**data-video**
+##### data-video
 
 The Brid.tv video ID.
 
-**data-playlist**
+##### data-playlist
 
 The Brid.tv playlist ID. Embed must either have video or playlist attribute.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

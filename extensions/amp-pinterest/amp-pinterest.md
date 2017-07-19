@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Examples
 
 Use the `amp-pinterest` component to display a Pin It button, Pin widget, or Follow button.
@@ -75,22 +77,21 @@ Use the `amp-pinterest` component to display a Pin It button, Pin widget, or Fol
 </amp-pinterest>
 ```
 
-
 ## Pin It Button
 
-**data-do** (required)
+##### data-do (required)
 
 Must be set to `buttonPin`.
 
-**data-url** (required)
+##### data-url (required)
 
 Contains the fully-qualified URL intended to be pinned or re-made into a widget.
 
-**data-media** (required)
+##### data-media (required)
 
 Contains the fully-qualified URL of the image intended to be pinned. If the pin will eventually contain multimedia (such as YouTube), it should point to a high-resolution thumbnail.
 
-**data-description** (required)
+##### data-description (required)
 
 Contains the default description that appears in the pin create form; please choose carefully, since many Pinners will close the form without pinning if it doesn't make sense.
 
@@ -146,25 +147,25 @@ height=32 width=32
 
 ## Follow Button
 
-**data-do** (required)
+##### data-do (required)
 
 Must be set to `buttonFollow`.
 
-**data-href** (required)
+##### data-href (required)
 
 Contains the fully qualified Pinterest user profile url to follow.
 
-**data-label** (required)
+##### data-label (required)
 
 Contains the text to display on the follow button.
 
 ## Embedded Pin Widget
 
-**data-do** (required)
+##### data-do (required)
 
 Must be set to `embedPin`.
 
-**data-url** (required)
+##### data-url (required)
 
 Must contain the fully-qualified URL of the Pinterest resource to be shown as a widget.
 

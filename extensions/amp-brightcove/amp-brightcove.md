@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
@@ -54,33 +56,33 @@ Example:
 
 ## Attributes
 
-**data-account**
+##### data-account
 
 The Brightcove Video Cloud or Perform account id.
 
-**data-player** or **data-player-id**
+##### data-player or data-player-id
 
 The Brightcove player id. This is a GUID, shortid or "default". The default value is "default".
 
 `data-player` is preferred. `data-player-id` is also supported for backwards-compatibility.
 
-**data-embed**
+##### data-embed
 
 The Brightcove player id. This is a GUID or "default". The default value and most common value is "default".
 
-**data-video-id**
+##### data-video-id
 
 The Video Cloud video id. Most Video Cloud players will need this.
 
 This is not used for Perform players by default; use it if you have added a plugin that expects a `videoId` param in the query string.
 
-**data-playlist-id**
+##### data-playlist-id
 
 The Video Cloud playlist id. For AMP HTML uses a video id will normally be used instead. If both a playlist and a video are specified, the playlist takes precedence.
 
 This is not used for Perform players by default; use it if you have added a plugin that expects a `playlistId` param in the query string.
 
-**data-param-***
+##### data-param-*
 
 All `data-param-*` attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.
 
@@ -89,7 +91,7 @@ Keys and values will be URI encoded. Keys will be camel cased.
 - `data-param-language="de"` becomes `&language=de`
 - `data-param-custom-ad-data="key:value;key2:value2"` becomes `&customAdData=key%3Avalue%3Bkey2%3Avalue2`
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

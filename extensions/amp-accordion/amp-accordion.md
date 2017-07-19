@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 The `amp-accordion` component allows you to display collapsible and expandable content sections. Each of the `amp-accordion` component’s immediate children is considered a section in the accordion. Each of these nodes must be a `<section>` tag.
@@ -68,11 +70,11 @@ To see more demos of the `amp-accordion`, visit [AMP By Example](https://ampbyex
 
 ## Attributes
 
-**disable-session-states**
+##### disable-session-states
 
 Set this attribute on the `<amp-accordion>` to opt out of preserving the collapsed/expanded state of the accordion.
 
-**expanded**
+#####  expanded
 
 Set this attribute on a `<section>` to display the section as expanded on page load.
 

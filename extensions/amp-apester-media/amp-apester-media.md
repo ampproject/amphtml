@@ -33,6 +33,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Examples 
 
 Single Mode:
@@ -51,17 +53,15 @@ Playlist Mode:
 </amp-apester-media>
 ```
 
-## Required attributes
+## Attributes
 
-### Single Mode: 
-**data-apester-media-id**
+##### data-apester-media-id
 
-The ID of the media, a string.
+This attribute is required for single mode, and it represents the ID of the media (string value).
 
-### Playlist Mode: 
-**data-apester-channel-token**
+##### data-apester-channel-token
 
-The token of the channel, a string.
+This attribute is required for playlist mode, and it represents the token of the channel (string value).
 
 ## Validation
 

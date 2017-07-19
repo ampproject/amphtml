@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 - There can be only one `<amp-sticky-ad>` in an AMP document. The `<amp-sticky-ad>` should only have one direct child: `<amp-ad>`. **Note**: Make sure you include any required scripts for the `<amp-ad>` component.
@@ -63,7 +65,7 @@ Example:
 
 ## Attributes
 
-**layout** (required)
+##### layout (required)
 
 Must be set to `nodisplay`.
 

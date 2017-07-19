@@ -31,6 +31,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Example
 
 With responsive layout the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
@@ -44,25 +46,25 @@ With responsive layout the width and height from the example should yield correc
 
 ## Attributes
 
-**data-videoid** (required)
+##### data-videoid (required)
 
 The ID of the Izlesene video, which can be found in the Izlesene video page URL. For example, in https://www.izlesene.com/video/yayin-yok/7221390, the video ID is `7221390`.
 
-**data-param-showrel** (optional)
+##### data-param-showrel (optional)
 
 This is an optional attribute that indicates whether to show related content. This functionality is not available for iOS devices.
 
 * Accepted values: `1` or `0`
 * Default value: `1`
 
-**data-param-showreplay** (optional)
+##### data-param-showreplay (optional)
 
 This is an optional attribute that indicates whether to show the replay button at the end of the content.
 
 * Accepted values: `1` or `0`
 * Default value: `1`
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

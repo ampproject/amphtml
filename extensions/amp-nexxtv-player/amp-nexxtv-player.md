@@ -31,6 +31,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Example
 
 With the responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
@@ -50,15 +52,15 @@ With the responsive layout, the width and height from the example should yield c
 
 ## Attributes
 
-**data-mediaid** (required)
+##### data-mediaid (required)
 
 Represents the ID of the media you want to play.
 
-**data-client** (required)
+##### data-client (required)
 
 Your domain ID.
 
-**data-streamtype** (optional)
+##### data-streamtype (optional)
 
 Indicates the media streaming type, which can be one of the following:
 
@@ -70,24 +72,23 @@ Indicates the media streaming type, which can be one of the following:
 * `album`: An audio playlist.
 
 
-**data-seek-to** (optional)
+##### data-seek-to (optional)
 
 Indicates the starting point of your media (in seconds).  For example, video starting 1:30min.
 
-**data-mode** (optional)
+##### data-mode (optional)
 
 Indicates the data mode, which can be `static` (default) or `api`.
 
-**data-origin** (optional)
+##### data-origin (optional)
 
 Indicates the source from which the embedded domain media is played. By default this is set to `https://embed.nexx.cloud/`.
 
-**data-disable-ads** (optional)
+##### data-disable-ads (optional)
 
 Ads are enabled by default. Set value to 1 to disable.
 
-
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

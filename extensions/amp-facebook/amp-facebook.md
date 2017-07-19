@@ -76,11 +76,11 @@ Renders as:
 
 ## Attributes
 
-**data-href** (required)
+##### data-href (required)
 
 The URL of the Facebook post/video. For example, `https://www.facebook.com/zuck/posts/10102593740125791`.
 
-**data-embed-as** (optional)
+##### data-embed-as
 
 The value is either `post` or `video`.  The default is `post`.
 
@@ -88,7 +88,7 @@ Both posts and videos can be embedded as a post. Setting `data-embed-as="video"`
 
 Check out the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

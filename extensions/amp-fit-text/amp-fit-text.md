@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 The `amp-fit-text` component expects its content to be text or other inline
@@ -61,15 +63,15 @@ For example:
 
 ## Attributes
 
-**min-font-size**
+##### min-font-size
 
 The minimum font size as an integer that the `amp-fit-text` can use.
 
-**max-font-size**
+##### max-font-size
 
 The maximum font size as an integer that the `amp-fit-text` can use.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

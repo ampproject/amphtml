@@ -39,25 +39,27 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 This extension creates an iframe and displays the imgur post. 
 
 ## Attributes
 
-**data-imgur-id** (required)
+##### data-imgur-id (required)
 
 The ID of the imgur to embed.
 
-**layout** (required)
+##### layout (required)
 
 Currently only supports `responsive`.
 
-**width** (required)
+##### width (required)
 
 The width of the imgur.
 
-**height** (required)
+##### height (required)
 
 The width of the imgur.
 

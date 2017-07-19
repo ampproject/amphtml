@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Overview
 
 See [Google VR View](https://developers.google.com/vr/concepts/vrview) for more details.
@@ -58,20 +60,20 @@ VR view supports mono and stereo 360 images. Note:
 
 ## Attributes
 
-**src**
+##### src
 
 The source URL of a stereo image. Must resolve to https. See notes above on what
 kind of image can be passed here.
 
-**stereo**
+##### stereo
 
 If specified, the image provided by the `src` attribute is considered to be a stereo
 image (see above), otherwise it's a mono image.
 
-**yaw**
+##### yaw
 
 Initial yaw of viewer, in degrees. Defaults to 0.
 
-**yaw-only**
+##### yaw-only
 
 Can be specified to restrict motion to yaw only.

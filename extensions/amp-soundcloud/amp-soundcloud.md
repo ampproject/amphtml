@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Examples
 
 Visual Mode:
@@ -55,28 +57,29 @@ Classic Mode:
 
 ## Attributes
 
-**data-trackid** (required if `data-playlistid` is not defined)
+##### data-trackid 
 
-The ID of a track, an integer.
+This attribute is required if `data-playlistid` is not defined.  
+The value for this attribute is the ID of a track, an integer.
 
-**data-playlistid** (required if `data-trackid` is not defined)
+##### data-playlistid
 
-The ID of a playlist, an integer.
+This attribute is required if `data-trackid` is not defined.
+The value for this attribute is the ID of a playlist, an integer.
 
-**data-secret-token** (optional)
+##### data-secret-token (optional)
 
 The secret token of the track, if it is private.
 
-**data-visual** (optional)
+##### data-visual (optional)
 
 If set to `true`, displays full-width "Visual" mode; otherwise, it displays as "Classic" mode. The default value is `false`.
 
-**data-color** (optional)
+##### data-color (optional)
 
 This attribute is a custom color override for the "Classic" mode. The attribute is ignored in "Visual" mode. Specify a hexadecimal color value, without the leading # (e.g., `data-color="e540ff"`).
 
-
-**width** and **height**
+##### width and height
 
 The layout for `amp-soundcloud` is set to `fixed-height` and it fills all of the available horizontal space. This is ideal for the "Classic" mode, but for "Visual" mode, it's recommended that the height is 300px, 450px or 600px, as per Soundcloud embed code. This will allow the clip's internal elements to resize properly on mobile.
 
