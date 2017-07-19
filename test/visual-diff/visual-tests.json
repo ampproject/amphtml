@@ -19,6 +19,9 @@
       "name": "AMP Article Access",
       "loading_complete_css": [
         ".login-section"
+      ],
+      "forbidden_css": [
+        ".article-body"
       ]
     },
     {
