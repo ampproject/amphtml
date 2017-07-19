@@ -39,7 +39,9 @@ import {
   PositionInViewportEntryDef,
 } from './position-observer-impl';
 import {layoutRectLtwh, RelativePositions} from '../layout-rect';
+import {Animation} from '../animation';
 import * as st from '../style';
+import * as tr from '../transition';
 
 /**
  * @const {number} Percentage of the video that should be in viewport before it
@@ -57,9 +59,25 @@ const SECONDS_PLAYED_MIN_DELAY = 1000;
  * @const {number} How much to scale the video by when minimized.
  */
 const DOCK_SCALE = 0.6;
+/**
+ * @const {string} Docked video's class name as it is minimizing
+ */
 const DOCK_CLASS = 'i-amphtml-dockable-video-minimizing';
+/**
+ * @const {number} Margin to leave around a docked video
+ */
 const DOCK_MARGIN = 20;
 
+/**
+ * @const {number} Amount by which the velocity decreseases every frame
+ */
+const FRICTION_COEFF = 0.55;
+
+/**
+ * @const {number} Used to determine at which minmal velocity the element is
+ * considered to have stopped moving
+ */
+const STOP_THRESHOLD = 3;
 
 /**
 * Docking Positions
@@ -107,6 +125,9 @@ export class VideoManager {
 
     /** @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc = ampdoc;
+
+    /** @private {!../service/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private {?Array<!VideoEntry>} */
     this.entries_ = null;
@@ -218,9 +239,8 @@ export class VideoManager {
           this.entries_[i].updateVisibility();
         }
       };
-      const viewport = Services.viewportForDoc(this.ampdoc);
-      viewport.onScroll(scrollListener);
-      viewport.onChanged(scrollListener);
+      this.viewport_.onScroll(scrollListener);
+      this.viewport_.onChanged(scrollListener);
       this.scrollListenerInstalled_ = true;
     }
   }
@@ -302,8 +322,7 @@ export class VideoManager {
           this.entries_[i].updateDockableInitialRect();
         }
       };
-      const viewport = Services.viewportForDoc(this.ampdoc);
-      viewport.onResize(resizeListener);
+      this.viewport_.onResize(resizeListener);
       this.resizeListenerInstalled_ = true;
     }
 
@@ -394,6 +413,9 @@ class VideoEntry {
     /** @private @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = manager.ampdoc;
 
+    /** @private {!../service/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc_);
+
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
 
@@ -436,16 +458,19 @@ class VideoEntry {
     /** @private {boolean} */
     this.userInteractedWithAutoPlay_ = false;
 
-    /** @private */
+    /** @private {boolean} */
     this.playCalledByAutoplay_ = false;
 
-    /** @private */
+    /** @private {boolean} */
     this.pauseCalledByAutoplay_ = false;
 
     /** @private {?Element} */
     this.internalElement_ = null;
 
-    /** @private */
+    /** @private {?Element} */
+    this.draggingMask_ = null;
+
+    /** @private {boolean} */
     this.muted_ = false;
 
     // Dockabled Video Variables
@@ -467,6 +492,33 @@ class VideoEntry {
 
     /** @private {boolean} */
     this.dockPreviouslyInView_ = false;
+
+    // Dragging Variables
+
+    /** @private {boolean} */
+    this.dragListenerInstalled_ = false;
+
+    /** @private {boolean} */
+    this.isTouched_ = false;
+
+    /** @private {boolean} */
+    this.isDragging_ = false;
+
+    /** @private {boolean} */
+    this.isSnapping_ = false;
+
+    /** @private {boolean} */
+    this.isDismissed_ = false;
+
+    /** @private {Object} */
+    this.dragCoordinates_ = {
+      mouse: {x: 0, y: 0},
+      displacement: {x: 0, y: 0},
+      initial: {x: 0, y: 0},
+      position: {x: 0, y: 0},
+      previous: {x: 0, y: 0},
+      velocity: {x: 0, y: 0},
+    };
 
     this.hasDocking = element.hasAttribute(VideoAttributes.DOCK);
 
@@ -869,7 +921,6 @@ class VideoEntry {
    * @private
    */
   updateDockableVideoPosition_(newPos) {
-    const viewport = Services.viewportForDoc(this.ampdoc_);
     const isBottom = newPos.relativePos == RelativePositions.BOTTOM;
     const isTop = newPos.relativePos == RelativePositions.TOP;
     const isInside = newPos.relativePos == RelativePositions.INSIDE;
@@ -886,7 +937,7 @@ class VideoEntry {
         // position right below the viewport
         layoutRectLtwh(
             this.initialRect_.left,
-            viewport.getHeight(),
+            this.viewport_.getHeight(),
             this.initialRect_.width,
             this.initialRect_.height
         ) :
@@ -921,19 +972,19 @@ class VideoEntry {
     // Calculate space on top and bottom of the video to see if it is possible
     // for the video to become hidden by scrolling to the top/bottom
     const spaceOnTop = this.video.element./*OK*/offsetTop;
-    const spaceOnBottom = viewport.getScrollHeight()
+    const spaceOnBottom = this.viewport_.getScrollHeight()
                          - spaceOnTop
                          - this.video.element./*OK*/offsetHeight;
     // Don't minimize if video can never be hidden by scrolling to top/bottom
-    if ((isBottom && spaceOnTop < viewport.getHeight())
-        || (isTop && spaceOnBottom < viewport.getHeight())) {
+    if ((isBottom && spaceOnTop < this.viewport_.getHeight())
+        || (isTop && spaceOnBottom < this.viewport_.getHeight())) {
       this.dockPosition_ = DockPositions.INLINE;
       return;
     }
 
     // Don't minimize if the video is bigger than the viewport (will always
     // minimize and never be inline otherwise!)
-    if (this.video.element./*OK*/offsetHeight >= viewport.getHeight()) {
+    if (this.video.element./*OK*/offsetHeight >= this.viewport_.getHeight()) {
       this.dockPosition_ = DockPositions.INLINE;
       return;
     }
@@ -952,7 +1003,7 @@ class VideoEntry {
     } else if (isInside) {
       this.dockPosition_ = DockPositions.INLINE;
     } else {
-      // The inline video is outside but the minimizePosition has been set, this
+      // The inline video is outside but the dockPosition has been set, this
       // means the position was manually changed by drag/drop, keep it as is.
     }
   }
@@ -1021,11 +1072,233 @@ class VideoEntry {
     // Update docking state
     if (this.scrollMap_(DOCK_SCALE, 1) == DOCK_SCALE) {
       this.dockState_ = DockStates.DOCKED;
+      this.initializeDragging_();
+      this.drag_();
     } else {
+      this.finishDragging_();
       this.dockState_ = DockStates.DOCKING;
     }
 
     // TODO(@wassim) Make minimized video draggable
+  }
+
+
+  initializeDragging_() {
+    if (this.dragListenerInstalled_) {
+      return;
+    }
+    const minimizedRect = this.internalElement_./*OK*/getBoundingClientRect();
+    this.dragCoordinates_.initial.x = minimizedRect.left;
+    this.dragCoordinates_.initial.y = minimizedRect.top;
+    this.dragCoordinates_.position.x = minimizedRect.left;
+    this.dragCoordinates_.position.y = minimizedRect.top;
+    this.dragCoordinates_.previous.x = minimizedRect.left;
+    this.dragCoordinates_.previous.y = minimizedRect.top;
+
+    this.draggingMask_ = this.createDraggingMask_();
+
+    // Desktop listeners
+    listen(this.draggingMask_, 'mousedown', e => {
+      e.preventDefault();
+      this.isTouched_ = true;
+      this.isDragging_ = false;
+      this.mouse_(e, true);
+    });
+    listen(this.ampdoc_.win.document, 'mouseup', () => {
+      this.isTouched_ = false;
+      this.isDragging_ = false;
+    });
+    listen(this.ampdoc_.win.document, 'mousemove', e => {
+      this.isDragging_ = this.isTouched_;
+      if (this.isDragging_) {
+        e.preventDefault();
+      }
+      this.mouse_(e);
+    });
+    // Touch listeners
+    listen(this.draggingMask_, 'touchstart', e => {
+      e.preventDefault();
+      this.isTouched_ = true;
+      this.isDragging_ = false;
+      this.mouse_(e, true);
+    });
+    listen(this.ampdoc_.win.document, 'touchend', () => {
+      this.isTouched_ = false;
+      this.isDragging_ = false;
+    });
+    listen(this.ampdoc_.win.document, 'touchmove', e => {
+      this.isDragging_ = this.isTouched_;
+      if (this.isDragging_) {
+        e.preventDefault();
+      }
+      this.mouse_(e);
+    });
+    this.dragListenerInstalled_ = true;
+  }
+
+  /**
+   * Handles the dragging, dropping and snapping to corners.
+   * Ran once every animation frame
+   * @private
+   */
+  drag_() {
+    // Stop the loop if the video is no longer in a draggable state
+    if (!this.loaded_
+      || !this.internalElement_
+      || this.dockPosition_ == DockPositions.INLINE
+      || this.dockVisibleHeight_ != 0
+      || !this.internalElement_.classList.contains(DOCK_CLASS)
+      || this.dockState_ != DockStates.DOCKED) {
+      return;
+    }
+
+    const minimizedRect = this.internalElement_./*OK*/getBoundingClientRect();
+    const dragCoord = this.dragCoordinates_;
+    if (this.isDragging_) {
+      dragCoord.previous.x = dragCoord.position.x;
+      dragCoord.previous.y = dragCoord.position.y;
+
+      dragCoord.position.x = dragCoord.mouse.x - dragCoord.displacement.x;
+      dragCoord.position.y = dragCoord.mouse.y - dragCoord.displacement.y;
+
+      dragCoord.velocity.x = (dragCoord.position.x - dragCoord.previous.x);
+      dragCoord.velocity.y = (dragCoord.position.y - dragCoord.previous.y);
+
+      const vidCenterX = dragCoord.position.x + minimizedRect.width / 2;
+      const vidCenterY = dragCoord.position.y + minimizedRect.height / 2;
+
+      if (vidCenterX > this.viewport_.getWidth()
+          || vidCenterX < 0
+          || vidCenterY > this.viewport_.getHeight()
+          || vidCenterY < 0) {
+        this.isDismissed_ = true;
+      }
+    } else {
+      dragCoord.position.x += dragCoord.velocity.x;
+      dragCoord.position.y += dragCoord.velocity.y;
+
+      dragCoord.velocity.x *= FRICTION_COEFF;
+      dragCoord.velocity.y *= FRICTION_COEFF;
+
+      if (this.isDismissed_) {
+        this.video.pause();
+        this.finishDocking_();
+        this.isDismissed_ = false;
+        return;
+      }
+    }
+
+    // Snap to corners
+    if (!this.isDragging_ && !this.isSnapping_
+        && Math.abs(dragCoord.velocity.x) <= STOP_THRESHOLD
+        && Math.abs(dragCoord.velocity.y) <= STOP_THRESHOLD) {
+      // X/Y Coordinates for each corner
+      const top = DOCK_MARGIN;
+      const left = DOCK_MARGIN;
+      const right = this.viewport_.getWidth()
+                    - minimizedRect.width
+                    - DOCK_MARGIN;
+      const bottom = this.viewport_.getHeight()
+                     - minimizedRect.height
+                     - DOCK_MARGIN;
+      // Determine corner and update this.dockPosition_
+      this.calcSnapCorner_(minimizedRect);
+      // Set coordinates based on corner
+      let newPosX = dragCoord.position.x, newPosY = dragCoord.position.y;
+      switch (this.dockPosition_) {
+        case DockPositions.BOTTOM_RIGHT:
+          newPosX = right;
+          newPosY = bottom;
+          break;
+        case DockPositions.TOP_RIGHT:
+          newPosX = right;
+          newPosY = top;
+          break;
+        case DockPositions.BOTTOM_LEFT:
+          newPosX = left;
+          newPosY = bottom;
+          break;
+        case DockPositions.TOP_LEFT:
+          newPosX = left;
+          newPosY = top;
+          break;
+      }
+      // Animate the snap transition
+      if (dragCoord.position.x != newPosX || dragCoord.position.y != newPosY) {
+        this.isSnapping_ = true;
+        // Snap to the calculated corner
+        this.animateSnap_(this.draggingMask_, newPosX, newPosY);
+        this.animateSnap_(this.internalElement_, newPosX, newPosY);
+      }
+    }
+
+    // Update the video's position
+    if (!this.isSnapping_) {
+      this.dragMove_(this.draggingMask_);
+      this.dragMove_(this.internalElement_);
+    }
+
+    // Re-run on every animation frame
+    this.vsync_.mutate(() => {
+      this.drag_();
+    });
+  }
+
+  /**
+   * Removes the draggable mask and ends dragging
+   * @private
+   */
+  finishDragging_() {
+    this.removeDraggingMask_();
+  }
+
+  /**
+   * Reads mouse coordinate and saves them to an internal variable
+   * @param {Event} e
+   * @param {boolean} updateDisplacement
+   * @private
+   */
+  mouse_(e, updateDisplacement = false) {
+    if (e.x) {
+      this.dragCoordinates_.mouse.x = e.x;
+      this.dragCoordinates_.mouse.y = e.y;
+    } else if (e.touches) {
+      this.dragCoordinates_.mouse.x = e.touches[0].clientX;
+      this.dragCoordinates_.mouse.y = e.touches[0].clientY;
+    }
+    if (updateDisplacement) {
+      this.dragCoordinates_.displacement.x = Math.abs(
+          this.dragCoordinates_.position.x - this.dragCoordinates_.mouse.x
+      );
+      this.dragCoordinates_.displacement.y = Math.abs(
+          this.dragCoordinates_.position.y - this.dragCoordinates_.mouse.y
+      );
+    }
+  }
+
+  /**
+   * Calculates which corner to snap to based on the element's position
+   * @param {?ClientRect} minimizedRect
+   * @private
+   */
+  calcSnapCorner_(minimizedRect) {
+    const viewportCenterX = this.viewport_.getWidth() / 2;
+    const viewportCenterY = this.viewport_.getHeight() / 2;
+    const centerX = this.dragCoordinates_.position.x + minimizedRect.width / 2;
+    const centerY = this.dragCoordinates_.position.y + minimizedRect.height / 2;
+    if (centerX >= viewportCenterX) {
+      if (centerY >= viewportCenterY) {
+        this.dockPosition_ = DockPositions.BOTTOM_RIGHT;
+      } else if (centerY < viewportCenterY) {
+        this.dockPosition_ = DockPositions.TOP_RIGHT;
+      }
+    } else if (centerX < viewportCenterX) {
+      if (centerY >= viewportCenterY) {
+        this.dockPosition_ = DockPositions.BOTTOM_LEFT;
+      } else if (centerY < viewportCenterY) {
+        this.dockPosition_ = DockPositions.TOP_LEFT;
+      }
+    }
   }
 
   /**
@@ -1040,6 +1313,7 @@ class VideoEntry {
     this.internalElement_.setAttribute('style', '');
     this.dockState_ = DockStates.INLINE;
     this.manager_.unregisterDocked();
+    this.dragListenerInstalled_ = false;
   }
 
   /**
@@ -1057,15 +1331,15 @@ class VideoEntry {
    * @return {string}
    */
   calcDockOffsetXRight_() {
-    const viewport = Services.viewportForDoc(this.ampdoc_);
-    const initialOffsetRight = viewport.getWidth()
+    const initialOffsetRight = this.viewport_.getWidth()
                         - this.initialRect_.left
                         - this.initialRect_.width;
     const scaledWidth = DOCK_SCALE * this.initialRect_.width;
+    const vw = this.viewport_.getWidth();
     return st.px(
         this.scrollMap_(
-            viewport.getWidth() - this.initialRect_.width - initialOffsetRight,
-            viewport.getWidth() - scaledWidth - DOCK_MARGIN,
+            vw - this.initialRect_.width - initialOffsetRight,
+            vw - scaledWidth - DOCK_MARGIN,
             true
         )
     );
@@ -1086,12 +1360,11 @@ class VideoEntry {
    * @return {string}
    */
   calcDockOffsetYBottom_() {
-    const viewport = Services.viewportForDoc(this.ampdoc_);
     const scaledHeight = DOCK_SCALE * this.initialRect_.height;
     return st.px(
         this.scrollMap_(
-            viewport.getHeight() - this.initialRect_.height,
-            viewport.getHeight() - scaledHeight - DOCK_MARGIN,
+            this.viewport_.getHeight() - this.initialRect_.height,
+            this.viewport_.getHeight() - scaledHeight - DOCK_MARGIN,
             true
         )
     );
@@ -1126,6 +1399,51 @@ class VideoEntry {
     }
     return anim;
   }
+  /**
+   * Update's the elements coordinates to one of the set corners with a timeDef
+   * animation
+   * @private
+   * @param {?Element} element
+   */
+  animateSnap_(element, newPosX, newPosY) {
+    Animation.animate(dev().assertElement(element),
+        tr.setStyles(dev().assertElement(element), {
+          'transform': tr.concat([
+            tr.translate(
+                tr.px(tr.numeric(this.dragCoordinates_.position.x, newPosX)),
+                tr.px(tr.numeric(this.dragCoordinates_.position.y, newPosY))
+            ),
+            tr.scale(tr.numeric(DOCK_SCALE, DOCK_SCALE)),
+          ]),
+        }), 200).thenAlways(() => {
+          // Update the positions
+          this.dragCoordinates_.position.x = newPosX;
+          this.dragCoordinates_.position.y = newPosY;
+          this.isSnapping_ = false;
+        });
+  }
+
+  /**
+   * Update's the elements coordinates according to the draggable's
+   * set coordinates
+   * @private
+   * @param {?Element} element
+   */
+  dragMove_(element) {
+    const translate = st.translate(
+        st.px(this.dragCoordinates_.position.x),
+        st.px(this.dragCoordinates_.position.y)
+    );
+    const scale = st.scale(DOCK_SCALE);
+    st.setStyles(dev().assertElement(element), {
+      'transform': translate + ' ' + scale,
+      'transform-origin': 'top left',
+      'bottom': 'auto',
+      'top': '0px',
+      'right': 'auto',
+      'left': '0px',
+    });
+  }
 
   /**
    * Creates a mask to overlay on top of an autoplay video to detect the first
@@ -1144,6 +1462,49 @@ class VideoEntry {
     const mask = doc.createElement('i-amphtml-video-mask');
     mask.classList.add('i-amphtml-fill-content');
     return mask;
+  }
+
+  /**
+   * Creates a mask to overlay on top of a minimized video to capture drag
+   * and drop events on iframe-based players
+   * @private
+   * @return {!Element}
+   */
+  createDraggingMask_() {
+    const doc = this.ampdoc_.win.document;
+    const mask = doc.createElement('i-amphtml-dragging-mask');
+    function cloneStyle(prop) {
+      return st.getStyle(this.internalElement_, prop);
+    };
+    st.setStyles(dev().assertElement(mask), {
+      'top': cloneStyle('top'),
+      'left': cloneStyle('left'),
+      'bottom': cloneStyle('bottom'),
+      'right': cloneStyle('right'),
+      'transform': cloneStyle('transform'),
+      'transform-origin': cloneStyle('transform-origin'),
+      'borderRadius': cloneStyle('borderRadius'),
+      'width': cloneStyle('width'),
+      'height': cloneStyle('height'),
+      'position': 'fixed',
+      'z-index': '3',
+      'background': 'transparent',
+    });
+    this.video.element.appendChild(mask);
+    return mask;
+  }
+
+
+  /**
+   * Removes the draggable mask so that the video can be interacted with
+   * again when inline
+   * @private
+   */
+  removeDraggingMask_() {
+    if (this.draggingMask_) {
+      removeElement(this.draggingMask_);
+      this.draggingMask_ = null;
+    }
   }
 
   /**
