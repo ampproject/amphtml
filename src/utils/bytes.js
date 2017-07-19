@@ -110,6 +110,8 @@ export function stringToBytes(str) {
  * @return {string}
  */
 export function bytesToString(bytes) {
+  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
+  // stack overflow. #10495, https://jsperf.com/bytesToString-2
   const array = new Array(bytes.length);
   for (let i = 0; i < bytes.length; i++) {
     array[i] = String.fromCharCode(bytes[i]);
