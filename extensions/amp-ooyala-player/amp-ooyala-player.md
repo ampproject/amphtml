@@ -31,6 +31,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Example
 
 ```html
@@ -43,27 +45,27 @@ limitations under the License.
 
 ## Attributes
 
-**data-embedcode** (required)
+##### data-embedcode (required)
 
 The video embed code from [Backlot](https://backlot.ooyala.com).
 
-**data-playerid** (required)
+##### data-playerid (required)
 
 The ID of the player to load from [Backlot](https://backlot.ooyala.com).
 
-**data-pcode** (required)
+##### data-pcode (required)
 
 The provider code for the account owning the embed code and player.
 
-**data-playerversion** (optional)
+##### data-playerversion (optional)
 
 Specifies which version of the Ooyala player to use, V3 or V4. Defaults to V3.
 
-**data-config** (optional)
+##### data-config (optional)
 
 Specifies a skin.json config file URL for player V4.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

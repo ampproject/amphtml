@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
@@ -54,27 +56,27 @@ Example:
 
 ## Attributes
 
-**data-pid** (required)
+##### data-pid (required)
 
 The Player ID for the O2Player.
 
-**data-bcid** (required)
+##### data-bcid (required)
 
 The Buyer Company ID (bcid) for the O2Player.
 
-**data-bid**
+##### data-bid
 
 The Playlist ID (bid) for the O2Player.
 
-**data-vid** 
+##### data-vid
 
 The Video ID (vid) for the O2Player.
 
-**data-macros**
+##### data-macros
 
 The macros for the O2Player.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
@@ -83,7 +85,6 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 See [amp-o2-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-o2-player/validator-amp-o2-player.protoascii) in the AMP validator specification.
 
 The following lists validation errors specific to the `amp-o2-player` tag:
-
 
 <table>
   <tr>

@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 The `amp-anim` component is almost identical to the `amp-img` element, but allows the AMP runtime to reduce CPU usage when the animation is off-screen. Like [other elements](https://www.ampproject.org/docs/guides/author-develop/responsive/placeholders), it supports an optional `placeholder` child, to display while the `src` file is loading:
@@ -50,29 +52,29 @@ In the future, additional functionality, such as animation playback control, cou
 
 ## Attributes
 
-**src**
+##### src
 
 Similar to the `src` attribute on the `img` tag. The value must be a URL that
 points to a publicly-cacheable image file. Cache providers may rewrite these
 URLs when ingesting AMP files to point to a cached version of the image.
 
-**srcset**
+##### srcset
 
 Same as `srcset` attribute on the `img` tag.
 
-**alt**
+##### alt
 
 A string of alternate text, similar to the `alt` attribute on `img`.
 
-**attribution**
+#####  attribution
 
 A string that indicates the attribution of the image. For example, `attribution="CC courtesy of Cats on Flicker"`.
 
-**height** and **width**
+##### height and width
 
 An explicit size of the image, which is used by the AMP runtime to determine the aspect ratio without fetching the image. 
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

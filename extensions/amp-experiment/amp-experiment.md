@@ -31,6 +31,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 The `<amp-experiment>` element is used to conduct user experience experiments (such as [A/B testing and multivariate testing](https://en.wikipedia.org/wiki/A/B_testing)) on an AMP document. It provides hooks to define customizable variants and allocates traffic to each of the variants based on the configuration. For each page view, the variant allocation is also exposed to `amp-pixel` and `amp-analytics` so that the necessary data can be collected to perform statistical comparison across variants.
 

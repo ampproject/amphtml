@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 The typical scenario looks like this:
@@ -94,11 +96,11 @@ The `amp-image-lightbox` exposes the following actions you can use [AMP on-synta
 
 ## Attributes
 
-**layout**
+##### layout
 
 Must be set to `nodisplay`.
 
-**data-close-button-aria-label**
+##### data-close-button-aria-label
 
 Optional string used as ARIA label for close button.
 

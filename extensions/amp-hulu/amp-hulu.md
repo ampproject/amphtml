@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Example
 
 ```html
@@ -45,11 +47,11 @@ limitations under the License.
 
 ## Attributes
 
-**data-eid**
+##### data-eid
 
 The ID of the video. For example, `4Dk5F2PYTtrgciuvloH3UA` is the eid in the following URL: https://player.hulu.com/site/dash/mobile_embed.html?eid=4Dk5F2PYTtrgciuvloH3UA.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

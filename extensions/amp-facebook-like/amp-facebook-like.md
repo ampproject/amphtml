@@ -31,6 +31,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Overview
 
 You can use the `amp-facebook-like` component to embed the [Facebook like button plugin](https://developers.facebook.com/docs/plugins/like-button).
@@ -46,45 +48,46 @@ You can use the `amp-facebook-like` component to embed the [Facebook like button
 ```
 ## Attributes
 
-**data-href** (required)
+##### data-href (required)
 
 The absolute URL of the page that will be liked. For example, `https://www.facebook.com/testesmegadivertidos/`.
 
-**data-action** (optional)
+##### data-action (optional)
 
 The verb to display on the button. Can be either `like` or `recommend`. The default is `like`.
 
-**data-colorscheme** (optional)
+##### data-colorscheme (optional)
 
 The color scheme used by the plugin for any text outside of the button itself. Can be `light` or `dark`. The default is `light`.
 
-**data-kd_site** (*aka data-kid_directed_site in facebook sdk*) (optional)
+##### data-kd_site  (optional)
 
-If your web site or online service, or a portion of your service, is directed to children under 13 you must enable this. The default is `false`.
+This attribute is also known as `data-kid_directed_site` in the Facebook SDK.
+If your web site or online service, or a portion of your service, is directed to children under 13 you must enable this attribute. The default is `false`.
 
-**data-layout** (optional)
+##### data-layout (optional)
 
 Selects one of the different layouts that are available for the plugin. Can be one of `standard`, `button_count`, `button` or `box_count`. The default is `standard`.
 
-**data-ref** (optional)
+##### data-ref (optional)
 
 A label for tracking referrals which must be less than 50 characters and can contain alphanumeric characters and some punctuation.
 
-**data-share** (optional)
+##### data-share (optional)
 
 Specifies whether to include a share button beside the Like button. This only works with the XFBML version. The default is `false`.
 
-**data-show_faces** (optional)
+#####data-show_faces (optional)
 
 Specifies whether to display profile photos below the button (standard layout only). You must not enable this on child-directed sites. The default is `false`.
 
-**data-size** (optional)
+##### data-size (optional)
 
 The size of the button, which can be one of two sizes, `large` or `small`. The default is `small`.
 
 For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/like-button#settings).
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

@@ -31,6 +31,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 `amp-fx-flying-carpet` displays its children inside a container of fixed height. As the user scrolls the page, the flying carpet reveals more of it contents, sliding across its children as if peering through a window in the page.
@@ -49,11 +51,11 @@ The following requirements are imposed on `amp-fx-flying-carpet` positioning:
 
 ## Attributes
 
-**height**
+##### height
 
 The height of the flying carpet's "window".
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

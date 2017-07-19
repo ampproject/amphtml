@@ -31,6 +31,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 The AMP selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text.
@@ -83,17 +85,17 @@ Example:
 
 ### Attributes on `<amp-selector>`
 
-**disabled, form, multiple, name**
+##### disabled, form, multiple, name
 
 The attributes above behave the same way as they do on a standard HTML [`<select>`](https://developer.mozilla.org/en/docs/Web/HTML/Element/select) element.
 
 ### Attributes on `<amp-selector>` options
 
-**option**
+##### option
 
 Indicates that the option is selectable.  If a value is specified, the contents of the value is submitted with the form.
 
-**disabled, selected**
+##### disabled, selected
 
 The attributes above behave the same way as they do on a standard HTML [`<option>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option) element.
 
