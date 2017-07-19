@@ -32,7 +32,7 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
     1. Implements separately documented security rewrites on served content.
 
-    2. The CSP should be equivalent or stronger to what is being served on [cdn.ampproject.org](http://cdn.ampproject.org).
+    2. The CSP should be equivalent or stronger to what is being served on `cdn.ampproject.org`.
 
     3. Caches must update their CSP in a timely fashion (within 7 days) at the request of the AMP Project.
 
@@ -56,7 +56,7 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
     1. The cache is allowed to serve stale content independent of HTTP caching headers. It must make reasonable efforts to keep the cache contents fresh and must revalidate content after serving stale responses.
 
-14. Follows [AMP cache modifications best practices](/spec/amp-cache-modifications.md).
+14. Follows [AMP cache modifications best practices](../spec/amp-cache-modifications.md).
 
 ## Guidelines: Crawling 
 
@@ -88,6 +88,10 @@ Accepted MIME types for fonts include the following prefixes:
 |  binary/octet-stream   |
 |  text/plain (not recommended)   |
 
+## Guidelines: Resource size limits
+
+For resources (i.e., HTML, images, fonts) that are larger than 12 MB, you may not fetch the resource, and you may return a 404 error.
+
 ## Guidelines: Adding a new cache to the AMP ecosystem
 
 * Contact relevant publishers to make sure they update their CORS policies to include your origin.
@@ -97,28 +101,19 @@ Accepted MIME types for fonts include the following prefixes:
   * [Google AMP Cache](https://developers.google.com/amp/cache/)
   * [Cloudflare AMP Cache](https://www.cloudflare.com/website-optimization/accelerated-mobile-links/)
 
-# References
 
-## [Google AMP Cache](https://developers.google.com/amp/cache/)
+## References
 
-* [Google AMP Cache Overview](https://developers.google.com/amp/cache/overview)
-
-* The [Google AMP Cache](https://developers.google.com/amp/cache/) is a proxy-based content delivery network for delivering all valid AMP documents.
-
-* It fetches AMP HTML pages, caches them, and improves page performance automatically. 
-
-* When using the Google AMP Cache, the document, all JS files and all images load from the same origin, which is using [HTTP 2.0](https://http2.github.io/) for maximum efficiency.
-
-* The cache also comes with a built-in [validation system](https://github.com/ampproject/amphtml/tree/master/validator) which confirms that the page works, and that it doesn’t depend on external resources. 
-
-* The validation system runs a series of assertions confirming that the page’s markup meets the AMP HTML specification.
-
-* [Google AMP Cache FAQ](https://developers.google.com/amp/cache/faq)
-
-* [Google AMP Cache updates](https://developers.google.com/amp/cache/overview#google-amp-cache-updates)
-
-* [Crawling Google AMP Cache URLs - How-to for search engines](https://docs.google.com/document/d/1V_uLHoa48IlbFl7_3KWT_1JmCf6BnFtt3S_oR4UsasQ/edit?usp=sharing)
-
-* * *
+* [Cloudflare AMP Cache](https://amp.cloudflare.com/)
+* [Google AMP Cache](https://developers.google.com/amp/cache/)
+  * [Google AMP Cache Overview](https://developers.google.com/amp/cache/overview)
+  * The [Google AMP Cache](https://developers.google.com/amp/cache/) is a proxy-based content delivery network for delivering all valid AMP documents.
+  * It fetches AMP HTML pages, caches them, and improves page performance automatically.
+  * When using the Google AMP Cache, the document, all JS files and all images load from the same origin, which is using [HTTP 2.0](https://http2.github.io/) for maximum efficiency.
+  * The cache also comes with a built-in [validation system](https://github.com/ampproject/amphtml/tree/master/validator) which confirms that the page works, and that it doesn’t depend on external resources. 
+  * The validation system runs a series of assertions confirming that the page’s markup meets the AMP HTML specification.
+  * [Google AMP Cache FAQ](https://developers.google.com/amp/cache/faq)
+  * [Google AMP Cache updates](https://developers.google.com/amp/cache/overview#google-amp-cache-updates)
+  * [Crawling Google AMP Cache URLs - How-to for search engines](https://docs.google.com/document/d/1V_uLHoa48IlbFl7_3KWT_1JmCf6BnFtt3S_oR4UsasQ/edit?usp=sharing)
 
 
