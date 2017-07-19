@@ -345,7 +345,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.isRelayoutNeededFlag = false;
 
     /** @private {!JsonObject} */
-    this.jsonConfig_ = {};
+    this.jsonConfig_ = /** @type {!JsonObject} */ ({});
     const jsonAttribute = element.getAttribute('json');
     if (jsonAttribute) {
       const jsonConfig =
