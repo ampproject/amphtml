@@ -79,7 +79,7 @@ export class AmpImgur extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
 
-    iframe.src = 'https://imgur.com/a/' +
+    iframe.src = 'https://imgur.com/' +
       encodeURIComponent(this.imgurid_) + '/embed?pub=true';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
