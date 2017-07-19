@@ -12,6 +12,10 @@
       "name": "AMP Article"
     },
     {
+      "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
+      "name": "AMP Article Access"
+    },
+    {
       "url": "examples/visual-tests/font.amp/font.amp.html",
       "name": "Fonts",
       "loading_incomplete_css": [
