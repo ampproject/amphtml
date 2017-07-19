@@ -344,18 +344,18 @@ export class AmpA4A extends AMP.BaseElement {
     /** @protected {boolean} */
     this.isRelayoutNeededFlag = false;
 
-    /** @private {!Object<string, ?JsonObject>} */
+    /** @private {!JsonObject} */
     this.jsonConfig_ = {};
     const jsonAttribute = element.getAttribute('json');
     if (jsonAttribute) {
-      const jsonConfig = tryParseJson(jsonAttribute, err => {
-        user().error(
-            TAG, this.element.getAttribute('type'), 'JSON invalid syntax',
-            err && err.message);
-      });
+      const jsonConfig =
+          /** {?JsonValue} */ (tryParseJson(jsonAttribute, err => {
+            user().error(
+                TAG, this.element.getAttribute('type'), 'JSON invalid syntax',
+                err && err.message);
+          }));
       if (typeof jsonConfig == 'object' && !Array.isArray(jsonConfig)) {
-        this.jsonConfig_ =
-            /** @type {!Object<string, ?JsonObject>} */ (jsonConfig);
+        this.jsonConfig_ = /** @type {!JsonObject} */ (jsonConfig);
       } else {
         user().error(
             TAG, this.element.getAttribute('type'),
@@ -509,8 +509,8 @@ export class AmpA4A extends AMP.BaseElement {
    * calls.
    *
    * @param {string} name the name of the config data property
-   * @return {?Object<string, ?JsonObject>} the value of the config data
-   *     property, or `null` if it's absent
+   * @return {?JsonObject} the value of the config data property, or `null` if
+   *     it's absent
    */
   getObjectData(name) {
     if (name in this.jsonConfig_) {
@@ -537,7 +537,7 @@ export class AmpA4A extends AMP.BaseElement {
    * always be treated as a string; a JSON value may be any JSON data type.
    *
    * @param {string} name the name of the config data property
-   * @return {(?JsonObject|undefined)} the value of the config data property, or
+   * @return {(?JsonValue|undefined)} the value of the config data property, or
    *     `undefined` if it's absent
    */
   getUntypedData(name) {

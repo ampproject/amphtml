@@ -766,8 +766,8 @@ function getPageLevelParameters_(win, doc, startTime, isSra) {
 }
 
 /**
- * @param {?Object<string, ?JsonObject>} targeting
- * @param {(?JsonObject|undefined)} categoryExclusions
+ * @param {!JsonObject} targeting
+ * @param {(?JsonValue|undefined)} categoryExclusions
  * @return {?string}
  * @private
  */
@@ -783,7 +783,7 @@ function serializeTargeting_(targeting, categoryExclusions) {
 
 /**
  * @param {string} key
- * @param {?JsonObject} value
+ * @param {?JsonValue} value
  * @return {string}
  * @private
  */
@@ -792,8 +792,8 @@ function serializeItem_(key, value) {
   if (typeof value == 'string') {
     serializedValue = encodeURIComponent(/** @type {string} */ (value));
   } else if (
-      Array.isArray(value) && /** @type {!Array<?JsonObject>} */
-                              (value).every(e => typeof e == 'string')) {
+      Array.isArray(value) && /** @type {!Array<?JsonValue>} */
+      (value).every(element => typeof element == 'string')) {
     serializedValue =
         /** @type {!Array<string>} */ (value).map(encodeURIComponent).join();
   } else {
