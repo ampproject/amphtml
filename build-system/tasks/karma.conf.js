@@ -46,14 +46,6 @@ module.exports = {
 
   reporters: process.env.TRAVIS ? ['super-dots', 'mocha'] : ['progress'],
 
-  superDotsReporter: {
-    icon: {
-      success : '✔',
-      failure : '✖',
-      ignore  : '?',
-    },
-  },
-
   mochaReporter: {
     output: 'minimal',
   },

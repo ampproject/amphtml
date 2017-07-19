@@ -51,7 +51,8 @@ function getConfig() {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
     return Object.assign({}, karmaDefault, {
-      reporters: ['dots', 'saucelabs'],
+      reporters: process.env.TRAVIS ?
+          ['super-dots', 'saucelabs', 'mocha'] : ['dots', 'saucelabs'],
       browsers: argv.oldchrome
           ? ['SL_Chrome_45']
           : [
@@ -215,7 +216,6 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
       'Started test responses server on localhost:31862'));
 
   new Karma(c, function(exitCode) {
-    console./*OK*/log('\n');
     server.emit('kill');
     if (exitCode) {
       var error = new Error(
