@@ -280,6 +280,11 @@ const EXPERIMENTS = [
         'amp-ad-network-doubleclick-impl/' +
         'amp-ad-network-doubleclick-impl-internal.md',
   },
+  {
+    id: 'disable-rtc',
+    name: 'Disable AMP RTC',
+    spec: 'https://github.com/ampproject/amphtml/issues/8551',
+  },
 ];
 
 if (getMode().localDev) {

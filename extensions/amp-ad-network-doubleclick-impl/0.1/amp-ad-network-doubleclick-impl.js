@@ -72,6 +72,7 @@ import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
 import {isSecureUrl, parseUrl} from '../../../src/url';
+import {isExperimentOn} from '../../../src/experiments';
 import {
   RefreshManager,
   DATA_ATTR_NAME,
@@ -388,7 +389,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     const pageLevelParametersPromise = getPageLevelParameters_(
         this.win, this.getAmpDoc(), startTime);
-    const rtcRequestPromise = this.executeRtc_();
+    const rtcRequestPromise = isExperimentOn('disable-rtc') ?
+    Promise.resolve({}) : this.executeRtc_();
     return Promise.all(
       [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
         return googleAdUrl(
@@ -676,7 +678,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           }
 
           const rtcResponse = r.rtcResponse;
-          const mergeHelper = key => {
+          ['targeting', 'categoryExclusions'].forEach(key => {
             if (!!rtcResponse[key]) {
               this.jsonTargeting_[key] =
                   !!this.jsonTargeting_[key] ?
@@ -684,9 +686,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                       rtcResponse[key]) :
                                 rtcResponse[key];
             }
-          };
-          ['targeting', 'categoryExclusions'].forEach(key => {
-            mergeHelper(key);
           });
           // rtcTotalTime is only the time that the rtc callout took,
           // does not include the time to merge.

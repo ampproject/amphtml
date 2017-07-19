@@ -78,6 +78,7 @@ export class AmpAd extends AMP.BaseElement {
           (!(adConfig[type] || {}).remoteHTMLDisabled &&
           this.win.document.querySelector('meta[name=amp-3p-iframe-src]') &&
           !this.win.document.getElementById('amp-rtc')) ||
+          // Note that predicate execution may have side effects.
           !a4aRegistry[type](this.win, this.element)) {
         // Either this ad network doesn't support Fast Fetch, its Fast Fetch
         // implementation has explicitly opted not to handle this tag, or this
