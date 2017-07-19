@@ -19,12 +19,10 @@ import {Services} from '../../src/services';
 import {
   cidServiceForDocForTesting,
 } from '../../src/service/cid-impl';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installTimerService} from '../../src/service/timer-impl';
 import {getAdCid} from '../../src/ad-cid';
 import * as lolex from 'lolex';
 
-describes.realWin('ad-cid', {}, env => {
+describes.realWin('ad-cid', {amp: true}, env => {
   const cidScope = 'cid-in-ads-test';
   const config = adConfig['_ping_'];
   let sandbox;
@@ -41,9 +39,7 @@ describes.realWin('ad-cid', {}, env => {
     clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
     element = env.win.document.createElement('amp-ad');
     element.setAttribute('type', '_ping_');
-    installDocService(win, /* isSingleDoc */ true);
-    installTimerService(win);
-    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+    const ampdoc = env.ampdoc;
     cidService = cidServiceForDocForTesting(ampdoc);
     adElement = {
       getAmpDoc: () => ampdoc,
