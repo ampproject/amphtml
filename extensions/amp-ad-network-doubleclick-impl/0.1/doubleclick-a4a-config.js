@@ -83,7 +83,8 @@ export const BETA_EXPERIMENT_ID = '2077831';
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element) {
-  if (element.hasAttribute('useSameDomainRenderingUntilDeprecated') ||
+  if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
+      element.hasAttribute('useSameDomainRenderingUntilDeprecated') ||
       !isGoogleAdsA4AValidEnvironment(win)) {
     return false;
   }
