@@ -803,8 +803,8 @@ function serializeItem_(key, value) {
 }
 
 /**
- * @param {instance} AmpA4A
- * @return {?Object<string,string|boolean|number>}
+ * @param {!AmpA4A} instance
+ * @return {?Object<string,number>}
  */
 function handleTfcd_(instance) {
   const tfcd = instance.getNumberData(TFCD);
@@ -816,6 +816,7 @@ function handleTfcd_(instance) {
       return null;
     default:
       user().error(TAG, 'Invalid TFCD value', tfcd);
+      return null;  // for Closure
   }
 }
 
