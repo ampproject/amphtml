@@ -940,7 +940,7 @@ app.get('/dist/iframe-transport-client-lib.js', (req, res, next) => {
   req.url = req.url.replace(/dist/, 'dist.3p/current');
   next();
 });
- 
+
 /*
  * Start Cache SW LOCALDEV section
  */

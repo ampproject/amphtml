@@ -48,7 +48,7 @@ export class IframeTransportMessageQueue {
      * @private
      * {!Array<!../../../src/3p-frame-messaging.IframeTransportEvent>}
      */
-    this.pendingEvents_ = [];
+    this.transportIdToPendingMessages_ = {};
 
     /** @private {!../../../src/iframe-helper.SubscriptionApi} */
     this.postMessageApi_ = new SubscriptionApi(this.frame_,
@@ -56,7 +56,8 @@ export class IframeTransportMessageQueue {
         true,
         () => {
           this.setIsReady();
-        });
+        },
+        true);
   }
 
   /**
@@ -84,7 +85,7 @@ export class IframeTransportMessageQueue {
    * @VisibleForTesting
    */
   queueSize() {
-    return this.pendingEvents_.length;
+    return Object.keys(this.transportIdToPendingMessages_).length;
   }
 
   /**
@@ -93,16 +94,14 @@ export class IframeTransportMessageQueue {
    * Identifies the event and which Transport instance (essentially which
    * creative) is sending it.
    */
-  enqueue(event) {
-    dev().assert(TAG_, event && event.transportId && event.message,
-        'Attempted to enqueue malformed message for: ' +
-        event.transportId);
-    this.pendingEvents_.push(event);
+  enqueue(transportId, event) {
+    this.transportIdToPendingMessages_[transportId] =
+        this.messagesFor(transportId) || [];
     if (this.queueSize() >= MAX_QUEUE_SIZE_) {
-      dev().warn(TAG_, 'Exceeded maximum size of queue for: ' +
-          event.transportId);
-      this.pendingEvents_.shift();
+      dev().warn(TAG_, 'Exceeded maximum size of queue for: ' + transportId);
+      this.messagesFor(transportId).shift();
     }
+    this.messagesFor(transportId).push(event);
     this.flushQueue_();
   }
 
@@ -114,9 +113,22 @@ export class IframeTransportMessageQueue {
     if (this.isReady() && this.queueSize()) {
       this.postMessageApi_.send(MessageType.IFRAME_TRANSPORT_EVENTS,
           /** @type {!JsonObject} */
-          ({events: this.pendingEvents_}));
-      this.pendingEvents_ = [];
+          ({data: this.transportIdToPendingMessages_}));
+      this.transportIdToPendingMessages_ = {};
     }
+  }
+
+  /**
+   * Test method to see which messages (if any) are associated with a given
+   * transportId
+   * @param {!string} transportId Identifies which creative is sending the
+   * message
+   * @return {Array<string>}
+   * @VisibleForTesting
+   */
+  messagesFor(transportId) {
+    return /** @type {Array<string>} */ (
+      this.transportIdToPendingMessages_[transportId]);
   }
 }
 
