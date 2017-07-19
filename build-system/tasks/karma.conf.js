@@ -56,6 +56,11 @@ module.exports = {
 
   mochaReporter: {
     output: 'minimal',
+    symbols: {
+      success : '✔',
+      error: '✖',
+      warning: '?',
+    },
   },
 
   port: 9876,
