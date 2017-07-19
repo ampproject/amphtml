@@ -31,7 +31,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     viewerMock = mockServiceForDoc(sandbox, ampdoc, 'viewer', [
       'sendMessageAwaitResponse',
       'hasCapability',
-      'getViewerOrigin',
+      'isTrustedViewer',
     ]);
 
     api = new ViewerCidApi(env.ampdoc);
@@ -63,20 +63,20 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     }
 
     it('should use client ID API from api if everything great', () => {
-      viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
+      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
       return verifyClientIdApiInUse(true);
     });
 
     it('should not use client ID API if no opt in meta tag', () => {
-      viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
+      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
 
       return verifyClientIdApiInUse(false);
     });
 
     it('should not use client ID API if Viewer origin not whitelisted', () => {
-      viewerMock.getViewerOrigin.returns(Promise.resolve('www.amazon.com'));
+      viewerMock.isTrustedViewer.returns(Promise.resolve(false));
 
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
@@ -84,7 +84,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     });
 
     it('should not use client ID API if vendor not whitelisted', () => {
-      viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
+      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
 
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="abodeanalytics">';
@@ -92,7 +92,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     });
 
     it('should not use client ID API if scope not whitelisted', () => {
-      viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
+      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
 
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
@@ -105,7 +105,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     });
 
     it('should return undefined if Viewer returns undefined', () => {
-      viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
+      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
 
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
@@ -118,7 +118,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     });
 
     it('should reject if Viewer rejects', () => {
-      viewerMock.getViewerOrigin.returns(Promise.resolve('www.google.com'));
+      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
 
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';

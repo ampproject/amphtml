@@ -18,8 +18,6 @@ import {Services} from '../services';
 import {dict} from '../utils/object';
 
 const GOOGLE_CLIENT_ID_API_META_NAME = 'amp-google-client-id-api';
-const GOOGLE_VIEWER_ORIGIN_REGEX =
-    /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 const CID_API_SCOPE_WHITELIST = {
   'googleanalytics': 'AMP_ECID_GOOGLE',
 };
@@ -64,9 +62,9 @@ export class ViewerCidApi {
       return Promise.resolve(false);
     }
 
-    return this.viewer_.getViewerOrigin().then(origin => {
-      return GOOGLE_VIEWER_ORIGIN_REGEX.test(origin);
-    });
+    // Semantically, we should be checking if it's a Viewer of Google origin
+    // Right now isTrustedViewer does the same check.
+    return this.viewer_.isTrustedViewer();
   }
 
   /**
