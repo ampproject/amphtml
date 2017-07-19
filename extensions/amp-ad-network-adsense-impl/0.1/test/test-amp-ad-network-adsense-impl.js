@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
@@ -31,7 +30,6 @@ import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-
 import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {upgradeOrRegisterElement} from '../../../../src/custom-element';
 import {
   createElementWithAttributes,
   addAttributesToElement,
@@ -314,8 +312,6 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
     });
 
     it('should contain act', () => {
-      upgradeOrRegisterElement(env.win, 'amp-a4a',
-          AmpAdNetworkAdsenseImpl);
       const ampStickyAd =
             createElementWithAttributes(env.win.document, 'amp-sticky-ad', {
               'layout': 'nodisplay',
@@ -329,17 +325,13 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
 
     it('formats client properly', () => {
       element.setAttribute('data-ad-client', 'SoMeClient');
-      new AmpAd(element).upgradeCallback();
-      impl.onLayoutMeasure();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(/\\?client=ca-someclient/);
       });
     });
     it('has correct format when width == "auto"', () => {
       element.setAttribute('width', 'auto');
-      new AmpAd(element).upgradeCallback();
       expect(impl.element.getAttribute('width')).to.equal('auto');
-      impl.onLayoutMeasure();
       return impl.getAdUrl().then(url =>
         // With exp as-use-attr-for-format off, we can't test for specific
         // numbers, but we know that the values should be numeric.
@@ -347,9 +339,7 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
     });
     it('has correct format when height == "auto"', () => {
       element.setAttribute('height', 'auto');
-      new AmpAd(element).upgradeCallback();
       expect(impl.element.getAttribute('height')).to.equal('auto');
-      impl.onLayoutMeasure();
       return impl.getAdUrl().then(url =>
         // With exp as-use-attr-for-format off, we can't test for specific
         // numbers, but we know that the values should be numeric.
@@ -359,8 +349,6 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
       toggleExperiment(impl.win, 'as-use-attr-for-format', true);
       const width = element.getAttribute('width');
       const height = element.getAttribute('height');
-      new AmpAd(element).upgradeCallback();
-      impl.onLayoutMeasure();
       return impl.getAdUrl().then(url =>
         // With exp as-use-attr-for-format off, we can't test for specific
         // numbers, but we know that the values should be numeric.
@@ -371,9 +359,7 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
         () => {
           toggleExperiment(impl.win, 'as-use-attr-for-format', true);
           element.setAttribute('width', 'auto');
-          new AmpAd(element).upgradeCallback();
           expect(impl.element.getAttribute('width')).to.equal('auto');
-          impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
               // Ensure that "auto" doesn't appear anywhere here:
               expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
@@ -382,8 +368,6 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
       forceExperimentBranch(impl.win,
           ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
           AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
-      new AmpAd(element).upgradeCallback();
-      impl.onLayoutMeasure();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
             `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.CONTROL}`));
@@ -393,8 +377,6 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
       forceExperimentBranch(impl.win,
           ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
           AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
-      new AmpAd(element).upgradeCallback();
-      impl.onLayoutMeasure();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
             `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT}`));
@@ -402,7 +384,6 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
     });
     it('returns the right URL', () => {
       element.setAttribute('data-ad-slot', 'some_slot');
-      new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().then(url => {
         [
           /^https:\/\/googleads\.g\.doubleclick\.net\/pagead\/ads/,
@@ -439,6 +420,63 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
           /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D\d+(&|$)/,
           /(\?|&)dtd=\d+(&|$)/,
         ].forEach(regexp => expect(url).to.match(regexp));
+      });
+    });
+
+    // Not using arrow function here because otherwise the way closure behaves
+    // prevents me from calling this.timeout(5000).
+    it('with multiple slots', function() {
+      // When ran locally, this test tends to exceed 2000ms timeout.
+      this.timeout(5000);
+      // Reset counter for purpose of this test.
+      delete env.win['ampAdGoogleIfiCounter'];
+      const elem1 = createAdsenseImplElement({
+        'data-ad-client': 'ca-adsense',
+        'width': '320',
+        'height': '50',
+        'data-experiment-id': '8675309',
+      }, env.win.document);
+      env.win.document.body.appendChild(elem1);
+      const elem2 = createAdsenseImplElement({
+        'data-ad-client': 'ca-adsense',
+        'width': '320',
+        'height': '50',
+        'data-experiment-id': '8675309',
+      }, env.win.document, 'amp-ad');
+      env.win.document.body.appendChild(elem2);
+      const elem3 = createAdsenseImplElement({
+        'data-ad-client': 'ca-not-adsense',
+        'width': '320',
+        'height': '50',
+        'data-experiment-id': '8675309',
+      }, env.win.document, 'amp-ad');
+      env.win.document.body.appendChild(elem3);
+      const impl1 = new AmpAdNetworkAdsenseImpl(elem1);
+      const impl2 = new AmpAdNetworkAdsenseImpl(elem2);
+      const impl3 = new AmpAdNetworkAdsenseImpl(elem3);
+      toggleExperiment(impl1.win, 'as-use-attr-for-format', true);
+      //new AmpAd(elem1).upgradeCallback();
+      return impl1.getAdUrl().then(adUrl1 => {
+        expect(adUrl1).to.match(/pv=2/);
+        expect(adUrl1).to.not.match(/prev_fmts/);
+        expect(adUrl1).to.match(/ifi=1/);
+        //new AmpAd(elem2).upgradeCallback();
+        return impl2.getAdUrl().then(adUrl2 => {
+          expect(adUrl2).to.match(/pv=1/);
+          expect(adUrl2).to.match(/prev_fmts=320x50/);
+          expect(adUrl2).to.match(/ifi=2/);
+          //new AmpAd(elem3).upgradeCallback();
+          return impl3.getAdUrl().then(adUrl3 => {
+            expect(adUrl3).to.match(/pv=2/);
+            // By some quirk of the test infrastructure, when this test
+            // is ran individually, each added slot after the first one
+            // has a bounding rectangle of 0x0. The important thing to
+            // test here is the number of previous formats.
+            expect(adUrl3).to.match(
+                /prev_fmts=(320x50%2C320x50|320x50%2C0x0)/);
+            expect(adUrl3).to.match(/ifi=3/);
+          });
+        });
       });
     });
   });
