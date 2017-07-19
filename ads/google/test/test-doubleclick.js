@@ -62,16 +62,6 @@ describes.sandboxed('writeAdScript', {}, env => {
   });
 
 
-  it('should use GPT and opt out of the GladeExperiment when' +
-  'useSameDomainRenderingUntilDeprecated is not undefined', () => {
-    const data = {useSameDomainRenderingUntilDeprecated: true};
-    const gptFilename = undefined;
-
-    writeAdScript(win, data, gptFilename);
-
-    verifyScript(win, 'gpt.js');
-  });
-
   it('should use GPT and opt out of the GladeExperiment when multiSize is not' +
   'null', () => {
     const data = {multiSize: 'hey!'};

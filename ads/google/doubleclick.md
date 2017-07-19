@@ -102,20 +102,37 @@ Supported via `json` attribute:
 - `cookieOptions`
 - `tagForChildDirectedTreatment`
 - `targeting`
-- `useSameDomainRenderingUntilDeprecated`
 
-### Temporary use of useSameDomainRenderingUntilDeprecated
-An experiment to use the higher performance GPT Light tag in place of the DoubleClick GPT tag causes the ad to render in a second cross domain iframe within the outer AMP iframe. This prevents ads from accessing the iframe sandbox information and methods which are provided by the AMP runtime. Until this API is available to work in the second level iframe, publishers can opt out of this experiment by including "useSameDomainRenderingUntilDeprecated": 1 as a json attribute. This attribute will be deprecated once the [new window.context implementation](https://github.com/ampproject/amphtml/issues/6829) is complete. After that point, the GPT Light tag will become the default and all eligible ads will always be rendered inside a second cross domain iframe.
+### Temporary use of useSameDomainRenderingUntilDeprecated -- NO LONGER SUPPORTED
+The useSameDomainRenderingUntilDeprecated flag is officially deprecated. Please refer to section below on using AmpContext library.
+
+### Use of AmpContext Library
+An experiment to use the higher performance GPT Light tag in place of the DoubleClick GPT tag causes the ad to render in a second cross domain iframe within the outer AMP iframe. This prevents ads from accessing the iframe sandbox information and methods which are provided by the AMP runtime. 
+
+To allow an ad to gain access to the sandbox information, i.e. window.context, ads must now load the AmpContext library, which will inflate the window.context library within the ad's window.
+
+This script must be loaded asynchronously, which means that the ad must wait on an event that the library has been loaded and built.
 
 Example:
-```html
-<amp-ad width=320 height=50
-    type="doubleclick"
-    data-slot="/4119129/mobile_ad_banner"
-    json='{"useSameDomainRenderingUntilDeprecated":1}'>
-</amp-ad>
-```
 
+``` javascript
+if (!window.context){
+ /* must add listener for the creation of window.context prior to attaching the script */
+ window.addEventListener('amp-windowContextCreated', function(){
+    /* window.context now ready to use */
+    ...
+ });
+
+ // load ampcontext-lib.js which will create window.context
+ try{
+   var ampContextScript = document.createElement('script');
+   ampContextScript.src = JSON.parse(decodeURI(window.name)).ampcontextFilepath;
+   document.head.appendChild(ampContextScript);
+  } catch (err){ /* window.context could not be built */ }
+} else {
+	/* window.context already available to use*/
+}
+```
 
 ### Unsupported DFP Features & Formats
 
