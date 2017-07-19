@@ -38,13 +38,13 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
   });
 
   describe('isSupported', () => {
-    it('should return true if cap=cid ', () => {
+    it('should return true if Viewer has CID capability', () => {
       viewerMock.hasCapability.withArgs('cid').returns(true);
       expect(api.isSupported()).to.be.true;
       expect(viewerMock.hasCapability).to.be.calledWith('cid');
     });
 
-    it('should return true if cap=cid ', () => {
+    it('should return false if Viewer has no CID capability', () => {
       viewerMock.hasCapability.withArgs('cid').returns(false);
       expect(api.isSupported()).to.be.false;
       expect(viewerMock.hasCapability).to.be.calledWith('cid');
