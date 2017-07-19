@@ -37,9 +37,6 @@ export class Toolbar {
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {Element} */
-    this.body_ = this.ampdoc_.win.document.body;
-
     /** @private {!string} */
     this.toolbarMedia_ = this.toolbarDomElement_.getAttribute('toolbar');
 
