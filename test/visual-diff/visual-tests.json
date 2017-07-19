@@ -20,7 +20,7 @@
       "loading_complete_css": [
         ".login-section"
       ],
-      "forbidden_css": [
+      "loading_incomplete_css": [
         ".article-body"
       ]
     },
