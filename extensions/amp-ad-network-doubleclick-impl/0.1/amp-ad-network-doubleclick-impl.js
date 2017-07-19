@@ -81,7 +81,7 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
 
-/** @private @const {!Object<string,string>} */
+/** @private @const {!Object<string, string>} */
 const PAGE_LEVEL_PARAMS_ = {
   'gdfp_req': '1',
   'sfv': DEFAULT_SAFEFRAME_VERSION,
@@ -101,7 +101,7 @@ let sraRequests = null;
  * Array of functions used to combine block level request parameters for SRA
  * request.
  * @private @const
- * {!Array<!function(!Array<AmpAdNetworkDoubleclickImpl>):?Object<string,string>}
+ * {!Array<function(!Array<!AmpAdNetworkDoubleclickImpl>): ?Object<string, string>}
  */
 const BLOCK_SRA_COMBINERS_ = [
   instances => {
