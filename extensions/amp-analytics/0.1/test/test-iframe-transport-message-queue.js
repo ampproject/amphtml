@@ -21,7 +21,7 @@ describes.realWin('amp-analytics.iframe-transport-message-queue', {amp: true},
     env => {
       let frame;
       let queue;
-
+ 
       beforeEach(() => {
         frame = createElementWithAttributes(env.win.document, 'iframe', {
           'sandbox': 'allow-scripts',
