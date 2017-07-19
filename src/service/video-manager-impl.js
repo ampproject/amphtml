@@ -131,7 +131,8 @@ export class VideoManager {
     /** @private {?Function} */
     this.boundSecondsPlaying_ = null;
 
-    const isAnalyticsEnabled = (Services.analyticsForDocOrNull(ampdoc) == null);
+    const isAnalyticsEnabled = getMode().test ?
+        true : (Services.analyticsForDocOrNull(ampdoc) == null);
 
     if (isAnalyticsEnabled) {
       this.timer_ = Services.timerFor(ampdoc.win);
