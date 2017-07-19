@@ -60,18 +60,18 @@ import {
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {stringHash32} from '../../../src/string';
 import {removeElement} from '../../../src/dom';
-import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {tryParseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {isCancellation} from '../../../src/error';
 import {
   RefreshManager,
-  DATA_ATTR_NAME,
+  DATA_JS_NAME,
 } from '../../amp-a4a/0.1/refresh-manager';
 
 /** @type {string} */
@@ -278,7 +278,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getBlockParameters_() {
     dev().assert(this.initialSize_);
     let sizeStr = `${this.initialSize_.width}x${this.initialSize_.height}`;
-    const multiSizeDataStr = this.element.getAttribute('data-multi-size');
+    const multiSizeDataStr = this.getStringData('multiSize');
     if (multiSizeDataStr) {
       const multiSizeValidation = this.getStringData('multiSizeValidation');
       // The following call will check all specified multi-size dimensions,
@@ -421,7 +421,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   layoutCallback() {
     const superReturnValue = super.layoutCallback();
-    if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
+    if (this.useSra && this.getBooleanData(DATA_JS_NAME)) {
       user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
     }
     this.refreshManager_ = this.useSra ||
@@ -494,8 +494,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   generateAdKey_(size) {
     const element = this.element;
     const domFingerprint = domFingerprintPlain(element);
-    const slot = element.getStringData('slot') || '';
-    const multiSize = element.getStringData('multiSize') || '';
+    const slot = this.getStringData('slot') || '';
+    const multiSize = this.getStringData('multiSize') || '';
     const string = `${slot}:${size}:${multiSize}:${domFingerprint}`;
     return stringHash32(string);
   }
@@ -540,7 +540,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   groupSlotsForSra() {
     return groupAmpAdsByType(
-        this.win, this.element.getAttribute('type'), getNetworkId);
+        this.win, this.getStringData('type'), getNetworkId);
   }
 
   /**
@@ -690,14 +690,35 @@ export function resetSraStateForTesting() {
 
 /**
  * @param {!Element} element
- * @return {string} networkId from data-ad-slot attribute.
+ * @return {string} networkId from data-slot or json attribute.
  * @visibileForTesting
  */
 export function getNetworkId(element) {
-  const networkId = /^(?:\/)?(\d+)/.exec(
-      dev().assertString(element.getStringData('slot')));
-  // TODO: guarantee data-ad-slot format as part of isValidElement?
-  return networkId ? networkId[1] : '';
+  // TODO(@taymonbeal, #10524): unify this with methods in AmpA4A
+  let slot;
+  const jsonAttribute = element.getAttribute('json');
+  if (jsonAttribute) {
+    const jsonConfig = tryParseJson(jsonAttribute, err => {
+      user().warn(TAG, 'JSON invalid syntax', err && err.message);
+    });
+    if (jsonConfig && typeof jsonConfig['slot'] == 'string') {
+      slot = jsonConfig['slot'];
+    } else {
+      user().warn(TAG, 'slot not found in JSON', jsonConfig);
+      return '';
+    }
+  } else if ('slot' in element.dataset) {
+    slot = element.dataset['slot'];
+  } else {
+    user().warn(TAG, 'slot not found');
+    return '';
+  }
+  const networkId = /^(?:\/)?(\d+)/.exec(slot);
+  if (!networkId) {
+    user().warn(TAG, 'invalid slot syntax');
+    return '';
+  }
+  return networkId[1];
 }
 
 

@@ -48,7 +48,7 @@ import {endsWith} from '../../../src/string';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
-import {parseJson} from '../../../src/json';
+import {parseJson, tryParseJson} from '../../../src/json';
 import {handleClick} from '../../../ads/alp/handler';
 import {
   getDefaultBootstrapBaseUrl,
@@ -348,14 +348,11 @@ export class AmpA4A extends AMP.BaseElement {
     this.jsonConfig_ = {};
     const jsonAttribute = element.getAttribute('json');
     if (jsonAttribute) {
-      let jsonConfig;
-      try {
-        jsonConfig = JSON.parse(jsonAttribute);
-      } catch (err) {
+      const jsonConfig = tryParseJson(jsonAttribute, err => {
         user().error(
             TAG, this.element.getAttribute('type'), 'JSON invalid syntax',
             err && err.message);
-      }
+      });
       if (typeof jsonConfig == 'object' && !Array.isArray(jsonConfig)) {
         this.jsonConfig_ = jsonConfig;
       } else {
@@ -424,6 +421,8 @@ export class AmpA4A extends AMP.BaseElement {
         elementCheck : super.renderOutsideViewport();
   }
 
+  // TODO(@taymonbeal, #10524): unify these into something more general
+
   /**
    * Returns a string-valued config data property set by the publisher in the
    * tag in a `data-` attribute or in the `json` attribute. Throws an error if
@@ -470,7 +469,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
     if (name in this.element.dataset) {
       const value = Number(this.element.dataset[name]);
-      if (Number.isNaN(value)) {
+      if (isNaN(value)) {
         user().error(
             TAG, this.element.getAttribute('type'),
             `JSON value for ${name} is not a number`, value);
@@ -521,6 +520,12 @@ export class AmpA4A extends AMP.BaseElement {
             `JSON value for ${name} is not an object`, value);
       }
       return value;
+    }
+    if (name in this.element.dataset) {
+      user().error(
+          TAG, this.element.getAttribute('type'),
+          `JSON value for ${name} is not an object`,
+          this.element.dataset[name]);
     }
     return null;
   }
