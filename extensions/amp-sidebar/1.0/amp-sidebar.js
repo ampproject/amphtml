@@ -104,14 +104,14 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.setAttribute('side', this.side_);
     }
 
-    const ampDoc = this.getAmpDoc();
+    const ampdoc = this.getAmpDoc();
     // Get the toolbar attribute from the child navs
     const toolbarElements =
-      toArray(this.element.querySelectorAll('nav[toolbar][toolbar-target]'));
+      toArray(ampdoc.getRootNode().querySelectorAll('nav[toolbar]'));
     toolbarElements.forEach(toolbarElement => {
       try {
-        this.toolbars_.push(new Toolbar(toolbarElement, this.win,
-          this.vsync_, ampDoc));
+        this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
+          ampdoc));
       } catch (e) {
         user().error(TAG, 'Failed to instantiate toolbar', e);
       }

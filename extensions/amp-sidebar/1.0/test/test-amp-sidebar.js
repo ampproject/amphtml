@@ -616,7 +616,7 @@
          const headerElements = sidebarElement.ownerDocument
                .getElementsByTagName('header');
          const toolbarElements = sidebarElement.ownerDocument
-               .querySelectorAll('[toolbar][toolbar-target]');
+               .querySelectorAll('[toolbar]');
          expect(headerElements.length).to.be.equal(0);
          expect(toolbarElements.length).to.be.equal(0);
          expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(0);

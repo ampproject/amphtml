@@ -16,23 +16,17 @@
 
 import {toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
+import {user} from '../../../src/log';
 
 export class Toolbar {
   /**
   * @param {!Element} element
-  * @param {!Window} win
   * @param {!../../../src/service/vsync-impl.Vsync} vsync
-  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
   */
-  constructor(element, win, vsync, ampDoc) {
+  constructor(element, vsync, ampdoc) {
     /** @private {!Element} */
     this.toolbarDomElement_ = element;
-
-    /** @private {!Window} **/
-    this.win_ = win;
-
-    /** @private {Element} */
-    this.body_ = this.win_.document.body;
 
     /** @private {number|undefined} */
     this.height_ = undefined;
@@ -41,7 +35,10 @@ export class Toolbar {
     this.vsync_ = vsync;
 
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampDoc_ = ampDoc;
+    this.ampdoc_ = ampdoc;
+
+    /** @private {Element} */
+    this.body_ = this.ampdoc_.win.document.body;
 
     /** @private {!string} */
     this.toolbarMedia_ = this.toolbarDomElement_.getAttribute('toolbar');
@@ -80,7 +77,7 @@ export class Toolbar {
    */
   onLayoutChange(onShowCallback) {
     // Get if we match the current toolbar media
-    const matchesMedia = this.win_
+    const matchesMedia = this.ampdoc_.win
         .matchMedia(this.toolbarMedia_).matches;
 
     // Remove and add the toolbar dynamically
@@ -100,10 +97,12 @@ export class Toolbar {
    */
   buildCallback_() {
     this.toolbarClone_ = this.toolbarDomElement_.cloneNode(true);
-    const targetId = this.toolbarDomElement_.getAttribute('toolbar-target');
+    const targetId = user().assert(this.toolbarDomElement_
+        .getAttribute('toolbar-target'), '"toolbar-target" is required',
+        this.toolbarDomElement_);
     // Set the target element to the toolbar clone if it exists.
-    this.ampDoc_.whenReady().then(() => {
-      const targetElement = this.win_.document.getElementById(targetId);
+    this.ampdoc_.whenReady().then(() => {
+      const targetElement = this.ampdoc_.getElementById(targetId);
       if (targetElement) {
         this.toolbarTarget_ = targetElement;
         this.toolbarClone_.classList.add('i-amphtml-toolbar');
