@@ -22,7 +22,6 @@ import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequestUsingIframe, Transport} from './transport';
 import {Services} from '../../../src/services';
-import {ResponseMap} from '../../../src/3p-analytics-common';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {parseJson} from '../../../src/json';
@@ -79,7 +78,7 @@ export class AmpAnalytics extends AMP.BaseElement {
      * @private {?string} Predefined type associated with the tag. If specified,
      * the config from the predefined type is merged with the inline config
      */
-    this.type_ = this.element.getAttribute('type');
+    this.type_ = null;
 
     /** @private {!boolean} */
     this.isSandbox_ = false;
@@ -115,8 +114,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {?Promise} */
     this.iniPromise_ = null;
 
-    /** @private {!Transport} */
-    this.transport_ = new Transport(this.type_);
+    /** @private {?Transport} */
+    this.transport_ = null;
   }
 
   /** @override */
@@ -167,8 +166,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     const ampDoc = this.getAmpDoc();
-    Transport.markCrossDomainIframeAsDone(ampDoc.win.document, this.type_);
-    ResponseMap.remove(ampDoc, this.type_);
+    const type = this.element.getAttribute('type');
+    Transport.markCrossDomainIframeAsDone(ampDoc.win.document, type);
     return true;
   }
 
@@ -234,11 +233,9 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.instrumentation_.createAnalyticsGroup(this.element);
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      this.transport_ = new Transport(this.element.getAttribute('type'));
       this.transport_.processCrossDomainIframe(this.getAmpDoc().win,
-          this.config_['transport']['iframe'],
-          (type, responseMessage) => {
-            this.processCrossDomainIframeResponse_(type, responseMessage);
-          });
+          this.config_['transport']['iframe']);
     }
 
     const promises = [];
@@ -296,20 +293,6 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     return Promise.all(promises);
-  }
-
-  /**
-   * Receives any response that may be sent from the cross-domain iframe.
-   * @param {!string} type The type parameter of the cross-domain iframe
-   * @param {!../../../src/3p-analytics-common.AmpAnalytics3pResponse} response
-   * The response message from the iframe that was specified in the
-   * amp-analytics config
-   */
-  processCrossDomainIframeResponse_(type, response) {
-    ResponseMap.add(this.getAmpDoc(),
-        type,
-        /** @type {string} */ (this.win.document.baseURI),
-        response['data']);
   }
 
   /**

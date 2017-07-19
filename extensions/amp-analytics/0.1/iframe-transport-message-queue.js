@@ -27,7 +27,7 @@ const MAX_QUEUE_SIZE_ = 100;
 /**
  * @visibleForTesting
  */
-export class AmpIframeTransportMessageQueue {
+export class IframeTransportMessageQueue {
   /**
    * Constructor
    * @param {!Window} win The window element

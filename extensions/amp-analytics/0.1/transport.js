@@ -30,11 +30,7 @@ import {
 import {removeElement} from '../../../src/dom';
 import {setStyle, setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
-import {listenFor} from '../../../src/iframe-helper';
-import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../../../src/3p-analytics-common';
-import {
-  AmpIframeTransportMessageQueue,
-} from './amp-iframe-transport-message-queue';
+import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.Transport';
@@ -43,7 +39,7 @@ const TAG_ = 'amp-analytics.Transport';
  *    frame: Element,
  *    sentinel: !string,
  *    usageCount: number,
- *    queue: AmpIframeTransportMessageQueue,
+ *    queue: IframeTransportMessageQueue,
  *  }} */
 export let FrameData;
 
@@ -157,12 +153,8 @@ export class Transport {
    * iframe already exists, and if not, create it.
    * @param {!Window} win The window element
    * @param {!string} frameUrl  The URL of the cross-domain iframe
-   * @param {function(!string,
-   *   !../../../src/3p-analytics-common.AmpAnalytics3pResponse)=}
-   *   opt_processResponse An optional function to receive any response
-   *   messages back from the cross-domain iframe
    */
-  processCrossDomainIframe(win, frameUrl, opt_processResponse) {
+  processCrossDomainIframe(win, frameUrl) {
     let frameData;
     if (Transport.hasCrossDomainIframe(this.type_)) {
       frameData = Transport.getFrameData(this.type_);
@@ -172,9 +164,6 @@ export class Transport {
       win.document.body.appendChild(frameData.frame);
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
-    if (opt_processResponse) {
-      Transport.responseProcessors_[this.id_] = opt_processResponse;
-    }
   }
 
   /**
@@ -201,7 +190,7 @@ export class Transport {
     const useLocal = getMode().localDev || getMode().test;
     const useRtvVersion = !useLocal;
     const scriptSrc = calculateEntryPointScriptUrl(
-        window.location, 'ampanalytics-lib', useLocal, useRtvVersion);
+        win.parent.location, 'ampanalytics-lib', useLocal, useRtvVersion);
     const frameName = JSON.stringify(/** @type {JsonObject} */ ({
       scriptSrc,
       sentinel,
@@ -210,51 +199,22 @@ export class Transport {
         /** @type {!JsonObject} */ ({
           sandbox: 'allow-scripts',
           name: frameName,
-          src: frameUrl,
           'data-amp-3p-sentinel': sentinel,
         }));
     frame.sentinel = sentinel;
     setStyles(frame, {
-      width: 0,
-      height: 0,
       display: 'none',
       position: 'absolute',
-      top: 0,
-      left: 0,
     });
+    frame.src = frameUrl;
     const frameData = /** @const {FrameData} */ ({
       frame,
       usageCount: 1,
-      queue: new AmpIframeTransportMessageQueue(win,
+      queue: new IframeTransportMessageQueue(win,
           /** @type {!HTMLIFrameElement} */
           (frame)),
     });
     Transport.crossDomainIframes_[this.type_] = frameData;
-    // Note: this is a listener for responses from the frame, regardless of
-    // which transport instance a response is intended for. This is because
-    // the listener may only be created prior to the iframe being attached
-    // to the DOM - see assert in listenFor which references #2942.
-    // This is why listenFor() is called here in createCrossDomainIframe(),
-    // rather than in processCrossDomainIframe().
-    frameData.responseMessageUnlisten = listenFor(frameData.frame,
-        AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
-        response => {
-          dev().assert(response && response['data'],
-              'Received empty response from 3p analytics frame');
-          const responseProcessor = Transport.responseProcessors_[
-            response['transport']];
-          if (!responseProcessor) {
-            dev().warn(TAG_,'Received a response, but no response processor' +
-              ' was configured');
-            return;
-          }
-          responseProcessor(
-              this.type_,
-              /** @type
-               * {!../../../src/3p-analytics-common.AmpAnalytics3pResponse}
-               */ (response));
-        },
-        true);
     return frameData;
   }
 
@@ -276,7 +236,6 @@ export class Transport {
       return;
     }
     ampDoc.body.removeChild(frameData.frame);
-    frameData.responseMessageUnlisten();
     delete Transport.crossDomainIframes_[type];
   }
 
@@ -352,11 +311,6 @@ export class Transport {
 
 /** @private {Object<string,FrameData>} */
 Transport.crossDomainIframes_ = {};
-
-/** @private {Object<string,
- * function(!string,!../../../src/3p-analytics-common.AmpAnalytics3pResponse)>}
- */
-Transport.responseProcessors_ = {};
 
 /** @private {number} */
 Transport.nextId_ = 0;
