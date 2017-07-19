@@ -88,6 +88,10 @@ Accepted MIME types for fonts include the following prefixes:
 |  binary/octet-stream   |
 |  text/plain (not recommended)   |
 
+## Guidelines: Resource size limits
+
+For resources (i.e., HTML, images, fonts) that are larger than 12 MB, you may not fetch the resource, and you may return a 404 error.
+
 ## Guidelines: Adding a new cache to the AMP ecosystem
 
 * Contact relevant publishers to make sure they update their CORS policies to include your origin.
