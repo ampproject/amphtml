@@ -940,7 +940,7 @@ function verifyRtcConfigMember(member, expectedType) {
     typeof rtcConfig[member] != expectedType) {
     const type = typeof rtcConfig[member];
     user().warn(
-        `RTC ${member} must be a ${expectedType}, instead was ${type}`);
+        TAG, `RTC ${member} must be a ${expectedType}, instead was ${type}`);
   }
 }
 
