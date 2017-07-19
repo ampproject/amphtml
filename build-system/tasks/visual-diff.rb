@@ -122,6 +122,10 @@ def generateSnapshots(pagesToSnapshot)
     page.driver.options[:js_errors] = true
     page.driver.options[:phantomjs_options] =
         ["--debug=#{ENV['PHANTOMJS_DEBUG']}"]
+    # Include a blank snapshot on master, to allow for PR builds to be skipped.
+    if ARGV.include? '--master'
+      Percy::Capybara.snapshot(page, name: 'Blank page')
+    end
     webpages.each do |webpage|
       url = webpage["url"]
       name = webpage["name"]
