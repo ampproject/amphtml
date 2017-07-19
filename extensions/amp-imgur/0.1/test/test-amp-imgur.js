@@ -35,7 +35,7 @@ describe('amp-imgur', () => {
 
   function testIframe(iframe) {
     expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal('https://imgur.com/a/2CnX7/embed?pub=true');
+    expect(iframe.src).to.equal('https://imgur.com/2CnX7/embed?pub=true');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
   }
 
