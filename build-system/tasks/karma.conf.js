@@ -59,7 +59,7 @@ module.exports = {
     symbols: {
       success : '✔',
       error: '✖',
-      warning: '?',
+      info: '?',
     },
   },
 
