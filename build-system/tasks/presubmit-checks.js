@@ -322,6 +322,7 @@ var forbiddenTerms = {
     message: 'Usages must be reviewed.',
     whitelist: [
       'src/service/viewer-impl.js',
+      'src/service/viewer-cid-api.js',
       'src/service/storage-impl.js',
       'src/service/history-impl.js',
       'src/service/cid-impl.js',
@@ -381,6 +382,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/viewer-impl.js',
+      'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',
       'src/service/cid-impl.js',
     ],

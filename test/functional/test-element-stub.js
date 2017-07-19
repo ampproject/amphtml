@@ -14,74 +14,45 @@
  * limitations under the License.
  */
 
-import {ElementStub, resetLoadingCheckForTests} from '../../src/element-stub';
-import {createIframePromise} from '../../testing/iframe';
-import '../../extensions/amp-ad/0.1/amp-ad';
-import '../../extensions/amp-analytics/0.1/amp-analytics';
-import '../../extensions/amp-video/0.1/amp-video';
+import {createElementWithAttributes} from '../../src/dom';
 
-describe('test-element-stub', () => {
+describes.realWin('test-element-stub', {amp: true}, env => {
 
-  let iframe;
+  let doc;
 
-  afterEach(() => {
-    resetLoadingCheckForTests();
+  beforeEach(() => {
+    doc = env.win.document;
   });
 
-  function getElementStubIframe(name) {
-    return createIframePromise().then(f => {
-      iframe = f;
-      const testElement = iframe.doc.createElement(name);
-      testElement.setAttribute('width', '300');
-      testElement.setAttribute('height', '250');
-      testElement.setAttribute('type', '_ping_');
-      testElement.setAttribute('data-aax_size', '300*250');
-      testElement.setAttribute('data-aax_pubname', 'abc123');
-      testElement.setAttribute('data-aax_src', '302');
-      const link = iframe.doc.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      link.setAttribute('href', 'blah');
-      iframe.doc.head.appendChild(link);
-      iframe.doc.getElementById('parent').appendChild(testElement);
+  function insertElement(name) {
+    const testElement = createElementWithAttributes(doc, name, {
+      width: '300',
+      height: '250',
+      type: '_ping_',
+      'data-aax_size': '300*250',
+      'data-aax_pubname': 'abc123',
+      'data-aax_src': '302',
     });
+    doc.body.appendChild(testElement);
   }
 
   it('insert script for amp-ad when script is not included', () => {
-    return getElementStubIframe('amp-ad').then(() => {
-      expect(iframe.doc.querySelectorAll('amp-ad')).to.have.length(1);
-      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
-          .to.have.length(0);
-      new ElementStub(iframe.doc.body.querySelector('#parent')
-          .firstChild);
-      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
-          .to.have.length(1);
-    });
+    insertElement('amp-ad');
+    expect(doc.head.querySelectorAll('[custom-element="amp-ad"]'))
+        .to.have.length(1);
   });
 
   it('insert script for amp-embed when script is not included', () => {
-    return getElementStubIframe('amp-embed').then(() => {
-      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
-          .to.have.length(0);
-      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-embed"]'))
-          .to.have.length(0);
-      new ElementStub(iframe.doc.body.querySelector('#parent')
-          .firstChild);
-      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-embed"]'))
-          .to.have.length(0);
-      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
-          .to.have.length(1);
-    });
+    insertElement('amp-embed');
+    expect(doc.head.querySelectorAll('[custom-element="amp-embed"]'))
+        .to.have.length(0);
+    expect(doc.head.querySelectorAll('[custom-element="amp-ad"]'))
+        .to.have.length(1);
   });
 
   it('insert script for amp-video when script is not included', () => {
-    return getElementStubIframe('amp-video').then(() => {
-      expect(iframe.doc.querySelectorAll('amp-video')).to.have.length(1);
-      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-video"]'))
-          .to.have.length(0);
-      new ElementStub(iframe.doc.body.querySelector('#parent')
-          .firstChild);
-      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-video"]'))
-          .to.have.length(1);
-    });
+    insertElement('amp-video');
+    expect(doc.head.querySelectorAll('[custom-element="amp-video"]'))
+        .to.have.length(1);
   });
 });
