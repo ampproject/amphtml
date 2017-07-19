@@ -22,10 +22,6 @@
               " has received an event: " + event +
               " from the creative with transport ID: " +
               ampAnalytics.getTransportId());
-            ampAnalytics.sendMessageToCreative({
-              'status': 'received',
-              'other': ampAnalytics.getTransportId()
-            });
           });
         });
       };
