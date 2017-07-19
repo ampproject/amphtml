@@ -65,6 +65,7 @@ export const URL_EXPERIMENT_MAPPING = {
  * @returns {boolean}
  */
 export function adsenseIsA4AEnabled(win, element) {
+  // TODO(@taymonbeal, #10524): unify this with methods in AmpA4A
   const jsonAttribute = element.getAttribute('json');
   const json = jsonAttribute && tryParseJson(jsonAttribute);
   if (!isGoogleAdsA4AValidEnvironment(win) ||
@@ -105,7 +106,6 @@ export function adsenseIsA4AEnabled(win, element) {
     ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL].includes(experimentId);
 }
 
-<<<<<<< HEAD
 /**
  * @param {!Window} win
  * @param {!ADSENSE_EXPERIMENT_FEATURE} feature
@@ -113,11 +113,4 @@ export function adsenseIsA4AEnabled(win, element) {
  */
 export function experimentFeatureEnabled(win, feature) {
   return getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) == feature;
-=======
-  // TODO(@taymonbeal, #10524): unify this with methods in AmpA4A
-      googleAdsIsA4AEnabled(
-          win, element, ADSENSE_A4A_EXPERIMENT_NAME, externalBranches,
-          internalBranches,
-          ADSENSE_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH);
->>>>>>> Apply JSON agnosticism to config checkers and fix numerous test problems
 }
