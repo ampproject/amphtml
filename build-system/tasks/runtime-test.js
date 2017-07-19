@@ -51,7 +51,8 @@ function getConfig() {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
     return Object.assign({}, karmaDefault, {
-      reporters: ['dots', 'saucelabs'],
+      reporters: process.env.TRAVIS ?
+          ['super-dots', 'saucelabs', 'mocha'] : ['dots', 'saucelabs'],
       browsers: argv.oldchrome
           ? ['SL_Chrome_45']
           : [
@@ -124,11 +125,13 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
 
   if (argv.testnames) {
     c.reporters = ['mocha'];
+    c.mochaReporter.output = 'full';
   }
 
   if (argv.files) {
     c.files = [].concat(config.commonTestPaths, argv.files);
     c.reporters = ['mocha'];
+    c.mochaReporter.output = 'full';
   } else if (argv.integration) {
     c.files = config.integrationTestPaths;
   } else if (argv.randomize || argv.glob || argv.a4a) {
@@ -201,19 +204,24 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
         host: 'localhost',
         directoryListing: true,
         middleware: [app],
+      })
+      .on('kill', function () {
+        util.log(util.colors.yellow(
+            'Shutting down test responses server on localhost:31862'));
+        process.nextTick(function() {
+          process.exit();
+        });
       }));
   util.log(util.colors.yellow(
       'Started test responses server on localhost:31862'));
 
   new Karma(c, function(exitCode) {
-    console./*OK*/log('\n');
-    util.log(util.colors.yellow(
-        'Shutting down test responses server on localhost:31862'));
     server.emit('kill');
     if (exitCode) {
-      var error = new Error(
-          util.colors.red('Karma test failed (error code: ' + exitCode + ')'));
-      done(error);
+      util.log(
+          util.colors.red('ERROR:'),
+          util.colors.yellow('Karma test failed with exit code', exitCode));
+      process.exit(exitCode);
     } else {
       done();
     }
