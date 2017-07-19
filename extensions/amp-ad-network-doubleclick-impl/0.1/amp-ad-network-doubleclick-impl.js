@@ -604,7 +604,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      *  returning cache headers.
      */
     const disableSWR = (
-        String(rtcConfig['disableStaleWhileRevalidate']) == 'true');
+        rtcConfig['disableStaleWhileRevalidate'] === true);
+    if (rtcConfig['disableStaleWhileRevalidate'] != undefined &&
+    typeof rtcConfig['disableStaleWhileRevalidate'] != 'boolean') {
+      user().warn('RTC disableStaleWhileRevalidate must be a boolean.');
+    }
     const headers = new Headers();
     headers.append('Cache-Control', 'max-age=0');
     const init = {
@@ -728,7 +732,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (errMessage.match(/^timeout/)) {
       rtcTotalTime = -1;
     }
-    return String(rtcConfig['sendAdRequestOnFailure']) !== 'false' ?
+    return rtcConfig['sendAdRequestOnFailure'] !== false ?
         Promise.resolve({
           artc: rtcTotalTime,
           ati: RTC_ATI_ENUM.RTC_FAILURE,
