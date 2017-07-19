@@ -3157,6 +3157,12 @@ tags: {
     mandatory: true
     value_casei: "application/json"
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
 }
 # Specific script tags for custom elements and runtime imports.
 # 4.11.2 The noscript element
