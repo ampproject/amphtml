@@ -389,7 +389,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     const pageLevelParametersPromise = getPageLevelParameters_(
         this.win, this.getAmpDoc(), startTime);
-    const rtcRequestPromise = isExperimentOn('disable-rtc') ?
+    const rtcRequestPromise = isExperimentOn(this.win, 'disable-rtc') ?
     Promise.resolve({}) : this.executeRtc_();
     return Promise.all(
       [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
