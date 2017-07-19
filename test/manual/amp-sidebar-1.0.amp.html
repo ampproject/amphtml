@@ -146,7 +146,7 @@ limitations under the License.
 
     <!-- Toolbar One, basic usage, toolbar-only -->
     <!-- Could center with CSS justify-content: space-between, but trying to be minimal -->
-    <nav toolbar="(min-width: 0px)" class="ampstart-hamburger-nav ampstart-navbar-bg" target="hamburger-toolbar" toolbar-only>
+    <nav toolbar="(min-width: 0px)" toolbar-target="hamburger-toolbar" class="ampstart-hamburger-nav ampstart-navbar-bg" toolbar-only>
       <ul class="justify-center">
         <li role="button" aria-label="open sidebar" on="tap:header-sidebar.toggle" tabindex="0" class="ampstart-navbar-trigger pl2">
           ☰
@@ -158,7 +158,7 @@ limitations under the License.
     </nav>
 
     <!-- Toolbar Two, min only  -->
-    <nav toolbar="(min-width: 931px)" target="accordion-toolbar" toolbar-only class="ampstart-headerbar-nav ampstart-nav ampstart-navbar-bg">
+    <nav toolbar="(min-width: 931px)" toolbar-target="accordion-toolbar" toolbar-only class="ampstart-headerbar-nav ampstart-nav ampstart-navbar-bg">
       <ul class="list-reset center m0 p0 flex justify-center nowrap">
           <li class="ampstart-nav-item ampstart-nav-dropdown">
             <!-- Start Dropdown -->

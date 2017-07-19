@@ -15,28 +15,18 @@
  */
 
 import {toggle} from '../../../src/style';
-
-/** @const */
-const TOOLBAR_TARGET_CLASS = 'i-amphtml-toolbar-target';
-
-/** @const */
-const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
+import {toArray} from '../../../src/types';
+import {user} from '../../../src/log';
 
 export class Toolbar {
   /**
   * @param {!Element} element
-  * @param {!Window} win
   * @param {!../../../src/service/vsync-impl.Vsync} vsync
+  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
   */
-  constructor(element, win, vsync) {
+  constructor(element, vsync, ampdoc) {
     /** @private {!Element} */
-    this.toolbarDOMElement_ = element;
-
-    /** @private {!Window} **/
-    this.win_ = win;
-
-    /** @private {Element} */
-    this.body_ = this.win_.document.body;
+    this.toolbarDomElement_ = element;
 
     /** @private {number|undefined} */
     this.height_ = undefined;
@@ -44,14 +34,17 @@ export class Toolbar {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
     /** @private {!string} */
-    this.toolbarMedia_ = this.toolbarDOMElement_.getAttribute('toolbar');
+    this.toolbarMedia_ = this.toolbarDomElement_.getAttribute('toolbar');
 
     /** @private {?Element} */
     this.toolbarClone_ = null;
 
     /** @private {Element|undefined} */
-    this.targetElement_ = undefined;
+    this.toolbarTarget_ = undefined;
 
     /** @private {!boolean} **/
     this.toolbarShown_ = false;
@@ -60,16 +53,16 @@ export class Toolbar {
     this.toolbarOnlyElementsInSidebar_ = [];
 
     // Find our tool-bar only elements
-    if (this.toolbarDOMElement_.hasAttribute('toolbar-only')) {
-      this.toolbarOnlyElementsInSidebar_.push(this.toolbarDOMElement_);
+    if (this.toolbarDomElement_.hasAttribute('toolbar-only')) {
+      this.toolbarOnlyElementsInSidebar_.push(this.toolbarDomElement_);
     } else {
       // Get our toolbar only elements
       const toolbarOnlyQuery =
-        this.toolbarDOMElement_.querySelectorAll('[toolbar-only]');
+        this.toolbarDomElement_.querySelectorAll('[toolbar-only]');
       if (toolbarOnlyQuery.length > 0) {
         // Check the nav's children for toolbar-only
         this.toolbarOnlyElementsInSidebar_ =
-          Array.prototype.slice.call(toolbarOnlyQuery, 0);
+          toArray(toolbarOnlyQuery);
       }
     }
     this.buildCallback_();
@@ -81,7 +74,7 @@ export class Toolbar {
    */
   onLayoutChange(onShowCallback) {
     // Get if we match the current toolbar media
-    const matchesMedia = this.win_
+    const matchesMedia = this.ampdoc_.win
         .matchMedia(this.toolbarMedia_).matches;
 
     // Remove and add the toolbar dynamically
@@ -100,36 +93,24 @@ export class Toolbar {
    * @private
    */
   buildCallback_() {
-    this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
-    const targetId = this.toolbarDOMElement_.getAttribute('target');
+    this.toolbarClone_ = this.toolbarDomElement_.cloneNode(true);
+    const targetId = user().assert(this.toolbarDomElement_
+        .getAttribute('toolbar-target'), '"toolbar-target" is required',
+        this.toolbarDomElement_);
     // Set the target element to the toolbar clone if it exists.
-    const targetElement =
-    this.win_.document.getElementById(`${targetId}_toolbar`) ||
-    this.win_.document.getElementById(targetId);
-    this.targetElement_ = targetElement || this.createTargetElement_();
-    this.targetElement_.appendChild(this.toolbarClone_);
-    toggle(this.targetElement_, false);
-
-    // Check if the target element was created by us, or already inserted by the user
-    if (!this.targetElement_.parentElement) {
-      this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
-      const fragment = this.win_
-        .document.createDocumentFragment();
-      fragment.appendChild(this.targetElement_);
-      this.body_.appendChild(fragment);
-    }
-  }
-
-  /**
-   * Returns a created element that can be used as the target if one does not exist
-   * @returns {Element}
-   * @private
-   */
-  createTargetElement_() {
-    const targetElement =
-      this.win_.document.createElement('header');
-    targetElement.classList.add(TOOLBAR_TARGET_CLASS);
-    return targetElement;
+    this.ampdoc_.whenReady().then(() => {
+      const targetElement = this.ampdoc_.getElementById(targetId);
+      if (targetElement) {
+        this.toolbarTarget_ = targetElement;
+        this.toolbarClone_.classList.add('i-amphtml-toolbar');
+        toggle(this.toolbarTarget_, false);
+      } else {
+        // This error will be later rethrown as a user error and
+        // the side bar will continue to function w/o toolbar feature
+        throw new Error('Could not find the ' +
+        `toolbar-target element with an id: ${targetId}`);
+      }
+    });
   }
 
   /**
@@ -154,8 +135,11 @@ export class Toolbar {
 
     // Display the elements
     return this.vsync_.mutatePromise(() => {
-      if (this.targetElement_) {
-        toggle(this.targetElement_, true);
+      if (this.toolbarTarget_) {
+        toggle(this.toolbarTarget_, true);
+        if (!this.toolbarTarget_.contains(this.toolbarClone_)) {
+          this.toolbarTarget_.appendChild(this.toolbarClone_);
+        }
       }
       if (this.toolbarOnlyElementsInSidebar_) {
         this.toolbarOnlyElementsInSidebar_.forEach(element => {
@@ -178,8 +162,8 @@ export class Toolbar {
 
     this.vsync_.mutate(() => {
       // Hide the elements
-      if (this.targetElement_) {
-        toggle(this.targetElement_, false);
+      if (this.toolbarTarget_) {
+        toggle(this.toolbarTarget_, false);
       }
       if (this.toolbarOnlyElementsInSidebar_) {
         this.toolbarOnlyElementsInSidebar_.forEach(element => {
