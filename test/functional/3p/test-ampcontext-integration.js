@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {masterFrameAccessibleTypes} from '../../../ads/_config';
 import {masterSelection} from '../../../3p/ampcontext-integration';
 
 describes.fakeWin('#masterSelect', {}, env => {
