@@ -9,11 +9,20 @@
     },
     {
       "url": "examples/visual-tests/article.amp/article.amp.html",
-      "name": "AMP Article"
+      "name": "AMP Article",
+      "loading_complete_css": [
+        ".article-body"
+      ]
     },
     {
       "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
-      "name": "AMP Article Access"
+      "name": "AMP Article Access",
+      "loading_complete_css": [
+        ".login-section"
+      ],
+      "loading_incomplete_css": [
+        ".article-body"
+      ]
     },
     {
       "url": "examples/visual-tests/font.amp/font.amp.html",
