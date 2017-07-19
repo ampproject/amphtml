@@ -32,8 +32,8 @@ export function vmfive(global, data) {
   validateData(data, mandatory_fields, optional_fields);
 
   createAdUnit(global, placementId, adType);
-  parallelDownloadScriptsAndExecuteInOrder(global);
   setupSDKReadyCallback(global, appKey);
+  parallelDownloadScriptsAndExecuteInOrder(global);
 }
 
 function parallelDownloadScriptsAndExecuteInOrder(win) {
