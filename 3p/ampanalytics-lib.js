@@ -18,6 +18,7 @@ import './polyfills';
 import {tryParseJson} from '../src/json';
 import {dev, user, initLogConstructor, setReportError} from '../src/log';
 import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../src/3p-analytics-common';
+import {getData} from '../src/event-helper';
 
 initLogConstructor();
 // TODO(alanorozco): Refactor src/error.reportError so it does not contain big
@@ -39,7 +40,7 @@ export class AmpAnalytics3pMessageRouter {
 
     /** @const {string} */
     this.sentinel_ = user().assertString(
-        tryParseJson(this.win_.name).sentinel,
+        tryParseJson(this.win_.name)['sentinel'],
         'Invalid/missing sentinel on iframe name attribute' + this.win_.name);
     if (!this.sentinel_) {
       return;
@@ -57,20 +58,20 @@ export class AmpAnalytics3pMessageRouter {
 
     this.win_.addEventListener('message', event => {
       const messageContainer = this.extractMessage_(event);
-      if (this.sentinel_ != messageContainer.sentinel) {
+      if (this.sentinel_ != messageContainer['sentinel']) {
         return;
       }
-      user().assert(messageContainer.type,
+      user().assert(messageContainer['type'],
           'Received message with missing type in ' + this.win_.location.href);
-      user().assert(messageContainer.data,
+      user().assert(messageContainer['data'],
           'Received empty message in ' + this.win_.location.href);
       user().assert(
-          messageContainer.type == AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
-          'Received unrecognized message type ' + messageContainer.type +
+          messageContainer['type'] == AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
+          'Received unrecognized message type ' + messageContainer['type'] +
           ' in ' + this.win_.location.href);
       this.processEventsMessage_(
-          /* @type {!../src/3p-analytics-common.AmpAnalytics3pEvent} */
-          (messageContainer.data));
+          /** @type {!../src/3p-analytics-common.AmpAnalytics3pEvent} */
+          (messageContainer['data']));
     }, false);
 
     this.subscribeTo(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT);
@@ -83,10 +84,10 @@ export class AmpAnalytics3pMessageRouter {
    * @VisibleForTesting
    */
   subscribeTo(messageType) {
-    this.win_.parent./*OK*/postMessage({
+    this.win_.parent./*OK*/postMessage(/** @type {JsonObject} */ ({
       sentinel: this.sentinel_,
       type: messageType,
-    }, '*');
+    }), '*');
   }
 
   /**
@@ -96,15 +97,17 @@ export class AmpAnalytics3pMessageRouter {
    * @private
    */
   processEventsMessage_(message) {
-    let entries;
-    user().assert((entries = Object.entries(message)).length,
+    let keys;
+    user().assert((keys = Object.keys(message)).length,
         'Received empty events message in ' + this.win_.location.href);
+    this.win_.onNewAmpAnalyticsInstance =
+        this.win_.onNewAmpAnalyticsInstance || null;
     user().assert(this.win_.onNewAmpAnalyticsInstance,
         'Must implement onNewAmpAnalyticsInstance in ' +
         this.win_.location.href);
-    entries.forEach(entry => {
-      const transportId = entry[0];
-      const events = entry[1];
+    keys.forEach(key => {
+      const transportId = key ;
+      const events = message[key];
       try {
         dev().assert(events && events.length,
             'Received empty events list for ' + transportId);
@@ -165,12 +168,13 @@ export class AmpAnalytics3pMessageRouter {
    * @private
    */
   extractMessage_(event) {
-    user().assert(event && event.data, 'Received empty events message in ' +
-        this.win_.name);
+    user().assert(event, 'Received null event in ' + this.win_.name);
+    const data = String(getData(event));
+    user().assert(data, 'Received empty event in ' + this.win_.name);
     let startIndex;
-    user().assert((startIndex = event.data.indexOf('-') + 1) > 0,
+    user().assert((startIndex = data.indexOf('-') + 1) > 0,
         'Received truncated events message in ' + this.win_.name);
-    return tryParseJson(event.data.substr(startIndex));
+    return tryParseJson(data.substr(startIndex)) || null;
   }
 }
 
@@ -185,8 +189,7 @@ if (!window.AMP_TEST) {
 
 /**
  * Receives messages bound for this cross-domain iframe, from a particular
- * creative. Also sends response messages from the iframe meant for this
- * particular creative.
+ * creative.
  */
 export class AmpAnalytics3pCreativeMessageRouter {
   /**
@@ -205,7 +208,8 @@ export class AmpAnalytics3pCreativeMessageRouter {
     /** @private {!string} */
     this.transportId_ = transportId;
 
-    /** @private {?function(!Array<!AmpAnalytics3pEvent>)} */
+    /** @private
+     * {?function(!Array<!string>)} */
     this.eventListener_ = null;
   }
 
@@ -213,8 +217,9 @@ export class AmpAnalytics3pCreativeMessageRouter {
    * Registers a callback function to be called when AMP Analytics events occur.
    * There may only be one listener. If another function has previously been
    * registered as a listener, it will no longer receive events.
-   * @param {!function(!Array<AmpAnalytics3pEvent>)} listener A function
-   * that takes an array of event strings, and does something with them.
+   * @param {!function(!Array<!string>)}
+   * listener A function that takes an array of event strings, and does
+   * something with them.
    */
   registerAmpAnalytics3pEventsListener(listener) {
     if (this.eventListener_) {
@@ -228,7 +233,8 @@ export class AmpAnalytics3pCreativeMessageRouter {
    * Receives message(s) from a creative for the cross-domain iframe
    * and passes them to that iframe's listener, if a listener has been
    * registered
-   * @param {!Array<AmpAnalytics3pEvent>} messages The message that was received
+   * @param {!Array<string>} messages
+   * The message that was received
    */
   sendMessagesToListener(messages) {
     if (!messages.length) {
@@ -249,23 +255,6 @@ export class AmpAnalytics3pCreativeMessageRouter {
       user().error(TAG_, 'Caught exception executing listener for ' +
         this.transportId_ + ': ' + e.message);
     }
-  }
-
-  /**
-   * Sends a message from the third-party vendor's metrics-collection page back
-   * to the creative.
-   * @param {!../src/3p-analytics-common.AmpAnalytics3pResponse} response The
-   * response to send.
-   */
-  sendMessageToCreative(response) {
-    const responseMessage = {
-      sentinel: this.sentinel_,
-      transport: this.transportId_,
-      type: AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
-      data: response,
-    };
-    this.win_.parent./*OK*/postMessage(
-        /** @type {!JsonObject} */ (responseMessage), '*');
   }
 
   /**
