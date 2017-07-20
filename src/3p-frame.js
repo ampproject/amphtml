@@ -135,10 +135,9 @@ export function getIframe(
 export function addDataAndJsonAttributes_(element, attributes) {
   const dataset = element.dataset;
   for (const name in dataset) {
-    if (dataset.hasOwnProperty(name)
-        // data-vars- is reserved for amp-analytics
-        // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
-        && !startsWith(name, 'vars')) {
+    // data-vars- is reserved for amp-analytics
+    // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
+    if (!startsWith(name, 'vars')) {
       attributes[name] = dataset[name];
     }
   }
