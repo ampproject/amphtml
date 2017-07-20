@@ -814,14 +814,15 @@ describes.realWin('amp-selector', {
           },
           config: {
             count: 3,
+            selectedOptions: 1,
           },
         });
-        ampSelector.build();
         ampSelector.children[1].setAttribute('selected', '');
+        ampSelector.build();
 
         const button = win.document.createElement('button');
         button.setAttribute('on', 'tap:ampSelector.clear');
-        win.document.body.append(button);
+        win.document.body.appendChild(button);
 
         button.click();
 
@@ -838,13 +839,13 @@ describes.realWin('amp-selector', {
             count: 6,
           },
         });
-        ampSelector.build();
         ampSelector.children[0].setAttribute('selected', '');
         ampSelector.children[3].setAttribute('selected', '');
+        ampSelector.build();
 
         const button = win.document.createElement('button');
         button.setAttribute('on', 'tap:ampSelector.clear');
-        win.document.body.append(button);
+        win.document.body.appendChild(button);
 
         button.click();
 
