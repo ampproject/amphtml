@@ -72,7 +72,7 @@ export class AmpImgur extends AMP.BaseElement {
     this.unlistenMessage_ = listen(
         this.win,
         'message',
-        this.hadleImgurMessages_.bind(this)
+        this.handleImgurMessages_.bind(this)
     );
 
     iframe.setAttribute('scrolling', 'no');
@@ -87,14 +87,14 @@ export class AmpImgur extends AMP.BaseElement {
   }
 
   /** @private */
-  hadleImgurMessages_(event) {
+  handleImgurMessages_(event) {
     if (event.origin != 'https://imgur.com' ||
         event.source != this.iframe_.contentWindow) {
       return;
     }
     const eventData = getData(event);
-    if (!eventData || !(isObject(eventData))
-        || startsWith(/** @type {string} */ (eventData), '{')) {
+    if (!eventData || !(isObject(eventData)
+        || startsWith(/** @type {string} */ (eventData), '{'))) {
       return;
     }
     const data = isObject(eventData) ? eventData : tryParseJson(eventData);
