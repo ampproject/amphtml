@@ -44,7 +44,7 @@ module.exports = {
     bundleDelay: 900,
   },
 
-  reporters: process.env.TRAVIS ? ['super-dots', 'mocha'] : ['progress'],
+  reporters: process.env.TRAVIS ? ['super-dots', 'mocha'] : ['dots', 'mocha'],
 
   superDotsReporter: {
     color: {
@@ -87,9 +87,9 @@ module.exports = {
     '/test/': '/base/test/',
   },
 
-  // Can't import Karma constants config.LOG_ERROR & config.LOG_WARN,
-  // so we hard code the strings here. Hopefully they'll never change.
-  logLevel: process.env.TRAVIS ? 'ERROR' : 'WARN',
+  // Can't import the Karma constant config.LOG_ERROR, so we hard code it here.
+  // Hopefully it'll never change.
+  logLevel: 'ERROR',
 
   autoWatch: true,
 
