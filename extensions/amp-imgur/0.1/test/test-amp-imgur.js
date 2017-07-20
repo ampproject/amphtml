@@ -19,7 +19,7 @@ import {
 } from '../../../../testing/iframe';
 import '../amp-imgur';
 
-describe('amp-imgur', () => {
+describes.realWin('amp-imgur', {}, () => {
 
   function getIns(imgurId) {
     return createIframePromise().then(iframe => {
@@ -42,6 +42,42 @@ describe('amp-imgur', () => {
   it('renders', () => {
     return getIns('2CnX7').then(ins => {
       testIframe(ins.querySelector('iframe'));
+    });
+  });
+
+  it('resizes with JSON String message', () => {
+    return getIns('2CnX7').then(ins => {
+      const impl = ins.implementation_;
+      const changeHeightSpy = sandbox.spy(impl, 'attemptChangeHeight');
+      expect(changeHeightSpy).not.to.have.been.called;
+      const event = {
+        origin: 'https://imgur.com',
+        source: impl.iframe_.contentWindow,
+        data: '{"message":"resize_imgur","href":"https://imgur.com/2CnX7/embed?pub=true","height":396,"width":1400,"context":true}',
+      };
+      impl.handleImgurMessages_(event);
+      expect(changeHeightSpy).to.have.been.calledWith(396);
+    });
+  });
+
+  it('resizes with JSON Object message', () => {
+    return getIns('2CnX7').then(ins => {
+      const impl = ins.implementation_;
+      const changeHeightSpy = sandbox.spy(impl, 'attemptChangeHeight');
+      expect(changeHeightSpy).not.to.have.been.called;
+      const event = {
+        origin: 'https://imgur.com',
+        source: impl.iframe_.contentWindow,
+        data: {
+          'message': 'resize_imgur',
+          'href': 'https://imgur.com/2CnX7/embed?pub=true',
+          'height': 400,
+          'width': 1400,
+          'context': true,
+        },
+      };
+      impl.handleImgurMessages_(event);
+      expect(changeHeightSpy).to.have.been.calledWith(400);
     });
   });
 });
