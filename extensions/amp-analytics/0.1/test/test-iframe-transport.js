@@ -40,8 +40,8 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   }
 
   it('enforces one frame url per vendor type', () => {
-    const createCrossDomainIframeSpy = sandbox.spy(iframeTransport,
-        'createCrossDomainIframe');
+    const createCrossDomainIframeSpy = sandbox.spy(
+        iframeTransport, 'createCrossDomainIframe');
     iframeTransport.processCrossDomainIframe();
     expect(createCrossDomainIframeSpy).to.not.be.called;
     expect(IframeTransport.hasCrossDomainIframe(iframeTransport.getType()))
