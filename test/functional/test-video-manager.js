@@ -503,6 +503,18 @@ function createFakeVideoPlayerClass(win) {
     hideControls() {
     }
 
+    /**
+     * @override
+     */
+    fullscreenEnter() {
+    }
+
+    /**
+     * @override
+     */
+    fullscreenExit() {
+    }
+
     /** @override */
     getCurrentTime() {
       return this.currentTime_;

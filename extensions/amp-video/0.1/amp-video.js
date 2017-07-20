@@ -14,7 +14,7 @@
   * limitations under the License.
   */
 
-import {elementByTag} from '../../../src/dom';
+import {elementByTag, fullscreenEnter, fullscreenExit} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getMode} from '../../../src/mode';
@@ -182,9 +182,9 @@ class AmpVideo extends AMP.BaseElement {
     });
   }
 
-    /**
-     * @private
-     */
+  /**
+   * @private
+   */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
     this.forwardEvents([VideoEvents.PLAYING, VideoEvents.PAUSE], video);
@@ -200,37 +200,37 @@ class AmpVideo extends AMP.BaseElement {
     });
   }
 
-    /** @override */
+  /** @override */
   pauseCallback() {
     if (this.video_) {
       this.video_.pause();
     }
   }
 
-    /** @private */
+  /** @private */
   isVideoSupported_() {
     return !!this.video_.play;
   }
 
-    // VideoInterface Implementation. See ../src/video-interface.VideoInterface
+  // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   supportsPlatform() {
     return this.isVideoSupported_();
   }
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   isInteractive() {
     return this.element.hasAttribute('controls');
   }
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   play(unusedIsAutoplay) {
     const ret = this.video_.play();
 
@@ -245,39 +245,53 @@ class AmpVideo extends AMP.BaseElement {
     }
   }
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   pause() {
     this.video_.pause();
   }
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   mute() {
     this.video_.muted = true;
   }
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   unmute() {
     this.video_.muted = false;
   }
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   showControls() {
     this.video_.controls = true;
   }
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   hideControls() {
     this.video_.controls = false;
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    fullscreenEnter(this.video_);
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    fullscreenExit(this.video_);
   }
 
   /** @override */

@@ -755,11 +755,14 @@ export function whenUpgradedToCustomElement(element) {
  * @param {Element} element
  */
 export function fullscreenEnter(element) {
-  const requestFs = element.webkitEnterFullscreen
+  const requestFs = element.requestFullscreen
+   || element.requestFullScreen
+   || element.webkitRequestFullscreen
    || element.webkitRequestFullScreen
-   || element.requestFullscreen
    || element.webkitEnterFullscreen
+   || element.webkitEnterFullScreen
    || element.msRequestFullscreen
+   || element.msRequestFullScreen
    || element.mozRequestFullscreen
    || element.mozRequestFullScreen;
   if (requestFs) {
@@ -770,16 +773,33 @@ export function fullscreenEnter(element) {
 /**
  * Replacement for `Document.exitFullscreen()` method.
  * https://developer.mozilla.org/en-US/docs/Web/API/Document/exitFullscreen
- * @param {Document} doc
+ * @param {Element} element
  */
-export function fullscreenExit(doc) {
-  const exitFs = doc.webkitCancelFullScreen
-  || doc.cancelFullScreen
-  || doc.webkitExitFullscreen
-  || doc.exitFullscreen
-  || doc.mozCancelFullScreen
-  || doc.msExitFullscreen;
+export function fullscreenExit(element) {
+  let exitFs = element.cancelFullScreen
+               || element.exitFullscreen
+               || element.exitFullScreen
+               || element.webkitExitFullscreen
+               || element.webkitExitFullScreen
+               || element.webkitCancelFullScreen
+               || element.mozCancelFullScreen
+               || element.msExitFullscreen;
   if (exitFs) {
-    exitFs.call(doc);
+    exitFs.call(element);
+    return;
+  }
+  if (element.ownerDocument) {
+    exitFs = element.ownerDocument.cancelFullScreen
+             || element.ownerDocument.exitFullscreen
+             || element.ownerDocument.exitFullScreen
+             || element.ownerDocument.webkitExitFullscreen
+             || element.ownerDocument.webkitExitFullScreen
+             || element.ownerDocument.webkitCancelFullScreen
+             || element.ownerDocument.mozCancelFullScreen
+             || element.ownerDocument.msExitFullscreen;
+  }
+  if (exitFs) {
+    exitFs.call(element.ownerDocument);
+    return;
   }
 }

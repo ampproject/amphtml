@@ -22,7 +22,7 @@ import {user} from '../../../src/log';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {removeElement} from '../../../src/dom';
+import {removeElement, fullscreenEnter, fullscreenExit} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
@@ -239,6 +239,20 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 
   hideControls() {
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    fullscreenEnter(this.iframe_);
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    fullscreenExit(this.iframe_);
   }
 
   /** @override */

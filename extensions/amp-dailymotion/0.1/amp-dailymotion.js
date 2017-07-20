@@ -28,7 +28,11 @@ import {
     addParamsToUrl,
     addParamToUrl,
 } from '../../../src/url';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {
+  getDataParamsFromAttributes,
+  fullscreenEnter,
+  fullscreenExit,
+} from '../../../src/dom';
 
 /**
  * Player events reverse-engineered from the Dailymotion API
@@ -335,6 +339,30 @@ class AmpDailymotion extends AMP.BaseElement {
    */
   hideControls() {
     // Not supported
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    const platform = Services.platformFor(this.win);
+    if (platform.isSafari() || platform.isIos()) {
+      this.sendCommand_('fullscreen', [true]);
+    } else {
+      fullscreenEnter(this.iframe_);
+    }
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    const platform = Services.platformFor(this.win);
+    if (platform.isSafari() || platform.isIos()) {
+      this.sendCommand_('fullscreen', [false]);
+    } else {
+      fullscreenExit(this.iframe_);
+    }
   }
 
   /** @override */

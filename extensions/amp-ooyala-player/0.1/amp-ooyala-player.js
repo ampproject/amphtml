@@ -17,7 +17,7 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
-import {removeElement} from '../../../src/dom';
+import {removeElement, fullscreenEnter, fullscreenExit} from '../../../src/dom';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -224,6 +224,20 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   hideControls() {
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    fullscreenEnter(this.iframe_);
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    fullscreenExit(this.iframe_);
   }
 
   /** @override */

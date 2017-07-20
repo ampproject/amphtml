@@ -30,7 +30,7 @@ import {
   listen,
 } from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
-import {removeElement} from '../../../src/dom';
+import {removeElement, fullscreenEnter, fullscreenExit} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
@@ -271,6 +271,22 @@ class AmpImaVideo extends AMP.BaseElement {
    */
   hideControls() {
     // Not supported.
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    // TODO(@aghassemi) Make internal <video> element go fullscreen instead
+    // using postMessages
+    fullscreenEnter(this.iframe_);
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    fullscreenExit(this.iframe_);
   }
 
   /** @override */

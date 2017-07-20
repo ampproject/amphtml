@@ -17,7 +17,7 @@
 
 import {ActionTrust} from '../action-trust';
 import {VideoSessionManager} from './video-session-manager';
-import {removeElement, isRTL} from '../dom';
+import {removeElement, scopedQuerySelector, isRTL} from '../dom';
 import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
@@ -38,11 +38,6 @@ import {
   PositionObserverFidelity,
   PositionInViewportEntryDef,
 } from './position-observer-impl';
-import {
-  scopedQuerySelector,
-  fullscreenEnter,
-  fullscreenExit,
-} from '../dom';
 import {layoutRectLtwh, RelativePositions} from '../layout-rect';
 import * as st from '../style';
 
@@ -247,8 +242,8 @@ export class VideoManager {
 
     // TODO(@wassgha) Check support status for orientation API and update
     // this as needed.
-    const screen = this.ampdoc_.win.screen;
-    const win = this.ampdoc_.win;
+    const win = this.ampdoc.win;
+    const screen = win.screen;
     const handleOrientationChange = () => {
       let isLandscape;
       if (screen && 'orientation' in screen) {
@@ -580,16 +575,11 @@ class VideoEntry {
    * @private
    */
   orientationChanged_(isLandscape) {
-    if (!viewerForDoc(this.ampdoc_).isVisible()) {
-      return;
-    }
     // Put the video in/out of fullscreen depending on orientation
     if (!isLandscape && this.isFullscreenByOrientationChange_) {
     	this.exitFullscreen_();
-    }
-    if (isLandscape
-        && this.isVisible_
-        && this.getPlayingState() == PlayingStates.PLAYING_MANUAL) {
+    } else if (this.getPlayingState() == PlayingStates.PLAYING_MANUAL
+               && this.isVisible_) {
     	this.enterFullscreen_();
     }
   }
@@ -599,7 +589,7 @@ class VideoEntry {
    * @private
    */
   enterFullscreen_() {
-    fullscreenEnter(this.internalElement_);
+    this.video.fullscreenEnter();
     this.isFullscreenByOrientationChange_ = true;
   }
 
@@ -608,7 +598,7 @@ class VideoEntry {
    * @private
    */
   exitFullscreen_() {
-    fullscreenExit(this.ampdoc_.win.document);
+    this.video.fullscreenExit();
     this.isFullscreenByOrientationChange_ = false;
   }
 

@@ -119,6 +119,22 @@ export class VideoInterface {
   isInViewport() {}
 
   /**
+   * Enables fullscreen on the internal video element
+   * NOTE: While implementing, keep in mind that Safari/iOS do not allow taking
+   * any element other than <video> to fullscreen, if the player has an internal
+   * implementation of fullscreen (flash for example) then check
+   * if Services.platformFor(this.win).isSafari is true and use the internal
+   * implementation instead. If not, it is recommended to take the iframe
+   * to fullscreen using fullscreenEnter from dom.js
+   */
+  fullscreenEnter() {}
+
+  /**
+   * Quits fullscreen mode
+   */
+  fullscreenExit() {}
+
+  /**
    * Automatically comes from {@link ./base-element.BaseElement}
    *
    * @param {string} unusedMethod

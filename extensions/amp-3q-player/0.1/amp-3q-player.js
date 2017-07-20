@@ -17,7 +17,7 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {tryParseJson} from '../../../src/json';
 import {user, dev} from '../../../src/log';
-import {removeElement} from '../../../src/dom';
+import {removeElement, fullscreenEnter, fullscreenExit} from '../../../src/dom';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -213,6 +213,20 @@ class Amp3QPlayer extends AMP.BaseElement {
   /** @override */
   hideControls() {
     this.sdnPostMessage_('hideControlbar');
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    fullscreenEnter(this.iframe_);
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    fullscreenExit(this.iframe_);
   }
 
   /** @override */
