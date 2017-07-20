@@ -260,6 +260,7 @@ export const adConfig = {
       'https://api.dable.io',
       'https://images.dable.io',
     ],
+    renderStartImplemented: true,
   },
 
   distroscale: {
