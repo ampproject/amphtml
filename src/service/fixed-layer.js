@@ -721,6 +721,37 @@ export class FixedLayer {
       }
     }
   }
+
+  safeTopOffset() {
+    const elements = this.elements_;
+    let maxTopOffset = 0;
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      if ((element.fixedNow || element.stickyNow) && !!element.top) {
+        const elementTopOffset = element.element./*OK*/offsetTop
+                               + element.element./*OK*/offsetHeight;
+        if (elementTopOffset > maxTopOffset) {
+          maxTopOffset = elementTopOffset;
+        }
+      }
+    }
+    return maxTopOffset;
+  }
+
+  safeBottomOffset() {
+    const elements = this.elements_;
+    let maxBottomOffset = 0;
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      if ((element.fixedNow || element.stickyNow) && !element.top) {
+        const elementBottomOffset = element.element./*OK*/offsetHeight;
+        if (elementBottomOffset > maxBottomOffset) {
+          maxBottomOffset = elementBottomOffset;
+        }
+      }
+    }
+    return maxBottomOffset;
+  }
 }
 
 
