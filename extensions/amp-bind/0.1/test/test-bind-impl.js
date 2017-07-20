@@ -220,6 +220,16 @@ describe('Bind', function() {
       });
     });
 
+    it('should call createTreeWalker() with all params', () => {
+      const spy = env.sandbox.spy(env.win.document, 'createTreeWalker');
+      createElement(env, container, '[text]="1+1"');
+      return onBindReady(env, bind).then(() => {
+        // createTreeWalker() on IE does not support optional arguments.
+        expect(spy.callCount).to.equal(1);
+        expect(spy.firstCall.args.length).to.equal(4);
+      });
+    });
+
     it('should have same state after removing + re-adding a subtree', () => {
       for (let i = 0; i < 5; i++) {
         createElement(env, container, '[text]="1+1"');
