@@ -805,5 +805,53 @@ describes.realWin('amp-selector', {
         expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
       });
     });
+
+    describe('clear action',() => {
+      it('should clear selection of a single select', () => {
+        const ampSelector = getSelector({
+          attributes: {
+            id: 'ampSelector',
+          },
+          config: {
+            count: 3,
+            selectedOptions: 1,
+          },
+        });
+        ampSelector.children[1].setAttribute('selected', '');
+        ampSelector.build();
+
+        const button = win.document.createElement('button');
+        button.setAttribute('on', 'tap:ampSelector.clear');
+        win.document.body.appendChild(button);
+
+        button.click();
+
+        expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
+      });
+
+      it('should clear selection of a multiselect', () => {
+        const ampSelector = getSelector({
+          attributes: {
+            id: 'ampSelector',
+            multiple: true,
+          },
+          config: {
+            count: 6,
+          },
+        });
+        ampSelector.children[0].setAttribute('selected', '');
+        ampSelector.children[3].setAttribute('selected', '');
+        ampSelector.build();
+
+        const button = win.document.createElement('button');
+        button.setAttribute('on', 'tap:ampSelector.clear');
+        win.document.body.appendChild(button);
+
+        button.click();
+
+        expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+        expect(ampSelector.children[3].hasAttribute('selected')).to.be.false;
+      });
+    });
   });
 });

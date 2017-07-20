@@ -104,6 +104,8 @@ export class AmpSelector extends AMP.BaseElement {
     }
     this.kbSelectMode_ = kbSelectMode;
 
+    this.registerAction('clear', this.clearAllSelections_.bind(this));
+
     this.init_();
     if (!this.isDisabled_) {
       this.element.addEventListener('click', this.clickHandler_.bind(this));
