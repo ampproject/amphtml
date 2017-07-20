@@ -543,7 +543,8 @@ export class FixedLayer {
       } else if (this.committedPaddingTop_ === this.paddingTop_) {
         setStyle(element, 'top', state.top);
       } else {
-        setStyle(element, 'top', `calc(${state.top} - ${this.committedPaddingTop_}px)`);
+        setStyle(element, 'top',
+            `calc(${state.top} - ${this.committedPaddingTop_}px)`);
       }
     }
 
