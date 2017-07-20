@@ -18,7 +18,6 @@ import {dev, user} from './log';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
-import {dashToCamelCase} from './string';
 import {dict} from './utils/object';
 import {parseUrl, assertHttpsUrl} from './url';
 import {urls} from './config';
