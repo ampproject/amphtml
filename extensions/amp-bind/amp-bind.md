@@ -492,6 +492,10 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 </amp-state>
 ```
 
+#### XHR batching
+
+AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-state` elements) on an AMP page.  For example, if your `amp-state` element makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR. 
+
 #### Attributes
 
 **src**
