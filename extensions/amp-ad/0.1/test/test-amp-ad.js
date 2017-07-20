@@ -161,6 +161,60 @@ describe('Ad loader', () => {
         });
       });
 
+      it('uses Fast Fetch if just RTC is used', () => {
+        return iframePromise.then(fixture => {
+          const rtcConfig = fixture.doc.createElement('script');
+          rtcConfig.setAttribute('id', 'amp-rtc');
+          fixture.doc.head.appendChild(rtcConfig);
+          a4aRegistry['zort'] = function() {
+            return true;
+          };
+          ampAdElement.setAttribute('type', 'zort');
+          const zortInstance = {};
+          const zortConstructor = function() { return zortInstance; };
+          const extensions = Services.extensionsFor(fixture.win);
+          const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
+              .withArgs('amp-ad-network-zort-impl')
+              .returns(Promise.resolve(zortConstructor));
+          ampAd = new AmpAd(ampAdElement);
+          return ampAd.upgradeCallback().then(baseElement => {
+            expect(extensionsStub).to.be.calledAtLeastOnce;
+            expect(ampAdElement.getAttribute(
+                'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
+            expect(baseElement).to.equal(zortInstance);
+          });
+        });
+      });
+
+      it('uses Fast Fetch if remote.html and RTC are used', () => {
+        return iframePromise.then(fixture => {
+          const meta = fixture.doc.createElement('meta');
+          meta.setAttribute('name', 'amp-3p-iframe-src');
+          meta.setAttribute('content', 'https://example.com/remote.html');
+          fixture.doc.head.appendChild(meta);
+          const rtcConfig = fixture.doc.createElement('script');
+          rtcConfig.setAttribute('id', 'amp-rtc');
+          fixture.doc.head.appendChild(rtcConfig);
+          a4aRegistry['zort'] = function() {
+            return true;
+          };
+          ampAdElement.setAttribute('type', 'zort');
+          const zortInstance = {};
+          const zortConstructor = function() { return zortInstance; };
+          const extensions = Services.extensionsFor(fixture.win);
+          const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
+              .withArgs('amp-ad-network-zort-impl')
+              .returns(Promise.resolve(zortConstructor));
+          ampAd = new AmpAd(ampAdElement);
+          return ampAd.upgradeCallback().then(baseElement => {
+            expect(extensionsStub).to.be.calledAtLeastOnce;
+            expect(ampAdElement.getAttribute(
+                'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
+            expect(baseElement).to.equal(zortInstance);
+          });
+        });
+      });
+
       it('uses Fast Fetch if remote.html is used but disabled', () => {
         return iframePromise.then(fixture => {
           const meta = fixture.doc.createElement('meta');

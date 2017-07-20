@@ -395,9 +395,10 @@ export class Bind {
     /** @type {!Object<string, !Array<!Element>>} */
     const expressionToElements = Object.create(null);
 
-    const doc = dev().assert(
-        node.ownerDocument, 'ownerDocument is null.');
-    const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT);
+    const doc = dev().assert(node.ownerDocument, 'ownerDocument is null.');
+    // Third and fourth params of `createTreeWalker` are not optional on IE11.
+    const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, null,
+        /* entityReferenceExpansion */ false);
 
     // Set to true if number of bindings in `node` exceeds `limit`.
     let limitExceeded = false;

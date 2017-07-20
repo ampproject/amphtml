@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Examples
 
 Use the `amp-reddit` component to embed a Reddit post or comment.
@@ -69,31 +71,31 @@ Use the `amp-reddit` component to embed a Reddit post or comment.
 
 ## Attributes
 
-**data-embedtype** (required)
+##### data-embedtype (required)
 
 The type of embed, either `post` or `comment`.
 
-**data-src** (required)
+##### data-src (required)
 
 The permamlink uri for the post or comment.
 
-**data-uuid**
+##### data-uuid
 
 The provided UUID for the comment embed. Supported when `data-embedtype` is `comment`. 
 
-**data-embedcreated**
+##### data-embedcreated
 
 The datetime string for the comment embed. Supported when `data-embedtype` is `comment`. 
 
-**data-embedparent**
+##### data-embedparent
 
  Indicates whether the parent comment should be included in the embed. Supported when `data-embedtype` is `comment`.
 
-**data-embedlive**
+##### data-embedlive
 
  Indicates whether the embedded comment should update if the original comment is updated. Supported when `data-embedtype` is `comment`.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
