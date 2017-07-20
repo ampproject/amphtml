@@ -51,7 +51,8 @@ function getConfig() {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
     return Object.assign({}, karmaDefault, {
-      reporters: ['super-dots', 'saucelabs', 'mocha'],
+      reporters: process.env.TRAVIS ?
+          ['super-dots', 'saucelabs', 'mocha'] : ['dots', 'saucelabs', 'mocha'],
       browsers: argv.oldchrome
           ? ['SL_Chrome_45']
           : [
