@@ -30,10 +30,17 @@ export function yieldbot(global, data) {
   loadScript(global, 'https://cdn.yldbt.com/js/yieldbot.intent.amp.js', () => {
     global.ybotq.push(() => {
       try {
-        const dimensions = [[
-          parseInt(data.overrideWidth || data.width, 10),
-          parseInt(data.overrideHeight || data.height, 10),
-        ]];
+        const multiSizeDataStr = data.multiSize || null;
+        const primaryWidth = parseInt(data.overrideWidth || data.width, 10);
+        const primaryHeight = parseInt(data.overrideHeight || data.height, 10);
+        let dimensions;
+
+        if (multiSizeDataStr) {
+          dimensions = getMultiSizeDimensions(multiSizeDataStr);
+          dimensions.unshift([primaryWidth, primaryHeight]);
+        } else {
+          dimensions = [[primaryWidth, primaryHeight]];
+        }
 
         global.yieldbot.psn(data.psn);
         global.yieldbot.enableAsync();
@@ -65,4 +72,38 @@ export function yieldbot(global, data) {
       doubleclick(global, data);
     });
   });
+}
+
+/**
+ * Parse a string of comma separated <code>WxH</code> values.
+ * @param {string} multiSizeDataStr The amp-ad data attribute containing the multi-size dimensions.
+ * @return {?Array<!Array<number>>} An array of dimensions.
+ * @see https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md#multi-size-ad
+ * @example data-multi-size="300x220,300x210,300x200"
+ * @private
+ */
+function getMultiSizeDimensions(multiSizeDataStr) {
+  const dimensions = [];
+
+  if (multiSizeDataStr) {
+    const arrayOfSizeStrs = multiSizeDataStr.split(',');
+
+    for (let idx = 0; idx < arrayOfSizeStrs.length; idx++) {
+      const sizeStr = arrayOfSizeStrs[idx];
+      const size = sizeStr.split('x');
+
+      if (size.length != 2) {
+        continue;
+      }
+      const width = Number(size[0]);
+      const height = Number(size[1]);
+
+      if (isNaN(width) || isNaN(height)) {
+        continue;
+      }
+
+      dimensions.push([width, height]);
+    }
+  }
+  return dimensions;
 }
