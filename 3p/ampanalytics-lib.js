@@ -28,7 +28,6 @@ setReportError(() => {});
 /** @private @const {string} */
 const TAG_ = 'ampanalytics-lib';
 
-
 /**
  * Receives messages bound for this cross-domain iframe, from all creatives
  */
