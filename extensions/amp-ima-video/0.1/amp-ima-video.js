@@ -103,7 +103,7 @@ class AmpImaVideo extends AMP.BaseElement {
     const scriptElement = childElementsByTag(this.element, 'SCRIPT')[0];
     if (scriptElement && isJsonScriptTag(scriptElement)) {
       this.element.setAttribute(
-          'data-ima-settings', scriptElement./*REVIEW*/innerHTML);
+          'data-ima-settings', scriptElement./*OK*/innerHTML);
     }
   }
 
