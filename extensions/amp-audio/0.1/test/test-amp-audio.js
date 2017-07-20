@@ -193,7 +193,7 @@ describe('amp-audio', () => {
         'intersectionRatio': 0,
       });
       // Trigger scroll event
-      iframe.getViewport().setScrollTop(10);
+      iframe.doc.getViewport().setScrollTop(10);
       expect(floatingControls).to.exist;
     });
   });

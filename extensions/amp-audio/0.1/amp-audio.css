@@ -20,7 +20,7 @@ amp-audio {
 /**
  * Floating Pause Button for amp-audio
  */
-.amp-audio-floating-controls {
+amp-audio-floating-controls {
   display: block;
   position: fixed;
   bottom: 20px;
@@ -31,16 +31,16 @@ amp-audio {
   height: 48px;
 }
 
-[dir=rtl] .amp-audio-floating-controls {
+[dir=rtl] amp-audio-floating-controls {
   right: auto;
   left: 20px;
 }
 
-.amp-audio-floating-controls.sticky-ad-exists{
+amp-audio-floating-controls.sticky-ad-exists{
   bottom: 100px;
 }
 
-.amp-audio-floating-controls-inline {
+amp-audio-floating-controls > amp-audio-scroll-btn {
   width: 48px;
   height: 48px;
   left: 0px;
@@ -54,15 +54,15 @@ amp-audio {
   border-right: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.amp-audio-floating-controls-inline.top {
+amp-audio-floating-controls > amp-audio-scroll-btn.top {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><g id="arrow" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round"><g id="Artboard" stroke="#FFFFFF" stroke-width="5"><path d="M11.7777778,21.1165273 L11.7777778,3.5" id="Line" transform="translate(11.500000, 12.500000) rotate(-360.000000) translate(-11.500000, -12.500000) "></path><path d="M21.0625526,12.0609371 L12.1008403,3.09922482" id="Line-Copy" transform="translate(17.000000, 8.000000) rotate(-360.000000) translate(-17.000000, -8.000000) "></path><path d="M11.0625526,12.0609371 L2.10084034,3.09922482" id="Line-Copy" transform="translate(7.000000, 8.000000) scale(-1, 1) rotate(-360.000000) translate(-7.000000, -8.000000) "></path></g></g></svg>');
 }
 
-.amp-audio-floating-controls-inline.bottom {
+amp-audio-floating-controls > amp-audio-scroll-btn.bottom {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><g id="arrow" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round"><g id="Artboard" stroke="#FFFFFF" stroke-width="5"><path d="M12.7777778,20.1165273 L12.7777778,2.5" id="Line" transform="translate(12.500000, 11.500000) rotate(-180.000000) translate(-12.500000, -11.500000) "></path><path d="M11.0625526,20.0609371 L2.10084034,11.0992248" id="Line-Copy" transform="translate(7.000000, 16.000000) rotate(-180.000000) translate(-7.000000, -16.000000) "></path><path d="M21.0625526,20.0609371 L12.1008403,11.0992248" id="Line-Copy" transform="translate(17.000000, 16.000000) scale(-1, 1) rotate(-180.000000) translate(-17.000000, -16.000000) "></path></g></g></svg>');
 }
 
-.amp-audio-floating-controls-pause {
+amp-audio-floating-controls > amp-audio-pause-btn {
   background-repeat: no-repeat;
   width: 48px;
   height: 48px;
@@ -73,12 +73,12 @@ amp-audio {
   background-position: 10px center;
 }
 
-.amp-audio-floating-controls-pause.play {
+amp-audio-floating-controls > amp-audio-pause-btn.play {
   background-color: rgba(0,0,0,0.75);
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
 }
 
-.amp-audio-floating-controls-pause.pause {
+amp-audio-floating-controls > amp-audio-pause-btn.pause {
   background-color: rgba(192, 57, 43, 0.85);
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
 }

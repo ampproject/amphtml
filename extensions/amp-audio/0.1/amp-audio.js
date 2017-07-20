@@ -167,22 +167,19 @@ export class AmpAudio extends AMP.BaseElement {
       return;
     }
     const doc = this.element.ownerDocument;
-    const btn = doc.createElement('div');
-    btn.classList.add('amp-audio-floating-controls');
+    const btn = doc.createElement('amp-audio-floating-controls');
     // Pause/Play icon
-    const pauseBtn = doc.createElement('div');
-    pauseBtn.classList.add('amp-audio-floating-controls-pause');
+    const pauseBtn = doc.createElement('amp-audio-pause-btn');
     pauseBtn.classList.toggle('pause', audio.paused);
     pauseBtn.classList.toggle('play', !audio.paused);
     // Scroll to element icon
     // (Different icon based on whether the original element is above or
     // below the viewport)
-    const inlineBtn = doc.createElement('div');
+    const inlineBtn = doc.createElement('amp-audio-scroll-btn');
     const viewportTop = this.getViewport().getScrollTop();
     const isTop = viewportTop > this.element./*OK*/offsetTop;
     inlineBtn.classList.toggle('top', isTop);
     inlineBtn.classList.toggle('bottom', !isTop);
-    inlineBtn.classList.add('amp-audio-floating-controls-inline');
     btn.appendChild(pauseBtn);
     btn.appendChild(inlineBtn);
     this.element.ownerDocument.body.appendChild(btn);
