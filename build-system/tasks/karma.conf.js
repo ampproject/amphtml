@@ -44,7 +44,7 @@ module.exports = {
     bundleDelay: 900,
   },
 
-  reporters: ['super-dots', 'mocha'],
+  reporters: process.env.TRAVIS ? ['super-dots', 'mocha'] : ['dots', 'mocha'],
 
   superDotsReporter: {
     color: {
