@@ -378,6 +378,12 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  innity: {
+    prefetch: 'https://cdn.innity.net/admanager.js',
+    preconnect: 'https://as.innity.com',
+    renderStartImplemented: true,
+  },
+
   ix: {
     prefetch: [
       'https://js-sec.indexww.com/apl/amp.js',
