@@ -70,7 +70,7 @@ export class AmpAnalytics3pMessageRouter {
           'Received unrecognized message type ' + messageContainer['type'] +
           ' in ' + this.win_.location.href);
       this.processEventsMessage_(
-          /** @type {!../src/3p-analytics-common.AmpAnalytics3pEvent} */
+          /** @type {!../src/3p-analytics-common.AmpAnalytics3pEventMap} */
           (messageContainer['data']));
     }, false);
 
@@ -93,7 +93,7 @@ export class AmpAnalytics3pMessageRouter {
   /**
    * Handle receipt of a message indicating that creative(s) have sent
    * event(s) to this frame
-   * @param {!../src/3p-analytics-common.AmpAnalytics3pEvent} message
+   * @param {!../src/3p-analytics-common.AmpAnalytics3pEventMap} message
    * @private
    */
   processEventsMessage_(message) {
