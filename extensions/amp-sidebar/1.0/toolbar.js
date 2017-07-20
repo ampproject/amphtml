@@ -50,18 +50,18 @@ export class Toolbar {
     this.toolbarShown_ = false;
 
     /** @private {Array} */
-    this.toolbarOnlyElementsInSidebar_ = [];
+    this.hiddenWhenToolbarElementsInSidebar_ = [];
 
-    // Find our tool-bar only elements
-    if (this.toolbarDomElement_.hasAttribute('toolbar-only')) {
-      this.toolbarOnlyElementsInSidebar_.push(this.toolbarDomElement_);
+    // Find our hidden-when-toolbar only elements
+    if (this.toolbarDomElement_.hasAttribute('hidden-when-toolbar')) {
+      this.hiddenWhenToolbarElementsInSidebar_.push(this.toolbarDomElement_);
     } else {
       // Get our toolbar only elements
       const toolbarOnlyQuery =
-        this.toolbarDomElement_.querySelectorAll('[toolbar-only]');
+        this.toolbarDomElement_.querySelectorAll('[hidden-when-toolbar]');
       if (toolbarOnlyQuery.length > 0) {
-        // Check the nav's children for toolbar-only
-        this.toolbarOnlyElementsInSidebar_ =
+        // Check the nav's children for hidden-when-toolbar
+        this.hiddenWhenToolbarElementsInSidebar_ =
           toArray(toolbarOnlyQuery);
       }
     }
@@ -124,7 +124,7 @@ export class Toolbar {
 
   /**
    * Function to attempt to show the toolbar,
-   * and hide toolbar-only element in the sidebar.
+   * and hide hidden-when-toolbar elements in the sidebar.
    * @returns {Promise|undefined}
    * @private
    */
@@ -141,8 +141,8 @@ export class Toolbar {
           this.toolbarTarget_.appendChild(this.toolbarClone_);
         }
       }
-      if (this.toolbarOnlyElementsInSidebar_) {
-        this.toolbarOnlyElementsInSidebar_.forEach(element => {
+      if (this.hiddenWhenToolbarElementsInSidebar_) {
+        this.hiddenWhenToolbarElementsInSidebar_.forEach(element => {
           toggle(element, false);
         });
       }
@@ -152,7 +152,7 @@ export class Toolbar {
 
   /**
   * Function to hide the toolbar,
-  * and show toolbar-only element in the sidebar.
+  * and show hidden-when-toolbar elements in the sidebar.
   * @private
    */
   hideToolbar_() {
@@ -165,8 +165,8 @@ export class Toolbar {
       if (this.toolbarTarget_) {
         toggle(this.toolbarTarget_, false);
       }
-      if (this.toolbarOnlyElementsInSidebar_) {
-        this.toolbarOnlyElementsInSidebar_.forEach(element => {
+      if (this.hiddenWhenToolbarElementsInSidebar_) {
+        this.hiddenWhenToolbarElementsInSidebar_.forEach(element => {
           toggle(element, true);
         });
       }

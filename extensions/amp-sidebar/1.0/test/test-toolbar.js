@@ -65,8 +65,8 @@
          } else {
            navToolbar.setAttribute('toolbar', '(min-width: 768px)');
          }
-         if (toolbarObj.toolbarOnlyOnNav) {
-           navToolbar.setAttribute('toolbar-only', '');
+         if (toolbarObj.hiddenWhenToolbarOnNav) {
+           navToolbar.setAttribute('hidden-when-toolbar', '');
          }
          const toolbarTarget = ampdoc.win.document.createElement('div');
          if (toolbarObj.toolbarTarget) {
@@ -82,6 +82,9 @@
          const toolbarList = ampdoc.win.document.createElement('ul');
          for (let i = 0; i < 3; i++) {
            const li = ampdoc.win.document.createElement('li');
+           if (toolbarObj.hiddenWhenToolbarOnNavChild && i == 1) {
+             li.setAttribute('hidden-when-toolbar', '');
+           }
            li.innerHTML = 'Toolbar item ' + i;
            toolbarList.appendChild(li);
          }
@@ -227,11 +230,11 @@
      });
    });
 
-   it('should hide <nav toolbar> elements with toolbar-only, \
+   it('should hide <nav toolbar> elements with hidden-when-toolbar, \
    inside the sidebar, but not inside the toolbar, for a matching \
    window size for (min-width: 768px)', () => {
      return getToolbars([{
-       toolbarOnlyOnNav: true,
+       hiddenWhenToolbarOnNav: true,
      }]).then(obj => {
        const toolbars = obj.toolbars;
        resizeIframeToWidth(obj.iframe, '4000px', () => {
@@ -246,6 +249,31 @@
                 .querySelectorAll('nav[style]'));
          expect(toolbarNavElements.length).to.be.equal(2);
          expect(hiddenToolbarNavElements.length).to.be.equal(1);
+         expect(toolbars.length).to.be.equal(1);
+       });
+     });
+   });
+
+   it('should hide individual <nav toolbar> \
+   children elements with hidden-when-toolbar, \
+   inside the sidebar, but not inside the toolbar, for a matching \
+   window size for (min-width: 768px)', () => {
+     return getToolbars([{
+       hiddenWhenToolbarOnNavChild: true,
+     }]).then(obj => {
+       const toolbars = obj.toolbars;
+       resizeIframeToWidth(obj.iframe, '4000px', () => {
+         toolbars.forEach(toolbar => {
+           toolbar.onLayoutChange();
+         });
+         const toolbarNavChildElements =
+                toArray(obj.ampdoc.getRootNode()
+                .querySelectorAll('nav[toolbar] > ul > li'));
+         const hiddenToolbarNavChildElements =
+                toArray(obj.ampdoc.getRootNode()
+                .querySelectorAll('nav[toolbar] > ul > li[style]'));
+         expect(toolbarNavChildElements.length).to.be.equal(6);
+         expect(hiddenToolbarNavChildElements.length).to.be.equal(1);
          expect(toolbars.length).to.be.equal(1);
        });
      });
