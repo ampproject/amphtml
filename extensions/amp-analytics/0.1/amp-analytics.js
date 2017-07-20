@@ -165,9 +165,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    const ampDoc = this.getAmpDoc();
-    const type = this.element.getAttribute('type');
-    Transport.markCrossDomainIframeAsDone(ampDoc.win.document, type);
+    this.transport_.unlayoutCallback();
     return true;
   }
 
@@ -232,11 +230,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
 
-    if (this.config_['transport'] && this.config_['transport']['iframe']) {
-      this.transport_ = new Transport(this.element.getAttribute('type'));
-      this.transport_.processCrossDomainIframe(this.getAmpDoc().win,
-          this.config_['transport']['iframe']);
-    }
+    this.transport_ = new Transport(this.getAmpDoc().win,
+        this.element.getAttribute('type'),
+        this.config_['transport']);
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -751,8 +747,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           'iframePing is only available on page view requests.');
       sendRequestUsingIframe(this.win, request);
     } else {
-      this.transport_.sendRequest(this.win, request,
-          this.config_['transport'] || {});
+      this.transport_.sendRequest(request, this.config_['transport'] || {});
     }
   }
 

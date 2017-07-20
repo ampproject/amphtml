@@ -48,48 +48,63 @@ export let FrameData;
  */
 export class Transport {
   /**
+   * @param {!Window} win
    * @param {!string} type The value of the amp-analytics tag's type attribute
+   * @param {!JsonObject} config
    */
-  constructor(type) {
-    /** @private @const {string} */
-    this.id_ = Transport.createUniqueId_();
+  constructor(win, type, config) {
+    /** @private @const {!Window} win */
+    this.win_ = win;
 
     /** @private @const {string} */
     this.type_ = type;
+
+    /** @private @const {string} */
+    this.id_ = Transport.createUniqueId_();
+
+    if (config && config['iframe']) {
+      this.frameUrl_ = config['iframe'];
+      this.processCrossDomainIframe();
+    }
   }
 
   /**
-   * @param {!Window} win
+   * Called when a Transport instance is being removed from the DOM
+   */
+  unlayoutCallback() {
+    Transport.markCrossDomainIframeAsDone(this.win_.document, this.type_);
+  }
+
+  /**
    * @param {string} request
    * @param {Object<string, string>=} transportOptions
    */
-  sendRequest(win, request, transportOptions) {
-    assertHttpsUrl(request, 'amp-analytics request');
+  sendRequest(request, transportOptions) {
     if (transportOptions && transportOptions['iframe']) {
       this.sendRequestUsingCrossDomainIframe(request);
       return;
     }
+    assertHttpsUrl(request, 'amp-analytics request');
     checkCorsUrl(request);
     if (transportOptions['beacon'] &&
-      Transport.sendRequestUsingBeacon(win, request)) {
+      Transport.sendRequestUsingBeacon(this.win_, request)) {
       return;
     }
     if (transportOptions['xhrpost'] &&
-      Transport.sendRequestUsingXhr(win, request)) {
+      Transport.sendRequestUsingXhr(this.win_, request)) {
       return;
     }
     if (transportOptions['image']) {
-      Transport.sendRequestUsingImage(win, request);
+      Transport.sendRequestUsingImage(request);
       return;
     }
     user().warn(TAG_, 'Failed to send request', request, transportOptions);
   }
 
   /**
-   * @param {!Window} unusedWin
    * @param {string} request
    */
-  static sendRequestUsingImage(unusedWin, request) {
+  static sendRequestUsingImage(request) {
     const image = new Image();
     image.src = request;
     image.width = 1;
@@ -151,29 +166,25 @@ export class Transport {
   /**
    * If iframe is specified in config/transport, check whether third-party
    * iframe already exists, and if not, create it.
-   * @param {!Window} win The window element
-   * @param {!string} frameUrl  The URL of the cross-domain iframe
    */
-  processCrossDomainIframe(win, frameUrl) {
+  processCrossDomainIframe() {
     let frameData;
     if (Transport.hasCrossDomainIframe(this.type_)) {
       frameData = Transport.getFrameData(this.type_);
       ++(frameData.usageCount);
     } else {
-      frameData = this.createCrossDomainIframe(win, frameUrl);
-      win.document.body.appendChild(frameData.frame);
+      frameData = this.createCrossDomainIframe();
+      this.win_.document.body.appendChild(frameData.frame);
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
   }
 
   /**
    * Create a cross-domain iframe for third-party vendor anaytlics
-   * @param {!Window} win The window element
-   * @param {!string} frameUrl  The URL of the cross-domain iframe
    * @return {!FrameData}
    * @VisibleForTesting
    */
-  createCrossDomainIframe(win, frameUrl) {
+  createCrossDomainIframe() {
     // Explanation of IDs:
     // Each instance of Transport (owned by a specific amp-analytics tag, in
     // turn owned by a specific creative) has an ID in this._id.
@@ -190,12 +201,12 @@ export class Transport {
     const useLocal = getMode().localDev || getMode().test;
     const useRtvVersion = !useLocal;
     const scriptSrc = calculateEntryPointScriptUrl(
-        win.parent.location, 'ampanalytics-lib', useLocal, useRtvVersion);
+        this.win_.parent.location, 'ampanalytics-lib', useLocal, useRtvVersion);
     const frameName = JSON.stringify(/** @type {JsonObject} */ ({
       scriptSrc,
       sentinel,
     }));
-    const frame = createElementWithAttributes(win.document, 'iframe',
+    const frame = createElementWithAttributes(this.win_.document, 'iframe',
         /** @type {!JsonObject} */ ({
           sandbox: 'allow-scripts',
           name: frameName,
@@ -204,13 +215,12 @@ export class Transport {
     frame.sentinel = sentinel;
     setStyles(frame, {
       display: 'none',
-      position: 'absolute',
     });
-    frame.src = frameUrl;
+    frame.src = this.frameUrl_;
     const frameData = /** @const {FrameData} */ ({
       frame,
       usageCount: 1,
-      queue: new IframeTransportMessageQueue(win,
+      queue: new IframeTransportMessageQueue(this.win_,
           /** @type {!HTMLIFrameElement} */
           (frame)),
     });

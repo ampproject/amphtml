@@ -17,146 +17,204 @@
 import {sendRequestUsingIframe, Transport} from '../transport';
 import {adopt} from '../../../../src/runtime';
 import {loadPromise} from '../../../../src/event-helper';
-import * as sinon from 'sinon';
 
 adopt(window);
 
 describes.realWin('amp-analytics.transport', {amp: true}, env => {
 
   let sandbox;
-  const transport = new Transport('foo');
+  let transport;
+  const frameUrl = 'https://www.google.com';
+
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = env.sandbox;
+    transport = new Transport(env.win, 'some_vendor_type', {iframe: frameUrl});
   });
 
   afterEach(() => {
     Transport.resetCrossDomainIframes();
-    sandbox.restore();
   });
 
-  function setupStubs(crossDomainIframeRetval, imageRetval,
-                      beaconRetval, xhrRetval) {
+  function setupStubs(returnValues) {
     sandbox.stub(transport, 'sendRequestUsingCrossDomainIframe').returns(
-        crossDomainIframeRetval);
-    sandbox.stub(Transport, 'sendRequestUsingImage').returns(imageRetval);
-    sandbox.stub(Transport, 'sendRequestUsingBeacon').returns(beaconRetval);
-    sandbox.stub(Transport, 'sendRequestUsingXhr').returns(xhrRetval);
+        returnValues['crossDomainIframe']);
+    sandbox.stub(Transport, 'sendRequestUsingImage').returns(
+        returnValues['image']);
+    sandbox.stub(Transport, 'sendRequestUsingBeacon').returns(
+        returnValues['beacon']);
+    sandbox.stub(Transport, 'sendRequestUsingXhr').returns(
+        returnValues['xhr']);
   }
 
-  function assertCallCounts(
-      expectedCrossDomainIframeCalls,
-      expectedBeaconCalls, expectedXhrCalls, expectedImageCalls) {
+  function assertCallCounts(counts) {
     expect(transport.sendRequestUsingCrossDomainIframe.callCount,
         'sendRequestUsingCrossDomainIframe call count').to.equal(
-        expectedCrossDomainIframeCalls);
-    expect(Transport.sendRequestUsingBeacon.callCount,
-        'sendRequestUsingBeacon call count').to.equal(expectedBeaconCalls);
-    expect(Transport.sendRequestUsingXhr.callCount,
-        'sendRequestUsingXhr call count').to.equal(expectedXhrCalls);
+        counts['crossDomainIframe']);
     expect(Transport.sendRequestUsingImage.callCount,
-        'sendRequestUsingImage call count').to.equal(expectedImageCalls);
+        'sendRequestUsingImage call count').to.equal(counts['image']);
+    expect(Transport.sendRequestUsingBeacon.callCount,
+        'sendRequestUsingBeacon call count').to.equal(counts['beacon']);
+    expect(Transport.sendRequestUsingXhr.callCount,
+        'sendRequestUsingXhr call count').to.equal(counts['xhr']);
   }
 
   function expectAllUnique(numArray) {
     if (!numArray) {
       return;
     }
-    expect(numArray.length).to.equal(new Set(numArray).size);
+    expect(numArray).to.have.lengthOf(new Set(numArray).size);
   }
 
   it('prefers cross-domain iframe over beacon, xhrpost, and image', () => {
-    setupStubs(true, true, true, true);
-    transport.sendRequest(env.win, 'https://example.com/test', {
+    setupStubs({
+      'crossDomainIframe': true,
+      'image': true,
+      'beacon': true,
+      'xhr': true,
+    });
+    transport.sendRequest('https://example.com/test', {
       iframe: 'https://example.com/test',
     });
-    assertCallCounts(1, 0, 0, 0);
+    assertCallCounts({
+      'crossDomainIframe': 1,
+      'image': 0,
+      'beacon': 0,
+      'xhr': 0,
+    });
   });
 
   it('prefers beacon over xhrpost and image', () => {
-    setupStubs(true, true, true, true);
-    transport.sendRequest(env.win, 'https://example.com/test', {
+    setupStubs({
+      'crossDomainIframe': true,
+      'image': true,
+      'beacon': true,
+      'xhr': true,
+    });
+    transport.sendRequest('https://example.com/test', {
       beacon: true, xhrpost: true, image: true,
     });
-    assertCallCounts(0, 1, 0, 0);
+    assertCallCounts({
+      'crossDomainIframe': 0,
+      'image': 0,
+      'beacon': 1,
+      'xhr': 0,
+    });
   });
 
   it('prefers xhrpost over image', () => {
-    setupStubs(true, true, true, true);
-    transport.sendRequest(env.win, 'https://example.com/test', {
+    setupStubs({
+      'crossDomainIframe': true,
+      'image': true,
+      'beacon': true,
+      'xhr': true,
+    });
+    transport.sendRequest('https://example.com/test', {
       beacon: false, xhrpost: true, image: true,
     });
-    assertCallCounts(0, 0, 1, 0);
+    assertCallCounts({
+      'crossDomainIframe': 0,
+      'image': 0,
+      'beacon': 0,
+      'xhr': 1,
+    });
   });
 
   it('reluctantly uses image if nothing else is enabled', () => {
-    setupStubs(true, true, true, true);
-    transport.sendRequest(env.win, 'https://example.com/test', {
-      image: true,
+    setupStubs({
+      'crossDomainIframe': true,
+      'image': true,
+      'beacon': true,
+      'xhr': true,
     });
-    assertCallCounts(0, 0, 0, 1);
+    transport.sendRequest('https://example.com/test', {image: true});
+    assertCallCounts({
+      'crossDomainIframe': 0,
+      'image': 1,
+      'beacon': 0,
+      'xhr': 0,
+    });
   });
 
   it('falls back to xhrpost when enabled and beacon is not available', () => {
-    setupStubs(false, false, false, true);
-    transport.sendRequest(env.win, 'https://example.com/test', {
+    setupStubs({
+      'crossDomainIframe': false,
+      'image': false,
+      'beacon': false,
+      'xhr': true,
+    });
+    transport.sendRequest('https://example.com/test', {
       beacon: true, xhrpost: true, image: true,
     });
-    assertCallCounts(0, 1, 1, 0);
+    assertCallCounts({
+      'crossDomainIframe': 0,
+      'image': 0,
+      'beacon': 1,
+      'xhr': 1,
+    });
   });
 
   it('falls back to image when beacon not found and xhr disabled', () => {
-    setupStubs(false, false, false, true);
-    transport.sendRequest(env.win, 'https://example.com/test', {
+    setupStubs({
+      'crossDomainIframe': false,
+      'image': false,
+      'beacon': false,
+      'xhr': true,
+    });
+    transport.sendRequest('https://example.com/test', {
       beacon: true, xhrpost: false, image: true,
     });
-    assertCallCounts(0, 1, 0, 1);
+    assertCallCounts({
+      'crossDomainIframe': 0,
+      'image': 1,
+      'beacon': 1,
+      'xhr': 0,
+    });
   });
 
   it('falls back to image when beacon and xhr are not available', () => {
-    setupStubs(false, false, false, false);
-    transport.sendRequest(env.win, 'https://example.com/test', {
+    setupStubs({
+      'crossDomainIframe': false,
+      'image': false,
+      'beacon': false,
+      'xhr': false,
+    });
+    transport.sendRequest('https://example.com/test', {
       beacon: true, xhrpost: true, image: true,
     });
-    assertCallCounts(0, 1, 1, 1);
+    assertCallCounts({
+      'crossDomainIframe': 0,
+      'image': 1,
+      'beacon': 1,
+      'xhr': 1,
+    });
   });
 
-  it('must create xframe before sending message to it', () => {
-    expect(() => {
-      transport.sendRequest(env.win, 'https://example.com/test', {
-        iframe: 'https://example.com/test',
-      });
-    }).to.throw(/send message to non-existent/);
-  });
-
-  it('reuses cross-domain iframe', () => {
-    const url = 'https://example.com/test';
-    sandbox.spy(transport, 'createCrossDomainIframe');
-    transport.processCrossDomainIframe(env.win, url);
-    expect(transport.createCrossDomainIframe.calledOnce).to.be.true;
+  it('enforces one frame url per vendor type', () => {
+    const createCrossDomainIframeSpy = sandbox.spy(transport,
+        'createCrossDomainIframe');
+    transport.processCrossDomainIframe();
+    expect(createCrossDomainIframeSpy).to.not.be.called;
     expect(Transport.hasCrossDomainIframe(transport.getType())).to.be.true;
 
-    transport.processCrossDomainIframe(env.win, url);
-    expect(transport.createCrossDomainIframe.calledOnce).to.be.true;
+    transport.processCrossDomainIframe();
+    expect(createCrossDomainIframeSpy).to.not.be.called;
   });
 
   it('enqueues event messages correctly', () => {
     const url = 'https://example.com/test';
     const config = {iframe: url};
-    transport.processCrossDomainIframe(env.win, url);
-    transport.sendRequest(env.win, 'hello, world!', config);
+    transport.processCrossDomainIframe();
+    transport.sendRequest('hello, world!', config);
     const queue = Transport.getFrameData(transport.getType()).queue;
-    expect(queue.messagesFor(transport.getId()).length).to.equal(1);
-    transport.sendRequest(env.win, 'hello again, world!', config);
-    expect(queue.messagesFor(transport.getId()).length).to.equal(2);
+    expect(queue.messagesFor(transport.getId())).to.have.lengthOf(1);
+    transport.sendRequest('hello again, world!', config);
+    expect(queue.messagesFor(transport.getId())).to.have.lengthOf(2);
   });
 
   it('does not cause sentinel collisions', () => {
-    const url1 = 'https://example.com/test';
-    const url2 = 'https://example.com/test2';
-    const transport2 = new Transport('bar');
+    const transport2 = new Transport(env.win, 'some_other_vendor_type',
+      {iframe: 'https://example.com/test2'});
 
-    transport.processCrossDomainIframe(env.win, url1);
-    transport2.processCrossDomainIframe(env.win, url2);
     const frame1 = Transport.getFrameData(transport.getType());
     const frame2 = Transport.getFrameData(transport2.getType());
     expectAllUnique([transport.getId(), transport2.getId(),
@@ -164,25 +222,22 @@ describes.realWin('amp-analytics.transport', {amp: true}, env => {
   });
 
   it('correctly tracks usageCount and destroys iframes', () => {
-    // Add 2 iframes.
-    const url1 = 'https://example.com/usageCountTest1';
-    const url2 = 'https://example.com/usageCountTest2';
-    const transport2 = new Transport('bar');
+    const frameUrl2 = 'https://example.com/test2';
+    const transport2 = new Transport(env.win, 'some_other_vendor_type',
+      {iframe: frameUrl2});
 
-    transport.processCrossDomainIframe(env.win, url1);
-    transport2.processCrossDomainIframe(env.win, url2);
     const frame1 = Transport.getFrameData(transport.getType());
     const frame2 = Transport.getFrameData(transport2.getType());
     expect(frame1.usageCount).to.equal(1);
     expect(frame2.usageCount).to.equal(1);
-    expect(env.win.document.getElementsByTagName('IFRAME').length).to.equal(2);
+    expect(env.win.document.getElementsByTagName('IFRAME')).to.have.lengthOf(2);
 
     // Mark the iframes as used multiple times each.
-    transport.processCrossDomainIframe(env.win, url1);
-    transport.processCrossDomainIframe(env.win, url1);
-    transport2.processCrossDomainIframe(env.win, url2);
-    transport2.processCrossDomainIframe(env.win, url2);
-    transport2.processCrossDomainIframe(env.win, url2);
+    transport.processCrossDomainIframe();
+    transport.processCrossDomainIframe();
+    transport2.processCrossDomainIframe();
+    transport2.processCrossDomainIframe();
+    transport2.processCrossDomainIframe();
     expect(frame1.usageCount).to.equal(3);
     expect(frame2.usageCount).to.equal(4);
 
@@ -197,7 +252,7 @@ describes.realWin('amp-analytics.transport', {amp: true}, env => {
         transport.getType());
     expect(frame1.usageCount).to.equal(0);
     expect(frame2.usageCount).to.equal(4); // (Still)
-    expect(env.win.document.getElementsByTagName('IFRAME').length).to.equal(1);
+    expect(env.win.document.getElementsByTagName('IFRAME')).to.have.lengthOf(1);
     Transport.markCrossDomainIframeAsDone(env.win.document,
         transport2.getType());
     Transport.markCrossDomainIframeAsDone(env.win.document,
@@ -207,25 +262,34 @@ describes.realWin('amp-analytics.transport', {amp: true}, env => {
     Transport.markCrossDomainIframeAsDone(env.win.document,
         transport2.getType());
     expect(frame2.usageCount).to.equal(0);
-    expect(env.win.document.getElementsByTagName('IFRAME').length).to.equal(0);
+    expect(env.win.document.getElementsByTagName('IFRAME')).to.have.lengthOf(0);
   });
 
   it('does not send a request when no transport methods are enabled', () => {
-    setupStubs(true, true, true, true);
-    transport.sendRequest(env.win, 'https://example.com/test', {});
-    assertCallCounts(0, 0, 0, 0);
+    setupStubs({
+      'crossDomainIframe': true,
+      'image': true,
+      'beacon': true,
+      'xhr': true,
+    });
+    transport.sendRequest('https://example.com/test', {});
+    assertCallCounts({
+      'crossDomainIframe': 0,
+      'image': 0,
+      'beacon': 0,
+      'xhr': 0,
+    });
   });
 
   it('asserts that urls are https', () => {
     expect(() => {
-      transport.sendRequest(env.win, 'http://example.com/test');
+      transport.sendRequest('http://example.com/test');
     }).to.throw(/https/);
   });
 
   it('should NOT allow __amp_source_origin', () => {
     expect(() => {
-      transport.sendRequest(env.win,
-          'https://twitter.com?__amp_source_origin=1');
+      transport.sendRequest('https://twitter.com?__amp_source_origin=1');
     }).to.throw(/Source origin is not allowed in/);
   });
 

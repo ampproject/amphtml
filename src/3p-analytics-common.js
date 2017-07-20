@@ -20,10 +20,13 @@ export const AMP_ANALYTICS_3P_MESSAGE_TYPE = {
 };
 
 /** @typedef {!Object<!string,!Array<!string>>} */
-export let AmpAnalytics3pEvent;
+export let AmpAnalytics3pEventMap;
+// Maps transport IDs to events. For instance if the creative with transport
+// ID 2 sends "hi" and "hello" and the creative with transport ID 3 sends
+// "goodbye" then the map would look like:
 // Example:
 // {
-//   "2": ["viewed=true&...etc.", ... ],
-//   ...
+//   "2": ["hi", "hello" ],
+//   "3": ["goodbye" ]
 // }
 

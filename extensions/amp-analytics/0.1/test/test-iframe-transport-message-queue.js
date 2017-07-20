@@ -14,30 +14,25 @@
  * limitations under the License.
  */
 
-import {
-  IframeTransportMessageQueue,
-} from '../iframe-transport-message-queue';
-import * as sinon from 'sinon';
+import {IframeTransportMessageQueue} from '../iframe-transport-message-queue';
+import {createElementWithAttributes} from '../../../../src/dom';
 
 describes.realWin('amp-analytics.iframe-transport-message-queue', {amp: true},
     env => {
-      let sandbox;
       let frame;
       let queue;
 
       beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-        frame = env.win.document.createElement('iframe');
-        frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-        frame.setAttribute('name', 'some_name');
-        frame.setAttribute('src', 'https://www.google.com');
+        frame = createElementWithAttributes(env.win.document, 'iframe', {
+          'sandbox': 'allow-scripts allow-same-origin',
+          'name': 'some_name',
+        });
         frame.src = 'https://www.google.com';
         frame.sentinel = '42';
         queue = new IframeTransportMessageQueue(env.win, frame);
       });
 
       afterEach(() => {
-        sandbox.restore();
       });
 
       it('is empty when first created ', () => {

@@ -45,7 +45,7 @@ export class IframeTransportMessageQueue {
     this.isReady_ = false;
 
     /** @private
-     *  {!Object<!string,!../../../src/3p-analytics-common.AmpAnalytics3pEvent}}
+     *  {!../../../src/3p-analytics-common.AmpAnalytics3pEventMap}
      */
     this.transportIdToPendingMessages_ = {};
 
