@@ -20,7 +20,8 @@ import {dev, rethrowAsync, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
-import {sendRequestUsingIframe, Transport} from './transport';
+import {sendRequest, sendRequestUsingIframe} from './transport';
+import {IframeTransport} from './iframe-transport';
 import {Services} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
@@ -114,8 +115,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {?Promise} */
     this.iniPromise_ = null;
 
-    /** @private {?Transport} */
-    this.transport_ = null;
+    /** @private {?IframeTransport} */
+    this.iframeTransport_ = null;
   }
 
   /** @override */
@@ -165,7 +166,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    this.transport_.unlayoutCallback();
+    if (this.iframeTransport_) {
+      this.iframeTransport_.unlayoutCallback();
+    }
     return true;
   }
 
@@ -230,7 +233,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
 
-    this.transport_ = new Transport(this.getAmpDoc().win,
+    this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport']);
 
@@ -746,8 +749,11 @@ export class AmpAnalytics extends AMP.BaseElement {
       user().assert(trigger['on'] == 'visible',
           'iframePing is only available on page view requests.');
       sendRequestUsingIframe(this.win, request);
+    } else if (this.config_['transport'] &&
+        this.config_['transport']['iframe']) {
+      this.iframeTransport_.sendRequest(request);
     } else {
-      this.transport_.sendRequest(request, this.config_['transport'] || {});
+      sendRequest(this.win, request, this.config_['transport'] || {});
     }
   }
 
