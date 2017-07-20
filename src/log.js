@@ -17,6 +17,7 @@
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
+import {Services} from './services';
 
 /** @const Time when this JS loaded.  */
 const start = Date.now();
@@ -540,22 +541,34 @@ export function resetLogConstructorForTesting() {
  *  2. Development mode is enabled via `#development=1` or logging is explicitly
  *     enabled via `#log=D` where D >= 1.
  *
+ * @param {!Element=} opt_element
  * @return {!Log}
  */
-export function user() {
+export function user(opt_element) {
   if (logs.user) {
     return logs.user;
   }
   if (!logConstructor) {
     throw new Error('failed to call initLogConstructor');
   }
-  return logs.user = new logConstructor(self, mode => {
-    const logNum = parseInt(mode.log, 10);
-    if (mode.development || logNum >= 1) {
-      return LogLevel.FINE;
-    }
-    return LogLevel.OFF;
-  }, USER_ERROR_SENTINEL);
+  let excluded;
+
+  //TODO(tiendt): figure out how to get ampdoc
+  const ampdoc = Services.ampdocServiceFor(this.win).getAmpdoc();
+  if (opt_element) {
+    excluded = opt_element.ownerDocument.defaultView != ampdoc.win;
+  }
+  if (!opt_element || excluded === false) {
+    return logs.user = new logConstructor(self, mode => {
+      const logNum = parseInt(mode.log, 10);
+      if (mode.development || logNum >= 1) {
+        return LogLevel.FINE;
+      }
+      return LogLevel.OFF;
+    }, USER_ERROR_SENTINEL);
+  } else {
+    //return another log to send errors to console
+  }
 }
 
 
