@@ -328,7 +328,7 @@ export function imaVideo(global, data) {
     videoPlayer.appendChild(sourceElement);
   }
   if (data.childElements) {
-    const children = tryParseJson(data.childElements);
+    const children = JSON.parse(data.childElements);
     children.forEach(child => {
       videoPlayer.appendChild(htmlToElement(child));
     });
