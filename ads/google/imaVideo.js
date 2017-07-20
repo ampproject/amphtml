@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {camelCaseToTitleCase, setStyle} from '../../src/style';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
-import {setStyle} from '../../src/style';
 import {tryParseJson} from '../../src/json';
 
 /**
@@ -328,13 +328,13 @@ export function imaVideo(global, data) {
     videoPlayer.appendChild(sourceElement);
   }
   if (data.childElements) {
-    const children = JSON.parse(data.childElements);
+    const children = tryParseJson(data.childElements);
     children.forEach(child => {
       videoPlayer.appendChild(htmlToElement(child));
     });
   }
   if (data.imaSettings) {
-    imaSettings = JSON.parse(data.imaSettings);
+    imaSettings = tryParseJson(data.imaSettings);
   }
 
   contentDiv.appendChild(videoPlayer);
@@ -386,11 +386,13 @@ export function imaVideo(global, data) {
 
     // Handle settings that need to be set before the AdDisplayContainer is
     // created.
-    if (imaSettings.locale) {
-      global.google.ima.settings.setLocale(imaSettings.locale);
-    }
-    if (imaSettings.vpaidMode) {
-      global.google.ima.settings.setVpaidMode(imaSettings.vpaidMode);
+    if (imaSettings) {
+      if (imaSettings['locale']) {
+        global.google.ima.settings.setLocale(imaSettings['locale']);
+      }
+      if (imaSettings['vpaidMode']) {
+        global.google.ima.settings.setVpaidMode(imaSettings['vpaidMode']);
+      }
     }
 
 
@@ -410,9 +412,10 @@ export function imaVideo(global, data) {
     for (const setting in imaSettings) {
       if (!skippedSettings.includes(setting)) {
         // Change e.g. 'ppid' to 'setPpid'.
-        const methodName =
-            'set' + setting.charAt(0).toUpperCase() + setting.slice(1);
-        adsLoader.getSettings()[methodName](imaSettings[setting]);
+        const methodName = 'set' + camelCaseToTitleCase(setting);
+        if (typeof adsLoader.getSettings()[methodName] === 'function') {
+          adsLoader.getSettings()[methodName](imaSettings[setting]);
+        }
       }
     }
     adsLoader.addEventListener(

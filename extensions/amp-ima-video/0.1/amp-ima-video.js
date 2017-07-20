@@ -30,7 +30,7 @@ import {
   listen,
 } from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
-import {removeElement} from '../../../src/dom';
+import {childElementsByTag, isJsonScriptTag, removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
@@ -76,8 +76,8 @@ class AmpImaVideo extends AMP.BaseElement {
             'https');
 
     // Handle <source> and <track> children
-    const sourceElements = this.element.getElementsByTagName('source');
-    const trackElements = this.element.getElementsByTagName('track');
+    const sourceElements = childElementsByTag(this.element, 'SOURCE');
+    const trackElements = childElementsByTag(this.element, 'TRACK');
     const childElements =
         toArray(sourceElements).concat(toArray(trackElements));
     if (childElements.length > 0) {
@@ -96,10 +96,10 @@ class AmpImaVideo extends AMP.BaseElement {
     }
 
     // Handle IMASetting JSON
-    const scriptElement = this.element.getElementsByTagName('script')[0];
-    if (scriptElement.type == 'application/json') {
+    const scriptElement = childElementsByTag(this.element, 'SCRIPT')[0];
+    if (scriptElement && isJsonScriptTag(scriptElement)) {
       this.element.setAttribute(
-          'data-ima-settings', scriptElement.innerHTML);
+          'data-ima-settings', scriptElement./*REVIEW*/innerHTML);
     }
   }
 
