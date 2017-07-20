@@ -31,17 +31,17 @@ const TAG_ = 'amp-analytics.Transport';
 /**
  * @param {!Window} win
  * @param {string} request
- * @param {Object<string, string>=} transportOptions
+ * @param {!Object<string, string>} transportOptions
  */
 export function sendRequest(win, request, transportOptions) {
   assertHttpsUrl(request, 'amp-analytics request');
   checkCorsUrl(request);
   if (transportOptions['beacon'] &&
-    Transport.sendRequestUsingBeacon(win, request)) {
+      Transport.sendRequestUsingBeacon(win, request)) {
     return;
   }
   if (transportOptions['xhrpost'] &&
-    Transport.sendRequestUsingXhr(win, request)) {
+      Transport.sendRequestUsingXhr(win, request)) {
     return;
   }
   if (transportOptions['image']) {
