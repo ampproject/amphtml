@@ -364,6 +364,8 @@ performance. Currently the list contains:
  - `opacity`
  - `transform`
  - `visibility`
+ - 'offsetDistance'
+
 
 Notice that the use of vendor prefixed CSS properties is neither needed nor allowed.
 
@@ -554,6 +556,17 @@ These functions can be combined with `calc()`, `var()` and other CSS expressions
   "transform": "translateX(calc(width('#container') + 10px))"
 }
 ```
+
+
+### SVG animations
+
+SVGs are awesome and we certainly recommend their use for animations!
+
+SVG animations are supported via the same CSS properties described in [Whitelisted properties for keyframes](#whitelisted-properties-for-keyframes) with some nuances:
+
+- IE/Edge SVG elements [do not support CSS `transform` properties](https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/1173754/). The `transform` animation itself is polyfilled. However, initial state defined in a stylesheet is not applied. If the initial transformed state is important on IE/Edge, it's recommended to duplicate it via [SVG `transform` attribute](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform).
+- While `transform` CSS is polyfilled for IE/Edge, unfortunately, it's impossible to polyfill `transform-origin`. Thus, where compatibility with IE/Edge is desired, it's recommended to only use the default `transform-origin`.
+- Most of the browsers currently have issues interpreting `transform-origin` CSS correctly. See issues for [Chrome](https://bugs.chromium.org/p/chromium/issues/detail?id=740300), [Safari](https://bugs.webkit.org/show_bug.cgi?id=174285) and [Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=1379340). Most of this confusion should be resolved once [CSS `transform-box`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-box) is implemented. Where `transform-origin` is important, it's recommended to also include the desired `transform-box` CSS for future compatibility.
 
 
 ## Triggering animation
