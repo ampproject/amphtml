@@ -24,7 +24,7 @@ describes.realWin('amp-analytics.iframe-transport-message-queue', {amp: true},
 
       beforeEach(() => {
         frame = createElementWithAttributes(env.win.document, 'iframe', {
-          'sandbox': 'allow-scripts allow-same-origin',
+          'sandbox': 'allow-scripts',
           'name': 'some_name',
         });
         frame.src = 'https://www.google.com';

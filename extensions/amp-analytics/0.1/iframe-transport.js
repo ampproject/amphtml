@@ -87,8 +87,8 @@ export class IframeTransport {
    */
   createCrossDomainIframe() {
     // Explanation of IDs:
-    // Each instance of Transport (owned by a specific amp-analytics tag, in
-    // turn owned by a specific creative) has an ID in this._id.
+    // Each instance of IframeTransport (owned by a specific amp-analytics
+    // tag, in turn owned by a specific creative) has an ID in this._id.
     // Each cross-domain iframe also has an ID, stored here in sentinel.
     // These two types of IDs are drawn from the same pool of numbers, and
     // are thus mutually unique.
@@ -97,7 +97,7 @@ export class IframeTransport {
     // both use xframe #3.
     // Of course, a given creative may use multiple analytics vendors, but
     // in that case it would use multiple amp-analytics tags, so the
-    // transport.id_ -> sentinel relationship is *not* many-to-many.
+    // iframeTransport.id_ -> sentinel relationship is *not* many-to-many.
     const sentinel = IframeTransport.createUniqueId_();
     const useLocal = getMode().localDev || getMode().test;
     const useRtvVersion = !useLocal;
@@ -151,7 +151,7 @@ export class IframeTransport {
   }
 
   /**
-   * Returns whether a url of a cross-domain frame is already known
+   * Returns whether this type of cross-domain frame is already known
    * @param {!string} type The type attribute of the amp-analytics tag
    * @return {!boolean}
    * @VisibleForTesting
@@ -161,8 +161,8 @@ export class IframeTransport {
   }
 
   /**
-   * Create a unique value to differentiate messages from
-   * this particular creative to the cross-domain iframe
+   * Create a unique value to differentiate messages from a particular
+   * creative to the cross-domain iframe, or to identify the iframe itself.
    * @returns {string}
    * @private
    */
@@ -171,7 +171,7 @@ export class IframeTransport {
   }
 
   /**
-   * Sends an Amp Analytics trigger event to a vendor's cross-domain iframe,
+   * Sends an AMP Analytics trigger event to a vendor's cross-domain iframe,
    * or queues the message if the frame is not yet ready to receive messages.
    * @param {!string} event A string describing the trigger event
    * @VisibleForTesting
@@ -179,13 +179,12 @@ export class IframeTransport {
   sendRequest(event) {
     const frameData = IframeTransport.getFrameData(this.type_);
     dev().assert(frameData, 'Trying to send message to non-existent frame');
-    dev().assert(frameData.queue,
-        'Event queue is missing for ' + this.id_);
+    dev().assert(frameData.queue, 'Event queue is missing for ' + this.id_);
     frameData.queue.enqueue(this.id_, event);
   }
 
   /**
-   * Gets the FrameData associated with a particular cross-domain frame URL.
+   * Gets the FrameData associated with a particular cross-domain frame type.
    * @param {!string} type The type attribute of the amp-analytics tag
    * @returns {FrameData}
    * @VisibleForTesting
@@ -204,7 +203,7 @@ export class IframeTransport {
   }
 
   /**
-   * @returns {!string} Unique ID of this instance of Transport
+   * @returns {!string} Unique ID of this instance of IframeTransport
    * @VisibleForTesting
    */
   getId() {

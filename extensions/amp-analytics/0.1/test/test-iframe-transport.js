@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,9 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
     expect(numArray).to.have.lengthOf(new Set(numArray).size);
   }
 
-  it('enforces one frame url per vendor type', () => {
+  it('creates one frame per vendor type', () => {
     const createCrossDomainIframeSpy = sandbox.spy(
         iframeTransport, 'createCrossDomainIframe');
-    iframeTransport.processCrossDomainIframe();
     expect(createCrossDomainIframeSpy).to.not.be.called;
     expect(IframeTransport.hasCrossDomainIframe(iframeTransport.getType()))
         .to.be.true;
@@ -54,7 +53,6 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   it('enqueues event messages correctly', () => {
     const url = 'https://example.com/test';
     const config = {iframe: url};
-    iframeTransport.processCrossDomainIframe();
     iframeTransport.sendRequest('hello, world!', config);
     const queue = IframeTransport.getFrameData(iframeTransport.getType()).queue;
     expect(queue.messagesFor(iframeTransport.getId())).to.have.lengthOf(1);
