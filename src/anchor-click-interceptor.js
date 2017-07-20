@@ -81,4 +81,3 @@ function maybeExpandUrlParams(ampdoc, e) {
 export function maybeExpandUrlParamsForTesting(ampdoc, e) {
   maybeExpandUrlParams(ampdoc, e);
 }
-
