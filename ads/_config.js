@@ -673,6 +673,15 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  vmfive: {
+    prefetch: 'https://man.vm5apis.com/dist/adn-web-sdk.js',
+    preconnect: [
+      'https://vawpro.vm5apis.com',
+      'https://vahfront.vm5apis.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   webediads: {
     prefetch: 'https://eu1.wbdds.com/amp.min.js',
     preconnect: [
