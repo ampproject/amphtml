@@ -255,6 +255,15 @@ export const adConfig = {
     prefetch: 'https://www.google.com/adsense/search/ads.js',
   },
 
+  dable: {
+    preconnect: [
+      'https://static.dable.io',
+      'https://api.dable.io',
+      'https://images.dable.io',
+    ],
+    renderStartImplemented: true,
+  },
+
   distroscale: {
     preconnect: [
       'https://c.jsrdn.com',
