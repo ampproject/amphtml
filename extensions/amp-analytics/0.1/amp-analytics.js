@@ -402,6 +402,14 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     this.mergeObjects_(defaultConfig, config);
     this.mergeObjects_(typeConfig, config, /* predefined */ true);
+    if (typeConfig) {
+      // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport overwriting
+      if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
+        const TAG = this.getName_();
+        user().error(TAG, 'Inline or remote config should not' +
+            'overwrite vendor transport settings');
+      }
+    }
     this.mergeObjects_(inlineConfig, config);
     this.mergeObjects_(this.remoteConfig_, config);
     return config;
