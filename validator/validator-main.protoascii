@@ -3157,6 +3157,12 @@ tags: {
     mandatory: true
     value_casei: "application/json"
   }
+  attrs: {
+    name: "amp-ima-video-settings"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_DISPATCH
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "<!--"
