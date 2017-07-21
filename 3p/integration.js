@@ -94,6 +94,7 @@ import {colombia} from '../ads/colombia';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
 import {csa} from '../ads/google/csa';
+import {dable} from '../ads/dable';
 import {distroscale} from '../ads/distroscale';
 import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
@@ -187,6 +188,7 @@ import {zucks} from '../ads/zucks';
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
   bringhub: true,
+  dable: true,
   'mantis-recommend': true,
   mywidget: true,
   outbrain: true,
@@ -265,6 +267,7 @@ register('colombia', colombia);
 register('contentad', contentad);
 register('criteo', criteo);
 register('csa', csa);
+register('dable', dable);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
