@@ -88,8 +88,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         /* vsync */ null, /* resources */ null);
     sandbox.stub(builder, 'requireLayout');
     const scanner = builder.createScanner_([]);
-    scanner.scan(spec);
-    return scanner.requests_;
+    const success = scanner.scan(spec);
+    if (success) {
+      return scanner.requests_;
+    }
+    expect(scanner.requests_).to.have.length(0);
+    return null;
   }
 
   function scanTiming(spec) {
@@ -282,6 +286,52 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(requests[0].timing.duration).to.equal(0);
     expect(requests[1].target).to.equal(target2);
     expect(requests[1].timing.duration).to.equal(300);
+  });
+
+  it('should accept multi-animation array with some disabled elements', () => {
+    const requests = scan([
+      {media: 'not-match', target: target1, keyframes: {}},
+      {media: 'match', target: target2, duration: 300, keyframes: {}},
+    ]);
+    expect(requests).to.have.length(1);
+    expect(requests[0].target).to.equal(target2);
+    expect(requests[0].timing.duration).to.equal(300);
+  });
+
+  it('should accept multi-animation array with all disabled elements', () => {
+    const requests = scan([
+      {media: 'not-match', target: target1, keyframes: {}},
+      {media: 'not-match', target: target2, duration: 300, keyframes: {}},
+    ]);
+    expect(requests).to.be.null;
+  });
+
+  it('should accept switch-animation with first match', () => {
+    const requests = scan({switch: [
+      {media: 'match', target: target1, keyframes: {}},
+      {media: 'match', target: target2, duration: 300, keyframes: {}},
+    ]});
+    expect(requests).to.have.length(1);
+    expect(requests[0].target).to.equal(target1);
+    expect(requests[0].timing.duration).to.equal(0);
+  });
+
+  it('should accept switch-animation with second match', () => {
+    const requests = scan({switch: [
+      {media: 'not-match', target: target1, keyframes: {}},
+      {media: 'match', target: target2, duration: 300, keyframes: {}},
+    ]});
+    expect(requests).to.have.length(1);
+    expect(requests[0].target).to.equal(target2);
+    expect(requests[0].timing.duration).to.equal(300);
+  });
+
+  it('should accept switch-animation with no matches', () => {
+    const requests = scan({switch: [
+      {media: 'not-match', target: target1, keyframes: {}},
+      {media: 'not-match', target: target2, duration: 300, keyframes: {}},
+    ]});
+    expect(requests).to.have.length(0);
   });
 
   it('should propagate vars', () => {
@@ -659,7 +709,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         {target: target2, duration: 300, keyframes: {}},
       ],
     });
-    expect(requests).to.have.length(0);
+    expect(requests).to.be.null;
   });
 
   it('should check media in sub-animations', () => {
@@ -683,7 +733,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         {target: target2, duration: 300, keyframes: {}},
       ],
     });
-    expect(requests).to.have.length(0);
+    expect(requests).to.be.null;
   });
 
   it('should check supports in sub-animations', () => {
@@ -728,19 +778,19 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       supports: 'supported: 1',
       target: target1,
       keyframes: {},
-    })).to.have.length(0);
+    })).to.be.null;
     expect(scan({
       media: 'match',
       supports: 'supported: 0',
       target: target1,
       keyframes: {},
-    })).to.have.length(0);
+    })).to.be.null;
     expect(scan({
       media: 'not-match',
       supports: 'supported: 0',
       target: target1,
       keyframes: {},
-    })).to.have.length(0);
+    })).to.be.null;
   });
 
   it('should find targets by selector', () => {
