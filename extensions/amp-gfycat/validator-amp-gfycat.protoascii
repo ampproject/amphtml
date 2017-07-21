@@ -36,6 +36,10 @@ tags: {  # <amp-gfycat>
     mandatory: true
   }
   attrs: {
+    name: "autoplay"
+    value: ""
+  }
+  attrs: {
     name: "noautoplay"
     value: ""
   }

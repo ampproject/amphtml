@@ -15,18 +15,44 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
+import {VideoEvents} from '../../../src/video-interface';
+import {Services} from '../../../src/services';
+import {removeElement} from '../../../src/dom';
+import {getData, listen} from '../../../src/event-helper';
+import {addParamsToUrl} from '../../../src/url';
 
+/**
+ * @implements {../../../src/video-interface.VideoInterface}
+ */
 class AmpGfycat extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
+    /** @private {?string}  */
+    this.videoid_ = null;
+
     /**
      * @private {?Element}
      */
     this.iframe_ = null;
+
+    /** @private {?string} */
+    this.videoIframeSrc_ = null;
+
+    /** @private {?Promise} */
+    this.playerReadyPromise_ = null;
+
+    /** @private {?Function} */
+    this.playerReadyResolver_ = null;
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
 
  /**
@@ -48,34 +74,203 @@ class AmpGfycat extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
-    const gfyid = user().assert(
+  buildCallback() {
+    this.videoid_ = this.getVideoId_();
+
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
+    installVideoManagerForDoc(this.element);
+    Services.videoManagerForDoc(this.element).register(this);
+  }
+
+  /** @override */
+  createPlaceholderCallback() {
+    const placeholder = this.win.document.createElement('amp-img');
+    dev().assert(this.videoid_);
+    const videoid = this.videoid_ || '';
+
+    placeholder.setAttribute('src',
+        'https://thumbs.gfycat.com/' +
+        encodeURIComponent(videoid) + '-poster.jpg');
+    placeholder.setAttribute('layout', 'fill');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('referrerpolicy', 'origin');
+    this.applyFillContent(placeholder);
+
+    return placeholder;
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getVideoId_() {
+    return user().assert(
         this.element.getAttribute('data-gfyid'),
         'The data-gfyid attribute is required for <amp-gfycat> %s',
         this.element);
-    const noautoplay = this.element.hasAttribute('noautoplay');
+  }
 
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    iframe.setAttribute('frameborder', '0');
-
-    let src = 'https://gfycat.com/ifr/' + encodeURIComponent(gfyid);
-    if (noautoplay) {
-      src += '?autoplay=0';
+  /** @return {string} */
+  getVideoIframeSrc_() {
+    if (this.videoIframeSrc_) {
+      return this.videoIframeSrc_;
     }
 
+    dev().assert(this.videoid_);
+    let src = 'https://gfycat.com/ifr/' + encodeURIComponent(this.videoid_);
+    let params = {};
+
+    const noautoplay = this.element.hasAttribute('noautoplay');
+    if (noautoplay) {
+      params['autoplay'] = '0';
+    }
+    src = addParamsToUrl(src, params);
+    return this.videoIframeSrc_ = src;
+  }
+
+  /** @override */
+  layoutCallback() {
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    const src = this.getVideoIframeSrc_();
+
+    iframe.setAttribute('frameborder', '0');
     iframe.src = src;
     this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
     this.iframe_ = iframe;
 
-    return this.loadPromise(iframe);
+    this.unlistenMessage_ = listen(
+        this.win,
+        'message',
+        this.handleGfycatMessages_.bind(this)
+    );
+
+    this.element.appendChild(iframe);
+    const loaded = this.loadPromise(this.iframe_).then(() => {
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
+    this.playerReadyResolver_(loaded);
+    return loaded;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
+
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+    return true;  // Call layoutCallback again.
+  }
+
+  /**
+   * Sends a command to the player through postMessage.
+   * @param {string} command
+   * @param {*=} opt_arg
+   * @private
+   * */
+  sendCommand_(command, opt_arg) {
+    this.playerReadyPromise_.then(() => {
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        const message = command;
+        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+      }
+    });
+  }
+
+  /** @private */
+  handleGfycatMessages_(event) {
+    const eventData = /** @type {?string|undefined} */ (getData(event));
+
+    if (event.origin !== 'https://gfycat.com' ||
+        event.source != this.iframe_.contentWindow ||
+        typeof eventData !== 'string') {
+      return;
+    }
+
+    if (eventData == 'ready') {
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    } else if (eventData == 'paused') {
+      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+    } else if (eventData == 'playing') {
+      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+    }
   }
 
   /** @override */
   pauseCallback() {
-    if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage('pause', '*');
-    }
+    this.pause();
+  }
+
+  // VideoInterface Implementation. See ../src/video-interface.VideoInterface
+
+  /**
+   * @override
+   */
+  supportsPlatform() {
+    return true;
+  }
+
+  /** @override */
+  isInteractive() {
+    return true;
+  }
+
+  /** @override */
+  play(unusedIsAutoplay) {
+    this.sendCommand_('play');
+  }
+
+  /** @override */
+  pause() {
+    this.sendCommand_('pause');
+  }
+
+  /** @override */
+
+  mute() {
+    // All Gfycat videos have no sound.
+  }
+
+  /** @override */
+  unmute() {
+    // All Gfycat videos have no sound.
+  }
+
+  /** @override */
+  showControls() {
+    // Not supported.
+  }
+
+  /** @override */
+  hideControls() {
+    // Not supported.
+  }
+
+    /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 }
 
