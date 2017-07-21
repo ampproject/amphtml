@@ -22,7 +22,7 @@ import {
 import {
   triggerAnalyticsEvent,
 } from '../../src/analytics';
-import {timerFor} from '../../src/services';
+import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -44,7 +44,7 @@ describes.realWin('analytics', {
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
-      timer = timerFor(env.win);
+      timer = Services.timerFor(env.win);
       ampdoc = env.ampdoc;
       triggerEventSpy = sandbox.spy();
       resetServiceForTesting(window, 'amp-analytics-instrumentation');

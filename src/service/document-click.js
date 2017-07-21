@@ -26,14 +26,7 @@ import {
 } from '../service';
 import {dev} from '../log';
 import {getMode} from '../mode';
-import {
-  historyForDoc,
-  platformFor,
-  timerFor,
-  urlReplacementsForDoc,
-  viewerForDoc,
-  viewportForDoc,
-} from '../services';
+import {Services} from '../services';
 import {parseUrl, parseUrlWithA} from '../url';
 
 const TAG = 'clickhandler';
@@ -72,15 +65,15 @@ export class ClickHandler {
     this.rootNode_ = opt_rootNode || ampdoc.getRootNode();
 
     /** @private @const {!./viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(this.ampdoc);
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.ampdoc);
+    this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
     /** @private @const {!./history-impl.History} */
-    this.history_ = historyForDoc(this.ampdoc);
+    this.history_ = Services.historyForDoc(this.ampdoc);
 
-    const platform = platformFor(this.ampdoc.win);
+    const platform = Services.platformFor(this.ampdoc.win);
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
@@ -139,7 +132,7 @@ export class ClickHandler {
     if (!target || !target.href) {
       return;
     }
-    urlReplacementsForDoc(target).maybeExpandLink(target);
+    Services.urlReplacementsForDoc(target).maybeExpandLink(target);
 
     const tgtLoc = this.parseUrl_(target.href);
 
@@ -268,8 +261,8 @@ export class ClickHandler {
       // Without the first call there will be a visual jump due to browser scroll.
       // See https://github.com/ampproject/amphtml/issues/5334 for more details.
       this.viewport_./*OK*/scrollIntoView(elem);
-      timerFor(this.ampdoc.win).delay(() => this.viewport_./*OK*/scrollIntoView(
-          dev().assertElement(elem)), 1);
+      Services.timerFor(this.ampdoc.win).delay(() =>
+          this.viewport_./*OK*/scrollIntoView(dev().assertElement(elem)), 1);
     } else {
       dev().warn(TAG,
           `failed to find element with id=${hash} or a[name=${hash}]`);

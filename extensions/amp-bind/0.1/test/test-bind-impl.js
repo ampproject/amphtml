@@ -101,7 +101,7 @@ function waitForEvent(env, name) {
 
 describe('Bind', function() {
   // Give more than default 2000ms timeout for local testing.
-  const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 3000);
+  const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
 
   describes.realWin('in FIE', {
@@ -217,6 +217,16 @@ describe('Bind', function() {
       expect(bind.numberOfBindings()).to.equal(0);
       return onBindReady(env, bind).then(() => {
         expect(bind.numberOfBindings()).to.equal(1);
+      });
+    });
+
+    it('should call createTreeWalker() with all params', () => {
+      const spy = env.sandbox.spy(env.win.document, 'createTreeWalker');
+      createElement(env, container, '[text]="1+1"');
+      return onBindReady(env, bind).then(() => {
+        // createTreeWalker() on IE does not support optional arguments.
+        expect(spy.callCount).to.equal(1);
+        expect(spy.firstCall.args.length).to.equal(4);
       });
     });
 

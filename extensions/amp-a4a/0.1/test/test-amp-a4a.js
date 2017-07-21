@@ -39,12 +39,8 @@ import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {resetScheduledElementForTesting} from '../../../../src/custom-element';
-import {
-  ampdocServiceFor,
-  urlReplacementsForDoc,
-} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
-import {platformFor, timerFor} from '../../../../src/services';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev, user} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -125,7 +121,7 @@ describe('amp-a4a', () => {
       'type': 'adsense',
     });
     element.getAmpDoc = () => {
-      const ampdocService = ampdocServiceFor(doc.defaultView);
+      const ampdocService = Services.ampdocServiceFor(doc.defaultView);
       return ampdocService.getAmpDoc(element);
     };
     element.isBuilt = () => {return true;};
@@ -271,7 +267,7 @@ describe('amp-a4a', () => {
     });
 
     it('for ios defaults to SafeFrame rendering', () => {
-      const platform = platformFor(fixture.win);
+      const platform = Services.platformFor(fixture.win);
       sandbox.stub(platform, 'isIos').returns(true);
       a4a = new MockA4AImpl(a4aElement);
       // Make sure there's no signature, so that we go down the 3p iframe path.
@@ -1178,7 +1174,7 @@ describe('amp-a4a', () => {
             expect(unlayoutUISpy).to.be.calledOnce;
             expect(a4a.originalSlotSize_).to.be.ok;
             attemptChangeSizeResolver();
-            return timerFor(a4a.win).promise(1).then(() => {
+            return Services.timerFor(a4a.win).promise(1).then(() => {
               expect(a4a.originalSlotSize_).to.not.be.ok;
             });
           });
@@ -1232,7 +1228,7 @@ describe('amp-a4a', () => {
             a4a.unlayoutCallback();
             expect(a4a.originalSlotSize_).to.be.ok;
             attemptChangeSizeResolver();
-            return timerFor(a4a.win).promise(1).then(() => {
+            return Services.timerFor(a4a.win).promise(1).then(() => {
               expect(a4a.originalSlotSize_).to.not.be.ok;
             });
           });
@@ -1309,7 +1305,7 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_);
         // Delay to all getAdUrl to potentially execute.
-        return timerFor(a4a.win).promise(1).then(() => {
+        return Services.timerFor(a4a.win).promise(1).then(() => {
           expect(getAdUrlSpy).to.not.be.called;
           whenWithinRenderOutsideViewportResolve();
           return a4a.adPromise_.then(() => {
@@ -1527,8 +1523,8 @@ describe('amp-a4a', () => {
             }),
             'Some style is "background: green"').to.be.true;
         expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
-        expect(urlReplacementsForDoc(frameDoc))
-            .to.not.equal(urlReplacementsForDoc(a4aElement));
+        expect(Services.urlReplacementsForDoc(frameDoc))
+            .to.not.equal(Services.urlReplacementsForDoc(a4aElement));
       });
     });
 
@@ -2243,6 +2239,58 @@ describe('amp-a4a', () => {
       })).to.be.null;
     });
   });
+
+  describe('refresh', () => {
+    let sandbox;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('should effectively reset the slot and invoke given callback', () => {
+      return createIframePromise().then(f => {
+        const fixture = f;
+        setupForAdTesting(fixture);
+        const a4aElement = createA4aElement(fixture.doc);
+        const a4a = new MockA4AImpl(a4aElement);
+        a4a.adPromise_ = Promise.resolve();
+        a4a.getAmpDoc = () => a4a.win.document;
+        a4a.getResource = () => {
+          return {
+            layoutCanceled: () => {},
+          };
+        };
+        a4a.mutateElement = func => func();
+        a4a.togglePlaceholder = sandbox.spy();
+
+        // We don't really care about the behavior of the following methods, so
+        // long as they're called the appropriate number of times. We stub them
+        // out here because they would otherwise throw errors unrelated to the
+        // behavior actually being tested.
+        const initiateAdRequestMock =
+            sandbox.stub(AmpA4A.prototype, 'initiateAdRequest');
+        initiateAdRequestMock.returns(undefined);
+        const tearDownSlotMock = sandbox.stub(AmpA4A.prototype, 'tearDownSlot');
+        tearDownSlotMock.returns(undefined);
+        const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
+        destroyFrameMock.returns(undefined);
+
+        expect(a4a.isRefreshing).to.be.false;
+        return a4a.refresh(() => {}).then(() => {
+          expect(initiateAdRequestMock).to.be.calledOnce;
+          expect(tearDownSlotMock).to.be.calledOnce;
+          expect(a4a.togglePlaceholder).to.be.calledOnce;
+          expect(a4a.isRefreshing).to.be.true;
+          expect(a4a.isRelayoutNeededFlag).to.be.true;
+        });
+      });
+    });
+  });
+
   // TODO(tdrl): Other cases to handle for parsing JSON metadata:
   //   - Metadata tag(s) missing
   //   - JSON parse failure

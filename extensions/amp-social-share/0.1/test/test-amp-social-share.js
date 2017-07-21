@@ -19,7 +19,7 @@ import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 import '../amp-social-share';
-import {platformFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 
 adopt(window);
 
@@ -61,7 +61,7 @@ describe('amp-social-share', () => {
 
   function getCustomShare(modifier) {
     return createIframePromise().then(iframe => {
-      platform = platformFor(iframe.win);
+      platform = Services.platformFor(iframe.win);
       sandbox.stub(platform, 'isIos', () => isIos);
       sandbox.stub(platform, 'isSafari', () => isSafari);
       const canonical = iframe.doc.createElement('link');

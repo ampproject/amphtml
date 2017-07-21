@@ -72,14 +72,14 @@ export class AmpImgur extends AMP.BaseElement {
     this.unlistenMessage_ = listen(
         this.win,
         'message',
-        this.hadleImgurMessages_.bind(this)
+        this.handleImgurMessages_.bind(this)
     );
 
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
 
-    iframe.src = 'https://imgur.com/a/' +
+    iframe.src = 'https://imgur.com/' +
       encodeURIComponent(this.imgurid_) + '/embed?pub=true';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -87,14 +87,14 @@ export class AmpImgur extends AMP.BaseElement {
   }
 
   /** @private */
-  hadleImgurMessages_(event) {
+  handleImgurMessages_(event) {
     if (event.origin != 'https://imgur.com' ||
         event.source != this.iframe_.contentWindow) {
       return;
     }
     const eventData = getData(event);
-    if (!eventData || !(isObject(eventData))
-        || startsWith(/** @type {string} */ (eventData), '{')) {
+    if (!eventData || !(isObject(eventData)
+        || startsWith(/** @type {string} */ (eventData), '{'))) {
       return;
     }
     const data = isObject(eventData) ? eventData : tryParseJson(eventData);

@@ -38,8 +38,7 @@ const TOLERANCE_ = 2;
 
 
 import {removeElement} from '../../../src/dom';
-import {timerFor} from '../../../src/services';
-import {vsyncFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import * as style from '../../../src/style';
 
 
@@ -75,7 +74,7 @@ export class FontLoader {
    */
   load(fontConfig, timeout) {
     this.fontConfig_ = fontConfig;
-    return timerFor(this.win_)
+    return Services.timerFor(this.win_)
         .timeoutPromise(timeout, this.load_())
         .then(() => {
           this.fontLoadResolved_ = true;
@@ -150,7 +149,7 @@ export class FontLoader {
    */
   loadWithPolyfill_() {
     return new Promise((resolve, reject) => {
-      const vsync = vsyncFor(this.win_);
+      const vsync = Services.vsyncFor(this.win_);
       // Create font comparators
       const comparators = this.createFontComparators_();
       // Measure until timeout (or font load).

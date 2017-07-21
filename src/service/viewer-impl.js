@@ -17,7 +17,7 @@
 import {Observable} from '../observable';
 import {findIndex} from '../utils/array';
 import {dict, map} from '../utils/object';
-import {documentStateFor, timerFor} from '../services';
+import {Services} from '../services';
 import {registerServiceBuilderForDoc} from '../service';
 import {dev, duplicateErrorIfNecessary} from '../log';
 import {isIframed} from '../dom';
@@ -94,7 +94,7 @@ export class Viewer {
     this.isIframed_ = isIframed(this.win);
 
     /** @const {!./document-state.DocumentState} */
-    this.docState_ = documentStateFor(this.win);
+    this.docState_ = Services.documentStateFor(this.win);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = true;
@@ -246,7 +246,7 @@ export class Viewer {
      * @private @const {?Promise}
      */
     this.messagingReadyPromise_ = this.isEmbedded_ ?
-        timerFor(this.win).timeoutPromise(
+        Services.timerFor(this.win).timeoutPromise(
             20000,
             new Promise(resolve => {
               this.messagingReadyResolver_ = resolve;
@@ -305,7 +305,8 @@ export class Viewer {
         resolve(this.win.location.ancestorOrigins[0]);
       } else {
         // Race to resolve with a timer.
-        timerFor(this.win).delay(() => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
+        Services.timerFor(this.win).delay(
+            () => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
         this.viewerOriginResolver_ = resolve;
       }
     });

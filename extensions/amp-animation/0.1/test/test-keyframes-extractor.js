@@ -200,13 +200,30 @@ describes.realWin('extractKeyframes', {amp: 1}, env => {
       });
     });
 
-    it('should check media in style tag', () => {
+    it('should scan in supports CSS', () => {
+      if (!window.CSS || !window.CSS.supports) {
+        return;
+      }
       const kf1 = keyframesCss('anim1', 'from{opacity: 0} to{opacity: 0.1}');
       const kf2 = keyframesCss('anim1', 'from{opacity: 0} to{opacity: 0.2}');
-      return Promise.all([
-        createStyle({'amp-custom': ''}, kf1),
-        createStyle({'amp-custom': '', media: '(max-width: 10px)'}, kf2),
-      ]).then(() => {
+      const supports = `@supports (display:block) {${kf2}}`; // Always Enabled.
+      return createStyle({'amp-custom': ''}, kf1 + supports).then(() => {
+        const keyframes = extractKeyframes(doc, 'anim1');
+        expect(keyframes).to.jsonEqual([
+          {offset: 0, opacity: '0'},
+          {offset: 1, opacity: '0.2'},
+        ]);
+      });
+    });
+
+    it('should check supports in CSS', () => {
+      if (!window.CSS || !window.CSS.supports) {
+        return;
+      }
+      const kf1 = keyframesCss('anim1', 'from{opacity: 0} to{opacity: 0.1}');
+      const kf2 = keyframesCss('anim1', 'from{opacity: 0} to{opacity: 0.2}');
+      const supports = `@supports (display:bad) {${kf2}}`;  // Always Disabled.
+      return createStyle({'amp-custom': ''}, kf1 + supports).then(() => {
         const keyframes = extractKeyframes(doc, 'anim1');
         expect(keyframes).to.jsonEqual([
           {offset: 0, opacity: '0'},

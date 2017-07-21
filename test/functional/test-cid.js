@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  ampdocServiceFor,
-  cryptoFor,
-  extensionsFor,
-  timerFor,
-  viewerForDoc,
-} from '../../src/services';
+import {Services} from '../../src/services';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
@@ -67,7 +61,7 @@ describe('cid', () => {
   let storageGetStub;
 
   const hasConsent = Promise.resolve();
-  const timer = timerFor(window);
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     let call = 1;
@@ -112,12 +106,12 @@ describe('cid', () => {
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
     installDocumentStateService(fakeWin);
-    ampdoc = ampdocServiceFor(fakeWin).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(fakeWin).getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
 
     installExtensionsService(fakeWin);
-    const extensions = extensionsFor(fakeWin);
+    const extensions = Services.extensionsFor(fakeWin);
     // stub extensions service to provide crypto-polyfill
     sandbox.stub(extensions, 'loadExtension', extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
@@ -127,7 +121,7 @@ describe('cid', () => {
 
     installViewerServiceForDoc(ampdoc);
     storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
-    viewer = viewerForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
     });
@@ -149,7 +143,7 @@ describe('cid', () => {
 
     cid = cidServiceForDocForTesting(ampdoc);
     installCryptoService(fakeWin);
-    crypto = cryptoFor(fakeWin);
+    crypto = Services.cryptoFor(fakeWin);
   });
 
   afterEach(() => {
@@ -575,11 +569,30 @@ describe('cid', () => {
       fakeWin.location.href =
           'https://foo.abc.org/v/www.DIFFERENT.com/foo/?f=0';
       fakeWin.location.hostname = 'foo.abc.org';
+      fakeWin.crypto.getRandomValues = array => {
+        array[0] = 0;
+        array[1] = 2;
+        array[2] = 4;
+        array[3] = 8;
+        array[4] = 16;
+        array[5] = 32;
+        array[6] = 64;
+        array[7] = 128;
+        array[8] = 255;
+        array[9] = 7;
+        array[10] = 11;
+        array[11] = 22;
+        array[12] = 33;
+        array[13] = 66;
+        array[14] = 200;
+        array[15] = 39;
+      };
       return cid.get({scope: 'scope_name', createCookieIfNotPresent: true},
           hasConsent).then(c => {
             expect(c).to.exist;
-            expect(c).to
-                .equal('amp-sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])');
+            // Since various parties depend on the cookie values, please be careful
+            // about changing the format.
+            expect(c).to.equal('amp-AAIECBAgQID_BwsWIULIJw');
             expect(fakeWin.document.cookie).to.equal(
                 'scope_name=' + encodeURIComponent(c) +
                 '; path=/' +
@@ -598,8 +611,7 @@ describe('cid', () => {
         cookieName: 'cookie_name',
       }, hasConsent).then(c => {
         expect(c).to.exist;
-        expect(c).to
-            .equal('amp-sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])');
+        expect(c).to.equal('amp-AQIDAAAAAAAAAAAAAAAADw');
         expect(fakeWin.document.cookie).to.equal(
             'cookie_name=' + encodeURIComponent(c) +
             '; path=/' +

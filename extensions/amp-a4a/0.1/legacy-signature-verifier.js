@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {cryptoFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 
 /**
@@ -36,7 +36,7 @@ export class LegacySignatureVerifier {
   /** @param {!Window} win */
   constructor(win) {
     /** @private @const {!../../../src/service/crypto-impl.Crypto} */
-    this.crypto_ = cryptoFor(win);
+    this.crypto_ = Services.cryptoFor(win);
   }
 
   /**

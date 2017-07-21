@@ -16,7 +16,7 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import '../amp-video';
 import * as sinon from 'sinon';
@@ -26,7 +26,7 @@ const TAG = 'amp-video';
 describe(TAG, () => {
 
   let sandbox;
-  const timer = timerFor(window);
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();

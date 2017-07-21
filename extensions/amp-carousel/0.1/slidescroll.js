@@ -17,7 +17,7 @@
 import {ActionTrust} from '../../../src/action-trust';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {actionServiceForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
@@ -25,8 +25,6 @@ import {isConnectedNode} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
-import {platformFor} from '../../../src/services';
-import {timerFor} from '../../../src/services';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {isExperimentOn} from '../../../src/experiments';
 import {startsWith} from '../../../src/string';
@@ -116,7 +114,7 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {!Array<?string>} */
     this.dataSlideIdArr_ = [];
 
-    const platform = platformFor(this.win);
+    const platform = Services.platformFor(this.win);
 
     /** @private @const {boolean} */
     this.isIos_ = platform.isIos();
@@ -127,7 +125,8 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {boolean} */
     this.shouldDisableCssSnap_ = isExperimentOn(this.win,
         'slidescroll-disable-css-snap') &&
-        startsWith(platformFor(this.win).getIosVersionString(), '10.3');
+        startsWith(
+            Services.platformFor(this.win).getIosVersionString(), '10.3');
   }
 
   /** @override */
@@ -138,7 +137,7 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   buildSlides() {
     this.vsync_ = this.getVsync();
-    this.action_ = actionServiceForDoc(this.element);
+    this.action_ = Services.actionServiceForDoc(this.element);
 
     this.hasNativeSnapPoints_ = (
         getStyle(this.element, 'scrollSnapType') != undefined);
@@ -238,7 +237,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
     this.hasTouchMoved_ = true;
     if (this.touchEndTimeout_) {
-      timerFor(this.win).cancel(this.touchEndTimeout_);
+      Services.timerFor(this.win).cancel(this.touchEndTimeout_);
     }
   }
 
@@ -249,12 +248,12 @@ export class AmpSlideScroll extends BaseSlides {
   touchEndHandler_() {
     if (this.hasTouchMoved_) {
       if (this.scrollTimeout_) {
-        timerFor(this.win).cancel(this.scrollTimeout_);
+        Services.timerFor(this.win).cancel(this.scrollTimeout_);
       }
       const timeout = this.shouldDisableCssSnap_ ? IOS_TOUCH_TIMEOUT
           : NATIVE_TOUCH_TIMEOUT;
       // Timer that detects scroll end and/or end of snap scroll.
-      this.touchEndTimeout_ = timerFor(this.win).delay(() => {
+      this.touchEndTimeout_ = Services.timerFor(this.win).delay(() => {
         const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
 
         if (this.snappingInProgress_) {
@@ -341,7 +340,7 @@ export class AmpSlideScroll extends BaseSlides {
    */
   scrollHandler_(unusedEvent) {
     if (this.scrollTimeout_) {
-      timerFor(this.win).cancel(this.scrollTimeout_);
+      Services.timerFor(this.win).cancel(this.scrollTimeout_);
     }
 
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
@@ -353,7 +352,7 @@ export class AmpSlideScroll extends BaseSlides {
       const timeout = this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : (
           this.isIos_ ? IOS_CUSTOM_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT);
       // Timer that detects scroll end and/or end of snap scroll.
-      this.scrollTimeout_ = timerFor(this.win).delay(() => {
+      this.scrollTimeout_ = Services.timerFor(this.win).delay(() => {
 
         if (this.snappingInProgress_) {
           return;

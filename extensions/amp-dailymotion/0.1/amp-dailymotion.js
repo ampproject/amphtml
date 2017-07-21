@@ -22,7 +22,7 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {getData, listen} from '../../../src/event-helper';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {
     parseQueryString,
     addParamsToUrl,
@@ -142,7 +142,7 @@ class AmpDailymotion extends AMP.BaseElement {
         this.element);
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
@@ -335,6 +335,24 @@ class AmpDailymotion extends AMP.BaseElement {
    */
   hideControls() {
     // Not supported
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 };
 

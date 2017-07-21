@@ -18,7 +18,7 @@ import {makeClickDelaySpec} from './filters/click-delay';
 import {assertConfig, TransportMode} from './config';
 import {createFilter} from './filters/factory';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
-import {urlReplacementsForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
 
@@ -106,7 +106,7 @@ export class AmpAdExit extends AMP.BaseElement {
         }
       }
     }
-    const replacements = urlReplacementsForDoc(this.getAmpDoc());
+    const replacements = Services.urlReplacementsForDoc(this.getAmpDoc());
     return url => replacements.expandUrlSync(
         url, vars, undefined /* opt_collectVars */, whitelist);
   }
