@@ -121,7 +121,7 @@ class AmpGfycat extends AMP.BaseElement {
 
     dev().assert(this.videoid_);
     let src = 'https://gfycat.com/ifr/' + encodeURIComponent(this.videoid_);
-    let params = {};
+    const params = {};
 
     const noautoplay = this.element.hasAttribute('noautoplay');
     if (noautoplay) {

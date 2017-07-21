@@ -22,7 +22,6 @@ import {
 import '../amp-gfycat';
 import {adopt} from '../../../../src/runtime';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 
 adopt(window);
@@ -80,8 +79,7 @@ describe('amp-gfycat', () => {
 
   it('should forward events from gfycat player to the amp element', () => {
     return getGfycat('LeanMediocreBeardeddragon').then(gfycat => {
-     const iframe = gfycat.querySelector('iframe');
-
+      const iframe = gfycat.querySelector('iframe');
       return Promise.resolve()
           .then(() => {
             const p = listenOncePromise(gfycat, VideoEvents.PLAYING);
@@ -92,7 +90,7 @@ describe('amp-gfycat', () => {
             const p = listenOncePromise(gfycat, VideoEvents.PAUSE);
             sendFakeMessage(gfycat, iframe, 'paused');
             return p;
-          })
+          });
     });
   });
 
