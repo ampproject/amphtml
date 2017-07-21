@@ -47,32 +47,16 @@ describes.realWin('amp-analytics.iframe-transport-message-queue', {amp: true},
 
       it('queues messages when not ready to send ', () => {
         const beforeCount = queue.queueSize();
-        queue.enqueue('some_senderId', 'some_data');
-        queue.enqueue('another_senderId', 'some_data');
+        queue.enqueue({transportId: 'some_senderId', message: 'some_data'});
+        queue.enqueue({transportId: 'another_senderId', message: 'some_data'});
         const afterCount = queue.queueSize();
         expect(afterCount - beforeCount).to.equal(2);
       });
 
       it('flushes the queue when ready to send ', () => {
-        queue.enqueue('some_senderId', 'some_data');
+        queue.enqueue({transportId: 'some_senderId', message: 'some_data'});
         queue.setIsReady();
         const afterCount = queue.queueSize();
         expect(afterCount).to.equal(0);
       });
-
-      it('groups messages from same sender ', () => {
-        queue.enqueue('letter_sender', 'A');
-        queue.enqueue('letter_sender', 'B');
-        queue.enqueue('letter_sender', 'C');
-        queue.enqueue('number_sender', '1');
-        queue.enqueue('number_sender', '2');
-        queue.enqueue('number_sender', '3');
-        queue.enqueue('number_sender', '4');
-        const letterCount = queue.messagesFor('letter_sender').length;
-        const numberCount = queue.messagesFor('number_sender').length;
-        expect(queue.queueSize()).to.equal(2);
-        expect(letterCount).to.equal(3);
-        expect(numberCount).to.equal(4);
-      });
     });
-

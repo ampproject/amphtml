@@ -16,7 +16,7 @@
 
 import {dev} from '../../../src/log';
 import {
-  AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
+  IFRAME_TRANSPORT_EVENTS_TYPE,
 } from '../../../src/3p-analytics-common';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 
@@ -46,13 +46,13 @@ export class IframeTransportMessageQueue {
     /** @private {boolean} */
     this.isReady_ = false;
 
-    /** @private
-     *  {!../../../src/3p-analytics-common.AmpAnalytics3pEventMap}
+    /**
+     * @private {!Array<!../../../src/3p-analytics-common.IframeTransportEvent>}
      */
-    this.transportIdToPendingMessages_ = {};
+    this.pendingEvents_ = [];
 
     /** @private {string} */
-    this.messageType_ = AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE;
+    this.messageType_ = IFRAME_TRANSPORT_EVENTS_TYPE;
 
     /** @private {!../../../src/iframe-helper.SubscriptionApi} */
     this.postMessageApi_ = new SubscriptionApi(this.frame_,
@@ -88,24 +88,25 @@ export class IframeTransportMessageQueue {
    * @VisibleForTesting
    */
   queueSize() {
-    return Object.keys(this.transportIdToPendingMessages_).length;
+    return this.pendingEvents_.length;
   }
 
   /**
-   * Enqueues an AmpAnalytics3pEvent message to be sent to a cross-domain
-   * iframe.
-   * @param {!string} transportId Identifies which creative is sending the
-   * message
-   * @param {!string} event The event to be enqueued and then sent to the iframe
+   * Enqueues an event to be sent to a cross-domain iframe.
+   * @param {!../../../src/3p-analytics-common.IframeTransportEvent} event
+   * Identifies the event and which Transport instance (essentially which
+   * creative) is sending it.
    */
-  enqueue(transportId, event) {
-    this.transportIdToPendingMessages_[transportId] =
-        this.messagesFor(transportId) || [];
+  enqueue(event) {
+    dev().assert(TAG_, event && event.transportId && event.message,
+        'Attempted to enqueue malformed message for: ' +
+        event.transportId);
+    this.pendingEvents_.push(event);
     if (this.queueSize() >= MAX_QUEUE_SIZE_) {
-      dev().warn(TAG_, 'Exceeded maximum size of queue for: ' + transportId);
-      this.messagesFor(transportId).shift();
+      dev().warn(TAG_, 'Exceeded maximum size of queue for: ' +
+          event.transportId);
+      this.pendingEvents_.shift();
     }
-    this.messagesFor(transportId).push(event);
     this.flushQueue_();
   }
 
@@ -115,24 +116,11 @@ export class IframeTransportMessageQueue {
    */
   flushQueue_() {
     if (this.isReady() && this.queueSize()) {
-      this.postMessageApi_.send(AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
+      this.postMessageApi_.send(IFRAME_TRANSPORT_EVENTS_TYPE,
           /** @type {!JsonObject} */
-          ({data: this.transportIdToPendingMessages_}));
-      this.transportIdToPendingMessages_ = {};
+          ({events: this.pendingEvents_}));
+      this.pendingEvents_ = [];
     }
-  }
-
-  /**
-   * Test method to see which messages (if any) are associated with a given
-   * transportId
-   * @param {!string} transportId Identifies which creative is sending the
-   * message
-   * @return {Array<string>}
-   * @VisibleForTesting
-   */
-  messagesFor(transportId) {
-    return /** @type {Array<string>} */ (
-      this.transportIdToPendingMessages_[transportId]);
   }
 }
 

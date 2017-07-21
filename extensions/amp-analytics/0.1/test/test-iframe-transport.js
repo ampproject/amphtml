@@ -55,9 +55,9 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
     const config = {iframe: url};
     iframeTransport.sendRequest('hello, world!', config);
     const queue = IframeTransport.getFrameData(iframeTransport.getType()).queue;
-    expect(queue.messagesFor(iframeTransport.getId())).to.have.lengthOf(1);
+    expect(queue.queueSize()).to.equal(1);
     iframeTransport.sendRequest('hello again, world!', config);
-    expect(queue.messagesFor(iframeTransport.getId())).to.have.lengthOf(2);
+    expect(queue.queueSize()).to.equal(2);
   });
 
   it('does not cause sentinel collisions', () => {
