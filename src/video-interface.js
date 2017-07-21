@@ -224,6 +224,13 @@ export const VideoAttributes = {
    * and http://caniuse.com/#feat=fullscreen
    */
   FULLSCREEN_ON_LANDSCAPE: 'fullscreen-on-landscape',
+  /**
+   * custom-controls
+   *
+   * When this attribute is specified, native controls are hidden and
+   * customizable AMP controls are added to the video element
+   */
+   CUSTOM_CTRLS: 'custom-controls',
 };
 
 

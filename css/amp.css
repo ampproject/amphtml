@@ -714,6 +714,46 @@ i-amphtml-video-mask, i-amp-video-mask {
 }
 
 /**
+ * Custom Video Controls
+ */
+custom-ctrls {
+  position: absolute;
+  bottom: 0;
+  height: 44px;
+  background-image: -webkit-linear-gradient(bottom,rgba(0,0,0,.25) 0%,transparent 100%);
+  background-image: linear-gradient(0deg,rgba(0,0,0,.25) 0%,transparent 100%);
+  display: block;
+  padding: 10px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+custom-ctrls-playpause {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+custom-ctrls-volume {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+custom-ctrls-mute {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+input.custom-ctrls-volume-indicator {
+  display: inline-block;
+  vertical-align: middle;
+}
+/**
  * amp-accordion to avoid FOUC.
  */
 

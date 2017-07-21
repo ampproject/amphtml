@@ -572,6 +572,8 @@ class VideoEntry {
     /** @private {Array<!UnlistenDef>} */
     this.dragUnlisteners_ = [];
 
+    this.hasCustomCtrls = element.hasAttribute(VideoAttributes.CUSTOM_CTRLS);
+
     this.hasDocking = element.hasAttribute(VideoAttributes.DOCK);
 
     this.hasAutoplay = element.hasAttribute(VideoAttributes.AUTOPLAY);
@@ -610,6 +612,10 @@ class VideoEntry {
     }
     if (this.hasDocking) {
       this.dockableVideoBuilt_();
+    }
+    if (this.hasCustomCtrls) {
+      console.log('building custom controls');
+      this.customCtrlsVideoBuild_();
     }
   }
 
@@ -1838,6 +1844,99 @@ class VideoEntry {
         'width': width,
       };
     });
+  }
+
+  /* Custom Controls Behavior */
+
+  /**
+   * Called when a video with custom controls is built.
+   * @private
+   */
+  customCtrlsVideoBuild_() {
+
+    // Hide native controls
+    this.video.hideControls();
+    this.createCustomControls();
+  }
+
+  createCustomControls() {
+    console.log('creating custom controls');
+
+
+    // <ul id="video-controls" class="controls">
+    //    <li><button id="playpause" type="button">Play/Pause</button></li>
+    //    <li><button id="stop" type="button">Stop</button></li>
+    //    <li class="progress">
+    //       <progress id="progress" value="0" min="0">
+    //          <span id="progress-bar"></span>
+    //       </progress>
+    //    </li>
+    //    <li><button id="mute" type="button">Mute/Unmute</button></li>
+    //    <li><button id="volinc" type="button">Vol+</button></li>
+    //    <li><button id="voldec" type="button">Vol-</button></li>
+    //    <li><button id="fs" type="button">Fullscreen</button></li>
+    // </ul>
+
+    // Set up controls
+    const doc = this.ampdoc_.win.document;
+    const ctrlContainer = doc.createElement('custom-ctrls');
+
+    // Critical controls
+    const playpauseBtn = doc.createElement('custom-ctrls-playpause');
+
+    // progress-bar
+    const progressBar = null;
+
+    // Volume controls
+    const volumeContainer = doc.createElement('custom-ctrls-volume');
+    const volumeIndicator = doc.createElement('custom-ctrls-volume-indicator');
+    const volumeSlider = doc.createElement('input');
+    volumeSlider.setAttribute('type', 'range');
+    volumeSlider.setAttribute('min', '0');
+    volumeSlider.setAttribute('max', '100');
+    volumeSlider.setAttribute('value', '30');
+    volumeSlider.classList.add('custom-ctrls-volume-indicator');
+    const muteBtn = doc.createElement('custom-ctrls-mute');
+
+    // Add to the element
+    this.vsync_.mutate(() => {
+      playpauseBtn.appendChild(this.customControlIcon('play'));
+      ctrlContainer.appendChild(playpauseBtn);
+      volumeContainer.appendChild(volumeIndicator);
+      muteBtn.appendChild(this.customControlIcon('mute'));
+      volumeContainer.appendChild(muteBtn);
+      volumeContainer.appendChild(volumeSlider);
+      ctrlContainer.appendChild(volumeContainer);
+      this.video.element.appendChild(ctrlContainer);
+      console.log('done');
+    });
+  }
+
+  customControlIcon(name) {
+    /*eslint-disable */
+    const icons = {
+      'play':
+        `<path d="M8 5v14l11-7z"></path>
+         <path d="M0 0h24v24H0z" fill="none"></path>`,
+      'pause':
+        `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+         <path d="M0 0h24v24H0z" fill="none"></path>`,
+      'mute':
+        `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path>
+         <path d="M0 0h24v24H0z" fill="none"></path>`,
+      'volume_max':
+        `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
+         <path d="M0 0h24v24H0z" fill="none"></path>`,
+    }
+    /*eslint-enable */
+    const doc = this.ampdoc_.win.document;
+    const icon = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    icon.setAttributeNS(null, 'fill', '#FFFFFF');
+    icon.setAttributeNS(null, 'height', '100%');
+    icon.setAttributeNS(null, 'width', '100%');
+    icon.setAttributeNS(null, 'viewBox', '0 0 24 24');
+    icon.innerHTML = icons[name];
+    return icon;
   }
 }
 
