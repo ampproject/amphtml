@@ -38,6 +38,7 @@ import {
   WebKeyframeAnimationDef,
   WebKeyframesDef,
   WebMultiAnimationDef,
+  WebSwitchAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
 import {dashToCamelCase, startsWith} from '../../../src/string';
@@ -292,21 +293,24 @@ class Scanner {
 
   /**
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
+   * @return {boolean}
    */
   scan(spec) {
     if (isArray(spec)) {
-      spec.forEach(spec => this.scan(spec));
-      return;
+      // Returns `true` if any of the components scan successfully.
+      return spec.reduce((acc, comp) => this.scan(comp) || acc, false);
     }
 
     // Check whether the animation is enabled.
     if (!this.isEnabled(/** @type {!WebAnimationDef} */ (spec))) {
-      return;
+      return false;
     }
 
-    // WebAnimationDef: (!WebMultiAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef)
+    // WebAnimationDef: (!WebMultiAnimationDef|!WebSpecAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef)
     if (spec.animations) {
       this.onMultiAnimation(/** @type {!WebMultiAnimationDef} */ (spec));
+    } else if (spec.switch) {
+      this.onSwitchAnimation(/** @type {!WebSwitchAnimationDef} */ (spec));
     } else if (spec.animation) {
       this.onCompAnimation(/** @type {!WebCompAnimationDef} */ (spec));
     } else if (spec.keyframes) {
@@ -314,6 +318,7 @@ class Scanner {
     } else {
       this.onUnknownAnimation(spec);
     }
+    return true;
   }
 
   /**
@@ -330,6 +335,12 @@ class Scanner {
    * @abstract
    */
   onMultiAnimation(unusedSpec) {}
+
+  /**
+   * @param {!WebSwitchAnimationDef} unusedSpec
+   * @abstract
+   */
+  onSwitchAnimation(unusedSpec) {}
 
   /**
    * @param {!WebCompAnimationDef} unusedSpec
@@ -538,6 +549,20 @@ export class MeasureScanner extends Scanner {
   /** @override */
   onMultiAnimation(spec) {
     this.with_(spec, () => this.scan(spec.animations));
+  }
+
+  /** @override */
+  onSwitchAnimation(spec) {
+    // The first to match will be used; the rest will be ignored.
+    this.with_(spec, () => {
+      for (let i = 0; i < spec.switch.length; i++) {
+        const candidate = spec.switch[i];
+        if (this.scan(candidate)) {
+          // First matching candidate is applied and the rest are ignored.
+          break;
+        }
+      }
+    });
   }
 
   /** @override */

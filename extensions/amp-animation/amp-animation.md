@@ -115,6 +115,55 @@ for [CSS.supports](https://developer.mozilla.org/en-US/docs/Web/API/CSS/supports
 If value is specified for an animation component, the animation component will only be included if the
 supports condition will match the current environment.
 
+
+### Animation `switch` statement
+
+In some cases it's convenient to combine multiple [conditional animations](#conditions) with an optional default into a single animation. This can be done using `switch` animation statement in this format:
+
+```
+{
+  // Optional selector, vars, timing
+  ...
+  "switch": [
+    {
+      "media": "(min-width: 320px)",
+      "keyframes": {...},
+    },
+    {
+      "supports": "offset-distance: 0",
+      "keyframes": {...},
+    },
+    {
+      // Optional default: no conditionals
+    }
+  ]
+}
+```
+
+In `switch` animation, the candidates are evaluated in the defined order and the first animation that matches [conditional statements](#conditions) is executed and the rest are ignored.
+
+For instance, this animation runs motion-path animation if supported and falls back to transform:
+```
+{
+  "selector": "#target1",
+  "duration": "1s",
+  "switch": [
+    {
+      "supports": "offset-distance: 0",
+      "keyframes": {
+        "offsetDistance": [0, '300px']
+      }
+    },
+    {
+      "keyframes": {
+        "transform": [0, '300px']
+      }
+    }
+  ]
+}
+```
+
+
 ### Variables
 
 An animation component can declare CSS variables that will be used for timing and keyframes values via `var()` expressions. `var()` expressions are evaluated using the current target context. The CSS variables specified in animation components are propagated to nested animations, applied to animation targets and thus override CSS variables used in final animations.
