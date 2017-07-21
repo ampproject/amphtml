@@ -976,6 +976,18 @@ Provides the total time for which the element has met the `visiblitySpec `condit
 * **platform variable**: N/A
 * **amp-analytics variable**: `${totalVisibleTime}`
 
+#### User Agent
+
+Provides a string representing the user agent of the requesting software, usually tells about user's browser operating system.
+
+* **platform variable**: `USER_AGENT`
+  *  Example: <br>
+  ```html
+  <amp-pixel src="https://foo.com/pixel?sh=USER_AGENT"></amp-pixel>
+  ```
+* **amp-analytics variable**: `${userAgent}`
+  * Example value: `Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0`
+
 #### Vertical Scroll Boundary
 
 Provides the vertical scroll boundary that triggered a scroll event. This variable is only available in a `trigger` of type `scroll`. The value of the boundary may be rounded based on the precision supported by the extension. For example, a boundary with value `1` and precision of `5` will result in value of var to be 0.
