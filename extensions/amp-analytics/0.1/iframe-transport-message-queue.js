@@ -56,8 +56,7 @@ export class IframeTransportMessageQueue {
         true,
         () => {
           this.setIsReady();
-        },
-        true);
+        });
   }
 
   /**
