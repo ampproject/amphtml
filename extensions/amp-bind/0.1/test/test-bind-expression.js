@@ -182,6 +182,15 @@ describe('BindExpression', () => {
     expect(evaluate('["a", foo][1]', {foo: 'b'})).to.equal('b');
   });
 
+  it('should support trailing commas in array literals', () => {
+    expect(evaluate('[1,2,3,]')).to.deep.equal([1,2,3]);
+    expect(evaluate('["a", "b",].length')).to.equal(2);
+    expect(evaluate('[1, "a", [], {},]'))
+        .to.deep.equal([1, 'a', [], {}]);
+    expect(evaluate('["a", "b",][1]')).to.equal('b');
+    expect(evaluate('["a", foo,][1]', {foo: 'b'})).to.equal('b');
+  });
+
   it('should NOT allow invalid array access', () => {
     expect(evaluate('["a", "b"][-1]')).to.be.null;
     expect(evaluate('["a", "b"][2]')).to.be.null;
@@ -236,6 +245,11 @@ describe('BindExpression', () => {
     // Unquoted string keys should _not_ be evaluated as expressions.
     expect(evaluate('{a: "b"}', {a: 'foo'})).to.deep.equal({a: 'b'});
     expect(() => evaluate('{1+1: "b"}')).to.throw();
+  });
+
+  it('should support trailing commas in object literals', () => {
+    expect(evaluate('{a: "b",}')).to.deep.equal({a: 'b'});
+    expect(evaluate('{a: "b", c: "d",}')).to.deep.equal({a: 'b', c: 'd'});
   });
 
   it('should evaluate undefined vars and properties to null', () => {
