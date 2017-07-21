@@ -97,8 +97,12 @@ let detectedJsEngine;
  */
 export function reportErrorForWin(win, error, opt_associatedElement) {
   reportError(error, opt_associatedElement);
-  if (error && isUserErrorMessage(error.message) && !!win) {
-    reportErrorToAnalytics(/** @type {!Error} */(error), win);
+  if (error && !!win) {
+    if (isUserErrorMessage(error.message) && !error.embed) {
+      reportErrorToAnalytics(/** @type {!Error} */(error), win);
+    } else if (error.embed) {
+      console.log('EMBED: ' + error.message);
+    }
   }
 }
 

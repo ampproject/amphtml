@@ -17,7 +17,7 @@
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
-import {Services} from './services';
+//import {Services} from './services';
 
 /** @const Time when this JS loaded.  */
 const start = Date.now();
@@ -32,6 +32,7 @@ const start = Date.now();
  * @const {string}
  */
 export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
+let isEmbed;
 
 
 /**
@@ -216,6 +217,7 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.name = tag || error.name;
+      error.embed = isEmbed;
       // reportError is installed globally per window in the entry point.
       self.reportError(error);
     }
@@ -495,11 +497,12 @@ export function rethrowAsync(var_args) {
 /**
  * Cache for logs. We do not use a Service since the service module depends
  * on Log and closure literally can't even.
- * @type {{user: ?Log, dev: ?Log}}
+ * @type {{user: ?Log, dev: ?Log, userForEmbed: ?Log}}
  */
 self.log = (self.log || {
   user: null,
   dev: null,
+  userForEmbed: null,
 });
 
 const logs = self.log;
@@ -545,20 +548,27 @@ export function resetLogConstructorForTesting() {
  * @return {!Log}
  */
 export function user(opt_element) {
-  if (logs.user) {
-    return logs.user;
-  }
-  if (!logConstructor) {
-    throw new Error('failed to call initLogConstructor');
-  }
-  let excluded;
-
-  //TODO(tiendt): figure out how to get ampdoc
-  const ampdoc = Services.ampdocServiceFor(this.win).getAmpdoc();
-  if (opt_element) {
-    excluded = opt_element.ownerDocument.defaultView != ampdoc.win;
-  }
-  if (!opt_element || excluded === false) {
+  if (isFromEmbed(opt_element)) {
+    if (logs.userForEmbed) {
+      return logs.userForEmbed;
+    }
+    if (!logConstructor) {
+      throw new Error('failed to call initLogConstructor');
+    }
+    return logs.userForEmbed = new logConstructor(self, mode => {
+      const logNum = parseInt(mode.log, 10);
+      if (logNum >= 1) {
+        return LogLevel.FINE;
+      }
+      return LogLevel.OFF;
+    });
+  } else {
+    if (logs.user) {
+      return logs.user;
+    }
+    if (!logConstructor) {
+      throw new Error('failed to call initLogConstructor');
+    }
     return logs.user = new logConstructor(self, mode => {
       const logNum = parseInt(mode.log, 10);
       if (mode.development || logNum >= 1) {
@@ -566,8 +576,6 @@ export function user(opt_element) {
       }
       return LogLevel.OFF;
     }, USER_ERROR_SENTINEL);
-  } else {
-    //return another log to send errors to console
   }
 }
 
@@ -599,4 +607,12 @@ export function dev() {
     }
     return LogLevel.OFF;
   });
+}
+
+export function isFromEmbed(opt_element) {
+  //TODO(tiendt): figure out how to get ampdoc
+  // const ampdoc = Services.ampdocServiceFor(this.win).getAmpdoc();
+  // return opt_element.ownerDocument.defaultView != ampdoc.win;
+  isEmbed = true;
+  return isEmbed;
 }
