@@ -555,9 +555,13 @@ export class MeasureScanner extends Scanner {
   onSwitchAnimation(spec) {
     // The first to match will be used; the rest will be ignored.
     this.with_(spec, () => {
-      spec.switch.some(candidate => {
-        return this.scan(candidate);
-      });
+      for (let i = 0; i < spec.switch.length; i++) {
+        const candidate = spec.switch[i];
+        if (this.scan(candidate)) {
+          // First matching candidate is applied and the rest are ignored.
+          break;
+        }
+      }
     });
   }
 
