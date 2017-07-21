@@ -177,7 +177,7 @@ export class IframeTransport {
    * @param {!string} event A string describing the trigger event
    * @VisibleForTesting
    */
-  sendRequest(event) { 
+  sendRequest(event) {
     const frameData = IframeTransport.getFrameData(this.type_);
     dev().assert(frameData, 'Trying to send message to non-existent frame');
     dev().assert(frameData.queue, 'Event queue is missing for ' + this.id_);

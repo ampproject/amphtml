@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-/** @const {string} */
-export const AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE = 'AA3pEvtMsgs';
+/**
+ * @const {string}
+ * This is the type of message that will be sent over the wire.
+ * The message will contain an array of the typedef declared below.
+ */
+export const IFRAME_TRANSPORT_EVENTS_TYPE = 'IframeTptEvts';
 
-/** @typedef {!Object<!string,!Array<!string>>} */
-export let AmpAnalytics3pEventMap;
-// Maps transport IDs to events. For instance if the creative with transport
+/** @typedef {Object<string,string>} */
+export let IframeTransportEvent;
+// List of events, and the transport IDs of the amp-analytics tags that
+// generated them. For instance if the creative with transport
 // ID 2 sends "hi" and "hello" and the creative with transport ID 3 sends
-// "goodbye" then the map would look like:
-// Example:
-// {
-//   "2": ["hi", "hello" ],
-//   "3": ["goodbye" ]
-// }
+// "goodbye" then an array of 3 AmpAnalyticsIframeTransportEvent would be
+// sent across the wire like so:
+// [
+//   { transportId: "2", message: "hi" }, // An AmpAnalyticsIframeTransportEvent
+//   { transportId: "2", message: "hello" }, // Another
+//   { transportId: "3", message: "goodbye" } // And another
+// ]
 
