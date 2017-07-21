@@ -17,7 +17,12 @@
 import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {Services} from '../services';
-import {setStyle, setStyles, computedStyle} from '../style';
+import {
+  setStyle,
+  setStyles,
+  computedStyle,
+  getVendorJsPropertyName,
+} from '../style';
 
 const TAG = 'FixedLayer';
 
@@ -264,16 +269,23 @@ export class FixedLayer {
         // Notice that this code intentionally breaks vsync contract.
         // Unfortunately, there's no way to reliably test whether or not
         // `top` has been set to a non-auto value on all platforms. To work
-        // this around, this code compares `offsetTop` values with and without
-        // `style.top = auto`.
+        // this around, this code compares `style.top` values with a new
+        // `style.bottom` value.
+        // 1. Unset top from previous mutates and set bottom to an extremely
+        // large value (to catch cases where sticky-tops are in a long way
+        // down inside a scroller).
         for (let i = 0; i < elements.length; i++) {
           const element = elements[i].element;
           setStyle(element, 'top', '');
           setStyle(element, 'bottom', '-9999vh');
         }
+        // 2. Capture the `style.top` with this new `style.bottom` value. If
+        // this element has a non-auto top, this value will remain constant
+        // regardless of bottom.
         for (let i = 0; i < elements.length; i++) {
           autoTops.push(computedStyle(win, elements[i].element).top);
         }
+        // 3. Cleanup the `style.bottom`.
         for (let i = 0; i < elements.length; i++) {
           setStyle(elements[i].element, 'bottom', '');
         }
@@ -287,10 +299,10 @@ export class FixedLayer {
           const {
             position = '',
             bottom,
-            opacity,
             zIndex,
-            transform,
           } = style;
+          const opacity = parseFloat(style.opacity);
+          const transform = style[getVendorJsPropertyName(style, 'transform')];
           let {top} = style;
 
           // Element is indeed fixed. Visibility is added to the test to
@@ -536,15 +548,22 @@ export class FixedLayer {
 
     // Update `top`. This is necessary to adjust position to the viewer's
     // paddingTop.
-    // TODO
     if (state.top) {
       if (state.fixed || !this.transfer_) {
+        // Fixed positions always need top offsetting, as well as stickies on
+        // non iOS Safari.
         setStyle(element, 'top', `calc(${state.top} + ${this.paddingTop_}px)`);
-      } else if (this.committedPaddingTop_ === this.paddingTop_) {
-        setStyle(element, 'top', state.top);
       } else {
-        setStyle(element, 'top',
-            `calc(${state.top} - ${this.committedPaddingTop_}px)`);
+        // On iOS Safari (this.transfer_ = true), stickies need to be cannot
+        // have an offset because they are already offset by the padding-top.
+        if (this.committedPaddingTop_ === this.paddingTop_) {
+          // So, when the header is shown, just use top.
+          setStyle(element, 'top', state.top);
+        } else {
+          // When the header is not shown, we need to subtract the padding top.
+          setStyle(element, 'top',
+              `calc(${state.top} - ${this.committedPaddingTop_}px)`);
+        }
       }
     }
 
