@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-/** @enum {string} */
-export const AMP_ANALYTICS_3P_MESSAGE_TYPE = {
-  EVENT: 'E',
-};
+/** @const {string} */
+export const AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE = 'AA3pEvtMsgs';
 
 /** @typedef {!Object<!string,!Array<!string>>} */
 export let AmpAnalytics3pEventMap;

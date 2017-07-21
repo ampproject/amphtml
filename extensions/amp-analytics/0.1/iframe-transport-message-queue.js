@@ -15,7 +15,9 @@
  */
 
 import {dev} from '../../../src/log';
-import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../../../src/3p-analytics-common';
+import {
+  AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
+} from '../../../src/3p-analytics-common';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 
 /** @private @const {string} */
@@ -50,7 +52,7 @@ export class IframeTransportMessageQueue {
     this.transportIdToPendingMessages_ = {};
 
     /** @private {string} */
-    this.messageType_ = AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT;
+    this.messageType_ = AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE;
 
     /** @private {!../../../src/iframe-helper.SubscriptionApi} */
     this.postMessageApi_ = new SubscriptionApi(this.frame_,
@@ -58,8 +60,7 @@ export class IframeTransportMessageQueue {
         true,
         () => {
           this.setIsReady();
-        },
-        true);
+        });
   }
 
   /**
@@ -114,7 +115,7 @@ export class IframeTransportMessageQueue {
    */
   flushQueue_() {
     if (this.isReady() && this.queueSize()) {
-      this.postMessageApi_.send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
+      this.postMessageApi_.send(AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
           /** @type {!JsonObject} */
           ({data: this.transportIdToPendingMessages_}));
       this.transportIdToPendingMessages_ = {};
