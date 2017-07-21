@@ -63,8 +63,7 @@ export class AmpAnalytics3pMessageRouter {
       }
       user().assert(messageContainer['type'],
           'Received message with missing type in ' + this.win_.location.href);
-      user().assert(messageContainer['data'] &&
-          messageContainer['data']['events'],
+      user().assert(messageContainer['events'],
           'Received empty message in ' + this.win_.location.href);
       user().assert(
           messageContainer['type'] == IFRAME_TRANSPORT_EVENTS_TYPE,
@@ -72,7 +71,7 @@ export class AmpAnalytics3pMessageRouter {
           ' in ' + this.win_.location.href);
       this.processEventsMessage_(
           /** @type {!Array<../src/3p-analytics-common.IframeTransportEvent>} */
-          (messageContainer['data']['events']));
+          (messageContainer['events']));
     }, false);
 
     this.subscribeTo(IFRAME_TRANSPORT_EVENTS_TYPE);

@@ -79,7 +79,11 @@ describe('ampanalytics-lib', () => {
     const object = {};
     object['type'] = type;
     object['sentinel'] = sentinel;
-    object['data'] = data;
+    if (data['events']) {
+      object['events'] = data['events'];
+    } else {
+      object['data'] = data;
+    }
     const payload = 'amp-' + JSON.stringify(object);
     window./*OK*/postMessage(payload, '*');
   }
