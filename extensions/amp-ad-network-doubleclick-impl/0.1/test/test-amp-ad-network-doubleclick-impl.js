@@ -1462,7 +1462,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         impl.initialSize_ = {width: 200, height: 50};
 
         // Boilerplate stubbing
-        //sandbox.stub(doc, 'readyState', 'complete');
         sandbox.stub(impl, 'shouldInitializePromiseChain_', () => true);
         sandbox.stub(impl, 'getAmpDoc', () => {
           document.win = window;

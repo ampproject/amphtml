@@ -426,7 +426,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Returns the width and height of the slot as defined by the width and height
    * attributes, or the dimensions as computed by
    * getIntersectionElementLayoutBox.
-   * @return {width: number, height: number}|../../../src/layout-rect.LayoutRectDef
+   * @return {{width: number, height: number}|../../../src/layout-rect.LayoutRectDef}
    */
   getSlotSize() {
     const width = Number(this.element.getAttribute('width'));
@@ -539,6 +539,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // Force size of frame to match creative or, if creative size is unknown,
     // the slot. This ensures that the creative is centered in the former case,
     // and not truncated in the latter.
+    // TODO(levitzky) Figure out the behavior of responsive + multi-size.
     const size = this.returnedSize_ || this.getSlotSize();
     setStyles(dev().assertElement(this.iframe), {
       width: `${size.width}px`,
