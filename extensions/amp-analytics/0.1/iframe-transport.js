@@ -51,16 +51,16 @@ export class IframeTransport {
     /** @private @const {string} */
     this.id_ = IframeTransport.createUniqueId_();
 
-    if (config && config['iframe']) {
-      this.frameUrl_ = config['iframe'];
-      this.processCrossDomainIframe();
-    }
+    dev().assert(config && config['iframe'],
+        'Must supply iframe URL to constructor!');
+    this.frameUrl_ = config['iframe'];
+    this.processCrossDomainIframe();
   }
 
   /**
    * Called when a Transport instance is being removed from the DOM
    */
-  unlayoutCallback() {
+  detach() {
     IframeTransport.markCrossDomainIframeAsDone(this.win_.document, this.type_);
   }
 
@@ -109,7 +109,7 @@ export class IframeTransport {
     }));
     const frame = createElementWithAttributes(this.win_.document, 'iframe',
         /** @type {!JsonObject} */ ({
-          sandbox: 'allow-scripts',
+          sandbox: 'allow-scripts allow-same-origin',
           name: frameName,
           'data-amp-3p-sentinel': sentinel,
         }));

@@ -159,17 +159,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   layoutCallback() {
     // Now that we are rendered, stop rendering the element to reduce
     // resource consumption.
-    this.element.getResources().setOwner(this.element,
-        this.element.parentElement);
     return this.ensureInitialized_();
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    if (this.iframeTransport_) {
-      this.iframeTransport_.unlayoutCallback();
-    }
-    return true;
   }
 
   /** @override */
@@ -177,6 +167,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.analyticsGroup_) {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
+    }
+    if (this.iframeTransport_) {
+      this.iframeTransport_.detach();
     }
   }
 
@@ -233,9 +226,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
 
-    this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
+    if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport']);
+    }
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
