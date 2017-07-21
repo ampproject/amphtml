@@ -30,8 +30,6 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
-    user().assert(element.hasAttribute('src'),
-        'Attribute src required for <amp-ad type="fake">: %s', element);
   }
 
   /** @override */
