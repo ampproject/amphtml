@@ -295,7 +295,8 @@ describes.realWin('amp-auto-ads', {
     return ampAutoAds.layoutCallback().then(() => {
       expect(xhr.fetchJson).to.have.been.calledWith(
           '//pagead2.googlesyndication.com/getconfig/ama?client=' +
-          AD_CLIENT + '&plah=localhost&ama_t=amp', {
+          AD_CLIENT + '&plah=localhost&ama_t=amp&' +
+          'url=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html', {
             mode: 'cors',
             method: 'GET',
             credentials: 'omit',

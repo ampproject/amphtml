@@ -83,7 +83,23 @@ describes.realWin('ad-network-config', {
       const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
       expect(adNetwork.getConfigUrl()).to.equal(
           '//pagead2.googlesyndication.com/getconfig/ama?client=' +
-          AD_CLIENT + '&plah=foo.bar&ama_t=amp');
+          AD_CLIENT + '&plah=foo.bar&ama_t=amp&' +
+          'url=https%3A%2F%2Ffoo.bar%2Fbaz');
+    });
+
+    it('should truncate the URL if it\'s too long', () => {
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+
+      const canonicalUrl = 'http://foo.bar/' + 'a'.repeat(4050)
+          + 'shouldnt_be_included';
+
+      const docInfo = Services.documentInfoForDoc(ampAutoAdsElem);
+      sandbox.stub(docInfo, 'canonicalUrl', canonicalUrl);
+
+      const url = adNetwork.getConfigUrl();
+      expect(url).to.contain('ama_t=amp');
+      expect(url).to.contain('url=http%3A%2F%2Ffoo.bar');
+      expect(url).not.to.contain('shouldnt_be_included');
     });
 
     it('should generate the attributes', () => {
