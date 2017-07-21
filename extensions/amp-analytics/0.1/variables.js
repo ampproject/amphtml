@@ -220,7 +220,7 @@ export class VariableService {
         // Expand string values further.
         p = this.expandTemplate(raw,
             new ExpansionOptions(options.vars, options.iterations - 1,
-                options.noEncode));
+                true /* noEncode */));
       } else {
         // Values can also be arrays and objects. Don't expand them.
         p = Promise.resolve(raw);
