@@ -44,6 +44,7 @@ import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
 import {dev, initLogConstructor, setReportError, user} from '../src/log';
 import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
+import {once} from '../src/utils/function.js';
 import {startsWith} from '../src/string.js';
 import {AmpEvents} from '../src/amp-events';
 
@@ -212,19 +213,30 @@ const FALLBACK_CONTEXT_DATA = dict({
 // masterSelection, as per below.
 const iframeName = window.name;
 
-// TODO(alanorozco): Remove references to this and try to find a more suitable
-//    data structure.
-const data = getData(iframeName);
 
-window.context = data['_context'];
+/**
+ * Gets data encoded in iframe name attribute.
+ * @return {!JsonObject}
+ */
+const getData = once(() => {
+  const iframeName = window.name;
 
-// This should only be invoked after window.context is set
-initLogConstructor();
-setReportError(console.error.bind(console));
+  try {
+    // TODO(bradfrizzell@): Change the data structure of the attributes
+    //    to make it less terrible.
+    return parseJson(iframeName)['attributes'];
+  } catch (err) {
+    if (!getMode().test) {
+      dev().info(
+          'INTEGRATION', 'Could not parse context from:', iframeName);
+    }
+    return FALLBACK_CONTEXT_DATA;
+  }
+});
 
-// Experiment toggles
-setExperimentToggles(window.context.experimentToggles);
-delete window.context.experimentToggles;
+
+init(window);
+
 
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
@@ -380,21 +392,19 @@ const defaultAllowedTypesInCustomFrame = [
 
 
 /**
- * Gets data encoded in iframe name attribute.
- * @return {!JsonObject}
+ * Initialize 3p frame.
+ * @param {!Window} win
  */
-function getData(iframeName) {
-  try {
-    // TODO(bradfrizzell@): Change the data structure of the attributes
-    //    to make it less terrible.
-    return parseJson(iframeName)['attributes'];
-  } catch (err) {
-    if (!getMode().test) {
-      dev().info(
-          'INTEGRATION', 'Could not parse context from:', iframeName);
-    }
-    return FALLBACK_CONTEXT_DATA;
-  }
+function init(win) {
+  const data = getData();
+
+  // Overriding to short-circuit src/mode#getMode()
+  win.AMP_MODE = data['_context'].mode;
+
+  initLogConstructor();
+  setReportError(console.error.bind(console));
+
+  setExperimentToggles(data['_context'].experimentToggles);
 }
 
 
@@ -447,6 +457,7 @@ function isMaster() {
 window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     opt_allowedEmbeddingOrigins) {
   try {
+    const data = getData();
     const location = parseUrl(data['_context']['location']['href']);
 
     ensureFramed(window);
@@ -455,8 +466,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     if (opt_allowedEmbeddingOrigins) {
       validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
     }
-    installContext(window);
-    delete data['_context'];
+    installContext(window, data);
     manageWin(window);
     installEmbedStateListener();
 
@@ -497,14 +507,15 @@ function isAmpContextExperimentOn() {
 /**
  * Installs window.context API.
  * @param {!Window} win
+ * @param {!JsonObject} data
  */
-function installContext(win) {
+function installContext(win, data) {
   if (isAmpContextExperimentOn()) {
     installContextUsingExperimentalImpl(win);
     return;
   }
 
-  installContextUsingStandardImpl(win);
+  installContextUsingStandardImpl(win, data);
 }
 
 
@@ -520,8 +531,11 @@ function installContextUsingExperimentalImpl(win) {
 /**
  * Installs window.context using standard (to be deprecated) implementation.
  * @param {!Window} win
+ * @param {!JsonObject} data
  */
-function installContextUsingStandardImpl(win) {
+function installContextUsingStandardImpl(win, data) {
+  win.context = win.context || data['_context'];
+
   // Define master related properties to be lazily read.
   Object.defineProperties(win.context, {
     master: {
@@ -564,6 +578,9 @@ function installContextUsingStandardImpl(win) {
     iframe.name = iframeName;
   };
   win.context.getHtml = getHtml;
+
+  // TODO(alanorozco): don't delete _context. refactor data object structure.
+  delete data['_context'];
 }
 
 
