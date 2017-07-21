@@ -15,7 +15,7 @@
  */
 
 import {
-  AMP_ANALYTICS_3P_MESSAGE_TYPE,
+  AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
 } from '../../../../src/3p-analytics-common';
 import {
   AmpAnalytics3pMessageRouter,
@@ -106,7 +106,7 @@ describe('ampanalytics-lib', () => {
       expect(ampAnalytics.registerAmpAnalytics3pEventsListener).to.exist;
       ampAnalytics.registerAmpAnalytics3pEventsListener(() => {});
     };
-    send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
+    send(AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
       /** @type {!JsonObject} */ ({'100': ['hello, world!']}));
   });
 
@@ -124,13 +124,13 @@ describe('ampanalytics-lib', () => {
         });
       });
     };
-    send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
+    send(AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
       /** @type {!JsonObject} */ ({'101': ['hello, world!']}));
   });
 
   it('asserts when onNewAmpAnalyticsInstance is not implemented ', () => {
     window.onNewAmpAnalyticsInstance = null;
-    send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
+    send(AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
       /** @type {!JsonObject} */ ({'103': ['hello, world!']}));
     return timer.promise(POST_MESSAGE_DELAY).then(() => {
       expect(badAssertsCounterStub.callCount > 0).to.be.true;
@@ -156,7 +156,7 @@ describe('ampanalytics-lib', () => {
         expect(events[2]).to.equal('a third thing happened');
       });
     };
-    send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
+    send(AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
       /** @type {!JsonObject} */ ({'105': [
         'something happened',
         'something else happened',

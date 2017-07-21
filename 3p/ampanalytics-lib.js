@@ -17,7 +17,7 @@
 import './polyfills';
 import {tryParseJson} from '../src/json';
 import {dev, user, initLogConstructor, setReportError} from '../src/log';
-import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../src/3p-analytics-common';
+import {AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE} from '../src/3p-analytics-common';
 import {getData} from '../src/event-helper';
 
 initLogConstructor();
@@ -66,7 +66,7 @@ export class AmpAnalytics3pMessageRouter {
       user().assert(messageContainer['data'],
           'Received empty message in ' + this.win_.location.href);
       user().assert(
-          messageContainer['type'] == AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
+          messageContainer['type'] == AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
           'Received unrecognized message type ' + messageContainer['type'] +
           ' in ' + this.win_.location.href);
       this.processEventsMessage_(
@@ -74,7 +74,7 @@ export class AmpAnalytics3pMessageRouter {
           (messageContainer['data']));
     }, false);
 
-    this.subscribeTo(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT);
+    this.subscribeTo(AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE);
   }
 
   /**
