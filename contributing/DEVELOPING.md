@@ -195,6 +195,8 @@ The technology stack used is:
 
 The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. All PRs will show a check called `percy/amphtml` in addition to the `continuous-integration/travis-ci/pr` check. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted. (If you don't have permissions to view the diffs, you can make a request at [percy.io/ampproject/amphtml](percy.io/ampproject/amphtml).)
 
+### Running Visual Diff Tests Locally
+
 You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_PROJECT` and `PERCY_TOKEN` environment variables using the unique values you find at `https://percy.io/<your_project>/settings`. Once the environment variables are set up, you can run the AMP visual diff tests like so:
 
 ```
