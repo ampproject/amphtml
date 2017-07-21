@@ -187,11 +187,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
   {
-    id: 'visibility-v3',
-    name: 'Visibility tracking with FIE and in-a-box support',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8121',
-  },
-  {
     id: 'variable-filters',
     name: 'Format to apply filters to analytics variables',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
@@ -207,13 +202,6 @@ const EXPERIMENTS = [
     name: 'Force all extensions to have the same release ' +
         'as the main JS binary',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
-  },
-  {
-    id: 'amp-bind',
-    name: 'AMP extension for dynamic content',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-bind/amp-bind.md',
   },
   {
     id: 'web-worker',
@@ -253,10 +241,6 @@ const EXPERIMENTS = [
     name: 'Use slot width/height attribute for AdSense size format',
   },
   {
-    id: 'dc-use-attr-for-format',
-    name: 'Use slot width/height attribute for DoubleClick size format',
-  },
-  {
     id: 'ad-loader-v1',
     name: 'New ad loader version 1',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
@@ -283,17 +267,28 @@ const EXPERIMENTS = [
     name: 'IMA-integrated Video Player',
   },
   {
-    id: 'amp-ad-exit',
-    name: 'Enable amp-ad-exit component',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9502',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/amp-ad-exit.md',
-  },
-  {
     id: 'amp-sidebar 1.0',
     name: 'Amp sidebar 1.0 extension',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9803',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
       'amp-sidebar/1.0/amp-sidebar-1.0.md',
+  },
+  {
+    id: 'amp-ad-refresh',
+    name: 'Enable AMP ad refresh',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-ad-network-doubleclick-impl/' +
+        'amp-ad-network-doubleclick-impl-internal.md',
+  },
+  {
+    id: 'user-error-reporting',
+    name: 'Report error to publishers',
+    spec: 'https://github.com/ampproject/amphtml/issues/6415',
+  },
+  {
+    id: 'disable-rtc',
+    name: 'Disable AMP RTC',
+    spec: 'https://github.com/ampproject/amphtml/issues/8551',
   },
 ];
 

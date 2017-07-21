@@ -16,14 +16,10 @@
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
-import {cidForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {registerServiceBuilder, getService} from '../../../src/service';
 import {dev, user, rethrowAsync} from '../../../src/log';
-import {storageForDoc} from '../../../src/services';
-import {urlReplacementsForDoc} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
 import {whenDocumentReady} from '../../../src/document-ready';
-import {xhrFor} from '../../../src/services';
 import {setStyle} from '../../../src/style';
 
 
@@ -86,14 +82,40 @@ export class AmpUserNotification extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @const {?UrlReplacements} */
-    this.urlReplacements_ = null;
+    /** @private {?string} */
+    this.ampUserId_ = null;
 
-    /** @private @const {?UserNotificationManager} */
+    /** @private {?string} */
+    this.elementId_ = null;
+
+    /** @private {?function()} */
+    this.dialogResolve_ = null;
+
+    /** @private {Promise} */
+    this.dialogPromise_ = new Promise(resolve => {
+      this.dialogResolve_ = resolve;
+    });
+
+    /** @private {?string} */
+    this.dismissHref_ = null;
+
+    /** @private {boolean} */
+    this.persistDismissal_ = false;
+
+    /** @private {?string} */
+    this.showIfHref_ = null;
+
+    /** @private {string} */
+    this.storageKey_ = '';
+
+    /** @private {?Promise<!Storage>} */
+    this.storagePromise_ = null;
+
+    /** @private {?UserNotificationManager} */
     this.userNotificationManager_ = null;
 
-    /** @const @private {?Promise<!Storage>} */
-    this.storagePromise_ = null;
+    /** @private {?../../../src/service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacements_ = null;
   }
 
   /** @override */
@@ -104,38 +126,24 @@ export class AmpUserNotification extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const ampdoc = this.getAmpDoc();
-    this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
-    this.storagePromise_ = storageForDoc(ampdoc);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
+    this.storagePromise_ = Services.storageForDoc(ampdoc);
     if (!this.userNotificationManager_) {
       installUserNotificationManager(window);
       this.userNotificationManager_ = getService(window,
           'userNotificationManager');
     }
 
-    /** @private {?string} */
-    this.ampUserId_ = null;
-
-    /** @private {function()} */
-    this.dialogResolve_ = null;
-
-    /** @private {!Promise} */
-    this.dialogPromise_ = new Promise(resolve => {
-      this.dialogResolve_ = resolve;
-    });
-
     this.elementId_ = user().assert(this.element.id,
         'amp-user-notification should have an id.');
 
-    /** @private @const {string} */
     this.storageKey_ = 'amp-user-notification:' + this.elementId_;
 
-    /** @private @const {?string} */
     this.showIfHref_ = this.element.getAttribute('data-show-if-href');
     if (this.showIfHref_) {
       assertHttpsUrl(this.showIfHref_, this.element);
     }
 
-    /** @private @const {?string} */
     this.dismissHref_ = this.element.getAttribute('data-dismiss-href');
     if (this.dismissHref_) {
       assertHttpsUrl(this.dismissHref_, this.element);
@@ -149,14 +157,15 @@ export class AmpUserNotification extends AMP.BaseElement {
 
     const persistDismissal = this.element.getAttribute(
         'data-persist-dismissal');
-    /** @private @const {boolean} */
+
     this.persistDismissal_ = (
         persistDismissal != 'false' && persistDismissal != 'no');
 
     this.userNotificationManager_
         .registerUserNotification(this.elementId_, this);
 
-    this.registerAction('dismiss', this.dismiss.bind(this));
+    this.registerAction('dismiss', () => this.dismiss(/*forceNoPersist*/false));
+    this.registerAction('optoutOfCid', () => this.optoutOfCid_());
   }
 
   /**
@@ -167,12 +176,13 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   buildGetHref_(ampUserId) {
-    const showIfHref = dev().assert(this.showIfHref_);
+    const showIfHref = dev().assertString(this.showIfHref_);
     return this.urlReplacements_.expandAsync(showIfHref).then(href => {
-      return addParamsToUrl(href, {
-        elementId: this.elementId_,
-        ampUserId,
+      const data = /** @type {!JsonObject} */({
+        'elementId': this.elementId_,
+        'ampUserId': ampUserId,
       });
+      return addParamsToUrl(href, data);
     });
   }
 
@@ -190,7 +200,8 @@ export class AmpUserNotification extends AMP.BaseElement {
         credentials: 'include',
         requireAmpResponseSourceOrigin: false,
       };
-      return xhrFor(this.win).fetchJson(href, getReq).then(res => res.json());
+      return Services.xhrFor(this.win)
+          .fetchJson(href, getReq).then(res => res.json());
     });
   }
 
@@ -200,15 +211,17 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Promise}
    */
   postDismissEnpoint_() {
-    return xhrFor(this.win).fetchJson(dev().assert(this.dismissHref_), {
-      method: 'POST',
-      credentials: 'include',
-      requireAmpResponseSourceOrigin: false,
-      body: {
-        'elementId': this.elementId_,
-        'ampUserId': this.ampUserId_,
-      },
-    });
+    return Services.xhrFor(this.win).fetchJson(
+        dev().assertString(this.dismissHref_),
+        {
+          method: 'POST',
+          credentials: 'include',
+          requireAmpResponseSourceOrigin: false,
+          body: /** @type {!JsonObject} */({
+            'elementId': this.elementId_,
+            'ampUserId': this.ampUserId_,
+          }),
+        });
   }
 
   /**
@@ -232,12 +245,27 @@ export class AmpUserNotification extends AMP.BaseElement {
   }
 
   /**
-   * Get async cid service.
+   * Opts the user out of cid issuance and dismisses the notification.
+   * @private
+   */
+  optoutOfCid_() {
+    return this.getCidService_()
+        .then(cid => cid.optOut())
+        .then(() => this.dismiss(/*forceNoPersist*/false), reason => {
+          dev().error(TAG,
+              'Failed to opt out of Cid', reason);
+          // If optout fails, dismiss notification without persisting.
+          this.dismiss(/*forceNoPersist*/true);
+        });
+  }
+
+  /**
+   * Get async cid.
    * @return {!Promise}
    * @private
    */
   getAsyncCid_() {
-    return cidForDoc(this.element).then(cid => {
+    return this.getCidService_().then(cid => {
       // `amp-user-notification` is our cid scope, while we give it a resolved
       // promise for the 2nd argument so that the 3rd argument (the
       // persistentConsent) is the one used to resolve getting
@@ -250,6 +278,15 @@ export class AmpUserNotification extends AMP.BaseElement {
         {scope: 'amp-user-notification', createCookieIfNotPresent: true},
           Promise.resolve(), this.dialogPromise_);
     });
+  }
+
+  /**
+   * Get cid service.
+   * @return {!Promise}
+   * @private
+   */
+  getCidService_() {
+    return Services.cidForDoc(this.element);
   }
 
   /** @override */
@@ -302,20 +339,23 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   activate() {
-    this.dismiss();
+    this.dismiss(/*forceNoPersist*/false);
   }
 
   /**
    * Hides the current user notification and invokes the `dialogResolve_`
    * method. Removes the `.amp-active` class from the element.
+   *
+   * @param {boolean} forceNoPersist If true, dismissal won't be persisted
+   * regardless of 'data-persist-dismissal''s value
    */
-  dismiss() {
+  dismiss(forceNoPersist) {
     this.element.classList.remove('amp-active');
     this.element.classList.add('amp-hidden');
     this.dialogResolve_();
     this.getViewport().removeFromFixedLayer(this.element);
 
-    if (this.persistDismissal_) {
+    if (this.persistDismissal_ && !forceNoPersist) {
       // Store and post.
       this.storagePromise_.then(storage => {
         storage.set(this.storageKey_, true);
@@ -348,8 +388,8 @@ export class UserNotificationManager {
     /** @private @const {!Object<string,!UserNotificationDeferDef>} */
     this.deferRegistry_ = Object.create(null);
 
-    /** @private @const {!Viewer} */
-    this.viewer_ = viewerForDoc(this.win.document);
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(this.win.document);
 
     /** @private @const {!Promise} */
     this.documentReadyPromise_ = whenDocumentReady(this.win.document);

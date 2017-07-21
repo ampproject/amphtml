@@ -21,9 +21,14 @@ import {VideoEvents} from '../../../src/video-interface';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {listen} from '../../../src/event-helper';
-import {videoManagerForDoc} from '../../../src/services';
-import {parseQueryString} from '../../../src/url';
+import {getData, listen} from '../../../src/event-helper';
+import {Services} from '../../../src/services';
+import {
+    parseQueryString,
+    addParamsToUrl,
+    addParamToUrl,
+} from '../../../src/url';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 
 /**
  * Player events reverse-engineered from the Dailymotion API
@@ -137,7 +142,7 @@ class AmpDailymotion extends AMP.BaseElement {
         this.element);
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
@@ -153,8 +158,7 @@ class AmpDailymotion extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     dev().assert(this.videoid_);
-    iframe.src = 'https://www.dailymotion.com/embed/video/' +
-     encodeURIComponent(this.videoid_ || '') + '?' + this.getQuery_();
+    iframe.src = this.getIframeSrc_();
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -172,23 +176,15 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @private */
-  addQueryParam_(param, query) {
-    const val = this.element.getAttribute(`data-${param}`);
-    if (val) {
-      query.push(`${encodeURIComponent(param)}=${encodeURIComponent(val)}`);
-    }
-  }
-
-  /** @private */
   handleEvents_(event) {
     if (event.origin != 'https://www.dailymotion.com' ||
         event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!event.data || !event.type || event.type != 'message') {
+    if (!getData(event) || !event.type || event.type != 'message') {
       return;  // Event empty
     }
-    const data = parseQueryString(event.data);
+    const data = parseQueryString(/** @type {string} */ (getData(event)));
     if (data === undefined) {
       return; // The message isn't valid
     }
@@ -204,7 +200,7 @@ class AmpDailymotion extends AMP.BaseElement {
         this.playerState_ = DailymotionEvents.PAUSE;
         break;
       case DailymotionEvents.PLAY:
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
         this.playerState_ = DailymotionEvents.PLAY;
         break;
       case DailymotionEvents.VOLUMECHANGE:
@@ -247,14 +243,12 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @private */
-  getQuery_() {
-    const query = [
-      'api=1',
-      'html=1',
-      'app=amp',
-    ];
+  getIframeSrc_() {
 
-    const settings = [
+    let iframeSrc = 'https://www.dailymotion.com/embed/video/' +
+       encodeURIComponent(this.videoid_ || '') + '?api=1&html=1&app=amp';
+
+    const explicitParamsAttributes = [
       'mute',
       'endscreen-enable',
       'sharing-enable',
@@ -264,11 +258,17 @@ class AmpDailymotion extends AMP.BaseElement {
       'info',
     ];
 
-    settings.forEach(setting => {
-      this.addQueryParam_(setting, query);
+    explicitParamsAttributes.forEach(explicitParam => {
+      const val = this.element.getAttribute(`data-${explicitParam}`);
+      if (val) {
+        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
+      }
     });
 
-    return query.join('&');
+    const implicitParams = getDataParamsFromAttributes(this.element);
+    iframeSrc = addParamsToUrl(iframeSrc, implicitParams);
+
+    return iframeSrc;
   }
 
   /** @override */
@@ -335,6 +335,24 @@ class AmpDailymotion extends AMP.BaseElement {
    */
   hideControls() {
     // Not supported
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 };
 

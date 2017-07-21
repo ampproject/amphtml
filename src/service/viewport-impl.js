@@ -27,17 +27,20 @@ import {
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
 import {dict} from '../utils/object';
+import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
+import {isExperimentOn} from '../experiments';
 import {numeric} from '../transition';
 import {onDocumentReady, whenDocumentReady} from '../document-ready';
-import {platformFor} from '../services';
+import {Services} from '../services';
 import {px, setStyle, setStyles, computedStyle} from '../style';
-import {timerFor} from '../services';
-import {vsyncFor} from '../services';
-import {viewerForDoc} from '../services';
 import {waitForBody, isIframed} from '../dom';
 import {getMode} from '../mode';
 
 const TAG_ = 'Viewport';
+
+
+/** @const {string} */
+const A4A_LIGHTBOX_EXPERIMENT = 'amp-lightbox-a4a-proto';
 
 
 /**
@@ -52,6 +55,14 @@ const TAG_ = 'Viewport';
  */
 export let ViewportChangedEventDef;
 
+/**
+ * @typedef {{
+ *   relayoutAll: boolean,
+ *   width: number,
+ *   height: number
+ * }}
+ */
+export let ViewportResizedEventDef;
 
 /**
  * This object represents the viewport. It tracks scroll position, resize
@@ -112,10 +123,10 @@ export class Viewport {
     this.lastPaddingTop_ = 0;
 
     /** @private {!./timer-impl.Timer} */
-    this.timer_ = timerFor(this.ampdoc.win);
+    this.timer_ = Services.timerFor(this.ampdoc.win);
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.ampdoc.win);
+    this.vsync_ = Services.vsyncFor(this.ampdoc.win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
@@ -128,6 +139,9 @@ export class Viewport {
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
+
+    /** @private @const {!Observable} */
+    this.resizeObservable_ = new Observable();
 
     /** @private {?Element|undefined} */
     this.viewportMeta_ = undefined;
@@ -402,22 +416,39 @@ export class Viewport {
    * @param {!Element} element
    * @param {number=} duration
    * @param {string=} curve
+   * @param {string=} pos (takes one of 'top', 'bottom', 'center')
    * @return {!Promise}
    */
-  animateScrollIntoView(element, duration = 500, curve = 'ease-in') {
-    const elementTop = this.binding_.getLayoutRect(element).top;
-    const newScrollTop = Math.max(0, elementTop - this.paddingTop_);
+  animateScrollIntoView(element,
+                        duration = 500,
+                        curve = 'ease-in',
+                        pos = 'top') {
+    const elementRect = this.binding_.getLayoutRect(element);
+    let offset;
+    switch (pos) {
+      case 'bottom':
+        offset = -this.getHeight() + elementRect.height;
+        break;
+      case 'center':
+        offset = -this.getHeight() / 2 + elementRect.height / 2;
+        break;
+      default:
+        offset = 0;
+        break;
+    }
+    const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
+    const newScrollTop = Math.max(0, calculatedScrollTop);
     const curScrollTop = this.getScrollTop();
     if (newScrollTop == curScrollTop) {
       return Promise.resolve();
     }
     /** @const {!TransitionDef<number>} */
     const interpolate = numeric(curScrollTop, newScrollTop);
-    // TODO(erwinm): the duration should not be a constant and should
-    // be done in steps for better transition experience when things
-    // are closer vs farther.
-    return Animation.animate(this.ampdoc.getRootNode(), pos => {
-      this.binding_.setScrollTop(interpolate(pos));
+    // TODO(aghassemi, #10463): the duration should not be a constant and should
+    // be proportional to the distance to be scrolled for better transition
+    // experience when things are closer vs farther.
+    return Animation.animate(this.ampdoc.getRootNode(), position => {
+      this.binding_.setScrollTop(interpolate(position));
     }, duration, curve).then();
   }
 
@@ -444,27 +475,109 @@ export class Viewport {
   }
 
   /**
+   * Registers the handler for ViewportResizedEventDef events.
+   * @param {!function(!ViewportResizedEventDef)} handler
+   * @return {!UnlistenDef}
+   */
+  onResize(handler) {
+    return this.resizeObservable_.add(handler);
+  }
+
+  /**
    * Instruct the viewport to enter lightbox mode.
+   * Requesting element is necessary to be able to enter lightbox mode under FIE
+   * cases.
+   * @param {!Element=} opt_requestingElement
    * @return {!Promise}
    */
-  enterLightboxMode() {
-    this.viewer_.sendMessage('requestFullOverlay', dict(),
-        /* cancelUnsent */true);
+  enterLightboxMode(opt_requestingElement) {
+    this.viewer_.sendMessage(
+        'requestFullOverlay', dict(), /* cancelUnsent */ true);
+
     this.enterOverlayMode();
     this.hideFixedLayer();
+
+    if (opt_requestingElement) {
+      this.maybeEnterFieLightboxMode(
+          dev().assertElement(opt_requestingElement));
+    }
+
     return this.binding_.updateLightboxMode(true);
   }
 
   /**
    * Instruct the viewport to leave lightbox mode.
+   * Requesting element is necessary to be able to enter lightbox mode under FIE
+   * cases.
+   * @param {!Element=} opt_requestingElement
    * @return {!Promise}
    */
-  leaveLightboxMode() {
-    this.viewer_.sendMessage('cancelFullOverlay', dict(),
-        /* cancelUnsent */true);
+  leaveLightboxMode(opt_requestingElement) {
+    this.viewer_.sendMessage(
+        'cancelFullOverlay', dict(), /* cancelUnsent */ true);
+
     this.showFixedLayer();
     this.leaveOverlayMode();
+
+    if (opt_requestingElement) {
+      this.maybeLeaveFieLightboxMode(
+          dev().assertElement(opt_requestingElement));
+    }
+
     return this.binding_.updateLightboxMode(false);
+  }
+
+  /**
+   * @return {boolean}
+   * @visibleForTesting
+   */
+  isLightboxExperimentOn() {
+    return isExperimentOn(this.ampdoc.win, A4A_LIGHTBOX_EXPERIMENT);
+  }
+
+  /**
+   * Enters frame lightbox mode if under a Friendly Iframe Embed.
+   * @param {!Element} requestingElement
+   * @visibleForTesting
+   */
+  maybeEnterFieLightboxMode(requestingElement) {
+    const fieOptional = this.getFriendlyIframeEmbed_(requestingElement);
+
+    if (fieOptional) {
+      dev().assert(this.isLightboxExperimentOn(),
+          'Lightbox mode for A4A is only available when ' +
+          `'${A4A_LIGHTBOX_EXPERIMENT}' experiment is on`);
+
+      dev().assert(fieOptional).enterFullOverlayMode();
+    }
+  }
+
+  /**
+   * Leaves frame lightbox mode if under a Friendly Iframe Embed.
+   * @param {!Element} requestingElement
+   * @visibleForTesting
+   */
+  maybeLeaveFieLightboxMode(requestingElement) {
+    const fieOptional = this.getFriendlyIframeEmbed_(requestingElement);
+
+    if (fieOptional) {
+      dev().assert(fieOptional).leaveFullOverlayMode();
+    }
+  }
+
+  /**
+   * Get FriendlyIframeEmbed if available.
+   * @param {!Element} element Element supposedly inside the FIE.
+   * @return {?../friendly-iframe-embed.FriendlyIframeEmbed}
+   * @private
+   */
+  getFriendlyIframeEmbed_(element) {
+    const iframeOptional =
+        getParentWindowFrameElement(element, this.ampdoc.win);
+
+    return iframeOptional && getFriendlyIframeEmbedOptional(
+        /** @type {!HTMLIFrameElement} */
+        (dev().assertElement(iframeOptional)));
   }
 
   /*
@@ -798,7 +911,16 @@ export class Viewport {
     this.size_ = null;  // Need to recalc.
     const newSize = this.getSize();
     this.fixedLayer_.update().then(() => {
-      this.changed_(!oldSize || oldSize.width != newSize.width, 0);
+      const widthChanged = !oldSize || oldSize.width != newSize.width;
+      this.changed_(/*relayoutAll*/widthChanged, 0);
+      const sizeChanged = widthChanged || oldSize.height != newSize.height;
+      if (sizeChanged) {
+        this.resizeObservable_.fire({
+          relayoutAll: widthChanged,
+          width: newSize.width,
+          height: newSize.height,
+        });
+      }
     });
   }
 }
@@ -968,7 +1090,7 @@ export class ViewportBindingNatural_ {
     this.win = ampdoc.win;
 
     /** @const {!../service/platform-impl.Platform} */
-    this.platform_ = platformFor(this.win);
+    this.platform_ = Services.platformFor(this.win);
 
     /** @private @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewer;
@@ -1367,7 +1489,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // implementation.
     return new Promise(resolve => {
       onDocumentReady(this.win.document, doc => {
-        vsyncFor(this.win).mutatePromise(() => {
+        Services.vsyncFor(this.win).mutatePromise(() => {
           setStyle(doc.body, 'borderTopStyle', lightboxMode ? 'none' : 'solid');
         }).then(resolve);
       });
@@ -1833,13 +1955,13 @@ export function updateViewportMetaString(currentValue, updateParams) {
  * @private
  */
 function createViewport(ampdoc) {
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
     // The overriding of document.body fails in iOS7.
     // Also, iOS8 sometimes freezes scrolling.
-    if (platformFor(ampdoc.win).getIosMajorVersion() > 8) {
+    if (Services.platformFor(ampdoc.win).getIosMajorVersion() > 8) {
       binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
     } else {
       binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
@@ -1879,7 +2001,8 @@ const ViewportType = {
  */
 function getViewportType(win, viewer) {
   const viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
-  if (!platformFor(win).isIos() || viewportType != ViewportType.NATURAL) {
+  if (!Services.platformFor(win).isIos() ||
+      viewportType != ViewportType.NATURAL) {
     return viewportType;
   }
   // Enable iOS Embedded mode so that it's easy to test against a more

@@ -310,6 +310,7 @@ is demonstrated desire for it.
   <tr><td>amp-pixel</td></tr>
   <tr><td>amp-social-share</td></tr>
   <tr><td>amp-video</td></tr>
+  <tr><td>amp-youtube</td></tr>
 </table>
 
 ### HTML Tags

@@ -15,7 +15,6 @@
 #
 
 tags: {  # amp-animation
-  html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-animation"
@@ -25,7 +24,6 @@ tags: {  # amp-animation
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-animation> (json)
-  html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-animation extension .json script"
   mandatory_parent: "AMP-ANIMATION"
@@ -36,7 +34,7 @@ tags: {  # <amp-animation> (json)
     name: "type"
     mandatory: true
     value_casei: "application/json"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -46,7 +44,6 @@ tags: {  # <amp-animation> (json)
   }
 }
 tags: {  # <amp-animation>
-  html_format: AMP
   tag_name: "AMP-ANIMATION"
   mandatory_parent: "BODY"
   requires_extension: "amp-animation"

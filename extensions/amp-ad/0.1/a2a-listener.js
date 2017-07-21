@@ -15,8 +15,9 @@
 
 import {closestByTag} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {getData} from '../../../src/event-helper';
 import {user} from '../../../src/log';
-import {viewerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {isProxyOrigin} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 
@@ -45,7 +46,7 @@ export function setupA2AListener(win) {
  * @visibleForTesting
  */
 export function handleMessageEvent(win, event) {
-  const data = event.data;
+  const data = getData(event);
   // Only handle messages starting with the magic string.
   if (typeof data != 'string' || data.indexOf('a2a;') != 0) {
     return;
@@ -79,5 +80,5 @@ export function handleMessageEvent(win, event) {
   // We only allow AMP shaped URLs.
   user().assert(isProxyOrigin(url), 'Invalid ad A2A URL %s %s',
       url, origin);
-  viewerForDoc(win.document).navigateTo(url, 'ad-' + origin);
+  Services.viewerForDoc(win.document).navigateTo(url, 'ad-' + origin);
 }

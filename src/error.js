@@ -24,13 +24,17 @@ import {
   USER_ERROR_SENTINEL,
   isUserErrorMessage,
   duplicateErrorIfNecessary,
+  dev,
 } from './log';
 import {isProxyOrigin} from './url';
 import {isCanary, experimentTogglesOrNull} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {startsWith} from './string';
 import {urls} from './config';
-
+import {AmpEvents} from './amp-events';
+import {triggerAnalyticsEvent} from './analytics';
+import {isExperimentOn} from './experiments';
+import {Services} from './services';
 
 /**
  * @const {string}
@@ -85,6 +89,18 @@ function tryJsonStringify(value) {
  * Safari JS engine.
  */
 let detectedJsEngine;
+
+/**
+ * @param {!Window} win
+ * @param {*} error
+ * @param {!Element=} opt_associatedElement
+ */
+export function reportErrorForWin(win, error, opt_associatedElement) {
+  reportError(error, opt_associatedElement);
+  if (error && isUserErrorMessage(error.message) && !!win) {
+    reportErrorToAnalytics(/** @type {!Error} */(error), win);
+  }
+}
 
 /**
  * Reports an error. If the error has an "associatedElement" property
@@ -153,7 +169,7 @@ export function reportError(error, opt_associatedElement) {
       }
     }
     if (element && element.dispatchCustomEventForTesting) {
-      element.dispatchCustomEventForTesting('amp:error', error.message);
+      element.dispatchCustomEventForTesting(AmpEvents.ERROR, error.message);
     }
 
     // 'call' to make linter happy. And .call to make compiler happy
@@ -472,4 +488,28 @@ export function detectJsEngineFromStack() {
   }
 
   return 'unknown';
+}
+
+/**
+ * @param {!Error} error
+ * @param {!Window} win
+ */
+export function reportErrorToAnalytics(error, win) {
+  if (isExperimentOn(win, 'user-error-reporting')) {
+    const vars = {
+      'errorName': error.name,
+      'errorMessage': error.message,
+    };
+    triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
+  }
+}
+
+/**
+ * @param {!Window} win
+ * @return {!Element}
+ * @private
+ */
+function getRootElement_(win) {
+  const root = Services.ampdocServiceFor(win).getAmpDoc().getRootNode();
+  return dev().assertElement(root.documentElement || root.body || root);
 }

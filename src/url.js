@@ -20,6 +20,7 @@ import {getMode} from './mode';
 import {urls} from './config';
 import {isArray} from './types';
 import {parseQueryString_} from './url-parse-query-string';
+import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
@@ -176,7 +177,7 @@ export function addParamToUrl(url, key, value, opt_addToFront) {
  * Appends query string fields and values to a url. The `params` objects'
  * `key`s and `value`s will be transformed into query string keys/values.
  * @param {string} url
- * @param {!Object<string, string|!Array<string>>} params
+ * @param {!JsonObject<string, string|!Array<string>>} params
  * @return {string}
  */
 export function addParamsToUrl(url, params) {
@@ -186,7 +187,7 @@ export function addParamsToUrl(url, params) {
 /**
  * Serializes the passed parameter map into a query string with both keys
  * and values encoded.
- * @param {!Object<string, string|!Array<string>>} params
+ * @param {!JsonObject<string, string|!Array<string>>} params
  * @return {string}
  */
 export function serializeQueryString(params) {
@@ -476,4 +477,16 @@ export function checkCorsUrl(url) {
   const query = parseQueryString(parsedUrl.search);
   user().assert(!(SOURCE_ORIGIN_PARAM in query),
       'Source origin is not allowed in %s', url);
+}
+
+/**
+ * Tries to decode a URI component, falling back to opt_fallback (or an empty
+ * string)
+ *
+ * @param {string} component
+ * @param {string=} opt_fallback
+ * @return {string}
+ */
+export function tryDecodeUriComponent(component, opt_fallback) {
+  return tryDecodeUriComponent_(component, opt_fallback);
 }

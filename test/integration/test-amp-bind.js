@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {AmpEvents} from '../../src/amp-events';
+import {BindEvents} from '../../extensions/amp-bind/0.1/bind-events';
+import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
+import {Services} from '../../src/services';
 import {createFixtureIframe} from '../../testing/iframe';
-import {batchedXhrFor} from '../../src/services';
 import * as sinon from 'sinon';
 
-describe.configure().retryOnSaucelabs().run('amp-bind', function() {
+describe.configure().skipSauceLabs().run('amp-bind', function() {
+  // Give more than default 2000ms timeout for local testing.
+  const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
+  this.timeout(TIMEOUT);
+
   let fixture;
   let sandbox;
   let numSetStates;
@@ -46,20 +52,22 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       const loadStartsToExpect =
           (opt_numberOfAmpElements === undefined) ? 1 : opt_numberOfAmpElements;
       return Promise.all([
-        fixture.awaitEvent('amp:bind:initialize', 1),
-        fixture.awaitEvent('amp:load:start', loadStartsToExpect),
+        fixture.awaitEvent(BindEvents.INITIALIZE, 1),
+        fixture.awaitEvent(AmpEvents.LOAD_START, loadStartsToExpect),
       ]);
     });
   }
 
   /** @return {!Promise} */
   function waitForBindApplication() {
-    return fixture.awaitEvent('amp:bind:setState', ++numSetStates);
+    // Bind should be available, but need to wait for actions to resolve
+    // service promise for bind and call setState.
+    return fixture.awaitEvent(BindEvents.SET_STATE, ++numSetStates);
   }
 
   /** @return {!Promise} */
   function waitForTemplateRescan() {
-    return fixture.awaitEvent('amp:bind:rescan-template', ++numTemplated);
+    return fixture.awaitEvent(BindEvents.RESCAN_TEMPLATE, ++numTemplated);
   }
 
   describe('with [text] and [class]', () => {
@@ -95,7 +103,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       // <form> is not an AMP element.
       return setupWithFixture('test/fixtures/bind-form.html', 0)
           // Wait for AmpFormService to register <form> elements.
-          .then(() => fixture.awaitEvent('amp:form-service:initialize', 1));
+          .then(() => fixture.awaitEvent(FormEvents.SERVICE_INIT, 1));
     });
 
     it('should NOT allow invalid bindings or values', () => {
@@ -562,7 +570,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       const triggerBindApplicationButton =
           fixture.doc.getElementById('triggerBindApplicationButton');
       const ampState = fixture.doc.getElementById('ampState');
-      const batchedXhr = batchedXhrFor(fixture.win);
+      const batchedXhr = Services.batchedXhrFor(fixture.win);
       // Stub XHR for endpoint such that it returns state that would point
       // the amp-state element back to its original source.
       sandbox.stub(batchedXhr, 'fetchJson')

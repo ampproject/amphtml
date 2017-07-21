@@ -36,7 +36,7 @@ tags: {  # amp-analytics (json)
     name: "type"
     mandatory: true
     value_casei: "application/json"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   cdata: {
     blacklisted_cdata_regex: {

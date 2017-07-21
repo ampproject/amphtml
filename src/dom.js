@@ -15,6 +15,7 @@
  */
 
 import {dev} from './log';
+import {dict} from './utils/object';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {startsWith} from './string';
 
@@ -148,7 +149,7 @@ export function copyChildren(from, to) {
 /**
  * Add attributes to an element.
  * @param {!Element} element
- * @param {!Object<string, string>} attributes
+ * @param {!JsonObject<string, string>} attributes
  * @return {!Element} created element
  */
 export function addAttributesToElement(element, attributes) {
@@ -162,7 +163,7 @@ export function addAttributesToElement(element, attributes) {
  * Create a new element on document with specified tagName and attributes.
  * @param {!Document} doc
  * @param {string} tagName
- * @param {!Object<string, string>} attributes
+ * @param {!JsonObject<string, string>} attributes
  * @return {!Element} created element
  */
 export function createElementWithAttributes(doc, tagName, attributes) {
@@ -293,7 +294,7 @@ export function matches(el, selector) {
 
 /**
  * Finds the first descendant element with the specified name.
- * @param {!Element} element
+ * @param {!Element|!Document|!ShadowRoot} element
  * @param {string} tagName
  * @return {?Element}
  */
@@ -511,13 +512,13 @@ export function scopedQuerySelectorAll(root, selector) {
  * @param {function(string):string=} opt_computeParamNameFunc to compute the parameter
  *    name, get passed the camel-case parameter name.
  * @param {!RegExp=} opt_paramPattern Regex pattern to match data attributes.
- * @return {!Object<string, string>}
+ * @return {!JsonObject}
  */
 export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
   opt_paramPattern) {
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const dataset = element.dataset;
-  const params = Object.create(null);
+  const params = dict();
   const paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
   for (const key in dataset) {
     const matches = key.match(paramPattern);
@@ -636,6 +637,18 @@ export function openWindowDialog(win, url, target, opt_features) {
 export function isJsonScriptTag(element) {
   return element.tagName == 'SCRIPT' &&
             element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
+}
+
+/**
+ * Whether the page's direction is right to left or not.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isRTL(doc) {
+  const dir = doc.body.getAttribute('dir')
+                 || doc.documentElement.getAttribute('dir')
+                 || 'ltr';
+  return dir == 'rtl';
 }
 
 

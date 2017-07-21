@@ -18,8 +18,7 @@
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import {platformFor} from '../../../../src/services';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
 import * as sinon from 'sinon';
 import '../amp-sidebar';
@@ -61,18 +60,33 @@ describes.realWin('amp-sidebar 0.1 version', {
         if (options.open) {
           ampSidebar.setAttribute('open', '');
         }
+        if (options.closeText) {
+          ampSidebar.setAttribute('data-close-button-aria-label',
+              options.closeText);
+        };
         ampSidebar.setAttribute('id', 'sidebar1');
         ampSidebar.setAttribute('layout', 'nodisplay');
         return iframe.addElement(ampSidebar).then(() => {
-          timer = timerFor(iframe.win);
+          timer = Services.timerFor(iframe.win);
           return {iframe, ampSidebar};
         });
+      });
+
+      it('should replace text to screen reader \
+      button in data-close-button-aria-label', () => {
+        return getAmpSidebar({'closeText':
+          'data-close-button-aria-label'}).then(obj => {
+            const sidebarElement = obj.ampSidebar;
+            const closeButton = sidebarElement.lastElementChild;
+            expect(closeButton.textContent)
+                .to.equal('data-close-button-aria-label');
+          });
       });
     }
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
-      platform = platformFor(window);
+      platform = Services.platformFor(window);
     });
 
     afterEach(() => {
@@ -122,6 +136,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(closeButton).to.exist;
         expect(closeButton.tagName).to.equal('BUTTON');
         assertScreenReaderElement(closeButton);
+        expect(closeButton.textContent).to.equal('Close the sidebar');
         expect(impl.close_).to.have.not.been.called;
         closeButton.click();
         expect(impl.close_).to.be.calledOnce;

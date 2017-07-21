@@ -25,11 +25,10 @@ import {
 } from '../../src/friendly-iframe-embed';
 import {Signals} from '../../src/utils/signals';
 import {getStyle} from '../../src/style';
-import {extensionsFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {installServiceInEmbedScope} from '../../src/service';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-import {resourcesForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -43,8 +42,8 @@ describe('friendly-iframe-embed', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
 
-    const extensions = extensionsFor(window);
-    const resources = resourcesForDoc(window.document);
+    const extensions = Services.extensionsFor(window);
+    const resources = Services.resourcesForDoc(window.document);
     extensionsMock = sandbox.mock(extensions);
     resourcesMock = sandbox.mock(resources);
 
@@ -642,6 +641,130 @@ describe('friendly-iframe-embed', () => {
       errorListener();
       return embedPromise.then(() => {
         expect(polls).to.have.length(0);
+      });
+    });
+
+  });
+
+  describe('full overlay mode', () => {
+    const x = 10;
+    const y = 500;
+    const w = 400;
+    const h = 300;
+
+    const winW = 600;
+    const winH = 800;
+
+    const vsyncMock = {
+      measure: fn => fn(),
+    };
+
+    const resourcesMock = {
+      mutateElement: (unusedEl, fn) => {
+        fn();
+        return Promise.resolve();
+      },
+    };
+
+    let win;
+    let iframe;
+    let fie;
+
+    beforeEach(() => {
+      win = {
+        innerWidth: winW,
+        innerHeight: winH,
+      };
+      iframe = document.createElement('iframe');
+
+      sandbox./*OK*/stub(iframe, 'getBoundingClientRect', () => ({
+        right: x + w,
+        left: x,
+        top: y,
+        bottom: y + h,
+        width: w,
+        height: h,
+      }));
+
+      fie = new FriendlyIframeEmbed(iframe, {
+        url: 'https://acme.org/url1',
+        html: '<body></body>',
+      }, Promise.resolve());
+
+      sandbox.stub(fie, 'getVsync', () => vsyncMock);
+      sandbox.stub(fie, 'getResources', () => resourcesMock);
+      sandbox.stub(fie, 'win', win);
+    });
+
+    it('should resize body and fixed container when entering', () => {
+      const bodyElementMock = {style: {}};
+      const fixedContainerMock = {style: {}};
+
+      const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
+
+      sandbox.stub(fie, 'getBodyElement', () => bodyElementMock);
+      sandbox.stub(fie, 'getFixedContainer', () => fixedContainerMock);
+
+      return fie.enterFullOverlayMode().then(() => {
+        expect(bodyElementMock.style.background).to.equal('transparent');
+
+        expect(fixedContainerMock.style.position).to.equal('absolute');
+        expect(fixedContainerMock.style.width).to.equal(`${w}px`);
+        expect(fixedContainerMock.style.height).to.equal(`${h}px`);
+        expect(fixedContainerMock.style.top).to.equal(`${y}px`);
+        expect(fixedContainerMock.style.left).to.equal(`${x}px`);
+        expect(fixedContainerMock.style.right).to.equal(`${winW - x - w}px`);
+        expect(fixedContainerMock.style.bottom).to.equal(`${winH - y - h}px`);
+
+        expect(iframe.style.position).to.equal('fixed');
+        expect(iframe.style.left).to.equal('0px');
+        expect(iframe.style.right).to.equal('0px');
+        expect(iframe.style.top).to.equal('0px');
+        expect(iframe.style.bottom).to.equal('0px');
+        expect(iframe.style.width).to.equal('100vw');
+        expect(iframe.style.height).to.equal('100vh');
+
+        // ensuring that the resource scheduler knows about the iframe change
+        expect(mutateElementSpy)
+            .to.have.been.calledWith(iframe, sinon.match.any);
+      });
+    });
+
+    it('should reset body and fixed container when leaving', () => {
+      const bodyElementMock = {style: {}};
+      const fixedContainerMock = {style: {}};
+
+      const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
+
+      sandbox.stub(fie, 'getBodyElement', () => bodyElementMock);
+      sandbox.stub(fie, 'getFixedContainer', () => fixedContainerMock);
+
+      const enterAndLeave = fie.enterFullOverlayMode()
+          .then(() => fie.leaveFullOverlayMode());
+
+      return enterAndLeave.then(() => {
+        expect(bodyElementMock.style.background).to.be.null;
+
+        expect(fixedContainerMock.style.position).to.be.null;
+        expect(fixedContainerMock.style.width).to.be.null;
+        expect(fixedContainerMock.style.height).to.be.null;
+        expect(fixedContainerMock.style.top).to.be.null;
+        expect(fixedContainerMock.style.left).to.be.null;
+        expect(fixedContainerMock.style.right).to.be.null;
+        expect(fixedContainerMock.style.bottom).to.be.null;
+
+        // checking for empty instead of null as `iframe` is a real element
+        expect(iframe.style.position).to.be.empty;
+        expect(iframe.style.left).to.be.empty;
+        expect(iframe.style.right).to.be.empty;
+        expect(iframe.style.top).to.be.empty;
+        expect(iframe.style.bottom).to.be.empty;
+        expect(iframe.style.width).to.be.empty;
+        expect(iframe.style.height).to.be.empty;
+
+        // ensuring that the resource scheduler knows about the iframe change
+        expect(mutateElementSpy)
+            .to.have.been.calledWith(iframe, sinon.match.any);
       });
     });
   });

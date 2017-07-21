@@ -29,9 +29,6 @@ import {
 import {
   installUserNotificationManager,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
-import {
-  userNotificationManagerFor,
-} from '../../../../src/services';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
@@ -42,8 +39,8 @@ import {
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {map} from '../../../../src/utils/object';
 import {cidServiceForDocForTesting} from
-    '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {urlReplacementsForDoc} from '../../../../src/services';
+    '../../../../src/service/cid-impl';
+import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
@@ -114,13 +111,14 @@ describe('amp-analytics', function() {
       ins = instrumentationServiceForDocForTesting(ampdoc);
       installVariableService(iframe.win);
       installUserNotificationManager(iframe.win);
-      return userNotificationManagerFor(iframe.win).then(manager => {
+      return Services.userNotificationManagerFor(iframe.win).then(manager => {
         uidService = manager;
       });
     });
   });
 
   afterEach(() => {
+    windowApi.document.body.classList.remove('i-amphtml-element');
     sandbox.restore();
   });
 
@@ -134,7 +132,9 @@ describe('amp-analytics', function() {
     for (const k in attrs) {
       el.setAttribute(k, attrs[k]);
     }
+
     windowApi.document.body.appendChild(el);
+
     el.connectedCallback();
     const analytics = new AmpAnalytics(el);
     analytics.createdCallback();
@@ -174,8 +174,8 @@ describe('amp-analytics', function() {
    * inline config and iframePings/optout are not allowed to be used without
    * AMP team's approval.
    *
-   * @param {!JSONObject} config The inline config to update.
-   * @return {!JSONObject}
+   * @param {!JsonObject} config The inline config to update.
+   * @return {!JsonObject}
    */
   function clearVendorOnlyConfig(config) {
     for (const t in config.triggers) {
@@ -213,7 +213,8 @@ describe('amp-analytics', function() {
             const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
             analytics.createdCallback();
             analytics.buildCallback();
-            const urlReplacements = urlReplacementsForDoc(analytics.element);
+            const urlReplacements =
+                Services.urlReplacementsForDoc(analytics.element);
             sandbox.stub(urlReplacements.getVariableSource(), 'get',
                 function(name) {
                   expect(this.replacements_).to.have.property(name);
@@ -361,22 +362,6 @@ describe('amp-analytics', function() {
     });
   });
 
-  it('does not send a hit when eventType is blacklist', function() {
-    const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
-    const addStub = sandbox.stub(tracker, 'add');
-    const analytics = getAnalyticsTag({
-      requests: {foo: 'https://example.com/bar'},
-      triggers: [{on: 'click', selector: '${foo}', request: 'foo'}],
-      vars: {foo: 'bar'},
-    }, {
-      'sandbox': 'true',
-    });
-
-    return waitForNoSendRequest(analytics).then(() => {
-      expect(addStub).to.not.be.called;;
-    });
-  });
-
   it('expands nested requests', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo':
@@ -387,21 +372,6 @@ describe('amp-analytics', function() {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0])
           .to.equal('https://example.com/bar&f1&baz');
-    });
-  });
-
-  it('expand blacklist nested requests', () => {
-    const analytics = getAnalyticsTag({
-      'requests': {'foo':
-        'https://example.com/bar&${clientId}&baz', 'clientId': 'c1'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}],
-    }, {
-      'sandbox': 'true',
-    });
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0])
-          .to.equal('https://example.com/bar&c1&baz');
     });
   });
 
@@ -469,55 +439,6 @@ describe('amp-analytics', function() {
     });
   });
 
-  it('should not fill blacklist variable for scoped analytics', () => {
-    const analytics = getAnalyticsTag({
-      'requests': {'foo': 'https://example.com/cid=${clientId(analytics-abc)}'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}],
-    }, {
-      'sandbox': 'true',
-    });
-
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal(
-          'https://example.com/cid=CLIENT_ID(analytics-abc)');
-    });
-  });
-
-  it('should fill whitelist variable for scoped analytics', () => {
-    const analytics = getAnalyticsTag({
-      'requests': {'foo': 'https://example.com/random=${random}'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}],
-    }, {
-      'sandbox': 'true',
-    });
-
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.match(/random=0.[0-9]/);
-      expect(sendRequestSpy.args[0][0]).to.not.equal(
-          'https://example.com/random=${random}');
-    });
-  });
-
-  it('should fill for multi whitelistd(not) variables', () => {
-    const analytics = getAnalyticsTag({
-      'requests': {'foo':
-          'https://example.com/cid=${clientId(analytics-abc)}random=RANDOM'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}],
-    }, {
-      'sandbox': 'true',
-    });
-
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.match(/random=0.[0-9]/);
-      expect(sendRequestSpy.args[0][0]).to.not.equal(
-          'https://example.com/cid=${clientId}random=RANDOM');
-      expect(sendRequestSpy.args[0][0]).to.includes(
-          'https://example.com/cid=CLIENT_ID(analytics-abc)random=');
-    });
-  });
 
   it('merges requests correctly', function() {
     const analytics = getAnalyticsTag({
@@ -587,28 +508,6 @@ describe('amp-analytics', function() {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
           'https://example.com/test1=x&test2=test2');
-    });
-  });
-
-  it('expand trigger vars and not replace blacklist variables', () => {
-    const analytics = getAnalyticsTag({
-      'requests': {'pageview':
-        'https://example.com/test1=${var1}&CLIENT_ID(analytics-abc)=${var2}'},
-      'triggers': [{
-        'on': 'visible',
-        'request': 'pageview',
-        'vars': {
-          'var1': 'CLIENT_ID(analytics-abc)',
-          'var2': 'test2',
-        },
-      }]}, {
-        'sandbox': 'true',
-      });
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal(
-          'https://example.com/test1=CLIENT_ID(analytics-abc)&' +
-          'CLIENT_ID(analytics-abc)=test2');
     });
   });
 
@@ -776,31 +675,6 @@ describe('amp-analytics', function() {
     });
   });
 
-  it('expands url-replacements vars for scoped analytics', () => {
-    const analytics = getAnalyticsTag({
-      'requests': {
-        'pageview': 'https://example.com/VIEWER&AMP_VERSION&' +
-        'test1=${var1}&test2=${var2}&test3=${var3}&url=AMPDOC_URL'},
-      'triggers': [{
-        'on': 'visible',
-        'request': 'pageview',
-        'vars': {
-          'var1': 'x',
-          'var2': 'AMPDOC_URL',
-          'var3': 'CLIENT_ID',
-        },
-      }]}, {
-        'sandbox': 'true',
-      });
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal(
-          'https://example.com/VIEWER&%24internalRuntimeVersion%24' +
-        '&test1=x&test2=about%3Asrcdoc&test3=CLIENT_ID' +
-        '&url=about%3Asrcdoc');
-    });
-  });
-
   it('expands complex vars', () => {
     const analytics = getAnalyticsTag({
       'requests': {
@@ -812,7 +686,7 @@ describe('amp-analytics', function() {
           'qp_foo': '${queryParam(foo)}',
         },
       }]});
-    const urlReplacements = urlReplacementsForDoc(analytics.element);
+    const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
     sandbox.stub(urlReplacements.getVariableSource(), 'get',
         function(name) {
           return {sync: param => {
@@ -857,23 +731,6 @@ describe('amp-analytics', function() {
     });
   });
 
-  it('replace selector and selectionMethod when in scope', () => {
-    const tracker = ins.ampdocRoot_.getTracker('visible-v3', VisibilityTracker);
-    const addStub = sandbox.stub(tracker, 'add');
-    const analytics = getAnalyticsTag({
-      requests: {foo: 'https://example.com/bar'},
-      triggers: [{on: 'visible-v3', selector: 'amp-iframe', request: 'foo'}],
-    }, {
-      'sandbox': 'true',
-    });
-    return waitForNoSendRequest(analytics).then(() => {
-      expect(addStub).to.be.calledOnce;
-      const config = addStub.args[0][2];
-      expect(config['selector']).to.equal(
-          analytics.element.parentElement.tagName);
-      expect(config['selectionMethod']).to.equal('closest');
-    });
-  });
 
   function selectorExpansionTest(selector) {
     it('expand selector value: ' + selector, () => {
@@ -1031,20 +888,6 @@ describe('amp-analytics', function() {
     });
   });
 
-  it('not fetch remote config for scoped analtycis', () => {
-    const analytics = getAnalyticsTag({
-      'vars': {'title': 'local'},
-      'requests': {'foo': 'https://example.com/${title}'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}],
-    }, {
-      'config': 'config1',
-      'sandbox': 'true',
-    });
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/local');
-    });
-  });
-
   it('fetches and merges remote config with credentials', () => {
     configWithCredentials = true;
     const analytics = getAnalyticsTag({
@@ -1123,27 +966,10 @@ describe('amp-analytics', function() {
       config.triggers.sampled.sampleSpec.sampleOn = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005));
-      return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy).to.be.calledOnce;
-      });
-    });
-
-    it('allow a request through on blacklist url variables', () => {
-      const config = getConfig(1);
-      config.triggers.sampled.sampleSpec.sampleOn = '${clientId}';
-      const analytics = getAnalyticsTag(config, {
-        'sandbox': 'true',
-      });
-
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
-      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
-      sandbox.stub(crypto, 'uniform')
-          .withArgs('0').returns(Promise.resolve(0.005))
-          .withArgs('CLIENT_ID').returns(Promise.resolve(0.5));
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy).to.be.calledOnce;
       });
@@ -1260,7 +1086,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 1});
       return waitForSendRequest(analytics).then(() => {
@@ -1293,7 +1119,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns(null);
 
@@ -1308,7 +1134,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 0});
 
@@ -1323,7 +1149,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: false});
 
@@ -1338,7 +1164,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: null});
 
@@ -1353,7 +1179,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: NaN});
 
@@ -1368,7 +1194,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: undefined});
 
@@ -1394,7 +1220,7 @@ describe('amp-analytics', function() {
       config.enabled = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 1});
       return waitForSendRequest(analytics).then(() => {
@@ -1429,7 +1255,7 @@ describe('amp-analytics', function() {
       config.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1446,7 +1272,7 @@ describe('amp-analytics', function() {
 
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1461,7 +1287,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${foo}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns('page');
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1541,6 +1367,211 @@ describe('amp-analytics', function() {
         throw new Error('Must never be here');
       }, () => {
         expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
+  });
+
+  describe('Sandbox AMP Analytics Element', () => {
+
+    beforeEach(() => {
+      // Unfortunately need to fake sandbox analytics element's parent
+      // to an AMP element
+      windowApi.document.body.classList.add('i-amphtml-element');
+    });
+
+    afterEach(() => {
+      windowApi.document.body.classList.remove('i-amphtml-element');
+    });
+
+    it('should not fetch remote config', () => {
+      const analytics = getAnalyticsTag({
+        'vars': {'title': 'local'},
+        'requests': {'foo': 'https://example.com/${title}'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {
+        'config': 'config1',
+        'sandbox': 'true',
+      }, true);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/local');
+      });
+    });
+
+    it('should not add listener when eventType is not whitelist', function() {
+      // Right now we only whitelist VISIBLE & HIDDEN
+      const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
+      const addStub = sandbox.stub(tracker, 'add');
+      const analytics = getAnalyticsTag({
+        requests: {foo: 'https://example.com/bar'},
+        triggers: [{on: 'click', request: 'foo'}],
+      }, {
+        'sandbox': 'true',
+      });
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(addStub).to.not.be.called;;
+      });
+    });
+
+    it('replace selector and selectionMethod when in scope', () => {
+      const tracker = ins.ampdocRoot_.getTracker('visible', VisibilityTracker);
+      const addStub = sandbox.stub(tracker, 'add');
+      const analytics = getAnalyticsTag({
+        requests: {foo: 'https://example.com/bar'},
+        triggers: [{on: 'visible', selector: 'amp-iframe', request: 'foo'}],
+      }, {
+        'sandbox': 'true',
+      }, true);
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(addStub).to.be.calledOnce;
+        const config = addStub.args[0][2];
+        expect(config['selector']).to.equal(
+            analytics.element.parentElement.tagName);
+        expect(config['selectionMethod']).to.equal('closest');
+      });
+    });
+
+    it('expand nested requests with vendor provided value', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo':
+          'https://example.com/bar&${clientId}&baz', 'clientId': 'c1'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {
+        'sandbox': 'true',
+      }, true);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0])
+            .to.equal('https://example.com/bar&c1&baz');
+      });
+    });
+
+    it('expand vendor vars but not replace non whitelist variables', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'pageview':
+          'https://example.com/test1=${var1}&CLIENT_ID(analytics-abc)=${var2}'},
+        'triggers': [{
+          'on': 'visible',
+          'request': 'pageview',
+          'vars': {
+            'var1': 'CLIENT_ID(analytics-abc)',
+            'var2': 'test2',
+          },
+        }]}, {
+          'sandbox': 'true',
+        }, true);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/test1=CLIENT_ID(analytics-abc)&' +
+            'CLIENT_ID(analytics-abc)=test2');
+      });
+    });
+
+    it('should not replace non whitelist variable', () => {
+      const analytics = getAnalyticsTag({
+        'requests':
+            {'foo': 'https://example.com/cid=${clientId(analytics-abc)}'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {
+        'sandbox': 'true',
+      }, true);
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/cid=CLIENT_ID(analytics-abc)');
+      });
+    });
+
+    it('should replace whitelist variable', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/random=${random}'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {
+        'sandbox': 'true',
+      }, true);
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.match(/random=0.[0-9]/);
+        expect(sendRequestSpy.args[0][0]).to.not.equal(
+            'https://example.com/random=${random}');
+      });
+    });
+
+    it('should replace for multi whitelisted(or not) variables', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo':
+            'https://example.com/cid=${clientId(analytics-abc)}random=RANDOM'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {
+        'sandbox': 'true',
+      }, true);
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.match(/random=0.[0-9]/);
+        expect(sendRequestSpy.args[0][0]).to.not.equal(
+            'https://example.com/cid=${clientId}random=RANDOM');
+        expect(sendRequestSpy.args[0][0]).to.includes(
+            'https://example.com/cid=CLIENT_ID(analytics-abc)random=');
+      });
+    });
+
+    it('expands url-replacements vars', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {
+          'pageview': 'https://example.com/VIEWER&AMP_VERSION&' +
+          'test1=${var1}&test2=${var2}&test3=${var3}&url=AMPDOC_URL'},
+        'triggers': [{
+          'on': 'visible',
+          'request': 'pageview',
+          'vars': {
+            'var1': 'x',
+            'var2': 'AMPDOC_URL',
+            'var3': 'CLIENT_ID',
+          },
+        }]}, {
+          'sandbox': 'true',
+        }, true);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/VIEWER&%24internalRuntimeVersion%24' +
+          '&test1=x&test2=about%3Asrcdoc&test3=CLIENT_ID' +
+          '&url=about%3Asrcdoc');
+      });
+    });
+
+    it('allow a request sample through on non whitelist url variables', () => {
+      const config = {
+        'requests': {
+          'pageview1': '/test1=${requestCount}',
+        },
+        'triggers': {
+          'sampled': {
+            'on': 'visible',
+            'request': 'pageview1',
+            'sampleSpec': {
+              'sampleOn': '${requestCount}',
+              'threshold': 1,
+            },
+          },
+        },
+      };
+      config.triggers.sampled.sampleSpec.sampleOn = '${clientId}';
+      const analytics = getAnalyticsTag(config, {
+        'sandbox': 'true',
+      }, true);
+
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
+      sandbox.stub(crypto, 'uniform')
+          .withArgs('0').returns(Promise.resolve(0.005))
+          .withArgs('CLIENT_ID').returns(Promise.resolve(0.5));
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.be.calledOnce;
       });
     });
   });

@@ -23,7 +23,7 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-video';
@@ -115,7 +115,7 @@ class AmpVideo extends AMP.BaseElement {
     this.element.appendChild(this.video_);
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
     /** @override */
@@ -181,13 +181,16 @@ class AmpVideo extends AMP.BaseElement {
      */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
-    this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], video);
+    this.forwardEvents([VideoEvents.PLAYING, VideoEvents.PAUSE], video);
     listen(video, 'volumechange', () => {
       if (this.muted_ != this.video_.muted) {
         this.muted_ = this.video_.muted;
         const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
         this.element.dispatchCustomEvent(evt);
       }
+    });
+    listen(video, 'ended', () => {
+      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
     });
   }
 
@@ -269,6 +272,28 @@ class AmpVideo extends AMP.BaseElement {
      */
   hideControls() {
     this.video_.controls = false;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    return this.video_.currentTime;
+  }
+
+  /** @override */
+  getDuration() {
+    return this.video_.duration;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // TODO(cvializ): remove this because it can be inferred by other events
+    const played = this.video_.played;
+    const length = played.length;
+    const ranges = [];
+    for (let i = 0; i < length; i++) {
+      ranges.push([played.start(i), played.end(i)]);
+    }
+    return ranges;
   }
 }
 

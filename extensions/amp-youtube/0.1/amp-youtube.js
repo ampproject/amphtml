@@ -17,7 +17,7 @@
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {
@@ -28,7 +28,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {isObject} from '../../../src/types';
 import {dict} from '../../../src/utils/object';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {startsWith} from '../../../src/string';
 
 /**
@@ -139,7 +139,7 @@ class AmpYoutube extends AMP.BaseElement {
     }
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @return {string} */
@@ -287,26 +287,30 @@ class AmpYoutube extends AMP.BaseElement {
         event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!event.data || !(isObject(event.data) || startsWith(event.data, '{'))) {
+    if (!getData(event) || !(isObject(getData(event))
+        || startsWith(/** @type {string} */ (getData(event)), '{'))) {
       return;  // Doesn't look like JSON.
     }
-    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
+    /** @const {?JsonObject} */
+    const data = /** @type {?JsonObject} */ (isObject(getData(event))
+        ? getData(event)
+        : tryParseJson(getData(event)));
     if (data === undefined) {
       return; // We only process valid JSON.
     }
-    if (data.event == 'infoDelivery' &&
-        data.info && data.info.playerState !== undefined) {
-      this.playerState_ = data.info.playerState;
+    if (data['event'] == 'infoDelivery' &&
+        data['info'] && data['info']['playerState'] !== undefined) {
+      this.playerState_ = data['info']['playerState'];
       if (this.playerState_ == PlayerStates.PAUSED ||
           this.playerState_ == PlayerStates.ENDED) {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
       } else if (this.playerState_ == PlayerStates.PLAYING) {
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       }
-    } else if (data.event == 'infoDelivery' &&
-        data.info && data.info.muted !== undefined) {
-      if (this.muted_ != data.info.muted) {
-        this.muted_ = data.info.muted;
+    } else if (data['event'] == 'infoDelivery' &&
+        data['info'] && data['info']['muted'] !== undefined) {
+      if (this.muted_ != data['info']['muted']) {
+        this.muted_ = data['info']['muted'];
         const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
         this.element.dispatchCustomEvent(evt);
       }
@@ -427,6 +431,24 @@ class AmpYoutube extends AMP.BaseElement {
    */
   hideControls() {
     // Not supported.
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 };
 

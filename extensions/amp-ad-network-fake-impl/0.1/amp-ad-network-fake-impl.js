@@ -35,6 +35,13 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   }
 
   /** @override */
+  buildCallback() {
+    user().assert(this.element.hasAttribute('src'),
+        'Attribute src required for <amp-ad type="fake">: %s', this.element);
+    super.buildCallback();
+  }
+
+  /** @override */
   isValidElement() {
     // Note: true is the default, so this method is not strictly needed here.
     // But a network implementation might choose to implement a real check

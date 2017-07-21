@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+# `amp-access-laterpay`
+
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
@@ -32,12 +34,15 @@ limitations under the License.
       <div>
         <code>&lt;script async custom-element="amp-access-laterpay" src="https://cdn.ampproject.org/v0/amp-access-laterpay-0.1.js">&lt;/script></code>
       </div>
-
     </td>
+  </tr>
+  <tr>
+    <td><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-access-laterpay/">annotated amp-access-laterpay</a> example.</td>
   </tr>
 </table>
 
-
+[TOC]
 
 ## Behavior
 
@@ -142,32 +147,35 @@ The structure created for the dialog looks as follows:
 
 ```html
 <div id="amp-access-laterpay-dialog" class="amp-access-laterpay">
-  <p class="amp-access-laterpay-header">
-    Optional, appears if header locale message is defined.
-  </p>
-  <ul>
-    <li>
-      <label>
-        <input name="purchaseOption" type="radio" />
-        <div class="amp-access-laterpay-metadata">
-          <span class="amp-access-laterpay-title">Purchase option title</span>
-          <p class="amp-access-laterpay-description">Purchase option description</p>
-        </div>
-      </label>
-      <p class="amp-access-laterpay-price-container">
-        <span class="amp-access-laterpay-price">0.15</span>
-        <sup class="amp-access-laterpay-currency">USD</sup>
-      </p>
-    </li>
-    <!-- ... more list items for other purchase options ... -->
-  </ul>
-  <button class="amp-access-laterpay-purchase-button">Buy Now</button>
-  <p class="amp-access-laterpay-already-purchased-container">
-    <a href="...">I already bought this</a>
-  </p>
-  <p class="amp-access-laterpay-footer">
-    Optional, appears if footer locale message is defined.
-  </p>
+  <div class="amp-access-laterpay-container">
+    <p class="amp-access-laterpay-header">
+      Optional, appears if header locale message is defined.
+    </p>
+    <ul>
+      <li>
+        <label>
+          <input name="purchaseOption" type="radio" />
+          <div class="amp-access-laterpay-metadata">
+            <span class="amp-access-laterpay-title">Purchase option title</span>
+            <p class="amp-access-laterpay-description">Purchase option description</p>
+          </div>
+        </label>
+        <p class="amp-access-laterpay-price-container">
+          <span class="amp-access-laterpay-price">0.15</span>
+          <sup class="amp-access-laterpay-currency">USD</sup>
+        </p>
+      </li>
+      <!-- ... more list items for other purchase options ... -->
+    </ul>
+    <button class="amp-access-laterpay-purchase-button">Buy Now</button>
+    <p class="amp-access-laterpay-already-purchased-container">
+      <a href="...">I already bought this</a>
+    </p>
+    <p class="amp-access-laterpay-footer">
+      Optional, appears if footer locale message is defined.
+    </p>
+  </div>
+  <p class="amp-access-laterpay-badge">Powered by <a href="https://laterpay.net" target="_blank">LaterPay</a></p>
 </div>
 ```
 

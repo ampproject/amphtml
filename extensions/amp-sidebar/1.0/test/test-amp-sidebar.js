@@ -18,8 +18,7 @@
  import {KeyCodes} from '../../../../src/utils/key-codes';
  import {adopt} from '../../../../src/runtime';
  import {createIframePromise} from '../../../../testing/iframe';
- import {platformFor} from '../../../../src/services';
- import {timerFor} from '../../../../src/services';
+ import {Services} from '../../../../src/services';
  import {assertScreenReaderElement} from '../../../../testing/test-helper';
  import {toggleExperiment} from '../../../../src/experiments';
  import * as sinon from 'sinon';
@@ -56,24 +55,90 @@
          const anchor = iframe.doc.createElement('a');
          anchor.href = '#section1';
          ampSidebar.appendChild(anchor);
+         if (options.toolbars) {
+           // Stub our sidebar operations, doing this here as it will
+           // Ease testing our media queries
+           const impl = ampSidebar.implementation_;
+           sandbox.stub(impl.vsync_,
+               'mutate', callback => {
+                 callback();
+               });
+           sandbox.stub(impl.vsync_,
+               'mutatePromise', callback => {
+                 callback();
+                 return Promise.resolve();
+               });
+           // Create our individual toolbars
+           options.toolbars.forEach(toolbarObj => {
+             const navToolbar = iframe.doc.createElement('nav');
+
+             //Create/Set toolbar-target
+             const toolbarTarget = iframe.doc.createElement('div');
+             if (toolbarObj.toolbarTarget) {
+               toolbarTarget.setAttribute('id',
+                   toolbarObj.toolbarTarget);
+               navToolbar.setAttribute('toolbar-target',
+                   toolbarObj.toolbarTarget);
+             } else {
+               toolbarTarget.setAttribute('id', 'toolbar-target');
+               navToolbar.setAttribute('toolbar-target', 'toolbar-target');
+             }
+             iframe.win.document.body.appendChild(toolbarTarget);
+
+             // Set the toolbar media
+             if (toolbarObj.media) {
+               navToolbar.setAttribute('toolbar', toolbarObj.media);
+             } else {
+               navToolbar.setAttribute('toolbar', '(min-width: 768px)');
+             }
+             const toolbarList = iframe.doc.createElement('ul');
+             for (let i = 0; i < 3; i++) {
+               const li = iframe.doc.createElement('li');
+               li.innerHTML = 'Toolbar item ' + i;
+               toolbarList.appendChild(li);
+             }
+             navToolbar.appendChild(toolbarList);
+             ampSidebar.appendChild(navToolbar);
+           });
+         }
          if (options.side) {
            ampSidebar.setAttribute('side', options.side);
          }
          if (options.open) {
            ampSidebar.setAttribute('open', '');
          }
+         if (options.closeText) {
+           ampSidebar.setAttribute('data-close-button-aria-label',
+               options.closeText);
+         };
          ampSidebar.setAttribute('id', 'sidebar1');
          ampSidebar.setAttribute('layout', 'nodisplay');
          return iframe.addElement(ampSidebar).then(() => {
-           timer = timerFor(iframe.win);
+           timer = Services.timerFor(iframe.win);
+           if (options.toolbars) {
+             sandbox.stub(timer, 'delay', function(callback) {
+               callback();
+             });
+           }
            return {iframe, ampSidebar};
          });
+       });
+
+       it('should replace text to screen reader \
+       button in data-close-button-aria-label', () => {
+         return getAmpSidebar({'closeText':
+           'data-close-button-aria-label'}).then(obj => {
+             const sidebarElement = obj.ampSidebar;
+             const closeButton = sidebarElement.lastElementChild;
+             expect(closeButton.textContent)
+                 .to.equal('data-close-button-aria-label');
+           });
        });
      }
 
      beforeEach(() => {
        sandbox = sinon.sandbox.create();
-       platform = platformFor(window);
+       platform = Services.platformFor(window);
        toggleExperiment(window, 'amp-sidebar 1.0', true);
      });
 
@@ -124,6 +189,7 @@
          expect(closeButton).to.exist;
          expect(closeButton.tagName).to.equal('BUTTON');
          assertScreenReaderElement(closeButton);
+         expect(closeButton.textContent).to.equal('Close the sidebar');
          expect(impl.close_).to.have.not.been.called;
          closeButton.click();
          expect(impl.close_).to.be.calledOnce;
@@ -540,6 +606,45 @@
          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
          expect(sidebarElement.style.display).to.equal('');
          expect(impl.schedulePause).to.have.not.been.called;
+       });
+     });
+
+     // Tests for amp-sidebar 1.0
+     it('should not create toolbars without <nav toolbar />', () => {
+       return getAmpSidebar().then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         const headerElements = sidebarElement.ownerDocument
+               .getElementsByTagName('header');
+         const toolbarElements = sidebarElement.ownerDocument
+               .querySelectorAll('[toolbar]');
+         expect(headerElements.length).to.be.equal(0);
+         expect(toolbarElements.length).to.be.equal(0);
+         expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(0);
+       });
+     });
+
+     it('should create a toolbar element within the toolbar-target', () => {
+       return getAmpSidebar({
+         toolbars: [{}],
+       }).then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         expect(sidebarElement.implementation_.toolbars_.length)
+             .to.be.equal(1);
+       });
+     });
+
+     it('should create multiple toolbar elements, \
+     within their respective containers', () => {
+       return getAmpSidebar({
+         toolbars: [{},
+           {
+             media: '(min-width: 1024px)',
+           },
+         ],
+       }).then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         expect(sidebarElement.implementation_.toolbars_.length)
+             .to.be.equal(2);
        });
      });
    });

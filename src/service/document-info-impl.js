@@ -109,7 +109,7 @@ function getPageViewId(win) {
  * Returns a map object of link tag relations in document head.
  * Key is the link rel, value is a list of corresponding hrefs.
  * @param {!Document} doc
- * @return {!Object<string, string|!Array<string>>}
+ * @return {!JsonObject<string, string|!Array<string>>}
  */
 function getLinkRels(doc) {
   const linkRels = map();

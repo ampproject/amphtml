@@ -16,15 +16,12 @@
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {closestByTag, tryFocus} from '../../../src/dom';
+import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
 import {dev} from '../../../src/log';
-import {historyForDoc} from '../../../src/services';
-import {platformFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {setStyles, toggle} from '../../../src/style';
 import {removeFragment, parseUrl} from '../../../src/url';
-import {vsyncFor} from '../../../src/services';
-import {timerFor} from '../../../src/services';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;
@@ -41,7 +38,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_ = null;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private {?Element} */
     this.maskElement_ = null;
@@ -55,7 +52,7 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?string} */
     this.side_ = null;
 
-    const platform = platformFor(this.win);
+    const platform = Services.platformFor(this.win);
 
     /** @private @const {boolean} */
     this.isIos_ = platform.isIos();
@@ -70,7 +67,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.bottomBarCompensated_ = false;
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(this.win);
+    this.timer_ = Services.timerFor(this.win);
 
     /** @private {number|string|null} */
     this.openOrCloseTimeOut_ = null;
@@ -90,11 +87,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
 
     if (this.side_ != 'left' && this.side_ != 'right') {
-      const pageDir =
-          this.document_.body.getAttribute('dir') ||
-          this.documentElement_.getAttribute('dir') ||
-          'ltr';
-      this.side_ = (pageDir == 'rtl') ? 'right' : 'left';
+      this.side_ = isRTL(this.document_) ? 'right' : 'left';
       this.element.setAttribute('side', this.side_);
     }
 
@@ -121,10 +114,14 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     });
 
+    // Replacement label for invisible close button set value in amp sidebar
+    const ariaLabel = this.element.getAttribute('data-close-button-aria-label')
+    || 'Close the sidebar';
+
     // Invisible close button at the end of sidebar for screen-readers.
     const screenReaderCloseButton = this.document_.createElement('button');
-    // TODO(aghassemi, #4146) i18n
-    screenReaderCloseButton.textContent = 'Close the sidebar';
+
+    screenReaderCloseButton.textContent = ariaLabel;
     screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
@@ -136,7 +133,6 @@ export class AmpSidebar extends AMP.BaseElement {
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
-
     this.element.addEventListener('click', e => {
       const target = closestByTag(dev().assertElement(e.target), 'A');
       if (target && target.href) {
@@ -196,13 +192,13 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.enterOverlayMode();
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
-      this.openMask_();
       if (this.isIos_ && this.isSafari_) {
         this.compensateIosBottombar_();
       }
       this.element./*OK*/scrollTop = 1;
       // Start animation in a separate vsync due to display:block; set above.
       this.vsync_.mutate(() => {
+        this.openMask_();
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
         if (this.openOrCloseTimeOut_) {
@@ -322,7 +318,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private @return {!../../../src/service/history-impl.History}
    */
   getHistory_() {
-    return historyForDoc(this.getAmpDoc());
+    return Services.historyForDoc(this.getAmpDoc());
   }
 }
 

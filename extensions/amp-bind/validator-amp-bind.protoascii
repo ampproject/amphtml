@@ -20,6 +20,10 @@ tags: {  # amp-bind
     name: "amp-bind"
     allowed_versions: "0.1"
     allowed_versions: "latest"
+    # amp-bind has no associated tag which indicates usage of the extension.
+    # TODO(gregable): Implement a mechanism to associate attributes with
+    # extension usage and then set this to DEPRECATED_WARNING or ERROR.
+    requires_usage: NONE
   }
   attr_lists: "common-extension-attrs"
 }
@@ -34,7 +38,7 @@ tags: {  # <amp-state> (json)
     name: "type"
     mandatory: true
     value_casei: "application/json"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   cdata: {
     blacklisted_cdata_regex: {

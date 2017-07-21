@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/** @externs */
+
 // HACK. Define application types used in default AMP externs
 // that are not in the 3p code.
 /** @constructor */
@@ -290,6 +292,14 @@ window._inmobi;
 _inmobi.getNewAd;
 data.siteid;
 data.slotid;
+
+// innity.js
+var innity_adZone;
+var innityAMPZone;
+var innityAMPTag;
+data.pub;
+data.zone;
+data.channel;
 
 // ix.js
 data.ixId;

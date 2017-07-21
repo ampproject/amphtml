@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-import {viewerPromiseForDoc} from '../../src/services';
-import {documentStateFor} from '../../src/service/document-state';
-import {resourcesForDoc} from '../../src/services';
+import {Services} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
 import {getVendorJsPropertyName} from '../../src/style';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 import {createCustomEvent} from '../../src/event-helper';
 
-const config = describe.configure();
-config.skipEdge();
-config.skipIos();
-config.retryOnSaucelabs();
-config.run('Viewer Visibility State', () => {
+describe.configure().skipSauceLabs().run('Viewer Visibility State', () => {
 
   function noop() {}
 
@@ -95,12 +89,12 @@ config.run('Viewer Visibility State', () => {
       notifyPass = noop;
       shouldPass = false;
 
-      return viewerPromiseForDoc(win.document).then(v => {
+      return Services.viewerPromiseForDoc(win.document).then(v => {
         viewer = v;
-        const docState = documentStateFor(win);
+        const docState = Services.documentStateFor(win);
         docHidden = sandbox.stub(docState, 'isHidden').returns(false);
 
-        resources = resourcesForDoc(win.document);
+        resources = Services.resourcesForDoc(win.document);
         doPass_ = resources.doPass;
         sandbox.stub(resources, 'doPass', doPass);
         unselect = sandbox.stub(resources, 'unselectText');

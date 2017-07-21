@@ -18,7 +18,6 @@ import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
 
-
 /** @const Time when this JS loaded.  */
 const start = Date.now();
 
@@ -203,13 +202,14 @@ export class Log {
 
   /**
    * Reports an error message.
-   * @param {string} unusedTag
+   * @param {string} tag
    * @param {...*} var_args
    * @return {!Error|undefined}
    */
-  error(unusedTag, var_args) {
+  error(tag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
+      error.name = tag || error.name;
       // reportError is installed globally per window in the entry point.
       self.reportError(error);
     }
@@ -393,7 +393,6 @@ export class Log {
     }
   }
 }
-
 
 /**
  * @param {string|!Element} val

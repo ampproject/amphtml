@@ -19,13 +19,15 @@ import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {closestByTag, tryFocus} from '../../../src/dom';
-import {historyForDoc} from '../../../src/services';
-import {platformFor} from '../../../src/services';
+import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
+import {Services} from '../../../src/services';
 import {setStyles, toggle} from '../../../src/style';
 import {removeFragment, parseUrl} from '../../../src/url';
-import {vsyncFor} from '../../../src/services';
-import {timerFor} from '../../../src/services';
+import {toArray} from '../../../src/types';
+import {Toolbar} from './toolbar';
+
+/** @const */
+const TAG = 'amp-sidebar 1.0';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;
@@ -42,7 +44,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_ = null;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private {?Element} */
     this.maskElement_ = null;
@@ -56,7 +58,10 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?string} */
     this.side_ = null;
 
-    const platform = platformFor(this.win);
+    /** @private {Array} */
+    this.toolbars_ = [];
+
+    const platform = Services.platformFor(this.win);
 
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
@@ -68,7 +73,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.bottomBarCompensated_ = false;
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(this.win);
+    this.timer_ = Services.timerFor(this.win);
 
     /** @private {number|string|null} */
     this.openOrCloseTimeOut_ = null;
@@ -91,13 +96,22 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
 
     if (this.side_ != 'left' && this.side_ != 'right') {
-      const pageDir =
-          this.document_.body.getAttribute('dir') ||
-          this.documentElement_.getAttribute('dir') ||
-          'ltr';
-      this.side_ = (pageDir == 'rtl') ? 'right' : 'left';
+      this.side_ = isRTL(this.document_) ? 'right' : 'left';
       this.element.setAttribute('side', this.side_);
     }
+
+    const ampdoc = this.getAmpDoc();
+    // Get the toolbar attribute from the child navs
+    const toolbarElements =
+      toArray(this.element.querySelectorAll('nav[toolbar]'));
+    toolbarElements.forEach(toolbarElement => {
+      try {
+        this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
+          ampdoc));
+      } catch (e) {
+        user().error(TAG, 'Failed to instantiate toolbar', e);
+      }
+    });
 
     if (this.isIosSafari_) {
       this.fixIosElasticScrollLeak_();
@@ -122,10 +136,14 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     });
 
+    // Replacement label for invisible close button set value in amp sidebar
+    const ariaLabel = this.element.getAttribute('data-close-button-aria-label')
+    || 'Close the sidebar';
+
     // Invisible close button at the end of sidebar for screen-readers.
     const screenReaderCloseButton = this.document_.createElement('button');
-    // TODO(aghassemi, #4146) i18n
-    screenReaderCloseButton.textContent = 'Close the sidebar';
+
+    screenReaderCloseButton.textContent = ariaLabel;
     screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
@@ -159,6 +177,27 @@ export class AmpSidebar extends AMP.BaseElement {
     }, true);
   }
 
+  /** @override */
+  onLayoutMeasure() {
+    // Check our toolbars for changes
+    this.toolbars_.forEach(toolbar => {
+      toolbar.onLayoutChange(() => this.onToolbarOpen_());
+    });
+  }
+
+  /** @override */
+  activate() {
+    this.open_();
+  }
+
+  /**
+   * Function called whenever a tollbar is opened.
+   * @private
+   */
+  onToolbarOpen_() {
+    this.close_();
+  }
+
   /**
    * Returns true if the sidebar is opened.
    * @returns {boolean}
@@ -167,12 +206,6 @@ export class AmpSidebar extends AMP.BaseElement {
   isOpen_() {
     return this.element.hasAttribute('open');
   }
-
-  /** @override */
-  activate() {
-    this.open_();
-  }
-
 
   /**
    * Toggles the open/close state of the sidebar.
@@ -197,13 +230,13 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.enterOverlayMode();
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
-      this.openMask_();
       if (this.isIosSafari_) {
         this.compensateIosBottombar_();
       }
       this.element./*OK*/scrollTop = 1;
       // Start animation in a separate vsync due to display:block; set above.
       this.vsync_.mutate(() => {
+        this.openMask_();
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
         if (this.openOrCloseTimeOut_) {
@@ -323,7 +356,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private @return {!../../../src/service/history-impl.History}
    */
   getHistory_() {
-    return historyForDoc(this.getAmpDoc());
+    return Services.historyForDoc(this.getAmpDoc());
   }
 }
 

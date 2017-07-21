@@ -15,10 +15,10 @@
  */
 
 import {ActionTrust} from '../../../src/action-trust';
+import {FormEvents} from './form-events';
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
-import {documentInfoForDoc} from '../../../src/services';
 import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {iterateCursor} from '../../../src/dom';
 import {formOrNullForElement, setFormForElement} from '../../../src/form';
@@ -28,13 +28,11 @@ import {
   addParamsToUrl,
   SOURCE_ORIGIN_PARAM,
   isProxyOrigin,
-  parseUrl,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {xhrFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {toArray} from '../../../src/types';
-import {templatesFor} from '../../../src/services';
 import {
   removeElement,
   childElementByAttr,
@@ -42,11 +40,6 @@ import {
 } from '../../../src/dom';
 import {installStyles} from '../../../src/style-installer';
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {vsyncFor} from '../../../src/services';
-import {actionServiceForDoc} from '../../../src/services';
-import {timerFor} from '../../../src/services';
-import {urlReplacementsForDoc} from '../../../src/services';
-import {resourcesForDoc} from '../../../src/services';
 import {
   getFormValidator,
   isCheckValiditySupported,
@@ -56,7 +49,7 @@ import {
   getFormVerifier,
 } from './form-verifiers';
 import {deepMerge} from '../../../src/utils/object';
-
+import {AmpEvents} from '../../../src/amp-events';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -117,10 +110,10 @@ export class AmpForm {
     this.win_ = element.ownerDocument.defaultView;
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(this.win_);
+    this.timer_ = Services.timerFor(this.win_);
 
     /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacement_ = urlReplacementsForDoc(element);
+    this.urlReplacement_ = Services.urlReplacementsForDoc(element);
 
     /** @private {?Promise} */
     this.dependenciesPromise_ = null;
@@ -129,19 +122,19 @@ export class AmpForm {
     this.form_ = element;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.win_);
+    this.vsync_ = Services.vsyncFor(this.win_);
 
     /** @const @private {!../../../src/service/template-impl.Templates} */
-    this.templates_ = templatesFor(this.win_);
+    this.templates_ = Services.templatesFor(this.win_);
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
-    this.xhr_ = xhrFor(this.win_);
+    this.xhr_ = Services.xhrFor(this.win_);
 
     /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = actionServiceForDoc(this.form_);
+    this.actions_ = Services.actionServiceForDoc(this.form_);
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
-    this.resources_ = resourcesForDoc(this.form_);
+    this.resources_ = Services.resourcesForDoc(this.form_);
 
     /** @const @private {string} */
     this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();
@@ -193,8 +186,9 @@ export class AmpForm {
     this.verifier_ = getFormVerifier(
         this.form_, () => this.handleXhrVerify_());
 
+    // TODO(choumx, #9699): HIGH.
     this.actions_.installActionHandler(
-        this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
+        this.form_, this.actionHandler_.bind(this), ActionTrust.MEDIUM);
     this.installEventHandlers_();
 
     /** @private {?Promise} */
@@ -350,7 +344,7 @@ export class AmpForm {
       event.preventDefault();
     }
     // Submits caused by user input have high trust.
-    this.submit_(ActionTrust.HIGH);
+    this.submit_(ActionTrust.MEDIUM); // TODO(choumx, #9699): HIGH.
   }
 
   /**
@@ -375,33 +369,8 @@ export class AmpForm {
    * @private
    */
   getVarSubsFields_() {
-    // Only allow variable substitutions for inputs if the form action origin
-    // is the canonical origin.
-    // TODO(mkhatib, #7168): Consider relaxing this.
-    if (this.isSubmittingToCanonical_()) {
-      // Fields that support var substitutions.
-      return this.form_.querySelectorAll('[type="hidden"][data-amp-replace]');
-    } else {
-      user().warn(TAG, 'Variable substitutions disabled for non-canonical ' +
-          'origin submit action: %s', this.form_);
-      return [];
-    }
-  }
-
-  /**
-   * Checks whether the submissions are going to go through to the canonical origin
-   * or not.
-   * @private
-   */
-  isSubmittingToCanonical_() {
-    if (this.isCanonicalAction_ !== undefined) {
-      return this.isCanonicalAction_;
-    }
-
-    const docInfo = documentInfoForDoc(this.form_);
-    const canonicalOrigin = parseUrl(docInfo.canonicalUrl).origin;
-    const url = this.xhrAction_ || this.form_.getAttribute('action');
-    return this.isCanonicalAction_ = parseUrl(url).origin == canonicalOrigin;
+    // Fields that support var substitutions.
+    return this.form_.querySelectorAll('[type="hidden"][data-amp-replace]');
   }
 
   /**
@@ -728,12 +697,12 @@ export class AmpForm {
               rendered.id = messageId;
               rendered.setAttribute('i-amphtml-rendered', '');
               container.appendChild(rendered);
-              const templatedEvent = createCustomEvent(
+              const renderedEvent = createCustomEvent(
                   this.win_,
-                  'amp:template-rendered',
+                  AmpEvents.TEMPLATE_RENDERED,
                   /* detail */ null,
                   {bubbles: true});
-              container.dispatchEvent(templatedEvent);
+              container.dispatchEvent(renderedEvent);
             });
       } else {
         // TODO(vializ): This is to let AMP know that the AMP elements inside
@@ -946,7 +915,7 @@ export class AmpFormService {
       this.whenInitialized_.then(() => {
         const win = ampdoc.win;
         const event = createCustomEvent(
-            win, 'amp:form-service:initialize', null, {bubbles: true});
+            win, FormEvents.SERVICE_INIT, null, {bubbles: true});
         win.dispatchEvent(event);
       });
     }
@@ -1020,7 +989,7 @@ export class AmpFormService {
    * @private
    */
   installGlobalEventListener_(doc) {
-    doc.addEventListener('amp:dom-update', () => {
+    doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.installSubmissionHandlers_(doc.querySelectorAll('form'));
     });
   }

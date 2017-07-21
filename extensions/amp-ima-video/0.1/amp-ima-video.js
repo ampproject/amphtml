@@ -26,14 +26,14 @@ import {
   toArray,
 } from '../../../src/types';
 import {
+  getData,
   listen,
 } from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {removeElement} from '../../../src/dom';
-import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 /** @const */
 const TAG = 'amp-ima-video';
@@ -140,7 +140,7 @@ class AmpImaVideo extends AMP.BaseElement {
     this.element.appendChild(iframe);
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.win.document).register(this);
+    Services.videoManagerForDoc(this.win.document).register(this);
 
     return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
   }
@@ -200,21 +200,19 @@ class AmpImaVideo extends AMP.BaseElement {
     if (event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!event.data ||
-        !(isObject(event.data) || startsWith(event.data, '{'))) {
-      return;  // Doesn't look like JSON.
-    }
+    const eventData = getData(event);
 
-    if (isObject(event.data)) {
-      if (event.data.event == VideoEvents.LOAD ||
-          event.data.event == VideoEvents.PLAY ||
-          event.data.event == VideoEvents.PAUSE ||
-          event.data.event == VideoEvents.MUTED ||
-          event.data.event == VideoEvents.UNMUTED) {
-        if (event.data.event == VideoEvents.LOAD) {
+    if (isObject(eventData)) {
+      const videoEvent = eventData['event'];
+      if (videoEvent == VideoEvents.LOAD ||
+          videoEvent == VideoEvents.PLAYING ||
+          videoEvent == VideoEvents.PAUSE ||
+          videoEvent == VideoEvents.MUTED ||
+          videoEvent == VideoEvents.UNMUTED) {
+        if (videoEvent == VideoEvents.LOAD) {
           this.playerReadyResolver_(this.iframe_);
         }
-        this.element.dispatchCustomEvent(event.data.event);
+        this.element.dispatchCustomEvent(videoEvent);
       }
     }
   }
@@ -273,6 +271,24 @@ class AmpImaVideo extends AMP.BaseElement {
    */
   hideControls() {
     // Not supported.
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 };
 

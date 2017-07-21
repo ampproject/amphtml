@@ -32,7 +32,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {isObject} from '../../../src/types';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {startsWith} from '../../../src/string';
 
 export class AmpImgur extends AMP.BaseElement {
@@ -72,14 +72,14 @@ export class AmpImgur extends AMP.BaseElement {
     this.unlistenMessage_ = listen(
         this.win,
         'message',
-        this.hadleImgurMessages_.bind(this)
+        this.handleImgurMessages_.bind(this)
     );
 
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
 
-    iframe.src = 'https://imgur.com/a/' +
+    iframe.src = 'https://imgur.com/' +
       encodeURIComponent(this.imgurid_) + '/embed?pub=true';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -87,17 +87,19 @@ export class AmpImgur extends AMP.BaseElement {
   }
 
   /** @private */
-  hadleImgurMessages_(event) {
+  handleImgurMessages_(event) {
     if (event.origin != 'https://imgur.com' ||
         event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!event.data || !(isObject(event.data)) || startsWith(event.data, '{')) {
+    const eventData = getData(event);
+    if (!eventData || !(isObject(eventData)
+        || startsWith(/** @type {string} */ (eventData), '{'))) {
       return;
     }
-    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
-    if (data.message == 'resize_imgur') {
-      const height = data.height;
+    const data = isObject(eventData) ? eventData : tryParseJson(eventData);
+    if (data['message'] == 'resize_imgur') {
+      const height = data['height'];
       this.attemptChangeHeight(height).catch(() => {});
     }
   }

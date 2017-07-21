@@ -19,6 +19,8 @@ import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {VisibilityState} from '../../src/visibility-state';
 import {layoutRectLtwh} from '../../src/layout-rect';
+import {loadPromise} from '../../src/event-helper';
+import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
@@ -536,6 +538,110 @@ describe('Resources', () => {
     expect(task.priority).to.equal(1);
     // The other task is not updated.
     expect(task2.priority).to.equal(2);
+  });
+});
+
+describes.fakeWin('Resources startup', {
+  win: {
+    readyState: 'loading',
+  },
+  amp: true,
+}, env => {
+  let win;
+  let clock;
+  let resources;
+  let schedulePassStub;
+
+  beforeEach(() => {
+    win = env.win;
+    clock = sandbox.useFakeTimers();
+    resources = Services.resourcesForDoc(win.document.body);
+    resources.relayoutAll_ = false;
+    schedulePassStub = sandbox.stub(resources, 'schedulePass');
+  });
+
+  it('should run a full reload pass on window.onload', () => {
+    expect(resources.relayoutAll_).to.be.false;
+    expect(schedulePassStub).to.not.be.called;
+    win.readyState = 'complete';
+    win.eventListeners.fire({type: 'load'});
+    win.document.eventListeners.fire({type: 'readystatechange'});
+    return resources.ampdoc.whenReady().then(() => {
+      return loadPromise(win);
+    }).then(() => {
+      expect(resources.relayoutAll_).to.be.true;
+      expect(schedulePassStub).to.have.been.called;
+    });
+  });
+
+  it('should run a full reload pass on fonts timeout', () => {
+    win.readyState = 'complete';
+    win.document.eventListeners.fire({type: 'readystatechange'});
+    return resources.ampdoc.whenReady().then(() => {
+      expect(resources.relayoutAll_).to.be.false;
+      expect(schedulePassStub).to.not.be.called;
+      clock.tick(3100);
+    }).then(() => {
+      expect(resources.relayoutAll_).to.be.true;
+      expect(schedulePassStub).to.have.been.called;
+    });
+  });
+
+  it('should run a full reload pass on document.fonts.ready', () => {
+    win.readyState = 'interactive';
+    win.document.eventListeners.fire({type: 'readystatechange'});
+    win.document.fonts.status = 'loading';
+    return resources.ampdoc.whenReady().then(() => {
+
+    }).then(() => {
+      // This is the regular remeasure on doc-ready.
+      expect(resources.relayoutAll_).to.be.true;
+      resources.relayoutAll_ = false;
+      return win.document.fonts.ready;
+    }).then(() => {
+      // Wait one micro task.
+      return Promise.resolve();
+    }).then(() => {
+      expect(resources.relayoutAll_).to.be.true;
+      // Remeasure on doc-ready and fonts-ready.
+      expect(schedulePassStub).to.have.been.calledTwice;
+    });
+  });
+
+  it('should not remeasure if fonts load before doc-ready', () => {
+    win.readyState = 'interactive';
+    win.document.eventListeners.fire({type: 'readystatechange'});
+    win.document.fonts.status = 'loaded';
+    return resources.ampdoc.whenReady().then(() => {
+
+    }).then(() => {
+      // This is the regular remeasure on doc-ready.
+      expect(resources.relayoutAll_).to.be.true;
+      resources.relayoutAll_ = false;
+      return win.document.fonts.ready;
+    }).then(() => {
+      // Wait one micro task.
+      return Promise.resolve();
+    }).then(() => {
+      expect(resources.relayoutAll_).to.be.false;
+      // Only remeasure on doc-ready.
+      expect(schedulePassStub).to.have.been.calledOnce;
+    });
+  });
+
+  it('should run a full reload when a new element is connected', () => {
+    expect(resources.relayoutAll_).to.be.false;
+    expect(schedulePassStub).to.not.be.called;
+    const el = win.document.createElement('amp-img');
+    el.isBuilt = () => { return true; };
+    el.isUpgraded = () => { return true; };
+    el.isRelayoutNeeded = () => { return true; };
+    el.updateLayoutBox = () => {};
+    win.document.body.appendChild(el);
+    resources.add(el);
+    expect(resources.relayoutAll_).to.be.false;
+    clock.tick(1000);
+    expect(resources.relayoutAll_).to.be.true;
   });
 });
 

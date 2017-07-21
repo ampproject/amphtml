@@ -14,38 +14,26 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
+import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
 import {ElementStub, setLoadingCheckForTests} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
+import {installDocumentStateService} from '../../src/service/document-state';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
 import {poll} from '../../testing/iframe';
 import {ResourceState} from '../../src/service/resource';
-import {resourcesForDoc} from '../../src/services';
-import {vsyncFor} from '../../src/services';
-import {
-  registerServiceBuilder,
-  resetServiceForTesting,
-} from '../../src/service';
+import {Services} from '../../src/services';
 import {
   copyElementToChildWindow,
   createAmpElementProto,
   getElementClassForTesting,
-  markElementScheduledForTesting,
   registerElement,
   resetScheduledElementForTesting,
   stubElementIfNotKnown,
   stubElements,
   upgradeOrRegisterElement,
 } from '../../src/custom-element';
-// TODO(@cramforce): Move tests into their own file.
-import {
-  getElementService,
-  getElementServiceIfAvailable,
-  getElementServiceForDoc,
-  getElementServiceIfAvailableForDoc,
-} from '../../src/element-service';
-import * as lolex from 'lolex';
-
 
 describes.realWin('CustomElement register', {amp: 1}, env => {
 
@@ -162,7 +150,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     clock = lolex.install(win);
-    resources = resourcesForDoc(doc);
+    resources = Services.resourcesForDoc(doc);
     resources.isBuildOn_ = true;
     resourcesMock = sandbox.mock(resources);
     container = doc.createElement('div');
@@ -346,7 +334,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
     expect(element.layoutWidth_).to.equal(111);
     expect(element.implementation_.layoutWidth_).to.equal(111);
-    expect(errorStub).to.be.calledWith('amp:error', 'intentional');
+    expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
   });
 
   it('StubElement - upgrade after attached', () => {
@@ -1463,7 +1451,7 @@ describes.realWin('CustomElement Loading Indicator', {amp: true}, env => {
       prototype: createAmpElementProto(win, 'amp-test-loader', TestElement),
     });
     LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
-    resources = resourcesForDoc(doc);
+    resources = Services.resourcesForDoc(doc);
     resources.isBuildOn_ = true;
     resourcesMock = sandbox.mock(resources);
     element = new ElementClass();
@@ -1471,7 +1459,7 @@ describes.realWin('CustomElement Loading Indicator', {amp: true}, env => {
     element.layout_ = Layout.FIXED;
     element.setAttribute('layout', 'fixed');
     element.resources_ = resources;
-    vsync = vsyncFor(win);
+    vsync = Services.vsyncFor(win);
     vsyncTasks = [];
     sandbox.stub(vsync, 'mutate', mutator => {
       vsyncTasks.push(mutator);
@@ -1761,7 +1749,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     ElementClass = doc.registerElement('amp-test-overflow', {
       prototype: createAmpElementProto(win, 'amp-test-overflow', TestElement),
     });
-    resources = resourcesForDoc(doc);
+    resources = Services.resourcesForDoc(doc);
     resourcesMock = sandbox.mock(resources);
     element = new ElementClass();
     element.layoutWidth_ = 300;
@@ -1770,7 +1758,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     overflowElement = doc.createElement('div');
     overflowElement.setAttribute('overflow', '');
     element.appendChild(overflowElement);
-    vsync = vsyncFor(win);
+    vsync = Services.vsyncFor(win);
     vsyncTasks = [];
     sandbox.stub(vsync, 'mutate', mutator => {
       vsyncTasks.push(mutator);
@@ -1851,7 +1839,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     let doc;
     let win;
     let elem1;
-    let intervalCallback;
+    let setIntervalCallback;
 
     beforeEach(() => {
       elements = [];
@@ -1882,7 +1870,6 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       };
       elements.push(elem1);
 
-      intervalCallback = undefined;
       win = {
         document: doc,
         Object: {
@@ -1890,7 +1877,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
         },
         HTMLElement,
         setInterval: callback => {
-          intervalCallback = callback;
+          setIntervalCallback = callback;
         },
         clearInterval: () => {
         },
@@ -1898,8 +1885,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       };
       doc.defaultView = win;
 
-      resetServiceForTesting(win, 'e1');
-      resetScheduledElementForTesting(win, 'element-1');
+      installDocumentStateService(win);
     });
 
     afterEach(() => {
@@ -1915,7 +1901,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       expect(win.ampExtendedElements['amp-test2']).to.be.undefined;
       expect(doc.registerElement).to.be.calledOnce;
       expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
-      expect(intervalCallback).to.be.undefined;
+      expect(setIntervalCallback).to.be.undefined;
     });
 
     it('should repeat stubbing when body is not available', () => {
@@ -1928,7 +1914,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       expect(win.ampExtendedElements['amp-test2']).to.be.undefined;
       expect(doc.registerElement).to.be.calledOnce;
       expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
-      expect(intervalCallback).to.exist;
+      expect(setIntervalCallback).to.exist;
 
       // Add more elements
       const elem2 = {
@@ -1941,7 +1927,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       };
       elements.push(elem2);
       doc.body = {};
-      intervalCallback();
+      setIntervalCallback();
 
       expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
       expect(win.ampExtendedElements['amp-test2']).to.equal(ElementStub);
@@ -1981,260 +1967,6 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       expect(registerElement.callCount > firstCallCount).to.be.true;
       expect(registerElement.getCall(registerElement.callCount - 1).args[0])
           .to.equal('amp-test2');
-    });
-
-    it('getElementService should wait for body when not available', () => {
-      doc.body = null;  // Body not available
-      let resolvedService;
-      const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1')
-          .then(service => {
-            resolvedService = service;
-            return service;
-          });
-      return Promise.resolve().then(() => {
-        expect(intervalCallback).to.exist;
-        expect(resolvedService).to.be.undefined;
-
-        // Resolve body.
-        doc.body = {};
-        intervalCallback();
-        return p1;
-      }).then(service => {
-        expect(resolvedService).to.be.null;
-        expect(service).to.be.null;
-      });
-    });
-
-    it('getElementService should resolve with body when not available', () => {
-      doc.body = {};  // Body is available
-      const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1');
-      return Promise.resolve().then(() => {
-        expect(intervalCallback).to.be.undefined;
-        return p1;
-      }).then(service => {
-        expect(service).to.be.null;
-      });
-    });
-
-    it('getElementService should wait for body when available', () => {
-      doc.body = null;  // Body not available
-      let resolvedService;
-      const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1')
-          .then(service => {
-            resolvedService = service;
-            return service;
-          });
-      return Promise.resolve().then(() => {
-        expect(intervalCallback).to.exist;
-        expect(resolvedService).to.be.undefined;
-
-        // Resolve body.
-        markElementScheduledForTesting(win, 'element-1');
-        registerServiceBuilder(win, 'e1', function() {
-          return {str: 'fake1'};
-        });
-        doc.body = {};
-        intervalCallback();
-        return p1;
-      }).then(service => {
-        expect(resolvedService).to.deep.equal({str: 'fake1'});
-        expect(service).to.deep.equal({str: 'fake1'});
-      });
-    });
-
-    it('getElementService should resolve with body when available', () => {
-      doc.body = {};  // Body is available
-      markElementScheduledForTesting(win, 'element-1');
-      const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1');
-      return Promise.resolve().then(() => {
-        expect(intervalCallback).to.be.undefined;
-        registerServiceBuilder(win, 'e1', function() {
-          return {str: 'fake1'};
-        });
-        return p1;
-      }).then(service => {
-        expect(service).to.deep.equal({str: 'fake1'});
-      });
-    });
-  });
-});
-
-
-describes.realWin('services', {
-  amp: {
-    ampdoc: 'single',
-  },
-}, env => {
-
-  beforeEach(() => {
-    resetServiceForTesting(env.win, 'e1');
-    resetScheduledElementForTesting(env.win, 'element-1');
-    resetScheduledElementForTesting(env.win, 'element-foo');
-  });
-
-  it('should be provided by element', () => {
-    markElementScheduledForTesting(env.win, 'element-1');
-    const p1 = getElementService(env.win, 'e1', 'element-1');
-    const p2 = getElementService(env.win, 'e1', 'element-1');
-
-    registerServiceBuilder(env.win, 'e1', function() {
-      return {str: 'from e1'};
-    });
-
-    return p1.then(s1 => {
-      expect(s1).to.deep.equal({str: 'from e1'});
-      return p2.then(s2 => {
-        expect(s1).to.equal(s2);
-      });
-    });
-  });
-
-  it('should fail if element is not in page.', () => {
-    markElementScheduledForTesting(env.win, 'element-foo');
-
-    return getElementService(env.win, 'e1', 'element-bar').then(() => {
-      return 'SUCCESS';
-    }, error => {
-      return 'ERROR ' + error;
-    }).then(result => {
-      expect(result).to.match(
-          /Service e1 was requested to be provided through element-bar/);
-    });
-  });
-
-  it('should be provided by element if available', () => {
-    markElementScheduledForTesting(env.win, 'element-1');
-    const p1 = getElementServiceIfAvailable(env.win, 'e1', 'element-1');
-    const p2 = getElementServiceIfAvailable(env.win, 'e2', 'not-available');
-    registerServiceBuilder(env.win, 'e1', function() {
-      return {str: 'from e1'};
-    });
-    return p1.then(s1 => {
-      expect(s1).to.deep.equal({str: 'from e1'});
-      return p2.then(s2 => {
-        expect(s2).to.be.null;
-      });
-    });
-  });
-
-  it('should be provided by element', () => {
-    markElementScheduledForTesting(env.win, 'element-1');
-    const p1 = getElementServiceForDoc(env.ampdoc, 'e1', 'element-1');
-    const p2 = getElementServiceForDoc(env.ampdoc, 'e1', 'element-1');
-
-    registerServiceBuilder(env.win, 'e1', function() {
-      return {str: 'from e1'};
-    });
-
-    return p1.then(s1 => {
-      expect(s1).to.deep.equal({str: 'from e1'});
-      return p2.then(s2 => {
-        expect(s1).to.equal(s2);
-      });
-    });
-  });
-
-  it('should fail if element is not in page.', () => {
-    markElementScheduledForTesting(env.win, 'element-foo');
-
-    return getElementServiceForDoc(env.ampdoc, 'e1', 'element-bar').then(() => {
-      return 'SUCCESS';
-    }, error => {
-      return 'ERROR ' + error;
-    }).then(result => {
-      expect(result).to.match(
-          /Service e1 was requested to be provided through element-bar/);
-    });
-  });
-
-  it('should be provided by element if available', () => {
-    markElementScheduledForTesting(env.win, 'element-1');
-    const p1 = getElementServiceIfAvailableForDoc(
-        env.ampdoc, 'e1', 'element-1');
-    const p2 = getElementServiceIfAvailableForDoc(
-        env.ampdoc, 'e2', 'not-available');
-    registerServiceBuilder(env.win, 'e1', function() {
-      return {str: 'from e1'};
-    });
-    return p1.then(s1 => {
-      expect(s1).to.deep.equal({str: 'from e1'});
-      return p2.then(s2 => {
-        expect(s2).to.be.null;
-      });
-    });
-  });
-
-  it('getElementServiceForDoc should wait for body when not available', () => {
-    let bodyResolver;
-    env.ampdoc.bodyPromise_ = new Promise(resolve => {
-      bodyResolver = resolve;
-    });
-    let resolvedService;
-    const p1 = getElementServiceIfAvailableForDoc(env.ampdoc, 'e1', 'element-1')
-        .then(service => {
-          resolvedService = service;
-          return service;
-        });
-    return Promise.resolve().then(() => {
-      expect(resolvedService).to.be.undefined;
-
-      // Resolve body.
-      bodyResolver();
-      return p1;
-    }).then(service => {
-      expect(resolvedService).to.be.null;
-      expect(service).to.be.null;
-    });
-  });
-
-  it('getElementServiceForDoc resolve w/ body when not available', () => {
-    const p1 = getElementServiceIfAvailableForDoc(
-        env.ampdoc, 'e1', 'element-1');
-    return Promise.resolve().then(() => {
-      return p1;
-    }).then(service => {
-      expect(service).to.be.null;
-    });
-  });
-
-  it('getElementServiceForDoc should wait for body when available', () => {
-    let bodyResolver;
-    env.ampdoc.bodyPromise_ = new Promise(resolve => {
-      bodyResolver = resolve;
-    });
-    let resolvedService;
-    const p1 = getElementServiceIfAvailableForDoc(env.ampdoc, 'e1', 'element-1')
-        .then(service => {
-          resolvedService = service;
-          return service;
-        });
-    return Promise.resolve().then(() => {
-      expect(resolvedService).to.be.undefined;
-
-      // Resolve body.
-      markElementScheduledForTesting(env.win, 'element-1');
-      registerServiceBuilder(env.win, 'e1', function() {
-        return {str: 'fake1'};
-      });
-      bodyResolver();
-      return p1;
-    }).then(service => {
-      expect(resolvedService).to.deep.equal({str: 'fake1'});
-      expect(service).to.deep.equal({str: 'fake1'});
-    });
-  });
-
-  it('getElementServiceForDoc should resolve with body when available', () => {
-    markElementScheduledForTesting(env.win, 'element-1');
-    const p1 = getElementServiceIfAvailableForDoc(
-        env.ampdoc, 'e1', 'element-1');
-    return Promise.resolve().then(() => {
-      registerServiceBuilder(env.win, 'e1', function() {
-        return {str: 'fake1'};
-      });
-      return p1;
-    }).then(service => {
-      expect(service).to.deep.equal({str: 'fake1'});
     });
   });
 });

@@ -85,15 +85,16 @@ class Shell {
   }
 
   /**
+   * @param {!Event} e
    */
   handleNavigate_(e) {
     if (e.defaultPrevented) {
       return false;
     }
-    if (event.button) {
+    if (e.button) {
       return false;
     }
-    let a = event.target;
+    let a = e.target;
     while (a) {
       if (a.tagName == 'A' && a.href) {
         break;
@@ -102,11 +103,12 @@ class Shell {
     }
     if (a) {
       const url = new URL(a.href);
-      if (url.origin == this.win.location.origin &&
-              startsWith(url.pathname, '/pwa/') &&
-              url.pathname.indexOf('amp.html') != -1) {
+      const location = this.win.location;
+      if (url.origin == location.origin &&
+          startsWith(url.pathname, '/pwa/') &&
+          url.pathname.indexOf('amp.html') != -1) {
         e.preventDefault();
-        const newPage = url.pathname;
+        const newPage = url.pathname + location.search;
         log('Internal link to: ', newPage);
         if (newPage != this.currentPage_) {
           this.navigateTo(newPage);
