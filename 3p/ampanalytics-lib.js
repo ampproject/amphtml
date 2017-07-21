@@ -17,7 +17,7 @@
 import './polyfills';
 import {tryParseJson} from '../src/json';
 import {dev, user, initLogConstructor, setReportError} from '../src/log';
-import {AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE} from '../src/3p-analytics-common';
+import {IFRAME_TRANSPORT_EVENTS_TYPE} from '../src/3p-analytics-common';
 import {getData} from '../src/event-helper';
 
 initLogConstructor();
@@ -63,18 +63,19 @@ export class AmpAnalytics3pMessageRouter {
       }
       user().assert(messageContainer['type'],
           'Received message with missing type in ' + this.win_.location.href);
-      user().assert(messageContainer['data'],
+      user().assert(messageContainer['data'] &&
+          messageContainer['data']['events'],
           'Received empty message in ' + this.win_.location.href);
       user().assert(
-          messageContainer['type'] == AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
+          messageContainer['type'] == IFRAME_TRANSPORT_EVENTS_TYPE,
           'Received unrecognized message type ' + messageContainer['type'] +
           ' in ' + this.win_.location.href);
       this.processEventsMessage_(
-          /** @type {!../src/3p-analytics-common.AmpAnalytics3pEventMap} */
-          (messageContainer['data']));
+          /** @type {!Array<../src/3p-analytics-common.IframeTransportEvent>} */
+          (messageContainer['data']['events']));
     }, false);
 
-    this.subscribeTo(AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE);
+    this.subscribeTo(IFRAME_TRANSPORT_EVENTS_TYPE);
   }
 
   /**
@@ -93,24 +94,22 @@ export class AmpAnalytics3pMessageRouter {
   /**
    * Handle receipt of a message indicating that creative(s) have sent
    * event(s) to this frame
-   * @param {!../src/3p-analytics-common.AmpAnalytics3pEventMap} message
+   * @param {!Array<!../src/3p-analytics-common.IframeTransportEvent>}
+   * events An array of events
    * @private
    */
-  processEventsMessage_(message) {
-    let keys;
-    user().assert((keys = Object.keys(message)).length,
-        'Received empty events message in ' + this.win_.location.href);
+  processEventsMessage_(events) {
+    user().assert(events && events.length,
+        'Received empty events list in ' + this.win_.location.href);
     this.win_.onNewAmpAnalyticsInstance =
         this.win_.onNewAmpAnalyticsInstance || null;
     user().assert(this.win_.onNewAmpAnalyticsInstance,
         'Must implement onNewAmpAnalyticsInstance in ' +
         this.win_.location.href);
-    keys.forEach(key => {
-      const transportId = key ;
-      const events = message[key];
+    events.forEach(event => {
+      const transportId = event['transportId'];
+      const message = event['message'];
       try {
-        dev().assert(events && events.length,
-            'Received empty events list for ' + transportId);
         if (!this.creativeMessageRouters_[transportId]) {
           this.creativeMessageRouters_[transportId] =
               new AmpAnalytics3pCreativeMessageRouter(
@@ -125,7 +124,7 @@ export class AmpAnalytics3pMessageRouter {
           }
         }
         this.creativeMessageRouters_[transportId]
-            .sendMessagesToListener(events);
+            .sendMessageToListener(message);
       } catch (e) {
         user().error(TAG_, 'Failed to pass message to event listener: ' +
           e.message);
@@ -217,9 +216,9 @@ export class AmpAnalytics3pCreativeMessageRouter {
    * Registers a callback function to be called when AMP Analytics events occur.
    * There may only be one listener. If another function has previously been
    * registered as a listener, it will no longer receive events.
-   * @param {!function(!Array<!string>)}
-   * listener A function that takes an array of event strings, and does
-   * something with them.
+   * @param {!function(!string)}
+   * listener A function that takes an event string, and does something with
+   * it.
    */
   registerAmpAnalytics3pEventsListener(listener) {
     if (this.eventListener_) {
@@ -233,24 +232,18 @@ export class AmpAnalytics3pCreativeMessageRouter {
    * Receives message(s) from a creative for the cross-domain iframe
    * and passes them to that iframe's listener, if a listener has been
    * registered
-   * @param {!Array<string>} messages
-   * The message that was received
+   * @param {!string} message The event message that was received
    */
-  sendMessagesToListener(messages) {
-    if (!messages.length) {
-      dev().warn(TAG_, 'Attempted to send zero messages in ' +
-          this.transportId_ + '. Ignoring.');
-      return;
-    }
+  sendMessageToListener(message) {
     if (!this.eventListener_) {
-      dev().warn(TAG_, 'Attempted to send messages when no listener' +
+      dev().warn(TAG_, 'Attempted to send message when no listener' +
         ' configured in ' + this.transportId_ + '. Be sure to' +
         ' call registerAmpAnalytics3pEventsListener() within' +
         ' onNewAmpAnalyticsInstance()!');
       return;
     }
     try {
-      this.eventListener_(messages);
+      this.eventListener_(message);
     } catch (e) {
       user().error(TAG_, 'Caught exception executing listener for ' +
         this.transportId_ + ': ' + e.message);

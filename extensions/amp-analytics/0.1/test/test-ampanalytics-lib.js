@@ -15,7 +15,7 @@
  */
 
 import {
-  AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
+  IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE,
 } from '../../../../src/3p-analytics-common';
 import {
   AmpAnalytics3pMessageRouter,
@@ -106,8 +106,10 @@ describe('ampanalytics-lib', () => {
       expect(ampAnalytics.registerAmpAnalytics3pEventsListener).to.exist;
       ampAnalytics.registerAmpAnalytics3pEventsListener(() => {});
     };
-    send(AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
-      /** @type {!JsonObject} */ ({'100': ['hello, world!']}));
+    send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
+      events: [
+        {transportId: '100', message: 'hello, world!'},
+      ]}));
   });
 
   it('receives an event message ', () => {
@@ -124,17 +126,21 @@ describe('ampanalytics-lib', () => {
         });
       });
     };
-    send(AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
-      /** @type {!JsonObject} */ ({'101': ['hello, world!']}));
+    send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
+      events: [
+        {transportId: '101', message: 'hello, world!'},
+      ]}));
   });
 
   it('asserts when onNewAmpAnalyticsInstance is not implemented ', () => {
     window.onNewAmpAnalyticsInstance = null;
-    send(AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
-      /** @type {!JsonObject} */ ({'103': ['hello, world!']}));
+    send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
+      events: [
+        {transportId: '102', message: 'hello, world!'},
+      ]}));
     return timer.promise(POST_MESSAGE_DELAY).then(() => {
       expect(badAssertsCounterStub.callCount > 0).to.be.true;
-      expect(badAssertsCounterStub.alwaysCalledWith(
+      expect(badAssertsCounterStub.calledWith(
           sinon.match(/Must implement onNewAmpAnalyticsInstance/))).to.be.true;
       return Promise.resolve();
     });
@@ -149,18 +155,18 @@ describe('ampanalytics-lib', () => {
       ampAnalytics.registerAmpAnalytics3pEventsListener(events => {
         expect(events).to.have.lengthOf(3);
         events.forEach(() => {
-          expect(ampAnalytics.getTransportId()).to.equal('105');
+          expect(ampAnalytics.getTransportId()).to.equal('103');
         });
         expect(events[0]).to.equal('something happened');
         expect(events[1]).to.equal('something else happened');
         expect(events[2]).to.equal('a third thing happened');
       });
     };
-    send(AMP_ANALYTICS_3P_EVENT_MESSAGES_TYPE,
-      /** @type {!JsonObject} */ ({'105': [
-        'something happened',
-        'something else happened',
-        'a third thing happened',
+    send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
+      events: [
+        {transportId: '103', message: 'something happened'},
+        {transportId: '103', message: 'something else happened'},
+        {transportId: '103', message: 'a third thing happened'},
       ]}));
   });
 });
