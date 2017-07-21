@@ -18,6 +18,8 @@ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {AmpAd3PImpl} from '../../../amp-ad/0.1/amp-ad-3p-impl';
 import {
   AmpA4A,
+  AMP_SIGNATURE_HEADER,
+  CREATIVE_SIZE_HEADER,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
 } from '../../../amp-a4a/0.1/amp-a4a';
@@ -41,7 +43,10 @@ import {
 import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
-import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
+import {
+  EXPERIMENT_ATTRIBUTE,
+  QQID_HEADER,
+} from '../../../../ads/google/a4a/utils';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -1427,7 +1432,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         arrayBuffer,
         headers: {
           get(prop) {
-            switch(prop) {
+            switch (prop) {
               case QQID_HEADER:
                 return 'qqid-header';
               case CREATIVE_SIZE_HEADER:
@@ -1441,7 +1446,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           has(prop) {
             return !!this.get(prop);
           },
-        }
+        },
       };
     }
 
