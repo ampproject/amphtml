@@ -264,6 +264,10 @@ array_literal:
       %{
         $$ = new AstNode(AstNodeType.ARRAY_LITERAL, [$2]);
       %}
+  | '[' array ',' ']'
+      %{
+        $$ = new AstNode(AstNodeType.ARRAY_LITERAL, [$2]);
+      %}
   ;
 
 array:
@@ -284,6 +288,10 @@ object_literal:
         $$ = new AstNode(AstNodeType.OBJECT_LITERAL, []);
       %}
   | '{' object '}'
+      %{
+        $$ = new AstNode(AstNodeType.OBJECT_LITERAL, [$2]);
+      %}
+  | '{' object ',' '}'
       %{
         $$ = new AstNode(AstNodeType.OBJECT_LITERAL, [$2]);
       %}
