@@ -193,7 +193,7 @@ The technology stack used is:
 - [Poltergeist](https://github.com/teampoltergeist/poltergeist), a driver capable of loading webpages for diffing
 - [PhantomJS](http://phantomjs.org/), a headless webkit based browser
 
-The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. All PRs will show a check called `percy/amphtml` in addition to the `continuous-integration/travis-ci/pr` check. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted. (If you don't have permissions to view the diffs, you can make a request at [percy.io/ampproject/amphtml](percy.io/ampproject/amphtml).)
+The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. All PRs will show a check called `percy/amphtml` in addition to the `continuous-integration/travis-ci/pr` check. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted. (If you don't have permissions to view the diffs, you can make a request at [https://percy.io/ampproject/amphtml](https://percy.io/ampproject/amphtml).)
 
 ### Running Visual Diff Tests Locally
 
