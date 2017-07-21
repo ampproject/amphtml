@@ -671,6 +671,15 @@ var forbiddenTermsSrcInclusive = {
       'src/utils/bytes.js',
     ],
   },
+  'Text(Encoder|Decoder)\\(': {
+    message: 'TextEncoder/TextDecoder is not supported in all browsers.' +
+        'Please use UTF8 utilities from src/bytes.js',
+    whitelist: [
+      'ads/google/a4a/line-delimited-response-handler.js',
+      'examples/pwa/pwa.js',
+      'src/utils/bytes.js',
+    ],
+  },
   // Super complicated regex that says "find any querySelector method call that
   // is passed as a variable anything that is not a string, or a string that
   // contains a space.
