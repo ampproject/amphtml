@@ -80,10 +80,7 @@ export function adsenseIsA4AEnabled(win, element) {
     const experimentInfoMap = {};
     experimentInfoMap[ADSENSE_A4A_EXPERIMENT_NAME] = {
       isTrafficEligible: () => true,
-      branches: {
-        control: '2092615',
-        experiment: ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
-      },
+      branches: ['2092615', ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
     };
     // Note: Because the same experimentName is being used everywhere here,
     // randomlySelectUnsetExperiments won't add new IDs if
