@@ -137,6 +137,11 @@ function filterWhitelistedLinks(markdown) {
   // Dailymotion link that is marked dead in Travis CI
   filteredMarkdown = filteredMarkdown.replace(/https:\/\/developer.dailymotion.com\/player#player-parameters/g, '');
 
+  // After all whitelisting is done, clean up any remaining empty blocks bounded
+  // by backticks. Otherwise, `` will be treated as the start of a code block
+  // and confuse the link extractor.
+  filteredMarkdown = filteredMarkdown.replace(/\ \`\`\ /g, '');
+
   return filteredMarkdown;
 }
 
