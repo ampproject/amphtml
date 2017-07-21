@@ -590,6 +590,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace USER_AGENT', () => {
+    return expandAsync('?sh=USER_AGENT').then(res => {
+      expect(res).to.match(/sh=\w+/);
+    });
+  });
+
   it('should replace VIEWER with origin', () => {
     return getReplacements().then(replacements => {
       sandbox.stub(viewerService, 'getViewerOrigin').returns(
@@ -944,12 +950,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
         });
     expect(expanded).to.equal('r=RANDOM&c=ABC&f=FUNCT(hello,world)' +
         '&a=b&d=PROM&e=PAGE_LOAD_TIME');
-  });
-
-  it('should replace USER_AGENT', () => {
-    return expandAsync('?sh=USER_AGENT').then(res => {
-      expect(res).to.match(/sh=\w+/);
-    });
   });
 
   describe('access values', () => {
