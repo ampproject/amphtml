@@ -56,6 +56,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp test --safari`<sup>[[1]](#footnote-1)</sup>                       | Runs tests in Safari.                                                 |
 | `gulp test --firefox`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Firefox.                                                |
 | `gulp test --files=<test-files-path-glob>`<sup>[[1]](#footnote-1)</sup> | Runs specific test files.                                             |
+| `gulp test --testnames`<sup>[[1]](#footnote-1)</sup>                    | Lists the name of each test being run, and prints a summary at the end.  |
 | `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default. |
 | `gulp serve --quiet`                                                    | Same as `serve`, with logging silenced. |
 | `gulp check-types`                                                      | Verifies that there are no errors associated with Closure typing. Run automatically upon push.  |
