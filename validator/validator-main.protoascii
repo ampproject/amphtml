@@ -3150,7 +3150,6 @@ tags: {
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-ima-video > script[type=application/json]"
-  unique: true
   mandatory_parent: "AMP-IMA-VIDEO"
   attrs: {
     name: "type"
