@@ -30,6 +30,25 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 12:01PM, July 21, 2017 UTC
+
+Validator Version 244
+Spec Version 455
+
+Includes:
+
+ - Add cutoff option to `<amp-timeago>` #10067
+ - amp-form verify-xhr #10370
+ - amp-timeago allow timezone offset #10350
+ - html_format semantics #9950
+ - Support slot element #10345
+ - Improvement to error messages: adjust position reported for cdata
+ - Improvement to error messages: require that noscript boilerplate is in head.
+ - `<amp-soundcloud playlist>` #10243
+ - Disallow duplicate `<body>` tags.
+ - Allow `<amp-animation>` in AMP4ADS documents #10093
+ - amp-bind extension rules to no longer require `<amp-state>` #10159
+ 
 ### 9:00PM, June 26, 2017 UTC
 
 Validator Version 239
