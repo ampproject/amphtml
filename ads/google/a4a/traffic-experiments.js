@@ -28,7 +28,7 @@ import {
   EXPERIMENT_ATTRIBUTE,
 } from './utils';
 import {
-  ExperimentInfo,
+  /* eslint no-unused-vars: 0 */ ExperimentInfo,
   isExperimentOn,
   forceExperimentBranch,
   getExperimentBranch,

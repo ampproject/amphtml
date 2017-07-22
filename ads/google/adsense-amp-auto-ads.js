@@ -16,7 +16,7 @@
 
 
 import {
-  ExperimentInfo,
+  /* eslint no-unused-vars: 0 */ ExperimentInfo,
   randomlySelectUnsetExperiments,
   getExperimentBranch,
 } from '../../src/experiments';

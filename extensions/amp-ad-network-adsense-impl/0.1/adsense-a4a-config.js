@@ -27,7 +27,7 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 import {
-  ExperimentInfo,
+  /* eslint no-unused-vars: 0 */ ExperimentInfo,
   getExperimentBranch,
   forceExperimentBranch,
   randomlySelectUnsetExperiments,
