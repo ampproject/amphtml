@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {
@@ -119,9 +120,10 @@ class AmpGfycat extends AMP.BaseElement {
       return this.videoIframeSrc_;
     }
 
-    dev().assert(this.videoid_);
-    let src = 'https://gfycat.com/ifr/' + encodeURIComponent(this.videoid_);
-    const params = {};
+    const videoid = this.videoid_ || '';
+    let src = 'https://gfycat.com/ifr/' + encodeURIComponent(videoid);
+
+    const params = getDataParamsFromAttributes(this.element);
 
     const noautoplay = this.element.hasAttribute('noautoplay');
     if (noautoplay) {
