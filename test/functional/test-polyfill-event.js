@@ -19,7 +19,9 @@ import {install} from '../../src/polyfills/event.js';
 describes.fakeWin('Event', {}, env => {
 
   beforeEach(() => {
+    // makes the Event polyfill install by setting window.Event to an object
     env.win.Event = Object.create(self.Event.prototype);
+    // makes the prototype available for assignment
     env.win.Event.prototype = self.Event.prototype;
     install(env.win);
   });
@@ -32,16 +34,16 @@ describes.fakeWin('Event', {}, env => {
     expect(() => new env.win.Event()).to.throw(TypeError);
   });
 
+  it('should not bubble or be cancelable by default', () => {
+    const defaultEvent = new env.win.Event('event');
+    expect(defaultEvent.bubbles).to.be.false;
+    expect(defaultEvent.cancelable).to.be.false;
+  });
+
   it('should be configurable', () => {
     const ev = new env.win.Event('event', {bubbles: true, cancelable: true});
     expect(ev.bubbles).to.be.true;
     expect(ev.cancelable).to.be.true;
-  });
-
-  it('should be able to be dispatched', () => {
-    const ev = new env.win.Event('event');
-    const elm = document.createElement('p');
-    expect(() => elm.dispatchEvent(ev)).to.not.throw();
   });
 
   it('should trigger listeners', () => {
