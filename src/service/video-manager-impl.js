@@ -42,6 +42,9 @@ import {
 } from '../dom';
 import {layoutRectLtwh, RelativePositions} from '../layout-rect';
 import * as st from '../style';
+import {onFixedLayerUpdate,
+        safeTopOffset,
+        safeBottomOffset} from '../fixed-layer';
 
 /**
  * @const {number} Percentage of the video that should be in viewport before it
@@ -635,7 +638,9 @@ class VideoEntry {
       },
     });
 
-    // TODO(@wassgha) Add video element wrapper here
+    onFixedLayerUpdate(() => {
+
+    });
   }
 
   /**

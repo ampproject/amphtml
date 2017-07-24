@@ -16,6 +16,7 @@
 
 import {dev, user} from '../log';
 import {endsWith} from '../string';
+import {Observable} from './observable';
 import {Services} from '../services';
 import {
   setStyle,
@@ -76,6 +77,9 @@ export class FixedLayer {
 
     /** @const @private {!Array<!ElementDef>} */
     this.elements_ = [];
+
+    /** @private {!Observable} */
+    this.observable_ = new Observable();
   }
 
   /**
@@ -197,6 +201,7 @@ export class FixedLayer {
         /* position */ 'fixed',
         opt_forceTransfer);
     this.sortInDomOrder_();
+    this.fire_();
     return this.update();
   }
 
@@ -216,6 +221,7 @@ export class FixedLayer {
         }
       });
     }
+    this.fire_();
   }
 
   /**
@@ -720,6 +726,17 @@ export class FixedLayer {
         this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
       }
     }
+  }
+
+  onFixedLayerUpdate(cb) {
+    if (!this.observable_) {
+      this.observable_ = new Observable();
+    }
+    this.observable_.add(cb);
+  }
+
+  fire_() {
+    this.observable_.fire();
   }
 
   safeTopOffset() {
