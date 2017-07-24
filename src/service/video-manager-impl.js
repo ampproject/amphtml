@@ -125,20 +125,16 @@ export class VideoManager {
     /** @private {?VideoEntry} */
     this.dockedVideo_ = null;
 
-    /** @private {?./timer-impl.Timer} */
-    this.timer_ = null;
+    /** @private @const */
+    this.timer_ = Services.timerFor(ampdoc.win);
 
-    /** @private {?Function} */
-    this.boundSecondsPlaying_ = null;
+    /** @private @const */
+    this.boundSecondsPlaying_ = () => this.secondsPlaying_();;
 
-    const isAnalyticsEnabled = getMode().test ?
-        true : (Services.analyticsForDocOrNull(ampdoc) == null);
-
-    if (isAnalyticsEnabled) {
-      this.timer_ = Services.timerFor(ampdoc.win);
-      this.boundSecondsPlaying_ = () => this.secondsPlaying_();
-      this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
-    }
+    // TODO(cvializ, #10599): It would be nice to only create the timer
+    // if video analytics are present, since the timer is not needed if
+    // video analytics are not present.
+    this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
   }
 
   /**
@@ -147,15 +143,13 @@ export class VideoManager {
    * @private
    */
   secondsPlaying_() {
-    if (this.timer_ && this.boundSecondsPlaying_) {
-      for (let i = 0; i < this.entries_.length; i++) {
-        const entry = this.entries_[i];
-        if (entry.getPlayingState() !== PlayingStates.PAUSED) {
-          analyticsEvent(entry, VideoAnalyticsEvents.SECONDS_PLAYED);
-        }
+    for (let i = 0; i < this.entries_.length; i++) {
+      const entry = this.entries_[i];
+      if (entry.getPlayingState() !== PlayingStates.PAUSED) {
+        analyticsEvent(entry, VideoAnalyticsEvents.SECONDS_PLAYED);
       }
-      this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
     }
+    this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
   }
 
   /**

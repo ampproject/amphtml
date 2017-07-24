@@ -278,6 +278,7 @@ export function runVideoPlayerIntegrationTests(
       let video;
       let timer;
       let pauseButton;
+      let playButton;
 
       return getVideoPlayer(
           {
@@ -288,6 +289,7 @@ export function runVideoPlayerIntegrationTests(
         timer = Services.timerFor(r.video.implementation_.win);
         video = r.video;
         pauseButton = createButton(r, 'pause');
+        playButton = createButton(r, 'play');
         return Promise.race([
           listenOncePromise(video, VideoAnalyticsEvents.SECONDS_PLAYED).then(
               () => Promise.reject('Triggered video-seconds-played')),
@@ -306,6 +308,11 @@ export function runVideoPlayerIntegrationTests(
               () => Promise.reject('Triggered video-seconds-played')),
           timer.promise(2000),
         ]);
+      }).then(() => {
+        playButton.click();
+        return listenOncePromise(video, VideoEvents.PLAYING);
+      }).then(() => {
+        return listenOncePromise(video, VideoAnalyticsEvents.SECONDS_PLAYED);
       });
     });
 

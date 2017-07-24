@@ -355,7 +355,7 @@ export const VideoAnalyticsEvents = {
   /**
    * video-seconds-played
    *
-   * Indicates that a video was playing when the was playing when the
+   * Indicates that a video was playing when the
    * video-seconds-played interval fired.
    * @property {!VideoAnalyticsDetailsDef} details
    * @event video-session-visible
