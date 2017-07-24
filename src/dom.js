@@ -294,7 +294,7 @@ export function matches(el, selector) {
 
 /**
  * Finds the first descendant element with the specified name.
- * @param {!Element} element
+ * @param {!Element|!Document|!ShadowRoot} element
  * @param {string} tagName
  * @return {?Element}
  */
@@ -637,6 +637,18 @@ export function openWindowDialog(win, url, target, opt_features) {
 export function isJsonScriptTag(element) {
   return element.tagName == 'SCRIPT' &&
             element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
+}
+
+/**
+ * Whether the page's direction is right to left or not.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isRTL(doc) {
+  const dir = doc.body.getAttribute('dir')
+                 || doc.documentElement.getAttribute('dir')
+                 || 'ltr';
+  return dir == 'rtl';
 }
 
 

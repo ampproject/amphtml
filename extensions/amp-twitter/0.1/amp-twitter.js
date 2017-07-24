@@ -54,7 +54,7 @@ class AmpTwitter extends AMP.BaseElement {
 
   /** @override */
   firstLayoutCompleted() {
-    // Do not hide placeholder
+    // Do not hide the placeholder.
   }
 
   /** @override */
@@ -63,9 +63,16 @@ class AmpTwitter extends AMP.BaseElement {
     this.applyFillContent(iframe);
     listenFor(iframe, 'embed-size', data => {
       // We only get the message if and when there is a tweet to display,
-      // so hide the placeholder.
+      // so hide the placeholder
       this.togglePlaceholder(false);
       this./*OK*/changeHeight(data['height']);
+    }, /* opt_is3P */true);
+    listenFor(iframe, 'no-content', () => {
+      if (this.getFallback()) {
+        this.togglePlaceholder(false);
+        this.toggleFallback(true);
+      }
+      // else keep placeholder displayed since there's no fallback
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;

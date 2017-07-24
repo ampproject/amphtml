@@ -20,14 +20,25 @@ import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import {templatesFor} from '../../../src/services';
-import {user} from '../../../src/log';
+import {Services} from '../../../src/services';
+import {dev, user} from '../../../src/log';
 
 /**
  * The implementation of `amp-list` component. See {@link ../amp-list.md} for
  * the spec.
  */
 export class AmpList extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.container_ = null;
+
+    /** @private {boolean} */
+    this.fallbackDisplayed_ = false;
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -36,7 +47,6 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @const {!Element} */
     this.container_ = this.win.document.createElement('div');
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
@@ -57,23 +67,56 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.populateList_();
+    const populate = this.populateList_();
+    if (this.getFallback()) {
+      populate.then(() => {
+        // Hide in case fallback was displayed for a previous fetch.
+        this.toggleFallbackInMutate_(false);
+      }, unusedError => {
+        // On fetch success, firstLayoutCompleted() hides placeholder.
+        // On fetch error, hide placeholder if fallback exists.
+        this.togglePlaceholder(false);
+        this.toggleFallbackInMutate_(true);
+      });
+    }
+    return populate;
   }
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    const srcMutation = mutations['src'];
-    const stateMutation = mutations['state'];
-    if (srcMutation != undefined) {
+    const src = mutations['src'];
+    const state = mutations['state'];
+    if (src != undefined) {
       this.populateList_();
-    } else if (stateMutation != undefined) {
-      const items = isArray(stateMutation) ? stateMutation : [stateMutation];
-      templatesFor(this.win).findAndRenderTemplateArray(
+    } else if (state != undefined) {
+      const items = isArray(state) ? state : [state];
+      Services.templatesFor(this.win).findAndRenderTemplateArray(
           this.element, items).then(this.rendered_.bind(this));
     }
-    if (srcMutation != undefined && stateMutation != undefined) {
+    if (src != undefined && state != undefined) {
       user().warn('AMP-LIST', '[src] and [state] mutated simultaneously.' +
           ' The [state] mutation will be dropped.');
+    }
+  }
+
+  /**
+   * Wraps `toggleFallback()` in a mutate context.
+   * @param {boolean} state
+   */
+  toggleFallbackInMutate_(state) {
+    if (state) {
+      this.getVsync().mutate(() => {
+        this.toggleFallback(true);
+        this.fallbackDisplayed_ = true;
+      });
+    } else {
+      // Don't queue mutate if fallback isn't already visible.
+      if (this.fallbackDisplayed_) {
+        this.getVsync().mutate(() => {
+          this.toggleFallback(false);
+          this.fallbackDisplayed_ = false;
+        });
+      }
     }
   }
 
@@ -88,7 +131,7 @@ export class AmpList extends AMP.BaseElement {
       user().assert(isArray(items),
           'Response must contain an array at "%s". %s',
           itemsExpr, this.element);
-      return templatesFor(this.win).findAndRenderTemplateArray(
+      return Services.templatesFor(this.win).findAndRenderTemplateArray(
           this.element, items).then(this.rendered_.bind(this));
     }, error => {
       throw user().createError('Error fetching amp-list', error);
@@ -100,7 +143,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   rendered_(elements) {
-    removeChildren(this.container_);
+    removeChildren(dev().assertElement(this.container_));
     elements.forEach(element => {
       if (!element.hasAttribute('role')) {
         element.setAttribute('role', 'listitem');

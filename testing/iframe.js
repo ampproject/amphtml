@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../src/amp-events';
+import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
 import {FakeLocation} from './fake-dom';
-import {ampdocServiceFor} from '../src/ampdoc';
+import {FormEvents} from '../extensions/amp-form/0.1/form-events';
+import {Services, resourcesForDoc} from '../src/services';
 import {cssText} from '../build/css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
 import {parseIfNeeded} from '../src/iframe-helper';
@@ -29,9 +32,6 @@ import installCustomElements from
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStyles} from '../src/style-installer';
-import {resourcesForDoc} from '../src/services';
-import {AmpEvents} from '../src/amp-events';
-import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
 
 let iframeCount = 0;
 
@@ -66,14 +66,14 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
   return new Promise((resolve, reject) => {
     // Counts the supported custom events.
     const events = {
-      'amp:form-service:initialize': 0,
       [AmpEvents.ATTACHED]: 0,
-      [BindEvents.INITIALIZE]: 0,
-      [BindEvents.SET_STATE]: 0,
-      [BindEvents.RESCAN_TEMPLATE]: 0,
       [AmpEvents.ERROR]: 0,
       [AmpEvents.LOAD_START]: 0,
       [AmpEvents.STUBBED]: 0,
+      [BindEvents.INITIALIZE]: 0,
+      [BindEvents.SET_STATE]: 0,
+      [BindEvents.RESCAN_TEMPLATE]: 0,
+      [FormEvents.SERVICE_INIT]: 0,
     };
     const messages = [];
     let html = __html__[fixture];
@@ -152,7 +152,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       };
       let timeout = setTimeout(function() {
         reject(new Error('Timeout waiting for elements to start loading.'));
-      }, 2000);
+      }, window.ampTestRuntimeConfig.mochaTimeout || 2000);
       // Declare the test ready to run when the document was fully parsed.
       window.afterLoad = function() {
         resolve({
@@ -227,13 +227,13 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
       installDocService(iframe.contentWindow, /* isSingleDoc */ true);
-      const ampdoc = ampdocServiceFor(iframe.contentWindow).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(iframe.contentWindow).getAmpDoc();
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
       installCustomElements(iframe.contentWindow);
       installAmpdocServices(ampdoc);
       registerForUnitTest(iframe.contentWindow);
-      resourcesForDoc(ampdoc).ampInitComplete();
+      Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
       installStyles(iframe.contentWindow.document, cssText, () => {
         resolve({
@@ -399,14 +399,15 @@ export function expectPostMessage(sourceWin, targetwin, msg) {
  */
 export function poll(description, condition, opt_onError, opt_timeout) {
   return new Promise((resolve, reject) => {
-    let start = Date.now();
+    const start = Date.now();
+    const end = opt_timeout || 1600;
     function poll() {
       const ret = condition();
       if (ret) {
         clearInterval(interval);
         resolve(ret);
       } else {
-        if (Date.now() - start > (opt_timeout || 1600)) {
+        if (Date.now() - start > end) {
           clearInterval(interval);
           if (opt_onError) {
             reject(opt_onError());
@@ -416,7 +417,7 @@ export function poll(description, condition, opt_onError, opt_timeout) {
         }
       }
     }
-    let interval = setInterval(poll, 8);
+    const interval = setInterval(poll, 8);
     poll();
   });
 }
@@ -447,15 +448,16 @@ export function pollForLayout(win, count, opt_timeout) {
 
 /**
  * @param {!Window} win
+ * @param {number=} opt_timeout
  * @return {!Promise}
  */
-export function expectBodyToBecomeVisible(win) {
+export function expectBodyToBecomeVisible(win, opt_timeout) {
   return poll('expect body to become visible', () => {
     return win && win.document && win.document.body && (
         (win.document.body.style.visibility == 'visible'
             && win.document.body.style.opacity != '0')
         || win.document.body.style.opacity == '1');
-  }, undefined, 5000);
+  }, undefined, opt_timeout || 5000);
 }
 
 /**

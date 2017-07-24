@@ -88,9 +88,9 @@
 
 .i-amphtml-lbv-desc-box.overflow {
   overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
   background-color: rgba(0,0,0,0.7);
-  top: 0 !important;
-  padding-top: 50px !important;
+  top: 50px !important;
 }
 
 .i-amphtml-lbv-desc-box.hide {
@@ -99,18 +99,14 @@
 
 .i-amphtml-lbv-desc-text {
   padding: 20px;
+  position: relative !important;
 }
 
-.i-amphtml-lbv-desc-box.standard .i-amphtml-lbv-desc-text {
+.i-amphtml-lbv-desc-text.non-expanded {
   overflow-y: hidden !important;
+  overflow-x: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
-}
-
-.i-amphtml-lbv-desc-box.overflow .i-amphtml-lbv-desc-text {
-  position: absolute !important;
-  bottom: 0;
-  padding-top: 0;
 }
 
 .i-amphtml-lbv[gallery-view] .i-amphtml-lbv-gallery {

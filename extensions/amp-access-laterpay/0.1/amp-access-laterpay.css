@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+.amp-access-laterpay {
+  position: relative;
+}
+
 @media (min-width: 420px) {
   .amp-access-laterpay {
     width: 420px;
@@ -50,6 +54,15 @@
   align-items: center;
   border-radius: 12px;
   box-shadow: 0 0 10px -1px rgba(0,0,0,.25);
+}
+
+.amp-access-laterpay-sandbox {
+  width: 112%;
+  padding: 15px 10px;
+  background-color: #f2902a;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
 }
 
 .amp-access-laterpay-badge {

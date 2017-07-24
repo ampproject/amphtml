@@ -16,10 +16,9 @@
 
 import {getFixedContainer} from '../../src/full-overlay-frame-child-helper';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
-import {viewerForDoc} from '../services';
+import {Services} from '../services';
 import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
 import {registerServiceBuilderForDoc} from '../service';
-import {resourcesForDoc} from '../services';
 import {
   nativeIntersectionObserverSupported,
 } from '../../src/intersection-observer-polyfill';
@@ -27,7 +26,6 @@ import {layoutRectLtwh} from '../layout-rect';
 import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
-import {vsyncFor} from '../../src/services';
 import {px, setStyles} from '../../src/style';
 
 
@@ -37,7 +35,7 @@ const TAG = 'inabox-viewport';
 
 /** @visibleForTesting */
 export function prepareFixedContainer(win, fixedContainer) {
-  return vsyncFor(win).runPromise({
+  return Services.vsyncFor(win).runPromise({
     measure: state => {
       state.boundingRect = fixedContainer./*OK*/getBoundingClientRect();
     },
@@ -64,7 +62,7 @@ export function prepareFixedContainer(win, fixedContainer) {
 
 /** @visibleForTesting */
 export function resetFixedContainer(win, fixedContainer) {
-  return vsyncFor(win).mutatePromise(() => {
+  return Services.vsyncFor(win).mutatePromise(() => {
     setStyles(dev().assertElement(win.document.body), {
       'background': 'transparent',
     });
@@ -137,26 +135,26 @@ export class ViewportBindingInabox {
 
   /** @override */
   connect() {
+    this.listenForPosition_();
+  }
+
+  /** @private */
+  listenForPosition_() {
     if (nativeIntersectionObserverSupported(this.win)) {
       // Using native IntersectionObserver, no position data needed
       // from host doc.
       return;
     }
+
     this.iframeClient_.makeRequest(
         MessageType.SEND_POSITIONS, MessageType.POSITION,
         data => {
           dev().fine(TAG, 'Position changed: ', data);
           const oldViewportRect = this.viewportRect_;
-          const oldSelfRect = this.boxRect_;
           this.viewportRect_ = data.viewport;
-          this.boxRect_ = data.target;
-          if (isChanged(this.boxRect_, oldSelfRect)) {
-            // Remeasure all AMP elements once iframe position is changed.
-            // Because all layout boxes are calculated relatively to the
-            // iframe position.
-            this.remeasureAllElements_();
-            // TODO: fire DOM mutation event once we handle them
-          }
+
+          this.updateBoxRect_(data.target);
+
           if (isResized(this.viewportRect_, oldViewportRect)) {
             this.resizeObservable_.fire();
           }
@@ -204,11 +202,37 @@ export class ViewportBindingInabox {
     return this.viewportRect_.left;
   }
 
-  remeasureAllElements_() {
-    const resources = resourcesForDoc(this.win.document).get();
-    for (let i = 0; i < resources.length; i++) {
-      resources[i].measure();
+  /**
+   * @param {!../layout-rect.LayoutRectDef|undefined} boxRect
+   * @private
+   */
+  updateBoxRect_(boxRect) {
+    if (!boxRect) {
+      return;
     }
+    if (isChanged(boxRect, this.boxRect_)) {
+      dev().fine(TAG, 'Updating viewport box rect: ', boxRect);
+
+      this.boxRect_ = boxRect;
+      // Remeasure all AMP elements once iframe position or size are changed.
+      // Because all layout boxes are calculated relatively to the
+      // iframe position.
+      this.remeasureAllElements_();
+      // TODO: fire DOM mutation event once we handle them
+    }
+  }
+
+  /**
+   * @return {!Array<!../service/resource.Resource>}
+   * @visibleForTesting
+   */
+  getChildResources() {
+    return Services.resourcesForDoc(this.win.document).get();
+  }
+
+  /** @private */
+  remeasureAllElements_() {
+    this.getChildResources().forEach(resource => resource.measure());
   }
 
   /** @override */
@@ -224,7 +248,6 @@ export class ViewportBindingInabox {
    * @private
    */
   tryToEnterOverlayMode_() {
-    // TODO(alanorozco): Update viewport measurement from host message.
     return this.prepareFixedContainer_()
         .then(() => this.requestFullOverlayFrame_());
   }
@@ -276,11 +299,13 @@ export class ViewportBindingInabox {
    */
   requestFullOverlayFrame_() {
     return new Promise((resolve, reject) => {
-      this.iframeClient_.makeRequest(
+      const unlisten = this.iframeClient_.makeRequest(
           MessageType.FULL_OVERLAY_FRAME,
           MessageType.FULL_OVERLAY_FRAME_RESPONSE,
           response => {
+            unlisten();
             if (response.success) {
+              this.updateBoxRect_(response.boxRect);
               resolve();
             } else {
               reject('Request to open lightbox rejected by host document');
@@ -295,10 +320,14 @@ export class ViewportBindingInabox {
    */
   requestCancelFullOverlayFrame_() {
     return new Promise(resolve => {
-      this.iframeClient_.makeRequest(
+      const unlisten = this.iframeClient_.makeRequest(
           MessageType.CANCEL_FULL_OVERLAY_FRAME,
           MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
-          resolve);
+          response => {
+            unlisten();
+            this.updateBoxRect_(response.boxRect);
+            resolve();
+          });
     });
   }
 
@@ -326,7 +355,7 @@ export class ViewportBindingInabox {
  */
 export function installInaboxViewportService(ampdoc) {
   const binding = new ViewportBindingInabox(ampdoc.win);
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   registerServiceBuilderForDoc(ampdoc,
       'viewport',
       function() {

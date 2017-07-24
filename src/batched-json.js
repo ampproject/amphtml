@@ -15,7 +15,7 @@
  */
 
 import {assertHttpsUrl} from './url';
-import {batchedXhrFor, urlReplacementsForDoc} from './services';
+import {Services} from './services';
 import {getValueForExpr} from './json';
 
 /**
@@ -32,14 +32,14 @@ import {getValueForExpr} from './json';
  */
 export function fetchBatchedJsonFor(ampdoc, element, opt_expr) {
   const url = assertHttpsUrl(element.getAttribute('src'), element);
-  return urlReplacementsForDoc(ampdoc).expandAsync(url).then(src => {
+  return Services.urlReplacementsForDoc(ampdoc).expandAsync(url).then(src => {
     const opts = {};
     if (element.hasAttribute('credentials')) {
       opts.credentials = element.getAttribute('credentials');
     } else {
       opts.requireAmpResponseSourceOrigin = false;
     }
-    return batchedXhrFor(ampdoc.win).fetchJson(src, opts);
+    return Services.batchedXhrFor(ampdoc.win).fetchJson(src, opts);
   }).then(res => res.json()).then(data => {
     if (data == null) {
       throw new Error('Response is undefined.');

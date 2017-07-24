@@ -20,10 +20,8 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {serializeQueryString} from '../../../src/url';
 import {getTimingDataSync} from '../../../src/service/variable-source';
-import {urlReplacementsForDoc} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {CommonSignals} from '../../../src/common-signals';
-import {analyticsForDoc} from '../../../src/analytics';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -128,11 +126,9 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
   /**
    * @param {!Window} win  Parent window object.
    * @param {!Element} element  Parent element object.
-   * @param {string} namespace  Namespace for page-level info.  (E.g.,
-   *   'amp' vs 'a4a'.)
    * @param {number} slotId
    */
-  constructor(win, element, namespace, slotId) {
+  constructor(win, element, slotId) {
     super();
 
     /** @private {!Window} @const */
@@ -142,7 +138,8 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     this.element_ = element;
 
     /** @private {string} @const */
-    this.namespace_ = namespace;
+    this.namespace_ =
+      element.getAttribute('data-a4a-upgrade-type') ? 'a4a' : 'amp';
 
     /** @private {number} @const */
     this.slotId_ = slotId;
@@ -175,10 +172,10 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
      * @private {!../../../src/service/url-replacements-impl.UrlReplacements}
      * @const
      */
-    this.urlReplacer_ = urlReplacementsForDoc(element);
+    this.urlReplacer_ = Services.urlReplacementsForDoc(element);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(element);
+    this.viewer_ = Services.viewerForDoc(element);
   }
 
   /**
@@ -276,7 +273,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * @override
    */
   addPingsForVisibility(element) {
-    analyticsForDoc(element, true).then(analytics => {
+    Services.analyticsForDoc(element, true).then(analytics => {
       const signals = element.signals();
       const readyPromise = Promise.race([
         signals.whenSignal(CommonSignals.INI_LOAD),

@@ -28,7 +28,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {isObject} from '../../../src/types';
 import {dict} from '../../../src/utils/object';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {startsWith} from '../../../src/string';
 
 /**
@@ -139,7 +139,7 @@ class AmpYoutube extends AMP.BaseElement {
     }
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @return {string} */
@@ -305,7 +305,7 @@ class AmpYoutube extends AMP.BaseElement {
           this.playerState_ == PlayerStates.ENDED) {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
       } else if (this.playerState_ == PlayerStates.PLAYING) {
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       }
     } else if (data['event'] == 'infoDelivery' &&
         data['info'] && data['info']['muted'] !== undefined) {
@@ -431,6 +431,24 @@ class AmpYoutube extends AMP.BaseElement {
    */
   hideControls() {
     // Not supported.
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 };
 

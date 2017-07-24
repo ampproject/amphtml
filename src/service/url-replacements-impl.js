@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-import {accessServiceForDocOrNull} from '../services';
-import {cidForDoc} from '../services';
-import {variantForOrNull} from '../services';
-import {shareTrackingForOrNull} from '../services';
+import {Services} from '../services';
 import {dev, user, rethrowAsync} from '../log';
-import {documentInfoForDoc} from '../services';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
 import {parseUrl, removeFragment, parseQueryString,
   addParamsToUrl} from '../url';
-import {viewerForDoc} from '../services';
-import {viewportForDoc} from '../services';
-import {userNotificationManagerFor} from '../services';
-import {activityForDoc} from '../services';
 import {getTrackImpressionPromise} from '../impression.js';
 import {
   VariableSource,
@@ -74,9 +66,10 @@ export class GlobalVariableSource extends VariableSource {
 
     /**
      * @private
-     * @const {function(!./ampdoc-impl.AmpDoc):!Promise<?AccessService>}
+     * @const {function(!./ampdoc-impl.AmpDoc):
+     *     !Promise<?../../extensions/amp-access/0.1/amp-access.AccessService>}
      */
-    this.getAccessService_ = accessServiceForDocOrNull;
+    this.getAccessService_ = Services.accessServiceForDocOrNull;
 
     /** @private {?Promise<?Object<string, string>>} */
     this.variants_ = null;
@@ -106,7 +99,7 @@ export class GlobalVariableSource extends VariableSource {
   initialize() {
 
     /** @const {!./viewport-impl.Viewport} */
-    const viewport = viewportForDoc(this.ampdoc);
+    const viewport = Services.viewportForDoc(this.ampdoc);
 
     // Returns a random value for cache busters.
     this.set('RANDOM', () => {
@@ -150,7 +143,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the referrer URL.
     this.setAsync('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
-      return viewerForDoc(this.ampdoc).getReferrerUrl();
+      return Services.viewerForDoc(this.ampdoc).getReferrerUrl();
     }));
 
     // Returns the title of this AMP document.
@@ -238,12 +231,12 @@ export class GlobalVariableSource extends VariableSource {
         // If no `opt_userNotificationId` argument is provided then
         // assume consent is given by default.
       if (opt_userNotificationId) {
-        consent = userNotificationManagerFor(this.ampdoc.win)
+        consent = Services.userNotificationManagerFor(this.ampdoc.win)
               .then(service => {
                 return service.get(opt_userNotificationId);
               });
       }
-      return cidForDoc(this.ampdoc).then(cid => {
+      return Services.cidForDoc(this.ampdoc).then(cid => {
         return cid.get({
           scope: dev().assertString(scope),
           createCookieIfNotPresent: true,
@@ -257,7 +250,7 @@ export class GlobalVariableSource extends VariableSource {
         // A temporary work around to extract Client ID from _ga cookie. #5761
         // TODO: replace with "filter" when it's in place. #2198
         const cookieName = opt_cookieName || scope;
-        if (cookieName == '_ga') {
+        if (cid && cookieName == '_ga') {
           cid = extractClientIdFromGaCookie(cid);
         }
 
@@ -366,6 +359,12 @@ export class GlobalVariableSource extends VariableSource {
           .toLowerCase();
     });
 
+    // Returns the user agent.
+    this.set('USER_AGENT', () => {
+      const nav = this.ampdoc.win.navigator;
+      return nav.userAgent;
+    });
+
     // Returns the time it took to load the whole page. (excludes amp-* elements
     // that are not rendered by the system yet.)
     this.setTimingResolver_(
@@ -418,14 +417,15 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns an identifier for the viewer.
     this.setAsync('VIEWER', () => {
-      return viewerForDoc(this.ampdoc).getViewerOrigin().then(viewer => {
-        return viewer == undefined ? '' : viewer;
-      });
+      return Services.viewerForDoc(this.ampdoc)
+          .getViewerOrigin().then(viewer => {
+            return viewer == undefined ? '' : viewer;
+          });
     });
 
     // Returns the total engaged time since the content became viewable.
     this.setAsync('TOTAL_ENGAGED_TIME', () => {
-      return activityForDoc(this.ampdoc).then(activity => {
+      return Services.activityForDoc(this.ampdoc).then(activity => {
         return activity.getTotalEngagedTime();
       });
     });
@@ -459,8 +459,9 @@ export class GlobalVariableSource extends VariableSource {
     this.set('AMP_VERSION', () => '$internalRuntimeVersion$');
 
     this.set('BACKGROUND_STATE', () => {
-      return viewerForDoc(this.ampdoc).isVisible() ? '0' : '1';
+      return Services.viewerForDoc(this.ampdoc).isVisible() ? '0' : '1';
     });
+
   }
 
   /**
@@ -470,13 +471,14 @@ export class GlobalVariableSource extends VariableSource {
    * @template T
    */
   getDocInfoValue_(getter) {
-    return getter(documentInfoForDoc(this.ampdoc));
+    return getter(Services.documentInfoForDoc(this.ampdoc));
   }
 
   /**
    * Resolves the value via access service. If access service is not configured,
    * the resulting value is `null`.
-   * @param {function(!AccessService):(T|!Promise<T>)} getter
+   * @param {function(!../../extensions/amp-access/0.1/amp-access.AccessService
+   *     ):(T|!Promise<T>)} getter
    * @param {string} expr
    * @return {T|null}
    * @template T
@@ -521,7 +523,7 @@ export class GlobalVariableSource extends VariableSource {
    */
   getVairiantsValue_(getter, expr) {
     if (!this.variants_) {
-      this.variants_ = variantForOrNull(this.ampdoc.win);
+      this.variants_ = Services.variantForOrNull(this.ampdoc.win);
     }
     return this.variants_.then(variants => {
       user().assert(variants,
@@ -541,7 +543,8 @@ export class GlobalVariableSource extends VariableSource {
    */
   getShareTrackingValue_(getter, expr) {
     if (!this.shareTrackingFragments_) {
-      this.shareTrackingFragments_ = shareTrackingForOrNull(this.ampdoc.win);
+      this.shareTrackingFragments_ =
+          Services.shareTrackingForOrNull(this.ampdoc.win);
     }
     return this.shareTrackingFragments_.then(fragments => {
       user().assert(fragments, 'To use variable %s, ' +
@@ -750,7 +753,7 @@ export class UrlReplacements {
     * @return {boolean}
     */
   isAllowedOrigin_(url) {
-    const docInfo = documentInfoForDoc(this.ampdoc);
+    const docInfo = Services.documentInfoForDoc(this.ampdoc);
 
     if (url.origin == parseUrl(docInfo.canonicalUrl).origin ||
         url.origin == parseUrl(docInfo.sourceUrl).origin) {

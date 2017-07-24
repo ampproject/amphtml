@@ -16,8 +16,15 @@
 
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
+import {
+  PlayingStates,
+  VideoAnalyticsDetailsDef,
+  VideoAnalyticsEvents,
+} from '../../../src/video-interface';
+import {dev, user} from '../../../src/log';
+import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {startsWith} from '../../../src/string';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
@@ -103,7 +110,7 @@ export class CustomEventTracker extends EventTracker {
     super(root);
 
     /** @const @private {!Object<string, !Observable<!AnalyticsEvent>>} */
-    this.observers_ = {};
+    this.observables_ = {};
 
     /**
      * Early events have to be buffered because there's no way to predict
@@ -111,6 +118,14 @@ export class CustomEventTracker extends EventTracker {
      * @private {!Object<string, !Array<!AnalyticsEvent>>|undefined}
      */
     this.buffer_ = {};
+
+    /**
+     * Sandbox events get their own buffer, because handler to those events will
+     * be added after parent element's layout. (Time varies, can be later than 10s)
+     * sandbox events buffer will never expire but will cleared when handler is ready.
+     * @private {!Object<string, !Array<!AnalyticsEvent>|undefined>|undefined}
+     */
+    this.sandboxBuffer_ = {};
 
     // Stop buffering of custom events after 10 seconds. Assumption is that all
     // `amp-analytics` elements will have been instrumented by this time.
@@ -122,22 +137,14 @@ export class CustomEventTracker extends EventTracker {
   /** @override */
   dispose() {
     this.buffer_ = undefined;
-    for (const k in this.observers_) {
-      this.observers_[k].removeAll();
+    this.sandboxBuffer_ = undefined;
+    for (const k in this.observables_) {
+      this.observables_[k].removeAll();
     }
   }
 
   /** @override */
   add(context, eventType, config, listener) {
-    // Push recent events if any.
-    const buffer = this.buffer_ && this.buffer_[eventType];
-    if (buffer) {
-      setTimeout(() => {
-        buffer.forEach(event => {
-          listener(event);
-        });
-      }, 1);
-    }
     let selector = config['selector'];
     if (!selector) {
       selector = ':root';
@@ -147,13 +154,39 @@ export class CustomEventTracker extends EventTracker {
     const targetReady =
         this.root.getElement(context, selector, selectionMethod);
 
-    let observers = this.observers_[eventType];
-    if (!observers) {
-      observers = new Observable();
-      this.observers_[eventType] = observers;
+    const isSandboxEvent = startsWith(eventType, 'sandbox-');
+
+    // Push recent events if any.
+    const buffer = isSandboxEvent ?
+        this.sandboxBuffer_ && this.sandboxBuffer_[eventType] :
+        this.buffer_ && this.buffer_[eventType];
+
+    if (buffer) {
+      const bufferLength = buffer.length;
+      targetReady.then(target => {
+        setTimeout(() => {
+          for (let i = 0; i < bufferLength; i++) {
+            const event = buffer[i];
+            if (target.contains(event.target)) {
+              listener(event);
+            }
+          }
+          if (isSandboxEvent) {
+            // We assume sandbox event will only has single listener.
+            // It is safe to clear buffer once handler is ready.
+            this.sandboxBuffer_[eventType] = undefined;
+          }
+        }, 1);
+      });
     }
 
-    return this.observers_[eventType].add(event => {
+    let observables = this.observables_[eventType];
+    if (!observables) {
+      observables = new Observable();
+      this.observables_[eventType] = observables;
+    }
+
+    return this.observables_[eventType].add(event => {
       // Wait for target selected
       targetReady.then(target => {
         if (target.contains(event.target)) {
@@ -168,20 +201,29 @@ export class CustomEventTracker extends EventTracker {
    * @param {!AnalyticsEvent} event
    */
   trigger(event) {
-    // Buffer still exists - enqueue.
-    if (this.buffer_) {
-      let buffer = this.buffer_[event.type];
-      if (!buffer) {
-        buffer = [];
-        this.buffer_[event.type] = buffer;
-      }
-      buffer.push(event);
-    }
+    const eventType = event.type;
+    const isSandboxEvent = startsWith(eventType, 'sandbox-');
+    const observables = this.observables_[eventType];
 
     // If listeners already present - trigger right away.
-    const observers = this.observers_[event.type];
-    if (observers) {
-      observers.fire(event);
+    if (observables) {
+      observables.fire(event);
+      if (isSandboxEvent) {
+        // No need to buffer sandbox event if handler ready
+        return;
+      }
+    }
+
+    // Create buffer and enqueue buffer if needed
+    if (isSandboxEvent) {
+      this.sandboxBuffer_[eventType] = this.sandboxBuffer_[eventType] || [];
+      this.sandboxBuffer_[eventType].push(event);
+    } else {
+      // Check if buffer has expired
+      if (this.buffer_) {
+        this.buffer_[eventType] = this.buffer_[eventType] || [];
+        this.buffer_[eventType].push(event);
+      }
     }
   }
 }
@@ -361,6 +403,81 @@ export class IniLoadTracker extends EventTracker {
       signals.whenSignal(CommonSignals.INI_LOAD),
       signals.whenSignal(CommonSignals.LOAD_END),
     ]);
+  }
+}
+
+
+/**
+ * Tracks video session events
+ */
+export class VideoEventTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+
+    /** @private @const {!Observable<!Event>} */
+    this.sessionObservable_ = new Observable();
+
+    /** @private @const */
+    this.boundOnSession_ = e => {
+      this.sessionObservable_.fire(e);
+    };
+
+    Object.keys(VideoAnalyticsEvents).forEach(key => {
+      this.root.getRoot().addEventListener(
+          VideoAnalyticsEvents[key], this.boundOnSession_);
+    });
+  }
+
+  /** @override */
+  dispose() {
+    Object.keys(VideoAnalyticsEvents).forEach(key => {
+      this.root.getRoot().removeEventListener(
+          VideoAnalyticsEvents[key], this.boundOnSession_);
+    });
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    const videoSpec = config['videoSpec'] || {};
+    const selector = config['selector'] || videoSpec['selector'];
+    const selectionMethod = config['selectionMethod'] || null;
+    const targetReady =
+        this.root.getElement(context, selector, selectionMethod);
+
+    const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
+    const excludeAutoplay = videoSpec['exclude-autoplay'];
+    const on = config['on'];
+
+    return this.sessionObservable_.add(event => {
+      const type = event.type;
+      const details = /** @type {!VideoAnalyticsDetailsDef} */ (getData(event));
+      const isVisibleType = type === VideoAnalyticsEvents.SESSION_VISIBLE;
+      const normalizedType =
+          isVisibleType ? VideoAnalyticsEvents.SESSION : type;
+
+      if (normalizedType !== on) {
+        return;
+      }
+
+      if (isVisibleType && !endSessionWhenInvisible) {
+        return;
+      }
+
+      if (excludeAutoplay && details['state'] === PlayingStates.PLAYING_AUTO) {
+        return;
+      }
+
+      const el = dev().assertElement(event.target,
+          'No target specified by video session event.');
+      targetReady.then(target => {
+        if (target.contains(el)) {
+          listener(new AnalyticsEvent(target, normalizedType, details));
+        }
+      });
+    });
   }
 }
 

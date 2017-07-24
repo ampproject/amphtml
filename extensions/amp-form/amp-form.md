@@ -43,9 +43,9 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-form` extension allows the usage of forms and input fields in an AMP document. The extension allows polyfilling some of the missing behaviors in browsers.
+The `amp-form` extension allows the usage of forms to submit input fields in an AMP document. The extension allows polyfilling some of the missing behaviors in browsers.
 
-The `amp-form` extension **MUST** be loaded if you're using `<form>` or any input tags, otherwise your document will be invalid!
+The `amp-form` extension **MUST** be loaded if you're using `<form>`, otherwise your document will be invalid! Use of `input` tags for purposes other than submitting their values (e.g. inputs not inside a `<form>`) is valid without loading `amp-form` extension.
 
 <div>
   <amp-iframe height="671"

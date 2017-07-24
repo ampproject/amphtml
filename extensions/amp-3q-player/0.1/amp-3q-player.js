@@ -16,15 +16,15 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isObject} from '../../../src/types';
-import {listen} from '../../../src/event-helper';
+import {listen, getData} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -71,7 +71,7 @@ class Amp3QPlayer extends AMP.BaseElement {
     });
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @override */
@@ -89,8 +89,9 @@ class Amp3QPlayer extends AMP.BaseElement {
     );
 
     this.applyFillContent(iframe, true);
-    iframe.src = 'https://playout.3qsdn.com/' +
-      encodeURIComponent(this.dataId) + '?autoplay=false&amp=true';
+    iframe.src = 'https://playout.3qsdn.com/'
+        + encodeURIComponent(dev().assertString(this.dataId))
+        + '?autoplay=false&amp=true';
     this.element.appendChild(iframe);
 
     return this.loadPromise(this.iframe_).then(() =>
@@ -138,18 +139,20 @@ class Amp3QPlayer extends AMP.BaseElement {
       }
     }
 
-    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
+    const data = isObject(getData(event))
+        ? getData(event)
+        : tryParseJson(getData(event));
     if (data === undefined) {
       return;
     }
 
-    switch (data.data) {
+    switch (data['data']) {
       case 'ready':
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
         this.playerReadyResolver_();
         break;
       case 'playing':
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
         break;
       case 'paused':
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
@@ -210,6 +213,24 @@ class Amp3QPlayer extends AMP.BaseElement {
   /** @override */
   hideControls() {
     this.sdnPostMessage_('hideControlbar');
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 };
 

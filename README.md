@@ -39,3 +39,7 @@ The AMP Project accepts responsible security disclosures through the [Google App
 ## Code of conduct
 
 The AMP Project strives for a positive and growing project community that provides a safe environment for everyone.  All members, committers and volunteers in the community are required to act according to the [code of conduct](CODE_OF_CONDUCT.md).
+
+## License
+
+AMP HTML is licensed under the [Apache License, Version 2.0](LICENSE).

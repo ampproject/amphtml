@@ -240,6 +240,10 @@ The `amp-user-notification` exposes the following actions that you can use [AMP 
     <td>dismiss (default)</td>
     <td>Closes the user notification; see <a href="#usage">usage</a> for more details.</td>
   </tr>
+  <tr>
+    <td>optoutOfCid</td>
+    <td>User will be opted out of Client ID generation for all scopes.</td>
+  </tr>
 </table>
 
 ## Delaying Client ID generation until the notification is acknowledged

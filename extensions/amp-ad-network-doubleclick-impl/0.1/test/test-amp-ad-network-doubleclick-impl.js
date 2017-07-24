@@ -25,24 +25,30 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
-import {extensionsFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
   constructSRABlockParameters,
   TFCD,
   resetSraStateForTesting,
+  resetRtcStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
+import {
+  DOUBLECLICK_A4A_EXPERIMENT_NAME,
+  DOUBLECLICK_EXPERIMENT_FEATURE,
+} from '../doubleclick-a4a-config';
 import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
+import {
+  toggleExperiment,
+  forceExperimentBranch,
+} from '../../../../src/experiments';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {Xhr, FetchResponseHeaders} from '../../../../src/service/xhr-impl';
@@ -145,76 +151,40 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         impl = new AmpAdNetworkDoubleclickImpl(element);
         impl.size_ = size;
         installExtensionsService(impl.win);
-        const extensions = extensionsFor(impl.win);
+        const extensions = Services.extensionsFor(impl.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });
 
-    it('without signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        return impl.extractCreativeAndSignature(
-            creative,
-            {
-              get() { return undefined; },
-              has() { return false; },
-            }).then(adResponse => {
-              expect(adResponse).to.deep.equal(
-                  {creative, signature: null, size});
-              expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be
-                  .called;
-            });
-      });
+    it('should not load amp-analytics without an analytics header', () => {
+      expect(impl.extractSize({
+        get() {
+          return undefined;
+        },
+        has() {
+          return false;
+        },
+      })).to.deep.equal(size);
+      expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
     });
-    it('with signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        return impl.extractCreativeAndSignature(
-            creative,
-            {
-              get(name) {
-                return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-              },
-              has(name) {
-                return name === 'X-AmpAdSignature';
-              },
-            }).then(adResponse => {
-              expect(adResponse).to.deep.equal(
-              {creative, signature: base64UrlDecodeToBytes('AQAB'), size});
-              expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be
-                  .called;
-            });
-      });
-    });
-    it('with analytics', () => {
-      return utf8Encode('some creative').then(creative => {
-        const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
-        return impl.extractCreativeAndSignature(
-            creative,
-            {
-              get(name) {
-                switch (name) {
-                  case 'X-AmpAnalytics':
-                    return JSON.stringify({url});
-                  case 'X-AmpAdSignature':
-                    return 'AQAB';
-                  default:
-                    return undefined;
-                }
-              },
-              has(name) {
-                return !!this.get(name);
-              },
-            }).then(adResponse => {
-              expect(adResponse).to.deep.equal(
-                  {
-                    creative,
-                    signature: base64UrlDecodeToBytes('AQAB'),
-                    size,
-                  });
-              expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
-            // exact value of ampAnalyticsConfig covered in
-            // ads/google/test/test-utils.js
-            });
-      });
+    it('should load amp-analytics with an analytics header', () => {
+      const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
+      expect(impl.extractSize({
+        get(name) {
+          switch (name) {
+            case 'X-AmpAnalytics':
+              return JSON.stringify({url});
+            default:
+              return undefined;
+          }
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      })).to.deep.equal(size);
+      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+      // exact value of ampAnalyticsConfig covered in
+      // ads/google/test/test-utils.js
     });
   });
 
@@ -235,6 +205,18 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         impl.size_ = {width: 200, height: 50};
         impl.iframe = impl.win.document.createElement('iframe');
         installExtensionsService(impl.win);
+        // Temporary fix for local test failure.
+        sandbox.stub(impl,
+            'getIntersectionElementLayoutBox', () => {
+              return {
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                width: 320,
+                height: 50,
+              };
+            });
       });
     });
 
@@ -390,8 +372,11 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
     });
 
-    afterEach(() =>
-        toggleExperiment(window, 'dc-use-attr-for-format', false));
+    afterEach(() => {
+      toggleExperiment(window, 'dc-use-attr-for-format', false);
+      document.body.removeChild(element);
+      window['ampAdGoogleIfiCounter'] = 0;
+    });
 
     it('returns the right URL', () => {
       new AmpAd(element).upgradeCallback();
@@ -463,20 +448,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         // numbers, but we know that the values should be numeric.
         expect(url).to.match(/sz=[0-9]+x[0-9]+/));
     });
-    it('has correct format when dc-use-attr-for-format is on', () => {
-      toggleExperiment(window, 'dc-use-attr-for-format', true);
-      new AmpAd(element).upgradeCallback();
-      const width = impl.element.getAttribute('width');
-      const height = impl.element.getAttribute('height');
-      impl.onLayoutMeasure();
-      return impl.getAdUrl().then(url =>
-        // With exp dc-use-attr-for-format off, we can't test for specific
-        // numbers, but we know that the values should be numeric.
-        expect(url).to.match(new RegExp(`sz=${width}x${height}`)));
-    });
-    it('has correct format when width=auto and dc-use-attr-for-format is on',
+    it('has correct format when width == "auto"',
         () => {
-          toggleExperiment(window, 'dc-use-attr-for-format', true);
           element.setAttribute('width', 'auto');
           new AmpAd(element).upgradeCallback();
           expect(impl.element.getAttribute('width')).to.equal('auto');
@@ -485,7 +458,135 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               // Ensure that "auto" doesn't appear anywhere here:
               expect(url).to.match(/sz=[0-9]+x[0-9]+/));
         });
+    it('should add RTC params if RTC is used', () => {
+      const rtcConf = createElementWithAttributes(
+          document, 'script',
+          {type: 'application/json', id: 'amp-rtc'});
+      rtcConf.innerHTML = `{
+          "endpoint": "https://example-publisher.com/rtc/",
+          "sendAdRequestOnFailure": false
+          }`;
+      document.head.appendChild(rtcConf);
+      const rtcResponse = {targeting: {age: '18-24'}};
+      const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+      xhrMock.returns(
+          Promise.resolve({
+            redirected: false,
+            status: 200,
+            text: () => {
+              return Promise.resolve(JSON.stringify(rtcResponse));
+            },
+          })
+      );
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/(\?|&)artc=[0-9]+(&|$)/);
+        expect(url).to.match(
+            /(\?|&)ard=example-publisher.com/);
+        expect(url).to.match(/(\?|&)ati=2(&|$)/);
+      });
+
+    });
+    it('should add param artc=-1 if RTC request times out', () => {
+      const rtcConf = createElementWithAttributes(
+          document, 'script',
+          {type: 'application/json', id: 'amp-rtc'});
+      rtcConf.innerHTML = `{
+          "endpoint": "https://example-publisher.com/rtc/",
+          "sendAdRequestOnFailure": false
+          }`;
+      document.head.appendChild(rtcConf);
+      const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+      // never resolve this promise
+      const xhrResponse = new Promise(() => {});
+      xhrMock.returns(xhrResponse);
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().catch(err => {
+        expect(err.message.match(/^timeout.*/)).to.be.ok;
+      });
+
+    });
+    it('has correct format with height/width override',
+        () => {
+          element.setAttribute('data-override-width', '123');
+          element.setAttribute('data-override-height', '456');
+          new AmpAd(element).upgradeCallback();
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+              expect(url).to.contain('sz=123x456&'));
+        });
+    it('has correct format with height/width override and multiSize',
+        () => {
+          element.setAttribute('data-override-width', '123');
+          element.setAttribute('data-override-height', '456');
+          element.setAttribute('data-multi-size', '1x2,3x4');
+          element.setAttribute('data-multi-size-validation', 'false');
+          new AmpAd(element).upgradeCallback();
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+              expect(url).to.contain('sz=123x456%7C1x2%7C3x4&'));
+        });
+    it('has correct format with auto height/width and multiSize',
+        () => {
+          element.setAttribute('data-override-width', '123');
+          element.setAttribute('data-override-height', '456');
+          element.setAttribute('data-multi-size', '1x2,3x4');
+          element.setAttribute('data-multi-size-validation', 'false');
+          new AmpAd(element).upgradeCallback();
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+              // Ensure that "auto" doesn't appear anywhere here:
+              expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
+        });
+    it('should have the correct ifi numbers - no refresh', function() {
+      // When ran locally, this test tends to exceed 2000ms timeout.
+      this.timeout(5000);
+      // Reset counter for purpose of this test.
+      delete window['ampAdGoogleIfiCounter'];
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url1 => {
+        expect(url1).to.match(/ifi=1/);
+        return impl.getAdUrl().then(url2 => {
+          expect(url2).to.match(/ifi=2/);
+          return impl.getAdUrl().then(url3 => {
+            expect(url3).to.match(/ifi=3/);
+          });
+        });
+      });
+    });
+    it('has correct rc and ifi after refresh', () => {
+      // We don't really care about the behavior of the following methods, so
+      // we'll just stub them out so that refresh() can run without tripping any
+      // unrelated errors.
+      sandbox.stub(AmpA4A.prototype, 'initiateAdRequest',
+          () => impl.adPromise_ = Promise.resolve());
+      const tearDownSlotMock = sandbox.stub(AmpA4A.prototype, 'tearDownSlot');
+      tearDownSlotMock.returns(undefined);
+      const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
+      destroyFrameMock.returns(undefined);
+      impl.mutateElement = func => func();
+      impl.togglePlaceholder = sandbox.spy();
+      impl.getAmpDoc = () => impl.win.document;
+      impl.getResource = () => {
+        return {
+          layoutCanceled: () => {},
+        };
+      };
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url1 => {
+        expect(url1).to.not.match(/(\?|&)rc=[0-9]+(&|$)/);
+        expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
+        return impl.refresh(() => {}).then(() => {
+          return impl.getAdUrl().then(url2 => {
+            expect(url2).to.match(/(\?|&)rc=1(&|$)/);
+            expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
+          });
+        });
+      });
+    });
   });
+
+
 
   describe('#unlayoutCallback', () => {
     it('should call #resetSlot, remove child iframe, but keep other children',
@@ -494,6 +595,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             width: '300',
             height: '150',
           }).then(() => {
+            impl.buildCallback();
             const slotIdBefore = impl.element.getAttribute(
                 'data-amp-slot-index');
 
@@ -543,6 +645,98 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         element.setAttribute('data-slot', slotName);
         expect(getNetworkId(element)).to.equal(testValues[slotName]);
       });
+    });
+  });
+
+  describe('#SRA enabled', () => {
+    let fixture;
+
+    beforeEach(() => {
+      return createIframePromise().then(f => {
+        setupForAdTesting(f);
+        fixture = f;
+      });
+    });
+
+    it('should be disabled by default', () => {
+      const element = createElementWithAttributes(
+          fixture.doc, 'amp-ad', {
+            type: 'doubleclick',
+            height: 320,
+            width: 50,
+          });
+      fixture.doc.body.appendChild(element);
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(impl.useSra).to.be.false;
+    });
+
+    it('should force refresh off when enabled', () => {
+      const metaElement = createElementWithAttributes(fixture.doc, 'meta', {
+        name: 'amp-ad-doubleclick-sra',
+      });
+      fixture.doc.head.appendChild(metaElement);
+      const element = createElementWithAttributes(
+          fixture.doc, 'amp-ad', {
+            type: 'doubleclick',
+            height: 320,
+            width: 50,
+          });
+      fixture.doc.body.appendChild(element);
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(impl.useSra).to.be.true;
+      impl.layoutCallback();
+      expect(impl.refreshManager_).to.be.null;
+    });
+
+    it('should be enabled if meta tag present', () => {
+      const metaElement = createElementWithAttributes(fixture.doc, 'meta', {
+        name: 'amp-ad-doubleclick-sra',
+      });
+      fixture.doc.head.appendChild(metaElement);
+      const element = createElementWithAttributes(
+          fixture.doc, 'amp-ad', {
+            type: 'doubleclick',
+            height: 320,
+            width: 50,
+          });
+      fixture.doc.body.appendChild(element);
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(impl.useSra).to.be.true;
+    });
+  });
+
+  describe('#SRA AMP creative unlayoutCallback', () => {
+    let impl;
+
+    beforeEach(() => {
+      return createIframePromise().then(f => {
+        setupForAdTesting(f);
+        const element = createElementWithAttributes(
+            f.doc, 'amp-ad', {
+              type: 'doubleclick',
+              height: 320,
+              width: 50,
+              'data-a4a-upgrade-type': 'amp-ad-network-doubleclick-impl',
+            });
+        f.doc.body.appendChild(element);
+        const iframe = createElementWithAttributes(
+            f.doc, 'iframe', {
+              src: 'https://foo.com',
+              height: 320,
+              width: 50,
+            });
+        element.appendChild(iframe);
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+      });
+    });
+
+    it('should not remove if not SRA', () => {
+      expect(impl.shouldUnlayoutAmpCreatives()).to.be.false;
+    });
+
+    it('should remove if SRA and has frame', () => {
+      impl.useSra = true;
+      expect(impl.shouldUnlayoutAmpCreatives()).to.be.true;
     });
   });
 
@@ -624,7 +818,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'data-slot': `/${networkId}/abc/def`,
         });
       element.getAmpDoc = () => {
-        const ampdocService = ampdocServiceFor(doc.defaultView);
+        const ampdocService = Services.ampdocServiceFor(doc.defaultView);
         return ampdocService.getAmpDoc(element);
       };
       element.isBuilt = () => {return true;};
@@ -637,7 +831,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       element.getIntersectionChangeEntry = () => {return null;};
       doc.body.appendChild(element);
       const impl = new AmpAdNetworkDoubleclickImpl(element);
-      impl.useSra_ = true;
+      impl.useSra = true;
       return impl;
     }
 
@@ -746,8 +940,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           for (let i = 0; i < instanceCount; i++) {
             const impl = createA4aSraInstance(network.networkId);
             doubleclickInstances.push(impl);
+            sandbox.stub(impl, 'isValidElement').returns(!invalid);
             if (invalid) {
-              sandbox.stub(impl, 'isValidElement').returns(false);
               impl.element.setAttribute('data-test-invalid', 'true');
             }
           }
@@ -874,5 +1068,344 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     it('should handle mixture of all possible scenarios', () => executeTest(
         [1234, 1234, 101, {networkId: 4567, instances: 2, xhrFail: true}, 202,
         {networkId: 8901, instances: 3, invalidInstances: 1}]));
+  });
+
+  describe('#delayAdRequestEnabled', () => {
+    let impl;
+    beforeEach(() => {
+      return createIframePromise().then(f => {
+        setupForAdTesting(f);
+        impl = new AmpAdNetworkDoubleclickImpl(
+          createElementWithAttributes(f.doc, 'amp-ad', {
+            type: 'doubleclick',
+          }));
+      });
+    });
+
+    it('should return true if in experiment', () => {
+      forceExperimentBranch(impl.win, DOUBLECLICK_A4A_EXPERIMENT_NAME,
+          DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST);
+      expect(impl.delayAdRequestEnabled()).to.be.true;
+    });
+
+    it('should return false if not in experiment', () => {
+      expect(impl.delayAdRequestEnabled()).to.be.false;
+    });
+  });
+
+  describe('#RTC', () => {
+    let impl;
+    let xhrMock;
+
+    function mockRtcExecution(rtcResponse, element, opt_textFunction) {
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      let textFunction = () => {
+        return Promise.resolve(JSON.stringify(rtcResponse));
+      };
+      textFunction = opt_textFunction || textFunction;
+      xhrMock.returns(
+          Promise.resolve({
+            redirected: false,
+            status: 200,
+            text: textFunction,
+          })
+      );
+      impl.populateAdUrlState();
+      return impl.executeRtc_();
+    }
+
+    function setRtcConfig(rtcConfigJson) {
+      const rtcConf = document.getElementById('amp-rtc');
+      rtcConf.innerText = JSON.stringify(rtcConfigJson);
+    }
+
+    beforeEach(() => {
+      resetRtcStateForTesting();
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        element = createElementWithAttributes(document, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+          'layout': 'fixed',
+        });
+        const rtcConf = createElementWithAttributes(
+            document, 'script',
+            {type: 'application/json', id: 'amp-rtc'});
+        rtcConf.innerHTML = JSON.stringify({
+          endpoint: 'https://example-publisher.com/rtc/',
+        });
+        document.head.appendChild(rtcConf);
+        xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+
+      });
+    });
+
+    afterEach(() => {
+      impl = null;
+      xhrMock = null;
+      resetRtcStateForTesting();
+      const rtcConf = document.getElementById('amp-rtc');
+      document.head.removeChild(rtcConf);
+    });
+
+    it('should add just targeting to impl', () => {
+      const targeting = {'sport': 'baseball'};
+      const jsonTargeting = {
+        targeting,
+      };
+      return mockRtcExecution({
+        targeting,
+      }, element).then(() => {
+        expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
+      });
+    });
+
+    it('should add just categoryExclusions to impl', () => {
+      const categoryExclusions = {'sport': 'baseball'};
+      const jsonTargeting = {
+        categoryExclusions,
+      };
+      return mockRtcExecution({
+        categoryExclusions,
+      }, element).then(() => {
+        expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
+      });
+    });
+
+    it('should add targeting and categoryExclusions to impl', () => {
+      const targeting = {'sport': 'baseball'};
+      const categoryExclusions = {'age': '18-25'};
+      const jsonTargeting = {
+        targeting,
+        categoryExclusions,
+      };
+      return mockRtcExecution({
+        targeting,
+        categoryExclusions,
+      }, element).then(() => {
+        expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
+      });
+    });
+
+    it('should deep merge targeting and categoryExclusions from amp-ad', () => {
+      const rtcResponse = {
+        targeting: {'food': {
+          'kids': ['chicken fingers', 'pizza']},
+          'sports': 'baseball'},
+        categoryExclusions: {'age': '18-25'}};
+      const contextualTargeting =
+      '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
+      const jsonTargeting = {
+        targeting: {
+          'food': {
+            'kids': ['chicken fingers', 'pizza'],
+            'adults': 'cheese',
+          },
+          'sports': 'baseball'},
+        categoryExclusions: {'age': '18-25'}};
+      element = createElementWithAttributes(document, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+        'layout': 'fixed',
+        'json': contextualTargeting,
+      });
+      return mockRtcExecution(rtcResponse, element).then(() => {
+        expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
+      });
+    });
+
+    it('should send two RTC callouts per page with SWR', () => {
+      const rtcResponse = {
+        targeting: {'food': {
+          'kids': ['chicken fingers', 'pizza']},
+          'sports': 'baseball'},
+        categoryExclusions: {'age': '18-25'}};
+      let contextualTargeting =
+      '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
+      element = createElementWithAttributes(document, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+        'layout': 'fixed',
+        'json': contextualTargeting,
+      });
+      mockRtcExecution(rtcResponse, element);
+
+      contextualTargeting =
+      '{"targeting": {"food": {"adults": "wine"}}}';
+      const secondElement = createElementWithAttributes(
+          document, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+            'layout': 'fixed',
+            'json': contextualTargeting,
+          });
+      return mockRtcExecution(rtcResponse, secondElement).then(() => {
+        expect(xhrMock).to.be.calledTwice;
+      });
+    });
+
+    it('should send one RTC callout per page with SWR disabled', () => {
+      setRtcConfig({
+        'endpoint': 'https://example-publisher.com/rtc/',
+        'disableStaleWhileRevalidate': true,
+      });
+      const rtcResponse = {
+        targeting: {'food': {
+          'kids': ['chicken fingers', 'pizza']},
+          'sports': 'baseball'},
+        categoryExclusions: {'age': '18-25'}};
+      let contextualTargeting =
+      '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
+      element = createElementWithAttributes(document, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+        'layout': 'fixed',
+        'json': contextualTargeting,
+      });
+      mockRtcExecution(rtcResponse, element);
+
+      contextualTargeting =
+      '{"targeting": {"food": {"adults": "wine"}}}';
+      const secondElement = createElementWithAttributes(
+          document, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+            'layout': 'fixed',
+            'json': contextualTargeting,
+          });
+      return mockRtcExecution(rtcResponse, secondElement).then(() => {
+        expect(xhrMock).to.be.calledOnce;
+      });
+    });
+
+    it('should not send RTC if url invalid', () => {
+      const rtcConf = document.getElementById('amp-rtc');
+      rtcConf.innerText = '{'
+          + '"endpoint": "http://example-publisher.com/rtc/",'
+          + '"sendAdRequestOnFailure": false'
+          + '}';
+
+      const targeting = {'sport': 'baseball'};
+      return mockRtcExecution({
+        targeting,
+      }, element).then(() => {
+        expect(xhrMock).to.not.be.called;
+      });
+    });
+
+    it('should resolve on empty RTC response', () => {
+      return mockRtcExecution('', element).then(() => {
+        // All that we are expecting here is that a Promise.reject doesn't
+        // bubble up
+      }).catch(() => {
+        expect(false).to.be.true;
+      });
+    });
+
+    it('should resolve on RTC failure if specified', () => {
+      const badRtcResponse = 'wrong: "unparseable}';
+      const jsonFunc = () => {
+        return Promise.resolve(JSON.parse(badRtcResponse));
+      };
+      return mockRtcExecution(badRtcResponse, element, jsonFunc).then(() => {
+        // All that we are expecting here is that a Promise.reject doesn't
+        // bubble up
+      }).catch(() => {
+        expect(false).to.be.true;
+      });
+    });
+
+    it('should reject on RTC failure if specified', () => {
+      setRtcConfig({
+        'endpoint': 'https://example-publisher.com/rtc/',
+        'sendAdRequestOnFailure': false,
+      });
+      const badRtcResponse = 'wrong: "unparseable}';
+      const jsonFunc = () => {
+        return Promise.resolve(JSON.parse(badRtcResponse));
+      };
+      return mockRtcExecution(badRtcResponse, element, jsonFunc).then(() => {
+        expect(false).to.be.true;
+      }).catch(err => {
+        expect(err.match(/Unexpected token/)).to.be.ok;
+      });
+    });
+
+    it('should bypass caching if specified', () => {
+      setRtcConfig({
+        'endpoint': 'https://example-publisher.com/rtc/',
+        'sendAdRequestOnFailure': true,
+        'disableStaleWhileRevalidate': true,
+      });
+
+      const targeting = {'sport': 'baseball'};
+      return mockRtcExecution({targeting}, element).then(() => {
+        expect(xhrMock).to.be.calledOnce;
+      });
+    });
+
+    it('should timeout slow response, then do not send without RTC', () => {
+      setRtcConfig({
+        'endpoint': 'https://example-publisher.com/rtc/',
+        'sendAdRequestOnFailure': false,
+      });
+      const targeting = {'sport': 'baseball'};
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+
+      xhrMock.returns(
+          Services.timerFor(window).promise(1200).then(() => {
+            return Promise.resolve({
+              redirected: false,
+              status: 200,
+              json: () => {
+                return Promise.resolve({targeting});
+              },
+            });
+          }));
+      impl.populateAdUrlState();
+      return impl.executeRtc_().then(() => {
+        // this then block should never run.
+        expect(true).to.be.false;
+      }).catch(err => {
+        // Have to get substring, because the error message has
+        // three 0 width blank space characters added to it
+        // automatically by the log constructor.
+        expect(err.substring(0, 7)).to.equal('timeout');
+      });
+    });
+
+    it('should timeout slow response, then send without RTC', () => {
+      setRtcConfig({
+        'endpoint': 'https://example-publisher.com/rtc/',
+      });
+      const targeting = {'sport': 'baseball'};
+
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+
+      xhrMock.returns(
+          Services.timerFor(window).promise(1200).then(() => {
+            return Promise.resolve({
+              redirected: false,
+              status: 200,
+              json: () => {
+                return Promise.resolve({targeting});
+              },
+            });
+          }));
+      impl.populateAdUrlState();
+      return impl.executeRtc_().then(result => {
+        expect(result.artc).to.equal(-1);
+        expect(result.ati).to.equal(3);
+      }).catch(() => {
+        // Should not error.
+        expect(true).to.be.false;
+      });
+    });
   });
 });

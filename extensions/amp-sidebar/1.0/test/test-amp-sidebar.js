@@ -18,16 +18,11 @@
  import {KeyCodes} from '../../../../src/utils/key-codes';
  import {adopt} from '../../../../src/runtime';
  import {createIframePromise} from '../../../../testing/iframe';
- import {platformFor} from '../../../../src/services';
- import {timerFor} from '../../../../src/services';
+ import {Services} from '../../../../src/services';
  import {assertScreenReaderElement} from '../../../../testing/test-helper';
  import {toggleExperiment} from '../../../../src/experiments';
  import * as sinon from 'sinon';
  import '../amp-sidebar';
-
- /** @const */
- const TOOLBAR_MEDIA = '(min-width: 768px)';
-
 
  adopt(window);
 
@@ -60,17 +55,51 @@
          const anchor = iframe.doc.createElement('a');
          anchor.href = '#section1';
          ampSidebar.appendChild(anchor);
-         if (options.toolbar) {
-           const navToolbar = iframe.doc.createElement('nav');
-           navToolbar.setAttribute('toolbar', TOOLBAR_MEDIA);
-           const toolbarList = iframe.doc.createElement('ul');
-           for (let i = 0; i < 3; i++) {
-             const li = iframe.doc.createElement('li');
-             li.innerHTML = 'Toolbar item ' + i;
-             toolbarList.appendChild(li);
-           }
-           navToolbar.appendChild(toolbarList);
-           ampSidebar.appendChild(navToolbar);
+         if (options.toolbars) {
+           // Stub our sidebar operations, doing this here as it will
+           // Ease testing our media queries
+           const impl = ampSidebar.implementation_;
+           sandbox.stub(impl.vsync_,
+               'mutate', callback => {
+                 callback();
+               });
+           sandbox.stub(impl.vsync_,
+               'mutatePromise', callback => {
+                 callback();
+                 return Promise.resolve();
+               });
+           // Create our individual toolbars
+           options.toolbars.forEach(toolbarObj => {
+             const navToolbar = iframe.doc.createElement('nav');
+
+             //Create/Set toolbar-target
+             const toolbarTarget = iframe.doc.createElement('div');
+             if (toolbarObj.toolbarTarget) {
+               toolbarTarget.setAttribute('id',
+                   toolbarObj.toolbarTarget);
+               navToolbar.setAttribute('toolbar-target',
+                   toolbarObj.toolbarTarget);
+             } else {
+               toolbarTarget.setAttribute('id', 'toolbar-target');
+               navToolbar.setAttribute('toolbar-target', 'toolbar-target');
+             }
+             iframe.win.document.body.appendChild(toolbarTarget);
+
+             // Set the toolbar media
+             if (toolbarObj.media) {
+               navToolbar.setAttribute('toolbar', toolbarObj.media);
+             } else {
+               navToolbar.setAttribute('toolbar', '(min-width: 768px)');
+             }
+             const toolbarList = iframe.doc.createElement('ul');
+             for (let i = 0; i < 3; i++) {
+               const li = iframe.doc.createElement('li');
+               li.innerHTML = 'Toolbar item ' + i;
+               toolbarList.appendChild(li);
+             }
+             navToolbar.appendChild(toolbarList);
+             ampSidebar.appendChild(navToolbar);
+           });
          }
          if (options.side) {
            ampSidebar.setAttribute('side', options.side);
@@ -85,7 +114,12 @@
          ampSidebar.setAttribute('id', 'sidebar1');
          ampSidebar.setAttribute('layout', 'nodisplay');
          return iframe.addElement(ampSidebar).then(() => {
-           timer = timerFor(iframe.win);
+           timer = Services.timerFor(iframe.win);
+           if (options.toolbars) {
+             sandbox.stub(timer, 'delay', function(callback) {
+               callback();
+             });
+           }
            return {iframe, ampSidebar};
          });
        });
@@ -104,7 +138,7 @@
 
      beforeEach(() => {
        sandbox = sinon.sandbox.create();
-       platform = platformFor(window);
+       platform = Services.platformFor(window);
        toggleExperiment(window, 'amp-sidebar 1.0', true);
      });
 
@@ -582,39 +616,35 @@
          const headerElements = sidebarElement.ownerDocument
                .getElementsByTagName('header');
          const toolbarElements = sidebarElement.ownerDocument
-               .querySelectorAll('*[toolbar]');
+               .querySelectorAll('[toolbar]');
          expect(headerElements.length).to.be.equal(0);
          expect(toolbarElements.length).to.be.equal(0);
-       });
-     });
-     it('should create a toolbar target element, \
-     containing the navigation toolbar element', () => {
-       return getAmpSidebar({
-         toolbar: true,
-       }).then(obj => {
-         const sidebarElement = obj.ampSidebar;
-         const toolbarNavElements = Array.prototype
-                .slice.call(sidebarElement.ownerDocument
-                .querySelectorAll('nav[toolbar]'), 0);
-         expect(toolbarNavElements.length).to.be.above(1);
+         expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(0);
        });
      });
 
-     it('toolbar header should be hidden for the const TOOLBAR_MEDIA', () => {
+     it('should create a toolbar element within the toolbar-target', () => {
        return getAmpSidebar({
-         toolbar: true,
+         toolbars: [{}],
        }).then(obj => {
          const sidebarElement = obj.ampSidebar;
-         const toolbarNavElements = Array.prototype
-                .slice.call(sidebarElement.ownerDocument
-                .querySelectorAll('nav[toolbar]'), 0);
-         expect(toolbarNavElements.length).to.be.above(1);
-         expect(toolbarNavElements.some(navElement => {
-           if (navElement.parentElement.style.display == 'none') {
-             return true;
-           }
-           return false;
-         })).to.be.true;
+         expect(sidebarElement.implementation_.toolbars_.length)
+             .to.be.equal(1);
+       });
+     });
+
+     it('should create multiple toolbar elements, \
+     within their respective containers', () => {
+       return getAmpSidebar({
+         toolbars: [{},
+           {
+             media: '(min-width: 1024px)',
+           },
+         ],
+       }).then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         expect(sidebarElement.implementation_.toolbars_.length)
+             .to.be.equal(2);
        });
      });
    });

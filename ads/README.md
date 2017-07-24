@@ -229,7 +229,7 @@ Technically the `<amp-ad>` tag loads an iframe to a generic bootstrap URL that k
 
 Access to a publishers 1st party cookies may be achieved through a custom ad bootstrap file. See ["Running ads from a custom domain"](../extensions/amp-ad/amp-ad.md#running-ads-from-a-custom-domain) in the ad documentation for details.
 
-If the publisher would like to add custom JavaScript in the `remote.html` file that wants to read or write to the publisher owned cookies, then the publisher needs to ensure that the `remote.html` file is hosted on a sub-domain of the publisher URL. e.g. if the publisher hosts a webpage on `https://nytimes.com`, then the remote file should be hosted on something similar to `https://sub-domain.nytimes.com` for the custom JavaScript to have the abiity to read or write cookies for nytimes.com.
+If the publisher would like to add custom JavaScript in the `remote.html` file that wants to read or write to the publisher owned cookies, then the publisher needs to ensure that the `remote.html` file is hosted on a sub-domain of the publisher URL. e.g. if the publisher hosts a webpage on `https://nytimes.com`, then the remote file should be hosted on something similar to `https://sub-domain.nytimes.com` for the custom JavaScript to have the ability to read or write cookies for nytimes.com.
 
 ## Developer guidelines for a pull request
 
@@ -248,7 +248,7 @@ If you're adding support for a new 3P ad service, changes to the following files
 
 ### Verify your examples
 
-To verify the examples that you have put in `/examples/ads.amp.html`, you will need to start a local gulp web server by running command `gulp`. Then visit `http://localhost:8000/examples/ads.amp.max.html?type=yournetwork` in your browser to make sure the examples load ads.
+To verify the examples that you have put in `/examples/ads.amp.html`, you will need to start a local gulp web server by running command `gulp`. Then visit `http://localhost:8000/examples/ads.amp.html?type=yournetwork` in your browser to make sure the examples load ads.
 
 Please consider having the example consistently load a fake ad (with ad targeting disabled). Not only it will be a more confident example for publishers to follow, but also for us to catch any regression bug during our releases.
 

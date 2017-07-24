@@ -28,12 +28,11 @@ import {
   deserializeMessage,
 } from '../../src/3p-frame-messaging';
 import {dev} from '../../src/log';
-import {documentInfoForDoc} from '../../src/services';
+import {Services} from '../../src/services';
 import {loadPromise} from '../../src/event-helper';
 import {toggleExperiment} from '../../src/experiments';
 import {preconnectForElement} from '../../src/preconnect';
 import {validateData} from '../../3p/3p';
-import {viewerForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('3p-frame', () => {
@@ -70,52 +69,7 @@ describe('3p-frame', () => {
     document.head.appendChild(meta);
   }
 
-  it('add attributes', () => {
-    const div = document.createElement('div');
-    div.setAttribute('data-foo', 'foo');
-    div.setAttribute('data-bar', 'bar');
-    div.setAttribute('foo', 'nope');
-    let obj = {};
-    addDataAndJsonAttributes_(div, obj);
-    expect(obj).to.deep.equal({
-      'foo': 'foo',
-      'bar': 'bar',
-    });
-
-    div.setAttribute('json', '{"abc": [1,2,3]}');
-
-    obj = {};
-    addDataAndJsonAttributes_(div, obj);
-    expect(obj).to.deep.equal({
-      'foo': 'foo',
-      'bar': 'bar',
-      'abc': [1, 2, 3],
-    });
-  });
-
-  // TODO(bradfrizzell) break this out into a test-iframe-attributes
-  it('should create an iframe', () => {
-    window.AMP_MODE = {
-      localDev: true,
-      development: false,
-      minified: false,
-      test: false,
-      version: '$internalRuntimeVersion$',
-    };
-    toggleExperiment(window, 'exp-a', true);
-    toggleExperiment(window, 'exp-b', true);
-    clock.tick(1234567888);
-    const link = document.createElement('link');
-    link.setAttribute('rel', 'canonical');
-    link.setAttribute('href', 'https://foo.bar/baz');
-    document.head.appendChild(link);
-
-    const div = document.createElement('my-element');
-    div.setAttribute('data-test-attr', 'value');
-    div.setAttribute('data-ping', 'pong');
-    div.setAttribute('width', '50');
-    div.setAttribute('height', '100');
-
+  function setupElementFunctions(div) {
     const width = window.innerWidth;
     const height = window.innerHeight;
     div.getIntersectionChangeEntry = function() {
@@ -155,8 +109,60 @@ describe('3p-frame', () => {
         height: 200,
       };
     };
+  }
 
-    const viewer = viewerForDoc(window.document);
+  it('add attributes', () => {
+    const div = document.createElement('div');
+    div.setAttribute('data-foo-bar', 'foobar');
+    div.setAttribute('data-hello', 'world');
+    div.setAttribute('foo-bar', 'nope');
+    div.setAttribute('data-vars-hello', 'nope');
+    let obj = {};
+    addDataAndJsonAttributes_(div, obj);
+    expect(obj).to.deep.equal({
+      'fooBar': 'foobar',
+      'hello': 'world',
+    });
+
+    div.setAttribute('json', '{"abc": [1,2,3]}');
+
+    obj = {};
+    addDataAndJsonAttributes_(div, obj);
+    expect(obj).to.deep.equal({
+      'fooBar': 'foobar',
+      'hello': 'world',
+      'abc': [1, 2, 3],
+    });
+  });
+
+  // TODO(bradfrizzell) break this out into a test-iframe-attributes
+  it('should create an iframe', () => {
+    window.AMP_MODE = {
+      localDev: true,
+      development: false,
+      minified: false,
+      test: false,
+      version: '$internalRuntimeVersion$',
+    };
+    toggleExperiment(window, 'exp-a', true);
+    toggleExperiment(window, 'exp-b', true);
+    clock.tick(1234567888);
+    const link = document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    link.setAttribute('href', 'https://foo.bar/baz');
+    document.head.appendChild(link);
+
+    const div = document.createElement('my-element');
+    div.setAttribute('data-test-attr', 'value');
+    div.setAttribute('data-ping', 'pong');
+    div.setAttribute('width', '50');
+    div.setAttribute('height', '100');
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    setupElementFunctions(div);
+
+    const viewer = Services.viewerForDoc(window.document);
     const viewerMock = sandbox.mock(viewer);
     viewerMock.expects('getUnconfirmedReferrerUrl')
         .returns('http://acme.org/')
@@ -167,7 +173,7 @@ describe('3p-frame', () => {
     const src = iframe.src;
     const locationHref = location.href;
     expect(locationHref).to.not.be.empty;
-    const docInfo = documentInfoForDoc(window.document);
+    const docInfo = Services.documentInfoForDoc(window.document);
     expect(docInfo.pageViewId).to.not.be.empty;
     const name = JSON.parse(decodeURIComponent(iframe.name));
     const sentinel = name.attributes._context['sentinel'];
@@ -279,6 +285,20 @@ describe('3p-frame', () => {
     }).to.throw(/must not be on the same origin as the/);
   });
 
+  it('should pick default url if custom disabled', () => {
+    addCustomBootstrap('http://localhost:9876/boot/remote.html');
+    expect(getBootstrapBaseUrl(window, true, undefined, true)).to.equal(
+        'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+  });
+
+  it('should create frame with default url if custom disabled', () => {
+    setupElementFunctions(container);
+    const iframe =
+        getIframe(window, container, '_ping_', {clientId: 'cidValue'});
+    expect(iframe.src).to.equal(
+        'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+  });
+
   it('should prefetch bootstrap frame and JS', () => {
     window.AMP_MODE = {localDev: true};
     preloadBootstrap(window, preconnect);
@@ -290,6 +310,18 @@ describe('3p-frame', () => {
           'http://ads.localhost:9876/dist.3p/current/frame.max.html');
       expect(fetches[1]).to.have.property('href',
           'http://ads.localhost:9876/dist.3p/current/integration.js');
+    });
+  });
+
+  it('should prefetch default bootstrap frame if custom disabled', () => {
+    window.AMP_MODE = {localDev: true};
+    addCustomBootstrap('http://localhost:9876/boot/remote.html');
+    preloadBootstrap(window, preconnect, undefined, true);
+    // Wait for visible promise
+    return Promise.resolve().then(() => {
+      expect(document.querySelectorAll('link[rel=preload]' +
+          '[href="http://ads.localhost:9876/dist.3p/current/frame.max.html"]'))
+          .to.be.ok;
     });
   });
 
@@ -329,7 +361,7 @@ describe('3p-frame', () => {
   });
 
   it('uses a unique name based on domain', () => {
-    const viewerMock = sandbox.mock(viewerForDoc(window.document));
+    const viewerMock = sandbox.mock(Services.viewerForDoc(window.document));
     viewerMock.expects('getUnconfirmedReferrerUrl')
         .returns('http://acme.org/').twice();
 

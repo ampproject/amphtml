@@ -123,7 +123,10 @@ function isBuildSystemFile(filePath) {
       path.extname(filePath) != '.textproto' &&
       // Exclude config files from build-system since we want it to trigger
       // the flag config check.
-      !isFlagConfig(filePath);
+      !isFlagConfig(filePath) &&
+      // Exclude visual diff files from build-system since we want it to trigger
+      // visual diff tests.
+      !isVisualDiffFile(filePath);
 }
 
 /**
@@ -164,6 +167,18 @@ function isDocFile(filePath) {
 }
 
 /**
+ * Determines if the given file is related to the visual diff tests.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isVisualDiffFile(filePath) {
+  const filename = path.basename(filePath);
+  return (filename == 'visual-diff.rb' ||
+          filename == 'visual-tests.json' ||
+          filePath.startsWith('examples/visual-tests/'));
+}
+
+/**
  * Determines if the given file is an integration test.
  * @param {string} filePath
  * @return {boolean}
@@ -198,7 +213,8 @@ function determineBuildTargets(filePaths) {
         'RUNTIME',
         'INTEGRATION_TEST',
         'DOCS',
-        'FLAG_CONFIG']);
+        'FLAG_CONFIG',
+        'VISUAL_DIFF']);
   }
   const targetSet = new Set();
   for (let i = 0; i < filePaths.length; i++) {
@@ -215,6 +231,8 @@ function determineBuildTargets(filePaths) {
       targetSet.add('FLAG_CONFIG');
     } else if (isIntegrationTest(p)) {
       targetSet.add('INTEGRATION_TEST');
+    } else if (isVisualDiffFile(p)) {
+      targetSet.add('VISUAL_DIFF');
     } else {
       targetSet.add('RUNTIME');
     }
@@ -225,7 +243,7 @@ function determineBuildTargets(filePaths) {
 
 const command = {
   testBuildSystem: function() {
-    timedExecOrDie('npm run ava');
+    timedExecOrDie(`${gulp} ava`);
   },
   testDocumentLinks: function(files) {
     let docFiles = files.filter(isDocFile);
@@ -262,9 +280,15 @@ const command = {
     timedExecOrDie(
         `${gulp} test --nobuild --saucelabs --integration --compiled`);
   },
-  runVisualDiffTests: function() {
+  runVisualDiffTests: function(opt_mode) {
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    timedExec(`ruby ${path.resolve('build-system/tasks/visual-diff.rb')}`);
+    let cmd = 'ruby build-system/tasks/visual-diff.rb';
+    if (opt_mode === 'skip') {
+      cmd += ' --skip';
+    } else if (opt_mode === 'master') {
+      cmd += ' --master';
+    }
+    timedExec(cmd);
   },
   runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);
@@ -283,7 +307,7 @@ function runAllCommands() {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
-    command.runVisualDiffTests();
+    command.runVisualDiffTests(/* opt_mode */ 'master');
     command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
     command.runUnitTests();
@@ -358,12 +382,12 @@ function main(argv) {
     if (buildTargets.has('BUILD_SYSTEM')) {
       command.testBuildSystem();
     }
-
     if (buildTargets.has('DOCS')) {
       command.testDocumentLinks(files);
     }
-
-    if (buildTargets.has('RUNTIME') || buildTargets.has('INTEGRATION_TEST')) {
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('VISUAL_DIFF')) {
       command.cleanBuild();
       command.buildRuntime();
       command.runVisualDiffTests();
@@ -374,10 +398,13 @@ function main(argv) {
       command.runPresubmitTests();
       command.runJsonAndLintChecks();
       command.runDepAndTypeChecks();
-      // Skip unit tests if the PR only contains changes to integration tests.
+      // Run unit tests only if the PR contains runtime changes.
       if (buildTargets.has('RUNTIME')) {
         command.runUnitTests();
       }
+    } else {
+      // Generates a blank Percy build to satisfy the required Github check.
+      command.runVisualDiffTests(/* opt_mode */ 'skip');
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();

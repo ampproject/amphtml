@@ -27,7 +27,7 @@ import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
-import {historyForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
@@ -35,7 +35,6 @@ import {
   moveLayoutRect,
 } from '../../../src/layout-rect';
 import {srcsetFromElement} from '../../../src/srcset';
-import {timerFor, platformFor} from '../../../src/services';
 import {user, dev} from '../../../src/log';
 import {startsWith} from '../../../src/string';
 import * as dom from '../../../src/dom';
@@ -314,7 +313,7 @@ export class ImageViewer {
     // Notice that we will wait until the next event cycle to set the "src".
     // This ensures that the already available image will show immediately
     // and then naturally upgrade to a higher quality image.
-    return timerFor(this.win).promise(1).then(() => {
+    return Services.timerFor(this.win).promise(1).then(() => {
       this.image_.setAttribute('src', src);
       return this.loadPromise_(this.image_);
     });
@@ -807,8 +806,9 @@ class AmpImageLightbox extends AMP.BaseElement {
         // element size depends on window size directly and the measurement
         // happens in window.resize event. Adding a timeout for correct
         // measurement. See https://github.com/ampproject/amphtml/issues/8479
-        if (startsWith(platformFor(this.win).getIosVersionString(), '10.3')) {
-          timerFor(this.win).delay(() => {
+        if (startsWith(
+            Services.platformFor(this.win).getIosVersionString(), '10.3')) {
+          Services.timerFor(this.win).delay(() => {
             this.imageViewer_.measure();
           }, 500);
         } else {
@@ -1094,7 +1094,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
   /** @private @return {!../../../src/service/history-impl.History} */
   getHistory_() {
-    return historyForDoc(this.getAmpDoc());
+    return Services.historyForDoc(this.getAmpDoc());
   }
 }
 

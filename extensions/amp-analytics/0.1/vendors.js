@@ -73,6 +73,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'timezone': 'TIMEZONE',
       'title': 'TITLE',
       'totalEngagedTime': 'TOTAL_ENGAGED_TIME',
+      'userAgent': 'USER_AGENT',
       'viewer': 'VIEWER',
       'viewportHeight': 'VIEWPORT_HEIGHT',
       'viewportWidth': 'VIEWPORT_WIDTH',
@@ -1279,6 +1280,41 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'top100': {
+    'vars': {
+      'pid': '',
+      'rid': 'PAGE_VIEW_ID',
+      'ruid': 'CLIENT_ID(ruid)',
+      'version': '1.0.0',
+    },
+    'requests': {
+      'host': 'https://kraken.rambler.ru',
+      'base': '${host}/cnt/?pid=${pid}' +
+                          '&rid=${rid}' +
+                          '&v=${version}' +
+                          '&rn=${random}' +
+                          '&ruid=${ruid}' +
+                          '&ct=amp',
+      'pageview': '${base}&et=pv' +
+                  '${_pageData}' +
+                  '${_screenData}',
+      '_screenData': '&sr=${screenWidth}x${screenHeight}' +
+                     '&cd=${screenColorDepth}-bit' +
+                     '&bs=${scrollWidth}x${scrollHeight}',
+      '_pageData': '&pt=${title}' +
+                   '&rf=${documentReferrer}' +
+                   '&en=${documentCharset}' +
+                   '&la=${browserLanguage}' +
+                   '&tz=${timezone}',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
+
   'webtrekk': {
     'requests': {
       'trackURL': 'https://${trackDomain}/${trackId}/wt',
@@ -1287,7 +1323,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         '${timestamp},${documentReferrer},${viewportWidth}x' +
         '${viewportHeight},0&tz=${timezone}' +
         '&eid=${clientId(amp-wt3-eid)}&la=${browserLanguage}',
-      'parameterSuffix': '&pu=${canonicalUrl}',
+      'parameterSuffix': '&pu=${sourceUrl}',
       'pageParameter': '&cp1=${pageParameter1}' +
         '&cp2=${pageParameter2}&cp3=${pageParameter3}' +
         '&cp4=${pageParameter4}&cp5=${pageParameter5}' +

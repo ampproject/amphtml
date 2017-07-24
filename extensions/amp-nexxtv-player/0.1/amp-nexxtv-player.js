@@ -26,7 +26,7 @@ import {removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -73,7 +73,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     });
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   getVideoIframeSrc_() {
@@ -200,7 +200,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     }
 
     if (data['event'] == 'play') {
-      this.element.dispatchCustomEvent(VideoEvents.PLAY);
+      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
     } else if (data['event'] == 'pause') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
     } else if (data['event'] == 'mute') {
@@ -239,6 +239,24 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 
   hideControls() {
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 }
 
