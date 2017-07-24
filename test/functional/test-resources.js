@@ -2249,6 +2249,47 @@ describe('Resources changeSize', () => {
       expect(overflowCallbackSpy).to.not.been.called;
     });
 
+    it('in viewport should change size if in the last 15% and ' +
+        'in the last 1000px', () => {
+      viewportRect.top = 9600;
+      viewportRect.bottom = 9800;
+      resource1.layoutBox_ = {top: 9650, left: 0, right: 100, bottom: 9700,
+        height: 50};
+      resources.scheduleChangeSize_(resource1, 111, 222,
+          {top: 1, right: 2, bottom: 3, left: 4}, false);
+
+      expect(vsyncSpy).to.be.calledOnce;
+      const marginsTask = vsyncSpy.lastCall.args[0];
+      marginsTask.measure({});
+
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledOnce;
+      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
+    });
+
+    it('in viewport should NOT change size if in the last 15% but NOT ' +
+        'in the last 1000px', () => {
+      viewportRect.top = 8600;
+      viewportRect.bottom = 8800;
+      resource1.layoutBox_ = {top: 8650, left: 0, right: 100, bottom: 8700,
+        height: 50};
+      resources.scheduleChangeSize_(resource1, 111, 222,
+          {top: 1, right: 2, bottom: 3, left: 4}, false);
+
+      expect(vsyncSpy).to.be.calledOnce;
+      const marginsTask = vsyncSpy.lastCall.args[0];
+      marginsTask.measure({});
+
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.not.been.called;
+      expect(overflowCallbackSpy).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledWith(true, 111, 222,
+          {top: 1, right: 2, bottom: 3, left: 4});
+    });
+
     it('in viewport should NOT change size and calls overflowCallback', () => {
       resources.scheduleChangeSize_(resource1, 111, 222,
           {top: 1, right: 2, bottom: 3, left: 4}, false);
