@@ -204,15 +204,20 @@ When a test run fails due to visual diffs being present, click the `details` lin
 
 ### Running Visual Diff Tests Locally
 
-You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_PROJECT` and `PERCY_TOKEN` environment variables using the unique values you find at `https://percy.io/<your_project>/settings`. Once the environment variables are set up, you can run the AMP visual diff tests like so:
+You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_PROJECT` and `PERCY_TOKEN` environment variables using the unique values you find at `https://percy.io/<org>/<project>/settings`. Once the environment variables are set up, you can run the AMP visual diff tests as described below.
 
+First, make sure you have [Ruby](https://www.ruby-lang.org/en/documentation/installation/) installed on your machine if you don't already have it, and download the gems required for local Percy builds:
+```
+gem install percy-capybara poltergeist phantomjs
+```
+Next, build the AMP runtime and invoke the visual diff script:
 ```
 gulp build
 ruby build-system/tasks/visual-diff.rb
 ```
-The build will use the Percy credentials set via environment variables in the previous step, and you can see the results at `https://percy.io/<your_project>`.
+The build will use the Percy credentials set via environment variables in the previous step, and you can see the results at `https://percy.io/<org>/<project>`.
 
-To see debugging info during percy runs, you can run:
+To see debugging info during Percy runs, you can run:
 ```
  ruby build-system/tasks/visual-diff.rb --percy_debug --phantomjs_debug --webserver_debug
 ```
@@ -220,7 +225,7 @@ The debug flags `--percy_debug`, `--phantomjs_debug`, and `--webserver_debug` ca
 ```
  ruby build-system/tasks/visual-diff.rb --debug
 ```
-After each run, a new set of results will be available at `https://percy.io/<your_project>`.
+After each run, a new set of results will be available at `https://percy.io/<org>/<project>/settings`.
 
 ## Testing on devices
 
