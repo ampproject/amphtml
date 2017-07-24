@@ -17,7 +17,6 @@
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
-//import {Services} from './services';
 
 /** @const Time when this JS loaded.  */
 const start = Date.now();
@@ -535,7 +534,6 @@ export function resetLogConstructorForTesting() {
   logConstructor = null;
 }
 
-
 /**
  * Publisher level log.
  *
@@ -548,35 +546,44 @@ export function resetLogConstructorForTesting() {
  * @return {!Log}
  */
 export function user(opt_element) {
-  if (isFromEmbed(opt_element)) {
+  const logger = getUserLogger();
+
+  if (!!opt_element &&
+      isFromEmbed(logger.win, /** @type {!Element} */ (opt_element))) {
     if (logs.userForEmbed) {
       return logs.userForEmbed;
     }
-    if (!logConstructor) {
-      throw new Error('failed to call initLogConstructor');
-    }
-    return logs.userForEmbed = new logConstructor(self, mode => {
+    logs.userForEmbed = new logConstructor(self, mode => {
       const logNum = parseInt(mode.log, 10);
       if (logNum >= 1) {
         return LogLevel.FINE;
       }
       return LogLevel.OFF;
     });
+    return logs.userForEmbed;
   } else {
-    if (logs.user) {
-      return logs.user;
-    }
-    if (!logConstructor) {
-      throw new Error('failed to call initLogConstructor');
-    }
-    return logs.user = new logConstructor(self, mode => {
-      const logNum = parseInt(mode.log, 10);
-      if (mode.development || logNum >= 1) {
-        return LogLevel.FINE;
-      }
-      return LogLevel.OFF;
-    }, USER_ERROR_SENTINEL);
+    return logger;
   }
+}
+
+/**
+ * Getter for original user logger
+ * @returns {!Log}
+ */
+function getUserLogger() {
+  if (logs.user) {
+    return logs.user;
+  }
+  if (!logConstructor) {
+    throw new Error('failed to call initLogConstructor');
+  }
+  return logs.user = new logConstructor(self, mode => {
+    const logNum = parseInt(mode.log, 10);
+    if (mode.development || logNum >= 1) {
+      return LogLevel.FINE;
+    }
+    return LogLevel.OFF;
+  }, USER_ERROR_SENTINEL);
 }
 
 
@@ -609,10 +616,12 @@ export function dev() {
   });
 }
 
-export function isFromEmbed(opt_element) {
-  //TODO(tiendt): figure out how to get ampdoc
-  // const ampdoc = Services.ampdocServiceFor(this.win).getAmpdoc();
-  // return opt_element.ownerDocument.defaultView != ampdoc.win;
-  isEmbed = true;
+/**
+ * @param {!Window} win
+ * @param {!Element} element
+ * @returns {boolean} isEmbed
+ */
+export function isFromEmbed(win, element) {
+  isEmbed = element.ownerDocument.defaultView != win;
   return isEmbed;
 }
