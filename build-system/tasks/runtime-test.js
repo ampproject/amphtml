@@ -130,8 +130,8 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
 
   if (argv.files) {
     c.files = [].concat(config.commonTestPaths, argv.files);
-    c.reporters = ['mocha'];
-    c.mochaReporter.output = 'full';
+    c.reporters = argv.saucelabs ? ['dots', 'saucelabs', 'mocha'] : ['mocha'];
+    c.mochaReporter.output = argv.saucelabs ? 'minimal' : 'full';
   } else if (argv.integration) {
     c.files = config.integrationTestPaths;
   } else if (argv.randomize || argv.glob || argv.a4a) {
