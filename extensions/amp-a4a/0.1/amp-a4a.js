@@ -62,6 +62,10 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 
+// Uncomment the next two lines when testing locally.
+// import '../../amp-ad/0.1/amp-ad-ui';
+// import '../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 

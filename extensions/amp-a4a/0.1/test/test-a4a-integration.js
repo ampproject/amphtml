@@ -15,15 +15,14 @@
  */
 
 import {AMP_SIGNATURE_HEADER} from '../amp-a4a';
+import {FetchMock, networkFailure} from './fetch-mock';
 import {MockA4AImpl, TEST_URL} from './utils';
-import {Xhr} from '../../../../src/service/xhr-impl';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
     data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {adConfig} from '../../../../ads/_config';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {signingServerURLs} from '../../../../ads/_a4a-config';
@@ -31,7 +30,6 @@ import {
     resetScheduledElementForTesting,
     upgradeOrRegisterElement,
 } from '../../../../src/custom-element';
-import {utf8Encode} from '../../../../src/utils/bytes';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {loadPromise} from '../../../../src/event-helper';
 import * as sinon from 'sinon';
@@ -81,51 +79,30 @@ function expectRenderedInXDomainIframe(element, src) {
 
 describe('integration test: a4a', () => {
   let sandbox;
-  let xhrMock;
   let fixture;
-  let mockResponse;
+  let fetchMock;
+  let adResponse;
   let a4aElement;
-  let headers;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
-    // Expect key set fetches for signing services.
-    const fetchJsonMock = sandbox.stub(Xhr.prototype, 'fetchJson');
-    for (const serviceName in signingServerURLs) {
-      fetchJsonMock.withArgs(signingServerURLs[serviceName],
-          {
-            mode: 'cors',
-            method: 'GET',
-            ampCors: false,
-            credentials: 'omit',
-          }).returns(Promise.resolve({
-            json() {
-              return Promise.resolve(
-                  {keys: [JSON.parse(validCSSAmp.publicKey)]});
-            },
-          }));
-    }
-    // Expect ad request.
-    headers = {};
-    headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
-    mockResponse = {
-      arrayBuffer: () => utf8Encode(validCSSAmp.reserialized),
-      bodyUsed: false,
-      headers: new FetchResponseHeaders({
-        getResponseHeader(name) {
-          return headers[name];
-        },
-      }),
-    };
-    xhrMock.withArgs(TEST_URL, {
-      mode: 'cors',
-      method: 'GET',
-      credentials: 'include',
-    }).onFirstCall().returns(Promise.resolve(mockResponse));
     adConfig['mock'] = {};
     a4aRegistry['mock'] = () => {return true;};
     return createIframePromise().then(f => {
       fixture = f;
+      fetchMock = new FetchMock(fixture.win);
+      for (const serviceName in signingServerURLs) {
+        fetchMock.getOnce(
+            signingServerURLs[serviceName],
+            `{"keys":[${validCSSAmp.publicKey}]}`);
+      }
+      fetchMock.getOnce(
+          TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+          {name: 'ad'});
+      adResponse = {
+        headers: {'AMP-Access-Control-Allow-Source-Origin': 'about:srcdoc'},
+        body: validCSSAmp.reserialized,
+      };
+      adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
       installDocService(fixture.win, /* isSingleDoc */ true);
       installCryptoService(fixture.win);
       upgradeOrRegisterElement(fixture.win, 'amp-a4a', MockA4AImpl);
@@ -138,6 +115,7 @@ describe('integration test: a4a', () => {
   });
 
   afterEach(() => {
+    fetchMock./*OK*/restore();
     sandbox.restore();
     resetScheduledElementForTesting(window, 'amp-a4a');
     delete adConfig['mock'];
@@ -151,7 +129,7 @@ describe('integration test: a4a', () => {
   });
 
   it('should fall back to 3p when no signature is present', () => {
-    delete headers[AMP_SIGNATURE_HEADER];
+    delete adResponse.headers[AMP_SIGNATURE_HEADER];
     return fixture.addElement(a4aElement).then(unusedElement => {
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
     });
@@ -160,14 +138,13 @@ describe('integration test: a4a', () => {
   it('should not send request if display none', () => {
     a4aElement.style.display = 'none';
     return fixture.addElement(a4aElement).then(element => {
-      expect(xhrMock).to.not.be.called;
+      expect(fetchMock.called('ad')).to.be.false;
       expect(element.querySelector('iframe')).to.not.be.ok;
     });
   });
 
   it('should fall back to 3p when the XHR fails', () => {
-    xhrMock.resetBehavior();
-    xhrMock.throws(new Error('Testing network error'));
+    adResponse = Promise.reject(networkFailure());
     // TODO(tdrl) Currently layoutCallback rejects, even though something *is*
     // rendered.  This should be fixed in a refactor, and we should change this
     // .catch to a .then.
@@ -181,96 +158,9 @@ describe('integration test: a4a', () => {
     });
   });
 
-  it('should fall back to 3p when extractCreative returns empty sig', () => {
-    const extractCreativeAndSignatureStub =
-        sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature');
-    extractCreativeAndSignatureStub.onFirstCall().returns({
-      creative: utf8Encode(validCSSAmp.reserialized),
-      signature: null,
-      size: null,
-    });
-    return fixture.addElement(a4aElement).then(unusedElement => {
-      expect(extractCreativeAndSignatureStub).to.be.calledOnce;
-      expectRenderedInXDomainIframe(a4aElement, TEST_URL);
-    });
-  });
-
-  it('should fall back to 3p when extractCreative returns empty creative',
-      () => {
-        sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature')
-            .onFirstCall().returns({
-              creative: null,
-              signature: validCSSAmp.signature,
-              size: null,
-            })
-            .onSecondCall().throws(new Error(
-            'Testing extractCreativeAndSignature should not occur error'));
-        // TODO(tdrl) Currently layoutCallback rejects, even though something
-        // *is* rendered.  This should be fixed in a refactor, and we should
-        // change this .catch to a .then.
-        return fixture.addElement(a4aElement).catch(error => {
-          expect(error.message).to.contain.string('Key failed to validate');
-          expect(error.message).to.contain.string('amp-a4a:');
-          expectRenderedInXDomainIframe(a4aElement, TEST_URL);
-        });
-      });
-
   it('should collapse slot when creative response has code 204', () => {
-    headers = {};
-    headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
-    mockResponse = {
-      arrayBuffer: () => utf8Encode(validCSSAmp.reserialized),
-      bodyUsed: false,
-      headers: new FetchResponseHeaders({
-        getResponseHeader(name) {
-          return headers[name];
-        },
-      }),
-      status: 204,
-    };
-    xhrMock.withArgs(TEST_URL, {
-      mode: 'cors',
-      method: 'GET',
-      credentials: 'include',
-    }).onFirstCall().returns(Promise.resolve(mockResponse));
-    const forceCollapseStub =
-        sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
-    return fixture.addElement(a4aElement).then(() => {
-      expect(forceCollapseStub).to.be.calledOnce;
-    });
-  });
-
-  it('should NOT collapse slot when creative response is null', () => {
-    xhrMock.withArgs(TEST_URL, {
-      mode: 'cors',
-      method: 'GET',
-      credentials: 'include',
-    }).onFirstCall().returns(Promise.resolve(null));
-    const forceCollapseStub =
-        sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
-    return fixture.addElement(a4aElement).then(unusedElement => {
-      expect(forceCollapseStub).to.be.notCalled;
-    });
-  });
-
-  it('should collapse slot when creative response.arrayBuffer is null', () => {
-    headers = {};
-    headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
-    mockResponse = {
-      arrayBuffer: () => null,
-      bodyUsed: false,
-      headers: new FetchResponseHeaders({
-        getResponseHeader(name) {
-          return headers[name];
-        },
-      }),
-      status: 204,
-    };
-    xhrMock.withArgs(TEST_URL, {
-      mode: 'cors',
-      method: 'GET',
-      credentials: 'include',
-    }).onFirstCall().returns(Promise.resolve(mockResponse));
+    adResponse.status = 204;
+    adResponse.body = null;
     const forceCollapseStub =
         sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
     return fixture.addElement(a4aElement).then(() => {
@@ -280,23 +170,7 @@ describe('integration test: a4a', () => {
 
   it('should collapse slot when creative response.arrayBuffer() is empty',
       () => {
-        headers = {};
-        headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
-        mockResponse = {
-          arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-          bodyUsed: false,
-          headers: new FetchResponseHeaders({
-            getResponseHeader(name) {
-              return headers[name];
-            },
-          }),
-          status: 200,
-        };
-        xhrMock.withArgs(TEST_URL, {
-          mode: 'cors',
-          method: 'GET',
-          credentials: 'include',
-        }).onFirstCall().returns(Promise.resolve(mockResponse));
+        adResponse.body = '';
         const forceCollapseStub =
             sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
         return fixture.addElement(a4aElement).then(unusedElement => {
