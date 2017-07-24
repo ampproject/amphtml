@@ -132,21 +132,21 @@ function createIframeWithApis(fixture) {
 function createFixture() {
   return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
 }
-//
-// describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
-//   let fixture;
-//
-//   beforeEach(() => {
-//     return createFixture().then(f => {
-//       fixture = f;
-//       installPlatformService(fixture.win);
-//     });
-//   });
-//
-//   it('create an iframe with APIs', function() {
-//     return createIframeWithApis.call(this, fixture);
-//   });
-// });
+
+describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
+  let fixture;
+
+  beforeEach(() => {
+    return createFixture().then(f => {
+      fixture = f;
+      installPlatformService(fixture.win);
+    });
+  });
+
+  it('create an iframe with APIs', function() {
+    return createIframeWithApis.call(this, fixture);
+  });
+});
 
 describe.configure().retryOnSaucelabs().run('amp-ad 3P ' +
     '(with AmpContext experiment)', () => {
