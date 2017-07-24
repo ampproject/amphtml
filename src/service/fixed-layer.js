@@ -548,7 +548,7 @@ export class FixedLayer {
 
     // Update `top`. This is necessary to adjust position to the viewer's
     // paddingTop.
-    if (state.top) {
+    if (state.top && (state.fixed || state.sticky)) {
       if (state.fixed || !this.transfer_) {
         // Fixed positions always need top offsetting, as well as stickies on
         // non iOS Safari.
