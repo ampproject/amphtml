@@ -185,6 +185,8 @@ window.parent.postMessage({
 
 Iframes can send a `send-intersections` message to their parents to start receiving IntersectionObserver style [change records](https://wicg.github.io/IntersectionObserver/#intersectionobserverentry) of the iframe's intersection with the parent viewport.
 
+*Note: In the following examples, we assume the script is in the created iframe, where `window.parent` is the top window. If the script lives in a nested iframe, change `window.parent` to the top AMP window.*
+
 *Example: iframe `send-intersections` request*
 
 ```javascript
@@ -212,8 +214,6 @@ window.addEventListener('message', function(event) {
   });
 });
 ```
-
-*Note: If script lives in nested iframe, change `window.parent` to the top AMP window instead*
 
 The intersection message would be sent by the parent to the iframe when the iframe moves in or out of the viewport (or is partially visible), when the iframe is scrolled or resized.
 
