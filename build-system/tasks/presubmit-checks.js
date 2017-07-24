@@ -385,6 +385,7 @@ var forbiddenTerms = {
       'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',
       'src/service/cid-impl.js',
+      'src/impression.js',
     ],
   },
   'eval\\(': {
