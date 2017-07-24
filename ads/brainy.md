@@ -28,7 +28,7 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact http://www.opt.ne.jp/contact_detail/id=8
+For configuration details and to generate your tags, please contact https://www.brainy-inc.co.jp/#page-contact
 
 Supported parameters:
 
