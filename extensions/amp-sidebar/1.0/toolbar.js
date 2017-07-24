@@ -15,7 +15,6 @@
  */
 
 import {toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
 
 export class Toolbar {
