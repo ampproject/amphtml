@@ -64,7 +64,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp presubmit`                                                        | Run validation against files to check for forbidden and required terms. Run automatically upon push.  |
 | `gulp validator`                                                        | Builds and tests the AMP validator. Run automatically upon push.  |
 | `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.                     |
-| `npm run ava`<sup>[[1]](#footnote-1)</sup>                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
+| `gulp ava`<sup>[[1]](#footnote-1)</sup>                                 | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 | `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
 | `ruby build-system/tasks/visual-diff.rb`                                | Runs all visual diff tests locally. Requires `gulp build` to have been run. Also requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables. |
 | `ruby build-system/tasks/visual-diff.rb --percy_debug --phantomjs_debug --webserver_debug`  | Same as above, with additional logging. Debug flags can be used independently.  |
