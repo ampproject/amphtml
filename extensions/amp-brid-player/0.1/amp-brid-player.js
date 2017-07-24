@@ -15,7 +15,7 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {
     installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -290,14 +290,14 @@ class AmpBridPlayer extends AMP.BaseElement {
    * @override
    */
   fullscreenEnter() {
-    fullscreenEnter(this.iframe_);
+    fullscreenEnter(dev().assertElement(this.iframe_));
   }
 
   /**
    * @override
    */
   fullscreenExit() {
-    fullscreenExit(this.iframe_);
+    fullscreenExit(dev().assertElement(this.iframe_));
   }
 
   /** @override */

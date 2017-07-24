@@ -284,14 +284,14 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   fullscreenEnter() {
-    fullscreenEnter(this.video_);
+    fullscreenEnter(dev().assertElement(this.video_));
   }
 
   /**
    * @override
    */
   fullscreenExit() {
-    fullscreenExit(this.video_);
+    fullscreenExit(dev().assertElement(this.video_));
   }
 
   /** @override */

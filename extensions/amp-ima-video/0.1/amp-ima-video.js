@@ -31,7 +31,7 @@ import {
 } from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {removeElement, fullscreenEnter, fullscreenExit} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
 
@@ -277,16 +277,16 @@ class AmpImaVideo extends AMP.BaseElement {
    * @override
    */
   fullscreenEnter() {
-    // TODO(@aghassemi) Make internal <video> element go fullscreen instead
+    // TODO(@aghassemi, #10597) Make internal <video> element go fullscreen instead
     // using postMessages
-    fullscreenEnter(this.iframe_);
+    fullscreenEnter(dev().assertElement(this.iframe_));
   }
 
   /**
    * @override
    */
   fullscreenExit() {
-    fullscreenExit(this.iframe_);
+    fullscreenExit(dev().assertElement(this.iframe_));
   }
 
   /** @override */

@@ -349,7 +349,7 @@ class AmpDailymotion extends AMP.BaseElement {
     if (platform.isSafari() || platform.isIos()) {
       this.sendCommand_('fullscreen', [true]);
     } else {
-      fullscreenEnter(this.iframe_);
+      fullscreenEnter(dev().assertElement(this.iframe_));
     }
   }
 
@@ -361,7 +361,7 @@ class AmpDailymotion extends AMP.BaseElement {
     if (platform.isSafari() || platform.isIos()) {
       this.sendCommand_('fullscreen', [false]);
     } else {
-      fullscreenExit(this.iframe_);
+      fullscreenExit(dev().assertElement(this.iframe_));
     }
   }
 

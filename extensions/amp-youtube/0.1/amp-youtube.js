@@ -441,14 +441,14 @@ class AmpYoutube extends AMP.BaseElement {
    * @override
    */
   fullscreenEnter() {
-    fullscreenEnter(this.iframe_);
+    fullscreenEnter(dev().assertElement(this.iframe_));
   }
 
   /**
    * @override
    */
   fullscreenExit() {
-    fullscreenExit(this.iframe_);
+    fullscreenExit(dev().assertElement(this.iframe_));
   }
 
 

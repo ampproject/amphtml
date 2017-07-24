@@ -752,7 +752,7 @@ export function whenUpgradedToCustomElement(element) {
 /**
  * Replacement for `Element.requestFullscreen()` method.
  * https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullscreen
- * @param {Element} element
+ * @param {!Element} element
  */
 export function fullscreenEnter(element) {
   const requestFs = element.requestFullscreen
@@ -773,7 +773,7 @@ export function fullscreenEnter(element) {
 /**
  * Replacement for `Document.exitFullscreen()` method.
  * https://developer.mozilla.org/en-US/docs/Web/API/Document/exitFullscreen
- * @param {Element} element
+ * @param {!Element} element
  */
 export function fullscreenExit(element) {
   let exitFs = element.cancelFullScreen
