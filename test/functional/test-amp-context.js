@@ -73,6 +73,20 @@ describe('3p ampcontext.js', () => {
     expect(context.referrer).to.equal('baz.net');
   });
 
+  it('should not expose _context as per 3p.', () => {
+    win.name = generateSerializedAttributes();
+    const context = new AmpContext(win);
+    expect(context).to.be.ok;
+    expect(context.data.hasOwnProperty('_context')).to.be.false;
+  });
+
+  it('should not expose _context as per A4A.', () => {
+    win.name = generateSerializedAttributesA4A();
+    const context = new AmpContext(win);
+    expect(context).to.be.ok;
+    expect(context.data.hasOwnProperty('_context')).to.be.false;
+  });
+
   it('should add metadata to window.context using name as per A4A.', () => {
     win.name = generateSerializedAttributesA4A();
     const context = new AmpContext(win);
