@@ -64,6 +64,17 @@ function createIframeWithApis(fixture) {
     expect(context.canonicalUrl).to.equal(
         'https://www.example.com/doubleclick.html');
     expect(context.clientId).to.be.defined;
+    expect(context.data).to.deep.equal({
+      width: 300,
+      height: 250,
+      type: '_ping_',
+      ampSlotIndex: '0',
+      id: '0',
+      url: 'https://example.com/a?b=c&d=e',
+      valid: 'true',
+      customValue: '123',
+      'other_value': 'foo',
+    });
     expect(context.pageViewId).to.be.greaterThan(0);
     expect(context.startTime).to.be.a('number');
     expect(context.container).to.be.defined;
@@ -122,50 +133,35 @@ function createFixture() {
   return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
 }
 
+describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
+  let fixture;
 
-describes.realWin('3P Ad', {
-  amp: {
-    runtimeOn: true,
-  },
-}, () => {
-  describe.configure().retryOnSaucelabs().run('render an ad should', () => {
-    let fixture;
-
-    beforeEach(() => {
-      return createFixture().then(f => {
-        fixture = f;
-        installPlatformService(fixture.win);
-      });
+  beforeEach(() => {
+    return createFixture().then(f => {
+      fixture = f;
+      installPlatformService(fixture.win);
     });
+  });
 
-    it('create an iframe with APIs', function() {
-      return createIframeWithApis.call(this, fixture);
-    });
+  it('create an iframe with APIs', function() {
+    return createIframeWithApis.call(this, fixture);
   });
 });
 
+describe.configure().retryOnSaucelabs().run('amp-ad 3P ' +
+    '(with AmpContext experiment)', () => {
+  let fixture;
 
-describes.realWin('3P Ad (with AmpContext experiment)', {
-  amp: {
-    runtimeOn: true,
-  },
-}, () => {
-  describe.configure().retryOnSaucelabs().run('render an ad should', () => {
-    let fixture;
-
-    beforeEach(() => {
-      return createFixture().then(f => {
-        fixture = f;
-        toggleExperiment(fixture.win, '3p-use-ampcontext', /* opt_on */ true,
-            /* opt_transientExperiment */ true);
-        installPlatformService(fixture.win);
-      });
-    });
-
-    it('create an iframe with APIs', function() {
-      return createIframeWithApis.call(this, fixture);
+  beforeEach(() => {
+    return createFixture().then(f => {
+      fixture = f;
+      toggleExperiment(fixture.win, '3p-use-ampcontext', /* opt_on */ true,
+          /* opt_transientExperiment */ true);
+      installPlatformService(fixture.win);
     });
   });
+
+  it('create an iframe with APIs', function() {
+    return createIframeWithApis.call(this, fixture);
+  });
 });
-
-
