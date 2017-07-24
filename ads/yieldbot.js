@@ -23,10 +23,7 @@ import {rethrowAsync} from '../src/log';
  * @param {!Object} data
  */
 export function yieldbot(global, data) {
-  validateData(data, ['psn', 'ybSlot', 'slot'], [
-    'targeting', 'categoryExclusions', 'tagForChildDirectedTreatment',
-    'cookieOptions','overrideWidth', 'overrideHeight',
-  ]);
+  validateData(data, ['psn', 'ybSlot', 'slot']);
 
   global.ybotq = global.ybotq || [];
 
@@ -69,4 +66,3 @@ export function yieldbot(global, data) {
     });
   });
 }
-
