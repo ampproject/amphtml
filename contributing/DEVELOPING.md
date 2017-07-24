@@ -217,7 +217,7 @@ ruby build-system/tasks/visual-diff.rb
 ```
 The build will use the Percy credentials set via environment variables in the previous step, and you can see the results at `https://percy.io/<org>/<project>`.
 
-To see debugging info during percy runs, you can run:
+To see debugging info during Percy runs, you can run:
 ```
  ruby build-system/tasks/visual-diff.rb --percy_debug --phantomjs_debug --webserver_debug
 ```
