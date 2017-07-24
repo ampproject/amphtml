@@ -52,7 +52,7 @@ export class FetchMock {
   /**
    * Unstubs the window object and restores the real `window.fetch`.
    */
-  restoreFetch() {
+  restore() {
     this.win_.fetch = this.realFetch_;
     this.routes_ = {};
   }
@@ -109,8 +109,8 @@ export class FetchMock {
     }
     route.called = true;
     return Promise.resolve(
-        typeof route.response == 'function' ? route.response() :
-                                                  route.response)
+        typeof route.response == 'function' ?
+            route.response() : route.response)
         .then(data => {
           if (data === null || typeof data == 'string') {
             return new Response(data);
