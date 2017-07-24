@@ -102,7 +102,7 @@ describe('ampanalytics-lib', () => {
   });
 
   it('initially has empty creativeMessageRouters mapping ', () => {
-    expect(Object.keys(router.getCreativeMethodRouters())).to.have.lengthOf(0);
+    expect(Object.keys(router.getCreativeEventRouters())).to.have.lengthOf(0);
   });
 
   it('makes registration function available ', () => {
@@ -120,7 +120,7 @@ describe('ampanalytics-lib', () => {
     window.onNewAmpAnalyticsInstance = ampAnalytics => {
       expect(ampAnalytics instanceof CreativeEventRouter)
           .to.be.true;
-      expect(Object.keys(router.getCreativeMethodRouters()))
+      expect(Object.keys(router.getCreativeEventRouters()))
           .to.have.lengthOf(1);
       ampAnalytics.registerCreativeEventListener(events => {
         expect(events).to.have.lengthOf(1);
@@ -154,7 +154,7 @@ describe('ampanalytics-lib', () => {
     window.onNewAmpAnalyticsInstance = ampAnalytics => {
       expect(ampAnalytics instanceof CreativeEventRouter)
           .to.be.true;
-      expect(Object.keys(router.getCreativeMethodRouters()))
+      expect(Object.keys(router.getCreativeEventRouters()))
           .to.have.lengthOf(1);
       ampAnalytics.registerCreativeEventListener(events => {
         expect(events).to.have.lengthOf(3);

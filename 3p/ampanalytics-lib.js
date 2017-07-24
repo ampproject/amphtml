@@ -55,7 +55,7 @@ export class EventRouter {
      * which is an object that handles messages to/from a particular creative.
      * @private {!Object<string, !CreativeEventRouter>}
      */
-    this.creativeMessageRouters_ = {};
+    this.creativeEventRouters_ = {};
 
     this.win_.addEventListener('message', event => {
       const messageContainer = this.extractMessage_(event);
@@ -112,20 +112,20 @@ export class EventRouter {
       const transportId = event['transportId'];
       const message = event['message'];
       try {
-        if (!this.creativeMessageRouters_[transportId]) {
-          this.creativeMessageRouters_[transportId] =
+        if (!this.creativeEventRouters_[transportId]) {
+          this.creativeEventRouters_[transportId] =
               new CreativeEventRouter(
                   this.win_, this.sentinel_, transportId);
           try {
             this.win_.onNewAmpAnalyticsInstance(
-                this.creativeMessageRouters_[transportId]);
+                this.creativeEventRouters_[transportId]);
           } catch (e) {
             user().error(TAG_, 'Caught exception in' +
               ' onNewAmpAnalyticsInstance: ' + e.message);
             throw e;
           }
         }
-        this.creativeMessageRouters_[transportId]
+        this.creativeEventRouters_[transportId]
             .sendMessageToListener(message);
       } catch (e) {
         user().error(TAG_, 'Failed to pass message to event listener: ' +
@@ -149,16 +149,16 @@ export class EventRouter {
    * @returns {!Object.<string, !CreativeEventRouter>}
    * @VisibleForTesting
    */
-  getCreativeMethodRouters() {
-    return this.creativeMessageRouters_;
+  getCreativeEventRouters() {
+    return this.creativeEventRouters_;
   }
 
   /**
-   * Gets rid of the mapping to EventRouter
+   * Gets rid of the mapping to CreativeEventRouter
    * @VisibleForTesting
    */
   reset() {
-    this.creativeMessageRouters_ = {};
+    this.creativeEventRouters_ = {};
   }
 
   /**
@@ -239,7 +239,8 @@ export class CreativeEventRouter {
   sendMessageToListener(message) {
     if (!this.eventListener_) {
       dev().warn(TAG_, 'Attempted to send message when no listener' +
-        ' configured in ' + this.transportId_ + '. Be sure to' +
+        ' configured. Sentinel=' + this.sentinel_ + ', TransportID=' +
+        this.transportId_ + '. Be sure to' +
         ' call registerCreativeEventListener() within' +
         ' onNewAmpAnalyticsInstance()!');
       return;
