@@ -17,7 +17,7 @@
 import {dev} from '../../../src/log';
 import {
   IFRAME_TRANSPORT_EVENTS_TYPE,
-} from '../../../src/3p-analytics-common';
+} from '../../../src/iframe-transport-common';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 
 /** @private @const {string} */
@@ -47,7 +47,8 @@ export class IframeTransportMessageQueue {
     this.isReady_ = false;
 
     /**
-     * @private {!Array<!../../../src/3p-analytics-common.IframeTransportEvent>}
+     * @private
+     * {!Array<!../../../src/iframe-transport-common.IframeTransportEvent>}
      */
     this.pendingEvents_ = [];
 
@@ -93,7 +94,7 @@ export class IframeTransportMessageQueue {
 
   /**
    * Enqueues an event to be sent to a cross-domain iframe.
-   * @param {!../../../src/3p-analytics-common.IframeTransportEvent} event
+   * @param {!../../../src/iframe-transport-common.IframeTransportEvent} event
    * Identifies the event and which Transport instance (essentially which
    * creative) is sending it.
    */
