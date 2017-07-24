@@ -144,7 +144,7 @@ AmpViewerMessage.prototype.rsvp;
 AmpViewerMessage.prototype.error;
 
 // AMP-Analytics Cross-domain iframes
-let AmpAnalyticsIframeTransportEventMap;
+let IframeTransportEvent;
 
 // amp-viz-vega related externs.
 /**

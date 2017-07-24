@@ -16,18 +16,20 @@
 
 /**
  * @const {string}
- * This is the type of message that will be sent over the wire.
+ * This is the type of message that will be sent to the 3p frame.
  * The message will contain an array of the typedef declared below.
  */
-export const IFRAME_TRANSPORT_EVENTS_TYPE = 'IframeTptEvts';
+export const IFRAME_TRANSPORT_EVENTS_TYPE = 'IframeTransportEvents';
 
 /** @typedef {Object<string,string>} */
 export let IframeTransportEvent;
-// List of events, and the transport IDs of the amp-analytics tags that
-// generated them. For instance if the creative with transport
-// ID 2 sends "hi" and "hello" and the creative with transport ID 3 sends
-// "goodbye" then an array of 3 AmpAnalyticsIframeTransportEvent would be
-// sent across the wire like so:
+// An event, and the transport ID of the amp-analytics tags that
+// generated it. For instance if the creative with transport
+// ID 2 sends "hi", then an IframeTransportEvent would look like:
+// { transportId: "2", message: "hi" }
+// If the creative with transport ID 2 sent that, and also sent "hello",
+// and the creative with transport ID 3 sends "goodbye" then an *array* of 3
+// AmpAnalyticsIframeTransportEvent would be sent to the 3p frame like so:
 // [
 //   { transportId: "2", message: "hi" }, // An AmpAnalyticsIframeTransportEvent
 //   { transportId: "2", message: "hello" }, // Another
