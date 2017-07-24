@@ -66,7 +66,7 @@ function createIframeWithApis(fixture) {
     expect(context.canonicalUrl).to.equal(
         'https://www.example.com/doubleclick.html');
     expect(context.clientId).to.be.defined;
-    expect(context.data).to.jsonEqual({
+    expect(context.data).to.deep.equal({
       width: 300,
       height: 250,
       type: '_ping_',
