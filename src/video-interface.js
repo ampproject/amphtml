@@ -123,7 +123,14 @@ export class VideoInterface {
    * album (string): Name of the video's album if it exists
    * @return {!VideoMetaDef} metadata
    */
-  getMetaData() {}
+  getMetaData() {
+    return {
+      'artwork': '',
+      'title': '',
+      'artist': '',
+      'album': '',
+    };
+  }
 
   /**
    * If this returns true then it will be assumed that the player implements
@@ -133,7 +140,9 @@ export class VideoInterface {
    *
    * @return {boolean}
    */
-  preimplementsMediaSessionAPI() {}
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
 
 
   /**

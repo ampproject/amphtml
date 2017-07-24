@@ -247,13 +247,6 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /** @override */
-  preimplementsMediaSessionAPI() {
-    // Youtube already updates the Media Session so no need for the video
-    // manager to update it too
-    return true;
-  }
-
-  /** @override */
   mutatedAttributesCallback(mutations) {
     if (mutations['data-videoid'] !== undefined) {
       this.videoid_ = this.getVideoId_();
@@ -471,6 +464,23 @@ class AmpYoutube extends AMP.BaseElement {
       return false;
     }
     return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetaData() {
+    return {
+      'artwork': [],
+      'title': '',
+      'artist': '',
+      'album': '',
+    };
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    // Youtube already updates the Media Session so no need for the video
+    // manager to update it too
+    return true;
   }
 
   /** @override */

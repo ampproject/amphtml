@@ -311,6 +311,21 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /** @override */
+  getMetaData() {
+    return {
+      'artwork': [],
+      'title': '',
+      'artist': '',
+      'album': '',
+    };
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
   getCurrentTime() {
     // Not supported.
     return 0;

@@ -42,7 +42,11 @@ import {map} from '../utils/object';
 import {layoutRectLtwh, RelativePositions} from '../layout-rect';
 import {Animation} from '../animation';
 import * as st from '../style';
+<<<<<<< HEAD
 import * as tr from '../transition';
+=======
+import {tryParseJson} from '../json';
+>>>>>>> Implemented metadata and mediasession api for all players & added better default posters
 
 /**
  * @const {number} Percentage of the video that should be in viewport before it
@@ -550,7 +554,7 @@ class VideoEntry {
     this.metaData_ = {
       'artist': '',
       'album': '',
-      'artwork': '',
+      'artwork': [],
       'title': '',
     };
 
@@ -655,18 +659,68 @@ class VideoEntry {
       this.metaData_ = map(this.video.getMetaData());
     }
 
-    if (!this.metaData_.artist) {
-      const artist = 'No artist';
-      if (artist) {
-        this.metaData_.artist = artist;
-      }
-    }
-
     if (!this.metaData_.artwork) {
+      const doc = this.ampdoc_.win.document;
+
+      // Parses the schema.org json-ld formatted meta-data
+      const parseSchemaImage = () => {
+        const schema = doc.querySelector('script[type="application/ld+json"]');
+        if (!schema) {
+          // No schema element found
+          return undefined;
+        }
+        const schemaJson = tryParseJson(schema.textContent);
+        if (!schemaJson || !schemaJson.image) {
+          // No image found in the schema
+          return undefined;
+        }
+
+        if (schemaJson.image['@list']
+            && schemaJson.image['@list'][0]
+            && typeof schemaJson.image['@list'][0] === 'string') {
+          return schemaJson.image['@list'][0];
+        } else if (schemaJson.image[0]
+            && typeof schemaJson.image[0] === 'string') {
+          // Return the first image
+          return schemaJson.image[0];
+        } else if (typeof schemaJson.image === 'string') {
+          return schemaJson.image;
+        } else {
+          return undefined;
+        }
+      };
+
+      // Parses the og:image if it exists
+      const parseOgImage = () => {
+        const metaTag = doc.querySelector('meta[property="og:image"]');
+        if (metaTag) {
+          return metaTage.getAttribute('content');
+        } else {
+          return undefined;
+        }
+      };
+
+      // Parses the website's Favicon
+      const parseFavicon = () => {
+        const linkTag = doc.querySelector('link[rel="shortcut icon"]')
+                        || doc.querySelector('link[rel="icon"]');
+        if (linkTag) {
+          return linkTag.getAttribute('href');
+        } else {
+          return undefined;
+        }
+      }
+
       const posterUrl = this.video.element.getAttribute('poster')
-                           || this.internalElement_.getAttribute('poster');
+                           || this.internalElement_.getAttribute('poster')
+                           || parseSchemaImage()
+                           || parseOgImage()
+                           || parseFavicon();
+
       if (posterUrl) {
-        this.metaData_.artwork = posterUrl;
+        this.metaData_.artwork = [{
+          'src':posterUrl,
+        }];
       }
     }
 
@@ -679,10 +733,6 @@ class VideoEntry {
       if (title) {
         this.metaData_.title = title;
       }
-    }
-
-    if (!this.metaData_.album) {
-      this.metaData_.album = 'No album';
     }
   }
 
@@ -698,7 +748,6 @@ class VideoEntry {
     const win = this.ampdoc_.win;
     const navigator = win.navigator;
     if ('mediaSession' in navigator && win.MediaMetadata) {
-
       navigator.mediaSession.metadata = new win.MediaMetadata(this.metaData_);
 
       navigator.mediaSession.setActionHandler('play', function() {
