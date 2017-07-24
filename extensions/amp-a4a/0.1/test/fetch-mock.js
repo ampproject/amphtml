@@ -29,6 +29,10 @@ export let MockResponseTiming;
 /** @typedef {(!MockResponseTiming|function(): !MockResponseTiming)} */
 export let MockResponse;
 
+/**
+ * A stub for `window.fetch`, facilitating hermetic testing of code that uses it.
+ * The window is stubbed when this class's constructor is called.
+ */
 export class FetchMock {
 
   /** @param {!Window} win */
@@ -45,15 +49,22 @@ export class FetchMock {
     win.fetch = (input, init = undefined) => this.fetch_(input, init);
   }
 
+  /**
+   * Unstubs the window object and restore the real `window.fetch`.
+   */
   restore() {
     this.win_.fetch = this.realFetch_;
     this.routes_ = {};
   }
 
   /**
-   * @param {string} url
-   * @param {!MockResponse} response
-   * @param {{name: string}=} options
+   * Specifies that up to one GET request may be made to the given URL during
+   * the current test, and defines the response to return.
+   *
+   * @param {string} url the URL that the request is made to
+   * @param {!MockResponse} response the response to return
+   * @param {{name: string}=} options if provided, specifies a name that the
+   *     caller may later use with the `called` method
    */
   getOnce(url, response, options) {
     if (url in this.routes_) {
@@ -66,8 +77,11 @@ export class FetchMock {
   }
 
   /**
-   * @param {string} name
-   * @return {boolean}
+   * Returns whether a particular URL specified by an earlier call to `getOnce`
+   * was ever actually used for a GET request.
+   *
+   * @param {string} name the name of the route passed in `options`
+   * @return {boolean} whether a request has been made to the given route.
    */
   called(name) {
     if (!(name in this.names_)) {
@@ -77,9 +91,12 @@ export class FetchMock {
   }
 
   /**
+   * Imitates the functionality of `window.fetch`.
+   *
    * @param {!RequestInfo} input
    * @param {(!RequestInit|undefined)} init
    * @return {!Promise<!Response>}
+   * @private
    */
   fetch_(input, init) {
     const url = new Request(input, init).url;
@@ -106,12 +123,9 @@ export class FetchMock {
 }
 
 /**
- * Returns an error representing a network failure. To simulate such a failure,
- * use the return value from this function as the rejection value of a promise
- * and use that promise as the `response` in an item of `entries` passed to
- * `FetchMock.prototype.use`.
+ * Simulates a network connectivity or CORS failure.
  *
- * @return {!Error}
+ * @return {!Error} an object that can be used as a rejection value
  */
 export function networkFailure() {
   return new TypeError('Failed to fetch');
