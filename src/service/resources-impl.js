@@ -49,6 +49,7 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
+const DOC_BOTTOM_OFFSET_LIMIT_ = 1000;
 
 
 /**
@@ -1096,7 +1097,8 @@ export class Resources {
     const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
-    const docBottomOffset = scrollHeight * 0.85;
+    const maxDocBottomOffset = scrollHeight - DOC_BOTTOM_OFFSET_LIMIT_;
+    const docBottomOffset = Math.max(scrollHeight * 0.85, maxDocBottomOffset);
     const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
