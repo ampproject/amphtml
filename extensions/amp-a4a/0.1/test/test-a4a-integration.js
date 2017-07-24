@@ -115,7 +115,7 @@ describe('integration test: a4a', () => {
   });
 
   afterEach(() => {
-    fetchMock.restore();
+    fetchMock.restoreFetch();
     sandbox.restore();
     resetScheduledElementForTesting(window, 'amp-a4a');
     delete adConfig['mock'];

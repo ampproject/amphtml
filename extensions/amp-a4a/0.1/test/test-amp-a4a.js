@@ -76,7 +76,7 @@ describe('amp-a4a', () => {
 
   afterEach(() => {
     if (fetchMock) {
-      fetchMock.restore();
+      fetchMock.restoreFetch();
       fetchMock = null;
     }
     sandbox.restore();

@@ -50,9 +50,9 @@ export class FetchMock {
   }
 
   /**
-   * Unstubs the window object and restore the real `window.fetch`.
+   * Unstubs the window object and restores the real `window.fetch`.
    */
-  restore() {
+  restoreFetch() {
     this.win_.fetch = this.realFetch_;
     this.routes_ = {};
   }
