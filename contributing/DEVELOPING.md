@@ -183,6 +183,45 @@ To run the tests on Sauce Labs:
 * It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
 
 
+## Visual Diff Tests
+
+**NOTE:** *We are working on giving all `ampproject/amphtml` committers automatic access to visual diff test results. Until this is in place, you can fill out [this](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform) form, and your request should be approved soon.*
+
+In addition to building the AMP runtime and running `gulp test`, the automatic test run on Travis includes a set of visual diff tests to make sure a new commit to `master` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
+
+The technology stack used is:
+
+- [Percy](https://percy.io/), a visual regression testing service for webpages
+- [Capybara](https://percy.io/docs/clients/ruby/capybara-rails), a framework that integrates tests with Percy
+- [Poltergeist](https://github.com/teampoltergeist/poltergeist), a driver capable of loading webpages for diffing
+- [PhantomJS](http://phantomjs.org/), a headless webkit based browser
+
+The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. All PRs will show a check called `percy/amphtml` in addition to the `continuous-integration/travis-ci/pr` check. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted.
+
+### Failing Tests
+
+When a test run fails due to visual diffs being present, click the `details` link next to `percy/amphtml` in your PR and examine the results. By default, Percy highlights the changes between snapshots in red. Clicking on the new snapshot will show it in its raw form. If the diffs indicate a problem that is likely to be due to your PR, you can try running the visual diffs locally in order to debug (see section below). However, if you are sure that the problem is not due to your PR, you may click the green `Approve` button on Percy to approve the snapshots and unblock your PR from being merged.
+
+### Running Visual Diff Tests Locally
+
+You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_PROJECT` and `PERCY_TOKEN` environment variables using the unique values you find at `https://percy.io/<your_project>/settings`. Once the environment variables are set up, you can run the AMP visual diff tests like so:
+
+```
+gulp build
+ruby build-system/tasks/visual-diff.rb
+```
+The build will use the Percy credentials set via environment variables in the previous step, and you can see the results at `https://percy.io/<your_project>`.
+
+To see debugging info during percy runs, you can run:
+```
+ ruby build-system/tasks/visual-diff.rb --percy_debug --phantomjs_debug --webserver_debug
+```
+The debug flags `--percy_debug`, `--phantomjs_debug`, and `--webserver_debug` can be used independently. To enable all three debug flags, you can also run:
+```
+ ruby build-system/tasks/visual-diff.rb --debug
+```
+After each run, a new set of results will be available at `https://percy.io/<your_project>`.
+
 ## Testing on devices
 
 ### Testing with ngrok
