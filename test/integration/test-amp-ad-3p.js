@@ -21,8 +21,10 @@ import {
 } from '../../testing/iframe';
 import {Services} from '../../src/services';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {toggleExperiment} from '../../src/experiments';
-
+import {
+  toggleExperiment,
+  resetExperimentTogglesForTesting,
+} from '../../src/experiments';
 
 // TODO(@alanorozco): Inline this once 3p-use-ampcontext experiment is removed
 function createIframeWithApis(fixture) {
@@ -64,7 +66,7 @@ function createIframeWithApis(fixture) {
     expect(context.canonicalUrl).to.equal(
         'https://www.example.com/doubleclick.html');
     expect(context.clientId).to.be.defined;
-    expect(context.data).to.deep.equal({
+    expect(context.data).to.jsonEqual({
       width: 300,
       height: 250,
       type: '_ping_',
@@ -153,12 +155,15 @@ describe.configure().retryOnSaucelabs().run('amp-ad 3P ' +
   let fixture;
 
   beforeEach(() => {
+    toggleExperiment(window, '3p-use-ampcontext', /* opt_on */ true);
     return createFixture().then(f => {
       fixture = f;
-      toggleExperiment(fixture.win, '3p-use-ampcontext', /* opt_on */ true,
-          /* opt_transientExperiment */ true);
       installPlatformService(fixture.win);
     });
+  });
+
+  afterEach(() => {
+    resetExperimentTogglesForTesting(window);
   });
 
   it('create an iframe with APIs', function() {
