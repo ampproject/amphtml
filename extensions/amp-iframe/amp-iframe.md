@@ -200,20 +200,20 @@ The iframe can listen to an `intersection` message from the parent window to rec
 
 ```javascript
 window.addEventListener('message', function(event) {
-  const listener = function(event) {
-    if (event.source != window.parent ||
-        event.origin != window.context.location.origin ||
-        !event.data ||
-        event.data.sentinel != 'amp' ||
-        event.data.type != 'intersection') {
-      return;
-    }
-    event.data.changes.forEach(function (change) {
-      console.log(change);
-    });
-  };
+  if (event.source != window.parent ||
+      event.origin == window.location.origin ||
+      !event.data ||
+      event.data.sentinel != 'amp' ||
+      event.data.type != 'intersection') {
+    return;
+  }
+  event.data.changes.forEach(function (change) {
+    console.log(change);
+  });
 });
 ```
+
+*Note: If script lives in nested iframe, change `window.parent` to the top AMP window instead*
 
 The intersection message would be sent by the parent to the iframe when the iframe moves in or out of the viewport (or is partially visible), when the iframe is scrolled or resized.
 
