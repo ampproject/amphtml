@@ -16,10 +16,10 @@
 
 import {
   IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE,
-} from '../../../../src/3p-analytics-common';
+} from '../../../../src/iframe-transport-common';
 import {
-  AmpAnalytics3pMessageRouter,
-  AmpAnalytics3pCreativeMessageRouter,
+  EventRouter,
+  CreativeEventRouter,
 } from '../../../../3p/ampanalytics-lib';
 import {dev, user} from '../../../../src/log';
 import {Timer} from '../../../../src/service/timer-impl';
@@ -52,8 +52,8 @@ describe('ampanalytics-lib', () => {
     badAssertsCounterStub = sandbox.stub();
     sentinel = createUniqueId();
     window.name = '{"sentinel": "' + sentinel + '"}';
-    sandbox.stub(AmpAnalytics3pMessageRouter.prototype, 'subscribeTo');
-    router = new AmpAnalytics3pMessageRouter(window);
+    sandbox.stub(EventRouter.prototype, 'subscribeTo');
+    router = new EventRouter(window);
     sandbox.stub(dev(), 'assert', (condition, msg) => {
       if (!condition) {
         badAssertsCounterStub(msg);
@@ -92,7 +92,7 @@ describe('ampanalytics-lib', () => {
     const oldWindowName = window.name;
     expect(() => {
       window.name = '';
-      new AmpAnalytics3pMessageRouter(window);
+      new EventRouter(window);
     }).to.throw(/Cannot read property 'sentinel' of undefined/);
     window.name = oldWindowName;
   });
@@ -107,8 +107,8 @@ describe('ampanalytics-lib', () => {
 
   it('makes registration function available ', () => {
     window.onNewAmpAnalyticsInstance = ampAnalytics => {
-      expect(ampAnalytics.registerAmpAnalytics3pEventsListener).to.exist;
-      ampAnalytics.registerAmpAnalytics3pEventsListener(() => {});
+      expect(ampAnalytics.registerCreativeEventListener).to.exist;
+      ampAnalytics.registerCreativeEventListener(() => {});
     };
     send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
       events: [
@@ -118,11 +118,11 @@ describe('ampanalytics-lib', () => {
 
   it('receives an event message ', () => {
     window.onNewAmpAnalyticsInstance = ampAnalytics => {
-      expect(ampAnalytics instanceof AmpAnalytics3pCreativeMessageRouter)
+      expect(ampAnalytics instanceof CreativeEventRouter)
           .to.be.true;
       expect(Object.keys(router.getCreativeMethodRouters()))
           .to.have.lengthOf(1);
-      ampAnalytics.registerAmpAnalytics3pEventsListener(events => {
+      ampAnalytics.registerCreativeEventListener(events => {
         expect(events).to.have.lengthOf(1);
         events.forEach(event => {
           expect(ampAnalytics.getTransportId()).to.equal('101');
@@ -152,11 +152,11 @@ describe('ampanalytics-lib', () => {
 
   it('receives multiple event messages ', () => {
     window.onNewAmpAnalyticsInstance = ampAnalytics => {
-      expect(ampAnalytics instanceof AmpAnalytics3pCreativeMessageRouter)
+      expect(ampAnalytics instanceof CreativeEventRouter)
           .to.be.true;
       expect(Object.keys(router.getCreativeMethodRouters()))
           .to.have.lengthOf(1);
-      ampAnalytics.registerAmpAnalytics3pEventsListener(events => {
+      ampAnalytics.registerCreativeEventListener(events => {
         expect(events).to.have.lengthOf(3);
         events.forEach(() => {
           expect(ampAnalytics.getTransportId()).to.equal('103');

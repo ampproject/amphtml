@@ -17,7 +17,7 @@
 import './polyfills';
 import {tryParseJson} from '../src/json';
 import {dev, user, initLogConstructor, setReportError} from '../src/log';
-import {IFRAME_TRANSPORT_EVENTS_TYPE} from '../src/3p-analytics-common';
+import {IFRAME_TRANSPORT_EVENTS_TYPE} from '../src/iframe-transport-common';
 import {getData} from '../src/event-helper';
 
 initLogConstructor();
@@ -29,9 +29,10 @@ setReportError(() => {});
 const TAG_ = 'ampanalytics-lib';
 
 /**
- * Receives messages bound for this cross-domain iframe, from all creatives
+ * Receives event messages bound for this cross-domain iframe, from all
+ * creatives
  */
-export class AmpAnalytics3pMessageRouter {
+export class EventRouter {
 
   /** @param {!Window} win */
   constructor(win) {
@@ -50,9 +51,9 @@ export class AmpAnalytics3pMessageRouter {
      * Multiple creatives on a page may wish to use the same type of
      * amp-analytics tag. This object provides a mapping between the
      * IDs which identify which amp-analytics tag a message is to/from,
-     * with each ID's corresponding AmpAnalytics3pCreativeMessageRouter,
+     * with each ID's corresponding CreativeEventRouter,
      * which is an object that handles messages to/from a particular creative.
-     * @private {!Object<string, !AmpAnalytics3pCreativeMessageRouter>}
+     * @private {!Object<string, !CreativeEventRouter>}
      */
     this.creativeMessageRouters_ = {};
 
@@ -70,7 +71,9 @@ export class AmpAnalytics3pMessageRouter {
           'Received unrecognized message type ' + messageContainer['type'] +
           ' in ' + this.win_.location.href);
       this.processEventsMessage_(
-          /** @type {!Array<../src/3p-analytics-common.IframeTransportEvent>} */
+          /**
+           * @type {!Array<../src/iframe-transport-common.IframeTransportEvent>}
+           */
           (messageContainer['events']));
     }, false);
 
@@ -93,7 +96,7 @@ export class AmpAnalytics3pMessageRouter {
   /**
    * Handle receipt of a message indicating that creative(s) have sent
    * event(s) to this frame
-   * @param {!Array<!../src/3p-analytics-common.IframeTransportEvent>}
+   * @param {!Array<!../src/iframe-transport-common.IframeTransportEvent>}
    * events An array of events
    * @private
    */
@@ -111,7 +114,7 @@ export class AmpAnalytics3pMessageRouter {
       try {
         if (!this.creativeMessageRouters_[transportId]) {
           this.creativeMessageRouters_[transportId] =
-              new AmpAnalytics3pCreativeMessageRouter(
+              new CreativeEventRouter(
                   this.win_, this.sentinel_, transportId);
           try {
             this.win_.onNewAmpAnalyticsInstance(
@@ -142,8 +145,8 @@ export class AmpAnalytics3pMessageRouter {
 
   /**
    * Gets the mapping of creative senderId to
-   * AmpAnalytics3pCreativeMessageRouter
-   * @returns {!Object.<string, !AmpAnalytics3pCreativeMessageRouter>}
+   * CreativeEventRouter
+   * @returns {!Object.<string, !CreativeEventRouter>}
    * @VisibleForTesting
    */
   getCreativeMethodRouters() {
@@ -151,7 +154,7 @@ export class AmpAnalytics3pMessageRouter {
   }
 
   /**
-   * Gets rid of the mapping to AmpAnalytics3pMessageRouter
+   * Gets rid of the mapping to EventRouter
    * @VisibleForTesting
    */
   reset() {
@@ -178,9 +181,9 @@ export class AmpAnalytics3pMessageRouter {
 
 if (!window.AMP_TEST) {
   try {
-    new AmpAnalytics3pMessageRouter(window);
+    new EventRouter(window);
   } catch (e) {
-    user().error(TAG_, 'Failed to construct AmpAnalytics3pMessageRouter: ' +
+    user().error(TAG_, 'Failed to construct EventRouter: ' +
       e.message);
   }
 }
@@ -189,7 +192,7 @@ if (!window.AMP_TEST) {
  * Receives messages bound for this cross-domain iframe, from a particular
  * creative.
  */
-export class AmpAnalytics3pCreativeMessageRouter {
+export class CreativeEventRouter {
   /**
    * @param {!Window} win The enclosing window object
    * @param {!string} sentinel The communication sentinel of this iframe
@@ -219,7 +222,7 @@ export class AmpAnalytics3pCreativeMessageRouter {
    * listener A function that takes an event string, and does something with
    * it.
    */
-  registerAmpAnalytics3pEventsListener(listener) {
+  registerCreativeEventListener(listener) {
     if (this.eventListener_) {
       dev().warn(TAG_, 'Replacing existing eventListener for ' +
         this.transportId_);
@@ -237,7 +240,7 @@ export class AmpAnalytics3pCreativeMessageRouter {
     if (!this.eventListener_) {
       dev().warn(TAG_, 'Attempted to send message when no listener' +
         ' configured in ' + this.transportId_ + '. Be sure to' +
-        ' call registerAmpAnalytics3pEventsListener() within' +
+        ' call registerCreativeEventListener() within' +
         ' onNewAmpAnalyticsInstance()!');
       return;
     }
