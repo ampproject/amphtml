@@ -913,7 +913,7 @@ app.get('/dist/rtv/*/v0/*.js', (req, res, next) => {
  */
 app.get(['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
     (req, res, next) => {
-      // Speical case for entry point script url. Use compiled for testing
+      // Special case for entry point script url. Use compiled for testing
       const mode = pc.env.SERVE_MODE;
       const fileName = path.basename(req.path);
       if (mode == 'cdn') {
@@ -935,6 +935,11 @@ app.get(['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
       }
       next();
     });
+
+app.get('/dist/ampanalytics-lib.js', (req, res, next) => {
+  req.url = req.url.replace(/dist/, 'dist.3p/current');
+  next();
+});
 
 /*
  * Start Cache SW LOCALDEV section
