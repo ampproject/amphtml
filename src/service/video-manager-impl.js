@@ -50,6 +50,12 @@ import * as st from '../style';
 const VISIBILITY_PERCENT = 75;
 
 /**
+ * @private {number} The minimum number of milliseconds to wait between each
+ * video-seconds-played analytics event.
+ */
+const SECONDS_PLAYED_MIN_DELAY = 1000;
+
+/**
  * @const {number} How much to scale the video by when minimized.
  */
 const DOCK_SCALE = 0.6;
@@ -118,6 +124,32 @@ export class VideoManager {
 
     /** @private {?VideoEntry} */
     this.dockedVideo_ = null;
+
+    /** @private @const */
+    this.timer_ = Services.timerFor(ampdoc.win);
+
+    /** @private @const */
+    this.boundSecondsPlaying_ = () => this.secondsPlaying_();;
+
+    // TODO(cvializ, #10599): It would be nice to only create the timer
+    // if video analytics are present, since the timer is not needed if
+    // video analytics are not present.
+    this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
+  }
+
+  /**
+   * Each second, trigger video-seconds-played for videos that are playing
+   * at trigger time.
+   * @private
+   */
+  secondsPlaying_() {
+    for (let i = 0; i < this.entries_.length; i++) {
+      const entry = this.entries_[i];
+      if (entry.getPlayingState() !== PlayingStates.PAUSED) {
+        analyticsEvent(entry, VideoAnalyticsEvents.SECONDS_PLAYED);
+      }
+    }
+    this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
   }
 
   /**
