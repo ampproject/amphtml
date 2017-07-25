@@ -22,7 +22,12 @@ import {user, dev} from '../../../src/log';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {removeElement, fullscreenEnter, fullscreenExit} from '../../../src/dom';
+import {
+  removeElement,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
@@ -253,6 +258,11 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
    */
   fullscreenExit() {
     fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    return isFullscreenElement(dev().assertElement(this.iframe_));
   }
 
   /** @override */

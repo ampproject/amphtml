@@ -135,6 +135,12 @@ export class VideoInterface {
   fullscreenExit() {}
 
   /**
+   * Returns whether the video is currently in fullscreen mode or not
+   * @return {boolean}
+   */
+  isFullscreen() {}
+
+  /**
    * Automatically comes from {@link ./base-element.BaseElement}
    *
    * @param {string} unusedMethod
@@ -184,7 +190,7 @@ export const VideoAttributes = {
    */
   DOCK: 'dock',
   /**
-   * auto-fullscreen
+   * fullscreen-on-landscape
    *
    * If enabled, this automatically expands the currently visible video and
    * playing to fullscreen when the user changes the device's orientation to
@@ -195,7 +201,7 @@ export const VideoAttributes = {
    * http://caniuse.com/#feat=screen-orientation
    * and http://caniuse.com/#feat=fullscreen
    */
-  AUTOFULLSCREEN: 'auto-fullscreen',
+  FULLSCREEN_ON_LANDSCAPE: 'fullscreen-on-landscape',
 };
 
 

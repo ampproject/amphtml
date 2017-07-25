@@ -575,7 +575,7 @@ var forbiddenTerms = {
       'src/event-helper.js',
     ],
   },
-  '[A-Za-z]*Full[Ss]creen\\(': {
+  '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {
     message: 'Use fullscreenEnter() and fullscreenExit() from dom.js instead.',
     whitelist: [
       'ads/google/imaVideo.js',

@@ -236,7 +236,7 @@ export class VideoManager {
   maybeInstallOrientationObserver_(entry) {
     // The orientation observer is only useful for automatically putting videos
     // in fullscreen.
-    if (!entry.video.element.hasAttribute(VideoAttributes.AUTOFULLSCREEN)) {
+    if (!entry.hasFullscreenOnLandscape) {
       return;
     }
 
@@ -255,15 +255,16 @@ export class VideoManager {
     };
     // Chrome apparently considers 'orientationchange' to be an untrusted
     // event, while 'change' on screen.orientation is considered a user
-    // interaction
+    // interaction. However on Chrome we still need to listen to
+    // 'orientationchange' to be able to exit fullscreen since 'change' does not
+    // fire when a video is in fullscreen.
     if (screen && 'orientation' in screen) {
       const orient = /** @type {!ScreenOrientation} */ (screen.orientation);
       listen(orient, 'change', handleOrientationChange.bind(this));
-    } else {
-      // iOS Safari does not have screen.orientation but classifies
-      // 'orientationchange' as a user interaction.
-      listen(win, 'orientationchange', handleOrientationChange.bind(this));
     }
+    // iOS Safari does not have screen.orientation but classifies
+    // 'orientationchange' as a user interaction.
+    listen(win, 'orientationchange', handleOrientationChange.bind(this));
   }
 
   /**
@@ -471,7 +472,12 @@ class VideoEntry {
 
     this.hasAutoplay = element.hasAttribute(VideoAttributes.AUTOPLAY);
 
-    this.hasAutoFs = element.hasAttribute(VideoAttributes.AUTOFULLSCREEN);
+    const fsOnLandscapeAttr = element.getAttribute(
+        VideoAttributes.FULLSCREEN_ON_LANDSCAPE
+    );
+
+    this.hasFullscreenOnLandscape = fsOnLandscapeAttr !== undefined
+      && (fsOnLandscapeAttr === '' || fsOnLandscapeAttr == 'always');
 
     listenOncePromise(element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
@@ -575,11 +581,13 @@ class VideoEntry {
    * @private
    */
   orientationChanged_(isLandscape) {
-    // Put the video in/out of fullscreen depending on orientation
+    // Put the video in/out of fullscreen depending on screen orientation
     if (!isLandscape && this.isFullscreenByOrientationChange_) {
     	this.exitFullscreen_();
-    } else if (this.getPlayingState() == PlayingStates.PLAYING_MANUAL
-               && this.isVisible_) {
+    } else if (isLandscape
+               && this.getPlayingState() == PlayingStates.PLAYING_MANUAL
+               && this.isVisible_
+               && Services.viewerForDoc(this.ampdoc_).isVisible()) {
     	this.enterFullscreen_();
     }
   }
@@ -589,8 +597,11 @@ class VideoEntry {
    * @private
    */
   enterFullscreen_() {
+    if (this.video.isFullscreen() || this.isFullscreenByOrientationChange_) {
+      return;
+    }
     this.video.fullscreenEnter();
-    this.isFullscreenByOrientationChange_ = true;
+    this.isFullscreenByOrientationChange_ = this.video.isFullscreen();
   }
 
   /**
@@ -598,6 +609,9 @@ class VideoEntry {
    * @private
    */
   exitFullscreen_() {
+    if (!this.isFullscreenByOrientationChange_) {
+      return;
+    }
     this.video.fullscreenExit();
     this.isFullscreenByOrientationChange_ = false;
   }

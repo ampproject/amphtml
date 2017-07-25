@@ -19,6 +19,7 @@ import {
   removeElement,
   fullscreenEnter,
   fullscreenExit,
+  isFullscreenElement,
 } from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {getData, listen} from '../../../src/event-helper';
@@ -451,6 +452,10 @@ class AmpYoutube extends AMP.BaseElement {
     fullscreenExit(dev().assertElement(this.iframe_));
   }
 
+  /** @override */
+  isFullscreen() {
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
 
   /** @override */
   getCurrentTime() {

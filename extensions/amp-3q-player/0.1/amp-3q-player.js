@@ -17,7 +17,12 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {tryParseJson} from '../../../src/json';
 import {user, dev} from '../../../src/log';
-import {removeElement, fullscreenEnter, fullscreenExit} from '../../../src/dom';
+import {
+  removeElement,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -227,6 +232,11 @@ class Amp3QPlayer extends AMP.BaseElement {
    */
   fullscreenExit() {
     fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    return isFullscreenElement(dev().assertElement(this.iframe_));
   }
 
   /** @override */

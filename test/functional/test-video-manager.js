@@ -515,6 +515,12 @@ function createFakeVideoPlayerClass(win) {
     fullscreenExit() {
     }
 
+    /**
+     * @override
+     */
+    isFullscreen() {
+    }
+
     /** @override */
     getCurrentTime() {
       return this.currentTime_;

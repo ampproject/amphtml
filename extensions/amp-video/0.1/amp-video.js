@@ -14,7 +14,12 @@
   * limitations under the License.
   */
 
-import {elementByTag, fullscreenEnter, fullscreenExit} from '../../../src/dom';
+import {
+  elementByTag,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getMode} from '../../../src/mode';
@@ -292,6 +297,11 @@ class AmpVideo extends AMP.BaseElement {
    */
   fullscreenExit() {
     fullscreenExit(dev().assertElement(this.video_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    return isFullscreenElement(dev().assertElement(this.video_));
   }
 
   /** @override */

@@ -803,3 +803,27 @@ export function fullscreenExit(element) {
     return;
   }
 }
+
+
+/**
+ * Replacement for `Document.fullscreenElement`.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Document/fullscreenElement
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isFullscreenElement(element) {
+  const isFullscreen = element.webkitDisplayingFullscreen;
+  if (isFullscreen) {
+    return true;
+  }
+  if (element.ownerDocument) {
+    const fullscreenElement = element.ownerDocument.fullscreenElement
+             || element.ownerDocument.webkitFullscreenElement
+             || element.ownerDocument.mozFullScreenElement
+             || element.webkitCurrentFullScreenElement;
+    if (fullscreenElement == element) {
+      return true;
+    }
+  }
+  return false;
+}
