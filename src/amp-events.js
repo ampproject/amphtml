@@ -21,7 +21,6 @@
 */
 export const AmpEvents = {
   VISIBILITY_CHANGE: 'amp:visibilitychange',
-  TEMPLATE_RENDERED: 'amp:template-rendered',
   DOM_UPDATE: 'amp:dom-update',
   BUILT: 'amp:built',
   ATTACHED: 'amp:attached',

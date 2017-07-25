@@ -255,7 +255,7 @@ describe('Bind', function() {
         const element = createElement(env, container, '[text]="1+1"');
         dynamicTag.appendChild(element);
         dynamicTag.dispatchEvent(
-            new Event(AmpEvents.TEMPLATE_RENDERED, {bubbles: true}));
+            new Event(AmpEvents.DOM_UPDATE, {bubbles: true}));
         return waitForEvent(env, BindEvents.RESCAN_TEMPLATE);
       }).then(() => {
         expect(bind.numberOfBindings()).to.equal(1);
