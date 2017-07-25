@@ -3,8 +3,8 @@
   "allow-url-opt-in": ["pump-early-frame"],
 
   "canary": 1,
-  "expAdsenseA4A": 1,
-  "expDoubleclickA4A": 1,
+  "expAdsenseA4A": 0.01,
+  "expDoubleclickA4A": 0.01,
   "a4aProfilingRate": 1,
   "ad-type-custom": 1,
   "ios-embed-wrapper": 1,
