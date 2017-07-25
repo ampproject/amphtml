@@ -18,6 +18,8 @@ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {AmpAd3PImpl} from '../../../amp-ad/0.1/amp-ad-3p-impl';
 import {
   AmpA4A,
+  AMP_SIGNATURE_HEADER,
+  CREATIVE_SIZE_HEADER,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
 } from '../../../amp-a4a/0.1/amp-a4a';
@@ -41,7 +43,10 @@ import {
 import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
-import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
+import {
+  EXPERIMENT_ATTRIBUTE,
+  QQID_HEADER,
+} from '../../../../ads/google/a4a/utils';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -1405,6 +1410,145 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       }).catch(() => {
         // Should not error.
         expect(true).to.be.false;
+      });
+    });
+  });
+
+  describe('#multi-size', () => {
+    const arrayBuffer = () => Promise.resolve({
+      byteLength: 256,
+    });
+
+    /**
+     * Calling this function ensures that the enclosing test will behave as if
+     * it has an AMP creative.
+     */
+    function stubForAmpCreative() {
+      sandbox.stub(impl, 'verifyCreativeSignature_', () => utf8Encode('foo'));
+    }
+
+    function mockSendXhrRequest() {
+      return {
+        arrayBuffer,
+        headers: {
+          get(prop) {
+            switch (prop) {
+              case QQID_HEADER:
+                return 'qqid-header';
+              case CREATIVE_SIZE_HEADER:
+                return '150x50';
+              case AMP_SIGNATURE_HEADER:
+                return 'fake-sig';
+              default:
+                return undefined;
+            }
+          },
+          has(prop) {
+            return !!this.get(prop);
+          },
+        },
+      };
+    }
+
+    beforeEach(() => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = window;
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+          'layout': 'fixed',
+        });
+        doc.body.appendChild(element);
+
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+        impl.initialSize_ = {width: 200, height: 50};
+
+        // Boilerplate stubbing
+        sandbox.stub(impl, 'shouldInitializePromiseChain_', () => true);
+        sandbox.stub(impl, 'getAmpDoc', () => {
+          document.win = window;
+          return document;
+        });
+        sandbox.stub(impl, 'getPageLayoutBox', () => {
+          return {
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            width: 200,
+            height: 50,
+          };
+        });
+        sandbox.stub(impl, 'protectedEmitLifecycleEvent_', () => {});
+        sandbox.stub(impl, 'attemptChangeSize', (height, width) => {
+          impl.element.setAttribute('height', height);
+          impl.element.setAttribute('width', width);
+          return Promise.resolve();
+        });
+        sandbox.stub(impl, 'getAmpAdMetadata_', () => {
+          return {
+            customElementExtensions: [],
+            minifiedCreative: '<html><body>Hello, World!</body></html>',
+          };
+        });
+        sandbox.stub(impl, 'updatePriority', () => {});
+      });
+    });
+
+    it('amp creative - should force iframe to match size of creative', () => {
+      stubForAmpCreative();
+      sandbox.stub(impl, 'sendXhrRequest', mockSendXhrRequest);
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        const iframe = impl.iframe;
+        expect(iframe).to.be.ok;
+        expect(iframe.getAttribute('style')).to.match(/width: 150/);
+        expect(iframe.getAttribute('style')).to.match(/height: 50/);
+      });
+    });
+
+    it('should force iframe to match size of creative', () => {
+      sandbox.stub(impl, 'sendXhrRequest', mockSendXhrRequest);
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        const iframe = impl.iframe;
+        expect(iframe).to.be.ok;
+        expect(iframe.getAttribute('style')).to.match(/width: 150/);
+        expect(iframe.getAttribute('style')).to.match(/height: 50/);
+      });
+    });
+
+    it('amp creative - should force iframe to match size of slot', () => {
+      stubForAmpCreative();
+      sandbox.stub(impl, 'sendXhrRequest', () => null);
+      sandbox.stub(impl, 'renderViaCachedContentIframe_',
+          () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
+      // This would normally be set in AmpA4a#buildCallback.
+      impl.creativeSize_ = {width: 200, height: 50};
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        const iframe = impl.iframe;
+        expect(iframe).to.be.ok;
+        expect(iframe.getAttribute('style')).to.match(/width: 200/);
+        expect(iframe.getAttribute('style')).to.match(/height: 50/);
+      });
+    });
+
+    it('should force iframe to match size of slot', () => {
+      sandbox.stub(impl, 'sendXhrRequest', () => null);
+      sandbox.stub(impl, 'renderViaCachedContentIframe_',
+          () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
+      // This would normally be set in AmpA4a#buildCallback.
+      impl.creativeSize_ = {width: 200, height: 50};
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        const iframe = impl.iframe;
+        expect(iframe).to.be.ok;
+        expect(iframe.getAttribute('style')).to.match(/width: 200/);
+        expect(iframe.getAttribute('style')).to.match(/height: 50/);
       });
     });
   });

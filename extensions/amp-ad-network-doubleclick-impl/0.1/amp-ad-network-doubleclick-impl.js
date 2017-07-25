@@ -315,6 +315,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
+      if (this.element.getAttribute('layout') == 'responsive') {
+        // TODO(levitzky) Define the behavior and remove this warning.
+        user().warn(TAG, 'Behavior of multi-size and responsive layout is ' +
+            'currently not well defined. Proceed with caution.');
+      }
       const multiSizeValidation = this.element
           .getAttribute('data-multi-size-validation') || 'true';
       // The following call will check all specified multi-size dimensions,
@@ -417,14 +422,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.returnedSize_ = size;
       this.handleResize_(size.width, size.height);
     } else {
-      const width = Number(this.element.getAttribute('width'));
-      const height = Number(this.element.getAttribute('height'));
-      size = width && height
-          ? {width, height}
-          // width/height could be 'auto' in which case we fallback to measured.
-          : this.getIntersectionElementLayoutBox();
+      size = this.getSlotSize();
     }
     return size;
+  }
+
+  /**
+   * Returns the width and height of the slot as defined by the width and height
+   * attributes, or the dimensions as computed by
+   * getIntersectionElementLayoutBox.
+   * @return {{width: number, height: number}|../../../src/layout-rect.LayoutRectDef}
+   */
+  getSlotSize() {
+    const width = Number(this.element.getAttribute('width'));
+    const height = Number(this.element.getAttribute('height'));
+    return width && height
+        ? {width, height}
+        // width/height could be 'auto' in which case we fallback to measured.
+        : this.getIntersectionElementLayoutBox();
   }
 
   /** @override */
@@ -529,7 +544,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // Force size of frame to match creative or, if creative size is unknown,
     // the slot. This ensures that the creative is centered in the former case,
     // and not truncated in the latter.
-    const size = this.returnedSize_ || this.getIntersectionElementLayoutBox();
+    // TODO(levitzky) Figure out the behavior of responsive + multi-size.
+    const size = this.returnedSize_ || this.getSlotSize();
     setStyles(dev().assertElement(this.iframe), {
       width: `${size.width}px`,
       height: `${size.height}px`,
