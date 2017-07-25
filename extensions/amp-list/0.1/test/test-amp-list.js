@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
@@ -93,7 +94,7 @@ describe('amp-list component', () => {
     const itemElement = document.createElement('div');
     const fetchPromise = Promise.resolve(items);
     const renderPromise = Promise.resolve([itemElement]);
-    listMock.expects('fetchItems_').withExactArgs('items')
+    listMock.expects('fetch_').withExactArgs('items')
         .returns(fetchPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withArgs()
         .returns(renderPromise).once();
