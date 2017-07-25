@@ -378,8 +378,12 @@ Here's an example:
         </template>
     </div>
 </form>
+```
 
-The form sends a `__amp_form_verify` field as part of the form data to let the server know the request is a verify request and not a formal submit.
+The form sends a `__amp_form_verify` field as part of the form data as a hint to
+the server that the request is a verify request and not a formal submit.
+This is helpful so the server knows not to store the verify request if the same
+endpoint is used for verification and for submit.
 
 ```
 
