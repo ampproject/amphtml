@@ -20,8 +20,10 @@ import {
 } from '../../testing/iframe';
 import {Services} from '../../src/services';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {toggleExperiment} from '../../src/experiments';
-
+import {
+  toggleExperiment,
+  resetExperimentTogglesForTesting,
+} from '../../src/experiments';
 
 // TODO(@alanorozco): Inline this once 3p-use-ampcontext experiment is removed
 function createIframeWithApis(fixture) {
@@ -144,12 +146,15 @@ describe.configure().retryOnSaucelabs().run('amp-ad 3P ' +
   let fixture;
 
   beforeEach(() => {
+    toggleExperiment(window, '3p-use-ampcontext', /* opt_on */ true);
     return createFixture().then(f => {
       fixture = f;
-      toggleExperiment(fixture.win, '3p-use-ampcontext', /* opt_on */ true,
-          /* opt_transientExperiment */ true);
       installPlatformService(fixture.win);
     });
+  });
+
+  afterEach(() => {
+    resetExperimentTogglesForTesting(window);
   });
 
   it('create an iframe with APIs', function() {
