@@ -16,41 +16,36 @@
 
 import {
   createFixtureIframe,
-  pollForLayout,
   poll,
 } from '../../testing/iframe';
-import {platformFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {toggleExperiment} from '../../src/experiments';
-
+import {
+  toggleExperiment,
+  resetExperimentTogglesForTesting,
+} from '../../src/experiments';
 
 // TODO(@alanorozco): Inline this once 3p-use-ampcontext experiment is removed
 function createIframeWithApis(fixture) {
   this.timeout(20000);
   let iframe;
-  let ampAd;
   let lastIO = null;
-  const platform = platformFor(fixture.win);
-  return pollForLayout(fixture.win, 1, 5500).then(() => {
-    // test amp-ad will create an iframe
-    return poll('frame to be in DOM', () => {
-      return fixture.doc.querySelector('iframe');
-    });
+  const platform = Services.platformFor(fixture.win);
+  // test amp-ad will create an iframe
+  return poll('frame to be in DOM', () => {
+    return fixture.doc.querySelector('amp-ad > iframe');
   }).then(iframeElement => {
     // test the created iframe will have correct src.
     iframe = iframeElement;
-    expect(fixture.doc.querySelectorAll('iframe')).to.have.length(1);
-    ampAd = iframe.parentElement;
-    expect(iframe.src).to.match(/http\:\/\/localhost:9876\/dist\.3p\//);
-  }).then(() => {
-    // wait for iframe to load.
-    return poll('frame to load', () => {
-      return iframe.contentWindow && iframe.contentWindow.document &&
-          iframe.contentWindow.document.getElementById('c');
+    return new Promise(resolve => {
+      if (iframe.contentWindow.context) {
+        resolve(iframe.contentWindow.context);
+      }
+      iframe.onload = () => {
+        expect(iframe.contentWindow.document.getElementById('c')).to.be.defined;
+        resolve(iframe.contentWindow.context);
+      };
     });
-  }).then(() => {
-    // wait for iframe to load.
-    return poll('3p JS to load.', () => iframe.contentWindow.context);
   }).then(context => {
     // test iframe is created with correct context info.
     expect(context.hidden).to.be.false;
@@ -64,6 +59,23 @@ function createIframeWithApis(fixture) {
     expect(context.canonicalUrl).to.equal(
         'https://www.example.com/doubleclick.html');
     expect(context.clientId).to.be.defined;
+    expect(context.data).to.deep.equal({
+      width: 300,
+      height: 250,
+      type: '_ping_',
+      ampSlotIndex: '0',
+      id: '0',
+      url: 'https://example.com/a?b=c&d=e',
+      valid: 'true',
+      customValue: '123',
+      'other_value': 'foo',
+    });
+
+    // make sure the context.data is the same instance as the data param passed
+    // into the vendor function. see #10628
+    expect(context.data).to.equal(
+        iframe.contentWindow.networkIntegrationDataParamForTesting);
+
     expect(context.pageViewId).to.be.greaterThan(0);
     expect(context.startTime).to.be.a('number');
     expect(context.container).to.be.defined;
@@ -88,8 +100,6 @@ function createIframeWithApis(fixture) {
     return poll('wait for visibility style to change', () => {
       return iframe.style.visibility == '';
     });
-  }).then(() => {
-    return ampAd.layoutCallback();
   }).then(() => {
     expect(iframe.offsetHeight).to.equal(250);
     expect(iframe.offsetWidth).to.equal(300);
@@ -122,50 +132,38 @@ function createFixture() {
   return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
 }
 
+describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
+  let fixture;
 
-describes.realWin('3P Ad', {
-  amp: {
-    runtimeOn: true,
-  },
-}, () => {
-  describe.configure().retryOnSaucelabs().run('render an ad should', () => {
-    let fixture;
-
-    beforeEach(() => {
-      return createFixture().then(f => {
-        fixture = f;
-        installPlatformService(fixture.win);
-      });
+  beforeEach(() => {
+    return createFixture().then(f => {
+      fixture = f;
+      installPlatformService(fixture.win);
     });
+  });
 
-    it('create an iframe with APIs', function() {
-      return createIframeWithApis.call(this, fixture);
-    });
+  it('create an iframe with APIs', function() {
+    return createIframeWithApis.call(this, fixture);
   });
 });
 
+describe.configure().retryOnSaucelabs().run('amp-ad 3P ' +
+    '(with AmpContext experiment)', () => {
+  let fixture;
 
-describes.realWin('3P Ad (with AmpContext experiment)', {
-  amp: {
-    runtimeOn: true,
-  },
-}, () => {
-  describe.configure().retryOnSaucelabs().run('render an ad should', () => {
-    let fixture;
-
-    beforeEach(() => {
-      return createFixture().then(f => {
-        fixture = f;
-        toggleExperiment(fixture.win, '3p-use-ampcontext', /* opt_on */ true,
-            /* opt_transientExperiment */ true);
-        installPlatformService(fixture.win);
-      });
-    });
-
-    it('create an iframe with APIs', function() {
-      return createIframeWithApis.call(this, fixture);
+  beforeEach(() => {
+    toggleExperiment(window, '3p-use-ampcontext', /* opt_on */ true);
+    return createFixture().then(f => {
+      fixture = f;
+      installPlatformService(fixture.win);
     });
   });
+
+  afterEach(() => {
+    resetExperimentTogglesForTesting(window);
+  });
+
+  it('create an iframe with APIs', function() {
+    return createIframeWithApis.call(this, fixture);
+  });
 });
-
-

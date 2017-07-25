@@ -114,6 +114,7 @@ export const adConfig = {
     clientIdScope: 'AMP_ECID_GOOGLE',
     clientIdCookieName: '_ga',
     remoteHTMLDisabled: true,
+    masterFrameAccessibleType: 'google_network',
   },
 
   adsnative: {
@@ -254,6 +255,15 @@ export const adConfig = {
     prefetch: 'https://www.google.com/adsense/search/ads.js',
   },
 
+  dable: {
+    preconnect: [
+      'https://static.dable.io',
+      'https://api.dable.io',
+      'https://images.dable.io',
+    ],
+    renderStartImplemented: true,
+  },
+
   distroscale: {
     preconnect: [
       'https://c.jsrdn.com',
@@ -280,6 +290,7 @@ export const adConfig = {
     clientIdScope: 'AMP_ECID_GOOGLE',
     clientIdCookieName: '_ga',
     renderStartImplemented: true,
+    masterFrameAccessibleType: 'google_network',
   },
 
   eas: {
@@ -373,6 +384,12 @@ export const adConfig = {
 
   inmobi: {
     prefetch: 'https://cf.cdn.inmobi.com/ad/inmobi.secure.js',
+    renderStartImplemented: true,
+  },
+
+  innity: {
+    prefetch: 'https://cdn.innity.net/admanager.js',
+    preconnect: 'https://as.innity.com',
     renderStartImplemented: true,
   },
 
@@ -667,6 +684,15 @@ export const adConfig = {
     preconnect: [
       'https://ad.jp.ap.valuecommerce.com',
       'https://ad.omks.valuecommerce.com',
+    ],
+    renderStartImplemented: true,
+  },
+
+  vmfive: {
+    prefetch: 'https://man.vm5apis.com/dist/adn-web-sdk.js',
+    preconnect: [
+      'https://vawpro.vm5apis.com',
+      'https://vahfront.vm5apis.com',
     ],
     renderStartImplemented: true,
   },

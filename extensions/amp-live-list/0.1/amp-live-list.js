@@ -18,7 +18,6 @@ import {AmpEvents} from '../../../src/amp-events';
 import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {childElementByAttr} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
 import {liveListManagerForDoc, LiveListManager} from './live-list-manager';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
@@ -348,10 +347,6 @@ export class AmpLiveList extends AMP.BaseElement {
     if (updateHasNewItems) {
       promise = promise.then(() => {
         this.sendAmpDomUpdateEvent_();
-
-        const templatedEvent = createCustomEvent(this.win,
-            AmpEvents.TEMPLATE_RENDERED, /* detail */ null, {bubbles: true});
-        this.itemsSlot_.dispatchEvent(templatedEvent);
       });
     }
 
@@ -866,9 +861,11 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 
   sendAmpDomUpdateEvent_() {
-    const event = this.win.document.createEvent('Event');
-    event.initEvent(AmpEvents.DOM_UPDATE, true, true);
-    this.win.document.dispatchEvent(event);
+    const event = new Event(
+      AmpEvents.DOM_UPDATE,
+      {bubbles: true, cancelable: true}
+    );
+    this.itemsSlot_.dispatchEvent(event);
   }
 }
 

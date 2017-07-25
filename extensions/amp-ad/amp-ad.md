@@ -77,6 +77,10 @@ Use this attribute to load a script tag for the specified ad network. This can b
 
 Most ad networks require further configuration, which can be passed to the network by using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar".  See the documentation for the [ad network](#supported-ad-networks) on which attributes can be used.
 
+##### data-vars-foo-bar
+
+Attributes starting with `data-vars-` are reserved for [`amp-analytics` vars](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute). 
+
 ##### json (optional)
 
 Use this attribute to pass a configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
@@ -221,6 +225,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Criteo](../../ads/criteo.md)
 - [CSA](../../ads/google/csa.md)
 - [CxenseDisplay](../../ads/eas.md)
+- [Dable](../../ads/dable.md)
 - [Dianomi](../../ads/dianomi.md)
 - [DistroScale](../../ads/distroscale.md)
 - [Dot and Media](../../ads/dotandads.md)
@@ -244,6 +249,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Index Exchange](../../ads/ix.md)
 - [Industrybrains](../../ads/industrybrains.md)
 - [InMobi](../../ads/inmobi.md)
+- [Innity](../../ads/innity.md)
 - [Kargo](../../ads/kargo.md)
 - [Kiosked](../../ads/kiosked.md)
 - [Kixer](../../ads/kixer.md)
@@ -289,6 +295,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Teads](../../ads/teads.md)
 - [TripleLift](../../ads/triplelift.md)
 - [ValueCommerce](../../ads/valuecommerce.md)
+- [VMFive](../../ads/vmfive.md)
 - [Webediads](../../ads/webediads.md)
 - [Weborama](../../ads/weborama.md)
 - [Widespace](../../ads/widespace.md)

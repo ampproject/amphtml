@@ -95,6 +95,8 @@ export class AmpAdUIHandler {
     if (isExperimentOn(this.baseInstance_.win, 'ad-loader-v2')) {
       content.setAttribute('experiment2', '');
     }
+    // TODO(aghassemi, #4146) i18n
+    content.setAttribute('data-ad-holder-text', 'Ad');
     uiComponent.appendChild(content);
 
     this.baseInstance_.element.appendChild(uiComponent);

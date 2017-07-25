@@ -49,7 +49,9 @@ describe('amp-analytics.VariableService', function() {
 
   describe('expandTemplate', () => {
     const vars = {
-      '1': '1${2}', '2': '2${3}', '3': '3${4}', '4': '4${1}', '5': 0};
+      '1': '1${2}', '2': '2${3}', '3': '3${4}', '4': '4${1}', '5': 0,
+      'a': '${b}', 'b': '${c}', 'c': 'https://www.google.com/a?b=1&c=2',
+    };
 
     it('expands zeros', () => {
       return variables.expandTemplate('${5}', new ExpansionOptions(vars))
@@ -61,7 +63,7 @@ describe('amp-analytics.VariableService', function() {
     it('expands nested vars', () => {
       return variables.expandTemplate('${1}', new ExpansionOptions(vars))
           .then(actual =>
-          expect(actual).to.equal('123%252524%25257B4%25257D')
+          expect(actual).to.equal('123%24%7B4%7D')
       );
     });
 
@@ -73,14 +75,20 @@ describe('amp-analytics.VariableService', function() {
         );
     });
 
+    it('expands nested vars without double encoding', () => {
+      return expect(variables.expandTemplate('${a}',
+          new ExpansionOptions(vars))).to.eventually.equal(
+          'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2');
+    });
+
     it('limits the recursion to n', () => {
       return variables.expandTemplate('${1}', new ExpansionOptions(vars, 3))
           .then(actual =>
-          expect(actual).to.equal('1234%25252524%2525257B1%2525257D'))
+          expect(actual).to.equal('1234%24%7B1%7D'))
           .then(() =>
           variables.expandTemplate('${1}', new ExpansionOptions(vars, 5))
               .then(actual => expect(actual).to
-                  .equal('123412%252525252524%25252525257B3%25252525257D')
+                  .equal('123412%24%7B3%7D')
       ));
     });
 

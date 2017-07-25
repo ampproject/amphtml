@@ -157,7 +157,7 @@
     "event": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=AppEvent&n=$eventName&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=false&lc=$location&av=$appVersion"
   },
   "nielsen": {
-    "session": "https://uaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P$apid&sessionId=_client_id_,&pingtype=4&enc=false&c61=createtm,_timestamp_&rnd=_random_",
+    "session": "https://uaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P$apid&sessionId=_client_id_&pingtype=4&enc=false&c61=createtm,_timestamp_&rnd=_random_",
     "cloudapi": "https://cloudapi.imrworldwide.com/nmapi/v2/$apid/_client_id_/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22_client_id_%22%2C%22apn%22%3A%22$apn%22%2C%22apv%22%3A%22$apv%22%2C%22apid%22%3A%22$apid%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22$section%22%2C%22assetid%22%3A%22_page_view_id_%22%2C%22segA%22%3A%22$segA%22%2C%22segB%22%3A%22$segB%22%2C%22segC%22%3A%22$segC%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22_timestamp_%22%2C%22data%22%3A%7B%22hidden%22%3A%22_background_state_%22%2C%22blur%22%3A%22_background_state_%22%2C%22position%22%3A%22_timestamp_%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22_timestamp_%22%2C%22index%22%3A%223%22%7D",
   },
   "parsely": {
@@ -207,6 +207,13 @@
     "basePrefix": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_",
     "pageView": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_&e=pv",
     "structEvent": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_&e=se&se_ca=$structEventCategory&se_ac=$structEventAction&se_la=$structEventLabel&se_pr=$structEventProperty&se_va=$structEventValue"
+  },
+  "top100": {
+    "host": "https://kraken.rambler.ru",
+    "base": "https://kraken.rambler.ru/cnt/?pid=$pid&rid=_page_view_id_&v=1.0.0&rn=_random_&ruid=_client_id_&ct=amp",
+    "pageview": "https://kraken.rambler.ru/cnt/?pid=$pid&rid=_page_view_id_&v=1.0.0&rn=_random_&ruid=_client_id_&ct=amp&et=pv&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
+    "_screenData": "&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
+    "_pageData": "&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_"
   },
   "topmailru": {
     "pageView": "https://top-fwz1.mail.ru/counter?js=13;id=$id;u=_source_url_;r=_document_referrer_;s=_screen_width_*_screen_height_;vp=_viewport_width_*_viewport_height_;st=$start;gender=$gender;age=$age;pid=$pid;userid=$userid;device=$device;params=$params;_=_random_;title=_title_",

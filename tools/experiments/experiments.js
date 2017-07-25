@@ -267,12 +267,6 @@ const EXPERIMENTS = [
     name: 'IMA-integrated Video Player',
   },
   {
-    id: 'amp-ad-exit',
-    name: 'Enable amp-ad-exit component',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9502',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/amp-ad-exit.md',
-  },
-  {
     id: 'amp-sidebar 1.0',
     name: 'Amp sidebar 1.0 extension',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9803',
@@ -285,6 +279,16 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-ad-network-doubleclick-impl/' +
         'amp-ad-network-doubleclick-impl-internal.md',
+  },
+  {
+    id: 'user-error-reporting',
+    name: 'Report error to publishers',
+    spec: 'https://github.com/ampproject/amphtml/issues/6415',
+  },
+  {
+    id: 'disable-rtc',
+    name: 'Disable AMP RTC',
+    spec: 'https://github.com/ampproject/amphtml/issues/8551',
   },
 ];
 

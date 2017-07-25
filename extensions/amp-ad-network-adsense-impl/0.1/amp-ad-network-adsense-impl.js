@@ -22,8 +22,11 @@
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
+  experimentFeatureEnabled,
+  ADSENSE_EXPERIMENT_FEATURE,
+} from './adsense-a4a-config';
+import {
   isInManualExperiment,
-  isInExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {isExperimentOn} from '../../../src/experiments';
 import {
@@ -43,15 +46,14 @@ import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/string';
 import {dev} from '../../../src/log';
-import {extensionsFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   computedStyle,
   setStyles,
 } from '../../../src/style';
-import {viewerForDoc} from '../../../src/services';
 import {AdsenseSharedState} from './adsense-shared-state';
-import {insertAnalyticsElement} from '../../../src/analytics';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
@@ -112,7 +114,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = null;
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
-    this.extensions_ = extensionsFor(this.win);
+    this.extensions_ = Services.extensionsFor(this.win);
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
@@ -132,7 +134,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return isInExperiment(this.element, '117152655');
+    return experimentFeatureEnabled(
+        this.win, ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST);
   }
 
   /** @override */
@@ -147,7 +150,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (adClientId.substring(0, 3) != 'ca-') {
       adClientId = 'ca-' + adClientId;
     }
-    const visibilityState = viewerForDoc(this.getAmpDoc())
+    const visibilityState = Services.viewerForDoc(this.getAmpDoc())
         .getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
@@ -170,6 +173,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const sharedStateParams = sharedState.addNewSlot(
         format, this.uniqueSlotId_, adClientId);
     const viewportSize = this.getViewport().getSize();
+    this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     const parameters = {
       'client': adClientId,
       format,
@@ -190,6 +194,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'dff': computedStyle(this.win, this.element)['font-family'],
       'prev_fmts': sharedStateParams.prevFmts || null,
       'brdim': additionalDimensions(this.win, viewportSize),
+      'ifi': this.win['ampAdGoogleIfiCounter']++,
+      'rc': this.fromResumeCallback ? 1 : null,
     };
 
     const experimentIds = [];

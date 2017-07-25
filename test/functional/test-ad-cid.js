@@ -15,16 +15,14 @@
  */
 
 import {adConfig} from '../../ads/_config';
-import {ampdocServiceFor, timerFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {
   cidServiceForDocForTesting,
 } from '../../src/service/cid-impl';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installTimerService} from '../../src/service/timer-impl';
 import {getAdCid} from '../../src/ad-cid';
 import * as lolex from 'lolex';
 
-describes.realWin('ad-cid', {}, env => {
+describes.realWin('ad-cid', {amp: true}, env => {
   const cidScope = 'cid-in-ads-test';
   const config = adConfig['_ping_'];
   let sandbox;
@@ -41,9 +39,7 @@ describes.realWin('ad-cid', {}, env => {
     clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
     element = env.win.document.createElement('amp-ad');
     element.setAttribute('type', '_ping_');
-    installDocService(win, /* isSingleDoc */ true);
-    installTimerService(win);
-    const ampdoc = ampdocServiceFor(win).getAmpDoc();
+    const ampdoc = env.ampdoc;
     cidService = cidServiceForDocForTesting(ampdoc);
     adElement = {
       getAmpDoc: () => ampdoc,
@@ -92,7 +88,7 @@ describes.realWin('ad-cid', {}, env => {
   it('should return on timeout', () => {
     config.clientIdScope = cidScope;
     sandbox.stub(cidService, 'get', () => {
-      return timerFor(win).promise(2000);
+      return Services.timerFor(win).promise(2000);
     });
     const p = getAdCid(adElement).then(cid => {
       expect(cid).to.be.undefined;

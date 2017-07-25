@@ -17,10 +17,7 @@
 import {BindExpressionResultDef} from './bind-expression';
 import {BindingDef} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
-import {
-  resourcesForDoc,
-  viewerForDoc,
-} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
 import {dict, deepMerge} from '../../../src/utils/object';
@@ -131,10 +128,10 @@ export class Bind {
     this.scope_ = dict();
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
-    this.resources_ = resourcesForDoc(ampdoc);
+    this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.ampdoc);
+    this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
     const bodyPromise = (opt_win)
         ? waitForBodyPromise(opt_win.document)
@@ -151,7 +148,7 @@ export class Bind {
         });
 
     /** @const @private {!Function} */
-    this.boundOnTemplateRendered_ = this.onTemplateRendered_.bind(this);
+    this.boundOnDomUpdate_ = this.onDomUpdate_.bind(this);
 
     /**
      * @private {?Promise}
@@ -240,9 +237,8 @@ export class Bind {
   initialize_(rootNode) {
     dev().fine(TAG, 'Scanning DOM for bindings...');
     let promise = this.addBindingsForNode_(rootNode).then(() => {
-      // Listen for template renders (e.g. amp-list) to rescan for bindings.
-      rootNode.addEventListener(
-          AmpEvents.TEMPLATE_RENDERED, this.boundOnTemplateRendered_);
+      // Listen for DOM updates (e.g. template render) to rescan for bindings.
+      rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
     });
     if (getMode().development) {
       // Check default values against initial expression results.
@@ -398,9 +394,10 @@ export class Bind {
     /** @type {!Object<string, !Array<!Element>>} */
     const expressionToElements = Object.create(null);
 
-    const doc = dev().assert(
-        node.ownerDocument, 'ownerDocument is null.');
-    const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT);
+    const doc = dev().assert(node.ownerDocument, 'ownerDocument is null.');
+    // Third and fourth params of `createTreeWalker` are not optional on IE11.
+    const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, null,
+        /* entityReferenceExpansion */ false);
 
     // Set to true if number of bindings in `node` exceeds `limit`.
     let limitExceeded = false;
@@ -823,7 +820,7 @@ export class Bind {
   /**
    * @param {!Event} event
    */
-  onTemplateRendered_(event) {
+  onDomUpdate_(event) {
     const templateContainer = dev().assertElement(event.target);
     this.removeBindingsForNode_(templateContainer).then(() => {
       return this.addBindingsForNode_(templateContainer);
@@ -959,13 +956,7 @@ export class Bind {
    */
   dispatchEventForTesting_(name) {
     if (getMode().test) {
-      let event;
-      if (typeof this.localWin_.Event === 'function') {
-        event = new Event(name, {bubbles: true, cancelable: true});
-      } else {
-        event = this.localWin_.document.createEvent('Event');
-        event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
-      }
+      const event = new Event(name, {bubbles: true, cancelable: true});
       this.localWin_.dispatchEvent(event);
     }
   }

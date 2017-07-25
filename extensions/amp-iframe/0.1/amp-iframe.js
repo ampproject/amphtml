@@ -24,7 +24,7 @@ import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
-import {timerFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {user, dev} from '../../../src/log';
 import {utf8EncodeSync} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';
@@ -357,7 +357,7 @@ export class AmpIframe extends AMP.BaseElement {
         // Prevent this iframe from ever being recreated.
         this.iframeSrc = null;
 
-        timerFor(this.win).promise(trackingIframeTimeout).then(() => {
+        Services.timerFor(this.win).promise(trackingIframeTimeout).then(() => {
           removeElement(iframe);
           this.element.setAttribute('amp-removed', '');
           this.iframe_ = null;
@@ -380,7 +380,7 @@ export class AmpIframe extends AMP.BaseElement {
       // container. To avoid this problem, we set the `overflow:auto` property
       // 1s later via `amp-active` class.
       if (this.container_ != this.element) {
-        timerFor(this.win).delay(() => {
+        Services.timerFor(this.win).delay(() => {
           this.deferMutate(() => {
             this.container_.classList.add('amp-active');
           });

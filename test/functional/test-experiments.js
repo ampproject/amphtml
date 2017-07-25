@@ -22,7 +22,7 @@ import {
   tokenWithBadSignature,
   tokenWithExpiredExperiment,
 } from './testdata-experiments';
-import {cryptoFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {installCryptoService} from '../../src/service/crypto-impl';
 import {
   enableExperimentsForOriginTrials,
@@ -825,15 +825,15 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
     sandbox = env.sandbox;
 
     installCryptoService(win);
-    crypto = cryptoFor(win);
+    crypto = Services.cryptoFor(win);
 
     warnStub = sandbox.stub(user(), 'warn');
 
     // Ensure that tests don't appear to pass because fake window object
     // doesn't have crypto when the window actually has it.
     installCryptoService(env.win);
-    expect(cryptoFor(env.win).isPkcsAvailable())
-        .to.equal(cryptoFor(win).isPkcsAvailable());
+    expect(Services.cryptoFor(env.win).isPkcsAvailable())
+        .to.equal(Services.cryptoFor(win).isPkcsAvailable());
   });
 
   afterEach(() => {

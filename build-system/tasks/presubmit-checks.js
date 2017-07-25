@@ -130,16 +130,6 @@ var forbiddenTerms = {
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',
   },
-  'documentStateFor': {
-    message: privateServiceFactory,
-    whitelist: [
-      'src/custom-element.js',
-      'src/style-installer.js',
-      'src/service/document-state.js',
-      'src/service/viewer-impl.js',
-      'src/service/vsync-impl.js',
-    ],
-  },
   'iframePing': {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
@@ -181,6 +171,13 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/service/crypto-impl.js',
+      'src/runtime.js',
+    ],
+  },
+  'installDocumentStateService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/document-state.js',
       'src/runtime.js',
     ],
   },
@@ -325,6 +322,7 @@ var forbiddenTerms = {
     message: 'Usages must be reviewed.',
     whitelist: [
       'src/service/viewer-impl.js',
+      'src/service/viewer-cid-api.js',
       'src/service/storage-impl.js',
       'src/service/history-impl.js',
       'src/service/cid-impl.js',
@@ -384,8 +382,10 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/viewer-impl.js',
+      'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',
       'src/service/cid-impl.js',
+      'src/impression.js',
     ],
   },
   'eval\\(': {
@@ -672,6 +672,15 @@ var forbiddenTermsSrcInclusive = {
       'src/utils/bytes.js',
     ],
   },
+  'Text(Encoder|Decoder)\\(': {
+    message: 'TextEncoder/TextDecoder is not supported in all browsers.' +
+        'Please use UTF8 utilities from src/bytes.js',
+    whitelist: [
+      'ads/google/a4a/line-delimited-response-handler.js',
+      'examples/pwa/pwa.js',
+      'src/utils/bytes.js',
+    ],
+  },
   // Super complicated regex that says "find any querySelector method call that
   // is passed as a variable anything that is not a string, or a string that
   // contains a space.
@@ -692,6 +701,8 @@ var forbiddenTermsSrcInclusive = {
       'src/service/crypto-impl.js',
       'src/shadow-embed.js',
       'src/analytics.js',
+      'src/extension-analytics.js',
+      'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',

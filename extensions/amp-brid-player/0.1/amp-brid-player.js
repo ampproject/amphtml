@@ -20,7 +20,7 @@ import {
     installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
@@ -125,7 +125,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     });
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @override */
@@ -284,6 +284,24 @@ class AmpBridPlayer extends AMP.BaseElement {
   /** @override */
   hideControls() {
     // Not supported.
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 };
 
