@@ -98,7 +98,7 @@ If present, the video will automatically loop back to the start upon reaching th
 
 ##### crossorigin
 
-Required if a resource, like a `track` tag, is hosted on a different origin than document.
+Required if a `track` resource is hosted on a different origin than the document.
 
 ##### muted (deprecated)
 
