@@ -45,8 +45,8 @@ import {
  */
 export const PROFILING_BRANCHES = {
   'a4aProfilingRate': {
-    'isTrafficEligible': () => true,
-    'branches': ['unused', 'unused'],
+    isTrafficEligible: () => true,
+    branches: ['unused', 'unused'],
   },
 };
 
