@@ -16,7 +16,6 @@
 
 import {
   createFixtureIframe,
-  pollForLayout,
   poll,
 } from '../../testing/iframe';
 import {Services} from '../../src/services';
@@ -28,29 +27,23 @@ import {toggleExperiment} from '../../src/experiments';
 function createIframeWithApis(fixture) {
   this.timeout(20000);
   let iframe;
-  let ampAd;
   let lastIO = null;
   const platform = Services.platformFor(fixture.win);
-  return pollForLayout(fixture.win, 1, 5500).then(() => {
-    // test amp-ad will create an iframe
-    return poll('frame to be in DOM', () => {
-      return fixture.doc.querySelector('iframe');
-    });
+  // test amp-ad will create an iframe
+  return poll('frame to be in DOM', () => {
+    return fixture.doc.querySelector('amp-ad > iframe');
   }).then(iframeElement => {
     // test the created iframe will have correct src.
     iframe = iframeElement;
-    expect(fixture.doc.querySelectorAll('iframe')).to.have.length(1);
-    ampAd = iframe.parentElement;
-    expect(iframe.src).to.match(/http\:\/\/localhost:9876\/dist\.3p\//);
-  }).then(() => {
-    // wait for iframe to load.
-    return poll('frame to load', () => {
-      return iframe.contentWindow && iframe.contentWindow.document &&
-          iframe.contentWindow.document.getElementById('c');
+    return new Promise(resolve => {
+      if (iframe.contentWindow.context) {
+        resolve(iframe.contentWindow.context);
+      }
+      iframe.onload = () => {
+        expect(iframe.contentWindow.document.getElementById('c')).to.be.defined;
+        resolve(iframe.contentWindow.context);
+      };
     });
-  }).then(() => {
-    // wait for iframe to load.
-    return poll('3p JS to load.', () => iframe.contentWindow.context);
   }).then(context => {
     // test iframe is created with correct context info.
     expect(context.hidden).to.be.false;
@@ -99,8 +92,6 @@ function createIframeWithApis(fixture) {
     return poll('wait for visibility style to change', () => {
       return iframe.style.visibility == '';
     });
-  }).then(() => {
-    return ampAd.layoutCallback();
   }).then(() => {
     expect(iframe.offsetHeight).to.equal(250);
     expect(iframe.offsetWidth).to.equal(300);
