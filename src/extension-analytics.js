@@ -141,10 +141,10 @@ export class CustomEventReporterBuilder {
   }
 
   /**
+   * The #track() method takes in a unique custom-event name, and the corresponding request url (or an array of request urls).
+   * One can call #track() multiple times with different eventType name (order doesn't matter) before #build() is called.
    * @param {string} eventType
    * @param {string|!Array<string>} request
-   * The #track() method takes in a unique custom-event name, and the corresponding request (or an array of requests).
-   * One can call #track() multiple times with different eventType name (order doesn't matter) before #build() is called.
    */
   track(eventType, request) {
     request = isArray(request) ? request : [request];
