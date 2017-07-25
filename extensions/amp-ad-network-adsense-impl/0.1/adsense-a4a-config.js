@@ -41,9 +41,12 @@ const TAG = 'amp-ad-network-adsense-impl';
 
 /** @const @enum{string} */
 export const ADSENSE_EXPERIMENT_FEATURE = {
-  HOLDBACK_EXTERNAL: '2092618',
+  HOLDBACK_EXTERNAL_CONTROL: '21060732',
+  HOLDBACK_EXTERNAL: '21060733',
+  DELAYED_REQUEST_CONTROL: '21060734',
+  DELAYED_REQUEST: '21060735',
+  HOLDBACK_INTERNAL_CONTROL: '2092615',
   HOLDBACK_INTERNAL: '2092616',
-  DELAYED_REQUEST: '117152655',
 };
 
 /** @const @type {!Object<string,?string>} */
@@ -51,10 +54,10 @@ export const URL_EXPERIMENT_MAPPING = {
   '-1': MANUAL_EXPERIMENT_ID,
   '0': null,
   // Holdback
-  '1': '2092617',
+  '1': ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL_CONTROL,
   '2': ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
   // Delay Request
-  '3': '117152654',
+  '3': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
   '4': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST,
 };
 
@@ -80,7 +83,8 @@ export function adsenseIsA4AEnabled(win, element) {
     const experimentInfoMap = {};
     experimentInfoMap[ADSENSE_A4A_EXPERIMENT_NAME] = {
       isTrafficEligible: () => true,
-      branches: ['2092615', ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
+      branches: [ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
+        ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
     };
     // Note: Because the same experimentName is being used everywhere here,
     // randomlySelectUnsetExperiments won't add new IDs if
