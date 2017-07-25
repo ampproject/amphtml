@@ -246,8 +246,7 @@ const command = {
     timedExecOrDie(`${gulp} ava`);
   },
   testDocumentLinks: function(files) {
-    let docFiles = files.filter(isDocFile);
-    timedExecOrDie(`${gulp} check-links --files ${docFiles.join(',')}`);
+    timedExecOrDie(`${gulp} check-links`);
   },
   cleanBuild: function() {
     timedExecOrDie(`${gulp} clean`);
