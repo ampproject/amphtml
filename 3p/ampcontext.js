@@ -58,7 +58,7 @@ export class AbstractAmpContext {
     /** @type {?string|undefined} */
     this.container = null;
 
-    /** @type {?Object<String, *>} */
+    /** @type {?Object<string, *>} */
     this.data = null;
 
     /** @type {?boolean} */
