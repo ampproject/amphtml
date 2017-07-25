@@ -35,9 +35,11 @@ const start = Date.now();
  * @return {boolean} Whether this error was a user error.
  */
 export function isUserError(error) {
+  if (error == undefined) {
+    return false;
+  }
   return error.userError;
 }
-
 
 /**
  * @enum {number}
@@ -209,7 +211,6 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.name = tag || error.name;
-      error.userError = this.userMode.userError || false;
       // reportError is installed globally per window in the entry point.
       self.reportError(error);
     }
@@ -382,9 +383,7 @@ export class Log {
    */
   prepareError_(error) {
     error = duplicateErrorIfNecessary(error);
-    if (error.userError == undefined) {
-      error.userError = this.userMode.userError || false;
-    }
+    error.userError = this.userMode.userError || false;
   }
 }
 
