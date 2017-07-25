@@ -74,7 +74,7 @@ export function recreateNonProtoObject(obj) {
 /**
  * Returns a value from an object for a field-based expression. The expression
  * is a simple nested dot-notation of fields, such as `field1.field2`. If any
- * field in a chain does not exist or is not an object or array, the returned 
+ * field in a chain does not exist or is not an object or array, the returned
  * value will be `undefined`.
  *
  * @param {!JsonObject} obj
