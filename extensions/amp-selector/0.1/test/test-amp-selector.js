@@ -777,7 +777,7 @@ describes.realWin('amp-selector', {
           },
         });
         expect(() => ampSelector.build())
-            .to.throw(/not supported for multiple selection amp-selector​​​/);
+            .to.throw(/not supported for multiple selection amp-selector/);
       });
 
       it('should ONLY change selection in `select` mode', () => {
