@@ -21,6 +21,7 @@ import {nextTick} from './3p';
 import {tryParseJson} from '../src/json';
 import {isObject} from '../src/types';
 import {AmpEvents} from '../src/amp-events';
+import {parseUrl} from '../src/url';
 
 export class AbstractAmpContext {
 
@@ -256,7 +257,7 @@ export class AbstractAmpContext {
     this.hidden = context.hidden;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
-    this.location = context.location;
+    this.location = parseUrl(context.location.href);
     this.mode = context.mode;
     this.pageViewId = context.pageViewId;
     this.referrer = context.referrer;
