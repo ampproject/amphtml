@@ -162,6 +162,19 @@ Container for analytics tags. Positioned far away from top to make sure that doe
         "type": "video-session"
       }
     },
+    "videoSecondsPlayed": {
+      "on": "video-seconds-played",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "end-session-when-invisible": false,
+        "exclude-autoplay": false,
+        "interval": 3
+      },
+      "request": "video",
+      "vars": {
+        "type": "video-seconds-played"
+      }
+    },
     "videoEnded": {
       "on": "video-ended",
       "selector": "#myVideo",
