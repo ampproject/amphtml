@@ -79,11 +79,36 @@ function createIframeWithApis(fixture) {
     expect(context.pageViewId).to.be.greaterThan(0);
     expect(context.startTime).to.be.a('number');
     expect(context.container).to.equal('AMP-LIGHTBOX');
-    expect(context.initialIntersection).to.be.defined;
-    // check for rootBounds as native IO doesn't support it with CORS
-    expect(context.initialLayoutRect).to.be.defined;
-    expect(context.initialLayoutRect.top).to.be.defined;
-    expect(context.initialIntersection.rootBounds).to.be.defined;
+    expect(context.initialLayoutRect).to.deep.equal({
+      height: 250,
+      left: 0,
+      top: platform.isIos() ? 1001 : 1000, // the iOS 1px trick
+      width: 300,
+    });
+    expect(context.initialIntersection.rootBounds).to.deep.equal({
+      bottom: 3000,
+      height: 3000,
+      left: 0,
+      right: 500,
+      top: 0,
+      width: 500,
+      x: 0,
+      y: 0,
+    });
+    const adRect = {
+      bottom: platform.isIos() ? 1251 : 1250, // the iOS 1px trick
+      height: 250,
+      left: 0,
+      right: 300,
+      top: platform.isIos() ? 1001 : 1000, // the iOS 1px trick
+      width: 300,
+      x: 0,
+      y: platform.isIos() ? 1001 : 1000, // the iOS 1px trick
+    };
+    expect(context.initialIntersection.boundingClientRect)
+        .to.deep.equal(adRect);
+    expect(context.initialIntersection.intersectionRect).to.deep.equal(adRect);
+    expect(context.initialIntersection.intersectionRatio).to.equal(1);
     expect(context.isMaster).to.be.defined;
     expect(context.computeInMasterFrame).to.be.defined;
     expect(context.location).to.deep.equal({
