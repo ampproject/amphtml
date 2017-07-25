@@ -540,3 +540,6 @@ data.renderer;
 // zergnet.js
 window.zergnetWidgetId;
 data.zergid;
+
+// _ping_.js
+window.networkIntegrationDataParamForTesting;
