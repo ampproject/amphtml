@@ -42,31 +42,30 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 
 /** @const @enum{string} */
 export const DOUBLECLICK_EXPERIMENT_FEATURE = {
-  HOLDBACK_EXTERNAL: '2092620',
-  HOLDBACK_INTERNAL: '2092614',
-  DELAYED_REQUEST: '117152665',
+  HOLDBACK_EXTERNAL_CONTROL: '21060726',
+  HOLDBACK_EXTERNAL: '21060727',
+  DELAYED_REQUEST_CONTROL: '21060728',
+  DELAYED_REQUEST: '21060729',
+  SFG_CONTROL_ID: '21060730',
+  SFG_EXP_ID: '21060731',
   SRA: '117152667',
+  HOLDBACK_INTERNAL_CONTROL: '2092613',
+  HOLDBACK_INTERNAL: '2092614',
 };
-
-/** @const @type {string} */
-const SFG_CONTROL_ID = '21060540';
-
-/** @const @type {string} */
-const SFG_EXP_ID = '21060541';
 
 /** @const @type {!Object<string,?string>} */
 export const URL_EXPERIMENT_MAPPING = {
   '-1': MANUAL_EXPERIMENT_ID,
   '0': null,
   // Holdback
-  '1': '2092619',
+  '1': DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL_CONTROL,
   '2': DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
   // Delay Request
-  '3': '117152664',
+  '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
   '4': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
   // SFG
-  '5': SFG_CONTROL_ID,
-  '6': SFG_EXP_ID,
+  '5': DOUBLECLICK_EXPERIMENT_FEATURE.SFG_CONTROL_ID,
+  '6': DOUBLECLICK_EXPERIMENT_FEATURE.SFG_EXP_ID,
   // SRA
   '7': '117152666',
   '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
@@ -107,7 +106,8 @@ export function doubleclickIsA4AEnabled(win, element) {
         /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[DOUBLECLICK_A4A_EXPERIMENT_NAME] = {
       isTrafficEligible: () => true,
-      branches: ['2092613', DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
+      branches: [DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
+        DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
     };
     // Note: Because the same experimentName is being used everywhere here,
     // randomlySelectUnsetExperiments won't add new IDs if
@@ -124,7 +124,8 @@ export function doubleclickIsA4AEnabled(win, element) {
   }
   return ![DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
     DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
-    SFG_CONTROL_ID, SFG_EXP_ID].includes(experimentId);
+    DOUBLECLICK_EXPERIMENT_FEATURE.SFG_CONTROL_ID,
+    DOUBLECLICK_EXPERIMENT_FEATURE.SFG_EXP_ID].includes(experimentId);
 }
 
 /**
