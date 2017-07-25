@@ -19,12 +19,15 @@ import {dev} from '../src/log';
 
 /**
  * A fake ad network integration that is mainly used for testing
- * and demo purpose.
+ * and demo purposes. This implementation gets stripped out in compiled
+ * production code.
  * @param {!Window} global
  * @param {!Object} data
  */
 export function _ping_(global, data) {
-  global.dataAsParam = data; // for testing only. see #10628
+  // for testing only. see #10628
+  global.networkIntegrationDataParamForTesting = data;
+
   validateData(data, [], ['valid', 'adHeight', 'adWidth', 'enableIo', 'url']);
   global.document.getElementById('c').textContent = data.ping;
   global.ping = Object.create(null);

@@ -73,7 +73,8 @@ function createIframeWithApis(fixture) {
 
     // make sure the context.data is the same instance as the data param passed
     // into the vendor function. see #10628
-    expect(context.data).to.equal(iframe.contentWindow.dataAsParam);
+    expect(context.data).to.equal(
+        iframe.contentWindow.networkIntegrationDataParamForTesting);
 
     expect(context.pageViewId).to.be.greaterThan(0);
     expect(context.startTime).to.be.a('number');
