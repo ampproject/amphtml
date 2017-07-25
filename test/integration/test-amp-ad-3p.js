@@ -86,7 +86,17 @@ function createIframeWithApis(fixture) {
     expect(context.initialIntersection.rootBounds).to.be.defined;
     expect(context.isMaster).to.be.defined;
     expect(context.computeInMasterFrame).to.be.defined;
-    expect(context.location).to.be.defined;
+    expect(context.location).to.deep.equal({
+      hash: '',
+      host: 'localhost:9876',
+      hostname: 'localhost',
+      href: 'http://localhost:9876/context.html',
+      origin: 'http://localhost:9876',
+      pathname: '/context.html',
+      port: '9876',
+      protocol: 'http:',
+      search: '',
+    });
     expect(context.sourceUrl).to.be.a('string');
   }).then(() => {
     // test iframe will send out render-start to amp-ad
