@@ -636,7 +636,7 @@ describes.repeated('', {
         }).then(() => {
           expect(spy.calledOnce).to.be.true;
           expect(spy).calledWithMatch({
-            type: AmpEvents.TEMPLATE_RENDERED,
+            type: AmpEvents.DOM_UPDATE,
             bubbles: true,
           });
         });

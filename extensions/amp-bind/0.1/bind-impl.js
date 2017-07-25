@@ -148,7 +148,7 @@ export class Bind {
         });
 
     /** @const @private {!Function} */
-    this.boundOnTemplateRendered_ = this.onTemplateRendered_.bind(this);
+    this.boundOnDomUpdate_ = this.onDomUpdate_.bind(this);
 
     /**
      * @private {?Promise}
@@ -237,9 +237,8 @@ export class Bind {
   initialize_(rootNode) {
     dev().fine(TAG, 'Scanning DOM for bindings...');
     let promise = this.addBindingsForNode_(rootNode).then(() => {
-      // Listen for template renders (e.g. amp-list) to rescan for bindings.
-      rootNode.addEventListener(
-          AmpEvents.TEMPLATE_RENDERED, this.boundOnTemplateRendered_);
+      // Listen for DOM updates (e.g. template render) to rescan for bindings.
+      rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
     });
     if (getMode().development) {
       // Check default values against initial expression results.
@@ -821,7 +820,7 @@ export class Bind {
   /**
    * @param {!Event} event
    */
-  onTemplateRendered_(event) {
+  onDomUpdate_(event) {
     const templateContainer = dev().assertElement(event.target);
     this.removeBindingsForNode_(templateContainer).then(() => {
       return this.addBindingsForNode_(templateContainer);
