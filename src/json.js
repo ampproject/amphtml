@@ -19,7 +19,7 @@
  * {@link http://json.org/}.
  */
 
-import {isObject, isArray} from './types';
+import {isObject} from './types';
 
 
 // NOTE Type are changed to {*} because of
@@ -91,17 +91,11 @@ export function getValueForExpr(obj, expr) {
   let value = obj;
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
-    if (!part) {
-      value = undefined;
-      break;
-    }
-    if (isArray(value) && arrayHasKey(value, part)) {
-      value = value[part];
-      continue;
-    }
-    if (isObject(value) &&
-            value[part] !== undefined &&
-            hasOwnProperty(value, part)) {
+    if (part &&
+        value &&
+        value[part] !== undefined &&
+        hasOwnProperty(value, part)
+    ) {
       value = value[part];
       continue;
     }
@@ -154,13 +148,4 @@ function hasOwnProperty(obj, key) {
   }
   return Object.prototype.hasOwnProperty.call(
       /** @type {!Object} */ (obj), key);
-}
-
-/**
- * @param {*} arr
- * @param {string} key
- * @return {boolean}
- */
-function arrayHasKey(arr, key) {
-  return (('' + parseInt(key, 10)) === key) && (typeof arr[key] !== 'undefined');
 }
