@@ -246,11 +246,8 @@ export class Bind {
         .then(numberOfBindingsAdded => {
           // Don't reevaluate/apply if there are no bindings.
           if (numberOfBindingsAdded > 0) {
-            return this.evaluate_()
-                .then(results => this.applyElement_(results, container))
-                .then(() => {
-                  this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
-                });
+            return this.evaluate_().then(results =>
+                this.applyElement_(results, container));
           }
         });
   }
