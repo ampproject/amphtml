@@ -58,7 +58,7 @@ export class AbstractAmpContext {
     /** @type {?string|undefined} */
     this.container = null;
 
-    /** @type {?Object<String, *>} */
+    /** @type {?Object<string, *>} */
     this.data = null;
 
     /** @type {?boolean} */
@@ -242,6 +242,12 @@ export class AbstractAmpContext {
     const context = dataObject._context || dataObject.attributes._context;
 
     this.data = dataObject.attributes || dataObject;
+
+    // TODO(alanorozco, #10576): This is really ugly. Find a better structure
+    // than passing context values via data.
+    if ('_context' in this.data) {
+      delete this.data['_context'];
+    }
 
     this.canary = context.canary;
     this.canonicalUrl = context.canonicalUrl;
