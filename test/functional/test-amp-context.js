@@ -65,8 +65,18 @@ describe('3p ampcontext.js', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
     expect(context).to.be.ok;
-    expect(context.location).to.equal('foo.com');
-    expect(context.canonicalUrl).to.equal('foo.com');
+    expect(context.location).to.deep.equal({
+      'hash': '',
+      'host': 'foo.com',
+      'hostname': 'foo.com',
+      'href': 'https://foo.com/a?b=c',
+      'origin': 'https://foo.com',
+      'pathname': '/a',
+      'port': '',
+      'protocol': 'https:',
+      'search': '?b=c',
+    });
+    expect(context.canonicalUrl).to.equal('https://bar.com');
     expect(context.pageViewId).to.equal('1');
     expect(context.sentinel).to.equal('1-291921');
     expect(context.startTime).to.equal(0);
@@ -77,8 +87,18 @@ describe('3p ampcontext.js', () => {
     win.name = generateSerializedAttributesA4A();
     const context = new AmpContext(win);
     expect(context).to.be.ok;
-    expect(context.location).to.equal('foo.com');
-    expect(context.canonicalUrl).to.equal('foo.com');
+    expect(context.location).to.deep.equal({
+      'hash': '',
+      'host': 'foo.com',
+      'hostname': 'foo.com',
+      'href': 'https://foo.com/a?b=c',
+      'origin': 'https://foo.com',
+      'pathname': '/a',
+      'port': '',
+      'protocol': 'https:',
+      'search': '?b=c',
+    });
+    expect(context.canonicalUrl).to.equal('https://bar.com');
     expect(context.pageViewId).to.equal('1');
     expect(context.sentinel).to.equal('1-291921');
     expect(context.startTime).to.equal(0);
@@ -89,8 +109,18 @@ describe('3p ampcontext.js', () => {
     win.AMP_CONTEXT_DATA = generateAttributes();
     const context = new AmpContext(win);
     expect(context).to.be.ok;
-    expect(context.location).to.equal('foo.com');
-    expect(context.canonicalUrl).to.equal('foo.com');
+    expect(context.location).to.deep.equal({
+      'hash': '',
+      'host': 'foo.com',
+      'hostname': 'foo.com',
+      'href': 'https://foo.com/a?b=c',
+      'origin': 'https://foo.com',
+      'pathname': '/a',
+      'port': '',
+      'protocol': 'https:',
+      'search': '?b=c',
+    });
+    expect(context.canonicalUrl).to.equal('https://bar.com');
     expect(context.pageViewId).to.equal('1');
     expect(context.sentinel).to.equal('1-291921');
     expect(context.startTime).to.equal(0);
@@ -323,8 +353,10 @@ function generateAttributes(opt_sentinel) {
   name.attributes = {};
   const sentinel = opt_sentinel || '1-291921';
   name.attributes._context = {
-    location: 'foo.com',
-    canonicalUrl: 'foo.com',
+    location: {
+      href: 'https://foo.com/a?b=c',
+    },
+    canonicalUrl: 'https://bar.com',
     pageViewId: '1',
     sentinel,
     startTime: 0,
@@ -342,8 +374,10 @@ function generateAttributesA4A(opt_sentinel) {
   const attributes = {};
   const sentinel = opt_sentinel || '1-291921';
   attributes._context = {
-    location: 'foo.com',
-    canonicalUrl: 'foo.com',
+    location: {
+      href: 'https://foo.com/a?b=c',
+    },
+    canonicalUrl: 'https://bar.com',
     pageViewId: '1',
     sentinel,
     startTime: 0,
@@ -358,8 +392,10 @@ function generateIncorrectAttributes() {
   const name = {};
   name.attributes = {};
   name.attributes.wrong = {
-    location: 'foo.com',
-    canonicalUrl: 'foo.com',
+    location: {
+      href: 'https://foo.com/a?b=c',
+    },
+    canonicalUrl: 'https://foo.com',
     pageViewId: '1',
     sentinel: '1-291921',
     startTime: 0,
