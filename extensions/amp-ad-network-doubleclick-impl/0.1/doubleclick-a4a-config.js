@@ -27,6 +27,7 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 import {
+  /* eslint no-unused-vars: 0 */ ExperimentInfo,
   getExperimentBranch,
   forceExperimentBranch,
   randomlySelectUnsetExperiments,
@@ -102,7 +103,8 @@ export function doubleclickIsA4AEnabled(win, element) {
         TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
   } else {
     // Not set via url so randomly set.
-    const experimentInfoMap = {};
+    const experimentInfoMap =
+        /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[DOUBLECLICK_A4A_EXPERIMENT_NAME] = {
       isTrafficEligible: () => true,
       branches: ['2092613', DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
