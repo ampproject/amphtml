@@ -30,14 +30,12 @@ const start = Date.now();
  *
  * @const {string}
  */
-export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
-
 
 /**
- * @return {boolean} Whether this message was a user error.
+ * @return {boolean} Whether this error was a user error.
  */
-export function isUserErrorMessage(message) {
-  return message.indexOf(USER_ERROR_SENTINEL) >= 0;
+export function isUserError(error) {
+  return error.userError;
 }
 
 
@@ -71,9 +69,9 @@ export class Log {
   /**
    * @param {!Window} win
    * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
-   * @param {string=} opt_suffix
+   * @param {boolean=} opt_userError
    */
-  constructor(win, levelFunc, opt_suffix) {
+  constructor(win, levelFunc, opt_userError) {
     /**
      * In tests we use the main test window instead of the iframe where
      * the tests runs because only the former is relayed to the console.
@@ -87,8 +85,9 @@ export class Log {
     /** @private @const {!LogLevel} */
     this.level_ = this.calcLevel_();
 
-    /** @private @const {string} */
-    this.suffix_ = opt_suffix || '';
+    this.userMode = {
+      userError: opt_userError || false,
+    };
   }
 
   /**
@@ -210,6 +209,7 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.name = tag || error.name;
+      error.userError = this.userMode.userError || false;
       // reportError is installed globally per window in the entry point.
       self.reportError(error);
     }
@@ -382,14 +382,8 @@ export class Log {
    */
   prepareError_(error) {
     error = duplicateErrorIfNecessary(error);
-    if (this.suffix_) {
-      if (!error.message) {
-        error.message = this.suffix_;
-      } else if (error.message.indexOf(this.suffix_) == -1) {
-        error.message += this.suffix_;
-      }
-    } else if (isUserErrorMessage(error.message)) {
-      error.message = error.message.replace(USER_ERROR_SENTINEL, '');
+    if (error.userError == undefined) {
+      error.userError = this.userMode.userError || false;
     }
   }
 }
@@ -550,7 +544,7 @@ export function user() {
       return LogLevel.FINE;
     }
     return LogLevel.OFF;
-  }, USER_ERROR_SENTINEL);
+  }, true);
 }
 
 
@@ -580,5 +574,5 @@ export function dev() {
       return LogLevel.INFO;
     }
     return LogLevel.OFF;
-  });
+  }, false);
 }

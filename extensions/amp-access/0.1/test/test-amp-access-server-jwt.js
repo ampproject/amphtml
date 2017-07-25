@@ -17,7 +17,7 @@
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {getMode} from '../../../../src/mode';
 import {removeFragment, serializeQueryString} from '../../../../src/url';
-import {isUserErrorMessage} from '../../../../src/log';
+import {isUserError} from '../../../../src/log';
 import * as lolex from 'lolex';
 import * as sinon from 'sinon';
 
@@ -395,7 +395,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
           throw new Error('must never happen');
         }, error => {
           expect(error).to.match(/intentional/);
-          expect(isUserErrorMessage(error.message)).to.be.true;
+          expect(isUserError(error)).to.be.true;
         });
       });
 
