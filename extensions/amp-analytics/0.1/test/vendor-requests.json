@@ -192,9 +192,9 @@
   },
   "simplereach": {
     "host": "https://edge.simplereach.com",
-    "baseParams": "amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_",
-    "visible": "https://edge.simplereach.com/n?amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_",
-    "timer": "https://edge.simplereach.com/t?amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&t=5000&e=5000"
+    "baseParams": "amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&article_id=$article_id&ignore_metadata=$ignore_metadata",
+    "visible": "https://edge.simplereach.com/n?amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&article_id=$article_id&ignore_metadata=$ignore_metadata",
+    "timer": "https://edge.simplereach.com/t?amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&article_id=$article_id&ignore_metadata=$ignore_metadata&t=5000&e=5000"
   },
   "segment": {
     "host": "https://api.segment.io/v1/pixel",
