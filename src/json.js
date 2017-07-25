@@ -19,7 +19,7 @@
  * {@link http://json.org/}.
  */
 
-import {isObject} from './types';
+import {isObject, isArray} from './types';
 
 
 // NOTE Type are changed to {*} because of
@@ -74,8 +74,8 @@ export function recreateNonProtoObject(obj) {
 /**
  * Returns a value from an object for a field-based expression. The expression
  * is a simple nested dot-notation of fields, such as `field1.field2`. If any
- * field in a chain does not exist or is not an object, the returned value will
- * be `undefined`.
+ * field in a chain does not exist or is not an object or array, the returned 
+ * value will be `undefined`.
  *
  * @param {!JsonObject} obj
  * @param {string} expr
@@ -95,13 +95,18 @@ export function getValueForExpr(obj, expr) {
       value = undefined;
       break;
     }
-    if (!isObject(value) ||
-            value[part] === undefined ||
-            !hasOwnProperty(value, part)) {
-      value = undefined;
-      break;
+    if (isArray(value) && arrayHasKey(value, part)) {
+      value = value[part];
+      continue;
     }
-    value = value[part];
+    if (isObject(value) &&
+            value[part] !== undefined &&
+            hasOwnProperty(value, part)) {
+      value = value[part];
+      continue;
+    }
+    value = undefined;
+    break;
   }
   return value;
 }
@@ -149,4 +154,13 @@ function hasOwnProperty(obj, key) {
   }
   return Object.prototype.hasOwnProperty.call(
       /** @type {!Object} */ (obj), key);
+}
+
+/**
+ * @param {*} arr
+ * @param {string} key
+ * @return {boolean}
+ */
+function arrayHasKey(arr, key) {
+  return (('' + parseInt(key, 10)) === key) && (typeof arr[key] !== 'undefined');
 }
