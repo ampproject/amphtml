@@ -24,6 +24,7 @@ import {
   toggleExperiment,
   resetExperimentTogglesForTesting,
 } from '../../src/experiments';
+import {layoutRectLtwh} from '../../src/layout-rect';
 
 // TODO(@alanorozco): Inline this once 3p-use-ampcontext experiment is removed
 function createIframeWithApis(fixture) {
@@ -85,30 +86,15 @@ function createIframeWithApis(fixture) {
       top: platform.isIos() ? 1001 : 1000, // the iOS 1px trick
       width: 300,
     });
-    expect(context.initialIntersection.rootBounds).to.deep.equal({
-      bottom: 3000,
-      height: 3000,
-      left: 0,
-      right: 500,
-      top: 0,
-      width: 500,
-      x: 0,
-      y: 0,
-    });
-    const adRect = {
-      bottom: platform.isIos() ? 1251 : 1250, // the iOS 1px trick
-      height: 250,
-      left: 0,
-      right: 300,
-      top: platform.isIos() ? 1001 : 1000, // the iOS 1px trick
-      width: 300,
-      x: 0,
-      y: platform.isIos() ? 1001 : 1000, // the iOS 1px trick
-    };
-    expect(context.initialIntersection.boundingClientRect)
-        .to.deep.equal(adRect);
-    expect(context.initialIntersection.intersectionRect).to.deep.equal(adRect);
-    expect(context.initialIntersection.intersectionRatio).to.equal(1);
+    const initialIntersection = context.initialIntersection;
+    expect(initialIntersection.rootBounds).to.deep
+        .equal(layoutRectLtwh(0, 0, 500, 3000));
+    expect(initialIntersection.boundingClientRect).to.deep
+        .equal(layoutRectLtwh(0, platform.isIos() ? 1001 : 1000, 300, 250));
+    expect(initialIntersection.intersectionRect).to.deep
+        .equal(layoutRectLtwh(0, platform.isIos() ? 1001 : 1000, 300, 250));
+    expect(initialIntersection.intersectionRatio).to.equal(1);
+    expect(initialIntersection.time).to.be.a('number');
     expect(context.isMaster).to.be.defined;
     expect(context.computeInMasterFrame).to.be.defined;
     expect(context.location).to.deep.equal({
