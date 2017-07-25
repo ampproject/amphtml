@@ -14,43 +14,54 @@
  * limitations under the License.
  */
 
-// Particulars of the webpages used in the AMP visual diff tests.
+/**
+ * Particulars of the webpages used in the AMP visual diff tests.
+ */
 {
-  // Path relative to amphtml/ that contains the assets for all test pages.
+  /**
+   * Path relative to amphtml/ that contains the assets for all test pages.
+   */
   "assets_dir": "examples/visual-tests",
 
-  // Path relative to webserver root where assets for all test pages are served.
+  /**
+   * Path relative to webserver root where assets for all test pages are
+   * served.
+   */
   "assets_base_url": "/examples/visual-tests",
 
-  // List of webpages used in tests.
+  /**
+   * List of webpages used in tests.
+   */
   "webpages": [
-    // Example of a webpage spec.
-    // {
-    //   // Path of webpage relative to webserver root.
-    //   "url": "examples/visual-tests/foo/foo.html",
-    //
-    //   // Name used to identify snapshots of webpage on Percy.
-    //   "name": "Foo test",
-    //
-    //   // CSS elements that must never appear on the webpage.
-    //   "forbidden_css": [
-    //     ".invalid-css-class",
-    //     ".another-invalid-css-class"
-    //   ],
-    //
-    //   // CSS elements that may initially appear on the page, but must
-    //   // eventually disappear.
-    //   "loading_incomplete_css": [
-    //     ".loading-in-progress-css-class",
-    //     ".another-loading-in-progress-css-class"
-    //   ],
-    //
-    //   // CSS elements that must eventually appear on the page.
-    //   "loading_complete_css": [
-    //     ".loading-complete-css-class",
-    //     ".another-loading-complete-css-class"
-    //   ]
-    // },
+  /**
+   * Example of a webpage spec.
+   * {
+   *   // Path of webpage relative to webserver root.
+   *   "url": "examples/visual-tests/foo/foo.html",
+   *
+   *   // Name used to identify snapshots of webpage on Percy.
+   *   "name": "Foo test",
+   *
+   *   // CSS elements that must never appear on the webpage.
+   *   "forbidden_css": [
+   *     ".invalid-css-class",
+   *     ".another-invalid-css-class"
+   *   ],
+   *
+   *   // CSS elements that may initially appear on the page, but must
+   *   // eventually disappear.
+   *   "loading_incomplete_css": [
+   *     ".loading-in-progress-css-class",
+   *     ".another-loading-in-progress-css-class"
+   *   ],
+   *
+   *   // CSS elements that must eventually appear on the page.
+   *   "loading_complete_css": [
+   *     ".loading-complete-css-class",
+   *     ".another-loading-complete-css-class"
+   *   ]
+   * },
+   */
 
     {
       "url": "examples/visual-tests/amp-by-example/amp-by-example.html",
@@ -88,11 +99,15 @@
     }
   ],
 
-  // List of failing webpages. Move pages here if they fail, since visual tests
-  // block PRs from being merged. Move them back once failures are fixed.
+  /**
+   * List of failing webpages. Move pages here if they fail, since visual tests
+   * block PRs from being merged. Move them back once failures are fixed.
+   */
   "failing_webpages": [
     {
-      // Fails due to https://github.com/ampproject/amphtml/issues/10377
+      /**
+       * Fails due to https://github.com/ampproject/amphtml/issues/10377
+       */
       "url": "examples/visual-tests/font.amp.404/font.amp.html",
       "name": "Fonts 404",
       "forbidden_css": [
