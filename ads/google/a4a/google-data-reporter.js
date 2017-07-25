@@ -44,9 +44,9 @@ import {
  * @const {!Object<string,!../../../src/experiments.ExperimentInfo>}
  */
 export const PROFILING_BRANCHES = {
-  a4aProfilingRate: {
-    isTrafficEligible: () => true,
-    branches: ['unused', 'unused'],
+  'a4aProfilingRate': {
+    'isTrafficEligible': () => true,
+    'branches': ['unused', 'unused'],
   },
 };
 

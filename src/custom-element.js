@@ -1103,11 +1103,8 @@ function createBaseCustomElementClass(win) {
      */
     dispatchCustomEvent(name, opt_data) {
       const data = opt_data || {};
-      // Constructors of events need to come from the correct window. Sigh.
-      const win = this.ownerDocument.defaultView;
-      const event = win.document.createEvent('Event');
+      const event = new Event(name, {bubbles: true, cancelable: true});
       event.data = data;
-      event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
       this.dispatchEvent(event);
     }
 
