@@ -58,7 +58,7 @@ function createIframeWithApis(fixture) {
 
     expect(context.canonicalUrl).to.equal(
         'https://www.example.com/doubleclick.html');
-    expect(context.clientId).to.be.defined;
+    expect(context.clientId).to.match(/amp-[a-zA-Z0-9\-_.]{22,24}/);
     expect(context.data).to.deep.equal({
       width: 300,
       height: 250,
