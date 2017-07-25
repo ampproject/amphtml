@@ -56,6 +56,10 @@ tags: {  # <amp-video>
   attrs: { name: "placeholder" }
   attrs: { name: "poster" }
   attrs: {
+    name: "crossorigin"
+    value_regex: "(^$|anonymous|use-credentials)"
+  }
+  attrs: {
     name: "preload"
     value_regex: "(none|metadata|auto|)"
   }
