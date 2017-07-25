@@ -73,7 +73,7 @@ let BoundElementDef;
  * A map of tag names to arrays of attributes that do not have non-bind
  * counterparts. For instance, amp-carousel allows a `[slide]` attribute,
  * but does not support a `slide` attribute.
- * @private {!Object<string, !Array<string>>}
+ * @const {!Object<string, !Array<string>>}
  */
 const BIND_ONLY_ATTRIBUTES = map({
   'AMP-CAROUSEL': ['slide'],
@@ -229,6 +229,33 @@ export class Bind {
   }
 
   /**
+   * Rescans elements for bindings, evaluates corresponding expressions
+   * and applies the results to only those elements. Does _not_ mutate other
+   * elements in the document.
+   * @param {!Array<!Element>} elements
+   * @return {!Promise}
+   */
+  rescanAndEvaluate(elements) {
+    // TODO(choumx): Shouldn't need to create an element.
+    const container = this.localWin_.document.createElement('div');
+    elements.forEach(element => {
+      container.appendChild(element);
+    });
+    return this.removeBindingsForNode_(container)
+        .then(() => this.addBindingsForNode_(container))
+        .then(numberOfBindingsAdded => {
+          // Don't reevaluate/apply if there are no bindings.
+          if (numberOfBindingsAdded > 0) {
+            return this.evaluate_()
+                .then(results => this.applyElement_(results, container))
+                .then(() => {
+                  this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
+                });
+          }
+        });
+  }
+
+  /**
    * Scans the ampdoc for bindings and creates the expression evaluator.
    * @param {!Node} rootNode
    * @return {!Promise}
@@ -281,7 +308,7 @@ export class Bind {
    * Returns a promise that resolves after bindings have been added.
    *
    * @param {!Node} node
-   * @return {!Promise}
+   * @return {!Promise<number>}
    * @private
    */
   addBindingsForNode_(node) {
@@ -293,11 +320,12 @@ export class Bind {
       const {
         boundElements, bindings, expressionToElements, limitExceeded,
       } = results;
+      const numberOfBindingsAdded = bindings.length;
 
       this.boundElements_ = this.boundElements_.concat(boundElements);
       Object.assign(this.expressionToElements_, expressionToElements);
 
-      dev().fine(TAG, `Scanned ${bindings.length} bindings from ` +
+      dev().fine(TAG, `Scanned ${numberOfBindingsAdded} bindings from ` +
           `${boundElements.length} elements.`);
 
       if (limitExceeded) {
@@ -306,28 +334,31 @@ export class Bind {
             'bindings will be ignored.');
       }
 
-      if (bindings.length == 0) {
-        return {};
+      // If there are no new bindings, early-out. Otherwise, parse expressions.
+      if (numberOfBindingsAdded == 0) {
+        return numberOfBindingsAdded;
       } else {
         dev().fine(TAG, 'Asking worker to parse expressions...');
-        return this.ww_('bind.addBindings', [bindings]);
-      }
-    }).then(parseErrors => {
-      // Report each parse error.
-      Object.keys(parseErrors).forEach(expressionString => {
-        const elements = this.expressionToElements_[expressionString];
-        if (elements.length > 0) {
-          const parseError = parseErrors[expressionString];
-          const userError = user().createError(
-              `${TAG}: Expression compilation error in "${expressionString}". `
-              + parseError.message);
-          userError.stack = parseError.stack;
-          reportError(userError, elements[0]);
-        }
-      });
+        return this.ww_('bind.addBindings', [bindings]).then(parseErrors => {
+          // Report each parse error.
+          Object.keys(parseErrors).forEach(expressionString => {
+            const elements = this.expressionToElements_[expressionString];
+            if (elements.length > 0) {
+              const parseError = parseErrors[expressionString];
+              const userError = user().createError(
+                  `${TAG}: Expression compile error in "${expressionString}". `
+                  + parseError.message);
+              userError.stack = parseError.stack;
+              reportError(userError, elements[0]);
+            }
+          });
 
-      dev().fine(TAG, 'Finished parsing expressions with ' +
-          `${Object.keys(parseErrors).length} errors.`);
+          dev().fine(TAG, 'Finished parsing expressions with ' +
+              `${Object.keys(parseErrors).length} errors.`);
+
+          return numberOfBindingsAdded;
+        });
+      }
     });
   }
 
@@ -589,64 +620,91 @@ export class Bind {
   }
 
   /**
-   * Applies expression results to the DOM.
+   * Applies expression results to all elements in the document.
    * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
    * @param {boolean=} opt_isAmpStateMutation
+   * @return {!Promise}
    * @private
    */
   apply_(results, opt_isAmpStateMutation) {
-    const applyPromises = [];
-    this.boundElements_.forEach(boundElement => {
-      const {element, boundProperties} = boundElement;
+    const promises = this.boundElements_.map(boundElement => {
       // If this "apply" round is triggered by an <amp-state> mutation,
       // ignore updates to <amp-state> element to prevent update cycles.
-      if (opt_isAmpStateMutation && element.tagName === 'AMP-STATE') {
-        return;
+      if (opt_isAmpStateMutation
+          && boundElement.element.tagName == 'AMP-STATE') {
+        return Promise.resolve();
       }
-      const updates = this.calculateUpdates_(boundProperties, results);
-      if (updates.length === 0) {
-        return;
+      return this.applyBoundElement_(results, boundElement);
+    });
+    return Promise.all(promises);
+  }
+
+  /**
+   * Applies expression results to a single element and its descendants.
+   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @param {!Element} element
+   * @return {!Promise}
+   */
+  applyElement_(results, element) {
+    const promises = this.boundElements_.map(boundElement => {
+      if (element.contains(boundElement.element)) {
+        return this.applyBoundElement_(results, boundElement);
+      } else {
+        return Promise.resolve();
       }
-      const promise = this.resources_.mutateElement(element, () => {
-        const mutations = dict();
-        let width, height;
+    });
+    return Promise.all(promises);
+  }
 
-        updates.forEach(update => {
-          const {boundProperty, newValue} = update;
-          const mutation = this.applyBinding_(boundProperty, element, newValue);
-          if (mutation) {
-            mutations[mutation.name] = mutation.value;
-            const property = boundProperty.property;
-            if (property == 'width') {
-              width = isFiniteNumber(newValue) ? Number(newValue) : width;
-            } else if (property == 'height') {
-              height = isFiniteNumber(newValue) ? Number(newValue) : height;
-            }
-          }
-        });
+  /**
+   * Applies expression results to a single BoundElementDef.
+   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @param {BoundElementDef} boundElement
+   * @return {!Promise}
+   */
+  applyBoundElement_(results, boundElement) {
+    const {element, boundProperties} = boundElement;
+    const updates = this.calculateUpdates_(boundProperties, results);
+    if (updates.length === 0) {
+      return Promise.resolve();
+    }
+    return this.resources_.mutateElement(element, () => {
+      const mutations = dict();
+      let width, height;
 
-        if (width !== undefined || height !== undefined) {
-          // TODO(choumx): Add new Resources method for adding change-size
-          // request without scheduling vsync pass since `mutateElement()`
-          // will schedule a pass after a short delay anyways.
-          this.resources_./*OK*/changeSize(element, height, width);
-        }
-
-        if (typeof element.mutatedAttributesCallback === 'function') {
-          // Prevent an exception in the callback from interrupting execution,
-          // instead wrap in user error and give a helpful message.
-          try {
-            element.mutatedAttributesCallback(mutations);
-          } catch (e) {
-            const error = user().createError(`${TAG}: Applying expression ` +
-                `results (${JSON.stringify(mutations)}) failed with error`, e);
-            reportError(error, element);
+      updates.forEach(update => {
+        const {boundProperty, newValue} = update;
+        const mutation = this.applyBinding_(boundProperty, element, newValue);
+        if (mutation) {
+          mutations[mutation.name] = mutation.value;
+          const property = boundProperty.property;
+          if (property == 'width') {
+            width = isFiniteNumber(newValue) ? Number(newValue) : width;
+          } else if (property == 'height') {
+            height = isFiniteNumber(newValue) ? Number(newValue) : height;
           }
         }
       });
-      applyPromises.push(promise);
+
+      if (width !== undefined || height !== undefined) {
+        // TODO(choumx): Add new Resources method for adding change-size
+        // request without scheduling vsync pass since `mutateElement()`
+        // will schedule a pass after a short delay anyways.
+        this.resources_./*OK*/changeSize(element, height, width);
+      }
+
+      if (typeof element.mutatedAttributesCallback === 'function') {
+        // Prevent an exception in the callback from interrupting execution,
+        // instead wrap in user error and give a helpful message.
+        try {
+          element.mutatedAttributesCallback(mutations);
+        } catch (e) {
+          const error = user().createError(`${TAG}: Applying expression ` +
+              `results (${JSON.stringify(mutations)}) failed with error`, e);
+          reportError(error, element);
+        }
+      }
     });
-    return Promise.all(applyPromises);
   }
 
   /**
