@@ -83,7 +83,7 @@ export const DEFAULT_SAFEFRAME_VERSION = '1-0-9';
 export const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 
 /** @const {string} */
-const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
+export const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
 
 /** @type {string} @visibleForTesting */
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
