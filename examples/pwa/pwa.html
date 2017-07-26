@@ -11,6 +11,33 @@
     if (window.location.pathname.indexOf('/examples') == 0) {
       window.location.assign('/pwa');
     }
+
+    function loadScript(url, callback) {
+        // Adding the script tag to the head as suggested before
+        var head = document.getElementsByTagName('head')[0];
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = url;
+
+        // Then bind the event to the callback function.
+        // There are several events for cross browser compatibility.
+        script.onreadystatechange = callback;
+        script.onload = callback;
+
+        // Fire the loading
+        head.appendChild(script);
+    }
+
+    // Using this explicitly, as firefox errors due to our polyfills
+    loadScript("https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.3/webcomponents-sd-ce.js", function() {
+      console.log('Started loading polyfill!');
+    });
+
+    setTimeout(function() {
+      loadScript("/pwa/pwa.js", function() {
+        console.log('Started loading pwa.js!');
+      });
+    }, 3000);
   </script>
 
   <style>
@@ -122,8 +149,5 @@
       </div>
     </template>
   </div>
-
-  <!-- Must be in the very end. -->
-  <script src="/pwa/pwa.js"></script>
 </body>
 </html>
