@@ -19,7 +19,6 @@ import {
 } from '../../../../src/iframe-transport-common';
 import {
   IframeTransportClient,
-  CreativeEventRouter,
 } from '../../../../3p/iframe-transport-client';
 import {dev, user} from '../../../../src/log';
 import {adopt} from '../../../../src/runtime';
@@ -93,7 +92,7 @@ describe('iframe-transport-client', () => {
 
   it('receives an event message ', () => {
     window.processAmpAnalyticsEvent = (event, transportId) => {
-      expect(ampAnalytics.getTransportId()).to.equal('101');
+      expect(transportId).to.equal('101');
       expect(event).to.equal('hello, world!');
     };
     send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
