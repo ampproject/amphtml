@@ -18,6 +18,7 @@ import {
   Log,
   LogLevel,
   USER_ERROR_SENTINEL,
+  EMBED,
   dev,
   isUserErrorMessage,
   rethrowAsync,
@@ -671,6 +672,34 @@ describe('Logging', () => {
       expect(duplicate.stack).to.equal(error.stack);
       expect(duplicate.args).to.equal(error.args);
       expect(duplicate.associatedElement).to.equal(error.associatedElement);
+    });
+  });
+
+  describe('embed error', () => {
+    let sandbox;
+    let iframe;
+    let element;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+      document.body.removeChild(iframe);
+    });
+
+    it('should return logger for user-error', () => {
+      expect(user().suffix_).to.equal(USER_ERROR_SENTINEL);
+      expect(user(this.element).suffix_).to.equal(USER_ERROR_SENTINEL);
+    });
+
+    it('should return logger for embed-error', () => {
+      element = document.createElement('embed');
+      iframe.contentWindow.document.body.appendChild(element);
+      expect(user(element).suffix_).to.equal(EMBED);
     });
   });
 });
