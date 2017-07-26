@@ -14,15 +14,26 @@
  * limitations under the License.
  */
 
-import {MessageType} from '../../../../src/3p-frame-messaging';
+import {
+  IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE,
+} from '../../../../src/iframe-transport-common';
 import {
   IframeTransportClient,
+  CreativeEventRouter,
 } from '../../../../3p/iframe-transport-client';
 import {dev, user} from '../../../../src/log';
+import {Timer} from '../../../../src/service/timer-impl';
 import {adopt} from '../../../../src/runtime';
 import * as sinon from 'sinon';
 
 adopt(window);
+
+/**
+ * @const {number}
+ * Testing postMessage necessarily involves race conditions. Set this high
+ * enough to avoid flakiness.
+ */
+const POST_MESSAGE_DELAY = 100;
 
 let nextId = 5000;
 function createUniqueId() {
@@ -31,8 +42,9 @@ function createUniqueId() {
 
 describe('iframe-transport-client', () => {
   let sandbox;
+  const timer = new Timer(window);
   let badAssertsCounterStub;
-  let iframeTransportClient;
+  let router;
   let sentinel;
 
   beforeEach(() => {
@@ -40,7 +52,8 @@ describe('iframe-transport-client', () => {
     badAssertsCounterStub = sandbox.stub();
     sentinel = createUniqueId();
     window.name = '{"sentinel": "' + sentinel + '"}';
-    iframeTransportClient = new IframeTransportClient(window);
+    sandbox.stub(IframeTransportClient.prototype, 'subscribeTo');
+    router = new IframeTransportClient(window);
     sandbox.stub(dev(), 'assert', (condition, msg) => {
       if (!condition) {
         badAssertsCounterStub(msg);
@@ -75,7 +88,7 @@ describe('iframe-transport-client', () => {
     window./*OK*/postMessage(payload, '*');
   }
 
-  it('fails to create iframeTransportClient if no window.name ', () => {
+  it('fails to create router if no window.name ', () => {
     const oldWindowName = window.name;
     expect(() => {
       window.name = '';
@@ -85,17 +98,79 @@ describe('iframe-transport-client', () => {
   });
 
   it('sets sentinel from window.name.sentinel ', () => {
-    expect(iframeTransportClient.getClient().sentinel_).to.equal(sentinel);
+    expect(router.getSentinel()).to.equal(sentinel);
+  });
+
+  it('initially has empty creativeMessageRouters mapping ', () => {
+    expect(Object.keys(router.getCreativeEventRouters())).to.have.lengthOf(0);
+  });
+
+  it('makes registration function available ', () => {
+    window.onNewAmpAnalyticsInstance = ampAnalytics => {
+      expect(ampAnalytics.registerCreativeEventListener).to.exist;
+      ampAnalytics.registerCreativeEventListener(() => {});
+    };
+    send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
+      events: [
+        {transportId: '100', message: 'hello, world!'},
+      ]}));
   });
 
   it('receives an event message ', () => {
-    window.processAmpAnalyticsEvent = (event, transportId) => {
-      expect(transportId).to.equal('101');
-      expect(event).to.equal('hello, world!');
+    window.onNewAmpAnalyticsInstance = ampAnalytics => {
+      expect(ampAnalytics instanceof CreativeEventRouter)
+          .to.be.true;
+      expect(Object.keys(router.getCreativeEventRouters()))
+          .to.have.lengthOf(1);
+      ampAnalytics.registerCreativeEventListener(events => {
+        expect(events).to.have.lengthOf(1);
+        events.forEach(event => {
+          expect(ampAnalytics.getTransportId()).to.equal('101');
+          expect(event).to.equal('hello, world!');
+        });
+      });
     };
-    send(MessageType.IFRAME_TRANSPORT_EVENTS, /** @type {!JsonObject} */ ({
+    send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
       events: [
         {transportId: '101', message: 'hello, world!'},
+      ]}));
+  });
+
+  it('asserts when onNewAmpAnalyticsInstance is not implemented ', () => {
+    window.onNewAmpAnalyticsInstance = null;
+    send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
+      events: [
+        {transportId: '102', message: 'hello, world!'},
+      ]}));
+    return timer.promise(POST_MESSAGE_DELAY).then(() => {
+      expect(badAssertsCounterStub.callCount > 0).to.be.true;
+      expect(badAssertsCounterStub.calledWith(
+          sinon.match(/Must implement onNewAmpAnalyticsInstance/))).to.be.true;
+      return Promise.resolve();
+    });
+  });
+
+  it('receives multiple event messages ', () => {
+    window.onNewAmpAnalyticsInstance = ampAnalytics => {
+      expect(ampAnalytics instanceof CreativeEventRouter)
+          .to.be.true;
+      expect(Object.keys(router.getCreativeEventRouters()))
+          .to.have.lengthOf(1);
+      ampAnalytics.registerCreativeEventListener(events => {
+        expect(events).to.have.lengthOf(3);
+        events.forEach(() => {
+          expect(ampAnalytics.getTransportId()).to.equal('103');
+        });
+        expect(events[0]).to.equal('something happened');
+        expect(events[1]).to.equal('something else happened');
+        expect(events[2]).to.equal('a third thing happened');
+      });
+    };
+    send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
+      events: [
+        {transportId: '103', message: 'something happened'},
+        {transportId: '103', message: 'something else happened'},
+        {transportId: '103', message: 'a third thing happened'},
       ]}));
   });
 });

@@ -690,15 +690,8 @@ function checkTypes() {
           includePolyfills: true,
           checkTypes: true,
         }),
-      closureCompile(['./3p/iframe-transport-client-lib.js'], './dist',
+      closureCompile(['./3p/iframe-transport-client.js'], './dist',
         'iframe-transport-client-check-types.js', {
-          externs: ['ads/ads.extern.js'],
-          include3pDirectories: true,
-          includePolyfills: true,
-          checkTypes: true,
-        }),
-      closureCompile(['./3p/ampanalytics-lib.js'], './dist',
-        'ampanalytics-check-types.js', {
           externs: ['ads/ads.extern.js'],
           include3pDirectories: true,
           includePolyfills: true,
