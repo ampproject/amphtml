@@ -174,7 +174,7 @@ export function reportError(error, opt_associatedElement) {
 
     // 'call' to make linter happy. And .call to make compiler happy
     // that expects some @this.
-    reportErrorToServer['call'](undefined, undefined, undefined, undefined,
+    reportErrorToServer['call'](undefined, undefined, undefined,
         undefined, error);
   } catch (errorReportingError) {
     setTimeout(function() {
@@ -226,14 +226,13 @@ export function installErrorReporting(win) {
 
 /**
  * Signature designed, so it can work with window.onerror
- * @param {string|undefined} message
+ * @param {*|undefined} error
  * @param {string|undefined} filename
  * @param {string|undefined} line
  * @param {string|undefined} col
- * @param {*|undefined} error
  * @this {!Window|undefined}
  */
-function reportErrorToServer(message, filename, line, col, error) {
+function reportErrorToServer(error, filename, line, col) {
   // Make an attempt to unhide the body.
   if (this && this.document) {
     makeBodyVisible(this.document);
@@ -253,7 +252,7 @@ function reportErrorToServer(message, filename, line, col, error) {
     // due to buggy browser extensions may be helpful to notify authors.
     return;
   }
-  const url = getErrorReportUrl(message, filename, line, col, error,
+  const url = getErrorReportUrl(error.message, filename, line, col, error,
       hasNonAmpJs);
   if (url) {
     reportingBackoff(() => {
