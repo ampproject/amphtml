@@ -52,11 +52,6 @@ describe('iframe-transport-client', () => {
     badAssertsCounterStub = sandbox.stub();
     sentinel = createUniqueId();
     window.name = '{"sentinel": "' + sentinel + '"}';
-    // This is OK because we're not stubbing something that lives in an
-    // iframe at all in this test, so certainly not in a cross-domain one.
-    // It's just something that has "Iframe" in its name, which triggered
-    // the presubmit rule.
-    sandbox./*OK*/stub(IframeTransportClient.prototype, 'subscribeTo');
     router = new IframeTransportClient(window);
     sandbox.stub(dev(), 'assert', (condition, msg) => {
       if (!condition) {
@@ -102,7 +97,7 @@ describe('iframe-transport-client', () => {
   });
 
   it('sets sentinel from window.name.sentinel ', () => {
-    expect(router.getSentinel()).to.equal(sentinel);
+    expect(router.getClient().sentinel_).to.equal(sentinel);
   });
 
   it('initially has empty creativeMessageRouters mapping ', () => {
@@ -138,20 +133,6 @@ describe('iframe-transport-client', () => {
       events: [
         {transportId: '101', message: 'hello, world!'},
       ]}));
-  });
-
-  it('asserts when onNewAmpAnalyticsInstance is not implemented ', () => {
-    window.onNewAmpAnalyticsInstance = null;
-    send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
-      events: [
-        {transportId: '102', message: 'hello, world!'},
-      ]}));
-    return timer.promise(POST_MESSAGE_DELAY).then(() => {
-      expect(badAssertsCounterStub.callCount > 0).to.be.true;
-      expect(badAssertsCounterStub.calledWith(
-          sinon.match(/Must implement onNewAmpAnalyticsInstance/))).to.be.true;
-      return Promise.resolve();
-    });
   });
 
   it('receives multiple event messages ', () => {
