@@ -80,6 +80,7 @@ describe(TAG, () => {
       'controls': '',
       'muted': '',
       'loop': '',
+      'crossorigin': '',
     }).then(v => {
       const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
@@ -88,6 +89,7 @@ describe(TAG, () => {
       expect(video.tagName).to.equal('VIDEO');
       expect(video.hasAttribute('controls')).to.be.true;
       expect(video.hasAttribute('loop')).to.be.true;
+      expect(video.hasAttribute('crossorigin')).to.be.true;
       // autoplay is never propagated to the video element
       expect(video.hasAttribute('autoplay')).to.be.false;
       // muted is a deprecated attribute

@@ -29,8 +29,14 @@ import {assertHttpsUrl} from '../../../src/url';
 const TAG = 'amp-video';
 
 /** @private {!Array<string>} */
-const ATTRS_TO_PROPAGATE_ON_BUILD = ['poster', 'controls', 'aria-label',
-  'aria-describedby', 'aria-labelledby'];
+const ATTRS_TO_PROPAGATE_ON_BUILD = [
+  'aria-describedby',
+  'aria-label',
+  'aria-labelledby',
+  'controls',
+  'crossorigin',
+  'poster',
+];
 
 /**
  * @note Do not propagate `autoplay`. Autoplay behaviour is managed by
