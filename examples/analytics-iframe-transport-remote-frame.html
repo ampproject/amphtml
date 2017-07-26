@@ -5,14 +5,13 @@
     <title>Requests Frame</title>
     <script>
       /**
-       * To receive analytics events in a third-party frame, you must
-       * implement this method, with this signature. Within that method, you
-       * must create a function which processes the analytics events, and
-       * pass that function to the registerAmpAnalytics3pEventsListener() method
-       * of the object which is passed as a parameter to
-       * onNewAmpAnalyticsInstance().
-       * @param ampAnalytics  Call registerAmpAnalyticsEventListener() on this,
-       * passing your function which will receive the analytics events.
+       * To receive AMP analytics events in a third-party frame, you must
+       * implement this method, with this signature. The method will receive
+       * two parameters:
+       * @param {string} event A string of the format specified in the
+       * requests block of the amp-analytics JSON config
+       * @param {string} transportId An ID uniquely identifying which creative
+       * generated the event
        */
       window.processAmpAnalyticsEvent = (event, transportId) => {
         // Now, do something meaningful with the AMP Analytics event
