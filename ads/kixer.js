@@ -82,7 +82,7 @@ export function kixer(global, data) {
   });
 
   loadScript(global, 'https://cdn.kixer.com/ad/load.js', () => {
-    global.__kx_domain = getSourceOrigin(global.context.location.href);
+    global.__kx_domain = getSourceOrigin(global.context.location.href); // Get domain
     __kxamp[data.adslot] = 1;
     __kx_ad_slots.push(data.adslot);
     __kx_ad_start();
