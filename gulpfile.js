@@ -265,7 +265,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       include3pDirectories: true,
       includePolyfills: false,
     }),
-    compileJs('./3p/', 'iframe-transport-client.js',
+    compileJs('./3p/', 'iframe-transport-client-lib.js',
         './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
       minifiedName: 'iframe-transport-client-v0.js',
       checkTypes: opt_checkTypes,
@@ -679,7 +679,7 @@ function checkTypes() {
           includePolyfills: true,
           checkTypes: true,
         }),
-      closureCompile(['./3p/iframe-transport-client.js'], './dist',
+      closureCompile(['./3p/iframe-transport-client-lib.js'], './dist',
         'iframe-transport-client-check-types.js', {
           externs: ['ads/ads.extern.js'],
           include3pDirectories: true,

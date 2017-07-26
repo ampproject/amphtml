@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-import './polyfills';
 import {tryParseJson} from '../src/json';
-import {dev, user, initLogConstructor, setReportError} from '../src/log';
+import {dev, user} from '../src/log';
 import {IFRAME_TRANSPORT_EVENTS_TYPE} from '../src/iframe-transport-common';
 import {IframeMessagingClient} from './iframe-messaging-client';
-
-initLogConstructor();
-// TODO(alanorozco): Refactor src/error.reportError so it does not contain big
-// transitive dependencies and can be included here.
-setReportError(() => {});
 
 /** @private @const {string} */
 const TAG_ = 'iframe-transport-client';
@@ -39,10 +33,8 @@ export class IframeTransportClient {
     /** @private {!Window} */
     this.win_ = win;
 
-    // Necessary, or else check-types will complain "Property
-    // processAmpAnalyticsEvent never defined on Window"
-    this.win_.processAmpAnalyticsEvent =
-      this.win_.processAmpAnalyticsEvent || null;
+    /** @private {?function(string,string)} */
+    this.listener_ = null;
 
     /** @protected {!IframeMessagingClient} */
     this.client_ = new IframeMessagingClient(win);
@@ -64,19 +56,29 @@ export class IframeTransportClient {
               'Received malformed events list in ' + this.win_.location.href);
           dev().assert(events.length,
               'Received empty events list in ' + this.win_.location.href);
-          user().assert(this.win_.processAmpAnalyticsEvent,
-              'Must implement processAmpAnalyticsEvent in ' +
-              this.win_.location.href);
+          user().assert(this.listener_,
+              'Must call onAnalyticsEvent in ' + this.win_.location.href);
           events.forEach(event => {
             try {
-              this.win_.processAmpAnalyticsEvent(event.message,
-                  event.transportId);
+              this.listener_(event.message, event.transportId);
             } catch (e) {
               user().error(TAG_,
-                  'Exception in processAmpAnalyticsEvent: ' + e.message);
+                  'Exception in callback passed to onAnalyticsEvent: ' +
+                  e.message);
             }
           });
         });
+  }
+
+  /**
+   * Registers a callback function to be called when an AMP analytics event
+   * is received.
+   * Note that calling this a second time will result in the first listener
+   * being removed - the events will not be sent to both callbacks.
+   * @param {function(string,string)} callback
+   */
+  onAnalyticsEvent(callback) {
+    this.listener_ = callback;
   }
 
   /**
@@ -86,14 +88,5 @@ export class IframeTransportClient {
    */
   getClient() {
     return this.client_;
-  }
-}
-
-if (!window.AMP_TEST) {
-  try {
-    new IframeTransportClient(window);
-  } catch (e) {
-    user().error(TAG_, 'Failed to construct IframeTransportClient: ' +
-      e.message);
   }
 }
