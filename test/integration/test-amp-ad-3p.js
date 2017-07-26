@@ -48,18 +48,10 @@ function createIframeWithApis(fixture) {
       };
     });
   }).then(context => {
-    // test iframe is created with correct context info.
-    expect(context.hidden).to.be.false;
-    // In some browsers the referrer is empty. But in Chrome it works, so
-    // we always check there.
-    if (context.referrer !== '' || platform.isChrome()) {
-      expect(context.referrer).to.contain(
-          'http://localhost:' + location.port);
-    }
-
     expect(context.canonicalUrl).to.equal(
         'https://www.example.com/doubleclick.html');
     expect(context.clientId).to.match(/amp-[a-zA-Z0-9\-_.]{22,24}/);
+    expect(context.container).to.equal('AMP-LIGHTBOX');
     expect(context.data).to.deep.equal({
       width: 300,
       height: 250,
@@ -77,9 +69,7 @@ function createIframeWithApis(fixture) {
     expect(context.data).to.equal(
         iframe.contentWindow.networkIntegrationDataParamForTesting);
 
-    expect(context.pageViewId).to.be.greaterThan(0);
-    expect(context.startTime).to.be.a('number');
-    expect(context.container).to.equal('AMP-LIGHTBOX');
+    expect(context.hidden).to.be.false;
     expect(context.initialLayoutRect).to.deep.equal({
       height: 250,
       left: 0,
@@ -108,6 +98,14 @@ function createIframeWithApis(fixture) {
       protocol: 'http:',
       search: '',
     });
+    expect(context.pageViewId).to.be.greaterThan(0);
+    // In some browsers the referrer is empty. But in Chrome it works, so
+    // we always check there.
+    if (context.referrer !== '' || platform.isChrome()) {
+      expect(context.referrer).to.contain(
+          'http://localhost:' + location.port);
+    }
+    expect(context.startTime).to.be.a('number');
     // Edge has different opinion about window.location in srcdoc iframe.
     // Nevertheless this only happens in test. In real world AMP will not
     // in srcdoc iframe.
