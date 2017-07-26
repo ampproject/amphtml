@@ -18,7 +18,6 @@ import './polyfills';
 import {tryParseJson} from '../src/json';
 import {dev, user, initLogConstructor, setReportError} from '../src/log';
 import {IFRAME_TRANSPORT_EVENTS_TYPE} from '../src/iframe-transport-common';
-import {getData} from '../src/event-helper';
 import {IframeMessagingClient} from './iframe-messaging-client';
 
 initLogConstructor();
@@ -40,19 +39,6 @@ export class IframeTransportClient {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @const {string} */
-    this.sentinel_ = user().assertString(
-        tryParseJson(this.win_.name)['sentinel'],
-        'Invalid/missing sentinel on iframe name attribute' + this.win_.name);
-    if (!this.sentinel_) {
-      return;
-    }
-
-    /** @protected {!IframeMessagingClient} */
-    this.client_ = new IframeMessagingClient(win);
-    this.client_.setHostWindow(this.win_);
-    this.client_.setSentinel(this.sentinel_);
-
     /**
      * Multiple creatives on a page may wish to use the same type of
      * amp-analytics tag. This object provides a mapping between the
@@ -63,85 +49,58 @@ export class IframeTransportClient {
      */
     this.creativeEventRouters_ = {};
 
-    this.win_.addEventListener('message', event => {
-      const messageContainer = this.extractMessage_(event);
-      if (this.sentinel_ != messageContainer['sentinel']) {
-        return;
-      }
-      user().assert(messageContainer['type'],
-          'Received message with missing type in ' + this.win_.location.href);
-      user().assert(messageContainer['events'],
-          'Received empty message in ' + this.win_.location.href);
-      user().assert(
-          messageContainer['type'] == IFRAME_TRANSPORT_EVENTS_TYPE,
-          'Received unrecognized message type ' + messageContainer['type'] +
-          ' in ' + this.win_.location.href);
-      this.processEventsMessage_(
-          /**
-           * @type {!Array<../src/iframe-transport-common.IframeTransportEvent>}
-           */
-          (messageContainer['events']));
-    }, false);
-
-    this.subscribeTo(IFRAME_TRANSPORT_EVENTS_TYPE);
-  }
-
-  /**
-   * Sends a message to the parent frame, requesting to subscribe to a
-   * particular message type
-   * @param messageType The type of message to subscribe to
-   * @VisibleForTesting
-   */
-  subscribeTo(messageType) {
-    this.client_./*OK*/sendMessage(messageType);
-  }
-
-  /**
-   * Handle receipt of a message indicating that creative(s) have sent
-   * event(s) to this frame
-   * @param {!Array<!../src/iframe-transport-common.IframeTransportEvent>}
-   * events An array of events
-   * @private
-   */
-  processEventsMessage_(events) {
-    user().assert(events && events.length,
-        'Received empty events list in ' + this.win_.location.href);
-    this.win_.onNewAmpAnalyticsInstance =
-        this.win_.onNewAmpAnalyticsInstance || null;
-    user().assert(this.win_.onNewAmpAnalyticsInstance,
-        'Must implement onNewAmpAnalyticsInstance in ' +
-        this.win_.location.href);
-    events.forEach(event => {
-      try {
-        if (!this.creativeEventRouters_[event.transportId]) {
-          this.creativeEventRouters_[event.transportId] =
-              new CreativeEventRouter(
-                  this.win_, this.sentinel_, event.transportId);
-          try {
-            this.win_.onNewAmpAnalyticsInstance(
-                this.creativeEventRouters_[event.transportId]);
-          } catch (e) {
-            user().error(TAG_, 'Caught exception in' +
-              ' onNewAmpAnalyticsInstance: ' + e.message);
-            throw e;
-          }
-        }
-        this.creativeEventRouters_[event.transportId]
-            .sendMessageToListener(event.message);
-      } catch (e) {
-        user().error(TAG_, 'Failed to pass message to event listener: ' +
-          e.message);
-      }
-    });
-  }
-
-  /**
-   * Test method to ensure sentinel set correctly
-   * @returns {string}
-   * @VisibleForTesting
-   */
-  getSentinel() {
-    return this.sentinel_;
+    /** @protected {!IframeMessagingClient} */
+    this.client_ = new IframeMessagingClient(win);
+    this.client_.setHostWindow(this.win_.parent);
+    this.client_.setSentinel(dev().assertString(
+        tryParseJson(this.win_.name)['sentinel'],
+        'Invalid/missing sentinel on iframe name attribute' + this.win_.name));
+    this.client_.makeRequest(
+        IFRAME_TRANSPORT_EVENTS_TYPE,
+        IFRAME_TRANSPORT_EVENTS_TYPE,
+        eventData => {
+          user().assert(eventData['type'],
+              'Received message with missing type in ' +
+              this.win_.location.href);
+          user().assert(eventData['type'] == IFRAME_TRANSPORT_EVENTS_TYPE,
+              'Received unrecognized message type ' + eventData['type'] +
+              ' in ' + this.win_.location.href);
+          const events =
+              /**
+               * @type {!Array<../src/iframe-transport-common.IframeTransportEvent>}
+               */
+              (eventData['events']);
+          user().assert(events,
+              'Received malformed events list in ' + this.win_.location.href);
+          dev().assert(events.length,
+              'Received empty events list in ' + this.win_.location.href);
+          this.win_.onNewAmpAnalyticsInstance =
+              this.win_.onNewAmpAnalyticsInstance || null;
+          user().assert(this.win_.onNewAmpAnalyticsInstance,
+              'Must implement onNewAmpAnalyticsInstance in ' +
+              this.win_.location.href);
+          events.forEach(event => {
+            try {
+              if (!this.creativeEventRouters_[event.transportId]) {
+                this.creativeEventRouters_[event.transportId] =
+                    new CreativeEventRouter(this.win_, event.transportId);
+                try {
+                  this.win_.onNewAmpAnalyticsInstance(
+                      this.creativeEventRouters_[event.transportId]);
+                } catch (e) {
+                  user().error(TAG_,
+                      'Exception in onNewAmpAnalyticsInstance: ' + e.message);
+                  throw e;
+                }
+              }
+              this.creativeEventRouters_[event.transportId]
+                  .sendMessageToListener(event.message);
+            } catch (e) {
+              user().error(TAG_, 'Failed to pass message to event listener: ' +
+                  e.message);
+            }
+          });
+        });
   }
 
   /**
@@ -163,20 +122,12 @@ export class IframeTransportClient {
   }
 
   /**
-   * Takes the raw postMessage event, and extracts from it the actual data
-   * payload
-   * @param event
-   * @returns {JsonObject}
-   * @private
+   * Gets the IframeMessagingClient
+   * @returns {!IframeMessagingClient}
+   * @VisibleForTesting
    */
-  extractMessage_(event) {
-    user().assert(event, 'Received null event in ' + this.win_.name);
-    const data = String(getData(event));
-    user().assert(data, 'Received empty event in ' + this.win_.name);
-    let startIndex;
-    user().assert((startIndex = data.indexOf('-') + 1) > 0,
-        'Received truncated events message in ' + this.win_.name);
-    return tryParseJson(data.substr(startIndex)) || null;
+  getClient() {
+    return this.client_;
   }
 }
 
@@ -196,16 +147,12 @@ if (!window.AMP_TEST) {
 export class CreativeEventRouter {
   /**
    * @param {!Window} win The enclosing window object
-   * @param {!string} sentinel The communication sentinel of this iframe
    * @param {!string} transportId The ID of the creative to route messages
    * to/from
    */
-  constructor(win, sentinel, transportId) {
+  constructor(win, transportId) {
     /** @private {!Window} */
     this.win_ = win;
-
-    /** @private {!string} */
-    this.sentinel_ = sentinel;
 
     /** @private {!string} */
     this.transportId_ = transportId;
@@ -240,7 +187,7 @@ export class CreativeEventRouter {
   sendMessageToListener(message) {
     if (!this.eventListener_) {
       dev().warn(TAG_, 'Attempted to send message when no listener' +
-        ' configured. Sentinel=' + this.sentinel_ + ', TransportID=' +
+        ' configured. TransportID=' +
         this.transportId_ + '. Be sure to' +
         ' call registerCreativeEventListener() within' +
         ' onNewAmpAnalyticsInstance()!');
