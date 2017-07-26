@@ -69,8 +69,11 @@ export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
  */
 export let AmpAnalyticsConfigDef;
 
-/** @const {!./url-builder.QueryParameterDef} */
-const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
+/**
+ * @const {!./url-builder.QueryParameterDef}
+ * @visibleForTesting
+ */
+export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
 /**
  * Check whether Google Ads supports the A4A rendering pathway is valid for the
@@ -558,7 +561,7 @@ export function maybeAppendErrorParameter(adUrl, parameterValue) {
   // truncated and error parameter is not already present.  Note that we assume
   // that added, error parameter length will be less than truncation parameter
   // so adding will not cause length to exceed maximum.
-  if (new RegExp(`&(${encodeURIComponent(TRUNCATION_PARAM.name)}=` +
+  if (new RegExp(`[?|&](${encodeURIComponent(TRUNCATION_PARAM.name)}=` +
       `${encodeURIComponent(String(TRUNCATION_PARAM.value))}|aet=[^&]*)$`)
       .test(adUrl)) {
     return;

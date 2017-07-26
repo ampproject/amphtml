@@ -22,7 +22,9 @@ import {
   googleAdUrl,
   mergeExperimentIds,
   maybeAppendErrorParameter,
+  TRUNCATION_PARAM,
 } from '../utils';
+import {buildUrl} from '../url-builder';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {
   installExtensionsService,
@@ -354,7 +356,10 @@ describe('Google A4A utils', () => {
       expect(maybeAppendErrorParameter(url + '&aet=already', 'n')).to.not.be.ok;
     });
     it('should not append parameter if truncated', () => {
-      expect(maybeAppendErrorParameter(url + '&trunc=1', 'n')).to.not.be.ok;
+      const truncUrl = buildUrl(
+          'https://foo.com/bar', {hello: 'world'}, 15, TRUNCATION_PARAM);
+      expect(truncUrl.indexOf(TRUNCATION_PARAM.name) != -1);
+      expect(maybeAppendErrorParameter(truncUrl, 'n')).to.not.be.ok;
     });
   });
 });
