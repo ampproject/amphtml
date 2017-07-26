@@ -43,6 +43,7 @@ import {
   ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsHoldoutBranches,
 } from '../../../../ads/google/adsense-amp-auto-ads';
+import * as sinon from 'sinon';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -91,9 +92,6 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
     }, env.win.document);
     document.body.appendChild(element);
     impl = new AmpAdNetworkAdsenseImpl(element);
-  });
-
-  afterEach(() => {
   });
 
   describe('#isValidElement', () => {
@@ -168,6 +166,15 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
       expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
       // exact value of ampAnalyticsConfig_ covered in
       // ads/google/test/test-utils.js
+    });
+  });
+
+  describe('#onNetworkFailure', () => {
+
+    it('should append error parameter', () => {
+      const TEST_URL = 'https://somenetwork.com/foo?hello=world&a=b';
+      expect(impl.onNetworkFailure(new Error('xhr failure'), TEST_URL))
+        .to.jsonEqual({adUrl: TEST_URL + '&aet=n'});
     });
   });
 

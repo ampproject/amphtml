@@ -21,6 +21,7 @@ import {
   EXPERIMENT_ATTRIBUTE,
   googleAdUrl,
   mergeExperimentIds,
+  maybeAppendErrorParameter,
 } from '../utils';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {
@@ -341,6 +342,19 @@ describe('Google A4A utils', () => {
     });
     it('should return empty string for invalid input', () => {
       expect(mergeExperimentIds(['frob'])).to.equal('');
+    });
+  });
+
+  describe('#maybeAppendErrorParameter', () => {
+    const url = 'https://foo.com/bar?hello=world&one=true';
+    it('should append parameter', () => {
+      expect(maybeAppendErrorParameter(url, 'n')).to.equal(url + '&aet=n');
+    });
+    it('should not append parameter if already present', () => {
+      expect(maybeAppendErrorParameter(url + '&aet=already', 'n')).to.not.be.ok;
+    });
+    it('should not append parameter if truncated', () => {
+      expect(maybeAppendErrorParameter(url + '&trunc=1', 'n')).to.not.be.ok;
     });
   });
 });

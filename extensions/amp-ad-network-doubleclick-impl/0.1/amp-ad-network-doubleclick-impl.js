@@ -48,6 +48,7 @@ import {
   QQID_HEADER,
   getEnclosingContainerTypes,
   ValidAdContainerTypes,
+  maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -404,6 +405,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 /* RTC Parameters */ values[1],
                 /* pageLevelParameters */ values[0]), ['108809080']);
       });
+  }
+
+  /** @override */
+  onNetworkFailure(error, adUrl) {
+    dev().info('network error, attempt adding of error parameter', error);
+    return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
   }
 
   /** @override */
