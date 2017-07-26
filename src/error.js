@@ -100,8 +100,6 @@ export function reportErrorForWin(win, error, opt_associatedElement) {
   if (error && !!win) {
     if (isUserErrorMessage(error.message) && !error.embed) {
       reportErrorToAnalytics(/** @type {!Error} */(error), win);
-    } else if (error.embed) {
-      console.log('EMBED: ' + error.message);
     }
   }
 }

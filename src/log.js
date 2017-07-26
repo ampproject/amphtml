@@ -31,7 +31,14 @@ const start = Date.now();
  * @const {string}
  */
 export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
-let isEmbed;
+
+
+/**
+ * Four zero width space.
+ *
+ * @const {string}
+ */
+export const EMBED = '\u200B\u200B\u200B\u200B';
 
 
 /**
@@ -39,6 +46,13 @@ let isEmbed;
  */
 export function isUserErrorMessage(message) {
   return message.indexOf(USER_ERROR_SENTINEL) >= 0;
+}
+
+/**
+ * @return {boolean} Whether this message was a iframe embed error.
+ */
+function isErrorEmbed(message) {
+  return message.indexOf(EMBED) >= 0;
 }
 
 
@@ -220,7 +234,7 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.name = tag || error.name;
-      error.embed = isEmbed;
+      error.embed = isErrorEmbed(error.message);
       // reportError is installed globally per window in the entry point.
       self.reportError(error);
     }
@@ -563,7 +577,7 @@ export function user(opt_element) {
         return LogLevel.FINE;
       }
       return LogLevel.OFF;
-    });
+    }, EMBED);
     return logs.userForEmbed;
   } else {
     return logger;
@@ -626,6 +640,5 @@ export function dev() {
  * @returns {boolean} isEmbed
  */
 export function isFromEmbed(win, element) {
-  isEmbed = element.ownerDocument.defaultView != win;
-  return isEmbed;
+  return element.ownerDocument.defaultView != win;
 }
