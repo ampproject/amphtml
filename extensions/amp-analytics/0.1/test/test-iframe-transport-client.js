@@ -91,62 +91,14 @@ describe('iframe-transport-client', () => {
     expect(router.getClient().sentinel_).to.equal(sentinel);
   });
 
-  it('initially has empty creativeMessageRouters mapping ', () => {
-    expect(Object.keys(router.getCreativeEventRouters())).to.have.lengthOf(0);
-  });
-
-  it('makes registration function available ', () => {
-    window.onNewAmpAnalyticsInstance = ampAnalytics => {
-      expect(ampAnalytics.registerCreativeEventListener).to.exist;
-      ampAnalytics.registerCreativeEventListener(() => {});
-    };
-    send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
-      events: [
-        {transportId: '100', message: 'hello, world!'},
-      ]}));
-  });
-
   it('receives an event message ', () => {
-    window.onNewAmpAnalyticsInstance = ampAnalytics => {
-      expect(ampAnalytics instanceof CreativeEventRouter)
-          .to.be.true;
-      expect(Object.keys(router.getCreativeEventRouters()))
-          .to.have.lengthOf(1);
-      ampAnalytics.registerCreativeEventListener(events => {
-        expect(events).to.have.lengthOf(1);
-        events.forEach(event => {
-          expect(ampAnalytics.getTransportId()).to.equal('101');
-          expect(event).to.equal('hello, world!');
-        });
-      });
+    window.processAmpAnalyticsEvent = (event, transportId) => {
+      expect(ampAnalytics.getTransportId()).to.equal('101');
+      expect(event).to.equal('hello, world!');
     };
     send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
       events: [
         {transportId: '101', message: 'hello, world!'},
-      ]}));
-  });
-
-  it('receives multiple event messages ', () => {
-    window.onNewAmpAnalyticsInstance = ampAnalytics => {
-      expect(ampAnalytics instanceof CreativeEventRouter)
-          .to.be.true;
-      expect(Object.keys(router.getCreativeEventRouters()))
-          .to.have.lengthOf(1);
-      ampAnalytics.registerCreativeEventListener(events => {
-        expect(events).to.have.lengthOf(3);
-        events.forEach(() => {
-          expect(ampAnalytics.getTransportId()).to.equal('103');
-        });
-        expect(events[0]).to.equal('something happened');
-        expect(events[1]).to.equal('something else happened');
-        expect(events[2]).to.equal('a third thing happened');
-      });
-    };
-    send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
-      events: [
-        {transportId: '103', message: 'something happened'},
-        {transportId: '103', message: 'something else happened'},
-        {transportId: '103', message: 'a third thing happened'},
       ]}));
   });
 });
