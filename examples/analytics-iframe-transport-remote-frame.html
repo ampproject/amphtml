@@ -14,14 +14,12 @@
        * @param ampAnalytics  Call registerAmpAnalyticsEventListener() on this,
        * passing your function which will receive the analytics events.
        */
-      window.onNewAmpAnalyticsInstance = ampAnalytics => {
-        ampAnalytics.registerCreativeEventListener(event => {
-          // Now, do something meaningful with the AMP Analytics event
-          console.log("The page at: " + window.location.href +
-            " has received an event: " + event +
-            " from the creative with transport ID: " +
-            ampAnalytics.getTransportId());
-        });
+      window.processAmpAnalyticsEvent = (event, transportId) => {
+        // Now, do something meaningful with the AMP Analytics event
+        console.log("The page at: " + window.location.href +
+          " has received an event: " + event +
+          " from the creative with transport ID: " +
+          transportId);
       };
 
       // Load the script specified in the iframe’s name attribute:
