@@ -21,7 +21,7 @@
  */
 export const IFRAME_TRANSPORT_EVENTS_TYPE = 'IframeTransportEvents';
 
-/** @typedef {Object<string,string>} */
+/** @typedef {{transportId: string, message: string}} */
 export let IframeTransportEvent;
 // An event, and the transport ID of the amp-analytics tags that
 // generated it. For instance if the creative with transport

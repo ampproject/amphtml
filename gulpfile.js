@@ -265,9 +265,9 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       include3pDirectories: true,
       includePolyfills: false,
     }),
-    compileJs('./3p/', 'ampanalytics-lib.js',
+    compileJs('./3p/', 'iframe-transport-client.js',
         './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-      minifiedName: 'ampanalytics-v0.js',
+      minifiedName: 'iframe-transport-client-v0.js',
       checkTypes: opt_checkTypes,
       watch: watch,
       minify: shouldMinify,
@@ -679,8 +679,8 @@ function checkTypes() {
           includePolyfills: true,
           checkTypes: true,
         }),
-      closureCompile(['./3p/ampanalytics-lib.js'], './dist',
-        'ampanalytics-check-types.js', {
+      closureCompile(['./3p/iframe-transport-client.js'], './dist',
+        'iframe-transport-client-check-types.js', {
           externs: ['ads/ads.extern.js'],
           include3pDirectories: true,
           includePolyfills: true,

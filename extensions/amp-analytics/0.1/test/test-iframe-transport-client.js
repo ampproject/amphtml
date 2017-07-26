@@ -18,9 +18,9 @@ import {
   IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE,
 } from '../../../../src/iframe-transport-common';
 import {
-  EventRouter,
+  IframeTransportClient,
   CreativeEventRouter,
-} from '../../../../3p/ampanalytics-lib';
+} from '../../../../3p/iframe-transport-client';
 import {dev, user} from '../../../../src/log';
 import {Timer} from '../../../../src/service/timer-impl';
 import {adopt} from '../../../../src/runtime';
@@ -40,7 +40,7 @@ function createUniqueId() {
   return String(++(nextId));
 }
 
-describe('ampanalytics-lib', () => {
+describe('iframe-transport-client', () => {
   let sandbox;
   const timer = new Timer(window);
   let badAssertsCounterStub;
@@ -52,8 +52,8 @@ describe('ampanalytics-lib', () => {
     badAssertsCounterStub = sandbox.stub();
     sentinel = createUniqueId();
     window.name = '{"sentinel": "' + sentinel + '"}';
-    sandbox.stub(EventRouter.prototype, 'subscribeTo');
-    router = new EventRouter(window);
+    sandbox.stub(IframeTransportClient.prototype, 'subscribeTo');
+    router = new IframeTransportClient(window);
     sandbox.stub(dev(), 'assert', (condition, msg) => {
       if (!condition) {
         badAssertsCounterStub(msg);
@@ -92,7 +92,7 @@ describe('ampanalytics-lib', () => {
     const oldWindowName = window.name;
     expect(() => {
       window.name = '';
-      new EventRouter(window);
+      new IframeTransportClient(window);
     }).to.throw(/Cannot read property 'sentinel' of undefined/);
     window.name = oldWindowName;
   });

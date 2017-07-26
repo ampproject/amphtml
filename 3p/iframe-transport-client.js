@@ -26,13 +26,13 @@ initLogConstructor();
 setReportError(() => {});
 
 /** @private @const {string} */
-const TAG_ = 'ampanalytics-lib';
+const TAG_ = 'iframe-transport-client';
 
 /**
  * Receives event messages bound for this cross-domain iframe, from all
  * creatives
  */
-export class EventRouter {
+export class IframeTransportClient {
 
   /** @param {!Window} win */
   constructor(win) {
@@ -109,24 +109,22 @@ export class EventRouter {
         'Must implement onNewAmpAnalyticsInstance in ' +
         this.win_.location.href);
     events.forEach(event => {
-      const transportId = event['transportId'];
-      const message = event['message'];
       try {
-        if (!this.creativeEventRouters_[transportId]) {
-          this.creativeEventRouters_[transportId] =
+        if (!this.creativeEventRouters_[event.transportId]) {
+          this.creativeEventRouters_[event.transportId] =
               new CreativeEventRouter(
-                  this.win_, this.sentinel_, transportId);
+                  this.win_, this.sentinel_, event.transportId);
           try {
             this.win_.onNewAmpAnalyticsInstance(
-                this.creativeEventRouters_[transportId]);
+                this.creativeEventRouters_[event.transportId]);
           } catch (e) {
             user().error(TAG_, 'Caught exception in' +
               ' onNewAmpAnalyticsInstance: ' + e.message);
             throw e;
           }
         }
-        this.creativeEventRouters_[transportId]
-            .sendMessageToListener(message);
+        this.creativeEventRouters_[event.transportId]
+            .sendMessageToListener(event.message);
       } catch (e) {
         user().error(TAG_, 'Failed to pass message to event listener: ' +
           e.message);
@@ -181,9 +179,9 @@ export class EventRouter {
 
 if (!window.AMP_TEST) {
   try {
-    new EventRouter(window);
+    new IframeTransportClient(window);
   } catch (e) {
-    user().error(TAG_, 'Failed to construct EventRouter: ' +
+    user().error(TAG_, 'Failed to construct IframeTransportClient: ' +
       e.message);
   }
 }
