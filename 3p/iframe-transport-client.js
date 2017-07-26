@@ -69,7 +69,8 @@ export class IframeTransportClient {
               this.win_.location.href);
           events.forEach(event => {
             try {
-              this.win_.processAmpAnalyticsEvent(event.message, event.transportId);
+              this.win_.processAmpAnalyticsEvent(event.message,
+                  event.transportId);
             } catch (e) {
               user().error(TAG_,
                   'Exception in processAmpAnalyticsEvent: ' + e.message);
