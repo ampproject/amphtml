@@ -1315,11 +1315,11 @@ export class AmpA4A extends AMP.BaseElement {
    * modification of ad url and prevent frame GET request on layoutCallback.
    * By default, GET frame request will be executed with same ad URL as used
    * for XHR CORS request.
-   * @param {!Error} error from network failure
-   * @param {string} adUrl used for network request
-   * @return {!{adUrl: string|undefined, frameGetDisabled: boolean|undefined}}
+   * @param {*} unusedError from network failure
+   * @param {string} unusedAdUrl used for network request
+   * @return {!{adUrl: (string|undefined), frameGetDisabled: (boolean|undefined)}}
    */
-  onNetworkFailure(error, adUrl) {
+  onNetworkFailure(unusedError, unusedAdUrl) {
     return {};
   }
 

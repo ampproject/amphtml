@@ -1040,7 +1040,7 @@ describe('amp-a4a', () => {
         return a4a.layoutCallback().then(() => {
           expect(getAdUrlSpy, 'getAdUrl called exactly once').to.be.calledOnce;
           expect(onNetworkFailureSpy,
-            'onNetworkFailureSpy called exactly once').to.be.calledOnce;
+              'onNetworkFailureSpy called exactly once').to.be.calledOnce;
           // Verify iframe presence and lack of visibility hidden
           const iframe = a4aElement.querySelector('iframe[src]');
           expect(iframe).to.be.ok;
@@ -1062,10 +1062,10 @@ describe('amp-a4a', () => {
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         sandbox.stub(a4a, 'onNetworkFailure')
-          .withArgs(sinon.match(val =>
-            val.message && val.message.indexOf('XHR Failed fetching') == 0),
+            .withArgs(sinon.match(val =>
+              val.message && val.message.indexOf('XHR Failed fetching') == 0),
             TEST_URL)
-          .returns({adUrl: TEST_URL + '&err=true'});
+            .returns({adUrl: TEST_URL + '&err=true'});
         a4a.buildCallback();
         const lifecycleEventStub = sandbox.stub(
             a4a, 'protectedEmitLifecycleEvent_');
@@ -1084,7 +1084,7 @@ describe('amp-a4a', () => {
         });
       });
     });
-    it('should not fetch via frame GET if disabled via onNetworkFailure', () => {
+    it('should not execute frame GET if disabled via onNetworkFailure', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         fetchMock.getOnce(
@@ -1095,15 +1095,12 @@ describe('amp-a4a', () => {
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         sandbox.stub(a4a, 'onNetworkFailure')
-          .withArgs(sinon.match(val =>
-            val.message && val.message.indexOf('XHR Failed fetching') == 0),
+            .withArgs(sinon.match(val =>
+              val.message && val.message.indexOf('XHR Failed fetching') == 0),
             TEST_URL)
-          .returns({frameGetDisabled: true});
+            .returns({frameGetDisabled: true});
         a4a.buildCallback();
-        const lifecycleEventStub = sandbox.stub(
-            a4a, 'protectedEmitLifecycleEvent_');
         a4a.onLayoutMeasure();
-        expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.layoutCallback().then(() => {
           expect(getAdUrlSpy, 'getAdUrl called exactly once').to.be.calledOnce;
           const iframe = a4aElement.querySelector('iframe');

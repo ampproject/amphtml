@@ -212,7 +212,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     it('should append error parameter', () => {
       const TEST_URL = 'https://somenetwork.com/foo?hello=world&a=b';
       expect(impl.onNetworkFailure(new Error('xhr failure'), TEST_URL))
-        .to.jsonEqual({adUrl: TEST_URL + '&aet=n'});
+          .to.jsonEqual({adUrl: TEST_URL + '&aet=n'});
     });
   });
 

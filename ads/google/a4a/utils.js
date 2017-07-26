@@ -69,7 +69,7 @@ export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
  */
 export let AmpAnalyticsConfigDef;
 
-/** @const {!QueryParameterDef} */
+/** @const {!./url-builder.QueryParameterDef} */
 const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
 /**
