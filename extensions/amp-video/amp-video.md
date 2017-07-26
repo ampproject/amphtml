@@ -43,9 +43,10 @@ limitations under the License.
 
 The `amp-video` component loads the video resource specified by its `src` attribute lazily, at a time determined by the runtime. You can control an `amp-video` component much the same way as a standard HTML5 `<video>` tag.
 
-The `amp-video` component accepts up to three unique types of HTML nodes as children:
+The `amp-video` component accepts up to four unique types of HTML nodes as children:
 
 - `source` tags: Just like in the HTML `<video>` tag, you can add `<source>` tag children to specify different source media files to play.
+- `track` tags to enable subtitles in the video. If the track is hosted on a different origin than the document, you must add the `crossorigin` attribute to the `<amp-video>` tag.
 -  a placeholder for before the video starts
 -  a fallback if the browser doesn’t support HTML5 video: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 video is not supported on the user’s browser.
 
@@ -59,7 +60,7 @@ The `amp-video` component accepts up to three unique types of HTML nodes as chil
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampvideo.basic.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 
 </div>
@@ -94,6 +95,10 @@ This attribute is similar to the `controls` attribute in the HTML5 `video`. If t
 ##### loop
 
 If present, the video will automatically loop back to the start upon reaching the end.
+
+##### crossorigin
+
+Required if a `track` resource is hosted on a different origin than the document.
 
 ##### muted (deprecated)
 
