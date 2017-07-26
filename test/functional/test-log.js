@@ -17,9 +17,8 @@
 import {
   Log,
   LogLevel,
-  USER_ERROR_SENTINEL,
   dev,
-  isUserErrorMessage,
+  isUserError,
   rethrowAsync,
   setReportError,
   user,
@@ -176,7 +175,7 @@ describe('Logging', () => {
       expect(reportedError).to.be.instanceof(Error);
       expect(reportedError.message).to.match(/intended\: test/);
       expect(reportedError.expected).to.be.undefined;
-      expect(isUserErrorMessage(reportedError.message)).to.be.false;
+      expect(isUserError(reportedError)).to.be.false;
     });
 
     it('should report ERROR and mark with expected flag', () => {
@@ -206,7 +205,7 @@ describe('Logging', () => {
 
       expect(reportedError).to.be.instanceof(Error);
       expect(reportedError.message).to.match(/intended/);
-      expect(isUserErrorMessage(reportedError.message)).to.be.false;
+      expect(isUserError(reportedError)).to.be.false;
     });
 
     it('should report ERROR when OFF from a single error object', () => {
@@ -221,7 +220,7 @@ describe('Logging', () => {
 
       expect(reportedError).to.be.instanceof(Error);
       expect(reportedError.message).to.match(/test/);
-      expect(isUserErrorMessage(reportedError.message)).to.be.false;
+      expect(isUserError(reportedError)).to.be.false;
     });
   });
 
@@ -252,8 +251,8 @@ describe('Logging', () => {
       expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
     });
 
-    it('should be configured with USER suffix', () => {
-      expect(user().suffix_).to.equal(USER_ERROR_SENTINEL);
+    it('should be configured with USER userMode', () => {
+      expect(user().userMode.isUserError).to.equal(true);
     });
   });
 
@@ -283,8 +282,8 @@ describe('Logging', () => {
       expect(dev().levelFunc_(mode)).to.equal(LogLevel.FINE);
     });
 
-    it('should be configured with no suffix', () => {
-      expect(dev().suffix_).to.equal('');
+    it('should be configured with isUserError false', () => {
+      expect(dev().userMode.isUserError).to.equal(false);
     });
   });
 
@@ -293,7 +292,7 @@ describe('Logging', () => {
     let log;
 
     beforeEach(() => {
-      log = new Log(win, RETURNS_FINE, USER_ERROR_SENTINEL);
+      log = new Log(win, RETURNS_FINE, true);
     });
 
     it('should fail', () => {
@@ -303,7 +302,7 @@ describe('Logging', () => {
       try {
         log.assert(false, '123');
       } catch (e) {
-        expect(e.message).to.equal('123' + USER_ERROR_SENTINEL);
+        expect(e.message).to.equal('123');
         return;
       }
       // Unreachable
@@ -337,7 +336,7 @@ describe('Logging', () => {
         error = e;
       }
       expect(error).to.be.instanceof(Error);
-      expect(error.message).to.equal('1 a 2 b 3' + USER_ERROR_SENTINEL);
+      expect(error.message).to.equal('1 a 2 b 3');
       expect(error.messageArray).to.deep.equal([1, 'a', 2, 'b', 3]);
     });
 
@@ -358,7 +357,7 @@ describe('Logging', () => {
       try {
         log.assert(false, '123');
       } catch (e) {
-        expect(isUserErrorMessage(e.message)).to.be.true;
+        expect(isUserError(e)).to.be.true;
         return;
       }
       // Unreachable
@@ -369,7 +368,7 @@ describe('Logging', () => {
       try {
         throw new Error('123');
       } catch (e) {
-        expect(isUserErrorMessage(e.message)).to.be.false;
+        expect(isUserError(e)).to.be.undefined;
         return;
       }
       // Unreachable
@@ -382,43 +381,18 @@ describe('Logging', () => {
       expect(error.expected).to.be.true;
     });
 
-    it('should create suffixed errors from message', () => {
+    it('should create user errors from message', () => {
       const error = log.createError('test');
       expect(error.expected).to.be.undefined;
       expect(error).to.be.instanceof(Error);
-      expect(isUserErrorMessage(error.message)).to.be.true;
-      expect(error.message).to.equal('test' + USER_ERROR_SENTINEL);
+      expect(isUserError(error)).to.be.true;
     });
 
-    it('should create suffixed errors from error', () => {
-      const error = log.createError(new Error('test'));
-      expect(error).to.be.instanceof(Error);
-      expect(isUserErrorMessage(error.message)).to.be.true;
-      expect(error.message).to.equal('test' + USER_ERROR_SENTINEL);
-    });
-
-    it('should only add suffix once', () => {
-      const error = log.createError(new Error('test' + USER_ERROR_SENTINEL));
-      expect(error).to.be.instanceof(Error);
-      expect(isUserErrorMessage(error.message)).to.be.true;
-      expect(error.message).to.equal('test' + USER_ERROR_SENTINEL);
-    });
-
-    it('should strip suffix if not available', () => {
-      const error = log.createError(new Error('test'));
-      expect(isUserErrorMessage(error.message)).to.be.true;
-
-      const noSuffixLog = new Log(win, RETURNS_FINE);
-      noSuffixLog.createError(error);
-      expect(isUserErrorMessage(error.message)).to.be.false;
-    });
-
-    it('should create other-suffixed errors', () => {
-      log = new Log(win, RETURNS_FINE, '-other');
+    it('should return isUserError false if isUserError not available', () => {
+      log = new Log(win, RETURNS_FINE);
       const error = log.createError('test');
       expect(error).to.be.instanceof(Error);
-      expect(isUserErrorMessage(error.message)).to.be.false;
-      expect(error.message).to.equal('test-other');
+      expect(isUserError(error)).to.be.false;
     });
 
     it('should pass for elements', () => {
@@ -623,9 +597,9 @@ describe('Logging', () => {
       expect(error.message).to.match(/^first second third: intended/);
     });
 
-    it('should preserve error suffix', () => {
+    it('should preserve error isUserError', () => {
       const orig = user().createError('intended');
-      expect(isUserErrorMessage(orig.message)).to.be.true;
+      expect(isUserError(orig)).to.be.true;
       rethrowAsync('first', orig, 'second');
       let error;
       try {
@@ -634,7 +608,7 @@ describe('Logging', () => {
         error = e;
       }
       expect(error).to.equal(orig);
-      expect(isUserErrorMessage(error.message)).to.be.true;
+      expect(isUserError(error)).to.be.true;
     });
   });
 

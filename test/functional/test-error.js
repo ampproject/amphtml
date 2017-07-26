@@ -214,7 +214,7 @@ describe('reportErrorToServer', () => {
       e = error;
     }
     const url = parseUrl(
-        getErrorReportUrl(e.message, undefined, undefined, undefined));
+        getErrorReportUrl(e.message, undefined, undefined, undefined, e));
     const query = parseQueryString(url.search);
 
     expect(query.m).to.equal('XYZ');

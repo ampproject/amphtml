@@ -22,24 +22,21 @@ import {isEnumValue} from './types';
 const start = Date.now();
 
 /**
- * Triple zero width space.
- *
- * This is added to user error messages, so that we can later identify
- * them, when the only thing that we have is the message. This is the
- * case in many browsers when the global exception handler is invoked.
- *
- * @const {string}
+ * @typedef {{
+ *   isUserError: boolean,
+ * }}
  */
-export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
-
+let userMode; // eslint-disable-line no-unused-vars
 
 /**
- * @return {boolean} Whether this message was a user error.
+ * @return {boolean} Whether this error was a user error.
  */
-export function isUserErrorMessage(message) {
-  return message.indexOf(USER_ERROR_SENTINEL) >= 0;
+export function isUserError(error) {
+  if (error == undefined) {
+    return false;
+  }
+  return error.isUserError;
 }
-
 
 /**
  * @enum {number}
@@ -71,9 +68,9 @@ export class Log {
   /**
    * @param {!Window} win
    * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
-   * @param {string=} opt_suffix
+   * @param {boolean=} opt_userError
    */
-  constructor(win, levelFunc, opt_suffix) {
+  constructor(win, levelFunc, opt_userError) {
     /**
      * In tests we use the main test window instead of the iframe where
      * the tests runs because only the former is relayed to the console.
@@ -87,8 +84,10 @@ export class Log {
     /** @private @const {!LogLevel} */
     this.level_ = this.calcLevel_();
 
-    /** @private @const {string} */
-    this.suffix_ = opt_suffix || '';
+    /** @const {!userMode} */
+    this.userMode = {
+      isUserError: opt_userError || false,
+    };
   }
 
   /**
@@ -382,15 +381,7 @@ export class Log {
    */
   prepareError_(error) {
     error = duplicateErrorIfNecessary(error);
-    if (this.suffix_) {
-      if (!error.message) {
-        error.message = this.suffix_;
-      } else if (error.message.indexOf(this.suffix_) == -1) {
-        error.message += this.suffix_;
-      }
-    } else if (isUserErrorMessage(error.message)) {
-      error.message = error.message.replace(USER_ERROR_SENTINEL, '');
-    }
+    error.isUserError = this.userMode.isUserError;
   }
 }
 
@@ -550,7 +541,7 @@ export function user() {
       return LogLevel.FINE;
     }
     return LogLevel.OFF;
-  }, USER_ERROR_SENTINEL);
+  }, true);
 }
 
 

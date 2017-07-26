@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
 import {
   isLoadErrorMessage,
 } from './event-helper';
 import {
-  USER_ERROR_SENTINEL,
-  isUserErrorMessage,
+  isUserError,
   duplicateErrorIfNecessary,
   dev,
 } from './log';
@@ -97,7 +95,7 @@ let detectedJsEngine;
  */
 export function reportErrorForWin(win, error, opt_associatedElement) {
   reportError(error, opt_associatedElement);
-  if (error && isUserErrorMessage(error.message) && !!win) {
+  if (error && isUserError(error) && !!win) {
     reportErrorToAnalytics(/** @type {!Error} */(error), win);
   }
 }
@@ -317,7 +315,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
     }
   }
 
-  const isUserError = isUserErrorMessage(message);
+  const isUserErr = isUserError(error);
 
   // This is the App Engine app in
   // ../tools/errortracker
@@ -326,8 +324,8 @@ export function getErrorReportUrl(message, filename, line, col, error,
   let url = urls.errorReporting +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&noAmp=' + (hasNonAmpJs ? 1 : 0) +
-      '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
-      '&a=' + (isUserError ? 1 : 0);
+      '&m=' + encodeURIComponent(message) +
+      '&a=' + (isUserErr ? 1 : 0);
   if (expected) {
     // Errors are tagged with "ex" ("expected") label to allow loggers to
     // classify these errors as benchmarks and not exceptions.
@@ -390,7 +388,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
       url += `&args=${encodeURIComponent(JSON.stringify(error.args))}`;
     }
 
-    if (!isUserError && !error.ignoreStack && error.stack) {
+    if (!isUserErr && !error.ignoreStack && error.stack) {
       // Shorten
       const stack = (error.stack || '').substr(0, 1000);
       url += `&s=${encodeURIComponent(stack)}`;
