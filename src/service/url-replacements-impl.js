@@ -231,7 +231,7 @@ export class GlobalVariableSource extends VariableSource {
         // If no `opt_userNotificationId` argument is provided then
         // assume consent is given by default.
       if (opt_userNotificationId) {
-        consent = Services.userNotificationManagerFor(this.ampdoc.win)
+        consent = Services.userNotificationManagerForDoc(this.ampdoc)
               .then(service => {
                 return service.get(opt_userNotificationId);
               });
