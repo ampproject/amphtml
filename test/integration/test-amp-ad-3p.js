@@ -24,6 +24,7 @@ import {
   toggleExperiment,
   resetExperimentTogglesForTesting,
 } from '../../src/experiments';
+import {layoutRectLtwh} from '../../src/layout-rect';
 
 // TODO(@alanorozco): Inline this once 3p-use-ampcontext experiment is removed
 function createIframeWithApis(fixture) {
@@ -47,18 +48,10 @@ function createIframeWithApis(fixture) {
       };
     });
   }).then(context => {
-    // test iframe is created with correct context info.
-    expect(context.hidden).to.be.false;
-    // In some browsers the referrer is empty. But in Chrome it works, so
-    // we always check there.
-    if (context.referrer !== '' || platform.isChrome()) {
-      expect(context.referrer).to.contain(
-          'http://localhost:' + location.port);
-    }
-
     expect(context.canonicalUrl).to.equal(
         'https://www.example.com/doubleclick.html');
-    expect(context.clientId).to.be.defined;
+    expect(context.clientId).to.match(/amp-[a-zA-Z0-9\-_.]{22,24}/);
+    expect(context.container).to.equal('AMP-LIGHTBOX');
     expect(context.data).to.deep.equal({
       width: 300,
       height: 250,
@@ -76,14 +69,22 @@ function createIframeWithApis(fixture) {
     expect(context.data).to.equal(
         iframe.contentWindow.networkIntegrationDataParamForTesting);
 
-    expect(context.pageViewId).to.be.greaterThan(0);
-    expect(context.startTime).to.be.a('number');
-    expect(context.container).to.be.defined;
-    expect(context.initialIntersection).to.be.defined;
-    // check for rootBounds as native IO doesn't support it with CORS
-    expect(context.initialLayoutRect).to.be.defined;
-    expect(context.initialLayoutRect.top).to.be.defined;
-    expect(context.initialIntersection.rootBounds).to.be.defined;
+    expect(context.hidden).to.be.false;
+    expect(context.initialLayoutRect).to.deep.equal({
+      height: 250,
+      left: 0,
+      top: platform.isIos() ? 1001 : 1000, // the iOS 1px trick
+      width: 300,
+    });
+    const initialIntersection = context.initialIntersection;
+    expect(initialIntersection.rootBounds).to.deep
+        .equal(layoutRectLtwh(0, 0, 500, 3000));
+    expect(initialIntersection.boundingClientRect).to.deep
+        .equal(layoutRectLtwh(0, platform.isIos() ? 1001 : 1000, 300, 250));
+    expect(initialIntersection.intersectionRect).to.deep
+        .equal(layoutRectLtwh(0, platform.isIos() ? 1001 : 1000, 300, 250));
+    expect(initialIntersection.intersectionRatio).to.equal(1);
+    expect(initialIntersection.time).to.be.a('number');
     expect(context.isMaster).to.be.defined;
     expect(context.computeInMasterFrame).to.be.defined;
     expect(context.location).to.deep.equal({
@@ -97,7 +98,20 @@ function createIframeWithApis(fixture) {
       protocol: 'http:',
       search: '',
     });
-    expect(context.sourceUrl).to.be.a('string');
+    expect(context.pageViewId).to.be.greaterThan(0);
+    // In some browsers the referrer is empty. But in Chrome it works, so
+    // we always check there.
+    if (context.referrer !== '' || platform.isChrome()) {
+      expect(context.referrer).to.contain(
+          'http://localhost:' + location.port);
+    }
+    expect(context.startTime).to.be.a('number');
+    // Edge has different opinion about window.location in srcdoc iframe.
+    // Nevertheless this only happens in test. In real world AMP will not
+    // in srcdoc iframe.
+    expect(context.sourceUrl).to.equal(platform.isEdge()
+        ? 'http://localhost:9876/context.html'
+        : 'about:srcdoc');
   }).then(() => {
     // test iframe will send out render-start to amp-ad
     return poll('render-start message received', () => {
