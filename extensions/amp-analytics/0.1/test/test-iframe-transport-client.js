@@ -52,7 +52,11 @@ describe('iframe-transport-client', () => {
     badAssertsCounterStub = sandbox.stub();
     sentinel = createUniqueId();
     window.name = '{"sentinel": "' + sentinel + '"}';
-    sandbox.stub(IframeTransportClient.prototype, 'subscribeTo');
+    // This is OK because we're not stubbing something that lives in an
+    // iframe at all in this test, so certainly not in a cross-domain one.
+    // It's just something that has "Iframe" in its name, which triggered
+    // the presubmit rule.
+    sandbox./*OK*/stub(IframeTransportClient.prototype, 'subscribeTo');
     router = new IframeTransportClient(window);
     sandbox.stub(dev(), 'assert', (condition, msg) => {
       if (!condition) {

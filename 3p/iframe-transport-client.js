@@ -19,6 +19,7 @@ import {tryParseJson} from '../src/json';
 import {dev, user, initLogConstructor, setReportError} from '../src/log';
 import {IFRAME_TRANSPORT_EVENTS_TYPE} from '../src/iframe-transport-common';
 import {getData} from '../src/event-helper';
+import {IframeMessagingClient} from './iframe-messaging-client';
 
 initLogConstructor();
 // TODO(alanorozco): Refactor src/error.reportError so it does not contain big
@@ -46,6 +47,11 @@ export class IframeTransportClient {
     if (!this.sentinel_) {
       return;
     }
+
+    /** @protected {!IframeMessagingClient} */
+    this.client_ = new IframeMessagingClient(win);
+    this.client_.setHostWindow(this.win_);
+    this.client_.setSentinel(this.sentinel_);
 
     /**
      * Multiple creatives on a page may wish to use the same type of
@@ -87,10 +93,7 @@ export class IframeTransportClient {
    * @VisibleForTesting
    */
   subscribeTo(messageType) {
-    this.win_.parent./*OK*/postMessage(/** @type {JsonObject} */ ({
-      sentinel: this.sentinel_,
-      type: messageType,
-    }), '*');
+    this.client_./*OK*/sendMessage(messageType);
   }
 
   /**
