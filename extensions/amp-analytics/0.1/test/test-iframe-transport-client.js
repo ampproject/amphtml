@@ -22,18 +22,10 @@ import {
   CreativeEventRouter,
 } from '../../../../3p/iframe-transport-client';
 import {dev, user} from '../../../../src/log';
-import {Timer} from '../../../../src/service/timer-impl';
 import {adopt} from '../../../../src/runtime';
 import * as sinon from 'sinon';
 
 adopt(window);
-
-/**
- * @const {number}
- * Testing postMessage necessarily involves race conditions. Set this high
- * enough to avoid flakiness.
- */
-const POST_MESSAGE_DELAY = 100;
 
 let nextId = 5000;
 function createUniqueId() {
@@ -42,7 +34,6 @@ function createUniqueId() {
 
 describe('iframe-transport-client', () => {
   let sandbox;
-  const timer = new Timer(window);
   let badAssertsCounterStub;
   let router;
   let sentinel;
