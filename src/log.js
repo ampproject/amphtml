@@ -22,14 +22,11 @@ import {isEnumValue} from './types';
 const start = Date.now();
 
 /**
- * Triple zero width space.
- *
- * This is added to user error messages, so that we can later identify
- * them, when the only thing that we have is the message. This is the
- * case in many browsers when the global exception handler is invoked.
- *
- * @const {string}
+ * @typedef {{
+ *   isUserError: boolean,
+ * }}
  */
+let userMode; // eslint-disable-line no-unused-vars
 
 /**
  * @return {boolean} Whether this error was a user error.
@@ -38,7 +35,7 @@ export function isUserError(error) {
   if (error == undefined) {
     return false;
   }
-  return error.userError;
+  return error.isUserError;
 }
 
 /**
@@ -87,8 +84,9 @@ export class Log {
     /** @private @const {!LogLevel} */
     this.level_ = this.calcLevel_();
 
+    /** @const {!userMode} */
     this.userMode = {
-      userError: opt_userError || false,
+      isUserError: opt_userError || false,
     };
   }
 
@@ -383,7 +381,7 @@ export class Log {
    */
   prepareError_(error) {
     error = duplicateErrorIfNecessary(error);
-    error.userError = this.userMode.userError || false;
+    error.isUserError = this.userMode.isUserError;
   }
 }
 
@@ -573,5 +571,5 @@ export function dev() {
       return LogLevel.INFO;
     }
     return LogLevel.OFF;
-  }, false);
+  });
 }

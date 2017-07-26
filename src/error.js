@@ -291,9 +291,6 @@ export function getErrorReportUrl(message, filename, line, col, error,
       expected = true;
     }
   }
-  //else {
-  //   error = new Error('Unknown error');
-  // }
   if (!message) {
     message = 'Unknown error';
   }

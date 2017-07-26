@@ -252,7 +252,7 @@ describe('Logging', () => {
     });
 
     it('should be configured with USER userMode', () => {
-      expect(user().userMode.userError).to.equal(true);
+      expect(user().userMode.isUserError).to.equal(true);
     });
   });
 
@@ -282,8 +282,8 @@ describe('Logging', () => {
       expect(dev().levelFunc_(mode)).to.equal(LogLevel.FINE);
     });
 
-    it('should be configured with userError false', () => {
-      expect(dev().userMode.userError).to.equal(false);
+    it('should be configured with isUserError false', () => {
+      expect(dev().userMode.isUserError).to.equal(false);
     });
   });
 
@@ -388,7 +388,7 @@ describe('Logging', () => {
       expect(isUserError(error)).to.be.true;
     });
 
-    it('should return userError false if userError not available', () => {
+    it('should return isUserError false if isUserError not available', () => {
       log = new Log(win, RETURNS_FINE);
       const error = log.createError('test');
       expect(error).to.be.instanceof(Error);
@@ -597,7 +597,7 @@ describe('Logging', () => {
       expect(error.message).to.match(/^first second third: intended/);
     });
 
-    it('should preserve error userError', () => {
+    it('should preserve error isUserError', () => {
       const orig = user().createError('intended');
       expect(isUserError(orig)).to.be.true;
       rethrowAsync('first', orig, 'second');
