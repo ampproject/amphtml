@@ -21,6 +21,14 @@
  */
 export const IFRAME_TRANSPORT_EVENTS_TYPE = 'IframeTransportEvents';
 
+/**
+ * @const {string}
+ * The 3p frame will use this to request that IFRAME_TRANSPORT_EVENTS_TYPE
+ * messages be sent to it. Due to the implementation of SubscriptionAPI,
+ * both this and IFRAME_TRANSPORT_EVENTS_TYPE must have the same value.
+ */
+export const SEND_IFRAME_TRANSPORT_EVENTS_TYPE = IFRAME_TRANSPORT_EVENTS_TYPE;
+
 /** @typedef {{transportId: string, message: string}} */
 export let IframeTransportEvent;
 // An event, and the transport ID of the amp-analytics tags that
