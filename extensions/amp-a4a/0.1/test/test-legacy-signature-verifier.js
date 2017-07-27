@@ -86,8 +86,7 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
     // For our purposes, re-using the same key is fine.
     keysetBody =
         `{"keys":[${validCSSAmp.publicKey},${
-                                               validCSSAmp.publicKey
-                                             },${validCSSAmp.publicKey}]}`;
+            validCSSAmp.publicKey},${validCSSAmp.publicKey}]}`;
     expect(result).to.be.empty;
     verifier.loadKeyset('google', Promise.resolve());
     expect(result).to.be.instanceof(Array);

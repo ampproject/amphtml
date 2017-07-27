@@ -227,13 +227,13 @@ export class LegacySignatureVerifier {
         // service, keyInfoPromise, can verify the signature, then the
         // creative is valid AMP.
         if (verified) {
-          return Promise.reject('noop');
+          return Promise.reject('redundant');
         }
         return some(keyInfoSet.keys.map(keyInfoPromise => {
           // Resolve Promise into signing key.
           return keyInfoPromise.then(keyInfo => {
             if (verified) {
-              return Promise.reject('noop');
+              return Promise.reject('redundant');
             }
             if (!keyInfo) {
               return Promise.reject('Promise resolved to null key.');
@@ -257,11 +257,8 @@ export class LegacySignatureVerifier {
                   }
                     // Only report if signature is expected to match, given that
                     // multiple key providers could have been specified.
-                    // Note: the 'keyInfo &&' check here is not strictly
-                    // necessary, because we checked that above.  But
-                    // Closure type compiler can't seem to recognize that, so
-                    // this guarantees it to the compiler.
-                  if (keyInfo && verifyHashVersion(signature, keyInfo)) {
+                  if (verifyHashVersion(
+                      signature, /** @type {!PublicKeyInfoDef} */ (keyInfo))) {
                     user().error(
                         TAG, 'Key failed to validate creative\'s signature',
                         keyInfo.signingServiceName, keyInfo.cryptoKey);
@@ -293,6 +290,7 @@ export class LegacySignatureVerifier {
    * Checks whether Web Cryptography is available in this context.
    *
    * @return {boolean}
+   * @visibleForTesting
    */
   isAvailable_() {
     return this.crypto_.isPkcsAvailable();
@@ -307,7 +305,7 @@ export class LegacySignatureVerifier {
    * @param {!Object} jwk An object which is hopefully an RSA JSON Web Key.  The
    *     caller should verify that it is an object before calling this function.
    * @return {!Promise<!PublicKeyInfoDef>}
-   * @private
+   * @visibleForTesting
    */
   importPublicKey_(signingServiceName, jwk) {
     return this.crypto_.importPkcsKey(jwk).then(cryptoKey => {
@@ -343,6 +341,7 @@ export class LegacySignatureVerifier {
    * @param {!PublicKeyInfoDef} publicKeyInfo the RSA public key.
    * @return {!Promise<!boolean>} whether the signature is valid for
    *     the public key.
+   * @visibleForTesting
    */
   verifySignature_(data, signature, publicKeyInfo) {
     if (!verifyHashVersion(signature, publicKeyInfo)) {
