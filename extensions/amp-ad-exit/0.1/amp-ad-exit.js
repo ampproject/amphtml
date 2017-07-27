@@ -21,6 +21,7 @@ import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
+import {ResponseMap} from '../../../src/iframe-transport-common';
 
 const TAG = 'amp-ad-exit';
 
@@ -102,8 +103,18 @@ export class AmpAdExit extends AMP.BaseElement {
     if (target.vars) {
       for (const customVar in target.vars) {
         if (customVar[0] == '_') {
-          vars[customVar] = () =>
-              args[customVar] || target.vars[customVar].defaultValue;
+          const vals = target.vars[customVar];
+          vars[customVar] = () => {
+            if (vals.vendorAnalyticsSource) {
+              const map = ResponseMap.get(this.getAmpDoc(),
+                  vals.vendorAnalyticsSource,
+                  /** @type {!string} */ (this.win.document.baseURI));
+              if (map && map[vals.vendorAnalyticsResponseKey]) {
+                return map[vals.vendorAnalyticsResponseKey];
+              }
+            }
+            return args[customVar] || vals.defaultValue;
+          };
           whitelist[customVar] = true;
         }
       }

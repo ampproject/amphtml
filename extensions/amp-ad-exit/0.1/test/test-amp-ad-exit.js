@@ -17,6 +17,7 @@
 import '../amp-ad-exit';
 import * as sinon from 'sinon';
 import {toggleExperiment} from '../../../../src/experiments';
+import {ResponseMap} from '../../../src/iframe-transport-common';
 
 const EXIT_CONFIG = {
   targets: {
@@ -57,6 +58,19 @@ const EXIT_CONFIG = {
       vars: {
         _foo: {
           defaultValue: 'foo-default',
+        },
+        _bar: {
+          defaultValue: 'bar-default',
+        },
+      },
+    },
+    variableFrom3pAnalytics: {
+      'finalUrl': 'http://localhost:8000/vars?foo=_foo',
+      vars: {
+        _foo: {
+          defaultValue: 'foo-default',
+          vendorAnalyticsSource: '3p-vendor',
+          vendorAnalyticsResponseKey: 'collected-data',
         },
         _bar: {
           defaultValue: 'bar-default',
@@ -509,7 +523,24 @@ describes.realWin('amp-ad-exit', {
     });
     expect(open).to.have.been.calledTwice;
     expect(open).to.have.been.calledWith(
-        EXIT_CONFIG.targets.borderProtection.finalUrl, '_blank');
+      EXIT_CONFIG.targets.borderProtection.finalUrl, '_blank');
+  });
+
+  it('should replace custom URL variables with 3P Analytics signals', () => {
+    ResponseMap.add(env.ampdoc, '3p-vendor', env.win.document.baseURI, {
+      'unused': 'unused',
+      'collected-data': 'abc123',
+    });
+
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'variableFrom3pAnalytics'},
+      event: makeClickEvent(1001, 101, 102),
+      satisfiesTrust: () => true,
+    });
+
+    expect(open).to.have.been.calledWith(
+        'http://localhost:8000/vars?foo=abc123', '_blank');
   });
 });
 
