@@ -42,6 +42,7 @@ import {cidServiceForDocForTesting} from
     '../../../../src/service/cid-impl';
 import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
+import * as log from '../../../../src/log';
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 
@@ -454,6 +455,64 @@ describe('amp-analytics', function() {
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/foobar');
+    });
+  });
+
+  describe('should assert against override vendor transport config', () => {
+    let errorSpy;
+
+    beforeEach(() => {
+      errorSpy = sandbox.spy();
+      sandbox.stub(log, 'user', () => {
+        return {
+          error: errorSpy,
+          assert: () => {},
+        };
+      });
+    });
+
+    it('should assert error when override', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/${bar}'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'transport': {'beacon': 'true'},
+      }, {'type': 'xyz'});
+      analytics.predefinedConfig_ = {
+        'xyz': {
+          'requests': {'foo': '/bar', 'bar': 'foobar'},
+        },
+      };
+      return analytics.layoutCallback().then(() => {
+        expect(errorSpy).to.be.calledWith('AmpAnalytics <unknown id>',
+            'Inline or remote config should not ' +
+            'overwrite vendor transport settings');
+      });
+    });
+
+    it('should not assert if not override transport', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/${bar}'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {'type': 'xyz'});
+      analytics.predefinedConfig_ = {
+        'xyz': {
+          'requests': {'foo': '/bar', 'bar': 'foobar'},
+        },
+      };
+      return analytics.layoutCallback().then(() => {
+        expect(errorSpy).to.not.be.called;
+      });
+    });
+
+    it('should not assert if vendor default config not used', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/${bar}'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'transport': {'beacon': 'true'},
+      }, {'type': 'xyz'});
+      return analytics.layoutCallback().then(() => {
+        expect(errorSpy).to.not.be.called;
+      });
     });
   });
 
