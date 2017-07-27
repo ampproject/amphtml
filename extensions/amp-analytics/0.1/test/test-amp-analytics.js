@@ -42,6 +42,7 @@ import {cidServiceForDocForTesting} from
     '../../../../src/service/cid-impl';
 import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
+import * as log from '../../../../src/log';
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 
@@ -454,6 +455,38 @@ describe('amp-analytics', function() {
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/foobar');
+    });
+  });
+
+  it('should only throw user error when override vendor transport', function() {
+    const errorSpy = sandbox.spy();
+    sandbox.stub(log, 'user', () => {
+      return {
+        error: (tag, msg) => {errorSpy(msg);},
+        assert: () => {},
+      };
+    });
+    const analytics = getAnalyticsTag({
+      'requests': {'foo': 'https://example.com/${bar}'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
+      'transport': {'beacon': 'true'},
+    }, {'type': 'xyz'});
+    analytics.predefinedConfig_ = {
+      'xyz': {
+        'requests': {'foo': '/bar', 'bar': 'foobar'},
+      },
+    };
+    const analytics1 = getAnalyticsTag({
+      'requests': {'foo': 'https://example.com/${bar}'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
+    }, {'type': 'xyz'});
+    return analytics.layoutCallback().then(() => {
+      expect(errorSpy).to.be.calledWith('Inline or remote config should not ' +
+          'overwrite vendor transport settings');
+      errorSpy.reset();
+      return analytics1.layoutCallback().then(() => {
+        expect(errorSpy).to.not.be.called;
+      });
     });
   });
 
