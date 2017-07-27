@@ -119,6 +119,28 @@ export class VideoInterface {
   isInViewport() {}
 
   /**
+   * Enables fullscreen on the internal video element
+   * NOTE: While implementing, keep in mind that Safari/iOS do not allow taking
+   * any element other than <video> to fullscreen, if the player has an internal
+   * implementation of fullscreen (flash for example) then check
+   * if Services.platformFor(this.win).isSafari is true and use the internal
+   * implementation instead. If not, it is recommended to take the iframe
+   * to fullscreen using fullscreenEnter from dom.js
+   */
+  fullscreenEnter() {}
+
+  /**
+   * Quits fullscreen mode
+   */
+  fullscreenExit() {}
+
+  /**
+   * Returns whether the video is currently in fullscreen mode or not
+   * @return {boolean}
+   */
+  isFullscreen() {}
+
+  /**
    * Automatically comes from {@link ./base-element.BaseElement}
    *
    * @param {string} unusedMethod
@@ -167,6 +189,19 @@ export const VideoAttributes = {
    * to the corner when scrolled out of view and has been interacted with.
    */
   DOCK: 'dock',
+  /**
+   * fullscreen-on-landscape
+   *
+   * If enabled, this automatically expands the currently visible video and
+   * playing to fullscreen when the user changes the device's orientation to
+   * landscape if the video was started following a user interaction
+   * (not autoplay)
+   *
+   * Dependent upon browser support of
+   * http://caniuse.com/#feat=screen-orientation
+   * and http://caniuse.com/#feat=fullscreen
+   */
+  FULLSCREEN_ON_LANDSCAPE: 'fullscreen-on-landscape',
 };
 
 
