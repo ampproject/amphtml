@@ -28,7 +28,12 @@ import {
     addParamsToUrl,
     addParamToUrl,
 } from '../../../src/url';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {
+  getDataParamsFromAttributes,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
 
 /**
  * Player events reverse-engineered from the Dailymotion API
@@ -57,6 +62,7 @@ const DailymotionEvents = {
   // Other events
   VOLUMECHANGE: 'volumechange',
   STARTED_BUFFERING: 'progress',
+  FULLSCREEN_CHANGE: 'fullscreenchange',
 };
 
 /**
@@ -96,6 +102,9 @@ class AmpDailymotion extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.startedBufferingResolver_ = null;
+
+    /** @private {boolean} */
+    this.isFullscreen_ = false;
 
   }
 
@@ -218,6 +227,9 @@ class AmpDailymotion extends AMP.BaseElement {
       case DailymotionEvents.STARTED_BUFFERING:
         this.startedBufferingResolver_(true);
         break;
+      case DailymotionEvents.FULLSCREEN_CHANGE:
+        this.isFullscreen_ = data['fullscreen'] == 'true';
+        break;
       default:
 
     }
@@ -335,6 +347,40 @@ class AmpDailymotion extends AMP.BaseElement {
    */
   hideControls() {
     // Not supported
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    const platform = Services.platformFor(this.win);
+    if (platform.isSafari() || platform.isIos()) {
+      this.sendCommand_('fullscreen', [true]);
+    } else {
+      fullscreenEnter(dev().assertElement(this.iframe_));
+    }
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    const platform = Services.platformFor(this.win);
+    if (platform.isSafari() || platform.isIos()) {
+      this.sendCommand_('fullscreen', [false]);
+    } else {
+      fullscreenExit(dev().assertElement(this.iframe_));
+    }
+  }
+
+  /** @override */
+  isFullscreen() {
+    const platform = Services.platformFor(this.win);
+    if (platform.isSafari() || platform.isIos()) {
+      return this.isFullscreen_;
+    } else {
+      return isFullscreenElement(dev().assertElement(this.iframe_));
+    }
   }
 
   /** @override */

@@ -748,3 +748,82 @@ export function whenUpgradedToCustomElement(element) {
 
   return element[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
 }
+
+/**
+ * Replacement for `Element.requestFullscreen()` method.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullscreen
+ * @param {!Element} element
+ */
+export function fullscreenEnter(element) {
+  const requestFs = element.requestFullscreen
+   || element.requestFullScreen
+   || element.webkitRequestFullscreen
+   || element.webkitRequestFullScreen
+   || element.webkitEnterFullscreen
+   || element.webkitEnterFullScreen
+   || element.msRequestFullscreen
+   || element.msRequestFullScreen
+   || element.mozRequestFullscreen
+   || element.mozRequestFullScreen;
+  if (requestFs) {
+    requestFs.call(element);
+  }
+}
+
+/**
+ * Replacement for `Document.exitFullscreen()` method.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Document/exitFullscreen
+ * @param {!Element} element
+ */
+export function fullscreenExit(element) {
+  let exitFs = element.cancelFullScreen
+               || element.exitFullscreen
+               || element.exitFullScreen
+               || element.webkitExitFullscreen
+               || element.webkitExitFullScreen
+               || element.webkitCancelFullScreen
+               || element.mozCancelFullScreen
+               || element.msExitFullscreen;
+  if (exitFs) {
+    exitFs.call(element);
+    return;
+  }
+  if (element.ownerDocument) {
+    exitFs = element.ownerDocument.cancelFullScreen
+             || element.ownerDocument.exitFullscreen
+             || element.ownerDocument.exitFullScreen
+             || element.ownerDocument.webkitExitFullscreen
+             || element.ownerDocument.webkitExitFullScreen
+             || element.ownerDocument.webkitCancelFullScreen
+             || element.ownerDocument.mozCancelFullScreen
+             || element.ownerDocument.msExitFullscreen;
+  }
+  if (exitFs) {
+    exitFs.call(element.ownerDocument);
+    return;
+  }
+}
+
+
+/**
+ * Replacement for `Document.fullscreenElement`.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Document/fullscreenElement
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isFullscreenElement(element) {
+  const isFullscreen = element.webkitDisplayingFullscreen;
+  if (isFullscreen) {
+    return true;
+  }
+  if (element.ownerDocument) {
+    const fullscreenElement = element.ownerDocument.fullscreenElement
+             || element.ownerDocument.webkitFullscreenElement
+             || element.ownerDocument.mozFullScreenElement
+             || element.webkitCurrentFullScreenElement;
+    if (fullscreenElement == element) {
+      return true;
+    }
+  }
+  return false;
+}

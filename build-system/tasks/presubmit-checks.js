@@ -575,6 +575,13 @@ var forbiddenTerms = {
       'src/event-helper.js',
     ],
   },
+  '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {
+    message: 'Use fullscreenEnter() and fullscreenExit() from dom.js instead.',
+    whitelist: [
+      'ads/google/imaVideo.js',
+      'dist.3p/current/integration.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
