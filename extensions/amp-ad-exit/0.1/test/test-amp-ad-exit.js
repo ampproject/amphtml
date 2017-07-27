@@ -17,7 +17,7 @@
 import '../amp-ad-exit';
 import * as sinon from 'sinon';
 import {toggleExperiment} from '../../../../src/experiments';
-import {ResponseMap} from '../../../src/iframe-transport-common';
+import {ResponseMap} from '../../../../src/iframe-transport-common';
 
 const EXIT_CONFIG = {
   targets: {
