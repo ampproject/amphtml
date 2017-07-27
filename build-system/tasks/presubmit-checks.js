@@ -322,6 +322,7 @@ var forbiddenTerms = {
     message: 'Usages must be reviewed.',
     whitelist: [
       'src/service/viewer-impl.js',
+      'src/service/viewer-cid-api.js',
       'src/service/storage-impl.js',
       'src/service/history-impl.js',
       'src/service/cid-impl.js',
@@ -381,8 +382,10 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/viewer-impl.js',
+      'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',
       'src/service/cid-impl.js',
+      'src/impression.js',
     ],
   },
   'eval\\(': {
@@ -666,6 +669,15 @@ var forbiddenTermsSrcInclusive = {
       'extensions/amp-pinterest/0.1/util.js',
       'src/url.js',
       'src/url-try-decode-uri-component.js',
+      'src/utils/bytes.js',
+    ],
+  },
+  'Text(Encoder|Decoder)\\(': {
+    message: 'TextEncoder/TextDecoder is not supported in all browsers.' +
+        'Please use UTF8 utilities from src/bytes.js',
+    whitelist: [
+      'ads/google/a4a/line-delimited-response-handler.js',
+      'examples/pwa/pwa.js',
       'src/utils/bytes.js',
     ],
   },

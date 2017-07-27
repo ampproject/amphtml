@@ -21,6 +21,7 @@ import {
   getServiceForDoc,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
+  resetServiceForTesting,
 } from '../src/service';
 
 export function stubService(sandbox, win, serviceId, method) {
@@ -43,6 +44,20 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
   });
   const service = getServiceForDoc(ampdoc, serviceId);
   return sandbox.stub(service, method);
+}
+
+export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
+  resetServiceForTesting(ampdoc.win, 'viewer');
+  const impl = {};
+  methods.forEach(method => {
+    impl[method] = () => {};
+  });
+  registerServiceBuilderForDoc(ampdoc, serviceId, () => impl);
+  const mock = {};
+  methods.forEach(method => {
+    mock[method] = sandbox.stub(impl, method);
+  });
+  return mock;
 }
 
 /**

@@ -94,6 +94,7 @@ import {colombia} from '../ads/colombia';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
 import {csa} from '../ads/google/csa';
+import {dable} from '../ads/dable';
 import {distroscale} from '../ads/distroscale';
 import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
@@ -116,6 +117,7 @@ import {imedia} from '../ads/imedia';
 import {imobile} from '../ads/imobile';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
+import {innity} from '../ads/innity';
 import {ix} from '../ads/ix';
 import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
@@ -163,6 +165,7 @@ import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {valuecommerce} from '../ads/valuecommerce';
+import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
 import {widespace} from '../ads/widespace';
@@ -185,6 +188,7 @@ import {zucks} from '../ads/zucks';
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
   bringhub: true,
+  dable: true,
   'mantis-recommend': true,
   mywidget: true,
   outbrain: true,
@@ -263,6 +267,7 @@ register('colombia', colombia);
 register('contentad', contentad);
 register('criteo', criteo);
 register('csa', csa);
+register('dable', dable);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
@@ -288,6 +293,7 @@ register('imobile', imobile);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
+register('innity', innity);
 register('ix', ix);
 register('kargo', kargo);
 register('kiosked', kiosked);
@@ -338,6 +344,7 @@ register('teads', teads);
 register('triplelift', triplelift);
 register('twitter', twitter);
 register('valuecommerce', valuecommerce);
+register('vmfive', vmfive);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
 register('widespace', widespace);

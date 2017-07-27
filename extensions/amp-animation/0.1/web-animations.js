@@ -38,6 +38,7 @@ import {
   WebKeyframeAnimationDef,
   WebKeyframesDef,
   WebMultiAnimationDef,
+  WebSwitchAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
 import {dashToCamelCase, startsWith} from '../../../src/string';
@@ -292,21 +293,24 @@ class Scanner {
 
   /**
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
+   * @return {boolean}
    */
   scan(spec) {
     if (isArray(spec)) {
-      spec.forEach(spec => this.scan(spec));
-      return;
+      // Returns `true` if any of the components scan successfully.
+      return spec.reduce((acc, comp) => this.scan(comp) || acc, false);
     }
 
     // Check whether the animation is enabled.
     if (!this.isEnabled(/** @type {!WebAnimationDef} */ (spec))) {
-      return;
+      return false;
     }
 
-    // WebAnimationDef: (!WebMultiAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef)
+    // WebAnimationDef: (!WebMultiAnimationDef|!WebSpecAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef)
     if (spec.animations) {
       this.onMultiAnimation(/** @type {!WebMultiAnimationDef} */ (spec));
+    } else if (spec.switch) {
+      this.onSwitchAnimation(/** @type {!WebSwitchAnimationDef} */ (spec));
     } else if (spec.animation) {
       this.onCompAnimation(/** @type {!WebCompAnimationDef} */ (spec));
     } else if (spec.keyframes) {
@@ -314,6 +318,7 @@ class Scanner {
     } else {
       this.onUnknownAnimation(spec);
     }
+    return true;
   }
 
   /**
@@ -330,6 +335,12 @@ class Scanner {
    * @abstract
    */
   onMultiAnimation(unusedSpec) {}
+
+  /**
+   * @param {!WebSwitchAnimationDef} unusedSpec
+   * @abstract
+   */
+  onSwitchAnimation(unusedSpec) {}
 
   /**
    * @param {!WebCompAnimationDef} unusedSpec
@@ -408,8 +419,8 @@ export class Builder {
    * @protected
    */
   resolveRequests(path, spec, args,
-      target = null, vars = null, timing = null) {
-    const scanner = this.createScanner_(path, target, vars, timing);
+      target = null, index = null, vars = null, timing = null) {
+    const scanner = this.createScanner_(path, target, index, vars, timing);
     return this.vsync_.measurePromise(
         () => scanner.resolveRequests(spec, args));
   }
@@ -428,12 +439,14 @@ export class Builder {
   /**
    * @param {!Array<string>} path
    * @param {?Element} target
+   * @param {?number} index
    * @param {?Object<string, *>} vars
    * @param {?WebAnimationTimingDef} timing
    * @private
    */
-  createScanner_(path, target, vars, timing) {
-    return new MeasureScanner(this, this.css_, path, target, vars, timing);
+  createScanner_(path, target, index, vars, timing) {
+    return new MeasureScanner(this, this.css_, path,
+        target, index, vars, timing);
   }
 }
 
@@ -450,10 +463,11 @@ export class MeasureScanner extends Scanner {
    * @param {!CssContextImpl} css
    * @param {!Array<string>} path
    * @param {?Element} target
+   * @param {?number} index
    * @param {?Object<string, *>} vars
    * @param {?WebAnimationTimingDef} timing
    */
-  constructor(builder, css, path, target, vars, timing) {
+  constructor(builder, css, path, target, index, vars, timing) {
     super();
 
     /** @const @private */
@@ -467,6 +481,9 @@ export class MeasureScanner extends Scanner {
 
     /** @private {?Element} */
     this.target_ = target;
+
+    /** @private {?number} */
+    this.index_ = index;
 
     /** @private {!Object<string, *>} */
     this.vars_ = vars || map();
@@ -535,6 +552,20 @@ export class MeasureScanner extends Scanner {
   }
 
   /** @override */
+  onSwitchAnimation(spec) {
+    // The first to match will be used; the rest will be ignored.
+    this.with_(spec, () => {
+      for (let i = 0; i < spec.switch.length; i++) {
+        const candidate = spec.switch[i];
+        if (this.scan(candidate)) {
+          // First matching candidate is applied and the rest are ignored.
+          break;
+        }
+      }
+    });
+  }
+
+  /** @override */
   onCompAnimation(spec) {
     user().assert(this.path_.indexOf(spec.animation) == -1,
         `Recursive animations are not allowed: "${spec.animation}"`);
@@ -551,6 +582,7 @@ export class MeasureScanner extends Scanner {
     });
     this.with_(spec, () => {
       const target = this.target_;
+      const index = this.index_;
       const vars = this.vars_;
       const timing = this.timing_;
       const promise = otherSpecPromise.then(otherSpec => {
@@ -558,7 +590,7 @@ export class MeasureScanner extends Scanner {
           return;
         }
         return this.builder_.resolveRequests(
-            newPath, otherSpec, /* args */ null, target, vars, timing);
+            newPath, otherSpec, /* args */ null, target, index, vars, timing);
       }).then(requests => {
         requests.forEach(request => this.requests_.push(request));
       });
@@ -688,6 +720,7 @@ export class MeasureScanner extends Scanner {
   with_(spec, callback) {
     // Save context.
     const prevTarget = this.target_;
+    const prevIndex = this.index_;
     const prevVars = this.vars_;
     const prevTiming = this.timing_;
 
@@ -698,10 +731,11 @@ export class MeasureScanner extends Scanner {
         [null];
     targets.forEach((target, index) => {
       this.target_ = target || prevTarget;
-      this.css_.withTarget(this.target_, () => {
+      this.index_ = target ? index : prevIndex;
+      this.css_.withTarget(this.target_, this.index_, () => {
         const subtargetSpec =
             this.target_ ?
-            this.matchSubtargets_(this.target_, index, spec) :
+            this.matchSubtargets_(this.target_, this.index_ || 0, spec) :
             spec;
         this.vars_ = this.mergeVars_(subtargetSpec, prevVars);
         this.css_.withVars(this.vars_, () => {
@@ -713,6 +747,7 @@ export class MeasureScanner extends Scanner {
 
     // Restore context.
     this.target_ = prevTarget;
+    this.index_ = prevIndex;
     this.vars_ = prevVars;
     this.timing_ = prevTiming;
   }
@@ -941,6 +976,9 @@ class CssContextImpl {
     /** @private {?Element} */
     this.currentTarget_ = null;
 
+    /** @private {?number} */
+    this.currentIndex_ = null;
+
     /** @private {?Object<string, *>} */
     this.vars_ = null;
 
@@ -1022,16 +1060,20 @@ class CssContextImpl {
 
   /**
    * @param {?Element} target
+   * @param {?number} index
    * @param {function(?Element):T} callback
    * @return {T}
    * @template T
    * @protected
    */
-  withTarget(target, callback) {
+  withTarget(target, index, callback) {
     const prev = this.currentTarget_;
+    const prevIndex = this.currentIndex_;
     this.currentTarget_ = target;
+    this.currentIndex_ = index;
     const result = callback(target);
     this.currentTarget_ = prev;
+    this.currentIndex_ = prevIndex;
     return result;
   }
 
@@ -1225,6 +1267,12 @@ class CssContextImpl {
       };
     }
     return this.viewportSize_;
+  }
+
+  /** @override */
+  getCurrentIndex() {
+    this.requireTarget_();
+    return dev().assertNumber(this.currentIndex_);
   }
 
   /** @override */

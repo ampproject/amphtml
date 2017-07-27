@@ -24,10 +24,6 @@
  import * as sinon from 'sinon';
  import '../amp-sidebar';
 
- /** @const */
- const DEFAULT_TOOLBAR_MEDIA = '(min-width: 768px)';
-
-
  adopt(window);
 
  describes.realWin('amp-sidebar 1.0 version', {
@@ -73,9 +69,28 @@
                  return Promise.resolve();
                });
            // Create our individual toolbars
-           options.toolbars.forEach(() => {
+           options.toolbars.forEach(toolbarObj => {
              const navToolbar = iframe.doc.createElement('nav');
-             navToolbar.setAttribute('toolbar', DEFAULT_TOOLBAR_MEDIA);
+
+             //Create/Set toolbar-target
+             const toolbarTarget = iframe.doc.createElement('div');
+             if (toolbarObj.toolbarTarget) {
+               toolbarTarget.setAttribute('id',
+                   toolbarObj.toolbarTarget);
+               navToolbar.setAttribute('toolbar-target',
+                   toolbarObj.toolbarTarget);
+             } else {
+               toolbarTarget.setAttribute('id', 'toolbar-target');
+               navToolbar.setAttribute('toolbar-target', 'toolbar-target');
+             }
+             iframe.win.document.body.appendChild(toolbarTarget);
+
+             // Set the toolbar media
+             if (toolbarObj.media) {
+               navToolbar.setAttribute('toolbar', toolbarObj.media);
+             } else {
+               navToolbar.setAttribute('toolbar', '(min-width: 768px)');
+             }
              const toolbarList = iframe.doc.createElement('ul');
              for (let i = 0; i < 3; i++) {
                const li = iframe.doc.createElement('li');
@@ -330,16 +345,14 @@
          impl.open_();
          expect(sidebarElement.hasAttribute('open')).to.be.true;
          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
-         const eventObj = document.createEventObject ?
-             document.createEventObject() : document.createEvent('Events');
-         if (eventObj.initEvent) {
-           eventObj.initEvent('keydown', true, true);
-         }
+         const eventObj = new Event(
+           'keydown',
+           {bubbles: true, cancelable: true}
+         );
          eventObj.keyCode = KeyCodes.ESCAPE;
          eventObj.which = KeyCodes.ESCAPE;
          const el = iframe.doc.documentElement;
-         el.dispatchEvent ?
-             el.dispatchEvent(eventObj) : el.fireEvent('onkeydown', eventObj);
+         el.dispatchEvent(eventObj);
          expect(sidebarElement.hasAttribute('open')).to.be.false;
          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
          expect(sidebarElement.style.display).to.equal('none');
@@ -447,11 +460,7 @@
          impl.open_();
          expect(sidebarElement.hasAttribute('open')).to.be.true;
          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
-         const eventObj = document.createEventObject ?
-             document.createEventObject() : document.createEvent('Events');
-         if (eventObj.initEvent) {
-           eventObj.initEvent('click', true, true);
-         }
+         const eventObj = new Event('click', {bubbles: true, cancelable: true});
          sandbox.stub(sidebarElement, 'getAmpDoc', () => {
            return {
              win: {
@@ -461,9 +470,7 @@
              },
            };
          });
-         anchor.dispatchEvent ?
-             anchor.dispatchEvent(eventObj) :
-             anchor.fireEvent('onkeydown', eventObj);
+         anchor.dispatchEvent(eventObj);
          expect(sidebarElement.hasAttribute('open')).to.be.false;
          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
          expect(sidebarElement.style.display).to.equal('none');
@@ -491,11 +498,7 @@
          impl.open_();
          expect(sidebarElement.hasAttribute('open')).to.be.true;
          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
-         const eventObj = document.createEventObject ?
-             document.createEventObject() : document.createEvent('Events');
-         if (eventObj.initEvent) {
-           eventObj.initEvent('click', true, true);
-         }
+         const eventObj = new Event('click', {bubbles: true, cancelable: true});
          sandbox.stub(sidebarElement, 'getAmpDoc', () => {
            return {
              win: {
@@ -506,9 +509,7 @@
              },
            };
          });
-         anchor.dispatchEvent ?
-             anchor.dispatchEvent(eventObj) :
-             anchor.fireEvent('onkeydown', eventObj);
+         anchor.dispatchEvent(eventObj);
          expect(sidebarElement.hasAttribute('open')).to.be.true;
          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
          expect(sidebarElement.style.display).to.equal('');
@@ -535,11 +536,7 @@
          impl.open_();
          expect(sidebarElement.hasAttribute('open')).to.be.true;
          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
-         const eventObj = document.createEventObject ?
-             document.createEventObject() : document.createEvent('Events');
-         if (eventObj.initEvent) {
-           eventObj.initEvent('click', true, true);
-         }
+         const eventObj = new Event('click', {bubbles: true, cancelable: true});
          sandbox.stub(sidebarElement, 'getAmpDoc', () => {
            return {
              win: {
@@ -551,9 +548,7 @@
              },
            };
          });
-         anchor.dispatchEvent ?
-             anchor.dispatchEvent(eventObj) :
-             anchor.fireEvent('onkeydown', eventObj);
+         anchor.dispatchEvent(eventObj);
          expect(sidebarElement.hasAttribute('open')).to.be.true;
          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
          expect(sidebarElement.style.display).to.equal('');
@@ -579,14 +574,11 @@
          impl.open_();
          expect(sidebarElement.hasAttribute('open')).to.be.true;
          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
-         const eventObj = document.createEventObject ?
-             document.createEventObject() : document.createEvent('Events');
-         if (eventObj.initEvent) {
-           eventObj.initEvent('click', true, true);
-         }
-         li.dispatchEvent ?
-             li.dispatchEvent(eventObj) :
-             li.fireEvent('onkeydown', eventObj);
+         const eventObj = new Event(
+           'click',
+           {bubbles: true, cancelable: true}
+         );
+         li.dispatchEvent(eventObj);
          expect(sidebarElement.hasAttribute('open')).to.be.true;
          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
          expect(sidebarElement.style.display).to.equal('');
@@ -601,42 +593,35 @@
          const headerElements = sidebarElement.ownerDocument
                .getElementsByTagName('header');
          const toolbarElements = sidebarElement.ownerDocument
-               .querySelectorAll('*[toolbar]');
+               .querySelectorAll('[toolbar]');
          expect(headerElements.length).to.be.equal(0);
          expect(toolbarElements.length).to.be.equal(0);
          expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(0);
        });
      });
 
-     it('should create a toolbar target element, \
-     containing the navigation toolbar element', () => {
+     it('should create a toolbar element within the toolbar-target', () => {
        return getAmpSidebar({
-         toolbars: [true],
+         toolbars: [{}],
        }).then(obj => {
          const sidebarElement = obj.ampSidebar;
-         const toolbarNavElements = Array.prototype
-                .slice.call(sidebarElement.ownerDocument
-                .querySelectorAll('nav[toolbar]'), 0);
-         expect(toolbarNavElements.length).to.be.above(1);
-         expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(1);
+         expect(sidebarElement.implementation_.toolbars_.length)
+             .to.be.equal(1);
        });
      });
 
-     it('should create multiple toolbar target elements, \
-     containing the navigation toolbar element', () => {
+     it('should create multiple toolbar elements, \
+     within their respective containers', () => {
        return getAmpSidebar({
-         toolbars: [true,
+         toolbars: [{},
            {
              media: '(min-width: 1024px)',
            },
          ],
        }).then(obj => {
          const sidebarElement = obj.ampSidebar;
-         const toolbarNavElements = Array.prototype
-                .slice.call(sidebarElement.ownerDocument
-                .querySelectorAll('nav[toolbar]'), 0);
-         expect(toolbarNavElements.length).to.be.equal(4);
-         expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(2);
+         expect(sidebarElement.implementation_.toolbars_.length)
+             .to.be.equal(2);
        });
      });
    });

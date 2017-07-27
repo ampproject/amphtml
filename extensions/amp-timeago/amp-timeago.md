@@ -31,6 +31,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 Provides fuzzy timestamps that you can use on your AMP pages. This component is based on <a href="https://github.com/hustcc/timeago.js">timeago.js</a>.
@@ -46,11 +48,11 @@ Example:
 
 ## Attributes
 
-**datetime** (required)
+##### datetime (required)
 
 An ISO datetime. E.g. 2017-03-10T01:00:00Z (UTC) *or* 2017-03-09T20:00:00-05:00 (specifying timezone offset).
 
-**locale** (optional)
+##### locale (optional)
 
 By default, the local is set to <code>en</code>; however, you can specify one of the following locales:
 
@@ -94,11 +96,11 @@ By default, the local is set to <code>en</code>; however, you can specify one of
   <li>zhTW (Taiwanese)</li>
 </ul>
 
-**cutoff** (optional)
+##### cutoff (optional)
 
 Display the original date if time distance is older than cutoff (seconds).
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

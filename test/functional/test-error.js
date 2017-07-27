@@ -22,6 +22,7 @@ import {
   isCancellation,
   reportError,
   detectJsEngineFromStack,
+  reportErrorToAnalytics,
 } from '../../src/error';
 import {parseUrl, parseQueryString} from '../../src/url';
 import {user} from '../../src/log';
@@ -30,7 +31,7 @@ import {
   toggleExperiment,
 } from '../../src/experiments';
 import * as sinon from 'sinon';
-
+import * as analytics from '../../src/analytics';
 
 describes.fakeWin('installErrorReporting', {}, env => {
   let win;
@@ -537,5 +538,28 @@ describe('detectJsEngineFromStack', () => {
     it.configure().ifEdge().run('detects edge as IE', () => {
       expect(detectJsEngineFromStack()).to.equal('IE');
     });
+  });
+});
+
+
+describes.fakeWin('user error reporting', {amp: true}, env => {
+  let win;
+  sandbox = env.sandbox;
+  const error = new Error('ERROR','user error');
+  let analyticsEventSpy;
+
+  beforeEach(() => {
+    win = env.win;
+    analyticsEventSpy = sandbox.spy(analytics, 'triggerAnalyticsEvent');
+    toggleExperiment(window, 'user-error-reporting', true);
+  });
+
+  it('should trigger triggerAnalyticsEvent with correct arguments', () => {
+    reportErrorToAnalytics(error, win);
+    expect(analyticsEventSpy).to.have.been.called;
+    expect(analyticsEventSpy).to.have.been.calledWith(
+        sinon.match.any,
+        'user-error',
+        {errorName: error.name, errorMessage: error.message});
   });
 });

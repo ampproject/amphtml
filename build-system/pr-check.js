@@ -243,11 +243,10 @@ function determineBuildTargets(filePaths) {
 
 const command = {
   testBuildSystem: function() {
-    timedExecOrDie('npm run ava');
+    timedExecOrDie(`${gulp} ava`);
   },
   testDocumentLinks: function(files) {
-    let docFiles = files.filter(isDocFile);
-    timedExecOrDie(`${gulp} check-links --files ${docFiles.join(',')}`);
+    timedExecOrDie(`${gulp} check-links`);
   },
   cleanBuild: function() {
     timedExecOrDie(`${gulp} clean`);
@@ -280,9 +279,15 @@ const command = {
     timedExecOrDie(
         `${gulp} test --nobuild --saucelabs --integration --compiled`);
   },
-  runVisualDiffTests: function() {
+  runVisualDiffTests: function(opt_mode) {
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    timedExec(`ruby build-system/tasks/visual-diff.rb`);
+    let cmd = 'ruby build-system/tasks/visual-diff.rb';
+    if (opt_mode === 'skip') {
+      cmd += ' --skip';
+    } else if (opt_mode === 'master') {
+      cmd += ' --master';
+    }
+    timedExec(cmd);
   },
   runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);
@@ -301,7 +306,7 @@ function runAllCommands() {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
-    command.runVisualDiffTests();
+    command.runVisualDiffTests(/* opt_mode */ 'master');
     command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
     command.runUnitTests();
@@ -396,6 +401,9 @@ function main(argv) {
       if (buildTargets.has('RUNTIME')) {
         command.runUnitTests();
       }
+    } else {
+      // Generates a blank Percy build to satisfy the required Github check.
+      command.runVisualDiffTests(/* opt_mode */ 'skip');
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();

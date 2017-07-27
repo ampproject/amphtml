@@ -19,10 +19,11 @@ import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {closestByTag, tryFocus} from '../../../src/dom';
+import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {setStyles, toggle} from '../../../src/style';
 import {removeFragment, parseUrl} from '../../../src/url';
+import {toArray} from '../../../src/types';
 import {Toolbar} from './toolbar';
 
 /** @const */
@@ -95,21 +96,18 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
 
     if (this.side_ != 'left' && this.side_ != 'right') {
-      const pageDir =
-          this.document_.body.getAttribute('dir') ||
-          this.documentElement_.getAttribute('dir') ||
-          'ltr';
-      this.side_ = (pageDir == 'rtl') ? 'right' : 'left';
+      this.side_ = isRTL(this.document_) ? 'right' : 'left';
       this.element.setAttribute('side', this.side_);
     }
 
+    const ampdoc = this.getAmpDoc();
     // Get the toolbar attribute from the child navs
     const toolbarElements =
-    Array.prototype.slice
-      .call(this.element.querySelectorAll('nav[toolbar]'), 0);
+      toArray(this.element.querySelectorAll('nav[toolbar]'));
     toolbarElements.forEach(toolbarElement => {
       try {
-        this.toolbars_.push(new Toolbar(toolbarElement, this.win, this.vsync_));
+        this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
+          ampdoc));
       } catch (e) {
         user().error(TAG, 'Failed to instantiate toolbar', e);
       }

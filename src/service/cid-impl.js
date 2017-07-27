@@ -36,8 +36,10 @@ import {dict} from '../utils/object';
 import {isIframed} from '../dom';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
 import {Services} from '../services';
+import {base64UrlEncodeFromBytes} from '../utils/base64';
 import {parseJson, tryParseJson} from '../json';
 import {user, rethrowAsync} from '../log';
+import {ViewerCidApi} from './viewer-cid-api';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
@@ -90,6 +92,11 @@ export class Cid {
      * @private {!Object<string, !Promise<string>>}
      */
     this.externalCidCache_ = Object.create(null);
+
+    /**
+     * @private {!ViewerCidApi}
+     */
+    this.viewerCidApi_ = new ViewerCidApi(ampdoc);
   }
 
   /**
@@ -168,29 +175,16 @@ export class Cid {
     if (!isProxyOrigin(url)) {
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
-    const viewer = Services.viewerForDoc(this.ampdoc);
-    if (viewer.hasCapability('cid')) {
-      return this.getScopedCidFromViewer_(getCidStruct.scope);
-    }
-    return getBaseCid(this, persistenceConsent)
-        .then(baseCid => {
-          return Services.cryptoFor(this.ampdoc.win).sha384Base64(
-              baseCid + getProxySourceOrigin(url) + getCidStruct.scope);
-        });
-  }
-
-  /**
-   * @param {!string} scope
-   * @return {!Promise<?string>}
-   */
-  getScopedCidFromViewer_(scope) {
-    const viewer = Services.viewerForDoc(this.ampdoc);
-    return viewer.isTrustedViewer().then(trusted => {
-      if (!trusted) {
-        rethrowAsync('Ignore CID API from Untrustful Viewer.');
-        return;
+    const scope = getCidStruct.scope;
+    return this.viewerCidApi_.isSupported().then(supported => {
+      if (supported) {
+        return this.viewerCidApi_.getScopedCid(scope);
       }
-      return viewer.sendMessageAwaitResponse('cid', dict({'scope': scope}));
+      return getBaseCid(this, persistenceConsent)
+          .then(baseCid => {
+            return Services.cryptoFor(this.ampdoc.win).sha384Base64(
+                baseCid + getProxySourceOrigin(url) + scope);
+          });
     });
   }
 }
@@ -275,7 +269,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
         Promise.resolve(existingCookie));
   }
 
-  const newCookiePromise = Services.cryptoFor(win).sha384Base64(getEntropy(win))
+  const newCookiePromise = getNewCidForCookie(win)
       // Create new cookie, always prefixed with "amp-", so that we can see from
       // the value whether we created it.
       .then(randomStr => 'amp-' + randomStr);
@@ -494,6 +488,24 @@ function getEntropy(win) {
   // Support for legacy browsers.
   return String(win.location.href + Date.now() +
       win.Math.random() + win.screen.width + win.screen.height);
+}
+
+/**
+ * Produces an external CID for use in a cookie.
+ * @param {!Window} win
+ * @return {!Promise<string>} The cid
+ */
+function getNewCidForCookie(win) {
+  const entropy = getEntropy(win);
+  if (typeof entropy == 'string') {
+    return Services.cryptoFor(win).sha384Base64(entropy);
+  } else {
+    // If our entropy is a pure random number, we can just directly turn it
+    // into base 64
+    return Promise.resolve(base64UrlEncodeFromBytes(entropy)
+        // Remove trailing padding
+        .replace(/\.+$/, ''));
+  }
 }
 
 /**

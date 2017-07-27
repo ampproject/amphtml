@@ -29,8 +29,14 @@ import {assertHttpsUrl} from '../../../src/url';
 const TAG = 'amp-video';
 
 /** @private {!Array<string>} */
-const ATTRS_TO_PROPAGATE_ON_BUILD = ['poster', 'controls', 'aria-label',
-  'aria-describedby', 'aria-labelledby'];
+const ATTRS_TO_PROPAGATE_ON_BUILD = [
+  'aria-describedby',
+  'aria-label',
+  'aria-labelledby',
+  'controls',
+  'crossorigin',
+  'poster',
+];
 
 /**
  * @note Do not propagate `autoplay`. Autoplay behaviour is managed by
@@ -44,7 +50,7 @@ const ATTRS_TO_PROPAGATE =
     ATTRS_TO_PROPAGATE_ON_BUILD.concat(ATTRS_TO_PROPAGATE_ON_LAYOUT);
 
 /**
- * @implements {../../../src/video-interface.VideoInterfaceWithAnalytics}
+ * @implements {../../../src/video-interface.VideoInterface}
  */
 class AmpVideo extends AMP.BaseElement {
 
@@ -181,17 +187,16 @@ class AmpVideo extends AMP.BaseElement {
      */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
-    this.forwardEvents([
-      VideoEvents.PLAYING,
-      VideoEvents.PAUSE,
-      VideoEvents.ENDED,
-    ], video);
+    this.forwardEvents([VideoEvents.PLAYING, VideoEvents.PAUSE], video);
     listen(video, 'volumechange', () => {
       if (this.muted_ != this.video_.muted) {
         this.muted_ = this.video_.muted;
         const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
         this.element.dispatchCustomEvent(evt);
       }
+    });
+    listen(video, 'ended', () => {
+      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
     });
   }
 
@@ -273,11 +278,6 @@ class AmpVideo extends AMP.BaseElement {
      */
   hideControls() {
     this.video_.controls = false;
-  }
-
-  /** @override */
-  supportsAnalytics() {
-    return true;
   }
 
   /** @override */
