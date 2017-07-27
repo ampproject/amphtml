@@ -181,15 +181,14 @@ export class VideoManager {
    * @private
    */
   registerCommonActions_(video) {
-    // TODO(choumx, #9699): HIGH for unmuted play, LOW for muted play.
     video.registerAction('play', video.play.bind(video, /* isAutoplay */ false),
-        ActionTrust.MEDIUM);
-    // TODO(choumx, #9699): LOW.
-    video.registerAction('pause', video.pause.bind(video), ActionTrust.MEDIUM);
-    video.registerAction('mute', video.mute.bind(video), ActionTrust.MEDIUM);
-    // TODO(choumx, #9699): HIGH.
+        ActionTrust.HIGH);
+    video.registerAction('pause', video.pause.bind(video), ActionTrust.HIGH);
+    video.registerAction('mute', video.mute.bind(video), ActionTrust.HIGH);
     video.registerAction('unmute', video.unmute.bind(video),
-        ActionTrust.MEDIUM);
+        ActionTrust.HIGH);
+    video.registerAction('fullscreen', video.fullscreenEnter.bind(video),
+        ActionTrust.HIGH);
   }
 
   /**

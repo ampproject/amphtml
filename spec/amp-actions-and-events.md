@@ -322,7 +322,7 @@ For example, the following is possible in AMP.
   </tr>
 </table>
 
-### amp-video, amp-youtube
+### amp-video, amp-youtube, amp-3q-player, amp-brid-player, amp-dailymotion, amp-ima-video
 <table>
   <tr>
     <th>Action</th>
@@ -343,6 +343,10 @@ For example, the following is possible in AMP.
   <tr>
     <td><code>unmute</code></td>
     <td>Unmutes the video.</td>
+  </tr>
+  <tr>
+    <td><code>fullscreen</code></td>
+    <td>Takes the video to fullscreen</td>
   </tr>
 </table>
 
