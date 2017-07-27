@@ -32,12 +32,12 @@ tags: {  # <amp-gfycat>
   disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-gfycat"
   attrs: {
-    name: "data-gfyid"
-    mandatory: true
-  }
-  attrs: {
     name: "autoplay"
     value: ""
+  }
+  attrs: {
+    name: "data-gfyid"
+    mandatory: true
   }
   attrs: {
     name: "noautoplay"
