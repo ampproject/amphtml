@@ -476,8 +476,8 @@ class VideoEntry {
         VideoAttributes.FULLSCREEN_ON_LANDSCAPE
     );
 
-    this.hasFullscreenOnLandscape = fsOnLandscapeAttr !== undefined
-      && (fsOnLandscapeAttr === '' || fsOnLandscapeAttr == 'always');
+    this.hasFullscreenOnLandscape = fsOnLandscapeAttr == ''
+                                    || fsOnLandscapeAttr == 'always';
 
     listenOncePromise(element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
@@ -581,6 +581,9 @@ class VideoEntry {
    * @private
    */
   orientationChanged_(isLandscape) {
+    if (!this.loaded_) {
+      return;
+    }
     // Put the video in/out of fullscreen depending on screen orientation
     if (!isLandscape && this.isFullscreenByOrientationChange_) {
     	this.exitFullscreen_();
