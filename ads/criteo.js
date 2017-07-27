@@ -101,7 +101,7 @@ function listenForCreativeRequests() {
           'creative': bid.creative,
           'displayUrl': bid.displayUrl,
         });
-        ev.source.postMessage(JSON.stringify(message), '*');
+        ev.source./*OK*/postMessage(JSON.stringify(message), '*');
       }
     }
   }, false);
