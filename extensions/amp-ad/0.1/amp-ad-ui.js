@@ -15,7 +15,6 @@
  */
 
 import {getAdContainer} from '../../../src/ad-helper';
-import {isExperimentOn} from '../../../src/experiments';
 
 export class AmpAdUIHandler {
 
@@ -89,12 +88,7 @@ export class AmpAdUIHandler {
 
     const content = this.doc_.createElement('div');
     content.classList.add('i-amphtml-ad-default-holder');
-    if (isExperimentOn(this.baseInstance_.win, 'ad-loader-v1')) {
-      content.setAttribute('experiment1', '');
-    }
-    if (isExperimentOn(this.baseInstance_.win, 'ad-loader-v2')) {
-      content.setAttribute('experiment2', '');
-    }
+
     // TODO(aghassemi, #4146) i18n
     content.setAttribute('data-ad-holder-text', 'Ad');
     uiComponent.appendChild(content);

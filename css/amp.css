@@ -403,12 +403,8 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   position: absolute;
   width: 100%;
   height: 100% !important;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 2;
-}
-
-.i-amphtml-loader-moving-line[experiment] {
   background-color: rgba(151, 151, 151, 0.65);
+  z-index: 2;
 }
 
 @keyframes i-amphtml-loader-line-moving {

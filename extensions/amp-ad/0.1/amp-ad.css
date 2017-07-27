@@ -34,36 +34,20 @@ amp-embed iframe {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(200, 200, 200, 0.5);
-}
-
-.i-amphtml-ad-default-holder[experiment1] {
-  background-color: rgba(0, 0, 0, 0.01);
-}
-
-.i-amphtml-ad-default-holder[experiment2] {
   background-color: rgba(200, 200, 200, 0.05);
 }
 
 .i-amphtml-ad-default-holder:after {
   content: "Ad";
   content: attr(data-ad-holder-text);
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: transparent;
   border-radius: 2px;
-  color: #fff;
-  font-size: 16px;
+  color: #696969;
+  font-size: 10px;
   line-height: 1;
   font-family: Arial, sans-serif;
-  padding: 2px 4px;
-}
-
-.i-amphtml-ad-default-holder[experiment1]:after,
-.i-amphtml-ad-default-holder[experiment2]:after {
-  font-size: 10px;
-  color: #696969;
-  background-color: transparent;
-  border: 1px, solid, #696969;
   padding: 3px 4px 1px;
+  border: 1px, solid, #696969;
 }
 
 amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
