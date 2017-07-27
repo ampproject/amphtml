@@ -33,6 +33,15 @@ mention any release notes since the last change as well as the version numbers.
 ### 12:01PM, July 21, 2017 UTC
 
 Validator Version 244
+Spec Version 456
+
+Includes:
+ - `amp-google-client-id-api` meta tag
+
+
+### 12:01PM, July 21, 2017 UTC
+
+Validator Version 244
 Spec Version 455
 
 Includes:
