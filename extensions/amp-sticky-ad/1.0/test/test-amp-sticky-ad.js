@@ -18,7 +18,6 @@
 import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
 import {poll} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-sticky-ad 1.0 version', {
   win: { /* window spec */
@@ -54,21 +53,16 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       expect(impl.scrollUnlisten_).to.be.function;
     });
 
-    it('should not build when scrollTop less than viewportHeight', () => {
+    it('should not build when scrollTop not greater than 1', () => {
       const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
       const removeOnScrollListenerSpy =
           sandbox.spy(impl, 'removeOnScrollListener_');
       const getScrollTopSpy = sandbox.spy();
-      const getSizeSpy = sandbox.spy();
       const getScrollHeightSpy = sandbox.spy();
 
       impl.viewport_.getScrollTop = function() {
         getScrollTopSpy();
-        return 20;
-      };
-      impl.viewport_.getSize = function() {
-        getSizeSpy();
-        return {height: 50};
+        return 1;
       };
       impl.viewport_.getScrollHeight = function() {
         getScrollHeightSpy();
@@ -79,54 +73,12 @@ describes.realWin('amp-sticky-ad 1.0 version', {
         setTimeout(resolve, 0);
       }).then(() => {
         expect(getScrollTopSpy).to.have.been.called;
-        expect(getSizeSpy).to.have.been.called;
         expect(scheduleLayoutSpy).to.not.have.been.called;
         expect(removeOnScrollListenerSpy).to.not.have.been.called;
       });
     });
 
-    it('should build on enough scroll dist, one more viewport ahead', () => {
-      const scheduleLayoutSpy = sandbox.stub(impl, 'scheduleLayoutForAd_',
-          () => {});
-      const removeOnScrollListenerSpy =
-          sandbox.spy(impl, 'removeOnScrollListener_');
-      const getScrollTopSpy = sandbox.spy();
-      const getSizeSpy = sandbox.spy();
-      const getScrollHeightSpy = sandbox.spy();
-
-      impl.viewport_.getScrollTop = function() {
-        getScrollTopSpy();
-        return 100;
-      };
-      impl.viewport_.getSize = function() {
-        getSizeSpy();
-        return {height: 50};
-      };
-      impl.viewport_.getScrollHeight = function() {
-        getScrollHeightSpy();
-        return 300;
-      };
-      impl.deferMutate = function(callback) {
-        callback();
-      };
-      impl.vsync_.mutate = function(callback) {
-        callback();
-      };
-
-      impl.onScroll_();
-      expect(getScrollTopSpy).to.have.been.called;
-      expect(getSizeSpy).to.have.been.called;
-      expect(removeOnScrollListenerSpy).to.have.been.called;
-      // Layout on ad is called only after fixed layer is done.
-      expect(scheduleLayoutSpy).to.not.have.been.called;
-      expect(addToFixedLayerStub).to.have.been.calledOnce;
-      return addToFixedLayerPromise.then(() => {
-        expect(scheduleLayoutSpy).to.have.been.calledOnce;
-      });
-    });
-
-    it('experiment version, should display once user scroll', () => {
-      toggleExperiment(win, 'sticky-ad-early-load');
+    it('should display once user scroll', () => {
       const scheduleLayoutSpy = sandbox.stub(impl, 'scheduleLayoutForAd_',
           () => {});
       const removeOnScrollListenerSpy =
@@ -151,7 +103,6 @@ describes.realWin('amp-sticky-ad 1.0 version', {
 
       impl.onScroll_();
       expect(removeOnScrollListenerSpy).to.have.been.called;
-      toggleExperiment(win, 'sticky-ad-early-load');
       // Layout on ad is called only after fixed layer is done.
       expect(scheduleLayoutSpy).to.not.have.been.called;
       expect(addToFixedLayerStub).to.have.been.calledOnce;
