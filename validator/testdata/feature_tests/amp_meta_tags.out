@@ -1,0 +1,2 @@
+FAIL
+feature_tests/amp_meta_tags.html:38:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'amp-tag-does-not-exist'. [DISALLOWED_HTML]
