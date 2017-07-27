@@ -62,6 +62,10 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 
+// Uncomment the next two lines when testing locally.
+// import '../../amp-ad/0.1/amp-ad-ui';
+// import '../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 
@@ -79,7 +83,7 @@ export const DEFAULT_SAFEFRAME_VERSION = '1-0-9';
 export const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 
 /** @const {string} */
-const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
+export const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
 
 /** @type {string} @visibleForTesting */
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';

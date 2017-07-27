@@ -1030,14 +1030,10 @@ describes.fakeWin('AccessService pingback', {
     service.reportViewToServer_ = sandbox.spy();
     const p = service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
-      let clickEvent;
-      if (document.createEvent) {
-        clickEvent = document.createEvent('MouseEvent');
-        clickEvent.initMouseEvent('click', true, true, window, 1);
-      } else {
-        clickEvent = document.createEventObject();
-        clickEvent.type = 'click';
-      }
+      const clickEvent = new MouseEvent(
+        'click',
+        {bubbles: true, cancelable: true, view: window, detail: 1}
+      );
       document.documentElement.dispatchEvent(clickEvent);
       return p;
     }).then(() => {}, () => {}).then(() => {

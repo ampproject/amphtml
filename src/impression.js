@@ -47,7 +47,7 @@ export function resetTrackImpressionPromiseForTesting() {
 
 /**
  * Emit a HTTP request to a destination defined on the incoming URL.
- * Protected by experiment.
+ * Launched for trusted viewer. Otherwise guarded by experiment.
  * @param {!Window} win
  */
 export function maybeTrackImpression(win) {
@@ -57,12 +57,29 @@ export function maybeTrackImpression(win) {
     resolveImpression = resolve;
   });
 
-  if (!isExperimentOn(win, 'alp')) {
-    resolveImpression();
-    return;
-  }
-
   const viewer = Services.viewerForDoc(win.document);
+  viewer.isTrustedViewer().then(isTrusted => {
+    // Currently this feature is launched for trusted viewer, but still
+    // experiment guarded for all AMP docs.
+    if (!isTrusted && !isExperimentOn(win, 'alp')) {
+      resolveImpression();
+      return;
+    }
+
+    trackImpressionFromClickParam(win, viewer, resolveImpression);
+  });
+}
+
+
+/**
+ * Actually perform the impression request if it has been provided via
+ * the click param in the viewer arguments.
+ * @param {!Window} win
+ * @param {!./service/viewer-impl.Viewer} viewer
+ * @param {!Function} resolveImpression Call when the impression has been
+ *     tracked.
+ */
+function trackImpressionFromClickParam(win, viewer, resolveImpression) {
   /** @const {string|undefined} */
   const clickUrl = viewer.getParam('click');
 
