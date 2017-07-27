@@ -15,7 +15,7 @@
  */
 
 import '../amp-call-tracking';
-import {clearResponseCache} from '../amp-call-tracking';
+import {clearResponseCacheForTesting} from '../amp-call-tracking';
 import {createIframePromise} from '../../../../testing/iframe';
 import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
@@ -49,7 +49,7 @@ describe('amp-call-tracking', () => {
   function mockXhrResponse(iframe, url, response) {
     xhrMock
         .expects('fetchJson')
-        .withArgs(url)
+        .withArgs(url, sandbox.match(init => init.credentials == 'include'))
         .returns(Promise.resolve({
           json() {
             return Promise.resolve(response);
@@ -69,7 +69,7 @@ describe('amp-call-tracking', () => {
   });
 
   afterEach(() => {
-    clearResponseCache();
+    clearResponseCacheForTesting();
 
     xhrMock.verify();
     sandbox.restore();
