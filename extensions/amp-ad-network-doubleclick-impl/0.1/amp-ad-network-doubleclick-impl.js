@@ -409,7 +409,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   onNetworkFailure(error, adUrl) {
-    dev().info('network error, attempt adding of error parameter', error);
+    dev().info(TAG, 'network error, attempt adding of error parameter', error);
     return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
   }
 

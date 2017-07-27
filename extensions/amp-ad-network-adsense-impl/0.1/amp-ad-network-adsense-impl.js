@@ -62,6 +62,9 @@ import {
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 
+/** @const {string} */
+const TAG = 'amp-ad-network-adsense-impl';
+
 /**
  * See `VisibilityState` enum.
  * @const {!Object<string, string>}
@@ -211,7 +214,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   onNetworkFailure(error, adUrl) {
-    dev().info('network error, attempt adding of error parameter', error);
+    dev().info(TAG, 'network error, attempt adding of error parameter', error);
     return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
   }
 
