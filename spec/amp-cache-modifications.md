@@ -175,6 +175,19 @@ If `<a>` tag does not have attribute `target=_blank` or `target=_top` then add a
 
 ### Insert and Rewrite Tags
 
+#### Insert `<link as=script href=https://cdn.ampproject.org/v0.js rel=preload>`
+
+Before the AMP Runtime `script` tag, insert a `link` tag that tells the browser the AMP Runtime `script` tag is high priority despite being an async `script` tag.
+
+<details>
+<summary>example</summary>
+
+| before | after |
+| --- | --- |
+| `<head>`<br>`...`<br>`<script async src=https://cdn.ampproject.org/v0.js></script>`<br>`...`<br>`</head>` | `<head>`<br>`...`<br>`<link as=script href=https://cdn.ampproject.org/v0.js rel=preload>`<br>`<script async src=https://cdn.ampproject.org/v0.js></script>`<br>`...`<br>`</head>` |
+
+</details>
+
 #### Insert `<link rel=icon>`
 
 When a given AMP document does not have a favicon present, insert one. Inserted tag is of the form `<link href={document_protocol}://{document_domain}/favicon.ico rel=icon>`.
