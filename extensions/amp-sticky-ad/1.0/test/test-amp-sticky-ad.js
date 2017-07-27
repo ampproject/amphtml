@@ -53,21 +53,16 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       expect(impl.scrollUnlisten_).to.be.function;
     });
 
-    it('should not build when scrollTop less than viewportHeight', () => {
+    it('should not build when scrollTop not greater than 1', () => {
       const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
       const removeOnScrollListenerSpy =
           sandbox.spy(impl, 'removeOnScrollListener_');
       const getScrollTopSpy = sandbox.spy();
-      const getSizeSpy = sandbox.spy();
       const getScrollHeightSpy = sandbox.spy();
 
       impl.viewport_.getScrollTop = function() {
         getScrollTopSpy();
-        return 20;
-      };
-      impl.viewport_.getSize = function() {
-        getSizeSpy();
-        return {height: 50};
+        return 1;
       };
       impl.viewport_.getScrollHeight = function() {
         getScrollHeightSpy();
@@ -78,7 +73,6 @@ describes.realWin('amp-sticky-ad 1.0 version', {
         setTimeout(resolve, 0);
       }).then(() => {
         expect(getScrollTopSpy).to.have.been.called;
-        expect(getSizeSpy).to.have.been.called;
         expect(scheduleLayoutSpy).to.not.have.been.called;
         expect(removeOnScrollListenerSpy).to.not.have.been.called;
       });
