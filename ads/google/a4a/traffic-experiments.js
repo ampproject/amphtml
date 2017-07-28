@@ -28,6 +28,7 @@ import {
   EXPERIMENT_ATTRIBUTE,
 } from './utils';
 import {
+  /* eslint no-unused-vars: 0 */ ExperimentInfo,
   isExperimentOn,
   forceExperimentBranch,
   getExperimentBranch,
@@ -90,7 +91,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
       opt_sfgInternalBranches ? opt_sfgInternalBranches.experiment : null,
       MANUAL_EXPERIMENT_ID);
   if (!isSetFromUrl) {
-    const experimentInfoMap = {};
+    const experimentInfoMap =
+        /** @type {!Object<string, !ExperimentInfo>} */ ({});
     const branches = [
       internalBranches.control,
       internalBranches.experiment,

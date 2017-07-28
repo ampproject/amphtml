@@ -55,6 +55,7 @@ let AdNetworkConfigDef;
 export const adConfig = {
   _ping_: {
     renderStartImplemented: true,
+    clientIdScope: '_PING_',
   },
 
   a8: {
@@ -255,6 +256,15 @@ export const adConfig = {
     prefetch: 'https://www.google.com/adsense/search/ads.js',
   },
 
+  dable: {
+    preconnect: [
+      'https://static.dable.io',
+      'https://api.dable.io',
+      'https://images.dable.io',
+    ],
+    renderStartImplemented: true,
+  },
+
   distroscale: {
     preconnect: [
       'https://c.jsrdn.com',
@@ -375,6 +385,12 @@ export const adConfig = {
 
   inmobi: {
     prefetch: 'https://cf.cdn.inmobi.com/ad/inmobi.secure.js',
+    renderStartImplemented: true,
+  },
+
+  innity: {
+    prefetch: 'https://cdn.innity.net/admanager.js',
+    preconnect: 'https://as.innity.com',
     renderStartImplemented: true,
   },
 

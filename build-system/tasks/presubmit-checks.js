@@ -385,6 +385,7 @@ var forbiddenTerms = {
       'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',
       'src/service/cid-impl.js',
+      'src/impression.js',
     ],
   },
   'eval\\(': {
@@ -574,6 +575,13 @@ var forbiddenTerms = {
       'src/event-helper.js',
     ],
   },
+  '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {
+    message: 'Use fullscreenEnter() and fullscreenExit() from dom.js instead.',
+    whitelist: [
+      'ads/google/imaVideo.js',
+      'dist.3p/current/integration.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
@@ -668,6 +676,15 @@ var forbiddenTermsSrcInclusive = {
       'extensions/amp-pinterest/0.1/util.js',
       'src/url.js',
       'src/url-try-decode-uri-component.js',
+      'src/utils/bytes.js',
+    ],
+  },
+  'Text(Encoder|Decoder)\\(': {
+    message: 'TextEncoder/TextDecoder is not supported in all browsers.' +
+        'Please use UTF8 utilities from src/bytes.js',
+    whitelist: [
+      'ads/google/a4a/line-delimited-response-handler.js',
+      'examples/pwa/pwa.js',
       'src/utils/bytes.js',
     ],
   },

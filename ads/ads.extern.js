@@ -296,6 +296,14 @@ _inmobi.getNewAd;
 data.siteid;
 data.slotid;
 
+// innity.js
+var innity_adZone;
+var innityAMPZone;
+var innityAMPTag;
+data.pub;
+data.zone;
+data.channel;
+
 // ix.js
 data.ixId;
 data.ixId;
@@ -535,3 +543,6 @@ data.renderer;
 // zergnet.js
 window.zergnetWidgetId;
 data.zergid;
+
+// _ping_.js
+window.networkIntegrationDataParamForTesting;

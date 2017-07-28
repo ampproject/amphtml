@@ -100,7 +100,7 @@ describe('amp-list component', () => {
     }).then(() => {
       expect(spy).to.have.been.calledOnce;
       expect(spy).calledWithMatch({
-        type: AmpEvents.TEMPLATE_RENDERED,
+        type: AmpEvents.DOM_UPDATE,
         bubbles: true,
       });
     });

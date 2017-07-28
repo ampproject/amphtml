@@ -21,6 +21,7 @@ import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
+import {IframeTransport} from './iframe-transport';
 import {Services} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
@@ -113,6 +114,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.iniPromise_ = null;
+
+    /** @private {?IframeTransport} */
+    this.iframeTransport_ = null;
   }
 
   /** @override */
@@ -141,9 +145,10 @@ export class AmpAnalytics extends AMP.BaseElement {
         .getAttribute('data-consent-notification-id');
 
     if (this.consentNotificationId_ != null) {
-      this.consentPromise_ = Services.userNotificationManagerFor(this.win)
-          .then(service => service.get(dev().assertString(
-              this.consentNotificationId_)));
+      this.consentPromise_ =
+          Services.userNotificationManagerForDoc(this.element)
+              .then(service => service.get(dev().assertString(
+                  this.consentNotificationId_)));
     }
 
     if (this.element.getAttribute('trigger') == 'immediate') {
@@ -163,6 +168,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.analyticsGroup_) {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
+    }
+    if (this.iframeTransport_) {
+      this.iframeTransport_.detach();
     }
   }
 
@@ -218,6 +226,12 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
+
+    if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
+        this.element.getAttribute('type'),
+        this.config_['transport']);
+    }
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -398,10 +412,18 @@ export class AmpAnalytics extends AMP.BaseElement {
           'amp-analytics config attribute unless you plan to migrate before ' +
           'deprecation');
     }
-    const typeConfig = this.predefinedConfig_[type] || {};
+    const typeConfig = this.predefinedConfig_[type];
+    if (typeConfig) {
+      // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport overwriting
+      if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
+        const TAG = this.getName_();
+        user().error(TAG, 'Inline or remote config should not ' +
+            'overwrite vendor transport settings');
+      }
+    }
 
     this.mergeObjects_(defaultConfig, config);
-    this.mergeObjects_(typeConfig, config, /* predefined */ true);
+    this.mergeObjects_((typeConfig || {}), config, /* predefined */ true);
     this.mergeObjects_(inlineConfig, config);
     this.mergeObjects_(this.remoteConfig_, config);
     return config;
@@ -731,6 +753,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       user().assert(trigger['on'] == 'visible',
           'iframePing is only available on page view requests.');
       sendRequestUsingIframe(this.win, request);
+    } else if (this.config_['transport'] &&
+        this.config_['transport']['iframe']) {
+      this.iframeTransport_.sendRequest(request);
     } else {
       sendRequest(this.win, request, this.config_['transport'] || {});
     }

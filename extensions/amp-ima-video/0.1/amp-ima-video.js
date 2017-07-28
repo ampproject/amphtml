@@ -32,10 +32,14 @@ import {
 import {dict} from '../../../src/utils/object';
 import {
   childElementsByTag,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
 import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
 
@@ -283,6 +287,29 @@ class AmpImaVideo extends AMP.BaseElement {
    */
   hideControls() {
     // Not supported.
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    // TODO(@aghassemi, #10597) Make internal <video> element go fullscreen instead
+    // using postMessages
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    // TODO(@aghassemi, #10597) Report fullscreen status of internal <video>
+    // element rather than iframe
+    return isFullscreenElement(dev().assertElement(this.iframe_));
   }
 
   /** @override */

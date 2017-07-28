@@ -213,12 +213,6 @@ const EXPERIMENTS = [
     name: 'Display jank meter',
   },
   {
-    id: 'sticky-ad-early-load',
-    name: 'Load sticky-ad early after user first scroll' +
-        'Only apply to 1.0 version',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7479',
-  },
-  {
     id: 'amp-fx-parallax',
     name: 'Amp extension for a parallax effect',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
@@ -239,16 +233,6 @@ const EXPERIMENTS = [
   {
     id: 'as-use-attr-for-format',
     name: 'Use slot width/height attribute for AdSense size format',
-  },
-  {
-    id: 'ad-loader-v1',
-    name: 'New ad loader version 1',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
-  },
-  {
-    id: 'ad-loader-v2',
-    name: 'New ad loader version 2',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
   },
   {
     id: 'amp-form-verifiers',
