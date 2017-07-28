@@ -53,7 +53,7 @@ export class AmpAd extends AMP.BaseElement {
     /** @const {string} */
     const consentId = this.element.getAttribute('data-consent-notification-id');
     const consent = consentId
-        ? Services.userNotificationManagerFor(this.win)
+        ? Services.userNotificationManagerForDoc(this.element)
             .then(service => service.get(consentId))
         : Promise.resolve();
 

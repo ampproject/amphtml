@@ -15,16 +15,17 @@
  */
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
-import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {Services} from '../../../src/services';
-import {registerServiceBuilder, getService} from '../../../src/service';
+import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {dev, user, rethrowAsync} from '../../../src/log';
-import {whenDocumentReady} from '../../../src/document-ready';
+import {
+  getServicePromiseForDoc,
+  registerServiceBuilderForDoc,
+} from '../../../src/service';
 import {setStyle} from '../../../src/style';
 
-
-/** @private @const {string} */
 const TAG = 'amp-user-notification';
+const SERVICE_ID = 'userNotificationManager';
 
 
 /**
@@ -111,9 +112,6 @@ export class AmpUserNotification extends AMP.BaseElement {
     /** @private {?Promise<!Storage>} */
     this.storagePromise_ = null;
 
-    /** @private {?UserNotificationManager} */
-    this.userNotificationManager_ = null;
-
     /** @private {?../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacements_ = null;
   }
@@ -128,11 +126,6 @@ export class AmpUserNotification extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
     this.storagePromise_ = Services.storageForDoc(ampdoc);
-    if (!this.userNotificationManager_) {
-      installUserNotificationManager(window);
-      this.userNotificationManager_ = getService(window,
-          'userNotificationManager');
-    }
 
     this.elementId_ = user().assert(this.element.id,
         'amp-user-notification should have an id.');
@@ -161,11 +154,16 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.persistDismissal_ = (
         persistDismissal != 'false' && persistDismissal != 'no');
 
-    this.userNotificationManager_
-        .registerUserNotification(this.elementId_, this);
-
     this.registerAction('dismiss', () => this.dismiss(/*forceNoPersist*/false));
     this.registerAction('optoutOfCid', () => this.optoutOfCid_());
+
+    const userNotificationManagerPromise =
+        /** @type {!Promise<!UserNotificationManager>} */
+        (getServicePromiseForDoc(ampdoc, SERVICE_ID));
+    userNotificationManagerPromise.then(manager => {
+      manager.registerUserNotification(
+          dev().assertString(this.elementId_), this);
+    });
   }
 
   /**
@@ -275,7 +273,7 @@ export class AmpUserNotification extends AMP.BaseElement {
       // the notification or have the nagging notification sitting there
       // (to never resolve).
       return cid.get(
-        {scope: 'amp-user-notification', createCookieIfNotPresent: true},
+        {scope: TAG, createCookieIfNotPresent: true},
           Promise.resolve(), this.dialogPromise_);
     });
   }
@@ -376,11 +374,11 @@ export class AmpUserNotification extends AMP.BaseElement {
 export class UserNotificationManager {
 
   /**
-   * @param {!Window} window
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
-    /** @const {!Window} */
-    this.win = window;
+  constructor(ampdoc) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
     /** @private @const {!Object<string,!NotificationInterface>} */
     this.registry_ = Object.create(null);
@@ -389,10 +387,10 @@ export class UserNotificationManager {
     this.deferRegistry_ = Object.create(null);
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(this.win.document);
+    this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
     /** @private @const {!Promise} */
-    this.documentReadyPromise_ = whenDocumentReady(this.win.document);
+    this.documentReadyPromise_ = this.ampdoc.whenReady();
 
     /** @private @const {!Promise} */
     this.managerReadyPromise_ = Promise.all([
@@ -412,7 +410,7 @@ export class UserNotificationManager {
    */
   get(id) {
     this.managerReadyPromise_.then(() => {
-      if (this.win.document.getElementById(id) == null) {
+      if (this.ampdoc.getElementById(id) == null) {
         user().warn(TAG, `Did not find amp-user-notification element ${id}.`);
       }
     });
@@ -475,15 +473,18 @@ export class UserNotificationManager {
   }
 }
 
+
 /**
- * @param {!Window} window
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @visibleForTesting
  */
-export function installUserNotificationManager(window) {
-  registerServiceBuilder(window,
-      'userNotificationManager',
-      UserNotificationManager);
+export function installUserNotificationManagerForTesting(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, SERVICE_ID, UserNotificationManager);
 }
 
-installUserNotificationManager(AMP.win);
 
-AMP.registerElement('amp-user-notification', AmpUserNotification, CSS);
+// Register the extension services.
+AMP.extension(TAG, '0.1', function(AMP) {
+  AMP.registerServiceForDoc(SERVICE_ID, UserNotificationManager);
+  AMP.registerElement(TAG, AmpUserNotification, CSS);
+});
