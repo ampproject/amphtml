@@ -229,6 +229,8 @@ Criteo.Log.Debug;
 Criteo.CallRTA;
 Criteo.ComputeDFPTargetingForAMP;
 Criteo.PubTag = {};
+Criteo.PubTag.Adapters = {};
+Criteo.PubTag.Adapters.AMP = {};
 Criteo.PubTag.Adapters.AMP.Standalone;
 Criteo.PubTag.RTA = {};
 Criteo.PubTag.RTA.DefaultCrtgContentName;
