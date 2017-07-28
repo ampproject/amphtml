@@ -15,8 +15,6 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {toggle} from '../src/style';
-import {toArray} from '../src/types';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/custom-element';
 import {srcsetFromElement} from '../src/srcset';
