@@ -16,6 +16,7 @@
 
 import {dev, user} from '../log';
 import {endsWith} from '../string';
+import {Observable} from './observable';
 import {Services} from '../services';
 import {
   setStyle,
@@ -76,6 +77,9 @@ export class FixedLayer {
 
     /** @const @private {!Array<!ElementDef>} */
     this.elements_ = [];
+
+    /** @private {!Observable} */
+    this.observable_ = new Observable();
   }
 
   /**
@@ -197,6 +201,7 @@ export class FixedLayer {
         /* position */ 'fixed',
         opt_forceTransfer);
     this.sortInDomOrder_();
+    this.fire_();
     return this.update();
   }
 
@@ -216,6 +221,7 @@ export class FixedLayer {
         }
       });
     }
+    this.fire_();
   }
 
   /**
@@ -725,6 +731,48 @@ export class FixedLayer {
         this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
       }
     }
+  }
+
+  onFixedLayerUpdate(cb) {
+    if (!this.observable_) {
+      this.observable_ = new Observable();
+    }
+    this.observable_.add(cb);
+  }
+
+  fire_() {
+    this.observable_.fire();
+  }
+
+  safeTopOffset() {
+    const elements = this.elements_;
+    let maxTopOffset = 0;
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      if ((element.fixedNow || element.stickyNow) && !!element.top) {
+        const elementTopOffset = element.element./*OK*/offsetTop
+                               + element.element./*OK*/offsetHeight;
+        if (elementTopOffset > maxTopOffset) {
+          maxTopOffset = elementTopOffset;
+        }
+      }
+    }
+    return maxTopOffset;
+  }
+
+  safeBottomOffset() {
+    const elements = this.elements_;
+    let maxBottomOffset = 0;
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      if ((element.fixedNow || element.stickyNow) && !element.top) {
+        const elementBottomOffset = element.element./*OK*/offsetHeight;
+        if (elementBottomOffset > maxBottomOffset) {
+          maxBottomOffset = elementBottomOffset;
+        }
+      }
+    }
+    return maxBottomOffset;
   }
 }
 
