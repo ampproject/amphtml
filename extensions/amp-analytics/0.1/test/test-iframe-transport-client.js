@@ -32,7 +32,7 @@ function createUniqueId() {
 describe('iframe-transport-client', () => {
   let sandbox;
   let badAssertsCounterStub;
-  let router;
+  let iframeTransportClient;
   let sentinel;
 
   beforeEach(() => {
@@ -40,7 +40,7 @@ describe('iframe-transport-client', () => {
     badAssertsCounterStub = sandbox.stub();
     sentinel = createUniqueId();
     window.name = '{"sentinel": "' + sentinel + '"}';
-    router = new IframeTransportClient(window);
+    iframeTransportClient = new IframeTransportClient(window);
     sandbox.stub(dev(), 'assert', (condition, msg) => {
       if (!condition) {
         badAssertsCounterStub(msg);
@@ -75,7 +75,7 @@ describe('iframe-transport-client', () => {
     window./*OK*/postMessage(payload, '*');
   }
 
-  it('fails to create router if no window.name ', () => {
+  it('fails to create iframeTransportClient if no window.name ', () => {
     const oldWindowName = window.name;
     expect(() => {
       window.name = '';
@@ -85,7 +85,7 @@ describe('iframe-transport-client', () => {
   });
 
   it('sets sentinel from window.name.sentinel ', () => {
-    expect(router.getClient().sentinel_).to.equal(sentinel);
+    expect(iframeTransportClient.getClient().sentinel_).to.equal(sentinel);
   });
 
   it('receives an event message ', () => {
