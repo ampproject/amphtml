@@ -15,7 +15,6 @@
  */
 
 import {toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
 
 export class Toolbar {
@@ -49,22 +48,10 @@ export class Toolbar {
     /** @private {!boolean} **/
     this.toolbarShown_ = false;
 
-    /** @private {Array} */
-    this.toolbarOnlyElementsInSidebar_ = [];
+    // Default to toolbar target being hidden
+    this.toolbarDomElement_.classList
+        .add('amp-sidebar-toolbar-target-hidden');
 
-    // Find our tool-bar only elements
-    if (this.toolbarDomElement_.hasAttribute('toolbar-only')) {
-      this.toolbarOnlyElementsInSidebar_.push(this.toolbarDomElement_);
-    } else {
-      // Get our toolbar only elements
-      const toolbarOnlyQuery =
-        this.toolbarDomElement_.querySelectorAll('[toolbar-only]');
-      if (toolbarOnlyQuery.length > 0) {
-        // Check the nav's children for toolbar-only
-        this.toolbarOnlyElementsInSidebar_ =
-          toArray(toolbarOnlyQuery);
-      }
-    }
     this.buildCallback_();
   }
 
@@ -140,11 +127,10 @@ export class Toolbar {
         if (!this.toolbarTarget_.contains(this.toolbarClone_)) {
           this.toolbarTarget_.appendChild(this.toolbarClone_);
         }
-      }
-      if (this.toolbarOnlyElementsInSidebar_) {
-        this.toolbarOnlyElementsInSidebar_.forEach(element => {
-          toggle(element, false);
-        });
+        this.toolbarDomElement_.classList
+            .add('amp-sidebar-toolbar-target-shown');
+        this.toolbarDomElement_.classList
+            .remove('amp-sidebar-toolbar-target-hidden');
       }
       this.toolbarShown_ = true;
     });
@@ -164,11 +150,10 @@ export class Toolbar {
       // Hide the elements
       if (this.toolbarTarget_) {
         toggle(this.toolbarTarget_, false);
-      }
-      if (this.toolbarOnlyElementsInSidebar_) {
-        this.toolbarOnlyElementsInSidebar_.forEach(element => {
-          toggle(element, true);
-        });
+        this.toolbarDomElement_.classList
+            .add('amp-sidebar-toolbar-target-hidden');
+        this.toolbarDomElement_.classList
+            .remove('amp-sidebar-toolbar-target-shown');
       }
       this.toolbarShown_ = false;
     });

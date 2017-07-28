@@ -74,6 +74,10 @@ limitations under the License.
   background-color: transparent;
 }
 
+.amp-sidebar-toolbar-target-shown {
+  display: none;
+}
+
 .ampstart-hamburger-nav > ul {
   display: flex;
   justify-content: flex-start;
@@ -144,9 +148,9 @@ limitations under the License.
       </ul>
     </nav>
 
-    <!-- Toolbar One, basic usage, toolbar-only -->
+    <!-- Toolbar One, basic usage -->
     <!-- Could center with CSS justify-content: space-between, but trying to be minimal -->
-    <nav toolbar="(min-width: 0px)" toolbar-target="hamburger-toolbar" class="ampstart-hamburger-nav ampstart-navbar-bg" toolbar-only>
+    <nav toolbar="(min-width: 0px)" toolbar-target="hamburger-toolbar" class="ampstart-hamburger-nav ampstart-navbar-bg">
       <ul class="justify-center">
         <li role="button" aria-label="open sidebar" on="tap:header-sidebar.toggle" tabindex="0" class="ampstart-navbar-trigger pl2">
           ☰
@@ -158,7 +162,7 @@ limitations under the License.
     </nav>
 
     <!-- Toolbar Two, min only  -->
-    <nav toolbar="(min-width: 931px)" toolbar-target="accordion-toolbar" toolbar-only class="ampstart-headerbar-nav ampstart-nav ampstart-navbar-bg">
+    <nav toolbar="(min-width: 931px)" toolbar-target="accordion-toolbar" class="ampstart-headerbar-nav ampstart-nav ampstart-navbar-bg">
       <ul class="list-reset center m0 p0 flex justify-center nowrap">
           <li class="ampstart-nav-item ampstart-nav-dropdown">
             <!-- Start Dropdown -->
@@ -207,9 +211,9 @@ limitations under the License.
         <a href="#" target="_blank" class="inline-block" aria-label="Link to AMP HTML pin trest"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="28.5" viewbox="0 0 43 51"><title>pinterest</title><path d="M-13.6-5c0-1.6.2-3 .8-4.4.5-1.4 1.2-2.6 2.2-3.6.9-1 2-1.9 3.2-2.6 1.2-.8 2.5-1.3 3.9-1.7 1.5-.4 2.9-.5 4.4-.5 2.2 0 4.3.4 6.2 1.4 1.9.9 3.5 2.3 4.7 4.1 1.2 1.9 1.8 3.9 1.8 6.2 0 1.4-.1 2.7-.4 4C13-.8 12.5.5 12 1.7c-.6 1.2-1.3 2.3-2.2 3.2C9 5.8 8 6.6 6.7 7.1c-1.2.6-2.5.9-4 .9-1 0-1.9-.3-2.9-.7-.9-.5-1.6-1.1-2-1.9-.1.5-.3 1.4-.6 2.4-.3 1.1-.4 1.7-.5 2-.1.3-.2.9-.4 1.6-.3.7-.4 1.2-.6 1.5-.1.3-.4.7-.7 1.3-.3.6-.6 1.2-1 1.7-.3.5-.7 1.1-1.3 1.8l-.3.1-.2-.2c-.2-2.2-.3-3.6-.3-4 0-1.3.2-2.8.5-4.4.3-1.7.8-3.7 1.4-6.2.6-2.5 1-3.9 1.1-4.4-.5-.9-.7-2.1-.7-3.6 0-1.2.4-2.3 1.1-3.3.8-1.1 1.7-1.6 2.8-1.6.9 0 1.6.3 2.1.9.4.6.7 1.3.7 2.2 0 .9-.3 2.3-1 4.1C-.7-.9-1 .4-1 1.3c0 .9.3 1.6 1 2.2.6.6 1.4.9 2.3.9.8 0 1.5-.2 2.2-.5.6-.4 1.2-.9 1.6-1.5.5-.6.9-1.3 1.2-2 .4-.8.6-1.5.8-2.4.2-.8.4-1.6.5-2.4.1-.7.1-1.4.1-2.1 0-2.5-.8-4.4-2.3-5.8-1.6-1.4-3.6-2.1-6.1-2.1-2.8 0-5.2 1-7.1 2.8-1.9 1.9-2.9 4.2-2.9 7.1 0 .6.1 1.2.3 1.8.2.6.4 1.1.6 1.4.2.3.4.7.5 1 .2.3.3.5.3.6 0 .4-.1.9-.3 1.6-.2.6-.5 1-.8 1 0 0-.1-.1-.4-.1-.7-.2-1.3-.6-1.9-1.2-.5-.6-1-1.3-1.3-2-.3-.8-.5-1.6-.7-2.4-.2-.7-.2-1.5-.2-2.2z" transform="translate(21.734 23.748)" class="ampstart-icon ampstart-icon-pinterest"></path></svg></a>
       </li>
     </ul>
-
+    
     <ul class="ampstart-sidebar-faq list-reset m0">
-      <li toolbar-only class="ampstart-faq-item"><a href="#" class="text-decoration-none">About</a></li>
+      <li class="ampstart-faq-item"><a href="#" class="text-decoration-none">About</a></li>
       <li class="ampstart-faq-item"><a href="#" class="text-decoration-none">Contact</a></li>
     </ul>
   </amp-sidebar>

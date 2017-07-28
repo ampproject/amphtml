@@ -41,7 +41,7 @@ limitations under the License.
 
 ## Overview
 `<amp-sidebar>` hides meta content intended for temporary access (navigation links, buttons, menus, etc.). `<amp-sidebar>` can be opened and closed by button taps, and tapping outside of amp-sidebar.
-However, optional attributes that accept media queries can be used to display meta content in other parts of the site. Child `<nav toolbar="(media query)" target="elementID">` elements allow
+However, optional attributes that accept media queries can be used to display meta content in other parts of the site. Child `<nav toolbar="(media query)" toolbar-target="elementID">` elements allow
 for content within the sidebar to be displayed on other parts of the main content.
 
 
@@ -114,22 +114,20 @@ Alternatively, pressing the escape key on the keyboard will also close the sideb
 
 ### Toolbar
 
-You can create a `toolbar` element that displays in the `<body>` by specifying the `toolbar` attribute with a media query and a `target` attribute with an element id on a `<nav>` element that is a child of  `<amp-sidebar>`. The `toolbar` duplicates the `<nav>` element and its children and appends the element into the `target` element.
+You can create a `toolbar` element that displays in the `<body>` by specifying the `toolbar` attribute with a media query and a `toolbar-target` attribute with an element id on a `<nav>` element that is a child of  `<amp-sidebar>`. The `toolbar` duplicates the `<nav>` element and its children and appends the element into the `toolbar-target` element.
 
 #### Behavior
 
-- The sidebar may implement toolbars by adding nav elements with the `toolbar` attribute and `target` attribute.
-- The nav element must be a child of `<amp-sidebar>` and follow this format: `<nav toolbar="(media-query)" target="elementID">`.
-    - For instance, this would be a valid use of toolbar: `<nav toolbar="(max-width: 1024px)" target="toolbar-target">`.
+- The sidebar may implement toolbars by adding nav elements with the `toolbar` attribute and `toolbar-target` attribute.
+- The nav element must be a child of `<amp-sidebar>` and follow this format: `<nav toolbar="(media-query)" toolbar-target="elementID">`.
+    - For instance, this would be a valid use of toolbar: `<nav toolbar="(max-width: 1024px)" toolbar-target="target-element">`.
 - The nav containing the toolbar attribute must only contain a single `<ul>` element, that contains `<li>` elements.
     - The `<li>` elements may contain any valid HTML elements (supported by AMP), or any of the AMP elements that `<amp-sidebar>` supports.
-- The nav element, or it's `<ul>`'s `<li>` elements, may also contain the attribute `toolbar-only`.
-    - The attribute `toolbar-only` will hide the elements with the attribute in the sidebar, but leave them shown in the toolbar.
-- Toolbar behavior is only applied while the `toolbar` attribute media-query is valid. Also, an element with the `target` attribute id must exist on the page for the toolbar to be applied.
+- Toolbar behavior is only applied while the `toolbar` attribute media-query is valid. Also, an element with the `toolbar-target` attribute id must exist on the page for the toolbar to be applied.
 
 *Example: Basic Toolbar*
 
-In the following example, we display a `toolbar` if the window width is less than or equal to 767px. The `toolbar` contains a search input element. The `toolbar` element will be appended to the `<div id="toolbar-target">` element.
+In the following example, we display a `toolbar` if the window width is less than or equal to 767px. The `toolbar` contains a search input element. The `toolbar` element will be appended to the `<div id="target-element">` element.
 
 ```html
 <amp-sidebar id="sidebar1" layout="nodisplay" side="right">
@@ -142,7 +140,7 @@ In the following example, we display a `toolbar` if the window width is less tha
     <li>Nav item 6</li>
   </ul>
 
-  <nav toolbar="(max-width: 767px)" target="toolbar-target">
+  <nav toolbar="(max-width: 767px)" toolbar-target="target-element">
     <ul>
       <li>
         <input placeholder="Search..."/>
@@ -151,15 +149,27 @@ In the following example, we display a `toolbar` if the window width is less tha
   </nav>
 </amp-sidebar>
 
-<div id="toolbar-target">
+<div id="target-element">
 </div>
 ```
 
-*Example: Display toolbar content only within the toolbar*
+## Styling Toolbar
 
-In the following example, we display a toolbar if the window width is greater than or equal to 0px. The toolbar contains a search input element. The `toolbar` element will be appended to the `<div id="toolbar-target">` element. However, with the `toolbar-only` attribute, the `<nav>` element and its children will be hidden inside the sidebar, but visible within the toolbar when the toolbar is displayed.
+The `toolbar` element within the `<amp-sidebar>` element, will have classes applied to the element depending if the `toolbar-target` element is shown or hidden. This is useful for applying different styles on the `toolbar` element and then `toolbar-target` element. The classes are `amp-sidebar-toolbar-target-shown`, and `amp-sidebar-toolbar-target-hidden`. The class `amp-sidebar-toolbar-target-shown` is applied to the `toolbar` element when the `toolbar-target` element is shown. The class `amp-sidebar-toolbar-target-hidden` is applied to the `toolbar` element when the `toolbar-target` element is hidden.
+
+*Example: Toolbar State Classes*
+
+In the following example, we display a `toolbar` if the window width is less than or equal to 767px. The `toolbar` contains a search input element. The `toolbar` element will be appended to the `<div id="target-element">` element. However, we added some custom styles to hide the `toolbar` element, when the `<div id="toolbar-target">` element is shown.
 
 ```html
+<style amp-custom="">
+
+  .amp-sidebar-toolbar-target-shown {
+      display: none;
+  }
+
+</style>
+
 <amp-sidebar id="sidebar1" layout="nodisplay" side="right">
   <ul>
     <li>Nav item 1</li>
@@ -170,7 +180,7 @@ In the following example, we display a toolbar if the window width is greater th
     <li>Nav item 6</li>
   </ul>
 
-  <nav toolbar="(min-width: 0px)" target="toolbar-target" toolbar-only>
+  <nav toolbar="(max-width: 767px)" toolbar-target="target-element">
     <ul>
       <li>
         <input placeholder="Search..."/>
@@ -179,40 +189,10 @@ In the following example, we display a toolbar if the window width is greater th
   </nav>
 </amp-sidebar>
 
-<div id="toolbar-target">
+<div id="target-element">
 </div>
 ```
 
-*Example: Display specific toolbar items only within the toolbar*
-
-In the following example, we display a toolbar if the window width is greater than or equal to 768px, or if the window width is less than or equal to 1024px. The toolbar contains two items, text representing a publisher's logo, and a search input element. The `toolbar` element will be appended to the `<div id="toolbar-target">` element. However, with the `toolbar-only` attribute, the `<li>` element and its children will be hidden inside the sidebar, but visible within the toolbar when the toolbar is displayed. Other elements that are a child of the `<nav>` element will be displayed inside the sidebar, and the toolbar when the toolbar is displayed.
-
-```html
-<amp-sidebar id="sidebar1" layout="nodisplay" side="right">
-  <ul>
-    <li>Nav item 1</li>
-    <li>Nav item 2</li>
-    <li>Nav item 3</li>
-    <li>Nav item 4</li>
-    <li>Nav item 5</li>
-    <li>Nav item 6</li>
-  </ul>
-
-  <nav toolbar="(min-width: 768px) and (max-width: 1024px)" target="toolbar-target">
-    <ul>
-      <li>
-        Publisher Logo
-      </li>
-      <li toolbar-only>
-        <input placeholder="Search..."/>
-      </li>
-    </ul>
-  </nav>
-</amp-sidebar>
-
-<div id="toolbar-target">
-</div>
-```
 
 
 {% call callout('Tip', type='success') %}
@@ -241,15 +221,11 @@ Optional attribute used to set ARIA label for the close button added for accessi
 
 ##### toolbar
 
-This attribute is present on child `<nav toolbar="(media-query)" target="elementID">` elements, and accepts a media query of when to show a toolbar. See the [Toolbar](#toolbar) section for more information on using toolbars.
+This attribute is present on child `<nav toolbar="(media-query)" toolbar-target="elementID">` elements, and accepts a media query of when to show a toolbar. See the [Toolbar](#toolbar) section for more information on using toolbars.
 
-##### target
+##### toolbar-target
 
-This attribute is present on child `<nav toolbar="(media-query)" target="elementID">`, and accepts an id of an element on the page.  The `target` attribute will place the toolbar into the specified id of the element on the page, without the default toolbar styling. See the [Toolbar](#toolbar) section for more information on using toolbars.
-
-##### toolbar-only
-
-This attribute is present on child `<nav toolbar="(media-query)" target="elementID">`, or children `<li>` elements of `<nav toolbar="(media-query)">` elements, and indicates that the element will only be shown in the toolbar, when the toolbar is shown. See the [Toolbar](#toolbar) section for more information on using toolbar.
+This attribute is present on child `<nav toolbar="(media-query)" toolbar-target="elementID">`, and accepts an id of an element on the page.  The `toolbar-target` attribute will place the toolbar into the specified id of the element on the page, without the default toolbar styling. See the [Toolbar](#toolbar) section for more information on using toolbars.
 
 ##### common attributes
 
