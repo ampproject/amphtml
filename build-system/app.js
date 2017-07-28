@@ -936,7 +936,7 @@ app.get(['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
       next();
     });
 
-app.get('/dist/ampanalytics-lib.js', (req, res, next) => {
+app.get('/dist/iframe-transport-client-lib.js', (req, res, next) => {
   req.url = req.url.replace(/dist/, 'dist.3p/current');
   next();
 });
