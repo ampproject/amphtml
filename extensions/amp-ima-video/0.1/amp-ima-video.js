@@ -38,7 +38,6 @@ import {
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
-import {user} from '../../../src/log';
 import {user, dev} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
