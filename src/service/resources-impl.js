@@ -524,13 +524,8 @@ export class Resources {
     if (this.isRuntimeOn_ || this.isBuildOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
-        resource.build();
-        if (scheduleWhenBuilt && !resource.isBlacklisted()) {
-          // TODO(dvoytenko): Consider removing "blacklisted" resources
-          // altogether from the list of resources.
-          this.schedulePass();
-        }
-      } else if (!resource.element.isBuilt()) {
+        this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
+      } else if (!resource.isBuilt() && !resource.isBuilding()) {
         if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
           this.pendingBuildResources_.push(resource);
@@ -564,7 +559,6 @@ export class Resources {
    * @private
    */
   buildReadyResourcesUnsafe_(scheduleWhenBuilt = true) {
-    let builtElementsCount = 0;
     // This will loop over all current pending resources and those that
     // get added by other resources build-cycle, this will make sure all
     // elements get a chance to be built.
@@ -576,16 +570,25 @@ export class Resources {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
-        resource.build();
-        if (!resource.isBlacklisted()) {
-          builtElementsCount++;
-        }
+        this.buildResourceUnsafe_(resource, /* schedulePass */ true);
       }
     }
+  }
 
-    if (scheduleWhenBuilt && builtElementsCount > 0) {
-      this.schedulePass();
+  /**
+   * @param {!Resource} resource
+   * @param {boolean} schedulePass
+   * @return {?Promise}
+   * @private
+   */
+  buildResourceUnsafe_(resource, schedulePass) {
+    const promise = resource.build();
+    if (!promise || !schedulePass) {
+      return promise;
     }
+    // TODO(dvoytenko): Consider removing "blacklisted" resources
+    // altogether from the list of resources.
+    return promise.then(() => this.schedulePass());
   }
 
   /**
