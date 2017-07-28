@@ -47,7 +47,7 @@ To take this approach, review the documentation for publishers' integration with
 
 ## Further Resources
 * Deep Dive: [Why not just use an iframe?](why-not-iframe.md)
-* Deep Dive: [Tracking users across origins](cross-origin-tracking.md)
+* Deep Dive: [Managing user state in AMP](../../spec/amp-managing-user-state.md)
 * Review pull requests from other AMP Analytics providers:
  * [AT Internet](https://github.com/ampproject/amphtml/pull/1672)
  * [Piano](https://github.com/ampproject/amphtml/pull/1652)
