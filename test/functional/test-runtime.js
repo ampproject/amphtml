@@ -375,6 +375,7 @@ describes.fakeWin('runtime', {
     }
     const s1 = addExisting(1);
     const s2 = addExisting(4);
+    const s3 = addExisting(5);
     const bodyCallbacks = new Observable();
     sandbox.stub(dom, 'waitForBody', (unusedDoc, callback) => {
       bodyCallbacks.add(callback);
@@ -407,6 +408,12 @@ describes.fakeWin('runtime', {
       expect(amp).to.equal(win.AMP);
       progress += 'not expected 2';
     }, 'version123'));
+    // Add legacy element (5) and eagarly ask for its load as ElementStub does.
+    Services.extensionsFor(win).loadExtension('amp-test-element5', false);
+    win.AMP.push(regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += '5';
+    }, 'version123'));
     runChunksForTesting(win.document);
     expect(progress).to.equal('');
 
@@ -417,19 +424,25 @@ describes.fakeWin('runtime', {
     expect(queueExtensions).to.have.length(0);
     expect(s1.getAttribute('custom-element')).to.be.null;
     expect(s2.getAttribute('custom-element')).to.be.null;
+    expect(s3.getAttribute('custom-element')).to.be.null;
     expect(s1.getAttribute('i-amphtml-loaded-new-version'))
         .to.equal('amp-test-element1');
     expect(s2.getAttribute('i-amphtml-loaded-new-version'))
         .to.equal('amp-test-element4');
+    expect(s3.getAttribute('i-amphtml-loaded-new-version'))
+        .to.equal('amp-test-element5');
     const inserted = win.document.head.querySelectorAll(
         '[i-amphtml-inserted]');
-    expect(inserted).to.have.length(2);
+    expect(inserted).to.have.length(3);
     expect(inserted[0].getAttribute('src')).to.equal(
         'https://cdn.ampproject.org/rtv/test-version' +
             '/v0/amp-test-element1-0.1.js');
     expect(inserted[1].getAttribute('src')).to.equal(
         'https://cdn.ampproject.org/rtv/test-version' +
             '/v0/amp-test-element4-0.1.js');
+    expect(inserted[2].getAttribute('src')).to.equal(
+        'https://cdn.ampproject.org/rtv/test-version' +
+            '/v0/amp-test-element5-0.1.js');
   });
 
   it('should be robust against errors in early extensions', () => {
