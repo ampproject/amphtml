@@ -57,6 +57,7 @@ export class LayoutLayers {
    * @return {!LayoutRectDef}
    */
   calcIntersectionWithParent(element, parent, opt_expand) {
+    // TODO
     const elementBox = LayoutElement.for(element).getLayoutBox(parent);
     const { left, top } = elementBox;
     let parentBox = LayoutElement.for(parent).getUnscrolledLayoutBox();
@@ -257,12 +258,8 @@ class LayoutLayer {
     return this.root_.contains(element);
   }
 
-  getUnscrolledyoutBox() {
-    return LayoutElement.for(this.root_).getUnscrolledyoutBox();
-  }
-
-  getLayoutBox() {
-    return LayoutElement.for(this.root_).getLayoutBox();
+  getUnscrolledPosition() {
+    return LayoutElement.for(this.root_).getUnscrolledPosition();
   }
 
   getScrollTop() {
@@ -305,10 +302,10 @@ class LayoutLayer {
   remeasure() {
     this.updateScrollPosition();
 
-    const box = this.getLayoutBox();
+    const position = this.getScrolledPosition();
     const elements = this.ampElements_;
     for (let i = 0; i < elements.length; i++) {
-      LayoutElement.for(elements[i]).remeasure(box);
+      LayoutElement.for(elements[i]).remeasure(position);
     }
 
     const layers = this.layers_;
@@ -325,12 +322,8 @@ class LayoutElement {
      */
     this.element_ = element;
 
-    /**
-     * A cached layout rectangle, relative to the containing layer's top-left
-     * corner. This box DOES NOT change based on scroll position.
-     * @private {!LayoutRectDef}
-     */
-    this.layoutBox_ = layoutRectLtwh(0, 0, 0, 0);
+    this.size_ = {width: 0, height: 0};
+    this.position_ = {top: 0, left: 0};
 
     element[LAYOUT_PROP] = this;
   }
@@ -379,58 +372,64 @@ class LayoutElement {
   }
 
   /**
-   * Gets the layout rectangle relative to the parent's coordinate system.
-   * @return {!LayoutRectDef}
+   * Gets the size of the element.
+   * @return {!{width: number, height: number}}
    */
-  getUnscrolledyoutBox() {
-    return this.layoutBox_;
+  getSize() {
+    return this.size_;
   }
 
   /**
-   * Gets the layout rectangle translated into the parent's coordinate system.
+   * Gets position of the element relative to the parent layer without taking
+   * scroll position into account.
+   * @return {!LayoutRectDef}
+   */
+  getUnscrolledPosition() {
+    return this.position_;
+  }
+
+  /**
+   * Gets the position of the element relative to the parent layer, taking
+   * scroll position of the parents into account.
    * @param {Element=} opt_parent
    * @return {!LayoutRectDef}
    */
-  getLayoutBox(opt_parent) {
-    const parents = [];
+  getScrolledPosition(opt_parent) {
+    const position = this.getUnscrolledPosition();
+    let x = position.left;
+    let y = position.top;
+
+    let first = true;
     const stopAt = opt_parent ? LayoutLayer.getParentLayer(opt_parent) : null;
     for (let p = this.getParentLayer(); p !== stopAt; p = p.getParentLayer()) {
-      parents.push(p);
-    }
-
-    const box = this.getUnscrolledyoutBox();
-    let x = box.left;
-    let y = box.top;
-    let first = true;
-    for (let i = parents.length - 1; i >= 0; i--) {
       const parent = parents[i];
 
-      const box = parent.getUnscrolledyoutBox();
       x -= parent.getScrollLeft();
       y -= parent.getScrollTop();
-      if (!first) {
-        x += box.left;
-        y += box.top;
-      }
 
-      first = false;
+      if (first) {
+        first = false;
+      } else {
+        const position = parent.getUnscrolledPosition();
+        x += position.left;
+        y += position.top;
+      }
     }
 
-    return layoutRectLtwh(x, y, box.width, box.height);
+    return {top: y, left: x};
   }
 
   remeasure(opt_relativeTo) {
     let relative = opt_relativeTo;
     if (!relative) {
       const parent = this.getParentLayer();
-      relative = parent ? parent.getLayoutBox() : layoutRectLtwh(0, 0, 0, 0);
+      relative = parent ? parent.getScrolledPosition() : layoutRectLtwh(0, 0, 0, 0);
     }
     const box = this.element_.getBoundingClientRect();
-    this.layoutBox_ = layoutRectLtwh(
-      box.left - relative.left,
-      box.top - relative.top,
-      box.width,
-      box.height
-    );
+    this.size_ = {width: box.width, height: box.height};
+    this.position_ = {
+      top: box.top - relative.top,
+      left: box.left - relative.left,
+    };
   }
 }

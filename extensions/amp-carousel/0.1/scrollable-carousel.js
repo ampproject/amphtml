@@ -146,6 +146,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   nextPos_(pos, dir) {
+    // TODO(jridgewell): this could be using cached values from Layers.
     const containerWidth = this.element./*OK*/offsetWidth;
     const fullWidth = this.container_./*OK*/scrollWidth;
     const newPos = pos + dir * containerWidth;
@@ -166,6 +167,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   hasNext() {
+    // TODO(jridgewell): this could be using cached values from Layers.
     const containerWidth = this.getLayoutWidth();
     const scrollWidth = this.container_./*OK*/scrollWidth;
     const maxPos = Math.max(scrollWidth - containerWidth, 0);
