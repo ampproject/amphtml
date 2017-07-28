@@ -282,6 +282,7 @@ var forbiddenTerms = {
     whitelist: [
       '3p/integration.js',
       '3p/ampcontext-lib.js',
+      '3p/iframe-transport-client-lib.js',
       'ads/alp/install-alp.js',
       'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',

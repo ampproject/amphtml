@@ -102,7 +102,8 @@ export class IframeTransport {
     const useLocal = getMode().localDev || getMode().test;
     const useRtvVersion = !useLocal;
     const scriptSrc = calculateEntryPointScriptUrl(
-        this.win_.parent.location, 'ampanalytics-lib', useLocal, useRtvVersion);
+        this.win_.parent.location, 'iframe-transport-client-lib',
+        useLocal, useRtvVersion);
     const frameName = JSON.stringify(/** @type {JsonObject} */ ({
       scriptSrc,
       sentinel,
@@ -182,7 +183,7 @@ export class IframeTransport {
     dev().assert(frameData.queue, 'Event queue is missing for ' + this.id_);
     frameData.queue.enqueue(
         /**
-         * @type {!../../../src/iframe-transport-common.IframeTransportEvent}
+         * @type {!../../../src/3p-frame-messaging.IframeTransportEvent}
          */
         ({transportId: this.id_, message: event}));
   }
