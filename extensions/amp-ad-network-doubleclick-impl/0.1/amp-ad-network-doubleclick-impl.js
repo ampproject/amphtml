@@ -318,13 +318,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // Do not allow experiment selection if SRA or correlator was not set.
         return;
       }
-      // Select into correlator clear experiment.  Note that it is assumed
-      // that AMP lifecycle ensures pauseCallback is called for ALL slots on
-      // the page prior to potentially calling resumeCallback.  Otherwise
-      // correlator would be cleared multiple times, between slots.
+      // Select into correlator clear experiment of pause visibility change.
+      // Should execute prior to resumeCallback.
       // TODO(keithwrightbos,glevitzy) - determine behavior for correlator
       // interaction with refresh.
-
       const experimentInfoMap =
           /** @type {!Object<string, !ExperimentInfo>} */ ({});
       experimentInfoMap[CORRELATOR_CLEAR_EXP_NAME] = {
