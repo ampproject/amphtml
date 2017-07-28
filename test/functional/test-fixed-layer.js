@@ -187,9 +187,9 @@ describe('FixedLayer', () => {
         visibility: 'visible',
         _top: '',
         get top() {
-          if (elem.computedStyle.transitionDuration &&
-              elem.style.transitionDuration !== '' &&
-              elem.style.transitionDuration !== '0s') {
+          if (elem.computedStyle.transition &&
+              elem.style.transition !== '' &&
+              elem.style.transition !== 'none') {
             return this._oldTop;
           }
           if (elem.style.bottom) {
@@ -205,7 +205,7 @@ describe('FixedLayer', () => {
         zIndex: '',
         transform: '',
         position: '',
-        transitionDuration: '',
+        transition: '',
       },
       matches: () => true,
       compareDocumentPosition: other => {
@@ -730,13 +730,13 @@ describe('FixedLayer', () => {
 
     it('should handle transitions', () => {
       element1.computedStyle['position'] = 'fixed';
-      element1.computedStyle['transitionDuration'] = '1s';
+      element1.computedStyle['transition'] = 'all .4s ease';
       element1.computedStyle['top'] = '0px';
       element1.autoTop = '0px';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
       element5.computedStyle['position'] = 'sticky';
-      element5.computedStyle['transitionDuration'] = '1s';
+      element5.computedStyle['transition'] = 'all .4s ease';
       element5.computedStyle['top'] = '0px';
       element5.autoTop = '0px';
 

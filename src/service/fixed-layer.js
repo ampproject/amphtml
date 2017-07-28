@@ -278,7 +278,7 @@ export class FixedLayer {
           setStyles(elements[i].element, {
             top: '',
             bottom: '-9999vh',
-            transitionDuration: '0s',
+            transition: 'none',
           });
         }
         // 2. Capture the `style.top` with this new `style.bottom` value. If
@@ -291,7 +291,7 @@ export class FixedLayer {
         for (let i = 0; i < elements.length; i++) {
           setStyles(elements[i].element, {
             bottom: '',
-            transitionDuration: '',
+            transition: '',
           });
         }
 
