@@ -688,7 +688,7 @@ i-amphtml-video-mask, i-amp-video-mask {
 .i-amphtml-dockable-video {
   padding: 0px;
   margin:0px;
-  background: darkgray;
+  transition: background-color 1s;
 }
 
 .i-amphtml-dockable-video > video.i-amphtml-dockable-video-minimizing,
@@ -696,7 +696,7 @@ i-amphtml-video-mask, i-amp-video-mask {
   position: fixed;
   height: auto;
   overflow: hidden;
-  z-index: 2;
+  z-index: 16;
   will-change: transform;
   transform: scale(0.6) translateX(20px) translateY(20px);
   border-radius: 6px;
