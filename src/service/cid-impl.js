@@ -179,7 +179,7 @@ export class Cid {
     if (!isProxyOrigin(url)) {
       const apiClient = scopeOptedInForCidApi(this.ampdoc.win, scope);
       if (apiClient) {
-        this.cidApi_.getPubCid(scope, apiClient);
+        return this.cidApi_.getPubCid(scope, apiClient);
       }
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
