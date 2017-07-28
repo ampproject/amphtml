@@ -275,9 +275,11 @@ export class FixedLayer {
         // large value (to catch cases where sticky-tops are in a long way
         // down inside a scroller).
         for (let i = 0; i < elements.length; i++) {
-          const element = elements[i].element;
-          setStyle(element, 'top', '');
-          setStyle(element, 'bottom', '-9999vh');
+          setStyles(elements[i].element, {
+            top: '',
+            bottom: '-9999vh',
+            transition: 'none',
+          });
         }
         // 2. Capture the `style.top` with this new `style.bottom` value. If
         // this element has a non-auto top, this value will remain constant
@@ -287,7 +289,10 @@ export class FixedLayer {
         }
         // 3. Cleanup the `style.bottom`.
         for (let i = 0; i < elements.length; i++) {
-          setStyle(elements[i].element, 'bottom', '');
+          setStyles(elements[i].element, {
+            bottom: '',
+            transition: '',
+          });
         }
 
         for (let i = 0; i < elements.length; i++) {
