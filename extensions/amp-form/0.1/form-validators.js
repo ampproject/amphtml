@@ -51,7 +51,7 @@ export function setCheckValiditySupportedForTesting(isSupported) {
 const CustomValidationTypes = {
   AsYouGo: 'as-you-go',
   ShowAllOnSubmit: 'show-all-on-submit',
-  AsYouGoShowAllOnSubmit: 'as-you-go-show-all-on-submit',
+  AsYouGoShowAllOnSubmit: 'interact-and-submit',
   ShowFirstOnSubmit: 'show-first-on-submit',
 };
 
@@ -339,7 +339,7 @@ export class AsYouGoValidator extends AbstractCustomValidator {
 
 
 /** @private visible for testing */
-export class AsYouGoShowAllOnSubmitValidator extends ShowAllOnSubmitValidator {
+export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
   /** @override */
   shouldValidateOnInteraction(unusedInput) {
     return true;
@@ -362,7 +362,7 @@ export function getFormValidator(form) {
     case CustomValidationTypes.ShowAllOnSubmit:
       return new ShowAllOnSubmitValidator(form);
     case CustomValidationTypes.AsYouGoShowAllOnSubmit:
-      return new AsYouGoShowAllOnSubmitValidator(form);
+      return new InteractAndSubmitValidator(form);
     case CustomValidationTypes.ShowFirstOnSubmit:
       return new ShowFirstOnSubmitValidator(form);
   }

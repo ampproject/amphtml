@@ -21,7 +21,7 @@ import {
   PolyfillDefaultValidator,
   AsYouGoValidator,
   ShowAllOnSubmitValidator,
-  AsYouGoShowAllOnSubmitValidator,
+  InteractAndSubmitValidator,
   ShowFirstOnSubmitValidator,
 } from '../form-validators';
 import {ValidationBubble} from '../validation-bubble';
@@ -113,9 +113,9 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(getFormValidator(form)).to.be.instanceOf(
           ShowAllOnSubmitValidator);
       form.setAttribute(
-          'custom-validation-reporting', 'as-you-go-show-all-on-submit');
+          'custom-validation-reporting', 'interact-and-submit');
       expect(getFormValidator(form)).to.be.instanceOf(
-          AsYouGoShowAllOnSubmitValidator);
+          InteractAndSubmitValidator);
       form.setAttribute(
           'custom-validation-reporting', 'show-first-on-submit');
       expect(getFormValidator(form)).to.be.instanceOf(
@@ -372,7 +372,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[2].className).to.not.contain('visible');
     });
 
-    describe('AsYouGoShowAllOnSubmitValidator', () => {
+    describe('InteractAndSubmitValidator', () => {
       it('should report validation for input on interaction', () => {
         const doc = env.win.document;
         const form = getForm(doc, true);
