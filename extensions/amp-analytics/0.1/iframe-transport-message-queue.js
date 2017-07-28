@@ -16,7 +16,8 @@
 
 import {dev} from '../../../src/log';
 import {
-  IFRAME_TRANSPORT_EVENTS_TYPE,
+  SEND_IFRAME_TRANSPORT_EVENTS,
+  IFRAME_TRANSPORT_EVENTS,
 } from '../../../src/iframe-transport-common';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 
@@ -52,12 +53,9 @@ export class IframeTransportMessageQueue {
      */
     this.pendingEvents_ = [];
 
-    /** @private {string} */
-    this.messageType_ = IFRAME_TRANSPORT_EVENTS_TYPE;
-
     /** @private {!../../../src/iframe-helper.SubscriptionApi} */
     this.postMessageApi_ = new SubscriptionApi(this.frame_,
-        this.messageType_,
+        SEND_IFRAME_TRANSPORT_EVENTS,
         true,
         () => {
           this.setIsReady();
@@ -117,7 +115,7 @@ export class IframeTransportMessageQueue {
    */
   flushQueue_() {
     if (this.isReady() && this.queueSize()) {
-      this.postMessageApi_.send(IFRAME_TRANSPORT_EVENTS_TYPE,
+      this.postMessageApi_.send(IFRAME_TRANSPORT_EVENTS,
           /** @type {!JsonObject} */
           ({events: this.pendingEvents_}));
       this.pendingEvents_ = [];

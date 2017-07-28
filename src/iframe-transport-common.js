@@ -19,15 +19,14 @@
  * This is the type of message that will be sent to the 3p frame.
  * The message will contain an array of the typedef declared below.
  */
-export const IFRAME_TRANSPORT_EVENTS_TYPE = 'IframeTransportEvents';
+export const IFRAME_TRANSPORT_EVENTS = 'iframe-transport-events';
 
 /**
  * @const {string}
  * The 3p frame will use this to request that IFRAME_TRANSPORT_EVENTS_TYPE
- * messages be sent to it. Due to the implementation of SubscriptionAPI,
- * both this and IFRAME_TRANSPORT_EVENTS_TYPE must have the same value.
+ * messages be sent to it.
  */
-export const SEND_IFRAME_TRANSPORT_EVENTS_TYPE = IFRAME_TRANSPORT_EVENTS_TYPE;
+export const SEND_IFRAME_TRANSPORT_EVENTS = 'send-iframe-transport-events';
 
 /** @typedef {{transportId: string, message: string}} */
 export let IframeTransportEvent;

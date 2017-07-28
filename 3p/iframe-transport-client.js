@@ -17,8 +17,8 @@
 import {tryParseJson} from '../src/json';
 import {dev, user} from '../src/log';
 import {
-  SEND_IFRAME_TRANSPORT_EVENTS_TYPE,
-  IFRAME_TRANSPORT_EVENTS_TYPE,
+  SEND_IFRAME_TRANSPORT_EVENTS,
+  IFRAME_TRANSPORT_EVENTS,
 } from '../src/iframe-transport-common';
 import {IframeMessagingClient} from './iframe-messaging-client';
 
@@ -46,8 +46,8 @@ export class IframeTransportClient {
         tryParseJson(this.win_.name)['sentinel'],
         'Invalid/missing sentinel on iframe name attribute' + this.win_.name));
     this.client_.makeRequest(
-        SEND_IFRAME_TRANSPORT_EVENTS_TYPE,
-        IFRAME_TRANSPORT_EVENTS_TYPE,
+        SEND_IFRAME_TRANSPORT_EVENTS,
+        IFRAME_TRANSPORT_EVENTS,
         eventData => {
           const events =
               /**
