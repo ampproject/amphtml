@@ -225,24 +225,20 @@ data.url;
 // criteo.js
 var Criteo;
 Criteo.DisplayAd;
-Criteo.RenderAd;
 Criteo.Log.Debug;
 Criteo.CallRTA;
 Criteo.ComputeDFPTargetingForAMP;
-Criteo.ComputeStandaloneDFPTargeting;
 Criteo.PubTag = {};
+Criteo.PubTag.Adapters.AMP.Standalone;
 Criteo.PubTag.RTA = {};
 Criteo.PubTag.RTA.DefaultCrtgContentName;
 Criteo.PubTag.RTA.DefaultCrtgRtaCookieName
-Criteo.RequestBids;
-Criteo.GetBids;
 data.tagtype;
 data.networkid;
 data.cookiename;
 data.varname;
 data.zone;
 data.adserver;
-data.lineItemRanges
 
 // distroscale.js
 data.tid;
