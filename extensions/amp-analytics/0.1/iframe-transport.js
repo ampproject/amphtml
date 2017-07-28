@@ -183,7 +183,7 @@ export class IframeTransport {
     dev().assert(frameData.queue, 'Event queue is missing for ' + this.id_);
     frameData.queue.enqueue(
         /**
-         * @type {!../../../src/iframe-transport-common.IframeTransportEvent}
+         * @type {!../../../src/3p-frame-messaging.IframeTransportEvent}
          */
         ({transportId: this.id_, message: event}));
   }

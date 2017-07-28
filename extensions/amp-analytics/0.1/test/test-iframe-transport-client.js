@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE,
-} from '../../../../src/iframe-transport-common';
+import {MessageType} from '../../../../src/3p-frame-messaging';
 import {
   IframeTransportClient,
 } from '../../../../3p/iframe-transport-client';
@@ -95,7 +93,7 @@ describe('iframe-transport-client', () => {
       expect(transportId).to.equal('101');
       expect(event).to.equal('hello, world!');
     };
-    send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
+    send(MessageType.IFRAME_TRANSPORT_EVENTS, /** @type {!JsonObject} */ ({
       events: [
         {transportId: '101', message: 'hello, world!'},
       ]}));
