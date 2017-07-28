@@ -23,9 +23,9 @@ import {startsWith} from '../../../src/string';
  * @type {string}
  * @private
  */
-const GMOSSP_BASE_URL_ = 'https://sp.gmossp-sp.jp';
+const GMOSSP_BASE_URL_ = 'https://sp.gmossp-sp.jp/';
 
-const GMOSSP_BASE_A4A_URL_ = 'https://amp.sp.gmossp-sp.jp';
+const GMOSSP_BASE_A4A_URL_ = 'https://amp.sp.gmossp-sp.jp/_a4a/';
 
 /**
  * This is a minimalistic AmpA4A implementation that primarily gets an Ad
