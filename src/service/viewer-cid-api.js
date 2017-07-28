@@ -23,6 +23,26 @@ const CID_API_SCOPE_WHITELIST = {
 };
 
 /**
+ * @param {!Window} win
+ * @param {string} scope
+ * @return {?string}
+ */
+export function scopeOptedInForCidApi(win, scope) {
+  const optInMeta = win.document.head./*OK*/querySelector(
+      `meta[name=${GOOGLE_CLIENT_ID_API_META_NAME}]`);
+  if (!optInMeta || !optInMeta.hasAttribute('content')) {
+    return null;
+  }
+  const whiteListedVendors = optInMeta.getAttribute('content').split(',');
+  for (let i = 0; i < whiteListedVendors.length; ++i) {
+    if (CID_API_SCOPE_WHITELIST[whiteListedVendors[i]] === scope) {
+      return whiteListedVendors[i];
+    }
+  }
+  return null;
+}
+
+/**
  * Exposes CID API if provided by the Viewer.
  */
 export class ViewerCidApi {
@@ -50,26 +70,7 @@ export class ViewerCidApi {
   getScopedCid(scope) {
     return this.viewer_.sendMessageAwaitResponse('cid', dict({
       'scope': scope,
-      'clientIdApi': this.isScopeOptedInForCidApi_(scope),
+      'clientIdApi': !!scopeOptedInForCidApi(this.ampdoc_.win, scope),
     }));
-  }
-
-  /**
-   * @param {string} scope
-   * @return {boolean}
-   */
-  isScopeOptedInForCidApi_(scope) {
-    const optInMeta = this.ampdoc_.win.document.head./*OK*/querySelector(
-        `meta[name=${GOOGLE_CLIENT_ID_API_META_NAME}]`);
-    if (!optInMeta || !optInMeta.hasAttribute('content')) {
-      return false;
-    }
-    const whiteListedVendors = optInMeta.getAttribute('content').split(',');
-    for (let i = 0; i < whiteListedVendors.length; ++i) {
-      if (CID_API_SCOPE_WHITELIST[whiteListedVendors[i]] === scope) {
-        return true;
-      }
-    }
-    return false;
   }
 }
