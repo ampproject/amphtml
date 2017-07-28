@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Requests Frame</title>
+    <script>
+      window.addEventListener('amp-iframeTransportClientCreated', () => {
+        /**
+         * To receive AMP analytics events in a third-party frame, you must
+         * pass a callback function to this method. The callback will be called
+         * when an event is received, and will be passed two parameters:
+         * @param {string} event A string of the format specified in the
+         * requests block of the amp-analytics JSON config
+         * @param {string} transportId An ID uniquely identifying which creative
+         * generated the event
+         */
+        window.iframeTransportClient.onAnalyticsEvent(
+            (event, transportId) => {
+              // Now, do something meaningful with the AMP Analytics event
+              console.log('The page at: ' + window.location.href +
+                  ' has received an event: ' + event +
+                  ' from the creative with transport ID: ' + transportId);
+            });
+      });
+
+      // Load the script specified in the iframe’s name attribute:
+      const url = JSON.parse(window.name).scriptSrc;
+      if (url && url.startsWith('https://3p.ampproject.net/')) {
+        script = document.createElement('script');
+        script.src = url;
+        document.head.appendChild(script);
+        // The script will be loaded, and will call onNewAmpAnalyticsInstance()
+      } else {
+        console.warn('Received invalid URL - risk of XSS! ' + url);
+      }
+    </script>
+  </head>
+  <!-- The frame will not be visible, so there is no need for a body tag. -->
+</html>
