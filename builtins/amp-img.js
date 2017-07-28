@@ -199,21 +199,10 @@ export class AmpImg extends BaseElement {
     this.getVsync().mutate(() => {
       this.img_.classList.add('i-amphtml-ghost');
       this.toggleFallback(true);
-      // Hide child placeholders, as browsers that don't support webp
+      // Hide placeholders, as browsers that don't support webp
       // Would show the placeholder underneath a transparent fallback
-      this.hideChildPlaceholders_();
+      this.togglePlaceholder(false);
     });
-  }
-
-  /**
-  * Private function to hide child placeholder elements of our amp-img
-  * @private
-  */
-  hideChildPlaceholders_() {
-    toArray(this.element.querySelectorAll('[placeholder]'))
-        .forEach(placeholderElement => {
-          toggle(placeholderElement);
-        });
   }
 };
 
