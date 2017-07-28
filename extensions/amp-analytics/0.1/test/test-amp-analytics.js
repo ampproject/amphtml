@@ -27,7 +27,7 @@ import {
   variableServiceFor,
 } from '../variables';
 import {
-  installUserNotificationManager,
+  installUserNotificationManagerForTesting,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
@@ -111,8 +111,8 @@ describe('amp-analytics', function() {
       viewer = windowApi.services.viewer.obj;
       ins = instrumentationServiceForDocForTesting(ampdoc);
       installVariableService(iframe.win);
-      installUserNotificationManager(iframe.win);
-      return Services.userNotificationManagerFor(iframe.win).then(manager => {
+      installUserNotificationManagerForTesting(ampdoc);
+      return Services.userNotificationManagerForDoc(ampdoc).then(manager => {
         uidService = manager;
       });
     });

@@ -23,7 +23,6 @@ import {
   getAmpdoc,
 } from './service';
 import {
-  getElementService,
   getElementServiceForDoc,
   getElementServiceIfAvailable,
   getElementServiceIfAvailableForDoc,
@@ -288,12 +287,12 @@ export class Services {
   }
 
   /**
-   * @param {!Window} window
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>}
    */
-  static userNotificationManagerFor(window) {
+  static userNotificationManagerForDoc(nodeOrDoc) {
     return (/** @type {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>} */
-        (getElementService(window, 'userNotificationManager',
+        (getElementServiceForDoc(nodeOrDoc, 'userNotificationManager',
             'amp-user-notification')));
   }
 
