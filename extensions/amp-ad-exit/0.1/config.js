@@ -37,7 +37,16 @@ export let AmpAdExitConfig;
 export let NavigationTargetConfig;
 
 /**
- * @typedef {!Object<string, {defaultValue: (string|number|boolean)}>}
+ * @typedef {{
+ *   defaultValue: (string|number|boolean),
+ *   vendorAnalyticsSource: (string|undefined),
+ *   vendorAnalyticsResponseKey: (string|undefined)
+ * }}
+ */
+export let Variable;
+
+/**
+ * @typedef {!Object<string, !Variable>}
  */
 export let Variables;
 
@@ -135,6 +144,12 @@ function assertTarget(name, target, config) {
       user().assert(
           pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
           variable, pattern);
+      // TODO(clawr): Verify vendor name?
+      user().assert(
+          target.vars[variable]['vendorAnalyticsSource'] === undefined ||
+          target.vars[variable]['vendorAnalyticsResponseKey'],
+          'Variable \'%s\': If vendorAnalyticsSource is defined then ' +
+          'vendorAnalyticsResponseKey must also be defined', variable);
     }
   }
 }

@@ -1,20 +1,16 @@
 <!doctype html>
 <html amp4ads>
   <head>
+    <title>Ad with 3p Analytics and amp-ad-exit</title>
     <meta charset=utf-8>
     <script async src='https://cdn.ampproject.org/v0.js'></script>
-    <script async custom-element=amp-analytics src='https://cdn.ampproject.org/v0/amp-analytics-0.1.js'></script>
+    <script async custom-element='amp-analytics' src='https://cdn.ampproject.org/v0/amp-analytics-0.1.js'></script>
+    <script async custom-element='amp-ad-exit' src='https://cdn.ampproject.org/v0/amp-ad-exit-0.1.js'></script>
     <style amp4ads-boilerplate>body{visibility:hidden}</style>
     <meta name=viewport content=width=device-width,minimum-scale=1>
   </head>
   <body>
-    <a href="/landing.html">
-      <amp-img id=img src='https://upload.wikimedia.org/wikipedia/commons/6/6e/Golde33443.jpg' width=256 height=300></amp-img>
-      <p class=frob>
-        By Golden Trvs Gol twister (Own work) [CC BY-SA 4.0 (http://creativecommons.org/licenses/by-sa/4.0)], via Wikimedia Commons
-      </p>
-    </a>
-    <amp-analytics type="testVendor">
+    <amp-analytics type='testVendor'>
       <script type='application/json'>
         {
           "requests": {
@@ -41,6 +37,37 @@
         }
       </script>
     </amp-analytics>
+    <amp-ad-exit id='exit-api'>
+      <script type='application/json'>
+        {
+          "targets": {
+            "target1": {
+              "finalUrl": "/?product1&x=CLICK_X&y=CLICK_Y&e=_elem&shouldNotBeReplaced=AMP_VERSION",
+              "vars": {
+                "_elem": {"defaultValue": "headline"}
+              }
+            }
+          },
+          "filters": {
+            "longDelay": {
+              "type": "clickDelay",
+              "delay": 10000
+            }
+          },
+          "transport": {
+            "beacon": true,
+            "image": true
+          }
+        }
+      </script>
+    </amp-ad-exit>
+    <div id='ad'>
+      <div class='product' on='tap:exit-api.exit(target="target1", _elem="Product 1")'>
+        <amp-img id='img' src='https://upload.wikimedia.org/wikipedia/commons/6/6e/Golde33443.jpg' width=256 height=300></amp-img>
+        <p class='frob'>
+          By Golden Trvs Gol twister (Own work) [CC BY-SA 4.0 (http://creativecommons.org/licenses/by-sa/4.0)], via Wikimedia Commons
+        </p>
+      </div>
   </body>
 </html>
 

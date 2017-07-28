@@ -94,7 +94,7 @@ exposes an "exit" action to other elements in the [A4A (AMP for Ads)](../amp-a4a
 </script>
 </amp-ad-exit>
 
-<h1 on="tap:exit-api.exit(target='landingPage')">Artisan Baking Supplies</h1>
+<h1 on="tap:exit-api.exit(target='landing')">Artisan Baking Supplies</h1>
 <div id="product0" on="tap:exit-api.exit(target='flour')">
   <p>Rye flour</p>
   <amp-img src="..." width="..." height="..."></amp-img>
@@ -103,7 +103,7 @@ exposes an "exit" action to other elements in the [A4A (AMP for Ads)](../amp-a4a
   <p>Bannetons</p>
   <amp-img src="..." width="..." height="..."></amp-img>
 </div>
-<div id="footer" on="tap:exit-api.exit(target='landingPage', _clickArea='footer')">
+<div id="footer" on="tap:exit-api.exit(target='landing', _clickArea='footer')">
   example.com/artisan-baking
 </div>
 ```
@@ -212,18 +212,26 @@ applies to navigation URLs and click tracking URLs.
 
 ### Custom variables
 Custom variables must begin with an underscore. Define variables in the
-config alongside the navigation target. The default value can be overridden
-in the `exit` action invocation:
+config alongside the navigation target. Variables should have a `"defaultValue"`
+property. The default value can be overridden in the `exit` action invocation.
 
+Variable values can also come from 3P analytics.
+
+Example:
 ```html
 <amp-ad-exit id="exit-api"><script type="application/json">
 {
   "targets": {
     "product": {
-      "finalUrl": "http://example.com/?page=_productCategory",
+      "finalUrl": "http://example.com/?page=_productCategory&verification=_3pAnalytics"
       "vars": {
         "_productCategory": {
           "defaultValue": "none"
+        },
+        "_3pAnalytics": {
+          "defaultValue": "no_response",
+          "vendorAnalyticsSource": "VendorXYZ",
+          "vendorAnalyticsResponseKey": "findings"
         }
       }
     }
