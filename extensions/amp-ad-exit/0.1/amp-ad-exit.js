@@ -21,7 +21,9 @@ import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
-import {ResponseMap} from '../../../src/iframe-transport-common';
+import {
+  IframeTransportResponseMap,
+} from '../../../src/iframe-transport-response-map';
 
 const TAG = 'amp-ad-exit';
 
@@ -34,6 +36,15 @@ const TAG = 'amp-ad-exit';
  * }}
  */
 let NavigationTarget;  // eslint-disable-line no-unused-vars
+
+/**
+ * @typedef {{
+ *   defaultValue: string,
+ *   vendorAnalyticsSource: string,
+ *   vendorAnalyticsResponseKey: string
+ * }}
+ */
+let VariableFrom3pAnalytics;  // eslint-disable-line no-unused-vars
 
 export class AmpAdExit extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -103,10 +114,11 @@ export class AmpAdExit extends AMP.BaseElement {
     if (target.vars) {
       for (const customVar in target.vars) {
         if (customVar[0] == '_') {
-          const vals = target.vars[customVar];
+          const vals =
+              /** @type {VariableFrom3pAnalytics} */ (target.vars[customVar]);
           vars[customVar] = () => {
             if (vals.vendorAnalyticsSource) {
-              const map = ResponseMap.get(this.getAmpDoc(),
+              const map = IframeTransportResponseMap.get(this.getAmpDoc(),
                   vals.vendorAnalyticsSource,
                   /** @type {!string} */ (this.win.document.baseURI));
               if (map && map[vals.vendorAnalyticsResponseKey]) {

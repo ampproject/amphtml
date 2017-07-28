@@ -188,7 +188,7 @@ export class AmpDoc {
     /** @private @const */
     this.signals_ = new Signals();
 
-    /** @private {!Object<string, Object<string, string>>} */
+    /** @private {!Object<string, !Object<string, Object<string,string>>>} */
     this.iframeTransportResponses_ = {};
   }
 
@@ -306,7 +306,7 @@ export class AmpDoc {
 
   /**
    * Binding of 3p analytics vendors' responses, used amp-ad-exit
-   * @return {!Object<string, Object<string, string>>}
+   * @return {!Object<string, !Object<string, Object<string,string>>>}
    */
   getIframeTransportResponses() {
     return this.iframeTransportResponses_;
