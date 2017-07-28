@@ -227,9 +227,8 @@
      });
    });
 
-   it('should hide <nav toolbar> elements with toolbar-only, \
-   inside the sidebar, but not inside the toolbar, for a matching \
-   window size for (min-width: 768px)', () => {
+   it('should add the "amp-sidebar-toolbar-target-shown" state class, \
+   for matching window size of (min-width: 768px)', () => {
      return getToolbars([{
        toolbarOnlyOnNav: true,
      }]).then(obj => {
@@ -238,19 +237,37 @@
          toolbars.forEach(toolbar => {
            toolbar.onLayoutChange();
          });
-         const toolbarNavElements =
+         const toolbarNavElementsWithState =
                 toArray(obj.ampdoc.getRootNode()
-                .querySelectorAll('nav[toolbar]'));
-         const hiddenToolbarNavElements =
-                toArray(obj.ampdoc.getRootNode()
-                .querySelectorAll('nav[style]'));
-         expect(toolbarNavElements.length).to.be.equal(2);
-         expect(hiddenToolbarNavElements.length).to.be.equal(1);
+                .querySelectorAll(
+                    'nav[toolbar].amp-sidebar-toolbar-target-shown'
+                ));
+         expect(toolbarNavElementsWithState.length).to.be.equal(1);
          expect(toolbars.length).to.be.equal(1);
        });
      });
    });
 
+   it('should add the "amp-sidebar-toolbar-target-hidden" state class, \
+   for non-matching window size of (min-width: 768px)', () => {
+     return getToolbars([{
+       toolbarOnlyOnNav: true,
+     }]).then(obj => {
+       const toolbars = obj.toolbars;
+       resizeIframeToWidth(obj.iframe, '0px', () => {
+         toolbars.forEach(toolbar => {
+           toolbar.onLayoutChange();
+         });
+         const toolbarNavElementsWithState =
+                toArray(obj.ampdoc.getRootNode()
+                .querySelectorAll(
+                    'nav[toolbar].amp-sidebar-toolbar-target-hidden'
+                ));
+         expect(toolbarNavElementsWithState.length).to.be.equal(1);
+         expect(toolbars.length).to.be.equal(1);
+       });
+     });
+   });
 
    it('toolbar should be in the hidden state \
    when it is not being displayed', () => {
