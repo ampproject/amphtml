@@ -263,6 +263,25 @@ export class Extensions {
   }
 
   /**
+   * Reloads the new version of the extension.
+   * @param {string} extensionId
+   * @param {!Element} oldScriptElement
+   * @return {!Promise<!ExtensionDef>}
+   */
+  reloadExtension(extensionId, oldScriptElement) {
+    // "Disconnect" the old script element and extension record.
+    const holder = this.extensions_[extensionId];
+    if (holder) {
+      dev().assert(!holder.loaded && !holder.error);
+      delete this.extensions_[extensionId];
+    }
+    oldScriptElement.removeAttribute('custom-element');
+    oldScriptElement.setAttribute('i-amphtml-loaded-new-version', extensionId);
+    return this.loadExtension(extensionId,
+        /* stubbing not needed, should have already happened. */ false);
+  }
+
+  /**
    * Returns the promise that will be resolved with the extension element's
    * class when the extension has been loaded. If necessary, adds the extension
    * script to the page.
