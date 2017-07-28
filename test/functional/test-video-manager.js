@@ -228,6 +228,22 @@ describes.fakeWin('VideoManager', {
   });
 
 
+  it('should change media session when video starts playing', () => {
+
+    videoManager.register(impl);
+
+    const mediaSessionSpy = sandbox.spy(
+        videoManager.getEntryForVideo_(impl),
+        'updateMediaSession_'
+    );
+
+    impl.play();
+
+    return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+      expect(mediaSessionSpy.called).to.be.true;
+    });
+  });
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     klass = createFakeVideoPlayerClass(env.win);
@@ -524,6 +540,21 @@ function createFakeVideoPlayerClass(win) {
     /** @override */
     getCurrentTime() {
       return this.currentTime_;
+    }
+
+    /** @override */
+    getMetaData() {
+      return {
+        'artwork': '',
+        'title': '',
+        'artist': '',
+        'album': '',
+      };
+    }
+
+    /** @override */
+    preimplementsMediaSessionAPI() {
+      return false;
     }
 
     /** @override */

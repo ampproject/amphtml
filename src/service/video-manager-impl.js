@@ -694,7 +694,7 @@ class VideoEntry {
       const parseOgImage = () => {
         const metaTag = doc.querySelector('meta[property="og:image"]');
         if (metaTag) {
-          return metaTage.getAttribute('content');
+          return metaTag.getAttribute('content');
         } else {
           return undefined;
         }
@@ -719,7 +719,7 @@ class VideoEntry {
 
       if (posterUrl) {
         this.metaData_.artwork = [{
-          'src':posterUrl,
+          'src': posterUrl,
         }];
       }
     }
