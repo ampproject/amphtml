@@ -64,17 +64,16 @@ export function setReportError(fn) {
 
 /**
  * Logging class.
- *
- * Use of sentinel string instead of a boolean to check user/dev errors
- * because errors could be rethrown by some native code as a new error, and only a message would survive.
- * Also, some browser don’t support a 5th error object argument in window.onerror. List of supporting browser can be found
- * here: https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
- *
  * @final
  * @private Visible for testing only.
  */
 export class Log {
   /**
+   * opt_suffix will be appended to error message to identify the type of the error message.
+   * We can't rely on the error object to pass along the type because
+   * some browsers do not have this param in its window.onerror API.
+   * See: https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
+   *
    * @param {!Window} win
    * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
    * @param {string=} opt_suffix
