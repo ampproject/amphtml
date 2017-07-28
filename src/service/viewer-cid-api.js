@@ -33,10 +33,10 @@ export function scopeOptedInForCidApi(win, scope) {
   if (!optInMeta || !optInMeta.hasAttribute('content')) {
     return null;
   }
-  const whiteListedVendors = optInMeta.getAttribute('content').split(',');
-  for (let i = 0; i < whiteListedVendors.length; ++i) {
-    if (CID_API_SCOPE_WHITELIST[whiteListedVendors[i]] === scope) {
-      return whiteListedVendors[i];
+  const whiteListedClients = optInMeta.getAttribute('content').split(',');
+  for (let i = 0; i < whiteListedClients.length; ++i) {
+    if (CID_API_SCOPE_WHITELIST[whiteListedClients[i]] === scope) {
+      return whiteListedClients[i];
     }
   }
   return null;

@@ -177,12 +177,9 @@ export class Cid {
     /** @const {!Location} */
     const url = parseUrl(this.ampdoc.win.location.href);
     if (!isProxyOrigin(url)) {
-      const vendor = scopeOptedInForCidApi(this.ampdoc.win, scope);
-      if (vendor) {
-        this.cidApi_.getPubCid(vendor).then(pubCid => {
-          return Services.cryptoFor(this.ampdoc.win)
-              .sha384Base64(pubCid + ';' + scope);
-        });
+      const apiClient = scopeOptedInForCidApi(this.ampdoc.win, scope);
+      if (apiClient) {
+        this.cidApi_.getPubCid(scope, apiClient);
       }
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }

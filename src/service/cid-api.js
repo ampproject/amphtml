@@ -25,9 +25,16 @@ const API_KEYS = {
 
 const TAG = 'GoogleCidApi';
 const AMP_TOKEN = 'AMP_TOKEN';
-const RETRIEVING = '$RETRIEVING';
+
+const TokenStatus = {
+  RETRIEVING: '$RETRIEVING',
+  OPT_OUT: '$OPT_OUT',
+  ERROR: '$ERROR',
+};
+
 const TIMEOUT = 30000;
-const EXPIRE_IN_A_YEAR = 365 * 24 * 60 * 60 * 1000;
+const DAY = 24 * 60 * 60 * 1000;
+const YEAR = 365 * DAY;
 
 export class GoogleCidApi {
 
@@ -37,8 +44,8 @@ export class GoogleCidApi {
     this.cidPromise_ = null;
   }
 
-  getPubCid(vendor) {
-    const url = this.getUrl_(vendor);
+  getPubCid(scope, apiClient) {
+    const url = this.getUrl_(apiClient);
     if (!url) {
       return Promise.resolve(null);
     }
@@ -49,31 +56,43 @@ export class GoogleCidApi {
     let token;
     return this.cidPromise_ = this.timer_.poll(100, () => {
       token = getCookie(this.win_, AMP_TOKEN);
-      return token !== RETRIEVING;
+      return token !== TokenStatus.RETRIEVING;
     }).then(() => {
-      if (!token) {
-        const expire = this.win_.Date.time() + TIMEOUT;
-        setCookie(this.win_, AMP_TOKEN, RETRIEVING, expire);
+      if (token === TokenStatus.OPT_OUT || token === TokenStatus.ERROR) {
+        return null;
       }
-      return this.fetchCid_(url, token).then(res => {
+
+      if (!token) {
+        setCookie(this.win_, AMP_TOKEN, TokenStatus.RETRIEVING,
+            this.expiresIn_(TIMEOUT));
+      }
+      return this.fetchCid_(url, scope, token).then(res => {
         if (res.optOut) {
+          setCookie(this.win_, AMP_TOKEN, TokenStatus.OPT_OUT,
+              this.expiresIn_(YEAR));
           return null;
         }
         if (res.clientId) {
-          const expire = this.win_.Date.time() + EXPIRE_IN_A_YEAR;
-          setCookie(this.win_, AMP_TOKEN, res.securityToken, expire);
+          setCookie(this.win_, AMP_TOKEN, res.securityToken,
+              this.expiresIn_(YEAR));
           return res.clientId;
+        } else {
+          setCookie(this.win_, AMP_TOKEN, TokenStatus.ERROR,
+              this.expiresIn_(DAY));
+          return null;
         }
       }).catch(e => {
+        setCookie(this.win_, AMP_TOKEN, TokenStatus.ERROR,
+            this.expiresIn_(TIMEOUT));
         dev().error(TAG, e);
         return null;
       });
     });
   }
 
-  fetchCid_(url, token) {
+  fetchCid_(url, scope, token) {
     const payload = {
-      pubOrigin: this.win_.location.origin,
+      originScope: scope,
     };
     if (token) {
       payload.securityToken = token;
@@ -87,11 +106,15 @@ export class GoogleCidApi {
         }).then(res => res.json()));
   }
 
-  getUrl_(vendor) {
-    const key = API_KEYS[vendor];
+  getUrl_(apiClient) {
+    const key = API_KEYS[apiClient];
     if (!key) {
       return null;
     }
     return GOOGLE_API_URL + key;
+  }
+
+  expiresIn_(time) {
+    return this.win_.Date.time() + time;
   }
 }
