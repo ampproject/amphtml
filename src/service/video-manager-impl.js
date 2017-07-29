@@ -40,14 +40,15 @@ import {
 } from './position-observer-impl';
 import {map} from '../utils/object';
 import {layoutRectLtwh, RelativePositions} from '../layout-rect';
+import {
+  parseSchemaImage,
+  parseOgImage,
+  parseFavicon,
+  setMediaSession,
+} from '../mediasession-helper';
 import {Animation} from '../animation';
 import * as st from '../style';
-<<<<<<< HEAD
 import * as tr from '../transition';
-=======
-import {tryParseJson} from '../json';
->>>>>>> Implemented metadata and mediasession api for all players & added better default posters
-
 /**
  * @const {number} Percentage of the video that should be in viewport before it
  * is considered visible.
@@ -589,7 +590,22 @@ class VideoEntry {
    */
   videoPlayed_() {
     this.isPlaying_ = true;
-    this.updateMediaSession_();
+
+    if (!this.video.preimplementsMediaSessionAPI()) {
+      const playHandler = () => {
+        this.video.play(/*isAutoplay*/ false);
+      };
+      const pauseHandler = () => {
+        this.video.pause(/*isAutoplay*/ false);
+      }
+      // Update the media session
+      setMediaSession(
+          this.ampdoc_,
+          this.metaData_,
+          playHandler,
+          pauseHandler
+      );
+    }
 
     this.actionSessionManager_.beginSession();
     if (this.isVisible_) {
@@ -637,7 +653,7 @@ class VideoEntry {
       this.inlineVidRect_ = this.video.element./*OK*/getBoundingClientRect();
     });
 
-    this.getMetaData_();
+    this.fillMetaData_();
 
     this.updateVisibility();
     if (this.isVisible_) {
@@ -650,7 +666,7 @@ class VideoEntry {
    * Gets the provided metadata and fills in missing fields
    * @private
    */
-  getMetaData_() {
+  fillMetaData_() {
     if (this.video.preimplementsMediaSessionAPI()) {
       return;
     }
@@ -659,63 +675,12 @@ class VideoEntry {
       this.metaData_ = map(this.video.getMetaData());
     }
 
-    if (!this.metaData_.artwork) {
-      const doc = this.ampdoc_.win.document;
-
-      // Parses the schema.org json-ld formatted meta-data
-      const parseSchemaImage = () => {
-        const schema = doc.querySelector('script[type="application/ld+json"]');
-        if (!schema) {
-          // No schema element found
-          return undefined;
-        }
-        const schemaJson = tryParseJson(schema.textContent);
-        if (!schemaJson || !schemaJson.image) {
-          // No image found in the schema
-          return undefined;
-        }
-
-        if (schemaJson.image['@list']
-            && schemaJson.image['@list'][0]
-            && typeof schemaJson.image['@list'][0] === 'string') {
-          return schemaJson.image['@list'][0];
-        } else if (schemaJson.image[0]
-            && typeof schemaJson.image[0] === 'string') {
-          // Return the first image
-          return schemaJson.image[0];
-        } else if (typeof schemaJson.image === 'string') {
-          return schemaJson.image;
-        } else {
-          return undefined;
-        }
-      };
-
-      // Parses the og:image if it exists
-      const parseOgImage = () => {
-        const metaTag = doc.querySelector('meta[property="og:image"]');
-        if (metaTag) {
-          return metaTag.getAttribute('content');
-        } else {
-          return undefined;
-        }
-      };
-
-      // Parses the website's Favicon
-      const parseFavicon = () => {
-        const linkTag = doc.querySelector('link[rel="shortcut icon"]')
-                        || doc.querySelector('link[rel="icon"]');
-        if (linkTag) {
-          return linkTag.getAttribute('href');
-        } else {
-          return undefined;
-        }
-      }
-
+    if (!this.metaData_.artwork || this.metaData_.artwork.length == 0) {
       const posterUrl = this.video.element.getAttribute('poster')
-                           || this.internalElement_.getAttribute('poster')
-                           || parseSchemaImage()
-                           || parseOgImage()
-                           || parseFavicon();
+                        || this.internalElement_.getAttribute('poster')
+                        || parseSchemaImage(this.ampdoc_)
+                        || parseOgImage(this.ampdoc_)
+                        || parseFavicon(this.ampdoc_);
 
       if (posterUrl) {
         this.metaData_.artwork = [{
@@ -726,40 +691,14 @@ class VideoEntry {
 
     if (!this.metaData_.title) {
       const title = this.video.element.getAttribute('title')
-                             || this.video.element.getAttribute('aria-label')
-                             || this.internalElement_.getAttribute('title')
-                             || this.internalElement_.getAttribute('aria-label')
-                             || this.ampdoc_.win.document.title;
+                    || this.video.element.getAttribute('aria-label')
+                    || this.internalElement_.getAttribute('title')
+                    || this.internalElement_.getAttribute('aria-label')
+                    || this.ampdoc_.win.document.title;
       if (title) {
         this.metaData_.title = title;
       }
     }
-  }
-
-  /**
-   * Gets the provided metadata and fills in missing fields
-   * @private
-   */
-  updateMediaSession_() {
-    if (this.video.preimplementsMediaSessionAPI()) {
-      return;
-    }
-
-    const win = this.ampdoc_.win;
-    const navigator = win.navigator;
-    if ('mediaSession' in navigator && win.MediaMetadata) {
-      navigator.mediaSession.metadata = new win.MediaMetadata(this.metaData_);
-
-      navigator.mediaSession.setActionHandler('play', function() {
-        this.video.play(/*isAutoplay*/ false);
-      });
-      navigator.mediaSession.setActionHandler('pause', function() {
-        this.video.pause();
-      });
-
-      // TODO(@wassgha) Implement seek & next/previous
-    }
-
   }
 
   /**
