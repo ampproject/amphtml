@@ -120,7 +120,7 @@ export class StandardActions {
    * @private
    */
   handleAmpSetState_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return;
     }
     Services.bindForDocOrNull(invocation.target).then(bind => {
@@ -167,8 +167,7 @@ export class StandardActions {
    * @private
    */
   handleAmpGoBack_(invocation) {
-    // TODO(choumx, #9699): HIGH.
-    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return;
     }
     Services.historyForDoc(this.ampdoc).goBack();
@@ -193,7 +192,7 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleScrollTo(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return;
     }
     const node = dev().assertElement(invocation.target);
@@ -219,7 +218,7 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleFocus(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return;
     }
     const node = dev().assertElement(invocation.target);

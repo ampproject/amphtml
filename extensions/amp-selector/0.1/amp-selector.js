@@ -294,9 +294,8 @@ export class AmpSelector extends AMP.BaseElement {
               targetOption: el.getAttribute('option'),
               selectedOptions: selectedValues,
             });
-        // TODO(choumx, #9699): HIGH.
         this.action_.trigger(this.element, name, selectEvent,
-            ActionTrust.MEDIUM);
+            ActionTrust.HIGH);
       }
     });
   }

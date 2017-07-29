@@ -502,7 +502,7 @@ export class BaseElement {
    * @return {ActionTrust}
    */
   activationTrust() {
-    return ActionTrust.MEDIUM;
+    return ActionTrust.HIGH;
   }
 
   /**
@@ -528,15 +528,14 @@ export class BaseElement {
    * Registers the action handler for the method with the specified name.
    *
    * The handler is only invoked by events with trust equal to or greater than
-   * `minTrust` (or ActionTrust.MEDIUM if not provided). Otherwise, a
-   * user error is logged.
+   * `minTrust`. Otherwise, a user error is logged.
    *
    * @param {string} method
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(method, handler, minTrust = ActionTrust.MEDIUM) {
+  registerAction(method, handler, minTrust = ActionTrust.HIGH) {
     this.initActionMap_();
     this.actionMap_[method] = {handler, minTrust};
   }

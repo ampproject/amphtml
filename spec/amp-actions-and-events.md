@@ -374,7 +374,7 @@ actions that apply to the whole document.
   </tr>
   <tr>
     <td><code>navigateTo(url=STRING)</code></td>
-    <td>Navigates current window to given URL. Supports <a href="./amp-var-substitutions.md">standard URL subsitutions</a>. Can only be invoked via <code>tap</code> or <code>change</code> events.</td>
+    <td>Navigates current window to given URL. Supports <a href="./amp-var-substitutions.md">standard URL subsitutions</a>.</td>
   </tr>
   <tr>
     <td><code>goBack</code></td>

@@ -210,7 +210,7 @@ export class AmpSlideScroll extends BaseSlides {
       if (args) {
         this.showSlideWhenReady(args['index']);
       }
-    }, ActionTrust.MEDIUM); // TODO(choumx, #9699): LOW.
+    }, ActionTrust.HIGH);
   }
 
   /** @override */
@@ -595,7 +595,7 @@ export class AmpSlideScroll extends BaseSlides {
       const name = 'slideChange';
       const event =
           createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
-      this.action_.trigger(this.element, name, event, ActionTrust.MEDIUM);
+      this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
 
       this.element.dispatchCustomEvent(name, {index: newIndex});
     }

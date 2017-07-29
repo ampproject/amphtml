@@ -220,24 +220,19 @@ export class ActionService {
     } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
         const element = dev().assertElement(event.target);
-        // TODO(choumx, #9699): HIGH.
-        this.trigger(element, name, event, ActionTrust.MEDIUM);
+        this.trigger(element, name, event, ActionTrust.HIGH);
       });
     } else if (name == 'change') {
       this.root_.addEventListener(name, event => {
         const element = dev().assertElement(event.target);
-        // Only `change` events from <select> elements have high trust.
-        const trust = element.tagName == 'SELECT'
-            ? ActionTrust.HIGH
-            : ActionTrust.MEDIUM;
         this.addInputDetails_(event);
-        this.trigger(element, name, event, trust);
+        this.trigger(element, name, event, ActionTrust.HIGH);
       });
     } else if (name == 'input-debounced') {
       const debouncedInput = debounce(this.ampdoc.win, event => {
         const target = dev().assertElement(event.target);
         this.trigger(target, name, /** @type {!ActionEventDef} */ (event),
-            ActionTrust.MEDIUM);
+            ActionTrust.HIGH);
       }, DEFAULT_DEBOUNCE_WAIT);
 
       this.root_.addEventListener('input', event => {
@@ -299,7 +294,7 @@ export class ActionService {
    * @param {function(!ActionInvocation)} handler
    * @param {ActionTrust} minTrust
    */
-  addGlobalMethodHandler(name, handler, minTrust = ActionTrust.MEDIUM) {
+  addGlobalMethodHandler(name, handler, minTrust = ActionTrust.HIGH) {
     this.globalMethodHandlers_[name] = {handler, minTrust};
   }
 
@@ -333,7 +328,7 @@ export class ActionService {
    * @param {function(!ActionInvocation)} handler
    * @param {ActionTrust} minTrust
    */
-  installActionHandler(target, handler, minTrust = ActionTrust.MEDIUM) {
+  installActionHandler(target, handler, minTrust = ActionTrust.HIGH) {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = target.getAttribute('id') || '';
     const debugid = target.tagName + '#' + targetId;
