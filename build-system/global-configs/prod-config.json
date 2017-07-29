@@ -5,7 +5,6 @@
   "canary": 0,
   "expAdsenseA4A": 0.01,
   "expDoubleclickA4A": 0.01,
-  "dbclk-correlator-clear": 0.02,
   "a4aProfilingRate": 0.1,
   "ad-type-custom": 1,
   "ios-embed-wrapper": 1,
