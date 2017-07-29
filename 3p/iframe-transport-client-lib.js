@@ -35,4 +35,3 @@ try {
 } catch (err) {
   // do nothing with error
 }
-

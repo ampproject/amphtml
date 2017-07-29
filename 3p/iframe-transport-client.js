@@ -16,7 +16,7 @@
 
 import {tryParseJson} from '../src/json';
 import {dev, user} from '../src/log';
-import {IFRAME_TRANSPORT_EVENTS_TYPE} from '../src/iframe-transport-common';
+import {MessageType} from '../src/3p-frame-messaging';
 import {IframeMessagingClient} from './iframe-messaging-client';
 
 /** @private @const {string} */
@@ -64,17 +64,17 @@ export class IframeTransportClient {
     /** @protected {!IframeMessagingClient} */
     this.client_ = new IframeMessagingClient(win);
     this.client_.setHostWindow(this.win_.parent);
-    this.client_.setSentinel(dev().assertString(
+    this.client_.setSentinel(user().assertString(
         tryParseJson(this.win_.name)['sentinel'],
         'Invalid/missing sentinel on iframe name attribute' + this.win_.name));
     this.client_.makeRequest(
-        IFRAME_TRANSPORT_EVENTS_TYPE,
-        IFRAME_TRANSPORT_EVENTS_TYPE,
+        MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
+        MessageType.IFRAME_TRANSPORT_EVENTS,
         eventData => {
           const events =
               /**
                * @type
-               * {!Array<../src/iframe-transport-common.IframeTransportEvent>}
+               * {!Array<../src/3p-frame-messaging.IframeTransportEvent>}
                */
               (eventData['events']);
           user().assert(events,
@@ -85,7 +85,8 @@ export class IframeTransportClient {
               'Must call onAnalyticsEvent in ' + this.win_.location.href);
           events.forEach(event => {
             try {
-              this.listener_(event.message, event.transportId);
+              this.listener_ &&
+                  this.listener_(event.message, event.transportId);
             } catch (e) {
               user().error(TAG_,
                   'Exception in callback passed to onAnalyticsEvent: ' +
