@@ -17,7 +17,9 @@
 import '../amp-ad-exit';
 import * as sinon from 'sinon';
 import {toggleExperiment} from '../../../../src/experiments';
-import {ResponseMap} from '../../../../src/iframe-transport-common';
+import {
+  IframeTransportResponseMap,
+} from '../../../../src/iframe-transport-response-map';
 
 const EXIT_CONFIG = {
   targets: {
@@ -531,6 +533,12 @@ describes.realWin('amp-ad-exit', {
       'unused': 'unused',
       'collected-data': 'abc123',
     });
+
+    IframeTransportResponseMap.add(env.ampdoc, '3p-vendor',
+        env.win.document.baseURI, {
+          'unused': 'unused',
+          'collected-data': 'abc123',
+        });
 
     element.implementation_.executeAction({
       method: 'exit',
