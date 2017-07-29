@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE,
-} from '../../../../src/iframe-transport-common';
+import {MessageType} from '../../../../src/3p-frame-messaging';
 import {
   IframeTransportClient,
 } from '../../../../3p/iframe-transport-client';
@@ -34,7 +32,7 @@ function createUniqueId() {
 describe('iframe-transport-client', () => {
   let sandbox;
   let badAssertsCounterStub;
-  let router;
+  let iframeTransportClient;
   let sentinel;
 
   beforeEach(() => {
@@ -42,7 +40,7 @@ describe('iframe-transport-client', () => {
     badAssertsCounterStub = sandbox.stub();
     sentinel = createUniqueId();
     window.name = '{"sentinel": "' + sentinel + '"}';
-    router = new IframeTransportClient(window);
+    iframeTransportClient = new IframeTransportClient(window);
     sandbox.stub(dev(), 'assert', (condition, msg) => {
       if (!condition) {
         badAssertsCounterStub(msg);
@@ -77,7 +75,7 @@ describe('iframe-transport-client', () => {
     window./*OK*/postMessage(payload, '*');
   }
 
-  it('fails to create router if no window.name ', () => {
+  it('fails to create iframeTransportClient if no window.name ', () => {
     const oldWindowName = window.name;
     expect(() => {
       window.name = '';
@@ -87,7 +85,7 @@ describe('iframe-transport-client', () => {
   });
 
   it('sets sentinel from window.name.sentinel ', () => {
-    expect(router.getClient().sentinel_).to.equal(sentinel);
+    expect(iframeTransportClient.getClient().sentinel_).to.equal(sentinel);
   });
 
   it('receives an event message ', () => {
@@ -95,7 +93,7 @@ describe('iframe-transport-client', () => {
       expect(transportId).to.equal('101');
       expect(event).to.equal('hello, world!');
     };
-    send(IFRAME_TRANSPORT_EVENT_MESSAGES_TYPE, /** @type {!JsonObject} */ ({
+    send(MessageType.IFRAME_TRANSPORT_EVENTS, /** @type {!JsonObject} */ ({
       events: [
         {transportId: '101', message: 'hello, world!'},
       ]}));
