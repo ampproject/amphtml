@@ -191,10 +191,8 @@ export function importShadowBody(shadowRoot, body, deep) {
   const doc = shadowRoot.ownerDocument;
   let resultBody;
   if (isShadowCssSupported()) {
-    console.log('import shadow body, if');
     resultBody = dev().assertElement(doc.importNode(body, deep));
   } else {
-    console.log('import shadow body, else');
     resultBody = doc.createElement('amp-body');
     setStyle(resultBody, 'display', 'block');
     for (let i = 0; i < body.attributes.length; i++) {
@@ -208,7 +206,12 @@ export function importShadowBody(shadowRoot, body, deep) {
     }
   }
   setStyle(resultBody, 'position', 'relative');
-  shadowRoot.appendChild(resultBody);
+  resultBody.classList.add('amp-shadow');
+  //NOTE(torch2424), create a shadow root elelment, and add it to the body
+  const shadowRootElement = doc.createElement('i-amphtml-shadow-root');
+  shadowRootElement.id = shadowRoot.id;
+  shadowRootElement.appendChild(resultBody);
+  shadowRoot.appendChild(shadowRootElement);
   Object.defineProperty(shadowRoot, 'body', {value: resultBody});
   return resultBody;
 }
