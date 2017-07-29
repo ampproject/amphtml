@@ -26,6 +26,7 @@ import {
 import {installCssTransformer} from './style-installer';
 import {
   isShadowDomSupported,
+  isShadowCssSupported,
   getShadowDomSupportedVersion,
   ShadowDomVersion,
 } from './web-components';
@@ -189,9 +190,11 @@ export function getShadowRootNode(node) {
 export function importShadowBody(shadowRoot, body, deep) {
   const doc = shadowRoot.ownerDocument;
   let resultBody;
-  if (isShadowDomSupported()) {
+  if (isShadowCssSupported()) {
+    console.log('import shadow body, if');
     resultBody = dev().assertElement(doc.importNode(body, deep));
   } else {
+    console.log('import shadow body, else');
     resultBody = doc.createElement('amp-body');
     setStyle(resultBody, 'display', 'block');
     for (let i = 0; i < body.attributes.length; i++) {
@@ -219,7 +222,7 @@ export function importShadowBody(shadowRoot, body, deep) {
  * @return {string}
  */
 export function transformShadowCss(shadowRoot, css) {
-  if (isShadowDomSupported()) {
+  if (isShadowCssSupported()) {
     return css;
   }
   return scopeShadowCss(shadowRoot, css);

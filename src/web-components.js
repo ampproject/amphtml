@@ -48,6 +48,26 @@ export function isShadowDomSupported() {
 }
 
 /**
+ * Returns `true` if Shadow CSS encapsulation is supported.
+ * @return {boolean}
+ */
+export function isShadowCssSupported() {
+  if (!isShadowDomSupported()) {
+    return false;
+  }
+
+  //TODO: Find a better way to test CSS encapsulation
+  if (window.ShadyCSS) {
+    console.log('shadycss');
+    return false;
+  }
+
+  console.log('no shadycss');
+
+  return true;
+}
+
+/**
  * Returns the supported version of Shadow DOM spec.
  * @param {Function=} opt_elementClass optional for testing
  * @return {ShadowDomVersion}

@@ -30,14 +30,14 @@
 
     // Using this explicitly, as firefox errors due to our polyfills
     loadScript("https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.3/webcomponents-sd-ce.js", function() {
-      console.log('Started loading polyfill!');
+      console.log('Started loading webcomponents polyfill!');
     });
 
     setTimeout(function() {
       loadScript("/pwa/pwa.js", function() {
         console.log('Started loading pwa.js!');
       });
-    }, 3000);
+    }, 2000);
   </script>
 
   <style>
@@ -63,7 +63,7 @@
 
     .container {
       min-height: 100vh;
-      background: #eee;
+      /*background: #eee;*/
       overflow: hidden;
     }
 

@@ -28,6 +28,7 @@ html {
 }
 html, body {
   height: auto !important;
+  background: red !important;
 }
 
 /**
