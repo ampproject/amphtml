@@ -16,17 +16,17 @@
 
 // Importing the document-register-element module has the side effect
 // of installing the custom elements polyfill if necessary.
-import installCustomElements
-    from 'document-register-element/build/document-register-element.node';
-import {getMode} from './mode';
-import {install as installArrayIncludes} from './polyfills/array-includes';
+import installCustomElements from
+    'document-register-element/build/document-register-element.node';
+import {
+  install as installDOMTokenListToggle,
+} from './polyfills/domtokenlist-toggle';
 import {install as installDocContains} from './polyfills/document-contains';
-import {install as installDOMTokenListToggle}
-    from './polyfills/domtokenlist-toggle';
-import {install as installEvent} from './polyfills/event';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installPromise} from './polyfills/promise';
+import {install as installArrayIncludes} from './polyfills/array-includes';
+import {getMode} from './mode';
 
 /**
   Only install in closure binary and not in babel/browserify binary, since in
@@ -44,4 +44,3 @@ installObjectAssign(self);
 installPromise(self);
 installDocContains(self);
 installArrayIncludes(self);
-installEvent(self);

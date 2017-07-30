@@ -860,10 +860,8 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 
   sendAmpDomUpdateEvent_() {
-    const event = new Event(
-      AmpEvents.DOM_UPDATE,
-      {bubbles: true, cancelable: true}
-    );
+    const event = this.win.document.createEvent('Event');
+    event.initEvent(AmpEvents.DOM_UPDATE, true, true);
     this.itemsSlot_.dispatchEvent(event);
   }
 }
