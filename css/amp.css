@@ -708,6 +708,16 @@ i-amphtml-video-mask, i-amp-video-mask {
   margin: initial !important;
 }
 
+i-amphtml-dockable-video-control-btn {
+  flex-grow: 1;
+  font-size: 40px;
+  color: white;
+}
+
+i-amphtml-dockable-video-control-btn.play {
+
+}
+
 /**
  * amp-accordion to avoid FOUC.
  */

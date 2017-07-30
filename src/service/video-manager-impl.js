@@ -1022,7 +1022,6 @@ class VideoEntry {
       function cloneStyle(prop) {
         return st.getStyle(dev().assertElement(internalElement), prop);
       };
-
       st.setStyles(dev().assertElement(this.draggingMask_), {
         'top': cloneStyle('top'),
         'left': cloneStyle('left'),
@@ -1035,7 +1034,10 @@ class VideoEntry {
         'height': cloneStyle('height'),
         'position': 'fixed',
         'z-index': '17',
-        'background': 'transparent',
+        'background': 'rgba(0,0,0,0.4)',
+        'display': 'flex',
+        'align-items': 'center',
+        'text-align': 'center',
       });
     });
   }
@@ -1713,6 +1715,17 @@ class VideoEntry {
   createDraggingMask_() {
     const doc = this.ampdoc_.win.document;
     this.draggingMask_ = doc.createElement('i-amphtml-dragging-mask');
+    const play_btn = doc.createElement('i-amphtml-dockable-video-control-btn');
+    play_btn.classList.toggle('play', !this.isPlaying_);
+    play_btn.classList.toggle('pause', this.isPlaying_);
+    const mute_btn = doc.createElement('i-amphtml-dockable-video-control-btn');
+    mute_btn.classList.toggle('mute', !this.muted_);
+    mute_btn.classList.toggle('unmute', this.muted_);
+    const fs_btn = doc.createElement('i-amphtml-dockable-video-control-btn');
+    fs_btn.classList.add('fullscreen');
+    this.draggingMask_.appendChild(play_btn);
+    this.draggingMask_.appendChild(mute_btn);
+    this.draggingMask_.appendChild(fs_btn);
     this.realignDraggingMask_();
     this.video.element.appendChild(this.draggingMask_);
   }
