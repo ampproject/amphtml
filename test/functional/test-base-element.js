@@ -177,9 +177,11 @@ describe('BaseElement', () => {
       const timer = Services.timerFor(element.win);
       target = document.createElement('div');
 
-      event1 = new Event('event1', {bubbles: false, cancelable: true});
+      event1 = document.createEvent('Event');
+      event1.initEvent('event1', false, true);
 
-      event2 = new Event('event2', {bubbles: false, cancelable: true});
+      event2 = document.createEvent('Event');
+      event2.initEvent('event2', false, true);
 
       event1Promise = listenOncePromise(element.element, 'event1');
       event1Promise = timer.timeoutPromise(TIMEOUT, event1Promise);
