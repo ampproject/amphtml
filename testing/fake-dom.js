@@ -64,8 +64,6 @@ export class FakeWindow {
     this.DOMTokenList = window.DOMTokenList;
     /** @const */
     this.Math = window.Math;
-    /** @const */
-    this.Event = window.Event;
 
     // Parent Window points to itself if spec.parent was not passed.
     /** @const @type {!Window} */
