@@ -16,7 +16,6 @@
 
 import {
   AsyncVerifier,
-  FORM_VERIFY_EXPERIMENT,
   DefaultVerifier,
   getFormVerifier,
 } from '../form-verifiers';
@@ -98,10 +97,6 @@ describes.fakeWin('amp-form async verification', {}, env => {
   }
 
   describe('getFormVerifier', () => {
-    beforeEach(() => {
-      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, true);
-    });
-
     it('returns a DefaultVerifier without the verify-xhr attribute', () => {
       const form = getForm(env.win.document, false);
       const verifier = getFormVerifier(form, () => {});
@@ -116,7 +111,6 @@ describes.fakeWin('amp-form async verification', {}, env => {
 
     it('should throw if the experiment is disabled with the verify-xhr ' +
         'attribute present', () => {
-      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, false);
       const form = getForm(env.win.document);
       expect(() => getFormVerifier(form, () => {})).to.throw(/experiment/);
     });
@@ -125,7 +119,6 @@ describes.fakeWin('amp-form async verification', {}, env => {
   describe('AsyncVerifier', () => {
     let sandbox;
     beforeEach(() => {
-      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, true);
       sandbox = env.sandbox;
     });
 

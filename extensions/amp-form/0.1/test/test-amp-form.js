@@ -24,8 +24,7 @@ import {
   setCheckValiditySupportedForTesting,
 } from '../form-validators';
 import {
-  CONFIG_KEY,
-  FORM_VERIFY_EXPERIMENT,
+  CONFIG_KEY
 } from '../form-verifiers';
 import * as sinon from 'sinon';
 import '../../../amp-mustache/0.1/amp-mustache';
@@ -429,7 +428,6 @@ describes.repeated('', {
     });
 
     it('should allow verifying elements with a presubmit request', () => {
-      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, true);
       const formPromise = getAmpForm(getVerificationForm(
           env.win.document));
       const fetchRejectPromise = Promise.reject({
@@ -461,7 +459,6 @@ describes.repeated('', {
     });
 
     it('should only use the more recent verify request', () => {
-      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, true);
       const formPromise = getAmpForm(getVerificationForm(
           env.win.document, asyncVerifyConfig));
 
