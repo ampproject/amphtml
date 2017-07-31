@@ -122,6 +122,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td>Pinterest</td>
     <td>
       <ul>
+        <li><code>data-param-media</code>: optional (but highly recommended to be set), defaults to: none. Url for the media to be shared on Pinterest. If not set, the end user will be requested to upload a media by Pinterest.</li>
         <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
         <li><code>data-param-description</code>: optional, defaults to: Current page title</li>
       </ul>
