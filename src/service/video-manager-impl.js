@@ -556,6 +556,9 @@ class VideoEntry {
     /** @private {boolean} */
     this.isDismissed_ = false;
 
+    /** @private {boolean} */
+    this.isShowingControls_ = false;
+
     /** @private {Object} */
     this.dragCoordinates_ = {
       mouse: {x: 0, y: 0},
@@ -568,6 +571,15 @@ class VideoEntry {
 
     /** @private {Array<!UnlistenDef>} */
     this.dragUnlisteners_ = [];
+
+    /** @private {Node} */
+    this.lastTouchedElement_ = null;
+
+    /** @private {Node} */
+    this.miniControls_ = null;
+
+    /** @private {number} */
+    this.controlsTimeout_ = null;
 
     this.hasDocking = element.hasAttribute(VideoAttributes.DOCK);
 
@@ -1029,15 +1041,8 @@ class VideoEntry {
         'right': cloneStyle('right'),
         'transform': cloneStyle('transform'),
         'transform-origin': cloneStyle('transform-origin'),
-        'borderRadius': cloneStyle('borderRadius'),
         'width': cloneStyle('width'),
         'height': cloneStyle('height'),
-        'position': 'fixed',
-        'z-index': '17',
-        'background': 'rgba(0,0,0,0.4)',
-        'display': 'flex',
-        'align-items': 'center',
-        'text-align': 'center',
       });
     });
   }
@@ -1309,21 +1314,25 @@ class VideoEntry {
    * @param {function(!Event)} listener
    * @private
    */
-  addDragListener_(element, eventType, listener) {
-    this.dragUnlisteners_.push(
-        listen(
-            element,
-            eventType,
-            listener
-        )
-    );
+  addListener_(element, eventType, listener) {
+    eventType.split(' ').map(e => {
+      this.dragUnlisteners_.push(
+          listen(
+              element,
+              e,
+              listener,
+              /*opt_capture*/true,
+              /*opt_passive*/false
+          )
+      );
+    });
   }
 
   /**
    * Removes all listeners for touch and mouse events
    * @private
    */
-  unlistenToDragEvents_() {
+  unlistenAll_() {
     let unlistener = this.dragUnlisteners_.pop();
     while (unlistener) {
       unlistener.call();
@@ -1348,64 +1357,6 @@ class VideoEntry {
       },
       mutate: () => {
         this.createDraggingMask_();
-
-        // Desktop listeners
-        this.addDragListener_(
-            dev().assertElement(this.draggingMask_),
-            'mousedown',
-            e => {
-              e.preventDefault();
-              this.isTouched_ = true;
-              this.isDragging_ = false;
-              this.mouse_(e, true);
-            }
-        );
-        this.addDragListener_(this.ampdoc_.win.document, 'mouseup', () => {
-          this.isTouched_ = false;
-          this.isDragging_ = false;
-          // Call drag one last time to see if the velocity is still not null
-          // in which case, drag would call itself again to finish the animation
-          this.drag_();
-        });
-        this.addDragListener_(this.ampdoc_.win.document, 'mousemove', e => {
-          this.isDragging_ = this.isTouched_;
-          if (this.isDragging_) {
-            e.preventDefault();
-            // Start dragging
-            this.dockState_ = DockStates.DRAGGABLE;
-            this.drag_();
-          }
-          this.mouse_(e);
-        });
-        // Touch listeners
-        this.addDragListener_(
-            dev().assertElement(this.draggingMask_),
-            'touchstart',
-            e => {
-              e.preventDefault();
-              this.isTouched_ = true;
-              this.isDragging_ = false;
-              this.mouse_(e, true);
-            }
-        );
-        this.addDragListener_(this.ampdoc_.win.document, 'touchend', () => {
-          this.isTouched_ = false;
-          this.isDragging_ = false;
-          // Call drag one last time to see if the velocity is still not null
-          // in which case, drag would call itself again to finish the animation
-          this.drag_();
-        });
-        this.addDragListener_(this.ampdoc_.win.document, 'touchmove', e => {
-          this.isDragging_ = this.isTouched_;
-          if (this.isDragging_) {
-            e.preventDefault();
-            // Start dragging
-            this.dockState_ = DockStates.DRAGGABLE;
-            this.drag_();
-          }
-          this.mouse_(e);
-        });
-        this.dragListenerInstalled_ = true;
       },
     });
   }
@@ -1537,7 +1488,7 @@ class VideoEntry {
    */
   finishDragging_() {
     this.vsync_.mutate(() => {
-      this.unlistenToDragEvents_();
+      this.unlistenAll_();
       this.removeDraggingMask_();
     });
   }
@@ -1715,19 +1666,257 @@ class VideoEntry {
   createDraggingMask_() {
     const doc = this.ampdoc_.win.document;
     this.draggingMask_ = doc.createElement('i-amphtml-dragging-mask');
-    const play_btn = doc.createElement('i-amphtml-dockable-video-control-btn');
-    play_btn.classList.toggle('play', !this.isPlaying_);
-    play_btn.classList.toggle('pause', this.isPlaying_);
-    const mute_btn = doc.createElement('i-amphtml-dockable-video-control-btn');
-    mute_btn.classList.toggle('mute', !this.muted_);
-    mute_btn.classList.toggle('unmute', this.muted_);
-    const fs_btn = doc.createElement('i-amphtml-dockable-video-control-btn');
-    fs_btn.classList.add('fullscreen');
-    this.draggingMask_.appendChild(play_btn);
-    this.draggingMask_.appendChild(mute_btn);
-    this.draggingMask_.appendChild(fs_btn);
+
+    // Controls container
+    this.miniControls_ = doc.createElement('i-amphtml-dockable-video-controls');
+
+    // Play/Pause button
+    this.createControlBtn_(
+        null,
+        () => { this.video.play(/*autoplay*/ false); },
+        () => { this.video.pause(); },
+        () => { return this.isPlaying_; },
+        'play', 'pause',
+        [VideoEvents.PLAYING, VideoEvents.PAUSE],
+        [
+          () => { this.hideMiniControlsDeferred_(); },
+          () => { clearTimeout(this.controlsTimeout_); },
+        ]
+    );
+
+    // Mute/unmute button
+    this.createControlBtn_(
+        () => { this.hideMiniControlsDeferred_(); },
+        () => { this.video.mute(); },
+        () => { this.video.unmute(); },
+        () => { return this.muted_; },
+        'unmute', 'mute',
+        [VideoEvents.MUTED, VideoEvents.UNMUTED]
+    );
+
+    // Fullscreen button
+    this.createControlBtn_(
+        () => { this.hideMiniControlsDeferred_(); },
+        () => { this.video.fullscreenEnter(); },
+        () => { this.video.fullscreenExit(); },
+        () => { return this.video.isFullscreen(); },
+        'enterfullscreen', 'exitfullscreen'
+    );
+
+    // Create progress bar
+    const progress = doc.createElement('progress');
+    progress.classList.add('i-amphtml-dockable-video-progress');
+    progress.setAttribute('value', 0);
+    progress.setAttribute('max', 100);
+    const updateVideoProgress = () => {
+      const current = this.video.getCurrentTime();
+      const duration = this.video.getDuration();
+      progress.setAttribute('value',
+          Math.floor(current * (100 / duration))
+      );
+    };
+    this.addListener_(dev().assertElement(this.video.element),
+        VideoAnalyticsEvents.SECONDS_PLAYED,
+        () => {
+          updateVideoProgress();
+        }
+    );
+
+    // Create close button
+    const closeBtn = doc.createElement('i-amphtml-dockable-video-close');
+    this.addListener_(dev().assertElement(closeBtn),
+        'click',
+        () => {
+          this.video.pause();
+          this.finishDocking_();
+        }
+    );
+
+    // Update the played time for the first time
+    updateVideoProgress();
+
+    // Add controls and progress-bar to the mask
+    this.miniControls_.appendChild(closeBtn);
+    this.draggingMask_.appendChild(this.miniControls_);
+    this.draggingMask_.appendChild(progress);
+
+    // Align mask with docked video
     this.realignDraggingMask_();
+
+    // Add the mask and its events
     this.video.element.appendChild(this.draggingMask_);
+
+    // Touch/Mouse listeners
+    this.addListener_(
+        dev().assertElement(this.draggingMask_),
+        'mousedown touchstart',
+        e => {
+          if (e.type == 'touchstart') {
+            this.lastTouchedElement_ = e.target;
+          } else if (e.type == 'mousedown'
+                     && this.lastTouchedElement_
+                     && e.target != this.lastTouchedElement_) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+          this.isTouched_ = true;
+          this.isDragging_ = false;
+          this.mouse_(e, true);
+          // Time-out to make sure we don't show controls
+          // when user wanted to drag rather than show controls
+          setTimeout(() => { if (!this.isShowingControls_) {
+            this.showMiniControls_();
+          } }, 200);
+        }
+    );
+
+    this.addListener_(
+        dev().assertElement(this.draggingMask_),
+        'click',
+        e => {
+          if (e.target != this.draggingMask_) {
+            return;
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+    );
+
+    this.addListener_(this.ampdoc_.win.document, 'mouseup touchend', e => {
+      if (e.type == 'mouseup'
+          && this.lastTouchedElement_
+          && e.target != this.lastTouchedElement_) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      this.isTouched_ = false;
+      this.isDragging_ = false;
+      // Call drag one last time to see if the velocity is still not null
+      // in which case, drag would call itself again to finish the animation
+      this.drag_();
+    });
+
+    this.addListener_(this.ampdoc_.win.document, 'mousemove touchmove', e => {
+      if (e.type == 'mousemove'
+          && this.lastTouchedElement_
+          && e.target != this.lastTouchedElement_) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      this.isDragging_ = this.isTouched_;
+      if (this.isDragging_) {
+        e.preventDefault();
+        // Start dragging
+        this.dockState_ = DockStates.DRAGGABLE;
+        this.drag_();
+      }
+      this.mouse_(e);
+    });
+
+    this.dragListenerInstalled_ = true;
+  }
+
+  /**
+   * Hides the minimized controls after a certain time has passed
+   * @private
+   */
+  hideMiniControlsDeferred_() {
+    // After a second we hide the controls again
+    this.controlsTimeout_ = setTimeout(() => {
+      // Fade Out
+      Animation.animate(this.miniControls_,
+          tr.setStyles(dev().assertElement(this.miniControls_), {
+            'opacity': tr.numeric(1, 0),
+          }), 200)
+      .thenAlways(() => {
+        st.setStyles(dev().assertElement(this.miniControls_), {
+          'display': 'none',
+        });
+        this.isShowingControls_ = false;
+      });
+    }, 1500);
+  }
+
+  /**
+   * Makes minimized video controls fade in
+   * @param {boolean} persistent
+   * @private
+   */
+  showMiniControls_(persistent) {
+    // If the video is moving then don't show controls
+    if (this.isDragging_
+      || this.isSnapping_
+      || Math.abs(this.dragCoordinates_.velocity.x) >= STOP_THRESHOLD
+      || Math.abs(this.dragCoordinates_.velocity.y) >= STOP_THRESHOLD) {
+      return;
+    }
+    if (this.controlsTimeout_) {
+      clearTimeout(this.controlsTimeout_);
+    }
+    // Show controls
+    this.isShowingControls_ = true;
+    st.setStyles(dev().assertElement(this.miniControls_), {
+      'display': 'flex',
+    });
+    // Fade In
+    Animation.animate(dev().assertElement(this.miniControls_),
+        tr.setStyles(dev().assertElement(this.miniControls_), {
+          'opacity': tr.numeric(0, 1),
+        }), 200);
+    if (!persistent) {
+      this.hideMiniControlsDeferred_();
+    }
+  }
+
+  /**
+   * Create a minimized controls button
+   * @private
+   */
+  createControlBtn_(before, action1, action2, state, class1, class2,
+    events, afterEachEventOccured) {
+    const doc = this.ampdoc_.win.document;
+    const button = doc.createElement('i-amphtml-dockable-video-control-btn');
+    button.classList.toggle(class1, !state());
+    button.classList.toggle(class2, state());
+    if (events) {
+      this.addListener_(this.video.element,
+          events.join(' '), e => {
+            button.classList.toggle(class1, !state());
+            button.classList.toggle(class2, state());
+            if (afterEachEventOccured
+                && afterEachEventOccured[events.indexOf(e.type)]) {
+              afterEachEventOccured[events.indexOf(e.type)]();
+            }
+          }
+      );
+    }
+    this.miniControls_.appendChild(button);
+    this.addListener_(button, 'click', e => {
+      if (this.lastTouchedElement_
+          && e.target != this.lastTouchedElement_) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      if (e.target != button) {
+        return;
+      }
+      if (before) {
+        before();
+      }
+      if (!state()) {
+        action1();
+      } else {
+        action2();
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    });
   }
 
   /**

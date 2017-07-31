@@ -27,7 +27,7 @@ import {dev} from '../../../src/log';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents, VideoAnalyticsEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
@@ -242,6 +242,9 @@ class AmpVideo extends AMP.BaseElement {
     });
     listen(video, 'ended', () => {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+    });
+    listen(video, 'timeupdate', () => {
+      this.element.dispatchCustomEvent(VideoAnalyticsEvents.SECONDS_PLAYED);
     });
   }
 

@@ -25,10 +25,11 @@
  * @param {string} eventType
  * @param {function(!Event)} listener
  * @param {boolean=} opt_capture
+ * @param {boolean=} opt_passive
  * @return {!UnlistenDef}
  */
 export function internalListenImplementation(element, eventType, listener,
-    opt_capture) {
+    opt_capture, opt_passive) {
   let localElement = element;
   let localListener = listener;
   /** @type {?Function}  */
@@ -41,11 +42,34 @@ export function internalListenImplementation(element, eventType, listener,
       throw e;
     }
   };
+
+  // Test whether browser supports the passive option or not
+  let passiveSupported = false;
+  try {
+    const options = Object.defineProperty({}, 'passive', {
+      get: function() {
+        passiveSupported = true;
+      },
+    });
+    self.addEventListener('test-passive', null, options);
+  } catch (err) {
+    // Passive is not supported
+  }
+
   const capture = opt_capture || false;
-  localElement.addEventListener(eventType, wrapped, capture);
+  const passive = opt_passive || false;
+  localElement.addEventListener(
+      eventType,
+      wrapped,
+      passiveSupported ? {'capture': capture, 'passive': passive} : capture
+  );
   return () => {
     if (localElement) {
-      localElement.removeEventListener(eventType, wrapped, capture);
+      localElement.removeEventListener(
+          eventType,
+          wrapped,
+          passiveSupported ? {'capture': capture, 'passive': passive} : capture
+      );
     }
     // Ensure these are GC'd
     localListener = null;

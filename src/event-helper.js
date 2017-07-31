@@ -50,11 +50,12 @@ export function createCustomEvent(win, type, detail, opt_eventInit) {
  * @param {string} eventType
  * @param {function(!Event)} listener
  * @param {boolean=} opt_capture
+ * @param {boolean=} opt_passive
  * @return {!UnlistenDef}
  */
-export function listen(element, eventType, listener, opt_capture) {
+export function listen(element, eventType, listener, opt_capture, opt_passive) {
   return internalListenImplementation(
-      element, eventType, listener, opt_capture);
+      element, eventType, listener, opt_capture, opt_passive);
 }
 
 /**
@@ -73,9 +74,11 @@ export function getData(event) {
  * @param {string} eventType
  * @param {function(!Event)} listener
  * @param {boolean=} opt_capture
+ * @param {boolean=} opt_passive
  * @return {!UnlistenDef}
  */
-export function listenOnce(element, eventType, listener, opt_capture) {
+export function listenOnce(element, eventType, listener,
+  opt_capture, opt_passive) {
   let localListener = listener;
   const unlisten = internalListenImplementation(element, eventType, event => {
     try {
@@ -85,7 +88,7 @@ export function listenOnce(element, eventType, listener, opt_capture) {
       localListener = null;
       unlisten();
     }
-  }, opt_capture);
+  }, opt_capture, opt_passive);
   return unlisten;
 }
 
