@@ -21,7 +21,6 @@ import {
   METATAG_NAME,
 } from '../refresh-manager';
 import {timerFor} from '../../../../src/services';
-import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
 function getTestElement() {
@@ -49,7 +48,6 @@ describe('refresh-manager', () => {
       element: getTestElement(),
       refresh: () => {},
     };
-    toggleExperiment(window, 'amp-ad-refresh', true);
   });
 
   afterEach(() => {
