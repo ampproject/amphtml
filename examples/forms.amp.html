@@ -491,6 +491,30 @@
     </fieldset>
 </form>
 
+<h4>Show As You Go Messages (with all messages on submit)</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="interact-and-submit">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name7" required pattern="\w+\s\w+">
+            <span visible-when-invalid="valueMissing" validation-for="name7"></span>
+            <span visible-when-invalid="patternMismatch" validation-for="name7">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </span>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email7" required>
+            <span visible-when-invalid="valueMissing" validation-for="email7"></span>
+            <span visible-when-invalid="typeMismatch" validation-for="email7"></span>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
 <h4 id="header1">on=change and form.submit examples</h4>
 <button on="tap:header1.submit">Wrong Action - should throw an error</button>
 <form method="post"

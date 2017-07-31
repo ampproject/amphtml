@@ -331,6 +331,9 @@ The `show-all-on-submit` reporting option shows all validation errors on all inv
 #### As You Go
 The `as-you-go` reporting option allows your user to see validation messages as they're interacting with the input. For example, if the user types an invalid email address, the user will see the error right away.  Once they correct the value, the error goes away.
 
+#### Interact and Submit
+The `interact-and-submit` reporting option combines the behavior of `show-all-on-submit` and `as-you-go`. Individual fields will show any errors immediately after interactions, and on submit the form will show errors on all invalid fields.
+
 ## Verification (Experimental)
 
 This feature is still experimental, so you need to [enable the experiment](https://www.ampproject.org/docs/reference/experimental) to use form verification.
