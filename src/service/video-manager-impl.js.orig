@@ -203,6 +203,16 @@ export class VideoManager {
    * @private
    */
   registerCommonActions_(video) {
+<<<<<<< HEAD
+    video.registerAction('play', video.play.bind(video, /* isAutoplay */ false),
+        ActionTrust.HIGH);
+    video.registerAction('pause', video.pause.bind(video), ActionTrust.HIGH);
+    video.registerAction('mute', video.mute.bind(video), ActionTrust.HIGH);
+    video.registerAction('unmute', video.unmute.bind(video),
+        ActionTrust.HIGH);
+    video.registerAction('fullscreen', video.fullscreenEnter.bind(video),
+        ActionTrust.HIGH);
+=======
     // Only require ActionTrust.LOW for video actions to defer to platform
     // specific handling (e.g. user gesture requirement for unmuted playback).
     video.registerAction('play',
@@ -210,8 +220,7 @@ export class VideoManager {
     video.registerAction('pause', video.pause.bind(video), ActionTrust.LOW);
     video.registerAction('mute', video.mute.bind(video), ActionTrust.LOW);
     video.registerAction('unmute', video.unmute.bind(video), ActionTrust.LOW);
-    video.registerAction('fullscreen', video.fullscreenEnter.bind(video),
-        ActionTrust.LOW);
+>>>>>>> 1cc2b8b10cb566eac652d43c2db7125bb1c725cb
   }
 
   /**

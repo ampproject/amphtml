@@ -18,7 +18,10 @@ import {
   AmpUserNotification,
   UserNotificationManager,
 } from '../amp-user-notification';
-import {getServiceForDoc} from '../../../../src/service';
+import {
+  getServiceForDoc,
+  getServicePromiseForDoc,
+} from '../../../../src/service';
 
 
 describes.realWin('amp-user-notification', {
@@ -27,14 +30,12 @@ describes.realWin('amp-user-notification', {
     extensions: ['amp-user-notification'],
   },
 }, env => {
-  let sandbox;
   let ampdoc;
   let win;
   let dftAttrs;
   let storageMock;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
     ampdoc = env.ampdoc;
     win = env.win;
     dftAttrs = {
@@ -45,6 +46,11 @@ describes.realWin('amp-user-notification', {
     };
     const storage = getServiceForDoc(ampdoc, 'storage');
     storageMock = sandbox.mock(storage);
+
+    return getServicePromiseForDoc(ampdoc, 'userNotificationManager')
+        .then(manager => {
+          sandbox.stub(manager, 'registerUserNotification');
+        });
   });
 
   function getUserNotification(attrs = {}) {
@@ -60,11 +66,6 @@ describes.realWin('amp-user-notification', {
     elem.appendChild(button);
 
     doc.body.appendChild(elem);
-    const impl = elem.implementation_;
-    impl.userNotificationManager_ = {
-      registerUserNotification: () => {},
-    };
-
     return elem;
   }
 
@@ -523,7 +524,7 @@ describes.realWin('amp-user-notification', {
     let tag;
 
     beforeEach(() => {
-      service = new UserNotificationManager(window);
+      service = new UserNotificationManager(ampdoc);
       service.managerReadyPromise_ = Promise.resolve();
       service.nextInQueue_ = service.managerReadyPromise_;
       tag = {
