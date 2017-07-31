@@ -357,6 +357,9 @@ class AmpDailymotion extends AMP.BaseElement {
     if (platform.isSafari() || platform.isIos()) {
       this.sendCommand_('fullscreen', [true]);
     } else {
+      if (!this.iframe_) {
+        return;
+      }
       fullscreenEnter(dev().assertElement(this.iframe_));
     }
   }
@@ -369,6 +372,9 @@ class AmpDailymotion extends AMP.BaseElement {
     if (platform.isSafari() || platform.isIos()) {
       this.sendCommand_('fullscreen', [false]);
     } else {
+      if (!this.iframe_) {
+        return;
+      }
       fullscreenExit(dev().assertElement(this.iframe_));
     }
   }
@@ -379,6 +385,9 @@ class AmpDailymotion extends AMP.BaseElement {
     if (platform.isSafari() || platform.isIos()) {
       return this.isFullscreen_;
     } else {
+      if (!this.iframe_) {
+        return false;
+      }
       return isFullscreenElement(dev().assertElement(this.iframe_));
     }
   }

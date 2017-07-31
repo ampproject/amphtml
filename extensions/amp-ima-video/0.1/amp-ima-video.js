@@ -284,6 +284,9 @@ class AmpImaVideo extends AMP.BaseElement {
   fullscreenEnter() {
     // TODO(@aghassemi, #10597) Make internal <video> element go fullscreen instead
     // using postMessages
+    if (!this.iframe_) {
+      return;
+    }
     fullscreenEnter(dev().assertElement(this.iframe_));
   }
 
@@ -291,6 +294,9 @@ class AmpImaVideo extends AMP.BaseElement {
    * @override
    */
   fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
     fullscreenExit(dev().assertElement(this.iframe_));
   }
 
@@ -298,6 +304,9 @@ class AmpImaVideo extends AMP.BaseElement {
   isFullscreen() {
     // TODO(@aghassemi, #10597) Report fullscreen status of internal <video>
     // element rather than iframe
+    if (!this.iframe_) {
+      return false;
+    }
     return isFullscreenElement(dev().assertElement(this.iframe_));
   }
 

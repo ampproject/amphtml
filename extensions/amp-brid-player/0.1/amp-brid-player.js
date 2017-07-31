@@ -295,6 +295,9 @@ class AmpBridPlayer extends AMP.BaseElement {
    * @override
    */
   fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
     fullscreenEnter(dev().assertElement(this.iframe_));
   }
 
@@ -302,11 +305,17 @@ class AmpBridPlayer extends AMP.BaseElement {
    * @override
    */
   fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
     fullscreenExit(dev().assertElement(this.iframe_));
   }
 
   /** @override */
   isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
     return isFullscreenElement(dev().assertElement(this.iframe_));
   }
 
