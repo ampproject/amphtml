@@ -1627,7 +1627,8 @@ describe('amp-a4a', () => {
         return signatureVerifierFor(a4a.win).verify(
             utf8EncodeSync('some_creative'), headers, () => {})
             .then(status => {
-              expect(status).to.equal(VerificationStatus.SIGNATURE_MISMATCH);
+              expect(status).to.equal(
+                  VerificationStatus.ERROR_SIGNATURE_MISMATCH);
               expect(stubVerifySignature).to.be.callCount(20);
             });
       });
@@ -1648,9 +1649,9 @@ describe('amp-a4a', () => {
         stubVerifySignature.onCall(1).returns(Promise.resolve(true));
         return signatureVerifierFor(a4a.win).verify(
             utf8EncodeSync(creative), headers, () => {})
-            .then(failure => {
+            .then(status => {
               expect(stubVerifySignature).to.be.calledTwice;
-              expect(failure).to.be.null;
+              expect(status).to.equal(VerificationStatus.OK);
             });
       });
 
@@ -1681,9 +1682,9 @@ describe('amp-a4a', () => {
 
         return signatureVerifierFor(a4a.win).verify(
             utf8EncodeSync(creative), headers, () => {})
-            .then(failure => {
+            .then(status => {
               expect(stubVerifySignature).to.be.calledTwice;
-              expect(failure).to.be.null;
+              expect(status).to.equal(VerificationStatus.OK);
             });
       });
     });
