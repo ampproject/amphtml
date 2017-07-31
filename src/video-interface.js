@@ -18,7 +18,7 @@ import {ActionTrust} from './action-trust'; /* eslint no-unused-vars: 0 */
 
 /**
  * @typedef {{
- *   artwork: string,
+ *   artwork: Array,
  *   title: string,
  *   album: string,
  *   artist: string,
@@ -121,28 +121,19 @@ export class VideoInterface {
    * title (string): Name of the video
    * artist (string): Name of the video's author/artist
    * album (string): Name of the video's album if it exists
-   * @return {!VideoMetaDef} metadata
+   * @return {!VideoMetaDef|undefined} metadata
    */
-  getMetaData() {
-    return {
-      'artwork': '',
-      'title': '',
-      'artist': '',
-      'album': '',
-    };
-  }
+  getMetadata() {}
 
   /**
    * If this returns true then it will be assumed that the player implements
    * the MediaSession API internally so that the video manager does not override
-   * it. If not, the video manager will use the metaData variable as well as
+   * it. If not, the video manager will use the metadata variable as well as
    * inferred meta-data to update the video's Media Session notification.
    *
    * @return {boolean}
    */
-  preimplementsMediaSessionAPI() {
-    return false;
-  }
+  preimplementsMediaSessionAPI() {}
 
 
   /**

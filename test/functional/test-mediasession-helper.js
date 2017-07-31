@@ -71,20 +71,20 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
     document.documentElement.innerHTML = template;
     ampdoc = {
       win: {
-        document: document,
-        navigator: {
-          mediaSession: {
-            metadata: {
+        'document': document,
+        'navigator': {
+          'mediaSession': {
+            'metadata': {
               'artist': '',
               'album': '',
               'artwork': [],
               'title': '',
             },
-            setActionHandler: () => {
+            'setActionHandler': () => {
             },
-          }
+          },
         },
-        MediaMetadata: Object,
+        'MediaMetadata': Object,
       },
     };
   });
@@ -116,11 +116,12 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       'artist': 'Some artist',
       'album': 'Some album',
       'artwork': [
-        'http://example.com/image.png'
+        'http://example.com/image.png',
       ],
       'title': 'Some title',
     };
     setMediaSession(ampdoc, fakeMetaData);
-    expect(ampdoc.win.navigator.mediaSession.metadata).to.deep.equal(fakeMetaData);
+    const newMetaData = ampdoc.win.navigator.mediaSession.metadata;
+    expect(newMetaData).to.deep.equal(fakeMetaData);
   });
 });

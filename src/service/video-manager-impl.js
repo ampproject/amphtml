@@ -41,6 +41,7 @@ import {
 import {map} from '../utils/object';
 import {layoutRectLtwh, RelativePositions} from '../layout-rect';
 import {
+  EMPTY_METADATA,
   parseSchemaImage,
   parseOgImage,
   parseFavicon,
@@ -546,18 +547,10 @@ class VideoEntry {
     this.hasFullscreenOnLandscape = fsOnLandscapeAttr == ''
                                     || fsOnLandscapeAttr == 'always';
 
-    listenOncePromise(element, VideoEvents.LOAD)
-        .then(() => this.videoLoaded());
-
     // Media Session API Variables
 
     /** @private {!../video-interface.VideoMetaDef} */
-    this.metaData_ = {
-      'artist': '',
-      'album': '',
-      'artwork': [],
-      'title': '',
-    };
+    this.metadata_ = EMPTY_METADATA;
 
     listenOncePromise(element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
@@ -596,12 +589,12 @@ class VideoEntry {
         this.video.play(/*isAutoplay*/ false);
       };
       const pauseHandler = () => {
-        this.video.pause(/*isAutoplay*/ false);
-      }
+        this.video.pause();
+      };
       // Update the media session
       setMediaSession(
           this.ampdoc_,
-          this.metaData_,
+          this.metadata_,
           playHandler,
           pauseHandler
       );
@@ -653,7 +646,7 @@ class VideoEntry {
       this.inlineVidRect_ = this.video.element./*OK*/getBoundingClientRect();
     });
 
-    this.fillMetaData_();
+    this.fillMediaSessionMetadata_();
 
     this.updateVisibility();
     if (this.isVisible_) {
@@ -666,37 +659,36 @@ class VideoEntry {
    * Gets the provided metadata and fills in missing fields
    * @private
    */
-  fillMetaData_() {
+  fillMediaSessionMetadata_() {
     if (this.video.preimplementsMediaSessionAPI()) {
       return;
     }
 
-    if (this.video.getMetaData()) {
-      this.metaData_ = map(this.video.getMetaData());
+    if (this.video.getMetadata()) {
+      const mapped = map(this.video.getMetadata());
+      this.metadata_ = /** @type {!../video-interface.VideoMetaDef} */ (mapped);
     }
 
-    if (!this.metaData_.artwork || this.metaData_.artwork.length == 0) {
-      const posterUrl = this.video.element.getAttribute('poster')
-                        || this.internalElement_.getAttribute('poster')
-                        || parseSchemaImage(this.ampdoc_)
+    if (!this.metadata_.artwork || this.metadata_.artwork.length == 0) {
+      const posterUrl = parseSchemaImage(this.ampdoc_)
                         || parseOgImage(this.ampdoc_)
                         || parseFavicon(this.ampdoc_);
 
       if (posterUrl) {
-        this.metaData_.artwork = [{
+        this.metadata_.artwork = [{
           'src': posterUrl,
         }];
       }
     }
 
-    if (!this.metaData_.title) {
+    if (!this.metadata_.title) {
       const title = this.video.element.getAttribute('title')
                     || this.video.element.getAttribute('aria-label')
                     || this.internalElement_.getAttribute('title')
                     || this.internalElement_.getAttribute('aria-label')
                     || this.ampdoc_.win.document.title;
       if (title) {
-        this.metaData_.title = title;
+        this.metadata_.title = title;
       }
     }
   }

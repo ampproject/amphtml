@@ -305,13 +305,18 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /** @override */
-  getMetaData() {
-    return {
-      'artwork': [],
-      'title': '',
-      'artist': '',
-      'album': '',
-    };
+  getMetadata() {
+    const poster = this.element.getAttribute('poster');
+    if (poster) {
+      return {
+        'title': '',
+        'artist': '',
+        'album': '',
+        'artwork': [
+          {'src': poster},
+        ],
+      };
+    }
   }
 
   /** @override */

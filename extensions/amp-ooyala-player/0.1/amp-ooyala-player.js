@@ -260,13 +260,8 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  getMetaData() {
-    return {
-      'artwork': [],
-      'title': '',
-      'artist': '',
-      'album': '',
-    };
+  getMetadata() {
+    // Not implemented
   }
 
   /** @override */

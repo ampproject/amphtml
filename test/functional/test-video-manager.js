@@ -526,13 +526,8 @@ function createFakeVideoPlayerClass(win) {
     }
 
     /** @override */
-    getMetaData() {
-      return {
-        'artwork': '',
-        'title': '',
-        'artist': '',
-        'album': '',
-      };
+    getMetadata() {
+      // Not supported
     }
 
     /** @override */

@@ -16,32 +16,35 @@
 
 import {tryParseJson} from './json';
 
+/** @const {./video-interface.VideoMetaDef} Dummy metadata used to fix a bug */
+export const EMPTY_METADATA = {
+  'title': '',
+  'artist': '',
+  'album': '',
+  'artwork': [
+    {'src': ''},
+  ],
+};
+
 /**
  * Updates the Media Session API's metadata
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @param {!./video-interface.VideoMetaDef} metaData
- * @param {function} playHandler
- * @param {function} pauseHandler
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./video-interface.VideoMetaDef} metadata
+ * @param {function()=} playHandler
+ * @param {function()=} pauseHandler
  */
 export function setMediaSession(ampdoc,
-                                metaData,
-                                playHandler = null,
-                                pauseHandler = null) {
+                                metadata,
+                                playHandler,
+                                pauseHandler) {
   const win = ampdoc.win;
   const navigator = win.navigator;
   if ('mediaSession' in navigator && win.MediaMetadata) {
     // Clear mediaSession (required to fix a bug when switching between two
     // videos)
-    navigator.mediaSession.metadata = new win.MediaMetadata({
-      title: '',
-      artist: '',
-      album: '',
-      artwork: [
-        { src: ''},
-      ]
-    });
-    // Add metaData
-    navigator.mediaSession.metadata = new win.MediaMetadata(metaData);
+    navigator.mediaSession.metadata = new win.MediaMetadata(EMPTY_METADATA);
+    // Add metadata
+    navigator.mediaSession.metadata = new win.MediaMetadata(metadata);
 
     navigator.mediaSession.setActionHandler('play', playHandler);
     navigator.mediaSession.setActionHandler('pause', pauseHandler);
@@ -54,7 +57,7 @@ export function setMediaSession(ampdoc,
 /**
  * Parses the schema.org json-ld formatted meta-data, looks for the page's
  * featured image and returns it
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @return {string|undefined}
  */
 export function parseSchemaImage(ampdoc) {
@@ -62,39 +65,39 @@ export function parseSchemaImage(ampdoc) {
   const schema = doc.querySelector('script[type="application/ld+json"]');
   if (!schema) {
     // No schema element found
-    return undefined;
+    return;
   }
   const schemaJson = tryParseJson(schema.textContent);
-  if (!schemaJson || !schemaJson.image) {
+  if (!schemaJson || !schemaJson['image']) {
     // No image found in the schema
-    return undefined;
+    return;
   }
 
   // Image definition in schema could be one of :
-  if (schemaJson.image['@list']
-      && schemaJson.image['@list'][0]
-      && typeof schemaJson.image['@list'][0] === 'string') {
-    // 1. "image": {.., "@list": ["http://.."], ..}
-    return schemaJson.image['@list'][0];
-  } else if (schemaJson.image['url']
-      && typeof schemaJson.image['url'] === 'string') {
-    // 2. "image": {.., "url": "http://..", ..}
-    return schemaJson.image['url'];
-  } else if (schemaJson.image[0]
-      && typeof schemaJson.image[0] === 'string') {
-    // 3. "image": ["http://.. "]
-    return schemaJson.image[0];
-  } else if (typeof schemaJson.image === 'string') {
-    // 4. "image": "http://..",
-    return schemaJson.image;
+  if (typeof schemaJson['image'] === 'string') {
+    // 1. "image": "http://..",
+    return schemaJson['image'];
+  } else if (schemaJson['image']['@list']
+      && schemaJson['image']['@list'][0]
+      && typeof schemaJson['image']['@list'][0] === 'string') {
+    // 2. "image": {.., "@list": ["http://.."], ..}
+    return schemaJson['image']['@list'][0];
+  } else if (schemaJson['image']['url']
+             && typeof schemaJson['image']['url'] === 'string') {
+    // 3. "image": {.., "url": "http://..", ..}
+    return schemaJson['image']['url'];
+  } else if (schemaJson['image'][0]
+             && typeof schemaJson['image'][0] === 'string') {
+    // 4. "image": ["http://.. "]
+    return schemaJson['image'][0];
   } else {
-    return undefined;
+    return;
   }
 };
 
 /**
  * Parses the og:image if it exists and returns it
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @return {string|undefined}
  */
 export function parseOgImage(ampdoc) {
@@ -103,13 +106,13 @@ export function parseOgImage(ampdoc) {
   if (metaTag) {
     return metaTag.getAttribute('content');
   } else {
-    return undefined;
+    return;
   }
 };
 
 /**
  * Parses the website's Favicon and returns it
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @return {string|undefined}
  */
 export function parseFavicon(ampdoc) {
@@ -119,6 +122,6 @@ export function parseFavicon(ampdoc) {
   if (linkTag) {
     return linkTag.getAttribute('href');
   } else {
-    return undefined;
+    return;
   }
 }
