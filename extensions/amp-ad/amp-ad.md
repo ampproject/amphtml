@@ -282,7 +282,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Smart AdServer](../../ads/smartadserver.md)
 - [smartclip](../../ads/smartclip.md)
 - [Sortable](../../ads/sortable.md)
-- [sogou_ad](../../ads/sogou_ad.md)
+- [sogou Ad](../../ads/sogouad.md)
 - [SOVRN](../../ads/sovrn.md)
 - [SpotX](../../ads/spotx.md)
 - [SunMedia](../../ads/sunmedia.md)

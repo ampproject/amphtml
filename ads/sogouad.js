@@ -20,7 +20,7 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function sogou_ad(global, data) {
+export function sogouad(global, data) {
   validateData(data, ['slot', 'w', 'h'], ['responsive']);
   const slot = global.document.getElementById('c');
   const ad = global.document.createElement('div');
