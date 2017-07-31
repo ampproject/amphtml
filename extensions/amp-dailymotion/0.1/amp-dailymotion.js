@@ -339,14 +339,14 @@ class AmpDailymotion extends AMP.BaseElement {
    * @override
    */
   showControls() {
-    // Not supported
+    this.sendCommand_('controls', [true]);
   }
 
   /**
    * @override
    */
   hideControls() {
-    // Not supported
+    this.sendCommand_('controls', [false]);
   }
 
   /**
