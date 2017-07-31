@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {VerificationFailure} from './signature-verifier';
+import {VerificationStatus} from './signature-verifier';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -181,8 +181,8 @@ export class LegacySignatureVerifier {
   }
 
   /**
-   * Extracts a cryptographic signature from `headers` and verifies that it's
-   * the correct cryptographic signature for `creative`.
+   * Extracts a cryptographic signature from `headers` and attempts to verify
+   * that it's the correct cryptographic signature for `creative`.
    *
    * As a precondition, `loadKeyset` must have already been called on the
    * signing service that was used.
@@ -191,25 +191,21 @@ export class LegacySignatureVerifier {
    * @param {!Headers} headers
    * @param {function(string, !Object)} lifecycleCallback called for each AMP
    *     lifecycle event triggered during verification
-   * @return {!Promise<?VerificationFailure>} resolves to `null` on success, or,
-   *     on failure, to a `VerificationFailure` indicating the cause
+   * @return {!Promise<!VerificationStatus>}
    */
   verify(creative, headers, lifecycleCallback) {
     if (!this.isAvailable_()) {
-      return Promise.resolve(
-          /** @type {?VerificationFailure} */ (VerificationFailure.NO_FAULT));
+      return Promise.resolve(VerificationStatus.UNVERIFIED);
     }
     const headerValue = headers.get(AMP_SIGNATURE_HEADER);
     if (!headerValue) {
-      return Promise.resolve(
-          /** @type {?VerificationFailure} */ (VerificationFailure.NO_FAULT));
+      return Promise.resolve(VerificationStatus.UNVERIFIED);
     }
     let signature;
     try {
       signature = base64UrlDecodeToBytes(headerValue);
     } catch (e) {
-      return Promise.resolve(/** @type {?VerificationFailure} */ (
-          VerificationFailure.SIGNATURE_MISMATCH));
+      return Promise.resolve(VerificationStatus.ERROR_SIGNATURE_MISMATCH);
     }
     // For each signing service, we have exactly one Promise,
     // keyInfoSetPromise, that holds an Array of Promises of signing keys.
@@ -280,10 +276,9 @@ export class LegacySignatureVerifier {
         });
       });
     })).then(
-        () => null,
+        () => VerificationStatus.OK,
         // rejection occurs if all providers fail to verify.
-        () => /** @type {?VerificationFailure} */ (
-            VerificationFailure.SIGNATURE_MISMATCH));
+        () => VerificationStatus.ERROR_SIGNATURE_MISMATCH);
   }
 
   /**

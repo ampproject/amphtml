@@ -15,30 +15,35 @@
  */
 
 /**
- * Potential reasons why an attempt to verify a Fast Fetch signature might not
- * succeed. Used for reporting errors to the ad network.
+ * The result of an attempt to verify a Fast Fetch signature. The different
+ * error statuses are used for reporting errors to the ad network.
  *
  * @enum {number}
  */
-export const VerificationFailure = {
+export const VerificationStatus = {
+
+  /** Verification succeeded. */
+  OK: 0,
 
   /**
-   * A network connectivity failure, misbehaving signing service, or other
-   * factor beyond the ad network's control caused verification to fail.
+   * Verification failed because of a factor beyond the ad network's control,
+   * such as a network connectivity failure, unavailability of Web Cryptography
+   * in the current browsing context, or a misbehaving signing service.
    */
-  NO_FAULT: 1,
+  UNVERIFIED: 1,
 
   /**
-   * The keypair ID provided by the ad network does not correspond to any public
-   * key offered by the signing service.
+   * Verification failed because the keypair ID provided by the ad network did
+   * not correspond to any public key offered by the signing service.
    */
-  KEY_NOT_FOUND: 2,
+  ERROR_KEY_NOT_FOUND: 2,
 
   /**
-   * The signature provided by the ad network is not the correct cryptographic
-   * signature for the given creative data and public key.
+   * Verification failed because the signature provided by the ad network was
+   * not the correct cryptographic signature for the given creative data and
+   * public key.
    */
-  SIGNATURE_MISMATCH: 3,
+  ERROR_SIGNATURE_MISMATCH: 3,
 
 };
 
@@ -66,8 +71,8 @@ export class ISignatureVerifier {
   loadKeyset(unusedSigningServiceName, unusedWaitFor) {}
 
   /**
-   * Extracts a cryptographic signature from `headers` and verifies that it's
-   * the correct cryptographic signature for `creative`.
+   * Extracts a cryptographic signature from `headers` and attempts to verify
+   * that it's the correct cryptographic signature for `creative`.
    *
    * As a precondition, `loadKeyset` must have already been called on the
    * signing service that was used.
@@ -76,8 +81,7 @@ export class ISignatureVerifier {
    * @param {!Headers} unusedHeaders
    * @param {function(string, !Object)} unusedLifecycleCallback called for each
    *     AMP lifecycle event triggered during verification
-   * @return {!Promise<?VerificationFailure>} resolves to `null` on success, or,
-   *     on failure, to a `VerificationFailure` indicating the cause
+   * @return {!Promise<!VerificationStatus>}
    */
   verify(unusedCreative, unusedHeaders, unusedLifecycleCallback) {}
 }

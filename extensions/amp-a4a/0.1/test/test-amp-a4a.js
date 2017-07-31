@@ -29,7 +29,7 @@ import {
   AMP_SIGNATURE_HEADER,
   signatureVerifierFor,
 } from '../legacy-signature-verifier';
-import {VerificationFailure} from '../signature-verifier';
+import {VerificationStatus} from '../signature-verifier';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {utf8EncodeSync} from '../../../../src/utils/bytes';
 import {Signals} from '../../../../src/utils/signals';
@@ -1626,8 +1626,8 @@ describe('amp-a4a', () => {
         headers.set(AMP_SIGNATURE_HEADER, 'some_sig');
         return signatureVerifierFor(a4a.win).verify(
             utf8EncodeSync('some_creative'), headers, () => {})
-            .then(failure => {
-              expect(failure).to.equal(VerificationFailure.SIGNATURE_MISMATCH);
+            .then(status => {
+              expect(status).to.equal(VerificationStatus.SIGNATURE_MISMATCH);
               expect(stubVerifySignature).to.be.callCount(20);
             });
       });

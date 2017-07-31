@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {signatureVerifierFor} from './legacy-signature-verifier';
-import {VerificationFailure} from './signature-verifier';
+import {VerificationStatus} from './signature-verifier';
 import {
   is3pThrottled,
   getAmpAdRenderOutsideViewport,
@@ -661,16 +661,16 @@ export class AmpA4A extends AMP.BaseElement {
               .verify(bytes, headers, (eventName, extraVariables) => {
                 this.protectedEmitLifecycleEvent_(eventName, extraVariables);
               })
-              .then(failure => {
+              .then(status => {
                 this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
-                switch (failure) {
-                  case null:
+                switch (status) {
+                  case VerificationStatus.OK:
                     return bytes;
-                  case VerificationFailure.NO_FAULT:
+                  case VerificationStatus.UNVERIFIED:
                     return null;
                   // TODO(@taymonbeal, #9274): differentiate between these
-                  case VerificationFailure.KEY_NOT_FOUND:
-                  case VerificationFailure.SIGNATURE_MISMATCH:
+                  case VerificationStatus.ERROR_KEY_NOT_FOUND:
+                  case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
                     user().error(
                         TAG, this.element.getAttribute('type'),
                         'Signature verification failed');
