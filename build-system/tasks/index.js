@@ -27,6 +27,7 @@ require('./compile-css-expr');
 require('./csvify-size');
 require('./dep-check');
 require('./get-zindex');
+require('./generate-codeowners');
 require('./extension-generator');
 require('./json-check');
 require('./lint');
