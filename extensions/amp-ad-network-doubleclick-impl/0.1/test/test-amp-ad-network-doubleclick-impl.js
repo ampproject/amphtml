@@ -1584,7 +1584,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         doc.body.appendChild(element);
         impl = new AmpAdNetworkDoubleclickImpl(element);
         impl.win.ampAdPageCorrelator = 12345;
-        delete impl.win['dbclk_a4a_viz_change'];
       });
     });
 
@@ -1666,7 +1665,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       impl.buildCallback();
       expect(onVisibilityChangedHandler).to.be.ok;
       onVisibilityChangedHandler = null;
-      const elem2 = createElementWithAttributes(impl.win.document, 'amp-ad', {
+      const elem2 = createElementWithAttributes(doc, 'amp-ad', {
         type: 'doubleclick',
         height: '250',
         width: '320',

@@ -305,6 +305,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   buildCallback() {
+    super.buildCallback();
     if (this.win['dbclk_a4a_viz_change']) {
       // Only create one per page.
       return;
