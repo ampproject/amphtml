@@ -29,7 +29,7 @@ import {user, dev} from '../../../src/log';
 import {utf8EncodeSync} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';
 import {moveLayoutRect} from '../../../src/layout-rect';
-import {setStyle} from '../../../src/style';
+import {computedStyle, setStyle} from '../../../src/style';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -253,7 +253,9 @@ export class AmpIframe extends AMP.BaseElement {
     this.measureIframeLayoutBox_();
 
     this.isAdLike_ = isAdLike(this.element);
-    this.isTrackingFrame_ = this.looksLikeTrackingIframe_();
+    const layoutBox = this.element.getLayoutBox();
+    this.isTrackingFrame_ =
+        this.looksLikeTrackingIframe_(layoutBox);
     this.isDisallowedAsAd_ = this.isAdLike_ &&
         !isAdPositionAllowed(this.element, this.win);
 
@@ -318,16 +320,33 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     if (this.isTrackingFrame_) {
-      trackingIframeCount++;
-      if (trackingIframeCount > 1) {
-        console/*OK*/.error('Only 1 analytics/tracking iframe allowed per ' +
-            'page. Please use amp-analytics instead or file a GitHub issue ' +
-            'for your use case: ' +
-            'https://github.com/ampproject/amphtml/issues/new');
-        return Promise.resolve();
-      }
+      // Supsect that the iframe is a tracking frame
+      return this.confirmLooksLikeTrackingIframe_().then(isTrackingIframe => {
+        if (isTrackingIframe) {
+          trackingIframeCount++;
+          if (trackingIframeCount > 1) {
+            console/*OK*/.error('Only 1 analytics/tracking iframe allowed per ' +
+                'page. Please use amp-analytics instead or file a GitHub issue ' +
+                'for your use case: ' +
+                'https://github.com/ampproject/amphtml/issues/new');
+            return Promise.resolve();
+          }
+        } else {
+          this.isTrackingFrame_ = false;
+        }
+        console.log('false supsect on tracking iframe');
+        return this.initIframeOnLayout_();
+      });
     }
+    return this.initIframeOnLayout_();
 
+  }
+
+  /**
+   * Real layout promise
+   * @return {Promise}
+   */
+  initIframeOnLayout_() {
     const iframe = this.element.ownerDocument.createElement('iframe');
 
     this.iframe_ = iframe;
@@ -530,15 +549,50 @@ export class AmpIframe extends AMP.BaseElement {
 
   /**
    * Whether this is iframe may have tracking as its primary use case.
+   * @param {!../../../src/layout-rect.LayoutRectDef} layoutBox
    * @return {boolean}
    */
-  looksLikeTrackingIframe_() {
-    const box = this.element.getLayoutBox();
+  looksLikeTrackingIframe_(layoutBox) {
     // This heuristic is subject to change.
-    if (box.width > 10 && box.height > 10) {
+    if (layoutBox.width > 10 && layoutBox.height > 10) {
       return false;
     }
     return true;
+  }
+
+  /**
+   * If suspect that iframe is a tracking iframe, check if we measure the iframe
+   * layoutbox too early. Measure again when animation stops.
+   * @return {Promise<boolean>}
+   */
+  confirmLooksLikeTrackingIframe_() {
+    return new Promise(resolve => {
+      const animationDuration = computedStyle(
+          this.win, this.element)['animationDuration'].slice(0, -1);
+      const transitionDuration = computedStyle(
+          this.win, this.element)['transitionDuration'].slice(0, -1);
+      const isAnimated = animationDuration != 0 ||
+          transitionDuration != 0;
+      if (!isAnimated) {
+        resolve(true);
+        return;
+      }
+      const duration = Math.max(animationDuration, transitionDuration);
+      const eventType =
+          animationDuration == duration ? 'animationend' : 'transitionend';
+      const animateEndPromise = new Promise(resolve => {
+        this.element.addEventListener(eventType, resolve);
+      });
+      return Promise.race([
+        animateEndPromise,
+        Services.timerFor(this.win).promise(duration * 1000)]).then(() => {
+          const viewport = Services.viewportForDoc(this.getAmpDoc());
+          this.element.getResources().getResourceForElement(
+              this.element).requestMeasure();
+          resolve(this.looksLikeTrackingIframe_(
+              viewport.getLayoutRect(this.element)));
+        });
+    });
   }
 };
 
