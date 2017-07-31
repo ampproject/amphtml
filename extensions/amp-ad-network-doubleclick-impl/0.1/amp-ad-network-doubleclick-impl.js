@@ -287,8 +287,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {number} */
     this.ifi_ = 0;
-
-    this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
   }
 
   /** @override */
@@ -312,8 +310,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return;
     }
     this.win['dbclk_a4a_viz_change'] = true;
-    this.viewer_.onVisibilityChanged(() => {
-      if (this.viewer_.getVisibilityState() != VisibilityState.PAUSED ||
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    viewer.onVisibilityChanged(() => {
+      if (viewer.getVisibilityState() != VisibilityState.PAUSED ||
           this.useSra || !this.win.ampAdPageCorrelator) {
         // Do not allow experiment selection if SRA or correlator was not set.
         return;

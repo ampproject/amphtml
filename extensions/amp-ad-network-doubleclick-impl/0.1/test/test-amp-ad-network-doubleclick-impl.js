@@ -1560,11 +1560,13 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
   describe('#correlator clear experiment', () => {
     let onVisibilityChangedHandler;
     let visabilityState;
+    let doc;
 
     beforeEach(() => {
       onVisibilityChangedHandler = null;
       visabilityState = VisibilityState.PAUSED;
       return createIframePromise().then(fixture => {
+        doc = fixture.doc;
         const viewer = {
           isVisible: () => true,
           onVisibilityChanged: handler => {
@@ -1574,12 +1576,12 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           whenFirstVisible: () => Promise.resolve(),
         };
         sandbox.stub(Services, 'viewerForDoc').returns(viewer);
-        element = createElementWithAttributes(fixture.doc, 'amp-ad', {
+        element = createElementWithAttributes(doc, 'amp-ad', {
           type: 'doubleclick',
           height: '250',
           width: '320',
         });
-        document.body.appendChild(element);
+        doc.body.appendChild(element);
         impl = new AmpAdNetworkDoubleclickImpl(element);
         impl.win.ampAdPageCorrelator = 12345;
         delete impl.win['dbclk_a4a_viz_change'];
@@ -1587,7 +1589,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
 
     it('clears if in experiment', () => {
-      impl.win.ampAdPageCorrelator = 12345;
       forceExperimentBranch(impl.win, CORRELATOR_CLEAR_EXP_NAME,
           CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT);
       impl.buildCallback();
@@ -1606,6 +1607,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       impl.buildCallback();
       expect(onVisibilityChangedHandler).to.be.ok;
       onVisibilityChangedHandler();
+      expect(impl.win.ampAdPageCorrelator).to.equal(12345);
       expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.CONTROL))
           .to.be.true;
       expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT))
@@ -1660,7 +1662,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           impl.win.experimentBranches[CORRELATOR_CLEAR_EXP_NAME] === undefined);
     });
 
-    it('only registers one on viewability change listener', () => {
+    it('only registers one onViewabilityChange handler', () => {
       impl.buildCallback();
       expect(onVisibilityChangedHandler).to.be.ok;
       onVisibilityChangedHandler = null;
@@ -1669,7 +1671,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         height: '250',
         width: '320',
       });
-      document.body.appendChild(elem2);
+      doc.body.appendChild(elem2);
       new AmpAdNetworkDoubleclickImpl(elem2).buildCallback();
       expect(onVisibilityChangedHandler).to.not.be.ok;
     });
