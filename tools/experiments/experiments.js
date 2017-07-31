@@ -258,13 +258,6 @@ const EXPERIMENTS = [
       'amp-sidebar/1.0/amp-sidebar-1.0.md',
   },
   {
-    id: 'amp-ad-refresh',
-    name: 'Enable AMP ad refresh',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-ad-network-doubleclick-impl/' +
-        'amp-ad-network-doubleclick-impl-internal.md',
-  },
-  {
     id: 'user-error-reporting',
     name: 'Report error to publishers',
     spec: 'https://github.com/ampproject/amphtml/issues/6415',
