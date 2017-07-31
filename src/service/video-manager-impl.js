@@ -210,6 +210,8 @@ export class VideoManager {
     video.registerAction('pause', video.pause.bind(video), ActionTrust.LOW);
     video.registerAction('mute', video.mute.bind(video), ActionTrust.LOW);
     video.registerAction('unmute', video.unmute.bind(video), ActionTrust.LOW);
+    video.registerAction('fullscreen', video.fullscreenEnter.bind(video),
+        ActionTrust.LOW);
   }
 
   /**
