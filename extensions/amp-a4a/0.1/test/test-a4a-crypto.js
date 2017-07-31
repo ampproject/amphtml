@@ -31,7 +31,7 @@ describe('A4A crypto', () => {
       'BPh0v2RwtwxNFytR9Ksrj_hwOYz_l81m8PnaBhMnkZorqF53bg' +
       'eJ8jvDx2_mBb';
   const pubExp = 'AQAB';
-  const serviceName = 'test-service';
+  const signingServiceName = 'test-service';
 
   const modulus1 =
       'vwx9LQrXHQmiVxxSK9IA_wq9Yu2TFDEQHk9b_rdYJe6fEEwron' +
@@ -73,14 +73,14 @@ describe('A4A crypto', () => {
 
   beforeEach(() => {
     verifier = new LegacySignatureVerifier(window);
-    pubKeyInfoPromise = verifier.importPublicKey(serviceName, {
+    pubKeyInfoPromise = verifier.importPublicKey_(signingServiceName, {
       kty: 'RSA',
       'n': modulus,
       'e': pubExp,
       alg: 'RS256',
       ext: true,
     });
-    pubKeyInfoPromise1 = verifier.importPublicKey(serviceName, {
+    pubKeyInfoPromise1 = verifier.importPublicKey_(signingServiceName, {
       kty: 'RSA',
       'n': modulus1,
       'e': pubExp1,
@@ -90,10 +90,10 @@ describe('A4A crypto', () => {
   });
 
   it('should resolve to a PublicKeyInfoDef object', () => {
-    if (!verifier.isAvailable()) { return; }
+    if (!verifier.isAvailable_()) { return; }
     return pubKeyInfoPromise.then(pubKeyInfo => {
       expect(pubKeyInfo).to.not.be.null;
-      expect(pubKeyInfo.serviceName).to.equal(serviceName);
+      expect(pubKeyInfo.signingServiceName).to.equal(signingServiceName);
       expect(pubKeyInfo.hash).to.not.be.null;
       expect(pubKeyInfo.hash.length).to.equal(4);
       expect(pubKeyInfo.cryptoKey).to.not.be.null;
@@ -102,29 +102,29 @@ describe('A4A crypto', () => {
 
   describe('verifySignature', function() {
     it('should validate with the correct key and signature', () => {
-      if (!verifier.isAvailable()) { return; }
+      if (!verifier.isAvailable_()) { return; }
       return pubKeyInfoPromise.then(pubKeyInfo =>
-          verifier.verifySignature(data, signature, pubKeyInfo)
+          verifier.verifySignature_(data, signature, pubKeyInfo)
               .then(isvalid => expect(isvalid).to.be.true));
     });
 
     it('should not validate with the correct key but wrong data', () => {
-      if (!verifier.isAvailable()) { return; }
+      if (!verifier.isAvailable_()) { return; }
       // Test with correct key, but wrong data.
       return pubKeyInfoPromise.then(pubKeyInfo =>
-          verifier.verifySignature(wrongData, signature, pubKeyInfo)
+          verifier.verifySignature_(wrongData, signature, pubKeyInfo)
               .then(isvalid => expect(isvalid).to.be.false));
     });
 
     it('should not validate with the correct key but modified signature',
         () => {
-          if (!verifier.isAvailable()) { return; }
+          if (!verifier.isAvailable_()) { return; }
           pubKeyInfoPromise.then(pubKeyInfo => {
             const arr = new Array(signature.length);
             for (let i = 0; i < signature.length ; i++) {
               const modifiedSig = signature.slice(0);
               modifiedSig[i] += 1;
-              arr[i] = verifier.verifySignature(data, modifiedSig, pubKeyInfo)
+              arr[i] = verifier.verifySignature_(data, modifiedSig, pubKeyInfo)
                  .then(isvalid => expect(isvalid).to.be.false);
             };
             return Promise.all(arr);
@@ -132,9 +132,9 @@ describe('A4A crypto', () => {
         });
 
     it('should not validate with wrong key', () => {
-      if (!verifier.isAvailable()) { return; }
+      if (!verifier.isAvailable_()) { return; }
       return pubKeyInfoPromise1.then(pubKeyInfo1 =>
-          verifier.verifySignature(data, signature, pubKeyInfo1)
+          verifier.verifySignature_(data, signature, pubKeyInfo1)
               .then(isvalid => expect(isvalid).to.be.false));
     });
   });

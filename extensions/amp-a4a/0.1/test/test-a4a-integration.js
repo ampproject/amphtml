@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AMP_SIGNATURE_HEADER} from '../amp-a4a';
+import {AMP_SIGNATURE_HEADER} from '../legacy-signature-verifier';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {createIframePromise} from '../../../../testing/iframe';
