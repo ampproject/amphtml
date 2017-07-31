@@ -135,7 +135,6 @@ describe('GoogleAdLifecycleReporter', () => {
           urlBuilt: '1',
           adRequestStart: '2',
           adRequestEnd: '3',
-          extractCreativeAndSignature: '4',
           adResponseValidateStart: '5',
           renderFriendlyStart: '6',
           renderCrossDomainStart: '7',

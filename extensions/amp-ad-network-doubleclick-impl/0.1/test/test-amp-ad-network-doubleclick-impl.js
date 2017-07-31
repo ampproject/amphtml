@@ -18,11 +18,14 @@ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {AmpAd3PImpl} from '../../../amp-ad/0.1/amp-ad-3p-impl';
 import {
   AmpA4A,
-  AMP_SIGNATURE_HEADER,
   CREATIVE_SIZE_HEADER,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
 } from '../../../amp-a4a/0.1/amp-a4a';
+import {
+  AMP_SIGNATURE_HEADER,
+  signatureVerifierFor,
+} from '../../../amp-a4a/0.1/legacy-signature-verifier';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
   installExtensionsService,
@@ -138,7 +141,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
   });
 
-  describe('#extractCreativeAndSignature', () => {
+  describe('#extractSize', () => {
     let loadExtensionSpy;
     const size = {width: 200, height: 50};
 
@@ -1424,7 +1427,9 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
      * it has an AMP creative.
      */
     function stubForAmpCreative() {
-      sandbox.stub(impl, 'verifyCreativeSignature_', () => utf8Encode('foo'));
+      sandbox.stub(
+          signatureVerifierFor(impl.win), 'verify',
+          () => Promise.resolve(null));
     }
 
     function mockSendXhrRequest() {
