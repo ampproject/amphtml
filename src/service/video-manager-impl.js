@@ -350,8 +350,25 @@ export class VideoManager {
         return this.entries_[i];
       }
     }
+
     dev().assert(false, 'video is not registered to this video manager');
     return null;
+  }
+
+  /**
+   * Get the current analytics details for the given video.
+   * Silently fail if the video is not found in this manager.
+   * @param {!AmpElement} videoElement
+   * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>|!Promise<undefined>}
+   */
+  getVideoAnalyticsDetails(videoElement) {
+    for (let i = 0; i < this.entries_.length; i++) {
+      const entry = this.entries_[i];
+      if (entry.video.element === videoElement) {
+        return entry.getAnalyticsDetails();
+      }
+    }
+    return Promise.resolve();
   }
 
   /**

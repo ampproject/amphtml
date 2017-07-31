@@ -462,6 +462,14 @@ export class GlobalVariableSource extends VariableSource {
       return Services.viewerForDoc(this.ampdoc).isVisible() ? '0' : '1';
     });
 
+    this.setAsync('VIDEO_DATA', (videoId, analyticsProperty) => {
+      const root = this.ampdoc.getRootNode();
+      const video = user().assertElement(root.querySelector(`#${videoId}`),
+          `Could not find an element with id="${videoId}" for VIDEO_DATA`);
+      return Services.videoManagerForDoc(this.ampdoc)
+          .getVideoAnalyticsDetails(video)
+          .then(details => details ? details[analyticsProperty] : '');
+    });
   }
 
   /**
