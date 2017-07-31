@@ -22,9 +22,11 @@ import * as sinon from 'sinon';
 
 describe('amp-img', () => {
   let sandbox;
+  let screenWidth;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    screenWidth = 320;
   });
 
   afterEach(() => {
@@ -36,6 +38,9 @@ describe('amp-img', () => {
         .returns(true);
     return createIframePromise().then(iframe => {
       installImg(iframe.win);
+      Object.defineProperty(iframe.win.screen, 'width', {
+        get: () => screenWidth,
+      });
       const img = iframe.doc.createElement('amp-img');
       for (const key in attributes) {
         img.setAttribute(key, attributes[key]);
@@ -106,6 +111,20 @@ describe('amp-img', () => {
       const img = ampImg.querySelector('img');
       expect(img.tagName).to.equal('IMG');
       expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
+      expect(img.hasAttribute('referrerpolicy')).to.be.false;
+    });
+  });
+
+  it('should load larger image on larger screen', () => {
+    screenWidth = 3000;
+    return getImg({
+      srcset: 'large.jpg 2000w, small.jpg 1000w',
+      width: 300,
+      height: 200,
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.tagName).to.equal('IMG');
+      expect(img.getAttribute('src')).to.equal('large.jpg');
       expect(img.hasAttribute('referrerpolicy')).to.be.false;
     });
   });

@@ -174,7 +174,7 @@ export class AmpImg extends BaseElement {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
-    const src = this.srcset_.select(this.getLayoutWidth(), this.getDpr()).url;
+    const src = this.srcset_.select(this.win.screen.width, this.getDpr()).url;
     if (src == this.img_.getAttribute('src')) {
       return Promise.resolve();
     }
