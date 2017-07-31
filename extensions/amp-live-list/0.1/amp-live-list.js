@@ -223,9 +223,8 @@ export class AmpLiveList extends AMP.BaseElement {
     this.curNumOfLiveItems_ = this.validateLiveListItems_(
         this.itemsSlot_, true);
 
-    // TODO(choumx, #9699): LOW.
     this.registerAction(
-        'update', this.updateAction_.bind(this), ActionTrust.MEDIUM);
+        'update', this.updateAction_.bind(this), ActionTrust.HIGH);
 
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
@@ -861,10 +860,8 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 
   sendAmpDomUpdateEvent_() {
-    const event = new Event(
-      AmpEvents.DOM_UPDATE,
-      {bubbles: true, cancelable: true}
-    );
+    const event = this.win.document.createEvent('Event');
+    event.initEvent(AmpEvents.DOM_UPDATE, true, true);
     this.itemsSlot_.dispatchEvent(event);
   }
 }

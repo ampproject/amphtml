@@ -69,6 +69,11 @@ export function setReportError(fn) {
  */
 export class Log {
   /**
+   * opt_suffix will be appended to error message to identify the type of the error message.
+   * We can't rely on the error object to pass along the type because
+   * some browsers do not have this param in its window.onerror API.
+   * See: https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
+   *
    * @param {!Window} win
    * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
    * @param {string=} opt_suffix

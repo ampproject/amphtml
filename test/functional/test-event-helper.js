@@ -28,7 +28,8 @@ import * as sinon from 'sinon';
 describe('EventHelper', () => {
 
   function getEvent(name, target) {
-    const event = new Event(name, {bubbles: true, cancelable: true});
+    const event = document.createEvent('Event');
+    event.initEvent(name, true, true);
     event.testTarget = target;
     return event;
   }
