@@ -101,9 +101,15 @@ For further detail on integrating third party services, fonts, embeds, etc. see 
 
 ## Contributor License Agreement
 
-The AMP Project hosted at GitHub requires all contributors to sign a Contributor License Agreement ([individual](https://developers.google.com/open-source/cla/individual) or [corporation](https://developers.google.com/open-source/cla/corporate)) in order to protect contributors, users and Google in issues of intellectual property.
+The AMP Project hosted at GitHub requires all contributors to sign a Contributor License Agreement in order to protect contributors and users in issues of intellectual property.
 
-When you create a Pull Request a check will be run to ensure that you have signed the CLA.  Make sure that you sign the CLA with the same email address you associate with your commits (likely via the `user.email` Git config as described on GitHub's [Set up Git](https://help.github.com/articles/set-up-git/) page).
+We recommend signing the CLA *before* you send a pull request to avoid problems, though this is not absolutely necessary until your code is ready to be merged in.
+
+**Make sure that you sign the CLA with the same email address you associate with your commits (likely via the `user.email` Git config as described on GitHub's [Set up Git](https://help.github.com/articles/set-up-git/) page).**
+
+* If you are contributing code on your own behalf you can sign the ([individual CLA](https://developers.google.com/open-source/cla/individual) instantly online.
+* If you are planning on contributing code on behalf of your company your company will need to agree to a [corporate CLA](https://developers.google.com/open-source/cla/corporate) if it has not already done so.  Although this is a relatively straightforward process, it requires approval from an authorized signer at your company and a manual verification process, so to ensure you can get your code reviewed and merged quickly please start this process as soon as possible.
+* If your company has already agreed to a corporate CLA you can indicate agreement to the CLA by having the appropriate person at your company add your email address added to the Google Group associated with your corporate CLA.
 
 ## Ongoing participation
 
