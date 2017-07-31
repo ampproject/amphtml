@@ -25,17 +25,24 @@ var util = require('gulp-util');
 
 
 /**
+ * Returns the number of AMP_CONFIG matches in the given config string.
+ *
+ * @param {string} str
+ * @return {number}
+ */
+function numConfigs(str) {
+  var re = /\/\*AMP_CONFIG\*\//g;
+  var matches = str.match(re)
+  return matches == null ? 0 : matches.length;
+}
+
+/**
  * Checks that only 1 AMP_CONFIG should exist after append.
  *
  * @param {string} str
- * @return {boolean}
  */
 function sanityCheck(str) {
-  var re = /\/\*AMP_CONFIG\*\//g;
-  // There must be one and exactly 1 match.
-  var matches = str.match(re)
-  if (matches == null || matches.length != 1) {
-    var numMatches = matches == null ? 0 : matches.length;
+  if (numConfigs(str) != 1) {
     throw new Error(
       'Found ' + numMatches + ' AMP_CONFIG(s) before write. Aborting!');
   }
@@ -182,3 +189,4 @@ exports.prependConfig = prependConfig;
 exports.writeTarget = writeTarget;
 exports.valueOrDefault = valueOrDefault;
 exports.sanityCheck = sanityCheck;
+exports.numConfigs = numConfigs;
