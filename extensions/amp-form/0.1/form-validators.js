@@ -51,7 +51,7 @@ export function setCheckValiditySupportedForTesting(isSupported) {
 const CustomValidationTypes = {
   AsYouGo: 'as-you-go',
   ShowAllOnSubmit: 'show-all-on-submit',
-  AsYouGoShowAllOnSubmit: 'interact-and-submit',
+  InteractAndSubmit: 'interact-and-submit',
   ShowFirstOnSubmit: 'show-first-on-submit',
 };
 
@@ -361,7 +361,7 @@ export function getFormValidator(form) {
       return new AsYouGoValidator(form);
     case CustomValidationTypes.ShowAllOnSubmit:
       return new ShowAllOnSubmitValidator(form);
-    case CustomValidationTypes.AsYouGoShowAllOnSubmit:
+    case CustomValidationTypes.InteractAndSubmit:
       return new InteractAndSubmitValidator(form);
     case CustomValidationTypes.ShowFirstOnSubmit:
       return new ShowFirstOnSubmitValidator(form);
