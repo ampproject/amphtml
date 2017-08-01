@@ -35,11 +35,14 @@ ENV['WEBSERVER_QUIET'] = '--quiet'
 DEFAULT_WIDTHS = [375, 411, 1440]
 HOST = 'localhost'
 PORT = '8000'
+CONFIGS = ['prod', 'canary']
+AMP_RUNTIME_FILE = 'dist/amp.js'
 
 
 # Colorize logs.
 def red(text); "\e[31m#{text}\e[0m"; end
 def cyan(text); "\e[36m#{text}\e[0m"; end
+def green(text); "\e[32m#{text}\e[0m"; end
 
 
 # Launches a background AMP webserver for unminified js using gulp.
@@ -126,16 +129,22 @@ def generateSnapshots(pagesToSnapshot)
     if ARGV.include? '--master'
       Percy::Capybara.snapshot(page, name: 'Blank page')
     end
-    webpages.each do |webpage|
-      url = webpage["url"]
-      name = webpage["name"]
-      forbidden_css = webpage["forbidden_css"]
-      loading_incomplete_css = webpage["loading_incomplete_css"]
-      loading_complete_css = webpage["loading_complete_css"]
-      page.visit(url)
-      verifyCssElements(
-          page, forbidden_css, loading_incomplete_css, loading_complete_css)
-      Percy::Capybara.snapshot(page, name: name)
+    for config in CONFIGS
+      puts green('Generating snapshots using the ') + cyan("#{config}") +
+          green(' AMP config')
+      system("gulp prepend-global --target #{AMP_RUNTIME_FILE} --#{config}")
+      webpages.each do |webpage|
+        url = webpage["url"]
+        name = "#{webpage["name"]} (#{config})"
+        forbidden_css = webpage["forbidden_css"]
+        loading_incomplete_css = webpage["loading_incomplete_css"]
+        loading_complete_css = webpage["loading_complete_css"]
+        page.visit(url)
+        verifyCssElements(
+            page, forbidden_css, loading_incomplete_css, loading_complete_css)
+        Percy::Capybara.snapshot(page, name: name)
+      end
+      system("gulp prepend-global --target #{AMP_RUNTIME_FILE} --remove")
     end
   end
 end
