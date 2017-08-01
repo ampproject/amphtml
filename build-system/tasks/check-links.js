@@ -99,12 +99,12 @@ function checkLinks() {
     if (deadLinksFound) {
         util.log(
             util.colors.red('ERROR'),
-            'Please update',
+            'Please update dead link(s) in',
             util.colors.magenta(filesWithDeadLinks.join(',')),
-            'or whitelist in build-system/tasks/check-links.js');
+            'or whitelist them in build-system/tasks/check-links.js');
         util.log(
-            util.colors.yellow('NOTE:'),
-            'If the links above are examples that aren\'t meant to work,',
+            util.colors.yellow('NOTE'),
+            'If the link(s) above are illustrative and aren\'t meant to work,',
             'surrounding them with backticks or <code></code> will exempt them',
             'from the link checker.');
         process.exit(1);
