@@ -20,13 +20,14 @@ import {
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {LegacySignatureVerifier} from '../legacy-signature-verifier';
 
-describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
+describes.realWin('LegacySignatureVerifier', {amp: true,
+  xhrMock: true,
+},env => {
 
   let fetchMock;
   let keysetBody;
   let verifier;
   let result;
-
   beforeEach(() => {
     fetchMock = new FetchMock(env.win);
     fetchMock.getOnce(
