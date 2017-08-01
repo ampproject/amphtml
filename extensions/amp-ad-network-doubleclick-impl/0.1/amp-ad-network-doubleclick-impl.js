@@ -390,8 +390,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           multiSizeDataStr,
           this.initialSize_.width,
           this.initialSize_.height,
-          multiSizeValidation == 'true',
-          /* Use strict mode only in non-refresh case */ !this.isRefreshing);
+          multiSizeValidation == 'true');
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
           .join('|');
