@@ -87,7 +87,7 @@ export function getMultiSizeDimensions(
           badParams => badParams.map(badParam =>
               `Secondary ${badParam.dim} ${badParam.val} is ` +
               `smaller than 2/3rds of the primary ${badParam.dim}.`)
-          .join(' '))) {
+              .join(' '))) {
         continue;
       }
     }
