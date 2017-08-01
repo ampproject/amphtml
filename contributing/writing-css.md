@@ -174,8 +174,8 @@ Fixing PR: https://github.com/ampproject/amphtml/commit/e12deb125bc0bed16d33481e
 +}
 ```
 * Breaking change: https://github.com/ampproject/amphtml/commit/f2a361651b4b4d1d484c6cd9502c895695545d
-* GH Issue : https://github.com/ampproject/amphtml/issues/
-* Partial Rollback: https://github.com/ampproject/amphtml/pull/
+* GH Issue : https://github.com/ampproject/amphtml/issues/10224
+* Partial Rollback: https://github.com/ampproject/amphtml/pull/10225 
 
 The lesson learnt here is that even though the breaking CSS was a good change (it fixed the FOUC
 due to the class introduced at BUILD), it moved properties from a selector with LOWER
