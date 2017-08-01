@@ -220,8 +220,7 @@ export class AmpUserNotification extends AMP.BaseElement {
             'ampUserId': this.ampUserId_,
           }),
           headers: {
-
-           'Content-Type': 'application/json;charset=utf-8',
+            'Content-Type': 'application/json;charset=utf-8',
           },
         });
   }

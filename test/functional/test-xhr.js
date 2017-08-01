@@ -584,8 +584,8 @@ describe('XHR', function() {
             hello: 'world',
           },
           headers: {
-            'Content-Type': 'application/json;charset=utf-8'
-          }
+            'Content-Type': 'application/json;charset=utf-8',
+          },
         }).then(res => res.json()).then(res => {
           expect(res.json).to.jsonEqual({
             hello: 'world',
