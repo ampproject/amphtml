@@ -368,6 +368,8 @@ export class VideoManager {
         return entry.getAnalyticsDetails();
       }
     }
+
+    dev().assert(false, 'video is not registered to this video manager');
     return Promise.resolve();
   }
 
