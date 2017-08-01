@@ -59,7 +59,7 @@ The `<amp-ad>` requires width and height values to be specified according to the
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampad.basic.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
@@ -79,7 +79,7 @@ Most ad networks require further configuration, which can be passed to the netwo
 
 ##### data-vars-foo-bar
 
-Attributes starting with `data-vars-` are reserved for [`amp-analytics` vars](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute). 
+Attributes starting with `data-vars-` are reserved for [`amp-analytics` vars](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute).
 
 ##### json (optional)
 
@@ -110,7 +110,7 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 
 ## No ad available
 
-The `amp-ad` component supports a child element with the `fallback` attribute. If supported by the ad network, the fallback element is shown if no ad is available for this slot. 
+The `amp-ad` component supports a child element with the `fallback` attribute. If supported by the ad network, the fallback element is shown if no ad is available for this slot.
 
 If there is no fallback element available, the `amp-ad` element is collapsed (that is, set to `display: none`) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
 
@@ -151,7 +151,7 @@ The `content` attribute of the meta tag is the absolute URL to your copy of the 
 Iframes should also enforce that they are only iframed into origins that they expect to be iframed into. The origins would be:
 
 - your own origins
-- https://cdn.ampproject.org for the AMP cache
+- `https://cdn.ampproject.org` for the AMP cache
 
 In the case of the AMP cache you also need to check that the "source origin" (origin of the document served by cdn.ampproject.org) is one of your origins.
 
