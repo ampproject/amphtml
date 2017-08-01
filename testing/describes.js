@@ -112,7 +112,7 @@ import {resetLoadingCheckForTests} from '../src/element-stub';
 import {resetScheduledElementForTesting} from '../src/custom-element';
 import {setStyles} from '../src/style';
 import * as sinon from 'sinon';
-import fetchMock from 'fetch-mock';
+const fetchMock = require('fetch-mock');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -197,6 +197,7 @@ export const sandboxed = describeEnv(spec => []);
  * })} fn
  */
 export const fakeWin = describeEnv(spec => [
+  new xhrMockFixture(spec),
   new FakeWinFixture(spec),
   new AmpFixture(spec),
 ]);
@@ -217,6 +218,7 @@ export const fakeWin = describeEnv(spec => [
  */
 export const realWin = describeEnv(spec => [
   new RealWinFixture(spec),
+  new FakeWinFixture(spec),
   new AmpFixture(spec),
 ]);
 
@@ -342,8 +344,7 @@ function describeEnv(factory) {
 
   /**
    * @param {string} name
-   * @param {!Object} specconsole.log(fetchMock.sandbox());
-          debugger;
+   * @param {!Object} spec
    * @param {function(!Object)} fn
    */
   const mainFunc = function(name, spec, fn) {
@@ -428,6 +429,46 @@ class SandboxFixture {
 }
 
 /** @implements {Fixture} */
+class xhrMockFixture {
+  /**@param {boolean} spec*/
+  constructor(spec) {
+    if (!spec) {
+      /** const */
+      this.spec = false;
+    } else {
+      /** const */
+      this.spec = spec;
+    }
+  }
+
+  /** @override */
+  isOn() {
+    return true;
+  }
+
+  /** @override */
+  setUp(env) {
+    if (this.spec === false) {
+      env.xhrMock.restore();
+      env.xhrMock = null;
+    } else {
+      env.xhrMock = fetchMock.sandbox();
+      env.expectFetch = function(url, response) {
+        env.xhrMock.restore();
+        env.xhrMock.mock(url, response);
+      };
+    }
+  }
+
+  teardown(env) {
+    env.xhrMock.restore();
+    fetchMock.restore();
+  }
+
+}
+
+
+/** @implements {Fixture} */
 class IntegrationFixture {
 
   /** @param {!{body: string}} spec */
@@ -485,23 +526,13 @@ class FakeWinFixture {
 
   /** @override */
   setup(env) {
-    const spec = this.spec;
     env.win = new FakeWindow(this.spec.win || {});
-    if (!(spec.xhrMock === false)) {
-      env.expectFetch = function(url, response) {
-        if (env.xhr) {
-          env.xhr.restore();
-        }
-        env.xhr = fetchMock.mock(url, response);
-      };
-    }
+
+    // setup fetch-mock here
   }
 
   /** @override */
   teardown(env) {
-    if (env.xhr) {
-      env.xhr.restore();
-    }
   }
 }
 
@@ -574,14 +605,6 @@ class RealWinFixture {
       };
       iframe.onerror = reject;
       document.body.appendChild(iframe);
-      if (!(spec.xhrMock === false)) {
-        env.expectFetch = function(url, response) {
-          if (env.xhr) {
-            env.xhr.restore();
-          }
-          env.xhr = fetchMock.mock(url, response);
-        };
-      }
     });
   }
 
@@ -590,9 +613,6 @@ class RealWinFixture {
     // TODO(dvoytenko): test that window is returned in a good condition.
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
-    }
-    if (env.xhr) {
-      env.xhr.restore();
     }
   }
 }
