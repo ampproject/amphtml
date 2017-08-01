@@ -29,14 +29,14 @@ export function sogouad(global, data) {
   if (data.w === '100%') {
     global[sogouUn].push({
       id: data.slot,
-      ele: ad
+      ele: ad,
     });
   } else {
     global[sogouUn].push({
       id: data.slot,
       ele: ad,
       w: data.w,
-      h: data.h
+      h: data.h,
     });
   }
   slot.appendChild(ad);
