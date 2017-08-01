@@ -30,9 +30,9 @@ which are composed of different sorts of CSS selectors.
 
 
 A selector is something which can identify/select an element or a group of elements and apply a
-list of properties to all the selected elements
+list of properties to all the selected elements.
 
-### Example CSS selectors
+### Example: CSS selectors
 
 ```css
  *
@@ -45,40 +45,37 @@ html > body div#pagewrap ul#summer-drinks > li.favorite
 #summer-drinks::after
 ```
 A selector can contain a class, id, pseudo elements, psuedo classes , :not(), and a combination
-of any of these and many more(Here is a comprehensive list of all the selectors -
-https://developer.mozilla.org/en-US/docs/Web/CSS/Reference#Selectors​).
+of any of these and many more. Here is a comprehensive list of all the selectors: 
+https://developer.mozilla.org/en-US/docs/Web/CSS/Reference#Selectors).
 
 In general, the order of the CSS selectors do not affect which rules get applied to your CSS,
-unless the selectors have the same specificity and apply to at-least one element in common.
-A well written CSS will work perfectly well even when the selectors are re-ordered (example
-scenario- reordering imports in a css file). In real world it is hard to achieve this , especially
-when we import CSS via gulp or 3p css (which can change at any time)
+unless the selectors have the same specificity and apply to at least one element in common.
+Well-written CSS will work perfectly fine even when the selectors are re-ordered (example
+scenario: reordering imports in a css file). In the real world, it's hard to achieve this, especially
+when we import CSS via gulp or third-party CSS (which can change at any time).
 
 ### How to calculate Specificity
 
-This blog explains specificty in very simple terms and helps to understand how it is computed -
-https://css-tricks.com/specifics-on-css-specificity/​ (very short and understandable - I promise)
+This blog explains specificity in very simple terms and helps you to understand how it is computed -
+https://css-tricks.com/specifics-on-css-specificity/​ (very short and understandable - I promise).
 
-Here is an online calculator that can be used to compute specificity -
-https://specificity.keegan.st/
+Here is an online calculator that can be used to compute specificity: https://specificity.keegan.st/
 
 ## Writing CSS in AMP Runtime or Extensions
 
-### Creating a new Selector:
-```
-1. Keep the specificity as low as possible - The Selector Properties should be easily
-    overridable (using may be a single id or class-name, without having to repeat a complex
+### Creating a new Selector
+
+1. Keep the specificity as low as possible; the Selector properties should be easily
+    overridable (using maybe a single id or class-name, without having to repeat a complex
     selector).
 
-
-2. Try to write selectors using tag-names and attributes (Class names that get added after
-    build GET FOUC). FOUC (Flash Of Unstyled Content), is a really bad UX, use caution
+2. Try to write selectors using tag-names and attributes; class names that get added after
+    build GET FOUC. FOUC (Flash Of Unstyled Content) is a really bad UX. Use caution
     and best effort to STAY AWAY from using elements/classes that are a result of
     BUILDing in the CSS.
-       ○ A good example would be amp-selector
+       ○ A good example would be amp-selector.
        ○ A bad example would be amp-accordion (See the ​Case Study​ below)
 3. Keep the Selector as simple as possible (readable)
-```
 
 ### Modifying an existing Selector:
 
