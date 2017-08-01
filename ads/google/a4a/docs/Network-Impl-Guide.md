@@ -41,7 +41,7 @@ All network communication via the AMP HTML runtime (resources or XHR) require SS
 
 ### AMP Ad Creative Signature
 
-In order for the AMP runtime to know that a creative is valid [AMP](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md), and thus receive preferential ad rendering, it must pass a client-side, validation check.  The creative must be sent by the ad network to a validation service which verifies the creative conforms to the [specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md).  If so, it will be rewritten by the validation service and the rewritten creative and a cryptographic signature will be returned to the ad network.  The rewritten creative and signature must be included in the response to the AMP runtime from the ad network. extractCreativeAndSignature will then parse out the creative and the signature from the ad response.  Lack of, or invalid signature will cause the runtime to treat it as a Legacy Ad, rendering it within a cross domain iframe and using delayed ad rendering.
+In order for the AMP runtime to know that a creative is valid [AMP](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md), and thus receive preferential ad rendering, it must pass a client-side, validation check.  The creative must be sent by the ad network to a validation service which verifies the creative conforms to the [specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md).  If so, it will be rewritten by the validation service and the rewritten creative and a cryptographic signature will be returned to the ad network.  The rewritten creative and signature must be included in the response to the AMP runtime from the ad network. The AMP runtime will then parse out the creative and the signature from the ad response.  Lack of, or invalid signature will cause the runtime to treat it as a Legacy Ad, rendering it within a cross domain iframe and using delayed ad rendering.
 
 Client side verification of the signature, and thus preferential rendering, requires a browser to have Web Crypto. However, if a browser does not have Web Crypto, Fast Fetch is still able to be used if the ad network permits it. In this case, the ad will simply be guaranteed to render in a cross-domain iframe.
 
@@ -79,7 +79,7 @@ Ad networks that want to add support for Fast Fetch within AMP must add the file
 
 *See Figure 1 Parts B and D*
 
-Implement class `AmpAdNetwork<TYPE>Impl`. This class must extend [AmpA4A](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js). This class must overwrite the super class methods **getAdUrl()** and **extractCreativeAndSignature()**.
+Implement class `AmpAdNetwork<TYPE>Impl`. This class must extend [AmpA4A](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js). This class must overwrite the super class method **getAdUrl()**.
 
 
 ``` javascript
@@ -87,17 +87,10 @@ getAdUrl() - must construct and return the ad url for ad request.
   // @return {string} - the ad url
 ```
 
-``` javascript
-extractCreativeAndSignature(responseText, responseHeaders)
-  // @param {!ArrayBuffer} responseText Response body from the ad request.
-  // @param {!Headers} responseHeaders Response headers from the ad request
-  // @return {Object} creativeParts Object must have a .creative and a .signature.
-``` 
-
 
 Examples of network implementations can be seen for [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js) and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js). 
 
-Usage of getAdUrl and extractCreativeAndSignature can be seen within the this.adPromise_ promise chain in [amp-a4a.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js)
+Usage of getAdUrl can be seen within the this.adPromise_ promise chain in [amp-a4a.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js)
 
 ### `<TYPE>-a4a-config.js`
 
@@ -155,8 +148,6 @@ Please write thorough testing for your AMP ad network implementation.
 * File hierarchy created within amphtml/extensions
 
 * Custom `amp-ad-network-<TYPE>-impl.js` overwrites getAdUrl()
-
-* Custom `amp-ad-network-<TYPE>-impl.js` overwrites extractCreativeAndSignature()
 
 * `<TYPE>-a4a-config.js` implements <TYPE>IsA4AEnabled()
 

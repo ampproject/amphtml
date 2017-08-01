@@ -14,7 +14,12 @@
   * limitations under the License.
   */
 
-import {elementByTag} from '../../../src/dom';
+import {
+  elementByTag,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getMode} from '../../../src/mode';
@@ -29,8 +34,14 @@ import {assertHttpsUrl} from '../../../src/url';
 const TAG = 'amp-video';
 
 /** @private {!Array<string>} */
-const ATTRS_TO_PROPAGATE_ON_BUILD = ['poster', 'controls', 'aria-label',
-  'aria-describedby', 'aria-labelledby'];
+const ATTRS_TO_PROPAGATE_ON_BUILD = [
+  'aria-describedby',
+  'aria-label',
+  'aria-labelledby',
+  'controls',
+  'crossorigin',
+  'poster',
+];
 
 /**
  * @note Do not propagate `autoplay`. Autoplay behaviour is managed by
@@ -176,9 +187,9 @@ class AmpVideo extends AMP.BaseElement {
     });
   }
 
-    /**
-     * @private
-     */
+  /**
+   * @private
+   */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
     this.forwardEvents([VideoEvents.PLAYING, VideoEvents.PAUSE], video);
@@ -194,37 +205,37 @@ class AmpVideo extends AMP.BaseElement {
     });
   }
 
-    /** @override */
+  /** @override */
   pauseCallback() {
     if (this.video_) {
       this.video_.pause();
     }
   }
 
-    /** @private */
+  /** @private */
   isVideoSupported_() {
     return !!this.video_.play;
   }
 
-    // VideoInterface Implementation. See ../src/video-interface.VideoInterface
+  // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   supportsPlatform() {
     return this.isVideoSupported_();
   }
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   isInteractive() {
     return this.element.hasAttribute('controls');
   }
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   play(unusedIsAutoplay) {
     const ret = this.video_.play();
 
@@ -239,39 +250,58 @@ class AmpVideo extends AMP.BaseElement {
     }
   }
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   pause() {
     this.video_.pause();
   }
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   mute() {
     this.video_.muted = true;
   }
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   unmute() {
     this.video_.muted = false;
   }
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   showControls() {
     this.video_.controls = true;
   }
 
-    /**
-     * @override
-     */
+  /**
+   * @override
+   */
   hideControls() {
     this.video_.controls = false;
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    fullscreenEnter(dev().assertElement(this.video_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    fullscreenExit(dev().assertElement(this.video_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    return isFullscreenElement(dev().assertElement(this.video_));
   }
 
   /** @override */

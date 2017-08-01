@@ -282,6 +282,7 @@ var forbiddenTerms = {
     whitelist: [
       '3p/integration.js',
       '3p/ampcontext-lib.js',
+      '3p/iframe-transport-client-lib.js',
       'ads/alp/install-alp.js',
       'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',
@@ -385,6 +386,7 @@ var forbiddenTerms = {
       'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',
       'src/service/cid-impl.js',
+      'src/impression.js',
     ],
   },
   'eval\\(': {
@@ -572,6 +574,13 @@ var forbiddenTerms = {
     message: 'Use createCustomEvent() helper instead.',
     whitelist: [
       'src/event-helper.js',
+    ],
+  },
+  '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {
+    message: 'Use fullscreenEnter() and fullscreenExit() from dom.js instead.',
+    whitelist: [
+      'ads/google/imaVideo.js',
+      'dist.3p/current/integration.js',
     ],
   },
 };

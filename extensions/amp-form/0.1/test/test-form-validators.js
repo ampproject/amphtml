@@ -21,6 +21,7 @@ import {
   PolyfillDefaultValidator,
   AsYouGoValidator,
   ShowAllOnSubmitValidator,
+  InteractAndSubmitValidator,
   ShowFirstOnSubmitValidator,
 } from '../form-validators';
 import {ValidationBubble} from '../validation-bubble';
@@ -111,6 +112,10 @@ describes.realWin('form-validators', {amp: true}, env => {
           'custom-validation-reporting', 'show-all-on-submit');
       expect(getFormValidator(form)).to.be.instanceOf(
           ShowAllOnSubmitValidator);
+      form.setAttribute(
+          'custom-validation-reporting', 'interact-and-submit');
+      expect(getFormValidator(form)).to.be.instanceOf(
+          InteractAndSubmitValidator);
       form.setAttribute(
           'custom-validation-reporting', 'show-first-on-submit');
       expect(getFormValidator(form)).to.be.instanceOf(
@@ -365,6 +370,68 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+    });
+
+    describe('InteractAndSubmitValidator', () => {
+      it('should report validation for input on interaction', () => {
+        const doc = env.win.document;
+        const form = getForm(doc, true);
+        const validations = doc.querySelectorAll('[visible-when-invalid]');
+        const validator = new AsYouGoValidator(form);
+        form.elements[0].validationMessage = 'Name is required';
+        form.elements[1].validationMessage = 'Email is required';
+
+        validator.onBlur({target: form.elements[0]});
+        expect(validations[0].className).to.contain('visible');
+        expect(validations[1].className).to.not.contain('visible');
+        expect(validations[2].className).to.not.contain('visible');
+
+        form.elements[0].value = 'John Miller';
+        validator.onInput({target: form.elements[0]});
+        expect(validations[0].className).to.not.contain('visible');
+        expect(validations[1].className).to.not.contain('visible');
+        expect(validations[2].className).to.not.contain('visible');
+
+        validator.onInput({target: form.elements[1]});
+        expect(validations[0].className).to.not.contain('visible');
+        expect(validations[1].className).to.contain('visible');
+        expect(validations[2].className).to.not.contain('visible');
+        expect(validations[1].textContent).to.equal('Email is required');
+
+        form.elements[1].value = 'invalidemail';
+        form.elements[1].validationMessage = 'Email format is wrong';
+        validator.onInput({target: form.elements[1]});
+        expect(validations[0].className).to.not.contain('visible');
+        expect(validations[1].className).to.not.contain('visible');
+        expect(validations[2].className).to.contain('visible');
+        expect(validations[2].textContent).to.not.equal(
+            'Email format is wrong');
+        expect(validations[2].textContent).to.equal(emailTypeValidationMsg);
+
+        form.elements[1].value = 'valid@email.com';
+        validator.onBlur({target: form.elements[1]});
+        expect(validations[0].className).to.not.contain('visible');
+        expect(validations[1].className).to.not.contain('visible');
+        expect(validations[2].className).to.not.contain('visible');
+      });
+
+      it('should report on interaction for non-active inputs on submit', () => {
+        const doc = env.win.document;
+        const form = getForm(doc, true);
+        const validations = doc.querySelectorAll('[visible-when-invalid]');
+        const validator = new ShowAllOnSubmitValidator(form);
+        validator.report();
+
+        expect(doc.activeElement).to.equal(form.elements[0]);
+        expect(validations[0].className).to.contain('visible');
+        expect(validations[1].className).to.contain('visible');
+        expect(validations[2].className).to.not.contain('visible');
+
+        expect(doc.activeElement).to.equal(form.elements[0]);
+        expect(validations[0].className).to.contain('visible');
+        expect(validations[1].className).to.contain('visible');
+        expect(validations[2].className).to.not.contain('visible');
+      });
     });
   });
 

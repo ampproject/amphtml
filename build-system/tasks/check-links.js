@@ -28,19 +28,37 @@ var util = require('gulp-util');
 
 
 /**
+ * Parses the list of files in argv, or extracts it from the commit log.
+ *
+ * @return {!Array<string>}
+ */
+function getMarkdownFiles() {
+  if (!!argv.files) {
+    return argv.files.split(',');
+  } else {
+    if (!!process.env.TRAVIS_PULL_REQUEST_SHA) {
+      // On Travis, derive the list of .md files from the latest commit.
+      var filesInPr =
+          getStdout(`git diff --name-only master...HEAD`).trim().split('\n');
+      return filesInPr.filter(function(file) {
+        return path.extname(file) == '.md'
+      });
+    } else {
+      // A list of files is required when check-links is run locally.
+      util.log(util.colors.red(
+          'Error: A list of markdown files must be specified via --files'));
+      process.exit(1);
+    }
+  }
+}
+
+/**
  * Parses the list of files in argv and checks for dead links.
  *
  * @return {Promise} Used to wait until all async link checkers finish.
  */
 function checkLinks() {
-  var files = argv.files;
-  if (!files) {
-    util.log(util.colors.red(
-        'Error: A list of markdown files must be specified via --files'));
-    process.exit(1);
-  }
-
-  var markdownFiles = files.split(',');
+  var markdownFiles = getMarkdownFiles();
   var linkCheckers = markdownFiles.map(function(markdownFile) {
     return runLinkChecker(markdownFile);
   });
@@ -70,9 +88,7 @@ function checkLinks() {
         util.log(
             util.colors.red('ERROR'),
             'Possible dead link(s) found in',
-            util.colors.magenta(markdownFiles[index]),
-            '(please update, or whitelist in',
-            'build-system/tasks/check-links.js).');
+            util.colors.magenta(markdownFiles[index]));
       } else {
         util.log(
             util.colors.green('SUCCESS'),
@@ -83,11 +99,15 @@ function checkLinks() {
     if (deadLinksFound) {
         util.log(
             util.colors.red('ERROR'),
-            'Possible dead link(s) found in this PR.',
             'Please update',
             util.colors.magenta(filesWithDeadLinks.join(',')),
             'or whitelist in build-system/tasks/check-links.js');
-            process.exit(1);
+        util.log(
+            util.colors.yellow('NOTE:'),
+            'If the links above are examples that aren\'t meant to work,',
+            'surrounding them with backticks or <code></code> will exempt them',
+            'from the link checker.');
+        process.exit(1);
     } else {
         util.log(
             util.colors.green('SUCCESS'),
@@ -129,13 +149,14 @@ function filterWhitelistedLinks(markdown) {
 
   // Direct links to the https://cdn.ampproject.org domain (not a valid page)
   filteredMarkdown =
-      filteredMarkdown.replace(/https:\/\/cdn.ampproject.org(?!\/)/g, '');
+      filteredMarkdown.replace(/https:\/\/cdn\.ampproject\.org(?!\/)/g, '');
 
   // Links inside a <code> block (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/<code>(.*?)<\/code>/g, '');
 
   // Dailymotion link that is marked dead in Travis CI
-  filteredMarkdown = filteredMarkdown.replace(/https:\/\/developer.dailymotion.com\/player#player-parameters/g, '');
+  filteredMarkdown = filteredMarkdown.replace(
+      /https:\/\/developer\.dailymotion\.com\/player#player-parameters/g, '');
 
   // After all whitelisting is done, clean up any remaining empty blocks bounded
   // by backticks. Otherwise, `` will be treated as the start of a code block

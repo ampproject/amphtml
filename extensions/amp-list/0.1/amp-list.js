@@ -152,7 +152,7 @@ export class AmpList extends AMP.BaseElement {
     });
 
     const templatedEvent = createCustomEvent(this.win,
-        AmpEvents.TEMPLATE_RENDERED, /* detail */ null, {bubbles: true});
+        AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
     this.container_.dispatchEvent(templatedEvent);
 
     // Change height if needed.
