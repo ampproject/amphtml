@@ -662,7 +662,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @private
    */
   executeRtc_(opt_doc) {
-    const doc = opt_doc || document;
+    const doc = opt_doc || this.element.ownerDocument;
     if (rtcPromise) {
       return this.mergeRtc();
     }

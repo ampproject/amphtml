@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
 import {Services} from '../../../../src/services';
 import {
   AmpAdNetworkDoubleclickImpl,
@@ -25,21 +24,7 @@ import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {Xhr} from '../../../../src/service/xhr-impl';
 
 // Uncomment out the next line when testing locally
-// import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
-
-function setupForAdTesting(fixture) {
-  installDocService(fixture.win, /* isSingleDoc */ true);
-  const doc = fixture.doc;
-  doc.win = fixture.win;
-  // TODO(a4a-cam@): This is necessary in the short term, until A4A is
-  // smarter about host document styling.  The issue is that it needs to
-  // inherit the AMP runtime style element in order for shadow DOM-enclosed
-  // elements to behave properly.  So we have to set up a minimal one here.
-  const ampStyle = doc.createElement('style');
-  ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
-  doc.head.appendChild(ampStyle);
-}
-
+ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 
 describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
   let impl;
@@ -50,10 +35,38 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
   beforeEach(() => {
     sandbox = env.sandbox;
     env.win.AMP_MODE.test = true;
+    resetRtcStateForTesting();
+    const doc = env.win.document;
+    // TODO(a4a-cam@): This is necessary in the short term, until A4A is
+    // smarter about host document styling.  The issue is that it needs to
+    // inherit the AMP runtime style element in order for shadow DOM-enclosed
+    // elements to behave properly.  So we have to set up a minimal one here.
+    const ampStyle = doc.createElement('style');
+    ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
+    doc.head.appendChild(ampStyle);
+    element = createElementWithAttributes(env.win.document, 'amp-ad', {
+      'width': '200',
+      'height': '50',
+      'type': 'doubleclick',
+      'layout': 'fixed',
+    });
+    const rtcConf = createElementWithAttributes(
+        env.win.document, 'script',
+        {type: 'application/json', id: 'amp-rtc'});
+    rtcConf.innerHTML = JSON.stringify({
+      endpoint: 'https://example-publisher.com/rtc/',
+    });
+    env.win.document.head.appendChild(rtcConf);
+    xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
   });
 
   afterEach(() => {
     sandbox.restore();
+    impl = null;
+    xhrMock = null;
+    resetRtcStateForTesting();
+    const rtcConf = env.win.document.getElementById('amp-rtc');
+    env.win.document.head.removeChild(rtcConf);
   });
 
   function mockRtcExecution(rtcResponse, element, opt_textFunction) {
@@ -68,7 +81,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
           status: 200,
           text: textFunction,
         })
-      );
+    );
     impl.populateAdUrlState();
     return impl.executeRtc_(env.win.document);
   }
@@ -77,36 +90,6 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
     const rtcConf = env.win.document.getElementById('amp-rtc');
     rtcConf.innerText = JSON.stringify(rtcConfigJson);
   }
-
-  beforeEach(() => {
-    resetRtcStateForTesting();
-    return createIframePromise().then(fixture => {
-      setupForAdTesting(fixture);
-      element = createElementWithAttributes(env.win.document, 'amp-ad', {
-        'width': '200',
-        'height': '50',
-        'type': 'doubleclick',
-        'layout': 'fixed',
-      });
-      const rtcConf = createElementWithAttributes(
-          env.win.document, 'script',
-            {type: 'application/json', id: 'amp-rtc'});
-      rtcConf.innerHTML = JSON.stringify({
-        endpoint: 'https://example-publisher.com/rtc/',
-      });
-      env.win.document.head.appendChild(rtcConf);
-      xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
-
-    });
-  });
-
-  afterEach(() => {
-    impl = null;
-    xhrMock = null;
-    resetRtcStateForTesting();
-    const rtcConf = env.win.document.getElementById('amp-rtc');
-    env.win.document.head.removeChild(rtcConf);
-  });
 
   it('should add just targeting to impl', () => {
     const targeting = {'sport': 'baseball'};
@@ -154,7 +137,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'sports': 'baseball'},
       categoryExclusions: {'age': '18-25'}};
     const contextualTargeting =
-      '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
+    '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
     const jsonTargeting = {
       targeting: {
         'food': {
@@ -182,7 +165,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'sports': 'baseball'},
       categoryExclusions: {'age': '18-25'}};
     let contextualTargeting =
-      '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
+    '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
     element = createElementWithAttributes(env.win.document, 'amp-ad', {
       'width': '200',
       'height': '50',
@@ -193,7 +176,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
     mockRtcExecution(rtcResponse, element);
 
     contextualTargeting =
-      '{"targeting": {"food": {"adults": "wine"}}}';
+    '{"targeting": {"food": {"adults": "wine"}}}';
     const secondElement = createElementWithAttributes(
         env.win.document, 'amp-ad', {
           'width': '200',
@@ -218,7 +201,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'sports': 'baseball'},
       categoryExclusions: {'age': '18-25'}};
     let contextualTargeting =
-      '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
+    '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
     element = createElementWithAttributes(env.win.document, 'amp-ad', {
       'width': '200',
       'height': '50',
@@ -229,7 +212,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
     mockRtcExecution(rtcResponse, element);
 
     contextualTargeting =
-      '{"targeting": {"food": {"adults": "wine"}}}';
+    '{"targeting": {"food": {"adults": "wine"}}}';
     const secondElement = createElementWithAttributes(
         env.win.document, 'amp-ad', {
           'width': '200',
@@ -246,9 +229,9 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
   it('should not send RTC if url invalid', () => {
     const rtcConf = env.win.document.getElementById('amp-rtc');
     rtcConf.innerText = '{'
-          + '"endpoint": "http://example-publisher.com/rtc/",'
-          + '"sendAdRequestOnFailure": false'
-          + '}';
+        + '"endpoint": "http://example-publisher.com/rtc/",'
+        + '"sendAdRequestOnFailure": false'
+        + '}';
 
     const targeting = {'sport': 'baseball'};
     return mockRtcExecution({
@@ -260,8 +243,8 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
 
   it('should resolve on empty RTC response', () => {
     return mockRtcExecution('', element).then(() => {
-        // All that we are expecting here is that a Promise.reject doesn't
-        // bubble up
+      // All that we are expecting here is that a Promise.reject doesn't
+      // bubble up
     }).catch(() => {
       expect(false).to.be.true;
     });
@@ -273,8 +256,8 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       return Promise.resolve(JSON.parse(badRtcResponse));
     };
     return mockRtcExecution(badRtcResponse, element, jsonFunc).then(() => {
-        // All that we are expecting here is that a Promise.reject doesn't
-        // bubble up
+      // All that we are expecting here is that a Promise.reject doesn't
+      // bubble up
     }).catch(() => {
       expect(false).to.be.true;
     });
@@ -329,12 +312,12 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         }));
     impl.populateAdUrlState();
     return impl.executeRtc_(env.win.document).then(() => {
-        // this then block should never run.
+      // this then block should never run.
       expect(true).to.be.false;
     }).catch(err => {
-        // Have to get substring, because the error message has
-        // three 0 width blank space characters added to it
-        // automatically by the log constructor.
+      // Have to get substring, because the error message has
+      // three 0 width blank space characters added to it
+      // automatically by the log constructor.
       expect(err.substring(0, 7)).to.equal('timeout');
     });
   });
@@ -362,7 +345,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       expect(result.artc).to.equal(-1);
       expect(result.ati).to.equal(3);
     }).catch(() => {
-        // Should not error.
+      // Should not error.
       expect(true).to.be.false;
     });
   });
