@@ -1,20 +1,18 @@
 # Writing CSS For AMP Runtime?
 
-Who should read this doc?
-
-What is Specificity?
-Example CSS selectors
-How to calculate Specificity
-Writing CSS in AMP Runtime or Extensions
-Creating a new Selector:
-Modifying an existing Selector:
-FOUC
-Rule of thumb
-Case Studies
-AMP Selector CSS has high CSS specificity
-AMP Accordion CSS Changes broke specificity
-
-Reading material
+- [Who should read this doc?](#who-should-read-this-doc?)
+- [What is Specificity?](#what-is-specificity?)
+ - [Example CSS selectors](#example-css-selectors)
+ - [How to calculate Specificity](#how-to-calculate-specificity)
+- [Writing CSS in AMP Runtime or Extensions](#writing-css-in-amp-runtime-or-extensions)
+ - [Creating a new Selector:](#creating-a-new-selector)
+ - [Modifying an existing Selector:](#modifying-an-existing-selector)
+ - [FOUC](#fouc)
+ - [Rule of thumb](#rule-of-thumb)
+- [Case Studies](#case-studies)
+ - [AMP Selector CSS has high CSS specificity](#amp-selector-css-has-high-css-specificity)
+ - [AMP Accordion CSS Changes broke specificity](#amp-accordion-css-changes-broke-specificity)
+-[Reading material](#reading-material)
 
 ## Who should read this doc?
 
@@ -67,7 +65,7 @@ https://specificity.keegan.st/
 ## Writing CSS in AMP Runtime or Extensions
 
 ### Creating a new Selector:
-
+```
 1. Keep the specificity as low as possible - The Selector Properties should be easily
     overridable (using may be a single id or class-name, without having to repeat a complex
     selector).
@@ -80,6 +78,7 @@ https://specificity.keegan.st/
        ○ A good example would be amp-selector
        ○ A bad example would be amp-accordion (See the ​Case Study​ below)
 3. Keep the Selector as simple as possible (readable)
+```
 
 ### Modifying an existing Selector:
 
@@ -89,7 +88,7 @@ AMP is a versioned Library that a lot of websites use. But I am only changing CS
 this break AMP?
 Yes you can! All it takes to break backward compatibility is replacing a selector with another
 selector that has higher specificity.
-
+```
 1. Do not change the specificity of a selector if possible
 2. If a new property (like font-size: 12px;) is being added , it is okay to add a new selector
 3. If an existing property is being shifted around between existing selectors make sure the
@@ -104,6 +103,7 @@ selector that has higher specificity.
           going to BREAK backward compatibility. (But could fix issues)
        ■ Always add !important during the first pass, Plan for it during design or
           early implementation phases.
+```
 
 ### FOUC
 
@@ -123,12 +123,13 @@ we should probably phrase it as "not allowed". A good example is padding vs marg
 element itself. It's totally fine to change padding during build, but a huge no-no for margin.
 
 ### Rule of thumb
-
+```
 1. Create low specificity selectors
 2. Mostly OK move properties/selectors from HIGHER TO LOWER specificity
 3. DON’T move properties/selectors from LOWER TO HIGHER specificity
 4. Avoid FOUC by writing CSS on tags and attributes and not depending on BUILD
     outcomes.
+```
 
 
 ## Case Studies
@@ -160,7 +161,7 @@ amp-selector​[​disabled​] [​selected​] {
 ​outline​: ​none​;
 }
 ```
-Fixing change:
+Fixing PR:
 https://github.com/ampproject/amphtml/commit/e12deb125bc0bed16d33481e0c
 50
 
@@ -187,7 +188,7 @@ b
 
 GH Issue : ​https://github.com/ampproject/amphtml/issues/
 
-Fixing Change: ​https://github.com/ampproject/amphtml/pull/
+Partial Rollback: ​https://github.com/ampproject/amphtml/pull/
 
 Lesson learnt here is , even though the breaking CSS was a good change it fixed the FOUC
 due to the class introduced at BUILD, it moved properties from a selector with LOWER
