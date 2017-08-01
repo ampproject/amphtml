@@ -107,12 +107,6 @@ describes.fakeWin('amp-form async verification', {}, env => {
       const verifier = getFormVerifier(form, () => {});
       expect(verifier instanceof AsyncVerifier).to.be.true;
     });
-
-    it('should throw if the experiment is disabled with the verify-xhr ' +
-        'attribute present', () => {
-      const form = getForm(env.win.document);
-      expect(() => getFormVerifier(form, () => {})).to.throw(/experiment/);
-    });
   });
 
   describe('AsyncVerifier', () => {
