@@ -66,6 +66,10 @@ const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 const METADATA_STRING_NO_QUOTES =
       '<script type=application/json amp-ad-metadata>';
 
+/** @type {string} */
+const METADATA_STRING_NO_QUOTES_SORTED =
+      '<script amp-ad-metadata type=application/json>';
+
 // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
@@ -1516,6 +1520,10 @@ export class AmpA4A extends AMP.BaseElement {
     if (metadataStart < 0) {
       metadataString = METADATA_STRING_NO_QUOTES;
       metadataStart = creative.lastIndexOf(METADATA_STRING_NO_QUOTES);
+    }
+    if (metadataStart < 0) {
+      metadataString = METADATA_STRING_NO_QUOTES_SORTED;
+      metadataStart = creative.lastIndexOf(METADATA_STRING_NO_QUOTES_SORTED);
     }
     if (metadataStart < 0) {
       // Couldn't find a metadata blob.
