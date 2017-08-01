@@ -280,7 +280,9 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   layoutCallback() {
     if (this.slideIndex_ === null) {
-      this.showSlide_(this.initialSlideIndex_);
+      this.mutateElement(() => {
+        this.showSlide_(this.initialSlideIndex_);
+      });
     }
     return Promise.resolve();
   }
@@ -354,7 +356,9 @@ export class AmpSlideScroll extends BaseSlides {
       // Timer that detects scroll end and/or end of snap scroll.
       this.scrollTimeout_ = Services.timerFor(this.win).delay(() => {
 
-        if (this.snappingInProgress_ || this.element.width <= 0) {
+        if (this.snappingInProgress_ ||
+            this.element.width <= 0 ||
+            this.element.height <= 0) {
           return;
         }
         if (this.hasNativeSnapPoints_) {
