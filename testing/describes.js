@@ -202,7 +202,6 @@ Spec,
  * })} fn
  */
 export const fakeWin = describeEnv(spec => [
-  new xhrMockFixture(spec),
   new FakeWinFixture(spec),
   new AmpFixture(spec),
 ]);
@@ -223,7 +222,6 @@ export const fakeWin = describeEnv(spec => [
  */
 export const realWin = describeEnv(spec => [
   new RealWinFixture(spec),
-  new FakeWinFixture(spec),
   new AmpFixture(spec),
 ]);
 
@@ -432,46 +430,6 @@ class SandboxFixture {
 }
 
 /** @implements {Fixture} */
-class xhrMockFixture {
-  /**@param {boolean} spec*/
-  constructor(spec) {
-    if (!spec) {
-      /** const */
-      this.spec = false;
-    } else {
-      /** const */
-      this.spec = spec;
-    }
-  }
-
-  /** @override */
-  isOn() {
-    return true;
-  }
-
-  /** @override */
-  setUp(env) {
-    if (this.spec === false) {
-      env.xhrMock.restore();
-      env.xhrMock = null;
-    } else {
-      env.xhrMock = fetchMock.sandbox();
-      env.expectFetch = function(url, response) {
-        env.xhrMock.restore();
-        env.xhrMock.mock(url, response);
-      };
-    }
-  }
-
-  teardown(env) {
-    env.xhrMock.restore();
-    fetchMock.restore();
-  }
-
-}
-
-
-/** @implements {Fixture} */
 class IntegrationFixture {
 
   /** @param {!{body: string}} spec */
@@ -624,6 +582,13 @@ class RealWinFixture {
       };
       iframe.onerror = reject;
       document.body.appendChild(iframe);
+      if (!(spec.xhrMock === false)) {
+        env.xhrMock = fetchMock.sandbox();
+        env.expectFetch = function(url, response) {
+          env.xhrMock.restore();
+          env.xhrMock.mock(url, response);
+        };
+      }
     });
   }
 
