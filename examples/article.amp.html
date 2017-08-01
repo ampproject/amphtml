@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>Lorem Ipsum | PublisherName</title>
   <link rel="canonical" href="https://medium.com/p/cb7f223fad86" >
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 
   <style amp-custom>
@@ -162,7 +162,6 @@
       justify-content: center;
       height: 226px;
       background: #f4f4f4;
-      margin-bottom: 20px;
     }
 
     hr {
@@ -292,9 +291,19 @@
        background: #1b1b1b;
        color: white;
      }
+
+     #lightbox-close-btn {
+       font-family: Helvetica, sans-serif;
+       color: white;
+       position: absolute;
+       top: 0px;
+       right: 0px;
+       padding: 20px;
+     }
   </style>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-image-lightbox" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"></script>
   <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
   <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
@@ -366,7 +375,7 @@
             layout="responsive" width="360" placeholder
             alt="Picture of two chairs on a lake shore with big pine trees"
             title="Opens image in a lightbox"
-            role="button" on="tap:headline-img-lightbox"
+            role="button" on="tap:headline-image-lightbox"
             height="216" tabindex="0">
         </amp-img>
         <figcaption class='image'>
@@ -374,22 +383,7 @@
         </figcaption>
       </figure>
 
-      <amp-lightbox id="headline-img-lightbox" class="lightbox"
-          layout="nodisplay">
-
-        <div class="lightbox-content">
-          <amp-img id="floating-headline-img"
-              src="img/hero@1x.jpg"
-              srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
-              alt="Two chairs on a lake shore with big pine trees"
-              placeholder
-              width="360" height="216" layout="responsive">
-          </amp-img>
-          <p>
-            Fusce pretium tempor justo, vitae consequat dolor maximus eget.
-          </p>
-        </div>
-      </amp-lightbox>
+      <amp-image-lightbox id="headline-image-lightbox" layout="nodisplay"></amp-image-lightbox>
 
       <div class="content-container">
         <div class="jump-to">
@@ -498,12 +492,35 @@
                 src="img/sea@1x.jpg"
                 srcset="img/sea@1x.jpg 1x, img/sea@2x.jpg 2x"
                 layout="responsive" width="320"
+                on="tap:inline-img-lightbox"
                 alt="Fusce pretium tempor justo, vitae consequat dolor maximus eget."
                 height="180">
             </amp-img>
             <figcaption class='image'>
               Fusce pretium tempor justo, vitae consequat dolor maximus eget.
             </figcaption>
+            <amp-lightbox id="inline-img-lightbox" class="lightbox"
+                layout="nodisplay">
+
+              <div class="lightbox-content">
+                <div id="lightbox-close-btn"
+                  on="tap:inline-img-lightbox.close"
+                  role="button"
+                  tabindex="0">
+                  <h1>x</h1>
+                </div>
+                <amp-img id="floating-headline-img"
+                    src="img/sea@1x.jpg"
+                    srcset="img/sea@1x.jpg 1x, img/sea@2x.jpg 2x"
+                    alt="Image of a sea"
+                    placeholder
+                    width="360" height="216" layout="responsive">
+                </amp-img>
+                <p>
+                  Fusce pretium tempor justo, vitae consequat dolor maximus eget.
+                </p>
+              </div>
+            </amp-lightbox>
           </figure>
 
           <p>
