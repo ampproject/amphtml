@@ -117,7 +117,7 @@ export class VideoInterface {
   /**
    * Returns video's meta data (artwork, title, artist, album, etc.) for use
    * with the Media Session API
-   * artwork (string): URL to the poster image (preferably a 512x512 PNG)
+   * artwork (Array): URL to the poster image (preferably a 512x512 PNG)
    * title (string): Name of the video
    * artist (string): Name of the video's author/artist
    * album (string): Name of the video's album if it exists

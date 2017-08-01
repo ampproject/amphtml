@@ -78,16 +78,13 @@ export function parseSchemaImage(ampdoc) {
     // 1. "image": "http://..",
     return schemaJson['image'];
   } else if (schemaJson['image']['@list']
-      && schemaJson['image']['@list'][0]
       && typeof schemaJson['image']['@list'][0] === 'string') {
     // 2. "image": {.., "@list": ["http://.."], ..}
     return schemaJson['image']['@list'][0];
-  } else if (schemaJson['image']['url']
-             && typeof schemaJson['image']['url'] === 'string') {
+  } else if (typeof schemaJson['image']['url'] === 'string') {
     // 3. "image": {.., "url": "http://..", ..}
     return schemaJson['image']['url'];
-  } else if (schemaJson['image'][0]
-             && typeof schemaJson['image'][0] === 'string') {
+  } else if (typeof schemaJson['image'][0] === 'string') {
     // 4. "image": ["http://.. "]
     return schemaJson['image'][0];
   } else {

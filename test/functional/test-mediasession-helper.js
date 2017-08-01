@@ -21,54 +21,63 @@ import {
   parseFavicon,
 } from '../../src/mediasession-helper';
 
-const template = `
-<head>
-<link rel="icon" href="http://example.com/favicon.ico">
-<script type="application/ld+json">
-      {
-        "@context": "http://schema.org",
-        "@type": "NewsArticle",
-        "mainEntityOfPage": "something",
-        "headline": "Something Happened",
-        "datePublished": "Fri Jul 28 12:45:00 EDT 2017",
-        "dateModified": "Fri Jul 28 12:45:00 EDT 2017",
-        "description": "Appearantly, yesterday something happened",
-        "author": {
-          "@type": "Person",
-          "name": "Awesome Author"
-        },
-        "publisher": {
-          "@type": "Organization",
-          "name": "Aperture Science",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "logo-url",
-            "width": 133,
-            "height": 60
-          }
-        },
-        "image": {
-          "@type": "ImageObject",
-          "url": "http://example.com/image.png",
-          "height": 392,
-          "width": 696
-        }
-      }
-</script>
-<meta property="og:image" content="http://example.com/og-image.png">
-</head>
-<body>
-<h1>Yesterday Something Happened</h1>
-<p>Lorem ipsum dolor set amet..</p>
-</body>
+const schemaTemplate = `
+{
+  "@context": "http://schema.org",
+  "@type": "NewsArticle",
+  "mainEntityOfPage": "something",
+  "headline": "Something Happened",
+  "datePublished": "Fri Jul 28 12:45:00 EDT 2017",
+  "dateModified": "Fri Jul 28 12:45:00 EDT 2017",
+  "description": "Appearantly, yesterday something happened",
+  "author": {
+    "@type": "Person",
+    "name": "Awesome Author"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Aperture Science",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "logo-url",
+      "width": 133,
+      "height": 60
+    }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "http://example.com/image.png",
+    "height": 392,
+    "width": 696
+  }
+}
 `;
 
 
 describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
   let ampdoc;
+  let favicon;
+  let schema;
+  let ogImage;
+  let head;
 
   beforeEach(() => {
-    document.documentElement.innerHTML = template;
+    head = document.querySelector('head');
+    // Favicon
+    favicon = document.createElement('link');
+    favicon.setAttribute('rel', 'icon');
+    favicon.setAttribute('href', 'http://example.com/favicon.ico');
+    head.appendChild(favicon);
+    // Schema
+    schema = document.createElement('script');
+    schema.setAttribute('type', 'application/ld+json');
+    schema.innerHTML = schemaTemplate;
+    head.appendChild(schema);
+    // og-image
+    ogImage = document.createElement('meta');
+    ogImage.setAttribute('property', 'og:image');
+    ogImage.setAttribute('content', 'http://example.com/og-image.png');
+    head.appendChild(ogImage);
     ampdoc = {
       win: {
         'document': document,
@@ -90,7 +99,9 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
   });
 
   afterEach(() => {
-    document.documentElement.innerHTML = '';
+    head.removeChild(favicon);
+    head.removeChild(schema);
+    head.removeChild(ogImage);
   });
 
   it('should parse the schema and find the image', () => {
