@@ -70,6 +70,12 @@ export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
 export let AmpAnalyticsConfigDef;
 
 /**
+ * @const {!./url-builder.QueryParameterDef}
+ * @visibleForTesting
+ */
+export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
+
+/**
  * Check whether Google Ads supports the A4A rendering pathway is valid for the
  * environment by ensuring native crypto support and page originated in the
  * the {@code cdn.ampproject.org} CDN <em>or</em> we must be running in local
@@ -248,7 +254,7 @@ export function googleAdUrl(
  */
 export function truncAndTimeUrl(baseUrl, parameters, startTime) {
   return buildUrl(
-      baseUrl, parameters, MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'})
+      baseUrl, parameters, MAX_URL_LENGTH - 10, TRUNCATION_PARAM)
     + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
 }
 
@@ -540,4 +546,27 @@ export function getEnclosingContainerTypes(adElement) {
     }
   }
   return Object.keys(containerTypeSet);
+}
+
+/**
+ * Appends parameter to ad request indicating error state so long as error
+ * parameter is not already present or url has been truncated.
+ * @param {string} adUrl used for network request
+ * @param {string} parameterValue to be appended
+ * @return {string|undefined} potentially modified url, undefined
+ */
+export function maybeAppendErrorParameter(adUrl, parameterValue) {
+  dev().assert(!!adUrl && !!parameterValue);
+  // Add parameter indicating error so long as the url has not already been
+  // truncated and error parameter is not already present.  Note that we assume
+  // that added, error parameter length will be less than truncation parameter
+  // so adding will not cause length to exceed maximum.
+  if (new RegExp(`[?|&](${encodeURIComponent(TRUNCATION_PARAM.name)}=` +
+      `${encodeURIComponent(String(TRUNCATION_PARAM.value))}|aet=[^&]*)$`)
+      .test(adUrl)) {
+    return;
+  }
+  const modifiedAdUrl = adUrl + `&aet=${parameterValue}`;
+  dev().assert(modifiedAdUrl.length <= MAX_URL_LENGTH);
+  return modifiedAdUrl;
 }
