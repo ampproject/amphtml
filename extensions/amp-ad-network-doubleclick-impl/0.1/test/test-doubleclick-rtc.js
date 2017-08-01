@@ -65,6 +65,8 @@ describes.realWin('amp-ad-network-doubleclick-impl RTC', {amp: true}, env => {
   }
 
   beforeEach(() => {
+    sandbox = env.sandbox;
+    env.win.AMP_MODE.test = true;
     resetRtcStateForTesting();
     return createIframePromise().then(fixture => {
       setupForAdTesting(fixture);
