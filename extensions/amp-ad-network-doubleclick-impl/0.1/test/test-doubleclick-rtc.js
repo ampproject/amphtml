@@ -15,14 +15,6 @@
  */
 
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
-import {AmpAd3PImpl} from '../../../amp-ad/0.1/amp-ad-3p-impl';
-import {
-  AmpA4A,
-  AMP_SIGNATURE_HEADER,
-  CREATIVE_SIZE_HEADER,
-  RENDERING_TYPE_HEADER,
-  XORIGIN_MODE,
-} from '../../../amp-a4a/0.1/amp-a4a';
 import {createIframePromise} from '../../../../testing/iframe';
 import {Services} from '../../../../src/services';
 import {
@@ -30,7 +22,6 @@ import {
   resetRtcStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {Xhr} from '../../../../src/service/xhr-impl';
 
