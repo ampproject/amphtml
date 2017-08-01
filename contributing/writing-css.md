@@ -12,7 +12,7 @@
 - [Case Studies](#case-studies)
   - [AMP Selector CSS has high CSS specificity](#amp-selector-css-has-high-css-specificity)
   - [AMP Accordion CSS Changes broke specificity](#amp-accordion-css-changes-broke-specificity)
--[Reading material](#reading-material)
+- [Reading material](#reading-material)
 
 ## Who should read this doc?
 
@@ -197,8 +197,8 @@ specificity to HIGHER specificity, which breaks backward compatibility.
 
 ## Reading material
 
-https://csswizardry.com/2014/07/hacks-for-dealing-with-specificity/
-https://csswizardry.com/2012/05/keep-your-css-selectors-short/
-https://philipwalton.com/articles/do-we-actually-need-specificity-in-css/
+- https://csswizardry.com/2014/07/hacks-for-dealing-with-specificity/
+- https://csswizardry.com/2012/05/keep-your-css-selectors-short/
+- https://philipwalton.com/articles/do-we-actually-need-specificity-in-css/
 
 
