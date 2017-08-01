@@ -24,7 +24,7 @@ import {
   setCheckValiditySupportedForTesting,
 } from '../form-validators';
 import {
-  CONFIG_KEY
+  CONFIG_KEY,
 } from '../form-verifiers';
 import * as sinon from 'sinon';
 import '../../../amp-mustache/0.1/amp-mustache';
@@ -33,7 +33,6 @@ import {
 } from '../../../../src/service/cid-impl';
 import {Services} from '../../../../src/services';
 import '../../../amp-selector/0.1/amp-selector';
-import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
 import {AmpEvents} from '../../../../src/amp-events';

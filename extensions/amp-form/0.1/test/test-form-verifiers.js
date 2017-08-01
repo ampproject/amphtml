@@ -19,7 +19,6 @@ import {
   DefaultVerifier,
   getFormVerifier,
 } from '../form-verifiers';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.fakeWin('amp-form async verification', {}, env => {
   function stubValidationMessage(input) {
