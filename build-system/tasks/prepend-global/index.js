@@ -25,16 +25,27 @@ var util = require('gulp-util');
 
 
 /**
+ * Returns the number of AMP_CONFIG matches in the given config string.
+ *
+ * @param {string} str
+ * @return {number}
+ */
+function numConfigs(str) {
+  var re = /\/\*AMP_CONFIG\*\//g;
+  var matches = str.match(re)
+  return matches == null ? 0 : matches.length;
+}
+
+/**
  * Checks that only 1 AMP_CONFIG should exist after append.
  *
  * @param {string} str
- * @return {boolean}
  */
 function sanityCheck(str) {
-  var re = /\/\*AMP_CONFIG\*\//g;
-  // There must be one and exactly 1 match.
-  var matches = str.match(re)
-  return matches != null && matches.length == 1;
+  if (numConfigs(str) != 1) {
+    throw new Error(
+      'Found ' + numMatches + ' AMP_CONFIG(s) before write. Aborting!');
+  }
 }
 
 /**
@@ -105,6 +116,18 @@ function main() {
     return;
   }
 
+  if (argv.remove) {
+    return fs.readFileAsync(target)
+    .then(file => {
+      var contents = file.toString();
+      sanityCheck(contents);
+      var config =
+          /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
+      contents = contents.replace(config, '');
+      return writeTarget(target, contents, argv.dryrun);
+    });
+  }
+
   if (!(argv.prod || argv.canary)) {
     util.log(util.colors.red('One of --prod or --canary should be provided.'));
     return;
@@ -141,10 +164,7 @@ function main() {
         return prependConfig(configFile, targetFile);
       })
       .then(fileString => {
-        if (!sanityCheck(fileString)) {
-          throw new Error('Found 0 or > 1 AMP_CONFIG(s) before write. ' +
-              'aborting');
-        }
+        sanityCheck(fileString);
         return writeTarget(target, fileString, argv.dryrun);
       });
 }
@@ -159,6 +179,8 @@ gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
     'branch': '  Switch to a git branch to get config source from. ' +
         'Uses master by default.',
     'local': '  Don\'t switch branches and use local config',
+    'remove': '  Removes previously prepended json config from the target ' +
+        'file (if present).',
   }
 });
 
@@ -167,3 +189,4 @@ exports.prependConfig = prependConfig;
 exports.writeTarget = writeTarget;
 exports.valueOrDefault = valueOrDefault;
 exports.sanityCheck = sanityCheck;
+exports.numConfigs = numConfigs;
