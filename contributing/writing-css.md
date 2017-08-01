@@ -53,7 +53,7 @@ when we import CSS via gulp or third-party CSS (which can change at any time).
 
 ### How to calculate Specificity
 
-Visit the [CSS Tricks: Specifics on CSS Specificity](Specifics on CSS Specificity) which explains specificity in very simple terms and helps you to understand how specificity is computed (it's very short and understandable - I promise!).
+Visit the [CSS Tricks: Specifics on CSS Specificity](https://css-tricks.com/specifics-on-css-specificity/) which explains specificity in very simple terms and helps you to understand how specificity is computed (it's very short and understandable - I promise!).
 
 To compute specificity, use this online calculator: https://specificity.keegan.st/
 
@@ -65,12 +65,12 @@ To compute specificity, use this online calculator: https://specificity.keegan.s
     overridable (using maybe a single id or class-name, without having to repeat a complex
     selector).
 2. Try to write selectors by using tag names and attributes; class names that get added after
-    build GET FOUC. [FOUC (Flash Of Unstyled Content)](#FOUC) is a really bad UX. Use caution
+    build GET FOUC. [FOUC (Flash Of Unstyled Content)](#fouc) is a really bad UX. Use caution
     and best effort to STAY AWAY from using elements/classes that are a result of
     BUILDing in the CSS.
-       ○ A good example would be amp-selector.
-       ○ A bad example would be amp-accordion (See the [Case Studies](#case-studies) below)
-3. Keep the Selector as simple as possible. Ensure it's readable.
+    * A good example would be amp-selector.
+    * A bad example would be amp-accordion (See the [Case Studies](#case-studies) below).
+3. Keep the Selector as simple as possible and ensure it's readable.
 
 ### Modifying an existing Selector
 
