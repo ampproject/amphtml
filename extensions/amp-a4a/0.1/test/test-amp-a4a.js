@@ -977,14 +977,16 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        const onNetworkFailureSpy = sandbox.spy(a4a, 'onNetworkFailure');
         a4a.buildCallback();
         const lifecycleEventStub = sandbox.stub(
             a4a, 'protectedEmitLifecycleEvent_');
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.layoutCallback().then(() => {
-          expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
-              .to.be.true;
+          expect(getAdUrlSpy, 'getAdUrl called exactly once').to.be.calledOnce;
+          expect(onNetworkFailureSpy,
+              'onNetworkFailureSpy called exactly once').to.be.calledOnce;
           // Verify iframe presence and lack of visibility hidden
           const iframe = a4aElement.querySelector('iframe[src]');
           expect(iframe).to.be.ok;
@@ -992,6 +994,63 @@ describe('amp-a4a', () => {
           expect(iframe).to.be.visible;
           expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
           expect(lifecycleEventStub).to.be.calledWith('networkError');
+        });
+      });
+    });
+    it('should use adUrl from onNetworkFailure', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+            Promise.reject(networkFailure()), {name: 'ad'});
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        const a4a = new MockA4AImpl(a4aElement);
+        const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        sandbox.stub(a4a, 'onNetworkFailure')
+            .withArgs(sinon.match(val =>
+              val.message && val.message.indexOf('XHR Failed fetching') == 0),
+            TEST_URL)
+            .returns({adUrl: TEST_URL + '&err=true'});
+        a4a.buildCallback();
+        const lifecycleEventStub = sandbox.stub(
+            a4a, 'protectedEmitLifecycleEvent_');
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
+        return a4a.layoutCallback().then(() => {
+          expect(getAdUrlSpy, 'getAdUrl called exactly once').to.be.calledOnce;
+          // Verify iframe presence and lack of visibility hidden
+          const iframe = a4aElement.querySelector('iframe[src]');
+          expect(iframe).to.be.ok;
+          expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
+          expect(/&err=true/.test(iframe.src), iframe.src).to.be.true;
+          expect(iframe).to.be.visible;
+          expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+          expect(lifecycleEventStub).to.be.calledWith('networkError');
+        });
+      });
+    });
+    it('should not execute frame GET if disabled via onNetworkFailure', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+            Promise.reject(networkFailure()), {name: 'ad'});
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        const a4a = new MockA4AImpl(a4aElement);
+        const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        sandbox.stub(a4a, 'onNetworkFailure')
+            .withArgs(sinon.match(val =>
+              val.message && val.message.indexOf('XHR Failed fetching') == 0),
+            TEST_URL)
+            .returns({frameGetDisabled: true});
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          expect(getAdUrlSpy, 'getAdUrl called exactly once').to.be.calledOnce;
+          const iframe = a4aElement.querySelector('iframe');
+          expect(iframe).to.not.be.ok;
         });
       });
     });
