@@ -47,9 +47,6 @@ export class AmpList extends AMP.BaseElement {
 
     /** @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
-
-    /** @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.win);
   }
 
   /** @override */
@@ -167,17 +164,15 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   scanForBindings_(elements) {
-    const rescan = Services.bindForDocOrNull(this.element).then(bind => {
+    const forwardElements = () => elements;
+    return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {
         return bind.rescanAndEvaluate(elements);
       } else {
         return Promise.resolve();
       }
-    });
-    const timeout = this.timer_.timeoutPromise(2000, rescan,
-        'Timed out waiting for amp-bind to process rendered template.');
-    // Forward rendered elements in returned promise.
-    return timeout.then(() => elements);
+    // Forward elements to chained promise on success or failure.
+    }).then(forwardElements, forwardElements);
   }
 
   /**
