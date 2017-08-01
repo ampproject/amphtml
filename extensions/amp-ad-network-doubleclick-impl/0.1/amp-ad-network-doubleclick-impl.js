@@ -661,11 +661,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    *   the ad request url.
    * @private
    */
-  executeRtc_() {
+  executeRtc_(opt_doc) {
+    const doc = opt_doc || document;
     if (rtcPromise) {
       return this.mergeRtc();
     }
-    const ampRtcPageElement = document.getElementById('amp-rtc');
+    const ampRtcPageElement = doc.getElementById('amp-rtc');
     if (!ampRtcPageElement) {
       return Promise.resolve();
     }
