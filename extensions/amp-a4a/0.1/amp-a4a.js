@@ -1359,7 +1359,7 @@ export class AmpA4A extends AMP.BaseElement {
    * TODO(keithwrightbos@): report error cases
    */
   getAmpAdMetadata_(creative) {
-    let metadataStart;
+    let metadataStart = -1;
     let metadataString;
     for (let i = 0; i < METADATA_STRINGS.length; i++) {
       metadataString = METADATA_STRINGS[i];
