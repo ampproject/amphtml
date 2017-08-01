@@ -17,6 +17,7 @@
 import {ActionTrust} from '../action-trust';
 import {KeyCodes} from '../utils/key-codes';
 import {debounce} from '../utils/rate-limit';
+import {matches} from '../dom';
 import {dev, user} from '../log';
 import {
   registerServiceBuilderForDoc,
@@ -51,6 +52,9 @@ const DEFAULT_METHOD_ = 'activate';
 
 /** @const {number} */
 const DEFAULT_DEBOUNCE_WAIT = 300; // ms
+
+/** @const {string} */
+const DISABLED_PSEUDOCLASS_ = ':disabled';
 
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
@@ -492,7 +496,8 @@ export class ActionService {
     let n = target;
     while (n) {
       const actionInfos = this.matchActionInfos_(n, actionEventType);
-      if (actionInfos) {
+      const isEnabled = !matches(n, DISABLED_PSEUDOCLASS_);
+      if (isEnabled && actionInfos) {
         return {node: n, actionInfos: dev().assert(actionInfos)};
       }
       n = n.parentElement;
