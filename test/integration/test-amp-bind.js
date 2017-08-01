@@ -37,6 +37,7 @@ describe.configure().skipSauceLabs().run('amp-bind', function() {
   });
 
   afterEach(() => {
+    fixture = null;
     sandbox.restore();
   });
 
