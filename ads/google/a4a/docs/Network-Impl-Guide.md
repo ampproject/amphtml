@@ -9,17 +9,17 @@
 
 # Objective
 
-Outline requirements and steps for ad network to implement Fast Fetch for early ad request and support for AMP Ads returned by the ad network to be given preferential rendering. 
+Outline requirements and steps for ad network to implement Fast Fetch for early ad request and support for AMP Ads returned by the ad network to be given preferential rendering.
 
 # Background
 
 Relevant design documents:  [A4A Readme](./a4a-readme.md), [A4A Format Guide](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) & [intent to implement](https://github.com/ampproject/amphtml/issues/3133).
 
-If you haven’t already, please read the A4A Readme to learn about why all networks should implement Fast Fetch. 
+If you haven’t already, please read the A4A Readme to learn about why all networks should implement Fast Fetch.
 
 # Overview
 
-Fast Fetch provides preferential treatment to Verified AMP Ads over Legacy Ads, unlike the current 3P rendering flow which treats AMP Ads and Legacy Ads the same. Within Fast Fetch, if an ad fails validation, that ad is wrapped in a cross-domain iframe to sandbox it from the rest of the AMP document. Conversely, an AMP Ad passing validation is written directly into the page. Fast Fetch handles both AMP and non-AMP ads; no additional ad requests are required for ads that fail validation.  
+Fast Fetch provides preferential treatment to Verified AMP Ads over Legacy Ads, unlike the current 3P rendering flow which treats AMP Ads and Legacy Ads the same. Within Fast Fetch, if an ad fails validation, that ad is wrapped in a cross-domain iframe to sandbox it from the rest of the AMP document. Conversely, an AMP Ad passing validation is written directly into the page. Fast Fetch handles both AMP and non-AMP ads; no additional ad requests are required for ads that fail validation.
 
 In order to support Fast Fetch, ad networks will be required to implement the following:
 
@@ -51,7 +51,7 @@ Client side verification of the signature, and thus preferential rendering, requ
 
 Fast Fetch requires that the ad request be sent via [XHR CORS](https://www.w3.org/TR/cors/) as this allows for direct communication with the ad network without the possibility of custom javascript execution (e.g. iframe or JSONP).  XHR CORS requires a preflight request where the response needs to indicate if the request is allowed by including the following headers in the response::
 
-* "Access-Control-Allow-Origin" with value matching the value of the request "Origin" header only if the origin domain is allowed ("Note that requests from pages hosted on the Google AMP Cache will have a value matching the domain [https://cdn.ampproject.org](https://cdn.ampproject.org)").
+* "Access-Control-Allow-Origin" with value matching the value of the request "Origin" header only if the origin domain is allowed ("Note that requests from pages hosted on the Google AMP Cache will have a value matching the domain `https://cdn.ampproject.org`").
 
 * "AMP-Access-Control-Allow-Source-Origin" with value matching the value of the request parameter "__amp_source_origin" which is [added](https://github.com/ampproject/amphtml/blob/master/src/service/xhr-impl.js#L103) by the AMP HTML runtime and matches the origin of the request had the page not been served from [Google AMP Cache](https://www.ampproject.org/docs/get_started/about-amp.html) (the originating source of the page).  Ad network can use this to prevent access by particular publisher domains where lack of response header will cause the response to be [dropped](https://github.com/ampproject/amphtml/blob/master/src/service/xhr-impl.js#L137) by the AMP HTML runtime.
 
@@ -61,13 +61,13 @@ Fast Fetch requires that the ad request be sent via [XHR CORS](https://www.w3.or
 
 ## A4A Extension Implementation
 
-The [AMP Ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad/amp-ad.md) element differentiates between different ad network implementations via the type attribute, e.g. the following amp-ad will utilize DoubleClick: 
+The [AMP Ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad/amp-ad.md) element differentiates between different ad network implementations via the type attribute, e.g. the following amp-ad will utilize DoubleClick:
 
   <amp-ad width=320 height=50 **type****=****"doubleclick"** data-slot="/43821041/mobile_ad_banner">
 
 To create an ad network implementation, the following steps must be taken:
 
-Create a new extension within the extensions section in the AMP HTML Github [repository](https://github.com/ampproject/amphtml) whose path and name match the type attribute given for amp ad element as follows: 
+Create a new extension within the extensions section in the AMP HTML Github [repository](https://github.com/ampproject/amphtml) whose path and name match the type attribute given for amp ad element as follows:
 
 ![Image of File Hierarchy](./2.png)
 Figure 2: A4A Extension File Hierarchy
@@ -88,7 +88,7 @@ getAdUrl() - must construct and return the ad url for ad request.
 ```
 
 
-Examples of network implementations can be seen for [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js) and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js). 
+Examples of network implementations can be seen for [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js) and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js).
 
 Usage of getAdUrl can be seen within the this.adPromise_ promise chain in [amp-a4a.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js)
 
@@ -96,23 +96,23 @@ Usage of getAdUrl can be seen within the this.adPromise_ promise chain in [amp-a
 
 *See Figure 1: Part A*
 
-Must implement and export following function. 
+Must implement and export following function.
 
 ``` javascript
 <TYPE>IsA4AEnabled(win, element)
   // @param (Window) win Window where AMP runtime is running.
   // @param (HTML Element) element ****The amp-ad element.
-  // @return (boolean) Whether or not A4A should be used in this context. 
+  // @return (boolean) Whether or not A4A should be used in this context.
 ```
 
-Once this file is implemented, [amphtml/ads/_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js) must also be updated. Specifically, `<TYPE>IsA4AEnabled()` must be imported, and it must be mapped to the ad network type in the a4aRegistry mapping. 
+Once this file is implemented, [amphtml/ads/_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js) must also be updated. Specifically, `<TYPE>IsA4AEnabled()` must be imported, and it must be mapped to the ad network type in the a4aRegistry mapping.
 
 ``` javascript
 /**amphtml/ads/_a4a-config.js */
 …
 import {
   <TYPE>IsA4AEnabled
-} from ‘../extensions/amp-ad-<TYPE>-impl/0.1/<TYPE>-a4a-config’; 
+} from ‘../extensions/amp-ad-<TYPE>-impl/0.1/<TYPE>-a4a-config’;
 …
 export const a4aRegistry = map({
   …
@@ -127,13 +127,13 @@ Usage of DoubleClick and AdSense configs can be seen in [_a4a-config.js](https:/
 
 ### `amp-ad-network-<TYPE>-impl-internal.md`
 
-Documentation for ad network amp-ad type. Please thoroughly document the usage of your implementation. 
+Documentation for ad network amp-ad type. Please thoroughly document the usage of your implementation.
 
 Examples can be seen for [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md) and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/amp-ad-network-adsense-impl-internal.md).
 
 ### `test-amp-ad-network-<TYPE>-impl.js`
 
-Please write thorough testing for your AMP ad network implementation. 
+Please write thorough testing for your AMP ad network implementation.
 
 ## Ad Network Checklist
 
@@ -157,4 +157,4 @@ Please write thorough testing for your AMP ad network implementation.
 
 * Tests written in `test-amp-ad-network-<TYPE>-impl.js`
 
-* Pull request merged to master 
+* Pull request merged to master
