@@ -72,11 +72,20 @@ import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
 import {isSecureUrl, parseUrl} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
+import {VisibilityState} from '../../../src/visibility-state';
+import {
+  isExperimentOn,
+  /* eslint no-unused-vars: 0 */ ExperimentInfo,
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {
   RefreshManager,
   DATA_ATTR_NAME,
 } from '../../amp-a4a/0.1/refresh-manager';
+import {
+  addExperimentIdToElement,
+} from '../../../ads/google/a4a/traffic-experiments';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -106,6 +115,15 @@ const PAGE_LEVEL_PARAMS_ = {
   'gdfp_req': '1',
   'sfv': DEFAULT_SAFEFRAME_VERSION,
   'u_sd': window.devicePixelRatio,
+};
+
+/** @visibleForTesting @const {string} */
+export const CORRELATOR_CLEAR_EXP_NAME = 'dbclk-correlator-clear';
+
+/** @visibleForTesting @enum {string} */
+export const CORRELATOR_CLEAR_EXP_BRANCHES = {
+  CONTROL: '22302764',
+  EXPERIMENT: '22302765',
 };
 
 /**
@@ -283,6 +301,49 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   delayAdRequestEnabled() {
     return experimentFeatureEnabled(
         this.win, DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST);
+  }
+
+  /** @override */
+  buildCallback() {
+    super.buildCallback();
+    if (this.win['dbclk_a4a_viz_change']) {
+      // Only create one per page.
+      return;
+    }
+    this.win['dbclk_a4a_viz_change'] = true;
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    viewer.onVisibilityChanged(() => {
+      if (viewer.getVisibilityState() != VisibilityState.PAUSED ||
+          this.useSra || !this.win.ampAdPageCorrelator) {
+        // Do not allow experiment selection if SRA or correlator was not set.
+        return;
+      }
+      // Select into correlator clear experiment of pause visibility change.
+      // Should execute prior to resumeCallback.
+      // TODO(keithwrightbos,glevitzy) - determine behavior for correlator
+      // interaction with refresh.
+      const experimentInfoMap =
+          /** @type {!Object<string, !ExperimentInfo>} */ ({});
+      experimentInfoMap[CORRELATOR_CLEAR_EXP_NAME] = {
+        isTrafficEligible: () => true,
+        branches: Object.values(CORRELATOR_CLEAR_EXP_BRANCHES),
+      };
+      randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+      const expId = getExperimentBranch(this.win, CORRELATOR_CLEAR_EXP_NAME);
+      if (expId) {
+        // Adding to experiment id will cause it to be included in subsequent ad
+        // requests.
+        addExperimentIdToElement(expId, this.element);
+        if (expId === CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT) {
+          // TODO(keithwrightbos) - do not clear if at least one slot on the page
+          // is an AMP creative that survived unlayoutCallback in order to
+          // ensure competitive exclusion/roadblocking.  Note this only applies
+          // to non-backfill inventory.
+          dev().info(TAG, 'resetting page correlator');
+          this.win.ampAdPageCorrelator = null;
+        }
+      }
+    });
   }
 
   /**
