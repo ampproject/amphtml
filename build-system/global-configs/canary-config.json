@@ -6,6 +6,7 @@
   "expAdsenseA4A": 0.01,
   "expDoubleclickA4A": 0.01,
   "a4aProfilingRate": 1,
+  "dbclk_a4a_viz_change": 0.02,
   "ad-type-custom": 1,
   "ios-embed-wrapper": 1,
   "amp-apester-media": 1,
