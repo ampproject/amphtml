@@ -53,7 +53,7 @@ when we import CSS via gulp or third-party CSS (which can change at any time).
 
 ### How to calculate Specificity
 
-Visit the [CSS Tricks: Specifics on CSS Specificity](https://css-tricks.com/specifics-on-css-specificity/) which explains specificity in very simple terms and helps you to understand how specificity is computed (it's very short and understandable - I promise!).
+Visit the [CSS Tricks: Specifics on CSS Specificity](https://css-tricks.com/specifics-on-css-specificity/) which explains specificity in very simple terms and shows how specificity is computed (it's very short and understandable).
 
 To compute specificity, use this online calculator: https://specificity.keegan.st/
 
