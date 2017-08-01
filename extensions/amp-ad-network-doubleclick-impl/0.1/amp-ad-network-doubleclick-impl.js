@@ -307,7 +307,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     if (this.win['dbclk_a4a_viz_change']) {
-      // Only create one per page.
+      // Only create one per page but ensure all slots get experiment
+      // selection.
+      const expId = getExperimentBranch(this.win, CORRELATOR_CLEAR_EXP_NAME);
+      if (expId) {
+        // If experiment was already selected, add to element to ensure it is
+        // included in request.
+        addExperimentIdToElement(expId, this.element);
+      }
       return;
     }
     this.win['dbclk_a4a_viz_change'] = true;
