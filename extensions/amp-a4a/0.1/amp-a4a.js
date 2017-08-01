@@ -56,8 +56,8 @@ import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 
 // Uncomment the next two lines when testing locally.
-// import '../../amp-ad/0.1/amp-ad-ui';
-// import '../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import '../../amp-ad/0.1/amp-ad-ui';
+import '../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -1092,14 +1092,39 @@ export class AmpA4A extends AMP.BaseElement {
     };
     return Services.xhrFor(this.win)
         .fetch(adUrl, xhrInit)
-        .catch(unusedReason => {
+        .catch(error => {
           // If an error occurs, let the ad be rendered via iframe after delay.
           // TODO(taymonbeal): Figure out a more sophisticated test for deciding
           // whether to retry with an iframe after an ad request failure or just
           // give up and render the fallback content (or collapse the ad slot).
           this.protectedEmitLifecycleEvent_('networkError');
+          const networkFailureHandlerResult =
+              this.onNetworkFailure(error, this.adUrl_);
+          dev().assert(!!networkFailureHandlerResult);
+          if (networkFailureHandlerResult.frameGetDisabled) {
+            // Reset adUrl to null which will cause layoutCallback to not
+            // fetch via frame GET.
+            dev().info(
+                TAG, 'frame get disabled as part of network failure handler');
+            this.resetAdUrl();
+          } else {
+            this.adUrl_ = networkFailureHandlerResult.adUrl || this.adUrl_;
+          }
           return null;
         });
+  }
+
+  /**
+   * Called on network failure sending XHR CORS ad request allowing for
+   * modification of ad url and prevent frame GET request on layoutCallback.
+   * By default, GET frame request will be executed with same ad URL as used
+   * for XHR CORS request.
+   * @param {*} unusedError from network failure
+   * @param {string} unusedAdUrl used for network request
+   * @return {!{adUrl: (string|undefined), frameGetDisabled: (boolean|undefined)}}
+   */
+  onNetworkFailure(unusedError, unusedAdUrl) {
+    return {};
   }
 
   /**

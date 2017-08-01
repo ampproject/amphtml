@@ -93,9 +93,6 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
     impl = new AmpAdNetworkAdsenseImpl(element);
   });
 
-  afterEach(() => {
-  });
-
   describe('#isValidElement', () => {
     it('should be valid', () => {
       expect(impl.isValidElement()).to.be.true;
@@ -168,6 +165,15 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
       expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
       // exact value of ampAnalyticsConfig_ covered in
       // ads/google/test/test-utils.js
+    });
+  });
+
+  describe('#onNetworkFailure', () => {
+
+    it('should append error parameter', () => {
+      const TEST_URL = 'https://somenetwork.com/foo?hello=world&a=b';
+      expect(impl.onNetworkFailure(new Error('xhr failure'), TEST_URL))
+          .to.jsonEqual({adUrl: TEST_URL + '&aet=n'});
     });
   });
 
