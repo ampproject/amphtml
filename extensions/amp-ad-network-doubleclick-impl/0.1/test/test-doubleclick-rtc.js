@@ -39,7 +39,7 @@ function setupForAdTesting(fixture) {
 }
 
 
-describes.realWin('amp-ad-network-doubleclick-impl', {amp:true}, env => {
+describes.realWin('DoubleClick Fast Fetch RTC', {amp:true}, env => {
   let impl;
   let element;
   let sandbox;
