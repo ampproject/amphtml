@@ -76,8 +76,7 @@ function doubleClickWithGpt(global, data, gladeExperiment, url) {
       multiSizeDataStr,
       primaryWidth,
       primaryHeight,
-      (data.multiSizeValidation || 'true') == 'true',
-      true))) {
+      (data.multiSizeValidation || 'true') == 'true'))) {
     dimensions.unshift([primaryWidth, primaryHeight]);
   } else {
     dimensions = [[primaryWidth, primaryHeight]];
