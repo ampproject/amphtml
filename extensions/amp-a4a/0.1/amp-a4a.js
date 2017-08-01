@@ -59,12 +59,11 @@ import {getContextMetadata} from '../../../src/iframe-attributes';
 // import '../../amp-ad/0.1/amp-ad-ui';
 // import '../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 
-/** @type {string} */
-const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
-
-/** @type {string} */
-const METADATA_STRING_NO_QUOTES =
-      '<script type=application/json amp-ad-metadata>';
+/** @type {Array<string>} */
+const METADATA_STRINGS = [
+  '<script amp-ad-metadata type=application/json>',
+  '<script type="application/json" amp-ad-metadata>',
+  '<script type=application/json amp-ad-metadata>'];
 
 // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
@@ -1360,11 +1359,14 @@ export class AmpA4A extends AMP.BaseElement {
    * TODO(keithwrightbos@): report error cases
    */
   getAmpAdMetadata_(creative) {
-    let metadataString = METADATA_STRING;
-    let metadataStart = creative.lastIndexOf(METADATA_STRING);
-    if (metadataStart < 0) {
-      metadataString = METADATA_STRING_NO_QUOTES;
-      metadataStart = creative.lastIndexOf(METADATA_STRING_NO_QUOTES);
+    let metadataStart = -1;
+    let metadataString;
+    for (let i = 0; i < METADATA_STRINGS.length; i++) {
+      metadataString = METADATA_STRINGS[i];
+      metadataStart = creative.lastIndexOf(metadataString);
+      if (metadataStart >= 0) {
+        break;
+      }
     }
     if (metadataStart < 0) {
       // Couldn't find a metadata blob.
@@ -1428,7 +1430,7 @@ export class AmpA4A extends AMP.BaseElement {
     } catch (err) {
       dev().warn(
           TAG, this.element.getAttribute('type'), 'Invalid amp metadata: %s',
-          creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
+          creative.slice(metadataStart + metadataString.length, metadataEnd));
       return null;
     }
   }
