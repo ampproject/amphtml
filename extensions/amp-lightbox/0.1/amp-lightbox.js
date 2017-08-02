@@ -21,6 +21,7 @@ import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
+import {debounce} from '../../../src/utils/rate-limit';
 import * as st from '../../../src/style';
 
 /** @const {string} */
@@ -62,6 +63,12 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @private {?number} */
     this.scrollTimerId_ = null;
+
+    this.boundReschedule_ = debounce(this.win, event => {
+      this.reschedule_(event);
+    }, 1000);
+
+    this.isFirstTransitonEnd_ = true;
   }
 
   /** @override */
@@ -152,6 +159,8 @@ class AmpLightbox extends AMP.BaseElement {
       }
       // TODO: instead of laying out children all at once, layout children based
       // on visibility.
+      this.element.addEventListener('transitionend', this.boundReschedule_);
+      this.element.addEventListener('animationend', this.boundReschedule_);
       this.scheduleLayout(container);
       this.scheduleResume(container);
     });
@@ -161,6 +170,19 @@ class AmpLightbox extends AMP.BaseElement {
     });
 
     this.active_ = true;
+  }
+
+  reschedule_(event) {
+    if (event.type == 'transitionend') {
+      // Ignore the first transitionend event.
+      if (this.isFirstTransitonEnd_) {
+        this.isFirstTransitonEnd_ = false;
+        return;
+      }
+    }
+    const container = dev().assertElement(this.container_);
+    this.scheduleLayout(container);
+    this.scheduleResume(container);
   }
 
   /**
@@ -195,6 +217,8 @@ class AmpLightbox extends AMP.BaseElement {
     }
     this.win.document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
+    this.element.removeEventListener('transitionend', this.boundReschedule_);
+    this.element.removeEventListener('animationend', this.boundReschedule_);
     this.boundCloseOnEscape_ = null;
     this.schedulePause(dev().assertElement(this.container_));
     this.active_ = false;
