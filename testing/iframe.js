@@ -67,6 +67,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     // Counts the supported custom events.
     const events = {
       [AmpEvents.ATTACHED]: 0,
+      [AmpEvents.DOM_UPDATE]: 0,
       [AmpEvents.ERROR]: 0,
       [AmpEvents.LOAD_START]: 0,
       [AmpEvents.STUBBED]: 0,
