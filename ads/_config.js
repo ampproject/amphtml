@@ -632,6 +632,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  sogouad: {
+    prefetch: 'https://theta.sogoucdn.com/wap/js/aw.js',
+    renderStartImplemented: true,
+  },
+
   sortable: {
     prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
     preconnect: [
