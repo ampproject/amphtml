@@ -36,7 +36,13 @@ import {getMode} from './mode';
   effect in importing the module.
 */
 if (!getMode().localDev) {
-  installCustomElements(self, 'auto');
+  // Keep in sync with extensions-impl.js
+  installCustomElements(self, {
+    type: 'auto',
+    // No not check whether it is possible to override built-in elements.
+    // AMP does not need this, and not browser as of July 2017 implements it.
+    noBuiltIn: true,
+  });
 }
 installDOMTokenListToggle(self);
 installMathSign(self);

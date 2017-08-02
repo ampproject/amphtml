@@ -641,7 +641,13 @@ export function stubLegacyElements(win) {
 function installPolyfillsInChildWindow(childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  installCustomElements(childWin, 'auto');
+  // Keep in-sync with polyfills.js
+  installCustomElements(childWin, {
+    type: 'auto',
+    // No not check whether it is possible to override built-in elements.
+    // AMP does not need this, and not browser as of July 2017 implements it.
+    noBuiltIn: true,
+  });
 }
 
 
