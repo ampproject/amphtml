@@ -17,6 +17,16 @@
 import {ActionTrust} from './action-trust'; /* eslint no-unused-vars: 0 */
 
 /**
+ * @typedef {{
+ *   artwork: Array,
+ *   title: string,
+ *   album: string,
+ *   artist: string,
+ * }}
+ */
+export let VideoMetaDef;
+
+/**
  * VideoInterface defines a common video API which any AMP component that plays
  * videos is expected to implement.
  *
@@ -103,6 +113,28 @@ export class VideoInterface {
    * AMP will not call this method if `controls` attribute is not set.
    */
   hideControls() {}
+
+  /**
+   * Returns video's meta data (artwork, title, artist, album, etc.) for use
+   * with the Media Session API
+   * artwork (Array): URL to the poster image (preferably a 512x512 PNG)
+   * title (string): Name of the video
+   * artist (string): Name of the video's author/artist
+   * album (string): Name of the video's album if it exists
+   * @return {!VideoMetaDef|undefined} metadata
+   */
+  getMetadata() {}
+
+  /**
+   * If this returns true then it will be assumed that the player implements
+   * the MediaSession API internally so that the video manager does not override
+   * it. If not, the video manager will use the metadata variable as well as
+   * inferred meta-data to update the video's Media Session notification.
+   *
+   * @return {boolean}
+   */
+  preimplementsMediaSessionAPI() {}
+
 
   /**
    * Automatically comes from {@link ./base-element.BaseElement}

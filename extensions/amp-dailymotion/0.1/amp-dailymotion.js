@@ -393,6 +393,16 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
   getCurrentTime() {
     // Not supported.
     return 0;
