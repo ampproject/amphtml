@@ -816,7 +816,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
-  $$.util.log('About to browserify ' + srcDir + srcFilename); // TODO(jonkeller) Just for debugging. Remove.
   var bundler = browserify(srcDir + srcFilename, {debug: true})
       .transform(babel, {loose: argv.strictBabelTransform ? undefined : 'all'});
   if (options.watch) {
