@@ -56,8 +56,8 @@ import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 
 // Uncomment the next two lines when testing locally.
-import '../../amp-ad/0.1/amp-ad-ui';
-import '../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+//import '../../amp-ad/0.1/amp-ad-ui';
+//import '../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
