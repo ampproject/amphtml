@@ -657,6 +657,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * model.
    * The targeting info from the RTC updates the targeting info on
    * this object within mergeRtc.
+   * @param {Document=} opt_doc Optional document for testing.
    * @return {?Promise<?Object>} An object of parameters to add to
    *   the ad request url.
    * @private

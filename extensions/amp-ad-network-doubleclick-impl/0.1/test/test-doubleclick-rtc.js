@@ -20,11 +20,10 @@ import {
   resetRtcStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {Xhr} from '../../../../src/service/xhr-impl';
 
 // Uncomment out the next line when testing locally
- import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
+// import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 
 describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
   let impl;
