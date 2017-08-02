@@ -55,7 +55,8 @@ function setupForAdTesting(win) {
   doc.head.appendChild(ampStyle);
 }
 
-describes.realWin('amp-ad-network-doubleclick-impl', {amp: true}, env => {
+describes.realWin('amp-ad-network-doubleclick-impl', {amp: true,
+  allowExternalResources: true}, env => {
   let sandbox;
   let doc;
 
