@@ -100,6 +100,7 @@ import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eas} from '../ads/eas';
+import {engageya} from '../ads/engageya';
 import {eplanning} from '../ads/eplanning';
 import {f1e} from '../ads/f1e';
 import {f1h} from '../ads/f1h';
@@ -190,6 +191,7 @@ const AMP_EMBED_ALLOWED = {
   _ping_: true,
   bringhub: true,
   dable: true,
+  engageya: true,
   'mantis-recommend': true,
   mywidget: true,
   outbrain: true,
@@ -273,6 +275,7 @@ register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
 register('eas', eas);
+register('engageya', engageya);
 register('eplanning', eplanning);
 register('ezoic', ezoic);
 register('f1e', f1e);
