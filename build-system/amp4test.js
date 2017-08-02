@@ -20,11 +20,15 @@ const app = module.exports = require('express').Router();
 app.get('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
 
+  const mode = process.env.SERVE_MODE == 'compiled' ? '' : 'max';
   let extensionString = '';
   const extensions = req.query.extensions.split(' ');
+
   for (let i = 0; i < extensions.length; i++) {
     if (extensions[i] != '') {
-      extensionString += '<script async custom-element="' + extensions[i] + '" src="https://cdn.ampproject.org/v0/' + extensions[i] + '-0.1.js"></script> \n';
+      extensionString += '<script async custom-element="'
+          + extensions[i] + '" src=/dist/v0/'
+          + extensions[i] + '-0.1.' + mode + '.js></script> \n';
     }
   }
   res.send(`
