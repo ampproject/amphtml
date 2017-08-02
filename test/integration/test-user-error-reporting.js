@@ -20,55 +20,86 @@ import {
     depositRequestUrl,
 } from '../../testing/test-helper';
 
-//import {createFixtureIframe} from '../../testing/iframe.js';
+import {createFixtureIframe} from '../../testing/iframe.js';
+
 
 describe('user-error-reporting', function() {
   //this.timeout(15000);
 
-  describes.integration('user-error-reporting integration test', {
-    extensions: ['amp-analytics'],
-    body:
-    `<amp-analytics><script type="application/json">
-          {
-              "requests": {
-                  "user-error": "//localhost:9876/amp4test/request-bank/deposit/user-error"
-              },
-
-              "triggers": {
-                  "user-error": {
-                      "on": "user-error",
-                      "request": "user-error"
-                  }
-              }
-          }
-      </script></amp-analytics>
-      <script>depositRequestUrl('aaaaaa'); console.log('adfsdfsdf');</script>
-    <amp-pixel src="https://foo.com/tracker/foo"
-           layout="nodisplay"
-           referrerpolicy="referrer-fail"></amp-pixel>`,
-  }, env => {
-    it('should ping correct host', () => {
-      return withdrawRequest(env.win, 'user-error').then(request => {
-        expect(request).to.be.ok;
-      });
-    });
-  });
-
-  // describe('User-Error', function() {
-  //   let fixture;
+  // describes.integration('amp-pixel integration test', {
+  //   body: `<amp-analytics>
+  //         {
+  //             "requests": {
+  //                 "user-error": "${depositRequestUrl('user-error-repor')}"
+  //             },
   //
-  //   beforeEach(() => {
-  //     return createFixtureIframe(
-  //         'test/fixtures/analytics-error-reporting.html', 500)
-  //         .then(f => {
-  //           fixture = f;
-  //         });
+  //             "triggers": {
+  //                 "user-error": {
+  //                     "on": "user-error",
+  //                     "request": "user-error"
+  //                 }
+  //             },
+  //
+  //             "transport": {
+  //               "beacon": "false",
+  //               "xhrpost": "false",
+  //               "image": "true"
+  //             }
+  //         }
+  //     </amp-analytics>
+  //     <amp-pixel src="${depositRequestUrl('has-referrer')}">`,
+  // }, env => {
+  //   it('should keep referrer if no referrerpolicy specified', () => {
+  //     return withdrawRequest(env.win, 'has-referrer').then(request => {
+  //       expect(request.headers.referer).to.be.ok;
+  //     });
   //   });
+  // });
+
+
+  // describes.integration('user-error-reporting integration test', {
+  //   extensions: 'amp-analytics',
+  //   body:
+  //   `<amp-analytics><script type="application/json">
+  //         {
+  //             "requests": {
+  //                 "user-error": "${depositRequestUrl('user-error-report')}"
+  //             },
+  //             "triggers": {
+  //                 "user-error": {
+  //                     "on": "user-error",
+  //                     "request": "user-error"
+  //                 }
+  //             }
+  //         }
+  //     </script></amp-analytics>
   //
+  //   <amp-pixel src="https://foo.com/tracker/foo"
+  //          layout="nodisplay"
+  //          referrerpolicy="referrer-fail"></amp-pixel>`,
+  // }, env => {
   //   it('should ping correct host', () => {
-  //     return withdrawRequest(fixture.win, 'user-error-report').then(request => {
+  //     return withdrawRequest(env.win, 'user-error-report').then(request => {
   //       expect(request).to.be.ok;
   //     });
   //   });
   // });
+
+  describe('User-Error', function() {
+    let fixture;
+
+    beforeEach(() => {
+      return createFixtureIframe(
+          'test/fixtures/analytics-error-reporting.html', 500)
+          .then(f => {
+            fixture = f;
+          });
+    });
+
+    it('should ping correct host', () => {
+      return withdrawRequest(fixture.win, 'user-error-report').then(request => {
+        expect(request).to.be.ok;
+      });
+    });
+  });
 });

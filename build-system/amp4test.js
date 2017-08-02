@@ -16,15 +16,15 @@
 'use strict';
 
 const app = module.exports = require('express').Router();
+let extensionString;
 
 app.get('/compose-doc', function(req, res) {
-  res.setHeader('X-XSS-Protection', '0');
-  let extensionString = '';
-  const extensions = req.query.extensions.split(' ');
-  for (let i = 0; i < extensions.length; i++) {
-    extensionString += '<script async custom-element="' + extensions[i] + '" src="https://cdn.ampproject.org/v0/' + extensions[i] + '-0.1.js"></script> \n';
-  }
 
+  // for (const extension of req.query.extensions) {
+  //   extensionString += '<script async custom-element=' + extension + 'src="https://cdn.ampproject.org/v0/' + extension + '-0.1.js"></script>';
+  // }
+  //extensionString = req.query.extensions;
+  console.log(req.query.extensions);
   res.send(`
 <!doctype html>
 <html ⚡>
@@ -35,8 +35,9 @@ app.get('/compose-doc', function(req, res) {
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="/dist/${process.env.SERVE_MODE == 'compiled' ? 'v0' : 'amp'}.js"></script>`
 
-  + extensionString
-      +
+  //+ extensionString +
+  + '<script async custom-element=' + req.query.extensions + 'src="https://cdn.ampproject.org/v0/' + req.query.extensions + '-0.1.js"></script>'
+  +
 `
 </head>
 <body>
@@ -57,9 +58,6 @@ const bank = {};
  * if the same ID already exists.
  */
 app.get('/request-bank/deposit/:id', (req, res) => {
-  console.log('deposit id: ' + req.params.id);
-  console.log(typeof bank[req.params.id]);
-
   if (typeof bank[req.params.id] === 'function') {
     bank[req.params.id](req);
   } else {
@@ -75,9 +73,6 @@ app.get('/request-bank/deposit/:id', (req, res) => {
  */
 app.get('/request-bank/withdraw/:id', (req, res) => {
   const result = bank[req.params.id];
-  console.log('withdraw id: ' + (typeof result === 'function'));
-  console.log('id: ' + req.params.id);
-  console.log(result);
   if (typeof result === 'function') {
     return res.status(500).send('another client is withdrawing this ID');
   }

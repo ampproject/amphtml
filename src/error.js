@@ -497,13 +497,13 @@ export function detectJsEngineFromStack() {
  * @param {!Window} win
  */
 export function reportErrorToAnalytics(error, win) {
-  //if (isExperimentOn(win, 'user-error-reporting')) {
-  const vars = {
-    'errorName': error.name,
-    'errorMessage': error.message,
-  };
-  triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
- // }
+  if (isExperimentOn(win, 'user-error-reporting')) {
+    const vars = {
+      'errorName': error.name,
+      'errorMessage': error.message,
+    };
+    triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
+  }
 }
 
 /**

@@ -111,13 +111,11 @@ const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
 const userAgent = encodeURIComponent(window.navigator.userAgent);
 
 export function depositRequestUrl(id) {
-  console.log('depositing...');
-  console.log(`${id}`);
   return `${REQUEST_URL}deposit/${id}-${userAgent}`;
 }
 
 export function withdrawRequest(win, id) {
-  const url = `${REQUEST_URL}withdraw/${id}`;
+  const url = `${REQUEST_URL}withdraw/${id}-${userAgent}`;
   return xhrServiceForTesting(win).fetchJson(url, {
     method: 'GET',
     ampCors: false,
