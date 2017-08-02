@@ -31,10 +31,12 @@ import {
 } from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {
-  removeElement,
+  childElementsByTag,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
+  isJsonScriptTag,
+  removeElement,
 } from '../../../src/dom';
 import {user, dev} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
@@ -80,8 +82,9 @@ class AmpImaVideo extends AMP.BaseElement {
         'The data-tag attribute is required for <amp-video-ima> and must be ' +
             'https');
 
-    const sourceElements = this.element.getElementsByTagName('source');
-    const trackElements = this.element.getElementsByTagName('track');
+    // Handle <source> and <track> children
+    const sourceElements = childElementsByTag(this.element, 'SOURCE');
+    const trackElements = childElementsByTag(this.element, 'TRACK');
     const childElements =
         toArray(sourceElements).concat(toArray(trackElements));
     if (childElements.length > 0) {
@@ -97,6 +100,13 @@ class AmpImaVideo extends AMP.BaseElement {
       });
       this.element.setAttribute(
           'data-child-elements', JSON.stringify(children));
+    }
+
+    // Handle IMASetting JSON
+    const scriptElement = childElementsByTag(this.element, 'SCRIPT')[0];
+    if (scriptElement && isJsonScriptTag(scriptElement)) {
+      this.element.setAttribute(
+          'data-ima-settings', scriptElement./*OK*/innerHTML);
     }
   }
 
