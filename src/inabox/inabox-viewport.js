@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {getFixedContainer} from '../../src/full-overlay-frame-child-helper';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {Services} from '../services';
 import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
@@ -26,7 +25,7 @@ import {layoutRectLtwh} from '../layout-rect';
 import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
-import {px, setStyles} from '../../src/style';
+import {px, setImportantStyles, resetStyles} from '../../src/style';
 
 
 /** @const {string} */
@@ -34,26 +33,25 @@ const TAG = 'inabox-viewport';
 
 
 /** @visibleForTesting */
-export function prepareFixedContainer(win, fixedContainer) {
+export function prepareBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).runPromise({
     measure: state => {
-      state.boundingRect = fixedContainer./*OK*/getBoundingClientRect();
+      state.width = win./*OK*/innerWidth;
+      state.height = win./*OK*/innerHeight;
     },
     mutate: state => {
-      setStyles(dev().assertElement(win.document.body), {
-        'background': 'transparent',
-      });
-
-      setStyles(fixedContainer, {
-        'position': 'absolute',
+      // We need to override runtime-level !important rules
+      setImportantStyles(bodyElement, {
+        'background': 'transparent', // TODO(alanorozco): do this early
         'left': '50%',
         'top': '50%',
         'right': 'auto',
         'bottom': 'auto',
-        'width': px(state.boundingRect.width),
-        'height': px(state.boundingRect.height),
-        'margin-left': px(-(state.boundingRect.width / 2)),
-        'margin-top': px(-(state.boundingRect.height / 2)),
+        'position': 'absolute',
+        'height': px(state.height),
+        'width': px(state.width),
+        'margin-top': px(-state.height / 2),
+        'margin-left': px(-state.width / 2),
       });
     },
   }, {});
@@ -61,23 +59,21 @@ export function prepareFixedContainer(win, fixedContainer) {
 
 
 /** @visibleForTesting */
-export function resetFixedContainer(win, fixedContainer) {
+export function resetBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).mutatePromise(() => {
-    setStyles(dev().assertElement(win.document.body), {
-      'background': 'transparent',
-    });
-
-    setStyles(fixedContainer, {
-      'position': null,
-      'left': null,
-      'top': null,
-      'right': null,
-      'bottom': null,
-      'width': null,
-      'height': null,
-      'margin-left': null,
-      'margin-top': null,
-    });
+    // we're not resetting background here as we need to set it to
+    // transparent permanently (see TODO)
+    resetStyles(bodyElement, [
+      'position',
+      'left',
+      'top',
+      'right',
+      'bottom',
+      'width',
+      'height',
+      'margin-left',
+      'margin-top',
+    ]);
   });
 }
 
@@ -248,7 +244,7 @@ export class ViewportBindingInabox {
    * @private
    */
   tryToEnterOverlayMode_() {
-    return this.prepareFixedContainer_()
+    return this.prepareBodyForOverlay_()
         .then(() => this.requestFullOverlayFrame_());
   }
 
@@ -258,7 +254,7 @@ export class ViewportBindingInabox {
    */
   leaveOverlayMode_() {
     return this.requestCancelFullOverlayFrame_()
-        .then(() => this.resetFixedContainer_());
+        .then(() => this.resetBodyForOverlay_());
   }
 
   /**
@@ -266,15 +262,8 @@ export class ViewportBindingInabox {
    * @return {!Promise}
    * @private
    */
-  prepareFixedContainer_() {
-    const fixedContainer = this.getFixedContainer_();
-
-    if (!fixedContainer) {
-      dev().warn(TAG, 'No fixed container inside frame, content will shift.');
-      return Promise.resolve();
-    }
-
-    return prepareFixedContainer(this.win, dev().assertElement(fixedContainer));
+  prepareBodyForOverlay_() {
+    return prepareBodyForOverlay(this.win, this.getBodyElement());
   }
 
   /**
@@ -282,15 +271,8 @@ export class ViewportBindingInabox {
    * @return {!Promise}
    * @private
    */
-  resetFixedContainer_() {
-    const fixedContainer = this.getFixedContainer_();
-
-    if (!fixedContainer) {
-      dev().warn(TAG, 'No fixed container inside frame, content will shift.');
-      return Promise.resolve();
-    }
-
-    return resetFixedContainer(this.win, dev().assertElement(fixedContainer));
+  resetBodyForOverlay_() {
+    return resetBodyForOverlay(this.win, this.getBodyElement());
   }
 
   /**
@@ -331,9 +313,9 @@ export class ViewportBindingInabox {
     });
   }
 
-  getFixedContainer_() {
-    return getFixedContainer(
-        /** @type {!HTMLBodyElement} */ (dev().assert(this.win.document.body)));
+  /** @visibleForTesting */
+  getBodyElement() {
+    return dev().assertElement(this.win.document.body);
   }
 
   /** @override */ disconnect() {/* no-op */}
