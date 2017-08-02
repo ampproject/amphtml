@@ -30,16 +30,16 @@ const PlayerStates = {
 };
 
 // Character used for play icon.
-const playChar = '\u25b6\ufe0e';
+const playChar = '<svg xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF" width="100%" height="100%" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>';
 
 // Character used for pause icons.
-const pauseChars = '\u258c\ufe0e\u258c\ufe0e';
+const pauseChars = '<svg xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF" width="100%" height="100%" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>';
 
 // Character used for seek dot on progress bar.
 const seekDot = '\u25cf\ufe0e';
 
 // Characters used for fullscreen icon.
-const fullscreenChars = '\u25ad\ufe0e';
+const fullscreenChars = '<svg xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF" width="100%" height="100%" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>';
 
 // Div wrapping our entire DOM.
 let wrapperDiv;
@@ -58,9 +58,6 @@ let controlsDiv;
 
 // Div containing play or pause button.
 let playPauseDiv;
-
-// Node contianing play or pause characters.
-let playPauseNode;
 
 // Div containing player time.
 let timeDiv;
@@ -225,7 +222,7 @@ export function imaVideo(global, data) {
   setStyle(controlsDiv, '-ms-user-select', 'none');
   setStyle(controlsDiv, 'user-select', 'none');
   // Play button
-  playPauseDiv = global.document.createElement('div');
+  playPauseDiv = global.document.createElementNS("http://www.w3.org/2000/svg", "svg");
   playPauseDiv.id = 'ima-play-pause';
   setStyle(playPauseDiv, 'width', '30px');
   setStyle(playPauseDiv, 'height', '30px');
@@ -233,8 +230,7 @@ export function imaVideo(global, data) {
   setStyle(playPauseDiv, 'font-size', '1.25em');
   setStyle(playPauseDiv, 'float', 'left');
   setStyle(playPauseDiv, 'cursor', 'pointer');
-  playPauseNode = global.document.createTextNode(playChar);
-  playPauseDiv.appendChild(playPauseNode);
+  playPauseDiv.innerHTML = playChar;
   controlsDiv.appendChild(playPauseDiv);
   // Current time and duration.
   timeDiv = global.document.createElement('div');
@@ -244,6 +240,7 @@ export function imaVideo(global, data) {
   setStyle(timeDiv, 'line-height', '30px');
   setStyle(timeDiv, 'float', 'left');
   setStyle(timeDiv, 'text-align', 'center');
+  setStyle(timeDiv, 'font-family', 'Helvetica, Arial, Sans-serif');
   timeNode = global.document.createTextNode('00:00 / 00:00');
   timeDiv.appendChild(timeNode);
   controlsDiv.appendChild(timeDiv);
@@ -294,7 +291,7 @@ export function imaVideo(global, data) {
   setStyle(fullscreenDiv, 'text-align', 'center');
   setStyle(fullscreenDiv, 'font-weight', 'bold');
   setStyle(fullscreenDiv, 'line-height', '1.4em');
-  fullscreenDiv.appendChild(global.document.createTextNode(fullscreenChars));
+  fullscreenDiv.innerHTML = fullscreenChars;
   controlsDiv.appendChild(fullscreenDiv);
 
   // Ad container.
@@ -722,7 +719,7 @@ export function playVideo() {
   // Kick off the hide controls timer.
   showControls();
   setStyle(playPauseDiv, 'line-height', '1.4em');
-  playPauseNode.textContent = pauseChars;
+  playPauseDiv.innerHTML = pauseChars;
   window.parent./*OK*/postMessage({event: VideoEvents.PLAYING}, '*');
   videoPlayer.play();
 }
@@ -740,7 +737,7 @@ export function pauseVideo(event) {
   if (!adsActive) {
     showControls();
   }
-  playPauseNode.textContent = playChar;
+  playPauseDiv.innerHTML = playChar;
   setStyle(playPauseDiv, 'line-height', '');;
   window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
   if (event && event.type == 'webkitendfullscreen') {
@@ -923,7 +920,7 @@ export function getPropertiesForTesting() {
   return {adContainerDiv, adRequestFailed, adsActive, adsManagerWidthOnLoad,
     adsManagerHeightOnLoad, contentComplete, controlsDiv, hideControlsTimeout,
     interactEvent, pauseChars, playbackStarted, playChar, playerState,
-    PlayerStates, playPauseDiv, playPauseNode, progressLine,
+    PlayerStates, playPauseDiv, playPauseDiv, progressLine,
     progressMarkerDiv, timeNode, uiTicker, videoPlayer};
 }
 
