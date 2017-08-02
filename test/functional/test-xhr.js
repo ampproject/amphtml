@@ -571,7 +571,7 @@ describe('XHR', function() {
           });
           expect(requests[0].requestHeaders).to.deep.equal({
             'Accept': 'application/json',
-            'Content-Type': 'application/json;charset=utf-8',
+            'Content-Type': 'text/plain;charset=utf-8',
             'Other': 'another',  // Not removed when other headers set.
           });
         });
@@ -582,6 +582,9 @@ describe('XHR', function() {
           method: 'POST',
           body: {
             hello: 'world',
+          },
+          headers: {
+            'Content-Type': 'application/json;charset=utf-8',
           },
         }).then(res => res.json()).then(res => {
           expect(res.json).to.jsonEqual({
