@@ -829,6 +829,12 @@ var forbiddenTermsSrcInclusive = {
   '\\.remove\\(\\)': {
     message: 'use removeElement helper in src/dom.js',
   },
+  '\\.trim(Left|Right)\\(\\)': {
+    message: 'Unsupported on IE; use trim() or a helper instead.',
+    whitelist: [
+      'validator/engine/validator.js',
+    ],
+  },
 };
 
 // Terms that must appear in a source file.
