@@ -55,6 +55,9 @@ tags: {  # <amp-video>
   }
   attrs: { name: "placeholder" }
   attrs: { name: "poster" }
+  attrs: { name: "title" }
+  attrs: { name: "artist" }
+  attrs: { name: "album" }
   attrs: { name: "crossorigin" }
   attrs: {
     name: "preload"
@@ -74,6 +77,9 @@ tags: {  # <amp-video>
   attrs: { name: "[controls]" }
   attrs: { name: "[loop]" }
   attrs: { name: "[poster]" }
+  attrs: { name: "[title]" }
+  attrs: { name: "[artist]" }
+  attrs: { name: "[album]" }
   attrs: { name: "[preload]" }
   attrs: { name: "[src]" }
   attr_lists: "extended-amp-global"
