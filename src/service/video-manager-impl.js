@@ -38,11 +38,18 @@ import {
   PositionObserverFidelity,
   PositionInViewportEntryDef,
 } from './position-observer-impl';
+import {map} from '../utils/object';
 import {layoutRectLtwh, RelativePositions} from '../layout-rect';
+import {
+  EMPTY_METADATA,
+  parseSchemaImage,
+  parseOgImage,
+  parseFavicon,
+  setMediaSession,
+} from '../mediasession-helper';
 import {Animation} from '../animation';
 import * as st from '../style';
 import * as tr from '../transition';
-
 /**
  * @const {number} Percentage of the video that should be in viewport before it
  * is considered visible.
@@ -456,6 +463,8 @@ class VideoEntry {
 
     const element = dev().assert(video.element);
 
+    // Autoplay Variables
+
     /** @private {boolean} */
     this.userInteractedWithAutoPlay_ = false;
 
@@ -538,10 +547,13 @@ class VideoEntry {
     this.hasFullscreenOnLandscape = fsOnLandscapeAttr == ''
                                     || fsOnLandscapeAttr == 'always';
 
+    // Media Session API Variables
+
+    /** @private {!../video-interface.VideoMetaDef} */
+    this.metadata_ = EMPTY_METADATA;
+
     listenOncePromise(element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
-
-
     listen(element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(element, VideoEvents.MUTED, () => this.muted_ = true);
@@ -571,6 +583,23 @@ class VideoEntry {
    */
   videoPlayed_() {
     this.isPlaying_ = true;
+
+    if (!this.video.preimplementsMediaSessionAPI()) {
+      const playHandler = () => {
+        this.video.play(/*isAutoplay*/ false);
+      };
+      const pauseHandler = () => {
+        this.video.pause();
+      };
+      // Update the media session
+      setMediaSession(
+          this.ampdoc_,
+          this.metadata_,
+          playHandler,
+          pauseHandler
+      );
+    }
+
     this.actionSessionManager_.beginSession();
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
@@ -617,10 +646,50 @@ class VideoEntry {
       this.inlineVidRect_ = this.video.element./*OK*/getBoundingClientRect();
     });
 
+    this.fillMediaSessionMetadata_();
+
     this.updateVisibility();
     if (this.isVisible_) {
       // Handles the case when the video becomes visible before loading
       this.loadedVideoVisibilityChanged_();
+    }
+  }
+
+  /**
+   * Gets the provided metadata and fills in missing fields
+   * @private
+   */
+  fillMediaSessionMetadata_() {
+    if (this.video.preimplementsMediaSessionAPI()) {
+      return;
+    }
+
+    if (this.video.getMetadata()) {
+      const mapped = map(this.video.getMetadata());
+      this.metadata_ = /** @type {!../video-interface.VideoMetaDef} */ (mapped);
+    }
+
+    if (!this.metadata_.artwork || this.metadata_.artwork.length == 0) {
+      const posterUrl = parseSchemaImage(this.ampdoc_)
+                        || parseOgImage(this.ampdoc_)
+                        || parseFavicon(this.ampdoc_);
+
+      if (posterUrl) {
+        this.metadata_.artwork = [{
+          'src': posterUrl,
+        }];
+      }
+    }
+
+    if (!this.metadata_.title) {
+      const title = this.video.element.getAttribute('title')
+                    || this.video.element.getAttribute('aria-label')
+                    || this.internalElement_.getAttribute('title')
+                    || this.internalElement_.getAttribute('aria-label')
+                    || this.ampdoc_.win.document.title;
+      if (title) {
+        this.metadata_.title = title;
+      }
     }
   }
 

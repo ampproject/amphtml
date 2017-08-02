@@ -467,6 +467,18 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    // Youtube already updates the Media Session so no need for the video
+    // manager to update it too
+    return true;
+  }
+
+  /** @override */
   getCurrentTime() {
     // Not supported.
     return 0;
