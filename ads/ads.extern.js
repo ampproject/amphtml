@@ -122,6 +122,9 @@ google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED;
 google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED;
 google.ima.AdsManager;
 google.ima.AdsManager.setVolume;
+google.ima.settings;
+google.ima.settings.setLocale;
+google.ima.settings.setVpaidMode;
 
 // 3P ads
 // Please sort by alphabetic order of the ad server name to avoid conflict
