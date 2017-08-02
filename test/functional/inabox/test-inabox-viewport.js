@@ -17,8 +17,8 @@
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
 import {
-  prepareFixedContainer,
-  resetFixedContainer,
+  prepareBodyForOverlay,
+  resetBodyForOverlay,
   ViewportBindingInabox,
 } from '../../../src/inabox/inabox-viewport';
 import {
@@ -161,7 +161,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     sandbox.stub(binding, 'getChildResources', () => allResourcesMock);
 
     const prepareContainer =
-        sandbox.stub(binding, 'prepareFixedContainer_')
+        sandbox.stub(binding, 'prepareBodyForOverlay_')
             .returns(Promise.resolve());
 
     const makeRequest = stubIframeClientMakeRequest(
@@ -191,7 +191,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
   it('should reset content and request resize on leave overlay mode', () => {
     const resetContainer =
-        sandbox.stub(binding, 'resetFixedContainer_')
+        sandbox.stub(binding, 'resetBodyForOverlay_')
             .returns(Promise.resolve());
 
     const makeRequest = stubIframeClientMakeRequest(
@@ -222,7 +222,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         'full-overlay-frame-response',
         (req, res, cb) => cb({success: true, boxRect}));
 
-    sandbox.stub(binding, 'prepareFixedContainer_').returns(Promise.resolve());
+    sandbox.stub(binding, 'prepareBodyForOverlay_').returns(Promise.resolve());
 
     yield binding.updateLightboxMode(true);
 
@@ -246,63 +246,49 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         'cancel-full-overlay-frame-response',
         (req, res, cb) => cb({success: true, boxRect}));
 
-    sandbox.stub(binding, 'resetFixedContainer_').returns(Promise.resolve());
+    sandbox.stub(binding, 'resetBodyForOverlay_').returns(Promise.resolve());
 
     yield binding.updateLightboxMode(false);
 
     expect(updateBoxRectStub).to.be.calledWith(boxRect);
   });
 
-  it('should center the fixed container properly', done => {
+  it('should center the fixed container properly', function* () {
     const w = 120;
     const h = 90;
 
-    const el = {
-      getBoundingClientRect() {
-        return layoutRectLtwh(123, 456, w, h);
-      },
-      style: {},
-    };
+    const el = document.createElement('div');
 
-    prepareFixedContainer(win, el).then(() => {
-      expect(el.style['position']).to.equal('absolute');
-      expect(el.style['left']).to.equal('50%');
-      expect(el.style['top']).to.equal('50%');
-      expect(el.style['bottom']).to.equal('auto');
-      expect(el.style['right']).to.equal('auto');
-      expect(el.style['width']).to.equal(`${w}px`);
-      expect(el.style['height']).to.equal(`${h}px`);
-      expect(el.style['margin-left']).to.equal(`-${w / 2}px`);
-      expect(el.style['margin-top']).to.equal(`-${h / 2}px`);
+    sandbox.stub(win, 'innerWidth', w);
+    sandbox.stub(win, 'innerHeight', h);
 
-      done();
-    });
+    yield prepareBodyForOverlay(win, el);
+
+    expect(el.style['position']).to.equal('absolute');
+    expect(el.style['left']).to.equal('50%');
+    expect(el.style['top']).to.equal('50%');
+    expect(el.style['bottom']).to.equal('auto');
+    expect(el.style['right']).to.equal('auto');
+    expect(el.style['width']).to.equal(`${w}px`);
+    expect(el.style['height']).to.equal(`${h}px`);
+    expect(el.style['margin-left']).to.equal(`-${w / 2}px`);
+    expect(el.style['margin-top']).to.equal(`-${h / 2}px`);
   });
 
-  it('should undo styling when the fixed container is reset', done => {
-    const w = 120;
-    const h = 90;
+  it('should undo styling when the fixed container is reset', function* () {
+    const el = document.createElement('div');
 
-    const el = {
-      getBoundingClientRect() {
-        return layoutRectLtwh(123, 456, w, h);
-      },
-      style: {},
-    };
+    yield resetBodyForOverlay(win, el);
 
-    resetFixedContainer(win, el).then(() => {
-      expect(el.style['position']).to.be.null;
-      expect(el.style['left']).to.be.null;
-      expect(el.style['top']).to.be.null;
-      expect(el.style['bottom']).to.be.null;
-      expect(el.style['right']).to.be.null;
-      expect(el.style['width']).to.be.null;
-      expect(el.style['height']).to.be.null;
-      expect(el.style['margin-left']).to.be.null;
-      expect(el.style['margin-top']).to.be.null;
-
-      done();
-    });
+    expect(el.style['position']).to.be.empty;
+    expect(el.style['left']).to.be.empty;
+    expect(el.style['top']).to.be.empty;
+    expect(el.style['bottom']).to.be.empty;
+    expect(el.style['right']).to.be.empty;
+    expect(el.style['width']).to.be.empty;
+    expect(el.style['height']).to.be.empty;
+    expect(el.style['margin-left']).to.be.empty;
+    expect(el.style['margin-top']).to.be.empty;
   });
 
 });
