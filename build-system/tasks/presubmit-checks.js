@@ -658,7 +658,7 @@ var forbiddenTermsSrcInclusive = {
   '\\.scheduleUnlayout\\(': bannedTermsHelpString,
   'getComputedStyle\\(': {
     message: 'Due to various bugs in Firefox, you must use the computedStyle ' +
-        'helper in style.js.',
+    'helper in style.js.',
     whitelist: [
       'src/style.js',
       'dist.3p/current/integration.js',
@@ -666,7 +666,7 @@ var forbiddenTermsSrcInclusive = {
   },
   'decodeURIComponent\\(': {
     message: 'decodeURIComponent throws for malformed URL components. Please ' +
-        'use tryDecodeUriComponent from src/url.js',
+    'use tryDecodeUriComponent from src/url.js',
     whitelist: [
       '3p/integration.js',
       'dist.3p/current/integration.js',
@@ -694,9 +694,9 @@ var forbiddenTermsSrcInclusive = {
   // contains a space.
   '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': {
     message: 'querySelector is not scoped to the element, but globally and ' +
-      'filtered to just the elements inside the element. This leads to ' +
-      'obscure bugs if you attempt to match a descendant of a descendant (ie ' +
-      '"div div"). Instead, use the scopedQuerySelector helper in dom.js',
+    'filtered to just the elements inside the element. This leads to ' +
+    'obscure bugs if you attempt to match a descendant of a descendant (ie ' +
+    '"div div"). Instead, use the scopedQuerySelector helper in dom.js',
   },
   'loadExtension': {
     message: bannedTermsHelpString,
@@ -729,7 +729,7 @@ var forbiddenTermsSrcInclusive = {
   },
   'reject\\(\\)': {
     message: 'Always supply a reason in rejections. ' +
-        'error.cancellation() may be applicable.',
+    'error.cancellation() may be applicable.',
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
       'extensions/amp-animation/0.1/css-expr-impl.js',
@@ -750,6 +750,7 @@ var forbiddenTermsSrcInclusive = {
       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
       'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
+      'extensions/amp-web-push/0.1/iframehost.js',
       'dist.3p/current/integration.js',
     ],
   },
