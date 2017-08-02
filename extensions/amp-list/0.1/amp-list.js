@@ -168,8 +168,6 @@ export class AmpList extends AMP.BaseElement {
     return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {
         return bind.rescanAndEvaluate(elements);
-      } else {
-        return Promise.resolve();
       }
     // Forward elements to chained promise on success or failure.
     }).then(forwardElements, forwardElements);

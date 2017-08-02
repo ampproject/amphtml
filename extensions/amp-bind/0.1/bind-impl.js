@@ -345,7 +345,8 @@ export class Bind {
     // Once all scans are complete, combine the bindings and ask web-worker to
     // evaluate expressions in a single RPC.
     return Promise.all(scanPromises).then(results => {
-      // `results[i]` is an array of bindings from the i'th scan -- combine.
+      // `results` is a 2D array where results[i] is an array of bindings.
+      // Flatten this into a 1D array of bindings via concat.
       const bindings = Array.prototype.concat.apply([], results);
       if (bindings.length == 0) {
         return bindings.length;
@@ -667,13 +668,13 @@ export class Bind {
    * @return {!Promise}
    */
   applyElements_(results, elements) {
-    const promises = this.boundElements_.map(boundElement => {
-      for (let i = 0; i < elements.length; i++) {
-        if (elements[i].contains(boundElement.element)) {
-          return this.applyBoundElement_(results, boundElement);
+    const promises = [];
+    this.boundElements_.forEach(boundElement => {
+      elements.forEach(element => {
+        if (element.contains(boundElement.element)) {
+          promises.push(this.applyBoundElement_(results, boundElement));
         }
-      }
-      return Promise.resolve();
+      });
     });
     return Promise.all(promises);
   }
