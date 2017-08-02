@@ -299,6 +299,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  engageya: {},
+
   eplanning: {
     prefetch: 'https://us.img.e-planning.net/layers/epl-amp.js',
   },
