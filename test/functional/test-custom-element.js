@@ -937,6 +937,22 @@ describes.realWin('CustomElement', {amp: true}, env => {
     expect(sizer.style.paddingTop).to.equal('99%');
   });
 
+  it('should update sizer if done improperly in SSR', () => {
+    const element1 = new ElementClass();
+    element1.setAttribute('i-amphtml-layout', 'responsive');
+    element1.setAttribute('layout', 'responsive');
+    element1.setAttribute('width', '200px');
+    element1.setAttribute('height', '200px');
+    container.appendChild(element1);
+
+    const sizer = doc.createElement('i-amphtml-sizer');
+    expect(element1.sizerElement_).to.be.undefined;
+    element1.appendChild(sizer);
+    element1.applySizesAndMediaQuery();
+    expect(element1.sizerElement_).to.equal(sizer);
+    expect(sizer.style.paddingTop).to.equal('100%');
+  });
+
   it('should NOT rediscover sizer after reset in SSR', () => {
     const element1 = new ElementClass();
     element1.setAttribute('i-amphtml-layout', 'responsive');
