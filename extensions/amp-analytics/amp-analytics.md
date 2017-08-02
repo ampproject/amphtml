@@ -54,23 +54,23 @@ To send data to a supported analytics vendor:
 
 *Example: Sending data to a third-party analytics provider*
 
-In the following example, pageview data is sent to Google Analytics, a third-party analytics provider.  Details for sending pageview data to Google Analytics can be found in the [Google Analytics](https://developers.google.com/analytics/devguides/collection/amp-analytics/#page_tracking) documentation.
+In the following example, analytics data is sent to Nielsen, a third-party analytics provider. Details for configuring analytics data for Nielsen can be found in the [Nielsen](https://engineeringportal.nielsen.com/docs/DCR_Static_Google_AMP_Cloud_API) documentation.
 
 ```html
-<amp-analytics type="googleanalytics" id="analytics1">
-<script type="application/json">
-{
-  "vars": {
-    "account": "UA-XXXXX-Y"
-  },
-  "triggers": {
-    "trackPageview": {  
-      "on": "visible",
-      "request": "pageview"
+<amp-analytics type="nielsen">
+    <script type="application/json">
+    {
+      "vars": {
+        "apid": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+        "apv": "1.0",
+        "apn": "My AMP Website",
+        "section": "Entertainment",
+        "segA": "Music",
+        "segB": "News",
+        "segC": "Google AMP"
+      }
     }
-  }
-}
-</script>
+    </script>
 </amp-analytics>
 ```
 
