@@ -72,7 +72,7 @@ class AmpVideo extends AMP.BaseElement {
     /** @private {?boolean}  */
     this.muted_ = false;
 
-    /** @private {../../../src/video-interface.VideoMetaDef} */
+    /** @private {!../../../src/video-interface.VideoMetaDef} */
     this.metadata_ = EMPTY_METADATA;
   }
 
@@ -112,8 +112,8 @@ class AmpVideo extends AMP.BaseElement {
   buildCallback() {
     this.video_ = this.element.ownerDocument.createElement('video');
 
-    const posterAttr = this.element.getAttribute('poster');
-    if (!posterAttr && getMode().development) {
+    const poster = this.element.getAttribute('poster');
+    if (!poster && getMode().development) {
       console/*OK*/.error(
           'No "poster" attribute has been provided for amp-video.');
     }
@@ -128,6 +128,19 @@ class AmpVideo extends AMP.BaseElement {
     this.installEventHandlers_();
     this.applyFillContent(this.video_, true);
     this.element.appendChild(this.video_);
+
+    // Gather metadata
+    const artist = this.element.getAttribute('artist');
+    const title = this.element.getAttribute('title');
+    const album = this.element.getAttribute('album');
+    this.metadata_ = {
+      'title': title || '',
+      'artist': artist || '',
+      'album': album || '',
+      'artwork': [
+        {'src': poster || ''},
+      ],
+    };
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
@@ -331,18 +344,7 @@ class AmpVideo extends AMP.BaseElement {
 
   /** @override */
   getMetadata() {
-    const poster = this.element.getAttribute('poster');
-    const artist = this.element.getAttribute('artist');
-    const title = this.element.getAttribute('title');
-    const album = this.element.getAttribute('album');
-    return {
-      'title': title || '',
-      'artist': artist || '',
-      'album': album || '',
-      'artwork': [
-        {'src': poster || ''},
-      ],
-    };
+    return this.metadata_;
   }
 
   /** @override */
