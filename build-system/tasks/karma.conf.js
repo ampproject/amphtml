@@ -35,14 +35,22 @@ module.exports = {
     'ads/**/test/test-*.js': ['browserify'],
     'extensions/**/test/**/*.js': ['browserify'],
     'testing/**/*.js': ['browserify'],
-    /* Cheap attempt to capture the test file being require()ed via abs path */
-    '/**/extensions/**/test/**/*.js': ['browserify'],
   },
 
   browserify: {
     watch: true,
     debug: true,
-    transform: ['babelify'],
+    transform: [
+      ['babelify'],
+      [
+        'browserify-istanbul',
+        {
+          instrumenterConfig: {
+            embedSource: true
+          }
+        }
+      ]
+    ],
     bundleDelay: 900,
   },
 

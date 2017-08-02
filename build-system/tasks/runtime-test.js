@@ -262,20 +262,6 @@ gulp.task('test', 'Runs tests',
     for (let type in c.preprocessors) {
       c.preprocessors[type] = c.preprocessors[type].concat(['coverage']);
     }
-    /* This block predates the addition of abs path in karma.conf.js
-    if (argv.files) {
-      util.log(util.colors.blue('Warning: this is a single-file hack for' +
-        ' now. Do not check in until it works with globs'));
-      let fullPath = process.cwd() + '/' + argv.files;
-      c.preprocessors[fullPath] = ['browserify', 'coverage'];
-      util.log(util.colors.blue('Set preprocessors for ' +
-        fullPath + ' to ' + JSON.stringify(c.preprocessors[process.cwd() + '/' + argv.files])));
-      c.files.push(fullPath);
-    }
-    */
-    c.files.push('/**/extensions/**/test/**/*.js');
-    util.log(util.colors.blue('Preprocessors: ' + JSON.stringify(c.preprocessors)));
-    util.log(util.colors.blue('Files: ' + JSON.stringify(c.files)));
     c.coverageReporter = {
       dir: 'test/coverage',
       reporters: [
@@ -286,7 +272,9 @@ gulp.task('test', 'Runs tests',
         { type: 'text-summary', subdir: '.', file: 'text-summary.txt' },
       ],
       instrumenterOptions: {
-        istanbul: { noCompact: true }
+        istanbul: {
+          noCompact: true,
+        }
       }
     };
     // TODO(jonkeller): Add c.coverageReporter.check as shown in
