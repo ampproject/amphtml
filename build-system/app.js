@@ -1131,6 +1131,11 @@ function enableCors(req, res, origin, opt_exposeHeaders) {
 }
 
 function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
+  // Allow disable CORS check (iframe fixtures have origin 'about:srcdoc').
+  if (req.query.cors == '0') {
+    return;
+  }
+
   const validMethods = opt_validMethods || ['GET', 'POST', 'OPTIONS'];
   const invalidMethod = req.method + ' method is not allowed. Use POST.';
   const invalidOrigin = 'Origin header is invalid.';
