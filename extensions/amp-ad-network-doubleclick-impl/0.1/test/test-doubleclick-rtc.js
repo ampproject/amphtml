@@ -22,8 +22,6 @@ import {
 import {createElementWithAttributes} from '../../../../src/dom';
 import {Xhr} from '../../../../src/service/xhr-impl';
 
-
-
 describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
   let impl;
   let element;
