@@ -66,7 +66,7 @@ The component HTML accepts the following types of HTML nodes as children:
   <source src="foo.mp4" type="video/mp4">
   <source src="foo.webm" type="video/webm">
   <track label="English subtitles" kind="subtitles" srclang="en" src="subtitles.vtt">
-  <script type="application/json" amp-ima-video-settings>
+  <script type="application/json">
   {
     "locale": "en",
     "numRedirects": 4
