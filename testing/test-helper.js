@@ -122,6 +122,3 @@ export function withdrawRequest(win, id) {
     credentials: 'omit',
   }).then(res => res.json());
 }
-
-
-

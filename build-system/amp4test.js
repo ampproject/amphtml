@@ -16,15 +16,8 @@
 'use strict';
 
 const app = module.exports = require('express').Router();
-let extensionString;
 
 app.get('/compose-doc', function(req, res) {
-
-  // for (const extension of req.query.extensions) {
-  //   extensionString += '<script async custom-element=' + extension + 'src="https://cdn.ampproject.org/v0/' + extension + '-0.1.js"></script>';
-  // }
-  //extensionString = req.query.extensions;
-  console.log(req.query.extensions);
   res.send(`
 <!doctype html>
 <html ⚡>
@@ -33,12 +26,7 @@ app.get('/compose-doc', function(req, res) {
   <link rel="canonical" href="http://nonblocking.io/" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-  <script async src="/dist/${process.env.SERVE_MODE == 'compiled' ? 'v0' : 'amp'}.js"></script>`
-
-  //+ extensionString +
-  + '<script async custom-element=' + req.query.extensions + 'src="https://cdn.ampproject.org/v0/' + req.query.extensions + '-0.1.js"></script>'
-  +
-`
+  <script async src="/dist/${process.env.SERVE_MODE == 'compiled' ? 'v0' : 'amp'}.js"></script>
 </head>
 <body>
 ${req.query.body}
