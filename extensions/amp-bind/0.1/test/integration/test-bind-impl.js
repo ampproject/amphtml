@@ -429,12 +429,14 @@ describe.configure().skipSauceLabs().run('Bind', function() {
     });
 
     it('should NOT mutate elements if expression result is unchanged', () => {
-      const binding = '[value]="1+1" [class]="\'abc\'" [text]="\'a\'+\'b\'"';
+      const binding = '[value]="foo" [class]="\'abc\'" [text]="\'a\'+\'b\'"';
       const element = createElement(env, container, binding, 'input');
-      return onBindReadyAndSetState(env, bind, {}).then(() => {
+      element.mutatedAttributesCallback = sandbox.spy();
+      return onBindReadyAndSetState(env, bind, {foo: {bar: [1]}}).then(() => {
         expect(element.textContent.length).to.not.equal(0);
         expect(element.classList.length).to.not.equal(0);
         expect(element.attributes.length).to.not.equal(0);
+        expect(element.mutatedAttributesCallback).to.be.called.once;
 
         element.textContent = '';
         element.className = '';
@@ -442,12 +444,14 @@ describe.configure().skipSauceLabs().run('Bind', function() {
           element.removeAttribute(element.attributes[0].name);
         }
 
-        bind.setState({});
-        env.flushVsync();
-
+        return onBindReadyAndSetState(env, bind, {});
+      }).then(() => {
+        // Attributes should not be updated and mutatedAttributesCallback
+        // should not be called since the expression results haven't changed.
         expect(element.textContent).to.equal('');
         expect(element.className).to.equal('');
         expect(element.attributes.length).to.equal(0);
+        expect(element.mutatedAttributesCallback).to.be.called.once;
       });
     });
 
