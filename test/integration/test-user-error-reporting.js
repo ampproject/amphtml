@@ -19,18 +19,22 @@ import {
     depositRequestUrl,
 } from '../../testing/test-helper';
 
-describe('user-error-reporting', function() {
+describe('user-error', function() {
   this.timeout(15000);
-  const randomId = Math.random();
+  let randomId;
 
-  describes.integration('user-error-reporting integration test', {
+  beforeEach(() => {
+    this.randomId = Math.random();
+  });
+
+  describes.integration('user-error integration test', {
     extensions: ['amp-analytics'],
     hash: 'log=0',
     body: `   
     <amp-analytics><script type="application/json">
           {
               "requests": {
-                  "user-error": "${depositRequestUrl(randomId)}"
+                  "user-error": "${depositRequestUrl(this.randomId)}"
               },
               "triggers": {
                   "user-error": {
@@ -39,36 +43,31 @@ describe('user-error-reporting', function() {
                   }
               }
           }
-      </script></amp-analytics>
+    </script></amp-analytics>
 
-      <amp-pixel src="https://foo.com/tracker/foo"
+    <amp-pixel src="https://foo.com/tracker/foo"
                referrerpolicy="fail-referrer">`,
   }, env => {
-    it('should ping correct host with amp-pixel referrer error', () => {
-      return withdrawRequest(env.win, randomId).then(request => {
-        expect(request).to.be.ok;
-      });
+    it('should ping correct host with amp-pixel user().assert err', () => {
+      return expect(withdrawRequest(env.win, randomId)).to.eventually.be.ok;
     });
   });
 
-  describes.integration('user-error-reporting integration test', {
+  describes.integration('user-error integration test', {
     extensions: ['amp-analytics'],
     hash: 'log=0',
     /* eslint-disable */
     body: `
     <amp-img
       src="../../examples/img/sea@1x.jpg"
-      srcset="../../examples/img/sea@1x.jpg 1x, ../../examples/img/sea@2x.jpg 2x"
-      alt="Fusce pretium tempor justo, vitae consequat dolor maximus eget."
-      placeholder
-      width="360" height="216" layout="responsive"
+      layout="responsive"
       role='img'>
     </amp-img>
     
     <amp-analytics><script type="application/json">
           {
               "requests": {
-                  "user-error": "${depositRequestUrl(randomId)}"
+                  "user-error": "${depositRequestUrl(this.randomId)}"
               },
               "triggers": {
                   "user-error": {
@@ -77,12 +76,10 @@ describe('user-error-reporting', function() {
                   }
               }
           }
-      </script></amp-analytics>`,
+    </script></amp-analytics>`,
   }, env => {
-    it('should ping correct host with amp-img error', () => {
-      return withdrawRequest(env.win, randomId).then(request => {
-        expect(request).to.be.ok;
-      });
+    it('should ping correct host with amp-img user().error err', () => {
+      return expect(withdrawRequest(env.win, randomId)).to.eventually.be.ok;
     });
   });
 });
