@@ -256,6 +256,43 @@ gulp.task('test', 'Runs tests',
     };
   }
 
+  if (argv.coverage) {
+    util.log(util.colors.blue('Including code coverage tests'));
+    c.reporters = c.reporters.concat(['progress', 'coverage']);
+    for (let type in c.preprocessors) {
+      c.preprocessors[type] = c.preprocessors[type].concat(['coverage']);
+    }
+    /* This block predates the addition of abs path in karma.conf.js
+    if (argv.files) {
+      util.log(util.colors.blue('Warning: this is a single-file hack for' +
+        ' now. Do not check in until it works with globs'));
+      let fullPath = process.cwd() + '/' + argv.files;
+      c.preprocessors[fullPath] = ['browserify', 'coverage'];
+      util.log(util.colors.blue('Set preprocessors for ' +
+        fullPath + ' to ' + JSON.stringify(c.preprocessors[process.cwd() + '/' + argv.files])));
+      c.files.push(fullPath);
+    }
+    */
+    c.files.push('/**/extensions/**/test/**/*.js');
+    util.log(util.colors.blue('Preprocessors: ' + JSON.stringify(c.preprocessors)));
+    util.log(util.colors.blue('Files: ' + JSON.stringify(c.files)));
+    c.coverageReporter = {
+      dir: 'test/coverage',
+      reporters: [
+        { type: 'html', subdir: 'report-html' },
+        { type: 'lcov', subdir: 'report-lcov' },
+        { type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt' },
+        { type: 'text', subdir: '.', file: 'text.txt' },
+        { type: 'text-summary', subdir: '.', file: 'text-summary.txt' },
+      ],
+      instrumenterOptions: {
+        istanbul: { noCompact: true }
+      }
+    };
+    // TODO(jonkeller): Add c.coverageReporter.check as shown in
+    // https://github.com/karma-runner/karma-coverage/blob/master/docs/configuration.md
+  }
+
   // Run fake-server to test XHR responses.
   var server = gulp.src(process.cwd())
       .pipe(webserver({

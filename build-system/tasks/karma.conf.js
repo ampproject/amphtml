@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ module.exports = {
     'ads/**/test/test-*.js': ['browserify'],
     'extensions/**/test/**/*.js': ['browserify'],
     'testing/**/*.js': ['browserify'],
+    /* Cheap attempt to capture the test file being require()ed via abs path */
+    '/**/extensions/**/test/**/*.js': ['browserify'],
   },
 
   browserify: {
@@ -204,6 +206,7 @@ module.exports = {
     'karma-chai',
     'karma-chai-as-promised',
     'karma-chrome-launcher',
+    'karma-coverage',
     'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',
