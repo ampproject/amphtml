@@ -9,13 +9,21 @@
   <script async src="/dist/amp.js"></script>
   <script async custom-element="amp-bind" src="/dist/v0/amp-bind-0.1.max.js"></script>
   <script async custom-element="amp-list" src="/dist/v0/amp-list-0.1.max.js"></script>
+  <script async custom-element="amp-mustache" src="/dist/v0/amp-mustache-0.1.max.js"></script>
 </head>
 
 <body>
   <!-- amp-list -->
-  <button id="listSrcButton" on="tap:AMP.setState({listSrc: 'https://www.google.com/bound.json'})">Change amp-list</button>
-  <button id="httpListSrcButton" on="tap:AMP.setState({listSrc: 'http://www.google.com/justhttp.json'})">Change amp-list</button>
-  <amp-list id="list" width=100 height=100 src="https://www.google.com/unbound.json" [src]=listSrc>
+  <amp-state id="foo">
+    <script type="application/json">
+      {"bar": "Evaluated!"}
+    </script>
+  </amp-state>
+  <button id="button" on="tap:AMP.setState({src: 'https://foo.com/data.json'})">Set `src`</button>
+  <amp-list id="list" width=200 height=50 src="/list/fruit-data/get?cors=0" [src]="src">
+    <template type="amp-mustache">
+      <span class="foobar" [text]="foo.bar">?</span>
+    </template>
   </amp-list>
 </body>
 </html>
