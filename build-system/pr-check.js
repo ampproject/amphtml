@@ -359,12 +359,20 @@ function main(argv) {
     process.exit(1);
   }
 
-  //if (files.includes('package.json') ?
-        //!files.includes('yarn.lock') : files.includes('yarn.lock')) {
-    //console.error('pr-check.js - any update to package.json or yarn.lock ' +
-        //'must include the other file. Please update through yarn.');
-    //process.exit(1);
-  //}
+  // Make sure changes to package.json also update yarn.lock.
+  if (files.indexOf('package.json') != -1 && files.indexOf('yarn.lock') == -1) {
+    console.error(fileLogPrefix, util.colors.red('ERROR:'),
+        'Updates to', util.colors.cyan('package.json'),
+        'must be accompanied by a corresponding update to',
+        util.colors.cyan('yarn.lock'));
+    console.error(fileLogPrefix, util.colors.yellow('NOTE:'),
+        'To update', util.colors.cyan('yarn.lock'), 'after changing',
+        util.colors.cyan('package.json') + ',', 'run',
+        '"' + util.colors.cyan('yarn install') + '"',
+        'and include the change to', util.colors.cyan('yarn.lock'),
+        'in your PR.');
+    process.exit(1);
+  }
 
   const sortedBuildTargets = [];
   for (const t of buildTargets) {
