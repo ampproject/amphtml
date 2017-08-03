@@ -570,7 +570,7 @@ export class Resources {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
-        this.buildResourceUnsafe_(resource, /* schedulePass */ true);
+        this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
       }
     }
   }
