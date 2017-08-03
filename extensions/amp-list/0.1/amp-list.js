@@ -33,20 +33,11 @@ export class AmpList extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const {!function(!Array<!Element>)} */
-    this.boundRendered_ = this.rendered_.bind(this);
-
-    /** @const {!function(!Array<!Element>):!Promise<!Array<!Element>>} */
-    this.boundScanForBindings_ = this.scanForBindings_.bind(this);
-
     /** @private {?Element} */
     this.container_ = null;
 
     /** @private {boolean} */
     this.fallbackDisplayed_ = false;
-
-    /** @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win);
   }
 
   /** @override */
@@ -76,9 +67,9 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const fetch = this.fetchList_();
+    const populate = this.populateList_();
     if (this.getFallback()) {
-      fetch.then(() => {
+      populate.then(() => {
         // Hide in case fallback was displayed for a previous fetch.
         this.toggleFallbackInMutate_(false);
       }, unusedError => {
@@ -88,7 +79,7 @@ export class AmpList extends AMP.BaseElement {
         this.toggleFallbackInMutate_(true);
       });
     }
-    return fetch;
+    return populate;
   }
 
   /** @override */
@@ -96,10 +87,11 @@ export class AmpList extends AMP.BaseElement {
     const src = mutations['src'];
     const state = mutations['state'];
     if (src != undefined) {
-      this.fetchList_();
+      this.populateList_();
     } else if (state != undefined) {
       const items = isArray(state) ? state : [state];
-      this.renderItems_(items);
+      Services.templatesFor(this.win).findAndRenderTemplateArray(
+          this.element, items).then(this.rendered_.bind(this));
     }
     if (src != undefined && state != undefined) {
       user().warn('AMP-LIST', '[src] and [state] mutated simultaneously.' +
@@ -110,7 +102,6 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Wraps `toggleFallback()` in a mutate context.
    * @param {boolean} state
-   * @private
    */
   toggleFallbackInMutate_(state) {
     if (state) {
@@ -133,44 +124,18 @@ export class AmpList extends AMP.BaseElement {
    * Request list data from `src` and return a promise that resolves when
    * the list has been populated with rendered list items.
    * @return {!Promise}
-   * @private
    */
-  fetchList_() {
+  populateList_() {
     const itemsExpr = this.element.getAttribute('items') || 'items';
-    return this.fetch_(itemsExpr).then(items => {
+    return this.fetchItems_(itemsExpr).then(items => {
       user().assert(isArray(items),
           'Response must contain an array at "%s". %s',
           itemsExpr, this.element);
-      return this.renderItems_(items);
+      return Services.templatesFor(this.win).findAndRenderTemplateArray(
+          this.element, items).then(this.rendered_.bind(this));
     }, error => {
       throw user().createError('Error fetching amp-list', error);
     });
-  }
-
-  /**
-   * @param {!Array} items
-   * @return {!Promise}
-   * @private
-   */
-  renderItems_(items) {
-    return this.templates_.findAndRenderTemplateArray(this.element, items)
-        .then(this.boundScanForBindings_)
-        .then(this.boundRendered_);
-  }
-
-  /**
-   * @param {!Array<!Element>} elements
-   * @return {!Promise<!Array<!Element>>}
-   * @private
-   */
-  scanForBindings_(elements) {
-    const forwardElements = () => elements;
-    return Services.bindForDocOrNull(this.element).then(bind => {
-      if (bind) {
-        return bind.rescanAndEvaluate(elements);
-      }
-    // Forward elements to chained promise on success or failure.
-    }).then(forwardElements, forwardElements);
   }
 
   /**
@@ -186,9 +151,9 @@ export class AmpList extends AMP.BaseElement {
       this.container_.appendChild(element);
     });
 
-    const event = createCustomEvent(this.win,
+    const templatedEvent = createCustomEvent(this.win,
         AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
-    this.container_.dispatchEvent(event);
+    this.container_.dispatchEvent(templatedEvent);
 
     // Change height if needed.
     this.getVsync().measure(() => {
@@ -203,9 +168,8 @@ export class AmpList extends AMP.BaseElement {
   /**
    * @param {string} itemsExpr
    * @visibleForTesting
-   * @private
    */
-  fetch_(itemsExpr) {
+  fetchItems_(itemsExpr) {
     return fetchBatchedJsonFor(this.getAmpDoc(), this.element, itemsExpr);
   }
 }

@@ -25,7 +25,6 @@ describe('amp-list component', () => {
   let element;
   let list;
   let listMock;
-  let bindStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -39,9 +38,6 @@ describe('amp-list component', () => {
     element.setAttribute('src', 'https://data.com/list.json');
     element.getAmpDoc = () => ampdoc;
     element.getFallback = () => null;
-
-    bindStub = sandbox.stub(Services, 'bindForDocOrNull')
-        .returns(Promise.resolve(null));
 
     list = new AmpList(element);
     list.buildCallback();
@@ -67,7 +63,7 @@ describe('amp-list component', () => {
     itemElement.style.height = newHeight + 'px';
     const fetchPromise = Promise.resolve(items);
     const renderPromise = Promise.resolve([itemElement]);
-    listMock.expects('fetch_').withExactArgs('items')
+    listMock.expects('fetchItems_').withExactArgs('items')
         .returns(fetchPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)
@@ -94,7 +90,7 @@ describe('amp-list component', () => {
     const itemElement = document.createElement('div');
     const fetchPromise = Promise.resolve(items);
     const renderPromise = Promise.resolve([itemElement]);
-    listMock.expects('fetch_').withExactArgs('items')
+    listMock.expects('fetchItems_').withExactArgs('items')
         .returns(fetchPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withArgs()
         .returns(renderPromise).once();
@@ -110,27 +106,6 @@ describe('amp-list component', () => {
     });
   });
 
-  it('should call rescanAndEvaluate() if Bind is available', () => {
-    const fakeBind = {rescanAndEvaluate: sandbox.spy()};
-    bindStub.returns(Promise.resolve(fakeBind));
-
-    const items = [{title: 'Title1'}];
-    const itemElement = document.createElement('div');
-    const fetchPromise = Promise.resolve(items);
-    const rendered = [itemElement];
-    const renderPromise = Promise.resolve(rendered);
-    listMock.expects('fetch_').withExactArgs('items')
-        .returns(fetchPromise).once();
-    templatesMock.expects('findAndRenderTemplateArray').withArgs()
-        .returns(renderPromise).once();
-    return list.layoutCallback().then(() => {
-      return Promise.all([fetchPromise, renderPromise]);
-    }).then(() => {
-      expect(fakeBind.rescanAndEvaluate).to.have.been.calledOnce;
-      expect(fakeBind.rescanAndEvaluate).calledWithExactly(rendered);
-    });
-  });
-
   it('should reload data if the src attribute changes', () => {
     const initialItems = [
       {title: 'Title1'},
@@ -143,7 +118,7 @@ describe('amp-list component', () => {
     const itemElement3 = document.createElement('div');
     const fetchPromise = Promise.resolve(initialItems);
     const renderPromise = Promise.resolve([itemElement]);
-    listMock.expects('fetch_').withExactArgs('items')
+    listMock.expects('fetchItems_').withExactArgs('items')
         .returns(fetchPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, initialItems)
@@ -157,12 +132,12 @@ describe('amp-list component', () => {
       expect(list.container_.contains(itemElement)).to.be.true;
       const newFetchPromise = Promise.resolve(newItems);
       const newRenderPromise = Promise.resolve([itemElement2, itemElement3]);
-      listMock.expects('fetch_').withExactArgs('items')
+      listMock.expects('fetchItems_').withExactArgs('items')
           .returns(newFetchPromise).once();
       templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
           element, newItems)
           .returns(newRenderPromise).once();
-      const spy = sandbox.spy(list, 'fetchList_');
+      const spy = sandbox.spy(list, 'populateList_');
       element.setAttribute('src', 'https://data2.com/list.json');
       list.mutatedAttributesCallback({'src': 'https://data2.com/list.json'});
       expect(spy).to.be.calledOnce;
@@ -170,7 +145,7 @@ describe('amp-list component', () => {
   });
 
   it('should fail to load b/c data is absent', () => {
-    listMock.expects('fetch_')
+    listMock.expects('fetchItems_')
         .returns(Promise.resolve({})).once();
     templatesMock.expects('findAndRenderTemplateArray').never();
     return expect(list.layoutCallback()).to.eventually.be
@@ -183,7 +158,7 @@ describe('amp-list component', () => {
     ];
     element.setAttribute('items', 'different');
     const itemElement = document.createElement('div');
-    listMock.expects('fetch_')
+    listMock.expects('fetchItems_')
         .returns(Promise.resolve(different)).once();
     templatesMock.expects('findAndRenderTemplateArray')
         .withExactArgs(element, different)
@@ -200,7 +175,7 @@ describe('amp-list component', () => {
     const itemElement = document.createElement('div');
     const fetchPromise = Promise.resolve(items);
     const renderPromise = Promise.resolve([itemElement]);
-    listMock.expects('fetch_').withExactArgs('items')
+    listMock.expects('fetchItems_').withExactArgs('items')
         .returns(fetchPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)
@@ -222,7 +197,7 @@ describe('amp-list component', () => {
     itemElement.setAttribute('role', 'listitem1');
     const fetchPromise = Promise.resolve(items);
     const renderPromise = Promise.resolve([itemElement]);
-    listMock.expects('fetch_').withExactArgs('items')
+    listMock.expects('fetchItems_').withExactArgs('items')
         .returns(fetchPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)
@@ -236,8 +211,8 @@ describe('amp-list component', () => {
   });
 
   it('should show placeholder on fetch failure (w/o fallback)', () => {
-    // Stub fetch_() to fail.
-    listMock.expects('fetch_').returns(Promise.reject()).once();
+    // Stub fetchItems_() to fail.
+    listMock.expects('fetchItems_').returns(Promise.reject()).once();
     listMock.expects('togglePlaceholder').never();
     return list.layoutCallback().catch(() => {});
   });
@@ -255,7 +230,7 @@ describe('amp-list component', () => {
 
     it('should hide fallback element on fetch success', () => {
       // Stub fetch and render to succeed.
-      listMock.expects('fetch_').returns(Promise.resolve([])).once();
+      listMock.expects('fetchItems_').returns(Promise.resolve([])).once();
       templatesMock.expects('findAndRenderTemplateArray')
           .returns(Promise.resolve([]));
       // Act as if a fallback is already displayed.
@@ -267,8 +242,8 @@ describe('amp-list component', () => {
     });
 
     it('should hide placeholder and display fallback on fetch failure', () => {
-      // Stub fetch_() to fail.
-      listMock.expects('fetch_').returns(Promise.reject()).once();
+      // Stub fetchItems_() to fail.
+      listMock.expects('fetchItems_').returns(Promise.reject()).once();
 
       listMock.expects('togglePlaceholder').withExactArgs(false).once();
       listMock.expects('toggleFallback').withExactArgs(true).once();
