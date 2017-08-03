@@ -51,7 +51,7 @@ var commonTestPaths = [
 ];
 
 var testPaths = commonTestPaths.concat([
-  'test/**/*.js',
+  'test/functional/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
 ]);

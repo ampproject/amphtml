@@ -145,7 +145,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
       ];
     } else {
       testPaths = [
-        'test/**/*.js',
+        'test/functional/**/*.js',
         'ads/**/test/test-*.js',
         'extensions/**/test/**/*.js',
       ];
