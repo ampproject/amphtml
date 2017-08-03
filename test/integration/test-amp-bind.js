@@ -544,7 +544,8 @@ describe.configure().skipSauceLabs().run('amp-bind', function() {
       });
     });
 
-    it('should evaluate bindings in template', () => {
+    // TODO(choumx): Fix this flaky test.
+    it.skip('should evaluate bindings in template', () => {
       const list = fixture.doc.getElementById('list');
       return fixture.awaitEvent(AmpEvents.DOM_UPDATE, 1).then(() => {
         list.querySelectorAll('span.foobar').forEach(span => {
