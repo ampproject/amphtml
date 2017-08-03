@@ -19,26 +19,28 @@
  * Asserts xhr fetch has been mocked out and under control
  **/
 
-describes.realWin('Test xhr Mock on real win', {xhrMock: true}, env => {
-  it('Should ensure xhr has been mocked', () => {
-    const response = {payload: 'I was mocked'};
-    env.expectFetch('trial.com', response);
-    return fetch('trial.com').then(function(response) {
-      return response.json().then(function(data) {
-        expect(data.payload).to.equal('I was mocked');
-        expect(env.xhr.called('trial.com')).to.be.true;
+describe('mocking fetch', () => {
+  describes.realWin('Test xhr Mock on real win', {xhrMock: true}, env => {
+    it('Should ensure xhr has been mocked', () => {
+      const response = {payload: 'I was mocked'};
+      const mock = env.expectFetch('trial.com', response);
+      return env.win.fetch('trial.com').then(function(response) {
+        return response.json().then(function(data) {
+          expect(data.payload).to.equal('I was mocked');
+          expect(mock.called('trial.com')).to.be.true;
+        });
       });
     });
   });
-});
 
-describes.fakeWin('Test xhr Mock on fake win', {xhrMock: true}, env => {
-  it('Should ensure xhr has been mocked', () => {
-    const response = {payload: 'I was mocked'};
-    env.expectFetch('trial.com', response);
-    return fetch('trial.com').then(function(response) {
-      return response.json().then(function(data) {
-        expect(data.payload).to.equal('I was mocked');
+  describes.fakeWin('Test xhr Mock on fake win', {xhrMock: true}, env => {
+    it('Should ensure xhr has been mocked', () => {
+      const response = {payload: 'I was mocked'};
+      env.expectFetch('trial.com', response);
+      return env.win.fetch('trial.com').then(function(response) {
+        return response.json().then(function(data) {
+          expect(data.payload).to.equal('I was mocked');
+        });
       });
     });
   });

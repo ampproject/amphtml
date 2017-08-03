@@ -68,6 +68,11 @@
  *   pass `false` to `spec.amp` to disable the AMP runtime if you just need
  *   a plain, non-AMP window.
  *
+ *  - `fakeWin()` and `realWin` both read spec.xhrMock. Unless spec.xhrMock
+ *  is explicitly declared as false, the fetch method will be mocked out.
+ *  You can access the mock through env.xhr, specify the mocking using
+ *  env.expectFetch(url,response).
+ *
  *   Several AMP runtime objects (e.g. AmpDoc, AmpDocService) are returned to
  *   the test method in `env.amp`. See AmpTestEnv for details.
  *
@@ -187,7 +192,8 @@ export const sandboxed = describeEnv(spec => []);
  * A test with a fake window.
  * @param {string} name
  * @param {{
- *   win: !FakeWindowSpec,
+ *   win: !FakeWindow
+Spec,
  *   amp: (boolean|!AmpTestSpec|undefined),
  * }} spec
  * @param {function({
@@ -575,14 +581,6 @@ class RealWinFixture {
       };
       iframe.onerror = reject;
       document.body.appendChild(iframe);
-      if (!(spec.xhrMock === false)) {
-        env.expectFetch = function(url, response) {
-          if (env.xhr) {
-            env.xhr.restore();
-          }
-          env.xhr = fetchMock.mock(url, response);
-        };
-      }
     });
   }
 
