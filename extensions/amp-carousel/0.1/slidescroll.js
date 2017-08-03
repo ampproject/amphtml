@@ -280,9 +280,17 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   layoutCallback() {
     if (this.slideIndex_ === null) {
-      this.mutateElement(() => {
-        this.showSlide_(this.initialSlideIndex_);
-      });
+      const slideChanged = this.showSlide_(this.initialSlideIndex_);
+
+      /**
+       * When display is toggled on a partcular media or element resizes,
+       * it will need to be re-laid-out. This is only needed when the slide
+       * does not change (example when browser window size changes,
+       * or orientation changes)
+       */
+      if (!slideChanged) {
+        this.scheduleLayout(this.slides_[this.initialSlideIndex_]);
+      }
     }
     return Promise.resolve();
   }
