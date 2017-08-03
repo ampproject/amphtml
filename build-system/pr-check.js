@@ -276,7 +276,7 @@ const command = {
   },
   runIntegrationTests: function(compiled) {
     // Integration tests with all saucelabs browsers
-    let cmd = '${gulp} test --nobuild --saucelabs --integration';
+    let cmd = `${gulp} test --nobuild --saucelabs --integration`;
     if (compiled) {
       cmd += ' --compiled';
     }
