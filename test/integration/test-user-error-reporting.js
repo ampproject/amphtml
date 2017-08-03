@@ -21,8 +21,8 @@ import {
 import {toggleExperiment} from '../../src/experiments';
 
 describe('user-error', function() {
-  this.timeout(15000);
-  let randomId = Math.random();
+
+  let randomId;
   describes.fakeWin('', {}, env => {
 
     beforeEach(() => {
