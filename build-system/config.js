@@ -56,6 +56,12 @@ var testPaths = commonTestPaths.concat([
   'extensions/**/test/**/*.js',
 ]);
 
+var unitTestPaths = commonTestPaths.concat([
+  'test/functional/**/*.js',
+  'ads/**/test/test-*.js',
+  'extensions/**/test/**/*.js',
+]);
+
 var integrationTestPaths = commonTestPaths.concat([
   'test/integration/**/*.js',
   'test/functional/test-error.js',
@@ -66,6 +72,7 @@ var integrationTestPaths = commonTestPaths.concat([
 module.exports = {
   commonTestPaths: commonTestPaths,
   testPaths: testPaths,
+  unitTestPaths: unitTestPaths,
   integrationTestPaths: integrationTestPaths,
   lintGlobs: [
     '**/*.js',
