@@ -30,6 +30,7 @@ import {
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
+import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 
 const TAG = 'amp-video';
 
@@ -70,6 +71,9 @@ class AmpVideo extends AMP.BaseElement {
 
     /** @private {?boolean}  */
     this.muted_ = false;
+
+    /** @private {!../../../src/video-interface.VideoMetaDef} */
+    this.metadata_ = EMPTY_METADATA;
   }
 
   /**
@@ -108,8 +112,8 @@ class AmpVideo extends AMP.BaseElement {
   buildCallback() {
     this.video_ = this.element.ownerDocument.createElement('video');
 
-    const posterAttr = this.element.getAttribute('poster');
-    if (!posterAttr && getMode().development) {
+    const poster = this.element.getAttribute('poster');
+    if (!poster && getMode().development) {
       console/*OK*/.error(
           'No "poster" attribute has been provided for amp-video.');
     }
@@ -124,6 +128,19 @@ class AmpVideo extends AMP.BaseElement {
     this.installEventHandlers_();
     this.applyFillContent(this.video_, true);
     this.element.appendChild(this.video_);
+
+    // Gather metadata
+    const artist = this.element.getAttribute('artist');
+    const title = this.element.getAttribute('title');
+    const album = this.element.getAttribute('album');
+    this.metadata_ = {
+      'title': title || '',
+      'artist': artist || '',
+      'album': album || '',
+      'artwork': [
+        {'src': poster || ''},
+      ],
+    };
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
@@ -146,6 +163,27 @@ class AmpVideo extends AMP.BaseElement {
     if (mutations['src']) {
       this.element.dispatchCustomEvent(VideoEvents.RELOAD);
     }
+    if (mutations['poster']) {
+      const poster = this.element.getAttribute('poster');
+      this.metadata_['artwork'] = [
+        {'src': poster || ''},
+      ];
+    }
+    if (mutations['album']) {
+      const album = this.element.getAttribute('album');
+      this.metadata_['album'] = album || '';
+    }
+    if (mutations['title']) {
+      const title = this.element.getAttribute('title');
+      this.metadata_['title'] = title || '';
+    }
+    if (mutations['artist']) {
+      const artist = this.element.getAttribute('artist');
+      this.metadata_['artist'] = artist || '';
+    }
+    // TODO(@aghassemi, 10756) Either make metadata observable or submit
+    // an event indicating metadata changed (in case metadata changes
+    // while the video is playing).
   }
 
   /** @override */
@@ -306,17 +344,7 @@ class AmpVideo extends AMP.BaseElement {
 
   /** @override */
   getMetadata() {
-    const poster = this.element.getAttribute('poster');
-    if (poster) {
-      return {
-        'title': '',
-        'artist': '',
-        'album': '',
-        'artwork': [
-          {'src': poster},
-        ],
-      };
-    }
+    return this.metadata_;
   }
 
   /** @override */
