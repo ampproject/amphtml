@@ -68,6 +68,11 @@
  *   pass `false` to `spec.amp` to disable the AMP runtime if you just need
  *   a plain, non-AMP window.
  *
+ *  - `fakeWin()` and `realWin` both read spec.xhrMock. Unless spec.xhrMock
+ *  is explicitly declared as false, the fetch method will be mocked out.
+ *  You can access the mock through env.xhr, specify the mocking using
+ *  env.expectFetch(url,response).
+ *
  *   Several AMP runtime objects (e.g. AmpDoc, AmpDocService) are returned to
  *   the test method in `env.amp`. See AmpTestEnv for details.
  *
@@ -188,7 +193,8 @@ export const sandboxed = describeEnv(spec => []);
  * A test with a fake window.
  * @param {string} name
  * @param {{
- *   win: !FakeWindowSpec,
+ *   win: !FakeWindow
+Spec,
  *   amp: (boolean|!AmpTestSpec|undefined),
  * }} spec
  * @param {function({
@@ -488,19 +494,18 @@ class FakeWinFixture {
     const spec = this.spec;
     env.win = new FakeWindow(this.spec.win || {});
     if (!(spec.xhrMock === false)) {
+      fetchMock.constructor.global = env.win;
+      fetchMock._mock();
       env.expectFetch = function(url, response) {
-        if (env.xhr) {
-          env.xhr.restore();
-        }
-        env.xhr = fetchMock.mock(url, response);
+        return fetchMock.mock(url, response);
       };
     }
   }
 
   /** @override */
   teardown(env) {
-    if (env.xhr) {
-      env.xhr.restore();
+    if (!(this.spec.xhrMock === false)) {
+      fetchMock.restore();
     }
   }
 }
@@ -569,19 +574,17 @@ class RealWinFixture {
         interceptEventListeners(win.document.documentElement);
         interceptEventListeners(win.document.body);
         env.interceptEventListeners = interceptEventListeners;
-
+        if (!(spec.xhrMock === false)) {
+          fetchMock.constructor.global = env.win;
+          fetchMock._mock();
+          env.expectFetch = function(url, response) {
+            return fetchMock.mock(url, response);
+          };
+        }
         resolve();
       };
       iframe.onerror = reject;
       document.body.appendChild(iframe);
-      if (!(spec.xhrMock === false)) {
-        env.expectFetch = function(url, response) {
-          if (env.xhr) {
-            env.xhr.restore();
-          }
-          env.xhr = fetchMock.mock(url, response);
-        };
-      }
     });
   }
 
@@ -591,8 +594,8 @@ class RealWinFixture {
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
     }
-    if (env.xhr) {
-      env.xhr.restore();
+    if (!(this.spec.xhrMock === false)) {
+      fetchMock.restore();
     }
   }
 }
