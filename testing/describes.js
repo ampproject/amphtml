@@ -476,7 +476,7 @@ class IntegrationFixture {
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
     }
-    toggleExperiment(env.win, this.experimentId, false);
+    toggleExperiment(window, this.experimentId, false);
   }
 }
 
