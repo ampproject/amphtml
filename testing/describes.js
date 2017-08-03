@@ -576,6 +576,14 @@ class RealWinFixture {
       };
       iframe.onerror = reject;
       document.body.appendChild(iframe);
+      if (!(spec.xhrMock === false)) {
+        env.expectFetch = function(url, response) {
+          if (env.xhrMock) {
+            env.xhrMock.restore();
+          }
+          env.xhrMock = fetchMock.mock(url, response);
+        };
+      }
     });
   }
 
