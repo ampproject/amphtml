@@ -342,7 +342,8 @@ function describeEnv(factory) {
 
   /**
    * @param {string} name
-   * @param {!Object} spec
+   * @param {!Object} specconsole.log(fetchMock.sandbox());
+          debugger;
    * @param {function(!Object)} fn
    */
   const mainFunc = function(name, spec, fn) {
@@ -488,18 +489,18 @@ class FakeWinFixture {
     env.win = new FakeWindow(this.spec.win || {});
     if (!(spec.xhrMock === false)) {
       env.expectFetch = function(url, response) {
-        if (env.xhrMock) {
-          env.xhrMock.restore();
+        if (env.xhr) {
+          env.xhr.restore();
         }
-        env.xhrMock = fetchMock.mock(url, response);
+        env.xhr = fetchMock.mock(url, response);
       };
     }
   }
 
   /** @override */
   teardown(env) {
-    if (env.xhrMock) {
-      env.xhrMock.restore();
+    if (env.xhr) {
+      env.xhr.restore();
     }
   }
 }
@@ -575,10 +576,10 @@ class RealWinFixture {
       document.body.appendChild(iframe);
       if (!(spec.xhrMock === false)) {
         env.expectFetch = function(url, response) {
-          if (env.xhrMock) {
-            env.xhrMock.restore();
+          if (env.xhr) {
+            env.xhr.restore();
           }
-          env.xhrMock = fetchMock.mock(url, response);
+          env.xhr = fetchMock.mock(url, response);
         };
       }
     });
@@ -590,8 +591,8 @@ class RealWinFixture {
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
     }
-    if (env.xhrMock) {
-      env.xhrMock.restore();
+    if (env.xhr) {
+      env.xhr.restore();
     }
   }
 }
