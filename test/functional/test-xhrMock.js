@@ -19,23 +19,28 @@
  * Asserts xhr fetch has been mocked out and under control
  **/
 
+
 describes.realWin('Test xhr Mock on real win', {xhrMock: true}, env => {
   it('Should ensure xhr has been mocked', () => {
-    const response = {message: 'I was mocked'};
+    const response = {payload: 'I was mocked'};
     env.expectFetch('trial.com', response);
     return fetch('trial.com').then(function(response) {
-      console.log(response);
-      expect(response.message).to.equal(response.message);
+      return response.json().then(function(data) {
+        expect(data.payload).to.equal('I was mocked');
+        expect(env.xhrMock.called('trial.com')).to.be.true;
+      });
     });
   });
 });
 
 describes.fakeWin('Test xhr Mock on fake win', {xhrMock: true}, env => {
   it('Should ensure xhr has been mocked', () => {
-    const response = {message: 'I was mocked'};
+    const response = {payload: 'I was mocked'};
     env.expectFetch('trial.com', response);
     return fetch('trial.com').then(function(response) {
-      expect(response.message).to.equal('I was mocked');
+      return response.json().then(function(data) {
+        expect(data.payload).to.equal('I was mocked');
+      });
     });
   });
 });
