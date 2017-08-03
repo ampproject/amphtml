@@ -31,10 +31,12 @@ import {
 } from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {
-  removeElement,
+  childElementsByTag,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
+  isJsonScriptTag,
+  removeElement,
 } from '../../../src/dom';
 import {user, dev} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
@@ -80,8 +82,9 @@ class AmpImaVideo extends AMP.BaseElement {
         'The data-tag attribute is required for <amp-video-ima> and must be ' +
             'https');
 
-    const sourceElements = this.element.getElementsByTagName('source');
-    const trackElements = this.element.getElementsByTagName('track');
+    // Handle <source> and <track> children
+    const sourceElements = childElementsByTag(this.element, 'SOURCE');
+    const trackElements = childElementsByTag(this.element, 'TRACK');
     const childElements =
         toArray(sourceElements).concat(toArray(trackElements));
     if (childElements.length > 0) {
@@ -97,6 +100,13 @@ class AmpImaVideo extends AMP.BaseElement {
       });
       this.element.setAttribute(
           'data-child-elements', JSON.stringify(children));
+    }
+
+    // Handle IMASetting JSON
+    const scriptElement = childElementsByTag(this.element, 'SCRIPT')[0];
+    if (scriptElement && isJsonScriptTag(scriptElement)) {
+      this.element.setAttribute(
+          'data-ima-settings', scriptElement./*OK*/innerHTML);
     }
   }
 
@@ -284,6 +294,9 @@ class AmpImaVideo extends AMP.BaseElement {
   fullscreenEnter() {
     // TODO(@aghassemi, #10597) Make internal <video> element go fullscreen instead
     // using postMessages
+    if (!this.iframe_) {
+      return;
+    }
     fullscreenEnter(dev().assertElement(this.iframe_));
   }
 
@@ -291,6 +304,9 @@ class AmpImaVideo extends AMP.BaseElement {
    * @override
    */
   fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
     fullscreenExit(dev().assertElement(this.iframe_));
   }
 
@@ -298,7 +314,20 @@ class AmpImaVideo extends AMP.BaseElement {
   isFullscreen() {
     // TODO(@aghassemi, #10597) Report fullscreen status of internal <video>
     // element rather than iframe
+    if (!this.iframe_) {
+      return false;
+    }
     return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
   }
 
   /** @override */

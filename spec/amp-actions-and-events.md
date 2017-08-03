@@ -322,7 +322,7 @@ For example, the following is possible in AMP.
   </tr>
 </table>
 
-### amp-video, amp-youtube
+### amp-video, amp-youtube, amp-3q-player, amp-brid-player, amp-dailymotion, amp-ima-video
 <table>
   <tr>
     <th>Action</th>
@@ -343,6 +343,10 @@ For example, the following is possible in AMP.
   <tr>
     <td><code>unmute</code></td>
     <td>Unmutes the video.</td>
+  </tr>
+  <tr>
+    <td><code>fullscreen</code></td>
+    <td>Takes the video to fullscreen</td>
   </tr>
 </table>
 
@@ -374,7 +378,7 @@ actions that apply to the whole document.
   </tr>
   <tr>
     <td><code>navigateTo(url=STRING)</code></td>
-    <td>Navigates current window to given URL. Supports <a href="./amp-var-substitutions.md">standard URL subsitutions</a>. Can only be invoked via <code>tap</code> or <code>change</code> events.</td>
+    <td>Navigates current window to given URL. Supports <a href="./amp-var-substitutions.md">standard URL subsitutions</a>.</td>
   </tr>
   <tr>
     <td><code>goBack</code></td>

@@ -442,6 +442,9 @@ class AmpYoutube extends AMP.BaseElement {
    * @override
    */
   fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
     fullscreenEnter(dev().assertElement(this.iframe_));
   }
 
@@ -449,12 +452,30 @@ class AmpYoutube extends AMP.BaseElement {
    * @override
    */
   fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
     fullscreenExit(dev().assertElement(this.iframe_));
   }
 
   /** @override */
   isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
     return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    // Youtube already updates the Media Session so no need for the video
+    // manager to update it too
+    return true;
   }
 
   /** @override */

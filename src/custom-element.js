@@ -1103,8 +1103,11 @@ function createBaseCustomElementClass(win) {
      */
     dispatchCustomEvent(name, opt_data) {
       const data = opt_data || {};
-      const event = new Event(name, {bubbles: true, cancelable: true});
+      // Constructors of events need to come from the correct window. Sigh.
+      const win = this.ownerDocument.defaultView;
+      const event = win.document.createEvent('Event');
       event.data = data;
+      event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
       this.dispatchEvent(event);
     }
 
@@ -1646,6 +1649,10 @@ function createBaseCustomElementClass(win) {
       // 4. The element has already been laid out (include having loading error);
       // 5. The element is a `placeholder` or a `fallback`;
       // 6. The element's layout is not a size-defining layout.
+      // 7. The document is A4A.
+      if (this.isInA4A_()) {
+        return false;
+      }
       if (this.loadingDisabled_ === undefined) {
         this.loadingDisabled_ = this.hasAttribute('noloading');
       }
@@ -1656,6 +1663,19 @@ function createBaseCustomElementClass(win) {
         return false;
       }
       return true;
+    }
+
+    /**
+     * @return {boolean}
+     * @private
+     */
+    isInA4A_() {
+      return (
+          // in FIE
+          this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView ||
+
+          // in inabox
+          getMode().runtime == 'inabox');
     }
 
     /**

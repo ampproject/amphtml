@@ -28,19 +28,13 @@ import {user} from '../../src/log';
  * @param {boolean} multiSizeValidation A flag that if set to true will enforce
  *   the rule that ensures multi-size dimensions are no less than 2/3rds of
  *   their primary dimension's counterpart.
- * @param {boolean} strict If set to true, this indicates that a single
- *   malformed size should cause the entire multi-size data string to be
- *   abandoned. If set to false, then malformed sizes will be ignored, and the
- *   remainder of the string will be parsed for any additional sizes.
- *   Additionally, errors will only be reported if this flag is set to true.
  * @return {?Array<!Array<number>>} An array of dimensions.
  */
 export function getMultiSizeDimensions(
     multiSizeDataStr,
     primaryWidth,
     primaryHeight,
-    multiSizeValidation,
-    strict) {
+    multiSizeValidation) {
 
   const dimensions = [];
   const arrayOfSizeStrs = multiSizeDataStr.split(',');
@@ -51,11 +45,8 @@ export function getMultiSizeDimensions(
     const size = sizeStr.split('x');
 
     // Make sure that each size is specified in the form WxH.
-    if (strict && size.length != 2) {
+    if (size.length != 2) {
       user().error('AMP-AD', `Invalid multi-size data format '${sizeStr}'.`);
-      if (strict) {
-        return null;
-      }
       continue;
     }
 
@@ -68,11 +59,7 @@ export function getMultiSizeDimensions(
         h => isNaN(h) || h <= 0,
         badParams => badParams.map(badParam =>
             `Invalid ${badParam.dim} of ${badParam.val} ` +
-            'given for secondary size.').join(' '),
-        strict)) {
-      if (strict) {
-        return null;
-      }
+            'given for secondary size.').join(' '))) {
       continue;
     }
 
@@ -82,11 +69,7 @@ export function getMultiSizeDimensions(
         h => h > primaryHeight,
         badParams => badParams.map(badParam =>
             `Secondary ${badParam.dim} ${badParam.val} ` +
-            `can't be larger than the primary ${badParam.dim}.`).join(' '),
-        strict)) {
-      if (strict) {
-        return null;
-      }
+            `can't be larger than the primary ${badParam.dim}.`).join(' '))) {
       continue;
     }
 
@@ -103,11 +86,8 @@ export function getMultiSizeDimensions(
           h => h < minHeight,
           badParams => badParams.map(badParam =>
               `Secondary ${badParam.dim} ${badParam.val} is ` +
-              `smaller than 2/3rds of the primary ${badParam.dim}.`).join(' '),
-          strict)) {
-        if (strict) {
-          return null;
-        }
+              `smaller than 2/3rds of the primary ${badParam.dim}.`)
+              .join(' '))) {
         continue;
       }
     }
@@ -135,12 +115,10 @@ export function getMultiSizeDimensions(
  * @param {function((number|string)): boolean} heightCond
  * @param {function(!Array<{dim: string, val: (number|string)}>): string=}
  *   errorBuilder A function that will produce an informative error message.
- * @param {boolean=} reportError If true, indicates that an error message
- *   should be logged to the console.
  * @return {boolean}
  */
-function validateDimensions(width, height, widthCond, heightCond,
-    errorBuilder, reportError = false) {
+function validateDimensions(width, height, widthCond, heightCond, errorBuilder)
+{
   const badParams = [];
   if (widthCond(width)) {
     badParams.push({dim: 'width', val: width});
@@ -148,8 +126,8 @@ function validateDimensions(width, height, widthCond, heightCond,
   if (heightCond(height)) {
     badParams.push({dim: 'height', val: height});
   }
-  if (reportError && badParams.length) {
-    user().error('AMP-AD', errorBuilder(badParams));
+  if (badParams.length) {
+    user().warn('AMP-AD', errorBuilder(badParams));
   }
   return !badParams.length;
 }

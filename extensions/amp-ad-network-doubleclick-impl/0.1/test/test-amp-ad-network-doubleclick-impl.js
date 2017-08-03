@@ -18,11 +18,14 @@ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {AmpAd3PImpl} from '../../../amp-ad/0.1/amp-ad-3p-impl';
 import {
   AmpA4A,
-  AMP_SIGNATURE_HEADER,
   CREATIVE_SIZE_HEADER,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
 } from '../../../amp-a4a/0.1/amp-a4a';
+import {
+  AMP_SIGNATURE_HEADER,
+  signatureVerifierFor,
+} from '../../../amp-a4a/0.1/legacy-signature-verifier';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
   installExtensionsService,
@@ -34,7 +37,8 @@ import {
   constructSRABlockParameters,
   TFCD,
   resetSraStateForTesting,
-  resetRtcStateForTesting,
+  CORRELATOR_CLEAR_EXP_BRANCHES,
+  CORRELATOR_CLEAR_EXP_NAME,
 } from '../amp-ad-network-doubleclick-impl';
 import {
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
@@ -42,6 +46,7 @@ import {
 } from '../doubleclick-a4a-config';
 import {
   MANUAL_EXPERIMENT_ID,
+  isInExperiment,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {
   EXPERIMENT_ATTRIBUTE,
@@ -58,6 +63,7 @@ import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {Xhr, FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {dev} from '../../../../src/log';
+import {VisibilityState} from '../../../../src/visibility-state';
 import * as sinon from 'sinon';
 
 function setupForAdTesting(fixture) {
@@ -138,7 +144,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
   });
 
-  describe('#extractCreativeAndSignature', () => {
+  describe('#extractSize', () => {
     let loadExtensionSpy;
     const size = {width: 200, height: 50};
 
@@ -190,6 +196,29 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
       // exact value of ampAnalyticsConfig covered in
       // ads/google/test/test-utils.js
+    });
+  });
+
+  describe('#onNetworkFailure', () => {
+
+    beforeEach(() => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = window;
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+        });
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+      });
+    });
+
+    it('should append error parameter', () => {
+      const TEST_URL = 'https://somenetwork.com/foo?hello=world&a=b';
+      expect(impl.onNetworkFailure(new Error('xhr failure'), TEST_URL))
+          .to.jsonEqual({adUrl: TEST_URL + '&aet=n'});
     });
   });
 
@@ -339,7 +368,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
     });
   });
-
 
   describe('#getAdUrl', () => {
     beforeEach(() => {
@@ -590,8 +618,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
     });
   });
-
-
 
   describe('#unlayoutCallback', () => {
     it('should call #resetSlot, remove child iframe, but keep other children',
@@ -1098,322 +1124,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
   });
 
-  describe('#RTC', () => {
-    let impl;
-    let xhrMock;
-
-    function mockRtcExecution(rtcResponse, element, opt_textFunction) {
-      impl = new AmpAdNetworkDoubleclickImpl(element);
-      let textFunction = () => {
-        return Promise.resolve(JSON.stringify(rtcResponse));
-      };
-      textFunction = opt_textFunction || textFunction;
-      xhrMock.returns(
-          Promise.resolve({
-            redirected: false,
-            status: 200,
-            text: textFunction,
-          })
-      );
-      impl.populateAdUrlState();
-      return impl.executeRtc_();
-    }
-
-    function setRtcConfig(rtcConfigJson) {
-      const rtcConf = document.getElementById('amp-rtc');
-      rtcConf.innerText = JSON.stringify(rtcConfigJson);
-    }
-
-    beforeEach(() => {
-      resetRtcStateForTesting();
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        element = createElementWithAttributes(document, 'amp-ad', {
-          'width': '200',
-          'height': '50',
-          'type': 'doubleclick',
-          'layout': 'fixed',
-        });
-        const rtcConf = createElementWithAttributes(
-            document, 'script',
-            {type: 'application/json', id: 'amp-rtc'});
-        rtcConf.innerHTML = JSON.stringify({
-          endpoint: 'https://example-publisher.com/rtc/',
-        });
-        document.head.appendChild(rtcConf);
-        xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
-
-      });
-    });
-
-    afterEach(() => {
-      impl = null;
-      xhrMock = null;
-      resetRtcStateForTesting();
-      const rtcConf = document.getElementById('amp-rtc');
-      document.head.removeChild(rtcConf);
-    });
-
-    it('should add just targeting to impl', () => {
-      const targeting = {'sport': 'baseball'};
-      const jsonTargeting = {
-        targeting,
-      };
-      return mockRtcExecution({
-        targeting,
-      }, element).then(() => {
-        expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
-      });
-    });
-
-    it('should add just categoryExclusions to impl', () => {
-      const categoryExclusions = {'sport': 'baseball'};
-      const jsonTargeting = {
-        categoryExclusions,
-      };
-      return mockRtcExecution({
-        categoryExclusions,
-      }, element).then(() => {
-        expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
-      });
-    });
-
-    it('should add targeting and categoryExclusions to impl', () => {
-      const targeting = {'sport': 'baseball'};
-      const categoryExclusions = {'age': '18-25'};
-      const jsonTargeting = {
-        targeting,
-        categoryExclusions,
-      };
-      return mockRtcExecution({
-        targeting,
-        categoryExclusions,
-      }, element).then(() => {
-        expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
-      });
-    });
-
-    it('should deep merge targeting and categoryExclusions from amp-ad', () => {
-      const rtcResponse = {
-        targeting: {'food': {
-          'kids': ['chicken fingers', 'pizza']},
-          'sports': 'baseball'},
-        categoryExclusions: {'age': '18-25'}};
-      const contextualTargeting =
-      '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
-      const jsonTargeting = {
-        targeting: {
-          'food': {
-            'kids': ['chicken fingers', 'pizza'],
-            'adults': 'cheese',
-          },
-          'sports': 'baseball'},
-        categoryExclusions: {'age': '18-25'}};
-      element = createElementWithAttributes(document, 'amp-ad', {
-        'width': '200',
-        'height': '50',
-        'type': 'doubleclick',
-        'layout': 'fixed',
-        'json': contextualTargeting,
-      });
-      return mockRtcExecution(rtcResponse, element).then(() => {
-        expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
-      });
-    });
-
-    it('should send two RTC callouts per page with SWR', () => {
-      const rtcResponse = {
-        targeting: {'food': {
-          'kids': ['chicken fingers', 'pizza']},
-          'sports': 'baseball'},
-        categoryExclusions: {'age': '18-25'}};
-      let contextualTargeting =
-      '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
-      element = createElementWithAttributes(document, 'amp-ad', {
-        'width': '200',
-        'height': '50',
-        'type': 'doubleclick',
-        'layout': 'fixed',
-        'json': contextualTargeting,
-      });
-      mockRtcExecution(rtcResponse, element);
-
-      contextualTargeting =
-      '{"targeting": {"food": {"adults": "wine"}}}';
-      const secondElement = createElementWithAttributes(
-          document, 'amp-ad', {
-            'width': '200',
-            'height': '50',
-            'type': 'doubleclick',
-            'layout': 'fixed',
-            'json': contextualTargeting,
-          });
-      return mockRtcExecution(rtcResponse, secondElement).then(() => {
-        expect(xhrMock).to.be.calledTwice;
-      });
-    });
-
-    it('should send one RTC callout per page with SWR disabled', () => {
-      setRtcConfig({
-        'endpoint': 'https://example-publisher.com/rtc/',
-        'disableStaleWhileRevalidate': true,
-      });
-      const rtcResponse = {
-        targeting: {'food': {
-          'kids': ['chicken fingers', 'pizza']},
-          'sports': 'baseball'},
-        categoryExclusions: {'age': '18-25'}};
-      let contextualTargeting =
-      '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
-      element = createElementWithAttributes(document, 'amp-ad', {
-        'width': '200',
-        'height': '50',
-        'type': 'doubleclick',
-        'layout': 'fixed',
-        'json': contextualTargeting,
-      });
-      mockRtcExecution(rtcResponse, element);
-
-      contextualTargeting =
-      '{"targeting": {"food": {"adults": "wine"}}}';
-      const secondElement = createElementWithAttributes(
-          document, 'amp-ad', {
-            'width': '200',
-            'height': '50',
-            'type': 'doubleclick',
-            'layout': 'fixed',
-            'json': contextualTargeting,
-          });
-      return mockRtcExecution(rtcResponse, secondElement).then(() => {
-        expect(xhrMock).to.be.calledOnce;
-      });
-    });
-
-    it('should not send RTC if url invalid', () => {
-      const rtcConf = document.getElementById('amp-rtc');
-      rtcConf.innerText = '{'
-          + '"endpoint": "http://example-publisher.com/rtc/",'
-          + '"sendAdRequestOnFailure": false'
-          + '}';
-
-      const targeting = {'sport': 'baseball'};
-      return mockRtcExecution({
-        targeting,
-      }, element).then(() => {
-        expect(xhrMock).to.not.be.called;
-      });
-    });
-
-    it('should resolve on empty RTC response', () => {
-      return mockRtcExecution('', element).then(() => {
-        // All that we are expecting here is that a Promise.reject doesn't
-        // bubble up
-      }).catch(() => {
-        expect(false).to.be.true;
-      });
-    });
-
-    it('should resolve on RTC failure if specified', () => {
-      const badRtcResponse = 'wrong: "unparseable}';
-      const jsonFunc = () => {
-        return Promise.resolve(JSON.parse(badRtcResponse));
-      };
-      return mockRtcExecution(badRtcResponse, element, jsonFunc).then(() => {
-        // All that we are expecting here is that a Promise.reject doesn't
-        // bubble up
-      }).catch(() => {
-        expect(false).to.be.true;
-      });
-    });
-
-    it('should reject on RTC failure if specified', () => {
-      setRtcConfig({
-        'endpoint': 'https://example-publisher.com/rtc/',
-        'sendAdRequestOnFailure': false,
-      });
-      const badRtcResponse = 'wrong: "unparseable}';
-      const jsonFunc = () => {
-        return Promise.resolve(JSON.parse(badRtcResponse));
-      };
-      return mockRtcExecution(badRtcResponse, element, jsonFunc).then(() => {
-        expect(false).to.be.true;
-      }).catch(err => {
-        expect(err.match(/Unexpected token/)).to.be.ok;
-      });
-    });
-
-    it('should bypass caching if specified', () => {
-      setRtcConfig({
-        'endpoint': 'https://example-publisher.com/rtc/',
-        'sendAdRequestOnFailure': true,
-        'disableStaleWhileRevalidate': true,
-      });
-
-      const targeting = {'sport': 'baseball'};
-      return mockRtcExecution({targeting}, element).then(() => {
-        expect(xhrMock).to.be.calledOnce;
-      });
-    });
-
-    it('should timeout slow response, then do not send without RTC', () => {
-      setRtcConfig({
-        'endpoint': 'https://example-publisher.com/rtc/',
-        'sendAdRequestOnFailure': false,
-      });
-      const targeting = {'sport': 'baseball'};
-      impl = new AmpAdNetworkDoubleclickImpl(element);
-
-      xhrMock.returns(
-          Services.timerFor(window).promise(1200).then(() => {
-            return Promise.resolve({
-              redirected: false,
-              status: 200,
-              json: () => {
-                return Promise.resolve({targeting});
-              },
-            });
-          }));
-      impl.populateAdUrlState();
-      return impl.executeRtc_().then(() => {
-        // this then block should never run.
-        expect(true).to.be.false;
-      }).catch(err => {
-        // Have to get substring, because the error message has
-        // three 0 width blank space characters added to it
-        // automatically by the log constructor.
-        expect(err.substring(0, 7)).to.equal('timeout');
-      });
-    });
-
-    it('should timeout slow response, then send without RTC', () => {
-      setRtcConfig({
-        'endpoint': 'https://example-publisher.com/rtc/',
-      });
-      const targeting = {'sport': 'baseball'};
-
-      impl = new AmpAdNetworkDoubleclickImpl(element);
-
-      xhrMock.returns(
-          Services.timerFor(window).promise(1200).then(() => {
-            return Promise.resolve({
-              redirected: false,
-              status: 200,
-              json: () => {
-                return Promise.resolve({targeting});
-              },
-            });
-          }));
-      impl.populateAdUrlState();
-      return impl.executeRtc_().then(result => {
-        expect(result.artc).to.equal(-1);
-        expect(result.ati).to.equal(3);
-      }).catch(() => {
-        // Should not error.
-        expect(true).to.be.false;
-      });
-    });
-  });
-
   describe('#multi-size', () => {
     const arrayBuffer = () => Promise.resolve({
       byteLength: 256,
@@ -1424,7 +1134,9 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
      * it has an AMP creative.
      */
     function stubForAmpCreative() {
-      sandbox.stub(impl, 'verifyCreativeSignature_', () => utf8Encode('foo'));
+      sandbox.stub(
+          signatureVerifierFor(impl.win), 'verify',
+          () => Promise.resolve(null));
     }
 
     function mockSendXhrRequest() {
@@ -1550,6 +1262,143 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         expect(iframe.getAttribute('style')).to.match(/width: 200/);
         expect(iframe.getAttribute('style')).to.match(/height: 50/);
       });
+    });
+
+    it('should issue an ad request even with bad multi-size data attr', () => {
+      stubForAmpCreative();
+      sandbox.stub(impl, 'sendXhrRequest', mockSendXhrRequest);
+      impl.element.setAttribute('data-multi-size', '201x50');
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        expect(impl.adUrl_).to.be.ok;
+        expect(impl.adUrl_.length).to.be.ok;
+      });
+    });
+  });
+
+  describe('#correlator clear experiment', () => {
+    let onVisibilityChangedHandler;
+    let visabilityState;
+    let doc;
+
+    beforeEach(() => {
+      onVisibilityChangedHandler = null;
+      visabilityState = VisibilityState.PAUSED;
+      return createIframePromise().then(fixture => {
+        doc = fixture.doc;
+        const viewer = {
+          isVisible: () => true,
+          onVisibilityChanged: handler => {
+            onVisibilityChangedHandler = handler;
+          },
+          getVisibilityState: () => visabilityState,
+          whenFirstVisible: () => Promise.resolve(),
+        };
+        sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          type: 'doubleclick',
+          height: '250',
+          width: '320',
+        });
+        doc.body.appendChild(element);
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+        impl.win.ampAdPageCorrelator = 12345;
+      });
+    });
+
+    it('clears if in experiment', () => {
+      forceExperimentBranch(impl.win, CORRELATOR_CLEAR_EXP_NAME,
+          CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT);
+      impl.buildCallback();
+      expect(onVisibilityChangedHandler).to.be.ok;
+      onVisibilityChangedHandler();
+      expect(impl.win.ampAdPageCorrelator).to.not.be.ok;
+      expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.CONTROL))
+          .to.be.false;
+      expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT))
+          .to.be.true;
+    });
+
+    it('does not clear if in control', () => {
+      forceExperimentBranch(impl.win, CORRELATOR_CLEAR_EXP_NAME,
+          CORRELATOR_CLEAR_EXP_BRANCHES.CONTROL);
+      impl.buildCallback();
+      expect(onVisibilityChangedHandler).to.be.ok;
+      onVisibilityChangedHandler();
+      expect(impl.win.ampAdPageCorrelator).to.equal(12345);
+      expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.CONTROL))
+          .to.be.true;
+      expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT))
+          .to.be.false;
+    });
+
+    it('does not clear if in neither branch', () => {
+      forceExperimentBranch(impl.win, CORRELATOR_CLEAR_EXP_NAME, null);
+      impl.buildCallback();
+      expect(onVisibilityChangedHandler).to.be.ok;
+      onVisibilityChangedHandler();
+      expect(impl.win.ampAdPageCorrelator).to.equal(12345);
+      expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.CONTROL))
+          .to.be.false;
+      expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT))
+          .to.be.false;
+    });
+
+    it('attempts to select into branch', () => {
+      impl.buildCallback();
+      expect(onVisibilityChangedHandler).to.be.ok;
+      onVisibilityChangedHandler();
+      expect(
+          impl.win.experimentBranches[CORRELATOR_CLEAR_EXP_NAME] !== undefined);
+    });
+
+    it('does not attempt to select into branch if SRA', () => {
+      impl.useSra = true;
+      impl.buildCallback();
+      expect(onVisibilityChangedHandler).to.be.ok;
+      onVisibilityChangedHandler();
+      expect(impl.win.ampAdPageCorrelator).to.equal(12345);
+      expect(
+          impl.win.experimentBranches[CORRELATOR_CLEAR_EXP_NAME] === undefined);
+    });
+
+    it('does not attempt to select into branch if no correlator', () => {
+      impl.win.ampAdPageCorrelator = undefined;
+      impl.buildCallback();
+      expect(onVisibilityChangedHandler).to.be.ok;
+      onVisibilityChangedHandler();
+      expect(
+          impl.win.experimentBranches[CORRELATOR_CLEAR_EXP_NAME] === undefined);
+    });
+
+    it('does not attempt to select into branch if not pause', () => {
+      visabilityState = VisibilityState.VISIBLE;
+      impl.buildCallback();
+      expect(onVisibilityChangedHandler).to.be.ok;
+      onVisibilityChangedHandler();
+      expect(
+          impl.win.experimentBranches[CORRELATOR_CLEAR_EXP_NAME] === undefined);
+    });
+
+    it('set experiment for second block', () => {
+      forceExperimentBranch(impl.win, CORRELATOR_CLEAR_EXP_NAME,
+          CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT);
+      impl.buildCallback();
+      expect(onVisibilityChangedHandler).to.be.ok;
+      onVisibilityChangedHandler();
+      expect(isInExperiment(element, CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT))
+          .to.be.true;
+      onVisibilityChangedHandler = null;
+      const elem2 = createElementWithAttributes(doc, 'amp-ad', {
+        type: 'doubleclick',
+        height: '250',
+        width: '320',
+      });
+      doc.body.appendChild(elem2);
+      new AmpAdNetworkDoubleclickImpl(elem2).buildCallback();
+      expect(onVisibilityChangedHandler).to.not.be.ok;
+      expect(isInExperiment(elem2, CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT))
+          .to.be.true;
     });
   });
 });

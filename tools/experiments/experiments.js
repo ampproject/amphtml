@@ -58,6 +58,12 @@ const EXPERIMENTS = [
         'README.md#amp-dev-channel',
   },
   {
+    id: 'amp-web-push',
+    name: 'Enable AMP web push',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-web-push/0.1/amp-web-push.md',
+  },
+  {
     id: 'ad-type-custom',
     name: 'Activates support for custom (self-serve) advertisements',
     spec: 'https://github.com/ampproject/amphtml/blob/master/ads/custom.md',
@@ -235,12 +241,6 @@ const EXPERIMENTS = [
     name: 'Use slot width/height attribute for AdSense size format',
   },
   {
-    id: 'amp-form-verifiers',
-    name: 'Asynchronous form verifiers',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9174',
-    spec: 'https://github.com/ampproject/amphtml/issues/8736',
-  },
-  {
     id: 'input-debounced',
     name: 'A debounced input event for AMP actions',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9413',
@@ -256,13 +256,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9803',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
       'amp-sidebar/1.0/amp-sidebar-1.0.md',
-  },
-  {
-    id: 'amp-ad-refresh',
-    name: 'Enable AMP ad refresh',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-ad-network-doubleclick-impl/' +
-        'amp-ad-network-doubleclick-impl-internal.md',
   },
   {
     id: 'user-error-reporting',

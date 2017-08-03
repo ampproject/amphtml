@@ -120,8 +120,8 @@ message AttrSpec {
   }
   // If set true, the TagSpec containing this AttrSpec will be evaluated first
   // for any encountered tag which matches the tag name and this attribute spec.
-  // May only be set for an AttrSpec where mandatory=true and the value field
-  // is set.
+  // May only be set for an AttrSpec where mandatory=true and type matches those
+  // specified in the comments of DispatchKeyType above.
   optional DispatchKeyType dispatch_key = 13 [default = NONE_DISPATCH];
 
   // If set to true, the TagSpec containing this AttrSpec implicitly has this
