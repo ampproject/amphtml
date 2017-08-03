@@ -35,7 +35,9 @@ tags: {  # <amp-video>
   # many pages don't have it, so it ends up late loaded and we warn, instead
   # of making this a validation error.
   also_requires_tag_warning: "amp-video extension .js script"
+  attrs: { name: "album" }
   attrs: { name: "alt" }
+  attrs: { name: "artist" }
   attrs: { name: "attribution" }
   attrs: {
     name: "autoplay"
@@ -45,6 +47,7 @@ tags: {  # <amp-video>
     name: "controls"
     value: ""
   }
+  attrs: { name: "crossorigin" }
   attrs: {
     name: "loop"
     value: ""
@@ -55,7 +58,6 @@ tags: {  # <amp-video>
   }
   attrs: { name: "placeholder" }
   attrs: { name: "poster" }
-  attrs: { name: "crossorigin" }
   attrs: {
     name: "preload"
     value_regex: "(none|metadata|auto|)"
@@ -69,10 +71,13 @@ tags: {  # <amp-video>
     blacklisted_value_regex: "__amp_source_origin"
   }
   # <amp-bind>
+  attrs: { name: "[album]" }
   attrs: { name: "[alt]" }
+  attrs: { name: "[artist]" }
   attrs: { name: "[attribution]" }
   attrs: { name: "[controls]" }
   attrs: { name: "[loop]" }
+  attrs: { name: "[title]" }
   attrs: { name: "[poster]" }
   attrs: { name: "[preload]" }
   attrs: { name: "[src]" }
