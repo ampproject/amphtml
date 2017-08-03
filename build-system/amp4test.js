@@ -20,7 +20,7 @@ const app = module.exports = require('express').Router();
 app.get('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
 
-  const mode = process.env.SERVE_MODE == 'compiled' ? '' : 'max';
+  const mode = process.env.SERVE_MODE == 'compiled' ? '' : 'max.';
   let extensionString = '';
   const extensions = req.query.extensions.split(' ');
 
@@ -28,7 +28,7 @@ app.get('/compose-doc', function(req, res) {
     if (extensions[i] != '') {
       extensionString += '<script async custom-element="'
           + extensions[i] + '" src=/dist/v0/'
-          + extensions[i] + '-0.1.' + mode + '.js></script> \n';
+          + extensions[i] + '-0.1.' + mode + 'js></script> \n';
     }
   }
   res.send(`

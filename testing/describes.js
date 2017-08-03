@@ -445,7 +445,7 @@ class IntegrationFixture {
 
   /** @override */
   setup(env) {
-    const body = this.spec.body;
+    const body = typeof this.spec.body == 'function' ? this.spec.body() : this.spec.body;
     const extensions = this.spec.extensions || [''];
     return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
