@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {dict} from '../src/utils/object';
-import {dev, user} from '../src/log';
+import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {nextTick} from './3p';
@@ -100,7 +100,7 @@ export class AbstractAmpContext {
     /** @protected {!IframeMessagingClient} */
     this.client_ = new IframeMessagingClient(win);
     this.client_.setHostWindow(this.getHostWindow_());
-    this.client_.setSentinel(user().assertString(this.sentinel));
+    this.client_.setSentinel(dev().assertString(this.sentinel));
 
     this.listenForPageVisibility_();
   }
