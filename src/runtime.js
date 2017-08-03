@@ -633,8 +633,8 @@ class MultidocManager {
                 dev().assertElement(doc.body),
                 /* deep */ false);
             //NOTE(torch2424), done in importshadowbody
-            //body.classList.add('amp-shadow');
-            //shadowRoot.appendChild(body);
+            body.classList.add('amp-shadow');
+            shadowRoot.appendChild(body);
             shadowDocHasBody(ampdoc, body);
             return body;
           });
