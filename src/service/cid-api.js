@@ -44,7 +44,7 @@ export class GoogleCidApi {
     this.cidPromise_ = null;
   }
 
-  getPubCid(scope, apiClient) {
+  getScopedCid(scope, apiClient) {
     const url = this.getUrl_(apiClient);
     if (!url) {
       return Promise.resolve(null);
@@ -54,7 +54,7 @@ export class GoogleCidApi {
       return this.cidPromise_;
     }
     let token;
-    return this.cidPromise_ = this.timer_.poll(100, () => {
+    return this.cidPromise_ = this.timer_.poll(1000, () => {
       token = getCookie(this.win_, AMP_TOKEN);
       return token !== TokenStatus.RETRIEVING;
     }).then(() => {
@@ -63,30 +63,15 @@ export class GoogleCidApi {
       }
 
       if (!token) {
-        setCookie(this.win_, AMP_TOKEN, TokenStatus.RETRIEVING,
-            this.expiresIn_(TIMEOUT));
+        this.persistToken_(TokenStatus.RETRIEVING, TIMEOUT);
       }
-      return this.fetchCid_(url, scope, token).then(res => {
-        if (res.optOut) {
-          setCookie(this.win_, AMP_TOKEN, TokenStatus.OPT_OUT,
-              this.expiresIn_(YEAR));
-          return null;
-        }
-        if (res.clientId) {
-          setCookie(this.win_, AMP_TOKEN, res.securityToken,
-              this.expiresIn_(YEAR));
-          return res.clientId;
-        } else {
-          setCookie(this.win_, AMP_TOKEN, TokenStatus.ERROR,
-              this.expiresIn_(DAY));
-          return null;
-        }
-      }).catch(e => {
-        setCookie(this.win_, AMP_TOKEN, TokenStatus.ERROR,
-            this.expiresIn_(TIMEOUT));
-        dev().error(TAG, e);
-        return null;
-      });
+      return this.fetchCid_(url, scope, token)
+          .then(this.handleResponse_.bind(this, scope))
+          .catch(e => {
+            this.persistToken_(TokenStatus.ERROR, TIMEOUT);
+            dev().error(TAG, e);
+            return null;
+          });
     });
   }
 
@@ -101,9 +86,26 @@ export class GoogleCidApi {
         TIMEOUT,
         Services.xhrFor(this.win_).fetchJson(url, {
           method: 'POST',
+          ampCors: false,
           credentials: 'include',
-          body: JSON.stringify(payload),
+          mode: 'cors',
+          body: payload,
         }).then(res => res.json()));
+  }
+
+  handleResponse_(scope, res) {
+    if (res.optOut) {
+      this.persistToken_(TokenStatus.OPT_OUT, YEAR);
+      return null;
+    }
+    if (res.clientId) {
+      this.persistToken_(res.securityToken, YEAR);
+      setCookie(this.win_, scope, res.clientId, this.expiresIn_(YEAR));
+      return res.clientId;
+    } else {
+      this.persistToken_(TokenStatus.ERROR, DAY);
+      return null;
+    }
   }
 
   getUrl_(apiClient) {
@@ -114,7 +116,13 @@ export class GoogleCidApi {
     return GOOGLE_API_URL + key;
   }
 
+  persistToken_(tokenValue, expires) {
+    if (tokenValue) {
+      setCookie(this.win_, AMP_TOKEN, tokenValue, this.expiresIn_(expires));
+    }
+  }
+
   expiresIn_(time) {
-    return this.win_.Date.time() + time;
+    return this.win_.Date.now() + time;
   }
 }
