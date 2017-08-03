@@ -431,7 +431,7 @@ function main(argv) {
       console.log(fileLogPrefix,
           'Running the',
           util.colors.cyan('integration_tests'),
-          'build shard since this PR touches',
+          'build shard since this PR modifies the runtime and / or touches',
           util.colors.cyan('test/integration'));
       command.cleanBuild();
       command.buildRuntime();
