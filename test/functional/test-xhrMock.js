@@ -32,7 +32,6 @@ describe('mocking fetch', () => {
       });
     });
   });
-
   describes.fakeWin('Test xhr Mock on fake win', {xhrMock: true}, env => {
     it('Should ensure xhr has been mocked', () => {
       const response = {payload: 'I was mocked'};

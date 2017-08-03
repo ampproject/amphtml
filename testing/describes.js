@@ -583,10 +583,11 @@ class RealWinFixture {
       iframe.onerror = reject;
       document.body.appendChild(iframe);
       if (!(spec.xhrMock === false)) {
-        env.xhrMock = fetchMock.sandbox();
         env.expectFetch = function(url, response) {
-          env.xhrMock.restore();
-          env.xhrMock.mock(url, response);
+          if (env.xhrMock) {
+            env.xhrMock.restore();
+          }
+          env.xhrMock = fetchMock.mock(url, response);
         };
       }
     });
