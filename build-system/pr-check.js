@@ -43,7 +43,7 @@ const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
 function startTimer(functionName) {
   const startTime = Date.now();
   console.log(
-      '\n' + fileLogPrefix, 'Running', util.colors.cyan(functionName), '...');
+      '\n' + fileLogPrefix, 'Running', util.colors.cyan(functionName) + '...');
   return startTime;
 }
 
