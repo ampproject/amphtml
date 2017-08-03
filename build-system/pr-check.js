@@ -367,9 +367,10 @@ function main(argv) {
         util.colors.cyan('yarn.lock'));
     console.error(fileLogPrefix, util.colors.yellow('NOTE:'),
         'To update', util.colors.cyan('yarn.lock'), 'after changing',
-        util.colors.cyan('package.json'), 'run',
-        util.colors.cyan('yarn install'), 'and include the change to',
-        util.colors.cyan('yarn.lock'), 'in your PR.');
+        util.colors.cyan('package.json') + ',', 'run',
+        '"' + util.colors.cyan('yarn install') + '"',
+        'and include the change to', util.colors.cyan('yarn.lock'),
+        'in your PR.');
     process.exit(1);
   }
 
