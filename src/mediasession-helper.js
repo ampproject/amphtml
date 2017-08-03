@@ -24,9 +24,9 @@ import {tryParseJson} from './json';
  *   artist: string,
  * }}
  */
-export let metadataDef;
+export let MetadataDef;
 
-/** @const {metadataDef} Dummy metadata used to fix a bug */
+/** @const {MetadataDef} Dummy metadata used to fix a bug */
 export const EMPTY_METADATA = {
   'title': '',
   'artist': '',
@@ -38,22 +38,22 @@ export const EMPTY_METADATA = {
 
 /**
  * Updates the Media Session API's metadata
- * @param {!Window} global
- * @param {!metadataDef} metadata
+ * @param {!Window} win
+ * @param {!MetadataDef} metadata
  * @param {function()=} playHandler
  * @param {function()=} pauseHandler
  */
-export function setMediaSession(global,
+export function setMediaSession(win,
                                 metadata,
                                 playHandler,
                                 pauseHandler) {
-  const navigator = global.navigator;
-  if ('mediaSession' in navigator && global.MediaMetadata) {
+  const navigator = win.navigator;
+  if ('mediaSession' in navigator && win.MediaMetadata) {
     // Clear mediaSession (required to fix a bug when switching between two
     // videos)
-    navigator.mediaSession.metadata = new global.MediaMetadata(EMPTY_METADATA);
+    navigator.mediaSession.metadata = new win.MediaMetadata(EMPTY_METADATA);
     // Add metadata
-    navigator.mediaSession.metadata = new global.MediaMetadata(metadata);
+    navigator.mediaSession.metadata = new win.MediaMetadata(metadata);
 
     navigator.mediaSession.setActionHandler('play', playHandler);
     navigator.mediaSession.setActionHandler('pause', pauseHandler);

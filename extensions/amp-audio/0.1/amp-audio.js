@@ -38,7 +38,7 @@ export class AmpAudio extends AMP.BaseElement {
     /** @private {?Element} */
     this.audio_ = null;
 
-    /** @private {!../../../src/mediasession-helper.metadataDef} */
+    /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
   }
 

@@ -111,7 +111,7 @@ export class VideoInterface {
    * title (string): Name of the video
    * artist (string): Name of the video's author/artist
    * album (string): Name of the video's album if it exists
-   * @return {!./mediasession-helper.metadataDef|undefined} metadata
+   * @return {!./mediasession-helper.MetadataDef|undefined} metadata
    */
   getMetadata() {}
 

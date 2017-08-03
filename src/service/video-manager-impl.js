@@ -549,7 +549,7 @@ class VideoEntry {
 
     // Media Session API Variables
 
-    /** @private {!../mediasession-helper.metadataDef} */
+    /** @private {!../mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
 
     listenOncePromise(element, VideoEvents.LOAD)
@@ -666,7 +666,7 @@ class VideoEntry {
 
     if (this.video.getMetadata()) {
       this.metadata_ = map(
-          /** @type {!../mediasession-helper.metadataDef} */
+          /** @type {!../mediasession-helper.MetadataDef} */
           (this.video.getMetadata())
       );
     }
