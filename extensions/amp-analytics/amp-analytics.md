@@ -45,16 +45,16 @@ Learn all about AMP analytics in the [Configure Analytics](https://www.ampprojec
 
 AMP analytics is specifically designed to measure once and report to many. If you are already working with one or more analytics vendors, check the list of [Analytics Vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) to see if they’ve integrated their solution with AMP.
 
-
-To send data to a supported analytics vendor:
+For integrated AMP analytics vendors:
 
 1.  In the `<amp-analytics>` tag, add the `type`attribute and set its value to the specified [vendor](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html).
 2. Determine what data you want to capture and track, and specify those details in the configuration data. See the vendor's documentation for  instructions on how to capture analytics data.
 
+If the analytics vendor hasn’t integrated with AMP, reach out to the vendor to ask for their support. We also encourage you to create an issue in the AMP project requesting that the vendor be added. See also [Integrating your analytics tools in AMP HTML](../amp-analytics/integrating-analytics.md). Alternatively, work with your vendor to send the data to their specified URL. Learn more in the [Sending data in-house](#sending-data-in-house) section below.
 
 *Example: Sending data to a third-party analytics provider*
 
-In the following example, analytics data is sent to Nielsen, a third-party analytics provider. Details for configuring analytics data for Nielsen can be found in the [Nielsen](https://engineeringportal.nielsen.com/docs/DCR_Static_Google_AMP_Cloud_API) documentation.
+In the following example, analytics data is sent to Nielsen, a third-party analytics provider that has integrated with AMP. Details for configuring analytics data for Nielsen can be found in the [Nielsen](https://engineeringportal.nielsen.com/docs/DCR_Static_Google_AMP_Cloud_API) documentation.
 
 ```html
 <amp-analytics type="nielsen">
@@ -78,14 +78,19 @@ In the following example, analytics data is sent to Nielsen, a third-party analy
 
 If you have your own in-house solution for measuring user engagement, the only thing you will need to integrate AMP analytics with that solution is a URL. This is where you will send the data. You can also send data to various URLs. For example, you can send page view data to one URL, and social engagement data to another URL.
 
-To send data in-house:
+
+{% call callout('Note', type='note') %}
+If your in-house solution involves working with an analytics vendor that hasn't integrated with AMP, work with the vendor to determine what configuration information is required.
+{% endcall %}
+
+To send data to a specific URL:
 
 1.  Determine what data you want to capture and track, and [specify those details in the configuration data](#specifying-configuration-data).
-2.  In the [`requests`](#requests) configuration object, specify the url(s) of where you want to send the tracking data to.
+2.  In the [`requests`](#requests) configuration object, specify the type of request to track (e.g., pageview, specific triggered events) and the url(s) of where you want to send the tracking data to.
 
 *Example: Sending data to a URL*
 
-In the following example, everytime a page is visible, the trigger event fires, and sends the pageview data to a defined URL along with a random ID:
+Here's a simple example that tracks page views.  Every time a page is visible, the trigger event fires, and sends the pageview data to a defined URL along with a random ID.
 
 ```html
 <amp-analytics>
@@ -104,6 +109,11 @@ In the following example, everytime a page is visible, the trigger event fires, 
 </script>
 </amp-analytics>
 ```
+
+{% call callout('Tip', type='success') %}
+For some common tracking use cases (e.g., page views, page clicks, scrolling, etc.) see [Analytics: Use Cases](https://www.ampproject.org/docs/guides/analytics/use_cases).
+{% endcall %}
+
 
 ## Specifying configuration data
 
@@ -162,9 +172,7 @@ In this example, we specify the `config` attribute to load the configuration dat
 ###  Configuration data objects
 
 ####  Requests
-The `requests` configuration object specifies the URLs used to transmit data to an analytics platform. The `request-name` is used
-in the trigger configuration to specify what request should be sent in response to a particular event. The `request-value`
-is an https URL. These values may include placeholder tokens that can reference other requests or variables.
+The `requests` configuration object specifies the URLs used to transmit data to an analytics platform. The `request-name` specifies what request should be sent in response to a particular event (e.g., `pageview`, `event`, etc.) . The `request-value` is an https URL. These values may include placeholder tokens that can reference other requests or variables.
 
 ```javascript
 "requests": {
@@ -173,6 +181,7 @@ is an https URL. These values may include placeholder tokens that can reference 
   "event": "${base}&type=event&eventId=${eventId}"
 }
 ```
+Some analytics providers have an already-provided configuration, which you use via the `type` attribute. If you are using an analytics provider, you may not need to include requests information. See your vendor documentation to find out if requests need to be configured, and how.
 
 #### Vars
 
