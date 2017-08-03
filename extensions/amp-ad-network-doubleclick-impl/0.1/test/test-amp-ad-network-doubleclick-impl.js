@@ -52,12 +52,12 @@ import {
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {VisibilityState} from '../../../../src/visibility-state';
+import {registerForUnitTest} from '../../../../src/runtime';
 import * as sinon from 'sinon';
 
-function setupForAdTesting(fixture) {
-  installDocService(fixture.win, /* isSingleDoc */ true);
-  const doc = fixture.doc;
-  doc.win = fixture.win;
+function setupForAdTesting (win) {
+  const doc = win.document;
+  doc.win = win;
   // TODO(a4a-cam@): This is necessary in the short term, until A4A is
   // smarter about host document styling.  The issue is that it needs to
   // inherit the AMP runtime style element in order for shadow DOM-enclosed
@@ -67,7 +67,8 @@ function setupForAdTesting(fixture) {
   doc.head.appendChild(ampStyle);
 }
 
-describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
+describes.realWin('amp-ad-network-doubleclick-impl', {amp: true,
+  allowExternalResources: true, ampAdCss: true, ampCss:true}, env => {
   let impl;
   let element;
 
@@ -79,21 +80,18 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
    */
   function createImplTag(config) {
     config.type = 'doubleclick';
-    return createIframePromise().then(fixture => {
-      setupForAdTesting(fixture);
-      element = createElementWithAttributes(fixture.doc, 'amp-ad', config);
-      // To trigger CSS styling.
-      element.setAttribute('data-a4a-upgrade-type',
-          'amp-ad-network-doubleclick-impl');
-      // Used to test styling which is targetted at first iframe child of
-      // amp-ad.
-      const iframe = fixture.doc.createElement('iframe');
-      element.appendChild(iframe);
-      document.body.appendChild(element);
-      impl = new AmpAdNetworkDoubleclickImpl(element);
-      impl.iframe = iframe;
-      return fixture;
-    });
+    setupForAdTesting(env.win);
+    element = createElementWithAttributes(env.win.document, 'amp-ad', config);
+    // To trigger CSS styling.
+    element.setAttribute('data-a4a-upgrade-type',
+    'amp-ad-network-doubleclick-impl');
+    // Used to test styling which is targetted at first iframe child of
+    // amp-ad.
+    const iframe = env.win.document.createElement('iframe');
+    element.appendChild(iframe);
+    env.win.document.body.appendChild(element);
+    impl = new AmpAdNetworkDoubleclickImpl(element);
+    impl.iframe = iframe;
   }
 
 
@@ -301,7 +299,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
     function verifyCss(iframe, expectedSize) {
       expect(iframe).to.be.ok;
-      const style = window.getComputedStyle(iframe);
+      const style = env.win.getComputedStyle(iframe);
       expect(style.top).to.equal('50%');
       expect(style.left).to.equal('50%');
       expect(style.width).to.equal(expectedSize.width);
@@ -314,46 +312,43 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
     }
 
-    afterEach(() => document.body.removeChild(impl.element));
+    afterEach(() => env.win.document.body.removeChild(impl.element));
 
     it('centers iframe in slot when height && width', () => {
-      return createImplTag({
+      env.win.AMP_MODE.test = true;
+      createImplTag({
         width: '300',
         height: '150',
-      }).then(() => {
-        expect(impl.element.getAttribute('width')).to.equal('300');
-        expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.iframe, size);
       });
+      expect(impl.element.getAttribute('width')).to.equal('300');
+      expect(impl.element.getAttribute('height')).to.equal('150');
+      verifyCss(impl.iframe, size);
     });
     it('centers iframe in slot when !height && !width', () => {
-      return createImplTag({
+      createImplTag({
         layout: 'fixed',
-      }).then(() => {
-        expect(impl.element.getAttribute('width')).to.be.null;
-        expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.iframe, size);
-      });
+      })
+      expect(impl.element.getAttribute('width')).to.be.null;
+      expect(impl.element.getAttribute('height')).to.be.null;
+      verifyCss(impl.iframe, size);
     });
     it('centers iframe in slot when !height && width', () => {
-      return createImplTag({
+      createImplTag({
         width: '300',
         layout: 'fixed',
-      }).then(() => {
-        expect(impl.element.getAttribute('width')).to.equal('300');
-        expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.iframe, size);
       });
+      expect(impl.element.getAttribute('width')).to.equal('300');
+      expect(impl.element.getAttribute('height')).to.be.null;
+      verifyCss(impl.iframe, size);
     });
     it('centers iframe in slot when height && !width', () => {
-      return createImplTag({
+      createImplTag({
         height: '150',
         layout: 'fixed',
-      }).then(() => {
-        expect(impl.element.getAttribute('width')).to.be.null;
-        expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.iframe, size);
       });
+      expect(impl.element.getAttribute('width')).to.be.null;
+      expect(impl.element.getAttribute('height')).to.equal('150');
+      verifyCss(impl.iframe, size);
     });
   });
 

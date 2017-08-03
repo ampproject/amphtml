@@ -101,6 +101,7 @@ import {
 import {createElementWithAttributes} from '../src/dom';
 import {addParamsToUrl} from '../src/url';
 import {cssText} from '../build/css';
+import {CSS} from '../build/amp-ad-0.1.css.js';
 import {createAmpElementProto} from '../src/custom-element';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {
@@ -541,6 +542,10 @@ class RealWinFixture {
           installRuntimeStylesPromise(win);
         }
 
+        if (spec.ampAdCss) {
+          installAmpAdStylesPromise(win);
+        }
+
         if (spec.fakeRegisterElement) {
           const customElements = new FakeCustomElements(win);
           Object.defineProperty(win, 'customElements', {
@@ -743,6 +748,21 @@ function installRuntimeStylesPromise(win) {
   style./*OK*/textContent = cssText;
   win.document.head.appendChild(style);
 }
+
+/**
+ * @param {!Window} win
+ */
+function installAmpAdStylesPromise(win) {
+  if (win.document.querySelector('style[amp-ad]')) {
+    // Already installed.
+    return;
+  }
+  const style = document.createElement('style');
+  style.setAttribute('amp-ad', '');
+  style./*OK*/textContent = CSS;
+  win.document.head.appendChild(style);
+}
+
 
 
 /**
