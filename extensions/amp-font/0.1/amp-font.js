@@ -32,7 +32,6 @@
  * </code>
  *
  * the amp-font element's layout type is nodisplay.
- * DUMMY CHANGE. DO NOT MERGE.
  */
 
 import {FontLoader} from './fontloader';
