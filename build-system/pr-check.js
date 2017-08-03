@@ -267,7 +267,7 @@ const command = {
   },
   runUnitTests: function() {
     // Unit tests with Travis' default chromium
-    timedExecOrDie(`${gulp} test --nobuild`);
+    timedExecOrDie(`${gulp} test --unit --nobuild`);
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
