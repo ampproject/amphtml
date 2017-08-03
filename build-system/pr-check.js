@@ -274,10 +274,13 @@ const command = {
     // timedExecOrDie(
     //     `${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
   },
-  runIntegrationTests: function() {
+  runIntegrationTests: function(compiled) {
     // Integration tests with all saucelabs browsers
-    timedExecOrDie(
-        `${gulp} test --nobuild --saucelabs --integration --compiled`);
+    let cmd = '${gulp} test --nobuild --saucelabs --integration';
+    if (compiled) {
+      cmd += ' --compiled';
+    }
+    timedExecOrDie(cmd);
   },
   runVisualDiffTests: function(opt_mode) {
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
@@ -318,7 +321,7 @@ function runAllCommands() {
     command.cleanBuild();
     command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
-    command.runIntegrationTests();
+    command.runIntegrationTests(/* compiled */ true);
   }
 }
 
@@ -422,17 +425,17 @@ function main(argv) {
   }
 
   if (process.env.BUILD_SHARD == "integration_tests") {
-    // Run the integration_tests shard for a PR only if it is modifying an
-    // integration test. Otherwise, the shard can be skipped.
-    if (buildTargets.has('INTEGRATION_TEST')) {
+    // Run the integration_tests shard for a PR only if it is modifying the
+    // runtime or an integration test. Otherwise, the shard can be skipped.
+    if (buildTargets.has('INTEGRATION_TEST') || buildTargets.has('RUNTIME')) {
       console.log(fileLogPrefix,
           'Running the',
           util.colors.cyan('integration_tests'),
           'build shard since this PR touches',
           util.colors.cyan('test/integration'));
       command.cleanBuild();
-      command.buildRuntimeMinified();
-      command.runIntegrationTests();
+      command.buildRuntime();
+      command.runIntegrationTests(/* compiled */ false);
     } else {
       console.log(fileLogPrefix,
           'Skipping the',
