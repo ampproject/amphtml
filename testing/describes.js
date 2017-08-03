@@ -112,7 +112,7 @@ import {resetLoadingCheckForTests} from '../src/element-stub';
 import {resetScheduledElementForTesting} from '../src/custom-element';
 import {setStyles} from '../src/style';
 import * as sinon from 'sinon';
-const fetchMock = require('fetch-mock');
+import fetchMock from 'fetch-mock';
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -487,10 +487,11 @@ class FakeWinFixture {
     const spec = this.spec;
     env.win = new FakeWindow(this.spec.win || {});
     if (!(spec.xhrMock === false)) {
-      env.xhrMock = fetchMock.sandbox();
       env.expectFetch = function(url, response) {
-        env.xhrMock.restore();
-        env.xhrMock.mock(url, response);
+        if (env.xhrMock) {
+          env.xhrMock.restore();
+        }
+        env.xhrMock = fetchMock.mock(url, response);
       };
     }
   }
@@ -573,10 +574,11 @@ class RealWinFixture {
       iframe.onerror = reject;
       document.body.appendChild(iframe);
       if (!(spec.xhrMock === false)) {
-        env.xhrMock = fetchMock.sandbox();
         env.expectFetch = function(url, response) {
-          env.xhrMock.restore();
-          env.xhrMock.mock(url, response);
+          if (env.xhrMock) {
+            env.xhrMock.restore();
+          }
+          env.xhrMock = fetchMock.mock(url, response);
         };
       }
     });
