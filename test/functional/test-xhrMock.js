@@ -19,7 +19,6 @@
  * Asserts xhr fetch has been mocked out and under control
  **/
 
-
 describes.realWin('Test xhr Mock on real win', {xhrMock: true}, env => {
   it('Should ensure xhr has been mocked', () => {
     const response = {payload: 'I was mocked'};
@@ -27,7 +26,7 @@ describes.realWin('Test xhr Mock on real win', {xhrMock: true}, env => {
     return fetch('trial.com').then(function(response) {
       return response.json().then(function(data) {
         expect(data.payload).to.equal('I was mocked');
-        expect(env.xhrMock.called('trial.com')).to.be.true;
+        expect(env.xhr.called('trial.com')).to.be.true;
       });
     });
   });
