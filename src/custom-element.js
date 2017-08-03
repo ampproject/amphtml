@@ -756,13 +756,8 @@ function createBaseCustomElementClass(win) {
       if (this.buildingPromise_) {
         return this.buildingPromise_;
       }
-      return this.buildingPromise_ = new Promise((resolve, reject) => {
-        const promise = this.implementation_.buildCallback();
-        if (promise) {
-          promise.then(resolve, reject);
-        } else {
-          resolve();
-        }
+      return this.buildingPromise_ = new Promise(resolve => {
+        resolve(this.implementation_.buildCallback());
       }).then(() => {
         this.preconnect(/* onLayout */false);
         this.built_ = true;
