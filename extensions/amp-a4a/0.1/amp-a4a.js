@@ -347,6 +347,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @protected {boolean} */
     this.isRelayoutNeededFlag = false;
+
+    /** @private {?Promise} */
+    this.beforeRequestPromise_ = null;
   }
 
   /** @override */
@@ -392,6 +395,16 @@ export class AmpA4A extends AMP.BaseElement {
       const forTypeSafety = this.getKeyInfoSets_();
       this.win.ampA4aValidationKeys = forTypeSafety;
     }
+
+    this.beforeRequestPromise_ = this.prepareBeforeRequest();
+  }
+
+  /**
+   * @return {?Promise}
+   * @protected
+   */
+  prepareBeforeRequest() {
+    return null;
   }
 
   /** @override */
@@ -552,7 +565,12 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    this.initiateAdRequest();
+    if (this.beforeRequestPromise_) {
+      // Block until request preparation is done.
+      this.beforeRequestPromise_.then(() => this.initiateAdRequest());
+    } else {
+      this.initiateAdRequest();
+    }
   }
 
   /**

@@ -139,6 +139,19 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
+  prepareBeforeRequest() {
+    if (this.isResponsive()) {
+      const viewportWidth = this.getViewport().getSize().width;
+      return this.attemptChangeSize(
+          this.calculateResponsiveHeight_(viewportWidth),
+          viewportWidth).catch(() => {
+            // Ignore resize rejections.
+          });
+    }
+    return null;
+  }
+
+  /** @override */
   getAdUrl() {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after moving it someplace common.
