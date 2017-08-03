@@ -365,7 +365,6 @@ function describeEnv(factory) {
   return mainFunc;
 }
 
-
 /** @interface */
 class Fixture {
 
@@ -578,10 +577,10 @@ class RealWinFixture {
       document.body.appendChild(iframe);
       if (!(spec.xhrMock === false)) {
         env.expectFetch = function(url, response) {
-          if (env.xhrMock) {
-            env.xhrMock.restore();
+          if (env.xhr) {
+            env.xhr.restore();
           }
-          env.xhrMock = fetchMock.mock(url, response);
+          env.xhr = fetchMock.mock(url, response);
         };
       }
     });
