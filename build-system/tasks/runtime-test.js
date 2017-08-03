@@ -134,6 +134,8 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     c.mochaReporter.output = argv.saucelabs ? 'minimal' : 'full';
   } else if (argv.integration) {
     c.files = config.integrationTestPaths;
+  } else if (argv.unit) {
+    c.files = config.unitTestPaths;
   } else if (argv.randomize || argv.glob || argv.a4a) {
     /** Randomize the order of the test running */
     var testPaths;
@@ -235,6 +237,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     'safari': '  Runs tests in Safari',
     'firefox': '  Runs tests in Firefox',
     'edge': '  Runs tests in Edge',
+    'unit': '  Run only unit tests.',
     'integration': '  Run only integration tests.',
     'compiled': '  Changes integration tests to use production JS ' +
         'binaries for execution',
