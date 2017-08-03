@@ -326,7 +326,8 @@ class AmpLightbox extends AMP.BaseElement {
    */
   maybeSetTransparentBody_() {
     if (this.getAmpDoc().win != this.win) { // in FIE
-      setTransparentBody(this.getAmpDoc().win, this.win.document.body);
+      setTransparentBody(this.getAmpDoc().win, /** @type {!HTMLBodyElement} */ (
+          dev().assert(this.win.document.body)));
     }
   }
 }
@@ -355,7 +356,8 @@ function setTransparentBody(win, body) {
 
 
 if (getMode().runtime == 'inabox') {
-  setTransparentBody(window, document.body);
+  setTransparentBody(window, /** @type {!HTMLBodyElement} */ (
+      dev().assert(document.body)));
 }
 
 
