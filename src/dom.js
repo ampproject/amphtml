@@ -37,10 +37,6 @@ export const UPGRADE_TO_CUSTOMELEMENT_PROMISE =
 export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER =
     '__AMP_UPG_RES';
 
-/** @const {string} */
-const DISABLED_PSEUDOCLASS_ = ':disabled';
-
-
 /**
  * Waits until the child element is constructed. Once the child is found, the
  * callback is executed.
@@ -840,5 +836,5 @@ export function isFullscreenElement(element) {
  * @see https://www.w3.org/TR/html5/forms.html#concept-fe-disabled
  */
 export function isEnabled(element) {
-  return !(element.disabled || matches(element, DISABLED_PSEUDOCLASS_));
+  return !(element.disabled || matches(element, ':disabled'));
 }
