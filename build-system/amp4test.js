@@ -17,7 +17,7 @@
 
 const app = module.exports = require('express').Router();
 
-app.get('/compose-doc', function(req, res) {
+app.use('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
 
   const mode = process.env.SERVE_MODE == 'compiled' ? '' : 'max.';

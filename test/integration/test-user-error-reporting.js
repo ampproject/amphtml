@@ -18,22 +18,19 @@ import {
     withdrawRequest,
     depositRequestUrl,
 } from '../../testing/test-helper';
-import {toggleExperiment} from '../../src/experiments';
 
 describe('user-error', function() {
 
   let randomId;
-  describes.fakeWin('', {}, env => {
+  beforeEach(() => {
+    randomId = Math.random();
+  });
 
-    beforeEach(() => {
-      randomId = Math.random();
-      toggleExperiment(env.win, 'user-error-reporting', true);
-    });
-
-    describes.integration('user-error integration test', {
-      extensions: ['amp-analytics'],
-      hash: 'log=0',
-      body: () => `   
+  describes.integration('user-error integration test', {
+    extensions: ['amp-analytics'],
+    hash: 'log=0',
+    experimentId: 'user-error-reporting',
+    body: () => `   
     <amp-analytics><script type="application/json">
           {
               "requests": {
@@ -50,17 +47,18 @@ describe('user-error', function() {
 
     <amp-pixel src="https://foo.com/tracker/foo"
                referrerpolicy="fail-referrer">`,
-    }, env => {
-      it('should ping correct host with amp-pixel user().assert err', () => {
-        return expect(withdrawRequest(env.win, randomId)).to.eventually.be.ok;
-      });
+  }, env => {
+    it('should ping correct host with amp-pixel user().assert err', () => {
+      return expect(withdrawRequest(env.win, randomId)).to.eventually.be.ok;
     });
+  });
 
-    describes.integration('user-error integration test', {
-      extensions: ['amp-analytics'],
-      hash: 'log=0',
-      /* eslint-disable */
-      body: () => `
+  describes.integration('user-error integration test', {
+    extensions: ['amp-analytics'],
+    hash: 'log=0',
+    experimentId: 'user-error-reporting',
+
+    body: () => `
     <amp-img
       src="../../examples/img/sea@1x.jpg"
       width="360" height="216" layout="responsive"
@@ -80,10 +78,9 @@ describe('user-error', function() {
               }
           }
     </script></amp-analytics>`,
-    }, env => {
-      it('should ping correct host with amp-img user().error err', () => {
-          return expect(withdrawRequest(env.win, randomId)).to.eventually.be.ok;
-      });
+  }, env => {
+    it('should ping correct host with amp-img user().error err', () => {
+      return expect(withdrawRequest(env.win, randomId)).to.eventually.be.ok;
     });
   });
 });

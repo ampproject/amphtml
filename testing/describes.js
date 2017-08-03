@@ -111,6 +111,7 @@ import {
 import {resetLoadingCheckForTests} from '../src/element-stub';
 import {resetScheduledElementForTesting} from '../src/custom-element';
 import {setStyles} from '../src/style';
+import {toggleExperiment} from '../src/experiments';
 import * as sinon from 'sinon';
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -436,6 +437,10 @@ class IntegrationFixture {
     /** @const {string} */
     this.hash = spec.hash || '';
     delete spec.hash;
+
+    /** @const {string} */
+    this.experimentId = spec.experimentId || '';
+    delete spec.experimentId;
   }
 
   /** @override */
@@ -445,8 +450,13 @@ class IntegrationFixture {
 
   /** @override */
   setup(env) {
-    const body = typeof this.spec.body == 'function' ? this.spec.body() : this.spec.body;
+    const body = typeof this.spec.body == 'function' ?
+        this.spec.body() : this.spec.body;
     const extensions = this.spec.extensions || [''];
+
+    if (this.experimentId != '') {
+      toggleExperiment(window, this.experimentId, true);
+    }
     return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
         src: addParamsToUrl('/amp4test/compose-doc',
@@ -466,6 +476,7 @@ class IntegrationFixture {
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
     }
+    toggleExperiment(env.win, this.experimentId, false);
   }
 }
 
