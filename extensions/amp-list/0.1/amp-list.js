@@ -98,15 +98,15 @@ export class AmpList extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const src = mutations['src'];
     if (src !== undefined) {
-      if (typeof src === 'string') {
+      const typeOfSrc = typeof src;
+      if (typeOfSrc === 'string') {
         this.fetchList_();
-      } else if (typeof src === 'object') {
+      } else if (typeOfSrc === 'object') {
         const items = isArray(src) ? src : [src];
         this.renderItems_(items);
       } else {
         user().error(TAG, 'Unexpected "src" type: ' + src);
       }
-      return;
     }
 
     const state = mutations['state'];
