@@ -360,7 +360,7 @@ function main(argv) {
   }
 
   // Make sure changes to package.json also update yarn.lock.
-  if (files.includes('package.json') && !files.includes('yarn.lock')) {
+  if (files.indexOf('package.json') != -1 && files.indexOf('yarn.lock') == -1) {
     console.error(fileLogPrefix, util.colors.red('ERROR:'),
         'Updates to', util.colors.cyan('package.json'),
         'must be accompanied by a corresponding update to',
