@@ -57,24 +57,23 @@ export class LayoutLayers {
    * @return {!LayoutRectDef}
    */
   calcIntersectionWithParent(element, parent, opt_expand) {
-    // TODO
-    const elementBox = LayoutElement.for(element).getLayoutBox(parent);
-    const { left, top } = elementBox;
-    let parentBox = LayoutElement.for(parent).getUnscrolledLayoutBox();
+    const { left, top } = LayoutElement.getScrolledPosition(element, parent);
+    const size = LayoutElement.getSize(element);
+    let parentSize = LayoutElement.getSize(parent);
     if (opt_expand) {
-      parentBox = expandLayoutRect(parentBox, opt_expand.dw || 0,
-          opt_expand.dh || 0);
+      parentSize.width *= 1 + (opt_expand.dw || 0) * 2,
+      parentSize.height *= 1 + (opt_expand.dh || 0) * 2,
     }
 
     return layoutRectLtwh(
       left,
       top,
       Math.max(
-        Math.min(left + elementBox.width, parent.width) - left,
+        Math.min(left + size.width, parentSize.width) - left,
         0
       ),
       Math.max(
-        Math.min(top + elementBox.height, parent.height) - top,
+        Math.min(top + size.height, parentSize.height) - top,
         0
       )
     );
@@ -132,11 +131,11 @@ export class LayoutLayers {
   }
 
   scrolled_(element) {
-    let layer = LayoutLayer.forOptional(element);
+    const layer = LayoutLayer.forOptional(element);
     if (layer) {
       layer.updateScrollPosition();
     } else {
-      layer = this.declareLayer(element);
+      this.declareLayer(element);
     }
   }
 
@@ -156,7 +155,6 @@ class LayoutLayer {
   constructor(element) {
     /** @private @const {!Element} */
     this.root_ = element;
-    element[LAYOUT_LAYER_PROP] = this;
 
     /**
      * Holds all children AMP Elements, so we can quickly remeasure.
@@ -180,6 +178,7 @@ class LayoutLayer {
       this.parentLayer_.transfer_(this);
     }
 
+    element[LAYOUT_LAYER_PROP] = this;
     this.remeasure();
 
     /**
@@ -217,6 +216,11 @@ class LayoutLayer {
    * @return {?LayoutLayer}
    */
   static getParentLayer(element) {
+    const layout = LayoutElement.forOptional(element);
+    if (layout) {
+      return layout.getParentLayer();
+    }
+
     let last = element;
     for (let el = last.parentNode; el; last = el, el = el.parentNode) {
       const layer = LayoutLayer.forOptional(el);
@@ -258,8 +262,8 @@ class LayoutLayer {
     return this.root_.contains(element);
   }
 
-  getUnscrolledPosition() {
-    return LayoutElement.for(this.root_).getUnscrolledPosition();
+  getOffsets() {
+    return LayoutElement.for(this.root_).getOffsets();
   }
 
   getScrollTop() {
@@ -276,6 +280,7 @@ class LayoutLayer {
 
     filterSplice(this.ampElements_, element => {
       if (contained || layer.contains(element)) {
+        element.parentLayer_ = layer;
         layer.ampElements_.push(element);
         return false;
       }
@@ -322,6 +327,8 @@ class LayoutElement {
      */
     this.element_ = element;
 
+    this.parentLayer_ = LayoutLayer.getParentLayer(element);
+
     this.size_ = {width: 0, height: 0};
     this.position_ = {top: 0, left: 0};
 
@@ -354,12 +361,44 @@ class LayoutElement {
    * @param {Element=} opt_parent
    * @return {!LayoutRectDef}
    */
-  static getLayoutBox(opt_parent) {
+  static getScrolledPosition(element, opt_parent) {
     // 4 cases:
     //   1. AmpElement, AmpElement
     //   2. AmpElement, Element
     //   3. Element, AmpElement
     //   4. Element, Element
+    const layout = LayoutElement.forOptional(element);
+    if (layout) {
+      return layout.getScrolledPosition(opt_parent);
+    }
+
+    const box = element.getBoundingClientRect();
+    const position = { left: box.left, top: box.top };
+    if (opt_parent) {
+      const parentBox = LayoutElement.getScrolledPosition(opt_parent);
+      position.left -= parentBox.left;
+      position.top -= parentBox.top;
+    }
+    return position;
+  }
+
+  /**
+   * Calculates the size of element.
+   *
+   * @param {!Element} element
+   * @return {!{width: number, height: number}}
+   */
+  static getSize(element) {
+    const layout = LayoutElement.forOptional(element);
+    if (layout) {
+      return layout.getSize();
+    }
+
+    const box = element.getBoundingClientRect();
+    return {
+      width: box.width,
+      height: box.height,
+    };
   }
 
   /**
@@ -368,7 +407,7 @@ class LayoutElement {
    * @return {?LayoutLayer}
    */
   getParentLayer() {
-    return LayoutLayer.getParentLayer(this.element_);
+    return this.parentLayer_;
   }
 
   /**
@@ -380,11 +419,11 @@ class LayoutElement {
   }
 
   /**
-   * Gets position of the element relative to the parent layer without taking
+   * Gets offsets of the element relative to the parent layer, without taking
    * scroll position into account.
    * @return {!LayoutRectDef}
    */
-  getUnscrolledPosition() {
+  getOffsets() {
     return this.position_;
   }
 
@@ -395,22 +434,21 @@ class LayoutElement {
    * @return {!LayoutRectDef}
    */
   getScrolledPosition(opt_parent) {
-    const position = this.getUnscrolledPosition();
+    const position = this.getOffsets();
     let x = position.left;
     let y = position.top;
 
     let first = true;
     const stopAt = opt_parent ? LayoutLayer.getParentLayer(opt_parent) : null;
     for (let p = this.getParentLayer(); p !== stopAt; p = p.getParentLayer()) {
-      const parent = parents[i];
 
-      x -= parent.getScrollLeft();
-      y -= parent.getScrollTop();
+      x -= p.getScrollLeft();
+      y -= p.getScrollTop();
 
       if (first) {
         first = false;
       } else {
-        const position = parent.getUnscrolledPosition();
+        const position = p.getOffsets();
         x += position.left;
         y += position.top;
       }
@@ -423,7 +461,7 @@ class LayoutElement {
     let relative = opt_relativeTo;
     if (!relative) {
       const parent = this.getParentLayer();
-      relative = parent ? parent.getScrolledPosition() : layoutRectLtwh(0, 0, 0, 0);
+      relative = parent ? parent.getScrolledPosition() : { top: 0, left: 0};
     }
     const box = this.element_.getBoundingClientRect();
     this.size_ = {width: box.width, height: box.height};
