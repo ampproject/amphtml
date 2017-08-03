@@ -72,6 +72,7 @@ var integrationTestPaths = commonTestPaths.concat([
 module.exports = {
   commonTestPaths: commonTestPaths,
   testPaths: testPaths,
+  unitTestPaths: unitTestPaths,
   integrationTestPaths: integrationTestPaths,
   lintGlobs: [
     '**/*.js',
