@@ -67,8 +67,8 @@ function setupForAdTesting (win) {
   doc.head.appendChild(ampStyle);
 }
 
-describes.realWin('amp-ad-network-doubleclick-impl', {amp: true,
-  allowExternalResources: true, ampAdCss: true, ampCss:true}, env => {
+describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
+  /*allowExternalResources: true,*/ ampAdCss: true}, env => {
   let impl;
   let element;
 
@@ -315,7 +315,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', {amp: true,
     afterEach(() => env.win.document.body.removeChild(impl.element));
 
     it('centers iframe in slot when height && width', () => {
-      env.win.AMP_MODE.test = true;
+      //env.win.AMP_MODE.test = true;
       createImplTag({
         width: '300',
         height: '150',

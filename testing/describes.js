@@ -753,12 +753,12 @@ function installRuntimeStylesPromise(win) {
  * @param {!Window} win
  */
 function installAmpAdStylesPromise(win) {
-  if (win.document.querySelector('style[amp-ad]')) {
+  if (win.document.querySelector('style[amp-extension="amp-ad"]')) {
     // Already installed.
     return;
   }
   const style = document.createElement('style');
-  style.setAttribute('amp-ad', '');
+  style.setAttribute('amp-extension', 'amp-ad');
   style./*OK*/textContent = CSS;
   win.document.head.appendChild(style);
 }
