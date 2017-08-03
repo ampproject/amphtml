@@ -73,7 +73,7 @@ let BoundElementDef;
  * A map of tag names to arrays of attributes that do not have non-bind
  * counterparts. For instance, amp-carousel allows a `[slide]` attribute,
  * but does not support a `slide` attribute.
- * @const {!Object<string, !Array<string>>}
+ * @private {!Object<string, !Array<string>>}
  */
 const BIND_ONLY_ATTRIBUTES = map({
   'AMP-CAROUSEL': ['slide'],
@@ -129,9 +129,6 @@ export class Bind {
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
-
-    /** @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.win_);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
@@ -232,32 +229,6 @@ export class Bind {
   }
 
   /**
-   * Rescans elements for bindings, evaluates corresponding expressions
-   * and applies the results to only those elements. Does _not_ mutate other
-   * elements in the document.
-   *
-   * Returned promise is resolved when rescan and evaluation complete.
-   * If it doesn't complete within `timeout` ms, the promise is rejected.
-   *
-   * @param {!Array<!Element>} elements
-   * @param {number} timeout Timeout in milliseconds.
-   * @return {!Promise}
-   */
-  rescanAndEvaluate(elements, timeout = 2000) {
-    const rescan = this.removeBindingsForNodes_(elements)
-        .then(() => this.addBindingsForNodes_(elements))
-        .then(numberOfBindingsAdded => {
-          // Don't reevaluate/apply if there are no bindings.
-          if (numberOfBindingsAdded > 0) {
-            return this.evaluate_().then(results =>
-                this.applyElements_(results, elements));
-          }
-        });
-    return this.timer_.timeoutPromise(timeout, rescan,
-        'Timed out waiting for amp-bind to process rendered template.');
-  }
-
-  /**
    * Scans the ampdoc for bindings and creates the expression evaluator.
    * @param {!Node} rootNode
    * @return {!Promise}
@@ -265,7 +236,7 @@ export class Bind {
    */
   initialize_(rootNode) {
     dev().fine(TAG, 'Scanning DOM for bindings...');
-    let promise = this.addBindingsForNodes_([rootNode]).then(() => {
+    let promise = this.addBindingsForNode_(rootNode).then(() => {
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
     });
@@ -304,94 +275,75 @@ export class Bind {
   }
 
   /**
-   * For each node in an array, scans it and its descendants for bindings.
-   * This function is not idempotent.
+   * Scans `node` and its descendants and adds bindings for nodes
+   * that contain bindable elements. This function is not idempotent.
    *
    * Returns a promise that resolves after bindings have been added.
    *
-   * @param {!Array<!Node>} nodes
-   * @return {!Promise<number>}
+   * @param {!Node} node
+   * @return {!Promise}
    * @private
    */
-  addBindingsForNodes_(nodes) {
-    // For each node, scan it for bindings and store them.
-    const scanPromises = nodes.map(node => {
-      // Limit number of total bindings (unless in local manual testing).
-      const limit = (getMode().localDev && !getMode().test)
-          ? Number.POSITIVE_INFINITY
-          : this.maxNumberOfBindings_ - this.numberOfBindings();
+  addBindingsForNode_(node) {
+    // Limit number of total bindings (unless in local manual testing).
+    const limit = (getMode().localDev && !getMode().test)
+        ? Number.POSITIVE_INFINITY
+        : this.maxNumberOfBindings_ - this.numberOfBindings();
+    return this.scanNode_(node, limit).then(results => {
+      const {
+        boundElements, bindings, expressionToElements, limitExceeded,
+      } = results;
 
-      return this.scanNode_(node, limit).then(results => {
-        const {
-          boundElements, bindings, expressionToElements, limitExceeded,
-        } = results;
+      this.boundElements_ = this.boundElements_.concat(boundElements);
+      Object.assign(this.expressionToElements_, expressionToElements);
 
-        this.boundElements_ = this.boundElements_.concat(boundElements);
-        Object.assign(this.expressionToElements_, expressionToElements);
+      dev().fine(TAG, `Scanned ${bindings.length} bindings from ` +
+          `${boundElements.length} elements.`);
 
-        dev().fine(TAG, `Scanned ${bindings.length} bindings from ` +
-            `${boundElements.length} elements.`);
+      if (limitExceeded) {
+        user().error(TAG, 'Maximum number of bindings reached ' +
+            `(${this.maxNumberOfBindings_}). Additional elements with ` +
+            'bindings will be ignored.');
+      }
 
-        if (limitExceeded) {
-          user().error(TAG, 'Maximum number of bindings reached ' +
-              `(${this.maxNumberOfBindings_}). Additional elements with ` +
-              'bindings will be ignored.');
-        }
-
-        return bindings;
-      });
-    });
-
-    // Once all scans are complete, combine the bindings and ask web-worker to
-    // evaluate expressions in a single RPC.
-    return Promise.all(scanPromises).then(results => {
-      // `results` is a 2D array where results[i] is an array of bindings.
-      // Flatten this into a 1D array of bindings via concat.
-      const bindings = Array.prototype.concat.apply([], results);
       if (bindings.length == 0) {
-        return bindings.length;
+        return {};
       } else {
         dev().fine(TAG, 'Asking worker to parse expressions...');
-        return this.ww_('bind.addBindings', [bindings]).then(parseErrors => {
-          // Report each parse error.
-          Object.keys(parseErrors).forEach(expressionString => {
-            const elements = this.expressionToElements_[expressionString];
-            if (elements.length > 0) {
-              const parseError = parseErrors[expressionString];
-              const userError = user().createError(
-                  `${TAG}: Expression compile error in "${expressionString}". `
-                  + parseError.message);
-              userError.stack = parseError.stack;
-              reportError(userError, elements[0]);
-            }
-          });
-          dev().fine(TAG, 'Finished parsing expressions with ' +
-              `${Object.keys(parseErrors).length} errors.`);
-          return bindings.length;
-        });
+        return this.ww_('bind.addBindings', [bindings]);
       }
+    }).then(parseErrors => {
+      // Report each parse error.
+      Object.keys(parseErrors).forEach(expressionString => {
+        const elements = this.expressionToElements_[expressionString];
+        if (elements.length > 0) {
+          const parseError = parseErrors[expressionString];
+          const userError = user().createError(
+              `${TAG}: Expression compilation error in "${expressionString}". `
+              + parseError.message);
+          userError.stack = parseError.stack;
+          reportError(userError, elements[0]);
+        }
+      });
+
+      dev().fine(TAG, 'Finished parsing expressions with ' +
+          `${Object.keys(parseErrors).length} errors.`);
     });
   }
 
   /**
-   * For each node in an array, removes all bindings for it and its descendants.
+   * Removes all bindings nodes with `node` as their parent.
    *
    * Returns a promise that resolves after bindings have been removed.
    *
-   * @param {!Array<!Node>} nodes
+   * @param {!Node} node
    * @return {!Promise}
    * @private
-   * @visibleForTesting
    */
-  removeBindingsForNodes_(nodes) {
-    // Eliminate bound elements that are descendants of `nodes`.
+  removeBindingsForNode_(node) {
+    // Eliminate bound elements that have node as an ancestor.
     filterSplice(this.boundElements_, boundElement => {
-      for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].contains(boundElement.element)) {
-          return false;
-        }
-      }
-      return true;
+      return !node.contains(boundElement.element);
     });
 
     // Eliminate elements from the expression to elements map that
@@ -401,12 +353,7 @@ export class Bind {
     for (const expression in this.expressionToElements_) {
       const elements = this.expressionToElements_[expression];
       filterSplice(elements, element => {
-        for (let i = 0; i < nodes.length; i++) {
-          if (nodes[i].contains(element)) {
-            return false;
-          }
-        }
-        return true;
+        return !node.contains(element);
       });
       if (elements.length == 0) {
         deletedExpressions.push(expression);
@@ -642,92 +589,64 @@ export class Bind {
   }
 
   /**
-   * Applies expression results to all elements in the document.
+   * Applies expression results to the DOM.
    * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
    * @param {boolean=} opt_isAmpStateMutation
-   * @return {!Promise}
    * @private
    */
   apply_(results, opt_isAmpStateMutation) {
-    const promises = this.boundElements_.map(boundElement => {
+    const applyPromises = [];
+    this.boundElements_.forEach(boundElement => {
+      const {element, boundProperties} = boundElement;
       // If this "apply" round is triggered by an <amp-state> mutation,
       // ignore updates to <amp-state> element to prevent update cycles.
-      if (opt_isAmpStateMutation
-          && boundElement.element.tagName == 'AMP-STATE') {
-        return Promise.resolve();
+      if (opt_isAmpStateMutation && element.tagName === 'AMP-STATE') {
+        return;
       }
-      return this.applyBoundElement_(results, boundElement);
-    });
-    return Promise.all(promises);
-  }
+      const updates = this.calculateUpdates_(boundProperties, results);
+      if (updates.length === 0) {
+        return;
+      }
+      const promise = this.resources_.mutateElement(element, () => {
+        const mutations = dict();
+        let width, height;
 
-  /**
-   * Applies expression results to only given elements and their descendants.
-   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
-   * @param {!Array<!Element>} elements
-   * @return {!Promise}
-   */
-  applyElements_(results, elements) {
-    const promises = [];
-    this.boundElements_.forEach(boundElement => {
-      elements.forEach(element => {
-        if (element.contains(boundElement.element)) {
-          promises.push(this.applyBoundElement_(results, boundElement));
+        updates.forEach(update => {
+          const {boundProperty, newValue} = update;
+          const mutation = this.applyBinding_(boundProperty, element, newValue);
+          if (mutation) {
+            mutations[mutation.name] = mutation.value;
+            const property = boundProperty.property;
+            if (property == 'width') {
+              width = isFiniteNumber(newValue) ? Number(newValue) : width;
+            } else if (property == 'height') {
+              height = isFiniteNumber(newValue) ? Number(newValue) : height;
+            }
+          }
+        });
+
+        if (width !== undefined || height !== undefined) {
+          // TODO(choumx): Add new Resources method for adding change-size
+          // request without scheduling vsync pass since `mutateElement()`
+          // will schedule a pass after a short delay anyways.
+          this.resources_./*OK*/changeSize(element, height, width);
         }
-      });
-    });
-    return Promise.all(promises);
-  }
 
-  /**
-   * Applies expression results to a single BoundElementDef.
-   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
-   * @param {BoundElementDef} boundElement
-   * @return {!Promise}
-   */
-  applyBoundElement_(results, boundElement) {
-    const {element, boundProperties} = boundElement;
-    const updates = this.calculateUpdates_(boundProperties, results);
-    if (updates.length === 0) {
-      return Promise.resolve();
-    }
-    return this.resources_.mutateElement(element, () => {
-      const mutations = dict();
-      let width, height;
-
-      updates.forEach(update => {
-        const {boundProperty, newValue} = update;
-        const mutation = this.applyBinding_(boundProperty, element, newValue);
-        if (mutation) {
-          mutations[mutation.name] = mutation.value;
-          const property = boundProperty.property;
-          if (property == 'width') {
-            width = isFiniteNumber(newValue) ? Number(newValue) : width;
-          } else if (property == 'height') {
-            height = isFiniteNumber(newValue) ? Number(newValue) : height;
+        if (typeof element.mutatedAttributesCallback === 'function') {
+          // Prevent an exception in the callback from interrupting execution,
+          // instead wrap in user error and give a helpful message.
+          try {
+            element.mutatedAttributesCallback(mutations);
+          } catch (e) {
+            const error = user().createError(`${TAG}: Applying expression ` +
+                `results (${JSON.stringify(mutations)}) failed with error`, e);
+            reportError(error, element);
           }
         }
       });
-
-      if (width !== undefined || height !== undefined) {
-        // TODO(choumx): Add new Resources method for adding change-size
-        // request without scheduling vsync pass since `mutateElement()`
-        // will schedule a pass after a short delay anyways.
-        this.resources_./*OK*/changeSize(element, height, width);
-      }
-
-      if (typeof element.mutatedAttributesCallback === 'function') {
-        // Prevent an exception in the callback from interrupting execution,
-        // instead wrap in user error and give a helpful message.
-        try {
-          element.mutatedAttributesCallback(mutations);
-        } catch (e) {
-          const error = user().createError(`${TAG}: Applying expression ` +
-              `results (${JSON.stringify(mutations)}) failed with error`, e);
-          reportError(error, element);
-        }
-      }
+      applyPromises.push(promise);
     });
+    return Promise.all(applyPromises);
   }
 
   /**
@@ -903,8 +822,8 @@ export class Bind {
    */
   onDomUpdate_(event) {
     const templateContainer = dev().assertElement(event.target);
-    this.removeBindingsForNodes_([templateContainer]).then(() => {
-      return this.addBindingsForNodes_([templateContainer]);
+    this.removeBindingsForNode_(templateContainer).then(() => {
+      return this.addBindingsForNode_(templateContainer);
     }).then(() => {
       this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
     });

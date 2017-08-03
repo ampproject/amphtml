@@ -237,10 +237,10 @@ describe('Bind', function() {
       expect(bind.numberOfBindings()).to.equal(0);
       return onBindReady(env, bind).then(() => {
         expect(bind.numberOfBindings()).to.equal(5);
-        return bind.removeBindingsForNodes_([container]);
+        return bind.removeBindingsForNode_(container);
       }).then(() => {
         expect(bind.numberOfBindings()).to.equal(0);
-        return bind.addBindingsForNodes_([container]);
+        return bind.addBindingsForNode_(container);
       }).then(() => {
         expect(bind.numberOfBindings()).to.equal(5);
       });
