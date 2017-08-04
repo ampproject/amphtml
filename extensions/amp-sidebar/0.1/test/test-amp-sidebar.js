@@ -125,14 +125,14 @@ describes.realWin('amp-sidebar 0.1 version', {
       });
 
       it('should replace text to screen reader \
-       button in data-close-button-aria-label', () => {
+      button in data-close-button-aria-label', () => {
         return getAmpSidebar({'closeText':
-           'data-close-button-aria-label'}).then(obj => {
-             const sidebarElement = obj.ampSidebar;
-             const closeButton = sidebarElement.lastElementChild;
-             expect(closeButton.textContent)
-                 .to.equal('data-close-button-aria-label');
-           });
+          'data-close-button-aria-label'}).then(obj => {
+            const sidebarElement = obj.ampSidebar;
+            const closeButton = sidebarElement.lastElementChild;
+            expect(closeButton.textContent)
+                .to.equal('data-close-button-aria-label');
+          });
       });
     }
 
@@ -180,7 +180,7 @@ describes.realWin('amp-sidebar 0.1 version', {
     });
 
     it('should create an invisible close \
-     button for screen readers only', () => {
+    button for screen readers only', () => {
       return getAmpSidebar().then(obj => {
         const sidebarElement = obj.ampSidebar;
         const impl = sidebarElement.implementation_;
@@ -238,7 +238,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(historyPopSpy).to.have.not.been.called;
         expect(impl.historyId_).to.not.equal('-1');
 
-         // second call to open_() should be a no-op and not increase call counts.
+        // second call to open_() should be a no-op and not increase call counts.
         impl.open_();
         expect(impl.scheduleLayout).to.be.calledOnce;
         expect(historyPushSpy).to.be.calledOnce;
@@ -288,7 +288,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(historyPopSpy).to.be.calledOnce;
         expect(impl.historyId_).to.equal(-1);
 
-         // second call to close_() should be a no-op and not increase call counts.
+        // second call to close_() should be a no-op and not increase call counts.
         impl.close_();
         expect(impl.schedulePause).to.be.calledOnce;
         expect(historyPopSpy).to.be.calledOnce;
@@ -346,7 +346,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         const eventObj = document.createEventObject ?
-             document.createEventObject() : document.createEvent('Events');
+            document.createEventObject() : document.createEvent('Events');
         if (eventObj.initEvent) {
           eventObj.initEvent('keydown', true, true);
         }
@@ -354,7 +354,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         eventObj.which = KeyCodes.ESCAPE;
         const el = iframe.doc.documentElement;
         el.dispatchEvent ?
-             el.dispatchEvent(eventObj) : el.fireEvent('onkeydown', eventObj);
+            el.dispatchEvent(eventObj) : el.fireEvent('onkeydown', eventObj);
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
         expect(sidebarElement.style.display).to.equal('none');
@@ -433,11 +433,11 @@ describes.realWin('amp-sidebar 0.1 version', {
           callback();
         });
         const compensateIosBottombarSpy =
-             sandbox.spy(impl, 'compensateIosBottombar_');
+            sandbox.spy(impl, 'compensateIosBottombar_');
         const initalChildrenCount = sidebarElement.children.length;
         impl.open_();
         expect(compensateIosBottombarSpy).to.be.calledOnce;
-         // 10 lis + one top padding element inserted
+        // 10 lis + one top padding element inserted
         expect(sidebarElement.children.length)
             .to.equal(initalChildrenCount + 1);
       });
@@ -477,8 +477,8 @@ describes.realWin('amp-sidebar 0.1 version', {
           };
         });
         anchor.dispatchEvent ?
-             anchor.dispatchEvent(eventObj) :
-             anchor.fireEvent('onkeydown', eventObj);
+            anchor.dispatchEvent(eventObj) :
+            anchor.fireEvent('onkeydown', eventObj);
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
         expect(sidebarElement.style.display).to.equal('none');
@@ -507,7 +507,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         const eventObj = document.createEventObject ?
-             document.createEventObject() : document.createEvent('Events');
+            document.createEventObject() : document.createEvent('Events');
         if (eventObj.initEvent) {
           eventObj.initEvent('click', true, true);
         }
@@ -515,7 +515,7 @@ describes.realWin('amp-sidebar 0.1 version', {
           return {
             win: {
               location: {
-                 // Mocking navigating from example.com -> localhost:9876
+                // Mocking navigating from example.com -> localhost:9876
                 href: 'http://example.com',
               },
             },
@@ -559,8 +559,8 @@ describes.realWin('amp-sidebar 0.1 version', {
           return {
             win: {
               location: {
-                 // Mocking navigating from
-                 // /context.html?old=context -> /context.html
+                // Mocking navigating from
+                // /context.html?old=context -> /context.html
                 href: 'http://localhost:9876/context.html?old=context',
               },
             },
@@ -595,13 +595,13 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         const eventObj = document.createEventObject ?
-             document.createEventObject() : document.createEvent('Events');
+            document.createEventObject() : document.createEvent('Events');
         if (eventObj.initEvent) {
           eventObj.initEvent('click', true, true);
         }
         li.dispatchEvent ?
-             li.dispatchEvent(eventObj) :
-             li.fireEvent('onkeydown', eventObj);
+            li.dispatchEvent(eventObj) :
+            li.fireEvent('onkeydown', eventObj);
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         expect(sidebarElement.style.display).to.equal('');

@@ -64,7 +64,10 @@ export class AmpSidebar extends AMP.BaseElement {
     const platform = Services.platformFor(this.win);
 
     /** @private @const {boolean} */
-    this.isIosSafari_ = platform.isIos() && platform.isSafari();
+    this.isIos_ = platform.isIos();
+
+    /** @private @const {boolean} */
+    this.isSafari_ = platform.isSafari();
 
     /** @private {number} */
     this.historyId_ = -1;
@@ -117,7 +120,7 @@ export class AmpSidebar extends AMP.BaseElement {
       });
     }
 
-    if (this.isIosSafari_) {
+    if (this.isIos_ && Safari_) {
       this.fixIosElasticScrollLeak_();
     }
 
@@ -182,16 +185,16 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /** @override */
+  activate() {
+    this.open_();
+  }
+
+  /** @override */
   onLayoutMeasure() {
     // Check our toolbars for changes
     this.toolbars_.forEach(toolbar => {
       toolbar.onLayoutChange(() => this.onToolbarOpen_());
     });
-  }
-
-  /** @override */
-  activate() {
-    this.open_();
   }
 
   /**
@@ -234,7 +237,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.enterOverlayMode();
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
-      if (this.isIosSafari_) {
+      if (this.isIos_ && this.isSafari_) {
         this.compensateIosBottombar_();
       }
       this.element./*OK*/scrollTop = 1;
