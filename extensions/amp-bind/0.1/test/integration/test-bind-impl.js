@@ -64,7 +64,8 @@ function onBindReady(env, bind) {
 function onBindReadyAndSetState(env, bind, state, opt_isAmpStateMutation) {
   return bind.initializePromiseForTesting().then(() => {
     return bind.setState(
-        state, /* opt_skipEval */ undefined, opt_isAmpStateMutation);
+        state, /* opt_skipEva
+l */ undefined, opt_isAmpStateMutation);
   }).then(() => {
     env.flushVsync();
     return bind.setStatePromiseForTesting();
@@ -109,6 +110,7 @@ describe.configure().skipSauceLabs().run('Bind', function() {
       ampdoc: 'fie',
       runtimeOn: false,
     },
+    xhrMock: false,
   }, env => {
     let bind;
     let container;
@@ -150,6 +152,7 @@ describe.configure().skipSauceLabs().run('Bind', function() {
         });
       });
 
+
       it('should not be able to access variables from other windows', () => {
         const element =
             createElement(env, container, '[text]="foo + bar"');
@@ -168,11 +171,13 @@ describe.configure().skipSauceLabs().run('Bind', function() {
     });
   }); // in FIE
 
+
   describes.realWin('in shadow ampdoc', {
     amp: {
       ampdoc: 'shadow',
       runtimeOn: false,
     },
+    xhrMock: false,
   }, env => {
     let bind;
     let container;
@@ -199,6 +204,7 @@ describe.configure().skipSauceLabs().run('Bind', function() {
       ampdoc: 'single',
       runtimeOn: false,
     },
+    xhrMock: false,
   }, env => {
     let bind;
     let container;
