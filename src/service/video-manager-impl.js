@@ -549,7 +549,7 @@ class VideoEntry {
 
     // Media Session API Variables
 
-    /** @private {!../video-interface.VideoMetaDef} */
+    /** @private {!../mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
 
     listenOncePromise(element, VideoEvents.LOAD)
@@ -593,7 +593,7 @@ class VideoEntry {
       };
       // Update the media session
       setMediaSession(
-          this.ampdoc_,
+          this.ampdoc_.win,
           this.metadata_,
           playHandler,
           pauseHandler
@@ -665,14 +665,18 @@ class VideoEntry {
     }
 
     if (this.video.getMetadata()) {
-      const mapped = map(this.video.getMetadata());
-      this.metadata_ = /** @type {!../video-interface.VideoMetaDef} */ (mapped);
+      this.metadata_ = map(
+          /** @type {!../mediasession-helper.MetadataDef} */
+          (this.video.getMetadata())
+      );
     }
 
+    const doc = this.ampdoc_.win.document;
+
     if (!this.metadata_.artwork || this.metadata_.artwork.length == 0) {
-      const posterUrl = parseSchemaImage(this.ampdoc_)
-                        || parseOgImage(this.ampdoc_)
-                        || parseFavicon(this.ampdoc_);
+      const posterUrl = parseSchemaImage(doc)
+                        || parseOgImage(doc)
+                        || parseFavicon(doc);
 
       if (posterUrl) {
         this.metadata_.artwork = [{
@@ -686,7 +690,7 @@ class VideoEntry {
                     || this.video.element.getAttribute('aria-label')
                     || this.internalElement_.getAttribute('title')
                     || this.internalElement_.getAttribute('aria-label')
-                    || this.ampdoc_.win.document.title;
+                    || doc.title;
       if (title) {
         this.metadata_.title = title;
       }

@@ -108,6 +108,39 @@ The `muted` attribute is deprecated and no longer has any effect. The `autoplay`
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
+
+## Media Session API Attributes
+
+`amp-video` implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session) enabling developers to specify more information about the video file that is playing to be displayed in the notification center of user's devices (along with play/pause controls).
+
+##### poster
+
+URL to a PNG/JPG/ICO image serving as the video's artwork. If not present, the MediaSessionAPI Helper will use either the `image` field in the `schema.org` definition, the `og:image` or the website's `favicon`.
+
+##### artist
+
+(string) indicates the author of the video file
+
+##### album
+
+(string) indicates the album/collection the video was taken from
+
+##### title
+
+(string) part of the [common attributes](https://www.ampproject.org/docs/reference/common_attributes), doubles as the video's name/title displayed in the MediaSession notification. If not provided, the MediaSessionAPI Helper will use either the `aria-label` attribute or fall back to the page's title.
+
+Example:
+
+```html
+<amp-audio width="400" height="300"
+  src="https://yourhost.com/audios/myaudio.mp3"
+  poster="https://yourhost.com/posters/poster.png"
+  title="Awesome music" artist="Awesome singer"
+  album="Amazing album">
+  <source type="audio/mpeg" src="foo.mp3">
+</amp-audio>
+```
+
 ## Click-to-Play overlay
 
 Providing a click-to-play overlay is a common UX feature for video players on the web.  For example, you could display a custom play icon that the user can click, as well as include the title of the video, different sized poster images, and so on.  Because the `amp-video` component supports the standard `play` AMP action, you can easily implement click-to-play.

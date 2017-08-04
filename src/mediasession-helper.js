@@ -16,7 +16,17 @@
 
 import {tryParseJson} from './json';
 
-/** @const {./video-interface.VideoMetaDef} Dummy metadata used to fix a bug */
+/**
+ * @typedef {{
+ *   artwork: Array,
+ *   title: string,
+ *   album: string,
+ *   artist: string,
+ * }}
+ */
+export let MetadataDef;
+
+/** @const {MetadataDef} Dummy metadata used to fix a bug */
 export const EMPTY_METADATA = {
   'title': '',
   'artist': '',
@@ -28,16 +38,15 @@ export const EMPTY_METADATA = {
 
 /**
  * Updates the Media Session API's metadata
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!./video-interface.VideoMetaDef} metadata
+ * @param {!Window} win
+ * @param {!MetadataDef} metadata
  * @param {function()=} playHandler
  * @param {function()=} pauseHandler
  */
-export function setMediaSession(ampdoc,
+export function setMediaSession(win,
                                 metadata,
                                 playHandler,
                                 pauseHandler) {
-  const win = ampdoc.win;
   const navigator = win.navigator;
   if ('mediaSession' in navigator && win.MediaMetadata) {
     // Clear mediaSession (required to fix a bug when switching between two
@@ -57,11 +66,10 @@ export function setMediaSession(ampdoc,
 /**
  * Parses the schema.org json-ld formatted meta-data, looks for the page's
  * featured image and returns it
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Document} doc
  * @return {string|undefined}
  */
-export function parseSchemaImage(ampdoc) {
-  const doc = ampdoc.win.document;
+export function parseSchemaImage(doc) {
   const schema = doc.querySelector('script[type="application/ld+json"]');
   if (!schema) {
     // No schema element found
@@ -94,11 +102,10 @@ export function parseSchemaImage(ampdoc) {
 
 /**
  * Parses the og:image if it exists and returns it
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Document} doc
  * @return {string|undefined}
  */
-export function parseOgImage(ampdoc) {
-  const doc = ampdoc.win.document;
+export function parseOgImage(doc) {
   const metaTag = doc.querySelector('meta[property="og:image"]');
   if (metaTag) {
     return metaTag.getAttribute('content');
@@ -109,11 +116,10 @@ export function parseOgImage(ampdoc) {
 
 /**
  * Parses the website's Favicon and returns it
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Document} doc
  * @return {string|undefined}
  */
-export function parseFavicon(ampdoc) {
-  const doc = ampdoc.win.document;
+export function parseFavicon(doc) {
   const linkTag = doc.querySelector('link[rel="shortcut icon"]')
                   || doc.querySelector('link[rel="icon"]');
   if (linkTag) {
