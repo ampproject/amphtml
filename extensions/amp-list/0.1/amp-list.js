@@ -97,6 +97,8 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   mutatedAttributesCallback(mutations) {
     const src = mutations['src'];
+    const state = mutations['state'];
+
     if (src !== undefined) {
       const typeOfSrc = typeof src;
       if (typeOfSrc === 'string') {
@@ -107,10 +109,7 @@ export class AmpList extends AMP.BaseElement {
       } else {
         user().error(TAG, 'Unexpected "src" type: ' + src);
       }
-    }
-
-    const state = mutations['state'];
-    if (state !== undefined) {
+    } else if (state !== undefined) {
       const items = isArray(state) ? state : [state];
       this.renderItems_(items);
       user().warn(TAG, '[state] is deprecated, please use [src] instead.');
