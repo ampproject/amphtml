@@ -680,6 +680,8 @@ describe('Logging', () => {
     let sandbox;
     let iframe;
     let element;
+    let element1;
+    let element2;
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
@@ -702,6 +704,15 @@ describe('Logging', () => {
       element = document.createElement('embed');
       iframe.contentWindow.document.body.appendChild(element);
       expect(user(element).suffix_).to.equal(USER_ERROR_EMBED_SENTINEL);
+    });
+
+    it('should not create extra identical logs', () => {
+      element1 = document.createElement('embed_1');
+      element2 = document.createElement('embed_2');
+      iframe.contentWindow.document.body.appendChild(element1);
+      iframe.contentWindow.document.body.appendChild(element2);
+      expect(user()).to.equal(user(this.element));
+      expect(user(element1)).to.equal(user(element2));
     });
   });
 });
