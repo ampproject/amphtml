@@ -25,10 +25,11 @@ import {
 } from '../../src/service/video-manager-impl';
 import {
   runVideoPlayerIntegrationTests,
-} from '../integration/test-video-players-helper';
+} from './test-video-players-helper';
 import * as sinon from 'sinon';
 
-describe('Fake Video Player Integration Tests', () => {
+describe.configure().skipSauceLabs().run(`Fake Video Player
+    Integration Tests`, () => {
   // We run the video player integration tests on a fake video player as part
   // of functional testing. Same tests run on real video players such as
   // `amp-video` and `amp-youtube` as part of integration testing.
@@ -39,210 +40,215 @@ describe('Fake Video Player Integration Tests', () => {
   });
 });
 
-describes.fakeWin('VideoManager', {
-  amp: {
-    ampdoc: 'single',
-  },
-}, env => {
-  let sandbox;
-  let videoManager;
-  let klass;
-  let video;
-  let impl;
+describe.configure().skipSauceLabs().run('VideoManager', function() {
+  describes.fakeWin('VideoManager', {
+    amp: {
+      ampdoc: 'single',
+    },
+  }, env => {
+    let sandbox;
+    let videoManager;
+    let klass;
+    let video;
+    let impl;
 
-  it('should register common actions', () => {
-    const spy = sandbox.spy(impl, 'registerAction');
-    videoManager.register(impl);
+    it('should register common actions', () => {
+      const spy = sandbox.spy(impl, 'registerAction');
+      videoManager.register(impl);
 
-    expect(spy).to.have.been.calledWith('play');
-    expect(spy).to.have.been.calledWith('pause');
-    expect(spy).to.have.been.calledWith('mute');
-    expect(spy).to.have.been.calledWith('unmute');
-  });
-
-  it('should be paused if autoplay is not set', () => {
-
-    videoManager.register(impl);
-    const entry = videoManager.getEntryForVideo_(impl);
-    entry.isVisible_ = false;
-
-    const curState = videoManager.getPlayingState(impl);
-    expect(curState).to.equal(PlayingStates.PAUSED);
-  });
-
-
-  it('autoplay - should be PLAYING_MANUAL if user interacted', () => {
-
-    video.setAttribute('autoplay', '');
-
-    videoManager.register(impl);
-
-    const entry = videoManager.getEntryForVideo_(impl);
-    entry.userInteractedWithAutoPlay_ = true;
-    entry.isVisible_ = true;
-    entry.loaded_ = true;
-
-    impl.play();
-    return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-      const curState = videoManager.getPlayingState(impl);
-      expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
-    });
-  });
-
-
-  it('autoplay - should be PLAYING_AUTO if user did not interact', () => {
-
-    video.setAttribute('autoplay', '');
-    videoManager.register(impl);
-
-    const visibilityStub = sandbox.stub(
-        Services.viewerForDoc(env.ampdoc), 'isVisible');
-    visibilityStub.onFirstCall().returns(true);
-
-    const entry = videoManager.getEntryForVideo_(impl);
-    entry.isVisible_ = true;
-    entry.loaded_ = true;
-    entry.videoVisibilityChanged_();
-
-    return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-      const curState = videoManager.getPlayingState(impl);
-      expect(curState).to.equal(PlayingStates.PLAYING_AUTO);
-
+      expect(spy).to.have.been.calledWith('play');
+      expect(spy).to.have.been.calledWith('pause');
+      expect(spy).to.have.been.calledWith('mute');
+      expect(spy).to.have.been.calledWith('unmute');
     });
 
-  });
+    it('should be paused if autoplay is not set', () => {
 
-  it('autoplay - autoplay not supported should behave like manual play', () => {
+      videoManager.register(impl);
+      const entry = videoManager.getEntryForVideo_(impl);
+      entry.isVisible_ = false;
 
-    video.setAttribute('autoplay', '');
-    videoManager.register(impl);
-
-    const visibilityStub = sandbox.stub(
-        Services.viewerForDoc(env.ampdoc), 'isVisible');
-    visibilityStub.onFirstCall().returns(true);
-
-    const entry = videoManager.getEntryForVideo_(impl);
-
-    const supportsAutoplayStub = sandbox.stub(entry, 'boundSupportsAutoplay_');
-    supportsAutoplayStub.returns(Promise.reject());
-
-    entry.isVisible_ = true;
-    entry.loaded_ = true;
-
-    entry.videoVisibilityChanged_();
-
-    return new Promise(function(resolve, reject) {
-      listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-        reject();
-      });
-      setTimeout(function() {
-        const curState = videoManager.getPlayingState(impl);
-        expect(curState).to.equal(PlayingStates.PAUSED);
-        resolve('Video did not autoplay as expected');
-      }, 1000);
-    });
-  });
-
-  it('autoplay - should be PAUSED if pause after playing', () => {
-
-    video.setAttribute('autoplay', '');
-
-    videoManager.register(impl);
-
-    impl.play();
-
-    const entry = videoManager.getEntryForVideo_(impl);
-    entry.userInteractedWithAutoPlay_ = true;
-    entry.isVisible_ = false;
-
-    impl.pause();
-    return listenOncePromise(video, VideoEvents.PAUSE).then(() => {
       const curState = videoManager.getPlayingState(impl);
       expect(curState).to.equal(PlayingStates.PAUSED);
     });
-  });
-
-  it('autoplay - initially there should be no user interaction', () => {
-
-    video.setAttribute('autoplay', '');
-
-    videoManager.register(impl);
-    const entry = videoManager.getEntryForVideo_(impl);
-    entry.isVisible_ = false;
-
-    const userInteracted = videoManager.userInteractedWithAutoPlay(impl);
-    expect(userInteracted).to.be.false;
-  });
 
 
-  it('autoplay - PAUSED if autoplaying and video is outside of view', () => {
+    it('autoplay - should be PLAYING_MANUAL if user interacted', () => {
 
-    video.setAttribute('autoplay', '');
+      video.setAttribute('autoplay', '');
 
-    videoManager.register(impl);
+      videoManager.register(impl);
 
-    const visibilityStub = sandbox.stub(
-        Services.viewerForDoc(env.ampdoc), 'isVisible');
-    visibilityStub.onFirstCall().returns(true);
+      const entry = videoManager.getEntryForVideo_(impl);
+      entry.userInteractedWithAutoPlay_ = true;
+      entry.isVisible_ = true;
+      entry.loaded_ = true;
 
-    const entry = videoManager.getEntryForVideo_(impl);
-    entry.isVisible_ = true;
-    entry.loaded_ = true;
-    entry.videoVisibilityChanged_();
-
-    entry.isVisible_ = false;
-    entry.videoVisibilityChanged_();
-    const curState = videoManager.getPlayingState(impl);
-    expect(curState).to.equal(PlayingStates.PAUSED);
-  });
+      impl.play();
+      return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+        const curState = videoManager.getPlayingState(impl);
+        expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+      });
+    });
 
 
-  it(`no autoplay - should be paused if the
-    user pressed pause after playing`, () => {
+    it('autoplay - should be PLAYING_AUTO if user did not interact', () => {
 
-    videoManager.register(impl);
-    const entry = videoManager.getEntryForVideo_(impl);
-    entry.isVisible_ = false;
+      video.setAttribute('autoplay', '');
+      videoManager.register(impl);
 
-    impl.play();
-    return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+      const visibilityStub = sandbox.stub(
+          Services.viewerForDoc(env.ampdoc), 'isVisible');
+      visibilityStub.onFirstCall().returns(true);
+
+      const entry = videoManager.getEntryForVideo_(impl);
+      entry.isVisible_ = true;
+      entry.loaded_ = true;
+      entry.videoVisibilityChanged_();
+
+      return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+        const curState = videoManager.getPlayingState(impl);
+        expect(curState).to.equal(PlayingStates.PLAYING_AUTO);
+
+      });
+
+    });
+
+    it(`autoplay - autoplay not supported should behave
+        like manual play`, () => {
+
+      video.setAttribute('autoplay', '');
+      videoManager.register(impl);
+
+      const visibilityStub = sandbox.stub(
+          Services.viewerForDoc(env.ampdoc), 'isVisible');
+      visibilityStub.onFirstCall().returns(true);
+
+      const entry = videoManager.getEntryForVideo_(impl);
+
+      const supportsAutoplayStub =
+          sandbox.stub(entry, 'boundSupportsAutoplay_');
+      supportsAutoplayStub.returns(Promise.reject());
+
+      entry.isVisible_ = true;
+      entry.loaded_ = true;
+
+      entry.videoVisibilityChanged_();
+
+      return new Promise(function(resolve, reject) {
+        listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+          reject();
+        });
+        setTimeout(function() {
+          const curState = videoManager.getPlayingState(impl);
+          expect(curState).to.equal(PlayingStates.PAUSED);
+          resolve('Video did not autoplay as expected');
+        }, 1000);
+      });
+    });
+
+    it('autoplay - should be PAUSED if pause after playing', () => {
+
+      video.setAttribute('autoplay', '');
+
+      videoManager.register(impl);
+
+      impl.play();
+
+      const entry = videoManager.getEntryForVideo_(impl);
+      entry.userInteractedWithAutoPlay_ = true;
+      entry.isVisible_ = false;
+
       impl.pause();
-      listenOncePromise(video, VideoEvents.PAUSE).then(() => {
+      return listenOncePromise(video, VideoEvents.PAUSE).then(() => {
         const curState = videoManager.getPlayingState(impl);
         expect(curState).to.equal(PlayingStates.PAUSED);
       });
     });
-  });
 
-  it('no autoplay - should be playing manual whenever video is playing', () => {
+    it('autoplay - initially there should be no user interaction', () => {
 
-    videoManager.register(impl);
-    const entry = videoManager.getEntryForVideo_(impl);
-    entry.isVisible_ = false;
+      video.setAttribute('autoplay', '');
 
-    impl.play();
-    return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-      const curState = videoManager.getPlayingState(impl);
-      expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+      videoManager.register(impl);
+      const entry = videoManager.getEntryForVideo_(impl);
+      entry.isVisible_ = false;
+
+      const userInteracted = videoManager.userInteractedWithAutoPlay(impl);
+      expect(userInteracted).to.be.false;
     });
-  });
 
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    klass = createFakeVideoPlayerClass(env.win);
-    video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-    impl = video.implementation_;
-    installVideoManagerForDoc(env.ampdoc);
-    videoManager = Services.videoManagerForDoc(env.ampdoc);
-  });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
+    it('autoplay - PAUSED if autoplaying and video is outside of view', () => {
 
+      video.setAttribute('autoplay', '');
+
+      videoManager.register(impl);
+
+      const visibilityStub = sandbox.stub(
+          Services.viewerForDoc(env.ampdoc), 'isVisible');
+      visibilityStub.onFirstCall().returns(true);
+
+      const entry = videoManager.getEntryForVideo_(impl);
+      entry.isVisible_ = true;
+      entry.loaded_ = true;
+      entry.videoVisibilityChanged_();
+
+      entry.isVisible_ = false;
+      entry.videoVisibilityChanged_();
+      const curState = videoManager.getPlayingState(impl);
+      expect(curState).to.equal(PlayingStates.PAUSED);
+    });
+
+
+    it(`no autoplay - should be paused if the
+        user pressed pause after playing`, () => {
+
+      videoManager.register(impl);
+      const entry = videoManager.getEntryForVideo_(impl);
+      entry.isVisible_ = false;
+
+      impl.play();
+      return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+        impl.pause();
+        listenOncePromise(video, VideoEvents.PAUSE).then(() => {
+          const curState = videoManager.getPlayingState(impl);
+          expect(curState).to.equal(PlayingStates.PAUSED);
+        });
+      });
+    });
+
+    it(`no autoplay - should be playing manual
+        whenever video is playing`, () => {
+
+      videoManager.register(impl);
+      const entry = videoManager.getEntryForVideo_(impl);
+      entry.isVisible_ = false;
+
+      impl.play();
+      return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+        const curState = videoManager.getPlayingState(impl);
+        expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+      });
+    });
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      klass = createFakeVideoPlayerClass(env.win);
+      video = env.createAmpElement('amp-test-fake-videoplayer', klass);
+      impl = video.implementation_;
+      installVideoManagerForDoc(env.ampdoc);
+      videoManager = Services.videoManagerForDoc(env.ampdoc);
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+  });
 });
 
-describe('Supports Autoplay', () => {
+describe.configure().skipSauceLabs().run('Supports Autoplay', () => {
   let sandbox;
 
   let win;
