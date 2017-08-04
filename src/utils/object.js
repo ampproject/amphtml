@@ -81,63 +81,51 @@ export function ownProperty(obj, key) {
 }
 
 /**
+ * Deep merges source into target.
+ *
  * @param {!Object} target
  * @param {!Object} source
- * @param {number} maxDepth The maximum depth for deep merge, beyond which
- *    Object.assign will be used.
+ * @param {number} depth The maximum merge depth. If exceeded, Object.assign
+ *                       will be used instead.
  * @return {!Object}
- * @throws {Error} if `source` contains a circular reference
+ * @throws {Error} If source contains a circular reference.
+ * @note Only nested objects are deep-merged, primitives and arrays are not.
  */
-function deepMerge_(target, source, maxDepth) {
-  // Keep track of seen objects to prevent infinite loops on objects with
-  // recursive references.
+export function deepMerge(target, source, depth = 10) {
+  // Keep track of seen objects to detect recursive references.
   const seen = [];
-  // Traversal must be breadth-first so any object encountered for the first
-  // time does not have a reference  at a shallower depth. Otherwise, a
-  // circular reference found at depth == maxDepth could cause an unexpected
-  // change at a shallower depth if the same object exists at a shallower depth.
-  const queue = [{target, source, depth: 0}];
+
+  /** @type {!Array<{t: !Object, s: !Object, d: number}>} */
+  const queue = [];
+  queue.push({t: target, s: source, d: 0});
+
+  // BFS to ensure objects don't have recursive references at shallower depths.
   while (queue.length > 0) {
-    const {target, source, depth} = queue.shift();
-    if (seen.includes(source)) {
-      throw new Error('Source object contains circular references');
+    const {t, s, d} = queue.shift();
+    if (seen.includes(s)) {
+      throw new Error('Source object has a circular reference.');
     }
-    seen.push(source);
-    if (target === source) {
+    seen.push(s);
+    if (t === s) {
       continue;
     }
-    if (depth > maxDepth) {
-      Object.assign(target, source);
+    if (d > depth) {
+      Object.assign(t, s);
       continue;
     }
-    Object.keys(source).forEach(key => {
-      const newValue = source[key];
-      // Perform a deep merge IFF both a and b have the same property and
-      // the properties on both a and b are non-null plain objects.
-      if (hasOwn(target, key)) {
-        const oldValue = target[key];
+    Object.keys(s).forEach(key => {
+      const newValue = s[key];
+      // Perform a deep merge IFF both target and source have the same key
+      // whose corresponding values are objects.
+      if (hasOwn(t, key)) {
+        const oldValue = t[key];
         if (isObject(newValue) && isObject(oldValue)) {
-          queue.push({target: oldValue, source: newValue, depth: depth + 1});
+          queue.push({t: oldValue, s: newValue, d: d + 1});
           return;
         }
       }
-      target[key] = newValue;
+      t[key] = newValue;
     });
   }
   return target;
-}
-
-/**
- * Deep merge object b into object a. Both a and b should only contain
- * primitives, arrays, and plain objects. For any conflicts, object b wins.
- * Arrays are replaced, not merged. Plain objects are recursively merged.
- * @param {!Object} target
- * @param {!Object} source
- * @param {number=} opt_maxDepth The maximum depth for deep merge,
- *     beyond which Object.assign will be used.
- * @return {!Object}
- * @throws {Error} if `source` contains a circular reference
- */
-export function deepMerge(target, source, opt_maxDepth) {
-  return deepMerge_(target, source, opt_maxDepth || Number.POSITIVE_INFINITY);
 }
