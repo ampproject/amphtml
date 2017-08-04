@@ -855,8 +855,7 @@ var requiredTerms = {
  */
 function isInTestFolder(path) {
   var dirs = path.split('/');
-  var folder = dirs[dirs.length - 2];
-  return path.startsWith('test/') || folder == 'test';
+  return dirs.indexOf('test') >= 0;
 }
 
 function stripComments(contents) {
