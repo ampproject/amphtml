@@ -108,7 +108,8 @@ function getAdTypes() {
 /**
  * Run tests.
  */
-gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
+gulp.task('test', 'Runs tests',
+    argv.nobuild ? [] : (argv.unit ? ['css'] : ['build']), function(done) {
   if (!argv.integration && process.env.AMPSAUCE_REPO) {
     console./*OK*/info('Deactivated for ampsauce repo')
   }

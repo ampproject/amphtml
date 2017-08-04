@@ -38,15 +38,13 @@ env:
     - NPM_CONFIG_PROGRESS="false"
 matrix:
   include:
-    - env: BUILD_SHARD="pre_build_checks_and_unit_tests"
+    - env: BUILD_SHARD="unit_tests"
+    - env: BUILD_SHARD="integration_tests"
       before_script:
         - pip install --user protobuf
         - gem install percy-capybara phantomjs poltergeist
         # Poltergeist requires an absolute path to find phantomjs. See #10305.
         - export PATH="`pwd`/node_modules/.bin:$PATH"
-    - env: BUILD_SHARD="integration_tests"
-      before_script:
-        - pip install --user protobuf
       addons:
         sauce_connect:
           username: "amphtml"
