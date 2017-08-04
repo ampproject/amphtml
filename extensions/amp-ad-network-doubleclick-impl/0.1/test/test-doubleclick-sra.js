@@ -61,9 +61,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
     env.win.AMP_MODE.test = true;
   });
 
-  function createAndAppendElementWithAttributes(type, attributes, domElement) {
-    const element = createElementWithAttributes(doc, type, attributes);
-    domElement.appendChild(element);
+  function createAndAppendAdElement(opt_attributes, opt_type, opt_domElement) {
+    const element = createElementWithAttributes(
+        doc, opt_type || 'amp-ad',
+        opt_attributes || Object.assign(
+        {type: 'doubleclick', height: 320, width: 50}, opt_attributes));
+    (opt_domElement || doc.body).appendChild(element);
     return element;
   }
 
@@ -73,12 +76,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
     });
 
     it('should be disabled by default', () => {
-      const element = createAndAppendElementWithAttributes(
-          'amp-ad', {
-            type: 'doubleclick',
-            height: 320,
-            width: 50,
-          }, doc.body);
+      const element = createAndAppendAdElement();
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       expect(impl.useSra).to.be.false;
     });
@@ -87,16 +85,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
     // verified by checking that refreshManager is null on the impl after
     // layoutCallback is executed.
     it('should be enabled if meta tag present, and force refresh off', () => {
-      createAndAppendElementWithAttributes('meta', {
-        name: 'amp-ad-doubleclick-sra',
-      }, doc.head);
-      const element = createAndAppendElementWithAttributes(
-          'amp-ad', {
-            type: 'doubleclick',
-            height: 320,
-            width: 50,
-            'data-enable-refresh': 30,
-          }, doc.body);
+      createAndAppendAdElement(
+        {name: 'amp-ad-doubleclick-sra'}, 'meta', doc.head);
+      const element = createAndAppendAdElement({'data-enable-refresh': 30});
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       expect(impl.useSra).to.be.true;
       impl.layoutCallback();
@@ -108,19 +99,17 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
     let impl;
 
     beforeEach(() => {
-      const element = createAndAppendElementWithAttributes(
-          'amp-ad', {
-            type: 'doubleclick',
-            height: 320,
-            width: 50,
-            'data-a4a-upgrade-type': 'amp-ad-network-doubleclick-impl',
-          }, doc.body);
-      createAndAppendElementWithAttributes(
-          'iframe', {
+      const element = createAndAppendAdElement(
+        {'data-a4a-upgrade-type': 'amp-ad-network-doubleclick-impl'});
+      // Testing competitive exclusion when we have an AMP ad and a non-AMP ad
+      // on the same page. Need to add the child frame of the element to stand
+      // in as the non-AMP ad.
+      createAndAppendAdElement(
+          {
             src: 'https://foo.com',
             height: 320,
             width: 50,
-          }, element);
+          }, 'iframe', element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
     });
 
