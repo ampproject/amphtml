@@ -25,6 +25,7 @@ import {
   setReportError,
   user,
   duplicateErrorIfNecessary,
+  isUserErrorEmbed,
 } from '../../src/log';
 import * as sinon from 'sinon';
 
@@ -692,7 +693,8 @@ describe('Logging', () => {
     });
 
     it('should return logger for user-error', () => {
-      expect(user().suffix_).to.equal(USER_ERROR_SENTINEL);
+      const error = user().createError();
+      expect(isUserErrorEmbed(error.message)).to.be.false;
       expect(user(this.element).suffix_).to.equal(USER_ERROR_SENTINEL);
     });
 

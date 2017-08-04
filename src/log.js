@@ -51,7 +51,7 @@ export function isUserErrorMessage(message) {
 /**
  * @return {boolean} Whether this message was a iframe embed error.
  */
-function isUserErrorEmbed(message) {
+export function isUserErrorEmbed(message) {
   return message.indexOf(USER_ERROR_EMBED_SENTINEL) >= 0;
 }
 
