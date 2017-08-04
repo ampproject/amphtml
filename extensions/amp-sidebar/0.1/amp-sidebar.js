@@ -15,16 +15,16 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
+import {Toolbar} from './toolbar';
+import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
-import {KeyCodes} from '../../../src/utils/key-codes';
-import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
-import {Services} from '../../../src/services';
-import {setStyles, toggle} from '../../../src/style';
 import {removeFragment, parseUrl} from '../../../src/url';
+import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
-import {Toolbar} from './toolbar';
 
 /** @const */
 const TAG = 'amp-sidebar toolbar';
