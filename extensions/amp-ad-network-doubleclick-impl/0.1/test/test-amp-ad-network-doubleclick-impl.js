@@ -66,14 +66,19 @@ function setupForAdTesting(win) {
 }
 
 const realWinConfig = {
+  amp: true, //{ampdoc: 'amp-ad'},
+  ampAdCss: true,
+  allowExternalResources: true,
+};
+
+const realWinConfigAmpAd = {
   amp: {ampdoc: 'amp-ad'},
   ampAdCss: true,
+  allowExternalResources: true,
 };
 
 describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
-  let impl;
-  let element;
-
+  let doc;
   /**
    * Creates an iframe promise, and instantiates element and impl, adding the
    * former to the document of the iframe.
@@ -96,12 +101,20 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     impl.iframe = iframe;
   }
 
+  beforeEach(() => {
+    doc = env.win.document;
+    env.win.AMP_MODE.test = true;
+  });
+
+
   describe('#isValidElement', () => {
+    let impl;
+    let element;
     beforeEach(() => {
-      element = document.createElement('amp-ad');
+      element = doc.createElement('amp-ad');
       element.setAttribute('type', 'doubleclick');
       element.setAttribute('data-ad-client', 'adsense');
-      document.body.appendChild(element);
+      doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
     });
 
@@ -131,14 +144,15 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
   });
 
+
   describe('#extractSize', () => {
     let loadExtensionSpy;
+    let impl;
+    let element;
     const size = {width: 200, height: 50};
 
     beforeEach(() => {
       setupForAdTesting(env.win);
-      const doc = env.win.document;
-      doc.win = env.win;
       element = createElementWithAttributes(doc, 'amp-ad', {
         'width': '200',
         'height': '50',
@@ -163,6 +177,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       })).to.deep.equal(size);
       expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
     });
+
     it('should load amp-analytics with an analytics header', () => {
       const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
       expect(impl.extractSize({
@@ -184,35 +199,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
   });
 
-  describe('#onNetworkFailure', () => {
-
-    beforeEach(() => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        doc.win = window;
-        element = createElementWithAttributes(doc, 'amp-ad', {
-          'width': '200',
-          'height': '50',
-          'type': 'doubleclick',
-        });
-        impl = new AmpAdNetworkDoubleclickImpl(element);
-      });
-    });
-
-    it('should append error parameter', () => {
-      const TEST_URL = 'https://somenetwork.com/foo?hello=world&a=b';
-      expect(impl.onNetworkFailure(new Error('xhr failure'), TEST_URL))
-          .to.jsonEqual({adUrl: TEST_URL + '&aet=n'});
-    });
-  });
-
   describe('#onCreativeRender', () => {
     beforeEach(() => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        doc.win = window;
+        setupForAdTesting(env.win);
+        doc.win = env.win;
         element = createElementWithAttributes(doc, 'amp-ad', {
           'width': '200',
           'height': '50',
@@ -236,7 +226,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
                 height: 50,
               };
             });
-      });
     });
 
     it('injects amp analytics', () => {
@@ -292,6 +281,59 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       // Just ensure extensions is loaded, and analytics element appended.
     });
   });
+});
+
+describes.realWin('DoubleClick More', realWinConfigAmpAd, env => {
+  let doc;
+  /**
+   * Creates an iframe promise, and instantiates element and impl, adding the
+   * former to the document of the iframe.
+   * @param {{width, height, type}} config
+   * @return The iframe promise.
+   */
+  function createImplTag(config) {
+    config.type = 'doubleclick';
+    setupForAdTesting(env.win);
+    element = createElementWithAttributes(env.win.document, 'amp-ad', config);
+    // To trigger CSS styling.
+    element.setAttribute('data-a4a-upgrade-type',
+        'amp-ad-network-doubleclick-impl');
+    // Used to test styling which is targetted at first iframe child of
+    // amp-ad.
+    const iframe = env.win.document.createElement('iframe');
+    element.appendChild(iframe);
+    env.win.document.body.appendChild(element);
+    impl = new AmpAdNetworkDoubleclickImpl(element);
+    impl.iframe = iframe;
+  }
+
+  beforeEach(() => {
+    doc = env.win.document;
+  });
+
+  describe('#onNetworkFailure', () => {
+
+    beforeEach(() => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = window;
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+        });
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+      });
+    });
+
+    it('should append error parameter', () => {
+      const TEST_URL = 'https://somenetwork.com/foo?hello=world&a=b';
+      expect(impl.onNetworkFailure(new Error('xhr failure'), TEST_URL))
+          .to.jsonEqual({adUrl: TEST_URL + '&aet=n'});
+    });
+  });
+
 
   describe('centering', () => {
     const size = {width: '300px', height: '150px'};
