@@ -55,50 +55,7 @@ describes.realWin('amp-sidebar 0.1 version', {
       anchor.href = '#section1';
       ampSidebar.appendChild(anchor);
       if (options.toolbars) {
-         // Stub our sidebar operations, doing this here as it will
-         // Ease testing our media queries
-        const impl = ampSidebar.implementation_;
-        sandbox.stub(impl.vsync_,
-            'mutate', callback => {
-              callback();
-            });
-        sandbox.stub(impl.vsync_,
-            'mutatePromise', callback => {
-              callback();
-              return Promise.resolve();
-            });
-         // Create our individual toolbars
-        options.toolbars.forEach(toolbarObj => {
-          const navToolbar = iframe.doc.createElement('nav');
-
-           //Create/Set toolbar-target
-          const toolbarTarget = iframe.doc.createElement('div');
-          if (toolbarObj.toolbarTarget) {
-            toolbarTarget.setAttribute('id',
-                toolbarObj.toolbarTarget);
-            navToolbar.setAttribute('toolbar-target',
-                toolbarObj.toolbarTarget);
-          } else {
-            toolbarTarget.setAttribute('id', 'toolbar-target');
-            navToolbar.setAttribute('toolbar-target', 'toolbar-target');
-          }
-          iframe.win.document.body.appendChild(toolbarTarget);
-
-           // Set the toolbar media
-          if (toolbarObj.media) {
-            navToolbar.setAttribute('toolbar', toolbarObj.media);
-          } else {
-            navToolbar.setAttribute('toolbar', '(min-width: 768px)');
-          }
-          const toolbarList = iframe.doc.createElement('ul');
-          for (let i = 0; i < 3; i++) {
-            const li = iframe.doc.createElement('li');
-            li.innerHTML = 'Toolbar item ' + i;
-            toolbarList.appendChild(li);
-          }
-          navToolbar.appendChild(toolbarList);
-          ampSidebar.appendChild(navToolbar);
-        });
+        getToolbars(options, ampSidebar, iframe);
       }
       if (options.side) {
         ampSidebar.setAttribute('side', options.side);
@@ -121,6 +78,53 @@ describes.realWin('amp-sidebar 0.1 version', {
         }
         return {iframe, ampSidebar};
       });
+    });
+  }
+
+  function getToolbars(options, ampSidebar, iframe) {
+    // Stub our sidebar operations, doing this here as it will
+    // Ease testing our media queries
+    const impl = ampSidebar.implementation_;
+    sandbox.stub(impl.vsync_,
+        'mutate', callback => {
+          callback();
+        });
+    sandbox.stub(impl.vsync_,
+        'mutatePromise', callback => {
+          callback();
+          return Promise.resolve();
+        });
+    // Create our individual toolbars
+    options.toolbars.forEach(toolbarObj => {
+      const navToolbar = iframe.doc.createElement('nav');
+
+      //Create/Set toolbar-target
+      const toolbarTarget = iframe.doc.createElement('div');
+      if (toolbarObj.toolbarTarget) {
+        toolbarTarget.setAttribute('id',
+            toolbarObj.toolbarTarget);
+        navToolbar.setAttribute('toolbar-target',
+            toolbarObj.toolbarTarget);
+      } else {
+        toolbarTarget.setAttribute('id', 'toolbar-target');
+        navToolbar.setAttribute('toolbar-target', 'toolbar-target');
+      }
+      iframe.win.document.body.appendChild(toolbarTarget);
+
+      // Set the toolbar media
+      if (toolbarObj.media) {
+        navToolbar.setAttribute('toolbar', toolbarObj.media);
+      } else {
+        navToolbar.setAttribute('toolbar', '(min-width: 768px)');
+      }
+      const toolbarList = iframe.doc.createElement('ul');
+      for (let i = 0; i < 3; i++) {
+        const li = iframe.doc.createElement('li');
+        li.innerHTML = 'Toolbar item ' + i;
+        toolbarList.appendChild(li);
+      }
+      navToolbar.appendChild(toolbarList);
+      ampSidebar.appendChild(navToolbar);
     });
   }
 
