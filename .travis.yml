@@ -25,6 +25,11 @@ before_install:
   - sh -e /etc/init.d/xvfb start
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb
+before_script:
+  - pip install --user protobuf
+  - gem install percy-capybara phantomjs poltergeist
+  # Poltergeist requires an absolute path to find phantomjs. See #10305.
+  - export PATH="`pwd`/node_modules/.bin:$PATH"
 script: node build-system/pr-check.js
 branches:
   only:
@@ -40,11 +45,6 @@ matrix:
   include:
     - env: BUILD_SHARD="unit_tests"
     - env: BUILD_SHARD="integration_tests"
-      before_script:
-        - pip install --user protobuf
-        - gem install percy-capybara phantomjs poltergeist
-        # Poltergeist requires an absolute path to find phantomjs. See #10305.
-        - export PATH="`pwd`/node_modules/.bin:$PATH"
       addons:
         sauce_connect:
           username: "amphtml"
