@@ -72,7 +72,7 @@ class AmpVideo extends AMP.BaseElement {
     /** @private {?boolean}  */
     this.muted_ = false;
 
-    /** @private {!../../../src/video-interface.VideoMetaDef} */
+    /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
   }
 

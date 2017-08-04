@@ -17,6 +17,14 @@
 import {Layout} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev} from '../../../src/log';
+import {listen} from '../../../src/event-helper';
+import {
+  EMPTY_METADATA,
+  parseSchemaImage,
+  parseOgImage,
+  parseFavicon,
+  setMediaSession,
+} from '../../../src/mediasession-helper';
 
 /**
  * Visible for testing only.
@@ -29,6 +37,9 @@ export class AmpAudio extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.audio_ = null;
+
+    /** @private {!../../../src/mediasession-helper.MetadataDef} */
+    this.metadata_ = EMPTY_METADATA;
   }
 
   /** @override */
@@ -65,6 +76,28 @@ export class AmpAudio extends AMP.BaseElement {
     });
     this.element.appendChild(audio);
     this.audio_ = audio;
+
+    // Gather metadata
+    const doc = this.getAmpDoc().win.document;
+    const artist = this.element.getAttribute('artist');
+    const title = this.element.getAttribute('title')
+                  || this.element.getAttribute('aria-label')
+                  || doc.title;
+    const album = this.element.getAttribute('album');
+    const poster = this.element.getAttribute('poster')
+                   || parseSchemaImage(doc)
+                   || parseOgImage(doc)
+                   || parseFavicon(doc);
+    this.metadata_ = {
+      'title': title || '',
+      'artist': artist || '',
+      'album': album || '',
+      'artwork': [
+        {'src': poster || ''},
+      ],
+    };
+
+    listen(this.audio_, 'playing', () => this.audioPlaying_());
     return this.loadPromise(audio);
   }
 
@@ -73,6 +106,23 @@ export class AmpAudio extends AMP.BaseElement {
     if (this.audio_) {
       this.audio_.pause();
     }
+  }
+
+  audioPlaying_() {
+    const playHandler = () => {
+      this.audio_.play();
+    };
+    const pauseHandler = () => {
+      this.audio_.pause();
+    };
+
+    // Update the media session
+    setMediaSession(
+        this.getAmpDoc().win,
+        this.metadata_,
+        playHandler,
+        pauseHandler
+    );
   }
 }
 
