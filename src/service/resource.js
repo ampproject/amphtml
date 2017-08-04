@@ -331,6 +331,7 @@ export class Resource {
       dev().error(TAG, 'failed to build:', this.debugid, reason);
       this.isBuilding_ = false;
       this.blacklisted_ = true;
+      throw reason;
     });
   }
 
