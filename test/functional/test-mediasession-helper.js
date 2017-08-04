@@ -105,15 +105,15 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
   });
 
   it('should parse the schema and find the image', () => {
-    expect(parseSchemaImage(ampdoc)).to.equal('http://example.com/image.png');
+    expect(parseSchemaImage(ampdoc.win.document)).to.equal('http://example.com/image.png');
   });
 
   it('should parse the og-image', () => {
-    expect(parseOgImage(ampdoc)).to.equal('http://example.com/og-image.png');
+    expect(parseOgImage(ampdoc.win.document)).to.equal('http://example.com/og-image.png');
   });
 
   it('should parse the favicon', () => {
-    expect(parseFavicon(ampdoc)).to.equal('http://example.com/favicon.ico');
+    expect(parseFavicon(ampdoc.win.document)).to.equal('http://example.com/favicon.ico');
   });
 
   it('should set the media session', () => {
@@ -131,7 +131,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       ],
       'title': 'Some title',
     };
-    setMediaSession(ampdoc, fakeMetaData);
+    setMediaSession(ampdoc.win, fakeMetaData);
     const newMetaData = ampdoc.win.navigator.mediaSession.metadata;
     expect(newMetaData).to.deep.equal(fakeMetaData);
   });
