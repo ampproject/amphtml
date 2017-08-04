@@ -25,7 +25,7 @@ import {
 } from '../../src/service/video-manager-impl';
 import {
   runVideoPlayerIntegrationTests,
-} from '../integration/test-video-players-helper';
+} from './test-video-players-helper';
 import * as sinon from 'sinon';
 
 describe('Fake Video Player Integration Tests', () => {

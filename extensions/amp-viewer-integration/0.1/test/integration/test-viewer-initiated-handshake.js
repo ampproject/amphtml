@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpViewerIntegration} from '../amp-viewer-integration';
-import {WebviewViewerForTesting} from './webview-viewer-for-testing.js';
+import {
+    WebviewViewerForTesting,
+} from '../viewer-initiated-handshake-viewer-for-testing';
 
 
 describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
@@ -32,7 +33,6 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
       viewerEl = document.createElement('div');
       document.body.appendChild(viewerEl);
       viewer = new WebviewViewerForTesting(viewerEl, '1', ampDocUrl, true);
-      return viewer.waitForHandshakeResponse();
     });
 
     afterEach(() => {
@@ -40,38 +40,15 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
     });
 
     it('should confirm the handshake', () => {
-      console/*OK*/.log('sending handshake response');
-      return viewer.waitForDocumentLoaded();
+      return viewer.waitForHandshakeResponse();
     });
 
     it('should handle unload correctly', () => {
-      viewer.waitForDocumentLoaded().then(() => {
+      viewer.waitForHandshakeResponse().then(() => {
         const stub = sandbox.stub(viewer, 'handleUnload_');
         window.eventListeners.fire({type: 'unload'});
         expect(stub).to.be.calledOnce;
       });
-    });
-  });
-
-  describes.fakeWin('webview window init', {
-    amp: {
-      params: {
-        webview: '1',
-        origin: null,
-      },
-    },
-  }, env => {
-    let integr;
-
-    beforeEach(() => {
-      integr = new AmpViewerIntegration(env.win);
-    });
-
-    it('should set source and origin for webview', () => {
-      const stub = sandbox.stub(integr, 'webviewPreHandshakePromise_',
-          () => new Promise(() => {}));
-      integr.init();
-      expect(stub).to.be.calledWith(/* source */ null, /* origin */ '');
     });
   });
 });
