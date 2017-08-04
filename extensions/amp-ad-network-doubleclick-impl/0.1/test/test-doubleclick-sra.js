@@ -178,8 +178,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
     let xhrMock;
 
     function createA4aSraInstance(networkId) {
-      const element =
-        createElementWithAttributes(doc, 'amp-ad', {
+      const element = createAndAppendAdElement({
           type: 'doubleclick',
           height: 320,
           width: 50,
@@ -188,7 +187,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
       element.getLayoutBox = () => {
         return layoutRectLtwh(0, 0, 200, 50);
       };
-      doc.body.appendChild(element);
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       impl.useSra = true;
       return impl;
