@@ -18,7 +18,6 @@ import {GoogleCidApi} from '../../src/service/cid-api';
 import {installTimerService} from '../../src/service/timer-impl';
 import {stubService} from '../../testing/test-helper';
 import {getCookie, setCookie} from '../../src/cookies';
-import * as sinon from 'sinon';
 
 describes.realWin('test-cid-api', {}, env => {
 
