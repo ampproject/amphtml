@@ -55,7 +55,6 @@ amp-sidebar[side] {
   flex-wrap: wrap;
   overflow: auto;
   list-style-type: none;
-
   padding: 0;
   margin: 0;
 }

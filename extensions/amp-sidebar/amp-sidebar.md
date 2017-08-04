@@ -63,7 +63,7 @@ for content within the sidebar to be displayed on other parts of the main conten
 
 *Example:*
 
-In the following example, we use `amp-sidebar` to contain navigation items. However, The second item, Nav Item 2, is assigned to element id that is on the page. By using the [`on`](../../spec/amp-actions-and-events.md) attribute, we can scroll smoothly to the element, using the element id and `scrollTo`.
+In the following example, we use `amp-sidebar` to contain navigation items. However, The second and fourth item, Nav Item 2 and Nav Item 4, are assigned to element id that is on the page. By using the [`on`](../../spec/amp-actions-and-events.md) attribute, we can scroll smoothly to the element, using the element id and `scrollTo`.
 
 ```html
 <amp-sidebar id="sidebar1" layout="nodisplay">
@@ -71,13 +71,15 @@ In the following example, we use `amp-sidebar` to contain navigation items. Howe
     <li>Nav item 1</li>
     <li><a href="#idTwo" on="tap:idTwo.scrollTo">Nav item 2</a></li>
     <li>Nav item 3</li>
-    <li>Nav item 4</li>
+    <li><a href="#idFour" on="tap:idFour.scrollTo">Nav item 4</a></li>
     <li>Nav item 5</li>
     <li>Nav item 6</li>
   </ul>
 </amp-sidebar>
 
 <div id="idTwo">
+</div>
+<div id="idFour">
 </div>
 ```
 
@@ -117,7 +119,7 @@ Alternatively, pressing the escape key on the keyboard will also close the sideb
 <button on='tap:sidebar1.close'>x</button>
 ```
 
-### Toolbar
+### Toolbar (Experimental)
 
 You can create a `toolbar` element that displays in the `<body>` by specifying the `toolbar` attribute with a media query and a `toolbar-target` attribute with an element id on a `<nav>` element that is a child of  `<amp-sidebar>`. The `toolbar` duplicates the `<nav>` element and its children and appends the element into the `toolbar-target` element.
 
@@ -138,9 +140,9 @@ In the following example, we display a `toolbar` if the window width is less tha
 <amp-sidebar id="sidebar1" layout="nodisplay" side="right">
   <ul>
     <li>Nav item 1</li>
-    <li>Nav item 2</li>
+    <li><a href="#idTwo" on="tap:idTwo.scrollTo">Nav item 2</a></li>
     <li>Nav item 3</li>
-    <li>Nav item 4</li>
+    <li><a href="#idFour" on="tap:idFour.scrollTo">Nav item 4</a></li>
     <li>Nav item 5</li>
     <li>Nav item 6</li>
   </ul>
@@ -155,6 +157,10 @@ In the following example, we display a `toolbar` if the window width is less tha
 </amp-sidebar>
 
 <div id="target-element">
+</div>
+<div id="idTwo">
+</div>
+<div id="idFour">
 </div>
 ```
 
@@ -178,9 +184,9 @@ In the following example, we display a `toolbar` if the window width is less tha
 <amp-sidebar id="sidebar1" layout="nodisplay" side="right">
   <ul>
     <li>Nav item 1</li>
-    <li>Nav item 2</li>
+    <li><a href="#idTwo" on="tap:idTwo.scrollTo">Nav item 2</a></li>
     <li>Nav item 3</li>
-    <li>Nav item 4</li>
+    <li><a href="#idFour" on="tap:idFour.scrollTo">Nav item 4</a></li>
     <li>Nav item 5</li>
     <li>Nav item 6</li>
   </ul>
@@ -195,6 +201,10 @@ In the following example, we display a `toolbar` if the window width is less tha
 </amp-sidebar>
 
 <div id="target-element">
+</div>
+<div id="idTwo">
+</div>
+<div id="idFour">
 </div>
 ```
 
