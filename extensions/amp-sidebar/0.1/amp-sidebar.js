@@ -191,10 +191,12 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    // Check our toolbars for changes
-    this.toolbars_.forEach(toolbar => {
-      toolbar.onLayoutChange(() => this.onToolbarOpen_());
-    });
+    if (this.isToolbarExperimentEnabled_) {
+      // Check our toolbars for changes
+      this.toolbars_.forEach(toolbar => {
+        toolbar.onLayoutChange(() => this.onToolbarOpen_());
+      });
+    }
   }
 
   /**
