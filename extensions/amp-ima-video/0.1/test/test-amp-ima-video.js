@@ -542,21 +542,21 @@ describe('amp-ima-video', () => {
 
       imaVideoObj.updateUi(0, 60);
       expect(imaVideoObj.getPropertiesForTesting().timeNode.textContent)
-          .to.eql('00:00 / 01:00');
+          .to.eql('0:00 / 1:00');
       expect(imaVideoObj.getPropertiesForTesting().progressLine.style.width)
           .to.eql('0%');
       expect(imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left)
           .to.eql('-1%');
       imaVideoObj.updateUi(30, 60);
       expect(imaVideoObj.getPropertiesForTesting().timeNode.textContent)
-          .to.eql('00:30 / 01:00');
+          .to.eql('0:30 / 1:00');
       expect(imaVideoObj.getPropertiesForTesting().progressLine.style.width)
           .to.eql('50%');
       expect(imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left)
           .to.eql('49%');
       imaVideoObj.updateUi(60, 60);
       expect(imaVideoObj.getPropertiesForTesting().timeNode.textContent)
-          .to.eql('01:00 / 01:00');
+          .to.eql('1:00 / 1:00');
       expect(imaVideoObj.getPropertiesForTesting().progressLine.style.width)
           .to.eql('100%');
       expect(imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left)
@@ -578,13 +578,13 @@ describe('amp-ima-video', () => {
       });
 
       let formattedTime = imaVideoObj.formatTime(0);
-      expect(formattedTime).to.eql('00:00');
+      expect(formattedTime).to.eql('0:00');
       formattedTime = imaVideoObj.formatTime(55);
-      expect(formattedTime).to.eql('00:55');
+      expect(formattedTime).to.eql('0:55');
       formattedTime = imaVideoObj.formatTime(60);
-      expect(formattedTime).to.eql('01:00');
+      expect(formattedTime).to.eql('1:00');
       formattedTime = imaVideoObj.formatTime(65);
-      expect(formattedTime).to.eql('01:05');
+      expect(formattedTime).to.eql('1:05');
       formattedTime = imaVideoObj.formatTime(3600);
       expect(formattedTime).to.eql('1:00:00');
       formattedTime = imaVideoObj.formatTime(3605);
@@ -687,11 +687,6 @@ describe('amp-ima-video', () => {
           imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING);
       // TODO - Why doesn't this work?
       //expect(showControlsSpy).to.have.been.called;
-      expect(
-          imaVideoObj.getPropertiesForTesting().playPauseDiv.style.lineHeight)
-          .to.eql('1.4em');
-      expect(imaVideoObj.getPropertiesForTesting().playPauseNode.textContent)
-          .to.eql(imaVideoObj.getPropertiesForTesting().pauseChars);
       expect(playSpy).to.have.been.called;
     });
   });
@@ -723,11 +718,6 @@ describe('amp-ima-video', () => {
           imaVideoObj.getPropertiesForTesting().PlayerStates.PAUSED);
       // TODO - Why doesn't this work?
       //expect(showControlsSpy).to.have.been.called;
-      expect(imaVideoObj.getPropertiesForTesting().playPauseNode.textContent)
-          .to.eql(imaVideoObj.getPropertiesForTesting().playChar);
-      expect(
-          imaVideoObj.getPropertiesForTesting().playPauseDiv.style.lineHeight)
-          .to.eql('');
     });
   });
 
@@ -761,11 +751,6 @@ describe('amp-ima-video', () => {
           imaVideoObj.getPropertiesForTesting().PlayerStates.PAUSED);
       // TODO - Why doesn't this work?
       //expect(showControlsSpy).to.have.been.called;
-      expect(imaVideoObj.getPropertiesForTesting().playPauseNode.textContent)
-          .to.eql(imaVideoObj.getPropertiesForTesting().playChar);
-      expect(
-          imaVideoObj.getPropertiesForTesting().playPauseDiv.style.lineHeight)
-          .to.eql('');
       expect(removeEventListenerSpy).to.have.been.called;
     });
   });
@@ -789,7 +774,7 @@ describe('amp-ima-video', () => {
       imaVideoObj.showControls();
 
       expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
-          .to.eql('block');
+          .to.eql('flex');
       expect(imaVideoObj.getPropertiesForTesting().hideControlsTimeout)
           .to.be.null;
     });
@@ -813,7 +798,7 @@ describe('amp-ima-video', () => {
       imaVideoObj.showControls();
 
       expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
-          .to.eql('block');
+          .to.eql('flex');
       expect(imaVideoObj.getPropertiesForTesting().hideControlsTimeout)
           .not.to.be.undefined;
     });
