@@ -120,7 +120,7 @@ export class AmpSidebar extends AMP.BaseElement {
       });
     }
 
-    if (this.isIos_ && Safari_) {
+    if (this.isIos_) {
       this.fixIosElasticScrollLeak_();
     }
 
