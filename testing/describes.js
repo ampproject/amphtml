@@ -488,6 +488,7 @@ class FakeWinFixture {
   setup(env) {
     const spec = this.spec;
     env.win = new FakeWindow(this.spec.win || {});
+    console.log(spec.xhrMock);
     if (!(spec.xhrMock === false)) {
       fetchMock.constructor.global = env.win;
       fetchMock._mock();
