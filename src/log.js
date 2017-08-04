@@ -564,46 +564,38 @@ export function resetLogConstructorForTesting() {
  * @return {!Log}
  */
 export function user(opt_element) {
-  const logger = getUserLogger();
-
+  const logger = getUserLogger(USER_ERROR_SENTINEL);
   if (!!opt_element &&
       isFromEmbed(logger.win, /** @type {!Element} */ (opt_element))) {
     if (logs.userForEmbed) {
       return logs.userForEmbed;
     }
-    logs.userForEmbed = new logConstructor(self, mode => {
-      const logNum = parseInt(mode.log, 10);
-      if (logNum >= 1) {
-        return LogLevel.FINE;
-      }
-      return LogLevel.OFF;
-    }, USER_ERROR_EMBED_SENTINEL);
-    return logs.userForEmbed;
+    return logs.userForEmbed = getUserLogger(USER_ERROR_EMBED_SENTINEL);
   } else {
-    return logger;
+    if (logs.user) {
+      return logs.user;
+    }
+    return logs.user = logger;
   }
 }
 
 /**
- * Getter for original user logger
+ * Getter for user logger
+ * @param {string=} suffix
  * @returns {!Log}
  */
-function getUserLogger() {
-  if (logs.user) {
-    return logs.user;
-  }
+function getUserLogger(suffix) {
   if (!logConstructor) {
     throw new Error('failed to call initLogConstructor');
   }
-  return logs.user = new logConstructor(self, mode => {
+  return new logConstructor(self, mode => {
     const logNum = parseInt(mode.log, 10);
     if (mode.development || logNum >= 1) {
       return LogLevel.FINE;
     }
     return LogLevel.OFF;
-  }, USER_ERROR_SENTINEL);
+  }, suffix);
 }
-
 
 /**
  * AMP development log. Calls to `devLog().assert` and `dev.fine` are stripped in
