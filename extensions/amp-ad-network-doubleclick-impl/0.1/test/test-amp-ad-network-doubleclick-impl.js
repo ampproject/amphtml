@@ -884,7 +884,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   });
 });
 
-describes.realWin('DoubleClick More', realWinConfigAmpAd, env => {
+describes.realWin('additional amp-ad-network-doubleclick-impl', realWinConfigAmpAd, env => {
   let doc;
   /**
    * Creates an iframe promise, and instantiates element and impl, adding the
@@ -988,46 +988,4 @@ describes.realWin('DoubleClick More', realWinConfigAmpAd, env => {
       verifyCss(impl.iframe, size);
     });
   });
-
-    describe('#unlayoutCallback', () => {
-    it('should call #resetSlot, remove child iframe, but keep other children',
-        () => {
-          createImplTag({
-            width: '300',
-            height: '150',
-          });
-          impl.buildCallback();
-          const slotIdBefore = impl.element.getAttribute(
-              'data-amp-slot-index');
-
-          impl.layoutMeasureExecuted_ = true;
-          impl.uiHandler = {applyUnlayoutUI: () => {}};
-          const placeholder = doc.createElement('div');
-          placeholder.setAttribute('placeholder', '');
-          const fallback = doc.createElement('div');
-          fallback.setAttribute('fallback', '');
-          impl.element.appendChild(placeholder);
-          impl.element.appendChild(fallback);
-          impl.ampAnalyticsConfig_ = {};
-          impl.ampAnalyticsElement_ =
-              doc.createElement('amp-analytics');
-          impl.element.appendChild(impl.ampAnalyticsElement_);
-
-          expect(impl.iframe).to.be.ok;
-          expect(impl.ampAnalyticsConfig_).to.be.ok;
-          expect(impl.element.querySelector('iframe')).to.be.ok;
-          expect(impl.element.querySelector('amp-analytics')).to.be.ok;
-          impl.unlayoutCallback();
-          expect(impl.element.querySelector('div[placeholder]')).to.be.ok;
-          expect(impl.element.querySelector('div[fallback]')).to.be.ok;
-          expect(impl.element.querySelector('iframe')).to.be.null;
-          expect(impl.element.querySelector('amp-analytics')).to.be.null;
-          expect(impl.iframe).to.be.null;
-          expect(impl.ampAnalyticsConfig_).to.be.null;
-          expect(impl.ampAnalyticsElement_).to.be.null;
-          expect(impl.element.getAttribute('data-amp-slot-index')).to
-              .equal(String(Number(slotIdBefore) + 1));
-        });
-  });
-
 });
