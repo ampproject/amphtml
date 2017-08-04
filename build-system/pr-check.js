@@ -308,7 +308,7 @@ const command = {
 
 function runAllCommands() {
   // Run different sets of independent tasks in parallel to reduce build time.
-  if (process.env.BUILD_SHARD == "pre_build_checks_and_unit_tests") {
+  if (process.env.BUILD_SHARD == "unit_tests") {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
