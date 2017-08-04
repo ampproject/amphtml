@@ -29,17 +29,28 @@ const PlayerStates = {
   PAUSED: 2,
 };
 
-// Character used for play icon.
-const playChar = '\u25b6\ufe0e';
-
-// Character used for pause icons.
-const pauseChars = '\u258c\ufe0e\u258c\ufe0e';
-
-// Character used for seek dot on progress bar.
-const seekDot = '\u25cf\ufe0e';
-
-// Characters used for fullscreen icon.
-const fullscreenChars = '\u25ad\ufe0e';
+/*eslint-disable */
+const icons = {
+  'play':
+    `<path d="M8 5v14l11-7z"></path>
+     <path d="M0 0h24v24H0z" fill="none"></path>`,
+  'pause':
+    `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+     <path d="M0 0h24v24H0z" fill="none"></path>`,
+  'fullscreen':
+    `<path d="M0 0h24v24H0z" fill="none"/>
+     <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>`,
+  'mute':
+    `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path>
+     <path d="M0 0h24v24H0z" fill="none"></path>`,
+  'volume_max':
+    `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
+     <path d="M0 0h24v24H0z" fill="none"></path>`,
+  'seek':
+    `<circle cx="12" cy="12" r="12" />`,
+}
+const controlsBg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAABkCAQAAADtJZLrAAAAQklEQVQY03WOwQoAIAxC1fX/v1yHaCgVeHg6wWFCAEABJl7glgZtmVaHZYmDjpxblVCfZPPIhHl9NntovBaZnf12LeWZAm6dMYNCAAAAAElFTkSuQmCC';
+/*eslint-enable */
 
 // Div wrapping our entire DOM.
 let wrapperDiv;
@@ -50,17 +61,11 @@ let bigPlayDiv;
 // Div contianing play button. Double-nested for alignment.
 let playButtonDiv;
 
-// Node containing play button characters.
-let bigPlayButtonNode;
-
 // Div containing player controls.
 let controlsDiv;
 
 // Div containing play or pause button.
 let playPauseDiv;
-
-// Node contianing play or pause characters.
-let playPauseNode;
 
 // Div containing player time.
 let timeDiv;
@@ -197,15 +202,11 @@ export function imaVideo(global, data) {
   setStyle(bigPlayDiv, 'text-align', 'center');
   setStyle(bigPlayDiv, 'cursor', 'pointer');
   // Inner div so we can v and h align.
-  playButtonDiv = global.document.createElement('div');
+  playButtonDiv = createIcon(global, 'play');
   playButtonDiv.id = 'ima-play-button';
-  setStyle(playButtonDiv, 'font-size', '10em');
-  setStyle(playButtonDiv, 'color', 'white');
   setStyle(playButtonDiv, 'display', 'inline-block');
-  setStyle(playButtonDiv, 'line-height', '0.5');
-  // Play button text node.
-  bigPlayButtonNode = global.document.createTextNode(playChar);
-  playButtonDiv.appendChild(bigPlayButtonNode);
+  setStyle(playButtonDiv, 'max-width', '120px');
+  setStyle(playButtonDiv, 'max-height', '120px');
   bigPlayDiv.appendChild(playButtonDiv);
 
   // Video controls.
@@ -214,10 +215,16 @@ export function imaVideo(global, data) {
   setStyle(controlsDiv, 'position', 'absolute');
   setStyle(controlsDiv, 'bottom', '0px');
   setStyle(controlsDiv, 'width', '100%');
-  setStyle(controlsDiv, 'height', '30px');
-  setStyle(controlsDiv, 'background-color', '#EEEEEE');
-  setStyle(controlsDiv, 'color', '#333333');
+  setStyle(controlsDiv, 'height', '100px');
+  setStyle(controlsDiv, 'box-sizing', 'border-box');
+  setStyle(controlsDiv, 'padding', '10px');
+  setStyle(controlsDiv, 'padding-top', '60px');
+  setStyle(controlsDiv, 'background-image', 'url(' + controlsBg + ')');
+  setStyle(controlsDiv, 'background-position', 'bottom');
+  setStyle(controlsDiv, 'color', 'white');
   setStyle(controlsDiv, 'display', 'none');
+  setStyle(controlsDiv, 'justify-content', 'center');
+  setStyle(controlsDiv, 'align-items', 'center');
   setStyle(controlsDiv, '-webkit-touch-callout', 'none');
   setStyle(controlsDiv, '-webkit-user-select', 'none');
   setStyle(controlsDiv, '-khtml-user-select', 'none');
@@ -225,68 +232,62 @@ export function imaVideo(global, data) {
   setStyle(controlsDiv, '-ms-user-select', 'none');
   setStyle(controlsDiv, 'user-select', 'none');
   // Play button
-  playPauseDiv = global.document.createElement('div');
+  playPauseDiv = createIcon(global, 'play');
   playPauseDiv.id = 'ima-play-pause';
   setStyle(playPauseDiv, 'width', '30px');
   setStyle(playPauseDiv, 'height', '30px');
-  setStyle(playPauseDiv, 'margin-left', '10px');
+  setStyle(playPauseDiv, 'margin-right', '20px');
   setStyle(playPauseDiv, 'font-size', '1.25em');
-  setStyle(playPauseDiv, 'float', 'left');
   setStyle(playPauseDiv, 'cursor', 'pointer');
-  playPauseNode = global.document.createTextNode(playChar);
-  playPauseDiv.appendChild(playPauseNode);
   controlsDiv.appendChild(playPauseDiv);
   // Current time and duration.
   timeDiv = global.document.createElement('div');
   timeDiv.id = 'ima-time';
-  setStyle(timeDiv, 'width', '120px');
-  setStyle(timeDiv, 'height', '30px');
-  setStyle(timeDiv, 'line-height', '30px');
-  setStyle(timeDiv, 'float', 'left');
+  setStyle(timeDiv, 'margin-right', '20px');
   setStyle(timeDiv, 'text-align', 'center');
-  timeNode = global.document.createTextNode('00:00 / 00:00');
+  setStyle(timeDiv, 'font-family', 'Helvetica, Arial, Sans-serif');
+  setStyle(timeDiv, 'font-size', '14px');
+  setStyle(timeDiv, 'text-shadow', '0px 0px 10px black');
+  timeNode = global.document.createTextNode('-:- / 0:00');
   timeDiv.appendChild(timeNode);
   controlsDiv.appendChild(timeDiv);
   // Progress bar.
   progressBarWrapperDiv = global.document.createElement('div');
   progressBarWrapperDiv.id = 'ima-progress-wrapper';
   setStyle(progressBarWrapperDiv, 'height', '30px');
-  setStyle(progressBarWrapperDiv, 'position', 'absolute');
-  setStyle(progressBarWrapperDiv, 'left', '160px');
-  setStyle(progressBarWrapperDiv, 'right', '50px');
+  setStyle(progressBarWrapperDiv, 'flex-grow', '1');
+  setStyle(progressBarWrapperDiv, 'position', 'relative');
+  setStyle(progressBarWrapperDiv, 'margin-right', '20px');
   progressLine = global.document.createElement('div');
   progressLine.id = 'progress-line';
-  setStyle(progressLine, 'background-color', '#00BBFF');
+  setStyle(progressLine, 'background-color', 'rgb(255, 255, 255)');
   setStyle(progressLine, 'height', '2px');
   setStyle(progressLine, 'margin-top', '14px');
   setStyle(progressLine, 'width', '0%');
   setStyle(progressLine, 'float', 'left');
   totalTimeLine = global.document.createElement('div');
   totalTimeLine.id = 'total-time-line';
-  setStyle(totalTimeLine, 'background-color', '#333333');
+  setStyle(totalTimeLine, 'background-color', 'rgba(255, 255, 255, 0.45)');
   setStyle(totalTimeLine, 'height', '2px');
   setStyle(totalTimeLine, 'width', '100%');
   setStyle(totalTimeLine, 'margin-top', '14px');
   progressMarkerDiv = global.document.createElement('div');
   progressMarkerDiv.id = 'ima-progress-marker';
-  setStyle(progressMarkerDiv, 'color', '#00BBFF');
-  setStyle(progressMarkerDiv, 'height', '30px');
+  setStyle(progressMarkerDiv, 'height', '14px');
+  setStyle(progressMarkerDiv, 'width', '14px');
   setStyle(progressMarkerDiv, 'position', 'absolute');
-  setStyle(progressMarkerDiv, 'font-size', '2em');
-  setStyle(progressMarkerDiv, 'margin-top', '-5px');
-  setStyle(progressMarkerDiv, 'left', '-1%');
-  setStyle(progressMarkerDiv, 'cursor', 'default');
-  progressMarkerDiv.appendChild(global.document.createTextNode(seekDot));
+  setStyle(progressMarkerDiv, 'left', '0%');
+  setStyle(progressMarkerDiv, 'top', '50%');
+  setStyle(progressMarkerDiv, 'margin-top', '-7px');
+  setStyle(progressMarkerDiv, 'cursor', 'pointer');
+  progressMarkerDiv.appendChild(createIcon(global, 'seek'));
   progressBarWrapperDiv.appendChild(progressLine);
   progressBarWrapperDiv.appendChild(progressMarkerDiv);
   progressBarWrapperDiv.appendChild(totalTimeLine);
   controlsDiv.appendChild(progressBarWrapperDiv);
   // Fullscreen button
-  fullscreenDiv = global.document.createElement('div');
+  fullscreenDiv = createIcon(global, 'fullscreen');
   fullscreenDiv.id = 'ima-fullscreen';
-  setStyle(fullscreenDiv, 'position', 'absolute');
-  setStyle(fullscreenDiv, 'bottom', '0px');
-  setStyle(fullscreenDiv, 'right', '10px');
   setStyle(fullscreenDiv, 'width', '30px');
   setStyle(fullscreenDiv, 'height', '30px');
   setStyle(fullscreenDiv, 'font-size', '1.25em');
@@ -294,7 +295,6 @@ export function imaVideo(global, data) {
   setStyle(fullscreenDiv, 'text-align', 'center');
   setStyle(fullscreenDiv, 'font-weight', 'bold');
   setStyle(fullscreenDiv, 'line-height', '1.4em');
-  fullscreenDiv.appendChild(global.document.createTextNode(fullscreenChars));
   controlsDiv.appendChild(fullscreenDiv);
 
   // Ad container.
@@ -446,6 +446,27 @@ function htmlToElement(html) {
   template./*OK*/innerHTML = html;
   return template.content.firstChild;
 }
+
+function createIcon(global, name, fill = '#FFFFFF') {
+  const doc = global.document;
+  const icon = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  icon.setAttributeNS(null, 'fill', fill);
+  icon.setAttributeNS(null, 'height', '100%');
+  icon.setAttributeNS(null, 'width', '100%');
+  icon.setAttributeNS(null, 'viewBox', '0 0 24 24');
+  setStyle(icon, 'filter', 'drop-shadow(0px 0px 14px rgba(0,0,0,0.4))');
+  setStyle(icon, '-webkit-filter', 'drop-shadow(0px 0px 14px rgba(0,0,0,0.4))');
+  icon./*OK*/innerHTML = icons[name];
+  return icon;
+}
+
+function changeIcon(element, name, fill = '#FFFFFF') {
+  element./*OK*/innerHTML = icons[name];
+  if (fill != element.getAttributeNS(null, 'fill')) {
+    element.setAttributeNS(null, 'fill', fill);
+  }
+}
+
 
 /**
  * Triggered when the user clicks on the big play button div.
@@ -616,7 +637,7 @@ export function updateUi(currentTime, duration) {
  */
 export function formatTime(time) {
   if (isNaN(time)) {
-    return '00:00';
+    return '0:00';
   }
   let timeString = '';
   const hours = Math.floor(time / 3600);
@@ -624,7 +645,11 @@ export function formatTime(time) {
     timeString += hours + ':';
   }
   const minutes = Math.floor((time % 3600) / 60);
-  timeString += zeroPad(minutes) + ':';
+  if (hours > 0) {
+    timeString += zeroPad(minutes) + ':';
+  } else {
+    timeString += minutes + ':';
+  }
   const seconds = Math.floor(time - ((hours * 3600) + (minutes * 60)));
   timeString += zeroPad(seconds);
   return timeString;
@@ -721,8 +746,7 @@ export function playVideo() {
   playerState = PlayerStates.PLAYING;
   // Kick off the hide controls timer.
   showControls();
-  setStyle(playPauseDiv, 'line-height', '1.4em');
-  playPauseNode.textContent = pauseChars;
+  changeIcon(playPauseDiv, 'pause');
   window.parent./*OK*/postMessage({event: VideoEvents.PLAYING}, '*');
   videoPlayer.play();
 }
@@ -740,8 +764,7 @@ export function pauseVideo(event) {
   if (!adsActive) {
     showControls();
   }
-  playPauseNode.textContent = playChar;
-  setStyle(playPauseDiv, 'line-height', '');;
+  changeIcon(playPauseDiv, 'play');
   window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
   if (event && event.type == 'webkitendfullscreen') {
     // Video was paused because we exited fullscreen.
@@ -827,7 +850,7 @@ function onFullscreenChange(global) {
  * @visibleForTesting
  */
 export function showControls() {
-  setStyle(controlsDiv, 'display', 'block');
+  setStyle(controlsDiv, 'display', 'flex');
   // Hide controls after 3 seconds
   if (playerState == PlayerStates.PLAYING) {
     // Reset hide controls timer.
@@ -922,8 +945,8 @@ function onMessage(global, event) {
 export function getPropertiesForTesting() {
   return {adContainerDiv, adRequestFailed, adsActive, adsManagerWidthOnLoad,
     adsManagerHeightOnLoad, contentComplete, controlsDiv, hideControlsTimeout,
-    interactEvent, pauseChars, playbackStarted, playChar, playerState,
-    PlayerStates, playPauseDiv, playPauseNode, progressLine,
+    interactEvent, playbackStarted, playerState,
+    PlayerStates, playPauseDiv, progressLine,
     progressMarkerDiv, timeNode, uiTicker, videoPlayer};
 }
 
