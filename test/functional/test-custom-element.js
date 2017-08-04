@@ -1742,7 +1742,7 @@ describes.realWin('CustomElement Loading Indicator', {amp: true}, env => {
     const toggle = sandbox.spy(element, 'toggleLoading_');
     container.appendChild(element);
     return element.buildingPromise_.then(() => {
-      return element.layoutCallback()
+      return element.layoutCallback();
     }).then(() => {
       expect(toggle).to.be.calledOnce;
       expect(toggle.firstCall.args[0]).to.equal(false);

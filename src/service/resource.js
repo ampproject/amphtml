@@ -304,6 +304,15 @@ export class Resource {
   }
 
   /**
+   * Returns promise that resolves when the element has been built.
+   * @return {!Promise}
+   */
+  whenBuilt() {
+    // TODO(dvoytenko): merge with the standard BUILT signal.
+    return this.element.signals().whenSignal('res-built');
+  }
+
+  /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
    * @return {?Promise}
@@ -324,6 +333,8 @@ export class Resource {
       } else {
         this.state_ = ResourceState.NOT_LAID_OUT;
       }
+      // TODO(dvoytenko): merge with the standard BUILT signal.
+      this.element.signals().signal('res-built');
       // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
       // in PROD.
       this.element.dispatchCustomEvent(AmpEvents.BUILT);
@@ -331,6 +342,7 @@ export class Resource {
       dev().error(TAG, 'failed to build:', this.debugid, reason);
       this.isBuilding_ = false;
       this.blacklisted_ = true;
+      this.element.signals().rejectSignal('res-built', reason);
       throw reason;
     });
   }

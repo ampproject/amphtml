@@ -668,7 +668,7 @@ export class Resources {
         return;
       }
       if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
-        promises.push(resource.element.whenBuilt().then(() => {
+        promises.push(resource.whenBuilt().then(() => {
           resource.measure();
           if (!resource.isDisplayed()) {
             return;
@@ -1837,7 +1837,7 @@ export class Resources {
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
       if (resource.getState() == ResourceState.NOT_BUILT) {
-        resource.element.whenBuilt().then(() => {
+        resource.whenBuilt().then(() => {
           this.measureAndScheduleIfAllowed_(resource, layout,
               parentResource.getPriority());
         });
