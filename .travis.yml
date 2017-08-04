@@ -39,6 +39,8 @@ env:
 matrix:
   include:
     - env: BUILD_SHARD="unit_tests"
+      before_script:
+        - pip install --user protobuf
     - env: BUILD_SHARD="integration_tests"
       before_script:
         - pip install --user protobuf
