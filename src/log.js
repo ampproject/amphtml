@@ -38,7 +38,7 @@ export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
  *
  * @const {string}
  */
-export const EMBED = '\u200B\u200B\u200B\u200B';
+export const USER_ERROR_EMBED_SENTINEL = '\u200B\u200B\u200B\u200B';
 
 
 /**
@@ -51,8 +51,8 @@ export function isUserErrorMessage(message) {
 /**
  * @return {boolean} Whether this message was a iframe embed error.
  */
-function isErrorEmbed(message) {
-  return message.indexOf(EMBED) >= 0;
+function isUserErrorEmbed(message) {
+  return message.indexOf(USER_ERROR_EMBED_SENTINEL) >= 0;
 }
 
 
@@ -234,7 +234,7 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.name = tag || error.name;
-      error.embed = isErrorEmbed(error.message);
+      error.embed = isUserErrorEmbed(error.message);
       // reportError is installed globally per window in the entry point.
       self.reportError(error);
     }
@@ -577,7 +577,7 @@ export function user(opt_element) {
         return LogLevel.FINE;
       }
       return LogLevel.OFF;
-    }, EMBED);
+    }, USER_ERROR_EMBED_SENTINEL);
     return logs.userForEmbed;
   } else {
     return logger;

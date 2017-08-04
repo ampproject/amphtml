@@ -18,7 +18,7 @@ import {
   Log,
   LogLevel,
   USER_ERROR_SENTINEL,
-  EMBED,
+  USER_ERROR_EMBED_SENTINEL,
   dev,
   isUserErrorMessage,
   rethrowAsync,
@@ -699,7 +699,7 @@ describe('Logging', () => {
     it('should return logger for embed-error', () => {
       element = document.createElement('embed');
       iframe.contentWindow.document.body.appendChild(element);
-      expect(user(element).suffix_).to.equal(EMBED);
+      expect(user(element).suffix_).to.equal(USER_ERROR_EMBED_SENTINEL);
     });
   });
 });

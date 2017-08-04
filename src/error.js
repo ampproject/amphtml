@@ -97,10 +97,8 @@ let detectedJsEngine;
  */
 export function reportErrorForWin(win, error, opt_associatedElement) {
   reportError(error, opt_associatedElement);
-  if (error && !!win) {
-    if (isUserErrorMessage(error.message) && !error.embed) {
-      reportErrorToAnalytics(/** @type {!Error} */(error), win);
-    }
+  if (error && !!win && isUserErrorMessage(error.message) && !error.embed) {
+    reportErrorToAnalytics(/** @type {!Error} */(error), win);
   }
 }
 
