@@ -17,6 +17,7 @@
 import {ActionTrust} from '../action-trust';
 import {KeyCodes} from '../utils/key-codes';
 import {debounce} from '../utils/rate-limit';
+import {isEnabled} from '../dom';
 import {dev, user} from '../log';
 import {
   registerServiceBuilderForDoc,
@@ -492,7 +493,7 @@ export class ActionService {
     let n = target;
     while (n) {
       const actionInfos = this.matchActionInfos_(n, actionEventType);
-      if (actionInfos) {
+      if (actionInfos && isEnabled(n)) {
         return {node: n, actionInfos: dev().assert(actionInfos)};
       }
       n = n.parentElement;
