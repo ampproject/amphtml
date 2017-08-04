@@ -71,10 +71,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
   }
 
   describe('#SRA enabled', () => {
-    beforeEach(() => {
-      sandbox = env.sandbox;
-    });
-
     it('should be disabled by default', () => {
       const element = createAndAppendAdElement();
       const impl = new AmpAdNetworkDoubleclickImpl(element);
@@ -189,18 +185,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           width: 50,
           'data-slot': `/${networkId}/abc/def`,
         });
-      element.getAmpDoc = () => {
-        const ampdocService = Services.ampdocServiceFor(doc.defaultView);
-        return ampdocService.getAmpDoc(element);
-      };
-      element.isBuilt = () => {return true;};
       element.getLayoutBox = () => {
         return layoutRectLtwh(0, 0, 200, 50);
       };
-      element.getPageLayoutBox = () => {
-        return element.getLayoutBox.apply(element, arguments);
-      };
-      element.getIntersectionChangeEntry = () => {return null;};
       doc.body.appendChild(element);
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       impl.useSra = true;
