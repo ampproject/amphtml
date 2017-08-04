@@ -522,8 +522,8 @@ describes.realWin('amp-sidebar 0.1 version', {
           };
         });
         anchor.dispatchEvent ?
-             anchor.dispatchEvent(eventObj) :
-             anchor.fireEvent('onkeydown', eventObj);
+            anchor.dispatchEvent(eventObj) :
+            anchor.fireEvent('onkeydown', eventObj);
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         expect(sidebarElement.style.display).to.equal('');
@@ -551,7 +551,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         const eventObj = document.createEventObject ?
-             document.createEventObject() : document.createEvent('Events');
+            document.createEventObject() : document.createEvent('Events');
         if (eventObj.initEvent) {
           eventObj.initEvent('click', true, true);
         }
@@ -567,8 +567,8 @@ describes.realWin('amp-sidebar 0.1 version', {
           };
         });
         anchor.dispatchEvent ?
-             anchor.dispatchEvent(eventObj) :
-             anchor.fireEvent('onkeydown', eventObj);
+            anchor.dispatchEvent(eventObj) :
+            anchor.fireEvent('onkeydown', eventObj);
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         expect(sidebarElement.style.display).to.equal('');
