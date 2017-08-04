@@ -64,8 +64,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
   function createAndAppendAdElement(opt_attributes, opt_type, opt_domElement) {
     const element = createElementWithAttributes(
         doc, opt_type || 'amp-ad',
-        opt_attributes || Object.assign(
-        {type: 'doubleclick', height: 320, width: 50}, opt_attributes));
+        Object.assign(
+          {type: 'doubleclick', height: 320, width: 50}, opt_attributes));
     (opt_domElement || doc.body).appendChild(element);
     return element;
   }
