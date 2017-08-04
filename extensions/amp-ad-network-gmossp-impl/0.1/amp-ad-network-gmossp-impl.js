@@ -25,6 +25,12 @@ import {startsWith} from '../../../src/string';
  */
 const GMOSSP_BASE_URL_ = 'https://sp.gmossp-sp.jp/';
 
+/**
+ * GMOSSP A4A base URL
+ *
+ * @type {string}
+ * @private
+ */
 const GMOSSP_BASE_A4A_URL_ = 'https://amp.sp.gmossp-sp.jp/_a4a/';
 
 /**
