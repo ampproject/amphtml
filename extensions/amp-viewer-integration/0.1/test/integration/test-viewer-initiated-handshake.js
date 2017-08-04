@@ -21,7 +21,7 @@ import {
 
 describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
-  describe('Handshake', function() {
+  describe.configure().skipSauceLabs().run('Handshake', function() {
     let viewerEl;
     let viewer;
 

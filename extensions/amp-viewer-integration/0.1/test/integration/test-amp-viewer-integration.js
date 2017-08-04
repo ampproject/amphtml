@@ -26,7 +26,7 @@ import {getSourceUrl} from '../../../../../src/url';
 
 describes.sandboxed('AmpViewerIntegration', {}, () => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
-  describe('Handshake', function() {
+  describe.configure().skipSauceLabs().run('Handshake', function() {
     let viewerEl;
     let viewer;
     let ampDocUrl;
@@ -139,7 +139,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
   });
 
-  describe('Unit Tests for messaging.js', () => {
+  describe.configure().skipSauceLabs().run(`Unit Tests for
+      messaging.js`, () => {
     const viewerOrigin = 'http://localhost:9876';
     const requestProcessor = function() {
       return Promise.resolve({});
