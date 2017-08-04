@@ -40,8 +40,8 @@ limitations under the License.
     </td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Codelabs</strong></td>
-    <td><a href="https://codelabs.developers.google.com/codelabs/advanced-interactivity-in-amp/">Advanced Interactivity in AMP</a> highlights a sophisticated e-commerce use case.</td>
+    <td class="col-fourty"><strong>Tutorials</strong></td>
+    <td><a href="https://www.ampproject.org/docs/tutorials/interactivity">Create interactive AMP pages</a></td>
   </tr>
 </table>
 
