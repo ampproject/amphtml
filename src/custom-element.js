@@ -780,7 +780,8 @@ function createBaseCustomElementClass(win) {
           }
         }
       }, reason => {
-        this.signals_.rejectSignal(CommonSignals.BUILT, reason);
+        this.signals_.rejectSignal(CommonSignals.BUILT,
+            /** @type {!Error} */ (reason));
         reportError(reason, this);
         throw reason;
       });
