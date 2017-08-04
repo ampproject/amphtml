@@ -61,6 +61,9 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {Array} */
     this.toolbars_ = [];
 
+    /** @private {boolean} */
+    this.isToolbarExperimentEnabled_ = isExperimentOn(this.win, TAG);
+
     const platform = Services.platformFor(this.win);
 
     /** @private @const {boolean} */
@@ -101,19 +104,16 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.setAttribute('side', this.side_);
     }
 
-    const ampdoc = this.getAmpDoc();
-    // Get the toolbar attribute from the child navs
-    const toolbarElements =
-      toArray(this.element.querySelectorAll('nav[toolbar]'));
-
-    if (toolbarElements.length > 0) {
-      user().assert(isExperimentOn(this.win, TAG),
-          `Experiment ${TAG} is disabled.`);
+    if (this.isToolbarExperimentEnabled_) {
+      const ampdoc = this.getAmpDoc();
+      // Get the toolbar attribute from the child navs
+      const toolbarElements =
+        toArray(this.element.querySelectorAll('nav[toolbar]'));
 
       toolbarElements.forEach(toolbarElement => {
         try {
           this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
-          ampdoc));
+            ampdoc));
         } catch (e) {
           user().error(TAG, 'Failed to instantiate toolbar', e);
         }
