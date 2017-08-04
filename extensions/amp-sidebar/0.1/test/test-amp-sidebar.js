@@ -463,7 +463,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         const eventObj = document.createEventObject ?
-             document.createEventObject() : document.createEvent('Events');
+            document.createEventObject() : document.createEvent('Events');
         if (eventObj.initEvent) {
           eventObj.initEvent('click', true, true);
         }
