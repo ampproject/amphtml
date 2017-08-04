@@ -234,7 +234,6 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.name = tag || error.name;
-      error.embed = isUserErrorEmbed(error.message);
       // reportError is installed globally per window in the entry point.
       self.reportError(error);
     }
