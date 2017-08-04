@@ -151,13 +151,11 @@ export function recursiveEquals(a, b, depth = 3) {
   if (a === b) {
     return true;
   }
-  if (a === null || b === null) {
+  // Only check shallow equality for depth < 1.
+  if (depth < 1) {
     return false;
   }
   if (typeof a !== typeof b) {
-    return false;
-  }
-  if (depth <= 0) {
     return false;
   }
   if (Array.isArray(a) && Array.isArray(b)) {
@@ -171,7 +169,7 @@ export function recursiveEquals(a, b, depth = 3) {
     }
     return true;
   }
-  if (typeof a === 'object' && typeof b === 'object') {
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
     const keysA = Object.keys(/** @type {!Object} */ (a));
     const keysB = Object.keys(/** @type {!Object} */ (b));
     if (keysA.length !== keysB.length) {
