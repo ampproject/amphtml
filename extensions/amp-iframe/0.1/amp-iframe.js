@@ -44,6 +44,12 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'scrolling',
 ];
 
+/** @const {!Array<string>} */
+const RELAYOUT_CONTAINER_LIST = [
+  'AMP-LIGHTBOX',
+  'AMP-SIDEBAR',
+];
+
 /** @type {number}  */
 let count = 0;
 
@@ -108,16 +114,13 @@ export class AmpIframe extends AMP.BaseElement {
     this.container_ = null;
 
     /** @private {boolean|undefined} */
-    this.isRelayoutNeeded_ = undefined;
+    this.isInContainer_ = undefined;
 
     /** @private {boolean} */
-    this.layoutStarted_ = false;
+    this.isRelayoutNeeded_ = true;
 
     /** @private {boolean} */
     this.treatAsTrackingFrame_ = false;
-
-    /** @private {boolean} */
-    this.laidOutAsTrackingFrame_ = false;
   }
 
   /** @override */
@@ -151,10 +154,7 @@ export class AmpIframe extends AMP.BaseElement {
 
   assertPosition() {
     const pos = this.element.getLayoutBox();
-    console.log(this.getViewport().getSize());
     const minTop = Math.min(600, this.getViewport().getSize().height * .75);
-    console.log('viewport height', this.getViewport().getSize().height);
-    console.log('min top is ', pos.top);
     user().assert(pos.top >= minTop,
         '<amp-iframe> elements must be positioned outside the first 75% ' +
         'of the viewport or 600px from the top (whichever is smaller): %s ' +
@@ -269,9 +269,6 @@ export class AmpIframe extends AMP.BaseElement {
 
     this.isAdLike_ = isAdLike(this.element);
     this.isTrackingFrame_ = this.looksLikeTrackingIframe_();
-    if (this.isTrackingFrame_ && !this.treatAsTrackingFrame_ && this.layoutStarted_) {
-      //
-    }
     this.isDisallowedAsAd_ = this.isAdLike_ &&
         !isAdPositionAllowed(this.element, this.win);
 
@@ -317,7 +314,6 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    console.log('layout');
     user().assert(!this.isDisallowedAsAd_, 'amp-iframe is not used for ' +
         'displaying fixed ad. Please use amp-sticky-ad and amp-ad instead.');
 
@@ -331,13 +327,7 @@ export class AmpIframe extends AMP.BaseElement {
           this.element);
     }
 
-    if (!this.iframeSrc) {
-      // This failed already, lets not signal another error.
-      return Promise.resolve();
-    }
-
     if (this.isTrackingFrame_) {
-      console.log('count is', trackingIframeCount);
       if (!this.treatAsTrackingFrame_) {
         // Only increase trackingIframeCount value once
         trackingIframeCount++;
@@ -350,16 +340,19 @@ export class AmpIframe extends AMP.BaseElement {
             'https://github.com/ampproject/amphtml/issues/new');
         return Promise.resolve();
       }
-      this.laidOutAsTrackingFrame_ = true;
     }
 
+    this.isRelayoutNeeded_ = false;
     // Need to decrease trackingIframeCount if needed
     if (this.treatAsTrackingFrame_ && !this.isTrackingFrame_) {
+      this.treatAsTrackingFrame_ = false;
       trackingIframeCount--;
     }
 
-    this.treatAsTrackingFrame_ = false;
-    this.layoutStarted_ = true;
+    if (!this.iframeSrc) {
+      // This failed already, lets not signal another error.
+      return Promise.resolve();
+    }
 
     const iframe = this.element.ownerDocument.createElement('iframe');
 
@@ -375,7 +368,6 @@ export class AmpIframe extends AMP.BaseElement {
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, iframe);
     setSandbox(this.element, iframe, this.sandbox_);
     iframe.src = this.iframeSrc;
-    console.log(iframe.src);
 
     if (!this.isTrackingFrame_) {
       this.intersectionObserverApi_ = new IntersectionObserverApi(this, iframe);
@@ -384,15 +376,11 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.onload = () => {
       // Chrome does not reflect the iframe readystate.
       iframe.readyState = 'complete';
-      console.log(iframe);
-      console.log('ready!');
       this.activateIframe_();
 
-      if (this.laidOutAsTrackingFrame_) {
-        console.log('laidoutastrackingiframe');
+      if (this.treatAsTrackingFrame_) {
         // Need to confirm the iframe is real tracking iframe
         if (!this.isTrackingFrame_) {
-          console.log('what!!!');
           trackingIframeCount--;
           return;
         }
@@ -400,13 +388,11 @@ export class AmpIframe extends AMP.BaseElement {
         this.iframeSrc = null;
 
         Services.timerFor(this.win).promise(trackingIframeTimeout).then(() => {
-          console.log('hrerherere remove iframe');
           if (!this.isTrackingFrame_) {
             // False treated as tracking iframe.
             trackingIframeCount--;
             return;
           }
-          console.log('removed iframe');
           removeElement(iframe);
           this.element.setAttribute('amp-removed', '');
           this.iframe_ = null;
@@ -450,6 +436,7 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    **/
   unlayoutCallback() {
+    this.isRelayoutNeeded_ = true;
     this.activateIframe_.layoutStarted_ = false;
     this.treatAsTrackingFrame_ = false;
     if (this.iframe_) {
@@ -522,25 +509,19 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override */
   isRelayoutNeeded() {
-    if (this.layoutStarted_) {
-      return false;
-    }
-
-    if (this.isRelayoutNeeded_ === undefined) {
-      const list = [
-        'AMP-LIGHTBOX',
-        'AMP-SIDEBAR',
-      ];
+    if (this.isInContainer_ === undefined) {
       let ele = this.element;
       do {
         ele = ele.parentElement;
-        if (list.includes(ele.tagName)) {
-          return this.isRelayoutNeeded_ = true;
+        if (RELAYOUT_CONTAINER_LIST.includes(ele.tagName)) {
+          this.isInContainer_ = true;
+          break;
         }
       } while (ele && ele.tagName != 'BODY');
-      this.isRelayoutNeeded_ = false;
+      this.isInContainer_ = this.isInContainer_ || false;
     }
-    return this.isRelayoutNeeded_;
+
+    return this.isInContainer_ && this.isRelayoutNeeded_;
   }
 
   /**

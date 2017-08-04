@@ -22,6 +22,8 @@ import {Toolbar} from './toolbar';
 import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {setStyles, toggle} from '../../../src/style';
+import {debounce} from '../../../src/utils/rate-limit';
 import {removeFragment, parseUrl} from '../../../src/url';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -83,6 +85,13 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {number|string|null} */
     this.openOrCloseTimeOut_ = null;
+
+    /** @const {function()} */
+    this.boundReschedule_ = debounce(this.win, () => {
+      const children = this.getRealChildren();
+      this.scheduleLayout(children);
+      this.scheduleResume(children);
+    }, 500);
   }
 
   /** @override */
@@ -255,6 +264,8 @@ export class AmpSidebar extends AMP.BaseElement {
           const children = this.getRealChildren();
           this.scheduleLayout(children);
           this.scheduleResume(children);
+          this.element.addEventListener('transitionend', this.boundReschedule_);
+          this.element.addEventListener('animationend', this.boundReschedule_);
           // Focus on the sidebar for a11y.
           tryFocus(this.element);
         }, ANIMATION_TIMEOUT);
@@ -274,6 +285,8 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
     this.viewport_.leaveOverlayMode();
+    this.element.removeEventListener('transitionend', this.boundReschedule_);
+    this.element.removeEventListener('animationend', this.boundReschedule_);
     this.vsync_.mutate(() => {
       this.closeMask_();
       this.element.removeAttribute('open');

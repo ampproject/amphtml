@@ -7,9 +7,7 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
-  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
-
-<style amp-custom>
+  <style amp-custom>
     body {
       max-width: 527px;
       font-family: 'Questrial', Arial;
@@ -35,22 +33,6 @@
       max-width: 80%;
       max-height: 80%;
       width: 100%;
-    }
-    .anim {
-      width: 350px;
-      top: 37%;
-      border-radius: 6px;
-      animation: bottom-pop 1s;
-    }
-    @keyframes bottom-pop {
-      0% {
-        height: 0;
-        top: 100%;
-      }
-      100% {
-        height: 500px;
-        top: 37%;
-      }
     }
 
     amp-lightbox .lightbox1-content {
@@ -82,15 +64,10 @@
   </p>
 
   <amp-lightbox id="lightbox1" class="lightbox1" layout="nodisplay">
-    <div>
-      <amp-iframe width=350 height=600
-      class="anim"
-        sandbox="allow-scripts allow-same-origin"
-        layout="responsive"
-        frameborder="0"
-        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=iceland">
-          <amp-img layout="fill" placeholder src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=fill></amp-img>
-      </amp-iframe>
+    <div class="lightbox1-content">
+      <amp-img id="img0" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w452-h900-p/PANO_20150726_171347%257E2.jpg" width=226 height=450 layout="responsive"></amp-img>
+      <button on="tap:lightbox1.close">Close using on Attribute</button>
+      <strong style="background:#fff;"> You can also hit the ESC key to close </strong>
     </div>
   </amp-lightbox>
 
@@ -115,15 +92,6 @@
   <p>
     Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
   </p>
-
-  <amp-iframe width=5 height=5
-   sandbox="allow-scripts allow-same-origin"
-   src="https://google.com/maps">
-</amp-iframe>
-  <amp-iframe width=5 height=5
-   sandbox="allow-scripts allow-same-origin"
-   src="https://google.com/maps">
-</amp-iframe>
 
 </body>
 </html>

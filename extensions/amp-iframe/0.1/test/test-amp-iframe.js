@@ -51,7 +51,6 @@ describes.realWin('amp-iframe', {
     let doc;
 
     beforeEach(() => {
-      //console.log('totaltracking count is ', env.win.parent.trackingIframeCount);
       iframeSrc = 'http://iframe.localhost:' + location.port +
         '/test/fixtures/served/iframe.html';
       clickableIframeSrc = 'http://iframe.localhost:' + location.port +
@@ -97,8 +96,8 @@ describes.realWin('amp-iframe', {
       });
     }
 
-    function createAmpIframe(env, opt_attributes, opt_top, opt_height, opt_translateY,
-        opt_onAppend) {
+    function createAmpIframe(env, opt_attributes, opt_top, opt_height,
+        opt_translateY, opt_container) {
       const doc = env.win.document;
       env.win.innerHeight = opt_height;
       const attributes = opt_attributes || {
@@ -121,7 +120,13 @@ describes.realWin('amp-iframe', {
         });
         ampIframe.appendChild(img);
       }
-      doc.body.appendChild(ampIframe);
+      if (opt_container) {
+        const container = doc.createElement(opt_container);
+        container.appendChild(ampIframe);
+        doc.body.appendChild(container);
+      } else {
+        doc.body.appendChild(ampIframe);
+      }
       const viewport = Services.viewportForDoc(doc);
       viewport.resize_();
       ampIframe.style.top = '600px';
@@ -149,9 +154,7 @@ describes.realWin('amp-iframe', {
         ampIframe.style.position = attributes.position;
       }
       viewport.setScrollTop(parseInt(top, 10));
-      // if (opt_onAppend) {
-      //   opt_onAppend(win);
-      // }
+
       return ampIframe;
     }
 
@@ -263,14 +266,13 @@ describes.realWin('amp-iframe', {
         try {
           ampIframe.implementation_.layoutCallback();
         } catch (e) {
-          console.log(e);
           expect(e.message).to.match(/position/);
           resolve();
         }
       });
     });
 
-    it('should render if further than 75% viewport away from top', function* () {
+    it('should render if further than 75% vh away from top', function* () {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -734,6 +736,43 @@ describes.realWin('amp-iframe', {
           expect(impl.iframeSrc).to.contain(newSrc);
           expect(iframe.getAttribute('src')).to.contain(newSrc);
         });
+
+    it('should allow relayout when in special amp-conponent', function* () {
+      const ampIframeRealTracking = createAmpIframe(env, {
+        src: iframeSrc,
+        width: 5,
+        height: 5,
+      });
+      const ampIframeRealTracking2 = createAmpIframe(env, {
+        src: iframeSrc,
+        width: 5,
+        height: 5,
+      });
+      const ampIframeTop = createAmpIframe(env, undefined, 0);
+      const ampIframeInLightbox = createAmpIframe(env, {
+        src: iframeSrc,
+        width: 5,
+        height: 5,
+      }, undefined, undefined, undefined, 'amp-lightbox');
+      const ampIframe = createAmpIframe(env);
+      yield waitForAmpIframeLayoutPromise(doc, ampIframeRealTracking);
+      yield waitForAmpIframeLayoutPromise(doc, ampIframeRealTracking2);
+      yield waitForAmpIframeLayoutPromise(doc, ampIframeInLightbox);
+      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+
+      expect(ampIframeRealTracking.implementation_.isRelayoutNeeded())
+          .to.be.false;
+      expect(ampIframeRealTracking2.implementation_.isRelayoutNeeded())
+          .to.be.false;
+      expect(ampIframeTop.implementation_.isRelayoutNeeded()).to.be.false;
+      expect(ampIframe.implementation_.isRelayoutNeeded()).to.be.false;
+      expect(ampIframeInLightbox.implementation_.isRelayoutNeeded()).to.be.true;
+      // relayout ampIframeInLightbox should update.
+      ampIframeInLightbox.implementation_.isTrackingFrame_ = false;
+      yield Services.timerFor(env.win).promise(21);
+      ampIframeInLightbox.implementation_.layoutCallback();
+      expect(ampIframeInLightbox.implementation_.isRelayoutNeeded())
+          .to.be.false;
+    });
   });
 });
-

@@ -64,9 +64,10 @@ class AmpLightbox extends AMP.BaseElement {
     /** @private {?number} */
     this.scrollTimerId_ = null;
 
+    /** @const {function()} */
     this.boundReschedule_ = debounce(this.win, event => {
       this.reschedule_(event);
-    }, 1000);
+    }, 500);
 
     this.isFirstTransitonEnd_ = true;
   }
@@ -172,6 +173,10 @@ class AmpLightbox extends AMP.BaseElement {
     this.active_ = true;
   }
 
+  /**
+   * reschedule layout on animation/transition end. But ignore the first transitionend event
+   * @param {!Event} event
+   */
   reschedule_(event) {
     if (event.type == 'transitionend') {
       // Ignore the first transitionend event.
