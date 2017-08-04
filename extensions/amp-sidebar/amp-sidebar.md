@@ -66,7 +66,7 @@ for content within the sidebar to be displayed on other parts of the main conten
 In the following example, we use `amp-sidebar` to contain navigation items. However, The second and fourth item, Nav Item 2 and Nav Item 4, are assigned to element id that is on the page. By using the [`on`](../../spec/amp-actions-and-events.md) attribute, we can scroll smoothly to the element, using the element id and `scrollTo`.
 
 ```html
-<amp-sidebar id="sidebar1" layout="nodisplay">
+<amp-sidebar id="sidebar1" layout="nodisplay" side="right">
   <ul>
     <li>Nav item 1</li>
     <li><a href="#idTwo" on="tap:idTwo.scrollTo">Nav item 2</a></li>
@@ -76,11 +76,6 @@ In the following example, we use `amp-sidebar` to contain navigation items. Howe
     <li>Nav item 6</li>
   </ul>
 </amp-sidebar>
-
-<div id="idTwo">
-</div>
-<div id="idFour">
-</div>
 ```
 
 ### Opening and closing the sidebar
@@ -158,10 +153,6 @@ In the following example, we display a `toolbar` if the window width is less tha
 
 <div id="target-element">
 </div>
-<div id="idTwo">
-</div>
-<div id="idFour">
-</div>
 ```
 
 ## Styling Toolbar
@@ -201,10 +192,6 @@ In the following example, we display a `toolbar` if the window width is less tha
 </amp-sidebar>
 
 <div id="target-element">
-</div>
-<div id="idTwo">
-</div>
-<div id="idFour">
 </div>
 ```
 
