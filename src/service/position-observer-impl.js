@@ -29,6 +29,8 @@ import {
 import {serializeMessage} from '../../src/3p-frame-messaging';
 import {parseJson, tryParseJson} from '../../src/json.js';
 import {getData} from '../../src/event-helper';
+import {Observable} from '../../src/observable';
+import {debounce} from '../../src/utils/rate-limit';
 
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';
@@ -60,22 +62,42 @@ export const PositionObserverFidelity = {
 /** @const @private */
 const LOW_FIDELITY_FRAME_COUNT = 4;
 
-class AbstractPositionObserver {
+export class PositionObserver {
 
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
-  constructor(ampdoc) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+  /**
+   * @param {!Window} win
+   * @param {!./vsync-impl.Vsync} vsync
+   * @param {!PosObViewportInfoDef} posObViewportInfo
+   */
+  constructor(win, vsync, posObViewportInfo) {
+    /** @private {!Window} */
+    this.win_ = win;
 
     /** @private {!Array<!Object>} */
     this.entries_ = [];
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(ampdoc.win);
+    this.vsync_ = vsync;
 
     /** @private {!./viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
+    /** @private {Array<function()>} */
+    this.unlisteners_ = [];
+
+    /** @private {boolean} */
+    this.inScroll_ = false;
+
+    /** @private {boolean} */
+    this.measure_ = false;
+
+    /** @private {function()} */
+    this.boundStopScroll_ = debounce(this.win_, () => {
+      this.inScroll_ = false;
+    }, 500);
+
+    /** @private {boolean} */
+    this.needRefreshOnMessage_ = false;
   }
 
   /**
@@ -84,51 +106,7 @@ class AbstractPositionObserver {
    * @param {function(PositionInViewportEntryDef)} handler
    */
   observe(element, fidelity, handler) {
-    // TODO(@zhouyx, #9208) make entry into a class
-    const entry = {
-      element,
-      handler,
-      fidelity,
-      position: null,
-      turn: (fidelity == PositionObserverFidelity.LOW) ?
-          Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0,
-      trigger(position) {
-        const prePos = entry.position;
-
-        if (prePos
-            && layoutRectEquals(prePos.positionRect, position.positionRect)
-            && layoutRectEquals(prePos.viewportRect, position.viewportRect)) {
-          // position doesn't change, do nothing.
-          return;
-        }
-
-        // Add the relative position of the element to its viewport
-        position.relativePos = layoutRectsRelativePos(
-            position.positionRect, position.viewportRect
-        );
-
-        if (layoutRectsOverlap(position.positionRect, position.viewportRect)) {
-          // Update position
-          entry.position = position;
-          // Only call handler if entry element overlap with viewport.
-          try {
-            entry.handler(position);
-          } catch (err) {
-            // TODO(@zhouyx, #9208) Throw error.
-          }
-        } else if (entry.position) {
-          // Need to notify that element gets outside viewport
-          // NOTE: This is required for inabox position observer.
-          entry.position = null;
-          position.positionRect = null;
-          try {
-            entry.handler(position);
-          } catch (err) {
-            // TODO(@zhouyx, #9208) Throw error.
-          }
-        }
-      },
-    };
+    const entry = new PositionObserverEntry(element, fidelity, handler);
 
     this.entries_.push(entry);
 
@@ -137,8 +115,56 @@ class AbstractPositionObserver {
     }
 
     this.vsync_.measure(() => {
-      this.updateEntryPosition(entry);
+      this.updateSingleEntry(entry);
     });
+  }
+
+  /**
+   * @param {!Element} element
+   */
+  unobserve(element) {
+    for (let i = 0; i < this.entries_.length; i++) {
+      if (this.entries_[i].element == element) {
+        this.entries_[i].handler = null;
+        this.entries_.splice(i, 1);
+        if (this.entries_.length == 0) {
+          this.stopCallback();
+        }
+        return;
+      }
+    }
+    dev().error(TAG, 'cannot unobserve unobserved element');
+  }
+
+  /**
+   * Callback function that gets called when start to observe the first element.
+   * Should be override by sub class.
+   */
+  startCallback() {
+    this.viewport_.connect();
+    // listen to viewport scroll event to help pass determine if need to
+    this.unlisteners_.push(this.viewport_.onScroll(() => {
+      this.onScrollHandler();
+    }));
+    this.unlisteners_.push(this.viewport_.onResize(() => {
+      this.onResizeHandler();
+    }));
+    this.unlisteners_.push(this.viewport_.onHostMessage(event => {
+      this.onHostMessageHandler(event);
+    }));
+  }
+
+  /**
+   * Callback function that gets called when unobserve last observed element.
+   * Should be override by sub class.
+   */
+    /* @override */
+  stopCallback() {
+    this.viewport_.disconnect();
+    while (this.unlisteners_.length) {
+      const unlisten = this.unlisteners_.pop();
+      unlisten();
+    }
   }
 
   /**
@@ -160,128 +186,17 @@ class AbstractPositionObserver {
   }
 
   /**
-   * @param {!Element} element
-   */
-  unobserve(element) {
-    for (let i = 0; i < this.entries_.length; i++) {
-      if (this.entries_[i].element == element) {
-        this.entries_[i].handler = null;
-        this.entries_.splice(i, 1);
-        if (this.entries_.length == 0) {
-          this.stopCallback();
-        }
-        return;
-      }
-    }
-    dev().error(TAG, 'cannot unobserve unobserved element');
-  }
-
-  /** @param {!Object} unusedEntry */
-  updateEntryPosition(unusedEntry) {}
-
-  /**
-   * Callback function that gets called when start to observe the first element.
-   * Should be override by sub class.
-   */
-  startCallback() {}
-
-  /**
-   * Callback function that gets called when unobserve last observed element.
-   * Should be override by sub class.
-   */
-  stopCallback() {}
-}
-
-/** The implementation of the positionObserver for an ampdoc */
-export class AmpDocPositionObserver extends AbstractPositionObserver {
-
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
-  constructor(ampdoc) {
-
-    super(ampdoc);
-
-    /** @private {boolean} */
-    this.inScroll_ = false;
-
-    /** @private {boolean} */
-    this.measure_ = false;
-
-    /** @private {number} */
-    this.scrollTimer_ = Date.now();
-
-    /** @private {Array<function()>} */
-    this.unlisteners_ = [];
-  }
-
-  /* @override */
-  startCallback() {
-    // listen to viewport scroll event to help pass determine if need to
-    const stopScroll = () => {
-      const timeDiff = Date.now() - this.scrollTimer_;
-      if (timeDiff < 500) {
-        // viewport scroll in the last 500 ms, wait
-        return;
-      }
-      // assume scroll stops, if no scroll event in the last 500,
-      this.inScroll_ = false;
-    };
-    let timeout = null;
-    this.unlisteners_.push(this.viewport_.onScroll(() => {
-      this.inScroll_ = true;
-      this.scrollTimer_ = Date.now();
-      this.schedulePass_();
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-      timeout = setTimeout(stopScroll.bind(this), 500);
-    }));
-    this.unlisteners_.push(this.viewport_.onResize(() => {
-      this.vsync_.measure(() => {
-        this.pass_(true);
-      });
-    }));
-  }
-
-  /* @override */
-  stopCallback() {
-    while (this.unlisteners_.length) {
-      const unlisten = this.unlisteners_.pop();
-      unlisten();
-    }
-  }
-
-  /** @param {boolean=} recursive */
-  schedulePass_(recursive) {
-    // TODO (@zhouyx, #9208): remove the duplicate recursive and this.measure_
-    // P1: account for effective fidelity using this.effectiveFidelity
-    // P2: do passes on onDomMutation (if available using MutationObserver
-    // mostly for in-a-box host, since most DOM mutations are constraint to the
-    // AMP elements).
-    if (!recursive && this.measure_) {
-      // call of schedulePass_ from viewport onScroll
-      // Do nothing if currently measure with calling schedulePass recursively
-      return;
-    }
-    this.measure_ = true;
-    if (!this.inScroll_) {
-      // not in scroll, do not need to measure
-      this.measure_ = false;
-      return;
-    }
-    this.vsync_.measure(() => {
-      this.pass_();
-      this.schedulePass_(true);
-    });
-  }
-
-  /**
    * This should always be called in vsync.
    * @param {boolean=} force
+   * @param {boolean=} opt_remeasure
    * @private
   */
-  pass_(force) {
+  updateAllEntries_(force, opt_remeasure) {
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
+      if (opt_remeasure) {
+        entry.element.inIframePositionRect = null;
+      }
       if (!force && entry.turn != 0) {
         // Not ready for their turn yet.
         entry.turn--;
@@ -293,21 +208,24 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
           entry.turn = LOW_FIDELITY_FRAME_COUNT;
         }
       }
-
-      this.updateEntryPosition(entry);
+      this.updateSingleEntry(entry);
     }
   }
 
-  /**
-   * Should always be called in vsync.
-   * @override
-   */
-  updateEntryPosition(entry) {
-    // get layoutBoxes relative to doc.
-    const elementBox = layoutRectFromDomRect(
-        entry.element./*OK*/getBoundingClientRect());
+  /** @param {!Object} entry */
+  updateSingleEntry(entry) {
+    if (this.needRefreshOnMessage_) {
+      entry.element.inIframePositionRect = null;
+    }
+
+    const elementBox =
+        this.viewport_.getLayoutRect(entry.element);
 
     const viewportSize = this.viewport_.getSize();
+    if (!elementBox || !viewportSize) {
+      // Viewport is not ready yet.
+      return;
+    }
     const viewportBox =
         layoutRectLtwh(0, 0, viewportSize.width, viewportSize.height);
 
@@ -317,129 +235,77 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
       viewportRect: viewportBox,
     }));
   }
-}
 
-/** The implementation of the positionObserver for inabox */
-export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
-  constructor(ampdoc) {
-    super(ampdoc);
-
-    /** @private {!AmpDocPositionObserver} */
-    this.positionObserver_ = new AmpDocPositionObserver(ampdoc);
-
-    // TODO(@zhouyx, #9208) support fidelity
-    this.effectiveFidelity_ = PositionObserverFidelity.LOW;
-
-    /** @private {?PositionInViewportEntryDef} */
-    this.iframePosition_ = null;
-
-    /** @private {?function()} */
-    this.unlistenHost_ = null;
-  }
-
-  /** @override */
-  observe(element, fidelity, handler) {
-    super.observe(element, fidelity, handler);
-    this.positionObserver_.observe(element, fidelity, position => {
-      element.inIframePositionRect = position.positionRect;
-    });
-  }
-
-  /** @override */
-  unobserve(element) {
-    super.unobserve(element);
-    this.positionObserver_.unobserve(element);
-  }
-
-  /** @override */
-  startCallback() {
-    // TODO(@zhouyx, #9208) Remove all of them
-    const object = {};
-    const dataObject = tryParseJson(this.ampdoc_.win.name);
-    let sentinel = null;
-    if (dataObject) {
-      sentinel = dataObject['_context']['sentinel'];
-    }
-    const win = this.ampdoc_.win;
-    object.type = SEND_POSITIONS_HIGH_FIDELITY;
-    this.ampdoc_.win.parent./*OK*/postMessage(serializeMessage(
-        SEND_POSITIONS_HIGH_FIDELITY, sentinel),
-        '*'
-    );
-
-    this.ampdoc_.win.addEventListener('message', event => {
-    // Cheap operations first, so we don't parse JSON unless we have to.
-      if (event.source != win.parent || typeof getData(event) != 'string' ||
-          dev().assertString(getData(event)).indexOf('amp-') != 0) {
-        return;
-      }
-      // Parse JSON only once per message.
-      const data = parseJson(
-          dev().assertString(getData(event)).substr(4));
-      if (data['sentinel'] != sentinel) {
-        return;
-      }
-
-      if (data['type'] != POSITION_HIGH_FIDELITY) {
-        return;
-      }
-
-      this.onMessageReceivedHandler_(
-      /** @type {PositionInViewportEntryDef} */ (data));
-    });
-  }
-
-  /** @override */
-  stopCallback() {
-    if (this.unlistenHost_) {
-      this.unlistenHost_();
-      this.unlistenHost_ = null;
+  /**
+   * Handle viewport scroll event
+   */
+  onScrollHandler() {
+    this.needRefreshOnMessage_ = true;
+    this.boundStopScroll_();
+    this.inScroll_ = true;
+    if (!this.measure_) {
+      this.schedulePass_();
     }
   }
 
   /**
-   * @param {!PositionInViewportEntryDef} iframePosition
-   * @private
+   * Handle viewport resize event
    */
-  onMessageReceivedHandler_(iframePosition) {
-    // iframe position change. recalculate element position.
-    // Cache iframe position for later usage.
-    this.iframePosition_ = iframePosition;
-
-    // do this in vsyn.measure
+  onResizeHandler() {
+    this.needRefreshOnMessage_ = true;
     this.vsync_.measure(() => {
-      this.pass_();
+      this.updateAllEntries_(true);
     });
   }
 
-  /** @private */
-  pass_() {
-    for (let i = 0; i < this.entries_.length; i++) {
-      const entry = this.entries_[i];
-      this.updateEntryPosition(entry);
+  /**
+   * Handle position info message from host window
+   * @param {!Event} event
+   */
+  onHostMessageHandler(event) {
+    if (event.source != this.win_.parent || typeof getData(event) != 'string' ||
+        dev().assertString(getData(event)).indexOf('amp-') != 0) {
+      return;
     }
+    // Parse JSON only once per message.
+    const data = parseJson(
+        dev().assertString(getData(event)).substr(4));
+    if (data['sentinel'] != this.viewport_.getSentinel()) {
+      return;
+    }
+
+    if (data['type'] != POSITION_HIGH_FIDELITY) {
+      return;
+    }
+    const iframePosition = data;
+
+    this.viewport_.storeIframePosition(iframePosition);
+
+    // do this in vsyn.measure
+    this.vsync_.measure(() => {
+      this.updateAllEntries_();
+    });
   }
 
-  /** @override */
-  updateEntryPosition(entry) {
-    if (!this.iframePosition_ || !this.iframePosition_.positionRect) {
-      // If not receive iframe position from host, or if iframe is outside vp
+  /**
+   * Update all entries during scroll
+   */
+  schedulePass_() {
+    // TODO (@zhouyx, #9208):
+    // P1: account for effective fidelity using this.effectiveFidelity
+    // P2: do passes on onDomMutation (if available using MutationObserver
+    // mostly for in-a-box host, since most DOM mutations are constraint to the
+    // AMP elements).
+    this.measure_ = true;
+    if (!this.inScroll_) {
+      // Stop measure if viewport is no longer scrolling
+      this.measure_ = false;
       return;
     }
-    if (!entry.element.inIframePositionRect) {
-      // Not receive element position in iframe from ampDocPositionObserver
-      return;
-    }
-    const iframeBox = this.iframePosition_.positionRect;
-    const viewportBox = this.iframePosition_.viewportRect;
-    // Adjust element rect relative to viewportBox
-    let elementBox = entry.element.inIframePositionRect;
-    elementBox = moveLayoutRect(elementBox, iframeBox.left, iframeBox.top);
-    entry.trigger(/** @type {PositionInViewportEntryDef}*/ ({
-      positionRect: elementBox,
-      viewportRect: viewportBox,
-    }));
+    this.vsync_.measure(() => {
+      this.updateAllEntries_();
+      this.schedulePass_();
+    });
   }
 }
 
@@ -448,10 +314,253 @@ export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
  */
 export function installPositionObserverServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'position-observer', () => {
+    let viewportInfo;
+    const vsync = Services.vsyncFor(ampdoc.win);
     if (getMode(ampdoc.win).runtime == 'inabox') {
-      return new InaboxAmpDocPositionObserver(ampdoc);
+      viewportInfo = new PosObViewportInfoInabox(ampdoc);
     } else {
-      return new AmpDocPositionObserver(ampdoc);
+      viewportInfo = new PosObViewportInfoAmpDoc(ampdoc);
     }
+    return new PositionObserver(ampdoc.win, vsync, viewportInfo);
   });
+}
+
+
+/**
+ * @interface
+ */
+export class PosObViewportInfoDef {
+  connect() {}
+
+  disconnect() {}
+
+  /**
+   * @param {function()} unusedCallback
+   * @return {function()}
+   */
+  onScroll(unusedCallback) {}
+
+  /**
+   * @param {function()} unusedCallback
+   * @return {function()}
+   */
+  onResize(unusedCallback) {}
+
+  /**
+   * @param {function(?)} unusedCallback
+   * @return {function()}
+   */
+  onHostMessage(unusedCallback) {
+
+  }
+
+  /**
+   * Returns the size of top window viewport.
+   * @return {?{width: number, height: number}}
+   */
+  getSize() {}
+
+  /**
+   * Returns the rect of the element to the top window viewport.
+   * @param {!Element} unusedElement
+   * @return {?../layout-rect.LayoutRectDef}
+   */
+  getLayoutRect(unusedElement) {}
+
+  /**
+   * TODO: Use iframeClient to make request. remove
+   * @return {string}
+   */
+  getSentinel() {}
+
+
+  storeIframePosition(unusedPosition) {}
+}
+
+/**
+ * @implements {PosObViewportInfoDef}
+ */
+class PosObViewportInfoAmpDoc {
+  constructor(ampdoc) {
+    this.ampdoc = ampdoc;
+    this.viewport_ = Services.viewportForDoc(ampdoc);
+  }
+
+  connect() {}
+
+  disconnect() {}
+
+  /**
+   * @param {function()} callback
+   * @return {function()}
+   */
+  onScroll(callback) {
+    return this.viewport_.onScroll(callback);
+  }
+
+  /**
+   * @param {function()} callback
+   * @return {function()}
+   */
+  onResize(callback) {
+    return this.viewport_.onResize(callback);
+  }
+
+  /**
+   * @param {function(?)} unusedCallback
+   * @return {function()}
+   */
+  onHostMessage(unusedCallback) {
+    // return unused unlisten function;
+    return () => {};
+  }
+
+  getSize() {
+    return this.viewport_.getSize();
+  }
+
+  getLayoutRect(element) {
+    //return this.viewport_.getLayoutRect(element);
+    return layoutRectFromDomRect(
+        element./*OK*/getBoundingClientRect());
+  }
+
+  getSentinel() {}
+
+  storeIframePosition(unusedPosition) {}
+}
+
+/**
+ * @implements {PosObViewportInfoDef}
+ */
+class PosObViewportInfoInabox {
+  constructor(ampdoc) {
+    this.ampdoc = ampdoc;
+    this.win_ = ampdoc.win;
+    this.viewport_ = Services.viewportForDoc(ampdoc);
+    this.onMessageReceivedObservers_ = new Observable();
+    this.boundOnMessageEventListener_ =
+        event => this.onMessageReceivedObservers_.fire(event);
+    this.viewportBox_ = null;
+    this.iframePosition_ = null;
+    this.sentinel = null;
+  }
+
+  connect() {
+    this.win_.addEventListener('message', this.boundOnMessageEventListener_);
+    const object = {};
+    const dataObject = tryParseJson(this.win_.name);
+    if (dataObject) {
+      this.sentinel = dataObject['_context']['sentinel'];
+    }
+    object.type = SEND_POSITIONS_HIGH_FIDELITY;
+    this.win_.parent./*OK*/postMessage(serializeMessage(
+        SEND_POSITIONS_HIGH_FIDELITY, this.sentinel),
+        '*'
+    );
+  }
+
+  disconnect() {
+    this.win_.removeEventListener('message', this.boundOnMessageEventListener_);
+  }
+
+  /**
+   * @param {function()} callback
+   * @return {function()}
+   */
+  onScroll(callback) {
+    return this.viewport_.onScroll(callback);
+  }
+
+  /**
+   * @param {function(?)} callback
+   * @return {function()}
+   */
+  onResize(callback) {
+    return this.viewport_.onResize(callback);
+  }
+
+  /**
+   * @param {function(?)} callback
+   * @return {function()}
+   */
+  onHostMessage(callback) {
+    return this.onMessageReceivedObservers_.add(callback);
+  }
+
+  getSize() {
+    return this.viewportBox_;
+  }
+
+  getLayoutRect(element) {
+    if (!this.iframePosition_) {
+      // If not receive iframe position from host, or if iframe is outside vp
+      return null;
+    }
+    if (!element.inIframePositionRect) {
+      // Not receive element position in iframe from ampDocPositionObserver
+      element.inIframePositionRect = element./*OK*/getBoundingClientRect();
+    }
+
+    const iframeBox = this.iframePosition_;
+    const elementBox = element.inIframePositionRect;
+    return moveLayoutRect(elementBox, iframeBox.left, iframeBox.top);
+  }
+
+  getSentinel() {
+    return this.sentinel;
+  }
+
+  storeIframePosition(iframePosition) {
+    this.iframePosition_ = iframePosition && iframePosition.positionRect;
+    this.viewportBox_ = iframePosition && iframePosition.viewportRect;
+  }
+}
+
+
+class PositionObserverEntry {
+  constructor(element, fidelity, handler) {
+    this.element = element;
+    this.handler_ = handler;
+    this.fidelity = fidelity;
+    this.turn = (fidelity == PositionObserverFidelity.LOW) ?
+        Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0;
+    this.position = null;
+  }
+
+  trigger(position) {
+    const prePos = this.position;
+    if (prePos
+        && layoutRectEquals(prePos.positionRect, position.positionRect)
+        && layoutRectEquals(prePos.viewportRect, position.viewportRect)) {
+      // position doesn't change, do nothing.
+      return;
+    }
+
+    // Add the relative position of the element to its viewport
+    position.relativePos = layoutRectsRelativePos(
+        position.positionRect, position.viewportRect
+    );
+
+    if (layoutRectsOverlap(position.positionRect, position.viewportRect)) {
+      // Update position
+      this.position = position;
+      // Only call handler if entry element overlap with viewport.
+      try {
+        this.handler_(position);
+      } catch (err) {
+        // TODO(@zhouyx, #9208) Throw error.
+      }
+    } else if (this.position) {
+      // Need to notify that element gets outside viewport
+      // NOTE: This is required for inabox position observer.
+      this.position = null;
+      position.positionRect = null;
+      try {
+        this.handler_(position);
+      } catch (err) {
+        // TODO(@zhouyx, #9208) Throw error.
+      }
+    }
+  }
 }

@@ -21,6 +21,75 @@ import {
 } from '../../src/layout-rect';
 import {Observable} from '../../src/observable';
 import {throttle} from '../../src/utils/rate-limit';
+import {
+  PosObViewportInfoDef,
+} from '../../src/service/position-observer-impl';
+
+
+/**
+ * @implements {PosObViewportInfoDef}
+ */
+export class PosObViewportInfoNonAmpHost {
+  constructor(win) {
+    this.win_ = win;
+    this.scrollObservable_ = new Observable();
+    this.resizeObservable_ = new Observable();
+    this.boundScrollEventListener_ = () => this.scrollObservable_.fire();
+    this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
+  }
+
+  connect() {
+    //console.log('connect but do nothing! should fail');
+    this.win_.addEventListener('scroll', this.boundScrollEventListener_);
+    this.win_.addEventListener('resize', this.boundResizeEventListener_);
+  }
+
+  disconnect() {
+    this.win_.removeEventListener('scroll', this.boundScrollEventListener_);
+    this.win_.removeEventListener('resize', this.boundResizeEventListener_);
+  }
+
+  onScroll(callback) {
+    return this.scrollObservable_.add(callback);
+  }
+
+  onResize(callback) {
+    return this.resizeObservable_.add(callback);
+  }
+
+  onHostMessage(unusedCallback) {
+    return () => {};
+  }
+
+  getSize() {
+    return {
+      width: this.win_./*OK*/innerWidth,
+      height: this.win_./*OK*/innerHeight,
+    };
+  }
+
+  getLayoutRect(element) {
+    return layoutRectFromDomRect(element./*OK*/getBoundingClientRect());
+  }
+
+  getSentinel() {}
+
+  storeIframePosition(unusedPosition) {}
+}
+
+export class NonAmpHostVsync {
+  constructor(win) {
+    this.win_ = win;
+  }
+
+  measure(callback) {
+    this.win_.requestAnimationFrame(callback);
+  }
+
+  mutate(callback) {
+    this.win_.requestAnimationFrame(callback);
+  }
+}
 
 /**
  * @typedef {{

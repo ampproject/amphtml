@@ -88,7 +88,7 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?SubscriptionApi} */
     this.inaboxRequestPositionApi_ = null;
 
-    /** @private {?../../../src/service/position-observer-impl.AmpDocPositionObserver} */
+    /** @private {?../../../src/service/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
     /** @private {!Array<!Function>} functions to unregister listeners */

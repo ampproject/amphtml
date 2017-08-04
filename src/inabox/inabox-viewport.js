@@ -222,6 +222,10 @@ export class ViewportBindingInabox {
    */
   updateBoxRect_(positionRect) {
     if (!positionRect) {
+      // inabox iframe gets out of viewport
+      const boxWidth = this.win./*OK*/innerWidth;
+      const boxHeight = this.win./*OK*/innerHeight;
+      this.boxRect_ = layoutRectLtwh(0, boxHeight + 1, boxWidth, boxHeight);
       return;
     }
 

@@ -149,7 +149,7 @@ export class VideoManager {
     /** @private {boolean} */
     this.resizeListenerInstalled_ = false;
 
-    /** @private {./position-observer-impl.AmpDocPositionObserver} */
+    /** @private {./position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
     /** @private {?VideoEntry} */
