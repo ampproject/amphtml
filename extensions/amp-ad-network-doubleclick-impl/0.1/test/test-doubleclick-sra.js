@@ -18,7 +18,6 @@ import {
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
 } from '../../../amp-a4a/0.1/amp-a4a';
-import {Services} from '../../../../src/services';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
@@ -179,11 +178,11 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
 
     function createA4aSraInstance(networkId) {
       const element = createAndAppendAdElement({
-          type: 'doubleclick',
-          height: 320,
-          width: 50,
-          'data-slot': `/${networkId}/abc/def`,
-        });
+        type: 'doubleclick',
+        height: 320,
+        width: 50,
+        'data-slot': `/${networkId}/abc/def`,
+      });
       element.getLayoutBox = () => {
         return layoutRectLtwh(0, 0, 200, 50);
       };
