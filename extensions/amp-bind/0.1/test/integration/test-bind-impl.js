@@ -15,12 +15,12 @@
  */
 
 import * as sinon from 'sinon';
-import {AmpEvents} from '../../../../src/amp-events';
-import {Bind} from '../bind-impl';
-import {BindEvents} from '../bind-events';
-import {chunkInstanceForTesting} from '../../../../src/chunk';
-import {toArray} from '../../../../src/types';
-import {user} from '../../../../src/log';
+import {AmpEvents} from '../../../../../src/amp-events';
+import {Bind} from '../../bind-impl';
+import {BindEvents} from '../../bind-events';
+import {chunkInstanceForTesting} from '../../../../../src/chunk';
+import {toArray} from '../../../../../src/types';
+import {user} from '../../../../../src/log';
 
 /**
  * @param {!Object} env
@@ -99,7 +99,7 @@ function waitForEvent(env, name) {
   });
 }
 
-describe('Bind', function() {
+describe.configure().skipSauceLabs().run('Bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);

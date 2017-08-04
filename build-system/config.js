@@ -59,7 +59,7 @@ var testPaths = commonTestPaths.concat([
 var unitTestPaths = commonTestPaths.concat([
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
-  'extensions/**/test/**/*.js',
+  'extensions/**/test/*.js',
 ]);
 
 var integrationTestPaths = commonTestPaths.concat([
