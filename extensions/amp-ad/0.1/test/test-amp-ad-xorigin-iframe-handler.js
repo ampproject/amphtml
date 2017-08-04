@@ -152,7 +152,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       });
 
       it('should resolve on message "no-content" ' +
-          'and remove non-master iframe', () => {
+          'and remove non-master iframe', function(done) {
         expect(iframe.style.visibility).to.equal('hidden');
         iframe.postMessageToParent({
           sentinel: 'amp3ptest' + testIndex,
@@ -161,6 +161,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         return initPromise.then(() => {
           expect(noContentSpy).to.be.calledWith(false);
           expect(iframeHandler.iframe).to.be.null;
+          done();
         });
       });
 
