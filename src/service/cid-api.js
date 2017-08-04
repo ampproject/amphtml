@@ -17,6 +17,7 @@
 import {getCookie, setCookie} from '../cookies';
 import {Services} from '../services';
 import {dev} from '../log';
+import {dict} from '../utils/object';
 
 const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
 const API_KEYS = {
@@ -36,25 +37,45 @@ const TIMEOUT = 30000;
 const DAY = 24 * 60 * 60 * 1000;
 const YEAR = 365 * DAY;
 
+/**
+ * Client impl for Google CID API
+ */
 export class GoogleCidApi {
 
+  /**
+   * @param {!Window} win
+   */
   constructor(win) {
     this.win_ = win;
+    /**
+     * @private {!./timer-impl.Timer}
+     */
     this.timer_ = Services.timerFor(this.win_);
-    this.cidPromise_ = null;
+
+    /**
+     * @private {!Object<string, !Promise<?string>>}
+     */
+    this.cidPromise_ = {};
   }
 
+  /**
+   * @param {string} scope
+   * @param {string} apiClient
+   * @return {!Promise<?string>}
+   */
   getScopedCid(scope, apiClient) {
     const url = this.getUrl_(apiClient);
     if (!url) {
-      return Promise.resolve(null);
+      return Promise.resolve(/** @type {?string} */(null));
     }
 
-    if (this.cidPromise_) {
-      return this.cidPromise_;
+    if (this.cidPromise_[scope]) {
+      return this.cidPromise_[scope];
     }
     let token;
-    return this.cidPromise_ = this.timer_.poll(1000, () => {
+    // Block the request if a previous request is on flight
+    // Poll every 200ms. Longer interval means longer latency for the 2nd CID.
+    return this.cidPromise_[scope] = this.timer_.poll(200, () => {
       token = getCookie(this.win_, AMP_TOKEN);
       return token !== TokenStatus.RETRIEVING;
     }).then(() => {
@@ -65,7 +86,7 @@ export class GoogleCidApi {
       if (!token) {
         this.persistToken_(TokenStatus.RETRIEVING, TIMEOUT);
       }
-      return this.fetchCid_(url, scope, token)
+      return this.fetchCid_(dev().assertString(url), scope, token)
           .then(this.handleResponse_.bind(this, scope))
           .catch(e => {
             this.persistToken_(TokenStatus.ERROR, TIMEOUT);
@@ -75,12 +96,18 @@ export class GoogleCidApi {
     });
   }
 
+  /**
+   * @param {string} url
+   * @param {string} scope
+   * @param {?string} token
+   * @return {!Promise<!JsonObject>}
+   */
   fetchCid_(url, scope, token) {
-    const payload = {
-      originScope: scope,
-    };
+    const payload = dict({
+      'originScope': scope,
+    });
     if (token) {
-      payload.securityToken = token;
+      payload['securityToken'] = token;
     }
     return this.timer_.timeoutPromise(
         TIMEOUT,
@@ -93,21 +120,30 @@ export class GoogleCidApi {
         }).then(res => res.json()));
   }
 
+  /**
+   * @param {string} scope
+   * @param {!JsonObject} res
+   * @return {?string}
+   */
   handleResponse_(scope, res) {
-    if (res.optOut) {
+    if (res['optOut']) {
       this.persistToken_(TokenStatus.OPT_OUT, YEAR);
       return null;
     }
-    if (res.clientId) {
-      this.persistToken_(res.securityToken, YEAR);
-      setCookie(this.win_, scope, res.clientId, this.expiresIn_(YEAR));
-      return res.clientId;
+    if (res['clientId']) {
+      this.persistToken_(res['securityToken'], YEAR);
+      setCookie(this.win_, scope, res['clientId'], this.expiresIn_(YEAR));
+      return res['clientId'];
     } else {
       this.persistToken_(TokenStatus.ERROR, DAY);
       return null;
     }
   }
 
+  /**
+   * @param {string} apiClient
+   * @return {?string}
+   */
   getUrl_(apiClient) {
     const key = API_KEYS[apiClient];
     if (!key) {
@@ -116,12 +152,20 @@ export class GoogleCidApi {
     return GOOGLE_API_URL + key;
   }
 
+  /**
+   * @param {string|undefined} tokenValue
+   * @param {number} expires
+   */
   persistToken_(tokenValue, expires) {
     if (tokenValue) {
       setCookie(this.win_, AMP_TOKEN, tokenValue, this.expiresIn_(expires));
     }
   }
 
+  /**
+   * @param {number} time
+   * @return {number}
+   */
   expiresIn_(time) {
     return this.win_.Date.now() + time;
   }

@@ -18,6 +18,7 @@ import {GoogleCidApi} from '../../src/service/cid-api';
 import {installTimerService} from '../../src/service/timer-impl';
 import {stubService} from '../../testing/test-helper';
 import {getCookie, setCookie} from '../../src/cookies';
+import * as sinon from 'sinon';
 
 describes.realWin('test-cid-api', {}, env => {
 
@@ -148,6 +149,59 @@ describes.realWin('test-cid-api', {}, env => {
   it('should return null if apiClient is not supported', () => {
     return api.getScopedCid('scope-a', 'non-supported').then(cid => {
       expect(cid).to.be.null;
+    });
+  });
+
+  it('should not send another request if one is already out', () => {
+    let responseResolver;
+    fetchJsonStub.returns(new Promise(res => {responseResolver = res;}));
+
+    const promise1 = api.getScopedCid('scope-a', 'googleanalytics');
+    const promise2 = api.getScopedCid('scope-a', 'googleanalytics');
+
+    responseResolver({
+      json: () => {
+        return {
+          clientId: 'amp-12345',
+        };
+      },
+    });
+    return Promise.all([promise1, promise2]).then(cids => {
+      expect(cids[0]).to.equal('amp-12345');
+      expect(cids[1]).to.equal('amp-12345');
+      expect(fetchJsonStub).to.be.calledOnce;
+    });
+  });
+
+  it('should work when 2 scopes are requested same time', () => {
+    let responseResolverA;
+    let responseResolverB;
+
+    fetchJsonStub.onCall(0)
+        .returns(new Promise(res => {responseResolverA = res;}));
+    fetchJsonStub.onCall(1)
+        .returns(new Promise(res => {responseResolverB = res;}));
+    const promiseA = api.getScopedCid('scope-a', 'googleanalytics');
+    const promiseB = api.getScopedCid('scope-b', 'googleanalytics');
+
+    responseResolverA({
+      json: () => {
+        return {
+          clientId: 'amp-12345-a',
+          securityToken: 'amp-token-123',
+        };
+      },
+    });
+    responseResolverB({
+      json: () => {
+        return {
+          clientId: 'amp-12345-b',
+        };
+      },
+    });
+    return Promise.all([promiseA, promiseB]).then(cids => {
+      expect(cids[0]).to.equal('amp-12345-a');
+      expect(cids[1]).to.equal('amp-12345-b');
     });
   });
 });
