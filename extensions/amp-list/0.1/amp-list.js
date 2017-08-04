@@ -23,6 +23,9 @@ import {removeChildren} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 
+/** @const {string} */
+const TAG = 'amp-list';
+
 /**
  * The implementation of `amp-list` component. See {@link ../amp-list.md} for
  * the spec.
@@ -95,15 +98,21 @@ export class AmpList extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const src = mutations['src'];
     const state = mutations['state'];
-    if (src != undefined) {
-      this.fetchList_();
-    } else if (state != undefined) {
+
+    if (src !== undefined) {
+      const typeOfSrc = typeof src;
+      if (typeOfSrc === 'string') {
+        this.fetchList_();
+      } else if (typeOfSrc === 'object') {
+        const items = isArray(src) ? src : [src];
+        this.renderItems_(items);
+      } else {
+        user().error(TAG, 'Unexpected "src" type: ' + src);
+      }
+    } else if (state !== undefined) {
       const items = isArray(state) ? state : [state];
       this.renderItems_(items);
-    }
-    if (src != undefined && state != undefined) {
-      user().warn('AMP-LIST', '[src] and [state] mutated simultaneously.' +
-          ' The [state] mutation will be dropped.');
+      user().warn(TAG, '[state] is deprecated, please use [src] instead.');
     }
   }
 
