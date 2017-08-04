@@ -46,7 +46,7 @@
    }
 
    const decoder = new TextDecoder('utf-8');
-   const reader = response.body.getReader();
+   const /** !ReadableStreamDefaultReader */ reader = response.body.getReader();
    reader.read().then(function chunk(result) {
      if (result.value) {
        streamer(
