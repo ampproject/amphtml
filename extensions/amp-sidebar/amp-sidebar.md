@@ -76,6 +76,27 @@ for content within the sidebar to be displayed on other parts of the main conten
 </amp-sidebar>
 ```
 
+*Example: Advanced usage of `amp-sidebar` with anchor links and smooth scrolling*
+
+In the following example, we use `amp-sidebar` to contain navigation links to other parts of the page. The links are assigned to element id that is on the page. By using the [`on`](../../spec/amp-actions-and-events.md) attribute, we can scroll smoothly to the elements, using the element id and `scrollTo`.
+
+```html
+<amp-sidebar id="sidebar1" layout="nodisplay">
+  <ul>
+    <li><a href="#idOne" on="tap:idOne.scrollTo">Nav item 1</a></li>
+    <li><a href="#idTwo" on="tap:idTwo.scrollTo">Nav item 2</a></li>
+    <li><a href="#idThree" on="tap:idThree.scrollTo">Nav item 3</a></li>
+  </ul>
+</amp-sidebar>
+
+<div id="idOne">
+</div>
+<div id="idTwo">
+</div>
+<div id="idThree">
+</div>
+```
+
 ### Opening and closing the sidebar
 
 To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods:
