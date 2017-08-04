@@ -49,13 +49,11 @@ import {
   toggleExperiment,
   forceExperimentBranch,
 } from '../../../../src/experiments';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {VisibilityState} from '../../../../src/visibility-state';
-import {registerForUnitTest} from '../../../../src/runtime';
 import * as sinon from 'sinon';
 
-function setupForAdTesting (win) {
+function setupForAdTesting(win) {
   const doc = win.document;
   doc.win = win;
   // TODO(a4a-cam@): This is necessary in the short term, until A4A is
@@ -67,8 +65,12 @@ function setupForAdTesting (win) {
   doc.head.appendChild(ampStyle);
 }
 
-describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
-  /*allowExternalResources: true,*/ ampAdCss: true}, env => {
+const realWinConfig = {
+  amp: {ampdoc: 'amp-ad'},
+  ampAdCss: true,
+};
+
+describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   let impl;
   let element;
 
@@ -84,7 +86,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
     element = createElementWithAttributes(env.win.document, 'amp-ad', config);
     // To trigger CSS styling.
     element.setAttribute('data-a4a-upgrade-type',
-    'amp-ad-network-doubleclick-impl');
+        'amp-ad-network-doubleclick-impl');
     // Used to test styling which is targetted at first iframe child of
     // amp-ad.
     const iframe = env.win.document.createElement('iframe');
@@ -93,7 +95,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
     impl = new AmpAdNetworkDoubleclickImpl(element);
     impl.iframe = iframe;
   }
-
 
   describe('#isValidElement', () => {
     beforeEach(() => {
@@ -109,7 +110,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
     });
     it('should NOT be valid (impl tag name)', () => {
       element =
-        document.createElement('amp-ad-network-doubleclick-impl');
+          document.createElement('amp-ad-network-doubleclick-impl');
       element.setAttribute('type', 'doubleclick');
       element.setAttribute('data-ad-client', 'doubleclick');
       impl = new AmpAdNetworkDoubleclickImpl(element);
@@ -135,22 +136,20 @@ describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
     const size = {width: 200, height: 50};
 
     beforeEach(() => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        doc.win = window;
-        element = createElementWithAttributes(doc, 'amp-ad', {
-          'width': '200',
-          'height': '50',
-          'type': 'doubleclick',
-          'layout': 'fixed',
-        });
-        impl = new AmpAdNetworkDoubleclickImpl(element);
-        impl.size_ = size;
-        installExtensionsService(impl.win);
-        const extensions = Services.extensionsFor(impl.win);
-        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
+      setupForAdTesting(env.win);
+      const doc = env.win.document;
+      doc.win = env.win;
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+        'layout': 'fixed',
       });
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.size_ = size;
+      installExtensionsService(impl.win);
+      const extensions = Services.extensionsFor(impl.win);
+      loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
     });
 
     it('should not load amp-analytics without an analytics header', () => {
@@ -327,7 +326,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
     it('centers iframe in slot when !height && !width', () => {
       createImplTag({
         layout: 'fixed',
-      })
+      });
       expect(impl.element.getAttribute('width')).to.be.null;
       expect(impl.element.getAttribute('height')).to.be.null;
       verifyCss(impl.iframe, size);
@@ -460,9 +459,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
       expect(impl.element.getAttribute('height')).to.equal('auto');
       impl.onLayoutMeasure();
       return impl.getAdUrl().then(url =>
-        // With exp dc-use-attr-for-format off, we can't test for specific
-        // numbers, but we know that the values should be numeric.
-        expect(url).to.match(/sz=[0-9]+x[0-9]+/));
+          // With exp dc-use-attr-for-format off, we can't test for specific
+          // numbers, but we know that the values should be numeric.
+          expect(url).to.match(/sz=[0-9]+x[0-9]+/));
     });
     it('has correct format when width == "auto"',
         () => {
@@ -471,8 +470,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
           expect(impl.element.getAttribute('width')).to.equal('auto');
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-              // Ensure that "auto" doesn't appear anywhere here:
-              expect(url).to.match(/sz=[0-9]+x[0-9]+/));
+             // Ensure that "auto" doesn't appear anywhere here:
+             expect(url).to.match(/sz=[0-9]+x[0-9]+/));
         });
     it('should add RTC params if RTC is used', () => {
       const rtcConf = createElementWithAttributes(
@@ -493,7 +492,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
               return Promise.resolve(JSON.stringify(rtcResponse));
             },
           })
-      );
+          );
       new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(/(\?|&)artc=[0-9]+(&|$)/);
@@ -529,7 +528,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
           new AmpAd(element).upgradeCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-              expect(url).to.contain('sz=123x456&'));
+             expect(url).to.contain('sz=123x456&'));
         });
     it('has correct format with height/width override and multiSize',
         () => {
@@ -540,7 +539,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
           new AmpAd(element).upgradeCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-              expect(url).to.contain('sz=123x456%7C1x2%7C3x4&'));
+             expect(url).to.contain('sz=123x456%7C1x2%7C3x4&'));
         });
     it('has correct format with auto height/width and multiSize',
         () => {
@@ -551,8 +550,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
           new AmpAd(element).upgradeCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-              // Ensure that "auto" doesn't appear anywhere here:
-              expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
+             // Ensure that "auto" doesn't appear anywhere here:
+             expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
         });
     it('should have the correct ifi numbers - no refresh', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
@@ -623,7 +622,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
             impl.element.appendChild(fallback);
             impl.ampAnalyticsConfig_ = {};
             impl.ampAnalyticsElement_ =
-                document.createElement('amp-analytics');
+               document.createElement('amp-analytics');
             impl.element.appendChild(impl.ampAnalyticsElement_);
 
             expect(impl.iframe).to.be.ok;
@@ -668,9 +667,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', {amp: {ampdoc: "amp-ad"},
       return createIframePromise().then(f => {
         setupForAdTesting(f);
         impl = new AmpAdNetworkDoubleclickImpl(
-          createElementWithAttributes(f.doc, 'amp-ad', {
-            type: 'doubleclick',
-          }));
+            createElementWithAttributes(f.doc, 'amp-ad', {
+              type: 'doubleclick',
+            }));
       });
     });
 
