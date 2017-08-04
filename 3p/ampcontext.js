@@ -62,6 +62,9 @@ export class AbstractAmpContext {
     /** @type {?Object<string, *>} */
     this.data = null;
 
+    /** @type {?string} */
+    this.domFingerprint = null;
+
     /** @type {?boolean} */
     this.hidden = null;
 
@@ -254,6 +257,7 @@ export class AbstractAmpContext {
     this.canonicalUrl = context.canonicalUrl;
     this.clientId = context.clientId;
     this.container = context.container;
+    this.domFingerprint = context.domFingerprint;
     this.hidden = context.hidden;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
