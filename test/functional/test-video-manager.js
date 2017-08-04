@@ -227,7 +227,6 @@ describes.fakeWin('VideoManager', {
     });
   });
 
-
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     klass = createFakeVideoPlayerClass(env.win);
@@ -503,9 +502,37 @@ function createFakeVideoPlayerClass(win) {
     hideControls() {
     }
 
+    /**
+     * @override
+     */
+    fullscreenEnter() {
+    }
+
+    /**
+     * @override
+     */
+    fullscreenExit() {
+    }
+
+    /**
+     * @override
+     */
+    isFullscreen() {
+    }
+
     /** @override */
     getCurrentTime() {
       return this.currentTime_;
+    }
+
+    /** @override */
+    getMetadata() {
+      // Not supported
+    }
+
+    /** @override */
+    preimplementsMediaSessionAPI() {
+      return false;
     }
 
     /** @override */

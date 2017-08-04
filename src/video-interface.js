@@ -17,6 +17,16 @@
 import {ActionTrust} from './action-trust'; /* eslint no-unused-vars: 0 */
 
 /**
+ * @typedef {{
+ *   artwork: Array,
+ *   title: string,
+ *   album: string,
+ *   artist: string,
+ * }}
+ */
+export let VideoMetaDef;
+
+/**
  * VideoInterface defines a common video API which any AMP component that plays
  * videos is expected to implement.
  *
@@ -105,6 +115,28 @@ export class VideoInterface {
   hideControls() {}
 
   /**
+   * Returns video's meta data (artwork, title, artist, album, etc.) for use
+   * with the Media Session API
+   * artwork (Array): URL to the poster image (preferably a 512x512 PNG)
+   * title (string): Name of the video
+   * artist (string): Name of the video's author/artist
+   * album (string): Name of the video's album if it exists
+   * @return {!VideoMetaDef|undefined} metadata
+   */
+  getMetadata() {}
+
+  /**
+   * If this returns true then it will be assumed that the player implements
+   * the MediaSession API internally so that the video manager does not override
+   * it. If not, the video manager will use the metadata variable as well as
+   * inferred meta-data to update the video's Media Session notification.
+   *
+   * @return {boolean}
+   */
+  preimplementsMediaSessionAPI() {}
+
+
+  /**
    * Automatically comes from {@link ./base-element.BaseElement}
    *
    * @return {!AmpElement}
@@ -117,6 +149,28 @@ export class VideoInterface {
    * @return {boolean}
    */
   isInViewport() {}
+
+  /**
+   * Enables fullscreen on the internal video element
+   * NOTE: While implementing, keep in mind that Safari/iOS do not allow taking
+   * any element other than <video> to fullscreen, if the player has an internal
+   * implementation of fullscreen (flash for example) then check
+   * if Services.platformFor(this.win).isSafari is true and use the internal
+   * implementation instead. If not, it is recommended to take the iframe
+   * to fullscreen using fullscreenEnter from dom.js
+   */
+  fullscreenEnter() {}
+
+  /**
+   * Quits fullscreen mode
+   */
+  fullscreenExit() {}
+
+  /**
+   * Returns whether the video is currently in fullscreen mode or not
+   * @return {boolean}
+   */
+  isFullscreen() {}
 
   /**
    * Automatically comes from {@link ./base-element.BaseElement}
@@ -167,6 +221,19 @@ export const VideoAttributes = {
    * to the corner when scrolled out of view and has been interacted with.
    */
   DOCK: 'dock',
+  /**
+   * fullscreen-on-landscape
+   *
+   * If enabled, this automatically expands the currently visible video and
+   * playing to fullscreen when the user changes the device's orientation to
+   * landscape if the video was started following a user interaction
+   * (not autoplay)
+   *
+   * Dependent upon browser support of
+   * http://caniuse.com/#feat=screen-orientation
+   * and http://caniuse.com/#feat=fullscreen
+   */
+  FULLSCREEN_ON_LANDSCAPE: 'fullscreen-on-landscape',
 };
 
 

@@ -18,11 +18,16 @@ import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dict} from '../../../src/utils/object';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {removeElement} from '../../../src/dom';
+import {
+  removeElement,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
@@ -239,6 +244,44 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 
   hideControls() {
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
   }
 
   /** @override */

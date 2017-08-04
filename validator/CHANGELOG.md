@@ -30,7 +30,15 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
-### 12:01PM, July 21, 2017 UTC
+### 9:00 PM, July 27, 2017 UTC
+
+Validator Version 244
+Spec Version 456
+
+Includes:
+ - `amp-google-client-id-api` meta tag
+
+### 12:01 PM, July 21, 2017 UTC
 
 Validator Version 244
 Spec Version 455
@@ -49,7 +57,7 @@ Includes:
  - Allow `<amp-animation>` in AMP4ADS documents #10093
  - amp-bind extension rules to no longer require `<amp-state>` #10159
  
-### 9:00PM, June 26, 2017 UTC
+### 9:00 PM, June 26, 2017 UTC
 
 Validator Version 239
 Spec Version 443

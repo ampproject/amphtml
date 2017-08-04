@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {camelCaseToTitleCase, setStyle} from '../../src/style';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
-import {setStyle} from '../../src/style';
 import {tryParseJson} from '../../src/json';
 
 /**
@@ -159,6 +159,9 @@ let adsManagerWidthOnLoad, adsManagerHeightOnLoad;
 
 // Initial video dimensions.
 let videoWidth, videoHeight;
+
+// IMASettings provided via <script> tag in parent element.
+let imaSettings;
 
 /**
  * Loads the IMA SDK library.
@@ -330,6 +333,9 @@ export function imaVideo(global, data) {
       videoPlayer.appendChild(htmlToElement(child));
     });
   }
+  if (data.imaSettings) {
+    imaSettings = tryParseJson(data.imaSettings);
+  }
 
   contentDiv.appendChild(videoPlayer);
   wrapperDiv.appendChild(contentDiv);
@@ -378,12 +384,40 @@ export function imaVideo(global, data) {
           false);
     });
 
+    // Handle settings that need to be set before the AdDisplayContainer is
+    // created.
+    if (imaSettings) {
+      if (imaSettings['locale']) {
+        global.google.ima.settings.setLocale(imaSettings['locale']);
+      }
+      if (imaSettings['vpaidMode']) {
+        global.google.ima.settings.setVpaidMode(imaSettings['vpaidMode']);
+      }
+    }
+
+
     adDisplayContainer =
         new global.google.ima.AdDisplayContainer(adContainerDiv, videoPlayer);
 
     adsLoader = new global.google.ima.AdsLoader(adDisplayContainer);
     adsLoader.getSettings().setPlayerType('amp-ima');
     adsLoader.getSettings().setPlayerVersion('0.1');
+    // Propogate settings provided via child script tag.
+    // locale and vpaidMode are set above, as they must be set before we create
+    // an AdDisplayContainer.
+    // playerType and playerVersion are used by the developers to track usage,
+    // so we do not want to allow users to overwrite those values.
+    const skippedSettings =
+        ['locale', 'vpaidMode', 'playerType', 'playerVersion'];
+    for (const setting in imaSettings) {
+      if (!skippedSettings.includes(setting)) {
+        // Change e.g. 'ppid' to 'setPpid'.
+        const methodName = 'set' + camelCaseToTitleCase(setting);
+        if (typeof adsLoader.getSettings()[methodName] === 'function') {
+          adsLoader.getSettings()[methodName](imaSettings[setting]);
+        }
+      }
+    }
     adsLoader.addEventListener(
         global.google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
         onAdsManagerLoaded.bind(null, global),
