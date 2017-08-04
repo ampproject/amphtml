@@ -862,6 +862,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       destroyFrameMock.returns(undefined);
       impl.mutateElement = func => func();
       impl.togglePlaceholder = sandbox.spy();
+      impl.win.document.win = impl.win;
       impl.getAmpDoc = () => impl.win.document;
       impl.getResource = () => {
         return {
