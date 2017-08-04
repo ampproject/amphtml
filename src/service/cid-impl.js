@@ -39,7 +39,7 @@ import {Services} from '../services';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
 import {parseJson, tryParseJson} from '../json';
 import {user, rethrowAsync} from '../log';
-import {ViewerCidApi, scopeOptedInForCidApi} from './viewer-cid-api';
+import {ViewerCidApi} from './viewer-cid-api';
 import {GoogleCidApi} from './cid-api';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
@@ -177,7 +177,8 @@ export class Cid {
     /** @const {!Location} */
     const url = parseUrl(this.ampdoc.win.location.href);
     if (!isProxyOrigin(url)) {
-      const apiClient = scopeOptedInForCidApi(this.ampdoc.win, scope);
+      const apiClient =
+          ViewerCidApi.scopeOptedInForCidApi(this.ampdoc.win, scope);
       if (apiClient) {
         return this.cidApi_.getScopedCid(scope, apiClient);
       }
