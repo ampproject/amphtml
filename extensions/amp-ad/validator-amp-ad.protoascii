@@ -18,8 +18,8 @@
 # Historically, amp-ad/amp-embed javascript were embedded into the main
 # runtime (v0.js), so there are many pages that do not include the amp-ad
 # extension. We want to warn for these.
-# AMP-USER_ERROR_EMBED_SENTINEL requires the amp-ad extension, not amp-embed.
-# Including the amp-ad extension, but not an AMP-AD/AMP-USER_ERROR_EMBED_SENTINEL tag should only
+# AMP-EMBED requires the amp-ad extension, not amp-embed.
+# Including the amp-ad extension, but not an AMP-AD/AMP-EMBED tag should only
 # produce a warning.
 #
 # To implement this, we mark the tags as requires_extension amp-ad, but the
@@ -120,7 +120,7 @@ tags: {  # <amp-ad data-multi-size>
 }
 tags: {  # <amp-embed>
   html_format: AMP
-  tag_name: "AMP-USER_ERROR_EMBED_SENTINEL"
+  tag_name: "AMP-EMBED"
   requires_extension: "amp-ad"  # See note at top of file
   also_requires_tag_warning: "amp-ad extension .js script"
   disallowed_ancestor: "AMP-APP-BANNER"
@@ -149,7 +149,7 @@ tags: {  # <amp-embed>
 }
 tags: {  # <amp-embed data-multi-size>
   html_format: AMP
-  tag_name: "AMP-USER_ERROR_EMBED_SENTINEL"
+  tag_name: "AMP-EMBED"
   spec_name: "amp-embed with data-multi-size attribute"
   requires_extension: "amp-ad"  # See note at top of file
   also_requires_tag_warning: "amp-ad extension .js script"
