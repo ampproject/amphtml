@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../src/amp-events';
+import {BindEvents} from './bind-events';
 import {BindExpressionResultDef} from './bind-expression';
 import {BindingDef} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
@@ -28,11 +30,10 @@ import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
+import {recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {waitForBodyPromise} from '../../../src/dom';
-import {AmpEvents} from '../../../src/amp-events';
-import {BindEvents} from './bind-events';
 
 const TAG = 'amp-bind';
 
@@ -628,7 +629,7 @@ export class Bind {
       const {expressionString, previousResult} = boundProperty;
       const newValue = results[expressionString];
       if (newValue === undefined ||
-          this.shallowEquals_(newValue, previousResult)) {
+          recursiveEquals(newValue, previousResult, /* depth */ 3)) {
         user().fine(TAG, 'Expression result unchanged or missing: ' +
             `"${expressionString}"`);
       } else {
@@ -804,6 +805,7 @@ export class Bind {
           }
           // Rewriting can fail due to e.g. invalid URL.
           if (rewrittenNewValue !== undefined) {
+            // TODO(choumx): Don't bother setting for bind-only attrs.
             element.setAttribute(property, rewrittenNewValue);
             if (updateProperty) {
               element[property] = rewrittenNewValue;
@@ -939,56 +941,6 @@ export class Bind {
       }
     }
     return true;
-  }
-
-  /**
-   * Checks strict equality of 1D children in arrays and objects.
-   * @param {./bind-expression.BindExpressionResultDef|undefined} a
-   * @param {./bind-expression.BindExpressionResultDef|undefined} b
-   * @return {boolean}
-   * @private
-   */
-  shallowEquals_(a, b) {
-    if (a === b) {
-      return true;
-    }
-
-    if (a === null || b === null) {
-      return false;
-    }
-
-    if (typeof a !== typeof b) {
-      return false;
-    }
-
-    if (Array.isArray(a) && Array.isArray(b)) {
-      if (a.length !== b.length) {
-        return false;
-      }
-      for (let i = 0; i < a.length; i++) {
-        if (a[i] !== b[i]) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    if (typeof a === 'object' && typeof b === 'object') {
-      const keysA = Object.keys(a);
-      const keysB = Object.keys(b);
-      if (keysA.length !== keysB.length) {
-        return false;
-      }
-      for (let i = 0; i < keysA.length; i++) {
-        const keyA = keysA[i];
-        if (a[keyA] !== b[keyA]) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    return false;
   }
 
   /**

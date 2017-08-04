@@ -13,11 +13,12 @@
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
 </head>
 <body>
-  <button on="tap:AMP.setState({listSrc:'/list/fruit-data/get'})">Show Fruit</button>
-  <button on="tap:AMP.setState({listSrc:'/list/vegetable-data/get'})">Show Vegetables</button>
+
+  <button on="tap:AMP.setState({src:'/list/fruit-data/get'})">Show Fruit</button>
+  <button on="tap:AMP.setState({src:'/list/vegetable-data/get'})">Show Vegetables</button>
 
   <button on="tap:AMP.setState({
-    localState: [{
+    src: [{
       name: 'pizza',
       quantity: 1976,
       unitPrice: 3.50
@@ -30,7 +31,7 @@
 
   <button on="tap:AMP.setState({foo: foo+1})">increment foo</button>
 
-  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="listSrc || '/list/fruit-data/get'" width="600" height="600" [state]="localState">
+  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="600">
     <template type="amp-mustache">
       <strong>Product</strong>: {{name}}
       <strong>Quantity:</strong>: {{quantity}}
