@@ -6,18 +6,18 @@
       if (!window.context){
         // window.context doesn't exist yet, must perform steps to create it
         // before using it
-        console.log("window.context NOT READY");
+        console.log('window.context NOT READY');
 
         // must add listener for the creation of window.context
-        window.addEventListener('amp-windowContextCreated', function(){
-          console.log("window.context created and ready to use");
+        window.addEventListener('amp-windowContextCreated', () => {
+          console.log('window.context created and ready to use');
           window.context.onResizeSuccess(resizeSuccessCallback);
           window.context.onResizeDenied(resizeDeniedCallback);
         });
 
         // load ampcontext-lib.js which will create window.context
         ampContextScript = document.createElement('script');
-        ampContextScript.src = "../dist.3p/current/ampcontext-lib.js";
+        ampContextScript.src = '../dist.3p/current/ampcontext-lib.js';
         document.head.appendChild(ampContextScript);
       }
 
@@ -55,7 +55,7 @@
       var stopIntFunc;
 
       function resizeSuccessCallback(requestedHeight, requestedWidth){
-        console.log("Success!");
+        console.log('Success!');
         console.log(this);
         resizeTo(requestedHeight, requestedWidth);
         console.log(requestedHeight);
@@ -68,7 +68,7 @@
       }
 
       function resizeDeniedCallback(requestedHeight, requestedWidth){
-        console.log("DENIED");
+        console.log('DENIED');
         console.log(requestedHeight);
         console.log(requestedWidth);
       }
@@ -95,9 +95,9 @@
 
   <body>
     Test Ad using ampcontext.js to create window.context
-    <button onclick="toggleObserveIntersection()">Toggle Observe Intersections</button>
-    <button onclick="toggleObserveVisibility()">Toggle Observe visibility</button>
-    <button onclick="window.context.requestResize(500,600)">resize ad</button>
-    <button onclick="console.log(window.context)">console.log(window.context)</button>
+    <button onclick='toggleObserveIntersection()'>Toggle Observe Intersections</button>
+    <button onclick='toggleObserveVisibility()'>Toggle Observe visibility</button>
+    <button onclick='window.context.requestResize(500,600)'>resize ad</button>
+    <button onclick='console.log(window.context)'>console.log(window.context)</button>
   </body>
 </html>
