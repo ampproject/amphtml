@@ -255,6 +255,9 @@ const command = {
     timedExecOrDie(`${gulp} json-syntax`);
     timedExecOrDie(`${gulp} lint`);
   },
+  buildCss: function() {
+    timedExecOrDie(`${gulp} css`);
+  },
   buildRuntime: function() {
     timedExecOrDie(`${gulp} build`);
   },
@@ -388,7 +391,7 @@ function main(argv) {
       util.colors.cyan(sortedBuildTargets.join(', ')));
 
   // Run different sets of independent tasks in parallel to reduce build time.
-  if (process.env.BUILD_SHARD == "pre_build_checks_and_unit_tests") {
+  if (process.env.BUILD_SHARD == "unit_tests") {
     if (buildTargets.has('BUILD_SYSTEM')) {
       command.testBuildSystem();
     }
@@ -396,25 +399,15 @@ function main(argv) {
       command.testDocumentLinks(files);
     }
     if (buildTargets.has('RUNTIME') ||
-        buildTargets.has('INTEGRATION_TEST') ||
-        buildTargets.has('VISUAL_DIFF')) {
+        buildTargets.has('INTEGRATION_TEST')) {
       command.cleanBuild();
-      command.buildRuntime();
-      command.runVisualDiffTests();
-      // Ideally, we'd run presubmit tests after `gulp dist`, as some checks run
-      // through the dist/ folder. However, to speed up the Travis queue, we no
-      // longer do a dist build for PRs, so this call won't cover dist/.
-      // TODO(rsimha-amp): Move this once integration tests are enabled.
-      command.runPresubmitTests();
+      command.buildCss();
       command.runJsonAndLintChecks();
       command.runDepAndTypeChecks();
       // Run unit tests only if the PR contains runtime changes.
       if (buildTargets.has('RUNTIME')) {
         command.runUnitTests();
       }
-    } else {
-      // Generates a blank Percy build to satisfy the required Github check.
-      command.runVisualDiffTests(/* opt_mode */ 'skip');
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();
@@ -425,22 +418,22 @@ function main(argv) {
   }
 
   if (process.env.BUILD_SHARD == "integration_tests") {
-    // Run the integration_tests shard for a PR only if it is modifying the
-    // runtime or an integration test. Otherwise, the shard can be skipped.
-    if (buildTargets.has('INTEGRATION_TEST') || buildTargets.has('RUNTIME')) {
-      console.log(fileLogPrefix,
-          'Running the',
-          util.colors.cyan('integration_tests'),
-          'build shard since this PR modifies the runtime and / or touches',
-          util.colors.cyan('test/integration'));
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('VISUAL_DIFF')) {
       command.cleanBuild();
       command.buildRuntime();
-      command.runIntegrationTests(/* compiled */ false);
+      command.runVisualDiffTests();
+      // Run presubmit and integration tests only if the PR contains runtime
+      // changes or modifies an integration test.
+      if (buildTargets.has('INTEGRATION_TEST') ||
+          buildTargets.has('RUNTIME')) {
+        command.runPresubmitTests();
+        command.runIntegrationTests(/* compiled */ false);
+      }
     } else {
-      console.log(fileLogPrefix,
-          'Skipping the',
-          util.colors.cyan('integration_tests'),
-          'build shard for this PR');
+      // Generates a blank Percy build to satisfy the required Github check.
+      command.runVisualDiffTests(/* opt_mode */ 'skip');
     }
   }
 
