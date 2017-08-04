@@ -36,7 +36,7 @@ import {validateData} from '../../3p/3p';
 import {DomFingerprint} from '../../src/utils/dom-fingerprint';
 import * as sinon from 'sinon';
 
-describe('3p-frame', () => {
+describe.configure().skipSauceLabs().run('3p-frame', () => {
 
   let clock;
   let sandbox;
