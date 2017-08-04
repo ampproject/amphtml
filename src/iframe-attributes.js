@@ -18,7 +18,7 @@ import {Services} from './services';
 import {experimentToggles, isCanary} from './experiments';
 import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
-import {domFingerprint} from './utils/dom-fingerprint';
+import {DomFingerprint} from './utils/dom-fingerprint';
 import {dict} from './utils/object.js';
 
 /**
@@ -75,7 +75,7 @@ export function getContextMetadata(
       'height': layoutRect.height,
     } : null,
     'initialIntersection': element.getIntersectionChangeEntry(),
-    'domFingerprint': domFingerprint(element),
+    'domFingerprint': DomFingerprint.generate(element),
     'experimentToggles': experimentToggles(parentWindow),
     'sentinel': sentinel,
   });

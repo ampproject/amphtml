@@ -24,7 +24,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin, parseUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
-import {domFingerprint} from '../../../src/utils/dom-fingerprint';
+import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {
   isExperimentOn,
   toggleExperiment,
@@ -147,7 +147,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
   }
   return {
-    'adf': domFingerprint(adElement),
+    'adf': DomFingerprint.generate(adElement),
     'nhd': iframeDepth,
     'eid': eids,
     'adx': slotRect.left,

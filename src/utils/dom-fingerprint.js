@@ -63,19 +63,22 @@ export function domFingerprintPlain(element) {
   return ids.join();
 };
 
-/**
- * Calculates ad slot DOM fingerprint.  This key is intended to
- * identify "same" ad unit across many page views. This is
- * based on where the ad appears within the page's DOM structure.
- *
- * @param {?Element} element The DOM element from which to collect
- *     the DOM chain element IDs.  If null, DOM chain element IDs are not
- *     included in the hash.
- * @return {string} The ad unit hash key string.
- */
-export function domFingerprint(element) {
-  return stringHash32(domFingerprintPlain(element));
-};
+
+export class DomFingerprint {
+  /**
+   * Calculates ad slot DOM fingerprint.  This key is intended to
+   * identify "same" ad unit across many page views. This is
+   * based on where the ad appears within the page's DOM structure.
+   *
+   * @param {?Element} element The DOM element from which to collect
+   *     the DOM chain element IDs.  If null, DOM chain element IDs are not
+   *     included in the hash.
+   * @return {string} The ad unit hash key string.
+   */
+  static generate(element) {
+    return stringHash32(domFingerprintPlain(element));
+  }
+}
 
 
 /**
