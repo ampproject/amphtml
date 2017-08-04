@@ -903,6 +903,32 @@ describes.sandboxed('DOM', {}, env => {
       });
     });
   });
+
+  it('isEnabled', () => {
+    expect(dom.isEnabled(document)).to.be.true;
+
+    const a = document.createElement('button');
+    expect(dom.isEnabled(a)).to.be.true;
+
+    a.disabled = true;
+    expect(dom.isEnabled(a)).to.be.false;
+
+    a.disabled = false;
+    expect(dom.isEnabled(a)).to.be.true;
+
+    const b = document.createElement('fieldset');
+    b.appendChild(a);
+    expect(dom.isEnabled(a)).to.be.true;
+
+    b.disabled = true;
+    expect(dom.isEnabled(a)).to.be.false;
+
+    b.removeChild(a);
+    const c = document.createElement('legend');
+    c.appendChild(a);
+    b.appendChild(c);
+    expect(dom.isEnabled(a)).to.be.true;
+  });
 });
 
 describes.realWin('DOM', {

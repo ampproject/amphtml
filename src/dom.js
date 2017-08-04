@@ -37,7 +37,6 @@ export const UPGRADE_TO_CUSTOMELEMENT_PROMISE =
 export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER =
     '__AMP_UPG_RES';
 
-
 /**
  * Waits until the child element is constructed. Once the child is found, the
  * callback is executed.
@@ -826,4 +825,16 @@ export function isFullscreenElement(element) {
     }
   }
   return false;
+}
+
+/**
+ * Returns true if node is not disabled.
+ *
+ * IE8 can return false positives, see {@link matches}.
+ * @param {!Element} element
+ * @return {boolean}
+ * @see https://www.w3.org/TR/html5/forms.html#concept-fe-disabled
+ */
+export function isEnabled(element) {
+  return !(element.disabled || matches(element, ':disabled'));
 }
