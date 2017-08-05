@@ -255,15 +255,15 @@ export class ActionService {
     const detail = /** @type {!JsonObject} */ (map());
     const target = event.target;
     const tagName = target.tagName;
+    const type = target.getAttribute('type');
 
     // Expose `value` property on HTMLInputElement and HTMLSelectElement.
     if (tagName == 'INPUT' || tagName == 'SELECT') {
-      detail['value'] = target.value
+      detail['value'] = (type == 'range') ? Number(target.value) : target.value;
     }
 
     // Expose HTMLInputElement properties based on type.
     if (tagName == 'INPUT') {
-      const type = target.getAttribute('type');
       if (type == 'checkbox' || type == 'radio') {
         detail['checked'] = target.checked;
       } else if (type == 'range') {

@@ -1021,7 +1021,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     const handler = window.document.addEventListener.getCall(3).args[1];
     const element = document.createElement('input');
     element.setAttribute('type', 'checkbox');
-    element.setAttribute('value', 'foo')
+    element.setAttribute('value', 'foo');
     element.checked = true;
     const event = {target: element};
     handler(event);
