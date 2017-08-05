@@ -37,6 +37,20 @@
           "visibility": "/${type}?elementX=${elementX}&elementY=${elementY}&elementWidth=${elementWidth}&elementHeight=${elementHeight}&totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}&maxContinuousVisibleTime=${maxContinuousVisibleTime}&loadTimeVisibility=${loadTimeVisibility}&backgrounded=${backgrounded}&backgroundedAtStart=${backgroundedAtStart}&firstSeenTime=${firstSeenTime}&lastSeenTime=${lastSeenTime}&firstVisibleTime=${firstVisibleTime}&lastVisibleTime=${lastVisibleTime}&minVisiblePercentage=${minVisiblePercentage}&maxVisiblePercentage=${maxVisiblePercentage}"
         },
         "triggers": {
+          "visible": {
+            "on": "visible",
+            "request": "visibility",
+            "vars": { "type": "visible" }
+          },
+          "rootVisible": {
+            "on": "visible",
+            "request": "visibility",
+            "visibilitySpec": {
+              "selector": ":root",
+              "visiblePercentageMin": 0
+            },
+            "vars": { "type": "rootVisible" }
+          },
           "imgVisible": {
             "on": "visible",
             "request": "visibility",

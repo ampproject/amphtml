@@ -189,9 +189,9 @@ export class PositionObserver {
    * This should always be called in vsync.
    * @param {boolean=} force
    * @param {boolean=} opt_remeasure
-   * @private
+   * @visibleForTesting
   */
-  updateAllEntries_(force, opt_remeasure) {
+  updateAllEntries(force, opt_remeasure) {
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
       if (opt_remeasure) {
@@ -254,7 +254,7 @@ export class PositionObserver {
   onResizeHandler() {
     this.needRefreshOnMessage_ = true;
     this.vsync_.measure(() => {
-      this.updateAllEntries_(true);
+      this.updateAllEntries(true);
     });
   }
 
@@ -283,7 +283,7 @@ export class PositionObserver {
 
     // do this in vsyn.measure
     this.vsync_.measure(() => {
-      this.updateAllEntries_();
+      this.updateAllEntries();
     });
   }
 
@@ -303,7 +303,7 @@ export class PositionObserver {
       return;
     }
     this.vsync_.measure(() => {
-      this.updateAllEntries_();
+      this.updateAllEntries();
       this.schedulePass_();
     });
   }
@@ -379,8 +379,9 @@ export class PosObViewportInfoDef {
 
 /**
  * @implements {PosObViewportInfoDef}
+ * @visibleForTesting
  */
-class PosObViewportInfoAmpDoc {
+export class PosObViewportInfoAmpDoc {
   constructor(ampdoc) {
     this.ampdoc = ampdoc;
     this.viewport_ = Services.viewportForDoc(ampdoc);
@@ -541,7 +542,6 @@ class PositionObserverEntry {
     position.relativePos = layoutRectsRelativePos(
         position.positionRect, position.viewportRect
     );
-
     if (layoutRectsOverlap(position.positionRect, position.viewportRect)) {
       // Update position
       this.position = position;

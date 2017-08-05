@@ -15,9 +15,7 @@
  */
 
 import {FrameOverlayManager} from './frame-overlay-manager';
-import {
-  PositionObserver,
-} from './position-observer';
+import {PositionObserver} from './position-observer';
 import {
   serializeMessage,
   deserializeMessage,
@@ -72,7 +70,6 @@ export class InaboxMessagingHost {
     this.iframes_ = iframes;
     this.iframeMap_ = Object.create(null);
     this.registeredIframeSentinels_ = Object.create(null);
-    // TODO(zhouyx, #9208) Use new position observer once fidelity is supported.
     this.positionObserver_ = new PositionObserver(win);
     this.msgObservable_ = new NamedObservable();
     this.frameOverlayManager_ = new FrameOverlayManager(win);

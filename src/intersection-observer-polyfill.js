@@ -72,10 +72,9 @@ export function getIntersectionChangeEntry(
 }
 
 export function nativeIntersectionObserverSupported(win) {
-  return false;
-  // return 'IntersectionObserver' in win &&
-  //     'IntersectionObserverEntry' in win &&
-  //     'intersectionRatio' in win.IntersectionObserverEntry.prototype;
+  return 'IntersectionObserver' in win &&
+      'IntersectionObserverEntry' in win &&
+      'intersectionRatio' in win.IntersectionObserverEntry.prototype;
 }
 
 /**
