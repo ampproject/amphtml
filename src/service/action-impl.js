@@ -254,27 +254,25 @@ export class ActionService {
   addInputDetails_(event) {
     const detail = /** @type {!JsonObject} */ (map());
     const target = event.target;
-    switch (target.tagName) {
-      case 'INPUT':
-        const type = target.getAttribute('type');
-        // Some <input> elements have special properties for content values.
-        // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
-        if (type == 'checkbox' || type == 'radio') {
-          detail['checked'] = target.checked;
-        } else if (type == 'range') {
-          // TODO(choumx): min/max are also available on date pickers.
-          detail['min'] = Number(target.min);
-          detail['max'] = Number(target.max);
-          // TODO(choumx): HTMLInputElement.valueAsNumber instead?
-          detail['value'] = Number(target.value);
-        } else {
-          detail['value'] = target.value;
-        }
-        break;
-      case 'SELECT':
-        detail['value'] = target.value;
-        break;
+    const tagName = target.tagName;
+
+    // Expose `value` property on HTMLInputElement and HTMLSelectElement.
+    if (tagName == 'INPUT' || tagName == 'SELECT') {
+      detail['value'] = target.value
     }
+
+    // Expose HTMLInputElement properties based on type.
+    if (tagName == 'INPUT') {
+      const type = target.getAttribute('type');
+      if (type == 'checkbox' || type == 'radio') {
+        detail['checked'] = target.checked;
+      } else if (type == 'range') {
+        // TODO(choumx): min/max are also available on date pickers.
+        detail['min'] = Number(target.min);
+        detail['max'] = Number(target.max);
+      }
+    }
+
     if (Object.keys(detail).length > 0) {
       event.detail = detail;
     }
