@@ -342,7 +342,6 @@ var forbiddenTerms = {
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-experiment/0.1/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
-      'dist.3p/current/integration.js',
     ],
   },
   'getBaseCid': {
@@ -403,7 +402,6 @@ var forbiddenTerms = {
       'src/service/cid-impl.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
-      'dist.3p/current/integration.js',
     ],
   },
   'localStorage': {
