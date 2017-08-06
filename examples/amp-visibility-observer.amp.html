@@ -48,6 +48,7 @@
     molestie nulla porttitor ac. Donec porta risus ut enim pellentesque, id placerat elit ornare.
   </p>
   <h1>Scrollbound animations with amp-visibility-observer and amp-animation</h1>
+  <h2>The following animation does one round when fully visible between the middle 80% of the viewport</h2>
   <amp-animation id="clockAnim1" layout="nodisplay">
     <script type="application/json">
     {
@@ -68,7 +69,8 @@
   </amp-animation>
   <div id="clock-scene-1" class="clock-scene">
     <amp-visibility-observer
-    intersection-ratio="0.5 1"
+    intersection-ratio="1"
+    exclusion-margins="10vh"
     on="scroll:clockAnim1.seekTo(percent=event.percent)"
     layout="nodisplay"></amp-visibility-observer>
 
@@ -97,7 +99,7 @@
   </p>
 
   <h1>Custom visibility start-end with amp-visibility-observer and amp-animation</h1>
-  <h3>The following animation will start when the scene is 50% visible and paused when 50% invisible</h3>
+  <h3>The following animation will start when the scene is 50% visible and pauses when 50% invisible</h3>
   <amp-animation id="clockAnim2" layout="nodisplay">
     <script type="application/json">
     {

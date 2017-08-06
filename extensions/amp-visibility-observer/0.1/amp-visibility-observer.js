@@ -17,10 +17,20 @@
 import {ActionTrust} from '../../../src/action-trust';
 import {getServiceForDoc} from '../../../src/service';
 import {Services} from '../../../src/services';
-import {Layout} from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
-import {RelativePositions, layoutRectsRelativePos} from '../../../src/layout-rect';
-
+import {dev, user} from '../../../src/log';
+import {
+  RelativePositions,
+  layoutRectsRelativePos,
+  layoutRectLtwh,
+} from '../../../src/layout-rect';
+import {
+  Layout,
+  getLengthNumeral,
+  getLengthUnits,
+  assertLength,
+  parseLength,
+} from '../../../src/layout';
 import {
   installPositionObserverServiceForDoc,
   PositionObserverFidelity,
@@ -51,6 +61,16 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {number} */
     this.bottomRatio_ = 0;
 
+    this.topMarginExpr_ = '0';
+
+    this.bottomMarginExpr_ = '0';
+
+    this.resolvedTopMargin_ = 0;
+
+    this.resolvedBottomMargin_ = 0;
+
+    this.viewportRect_ = null;
+
     this.scrollProgress_ = 0;
   }
 
@@ -64,15 +84,25 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     // Trigger, but only when visible.
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(this.trigger_.bind(this));
+
     // Ratio is either "0.dd" or "0.dd 0.dd"
-    const ratio = this.element.getAttribute('intersection-ratio');
-    if (ratio) {
-      const topBottom = ratio.split(' ');
-      this.bottomRatio_ = parseFloat(topBottom[0]);
+    const ratios = this.element.getAttribute('intersection-ratio');
+    if (ratios) {
+      const topBottom = ratios.trim().split(' ');
+      this.topRatio_ = this.validateAndResolveRatio_(topBottom[0]);
+      this.bottomRatio_ = this.topRatio_;
       if (topBottom[1]) {
-        this.topRatio_ = parseFloat(topBottom[1]);
-      } else {
-        this.topRatio_ = this.bottomRatio_;
+        this.bottomRatio_ = this.validateAndResolveRatio_(topBottom[1]);
+      }
+    }
+
+    const margins = this.element.getAttribute('exclusion-margins');
+    if (margins) {
+      const topBottom = margins.trim().split(' ');
+      this.topMarginExpr_ = topBottom[0];
+      this.bottomMarginExpr_ = this.topMarginExpr_;
+      if (topBottom[1]) {
+        this.bottomMarginExpr_ = topBottom[1];
       }
     }
   }
@@ -87,22 +117,33 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 
   positionChanged_(entry) {
-    const adjustedViewportRect = this.adjustMargins_(entry.viewportRect);
-    const positionRect = entry.positionRect;
     const wasVisible = this.isVisible_;
+    const prevViewportHeight = this.viewportRect_ && this.viewportRect_.height;
 
-    const relativePos = layoutRectsRelativePos(positionRect,
-        adjustedViewportRect);
+    this.viewportRect_ = entry.viewportRect;
 
-    if (!positionRect) {
+    if (prevViewportHeight != entry.viewportRect.height) {
+      this.recalculateMargins_();
+    }
+
+    // Adjust numbers for based on exclusion margins
+    const adjViewportRect = this.adjustMargins_(entry.viewportRect,
+        entry.viewportRect.height);
+    const adjPositionRect = entry.positionRect;
+
+    // Relative position of the element to the adjusted viewport
+    let relPos;
+    if (!adjPositionRect) {
       this.isVisible_ = false;
+      relPos = entry.relativePos;
     } else {
-      this.updateVisibility_(positionRect, adjustedViewportRect, relativePos);
+      relPos = layoutRectsRelativePos(adjPositionRect, adjViewportRect);
+      this.updateVisibility_(adjPositionRect, adjViewportRect, relPos);
     }
 
     if (wasVisible && !this.isVisible_) {
       // Send final scroll progress state before exiting.
-      this.scrollProgress_ = relativePos == RelativePositions.BOTTOM ? 0 : 1;
+      this.scrollProgress_ = relPos == RelativePositions.BOTTOM ? 0 : 1;
       this.triggerScroll_();
       this.triggerExit_();
     }
@@ -113,7 +154,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     // Send scroll progress if visible
     if (this.isVisible_) {
-      this.updateScrollProgress_(positionRect, adjustedViewportRect);
+      this.updateScrollProgress_(adjPositionRect, adjViewportRect);
       this.triggerScroll_();
     }
   }
@@ -123,7 +164,8 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
         (positionRect.height * this.topRatio_);
 
     const totalDuration = adjustedViewportRect.height + positionRect.height - totalDurationOffset;
-    const topOffset = Math.abs(positionRect.top - (adjustedViewportRect.height - (positionRect.height * this.bottomRatio_)));
+    const topOffset = Math.abs(positionRect.top - this.resolvedTopMargin_ -
+    (adjustedViewportRect.height - (positionRect.height * this.bottomRatio_)));
     this.scrollProgress_ = topOffset / totalDuration;
   }
 
@@ -139,16 +181,61 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     const offset = positionRect.height * ratioToUse;
     if (relativePos == RelativePositions.BOTTOM) {
-      this.isVisible_ = positionRect.top <= (adjustedViewportRect.bottom - offset);
+      this.isVisible_ =
+        positionRect.top <= (adjustedViewportRect.bottom - offset);
       return;
     } else {
-      this.isVisible_ = positionRect.bottom >= (adjustedViewportRect.top + offset);
+      this.isVisible_ =
+        positionRect.bottom >= (adjustedViewportRect.top + offset);
       return;
     }
   }
 
+  recalculateMargins_() {
+    dev().assert(this.viewportRect_);
+    dev().assert(this.bottomMarginExpr_);
+    dev().assert(this.topMarginExpr_);
+
+    this.resolvedTopMargin_ =
+        this.validateAndResolveMargin_(this.topMarginExpr_);
+
+    this.resolvedBottomMargin_ =
+        this.validateAndResolveMargin_(this.bottomMarginExpr_);
+
+  }
+
+  validateAndResolveMargin_(val) {
+    val = assertLength(parseLength(val));
+    const unit = getLengthUnits(val);
+    let num = getLengthNumeral(val);
+    user().assert(unit == 'px' || unit == 'vh', 'Only pixel or vh are valid ' +
+      'values for exclusion margin: ' + val);
+
+    if (unit == 'vh') {
+      num = (num / 100) * this.viewportRect_.height;
+    }
+    return num;
+  }
+
   adjustMargins_(rect) {
-    return rect;
+    dev().assert(rect);
+    const r = layoutRectLtwh(
+        rect.left,
+        rect.top,
+        rect.width,
+        rect.height
+    );
+    r.top = r.top + this.resolvedTopMargin_;
+    r.height = r.height - this.resolvedBottomMargin_ - this.resolvedTopMargin_;
+    r.bottom = r.bottom - this.resolvedBottomMargin_;
+    return r;
+  }
+
+  validateAndResolveRatio_(val) {
+    const num = parseFloat(val);
+    user().assert(num >= 0 && num <= 1,
+        'Ratios must be a decimal between 0 and 1: ' + val);
+    return num;
   }
 
   triggerEnter_() {
