@@ -563,20 +563,20 @@ export function resetLogConstructorForTesting() {
  * @return {!Log}
  */
 export function user(opt_element) {
-  let logger;
+  //let logger;
   if (logs.user) {
-    logger = logs.user;
+    logs.user = logs.user;
   } else {
-    logger = getUserLogger(USER_ERROR_SENTINEL);
+    logs.user = getUserLogger(USER_ERROR_SENTINEL);
   }
   if (!!opt_element &&
-      isFromEmbed(logger.win, /** @type {!Element} */ (opt_element))) {
+      isFromEmbed(logs.user.win, /** @type {!Element} */ (opt_element))) {
     if (logs.userForEmbed) {
       return logs.userForEmbed;
     }
     return logs.userForEmbed = getUserLogger(USER_ERROR_EMBED_SENTINEL);
   } else {
-    return logs.user = logger;
+    return logs.user;
   }
 }
 
