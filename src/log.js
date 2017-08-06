@@ -563,7 +563,12 @@ export function resetLogConstructorForTesting() {
  * @return {!Log}
  */
 export function user(opt_element) {
-  const logger = getUserLogger(USER_ERROR_SENTINEL);
+  let logger;
+  if (logs.user) {
+    logger = logs.user;
+  } else {
+    logger = getUserLogger(USER_ERROR_SENTINEL);
+  }
   if (!!opt_element &&
       isFromEmbed(logger.win, /** @type {!Element} */ (opt_element))) {
     if (logs.userForEmbed) {
@@ -571,9 +576,6 @@ export function user(opt_element) {
     }
     return logs.userForEmbed = getUserLogger(USER_ERROR_EMBED_SENTINEL);
   } else {
-    if (logs.user) {
-      return logs.user;
-    }
     return logs.user = logger;
   }
 }
