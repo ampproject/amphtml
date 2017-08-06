@@ -62,6 +62,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     // Trigger, but only when visible.
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(this.trigger_.bind(this));
+    // Ratio is either "0.dd" or "0.dd 0.dd"
     const ratio = this.element.getAttribute('intersection-ratio');
     if (ratio) {
       const topBottom = ratio.split(' ');
@@ -99,11 +100,11 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     }
 
     if (wasVisible && !this.isVisible_) {
-      // Send final progress state before existing
+      // Send final scroll progress state before exiting.
       if (relativePos == RelativePositions.BOTTOM) {
-        this.triggerProgress_(0);
+        this.triggerScroll_(0);
       } else {
-        this.triggerProgress_(1);
+        this.triggerScroll_(1);
       }
       this.triggerExit_();
     }
@@ -115,7 +116,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     // Send progress if visible
     if (this.isVisible_) {
       const progressPercent = 1 - (entry.positionRect.top / adjustedViewportRect.height);
-      this.triggerProgress_(progressPercent);
+      this.triggerScroll_(progressPercent);
     }
   }
 
@@ -153,11 +154,11 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     this.action_.trigger(this.element, 'exit', evt, ActionTrust.LOW);
   }
 
-  triggerProgress_(percentVal) {
-    const evt = createCustomEvent(this.win, 'amp-visibility-observer.progress',
+  triggerScroll_(percentVal) {
+    const evt = createCustomEvent(this.win, 'amp-visibility-observer.scroll',
         {percent: percentVal});
 
-    this.action_.trigger(this.element, 'progress', evt, ActionTrust.LOW);
+    this.action_.trigger(this.element, 'scroll', evt, ActionTrust.LOW);
   }
 
   maybeInstallPositionObserver_() {
