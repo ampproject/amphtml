@@ -18,7 +18,6 @@ import {
   Log,
   LogLevel,
   USER_ERROR_SENTINEL,
-  USER_ERROR_EMBED_SENTINEL,
   dev,
   isUserErrorMessage,
   rethrowAsync,
@@ -697,22 +696,24 @@ describe('Logging', () => {
     it('should return logger for user-error', () => {
       const error = user().createError();
       expect(isUserErrorEmbed(error.message)).to.be.false;
-      expect(user(this.element).suffix_).to.equal(USER_ERROR_SENTINEL);
+      expect(isUserErrorMessage(error.message)).to.be.true;
     });
 
     it('should return logger for embed-error', () => {
       element = document.createElement('embed');
       iframe.contentWindow.document.body.appendChild(element);
-      expect(user(element).suffix_).to.equal(USER_ERROR_EMBED_SENTINEL);
+      const error = user(element).createError();
+      expect(isUserErrorEmbed(error.message)).to.be.true;
     });
 
-    it('should not create extra identical logs', () => {
+    it('should not create extra identical loggers', () => {
       element1 = document.createElement('embed_1');
       element2 = document.createElement('embed_2');
       iframe.contentWindow.document.body.appendChild(element1);
       iframe.contentWindow.document.body.appendChild(element2);
       expect(user()).to.equal(user(this.element));
       expect(user(element1)).to.equal(user(element2));
+      expect(user()).to.not.equal(user(element1));
     });
   });
 });
