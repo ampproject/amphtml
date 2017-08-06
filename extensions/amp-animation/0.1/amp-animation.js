@@ -29,6 +29,7 @@ import {setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 import {Services} from '../../../src/services';
+import {isFiniteNumber} from '../../../src/types';
 
 const TAG = 'amp-animation';
 const POLYFILLED = '__AMP_WA';
@@ -250,12 +251,12 @@ export class AmpAnimation extends AMP.BaseElement {
       this.pause_();
       // time based seek
       const time = parseFloat(invocation.args && invocation.args['time']);
-      if (time && isFinite(time)) {
+      if (isFiniteNumber(time)) {
         this.runner_.seekTo(time);
       }
       // percent based seek
       const percent = parseFloat(invocation.args && invocation.args['percent']);
-      if (percent && isFinite(percent) && percent <= 1 && percent >= 0) {
+      if (isFiniteNumber(percent) && percent <= 1 && percent >= 0) {
         this.runner_.seekToPercent(percent);
       }
     });

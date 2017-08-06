@@ -50,6 +50,8 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     /** @private {number} */
     this.bottomRatio_ = 0;
+
+    this.scrollProgress_ = 0;
   }
 
   /** @override */
@@ -88,24 +90,20 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     const adjustedViewportRect = this.adjustMargins_(entry.viewportRect);
     const positionRect = entry.positionRect;
     const wasVisible = this.isVisible_;
-    let relativePos;
+
+    const relativePos = layoutRectsRelativePos(positionRect,
+        adjustedViewportRect);
 
     if (!positionRect) {
-      relativePos = entry.relativePos;
       this.isVisible_ = false;
     } else {
-      relativePos = layoutRectsRelativePos(positionRect, adjustedViewportRect);
-
       this.updateVisibility_(positionRect, adjustedViewportRect, relativePos);
     }
 
     if (wasVisible && !this.isVisible_) {
       // Send final scroll progress state before exiting.
-      if (relativePos == RelativePositions.BOTTOM) {
-        this.triggerScroll_(0);
-      } else {
-        this.triggerScroll_(1);
-      }
+      this.scrollProgress_ = relativePos == RelativePositions.BOTTOM ? 0 : 1;
+      this.triggerScroll_();
       this.triggerExit_();
     }
 
@@ -113,15 +111,24 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       this.triggerEnter_();
     }
 
-    // Send progress if visible
+    // Send scroll progress if visible
     if (this.isVisible_) {
-      const progressPercent = 1 - (entry.positionRect.top / adjustedViewportRect.height);
-      this.triggerScroll_(progressPercent);
+      this.updateScrollProgress_(positionRect, adjustedViewportRect);
+      this.triggerScroll_();
     }
   }
 
+  updateScrollProgress_(positionRect, adjustedViewportRect) {
+    const totalDurationOffset = (positionRect.height * this.bottomRatio_) +
+        (positionRect.height * this.topRatio_);
+
+    const totalDuration = adjustedViewportRect.height + positionRect.height - totalDurationOffset;
+    const topOffset = Math.abs(positionRect.top - (adjustedViewportRect.height - (positionRect.height * this.bottomRatio_)));
+    this.scrollProgress_ = topOffset / totalDuration;
+  }
+
   updateVisibility_(positionRect, adjustedViewportRect, relativePos) {
-    // Ratios don't matter, fully inside margin-adjusted viewport
+    // Fully inside margin-adjusted viewport
     if (relativePos == RelativePositions.INSIDE) {
       this.isVisible_ = true;
       return;
@@ -130,12 +137,12 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     const ratioToUse = relativePos == RelativePositions.TOP ?
         this.topRatio_ : this.bottomRatio_;
 
-    const neededHeight = positionRect.height * ratioToUse;
+    const offset = positionRect.height * ratioToUse;
     if (relativePos == RelativePositions.BOTTOM) {
-      this.isVisible_ = positionRect.top <= adjustedViewportRect.bottom - neededHeight;
+      this.isVisible_ = positionRect.top <= (adjustedViewportRect.bottom - offset);
       return;
     } else {
-      this.isVisible_ = positionRect.bottom >= adjustedViewportRect.top + neededHeight;
+      this.isVisible_ = positionRect.bottom >= (adjustedViewportRect.top + offset);
       return;
     }
   }
@@ -154,10 +161,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     this.action_.trigger(this.element, 'exit', evt, ActionTrust.LOW);
   }
 
-  triggerScroll_(percentVal) {
+  triggerScroll_() {
     const evt = createCustomEvent(this.win, 'amp-visibility-observer.scroll',
-        {percent: percentVal});
-
+        {percent: this.scrollProgress_});
     this.action_.trigger(this.element, 'scroll', evt, ActionTrust.LOW);
   }
 
