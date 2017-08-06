@@ -15,20 +15,19 @@
  */
 
 import {Builder} from './web-animations';
-import {ScrollboundScene} from './scrollbound-scene';
+import {ActionTrust} from '../../../src/action-trust';
 import {Pass} from '../../../src/pass';
 import {WebAnimationPlayState} from './web-animation-types';
 import {childElementByTag} from '../../../src/dom';
 import {getFriendlyIframeEmbedOptional}
     from '../../../src/friendly-iframe-embed';
-import {getMode} from '../../../src/mode';
 import {getParentWindowFrameElement} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {installWebAnimations} from 'web-animations-js/web-animations.install';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
-import {user, dev} from '../../../src/log';
+import {user} from '../../../src/log';
 import {Services} from '../../../src/services';
 
 const TAG = 'amp-animation';
@@ -138,15 +137,24 @@ export class AmpAnimation extends AMP.BaseElement {
     }
 
     // Actions.
-    this.registerAction('start', this.startAction_.bind(this));
-    this.registerAction('restart', this.restartAction_.bind(this));
-    this.registerAction('pause', this.pauseAction_.bind(this));
-    this.registerAction('resume', this.resumeAction_.bind(this));
-    this.registerAction('togglePause', this.togglePauseAction_.bind(this));
-    this.registerAction('seekTo', this.seekToAction_.bind(this));
-    this.registerAction('reverse', this.reverseAction_.bind(this));
-    this.registerAction('finish', this.finishAction_.bind(this));
-    this.registerAction('cancel', this.cancelAction_.bind(this));
+    this.registerAction('start',
+        this.startAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('restart',
+        this.restartAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('pause',
+        this.pauseAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('resume',
+        this.resumeAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('togglePause',
+        this.togglePauseAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('seekTo',
+        this.seekToAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('reverse',
+        this.reverseAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('finish',
+        this.finishAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('cancel',
+        this.cancelAction_.bind(this), ActionTrust.LOW);
   }
 
   /**
@@ -204,14 +212,18 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /** @private */
   pauseAction_() {
-    this.pause_();
+    this.maybeCreateRunner_().then(() => {
+      this.pause_();
+    });
   }
 
   /** @private */
   resumeAction_() {
-    if (this.runner_ && this.visible_ && this.triggered_) {
-      this.runner_.resume();
-    }
+    this.maybeCreateRunner_().then(() => {
+      if (this.visible_ && this.triggered_) {
+        this.runner_.resume();
+      }
+    });
   }
 
   /** @private */
@@ -230,12 +242,23 @@ export class AmpAnimation extends AMP.BaseElement {
    * @private
    */
   seekToAction_(invocation) {
-    if (this.runner_ && this.visible_ && this.triggered_) {
+
+    // The animation will be triggered (in paused state) and seek will happen
+    // regardless of visibility
+    this.triggered_ = true;
+    this.maybeCreateRunner_().then(() => {
+      this.pause_();
+      // time based seek
       const time = parseFloat(invocation.args && invocation.args['time']);
       if (time && isFinite(time)) {
         this.runner_.seekTo(time);
       }
-    }
+      // percent based seek
+      const percent = parseFloat(invocation.args && invocation.args['percent']);
+      if (percent && isFinite(percent) && percent <= 1 && percent >= 0) {
+        this.runner_.seekToPercent(percent);
+      }
+    });
   }
 
   /** @private */
@@ -262,7 +285,7 @@ export class AmpAnimation extends AMP.BaseElement {
   setVisible_(visible) {
     if (this.visible_ != visible) {
       this.visible_ = visible;
-      if (this.triggered_) {
+      if (this.triggered_ && this.triggerOnVisibility_) {
         if (this.visible_) {
           this.startOrResume_();
         } else {
@@ -306,12 +329,21 @@ export class AmpAnimation extends AMP.BaseElement {
       return null;
     }
 
-    return this.createRunner_(opt_args).then(runner => {
-      this.runner_ = runner;
-      this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
-      this.setupScrollboundAnimations_();
-      this.runner_.start();
+    return this.maybeCreateRunner_(opt_args).then(() => {
+      this.runner_.resume();
     });
+  }
+
+  maybeCreateRunner_(opt_args) {
+    if (!this.runnerPromise_ || !this.runner_) {
+      this.runnerPromise_ = this.createRunner_(opt_args).then(runner => {
+        this.runner_ = runner;
+        this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
+        this.runner_.init();
+      });
+    }
+
+    return this.runnerPromise_;
   }
 
   /** @private */
@@ -389,36 +421,6 @@ export class AmpAnimation extends AMP.BaseElement {
     if (playState == WebAnimationPlayState.FINISHED) {
       this.finish_();
     }
-  }
-
-  /**
-   * @private
-   */
-  setupScrollboundAnimations_() {
-    dev().assert(this.runner_);
-    if (!this.runner_.hasScrollboundAnimations()) {
-      return;
-    }
-
-    // TODO(aghassemi): Remove restriction when we fully support scenes through
-    // scene-id attribute and/or allowing parent of `amp-animation` to be the
-    // scene container.
-    user().assert(this.embed_ || getMode().runtime == 'inabox',
-        'scroll-bound animations are only supported in embeds at the moment');
-
-    let sceneElement;
-    if (this.embed_) {
-      sceneElement = this.embed_.iframe;
-    } else {
-      sceneElement = this.win.document.documentElement;
-    }
-
-    new ScrollboundScene(
-      this.getAmpDoc(),
-      sceneElement,
-      this.runner_.scrollTick.bind(this.runner_), /* onScroll */
-      this.runner_.updateScrollDuration.bind(this.runner_) /* onDurationChanged */
-    );
   }
 }
 
