@@ -123,10 +123,9 @@ export class AmpImg extends BaseElement {
     // only read "Graphic" when using only 'alt'.
     if (this.element.getAttribute('role') == 'img') {
       this.element.removeAttribute('role');
-      user(this.element).error('AMP-IMG',
-          'Setting role=img on amp-img elements breaks ' +
-          'screen readers please just set alt or ARIA attributes, they will ' +
-          'be correctly propagated for the underlying <img> element.');
+      user().error('AMP-IMG', 'Setting role=img on amp-img elements breaks ' +
+        'screen readers please just set alt or ARIA attributes, they will ' +
+        'be correctly propagated for the underlying <img> element.');
     }
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
