@@ -146,10 +146,6 @@ function filterWhitelistedLinks(markdown) {
   filteredMarkdown =
       filteredMarkdown.replace(/(\(|\[)?http:\/\/localhost:8000/g, '');
 
-  // cdn.ampproject.org link
-  filteredMarkdown =
-      filteredMarkdown.replace(/(\(|\[)?https:\/\/cdn.ampproject.org/g, '');
-
   // Links in script tags (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/src="http.*?"/g, '');
 

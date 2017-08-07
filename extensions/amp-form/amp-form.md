@@ -68,7 +68,7 @@ The value for the `target` attribute must be either `_blank` or `_top`.
 
 For GET submissions, at least one of `action` or `action-xhr` must be provided.
 
-This attribute is required for `method=GET`. The value must be an `https` URL and must not be a link to a CDN (does **NOT** link to https://cdn.ampproject.org). For `method=POST`, the `action` attribute is invalid, use  `action-xhr` instead.
+This attribute is required for `method=GET`. The value must be an `https` URL and must not be a link to a CDN (does **NOT** link to `https://cdn.ampproject.org`). For `method=POST`, the `action` attribute is invalid, use  `action-xhr` instead.
 
 
 {% call callout('Note', type='note') %}
