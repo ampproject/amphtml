@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Stable with the following Experimental feature: <a href="#verification-(experimental)">Verification</a></td>
+    <td>Stable</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -334,9 +334,7 @@ The `as-you-go` reporting option allows your user to see validation messages as 
 #### Interact and Submit
 The `interact-and-submit` reporting option combines the behavior of `show-all-on-submit` and `as-you-go`. Individual fields will show any errors immediately after interactions, and on submit the form will show errors on all invalid fields.
 
-## Verification (Experimental)
-
-This feature is still experimental, so you need to [enable the experiment](https://www.ampproject.org/docs/reference/experimental) to use form verification.
+## Verification
 
 HTML5 validation gives feedback based only on information available on the page, such as if a value matches a certain pattern. With `amp-form` verification you can give the user feedback that HTML5 validation alone cannot. For example, a form can use verification to check if an email address has already been registered. Another use-case is verifying that a city field and a zip code field match each other.
 
