@@ -24,6 +24,7 @@ import {
   setReportError,
   user,
   duplicateErrorIfNecessary,
+  isUserErrorEmbed,
 } from '../../src/log';
 import * as sinon from 'sinon';
 
@@ -671,6 +672,48 @@ describe('Logging', () => {
       expect(duplicate.stack).to.equal(error.stack);
       expect(duplicate.args).to.equal(error.args);
       expect(duplicate.associatedElement).to.equal(error.associatedElement);
+    });
+  });
+
+  describe('embed error', () => {
+    let sandbox;
+    let iframe;
+    let element;
+    let element1;
+    let element2;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+      document.body.removeChild(iframe);
+    });
+
+    it('should return logger for user-error', () => {
+      const error = user().createError();
+      expect(isUserErrorEmbed(error.message)).to.be.false;
+      expect(isUserErrorMessage(error.message)).to.be.true;
+    });
+
+    it('should return logger for embed-error', () => {
+      element = document.createElement('embed');
+      iframe.contentWindow.document.body.appendChild(element);
+      const error = user(element).createError();
+      expect(isUserErrorEmbed(error.message)).to.be.true;
+    });
+
+    it('should not create extra identical loggers', () => {
+      element1 = document.createElement('embed_1');
+      element2 = document.createElement('embed_2');
+      iframe.contentWindow.document.body.appendChild(element1);
+      iframe.contentWindow.document.body.appendChild(element2);
+      expect(user()).to.equal(user(this.element));
+      expect(user(element1)).to.equal(user(element2));
+      expect(user()).to.not.equal(user(element1));
     });
   });
 });
