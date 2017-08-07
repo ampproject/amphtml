@@ -28,22 +28,37 @@ var webserver = require('gulp-webserver');
 var app = require('../test-server').app;
 var karmaDefault = require('./karma.conf');
 
+
+/**
+ * Logs a message if tests are being run during local development.
+ */
+function logLocal() {
+  if (!process.env.TRAVIS) {
+    util.log(util.colors.green(...arguments));
+  }
+}
+
 /**
  * Read in and process the configuration settings for karma
  * @return {!Object} Karma configuration
  */
 function getConfig() {
   if (argv.safari) {
+    logLocal(util.colors.yellow('--safari:'), 'Running tests on Safari.');
     return Object.assign({}, karmaDefault, {browsers: ['Safari']});
   }
   if (argv.firefox) {
+    logLocal(util.colors.yellow('--firefox:'), 'Running tests on Firefox.');
     return Object.assign({}, karmaDefault, {browsers: ['Firefox']});
   }
   if (argv.edge) {
+    logLocal(util.colors.yellow('--edge:'), 'Running tests on Edge.');
     return Object.assign({}, karmaDefault, {browsers: ['Edge']});
   }
 
   if (argv.saucelabs) {
+    logLocal(util.colors.yellow('--saucelabs:'),
+        'Running tests on Sauce Labs.');
     if (!process.env.SAUCE_USERNAME) {
       throw new Error('Missing SAUCE_USERNAME Env variable');
     }
@@ -110,6 +125,10 @@ function getAdTypes() {
  */
 gulp.task('test', 'Runs tests',
     argv.nobuild ? [] : (argv.unit ? ['css'] : ['build']), function(done) {
+  if(argv.nobuild) {
+    logLocal(util.colors.yellow('--nobuild:'), 'Skipping build.');
+  }
+
   if (!argv.integration && process.env.AMPSAUCE_REPO) {
     console./*OK*/info('Deactivated for ampsauce repo')
   }
@@ -117,28 +136,46 @@ gulp.task('test', 'Runs tests',
   var c = getConfig();
 
   if (argv.watch || argv.w) {
+    logLocal(util.colors.yellow('--watch:'),
+        'Running tests in watch mode. Editing and saving a' +
+        ' file will cause the tests for that file to be re-run.');
     c.singleRun = false;
   }
 
   if (argv.verbose || argv.v) {
+    logLocal(util.colors.yellow('--verbose:'),
+        'Running tests in verbose mode. Expect lots of output!');
     c.client.captureConsole = true;
   }
 
   if (argv.testnames) {
+    logLocal(util.colors.yellow('--testnames:'),
+        'Listing the names of all tests being run.');
     c.reporters = ['mocha'];
     c.mochaReporter.output = 'full';
   }
 
   if (argv.files) {
+    logLocal(util.colors.yellow('--files:'),
+        'Running tests in the file(s):', util.colors.cyan(argv.files));
     c.files = [].concat(config.commonTestPaths, argv.files);
     c.reporters = argv.saucelabs ? ['dots', 'saucelabs', 'mocha'] : ['mocha'];
     c.mochaReporter.output = argv.saucelabs ? 'minimal' : 'full';
   } else if (argv.integration) {
+    logLocal(util.colors.yellow('--integration:'),
+        'Running only the integration tests. Requires',
+        util.colors.cyan("gulp build"),
+        'to have been run first.');
     c.files = config.integrationTestPaths;
   } else if (argv.unit) {
+    logLocal(util.colors.yellow('--unit:'),
+        'Running only the unit tests. Requires',
+        util.colors.cyan("gulp css"),
+        'to have been run first.');
     c.files = config.unitTestPaths;
   } else if (argv.randomize || argv.glob || argv.a4a) {
-    /** Randomize the order of the test running */
+    logLocal(util.colors.yellow('--randomize / --glob / --a4a:'),
+        'Randomizing the order in which tests are run.');
     var testPaths;
     if (argv.a4a) {
       testPaths = [
@@ -172,11 +209,18 @@ gulp.task('test', 'Runs tests',
     util.log(util.colors.yellow("Save the above files in a .json file to reuse"));
 
   } else if (argv.testlist) {
+    logLocal(util.colors.yellow('--testlist:'),
+        'Running the tests listed in', util.colors.cyan(argv.testlist));
     var file = read.file(argv.testlist);
     util.log(file);
     c.files = file;
 
   } else {
+    logLocal('Running all tests. Use',
+        util.colors.cyan('--unit'),
+        'or',
+        util.colors.cyan('--integration'),
+        'to run just the unit tests or integration tests.');
     c.files = config.testPaths;
   }
 
@@ -189,12 +233,18 @@ gulp.task('test', 'Runs tests',
   };
 
   if (argv.compiled) {
+    logLocal(util.colors.yellow('--compiled:'),
+        'Running tests against minified code.');
     process.env.SERVE_MODE = 'compiled';
   } else {
+    logLocal('Running tests against unminified code.');
     process.env.SERVE_MODE = 'default';
   }
 
   if (argv.grep) {
+    logLocal(util.colors.yellow('--grep:'),
+        'Only running tests that match the pattern',
+        util.colors.cyan(argv.grep));
     c.client.mocha = {
       'grep': argv.grep,
     };
