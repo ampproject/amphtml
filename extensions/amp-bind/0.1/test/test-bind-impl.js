@@ -64,8 +64,7 @@ function onBindReady(env, bind) {
 function onBindReadyAndSetState(env, bind, state, opt_isAmpStateMutation) {
   return bind.initializePromiseForTesting().then(() => {
     return bind.setState(
-        state, /* opt_skipEva
-l */ undefined, opt_isAmpStateMutation);
+        state, /* opt_skipEval */ undefined, opt_isAmpStateMutation);
   }).then(() => {
     env.flushVsync();
     return bind.setStatePromiseForTesting();
@@ -95,7 +94,7 @@ function waitForEvent(env, name) {
     function callback() {
       resolve();
       env.win.removeEventListener(name, callback);
-    };
+    }
     env.win.addEventListener(name, callback);
   });
 }
@@ -151,8 +150,6 @@ describe('Bind', function() {
           expect(parentBind.numberOfBindings()).to.equal(1);
         });
       });
-
-
       it('should not be able to access variables from other windows', () => {
         const element =
             createElement(env, container, '[text]="foo + bar"');
