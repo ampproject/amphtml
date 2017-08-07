@@ -280,17 +280,15 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   layoutCallback() {
     if (this.slideIndex_ === null) {
-      const slideChanged = this.showSlide_(this.initialSlideIndex_);
-
-      /**
-       * When display is toggled on a partcular media or element resizes,
-       * it will need to be re-laid-out. This is only needed when the slide
-       * does not change (example when browser window size changes,
-       * or orientation changes)
-       */
-      if (!slideChanged) {
-        this.scheduleLayout(this.slides_[this.initialSlideIndex_]);
-      }
+      this.showSlide_(this.initialSlideIndex_);
+    } else {
+     /**
+      * When display is toggled on a partcular media or element resizes,
+      * it will need to be re-laid-out. This is only needed when the slide
+      * does not change (example when browser window size changes,
+      * or orientation changes)
+      */
+      this.scheduleLayout(this.slides_[dev().assertNumber(this.slideIndex_)]);
     }
     return Promise.resolve();
   }
@@ -364,9 +362,7 @@ export class AmpSlideScroll extends BaseSlides {
       // Timer that detects scroll end and/or end of snap scroll.
       this.scrollTimeout_ = Services.timerFor(this.win).delay(() => {
 
-        if (this.snappingInProgress_ ||
-            this.element.width <= 0 ||
-            this.element.height <= 0) {
+        if (this.snappingInProgress_) {
           return;
         }
         if (this.hasNativeSnapPoints_) {
