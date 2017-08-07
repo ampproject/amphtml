@@ -28,6 +28,12 @@ var webserver = require('gulp-webserver');
 var app = require('../test-server').app;
 var karmaDefault = require('./karma.conf');
 
+
+const green = util.colors.green;
+const yellow = util.colors.yellow;
+const cyan = util.colors.cyan;
+
+
 /**
  * Read in and process the configuration settings for karma
  * @return {!Object} Karma configuration
@@ -120,34 +126,33 @@ function printArgvMessages() {
         ' tests for that file to be re-run in the same browser instance.',
     verbose: 'Enabling verbose mode. Expect lots of output!',
     testnames: 'Listing the names of all tests being run.',
-    files: 'Running tests in the file(s): ' + util.colors.cyan(argv.files),
+    files: 'Running tests in the file(s): ' + cyan(argv.files),
     integration: 'Running only the integration tests. Requires ' +
-        util.colors.cyan('gulp build') +  ' to have been run first.',
+        cyan('gulp build') +  ' to have been run first.',
     unit: 'Running only the unit tests. Requires ' +
-        util.colors.cyan('gulp css') +  ' to have been run first.',
+        cyan('gulp css') +  ' to have been run first.',
     randomize: 'Randomizing the order in which tests are run.',
-    testlist: 'Running the tests listed in ' + util.colors.cyan(argv.testlist),
+    testlist: 'Running the tests listed in ' + cyan(argv.testlist),
     compiled:  'Running tests against minified code.',
     grep: 'Only running tests that match the pattern "' +
-        util.colors.cyan(argv.grep) + '".'
+        cyan(argv.grep) + '".'
   };
   if (!process.env.TRAVIS) {
-    util.log(util.colors.green('Run', util.colors.cyan('gulp help'),
-        'to see a list of all test flags. (Use', util.colors.cyan('--nohelp'),
+    util.log(green('Run', cyan('gulp help'),
+        'to see a list of all test flags. (Use', cyan('--nohelp'),
         'to silence these messages.)'));
-    if (!argv['unit'] && !argv['integration'] && !argv['files']) {
-      util.log(util.colors.green('Running all tests. Use',
-          util.colors.cyan('--unit'), 'or', util.colors.cyan('--integration'),
+    if (!argv.unit && !argv.integration && !argv.files) {
+      util.log(green('Running all tests. Use',
+          cyan('--unit'), 'or', cyan('--integration'),
           'to run just the unit tests or integration tests.'));
     }
-    if (!argv['compiled']) {
-      util.log(util.colors.green('Running tests against unminified code.'));
+    if (!argv.compiled) {
+      util.log(green('Running tests against unminified code.'));
     }
     Object.keys(argv).forEach(arg => {
-      if (argvMessages[arg]) {
-        util.log(
-            util.colors.yellow('--' + arg + ':'),
-            util.colors.green(argvMessages[arg] || ''));
+      const message = argvMessages[arg];
+      if (message) {
+        util.log(yellow('--' + arg + ':'), green(message));
       }
     });
   }
@@ -221,7 +226,7 @@ gulp.task('test', 'Runs tests',
     c.files = config.commonTestPaths.concat(testFiles);
 
     util.log(util.colors.blue(JSON.stringify(c.files)));
-    util.log(util.colors.yellow("Save the above files in a .json file to reuse"));
+    util.log(yellow("Save the above files in a .json file to reuse"));
 
   } else if (argv.testlist) {
     var file = read.file(argv.testlist);
@@ -261,13 +266,13 @@ gulp.task('test', 'Runs tests',
         middleware: [app],
       })
       .on('kill', function () {
-        util.log(util.colors.yellow(
+        util.log(yellow(
             'Shutting down test responses server on localhost:31862'));
         process.nextTick(function() {
           process.exit();
         });
       }));
-  util.log(util.colors.yellow(
+  util.log(yellow(
       'Started test responses server on localhost:31862'));
 
   new Karma(c, function(exitCode) {
@@ -275,7 +280,7 @@ gulp.task('test', 'Runs tests',
     if (exitCode) {
       util.log(
           util.colors.red('ERROR:'),
-          util.colors.yellow('Karma test failed with exit code', exitCode));
+          yellow('Karma test failed with exit code', exitCode));
       process.exit(exitCode);
     } else {
       done();
@@ -301,7 +306,7 @@ gulp.task('test', 'Runs tests',
     'testlist': '  Runs tests specified in JSON by supplied file',
     'glob': '  Explicitly expands test paths using glob before passing ' +
         'to Karma',
-    'nohelp': '  Silence help messages that are printed prior to rest run',
+    'nohelp': '  Silence help messages that are printed prior to test run',
   }
 });
 
