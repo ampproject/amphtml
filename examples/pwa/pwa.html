@@ -13,8 +13,6 @@
     }
 
     function loadScript(url, callback) {
-        // Adding the script tag to the head as suggested before
-        var head = document.head[0];
         var script = document.createElement('script');
         script.type = 'text/javascript';
         script.src = url;
@@ -24,8 +22,7 @@
         script.onreadystatechange = callback;
         script.onload = callback;
 
-        // Fire the loading
-        head.appendChild(script);
+        document.head.appendChild(script);
     }
 
     // Using this explicitly, as firefox errors due to our polyfills
