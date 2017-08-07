@@ -119,6 +119,17 @@ describes.realWin('test-cid-api', {}, env => {
     });
   });
 
+  it('should return CID from cookie if API returns no CID', () => {
+    persistCookie('scope-a', 'amp-cid-from-cookie');
+    fetchJsonStub.returns(Promise.resolve({
+      json: () => {return {};},
+    }));
+    return api.getScopedCid('scope-a', 'googleanalytics').then(cid => {
+      expect(cid).to.equal('amp-cid-from-cookie');
+      expect(getCookie(win, 'AMP_TOKEN')).to.equal('$ERROR');
+    });
+  });
+
   it('should return null if API returns no CID', () => {
     fetchJsonStub.returns(Promise.resolve({
       json: () => {return {};},
@@ -129,7 +140,33 @@ describes.realWin('test-cid-api', {}, env => {
     });
   });
 
-  it('should return null if AMP_TOKEN=$ERROR ', () => {
+  it('should return CID from cookie if API rejects', () => {
+    fetchJsonStub.returns(Promise.reject());
+    return api.getScopedCid('scope-a', 'googleanalytics').then(cid => {
+      expect(cid).to.be.null;
+      expect(getCookie(win, 'AMP_TOKEN')).to.equal('$ERROR');
+    });
+  });
+
+  it('should return null if API rejects and no CID in cookie', () => {
+    persistCookie('scope-a', 'amp-cid-from-cookie');
+    fetchJsonStub.returns(Promise.reject());
+    return api.getScopedCid('scope-a', 'googleanalytics').then(cid => {
+      expect(cid).to.equal('amp-cid-from-cookie');
+      expect(getCookie(win, 'AMP_TOKEN')).to.equal('$ERROR');
+    });
+  });
+
+  it('should return CID from cookie if AMP_TOKEN=$ERROR', () => {
+    persistCookie('AMP_TOKEN', '$ERROR');
+    persistCookie('scope-a', 'amp-cid-from-cookie');
+    return api.getScopedCid('scope-a', 'googleanalytics').then(cid => {
+      expect(cid).to.equal('amp-cid-from-cookie');
+      expect(getCookie(win, 'AMP_TOKEN')).to.equal('$ERROR');
+    });
+  });
+
+  it('should return null if AMP_TOKEN=$ERROR and no CID in cookie', () => {
     persistCookie('AMP_TOKEN', '$ERROR');
     return api.getScopedCid('scope-a', 'googleanalytics').then(cid => {
       expect(cid).to.be.null;

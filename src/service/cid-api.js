@@ -27,6 +27,7 @@ const API_KEYS = {
 const TAG = 'GoogleCidApi';
 const AMP_TOKEN = 'AMP_TOKEN';
 
+/** @enum {string} */
 const TokenStatus = {
   RETRIEVING: '$RETRIEVING',
   OPT_OUT: '$OPT_OUT',
@@ -79,8 +80,11 @@ export class GoogleCidApi {
       token = getCookie(this.win_, AMP_TOKEN);
       return token !== TokenStatus.RETRIEVING;
     }).then(() => {
-      if (token === TokenStatus.OPT_OUT || token === TokenStatus.ERROR) {
+      if (token === TokenStatus.OPT_OUT) {
         return null;
+      }
+      if (token === TokenStatus.ERROR) {
+        return getCookie(this.win_, scope);
       }
 
       if (!token) {
@@ -91,7 +95,7 @@ export class GoogleCidApi {
           .catch(e => {
             this.persistToken_(TokenStatus.ERROR, TIMEOUT);
             dev().error(TAG, e);
-            return null;
+            return getCookie(this.win_, scope);
           });
     });
   }
@@ -136,7 +140,7 @@ export class GoogleCidApi {
       return res['clientId'];
     } else {
       this.persistToken_(TokenStatus.ERROR, DAY);
-      return null;
+      return getCookie(this.win_, scope);
     }
   }
 
