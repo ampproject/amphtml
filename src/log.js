@@ -629,8 +629,8 @@ export function dev() {
  * @returns {boolean} isEmbed
  */
 export function isFromEmbed(win, opt_element) {
-  if (!!opt_element) {
-    return opt_element.ownerDocument.defaultView != win;
+  if (!opt_element) {
+    return false;
   }
-  return false;
+  return opt_element.ownerDocument.defaultView != win;
 }
