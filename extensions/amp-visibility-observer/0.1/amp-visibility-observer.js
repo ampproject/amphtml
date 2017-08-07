@@ -37,6 +37,8 @@ import {
   PositionInViewportEntryDef,
 } from '../../../src/service/position-observer-impl';
 
+const TAG = 'amp-visibility-observer';
+
 export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -73,7 +75,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {!number} */
     this.resolvedBottomMargin_ = 0;
 
-    /** @private {!../../../src/layout-rect.LayoutRectDef} */
+    /** @private {?../../../src/layout-rect.LayoutRectDef} */
     this.viewportRect_ = null;
 
     /** @private {!number} */
@@ -87,12 +89,17 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // Trigger, but only when visible.
+    // Since this is a functional component and not visual,
+    // layoutCallback is meaningless. We delay the heavy work until
+    // we become visible.
     const viewer = Services.viewerForDoc(this.getAmpDoc());
-    viewer.whenFirstVisible().then(this.trigger_.bind(this));
+    viewer.whenFirstVisible().then(this.init_.bind(this));
   }
 
-  trigger_() {
+  /**
+   * @private
+   */
+  init_() {
     this.parseAttributes_();
     // TODO(aghassemi): support target selector, special case `body`
     this.scene_ = this.element.parentNode;
@@ -103,29 +110,42 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     );
   }
 
-  parseAttributes_() {
-    // Ratio is either "0.dd" or "0.dd 0.dd"
-    const ratios = this.element.getAttribute('intersection-ratio');
-    if (ratios) {
-      const topBottom = ratios.trim().split(' ');
-      this.topRatio_ = this.validateAndResolveRatio_(topBottom[0]);
-      this.bottomRatio_ = this.topRatio_;
-      if (topBottom[1]) {
-        this.bottomRatio_ = this.validateAndResolveRatio_(topBottom[1]);
-      }
-    }
-
-    const margins = this.element.getAttribute('exclusion-margins');
-    if (margins) {
-      const topBottom = margins.trim().split(' ');
-      this.topMarginExpr_ = topBottom[0];
-      this.bottomMarginExpr_ = this.topMarginExpr_;
-      if (topBottom[1]) {
-        this.bottomMarginExpr_ = topBottom[1];
-      }
-    }
+  /**
+   * Dispacthes the `enter` event
+   * @private
+   */
+  triggerEnter_() {
+    const name = 'enter';
+    const evt = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    this.action_.trigger(this.element, name, evt, ActionTrust.LOW);
   }
 
+  /**
+   * Dispacthes the `exit` event
+   * @private
+   */
+  triggerExit_() {
+    const name = 'exit';
+    const evt = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    this.action_.trigger(this.element, name, evt, ActionTrust.LOW);
+  }
+
+  /**
+   * Dispacthes the `scroll` event
+   * @private
+   */
+  triggerScroll_() {
+    const name = 'scroll';
+    const evt = createCustomEvent(this.win, `${TAG}.${name}`,
+        {percent: this.scrollProgress_});
+    this.action_.trigger(this.element, name, evt, ActionTrust.LOW);
+  }
+
+  /**
+   * Called by position observer.
+   * It calculated visibility and progress and triggers the appropriate events.
+   * @private
+   */
   positionChanged_(entry) {
     const wasVisible = this.isVisible_;
     const prevViewportHeight = this.viewportRect_ && this.viewportRect_.height;
@@ -137,8 +157,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     }
 
     // Adjust numbers for based on exclusion margins
-    const adjViewportRect = this.adjustMargins_(entry.viewportRect,
-        entry.viewportRect.height);
+    const adjViewportRect = this.applyMargins_(entry.viewportRect);
     const adjPositionRect = entry.positionRect;
 
     // Relative position of the element to the adjusted viewport
@@ -169,23 +188,10 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     }
   }
 
-  updateScrollProgress_(positionRect, adjustedViewportRect) {
-    const totalDurationOffset = (positionRect.height * this.bottomRatio_) +
-        (positionRect.height * this.topRatio_);
-
-    const totalDuration = adjustedViewportRect.height +
-        positionRect.height - totalDurationOffset;
-
-    const topOffset = Math.abs(
-        positionRect.top - this.resolvedTopMargin_ -
-        (adjustedViewportRect.height -
-            (positionRect.height * this.bottomRatio_)
-        )
-      );
-
-    this.scrollProgress_ = topOffset / totalDuration;
-  }
-
+  /**
+   * Calculates whether the item is visible considering ratios and margins.
+   * @private
+   */
   updateVisibility_(positionRect, adjustedViewportRect, relativePos) {
     // Fully inside margin-adjusted viewport
     if (relativePos == RelativePositions.INSIDE) {
@@ -208,19 +214,67 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     }
   }
 
-  recalculateMargins_() {
-    dev().assert(this.viewportRect_);
-    dev().assert(this.bottomMarginExpr_);
-    dev().assert(this.topMarginExpr_);
+  /**
+   * Calculates the current scroll progress as a percentage.
+   * Scroll progress is a decimal between 0-1 and shows progress between
+   * enter and exit.
+   * When items becomes visible^ (enters), progress is 0
+   * as it moves toward the top, progress increases until it becomes invisible^
+   * (exits).
+   *
+   * ^visibility as configured by ratios and margins.
+   * @private
+   */
+  updateScrollProgress_(positionRect, adjustedViewportRect) {
+    const totalDurationOffset = (positionRect.height * this.bottomRatio_) +
+        (positionRect.height * this.topRatio_);
 
-    this.resolvedTopMargin_ =
-        this.validateAndResolveMargin_(this.topMarginExpr_);
+    const totalDuration = adjustedViewportRect.height +
+        positionRect.height - totalDurationOffset;
 
-    this.resolvedBottomMargin_ =
-        this.validateAndResolveMargin_(this.bottomMarginExpr_);
+    const topOffset = Math.abs(
+        positionRect.top - this.resolvedTopMargin_ -
+        (adjustedViewportRect.height -
+            (positionRect.height * this.bottomRatio_)
+        )
+      );
 
+    this.scrollProgress_ = topOffset / totalDuration;
   }
 
+  /**
+   * @private
+   */
+  parseAttributes_() {
+    // Ratio is either "<top-bottom:{0,1}>" or "<top:{0,1}> <bottom:{0,1}>"
+    // e.g, "0.5 1": use 50% visibility at top and 100% at the bottom of viewport
+    const ratios = this.element.getAttribute('intersection-ratio');
+    if (ratios) {
+      const topBottom = ratios.trim().split(' ');
+      this.topRatio_ = this.validateAndResolveRatio_(topBottom[0]);
+      this.bottomRatio_ = this.topRatio_;
+      if (topBottom[1]) {
+        this.bottomRatio_ = this.validateAndResolveRatio_(topBottom[1]);
+      }
+    }
+
+    // Margin is either "<top-bottom:{px,vh}>" or "<top:{px,vh}> <bottom:{px,vh}>"
+    // e.g, "100px 10vh": exclude 100px from top and 10vh from bottom of viewport
+    const margins = this.element.getAttribute('exclusion-margins');
+    if (margins) {
+      const topBottom = margins.trim().split(' ');
+      this.topMarginExpr_ = topBottom[0];
+      this.bottomMarginExpr_ = this.topMarginExpr_;
+      if (topBottom[1]) {
+        this.bottomMarginExpr_ = topBottom[1];
+      }
+    }
+  }
+
+  /**
+   * Parses and validates margins.
+   * @private
+   */
   validateAndResolveMargin_(val) {
     val = assertLength(parseLength(val));
     const unit = getLengthUnits(val);
@@ -234,7 +288,39 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     return num;
   }
 
-  adjustMargins_(rect) {
+  /**
+   * Parses and validates ratios.
+   * @private
+   */
+  validateAndResolveRatio_(val) {
+    const num = parseFloat(val);
+    user().assert(num >= 0 && num <= 1,
+        'Ratios must be a decimal between 0 and 1: ' + val);
+    return num;
+  }
+
+  /**
+   * Margins can be of `vh` unit which means they may need to be recalculated
+   * when viewport height changes.
+   * @private
+   */
+  recalculateMargins_() {
+    dev().assert(this.viewportRect_);
+    dev().assert(this.bottomMarginExpr_);
+    dev().assert(this.topMarginExpr_);
+
+    this.resolvedTopMargin_ =
+        this.validateAndResolveMargin_(this.topMarginExpr_);
+
+    this.resolvedBottomMargin_ =
+        this.validateAndResolveMargin_(this.bottomMarginExpr_);
+  }
+
+  /**
+   * Readjusts the given rect using the configured margins.
+   * @private
+   */
+  applyMargins_(rect) {
     dev().assert(rect);
     const r = layoutRectLtwh(
         rect.left,
@@ -248,29 +334,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     return r;
   }
 
-  validateAndResolveRatio_(val) {
-    const num = parseFloat(val);
-    user().assert(num >= 0 && num <= 1,
-        'Ratios must be a decimal between 0 and 1: ' + val);
-    return num;
-  }
-
-  triggerEnter_() {
-    const evt = createCustomEvent(this.win, 'amp-visibility-observer.enter');
-    this.action_.trigger(this.element, 'enter', evt, ActionTrust.LOW);
-  }
-
-  triggerExit_() {
-    const evt = createCustomEvent(this.win, 'amp-visibility-observer.exit');
-    this.action_.trigger(this.element, 'exit', evt, ActionTrust.LOW);
-  }
-
-  triggerScroll_() {
-    const evt = createCustomEvent(this.win, 'amp-visibility-observer.scroll',
-        {percent: this.scrollProgress_});
-    this.action_.trigger(this.element, 'scroll', evt, ActionTrust.LOW);
-  }
-
+  /**
+   * @private
+   */
   maybeInstallPositionObserver_() {
     if (!this.positionObserver_) {
       installPositionObserverServiceForDoc(this.getAmpDoc());

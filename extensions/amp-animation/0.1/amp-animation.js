@@ -59,6 +59,9 @@ export class AmpAnimation extends AMP.BaseElement {
     /** @private {?./web-animations.WebAnimationRunner} */
     this.runner_ = null;
 
+    /** @private {?Promise} */
+    this.runnerPromise_ = null;
+
     /** @private {?Pass} */
     this.restartPass_ = null;
   }
@@ -335,6 +338,12 @@ export class AmpAnimation extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Creates the runner but animations will not start (paused)
+   * @param {?JsonObject=} opt_args
+   * @return {!Promise}
+   * @private
+   */
   maybeCreateRunner_(opt_args) {
     if (!this.runnerPromise_ || !this.runner_) {
       this.runnerPromise_ = this.createRunner_(opt_args).then(runner => {

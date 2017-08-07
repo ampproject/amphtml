@@ -192,7 +192,7 @@ export class WebAnimationRunner {
   /**
    * Seeks to a relative position within the animation timeline given a
    * percentage (0 to 1 number)
-   * @param {number} number between 0 and 1
+   * @param {number} percent between 0 and 1
    */
   seekToPercent(percent) {
     dev().assert(percent >= 0 && percent <= 1);
