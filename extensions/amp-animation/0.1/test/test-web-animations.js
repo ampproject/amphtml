@@ -244,7 +244,6 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           easing: 'ease-in',
           direction: 'reverse',
           fill: 'auto',
-          ticker: 'time',
         },
       ],
     });
@@ -257,7 +256,6 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       easing: 'ease-in',
       direction: 'reverse',
       fill: 'auto',
-      ticker: 'time',
     });
   });
 

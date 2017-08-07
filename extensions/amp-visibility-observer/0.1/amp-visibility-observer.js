@@ -94,6 +94,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
   trigger_() {
     this.parseAttributes_();
+    // TODO(aghassemi): support target selector, special case `body`
     this.scene_ = this.element.parentNode;
     this.action_ = Services.actionServiceForDoc(this.element);
     this.maybeInstallPositionObserver_();
@@ -172,9 +173,16 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     const totalDurationOffset = (positionRect.height * this.bottomRatio_) +
         (positionRect.height * this.topRatio_);
 
-    const totalDuration = adjustedViewportRect.height + positionRect.height - totalDurationOffset;
-    const topOffset = Math.abs(positionRect.top - this.resolvedTopMargin_ -
-    (adjustedViewportRect.height - (positionRect.height * this.bottomRatio_)));
+    const totalDuration = adjustedViewportRect.height +
+        positionRect.height - totalDurationOffset;
+
+    const topOffset = Math.abs(
+        positionRect.top - this.resolvedTopMargin_ -
+        (adjustedViewportRect.height -
+            (positionRect.height * this.bottomRatio_)
+        )
+      );
+
     this.scrollProgress_ = topOffset / totalDuration;
   }
 

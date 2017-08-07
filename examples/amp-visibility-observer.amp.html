@@ -1,58 +1,67 @@
 <!doctype html>
 <html ⚡>
+
 <head>
   <meta charset="utf-8">
   <title>AMP #0</title>
-  <link rel="canonical" href="amps.html" >
+  <link rel="canonical" href="amps.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
   <script async custom-element="amp-visibility-observer" src="https://cdn.ampproject.org/v0/amp-visibility-observer-0.1.js"></script>
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <style amp-custom>
+    main {
+      font-family: Helvetica, sans-serif;
+      padding: 10px;
+      max-width: 412px;
+      margin: auto;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-weight: normal;
+    }
+
     amp-img img {
       object-fit: cover;
     }
+
     .clock-hand {
       position: absolute;
       width: 2vw;
       height: 20vw;
+      max-height: 90px;
+      max-width: 10px;
       top: 50%;
       left: 50%;
       z-index: 2;
       background: #FAFAFA;
       transform-origin: 50% 0%;
       border-radius: 10px;
-      transform: rotate(180deg)
+      transform: rotate(-180deg)
+    }
+
+    .spacer {
+      height: 70vh;
+      width: 100%;
+      background-image: -webkit-linear-gradient(#EEE 50%, white 50%);
+      background-image: linear-gradient(#EEE 50%, white 50%);
+      /* 2 */
+      background-size: 100% 3em;
+      /* 3 */
     }
   </style>
-  <!--<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>-->
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
+
 <body>
-  <p>
-    Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio, quis dignissim nisi nulla
-    at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue augue magna, nec eleifend dui porttitor
-    sed. Cras orci quam, dignissim nec elementum ac, bibendum et purus. Ut elementum mi eget felis ultrices tempus. Maecenas
-    nec sodales ex. Phasellus ultrices, purus non egestas ullamcorper, felis lorem ultrices nibh, in tristique mauris justo
-    sed ante. Nunc commodo purus feugiat metus bibendum consequat. Duis finibus urna ut ligula auctor, sed vehicula ex aliquam.
-    Sed sed augue auctor, porta turpis ultrices, cursus diam. In venenatis aliquet porta. Sed volutpat fermentum quam, ac
-    molestie nulla porttitor ac. Donec porta risus ut enim pellentesque, id placerat elit ornare.
-  </p>
-  <p>
-    Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio, quis dignissim nisi nulla
-    at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue augue magna, nec eleifend dui porttitor
-    sed. Cras orci quam, dignissim nec elementum ac, bibendum et purus. Ut elementum mi eget felis ultrices tempus. Maecenas
-    nec sodales ex. Phasellus ultrices, purus non egestas ullamcorper, felis lorem ultrices nibh, in tristique mauris justo
-    sed ante. Nunc commodo purus feugiat metus bibendum consequat. Duis finibus urna ut ligula auctor, sed vehicula ex aliquam.
-    Sed sed augue auctor, porta turpis ultrices, cursus diam. In venenatis aliquet porta. Sed volutpat fermentum quam, ac
-    molestie nulla porttitor ac. Donec porta risus ut enim pellentesque, id placerat elit ornare.
-  </p>
-  <h1>Scrollbound animations with amp-visibility-observer and amp-animation</h1>
-  <h2>The following animation does one round when fully visible between the middle 80% of the viewport</h2>
   <amp-animation id="clockAnim1" layout="nodisplay">
     <script type="application/json">
-    {
-      "duration": "6s",
+      {
+      "duration": "3s",
       "fill": "both",
       "direction": "alternate",
       "animations": [
@@ -60,49 +69,17 @@
           "selector": "#clock-scene-1 .clock-hand",
           "keyframes": [
             { "transform": "rotate(-180deg)" },
-            { "transform": "rotate(180deg)" }
+            { "transform": "rotate(0deg)" }
           ]
         }
       ]
     }
     </script>
   </amp-animation>
-  <div id="clock-scene-1" class="clock-scene">
-    <amp-visibility-observer
-    intersection-ratio="1"
-    exclusion-margins="10vh"
-    on="scroll:clockAnim1.seekTo(percent=event.percent)"
-    layout="nodisplay"></amp-visibility-observer>
 
-    <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
-      <div class="clock-hand"></div>
-    </amp-img>
-  </div>
-
-  <p>
-    Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio, quis dignissim nisi nulla
-    at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue augue magna, nec eleifend dui porttitor
-    sed. Cras orci quam, dignissim nec elementum ac, bibendum et purus. Ut elementum mi eget felis ultrices tempus. Maecenas
-    nec sodales ex. Phasellus ultrices, purus non egestas ullamcorper, felis lorem ultrices nibh, in tristique mauris justo
-    sed ante. Nunc commodo purus feugiat metus bibendum consequat. Duis finibus urna ut ligula auctor, sed vehicula ex aliquam.
-    Sed sed augue auctor, porta turpis ultrices, cursus diam. In venenatis aliquet porta. Sed volutpat fermentum quam, ac
-    molestie nulla porttitor ac. Donec porta risus ut enim pellentesque, id placerat elit ornare.
-  </p>
-  <p>
-    Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio, quis dignissim nisi nulla
-    at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue augue magna, nec eleifend dui porttitor
-    sed. Cras orci quam, dignissim nec elementum ac, bibendum et purus. Ut elementum mi eget felis ultrices tempus. Maecenas
-    nec sodales ex. Phasellus ultrices, purus non egestas ullamcorper, felis lorem ultrices nibh, in tristique mauris justo
-    sed ante. Nunc commodo purus feugiat metus bibendum consequat. Duis finibus urna ut ligula auctor, sed vehicula ex aliquam.
-    Sed sed augue auctor, porta turpis ultrices, cursus diam. In venenatis aliquet porta. Sed volutpat fermentum quam, ac
-    molestie nulla porttitor ac. Donec porta risus ut enim pellentesque, id placerat elit ornare.
-  </p>
-
-  <h1>Custom visibility start-end with amp-visibility-observer and amp-animation</h1>
-  <h3>The following animation will start when the scene is 50% visible and pauses when 50% invisible</h3>
   <amp-animation id="clockAnim2" layout="nodisplay">
     <script type="application/json">
-    {
+      {
       "duration": "6s",
       "fill": "both",
       "iterations": "infinity",
@@ -118,41 +95,46 @@
     }
     </script>
   </amp-animation>
-  <div id="clock-scene-2" class="clock-scene">
-    <amp-visibility-observer
-    intersection-ratio="0.5"
-    on="enter:clockAnim2.start;exit:clockAnim2.pause"
-    layout="nodisplay"></amp-visibility-observer>
-    <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
-      <div class="clock-hand"></div>
-    </amp-img>
-  </div>
-  <p>
-    Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio, quis dignissim nisi nulla
-    at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue augue magna, nec eleifend dui porttitor
-    sed. Cras orci quam, dignissim nec elementum ac, bibendum et purus. Ut elementum mi eget felis ultrices tempus. Maecenas
-    nec sodales ex. Phasellus ultrices, purus non egestas ullamcorper, felis lorem ultrices nibh, in tristique mauris justo
-    sed ante. Nunc commodo purus feugiat metus bibendum consequat. Duis finibus urna ut ligula auctor, sed vehicula ex aliquam.
-    Sed sed augue auctor, porta turpis ultrices, cursus diam. In venenatis aliquet porta. Sed volutpat fermentum quam, ac
-    molestie nulla porttitor ac. Donec porta risus ut enim pellentesque, id placerat elit ornare.
-  </p>
-  <p>
-    Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio, quis dignissim nisi nulla
-    at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue augue magna, nec eleifend dui porttitor
-    sed. Cras orci quam, dignissim nec elementum ac, bibendum et purus. Ut elementum mi eget felis ultrices tempus. Maecenas
-    nec sodales ex. Phasellus ultrices, purus non egestas ullamcorper, felis lorem ultrices nibh, in tristique mauris justo
-    sed ante. Nunc commodo purus feugiat metus bibendum consequat. Duis finibus urna ut ligula auctor, sed vehicula ex aliquam.
-    Sed sed augue auctor, porta turpis ultrices, cursus diam. In venenatis aliquet porta. Sed volutpat fermentum quam, ac
-    molestie nulla porttitor ac. Donec porta risus ut enim pellentesque, id placerat elit ornare.
-  </p>
-  <p>
-    Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio, quis dignissim nisi nulla
-    at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue augue magna, nec eleifend dui porttitor
-    sed. Cras orci quam, dignissim nec elementum ac, bibendum et purus. Ut elementum mi eget felis ultrices tempus. Maecenas
-    nec sodales ex. Phasellus ultrices, purus non egestas ullamcorper, felis lorem ultrices nibh, in tristique mauris justo
-    sed ante. Nunc commodo purus feugiat metus bibendum consequat. Duis finibus urna ut ligula auctor, sed vehicula ex aliquam.
-    Sed sed augue auctor, porta turpis ultrices, cursus diam. In venenatis aliquet porta. Sed volutpat fermentum quam, ac
-    molestie nulla porttitor ac. Donec porta risus ut enim pellentesque, id placerat elit ornare.
-  </p>
+  <main>
+    <h1>amp-visibility-observer</h1>
+    <div class="spacer"></div>
+
+    <h2>Scrollbound animations with amp-visibility-observer and amp-animation</h2>
+    <h3>The following animation does one round (12pm-6pm) via scrolling when fully visible between the middle 80% of the viewport</h3>
+
+    <div id="clock-scene-1" class="clock-scene">
+      <amp-visibility-observer
+        intersection-ratio="1"
+        exclusion-margins="10vh"
+        on="scroll:clockAnim1.seekTo(percent=event.percent)"
+        layout="nodisplay">
+      </amp-visibility-observer>
+
+      <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
+        <div class="clock-hand"></div>
+      </amp-img>
+    </div>
+
+    <div class="spacer"></div>
+
+    <h2>Custom visibility start-end with amp-visibility-observer and amp-animation</h2>
+    <h3>The following animation will start when the scene is 50% visible and pauses when 50% invisible</h3>
+
+    <div id="clock-scene-2" class="clock-scene">
+      <amp-visibility-observer
+        intersection-ratio="0.5"
+        on="enter:clockAnim2.start;exit:clockAnim2.pause"
+        layout="nodisplay">
+      </amp-visibility-observer>
+
+      <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
+        <div class="clock-hand"></div>
+      </amp-img>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+  </main>
 </body>
+
 </html>
