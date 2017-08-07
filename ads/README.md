@@ -45,7 +45,6 @@ The ad itself is hosted within a document that has an origin different from the 
 We will provide the following information to the ad:
 
 - [ad viewability](#ad-viewability)
-- `document.referrer` will typically contain the URL of the primary document. This may change in the future (See window.context.location for a more reliable method).
 - `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
 - `window.context.clientId` contains a unique id that is persistently the same for a given user and AMP origin site in their current browser until local data is deleted or the value expires (expiration is currently set to 1 year).
   - Ad networks must register their cid scope in the variable `clientIdScope` in [_config.js](./_config.js). Use `clientIdCookieName` to provide a cookie name for non-proxy case, otherwise value of `clientIdScope` is used.
@@ -58,6 +57,7 @@ We will provide the following information to the ad:
   location is actually correct (So rogue pages cannot claim they represent an origin they do not actually represent).
 - `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
 - `window.context.referrer` contains the origin of the referrer value of the primary document if available.
+  - `document.referrer` will typically contain the URL of the primary document. This may change in the future (See window.context.location for a more reliable method).
 - `window.context.sourceUrl` contains the source URL of the original AMP document. See details [here](../spec/amp-var-substitutions.md#source-url).
 - `window.context.startTime` contains the time at which processing of the amp-ad element started.
 
