@@ -566,14 +566,13 @@ export function user(opt_element) {
   if (!logs.user) {
     logs.user = getUserLogger(USER_ERROR_SENTINEL);
   }
-  if (!!opt_element &&
-      isFromEmbed(logs.user.win, /** @type {!Element} */ (opt_element))) {
+  if (!isFromEmbed(logs.user.win, opt_element)) {
+    return logs.user;
+  } else {
     if (logs.userForEmbed) {
       return logs.userForEmbed;
     }
     return logs.userForEmbed = getUserLogger(USER_ERROR_EMBED_SENTINEL);
-  } else {
-    return logs.user;
   }
 }
 
@@ -626,9 +625,12 @@ export function dev() {
 
 /**
  * @param {!Window} win
- * @param {!Element} element
+ * @param {!Element=} opt_element
  * @returns {boolean} isEmbed
  */
-export function isFromEmbed(win, element) {
-  return element.ownerDocument.defaultView != win;
+export function isFromEmbed(win, opt_element) {
+  if (!!opt_element) {
+    return opt_element.ownerDocument.defaultView != win;
+  }
+  return false;
 }
