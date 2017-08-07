@@ -350,7 +350,25 @@ export class VideoManager {
         return this.entries_[i];
       }
     }
+    dev().assert(false, 'video is not registered to this video manager');
+    return null;
+  }
 
+  /**
+   * Returns the entry in the video manager corresponding to the element
+   * provided
+   *
+   * @param {!AmpElement} element
+   * @return {VideoEntry} entry
+   * @private
+   */
+  getEntryForElement_(element) {
+    for (let i = 0; i < this.entries_.length; i++) {
+      const entry = this.entries_[i];
+      if (entry.video.element === element) {
+        return entry;
+      }
+    }
     dev().assert(false, 'video is not registered to this video manager');
     return null;
   }
@@ -362,15 +380,8 @@ export class VideoManager {
    * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>|!Promise<undefined>}
    */
   getVideoAnalyticsDetails(videoElement) {
-    for (let i = 0; i < this.entries_.length; i++) {
-      const entry = this.entries_[i];
-      if (entry.video.element === videoElement) {
-        return entry.getAnalyticsDetails();
-      }
-    }
-
-    dev().assert(false, 'video is not registered to this video manager');
-    return Promise.resolve();
+    const entry = this.getEntryForElement_(videoElement);
+    return entry ? entry.getAnalyticsDetails() : Promise.resolve();
   }
 
   /**
