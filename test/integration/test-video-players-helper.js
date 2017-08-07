@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-import {listenOncePromise} from '../../src/event-helper';
-import {timerFor} from '../../src/services';
+import {getData, listen, listenOncePromise} from '../../src/event-helper';
+import {Services} from '../../src/services';
 import {removeElement} from '../../src/dom';
 import {toggleExperiment} from '../../src/experiments';
-import {VideoInterface, VideoEvents} from '../../src/video-interface';
+import {
+  VideoInterface,
+  VideoEvents,
+  VideoAnalyticsEvents,
+  PlayingStates,
+} from '../../src/video-interface';
 import {supportsAutoplay} from '../../src/service/video-manager-impl';
 import {
   createFixtureIframe,
@@ -42,7 +47,14 @@ export function runVideoPlayerIntegrationTests(
   let fixtureGlobal;
   let videoGlobal;
 
-  describe.configure().retryOnSaucelabs()
+  function createButton(r, action) {
+    const button = r.fixture.doc.createElement('button');
+    button.setAttribute('on', 'tap:myVideo.' + action);
+    r.fixture.doc.body.appendChild(button);
+    return button;
+  }
+
+  describe.configure().skipSauceLabs()
       .run('Video Interface', function() {
         this.timeout(TIMEOUT);
 
@@ -65,42 +77,40 @@ export function runVideoPlayerIntegrationTests(
         afterEach(cleanUp);
       });
 
-  describe.configure().retryOnSaucelabs().run('Actions', function() {
+  describe.configure().skipSauceLabs().run('Actions', function() {
     this.timeout(TIMEOUT);
 
-    it('should support mute, play, pause, unmute actions', function() {
+    it.skip('should support mute, play, pause, unmute actions', function() {
       return getVideoPlayer({outsideView: false, autoplay: false}).then(r => {
         // Create a action buttons
         const playButton = createButton(r, 'play');
         const pauseButton = createButton(r, 'pause');
         const muteButton = createButton(r, 'mute');
         const unmuteButton = createButton(r, 'unmute');
-        return Promise.resolve()
+
+        return listenOncePromise(r.video, VideoEvents.LOAD)
             .then(() => {
-              muteButton.click();
-              return listenOncePromise(r.video, VideoEvents.MUTED);
-            })
-            .then(() => {
+              const promise = listenOncePromise(r.video, VideoEvents.PLAYING);
               playButton.click();
-              return listenOncePromise(r.video, VideoEvents.PLAY);
+              return promise;
             })
             .then(() => {
+              const promise = listenOncePromise(r.video, VideoEvents.MUTED);
+              muteButton.click();
+              return promise;
+            })
+            .then(() => {
+              const promise = listenOncePromise(r.video, VideoEvents.PAUSE);
               pauseButton.click();
-              return listenOncePromise(r.video, VideoEvents.PAUSE);
+              return promise;
             })
             .then(() => {
+              const promise = listenOncePromise(r.video, VideoEvents.UNMUTED);
               unmuteButton.click();
-              return listenOncePromise(r.video, VideoEvents.UNMUTED);
+              return promise;
             });
       });
     });
-
-    function createButton(r, action) {
-      const button = r.fixture.doc.createElement('button');
-      button.setAttribute('on', 'tap:myVideo.' + action);
-      r.fixture.doc.body.appendChild(button);
-      return button;
-    }
 
     // Although these tests are not about autoplay, we can ony run them in
     // browsers that do support autoplay, this is because a synthetic click
@@ -121,7 +131,195 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().retryOnSaucelabs().run('Video Docking', function() {
+  describe.configure().skipSauceLabs().run('Analytics Triggers', function() {
+    this.timeout(TIMEOUT);
+    let video;
+
+    it('should trigger play analytics when the video plays', function() {
+      let playButton;
+
+      return getVideoPlayer(
+          {
+            outsideView: true,
+            autoplay: false,
+          }
+      ).then(r => {
+        video = r.video;
+        playButton = createButton(r, 'play');
+        const viewport = video.implementation_.getViewport();
+        const promise = listenOncePromise(video, VideoEvents.LOAD);
+        viewport.scrollIntoView(video);
+        return promise;
+      }).then(() => {
+        const promise = listenOncePromise(video, VideoAnalyticsEvents.PLAY);
+        playButton.click();
+        return promise;
+      });
+    });
+
+    it('should trigger pause analytics when the video pauses', function() {
+      let pauseButton;
+
+      return getVideoPlayer(
+          {
+            outsideView: false,
+            autoplay: true,
+          }
+      ).then(r => {
+        video = r.video;
+        pauseButton = createButton(r, 'pause');
+        return listenOncePromise(video, VideoEvents.PLAYING);
+      }).then(() => {
+        const promise = listenOncePromise(video, VideoAnalyticsEvents.PAUSE);
+        pauseButton.click();
+        return promise;
+      });
+    });
+
+    it('should trigger session analytics when a session ends', function() {
+      let pauseButton;
+
+      return getVideoPlayer(
+          {
+            outsideView: false,
+            autoplay: true,
+          }
+      ).then(r => {
+        video = r.video;
+        const promise = listenOncePromise(video, VideoEvents.PLAYING);
+        pauseButton = createButton(r, 'pause');
+        return promise;
+      }).then(() => {
+        const promise = listenOncePromise(video, VideoAnalyticsEvents.PAUSE);
+        pauseButton.click();
+        return promise;
+      });
+    });
+
+    it('should trigger session analytics when ' +
+        'a visible session ends', function() {
+      let viewport;
+      return getVideoPlayer(
+          {
+            outsideView: true,
+            autoplay: true,
+          }
+      ).then(r => {
+        video = r.video;
+        viewport = video.implementation_.getViewport();
+        // scroll to the bottom, make video fully visible
+        viewport.scrollIntoView(video);
+        return listenOncePromise(video, VideoEvents.PLAYING);
+      }).then(() => {
+        // scroll to the bottom, make video fully visible
+        viewport.setScrollTop(0);
+        return listenOncePromise(video, VideoAnalyticsEvents.SESSION_VISIBLE);
+      });
+    });
+
+    it('should trigger ended analytics when the video ends', function() {
+      return getVideoPlayer(
+          {
+            outsideView: false,
+            autoplay: true,
+          }
+      ).then(r => {
+        // TODO(cvializ): Better way to detect which classes implement methods
+        // needed for tracking?
+        const tagName = r.video.tagName;
+        if (tagName !== 'AMP-VIDEO' &&
+            tagName !== 'AMP-TEST-FAKE-VIDEOPLAYER') {
+          this.skip();
+          return;
+        }
+
+        video = r.video;
+        return listenOncePromise(video, VideoAnalyticsEvents.ENDED);
+      });
+    });
+
+    it('should include current time, play state, etc.', function() {
+      let playButton;
+      let pauseButton;
+
+      return getVideoPlayer(
+          {
+            outsideView: false,
+            autoplay: false,
+          }
+      ).then(r => {
+        video = r.video;
+        playButton = createButton(r, 'play');
+        pauseButton = createButton(r, 'pause');
+        return listenOncePromise(video, VideoEvents.LOAD);
+      }).then(() => {
+        const promise = listenOncePromise(video, VideoEvents.PLAYING);
+        playButton.click();
+        return promise;
+      }).then(() => {
+        pauseButton.click();
+        return listenOncePromise(video, VideoAnalyticsEvents.PAUSE);
+      }).then(event => {
+        const details = getData(event);
+        const playedRanges = JSON.parse(details.playedRangesJson);
+        expect(details.autoplay).to.be.a('boolean');
+        expect(details.currentTime).to.be.a('number');
+        expect(details.duration).to.be.a('number');
+        expect(details.height).to.be.a('number');
+        expect(details.id).to.be.a('string');
+        expect(details.playedTotal).to.be.a('number');
+        expect(playedRanges).to.be.an('array');
+        expect(details.state).to.be.a('string');
+        expect(details.width).to.be.a('number');
+      });
+    });
+
+    it('should trigger video-seconds-played when visible and playing', () => {
+      let video;
+      let timer;
+      let pauseButton;
+      let playButton;
+
+      return getVideoPlayer(
+          {
+            outsideView: true,
+            autoplay: true,
+          }
+      ).then(r => {
+        timer = Services.timerFor(r.video.implementation_.win);
+        video = r.video;
+        pauseButton = createButton(r, 'pause');
+        playButton = createButton(r, 'play');
+        return Promise.race([
+          listenOncePromise(video, VideoAnalyticsEvents.SECONDS_PLAYED).then(
+              () => Promise.reject('Triggered video-seconds-played')),
+          timer.promise(2000),
+        ]);
+      }).then(() => {
+        const viewport = video.implementation_.getViewport();
+        viewport.scrollIntoView(video);
+        return listenOncePromise(video, VideoAnalyticsEvents.SECONDS_PLAYED);
+      }).then(() => {
+        pauseButton.click();
+        return listenOncePromise(video, VideoEvents.PAUSE);
+      }).then(() => {
+        return Promise.race([
+          listenOncePromise(video, VideoAnalyticsEvents.SECONDS_PLAYED).then(
+              () => Promise.reject('Triggered video-seconds-played')),
+          timer.promise(2000),
+        ]);
+      }).then(() => {
+        playButton.click();
+        return listenOncePromise(video, VideoEvents.PLAYING);
+      }).then(() => {
+        return listenOncePromise(video, VideoAnalyticsEvents.SECONDS_PLAYED);
+      });
+    });
+
+    afterEach(cleanUp);
+  });
+
+  describe.configure().skipSauceLabs().run('Video Docking', function() {
     this.timeout(TIMEOUT);
 
     describe('General Behavior', () => {
@@ -154,8 +352,11 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    describe('without-autoplay', () => {
+    describe.configure('without-autoplay', () => {
+
       it('should minimize when out of viewport', function() {
+        this.skip();
+
         let viewport;
         let video;
         let insideElement;
@@ -169,7 +370,7 @@ export function runVideoPlayerIntegrationTests(
           video = r.video;
           const playButton = createButton(r, 'play');
           playButton.click();
-          return listenOncePromise(video, VideoEvents.PLAY);
+          return listenOncePromise(video, VideoEvents.PLAYING);
         }).then(() => {
           viewport = video.implementation_.getViewport();
           // scroll to the bottom, make video fully visible
@@ -192,7 +393,7 @@ export function runVideoPlayerIntegrationTests(
         }).then(() => {
           expect(insideElement).to.have.class(DOCK_CLASS);
           expect(st.getStyle(insideElement, 'transform')).to.equal(
-              st.scale(DOCK_SCALE) + ' ' + st.translate(st.px(20), st.px(20))
+              st.translate(st.px(300), st.px(680)) + ' ' + st.scale(DOCK_SCALE)
           );
         });
       });
@@ -212,7 +413,7 @@ export function runVideoPlayerIntegrationTests(
         ).then(r => {
           video = r.video;
           viewport = video.implementation_.getViewport();
-          return listenOncePromise(video, VideoEvents.PLAY);
+          return listenOncePromise(video, VideoEvents.PLAYING);
         }).then(() => {
           return poll('wait for mask', () => {
             return !!video.querySelector('i-amphtml-video-mask');
@@ -221,6 +422,14 @@ export function runVideoPlayerIntegrationTests(
           video.querySelector('i-amphtml-video-mask').click();
           return poll('wait for mask to hide', () => {
             return !video.querySelector('i-amphtml-video-mask');
+          });
+        }).then(() => {
+          const vidManager = Services.videoManagerForDoc(
+              video.implementation_.getAmpDoc()
+          );
+          return poll('wait for video to be playing manually', () => {
+            const curState = vidManager.getPlayingState(video.implementation_);
+            return curState == PlayingStates.PLAYING_MANUAL;
           });
         }).then(() => {
           viewport.setScrollTop(FRAME_HEIGHT);
@@ -236,7 +445,7 @@ export function runVideoPlayerIntegrationTests(
         }).then(() => {
           expect(insideElement).to.have.class(DOCK_CLASS);
           expect(st.getStyle(insideElement, 'transform')).to.equal(
-              st.scale(DOCK_SCALE) + ' ' + st.translate(st.px(20), st.px(20))
+              st.translate(st.px(300), st.px(20)) + ' ' + st.scale(DOCK_SCALE)
           );
         });
       });
@@ -253,7 +462,7 @@ export function runVideoPlayerIntegrationTests(
         ).then(r => {
           video = r.video;
           viewport = r.video.implementation_.getViewport();
-          return listenOncePromise(video, VideoEvents.PLAY);
+          return listenOncePromise(video, VideoEvents.PLAYING);
         }).then(() => {
           viewport.setScrollTop(FRAME_HEIGHT);
           return poll('wait for video/iframe', () => {
@@ -268,13 +477,6 @@ export function runVideoPlayerIntegrationTests(
         });
       });
     });
-
-    function createButton(r, action) {
-      const button = r.fixture.doc.createElement('button');
-      button.setAttribute('on', 'tap:myVideo.' + action);
-      r.fixture.doc.body.appendChild(button);
-      return button;
-    }
 
     // Although these tests are not about autoplay, we can ony run them in
     // browsers that do support autoplay, this is because a synthetic click
@@ -295,19 +497,20 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().retryOnSaucelabs().run('Autoplay', function() {
+  describe.configure().skipSauceLabs().run('Autoplay', function() {
     this.timeout(TIMEOUT);
+
     describe('play/pause', () => {
       it('should play when in view port initially', () => {
         return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
-          return listenOncePromise(r.video, VideoEvents.PLAY);
+          return listenOncePromise(r.video, VideoEvents.PLAYING);
         });
       });
 
       it('should not play when not in view port initially', () => {
         return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
-          const timer = timerFor(r.video.implementation_.win);
-          const p = listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
+          const timer = Services.timerFor(r.video.implementation_.win);
+          const p = listenOncePromise(r.video, VideoEvents.PLAYING).then(() => {
             return Promise.reject('should not have autoplayed');
           });
           // we have to wait to ensure play is NOT called.
@@ -315,7 +518,8 @@ export function runVideoPlayerIntegrationTests(
         });
       });
 
-      it('should play/pause when video enters/exists viewport', () => {
+      // TODO(aghassemi, #9379): Flaky on Safari 9.
+      it('should play/pause when video enters/exits viewport', function() {
         let video;
         let viewport;
         return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
@@ -323,7 +527,7 @@ export function runVideoPlayerIntegrationTests(
           viewport = video.implementation_.getViewport();
 
           // scroll to the bottom, make video fully visible
-          const p = listenOncePromise(video, VideoEvents.PLAY);
+          const p = listenOncePromise(video, VideoEvents.PLAYING);
           viewport.scrollIntoView(video);
           return p;
         }).then(() => {
@@ -336,7 +540,7 @@ export function runVideoPlayerIntegrationTests(
     });
 
     describe('Animated Icon', () => {
-      // TODO(amphtml): Unskip when #8385 is fixed.
+      // TODO(amphtml): Unskip when #9379 is fixed.
       it.skip('should create an animated icon overlay', () => {
         let video;
         let viewport;
@@ -364,14 +568,12 @@ export function runVideoPlayerIntegrationTests(
         function isAnimationPaused(iconElement) {
           const animElement = iconElement.querySelector('.amp-video-eq-1-1');
           const win = iconElement.ownerDocument.defaultView;
-          const computedStyle = win.getComputedStyle(animElement);
+          const cs = win.getComputedStyle(animElement);
           const isPaused =
-        (computedStyle.getPropertyValue('animation-play-state') == 'paused'
-        || computedStyle.getPropertyValue('-webkit-animation-play-state') ==
-          'paused'
-        || computedStyle.getPropertyValue('animation-name') == 'none'
-        || computedStyle.getPropertyValue('-webkit-animation-name') ==
-          'none');
+              cs.getPropertyValue('animation-play-state') == 'paused' ||
+              cs.getPropertyValue('-webkit-animation-play-state') == 'paused' ||
+              cs.getPropertyValue('animation-name') == 'none' ||
+              cs.getPropertyValue('-webkit-animation-name') == 'none';
           return isPaused;
         }
 
@@ -433,15 +635,18 @@ export function runVideoPlayerIntegrationTests(
           sizer.position = 'relative';
           sizer.style.height = '200vh';
 
+          const builtPromise = new Promise(resolve => {
+            return listen(video, VideoEvents.REGISTERED, () => {
+              resolve({video, fixture});
+            });
+          });
+
           fixture.doc.body.appendChild(sizer);
           fixture.doc.body.appendChild(video);
           fixtureGlobal = fixture;
           videoGlobal = video;
-          return poll('video built', () => {
-            return video.implementation_ && video.implementation_.play;
-          },undefined, 5000).then(() => {
-            return {video, fixture};
-          });
+
+          return builtPromise;
         });
   }
 

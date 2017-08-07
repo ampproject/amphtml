@@ -455,16 +455,6 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
       expect(attrSpec.mandatory).toBeDefined();
       expect(attrSpec.mandatory).toBe(true);
     });
-    it('value or value_casei defined when dispatch_key is true', () => {
-      expect((attrSpec.value !== null) || (attrSpec.valueCasei !== null))
-          .toBe(true);
-    });
-    if (attrSpec.valueCasei !== null) {
-      it('value_casei must be lower case when dispatch_key is true', () => {
-        expect(attrSpec.valueCasei === attrSpec.valueCasei.toLowerCase())
-            .toBe(true);
-      });
-    }
   }
   // Value property names must be unique.
   if (attrSpec.valueProperties !== null) {

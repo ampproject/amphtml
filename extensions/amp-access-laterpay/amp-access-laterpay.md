@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+# `amp-access-laterpay`
+
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
@@ -32,12 +34,15 @@ limitations under the License.
       <div>
         <code>&lt;script async custom-element="amp-access-laterpay" src="https://cdn.ampproject.org/v0/amp-access-laterpay-0.1.js">&lt;/script></code>
       </div>
-
     </td>
+  </tr>
+  <tr>
+    <td><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-access-laterpay/">annotated amp-access-laterpay</a> example.</td>
   </tr>
 </table>
 
-
+[TOC]
 
 ## Behavior
 

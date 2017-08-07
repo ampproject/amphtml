@@ -28,13 +28,13 @@ import {
   getServicePromise,
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
+import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
-import {platformFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {runChunksForTesting} from '../../src/chunk';
 import {toggleExperiment} from '../../src/experiments';
-import {extensionsFor} from '../../src/services';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
@@ -67,6 +67,7 @@ describes.fakeWin('runtime', {
     };
     const ampdoc = new AmpDocSingle(win);
     ampdocService.getAmpDoc = () => ampdoc;
+    installDocumentStateService(win);
     installPlatformService(win);
     installTimerService(win);
     vsyncForTesting(win);
@@ -124,21 +125,21 @@ describes.fakeWin('runtime', {
   });
 
   it('should NOT set cursor:pointer on document element on non-IOS', () => {
-    const platform = platformFor(win);
+    const platform = Services.platformFor(win);
     sandbox.stub(platform, 'isIos').returns(false);
     adopt(win);
     expect(win.document.documentElement.style.cursor).to.not.be.ok;
   });
 
   it('should set cursor:pointer on document element on IOS', () => {
-    const platform = platformFor(win);
+    const platform = Services.platformFor(win);
     sandbox.stub(platform, 'isIos').returns(true);
     adopt(win);
     expect(win.document.documentElement.style.cursor).to.equal('pointer');
   });
 
   it('should set cursor:pointer on IOS in shadow-doc', () => {
-    const platform = platformFor(win);
+    const platform = Services.platformFor(win);
     sandbox.stub(platform, 'isIos').returns(true);
     adoptShadowMode(win);
     expect(win.document.documentElement.style.cursor).to.equal('pointer');
@@ -313,7 +314,7 @@ describes.fakeWin('runtime', {
         expect(progress).to.equal('1HIGHAB2');
 
         ext.installExtensionsService(win);
-        const extensions = extensionsFor(win);
+        const extensions = Services.extensionsFor(win);
         const ext1 = extensions.waitForExtension('ext1');
         const ext2 = extensions.waitForExtension('ext2');
         return Promise.all([ext1, ext2]);
@@ -374,6 +375,7 @@ describes.fakeWin('runtime', {
     }
     const s1 = addExisting(1);
     const s2 = addExisting(4);
+    const s3 = addExisting(5);
     const bodyCallbacks = new Observable();
     sandbox.stub(dom, 'waitForBody', (unusedDoc, callback) => {
       bodyCallbacks.add(callback);
@@ -406,6 +408,12 @@ describes.fakeWin('runtime', {
       expect(amp).to.equal(win.AMP);
       progress += 'not expected 2';
     }, 'version123'));
+    // Add legacy element (5) and eagarly ask for its load as ElementStub does.
+    Services.extensionsFor(win).loadExtension('amp-test-element5', false);
+    win.AMP.push(regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += '5';
+    }, 'version123'));
     runChunksForTesting(win.document);
     expect(progress).to.equal('');
 
@@ -416,19 +424,25 @@ describes.fakeWin('runtime', {
     expect(queueExtensions).to.have.length(0);
     expect(s1.getAttribute('custom-element')).to.be.null;
     expect(s2.getAttribute('custom-element')).to.be.null;
+    expect(s3.getAttribute('custom-element')).to.be.null;
     expect(s1.getAttribute('i-amphtml-loaded-new-version'))
         .to.equal('amp-test-element1');
     expect(s2.getAttribute('i-amphtml-loaded-new-version'))
         .to.equal('amp-test-element4');
+    expect(s3.getAttribute('i-amphtml-loaded-new-version'))
+        .to.equal('amp-test-element5');
     const inserted = win.document.head.querySelectorAll(
         '[i-amphtml-inserted]');
-    expect(inserted).to.have.length(2);
+    expect(inserted).to.have.length(3);
     expect(inserted[0].getAttribute('src')).to.equal(
         'https://cdn.ampproject.org/rtv/test-version' +
             '/v0/amp-test-element1-0.1.js');
     expect(inserted[1].getAttribute('src')).to.equal(
         'https://cdn.ampproject.org/rtv/test-version' +
             '/v0/amp-test-element4-0.1.js');
+    expect(inserted[2].getAttribute('src')).to.equal(
+        'https://cdn.ampproject.org/rtv/test-version' +
+            '/v0/amp-test-element5-0.1.js');
   });
 
   it('should be robust against errors in early extensions', () => {
@@ -456,7 +470,7 @@ describes.fakeWin('runtime', {
     beforeEach(() => {
       adopt(win);
       ext.installExtensionsService(win);
-      extensions = extensionsFor(win);
+      extensions = Services.extensionsFor(win);
       registerStub = sandbox.stub(extel, 'registerExtendedElement');
     });
 
@@ -610,7 +624,7 @@ describes.fakeWin('runtime', {
     beforeEach(() => {
       adoptShadowMode(win);
       ext.installExtensionsService(win);
-      extensions = extensionsFor(win);
+      extensions = Services.extensionsFor(win);
       registerStub = sandbox.stub(extel, 'registerExtendedElement');
     });
 

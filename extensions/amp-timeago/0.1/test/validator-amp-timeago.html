@@ -21,7 +21,7 @@
 <html amp lang="en">
   <head>
     <meta charset="utf-8">
-    <link rel="canonical" href="./regular-html-version.html" />
+    <link rel="canonical" href="./regular-html-version.html">
     <meta name="viewport" content="width=device-width,minimum-scale=1">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-latest.js"></script>
@@ -30,9 +30,9 @@
   <body>
 
     <!-- valid -->
-    <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="en">Saturday 11 April 2017 00.37</amp-timeago>
+    <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="en" cutoff="8640000">Saturday 11 April 2017 00.37</amp-timeago>
 
-    <!-- valid, locale optional -->
+    <!-- valid, locale optional, cutoff optional -->
     <amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z">Saturday 11 April 2017 00.37</amp-timeago>
 
     <!-- invalid, datetime is not ISO date format -->

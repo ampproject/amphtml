@@ -20,7 +20,6 @@ tags: {  # amp-sidebar
   extension_spec: {
     name: "amp-sidebar"
     allowed_versions: "0.1"
-    allowed_versions: "1.0"
     allowed_versions: "latest"
     requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
@@ -40,5 +39,23 @@ tags: {  # <amp-sidebar>
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: NODISPLAY
+  }
+}
+tags: {  # amp-sidebar > nav
+  html_format: AMP
+  tag_name: "NAV"
+  spec_name: "amp-sidebar > nav"
+  mandatory_parent: "AMP-SIDEBAR"
+  attrs: {
+    name: "toolbar"
+    mandatory: true
+  }
+  attrs: {
+    name: "toolbar-target"
+    mandatory: true
+  }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "UL"
   }
 }

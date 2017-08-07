@@ -22,6 +22,8 @@ import {poll} from '../../../../../testing/iframe';
 import {registerExtendedTemplate} from
     '../../../../../src/service/template-impl';
 
+/** @const {number} */
+const RENDER_TIMEOUT = 15000;
 
 describes.realWin('AmpForm Integration', {
   amp: {
@@ -145,7 +147,9 @@ describes.realWin('AmpForm Integration', {
     });
   });
 
-  describeChrome.run('Submit xhr-POST', () => {
+  describeChrome.run('Submit xhr-POST', function() {
+    this.timeout(RENDER_TIMEOUT);
+
     it('should submit and render success', () => {
       const form = getForm({
         id: 'form1',
@@ -160,7 +164,7 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'form1');
       const fetch = poll('submit request sent',
           () => ampForm.xhrSubmitPromiseForTesting());
-      const render = listenOncePromise(form, AmpEvents.TEMPLATE_RENDERED);
+      const render = listenOncePromise(form, AmpEvents.DOM_UPDATE);
 
       form.dispatchEvent(new Event('submit'));
       return fetch.then(() => render).then(() => {
@@ -190,7 +194,7 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'form1');
       const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
       const fetch = poll('submit request sent', () => fetchSpy.returnValues[0]);
-      const render = listenOncePromise(form, AmpEvents.TEMPLATE_RENDERED);
+      const render = listenOncePromise(form, AmpEvents.DOM_UPDATE);
 
       form.dispatchEvent(new Event('submit'));
       return fetch.then(() => {
@@ -207,7 +211,9 @@ describes.realWin('AmpForm Integration', {
     });
   });
 
-  describeChrome.run('Submit xhr-GET', () => {
+  describeChrome.run('Submit xhr-GET', function() {
+    this.timeout(RENDER_TIMEOUT);
+
     it('should submit and render success', () => {
       const form = getForm({
         id: 'form1',
@@ -223,7 +229,7 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'form1');
       const fetch = poll('submit request sent',
           () => ampForm.xhrSubmitPromiseForTesting());
-      const render = listenOncePromise(form, AmpEvents.TEMPLATE_RENDERED);
+      const render = listenOncePromise(form, AmpEvents.DOM_UPDATE);
 
       form.dispatchEvent(new Event('submit'));
       return fetch.then(() => render).then(() => {
@@ -254,7 +260,7 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'form1');
       const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
       const fetch = poll('submit request sent', () => fetchSpy.returnValues[0]);
-      const render = listenOncePromise(form, AmpEvents.TEMPLATE_RENDERED);
+      const render = listenOncePromise(form, AmpEvents.DOM_UPDATE);
 
       form.dispatchEvent(new Event('submit'));
       return fetch.then(() => {
@@ -292,8 +298,6 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'form1');
       const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
       const fetch = poll('submit request sent', () => fetchSpy.returnValues[0]);
-      const layout = poll('amp-img layout completes',
-          () => form.querySelector('amp-img img'));
 
       form.dispatchEvent(new Event('submit'));
       return fetch.then(() => {
@@ -306,8 +310,10 @@ describes.realWin('AmpForm Integration', {
         const rendered = form.querySelectorAll('[i-amphtml-rendered]');
         expect(rendered.length).to.equal(0);
 
-        // Any amp elements inside the message should be layed out
-        return layout.then(img => {
+        // Any amp elements inside the message should be layed out.
+        const layout = listenOncePromise(form, AmpEvents.LOAD_START);
+        return layout.then(() => {
+          const img = form.querySelector('amp-img img');
           expect(img.src).to.contain('/examples/img/ampicon.png');
         });
       });

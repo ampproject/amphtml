@@ -21,7 +21,7 @@ import {
 import '../amp-3q-player';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {adopt} from '../../../../src/runtime';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import * as sinon from 'sinon';
 
@@ -30,7 +30,7 @@ adopt(window);
 describe('amp-3q-player', function() {
   this.timeout(10000);
   let sandbox;
-  const timer = timerFor(window);
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -88,7 +88,7 @@ describe('amp-3q-player', function() {
             sendFakeMessage(player, iframe, 'muted');
             return p;
           }).then(() => {
-            const p = listenOncePromise(player, VideoEvents.PLAY);
+            const p = listenOncePromise(player, VideoEvents.PLAYING);
             sendFakeMessage(player, iframe, 'playing');
             return p;
           }).then(() => {

@@ -18,7 +18,7 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import {viewerForDoc} from '../../src/services';
+import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -71,7 +71,7 @@ describe('Resource', () => {
     };
     elementMock = sandbox.mock(element);
 
-    const viewer = viewerForDoc(document);
+    const viewer = Services.viewerForDoc(document);
     sandbox.stub(viewer, 'isRuntimeOn', () => false);
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);

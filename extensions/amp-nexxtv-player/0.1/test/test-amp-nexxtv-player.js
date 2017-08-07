@@ -20,7 +20,7 @@ import {
 import '../amp-nexxtv-player';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {adopt} from '../../../../src/runtime';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import * as sinon from 'sinon';
 
@@ -29,7 +29,7 @@ adopt(window);
 describe('amp-nexxtv-player', () => {
 
   let sandbox;
-  const timer = timerFor(window);
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -93,7 +93,7 @@ describe('amp-nexxtv-player', () => {
 
       return Promise.resolve()
           .then(() => {
-            const p = listenOncePromise(nexxtv, VideoEvents.PLAY);
+            const p = listenOncePromise(nexxtv, VideoEvents.PLAYING);
             sendFakeMessage(nexxtv, iframe, {event: 'play'});
             return p;
           })

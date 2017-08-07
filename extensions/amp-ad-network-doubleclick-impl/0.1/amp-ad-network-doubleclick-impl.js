@@ -35,7 +35,6 @@ import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
-  extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   truncAndTimeUrl,
   googleBlockParameters,
@@ -47,6 +46,9 @@ import {
   groupAmpAdsByType,
   addCsiSignalsToAmpAnalyticsConfig,
   QQID_HEADER,
+  getEnclosingContainerTypes,
+  ValidAdContainerTypes,
+  maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -57,18 +59,34 @@ import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
-import {stringHash32} from '../../../src/crypto';
+import {stringHash32} from '../../../src/string';
 import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {extensionsFor, xhrFor} from '../../../src/services';
-import {isExperimentOn} from '../../../src/experiments';
+import {isObject} from '../../../src/types';
+import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {insertAnalyticsElement} from '../../../src/analytics';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
+import {deepMerge} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
+import {isSecureUrl, parseUrl} from '../../../src/url';
+import {VisibilityState} from '../../../src/visibility-state';
+import {
+  isExperimentOn,
+  /* eslint no-unused-vars: 0 */ ExperimentInfo,
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
+import {
+  RefreshManager,
+  DATA_ATTR_NAME,
+} from '../../amp-a4a/0.1/refresh-manager';
+import {
+  addExperimentIdToElement,
+} from '../../../ads/google/a4a/traffic-experiments';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -77,11 +95,36 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
 
+/** milliseconds */
+/** @const {number} */
+const RTC_TIMEOUT = 1000;
+
+/** @private {?Promise<?Object>} */
+let rtcPromise = null;
+
+/** @private {?JsonObject|undefined} */
+let rtcConfig = null;
+
+/** @private @enum {number} */
+const RTC_ATI_ENUM = {
+  RTC_SUCCESS: 2,
+  RTC_FAILURE: 3,
+};
+
 /** @private @const {!Object<string,string>} */
 const PAGE_LEVEL_PARAMS_ = {
   'gdfp_req': '1',
   'sfv': DEFAULT_SAFEFRAME_VERSION,
   'u_sd': window.devicePixelRatio,
+};
+
+/** @visibleForTesting @const {string} */
+export const CORRELATOR_CLEAR_EXP_NAME = 'dbclk-correlator-clear';
+
+/** @visibleForTesting @enum {string} */
+export const CORRELATOR_CLEAR_EXP_BRANCHES = {
+  CONTROL: '22302764',
+  EXPERIMENT: '22302765',
 };
 
 /**
@@ -92,6 +135,9 @@ export const TFCD = 'tagForChildDirectedTreatment';
 
 /** @private {?Promise} */
 let sraRequests = null;
+
+/** @private {?Promise<!Object<string,string|number|boolean>>} */
+let pageLevelParameters_ = null;
 
 /**
  * Array of functions used to combine block level request parameters for SRA
@@ -136,7 +182,7 @@ const BLOCK_SRA_COMBINERS_ = [
   },
   instances => {
     return {'prev_iu_szs': instances.map(instance =>
-      `${instance.size_.width}x${instance.size_.height}`).join()};
+      `${instance.initialSize_.width}x${instance.initialSize_.height}`).join()};
   },
   // Although declared at a block-level, this is actually page level so
   // return true if ANY indicate TFCD.
@@ -195,13 +241,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = null;
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
-    this.extensions_ = extensionsFor(this.win);
+    this.extensions_ = Services.extensionsFor(this.win);
 
     /** @private {?string} */
     this.qqid_ = null;
 
-    /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
-    this.size_ = null;
+    /** @private {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} */
+    this.initialSize_ = null;
+
+    /** @private {?{width: number, height: number}} */
+    this.returnedSize_ = null;
 
     /** @private {?Element} */
     this.ampAnalyticsElement_ = null;
@@ -230,6 +279,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {!Promise<?../../../src/service/xhr-impl.FetchResponse>} */
     this.sraResponsePromise_ = sraInitializer.promise;
+
+    /** @private {?RefreshManager} */
+    this.refreshManager_ = null;
+
+    /** @private {number} */
+    this.refreshCount_ = 0;
+
+    /** @private {number} */
+    this.ifi_ = 0;
   }
 
   /** @override */
@@ -244,6 +302,56 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   delayAdRequestEnabled() {
     return experimentFeatureEnabled(
         this.win, DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST);
+  }
+
+  /** @override */
+  buildCallback() {
+    super.buildCallback();
+    if (this.win['dbclk_a4a_viz_change']) {
+      // Only create one per page but ensure all slots get experiment
+      // selection.
+      const expId = getExperimentBranch(this.win, CORRELATOR_CLEAR_EXP_NAME);
+      if (expId) {
+        // If experiment was already selected, add to element to ensure it is
+        // included in request.
+        addExperimentIdToElement(expId, this.element);
+      }
+      return;
+    }
+    this.win['dbclk_a4a_viz_change'] = true;
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    viewer.onVisibilityChanged(() => {
+      if (viewer.getVisibilityState() != VisibilityState.PAUSED ||
+          this.useSra || !this.win.ampAdPageCorrelator) {
+        // Do not allow experiment selection if SRA or correlator was not set.
+        return;
+      }
+      // Select into correlator clear experiment of pause visibility change.
+      // Should execute prior to resumeCallback.
+      // TODO(keithwrightbos,glevitzy) - determine behavior for correlator
+      // interaction with refresh.
+      const experimentInfoMap =
+          /** @type {!Object<string, !ExperimentInfo>} */ ({});
+      experimentInfoMap[CORRELATOR_CLEAR_EXP_NAME] = {
+        isTrafficEligible: () => true,
+        branches: Object.values(CORRELATOR_CLEAR_EXP_BRANCHES),
+      };
+      randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+      const expId = getExperimentBranch(this.win, CORRELATOR_CLEAR_EXP_NAME);
+      if (expId) {
+        // Adding to experiment id will cause it to be included in subsequent ad
+        // requests.
+        addExperimentIdToElement(expId, this.element);
+        if (expId === CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT) {
+          // TODO(keithwrightbos) - do not clear if at least one slot on the page
+          // is an AMP creative that survived unlayoutCallback in order to
+          // ensure competitive exclusion/roadblocking.  Note this only applies
+          // to non-backfill inventory.
+          dev().info(TAG, 'resetting page correlator');
+          this.win.ampAdPageCorrelator = null;
+        }
+      }
+    });
   }
 
   /**
@@ -270,12 +378,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {!Object<string,string|boolean|number>}
    */
   getBlockParameters_() {
-    dev().assert(this.size_);
+    dev().assert(this.initialSize_);
     dev().assert(this.jsonTargeting_);
-    let sizeStr = `${this.size_.width}x${this.size_.height}`;
+    let sizeStr = `${this.initialSize_.width}x${this.initialSize_.height}`;
     const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
+      if (this.element.getAttribute('layout') == 'responsive') {
+        // TODO(levitzky) Define the behavior and remove this warning.
+        user().warn(TAG, 'Behavior of multi-size and responsive layout is ' +
+            'currently not well defined. Proceed with caution.');
+      }
       const multiSizeValidation = this.element
           .getAttribute('data-multi-size-validation') || 'true';
       // The following call will check all specified multi-size dimensions,
@@ -283,13 +396,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // dimensions in an array.
       const dimensions = getMultiSizeDimensions(
           multiSizeDataStr,
-          Number(this.element.getAttribute('width')),
-          Number(this.element.getAttribute('height')),
+          this.initialSize_.width,
+          this.initialSize_.height,
           multiSizeValidation == 'true');
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
           .join('|');
     }
+    const rc = (this.refreshCount_ && this.fromResumeCallback)
+        ? this.refreshCount_ + 1
+        : (this.fromResumeCallback ? 1 : this.refreshCount_ || null);
+    this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
+    this.ifi_ = (this.isRefreshing && this.ifi_) ||
+        this.win['ampAdGoogleIfiCounter']++;
     return Object.assign({
       'iu': this.element.getAttribute('data-slot'),
       'co': this.jsonTargeting_ &&
@@ -302,6 +421,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
           (this.jsonTargeting_ &&
             this.jsonTargeting_['categoryExclusions']) || null),
+      'ifi': this.ifi_,
+      rc,
     }, googleBlockParameters(this));
   }
 
@@ -310,26 +431,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibileForTesting
    */
   populateAdUrlState() {
-    const width = Number(this.element.getAttribute('width'));
-    const height = Number(this.element.getAttribute('height'));
-    // If dc-use-attr-for-format experiment is on, we want to make our attribute
-    // check to be more strict.
-    const useAttributesForSize =
-        isExperimentOn(this.win, 'dc-use-attr-for-format')
-        ? !isNaN(width) && width > 0 && !isNaN(height) && height > 0
-        : width && height;
-    this.size_ = useAttributesForSize
+    // Allow for pub to override height/width via override attribute.
+    const width = Number(this.element.getAttribute('data-override-width')) ||
+      Number(this.element.getAttribute('width'));
+    const height = Number(this.element.getAttribute('data-override-height')) ||
+      Number(this.element.getAttribute('height'));
+    this.initialSize_ = width && height
         ? {width, height}
+        // width/height could be 'auto' in which case we fallback to measured.
         : this.getIntersectionElementLayoutBox();
     this.jsonTargeting_ =
       tryParseJson(this.element.getAttribute('json')) || {};
-    this.adKey_ =
-      this.generateAdKey_(`${this.size_.width}x${this.size_.height}`);
+    this.adKey_ = this.generateAdKey_(
+        `${this.initialSize_.width}x${this.initialSize_.height}`);
   }
 
   /** @override */
   getAdUrl() {
-    if (this.iframe) {
+    if (this.iframe && !this.isRefreshing) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
       return '';
     }
@@ -340,15 +459,29 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
-    return getPageLevelParameters_(this.win, this.getAmpDoc(), startTime)
-        .then(pageLevelParameters =>
-        googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime,
-            Object.assign(this.getBlockParameters_(), pageLevelParameters),
-          ['108809080']));
+
+    const pageLevelParametersPromise = getPageLevelParameters_(
+        this.win, this.getAmpDoc(), startTime);
+    const rtcRequestPromise = isExperimentOn(this.win, 'disable-rtc') ?
+    Promise.resolve({}) : this.executeRtc_();
+    return Promise.all(
+      [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
+        return googleAdUrl(
+            this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
+                this.getBlockParameters_(),
+                /* RTC Parameters */ values[1],
+                /* pageLevelParameters */ values[0]), ['108809080']);
+      });
   }
 
   /** @override */
-  extractCreativeAndSignature(responseText, responseHeaders) {
+  onNetworkFailure(error, adUrl) {
+    dev().info(TAG, 'network error, attempt adding of error parameter', error);
+    return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
+  }
+
+  /** @override */
+  extractSize(responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
@@ -356,21 +489,31 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
     }
-    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
-  }
-
-  /** @override */
-  extractSize(responseHeaders) {
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);
     if (size) {
-      this.size_ = size;
+      this.returnedSize_ = size;
+      this.handleResize_(size.width, size.height);
     } else {
-      size = this.size_;
+      size = this.getSlotSize();
     }
-    this.handleResize_(size.width, size.height);
     return size;
+  }
+
+  /**
+   * Returns the width and height of the slot as defined by the width and height
+   * attributes, or the dimensions as computed by
+   * getIntersectionElementLayoutBox.
+   * @return {{width: number, height: number}|../../../src/layout-rect.LayoutRectDef}
+   */
+  getSlotSize() {
+    const width = Number(this.element.getAttribute('width'));
+    const height = Number(this.element.getAttribute('height'));
+    return width && height
+        ? {width, height}
+        // width/height could be 'auto' in which case we fallback to measured.
+        : this.getIntersectionElementLayoutBox();
   }
 
   /** @override */
@@ -391,8 +534,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  unlayoutCallback() {
-    super.unlayoutCallback();
+  tearDownSlot() {
+    super.tearDownSlot();
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
@@ -412,6 +555,30 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraResponseRejector = sraInitializer.rejector;
     this.sraResponsePromise_ = sraInitializer.promise;
     this.qqid_ = null;
+  }
+
+  /** @override */
+  layoutCallback() {
+    const superReturnValue = super.layoutCallback();
+    if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
+      user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
+    }
+    this.refreshManager_ = this.useSra ||
+        getEnclosingContainerTypes(this.element).filter(container =>
+            container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
+            container != ValidAdContainerTypes['AMP-STICKY-AD']).length
+            ? null
+            : this.refreshManager_ || new RefreshManager(this, {
+              visiblePercentageMin: 50,
+              continuousTimeMin: 1,
+            });
+    return superReturnValue;
+  }
+
+  /** @override */
+  refresh(refreshEndCallback) {
+    this.refreshCount_++;
+    return super.refresh(refreshEndCallback);
   }
 
   /**
@@ -439,12 +606,23 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.ampAnalyticsElement_ =
           insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
+    if (this.isRefreshing) {
+      dev().assert(this.refreshManager_);
+      this.refreshManager_.initiateRefreshCycle();
+      this.isRefreshing = false;
+      this.isRelayoutNeededFlag = false;
+    }
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
 
+    // Force size of frame to match creative or, if creative size is unknown,
+    // the slot. This ensures that the creative is centered in the former case,
+    // and not truncated in the latter.
+    // TODO(levitzky) Figure out the behavior of responsive + multi-size.
+    const size = this.returnedSize_ || this.getSlotSize();
     setStyles(dev().assertElement(this.iframe), {
-      width: `${this.size_.width}px`,
-      height: `${this.size_.height}px`,
+      width: `${size.width}px`,
+      height: `${size.height}px`,
     });
   }
 
@@ -480,6 +658,166 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.attemptChangeSize(height, width).catch(() => {});
     }
   }
+
+  /**
+   * Sends RTC request as specified by rtcConfig. Returns promise which
+   * resolves to the time that the RTC callout took to complete.
+   * If disableStalewhilerevalidate == true, then we will only
+   * send one RTC request per page. If it's !== true, then we always
+   * send two requests. The first will try
+   * to hit browser cache, and the second request will always bypass.
+   * This is a way for us to implement a simple stale-while-revalidate
+   * model.
+   * The targeting info from the RTC updates the targeting info on
+   * this object within mergeRtc.
+   * @param {Document=} opt_doc Optional document for testing.
+   * @return {!Promise<?Object>} An object of parameters to add to
+   *   the ad request url.
+   * @private
+   */
+  executeRtc_(opt_doc) {
+    const doc = opt_doc || this.element.ownerDocument;
+    if (rtcPromise) {
+      return this.mergeRtc();
+    }
+    const ampRtcPageElement = doc.getElementById('amp-rtc');
+    if (!ampRtcPageElement) {
+      return Promise.resolve();
+    }
+    let endpoint;
+    rtcConfig = tryParseJson(ampRtcPageElement.textContent);
+    if (!isObject(rtcConfig) || !(endpoint = rtcConfig['endpoint']) ||
+        typeof endpoint != 'string' || !isSecureUrl(endpoint)) {
+      user().warn(TAG, 'Sending ad request without RTC callout,' +
+          `invalid RTC config: ${ampRtcPageElement.textContent}`);
+      return Promise.resolve();
+    }
+    let rtcTotalTime;
+    const startTime = Date.now();
+    // Because we are wrapping the RTC request in the timeout,
+    // we are guaranteeing that if the RTC is slow to return and
+    // times out for the first slot, it won't be used for any
+    // other slots either. This is in opposition to the other way
+    // we could potentially do it, in which we only still make one
+    // rtc callout, but there is a 1 second timeout from the
+    // perspective of each slot. I.e. if the top slot on the page
+    // calls out for the RTC, which returns after 5 seconds, and
+    // then a slot way down on the page asks for it later.
+    rtcPromise = Services.timerFor(window).timeoutPromise(
+        RTC_TIMEOUT,
+        Services.xhrFor(this.win).fetchJson(
+            endpoint, {credentials: 'include'}).then(res => {
+              rtcTotalTime = Date.now() - startTime;
+              /*
+              *  disableSWR should be set to true if the endpoint is not
+              *  returning cache headers.
+              */
+              verifyRtcConfigMember('disableStaleWhileRevalidate', 'boolean');
+              if (rtcConfig['disableStaleWhileRevalidate'] !== true) {
+                const headers = new Headers();
+                headers.append('Cache-Control', 'max-age=0');
+                // Repopulate the cache.
+                Services.xhrFor(this.win).fetchJson(endpoint, {
+                  credentials: 'include',
+                  headers,
+                }).catch(err => {
+                  user().error(TAG, err.message);
+                });
+              }
+              // Non-200 status codes are forbidden for RTC.
+              // TODO: Add to fetchResponse the ability to
+              // check for redirects as well.
+              if (res.status != 200) {
+                return {rtcTotalTime};
+              }
+              return res.text().then(text => {
+                // An empty text response is fine, just means
+                // we have nothing to merge.
+                if (!text) {
+                  return {rtcTotalTime, success: true};
+                }
+                const rtcResponse = tryParseJson(text);
+                return {rtcResponse, rtcTotalTime};
+              });
+            }));
+
+    return this.mergeRtc();
+  }
+
+  /**
+   * Merges the RTC response into the jsonTargeting of this.
+   * If it can't merge, or there is no response, potentially
+   * rejects.
+   * @return {!Promise<?Object>} Resolves if ad request is
+   *     to be sent, with object of params to add to request,
+   *     otherwise rejects with a reject message if we have one.
+   */
+  mergeRtc() {
+    // add reasons for promise.reject
+    return rtcPromise.then(
+        r => {
+          // Don't try to merge if we're sending without RTC.
+          if (!r || (!r.rtcResponse && !r.success)) {
+            return this.shouldSendRequestWithoutRtc(
+                'Bad response');
+          } else if (!r.rtcResponse && r.success) {
+            // Empty response, no need to merge
+            return Promise.resolve({
+              artc: r.rtcTotalTime,
+              ati: RTC_ATI_ENUM.RTC_SUCCESS,
+              ard: parseUrl(rtcConfig['endpoint']).hostname,
+            });
+          }
+
+          const rtcResponse = r.rtcResponse;
+          ['targeting', 'categoryExclusions'].forEach(key => {
+            if (!!rtcResponse[key]) {
+              this.jsonTargeting_[key] =
+                  !!this.jsonTargeting_[key] ?
+                  deepMerge(this.jsonTargeting_[key],
+                      rtcResponse[key]) :
+                                rtcResponse[key];
+            }
+          });
+          // rtcTotalTime is only the time that the rtc callout took,
+          // does not include the time to merge.
+          return Promise.resolve({
+            artc: r.rtcTotalTime,
+            ati: RTC_ATI_ENUM.RTC_SUCCESS,
+            ard: parseUrl(rtcConfig['endpoint']).hostname,
+          });
+        }).catch(err => {
+          const errMessage = (!!err && !!err.message) ?
+              err.message : 'Unknown error';
+          return this.shouldSendRequestWithoutRtc(errMessage);
+        });
+  }
+
+  /**
+   * Checks whether the pub has specified if we should still send
+   * the ad request on RTC failure. If yes, we return a resolve,
+   * if not, we return a reject.
+   * @param {string} errMessage
+   * @return {!Promise<?Object>}
+   */
+  shouldSendRequestWithoutRtc(errMessage) {
+    user().error(TAG, errMessage);
+    let rtcTotalTime;
+    // Have to use match instead of == because AMP
+    // custom messages automatically append three
+    // 0-width blank space characters to the ends
+    // of error messages.
+    if (errMessage.match(/^timeout/)) {
+      rtcTotalTime = -1;
+    }
+    verifyRtcConfigMember('sendAdRequestOnFailure', 'boolean');
+    return rtcConfig['sendAdRequestOnFailure'] !== false ?
+        Promise.resolve({
+          artc: rtcTotalTime,
+          ati: RTC_ATI_ENUM.RTC_FAILURE,
+          ard: parseUrl(rtcConfig['endpoint']).hostname,
+        }) : Promise.reject(errMessage);
+  };
 
   /** @override */
   sendXhrRequest(adUrl) {
@@ -600,7 +938,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               .then(sraUrlIn => {
                 checkStillCurrent();
                 sraUrl = sraUrlIn;
-                return xhrFor(this.win).fetch(sraUrl, {
+                return Services.xhrFor(this.win).fetch(sraUrl, {
                   mode: 'cors',
                   method: 'GET',
                   credentials: 'include',
@@ -650,6 +988,11 @@ export function resetSraStateForTesting() {
   sraRequests = null;
 }
 
+/** @visibileForTesting */
+export function resetRtcStateForTesting() {
+  rtcPromise = null;
+}
+
 /**
  * @param {!Element} element
  * @return {string} networkId from data-ad-slot attribute.
@@ -680,6 +1023,19 @@ function constructSRARequest_(win, doc, instances) {
 }
 
 /**
+ * @param {string} member
+ * @param {string} expectedType
+ */
+function verifyRtcConfigMember(member, expectedType) {
+  if (rtcConfig[member] != undefined &&
+    typeof rtcConfig[member] != expectedType) {
+    const type = typeof rtcConfig[member];
+    user().warn(
+        TAG, `RTC ${member} must be a ${expectedType}, instead was ${type}`);
+  }
+}
+
+/**
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
  * @visibileForTesting
  */
@@ -698,12 +1054,13 @@ export function constructSRABlockParameters(instances) {
  * @return {!Promise<!Object<string,string|number|boolean>>}
  */
 function getPageLevelParameters_(win, doc, startTime, isSra) {
-  return googlePageParameters(win, doc, startTime, 'ldjh')
-      .then(pageLevelParameters => {
+  pageLevelParameters_ = pageLevelParameters_ || googlePageParameters(
+      win, doc, startTime, 'ldjh').then(pageLevelParameters => {
         const parameters = Object.assign({}, PAGE_LEVEL_PARAMS_);
         parameters['impl'] = isSra ? 'fifs' : 'ifr';
         return Object.assign(parameters, pageLevelParameters);
       });
+  return pageLevelParameters_;
 }
 
 /**

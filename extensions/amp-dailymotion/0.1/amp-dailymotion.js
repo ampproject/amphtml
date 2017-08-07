@@ -22,8 +22,18 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {getData, listen} from '../../../src/event-helper';
-import {videoManagerForDoc} from '../../../src/services';
-import {parseQueryString} from '../../../src/url';
+import {Services} from '../../../src/services';
+import {
+    parseQueryString,
+    addParamsToUrl,
+    addParamToUrl,
+} from '../../../src/url';
+import {
+  getDataParamsFromAttributes,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
 
 /**
  * Player events reverse-engineered from the Dailymotion API
@@ -52,6 +62,7 @@ const DailymotionEvents = {
   // Other events
   VOLUMECHANGE: 'volumechange',
   STARTED_BUFFERING: 'progress',
+  FULLSCREEN_CHANGE: 'fullscreenchange',
 };
 
 /**
@@ -91,6 +102,9 @@ class AmpDailymotion extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.startedBufferingResolver_ = null;
+
+    /** @private {boolean} */
+    this.isFullscreen_ = false;
 
   }
 
@@ -137,7 +151,7 @@ class AmpDailymotion extends AMP.BaseElement {
         this.element);
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
@@ -153,8 +167,7 @@ class AmpDailymotion extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     dev().assert(this.videoid_);
-    iframe.src = 'https://www.dailymotion.com/embed/video/' +
-     encodeURIComponent(this.videoid_ || '') + '?' + this.getQuery_();
+    iframe.src = this.getIframeSrc_();
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -169,14 +182,6 @@ class AmpDailymotion extends AMP.BaseElement {
     this.hasAutoplay_ = this.element.hasAttribute('autoplay');
 
     return this.loadPromise(this.iframe_);
-  }
-
-  /** @private */
-  addQueryParam_(param, query) {
-    const val = this.element.getAttribute(`data-${param}`);
-    if (val) {
-      query.push(`${encodeURIComponent(param)}=${encodeURIComponent(val)}`);
-    }
   }
 
   /** @private */
@@ -204,7 +209,7 @@ class AmpDailymotion extends AMP.BaseElement {
         this.playerState_ = DailymotionEvents.PAUSE;
         break;
       case DailymotionEvents.PLAY:
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
         this.playerState_ = DailymotionEvents.PLAY;
         break;
       case DailymotionEvents.VOLUMECHANGE:
@@ -221,6 +226,9 @@ class AmpDailymotion extends AMP.BaseElement {
         break;
       case DailymotionEvents.STARTED_BUFFERING:
         this.startedBufferingResolver_(true);
+        break;
+      case DailymotionEvents.FULLSCREEN_CHANGE:
+        this.isFullscreen_ = data['fullscreen'] == 'true';
         break;
       default:
 
@@ -247,14 +255,12 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @private */
-  getQuery_() {
-    const query = [
-      'api=1',
-      'html=1',
-      'app=amp',
-    ];
+  getIframeSrc_() {
 
-    const settings = [
+    let iframeSrc = 'https://www.dailymotion.com/embed/video/' +
+       encodeURIComponent(this.videoid_ || '') + '?api=1&html=1&app=amp';
+
+    const explicitParamsAttributes = [
       'mute',
       'endscreen-enable',
       'sharing-enable',
@@ -264,11 +270,17 @@ class AmpDailymotion extends AMP.BaseElement {
       'info',
     ];
 
-    settings.forEach(setting => {
-      this.addQueryParam_(setting, query);
+    explicitParamsAttributes.forEach(explicitParam => {
+      const val = this.element.getAttribute(`data-${explicitParam}`);
+      if (val) {
+        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
+      }
     });
 
-    return query.join('&');
+    const implicitParams = getDataParamsFromAttributes(this.element);
+    iframeSrc = addParamsToUrl(iframeSrc, implicitParams);
+
+    return iframeSrc;
   }
 
   /** @override */
@@ -327,14 +339,85 @@ class AmpDailymotion extends AMP.BaseElement {
    * @override
    */
   showControls() {
-    // Not supported
+    this.sendCommand_('controls', [true]);
   }
 
   /**
    * @override
    */
   hideControls() {
-    // Not supported
+    this.sendCommand_('controls', [false]);
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    const platform = Services.platformFor(this.win);
+    if (platform.isSafari() || platform.isIos()) {
+      this.sendCommand_('fullscreen', [true]);
+    } else {
+      if (!this.iframe_) {
+        return;
+      }
+      fullscreenEnter(dev().assertElement(this.iframe_));
+    }
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    const platform = Services.platformFor(this.win);
+    if (platform.isSafari() || platform.isIos()) {
+      this.sendCommand_('fullscreen', [false]);
+    } else {
+      if (!this.iframe_) {
+        return;
+      }
+      fullscreenExit(dev().assertElement(this.iframe_));
+    }
+  }
+
+  /** @override */
+  isFullscreen() {
+    const platform = Services.platformFor(this.win);
+    if (platform.isSafari() || platform.isIos()) {
+      return this.isFullscreen_;
+    } else {
+      if (!this.iframe_) {
+        return false;
+      }
+      return isFullscreenElement(dev().assertElement(this.iframe_));
+    }
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 };
 

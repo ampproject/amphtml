@@ -16,7 +16,7 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import '../amp-video';
 import * as sinon from 'sinon';
@@ -26,7 +26,7 @@ const TAG = 'amp-video';
 describe(TAG, () => {
 
   let sandbox;
-  const timer = timerFor(window);
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -80,6 +80,7 @@ describe(TAG, () => {
       'controls': '',
       'muted': '',
       'loop': '',
+      'crossorigin': '',
     }).then(v => {
       const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
@@ -88,6 +89,7 @@ describe(TAG, () => {
       expect(video.tagName).to.equal('VIDEO');
       expect(video.hasAttribute('controls')).to.be.true;
       expect(video.hasAttribute('loop')).to.be.true;
+      expect(video.hasAttribute('crossorigin')).to.be.true;
       // autoplay is never propagated to the video element
       expect(video.hasAttribute('autoplay')).to.be.false;
       // muted is a deprecated attribute
@@ -361,7 +363,7 @@ describe(TAG, () => {
 
   it('should forward certain events from video to the amp element', () => {
     return getVideo({
-      src: 'foo.mp4',
+      src: '/examples/av/ForBiggerJoyrides.mp4',
       width: 160,
       height: 90,
     }).then(v => {
@@ -373,7 +375,7 @@ describe(TAG, () => {
           })
           .then(() => {
             impl.play();
-            return listenOncePromise(v, VideoEvents.PLAY);
+            return listenOncePromise(v, VideoEvents.PLAYING);
           })
           .then(() => {
             impl.pause();
@@ -395,4 +397,3 @@ describe(TAG, () => {
     });
   });
 });
-
