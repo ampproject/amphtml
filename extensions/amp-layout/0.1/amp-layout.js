@@ -24,4 +24,4 @@ class AmpLayout extends AMP.BaseElement {
     }   
 }
 
-AMP.registerElement('amp-layout', AMPLayout);
+AMP.registerElement('amp-layout', AmpLayout);
