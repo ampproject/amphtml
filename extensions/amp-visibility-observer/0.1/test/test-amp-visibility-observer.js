@@ -24,7 +24,7 @@ import {layoutRectLtwh, RelativePositions} from '../../../../src/layout-rect';
  * - moves the container in the viewport and tests enter, exit, progress values
  *   with various ratio and margin configurations
  */
-describes.sandboxed('amp-visibility-selector', {}, env => {
+describes.sandboxed('amp-visibility-selector', {}, () => {
   let impl;
   let enterSpy;
   let exitSpy;
@@ -34,14 +34,14 @@ describes.sandboxed('amp-visibility-selector', {}, env => {
   const ABOVE_VP = -1000;
   const INSIDE_VP = 500;
 
-  function init(ratios=['0','0'], margins=['0','0']) {
+  function init(ratios = '0', margins = '0') {
     const elem = {
       getAttribute(attr) {
         if (attr == 'intersection-ratio') {
-          return ratios.join(' ');
+          return ratios;
         }
         if (attr == 'exclusion-margins') {
-          return margins.join(' ');
+          return margins;
         }
       },
     };
@@ -50,12 +50,17 @@ describes.sandboxed('amp-visibility-selector', {}, env => {
     };
 
     impl = new AmpVisibilityObserver(elem);
+    impl.parseAttributes_();
     enterSpy = sandbox.stub(impl, 'triggerEnter_');
     exitSpy = sandbox.stub(impl, 'triggerExit_');
     scrollSpy = sandbox.stub(impl, 'triggerScroll_');
   }
 
-
+  function resetSpies() {
+    enterSpy.reset();
+    exitSpy.reset();
+    scrollSpy.reset();
+  }
   function setPosition(top) {
     const viewportRect = layoutRectLtwh(0, 0, 500, 1000);
     let positionRect = layoutRectLtwh(0, top, 500, 200);
@@ -77,6 +82,27 @@ describes.sandboxed('amp-visibility-selector', {}, env => {
   }
 
   describe('no ratio, no margin', () => {
+    /**
+     * with no ratio, no margin, element progresses as soon as partially
+     * until it is fully invisible.
+     *
+     *    *******
+     *    * end *
+     * |--*******--|
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |--*******--|
+     *    *start*
+     *    *******
+     */
+
     describe('not initially in viewport', () => {
       it('should not trigger enter', () => {
         init();
@@ -174,9 +200,10 @@ describes.sandboxed('amp-visibility-selector', {}, env => {
         expect(scrollSpy).to.be.calledOnce;
         expect(exitSpy).not.to.be.called;
 
+        resetSpies();
         setPosition(ABOVE_VP);
 
-        expect(scrollSpy).to.be.calledTwice;
+        expect(scrollSpy).to.be.calledOnce;
         expect(exitSpy).to.be.calledOnce;
       });
 
@@ -188,20 +215,21 @@ describes.sandboxed('amp-visibility-selector', {}, env => {
         expect(scrollSpy).to.be.calledOnce;
         expect(exitSpy).not.to.be.called;
 
+        resetSpies();
         setPosition(BELOW_VP);
 
-        expect(scrollSpy).to.be.calledTwice;
+        expect(scrollSpy).to.be.calledOnce;
         expect(exitSpy).to.be.calledOnce;
       });
     });
 
+    /*
+     * Without any ratio/margins items becomes visible and starts reporting
+     * progress as soon:
+     *   FROM BOTTOM: Its top hits the bottom edge of VP
+     *   FROM TOP: Its bottom hits the top edge of VP.
+     */
     describe('scroll progress', () => {
-      /*
-       * Without any ratio/margins items becomes visible and starts reporting
-       * progress as soon:
-       *   FROM BOTTOM: Its top hits the bottom edge of VP
-       *   FROM TOP: Its bottom hits the top edge of VP.
-       */
       it('should report scroll progress - from bottom', () => {
         init();
 
@@ -283,6 +311,194 @@ describes.sandboxed('amp-visibility-selector', {}, env => {
         expect(impl.scrollProgress_).to.be.equal(0);
         expect(exitSpy).to.be.called;
       });
+    });
+  });
+
+  describe('has ratio, no margin', () => {
+    /**
+     * with both ratios as 1, element only progresses when fully visible
+     *  --*******--
+     * |  * end *  |
+     * |  *******  |
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |  *******  |
+     * |  *start*  |
+     *  --*******--
+     */
+    it('top: 1, bottom: 1', () => {
+      init('1');
+
+      // start just below
+      setPosition(801);
+      expect(scrollSpy).not.to.be.called;
+      expect(enterSpy).not.to.be.called;
+      expect(exitSpy).not.to.be.called;
+
+      // hit visibility edge ( element fully visible with means
+      // vpHeight(1000) - elementHeight(200) = 800
+      setPosition(800);
+      expect(scrollSpy).to.be.called;
+      expect(enterSpy).to.be.called;
+      expect(exitSpy).not.to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+
+      // scroll up more
+      setPosition(799);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      // 1/4
+      setPosition(600);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0.25);
+
+      // 3/4
+      setPosition(200);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0.75);
+
+      // about to exit
+      setPosition(1);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.below(1);
+
+      // exit edge
+      setPosition(0);
+      expect(scrollSpy).to.be.called;
+      expect(exitSpy).not.to.be.called;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      // exit
+      setPosition(-1);
+      expect(scrollSpy).to.be.called;
+      expect(exitSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      resetSpies();
+
+      // re-enter
+      setPosition(0);
+      expect(scrollSpy).to.be.called;
+      expect(enterSpy).to.be.calledOnce;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      // hit middle
+      setPosition(400);
+      expect(scrollSpy).to.be.called;
+      expect(enterSpy).to.be.calledOnce;
+      expect(impl.scrollProgress_).to.be.equals(0.5);
+
+      // about to exit from bottom
+      setPosition(799);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      // bottom exit from bottom
+      setPosition(800);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+
+      // exit from bottom
+      setPosition(801);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+    });
+
+    /**
+     * with both ratios as 0.5, element progresses when half visible
+     *    *******
+     * |--* end *--|
+     * |  *******  |
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |  *******  |
+     * |--*start*--|
+     *    *******
+     */
+    it('top: 0.5, bottom: 0.5', () => {
+      init('0.5');
+
+      // start just below
+      setPosition(901);
+      expect(scrollSpy).not.to.be.called;
+      expect(enterSpy).not.to.be.called;
+      expect(exitSpy).not.to.be.called;
+
+      // hit visibility edge ( element fully visible with means
+      // vpHeight(1000) - elementHeight(200) / 2 = 900
+      setPosition(900);
+      expect(scrollSpy).to.be.called;
+      expect(enterSpy).to.be.called;
+      expect(exitSpy).not.to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+
+      // scroll up more
+      setPosition(899);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      // 1/4
+      setPosition(650);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0.25);
+
+      // 3/4
+      setPosition(150);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0.75);
+
+      // about to exit
+      setPosition(-99);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.below(1);
+
+      // exit edge
+      setPosition(-100);
+      expect(scrollSpy).to.be.called;
+      expect(exitSpy).not.to.be.called;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      // exit
+      setPosition(-101);
+      expect(scrollSpy).to.be.called;
+      expect(exitSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      resetSpies();
+
+      // re-enter
+      setPosition(-100);
+      expect(scrollSpy).to.be.called;
+      expect(enterSpy).to.be.calledOnce;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      // hit middle
+      setPosition(400);
+      expect(scrollSpy).to.be.called;
+      expect(enterSpy).to.be.calledOnce;
+      expect(impl.scrollProgress_).to.be.equals(0.5);
+
+      // about to exit from bottom
+      setPosition(899);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      // bottom exit from bottom
+      setPosition(900);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+
+      // exit from bottom
+      setPosition(901);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
     });
   });
 });

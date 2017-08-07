@@ -90,7 +90,19 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     // Trigger, but only when visible.
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(this.trigger_.bind(this));
+  }
 
+  trigger_() {
+    this.parseAttributes_();
+    this.scene_ = this.element.parentNode;
+    this.action_ = Services.actionServiceForDoc(this.element);
+    this.maybeInstallPositionObserver_();
+    this.positionObserver_.observe(this.scene_, PositionObserverFidelity.HIGH,
+        this.positionChanged_.bind(this)
+    );
+  }
+
+  parseAttributes_() {
     // Ratio is either "0.dd" or "0.dd 0.dd"
     const ratios = this.element.getAttribute('intersection-ratio');
     if (ratios) {
@@ -111,16 +123,6 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
         this.bottomMarginExpr_ = topBottom[1];
       }
     }
-
-  }
-
-  trigger_() {
-    this.action_ = Services.actionServiceForDoc(this.element);
-    this.scene_ = this.element.parentNode;
-    this.maybeInstallPositionObserver_();
-    this.positionObserver_.observe(this.scene_, PositionObserverFidelity.HIGH,
-        this.positionChanged_.bind(this)
-    );
   }
 
   positionChanged_(entry) {
