@@ -125,6 +125,8 @@ function getAdTypes() {
  */
 gulp.task('test', 'Runs tests',
     argv.nobuild ? [] : (argv.unit ? ['css'] : ['build']), function(done) {
+  logLocal('Running tests. Run', util.colors.cyan('gulp help'),
+      'to see a list of all test flags.');
   if(argv.nobuild) {
     logLocal(util.colors.yellow('--nobuild:'), 'Skipping build.');
   }
@@ -137,14 +139,14 @@ gulp.task('test', 'Runs tests',
 
   if (argv.watch || argv.w) {
     logLocal(util.colors.yellow('--watch:'),
-        'Running tests in watch mode. Editing and saving a' +
-        ' file will cause the tests for that file to be re-run.');
+        'Enabling watch mode. Editing and saving a file will cause the tests' +
+        ' for that file to be re-run.');
     c.singleRun = false;
   }
 
   if (argv.verbose || argv.v) {
     logLocal(util.colors.yellow('--verbose:'),
-        'Running tests in verbose mode. Expect lots of output!');
+        'Enabling verbose mode. Expect lots of output!');
     c.client.captureConsole = true;
   }
 
@@ -164,13 +166,13 @@ gulp.task('test', 'Runs tests',
   } else if (argv.integration) {
     logLocal(util.colors.yellow('--integration:'),
         'Running only the integration tests. Requires',
-        util.colors.cyan("gulp build"),
+        util.colors.cyan('gulp build'),
         'to have been run first.');
     c.files = config.integrationTestPaths;
   } else if (argv.unit) {
     logLocal(util.colors.yellow('--unit:'),
         'Running only the unit tests. Requires',
-        util.colors.cyan("gulp css"),
+        util.colors.cyan('gulp css'),
         'to have been run first.');
     c.files = config.unitTestPaths;
   } else if (argv.randomize || argv.glob || argv.a4a) {
