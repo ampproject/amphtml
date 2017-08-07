@@ -352,11 +352,8 @@ export function applyLayout_(element) {
     setStyle(element, 'height', dev().assertString(height));
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
-    setStyles(sizer, {
-      display: 'block',
-      paddingTop:
-        ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%',
-    });
+    setStyle(sizer, 'paddingTop',
+        (getLengthNumeral(height) / getLengthNumeral(width) * 100) + '%');
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement_ = sizer;
   } else if (layout == Layout.FILL) {
@@ -852,12 +849,15 @@ function createBaseCustomElementClass(win) {
      * @private
      */
     getSizer_() {
-      if (this.sizerElement_ === undefined &&
-          this.layout_ === Layout.RESPONSIVE) {
-        // Expect sizer to exist, just not yet discovered.
-        this.sizerElement_ = this.querySelector('i-amphtml-sizer');
+      if (this.sizerElement_ === undefined) {
+        if (this.layout_ === Layout.RESPONSIVE) {
+          // Expect sizer to exist, just not yet discovered.
+          this.sizerElement_ = this.querySelector('i-amphtml-sizer');
+        } else {
+          this.sizerElement_ = null;
+        }
       }
-      return this.sizerElement_ || null;
+      return this.sizerElement_;
     }
 
     /**
@@ -901,11 +901,15 @@ function createBaseCustomElementClass(win) {
         this.heightsList_ = heightsAttr ?
             parseSizeList(heightsAttr, /* allowPercent */ true) : null;
       }
-      if (this.heightsList_) {
-        const sizer = this.getSizer_();
-        if (sizer) {
+      const sizer = this.getSizer_();
+      if (sizer) {
+        if (this.heightsList_) {
           setStyle(sizer, 'paddingTop',
               this.heightsList_.select(this.ownerDocument.defaultView));
+        } else if (!sizer.hasAttribute('style')) {
+          const height = getLengthNumeral(this.getAttribute('height'));
+          const width = getLengthNumeral(this.getAttribute('width'));
+          setStyle(sizer, 'paddingTop', (height / width * 100) + '%');
         }
       }
     }
