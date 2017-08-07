@@ -347,7 +347,8 @@ function describeEnv(factory) {
 
   /**
    * @param {string} name
-   * @param {!Object} spec
+   * @param {!Object} specconsole.log(fetchMock.sandbox());
+          debugger;
    * @param {function(!Object)} fn
    */
   const mainFunc = function(name, spec, fn) {

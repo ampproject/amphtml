@@ -2479,6 +2479,10 @@ dargs@^5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/dargs/-/dargs-5.1.0.tgz#ec7ea50c78564cd36c9d5ec18f66329fade27829"
 
+dargs@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/dargs/-/dargs-5.1.0.tgz#ec7ea50c78564cd36c9d5ec18f66329fade27829"
+
 dashdash@^1.12.0:
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/dashdash/-/dashdash-1.14.1.tgz#853cfa0f7cbe2fed5de20326b8dd581035f6e2f0"
@@ -4221,6 +4225,13 @@ hasha@~2.2.0:
     is-stream "^1.0.1"
     pinkie-promise "^2.0.0"
 
+hasha@~2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/hasha/-/hasha-2.2.0.tgz#78d7cbfc1e6d66303fe79837365984517b2f6ee1"
+  dependencies:
+    is-stream "^1.0.1"
+    pinkie-promise "^2.0.0"
+
 hat@^0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/hat/-/hat-0.0.3.tgz#bb014a9e64b3788aed8005917413d4ff3d502d8a"
@@ -4371,6 +4382,17 @@ ignore-by-default@^1.0.0:
 ignore@^3.2.0:
   version "3.3.3"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-3.3.3.tgz#432352e57accd87ab3110e82d3fea0e47812156d"
+
+import-lazy@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/import-lazy/-/import-lazy-2.1.0.tgz#05698e3d45c88e8d7e9d92cb0584e77f096f3e43"
+
+import-local@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/import-local/-/import-local-0.1.1.tgz#b1179572aacdc11c6a91009fb430dbcab5f668a8"
+  dependencies:
+    pkg-dir "^2.0.0"
+    resolve-cwd "^2.0.0"
 
 import-lazy@^2.1.0:
   version "2.1.0"
@@ -5340,6 +5362,14 @@ lodash.clonedeepwith@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.clonedeepwith/-/lodash.clonedeepwith-4.5.0.tgz#6ee30573a03a1a60d670a62ef33c10cf1afdbdd4"
 
+lodash.clonedeep@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/lodash.clonedeep/-/lodash.clonedeep-4.5.0.tgz#e23f3f9c4f8fbdde872529c1071857a086e5ccef"
+
+lodash.clonedeepwith@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/lodash.clonedeepwith/-/lodash.clonedeepwith-4.5.0.tgz#6ee30573a03a1a60d670a62ef33c10cf1afdbdd4"
+
 lodash.debounce@^4.0.3:
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
@@ -5395,6 +5425,10 @@ lodash.isarguments@^3.0.0:
 lodash.isarray@^3.0.0:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/lodash.isarray/-/lodash.isarray-3.0.4.tgz#79e4eb88c36a8122af86f844aa9bcd851b5fbb55"
+
+lodash.isequal@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/lodash.isequal/-/lodash.isequal-4.5.0.tgz#415c4478f2bcc30120c22ce10ed3226f7d3e18e0"
 
 lodash.isequal@^4.5.0:
   version "4.5.0"
@@ -6529,6 +6563,24 @@ pend@~1.2.0:
 performance-now@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-0.2.0.tgz#33ef30c5c77d4ea21c5a53869d91b56d8f2555e5"
+
+phantomjs-prebuilt@2.1.14:
+  version "2.1.14"
+  resolved "https://registry.yarnpkg.com/phantomjs-prebuilt/-/phantomjs-prebuilt-2.1.14.tgz#d53d311fcfb7d1d08ddb24014558f1188c516da0"
+  dependencies:
+    es6-promise "~4.0.3"
+    extract-zip "~1.5.0"
+    fs-extra "~1.0.0"
+    hasha "~2.2.0"
+    kew "~0.7.0"
+    progress "~1.1.8"
+    request "~2.79.0"
+    request-progress "~2.0.1"
+    which "~1.2.10"
+
+pend@~1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/pend/-/pend-1.2.0.tgz#7a57eb550a6783f9115331fcf4663d5c8e007a50"
 
 phantomjs-prebuilt@2.1.14:
   version "2.1.14"
@@ -8989,6 +9041,14 @@ wrappy@1:
 write-file-atomic@^1.1.2, write-file-atomic@^1.1.4:
   version "1.3.4"
   resolved "https://registry.yarnpkg.com/write-file-atomic/-/write-file-atomic-1.3.4.tgz#f807a4f0b1d9e913ae7a48112e6cc3af1991b45f"
+  dependencies:
+    graceful-fs "^4.1.11"
+    imurmurhash "^0.1.4"
+    slide "^1.1.5"
+
+write-file-atomic@^2.0.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/write-file-atomic/-/write-file-atomic-2.1.0.tgz#1769f4b551eedce419f0505deae2e26763542d37"
   dependencies:
     graceful-fs "^4.1.11"
     imurmurhash "^0.1.4"
