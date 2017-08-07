@@ -17,7 +17,7 @@
 'use strict';
 
 function log(args) {
-  const var_args = Array.prototype.slice.call(arguments, 0);
+  var var_args = Array.prototype.slice.call(arguments, 0);
   var_args.unshift('[SHELL]');
   console/*OK*/.log.apply(console, var_args);
 }
@@ -255,6 +255,7 @@ class AmpViewer {
     }
 
     this.container.appendChild(this.host_);
+
     this.ampReadyPromise_.then(AMP => {
       this.amp_ = AMP.attachShadowDoc(this.host_, doc, url, {});
       this.win.document.title = this.amp_.title || '';
@@ -368,7 +369,7 @@ function fetchDocument(url) {
         if (xhr.responseXML) {
           resolve(xhr.responseXML);
         } else {
-          reject(new Error('No xhr.responseXML'));
+          reject(new Error(`No xhr.responseXML`));
         }
       }
     };
@@ -486,4 +487,4 @@ function parseQueryString(queryString) {
 }
 
 
-const shell = new Shell(window, /* useStreaming */ true);
+var shell = new Shell(window, /* useStreaming */ true);
