@@ -17,7 +17,7 @@
 
 const app = module.exports = require('express').Router();
 
-app.get('/compose-doc', function(req, res) {
+app.use('/compose-doc', function(req, res) {
   const meta = req.query.meta;
   const experiments = req.query.experiments.split(' ');
   let metaTag;
@@ -57,7 +57,7 @@ const bank = {};
  * Deposit a request. An ID has to be specified. Will override previous request
  * if the same ID already exists.
  */
-app.get('/request-bank/deposit/:id', (req, res) => {
+app.use('/request-bank/deposit/:id', (req, res) => {
   if (typeof bank[req.params.id] === 'function') {
     bank[req.params.id](req);
   } else {
@@ -71,7 +71,7 @@ app.get('/request-bank/deposit/:id', (req, res) => {
  * return it immediately. Otherwise wait until it gets deposited
  * The same request cannot be withdrawn twice at the same time.
  */
-app.get('/request-bank/withdraw/:id', (req, res) => {
+app.use('/request-bank/withdraw/:id', (req, res) => {
   const result = bank[req.params.id];
   if (typeof result === 'function') {
     return res.status(500).send('another client is withdrawing this ID');
