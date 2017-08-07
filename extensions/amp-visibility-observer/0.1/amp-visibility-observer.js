@@ -49,28 +49,34 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {?Element} */
     this.scene_ = null;
 
-    /** @private {boolean} */
+    /** @private {!boolean} */
     this.isVisible_ = false;
 
     /** @private {?../../../src/service/position-observer-impl.AmpDocPositionObserver} */
     this.positionObserver_ = null;
 
-    /** @private {number} */
+    /** @private {!number} */
     this.topRatio_ = 0;
 
-    /** @private {number} */
+    /** @private {!number} */
     this.bottomRatio_ = 0;
 
+    /** @private {!string} */
     this.topMarginExpr_ = '0';
 
+    /** @private {!string} */
     this.bottomMarginExpr_ = '0';
 
+    /** @private {!number} */
     this.resolvedTopMargin_ = 0;
 
+    /** @private {!number} */
     this.resolvedBottomMargin_ = 0;
 
+    /** @private {!../../../src/layout-rect.LayoutRectDef} */
     this.viewportRect_ = null;
 
+    /** @private {!number} */
     this.scrollProgress_ = 0;
   }
 
@@ -105,6 +111,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
         this.bottomMarginExpr_ = topBottom[1];
       }
     }
+
   }
 
   trigger_() {
