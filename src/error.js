@@ -497,7 +497,9 @@ export function detectJsEngineFromStack() {
  * @param {!Window} win
  */
 export function reportErrorToAnalytics(error, win) {
+  console.log('reportErrorToAnalytics');
   if (isExperimentOn(win, 'user-error-reporting')) {
+    console.log('experiment on');
     const vars = {
       'errorName': error.name,
       'errorMessage': error.message,

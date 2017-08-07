@@ -205,6 +205,7 @@ export function isExperimentOnForOriginTrial(win, experimentId) {
  * @return {boolean}
  */
 export function isExperimentOn(win, experimentId) {
+  console.log('is Experiment on: ' + experimentId);
   const toggles = experimentToggles(win);
   return !!toggles[experimentId];
 }
@@ -223,6 +224,7 @@ export function isExperimentOn(win, experimentId) {
  */
 export function toggleExperiment(win, experimentId, opt_on,
     opt_transientExperiment) {
+  console.log('toggle Experiment: ' + experimentId);
   const currentlyOn = isExperimentOn(win, experimentId);
   const on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {
@@ -260,15 +262,20 @@ export function experimentToggles(win) {
     }
   }
 
+  console.log('mode test: ' + getMode().test);
   // Read document level override from meta tag.
   if ((win.AMP_CONFIG
       && Array.isArray(win.AMP_CONFIG['allow-doc-opt-in'])
       && win.AMP_CONFIG['allow-doc-opt-in'].length > 0) || getMode().test) {
+    console.log('about to toggle...');
     const allowed = win.AMP_CONFIG['allow-doc-opt-in'];
     const meta =
         win.document.head.querySelector('meta[name="amp-experiments-opt-in"]');
+    console.log(meta);
     if (meta) {
+      console.log('meta: ' + meta);
       const optedInExperiments = meta.getAttribute('content').split(',');
+      console.log(optedInExperiments);
       for (let i = 0; i < optedInExperiments.length; i++) {
         if (allowed.indexOf(optedInExperiments[i]) != -1 || getMode().test) {
           toggles_[optedInExperiments[i]] = true;

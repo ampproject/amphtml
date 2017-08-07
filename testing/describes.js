@@ -445,7 +445,8 @@ class IntegrationFixture {
 
   /** @override */
   setup(env) {
-    const body = this.spec.body;
+    const body = typeof this.spec.body == 'function' ?
+          this.spec.body() : this.spec.body;
     const meta = this.spec.meta || '';
     const experiments = this.spec.experiments || [''];
     return new Promise((resolve, reject) => {
