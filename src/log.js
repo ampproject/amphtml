@@ -563,10 +563,7 @@ export function resetLogConstructorForTesting() {
  * @return {!Log}
  */
 export function user(opt_element) {
-  //let logger;
-  if (logs.user) {
-    logs.user = logs.user;
-  } else {
+  if (!logs.user) {
     logs.user = getUserLogger(USER_ERROR_SENTINEL);
   }
   if (!!opt_element &&
