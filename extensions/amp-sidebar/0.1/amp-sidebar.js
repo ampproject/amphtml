@@ -25,7 +25,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 import {debounce} from '../../../src/utils/rate-limit';
 import {removeFragment, parseUrl} from '../../../src/url';
-import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @const */

@@ -66,7 +66,7 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @const {function()} */
     this.boundReschedule_ = debounce(this.win, event => {
-      this.reschedule_(event);
+      this.reschedule_(/** @type {!Event} */ (event));
     }, 500);
 
     this.isFirstTransitonEnd_ = true;
