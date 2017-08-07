@@ -384,6 +384,13 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
  * @return {!Promise}
  */
 function compileCss() {
+  // Print a message that could help speed up local development.
+  if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
+    $$.util.log(
+        $$.util.colors.green('To skip building during future test runs, use',
+            $$.util.colors.cyan('--nobuild'), 'with your',
+            $$.util.colors.cyan('gulp test'), 'command.'));
+  }
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
   .then(function(css) {
