@@ -34,7 +34,7 @@ var karmaDefault = require('./karma.conf');
  */
 function logLocal() {
   if (!process.env.TRAVIS) {
-    util.log(util.colors.green(...arguments));
+    util.log(util.colors.green.apply(null, arguments));
   }
 }
 
