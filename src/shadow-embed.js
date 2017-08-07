@@ -206,9 +206,8 @@ export function importShadowBody(shadowRoot, body, deep) {
     }
   }
   setStyle(resultBody, 'position', 'relative');
-  resultBody.classList.add('amp-shadow');
   //NOTE(torch2424), create a shadow root elelment, and add it to the body
-  //DO NOT SUBMIT: Find a solution, this is wrong place. Fix the problem here, need to place styles differently
+  // DO NOT SUBMIT: Find a solution, this is wrong place. Fix the problem here, need to place styles differently
   //    getRootNode().firstChild
   const shadowRootElement = doc.createElement('i-amphtml-shadow-root');
   shadowRootElement.id = shadowRoot.id;
