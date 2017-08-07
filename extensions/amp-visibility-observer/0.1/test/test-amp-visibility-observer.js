@@ -228,6 +228,19 @@ describes.sandboxed('amp-visibility-selector', {}, () => {
      * progress as soon:
      *   FROM BOTTOM: Its top hits the bottom edge of VP
      *   FROM TOP: Its bottom hits the top edge of VP.
+     *    *******
+     *    * end *
+     * |--*******--|
+     * |           |
+     * |           |
+     * |           |
+       |           |
+     * |           |
+     * |           |
+     * |           |
+     *  --*******--
+     *    *start*
+     *    *******
      */
     describe('scroll progress', () => {
       it('should report scroll progress - from bottom', () => {
@@ -269,10 +282,9 @@ describes.sandboxed('amp-visibility-selector', {}, () => {
         expect(scrollSpy).to.be.called;
         expect(impl.scrollProgress_).to.be.equal(1);
         expect(exitSpy).to.be.called;
-      });
 
-      it('should report scroll progress - from top', () => {
-        init();
+        resetSpies();
+        // rerenter
 
         // one pixel above
         setPosition(-201);
@@ -396,7 +408,7 @@ describes.sandboxed('amp-visibility-selector', {}, () => {
       expect(scrollSpy).to.be.called;
       expect(impl.scrollProgress_).to.be.above(0);
 
-      // bottom exit from bottom
+      // exit edge at bottom
       setPosition(800);
       expect(scrollSpy).to.be.called;
       expect(impl.scrollProgress_).to.be.equal(0);
@@ -490,7 +502,7 @@ describes.sandboxed('amp-visibility-selector', {}, () => {
       expect(scrollSpy).to.be.called;
       expect(impl.scrollProgress_).to.be.above(0);
 
-      // bottom exit from bottom
+      // exit edge at bottom
       setPosition(900);
       expect(scrollSpy).to.be.called;
       expect(impl.scrollProgress_).to.be.equal(0);
@@ -499,6 +511,547 @@ describes.sandboxed('amp-visibility-selector', {}, () => {
       setPosition(901);
       expect(scrollSpy).to.be.called;
       expect(impl.scrollProgress_).to.be.equal(0);
+    });
+
+    /**
+     *  top: 0 bottom: 1
+     *    *******
+     *    * end *
+     * |--*******--|
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |  *******  |
+     * |  *start*  |
+     * |--*******--
+     */
+    it('top: 0, bottom: 1', () => {
+      init('0 1');
+
+      // start just below
+      setPosition(801);
+      expect(scrollSpy).not.to.be.called;
+      expect(enterSpy).not.to.be.called;
+      expect(exitSpy).not.to.be.called;
+
+      // hit visibility
+      setPosition(800);
+      expect(scrollSpy).to.be.called;
+      expect(enterSpy).to.be.called;
+      expect(exitSpy).not.to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+
+      // scroll up more
+      setPosition(799);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      // about to exit
+      setPosition(-199);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.below(1);
+
+      // exit edge
+      setPosition(-200);
+      expect(scrollSpy).to.be.called;
+      expect(exitSpy).not.to.be.called;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      // exit
+      setPosition(-201);
+      expect(scrollSpy).to.be.called;
+      expect(exitSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      resetSpies();
+
+      // re-enter
+      setPosition(-200);
+      expect(scrollSpy).to.be.called;
+      expect(enterSpy).to.be.calledOnce;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      // about to exit from bottom
+      setPosition(799);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      // exit edge at bottom
+      setPosition(800);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+
+      // exit from bottom
+      setPosition(801);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+    });
+
+    /**
+     *  top: 1 bottom: 0
+     * |--*******--|
+     * |  * end *  |
+     * |  *******  |
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |           |
+     * |--*******--|
+     *    *start*
+     *    *******
+     */
+    it('top: 1, bottom: 0', () => {
+      init('1 0');
+
+      // start just below
+      setPosition(1001);
+      expect(scrollSpy).not.to.be.called;
+      expect(enterSpy).not.to.be.called;
+      expect(exitSpy).not.to.be.called;
+
+      // hit visibility
+      setPosition(1000);
+      expect(scrollSpy).to.be.called;
+      expect(enterSpy).to.be.called;
+      expect(exitSpy).not.to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+
+      // scroll up more
+      setPosition(999);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      // about to exit
+      setPosition(1);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.below(1);
+
+      // exit edge
+      setPosition(0);
+      expect(scrollSpy).to.be.called;
+      expect(exitSpy).not.to.be.called;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      // exit
+      setPosition(-1);
+      expect(scrollSpy).to.be.called;
+      expect(exitSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      resetSpies();
+
+      // re-enter
+      setPosition(0);
+      expect(scrollSpy).to.be.called;
+      expect(enterSpy).to.be.calledOnce;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      // about to exit from bottom
+      setPosition(999);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      // exit edge at bottom
+      setPosition(1000);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+
+      // exit from bottom
+      setPosition(1001);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+    });
+
+    /**
+     * top: 0.75 bottom: 0.2
+     * custom, can't ASCII draw thing one.
+     */
+    it('top: 0.75, bottom: 0.2', () => {
+      init('0.75 0.2');
+
+      // 1000 - 40 (0.2*200)
+      setPosition(961);
+      expect(scrollSpy).not.to.be.called;
+      expect(enterSpy).not.to.be.called;
+      expect(exitSpy).not.to.be.called;
+
+      // hit visibility
+      setPosition(960);
+      expect(scrollSpy).to.be.called;
+      expect(enterSpy).to.be.called;
+      expect(exitSpy).not.to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+
+      // scroll up more
+      setPosition(959);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      // 0.75 * 200 = 150. 200 -150 = 50
+      setPosition(-49);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.below(1);
+
+      // exit edge
+      setPosition(-50);
+      expect(scrollSpy).to.be.called;
+      expect(exitSpy).not.to.be.called;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      // exit
+      setPosition(-51);
+      expect(scrollSpy).to.be.called;
+      expect(exitSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      resetSpies();
+
+      // re-enter
+      setPosition(-50);
+      expect(scrollSpy).to.be.called;
+      expect(enterSpy).to.be.calledOnce;
+      expect(impl.scrollProgress_).to.be.equals(1);
+
+      // about to exit from bottom
+      setPosition(959);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      // exit edge at bottom
+      setPosition(960);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+
+      // exit from bottom
+      setPosition(961);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+    });
+  });
+
+  describe('has margin, no ratio', () => {
+    /**
+     * margins essentially just narrow the viewport.
+     * here we have 100px margin on top and 100px margin on bottom
+     */
+    it('topMargin: 100px, bottomMargin: 100px', () => {
+      init('0', '100');
+
+      // one pixel below
+      setPosition(901);
+      expect(scrollSpy).not.to.be.called;
+
+      // right on edge, progress is 0%
+      setPosition(900);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.equal(0);
+
+      // one more pixel
+      setPosition(899);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      setPosition(400);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0.5);
+
+      // about to exit
+      setPosition(-99);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.below(1);
+
+      // exit edge
+      setPosition(-100);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(1);
+      expect(exitSpy).not.to.be.called;
+
+      // exited, progress should stay 1
+      setPosition(-101);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(1);
+      expect(exitSpy).to.be.called;
+
+      resetSpies();
+      // rerenter
+
+      // one pixel above
+      setPosition(-101);
+      expect(scrollSpy).not.to.be.called;
+
+      // right on edge, progress is 100% (coming from top)
+      setPosition(-100);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.equal(1);
+
+      // one more pixel
+      setPosition(-99);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.below(1);
+
+      // middle
+      setPosition(400);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0.5);
+
+      // about to exit
+      setPosition(899);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      // exit edge
+      setPosition(900);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+      expect(exitSpy).not.to.be.called;
+
+      // exited, progress should stay 0
+      setPosition(901);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+      expect(exitSpy).to.be.called;
+    });
+
+    it('topMargin: 20vh, bottomMargin: 20vh', () => {
+      // 10vh = 20% of vpHeight = 200px
+      init('0', '20vh');
+
+      // one pixel below
+      setPosition(801);
+      expect(scrollSpy).not.to.be.called;
+
+      // right on edge, progress is 0%
+      setPosition(800);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.equal(0);
+
+      // one more pixel
+      setPosition(799);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      setPosition(400);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0.5);
+
+      // about to exit
+      setPosition(1);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.below(1);
+
+      // exit edge
+      setPosition(0);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(1);
+      expect(exitSpy).not.to.be.called;
+
+      // exited, progress should stay 1
+      setPosition(-1);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(1);
+      expect(exitSpy).to.be.called;
+
+      resetSpies();
+      // rerenter
+
+      // one pixel above
+      setPosition(-1);
+      expect(scrollSpy).not.to.be.called;
+
+      // right on edge, progress is 100% (coming from top)
+      setPosition(0);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.equal(1);
+
+      // one more pixel
+      setPosition(1);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.below(1);
+
+      // middle
+      setPosition(400);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0.5);
+
+      // about to exit
+      setPosition(799);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      // exit edge
+      setPosition(800);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+      expect(exitSpy).not.to.be.called;
+
+      // exited, progress should stay 0
+      setPosition(801);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+      expect(exitSpy).to.be.called;
+    });
+
+    it('topMargin: 0px, bottomMargin: 100px', () => {
+      init('0', '0 100');
+
+      // one pixel below
+      setPosition(901);
+      expect(scrollSpy).not.to.be.called;
+
+      // right on edge, progress is 0%
+      setPosition(900);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.equal(0);
+
+      // one more pixel
+      setPosition(899);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      setPosition(350);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0.5);
+
+      // about to exit
+      setPosition(-199);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.below(1);
+
+      // exit edge
+      setPosition(-200);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(1);
+      expect(exitSpy).not.to.be.called;
+
+      // exited, progress should stay 1
+      setPosition(-201);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(1);
+      expect(exitSpy).to.be.called;
+
+      resetSpies();
+      // rerenter
+
+      // one pixel above
+      setPosition(-201);
+      expect(scrollSpy).not.to.be.called;
+
+      // right on edge, progress is 100% (coming from top)
+      setPosition(-200);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.equal(1);
+
+      // one more pixel
+      setPosition(-199);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.below(1);
+
+      // middle
+      setPosition(350);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0.5);
+
+      // about to exit
+      setPosition(899);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      // exit edge
+      setPosition(900);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+      expect(exitSpy).not.to.be.called;
+
+      // exited, progress should stay 0
+      setPosition(901);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+      expect(exitSpy).to.be.called;
+    });
+  });
+
+  describe('with both margin and ratio', () => {
+    it('ratio: 0.5 padding: 100px', () => {
+      init('0.5', '100');
+
+      // one pixel below
+      setPosition(801);
+      expect(scrollSpy).not.to.be.called;
+
+      // right on edge, progress is 0%
+      setPosition(800);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.equal(0);
+
+      // one more pixel
+      setPosition(799);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      setPosition(400);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0.5);
+
+      // about to exit
+      setPosition(1);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.below(1);
+
+      // exit edge
+      setPosition(0);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(1);
+      expect(exitSpy).not.to.be.called;
+
+      // exited, progress should stay 1
+      setPosition(-1);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(1);
+      expect(exitSpy).to.be.called;
+
+      resetSpies();
+      // rerenter
+
+      // one pixel above
+      setPosition(-1);
+      expect(scrollSpy).not.to.be.called;
+
+      // right on edge, progress is 100% (coming from top)
+      setPosition(0);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.equal(1);
+
+      // one more pixel
+      setPosition(1);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.below(1);
+
+      // middle
+      setPosition(400);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0.5);
+
+      // about to exit
+      setPosition(799);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.above(0);
+
+      // exit edge
+      setPosition(800);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+      expect(exitSpy).not.to.be.called;
+
+      // exited, progress should stay 0
+      setPosition(801);
+      expect(scrollSpy).to.be.called;
+      expect(impl.scrollProgress_).to.be.equal(0);
+      expect(exitSpy).to.be.called;
     });
   });
 });
