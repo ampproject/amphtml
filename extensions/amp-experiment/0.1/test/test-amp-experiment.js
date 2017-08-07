@@ -17,7 +17,7 @@
 import {createIframePromise} from '../../../../testing/iframe';
 import {AmpExperiment} from '../amp-experiment';
 import * as variant from '../variant';
-import {variantForOrNull} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 describe('amp-experiment', () => {
@@ -131,7 +131,7 @@ describe('amp-experiment', () => {
         .returns(Promise.resolve(null));
 
     experiment.buildCallback();
-    return variantForOrNull(win).then(variants => {
+    return Services.variantForOrNull(win).then(variants => {
       expect(variants).to.jsonEqual({
         'experiment-1': 'variant-a',
         'experiment-2': 'variant-d',

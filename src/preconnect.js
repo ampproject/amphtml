@@ -22,9 +22,7 @@
 
 import {getService, registerServiceBuilder} from './service';
 import {parseUrl} from './url';
-import {timerFor} from './services';
-import {platformFor} from './services';
-import {viewerForDoc} from './services';
+import {Services} from './services';
 import {dev} from './log';
 import {startsWith} from './string';
 
@@ -53,15 +51,14 @@ function getPreconnectFeatures(win) {
   if (!preconnectFeatures) {
     const linkTag = win.document.createElement('link');
     const tokenList = linkTag['relList'];
-    linkTag.rel = 'preload';
-    linkTag.rel = 'invalid-value';
+    linkTag.as = 'invalid-value';
     if (!tokenList || !tokenList.supports) {
       return {};
     }
     preconnectFeatures = {
       preconnect: tokenList.supports('preconnect'),
       preload: tokenList.supports('preload'),
-      onlyValidAs: linkTag.rel != 'invalid-value',
+      onlyValidAs: linkTag.as != 'invalid-value',
     };
   }
   return preconnectFeatures;
@@ -99,7 +96,7 @@ class PreconnectService {
      */
     this.urls_ = {};
     /** @private @const {!./service/platform-impl.Platform}  */
-    this.platform_ = platformFor(win);
+    this.platform_ = Services.platformFor(win);
     // Mark current origin as preconnected.
     this.origins_[parseUrl(win.location.href).origin] = true;
 
@@ -112,7 +109,7 @@ class PreconnectService {
     this.features_ = getPreconnectFeatures(win);
 
     /** @private @const {!./service/timer-impl.Timer} */
-    this.timer_ = timerFor(win);
+    this.timer_ = Services.timerFor(win);
   }
 
   /**
@@ -321,7 +318,7 @@ export class Preconnect {
    */
   getViewer_() {
     if (!this.viewer_) {
-      this.viewer_ = viewerForDoc(this.element_);
+      this.viewer_ = Services.viewerForDoc(this.element_);
     }
     return this.viewer_;
   }

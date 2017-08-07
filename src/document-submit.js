@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust} from './action-trust';
-import {actionServiceForDoc} from './services';
+import {Services} from './services';
 import {dev, user} from './log';
 import {
   assertHttpsUrl,
@@ -130,8 +130,7 @@ export function onDocumentFormSubmit_(e) {
     // to deliver the submission event.
     e.stopImmediatePropagation();
 
-    const actions = actionServiceForDoc(form);
-    // TODO(choumx, #9699): HIGH.
-    actions.execute(form, 'submit', /*args*/ null, form, e, ActionTrust.MEDIUM);
+    const actions = Services.actionServiceForDoc(form);
+    actions.execute(form, 'submit', /*args*/ null, form, e, ActionTrust.HIGH);
   }
 }

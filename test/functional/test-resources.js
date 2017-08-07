@@ -20,6 +20,7 @@ import {Resource, ResourceState} from '../../src/service/resource';
 import {VisibilityState} from '../../src/visibility-state';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
+import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
@@ -554,7 +555,7 @@ describes.fakeWin('Resources startup', {
   beforeEach(() => {
     win = env.win;
     clock = sandbox.useFakeTimers();
-    resources = new Resources(new AmpDocSingle(win));
+    resources = Services.resourcesForDoc(win.document.body);
     resources.relayoutAll_ = false;
     schedulePassStub = sandbox.stub(resources, 'schedulePass');
   });
@@ -564,26 +565,83 @@ describes.fakeWin('Resources startup', {
     expect(schedulePassStub).to.not.be.called;
     win.readyState = 'complete';
     win.eventListeners.fire({type: 'load'});
-    return loadPromise(win).then(() => {
-      // Skip a microtask.
-      return Promise.race([Promise.resolve()]);
+    win.document.eventListeners.fire({type: 'readystatechange'});
+    return resources.ampdoc.whenReady().then(() => {
+      return loadPromise(win);
     }).then(() => {
       expect(resources.relayoutAll_).to.be.true;
-      expect(schedulePassStub).to.be.calledOnce;
+      expect(schedulePassStub).to.have.been.called;
     });
   });
 
   it('should run a full reload pass on fonts timeout', () => {
-    expect(resources.relayoutAll_).to.be.false;
-    expect(schedulePassStub).to.not.be.called;
-    clock.tick(4000);
-    // Skip a microtask.
-    return Promise.resolve().then(() => {
-      return Promise.race([Promise.resolve()]);
+    win.readyState = 'complete';
+    win.document.eventListeners.fire({type: 'readystatechange'});
+    return resources.ampdoc.whenReady().then(() => {
+      expect(resources.relayoutAll_).to.be.false;
+      expect(schedulePassStub).to.not.be.called;
+      clock.tick(3100);
     }).then(() => {
       expect(resources.relayoutAll_).to.be.true;
-      expect(schedulePassStub).to.be.calledOnce;
+      expect(schedulePassStub).to.have.been.called;
     });
+  });
+
+  it('should run a full reload pass on document.fonts.ready', () => {
+    win.readyState = 'interactive';
+    win.document.eventListeners.fire({type: 'readystatechange'});
+    win.document.fonts.status = 'loading';
+    return resources.ampdoc.whenReady().then(() => {
+
+    }).then(() => {
+      // This is the regular remeasure on doc-ready.
+      expect(resources.relayoutAll_).to.be.true;
+      resources.relayoutAll_ = false;
+      return win.document.fonts.ready;
+    }).then(() => {
+      // Wait one micro task.
+      return Promise.resolve();
+    }).then(() => {
+      expect(resources.relayoutAll_).to.be.true;
+      // Remeasure on doc-ready and fonts-ready.
+      expect(schedulePassStub).to.have.been.calledTwice;
+    });
+  });
+
+  it('should not remeasure if fonts load before doc-ready', () => {
+    win.readyState = 'interactive';
+    win.document.eventListeners.fire({type: 'readystatechange'});
+    win.document.fonts.status = 'loaded';
+    return resources.ampdoc.whenReady().then(() => {
+
+    }).then(() => {
+      // This is the regular remeasure on doc-ready.
+      expect(resources.relayoutAll_).to.be.true;
+      resources.relayoutAll_ = false;
+      return win.document.fonts.ready;
+    }).then(() => {
+      // Wait one micro task.
+      return Promise.resolve();
+    }).then(() => {
+      expect(resources.relayoutAll_).to.be.false;
+      // Only remeasure on doc-ready.
+      expect(schedulePassStub).to.have.been.calledOnce;
+    });
+  });
+
+  it('should run a full reload when a new element is connected', () => {
+    expect(resources.relayoutAll_).to.be.false;
+    expect(schedulePassStub).to.not.be.called;
+    const el = win.document.createElement('amp-img');
+    el.isBuilt = () => { return true; };
+    el.isUpgraded = () => { return true; };
+    el.isRelayoutNeeded = () => { return true; };
+    el.updateLayoutBox = () => {};
+    win.document.body.appendChild(el);
+    resources.add(el);
+    expect(resources.relayoutAll_).to.be.false;
+    clock.tick(1000);
+    expect(resources.relayoutAll_).to.be.true;
   });
 });
 
@@ -2189,6 +2247,47 @@ describe('Resources changeSize', () => {
       expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.not.been.called;
       expect(overflowCallbackSpy).to.not.been.called;
+    });
+
+    it('in viewport should change size if in the last 15% and ' +
+        'in the last 1000px', () => {
+      viewportRect.top = 9600;
+      viewportRect.bottom = 9800;
+      resource1.layoutBox_ = {top: 9650, left: 0, right: 100, bottom: 9700,
+        height: 50};
+      resources.scheduleChangeSize_(resource1, 111, 222,
+          {top: 1, right: 2, bottom: 3, left: 4}, false);
+
+      expect(vsyncSpy).to.be.calledOnce;
+      const marginsTask = vsyncSpy.lastCall.args[0];
+      marginsTask.measure({});
+
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledOnce;
+      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
+    });
+
+    it('in viewport should NOT change size if in the last 15% but NOT ' +
+        'in the last 1000px', () => {
+      viewportRect.top = 8600;
+      viewportRect.bottom = 8800;
+      resource1.layoutBox_ = {top: 8650, left: 0, right: 100, bottom: 8700,
+        height: 50};
+      resources.scheduleChangeSize_(resource1, 111, 222,
+          {top: 1, right: 2, bottom: 3, left: 4}, false);
+
+      expect(vsyncSpy).to.be.calledOnce;
+      const marginsTask = vsyncSpy.lastCall.args[0];
+      marginsTask.measure({});
+
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.not.been.called;
+      expect(overflowCallbackSpy).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledWith(true, 111, 222,
+          {top: 1, right: 2, bottom: 3, left: 4});
     });
 
     it('in viewport should NOT change size and calls overflowCallback', () => {

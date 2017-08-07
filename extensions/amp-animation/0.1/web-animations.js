@@ -38,6 +38,7 @@ import {
   WebKeyframeAnimationDef,
   WebKeyframesDef,
   WebMultiAnimationDef,
+  WebSwitchAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
 import {dashToCamelCase, startsWith} from '../../../src/string';
@@ -292,21 +293,24 @@ class Scanner {
 
   /**
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
+   * @return {boolean}
    */
   scan(spec) {
     if (isArray(spec)) {
-      spec.forEach(spec => this.scan(spec));
-      return;
+      // Returns `true` if any of the components scan successfully.
+      return spec.reduce((acc, comp) => this.scan(comp) || acc, false);
     }
 
     // Check whether the animation is enabled.
     if (!this.isEnabled(/** @type {!WebAnimationDef} */ (spec))) {
-      return;
+      return false;
     }
 
-    // WebAnimationDef: (!WebMultiAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef)
+    // WebAnimationDef: (!WebMultiAnimationDef|!WebSpecAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef)
     if (spec.animations) {
       this.onMultiAnimation(/** @type {!WebMultiAnimationDef} */ (spec));
+    } else if (spec.switch) {
+      this.onSwitchAnimation(/** @type {!WebSwitchAnimationDef} */ (spec));
     } else if (spec.animation) {
       this.onCompAnimation(/** @type {!WebCompAnimationDef} */ (spec));
     } else if (spec.keyframes) {
@@ -314,6 +318,7 @@ class Scanner {
     } else {
       this.onUnknownAnimation(spec);
     }
+    return true;
   }
 
   /**
@@ -330,6 +335,12 @@ class Scanner {
    * @abstract
    */
   onMultiAnimation(unusedSpec) {}
+
+  /**
+   * @param {!WebSwitchAnimationDef} unusedSpec
+   * @abstract
+   */
+  onSwitchAnimation(unusedSpec) {}
 
   /**
    * @param {!WebCompAnimationDef} unusedSpec
@@ -408,8 +419,8 @@ export class Builder {
    * @protected
    */
   resolveRequests(path, spec, args,
-      target = null, vars = null, timing = null) {
-    const scanner = this.createScanner_(path, target, vars, timing);
+      target = null, index = null, vars = null, timing = null) {
+    const scanner = this.createScanner_(path, target, index, vars, timing);
     return this.vsync_.measurePromise(
         () => scanner.resolveRequests(spec, args));
   }
@@ -428,12 +439,14 @@ export class Builder {
   /**
    * @param {!Array<string>} path
    * @param {?Element} target
+   * @param {?number} index
    * @param {?Object<string, *>} vars
    * @param {?WebAnimationTimingDef} timing
    * @private
    */
-  createScanner_(path, target, vars, timing) {
-    return new MeasureScanner(this, this.css_, path, target, vars, timing);
+  createScanner_(path, target, index, vars, timing) {
+    return new MeasureScanner(this, this.css_, path,
+        target, index, vars, timing);
   }
 }
 
@@ -450,10 +463,11 @@ export class MeasureScanner extends Scanner {
    * @param {!CssContextImpl} css
    * @param {!Array<string>} path
    * @param {?Element} target
+   * @param {?number} index
    * @param {?Object<string, *>} vars
    * @param {?WebAnimationTimingDef} timing
    */
-  constructor(builder, css, path, target, vars, timing) {
+  constructor(builder, css, path, target, index, vars, timing) {
     super();
 
     /** @const @private */
@@ -467,6 +481,9 @@ export class MeasureScanner extends Scanner {
 
     /** @private {?Element} */
     this.target_ = target;
+
+    /** @private {?number} */
+    this.index_ = index;
 
     /** @private {!Object<string, *>} */
     this.vars_ = vars || map();
@@ -520,8 +537,11 @@ export class MeasureScanner extends Scanner {
 
   /** @override */
   isEnabled(spec) {
-    if (spec.media) {
-      return this.css_.matchMedia(spec.media);
+    if (spec.media && !this.css_.matchMedia(spec.media)) {
+      return false;
+    }
+    if (spec.supports && !this.css_.supports(spec.supports)) {
+      return false;
     }
     return true;
   }
@@ -529,6 +549,20 @@ export class MeasureScanner extends Scanner {
   /** @override */
   onMultiAnimation(spec) {
     this.with_(spec, () => this.scan(spec.animations));
+  }
+
+  /** @override */
+  onSwitchAnimation(spec) {
+    // The first to match will be used; the rest will be ignored.
+    this.with_(spec, () => {
+      for (let i = 0; i < spec.switch.length; i++) {
+        const candidate = spec.switch[i];
+        if (this.scan(candidate)) {
+          // First matching candidate is applied and the rest are ignored.
+          break;
+        }
+      }
+    });
   }
 
   /** @override */
@@ -548,6 +582,7 @@ export class MeasureScanner extends Scanner {
     });
     this.with_(spec, () => {
       const target = this.target_;
+      const index = this.index_;
       const vars = this.vars_;
       const timing = this.timing_;
       const promise = otherSpecPromise.then(otherSpec => {
@@ -555,7 +590,7 @@ export class MeasureScanner extends Scanner {
           return;
         }
         return this.builder_.resolveRequests(
-            newPath, otherSpec, /* args */ null, target, vars, timing);
+            newPath, otherSpec, /* args */ null, target, index, vars, timing);
       }).then(requests => {
         requests.forEach(request => this.requests_.push(request));
       });
@@ -685,6 +720,7 @@ export class MeasureScanner extends Scanner {
   with_(spec, callback) {
     // Save context.
     const prevTarget = this.target_;
+    const prevIndex = this.index_;
     const prevVars = this.vars_;
     const prevTiming = this.timing_;
 
@@ -695,10 +731,11 @@ export class MeasureScanner extends Scanner {
         [null];
     targets.forEach((target, index) => {
       this.target_ = target || prevTarget;
-      this.css_.withTarget(this.target_, () => {
+      this.index_ = target ? index : prevIndex;
+      this.css_.withTarget(this.target_, this.index_, () => {
         const subtargetSpec =
             this.target_ ?
-            this.matchSubtargets_(this.target_, index, spec) :
+            this.matchSubtargets_(this.target_, this.index_ || 0, spec) :
             spec;
         this.vars_ = this.mergeVars_(subtargetSpec, prevVars);
         this.css_.withVars(this.vars_, () => {
@@ -710,6 +747,7 @@ export class MeasureScanner extends Scanner {
 
     // Restore context.
     this.target_ = prevTarget;
+    this.index_ = prevIndex;
     this.vars_ = prevVars;
     this.timing_ = prevTiming;
   }
@@ -850,17 +888,12 @@ export class MeasureScanner extends Scanner {
         newTiming.iterationStart, prevTiming.iterationStart);
 
     // Identifier CSS values.
-    const easing = newTiming.easing != null ?
-        this.css_.resolveCss(newTiming.easing) :
-        prevTiming.easing;
-    const direction = newTiming.direction != null ?
-        /** @type {!WebAnimationTimingDirection} */
-        (this.css_.resolveCss(newTiming.direction)) :
-        prevTiming.direction;
-    const fill = newTiming.fill != null ?
-        /** @type {!WebAnimationTimingFill} */
-        (this.css_.resolveCss(newTiming.fill)) :
-        prevTiming.fill;
+    const easing =
+        this.css_.resolveIdent(newTiming.easing, prevTiming.easing);
+    const direction = /** @type {!WebAnimationTimingDirection} */
+        (this.css_.resolveIdent(newTiming.direction, prevTiming.direction));
+    const fill = /** @type {!WebAnimationTimingFill} */
+        (this.css_.resolveIdent(newTiming.fill, prevTiming.fill));
 
     // Other.
     const ticker = newTiming.ticker != null ?
@@ -943,6 +976,9 @@ class CssContextImpl {
     /** @private {?Element} */
     this.currentTarget_ = null;
 
+    /** @private {?number} */
+    this.currentIndex_ = null;
+
     /** @private {?Object<string, *>} */
     this.vars_ = null;
 
@@ -962,6 +998,17 @@ class CssContextImpl {
    */
   matchMedia(mediaQuery) {
     return this.win_.matchMedia(mediaQuery).matches;
+  }
+
+  /**
+   * @param {string} query
+   * @return {boolean}
+   */
+  supports(query) {
+    if (this.win_.CSS && this.win_.CSS.supports) {
+      return this.win_.CSS.supports(query);
+    }
+    return false;
   }
 
   /**
@@ -1013,16 +1060,20 @@ class CssContextImpl {
 
   /**
    * @param {?Element} target
+   * @param {?number} index
    * @param {function(?Element):T} callback
    * @return {T}
    * @template T
    * @protected
    */
-  withTarget(target, callback) {
+  withTarget(target, index, callback) {
     const prev = this.currentTarget_;
+    const prevIndex = this.currentIndex_;
     this.currentTarget_ = target;
+    this.currentIndex_ = index;
     const result = callback(target);
     this.currentTarget_ = prev;
+    this.currentIndex_ = prevIndex;
     return result;
   }
 
@@ -1047,20 +1098,9 @@ class CssContextImpl {
    * @protected
    */
   resolveCss(input) {
-    if (input == null || input === '') {
-      return '';
-    }
-    const inputCss = String(input);
-    if (typeof input == 'number') {
-      return inputCss;
-    }
-    // Test first if CSS contains any variable components. Otherwise, there's
-    // no need to spend cycles to parse/evaluate.
-    if (!isVarCss(inputCss)) {
-      return inputCss;
-    }
-    const result = this.resolveAsNode_(inputCss);
-    return result != null ? result.css() : '';
+    // Will always return a valid string, since the default value is `''`.
+    return dev().assertString(this.resolveCss_(
+        input, /* def */ '', /* normalize */ true));
   }
 
   /**
@@ -1081,6 +1121,15 @@ class CssContextImpl {
 
   /**
    * @param {*} input
+   * @param {string|undefined} def
+   * @return {string|undefined}
+   */
+  resolveIdent(input, def) {
+    return this.resolveCss_(input, def, /* normalize */ false);
+  }
+
+  /**
+   * @param {*} input
    * @param {number|undefined} def
    * @return {number|undefined}
    */
@@ -1089,7 +1138,7 @@ class CssContextImpl {
       if (typeof input == 'number') {
         return input;
       }
-      const node = this.resolveAsNode_(input);
+      const node = this.resolveAsNode_(input, /* normalize */ false);
       if (node) {
         return CssTimeNode.millis(node);
       }
@@ -1107,7 +1156,7 @@ class CssContextImpl {
       if (typeof input == 'number') {
         return input;
       }
-      const node = this.resolveAsNode_(input);
+      const node = this.resolveAsNode_(input, /* normalize */ false);
       if (node) {
         return CssNumberNode.num(node);
       }
@@ -1117,10 +1166,35 @@ class CssContextImpl {
 
   /**
    * @param {*} input
+   * @param {string|undefined} def
+   * @param {boolean} normalize
+   * @return {string|undefined}
+   * @private
+   */
+  resolveCss_(input, def, normalize) {
+    if (input == null || input === '') {
+      return def;
+    }
+    const inputCss = String(input);
+    if (typeof input == 'number') {
+      return inputCss;
+    }
+    // Test first if CSS contains any variable components. Otherwise, there's
+    // no need to spend cycles to parse/evaluate.
+    if (!isVarCss(inputCss, normalize)) {
+      return inputCss;
+    }
+    const result = this.resolveAsNode_(inputCss, normalize);
+    return result != null ? result.css() : def;
+  }
+
+  /**
+   * @param {*} input
+   * @param {boolean} normalize
    * @return {?./css-expr-ast.CssNode}
    * @private
    */
-  resolveAsNode_(input) {
+  resolveAsNode_(input, normalize) {
     if (input == null || input === '') {
       return null;
     }
@@ -1138,7 +1212,7 @@ class CssContextImpl {
     if (!node) {
       return null;
     }
-    return node.resolve(this);
+    return node.resolve(this, normalize);
   }
 
   /**
@@ -1164,7 +1238,8 @@ class CssContextImpl {
     if (rawValue == null || rawValue === '') {
       user().warn(TAG, `Variable not found: "${varName}"`);
     }
-    const result = this.resolveAsNode_(rawValue);
+    // No need to normalize vars - they will be normalized later.
+    const result = this.resolveAsNode_(rawValue, /* normalize */ false);
     this.varPath_.pop();
     return result;
   }
@@ -1192,6 +1267,12 @@ class CssContextImpl {
       };
     }
     return this.viewportSize_;
+  }
+
+  /** @override */
+  getCurrentIndex() {
+    this.requireTarget_();
+    return dev().assertNumber(this.currentIndex_);
   }
 
   /** @override */
@@ -1252,7 +1333,8 @@ class CssContextImpl {
    * @private
    */
   getElementSize_(target) {
-    return {width: target./*OK*/offsetWidth, height: target./*OK*/offsetHeight};
+    const b = target./*OK*/getBoundingClientRect();
+    return {width: b.width, height: b.height};
   }
 
   /** @override */

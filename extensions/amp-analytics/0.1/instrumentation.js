@@ -24,6 +24,7 @@ import {
   CustomEventTracker,
   IniLoadTracker,
   SignalTracker,
+  VideoEventTracker,
   VisibilityTracker,
 } from './events';
 import {Observable} from '../../../src/observable';
@@ -38,9 +39,8 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
-import {timerFor} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
-import {viewportForDoc} from '../../../src/services';
+import {startsWith} from '../../../src/string';
+import {Services} from '../../../src/services';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
@@ -104,6 +104,11 @@ const EVENT_TRACKERS = {
     allowedFor: ALLOWED_FOR_ALL,
     klass: VisibilityTracker,
   },
+  'video': {
+    name: 'video',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: VideoEventTracker,
+  },
 };
 
 /** @const {string} */
@@ -139,13 +144,13 @@ export class InstrumentationService {
     this.ampdocRoot_ = new AmpdocAnalyticsRoot(this.ampdoc);
 
     /** @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(this.ampdoc.win);
+    this.timer_ = Services.timerFor(this.ampdoc.win);
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.ampdoc);
+    this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
     /** @const {!../../../src/service/viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(this.ampdoc);
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private {boolean} */
     this.scrollHandlerRegistered_ = false;
@@ -488,7 +493,9 @@ export class AnalyticsGroup {
    */
   addTrigger(config, handler) {
     const eventType = dev().assertString(config['on']);
-    let trackerProfile = EVENT_TRACKERS[eventType];
+    const trackerKey = startsWith(eventType, 'video-') ? 'video' : eventType;
+
+    let trackerProfile = EVENT_TRACKERS[trackerKey];
     if (!trackerProfile && !isEnumValue(AnalyticsEventType, eventType)) {
       trackerProfile = EVENT_TRACKERS['custom'];
     }

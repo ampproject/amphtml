@@ -25,7 +25,7 @@ min_validator_revision_required: 238
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 446
+spec_file_revision: 456
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
@@ -458,6 +458,23 @@ tags: {
     mandatory: true
   }
 }
+# AMP metadata, name=amp-google-client-id-api
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-google-clientid-id-api"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-google-client-id-api"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+}
 # AMP4ADS metadata, name=amp4ads-id
 # https://github.com/ampproject/amphtml/issues/7730
 tags: {
@@ -849,6 +866,7 @@ tags: {
   mandatory_alternatives: "noscript > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "NOSCRIPT"
+  mandatory_ancestor: "HEAD"
   deprecation: "noscript > style[amp-boilerplate]"
   deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
   attrs: { name: "nonce" }
@@ -909,6 +927,7 @@ tags: {
   mandatory_alternatives: "noscript > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "NOSCRIPT"
+  mandatory_ancestor: "HEAD"
   requires: "head > style[amp-boilerplate]"
   attrs: {
     name: "amp-boilerplate"
@@ -2559,7 +2578,7 @@ tags {  # <form method=GET ...>
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "(show-first-on-submit|show-all-on-submit|as-you-go)"
+    value_regex: "(show-first-on-submit|show-all-on-submit|as-you-go|interact-and-submit)"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -2575,7 +2594,19 @@ tags {  # <form method=GET ...>
     mandatory: true
     value_regex_casei: "(_blank|_top)"
   }
-
+  attrs: {
+    name: "verify-xhr"
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "https"
+      # These are disallowed due to serving content from multiple origins on
+      # a single CDN domain. New CDNs should use a different domain per origin
+      # domain rather than adding to this list.
+      disallowed_domain: "cdn.ampproject.org"
+      disallowed_domain: "amp.cloudflare.com"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
 }
 tags {  # <form method=POST ...>
   tag_name: "FORM"
@@ -2617,6 +2648,19 @@ tags {  # <form method=POST ...>
     name: "target"
     mandatory: true
     value_regex_casei: "(_blank|_top)"
+  }
+  attrs: {
+    name: "verify-xhr"
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "https"
+      # These are disallowed due to serving content from multiple origins on
+      # a single CDN domain. New CDNs should use a different domain per origin
+      # domain rather than adding to this list.
+      disallowed_domain: "cdn.ampproject.org"
+      disallowed_domain: "amp.cloudflare.com"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
   }
 }
 tags {
@@ -3118,6 +3162,25 @@ tags: {
     }
   }
 }
+# AMP IMA VIDEO
+tags: {
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-ima-video > script[type=application/json]"
+  mandatory_parent: "AMP-IMA-VIDEO"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
 # Specific script tags for custom elements and runtime imports.
 # 4.11.2 The noscript element
 tags: {
@@ -3197,6 +3260,14 @@ tags: {
 }
 
 # Some additional tags, microformats, allowances.
+
+# The slot element.
+# https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot
+tags: {
+  html_format: AMP
+  tag_name: "SLOT"
+  attrs: { name: "name" }
+}
 
 # This tag is a preserved indicator for documents created in microsoft word.
 # They do not render.

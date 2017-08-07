@@ -17,6 +17,7 @@
 import {ActionTrust} from '../action-trust';
 import {KeyCodes} from '../utils/key-codes';
 import {debounce} from '../utils/rate-limit';
+import {isEnabled} from '../dom';
 import {dev, user} from '../log';
 import {
   registerServiceBuilderForDoc,
@@ -26,8 +27,7 @@ import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
 import {isArray, isFiniteNumber} from '../types';
 import {map} from '../utils/object';
-import {timerFor} from '../services';
-import {vsyncFor} from '../services';
+import {Services} from '../services';
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.
@@ -56,31 +56,6 @@ const DEFAULT_DEBOUNCE_WAIT = 300; // ms
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
-};
-
-/** @enum {string} */
-const TYPE = {
-  NUMBER: 'number',
-  BOOLEAN: 'boolean',
-  STRING: 'string',
-};
-
-/** @const {!Object<string, !Object<string, string>>} */
-const WHITELISTED_INPUT_DATA_ = {
-  'range': {
-    'min': TYPE.NUMBER,
-    'max': TYPE.NUMBER,
-    'value': TYPE.NUMBER,
-  },
-  'radio': {
-    'checked': TYPE.BOOLEAN,
-  },
-  'checkbox': {
-    'checked': TYPE.BOOLEAN,
-  },
-  'text': {
-    'value': TYPE.STRING,
-  },
 };
 
 /**
@@ -202,7 +177,7 @@ export class ActionService {
     this.globalMethodHandlers_ = map();
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(ampdoc.win);
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     // Add core events.
     this.addEvent('tap');
@@ -246,24 +221,19 @@ export class ActionService {
     } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
         const element = dev().assertElement(event.target);
-        // TODO(choumx, #9699): HIGH.
-        this.trigger(element, name, event, ActionTrust.MEDIUM);
+        this.trigger(element, name, event, ActionTrust.HIGH);
       });
     } else if (name == 'change') {
       this.root_.addEventListener(name, event => {
         const element = dev().assertElement(event.target);
-        // Only `change` events from <select> elements have high trust.
-        const trust = element.tagName == 'SELECT'
-            ? ActionTrust.HIGH
-            : ActionTrust.MEDIUM;
         this.addInputDetails_(event);
-        this.trigger(element, name, event, trust);
+        this.trigger(element, name, event, ActionTrust.HIGH);
       });
     } else if (name == 'input-debounced') {
       const debouncedInput = debounce(this.ampdoc.win, event => {
         const target = dev().assertElement(event.target);
         this.trigger(target, name, /** @type {!ActionEventDef} */ (event),
-            ActionTrust.MEDIUM);
+            ActionTrust.HIGH);
       }, DEFAULT_DEBOUNCE_WAIT);
 
       this.root_.addEventListener('input', event => {
@@ -278,34 +248,31 @@ export class ActionService {
 
   /**
    * Given a browser 'change' or 'input' event, add `details` property
-   * containing the relevant information for the change that generated
-   * the initial event.
+   * containing the relevant information for the change that generated it.
    * @param {!ActionEventDef} event
    */
   addInputDetails_(event) {
-    const detail = map();
+    const detail = /** @type {!JsonObject} */ (map());
     const target = event.target;
-    const tagName = target.tagName.toLowerCase();
-    switch (tagName) {
-      case 'input':
-        const inputType = target.getAttribute('type');
-        const fieldsToInclude = WHITELISTED_INPUT_DATA_[inputType];
-        if (fieldsToInclude) {
-          Object.keys(fieldsToInclude).forEach(field => {
-            const expectedType = fieldsToInclude[field];
-            const value = target[field];
-            if (expectedType === 'number') {
-              detail[field] = Number(value);
-            } else if (expectedType === 'boolean') {
-              detail[field] = !!value;
-            } else {
-              detail[field] = String(value);
-            }
-          });
+    switch (target.tagName) {
+      case 'INPUT':
+        const type = target.getAttribute('type');
+        // Some <input> elements have special properties for content values.
+        // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
+        if (type == 'checkbox' || type == 'radio') {
+          detail['checked'] = target.checked;
+        } else if (type == 'range') {
+          // TODO(choumx): min/max are also available on date pickers.
+          detail['min'] = Number(target.min);
+          detail['max'] = Number(target.max);
+          // TODO(choumx): HTMLInputElement.valueAsNumber instead?
+          detail['value'] = Number(target.value);
+        } else {
+          detail['value'] = target.value;
         }
         break;
-      case 'select':
-        detail.value = target.value;
+      case 'SELECT':
+        detail['value'] = target.value;
         break;
     }
     if (Object.keys(detail).length > 0) {
@@ -328,7 +295,7 @@ export class ActionService {
    * @param {function(!ActionInvocation)} handler
    * @param {ActionTrust} minTrust
    */
-  addGlobalMethodHandler(name, handler, minTrust = ActionTrust.MEDIUM) {
+  addGlobalMethodHandler(name, handler, minTrust = ActionTrust.HIGH) {
     this.globalMethodHandlers_[name] = {handler, minTrust};
   }
 
@@ -362,7 +329,7 @@ export class ActionService {
    * @param {function(!ActionInvocation)} handler
    * @param {ActionTrust} minTrust
    */
-  installActionHandler(target, handler, minTrust = ActionTrust.MEDIUM) {
+  installActionHandler(target, handler, minTrust = ActionTrust.HIGH) {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = target.getAttribute('id') || '';
     const debugid = target.tagName + '#' + targetId;
@@ -382,7 +349,7 @@ export class ActionService {
 
     // Dequeue the current queue.
     if (isArray(currentQueue)) {
-      timerFor(target.ownerDocument.defaultView).delay(() => {
+      Services.timerFor(target.ownerDocument.defaultView).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
         currentQueue.forEach(invocation => {
           try {
@@ -526,7 +493,7 @@ export class ActionService {
     let n = target;
     while (n) {
       const actionInfos = this.matchActionInfos_(n, actionEventType);
-      if (actionInfos) {
+      if (actionInfos && isEnabled(n)) {
         return {node: n, actionInfos: dev().assert(actionInfos)};
       }
       n = n.parentElement;

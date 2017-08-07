@@ -73,6 +73,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'timezone': 'TIMEZONE',
       'title': 'TITLE',
       'totalEngagedTime': 'TOTAL_ENGAGED_TIME',
+      'userAgent': 'USER_AGENT',
       'viewer': 'VIEWER',
       'viewportHeight': 'VIEWPORT_HEIGHT',
       'viewportWidth': 'VIEWPORT_WIDTH',
@@ -993,7 +994,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'sessionId': 'CLIENT_ID(imrworldwide)',
     },
     'requests': {
-      'session': 'https://uaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P${apid}&sessionId=${sessionId},&pingtype=4&enc=false&c61=createtm,${timestamp}&rnd=${random}',
+      'session': 'https://uaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P${apid}&sessionId=${sessionId}&pingtype=4&enc=false&c61=createtm,${timestamp}&rnd=${random}',
       'cloudapi': 'https://cloudapi.imrworldwide.com/nmapi/v2/${apid}/${sessionId}/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22${sessionId}%22%2C%22apn%22%3A%22${apn}%22%2C%22apv%22%3A%22${apv}%22%2C%22apid%22%3A%22${apid}%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22${section}%22%2C%22assetid%22%3A%22${pageViewId}%22%2C%22segA%22%3A%22${segA}%22%2C%22segB%22%3A%22${segB}%22%2C%22segC%22%3A%22${segC}%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22${timestamp}%22%2C%22data%22%3A%7B%22hidden%22%3A%22${backgroundState}%22%2C%22blur%22%3A%22${backgroundState}%22%2C%22position%22%3A%22${timestamp}%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22${timestamp}%22%2C%22index%22%3A%22${requestCount}%22%7D',
     },
     'triggers': {
@@ -1199,7 +1200,9 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         '&referrer=${documentReferrer}' +
         '&page_url=${sourceUrl}' +
         '&user_id=${clientId(sr_amp_id)}' +
-        '&domain=${canonicalHost}',
+        '&domain=${canonicalHost}' +
+        '&article_id=${article_id}' +
+        '&ignore_metadata=${ignore_metadata}',
       'visible': '${host}/n?${baseParams}',
       'timer': '${host}/t?${baseParams}' +
         '&t=5000' +
@@ -1279,6 +1282,41 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'top100': {
+    'vars': {
+      'pid': '',
+      'rid': 'PAGE_VIEW_ID',
+      'ruid': 'CLIENT_ID(ruid)',
+      'version': '1.0.0',
+    },
+    'requests': {
+      'host': 'https://kraken.rambler.ru',
+      'base': '${host}/cnt/?pid=${pid}' +
+                          '&rid=${rid}' +
+                          '&v=${version}' +
+                          '&rn=${random}' +
+                          '&ruid=${ruid}' +
+                          '&ct=amp',
+      'pageview': '${base}&et=pv' +
+                  '${_pageData}' +
+                  '${_screenData}',
+      '_screenData': '&sr=${screenWidth}x${screenHeight}' +
+                     '&cd=${screenColorDepth}-bit' +
+                     '&bs=${scrollWidth}x${scrollHeight}',
+      '_pageData': '&pt=${title}' +
+                   '&rf=${documentReferrer}' +
+                   '&en=${documentCharset}' +
+                   '&la=${browserLanguage}' +
+                   '&tz=${timezone}',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
+
   'webtrekk': {
     'requests': {
       'trackURL': 'https://${trackDomain}/${trackId}/wt',
@@ -1287,7 +1325,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         '${timestamp},${documentReferrer},${viewportWidth}x' +
         '${viewportHeight},0&tz=${timezone}' +
         '&eid=${clientId(amp-wt3-eid)}&la=${browserLanguage}',
-      'parameterSuffix': '&pu=${canonicalUrl}',
+      'parameterSuffix': '&pu=${sourceUrl}',
       'pageParameter': '&cp1=${pageParameter1}' +
         '&cp2=${pageParameter2}&cp3=${pageParameter3}' +
         '&cp4=${pageParameter4}&cp5=${pageParameter5}' +

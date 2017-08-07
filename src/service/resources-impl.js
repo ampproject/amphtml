@@ -19,18 +19,11 @@ import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {Resource, ResourceState} from './resource';
+import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
-import {
-  documentInfoForDoc,
-  inputFor,
-  timerFor,
-  viewerForDoc,
-  viewportForDoc,
-  vsyncFor,
-} from '../services';
 import {expandLayoutRect} from '../layout-rect';
 import {installInputService} from '../input';
 import {loadPromise} from '../event-helper';
@@ -56,6 +49,7 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
+const DOC_BOTTOM_OFFSET_LIMIT_ = 1000;
 
 
 /**
@@ -92,7 +86,7 @@ export class Resources {
     this.win = ampdoc.win;
 
     /** @const @private {!./viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(ampdoc);
+    this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
@@ -158,8 +152,14 @@ export class Resources {
     /** @private {number} */
     this.lastVelocity_ = 0;
 
-    /** @const {!Pass} */
+    /** @const @private {!Pass} */
     this.pass_ = new Pass(this.win, () => this.doPass());
+
+    /** @const @private {!Pass} */
+    this.remeasurePass_ = new Pass(this.win, () => {
+      this.relayoutAll_ = true;
+      this.schedulePass();
+    });
 
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();
@@ -185,10 +185,10 @@ export class Resources {
     this.isCurrentlyBuildingPendingResources_ = false;
 
     /** @private @const {!./viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(this.ampdoc);
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -246,33 +246,33 @@ export class Resources {
       this.buildReadyResources_();
       this.pendingBuildResources_ = null;
       const fixPromise = ieMediaCheckAndFix(this.win);
+      const remeasure = () => this.remeasurePass_.schedule();
       if (fixPromise) {
-        fixPromise.then(() => {
-          this.relayoutAll_ = true;
-          this.schedulePass();
-        });
+        fixPromise.then(remeasure);
       } else {
         // No promise means that there's no problem.
-        this.relayoutAll_ = true;
+        remeasure();
       }
-      this.schedulePass();
       this.monitorInput_();
-    });
 
-    // Safari 10 and under incorrectly estimates font spacing for `@font-face`
-    // fonts. This leads to wild measurement errors. The best course of action
-    // is to remeasure everything on window.onload or font timeout (3s),
-    // whichever is earlier. This has to be done on the global window because
-    // this is where the fonts are always added. Unfortunately,
-    // `document.fonts.ready` cannot be used here due to
-    // https://bugs.webkit.org/show_bug.cgi?id=174030.
-    // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
-    Promise.race([
-      loadPromise(this.win),
-      timerFor(this.win).promise(3100),
-    ]).then(() => {
-      this.relayoutAll_ = true;
-      this.schedulePass();
+      // Safari 10 and under incorrectly estimates font spacing for
+      // `@font-face` fonts. This leads to wild measurement errors. The best
+      // course of action is to remeasure everything on window.onload or font
+      // timeout (3s), whichever is earlier. This has to be done on the global
+      // window because this is where the fonts are always added.
+      // Unfortunately, `document.fonts.ready` cannot be used here due to
+      // https://bugs.webkit.org/show_bug.cgi?id=174030.
+      // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
+      Promise.race([
+        loadPromise(this.win),
+        Services.timerFor(this.win).promise(3100),
+      ]).then(remeasure);
+
+      // Remeasure the document when all fonts loaded.
+      if (this.win.document.fonts &&
+          this.win.document.fonts.status != 'loaded') {
+        this.win.document.fonts.ready.then(remeasure);
+      }
     });
   }
 
@@ -353,7 +353,7 @@ export class Resources {
   /** @private */
   monitorInput_() {
     installInputService(this.win);
-    const input = inputFor(this.win);
+    const input = Services.inputFor(this.win);
     input.onTouchDetected(detected => {
       this.toggleInputClass_('amp-mode-touch', detected);
     }, true);
@@ -492,6 +492,7 @@ export class Resources {
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
+    this.remeasurePass_.schedule(1000);
   }
 
   /**
@@ -1020,7 +1021,7 @@ export class Resources {
         'title': doc.title,
         'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
         'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
-        'linkRels': documentInfoForDoc(this.ampdoc).linkRels,
+        'linkRels': Services.documentInfoForDoc(this.ampdoc).linkRels,
       }), /* cancelUnsent */true);
 
       this.scrollHeight_ = this.viewport_.getScrollHeight();
@@ -1096,7 +1097,8 @@ export class Resources {
     const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
-    const docBottomOffset = scrollHeight * 0.85;
+    const maxDocBottomOffset = scrollHeight - DOC_BOTTOM_OFFSET_LIMIT_;
+    const docBottomOffset = Math.max(scrollHeight * 0.85, maxDocBottomOffset);
     const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);

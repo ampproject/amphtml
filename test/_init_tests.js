@@ -17,7 +17,7 @@
 // This must load before all other tests.
 import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
-import {ampdocServiceFor} from '../src/ampdoc';
+import {Services} from '../src/services';
 import {removeElement} from '../src/dom';
 import {setReportError} from '../src/log';
 import {
@@ -27,7 +27,6 @@ import {
 } from '../src/runtime';
 import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
-import {platformFor, resourcesForDoc} from '../src/services';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {
   resetAccumulatedErrorMessagesForTesting,
@@ -100,7 +99,7 @@ class TestConfig {
      */
     this.configTasks = [];
 
-    this.platform = platformFor(window);
+    this.platform = Services.platformFor(window);
   }
 
   skipChrome() {
@@ -250,10 +249,10 @@ function beforeTest() {
   };
   window.AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
-  const ampdoc = ampdocServiceFor(window).getAmpDoc();
+  const ampdoc = Services.ampdocServiceFor(window).getAmpDoc();
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
-  resourcesForDoc(ampdoc).ampInitComplete();
+  Services.resourcesForDoc(ampdoc).ampInitComplete();
 }
 
 // Global cleanup of tags added during tests. Cool to add more
@@ -261,7 +260,7 @@ function beforeTest() {
 afterEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
-  if (!platformFor(window).isSafari()) {
+  if (!Services.platformFor(window).isSafari()) {
     cleanupTagNames.push('iframe');
   }
   const cleanup = document.querySelectorAll(cleanupTagNames.join(','));

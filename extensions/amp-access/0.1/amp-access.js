@@ -21,11 +21,10 @@ import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {SignInProtocol} from './signin';
-import {actionServiceForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
-import {cidForDoc} from '../../../src/services';
 import {evaluateAccessExpr} from './access-expr';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStyles} from '../../../src/style-installer';
@@ -34,16 +33,9 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
-import {performanceForOrNull} from '../../../src/services';
-import {resourcesForDoc} from '../../../src/services';
-import {templatesFor} from '../../../src/services';
-import {timerFor} from '../../../src/services';
-import {urlReplacementsForDoc} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
-import {viewportForDoc} from '../../../src/services';
-import {vsyncFor} from '../../../src/services';
 import {startsWith} from '../../../src/string';
 
 
@@ -103,17 +95,19 @@ export class AccessService {
     this.isJwtEnabled_ = isExperimentOn(ampdoc.win, 'amp-access-jwt');
 
     /** @const @private {!Element} */
-    this.accessElement_ = accessElement;
+    this.accessElement_ = dev().assertElement(accessElement);
 
     const configJson = tryParseJson(this.accessElement_.textContent, e => {
       throw user().createError('Failed to parse "amp-access" JSON: ' + e);
     });
 
     /** @const @private {!AccessType} */
-    this.type_ = this.buildConfigType_(configJson);
+    this.type_ = this.buildConfigType_(/** @type {!JsonObject} */ (
+        configJson));
 
-    /** @const @private {!Object<string, string>} */
-    this.loginConfig_ = this.buildConfigLoginMap_(configJson);
+    /** @const @private {!JsonObject} */
+    this.loginConfig_ = this.buildConfigLoginMap_(/** @type {!JsonObject} */ (
+        configJson));
 
     /** @const @private {!JsonObject} */
     this.authorizationFallbackResponse_ =
@@ -125,34 +119,34 @@ export class AccessService {
     /** @const @private {string} */
     this.pubOrigin_ = getSourceOrigin(ampdoc.win.location);
 
-    /** @const @private {!Timer} */
-    this.timer_ = timerFor(ampdoc.win);
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(ampdoc.win);
 
-    /** @const @private {!Vsync} */
-    this.vsync_ = vsyncFor(ampdoc.win);
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
-    /** @const @private {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
+    /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
 
     // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
     // is migrated to ampdoc as well.
-    /** @private @const {!Cid} */
-    this.cid_ = cidForDoc(ampdoc);
+    /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
+    this.cid_ = Services.cidForDoc(ampdoc);
 
-    /** @private @const {!Viewer} */
-    this.viewer_ = viewerForDoc(ampdoc);
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(ampdoc);
 
-    /** @private @const {!Viewport} */
-    this.viewport_ = viewportForDoc(ampdoc);
+    /** @private @const {!../../../src/service/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(ampdoc);
 
-    /** @private @const {!Templates} */
-    this.templates_ = templatesFor(ampdoc.win);
+    /** @private @const {!../../../src/service/template-impl.Templates} */
+    this.templates_ = Services.templatesFor(ampdoc.win);
 
-    /** @private @const {!Resources} */
-    this.resources_ = resourcesForDoc(ampdoc);
+    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    this.resources_ = Services.resourcesForDoc(ampdoc);
 
-    /** @private @const {?Performance} */
-    this.performance_ = performanceForOrNull(ampdoc.win);
+    /** @private @const {?../../../src/service/performance-impl.Performance} */
+    this.performance_ = Services.performanceForOrNull(ampdoc.win);
 
     /** @private @const {function(string):Promise<string>} */
     this.openLoginDialog_ = openLoginDialog.bind(null, ampdoc);
@@ -167,9 +161,11 @@ export class AccessService {
     this.signIn_ = new SignInProtocol(ampdoc, this.viewer_, this.pubOrigin_,
         configJson);
 
+    /** @private {?Function} */
+    this.firstAuthorizationResolver_ = null;
+
     /** @const @private {!Promise} */
     this.firstAuthorizationPromise_ = new Promise(resolve => {
-      /** @private {!Promise} */
       this.firstAuthorizationResolver_ = resolve;
     });
 
@@ -200,7 +196,7 @@ export class AccessService {
 
   /**
    * @param {string} name
-   * @param {./access-vendor.AccessVendor} vendor
+   * @param {!./access-vendor.AccessVendor} vendor
    */
   registerVendor(name, vendor) {
     user().assert(this.type_ == AccessType.VENDOR,
@@ -232,7 +228,7 @@ export class AccessService {
         }
         return new AccessServerAdapter(this.ampdoc, configJson, context);
       case AccessType.VENDOR:
-        return new AccessVendorAdapter(this.ampdoc, configJson, context);
+        return new AccessVendorAdapter(this.ampdoc, configJson);
       case AccessType.OTHER:
         return new AccessOtherAdapter(this.ampdoc, configJson, context);
     }
@@ -274,12 +270,12 @@ export class AccessService {
 
   /**
    * @param {!JsonObject} configJson
-   * @return {?Object<string, string>}
+   * @return {!JsonObject}
    * @private
    */
   buildConfigLoginMap_(configJson) {
     const loginConfig = configJson['login'];
-    const loginMap = {};
+    const loginMap = dict();
     if (!loginConfig) {
       // Ignore: in some cases login config is not necessary.
     } else if (typeof loginConfig == 'string') {
@@ -295,7 +291,7 @@ export class AccessService {
 
     // Check that all URLs are valid.
     for (const k in loginMap) {
-      assertHttpsUrl(loginMap[k]);
+      assertHttpsUrl(loginMap[k], this.accessElement_);
     }
     return loginMap;
   }
@@ -344,7 +340,7 @@ export class AccessService {
 
     // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
     // is migrated to ampdoc as well.
-    actionServiceForDoc(this.ampdoc).installActionHandler(
+    Services.actionServiceForDoc(this.ampdoc).installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
 
     // Calculate login URLs right away.
@@ -375,10 +371,10 @@ export class AccessService {
 
   /** @private */
   broadcastReauthorize_() {
-    this.viewer_.broadcast({
+    this.viewer_.broadcast(dict({
       'type': 'amp-access-reauthorize',
       'origin': this.pubOrigin_,
-    });
+    }));
   }
 
   /**
@@ -547,7 +543,7 @@ export class AccessService {
   }
 
   /**
-   * @param {!JsonObjectDef} response
+   * @param {!JsonObject} response
    * @return {!Promise}
    * @private
    */
@@ -562,7 +558,7 @@ export class AccessService {
 
   /**
    * @param {!Element} element
-   * @param {!JsonObjectDef} response
+   * @param {!JsonObject} response
    * @return {!Promise}
    * @private
    */
@@ -603,8 +599,8 @@ export class AccessService {
   /**
    * Discovers and renders templates.
    * @param {!Element} element
-   * @param {!JsonObjectDef} response
-   * @return {!Promise}
+   * @param {!JsonObject} response
+   * @return {?Promise}
    * @private
    */
   renderTemplates_(element, response) {
@@ -627,7 +623,7 @@ export class AccessService {
   /**
    * @param {!Element} element
    * @param {!Element} templateOrPrev
-   * @param {!JsonObjectDef} response
+   * @param {!JsonObject} response
    * @return {!Promise}
    * @private
    */
@@ -776,7 +772,7 @@ export class AccessService {
   }
 
   /**
-   * @param {!ActionInvocation} invocation
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @private
    */
   handleAction_(invocation) {
@@ -910,7 +906,7 @@ export class AccessService {
   }
 
   /**
-   * @return {?Promise<!{type: string, url: string}>}
+   * @return {?Promise<!Array<!{type: string, url: string}>>}
    * @private
    */
   buildLoginUrls_() {
@@ -938,13 +934,13 @@ export class AccessService {
  *       !Promise<!Object<string, *>>
  * }}
  */
-let AccessTypeAdapterContextDef;
+export let AccessTypeAdapterContextDef;
 
 
 /**
  * @interface
  */
-class AccessTypeAdapterDef {
+export class AccessTypeAdapterDef {
 
   /**
    * @return {!JsonObject}
@@ -975,10 +971,7 @@ class AccessTypeAdapterDef {
 
 // Register the extension services.
 AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc(
-      'access',
-      /* ctor */ undefined,
-      ampdoc => {
-        return new AccessService(ampdoc).start_();
-      });
+  AMP.registerServiceForDoc('access', function(ampdoc) {
+    return new AccessService(ampdoc).start_();
+  });
 });

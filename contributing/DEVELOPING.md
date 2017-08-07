@@ -42,28 +42,32 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
 | `gulp build`<sup>[[1]](#footnote-1)</sup>                               | Builds the AMP library.                                               |
 | `gulp build --fortesting`<sup>[[1]](#footnote-1)</sup>                  | Builds the AMP library and will read the AMP_TESTING_HOST environment variable to write out an override AMP_CONFIG. |
-| `gulp build --css-only`<sup>[[1]](#footnote-1)</sup>                    | Builds only the embedded css into js files for the AMP library.       |
+| `gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.                                                 |
 | `gulp clean`                                                            | Removes build output.                                                 |
-| `gulp css`                                                              | Recompile css to build directory.                                     |
+| `gulp css`<sup>[[1]](#footnote-1)</sup>                                 | Recompiles css to build directory and builds the embedded css into js files for the AMP library. |
 | `gulp extensions`                                                       | Build AMP Extensions.                                                 |
 | `gulp watch`<sup>[[1]](#footnote-1)</sup>                               | Watches for changes in files, re-build.                               |
 | `gulp test`<sup>[[1]](#footnote-1)</sup>                                | Runs tests in Chrome.                                                 |
 | `gulp test --verbose`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Chrome with logging enabled.                            |
 | `gulp test --nobuild`                                                   | Runs tests without re-build.                                          |
 | `gulp test --watch`<sup>[[1]](#footnote-1)</sup>                        | Watches for changes in files, runs corresponding test(s) in Chrome.   |
-| `gulp test --watch --verbose`<sup>[[1]](#footnote-1)</sup>              | Same as "watch" with logging enabled.                                 |
+| `gulp test --watch --verbose`<sup>[[1]](#footnote-1)</sup>              | Same as `watch`, with logging enabled.                                 |
 | `gulp test --saucelabs`<sup>[[1]](#footnote-1)</sup>                    | Runs test on saucelabs (requires [setup](#testing-on-sauce-labs)).                |
 | `gulp test --safari`<sup>[[1]](#footnote-1)</sup>                       | Runs tests in Safari.                                                 |
 | `gulp test --firefox`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Firefox.                                                |
 | `gulp test --files=<test-files-path-glob>`<sup>[[1]](#footnote-1)</sup> | Runs specific test files.                                             |
+| `gulp test --testnames`<sup>[[1]](#footnote-1)</sup>                    | Lists the name of each test being run, and prints a summary at the end.  |
 | `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default. |
+| `gulp serve --quiet`                                                    | Same as `serve`, with logging silenced. |
 | `gulp check-types`                                                      | Verifies that there are no errors associated with Closure typing. Run automatically upon push.  |
 | `gulp dep-check`                                                        | Runs a dependency check on each module. Run automatically upon push.  |
 | `gulp presubmit`                                                        | Run validation against files to check for forbidden and required terms. Run automatically upon push.  |
 | `gulp validator`                                                        | Builds and tests the AMP validator. Run automatically upon push.  |
 | `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.                     |
-| `npm run ava`<sup>[[1]](#footnote-1)</sup>                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
+| `gulp ava`<sup>[[1]](#footnote-1)</sup>                                 | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 | `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
+| `ruby build-system/tasks/visual-diff.rb`                                | Runs all visual diff tests locally. Requires `gulp build` to have been run. Also requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables. |
+| `ruby build-system/tasks/visual-diff.rb --percy_debug --phantomjs_debug --webserver_debug`  | Same as above, with additional logging. Debug flags can be used independently.  |
 
 <a id="footnote-1">[1]</a> On Windows, this command must be run as administrator.
 
@@ -178,6 +182,50 @@ To run the tests on Sauce Labs:
    ```
 * It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
 
+
+## Visual Diff Tests
+
+**NOTE:** *We are working on giving all `ampproject/amphtml` committers automatic access to visual diff test results. Until this is in place, you can fill out [this](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform) form, and your request should be approved soon.*
+
+In addition to building the AMP runtime and running `gulp test`, the automatic test run on Travis includes a set of visual diff tests to make sure a new commit to `master` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
+
+The technology stack used is:
+
+- [Percy](https://percy.io/), a visual regression testing service for webpages
+- [Capybara](https://percy.io/docs/clients/ruby/capybara-rails), a framework that integrates tests with Percy
+- [Poltergeist](https://github.com/teampoltergeist/poltergeist), a driver capable of loading webpages for diffing
+- [PhantomJS](http://phantomjs.org/), a headless webkit based browser
+
+The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. All PRs will show a check called `percy/amphtml` in addition to the `continuous-integration/travis-ci/pr` check. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted.
+
+### Failing Tests
+
+When a test run fails due to visual diffs being present, click the `details` link next to `percy/amphtml` in your PR and examine the results. By default, Percy highlights the changes between snapshots in red. Clicking on the new snapshot will show it in its raw form. If the diffs indicate a problem that is likely to be due to your PR, you can try running the visual diffs locally in order to debug (see section below). However, if you are sure that the problem is not due to your PR, you may click the green `Approve` button on Percy to approve the snapshots and unblock your PR from being merged.
+
+### Running Visual Diff Tests Locally
+
+You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_PROJECT` and `PERCY_TOKEN` environment variables using the unique values you find at `https://percy.io/<org>/<project>/settings`. Once the environment variables are set up, you can run the AMP visual diff tests as described below.
+
+First, make sure you have [Ruby](https://www.ruby-lang.org/en/documentation/installation/) installed on your machine if you don't already have it, and download the gems required for local Percy builds:
+```
+gem install percy-capybara poltergeist phantomjs
+```
+Next, build the AMP runtime and invoke the visual diff script:
+```
+gulp build
+ruby build-system/tasks/visual-diff.rb
+```
+The build will use the Percy credentials set via environment variables in the previous step, and you can see the results at `https://percy.io/<org>/<project>`.
+
+To see debugging info during Percy runs, you can run:
+```
+ ruby build-system/tasks/visual-diff.rb --percy_debug --phantomjs_debug --webserver_debug
+```
+The debug flags `--percy_debug`, `--phantomjs_debug`, and `--webserver_debug` can be used independently. To enable all three debug flags, you can also run:
+```
+ ruby build-system/tasks/visual-diff.rb --debug
+```
+After each run, a new set of results will be available at `https://percy.io/<org>/<project>/settings`.
 
 ## Testing on devices
 

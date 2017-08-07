@@ -92,6 +92,18 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
 
 
 /**
+ * Sets the CSS styles of the specified element with !important. The styles
+ * are specified as a map from CSS property names to their values.
+ * @param {!Element} element
+ * @param {!Object<string, *>} styles
+ */
+export function setImportantStyles(element, styles) {
+  element.style.cssText +=
+      Object.keys(styles).map(k => `${k}:${styles[k]}!important;`).join('');
+}
+
+
+/**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
  * @param {Element} element
  * @param {string} property

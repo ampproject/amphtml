@@ -122,6 +122,9 @@ google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED;
 google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED;
 google.ima.AdsManager;
 google.ima.AdsManager.setVolume;
+google.ima.settings;
+google.ima.settings.setLocale;
+google.ima.settings.setVpaidMode;
 
 // 3P ads
 // Please sort by alphabetic order of the ad server name to avoid conflict
@@ -292,6 +295,14 @@ window._inmobi;
 _inmobi.getNewAd;
 data.siteid;
 data.slotid;
+
+// innity.js
+var innity_adZone;
+var innityAMPZone;
+var innityAMPTag;
+data.pub;
+data.zone;
+data.channel;
 
 // ix.js
 data.ixId;
@@ -532,3 +543,6 @@ data.renderer;
 // zergnet.js
 window.zergnetWidgetId;
 data.zergid;
+
+// _ping_.js
+window.networkIntegrationDataParamForTesting;

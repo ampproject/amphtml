@@ -25,13 +25,18 @@ adopt(window);
 
 describe('amp-soundcloud', () => {
 
-  const embedUrl = 'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F243169232';
+  const trackEmbedUrl = 'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F243169232';
+  const playlistEmbedUrl = 'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Fplaylists%2F173211206';
 
-  function getIns(trackid, opt_attrs) {
+  function getIns(mediaid, playlist, opt_attrs) {
     return createIframePromise().then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const ins = iframe.doc.createElement('amp-soundcloud');
-      ins.setAttribute('data-trackid', trackid);
+      if (playlist) {
+        ins.setAttribute('data-playlistid', mediaid);
+      } else {
+        ins.setAttribute('data-trackid', mediaid);
+      }
       ins.setAttribute('height', '237');
 
       if (opt_attrs) {
@@ -44,17 +49,26 @@ describe('amp-soundcloud', () => {
     });
   }
 
-  it('renders', () => {
+  it('renders track', () => {
     return getIns('243169232').then(ins => {
       const iframe = ins.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(embedUrl);
+      expect(iframe.src).to.equal(trackEmbedUrl);
+    });
+  });
+
+  it('renders playlist', () => {
+    return getIns('173211206', true).then(ins => {
+      const iframe = ins.firstChild;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(playlistEmbedUrl);
     });
   });
 
   it('renders secret token', () => {
-    return getIns('243169232', {
+    return getIns('243169232', false, {
       'data-visual': true,
       'data-secret-token': 'c-af',
     }).then(ins => {
@@ -64,13 +78,13 @@ describe('amp-soundcloud', () => {
   });
 
   it('renders fixed-height', () => {
-    return getIns('243169232', {layout: 'fixed-height'}).then(ins => {
+    return getIns('243169232', false, {layout: 'fixed-height'}).then(ins => {
       expect(ins.className).to.match(/i-amphtml-layout-fixed-height/);
     });
   });
 
   it('ignores color in visual mode', () => {
-    return getIns('243169232', {
+    return getIns('243169232', false, {
       'data-visual': true,
       'data-color': '00FF00',
     }).then(ins => {

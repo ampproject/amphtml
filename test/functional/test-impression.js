@@ -20,8 +20,7 @@ import {
   resetTrackImpressionPromiseForTesting,
 } from '../../src/impression';
 import {toggleExperiment} from '../../src/experiments';
-import {viewerForDoc} from '../../src/services';
-import {xhrFor} from '../../src/services';
+import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('impression', () => {
@@ -29,12 +28,13 @@ describe('impression', () => {
   let sandbox;
   let viewer;
   let xhr;
+  let isTrustedViewer;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    viewer = viewerForDoc(window.document);
+    viewer = Services.viewerForDoc(window.document);
     sandbox.stub(viewer, 'getParam');
-    xhr = xhrFor(window);
+    xhr = Services.xhrFor(window);
     expect(xhr.fetchJson).to.be.defined;
     const stub = sandbox.stub(xhr, 'fetchJson');
     stub.returns(Promise.resolve({
@@ -43,6 +43,10 @@ describe('impression', () => {
       },
     }));
     sandbox.stub(viewer, 'whenFirstVisible').returns(Promise.resolve());
+    isTrustedViewer = false;
+    sandbox.stub(viewer, 'isTrustedViewer', () => {
+      return Promise.resolve(isTrustedViewer);
+    });
     resetTrackImpressionPromiseForTesting();
   });
 
@@ -73,12 +77,30 @@ describe('impression', () => {
     return getTrackImpressionPromise().should.be.fulfilled;
   });
 
-  it('should invoke URL', () => {
+  it('should invoke URL with experiment on', () => {
     toggleExperiment(window, 'alp', true);
+    isTrustedViewer = false;
     viewer.getParam.withArgs('click').returns('https://www.example.com');
     maybeTrackImpression(window);
     expect(xhr.fetchJson).to.have.not.been.called;
-    return Promise.resolve().then(() => {
+    return getTrackImpressionPromise().then(() => {
+      expect(xhr.fetchJson).to.be.calledOnce;
+      const url = xhr.fetchJson.lastCall.args[0];
+      const params = xhr.fetchJson.lastCall.args[1];
+      expect(url).to.equal('https://www.example.com');
+      expect(params).to.jsonEqual({
+        credentials: 'include',
+      });
+    });
+  });
+
+  it('should invoke URL in trusted viewer', () => {
+    toggleExperiment(window, 'alp', false);
+    isTrustedViewer = true;
+    viewer.getParam.withArgs('click').returns('https://www.example.com');
+    maybeTrackImpression(window);
+    expect(xhr.fetchJson).to.have.not.been.called;
+    return getTrackImpressionPromise().then(() => {
       expect(xhr.fetchJson).to.be.calledOnce;
       const url = xhr.fetchJson.lastCall.args[0];
       const params = xhr.fetchJson.lastCall.args[1];
@@ -99,9 +121,11 @@ describe('impression', () => {
     const clock = sandbox.useFakeTimers();
     maybeTrackImpression(window);
     return Promise.resolve().then(() => {
-      clock.tick(8001);
-      return getTrackImpressionPromise().then(() => {
-        expect(window.location.href).to.equal(href);
+      Promise.resolve().then(() => {
+        clock.tick(8001);
+        return getTrackImpressionPromise().then(() => {
+          expect(window.location.href).to.equal(href);
+        });
       });
     });
   });
