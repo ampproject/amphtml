@@ -299,10 +299,10 @@ const command = {
     timedExecOrDie(`${gulp} presubmit`);
   },
   buildValidatorWebUI: function() {
-    timedExecOrDie('cd validator/webui && python build.py');
+    timedExecOrDie(`${gulp} validator-webui`);
   },
   buildValidator: function() {
-    timedExecOrDie('cd validator && python build.py');
+    timedExecOrDie(`${gulp} validator`);
   },
 };
 
