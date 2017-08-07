@@ -27,6 +27,7 @@ import {getServicePromise} from './service';
 import {getSourceOrigin, parseQueryString, parseUrl} from './url';
 import {user} from './log';
 import {parseJson} from './json';
+import {getMode} from './mode';
 
 /** @const {string} */
 const TAG = 'experiments';
@@ -260,16 +261,16 @@ export function experimentToggles(win) {
   }
 
   // Read document level override from meta tag.
-  if (win.AMP_CONFIG
+  if ((win.AMP_CONFIG
       && Array.isArray(win.AMP_CONFIG['allow-doc-opt-in'])
-      && win.AMP_CONFIG['allow-doc-opt-in'].length > 0) {
+      && win.AMP_CONFIG['allow-doc-opt-in'].length > 0) || getMode().test) {
     const allowed = win.AMP_CONFIG['allow-doc-opt-in'];
     const meta =
         win.document.head.querySelector('meta[name="amp-experiments-opt-in"]');
     if (meta) {
       const optedInExperiments = meta.getAttribute('content').split(',');
       for (let i = 0; i < optedInExperiments.length; i++) {
-        if (allowed.indexOf(optedInExperiments[i]) != -1) {
+        if (allowed.indexOf(optedInExperiments[i]) != -1 || getMode().test) {
           toggles_[optedInExperiments[i]] = true;
         }
       }
