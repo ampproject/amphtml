@@ -43,11 +43,10 @@ export class AmpAdNetworkGmosspImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
+    const src = this.element.getAttribute('src') || '';
     return this.isAmpAdElement() &&
-      startsWith(
-          this.element.getAttribute('src') || '',
-          GMOSSP_BASE_URL_
-      );
+        (startsWith(src, GMOSSP_BASE_URL_) ||
+         startsWith(src, GMOSSP_BASE_A4A_URL_));
   }
 
   /** @override */

@@ -17,7 +17,10 @@
 import {startsWith} from '../../../src/string';
 
 /** @const @private {string} */
-const GMOSSP_SRC_PREFIX_ = 'https://sp.gmossp-sp.jp';
+const GMOSSP_SRC_PREFIX_ = 'https://sp.gmossp-sp.jp/';
+
+/** @const @private {string} */
+const GMOSSP_SRC_A4A_PREFIX_ = 'https://amp.sp.gmossp-sp.jp/_a4a/';
 
 /**
  * @param {!Window} win
@@ -27,5 +30,6 @@ const GMOSSP_SRC_PREFIX_ = 'https://sp.gmossp-sp.jp';
 export function gmosspIsA4AEnabled(win, element) {
   const src = element.getAttribute('src');
   return !!element.getAttribute('data-use-a4a') && !!src &&
-    startsWith(src, GMOSSP_SRC_PREFIX_);
+      (startsWith(src, GMOSSP_SRC_PREFIX_) ||
+       startsWith(src, GMOSSP_SRC_A4A_PREFIX_));
 }
