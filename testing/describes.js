@@ -446,9 +446,12 @@ class IntegrationFixture {
   /** @override */
   setup(env) {
     const body = this.spec.body;
+    const meta = this.spec.meta || '';
+    const experiments = this.spec.experiments || [''];
     return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
-        src: addParamsToUrl('/amp4test/compose-doc', {body}) + `#${this.hash}`,
+        src: addParamsToUrl('/amp4test/compose-doc',
+            {body, meta, experiments: experiments.join(' ')}) + `#${this.hash}`,
       });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
@@ -609,7 +612,7 @@ class AmpFixture {
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
     installDocService(win, singleDoc);
     const ampdocService = Services.ampdocServiceFor(win);
-    env.ampdocService  = ampdocService;
+    env.ampdocService = ampdocService;
     installExtensionsService(win);
     env.extensions = Services.extensionsFor(win);
     installBuiltinElements(win);
