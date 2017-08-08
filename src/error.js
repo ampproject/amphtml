@@ -376,7 +376,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
   url += `&jse=${detectedJsEngine}`;
 
   const exps = [];
-  const experiments = experimentTogglesOrNull();
+  const experiments = experimentTogglesOrNull(self);
   for (const exp in experiments) {
     const on = experiments[exp];
     exps.push(`${exp}=${on ? '1' : '0'}`);
