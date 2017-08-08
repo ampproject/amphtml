@@ -195,7 +195,6 @@ export class InstrumentationService {
     const root = this.findRoot_(target);
     const tracker = /** @type {!CustomEventTracker} */ (
         root.getTracker('custom', CustomEventTracker));
-    console.log('triggerEventforTarget');
     tracker.trigger(event);
   }
 

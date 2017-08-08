@@ -47,7 +47,7 @@ describe('user-error', function() {
     <amp-pixel src="https://foo.com/tracker/foo"
                referrerpolicy="fail-referrer">`,
   }, env => {
-    it.only('should ping correct host with amp-pixel user().assert err', () => {
+    it('should ping correct host with amp-pixel user().assert err', () => {
       return expect(withdrawRequest(env.win, randomId)).to.eventually.be.ok;
     });
   });

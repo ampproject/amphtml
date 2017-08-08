@@ -26,10 +26,8 @@ import {Services} from './services';
 export function triggerAnalyticsEvent(target, eventType, opt_vars) {
   Services.analyticsForDocOrNull(target).then(analytics => {
     if (!analytics) {
-      console.log('no analytics');
       return;
     }
-    console.log('triggerAnalyticsEvent');
     analytics.triggerEventForTarget(target, eventType, opt_vars);
   });
 }

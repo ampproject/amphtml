@@ -202,7 +202,6 @@ export class CustomEventTracker extends EventTracker {
    * @param {!AnalyticsEvent} event
    */
   trigger(event) {
-    console.log('trigger...');
     const eventType = event.type;
     const isSandboxEvent = startsWith(eventType, 'sandbox-');
     const observables = this.observables_[eventType];
