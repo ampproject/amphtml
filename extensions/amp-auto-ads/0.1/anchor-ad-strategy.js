@@ -22,6 +22,9 @@ import {Services} from '../../../src/services';
 const TAG = 'amp-auto-ads';
 
 /** @const */
+const STICKY_AD_TAG = 'amp-sticky-ad';
+
+/** @const */
 const OPT_IN_STATUS_ANCHOR_ADS = 2;
 
 export class AnchorAdStrategy {
@@ -53,6 +56,7 @@ export class AnchorAdStrategy {
       user().warn(TAG, 'exists <amp-sticky-ad>');
       return Promise.resolve(false);
     }
+    Services.extensionsFor(this.win_)./*OK*/loadElementClass(STICKY_AD_TAG);
     this.placeStickyAd_();
     return Promise.resolve(true);
   }
