@@ -91,7 +91,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
     });
 
     it('should fail without config', () => {
-      const anim = createAnim({}, null).then(() => {
+      return createAnim({}, null).then(() => {
         throw new Error('must have failed');
       }, reason => {
         expect(reason.message)
