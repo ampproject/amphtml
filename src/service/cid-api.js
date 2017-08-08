@@ -31,6 +31,7 @@ const AMP_TOKEN = 'AMP_TOKEN';
 const TokenStatus = {
   RETRIEVING: '$RETRIEVING',
   OPT_OUT: '$OPT_OUT',
+  NOT_FOUND: '$NOT_FOUND',
   ERROR: '$ERROR',
 };
 
@@ -85,7 +86,8 @@ export class GoogleCidApi {
       if (token === TokenStatus.OPT_OUT) {
         return null;
       }
-      if (token === TokenStatus.ERROR) {
+      // Token is in a special state, fallback to existing cookie
+      if (token && token[0] === '$') {
         return getCookie(this.win_, cookieName);
       }
 
@@ -141,7 +143,7 @@ export class GoogleCidApi {
       setCookie(this.win_, cookieName, res['clientId'], this.expiresIn_(YEAR));
       return res['clientId'];
     } else {
-      this.persistToken_(TokenStatus.ERROR, DAY);
+      this.persistToken_(TokenStatus.NOT_FOUND, DAY);
       return getCookie(this.win_, cookieName);
     }
   }
