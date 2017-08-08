@@ -25,7 +25,7 @@ min_validator_revision_required: 238
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 456
+spec_file_revision: 462
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
@@ -3767,8 +3767,8 @@ error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 100 }
 error_specificity { code: DEPRECATED_ATTR specificity: 101 }
 error_specificity { code: DEPRECATED_TAG specificity: 102 }
 error_specificity { code: DISALLOWED_MANUFACTURED_BODY specificity: 104 }
-
-
+error_specificity { code: DOCUMENT_TOO_COMPLEX specificity: 105 }
+error_specificity { code: INCORRECT_MIN_NUM_CHILD_TAGS specificity: 106 }
 # Error formats
 error_formats {
   code: UNKNOWN_CODE
@@ -3990,6 +3990,10 @@ error_formats {
   format: "Tag '%1' must have %2 child tags - saw %3 child tags."
 }
 error_formats {
+  code: INCORRECT_MIN_NUM_CHILD_TAGS
+  format: "Tag '%1' must have a minimum of %2 child tags - saw %3 child tags."
+}
+error_formats {
   code: DISALLOWED_CHILD_TAG_NAME
   format: "Tag '%1' is disallowed as child of tag '%2'. "
           "Child tag must be one of %3."
@@ -4036,6 +4040,10 @@ error_formats {
 error_formats {
   code: MISSING_REQUIRED_EXTENSION
   format: "The tag '%1' requires including the '%2' extension JavaScript."
+}
+error_formats {
+  code: DOCUMENT_TOO_COMPLEX
+  format: "The document is too complex."
 }
 
 # CSS Errors. All of these use %1 for the tag name (in practice 'style'
