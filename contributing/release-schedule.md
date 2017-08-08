@@ -15,10 +15,10 @@ Announcements regarding releases will be made on the [AMP Slack #release channel
 
 We are intentionally cautious with our release cadence.
 
-In determining how often we should push new versions of AMP to everyone we have to weigh many factors including:
+In determining how often we should push new versions of AMP to everyone, we have to weigh many factors including:
 
 - stability for the millions of sites/billions of pages built using AMP
-- the cache busting that happens we push a new version
+- cache busting that might happen when we push a new version
 - the desire to get new features out quickly
 
 After considering all of these factors we have arrived at the 1-2 week push cycle.  Thus far we have found this to be a reasonable compromise, but we will continue to evaluate all of these factors and may make changes in the future.
@@ -38,7 +38,7 @@ AMP Dev Channel is a way to opt a browser into using a newer version of the AMP 
 Opting into the Dev Channel is great to:
 
 - test and play with new features not yet available to all users
-- use in Q&A to ensure that your site is compatible with the next version of AMP
+- use in Quality Assurance (QA) to ensure that your site is compatible with the next version of AMP
 
 When you opt into the AMP Dev Channel you are only affecting the AMP JS libraries in your browser; there is no way to force visitors to your site to use the AMP Dev Channel version of AMP.
 
