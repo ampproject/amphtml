@@ -40,8 +40,8 @@ const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 /** @const {time} */
 const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
-/** @type {Object<string, boolean>} */
-let toggles_ = null;
+/** @const {string} */
+const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
 
 //TODO(kmh287, #8331) Uncomment and replace empty object literal with real
 // experiment public key jwk.
@@ -244,17 +244,18 @@ export function toggleExperiment(win, experimentId, opt_on,
  * @return {!Object<string, boolean>}
  */
 export function experimentToggles(win) {
-  if (toggles_) {
-    return toggles_;
+  if (win[TOGGLES_WINDOW_PROPERTY]) {
+    return win[TOGGLES_WINDOW_PROPERTY];
   }
-  toggles_ = Object.create(null);
+  win[TOGGLES_WINDOW_PROPERTY] = Object.create(null);
+  const toggles = win[TOGGLES_WINDOW_PROPERTY];
 
   // Read the default config of this build.
   if (win.AMP_CONFIG) {
     for (const experimentId in win.AMP_CONFIG) {
       const frequency = win.AMP_CONFIG[experimentId];
       if (typeof frequency === 'number' && frequency >= 0 && frequency <= 1) {
-        toggles_[experimentId] = Math.random() < frequency;
+        toggles[experimentId] = Math.random() < frequency;
       }
     }
   }
@@ -270,13 +271,13 @@ export function experimentToggles(win) {
       const optedInExperiments = meta.getAttribute('content').split(',');
       for (let i = 0; i < optedInExperiments.length; i++) {
         if (allowed.indexOf(optedInExperiments[i]) != -1) {
-          toggles_[optedInExperiments[i]] = true;
+          toggles[optedInExperiments[i]] = true;
         }
       }
     }
   }
 
-  Object.assign(toggles_, getExperimentTogglesFromCookie(win));
+  Object.assign(toggles, getExperimentTogglesFromCookie(win));
 
   if (win.AMP_CONFIG
       && Array.isArray(win.AMP_CONFIG['allow-url-opt-in'])
@@ -287,23 +288,24 @@ export function experimentToggles(win) {
     for (let i = 0; i < allowed.length; i++) {
       const param = params[`e-${allowed[i]}`];
       if (param == '1') {
-        toggles_[allowed[i]] = true;
+        toggles[allowed[i]] = true;
       }
       if (param == '0') {
-        toggles_[allowed[i]] = false;
+        toggles[allowed[i]] = false;
       }
     }
   }
-  return toggles_;
+  return toggles;
 }
 
 /**
  * Returns the cached experiments toggles, or null if they have not been
  * computed yet.
+ * @param {!Window} win
  * @return {Object<string, boolean>}
  */
-export function experimentTogglesOrNull() {
-  return toggles_;
+export function experimentTogglesOrNull(win) {
+  return win[TOGGLES_WINDOW_PROPERTY] || null;
 }
 
 /**
@@ -368,7 +370,7 @@ export function resetExperimentTogglesForTesting(win) {
   setCookie(win, COOKIE_NAME, '', 0, {
     domain: win.location.hostname,
   });
-  toggles_ = null;
+  win[TOGGLES_WINDOW_PROPERTY] = null;
 }
 
 /**
