@@ -143,6 +143,9 @@ export class Resource {
     this.isPlaceholder_ = element.hasAttribute('placeholder');
 
     /** @private {boolean} */
+    this.isBuilding_ = false;
+
+    /** @private {boolean} */
     this.blacklisted_ = false;
 
     /** @private {!AmpElement|undefined|null} */
@@ -277,6 +280,22 @@ export class Resource {
   }
 
   /**
+   * Returns whether the resource has been fully built.
+   * @return {boolean}
+   */
+  isBuilt() {
+    return this.element.isBuilt();
+  }
+
+  /**
+   * Returns whether the resource is currently being built.
+   * @return {boolean}
+   */
+  isBuilding() {
+    return this.isBuilding_;
+  }
+
+  /**
    * Returns whether the resource has been blacklisted.
    * @return {boolean}
    */
@@ -285,31 +304,47 @@ export class Resource {
   }
 
   /**
+   * Returns promise that resolves when the element has been built.
+   * @return {!Promise}
+   */
+  whenBuilt() {
+    // TODO(dvoytenko): merge with the standard BUILT signal.
+    return this.element.signals().whenSignal('res-built');
+  }
+
+  /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
+   * @return {?Promise}
    */
   build() {
-    if (this.blacklisted_ || !this.element.isUpgraded()
-        || !this.resources_.grantBuildPermission()) {
-      return;
+    if (this.isBuilding_ ||
+        this.blacklisted_ ||
+        !this.element.isUpgraded() ||
+        !this.resources_.grantBuildPermission()) {
+      return null;
     }
-    try {
-      this.element.build();
-    } catch (e) {
-      dev().error(TAG, 'failed to build:', this.debugid, e);
+    this.isBuilding_ = true;
+    return this.element.build().then(() => {
+      this.isBuilding_ = false;
+      if (this.hasBeenMeasured()) {
+        this.state_ = ResourceState.READY_FOR_LAYOUT;
+        this.element.updateLayoutBox(this.layoutBox_);
+      } else {
+        this.state_ = ResourceState.NOT_LAID_OUT;
+      }
+      // TODO(dvoytenko): merge with the standard BUILT signal.
+      this.element.signals().signal('res-built');
+      // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
+      // in PROD.
+      this.element.dispatchCustomEvent(AmpEvents.BUILT);
+    }, reason => {
+      dev().error(TAG, 'failed to build:', this.debugid, reason);
+      this.isBuilding_ = false;
       this.blacklisted_ = true;
-      return;
-    }
-
-    if (this.hasBeenMeasured()) {
-      this.state_ = ResourceState.READY_FOR_LAYOUT;
-      this.element.updateLayoutBox(this.layoutBox_);
-    } else {
-      this.state_ = ResourceState.NOT_LAID_OUT;
-    }
-    // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
-    // in PROD.
-    this.element.dispatchCustomEvent(AmpEvents.BUILT);
+      this.element.signals().rejectSignal('res-built', reason);
+      throw reason;
+    });
   }
 
   /**

@@ -1026,23 +1026,25 @@ describe('SlideScroll', () => {
         // Layout happens asynchronously after attaching to DOM, so we can
         // test pre-layoutCallback logic now.
         iframe.addElement(ampSlideScroll);
-        const impl = ampSlideScroll.implementation_;
-        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
-        const satisfiesTrust = () => true;
+        return ampSlideScroll.build().then(() => {
+          const impl = ampSlideScroll.implementation_;
+          const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+          const satisfiesTrust = () => true;
 
-        const args = {'index': '3'};
-        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
-        expect(showSlideSpy).to.not.have.been.called;
+          const args = {'index': '3'};
+          impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
+          expect(showSlideSpy).to.not.have.been.called;
 
-        impl.mutatedAttributesCallback({slide: 2});
-        expect(showSlideSpy).to.not.have.been.called;
+          impl.mutatedAttributesCallback({slide: 2});
+          expect(showSlideSpy).to.not.have.been.called;
 
-        impl.onLayoutMeasure();
-        ampSlideScroll.layoutCallback();
+          impl.onLayoutMeasure();
+          ampSlideScroll.layoutCallback();
 
-        // Should show the last slide index requested before layout.
-        expect(showSlideSpy).to.have.been.calledWith(2);
-        expect(showSlideSpy).to.be.calledOnce;
+          // Should show the last slide index requested before layout.
+          expect(showSlideSpy).to.have.been.calledWith(2);
+          expect(showSlideSpy).to.be.calledOnce;
+        });
       });
     });
 
@@ -1051,37 +1053,39 @@ describe('SlideScroll', () => {
         const {iframe, ampSlideScroll} = obj;
 
         iframe.addElement(ampSlideScroll);
-        const impl = ampSlideScroll.implementation_;
-        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
-        const satisfiesTrust = () => true;
+        return ampSlideScroll.build().then(() => {
+          const impl = ampSlideScroll.implementation_;
+          const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+          const satisfiesTrust = () => true;
 
-        // Test that showSlide_ due to goToSlide(index=1) is not called before layout.
-        let args = {'index': '1'};
-        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
-        expect(showSlideSpy).to.not.have.been.called;
+          // Test that showSlide_ due to goToSlide(index=1) is not called before layout.
+          let args = {'index': '1'};
+          impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
+          expect(showSlideSpy).to.not.have.been.called;
 
-        // Test that showSlide_ is called after layout.
-        impl.onLayoutMeasure();
-        ampSlideScroll.layoutCallback();
+          // Test that showSlide_ is called after layout.
+          impl.onLayoutMeasure();
+          ampSlideScroll.layoutCallback();
 
-        expect(showSlideSpy).to.have.been.calledWith(1);
-        expect(showSlideSpy).to.be.calledOnce;
+          expect(showSlideSpy).to.have.been.calledWith(1);
+          expect(showSlideSpy).to.be.calledOnce;
 
-        // Unlayout
-        showSlideSpy.reset();
-        impl.unlayoutCallback();
+          // Unlayout
+          showSlideSpy.reset();
+          impl.unlayoutCallback();
 
-        // Test that showSlide_ due to goToSlide(index=4) is not called before layout.
-        args = {'index': '4'};
-        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
-        expect(showSlideSpy).to.not.have.been.called;
+          // Test that showSlide_ due to goToSlide(index=4) is not called before layout.
+          args = {'index': '4'};
+          impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
+          expect(showSlideSpy).to.not.have.been.called;
 
-        // Test that showSlide_ is called after layout.
-        impl.onLayoutMeasure();
-        ampSlideScroll.layoutCallback();
+          // Test that showSlide_ is called after layout.
+          impl.onLayoutMeasure();
+          ampSlideScroll.layoutCallback();
 
-        expect(showSlideSpy).to.have.been.calledWith(4);
-        expect(showSlideSpy).to.be.calledOnce;
+          expect(showSlideSpy).to.have.been.calledWith(4);
+          expect(showSlideSpy).to.be.calledOnce;
+        });
       });
     });
   });

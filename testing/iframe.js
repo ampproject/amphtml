@@ -245,7 +245,8 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
           addElement: function(element) {
             const iWin = iframe.contentWindow;
             const p = onInsert(iWin).then(() => {
-              element.build(true);
+              return element.build();
+            }).then(() => {
               if (!element.getPlaceholder()) {
                 const placeholder = element.createPlaceholder();
                 if (placeholder) {
