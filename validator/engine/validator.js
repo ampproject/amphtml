@@ -907,6 +907,7 @@ class ChildTagMatcher {
         expectedNumChildTags !== this.numChildTagsSeen_) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
       } else {
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
@@ -918,6 +919,7 @@ class ChildTagMatcher {
               this.numChildTagsSeen_.toString()
             ],
             getTagSpecUrl(this.parentSpec_), result);
+        return;
       }
     }
 
@@ -927,6 +929,7 @@ class ChildTagMatcher {
         this.numChildTagsSeen_ < expectedMinNumChildTags) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
       } else {
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
@@ -939,6 +942,7 @@ class ChildTagMatcher {
               this.numChildTagsSeen_.toString()
             ],
             getTagSpecUrl(this.parentSpec_), result);
+        return;
       }
     }
   }
@@ -3060,13 +3064,20 @@ function validateDescendantTags(
     // If the tag we're validating is not whitelisted for a specific ancestor,
     // then throw an error.
     if (!allowedDescendantsList.allowedTags.includes(tagName)) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
-          context.getDocLocator(),
-          /* params */
-          [tagName.toLowerCase(), allowedDescendantsList.tagName.toLowerCase()],
-          getTagSpecUrl(spec), validationResult);
+      if (amp.validator.LIGHT) {
+        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      } else {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
+            context.getDocLocator(),
+            /* params */
+            [tagName.toLowerCase(),
+             allowedDescendantsList.tagName.toLowerCase()],
+            getTagSpecUrl(spec), validationResult);
+        return;
+      }
     }
   }
 }
