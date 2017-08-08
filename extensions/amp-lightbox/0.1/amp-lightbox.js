@@ -65,11 +65,11 @@ class AmpLightbox extends AMP.BaseElement {
     this.scrollTimerId_ = null;
 
     /** @const {function()} */
-    this.boundReschedule_ = debounce(this.win, event => {
-      this.reschedule_(/** @type {!Event} */ (event));
+    this.boundReschedule_ = debounce(this.win, () => {
+      const container = dev().assertElement(this.container_);
+      this.scheduleLayout(container);
+      this.scheduleResume(container);
     }, 500);
-
-    this.isFirstTransitonEnd_ = true;
   }
 
   /** @override */
@@ -171,23 +171,6 @@ class AmpLightbox extends AMP.BaseElement {
     });
 
     this.active_ = true;
-  }
-
-  /**
-   * reschedule layout on animation/transition end. But ignore the first transitionend event
-   * @param {!Event} event
-   */
-  reschedule_(event) {
-    if (event.type == 'transitionend') {
-      // Ignore the first transitionend event.
-      if (this.isFirstTransitonEnd_) {
-        this.isFirstTransitonEnd_ = false;
-        return;
-      }
-    }
-    const container = dev().assertElement(this.container_);
-    this.scheduleLayout(container);
-    this.scheduleResume(container);
   }
 
   /**

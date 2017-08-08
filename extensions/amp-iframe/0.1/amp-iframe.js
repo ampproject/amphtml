@@ -53,7 +53,7 @@ const CONTAINER_LIST = [
 /** @type {number}  */
 let count = 0;
 
-/** @type {number} */
+/** @type {number}  */
 let trackingIframeCount = 0;
 
 /** @type {number}  */
@@ -321,7 +321,13 @@ export class AmpIframe extends AMP.BaseElement {
           this.element);
     }
 
+    if (!this.iframeSrc) {
+      // This failed already, lets not signal another error.
+      return Promise.resolve();
+    }
+
     if (this.isTrackingFrame_) {
+      trackingIframeCount++;
       if (trackingIframeCount > 1) {
         console/*OK*/.error('Only 1 analytics/tracking iframe allowed per ' +
             'page. Please use amp-analytics instead or file a GitHub issue ' +
@@ -329,11 +335,6 @@ export class AmpIframe extends AMP.BaseElement {
             'https://github.com/ampproject/amphtml/issues/new');
         return Promise.resolve();
       }
-    }
-
-    if (!this.iframeSrc) {
-      // This failed already, lets not signal another error.
-      return Promise.resolve();
     }
 
     const iframe = this.element.ownerDocument.createElement('iframe');
@@ -408,7 +409,6 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    **/
   unlayoutCallback() {
-    this.activateIframe_.layoutStarted_ = false;
     if (this.iframe_) {
       removeElement(this.iframe_);
       if (this.placeholder_) {
