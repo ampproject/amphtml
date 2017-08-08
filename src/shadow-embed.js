@@ -64,28 +64,27 @@ export function createShadowRoot(hostElement) {
     return existingRoot;
   }
 
+  // Define our shadowRoot object to be returned
+  let shadowRoot;
+
   // Native support.
   const shadowDomSupported = getShadowDomSupportedVersion();
   if (shadowDomSupported == ShadowDomVersion.V1) {
-    const shadowRoot = hostElement.attachShadow({mode: 'open'});
-    if (!shadowRoot.styleSheets) {
-      Object.defineProperty(shadowRoot, 'styleSheets', {
-        get: function() {
-          const items = [];
-          iterateCursor(childElementsByTag(shadowRoot, 'style'), child => {
-            items.push(child.sheet);
-          });
-          return items;
-        },
-      });
-    }
-    return shadowRoot;
+    shadowRoot = hostElement.attachShadow({mode: 'open'});
   } else if (shadowDomSupported == ShadowDomVersion.V0) {
-    return hostElement.createShadowRoot();
+    shadowRoot = hostElement.createShadowRoot();
+  } else {
+    // Polyfill.
+    shadowRoot = createShadowRootPolyfill(hostElement);
   }
 
-  // Polyfill.
-  return createShadowRootPolyfill(hostElement);
+  // Ensure that Shadow CSS is supported, and add an id if not
+  if (!isShadowCssSupported()) {
+    const randomId = Math.floor(Math.random() * 10000);
+    shadowRoot.id = `i-amphtml-sd-${randomId}`;
+  }
+
+  return shadowRoot;
 }
 
 
@@ -112,7 +111,8 @@ function createShadowRootPolyfill(hostElement) {
       // Cast to ShadowRoot even though it is an Element
       // TODO(@dvoytenko) Consider to switch to a type union instead.
       /** @type {?}  */ (doc.createElement('i-amphtml-shadow-root')));
-  shadowRoot.id = 'i-amphtml-sd-' + Math.floor(win.Math.random() * 10000);
+  // NOTE (torch2424): Moved shadowRoot.id to createShadowRoot(), as browsers can have a shadowDom version (thefore not calling this fucntion), and not support CSS encapsulation
+  //shadowRoot.id = 'i-amphtml-sd-' + Math.floor(win.Math.random() * 10000);
   hostElement.appendChild(shadowRoot);
   hostElement.shadowRoot = hostElement.__AMP_SHADOW_ROOT = shadowRoot;
 
@@ -206,7 +206,6 @@ export function importShadowBody(shadowRoot, body, deep) {
     }
   }
   setStyle(resultBody, 'position', 'relative');
-  //NOTE(torch2424), create a shadow root elelment, and add it to the body
   // DO NOT SUBMIT: Find a solution, this is wrong place. Fix the problem above, the style elements need to be placed as the first child
   //    For example: getRootNode().firstChild , should return a style element
   const shadowRootElement = doc.createElement('i-amphtml-shadow-root');

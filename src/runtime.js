@@ -586,8 +586,9 @@ class MultidocManager {
           if (doc.body) {
             const body = importShadowBody(
                 shadowRoot, doc.body, /* deep */ true);
-            body.classList.add('amp-shadow');
-            shadowRoot.appendChild(body);
+            // TODO (torch2424): Understand why this duplicates the body when we are creating the shadow root element
+            //body.classList.add('amp-shadow');
+            //shadowRoot.appendChild(body);
             shadowDocHasBody(ampdoc, body);
           }
 
@@ -632,8 +633,9 @@ class MultidocManager {
                 shadowRoot,
                 dev().assertElement(doc.body),
                 /* deep */ false);
-            body.classList.add('amp-shadow');
-            shadowRoot.appendChild(body);
+            // TODO (torch2424): Understand why this duplicates the body, when we are creating the shadow root element
+            //body.classList.add('amp-shadow');
+            //shadowRoot.appendChild(body);
             shadowDocHasBody(ampdoc, body);
             return body;
           });
