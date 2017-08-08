@@ -251,7 +251,6 @@ export function toggleExperiment(win, experimentId, opt_on,
  */
 export function experimentToggles(win) {
   if (toggles_) {
-    console.log('RETURN toggles_');
     return toggles_;
   }
   toggles_ = Object.create(null);
@@ -266,7 +265,7 @@ export function experimentToggles(win) {
     }
   }
 
-  console.log('mode test: ' + getMode().test);
+  console.log('mode localDev: ' + getMode().localDev);
   // Read document level override from meta tag.
   // if ((win.AMP_CONFIG
   //     && Array.isArray(win.AMP_CONFIG['allow-doc-opt-in'])
@@ -504,7 +503,7 @@ export function forceExperimentBranch(win, experimentName, branchId) {
 }
 
 function isAllowed(win) {
-  return (getMode().test ||
+  return (getMode().localDev ||
       (win.AMP_CONFIG
         && Array.isArray(win.AMP_CONFIG['allow-doc-opt-in'])
         && win.AMP_CONFIG['allow-doc-opt-in'].length > 0));
