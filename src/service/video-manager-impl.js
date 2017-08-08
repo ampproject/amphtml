@@ -50,6 +50,9 @@ import {
 import {Animation} from '../animation';
 import * as st from '../style';
 import * as tr from '../transition';
+
+const TAG = 'video-manager';
+
 /**
  * @const {number} Percentage of the video that should be in viewport before it
  * is considered visible.
@@ -350,7 +353,7 @@ export class VideoManager {
         return this.entries_[i];
       }
     }
-    dev().assert(false, 'video is not registered to this video manager');
+    dev().error(TAG, 'video is not registered to this video manager');
     return null;
   }
 
@@ -369,7 +372,7 @@ export class VideoManager {
         return entry;
       }
     }
-    dev().assert(false, 'video is not registered to this video manager');
+    dev().error(TAG, 'video is not registered to this video manager');
     return null;
   }
 
