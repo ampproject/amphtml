@@ -334,7 +334,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           /** @type {!Object<string, !ExperimentInfo>} */ ({});
       experimentInfoMap[CORRELATOR_CLEAR_EXP_NAME] = {
         isTrafficEligible: () => true,
-        branches: Object.values(CORRELATOR_CLEAR_EXP_BRANCHES),
+        branches: ['22302764','22302765'],
       };
       randomlySelectUnsetExperiments(this.win, experimentInfoMap);
       const expId = getExperimentBranch(this.win, CORRELATOR_CLEAR_EXP_NAME);
