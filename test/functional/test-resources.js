@@ -17,6 +17,7 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
+import {Signals} from '../../src/utils/signals';
 import {VisibilityState} from '../../src/visibility-state';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
@@ -45,9 +46,11 @@ describe('Resources', () => {
   function createAmpElement() {
     const element = document.createElement('div');
     element.classList.add('i-amphtml-element');
+    const signals = new Signals();
+    element.signals = () => signals;
     element.whenBuilt = () => Promise.resolve();
     element.isBuilt = () => true;
-    element.build = () => {};
+    element.build = () => Promise.resolve();
     element.isUpgraded = () => true;
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
@@ -403,14 +406,13 @@ describe('Resources', () => {
         () => layoutRectLtwh(0, 0, 100, 100));
     const resource = new Resource(1, element, resources);
     const measureSpy = sandbox.spy(resource, 'measure');
-    const buildSpy = sandbox.spy(resource.element, 'whenBuilt');
     const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload_',
         () => resource.loadPromiseResolve_());
     const promise = resources.requireLayout(resource.element);
-    return Promise.all([promise, element.whenBuilt()]).then(() => {
+    resource.build();
+    return Promise.all([promise, resource.whenBuilt()]).then(() => {
       expect(scheduleStub).to.be.calledOnce;
       expect(measureSpy).to.be.calledOnce;
-      expect(buildSpy).to.be.calledTwice;  // 1 for scheduler + 1 for test.
     });
   });
 
@@ -423,6 +425,7 @@ describe('Resources', () => {
     const measureSpy = sandbox.spy(resource, 'measure');
     const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload_');
     const promise = resources.requireLayout(resource.element);
+    resource.build();
     resource.loadPromiseResolve_();
     return Promise.all([promise, element.whenBuilt()]).then(() => {
       expect(scheduleStub).to.not.be.called;
@@ -438,7 +441,8 @@ describe('Resources', () => {
     const measureSpy = sandbox.spy(resource, 'measure');
     const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload_');
     const promise = resources.requireLayout(resource.element);
-    return promise.then(() => {
+    resource.build();
+    return Promise.all([promise, resource.whenBuilt()]).then(() => {
       expect(scheduleStub).to.not.be.called;
       expect(measureSpy).to.be.calledOnce;
     });
@@ -453,6 +457,7 @@ describe('Resources', () => {
     const measureSpy = sandbox.spy(resource, 'measure');
     const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload_');
     const promise = resources.requireLayout(resource.element);
+    resource.build();
     return promise.then(() => {
       expect(scheduleStub).to.not.be.called;
       expect(measureSpy).to.not.be.called;
@@ -491,8 +496,9 @@ describe('Resources', () => {
         parentResource, true, [element]);
     expect(measureSpy).to.not.be.called;
     expect(scheduleStub).to.not.be.called;
-    resource.build();
-    return element.whenBuilt().then(() => {
+    return resource.build().then(() => {
+      return element.whenBuilt();
+    }).then(() => {
       expect(measureSpy).to.be.calledOnce;
       expect(scheduleStub).to.be.calledOnce;
     });
@@ -751,6 +757,7 @@ describe('Resources pause/resume/unlayout scheduling', () => {
   let child2;
 
   function createElement() {
+    const signals = new Signals();
     return {
       ownerDocument: {defaultView: window},
       tagName: 'amp-test',
@@ -788,6 +795,9 @@ describe('Resources pause/resume/unlayout scheduling', () => {
       },
       getPriority() {
         return 0;
+      },
+      signals() {
+        return signals;
       },
     };
   }
@@ -937,6 +947,7 @@ describe('Resources schedulePreload', () => {
   let placeholder;
 
   function createElement() {
+    const signals = new Signals();
     return {
       ownerDocument: {defaultView: window},
       tagName: 'amp-test',
@@ -978,6 +989,9 @@ describe('Resources schedulePreload', () => {
       },
       getPriority() {
         return 0;
+      },
+      signals() {
+        return signals;
       },
     };
   }
@@ -1067,6 +1081,7 @@ describe('Resources schedulePreload', () => {
 describe('Resources discoverWork', () => {
 
   function createElement(rect) {
+    const signals = new Signals();
     return {
       ownerDocument: {defaultView: window},
       tagName: 'amp-test',
@@ -1093,6 +1108,9 @@ describe('Resources discoverWork', () => {
       unlayoutOnPause: () => true,
       togglePlaceholder: () => sandbox.spy(),
       getPriority: () => 1,
+      signals() {
+        return signals;
+      },
       fakeComputedStyle: {
         marginTop: '0px',
         marginRight: '0px',
@@ -1695,6 +1713,7 @@ describes.realWin('Resources scrollHeight', {
 describe('Resources changeSize', () => {
 
   function createElement(rect) {
+    const signals = new Signals();
     return {
       ownerDocument: {defaultView: window},
       tagName: 'amp-test',
@@ -1725,6 +1744,7 @@ describe('Resources changeSize', () => {
           (unused_overflown, unused_requestedHeight, unused_requestedWidth) => {
           },
       getPriority: () => 0,
+      signals: () => signals,
       fakeComputedStyle: {
         marginTop: '0px',
         marginRight: '0px',
@@ -2431,6 +2451,7 @@ describe('Resources changeSize', () => {
 describe('Resources mutateElement and collapse', () => {
 
   function createElement(rect, isAmp) {
+    const signals = new Signals();
     return {
       ownerDocument: {defaultView: window},
       tagName: isAmp ? 'amp-test' : 'div',
@@ -2462,6 +2483,7 @@ describe('Resources mutateElement and collapse', () => {
       pauseCallback: () => {},
       unlayoutCallback: () => {},
       getPriority: () => 0,
+      signals: () => signals,
     };
   }
 
@@ -2689,8 +2711,7 @@ describe('Resources mutateElement and collapse', () => {
 });
 
 
-describe('Resources.add/upgrade/remove', () => {
-  let sandbox;
+describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
   let resources;
   let parent;
   let parentResource;
@@ -2700,6 +2721,7 @@ describe('Resources.add/upgrade/remove', () => {
   let resource2;
 
   function createElement() {
+    const signals = new Signals();
     const element = {
       ownerDocument: {defaultView: window},
       tagName: 'amp-test',
@@ -2723,8 +2745,11 @@ describe('Resources.add/upgrade/remove', () => {
       getBoundingClientRect() {
         return layoutRectLtwh(0, 0, 0, 0);
       },
+      signals() {
+        return signals;
+      },
     };
-    element.build = sandbox.spy();
+    element.build = sandbox.stub().returns(Promise.resolve());
     return element;
   }
 
@@ -2736,9 +2761,20 @@ describe('Resources.add/upgrade/remove', () => {
     return [element, resource];
   }
 
+  function stubBuild(resource) {
+    const origBuild = resource.build;
+    sandbox.stub(resource, 'build', () => {
+      resource.buildPromise = origBuild.call(resource);
+      return resource.buildPromise;
+    });
+    return resource;
+  }
+
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    resources = new Resources(new AmpDocSingle(window));
+    const infPromise = new Promise(() => {});
+    sandbox.stub(env.ampdoc, 'whenReady', () => infPromise);
+    resources = new Resources(env.ampdoc);
+    resources.isBuildOn_ = true;
     resources.pendingBuildResources_ = [];
     parent = createElementWithResource(1)[0];
     parentResource = parent['__AMP__RESOURCE'];
@@ -2749,7 +2785,6 @@ describe('Resources.add/upgrade/remove', () => {
   });
 
   afterEach(() => {
-    sandbox.restore();
   });
 
   it('should enforce that viewport is ready for first add', () => {
@@ -2770,12 +2805,16 @@ describe('Resources.add/upgrade/remove', () => {
     resources.documentReady_ = false;
     resources.add(child1);
     resources.upgraded(child1);
-    expect(child1.build.called).to.be.false;
+    expect(child1.build).to.not.be.called;
     resources.documentReady_ = true;
     resources.add(child2);
+    const resource2 = stubBuild(Resource.forElementOptional(child2));
     resources.upgraded(child2);
-    expect(child2.build.calledOnce).to.be.true;
-    expect(schedulePassStub).to.be.calledOnce;
+    expect(child2.build).to.be.calledOnce;
+    expect(schedulePassStub).to.not.be.called;
+    return resource2.buildPromise.then(() => {
+      expect(schedulePassStub).to.be.calledOnce;
+    });
   });
 
   it('should not schedule pass when immediate build fails', () => {
@@ -2785,13 +2824,18 @@ describe('Resources.add/upgrade/remove', () => {
     child1.build = () => {
       // Emulate an error happening during an element build.
       child1BuildSpy();
-      throw new Error('child1-build-error');
+      return Promise.reject(new Error('child1-build-error'));
     };
     resources.documentReady_ = true;
     resources.add(child1);
+    const resource1 = stubBuild(Resource.forElementOptional(child1));
     resources.upgraded(child1);
-    expect(child1BuildSpy.calledOnce).to.be.true;
-    expect(schedulePassStub).to.not.be.called;
+    return resource1.buildPromise.then(() => {
+      throw new Error('must have failed');
+    }, () => {
+      expect(child1BuildSpy).to.be.calledOnce;
+      expect(schedulePassStub).to.not.be.called;
+    });
   });
 
   it('should add element to pending build when document is not ready', () => {
@@ -2811,9 +2855,18 @@ describe('Resources.add/upgrade/remove', () => {
   });
 
   describe('buildReadyResources_', () => {
-    it('should build ready resources and remove them from pending', () => {
-      sandbox.stub(resources, 'schedulePass');
+    let schedulePassStub;
+
+    beforeEach(() => {
+      schedulePassStub = sandbox.stub(resources, 'schedulePass');
+      resources.isBuildOn_ = true;
       resources.documentReady_ = false;
+      resource1 = stubBuild(resource1);
+      resource2 = stubBuild(resource2);
+      parentResource = stubBuild(parentResource);
+    });
+
+    it('should build ready resources and remove them from pending', () => {
       resources.pendingBuildResources_ = [resource1, resource2];
       resources.buildReadyResources_();
       expect(child1.build.called).to.be.false;
@@ -2827,20 +2880,22 @@ describe('Resources.add/upgrade/remove', () => {
       expect(child2.build.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(1);
       expect(resources.pendingBuildResources_[0]).to.be.equal(resource2);
-      expect(resources.schedulePass.calledOnce).to.be.true;
+      return resource1.buildPromise.then(() => {
+        expect(resources.schedulePass.calledOnce).to.be.true;
 
-      child2.parentNode = parent;
-      parent.nextSibling = true;
-      resources.buildReadyResources_();
-      expect(child1.build.calledTwice).to.be.false;
-      expect(child2.build.called).to.be.true;
-      expect(resources.pendingBuildResources_.length).to.be.equal(0);
-      expect(resources.schedulePass.calledTwice).to.be.true;
+        child2.parentNode = parent;
+        parent.nextSibling = true;
+        resources.buildReadyResources_();
+        expect(child1.build.calledTwice).to.be.false;
+        expect(child2.build.called).to.be.true;
+        expect(resources.pendingBuildResources_.length).to.be.equal(0);
+        return resource2.buildPromise;
+      }).then(() => {
+        expect(resources.schedulePass.calledTwice).to.be.true;
+      });
     });
 
     it('should NOT build past the root node when pending', () => {
-      sandbox.stub(resources, 'schedulePass');
-      resources.documentReady_ = false;
       resources.pendingBuildResources_ = [resource1];
       resources.buildReadyResources_();
       expect(child1.build.called).to.be.false;
@@ -2857,7 +2912,6 @@ describe('Resources.add/upgrade/remove', () => {
     });
 
     it('should not try to build resources already being built', () => {
-      resources.documentReady_ = false;
       resources.pendingBuildResources_ = [resource1, resource2];
       resources.buildReadyResources_();
       expect(child1.build.called).to.be.false;
@@ -2876,6 +2930,7 @@ describe('Resources.add/upgrade/remove', () => {
         child1BuildSpy();
         resources.pendingBuildResources_.push(newResource);
         resources.buildReadyResources_();
+        return Promise.resolve();
       };
       resources.buildReadyResources_();
       expect(child1BuildSpy.called).to.be.true;
@@ -2894,37 +2949,49 @@ describe('Resources.add/upgrade/remove', () => {
     });
 
     it('should build everything pending when document is ready', () => {
-      const schedulePassStub = sandbox.stub(resources, 'schedulePass');
       resources.documentReady_ = true;
       resources.pendingBuildResources_ = [parentResource, resource1, resource2];
       const child1BuildSpy = sandbox.spy();
       child1.build = () => {
         // Emulate an error happening during an element build.
         child1BuildSpy();
-        throw new Error('child1-build-error');
+        return Promise.reject(new Error('child1-build-error'));
       };
       resources.buildReadyResources_();
       expect(child1BuildSpy.called).to.be.true;
       expect(child2.build.called).to.be.true;
       expect(parent.build.called).to.be.true;
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
-      expect(schedulePassStub).to.be.calledOnce;
+      return Promise.all([
+        parentResource.buildPromise,
+        resource2.buildPromise,
+        resource1.buildPromise.then(() => {
+          throw new Error('must have failed');
+        }, () => {
+          // Ignore error.
+        }),
+      ]).then(() => {
+        expect(schedulePassStub).to.be.calledTwice;
+      });
     });
 
     it('should not schedule pass if all builds failed', () => {
-      const schedulePassStub = sandbox.stub(resources, 'schedulePass');
       resources.documentReady_ = true;
       resources.pendingBuildResources_ = [resource1];
       const child1BuildSpy = sandbox.spy();
       child1.build = () => {
         // Emulate an error happening during an element build.
         child1BuildSpy();
-        throw new Error('child1-build-error');
+        return Promise.reject(new Error('child1-build-error'));
       };
       resources.buildReadyResources_();
       expect(child1BuildSpy.called).to.be.true;
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
-      expect(schedulePassStub).to.not.be.called;
+      return resource1.buildPromise.then(() => {
+        throw new Error('must have failed');
+      }, () => {
+        expect(schedulePassStub).to.not.be.called;
+      });
     });
   });
 

@@ -90,15 +90,16 @@ describes.realWin('amp-ad-exit', {
     json.setAttribute('type', 'application/json');
     el.appendChild(json);
     win.document.body.appendChild(el);
-    el.build();
-    return el;
+    return el.build().then(() => el);
   }
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create({useFakeTimers: true});
     win = env.win;
     toggleExperiment(win, 'amp-ad-exit', true);
-    element = makeElementWithConfig(EXIT_CONFIG);
+    return makeElementWithConfig(EXIT_CONFIG).then(el => {
+      element = el;
+    });
   });
 
   afterEach(() => {
@@ -111,7 +112,11 @@ describes.realWin('amp-ad-exit', {
     const el = win.document.createElement('amp-ad-exit');
     el.appendChild(win.document.createElement('p'));
     win.document.body.appendChild(el);
-    expect(() => el.build()).to.throw(/application\/json/);
+    return el.build().then(() => {
+      throw new Error('must have failed');
+    }, error => {
+      expect(error.message).to.match(/application\/json/);
+    });
   });
 
   it('should do nothing for missing targets', () => {
@@ -277,29 +282,29 @@ describes.realWin('amp-ad-exit', {
         beacon: false,
       },
     };
-    const el = makeElementWithConfig(config);
+    return makeElementWithConfig(config).then(el => {
+      const open = sandbox.stub(win, 'open', () => {
+        return {name: 'fakeWin'};
+      });
 
-    const open = sandbox.stub(win, 'open', () => {
-      return {name: 'fakeWin'};
+      const sendBeacon = sandbox.stub(win.navigator, 'sendBeacon', () => true);
+      const createElement = sandbox.spy(win.document, 'createElement');
+
+      el.implementation_.executeAction({
+        method: 'exit',
+        args: {target: 'tracking'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+
+      expect(open).to.have.been.calledOnce;
+      expect(sendBeacon).to.not.have.been.called;
+      expect(createElement.withArgs('img')).to.have.been.calledThrice;
+      const imgs = createElement.withArgs('img').returnValues;
+      expect(imgs[0].src).to.equal('http://localhost:8000/tracking?1');
+      expect(imgs[1].src).to.equal('http://localhost:8000/tracking?2');
+      expect(imgs[2].src).to.equal('http://localhost:8000/tracking?3');
     });
-
-    const sendBeacon = sandbox.stub(win.navigator, 'sendBeacon', () => true);
-    const createElement = sandbox.spy(win.document, 'createElement');
-
-    el.implementation_.executeAction({
-      method: 'exit',
-      args: {target: 'tracking'},
-      event: makeClickEvent(1001),
-      satisfiesTrust: () => true,
-    });
-
-    expect(open).to.have.been.calledOnce;
-    expect(sendBeacon).to.not.have.been.called;
-    expect(createElement.withArgs('img')).to.have.been.calledThrice;
-    const imgs = createElement.withArgs('img').returnValues;
-    expect(imgs[0].src).to.equal('http://localhost:8000/tracking?1');
-    expect(imgs[1].src).to.equal('http://localhost:8000/tracking?2');
-    expect(imgs[2].src).to.equal('http://localhost:8000/tracking?3');
   });
 
   it('should replace standard URL variables', () => {
