@@ -558,6 +558,7 @@ var forbiddenTerms = {
       'src/service-worker/core.js',
       'src/worker-error-reporting.js',
       'tools/experiments/experiments.js',
+      'build-system/amp4test.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
