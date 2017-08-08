@@ -45,7 +45,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
 ];
 
 /** @const {!Array<string>} */
-const RELAYOUT_CONTAINER_LIST = [
+const CONTAINER_LIST = [
   'AMP-LIGHTBOX',
   'AMP-SIDEBAR',
 ];
@@ -115,12 +115,6 @@ export class AmpIframe extends AMP.BaseElement {
 
     /** @private {boolean|undefined} */
     this.isInContainer_ = undefined;
-
-    /** @private {boolean} */
-    this.isRelayoutNeeded_ = true;
-
-    /** @private {boolean} */
-    this.treatAsTrackingFrame_ = false;
   }
 
   /** @override */
@@ -328,11 +322,6 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     if (this.isTrackingFrame_) {
-      if (!this.treatAsTrackingFrame_) {
-        // Only increase trackingIframeCount value once
-        trackingIframeCount++;
-      }
-      this.treatAsTrackingFrame_ = true;
       if (trackingIframeCount > 1) {
         console/*OK*/.error('Only 1 analytics/tracking iframe allowed per ' +
             'page. Please use amp-analytics instead or file a GitHub issue ' +
@@ -340,13 +329,6 @@ export class AmpIframe extends AMP.BaseElement {
             'https://github.com/ampproject/amphtml/issues/new');
         return Promise.resolve();
       }
-    }
-
-    this.isRelayoutNeeded_ = false;
-    // Need to decrease trackingIframeCount if needed
-    if (this.treatAsTrackingFrame_ && !this.isTrackingFrame_) {
-      this.treatAsTrackingFrame_ = false;
-      trackingIframeCount--;
     }
 
     if (!this.iframeSrc) {
@@ -378,21 +360,11 @@ export class AmpIframe extends AMP.BaseElement {
       iframe.readyState = 'complete';
       this.activateIframe_();
 
-      if (this.treatAsTrackingFrame_) {
-        // Need to confirm the iframe is real tracking iframe
-        if (!this.isTrackingFrame_) {
-          trackingIframeCount--;
-          return;
-        }
+      if (this.isTrackingFrame_) {
         // Prevent this iframe from ever being recreated.
         this.iframeSrc = null;
 
         Services.timerFor(this.win).promise(trackingIframeTimeout).then(() => {
-          if (!this.isTrackingFrame_) {
-            // False treated as tracking iframe.
-            trackingIframeCount--;
-            return;
-          }
           removeElement(iframe);
           this.element.setAttribute('amp-removed', '');
           this.iframe_ = null;
@@ -436,9 +408,7 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    **/
   unlayoutCallback() {
-    this.isRelayoutNeeded_ = true;
     this.activateIframe_.layoutStarted_ = false;
-    this.treatAsTrackingFrame_ = false;
     if (this.iframe_) {
       removeElement(this.iframe_);
       if (this.placeholder_) {
@@ -505,23 +475,6 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    */
   firstLayoutCompleted() {
-  }
-
-  /** @override */
-  isRelayoutNeeded() {
-    if (this.isInContainer_ === undefined) {
-      let ele = this.element;
-      do {
-        ele = ele.parentElement;
-        if (RELAYOUT_CONTAINER_LIST.includes(ele.tagName)) {
-          this.isInContainer_ = true;
-          break;
-        }
-      } while (ele && ele.tagName != 'BODY');
-      this.isInContainer_ = this.isInContainer_ || false;
-    }
-
-    return this.isInContainer_ && this.isRelayoutNeeded_;
   }
 
   /**
@@ -593,7 +546,19 @@ export class AmpIframe extends AMP.BaseElement {
     if (box.width > 10 && box.height > 10) {
       return false;
     }
-    return true;
+    // Iframe is not tracking iframe if open with user interaction
+    if (this.isInContainer_ === undefined) {
+      let ele = this.element;
+      do {
+        ele = ele.parentElement;
+        if (CONTAINER_LIST.includes(ele.tagName)) {
+          this.isInContainer_ = true;
+          break;
+        }
+      } while (ele && ele.tagName != 'BODY');
+      this.isInContainer_ = this.isInContainer_ || false;
+    }
+    return !this.isInContainer_;
   }
 };
 
@@ -663,13 +628,5 @@ export function isAdLike(element) {
 export function setTrackingIframeTimeoutForTesting(ms) {
   trackingIframeTimeout = ms;
 }
-
-/**
- * @param {number} count
- */
-export function setTrackingIframeCountForTesting(count) {
-  trackingIframeCount = count;
-}
-
 
 AMP.registerElement('amp-iframe', AmpIframe);

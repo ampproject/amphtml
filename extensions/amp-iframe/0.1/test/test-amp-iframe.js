@@ -19,7 +19,6 @@ import {
   AmpIframe,
   isAdLike,
   setTrackingIframeTimeoutForTesting,
-  setTrackingIframeCountForTesting,
 } from '../amp-iframe';
 import {adopt} from '../../../../src/runtime';
 import {
@@ -78,7 +77,6 @@ describes.realWin('amp-iframe', {
     });
 
     afterEach(() => {
-      setTrackingIframeCountForTesting(0);
       sandbox.restore();
     });
 
@@ -614,41 +612,34 @@ describes.realWin('amp-iframe', {
       // appended amp-iframe 100x100
       expect(impl3.looksLikeTrackingIframe_()).to.be.false;
       expect(impl3.getPriority()).to.equal(0);
-      // amp-iframe 5x5
-      expect(doc.querySelectorAll('iframe,[amp-removed]')).to.have.length(2);
-      return poll('iframe removal', () => {
-        return doc.querySelectorAll('[amp-removed]').length == 1;
-      }).then(() => {
-        expect(doc.querySelectorAll('iframe')).to.have.length(1);
-        expect(ampIframe3.querySelector('iframe')).to.not.be.null;
-        ampIframe1.implementation_.win.trackingIframeCount = 0;
-      });
+      yield Services.timerFor(env.win).promise(21);
+      expect(doc.querySelectorAll('[amp-removed]')).to.have.length(2);
+      expect(doc.querySelectorAll('iframe')).to.have.length(1);
+      expect(ampIframe3.querySelector('iframe')).to.not.be.null;
     });
 
-    it('should update if update to be non tracking iframe', function* () {
-      const ampIframe1 = createAmpIframe(env, {
-        src: clickableIframeSrc,
-        sandbox: 'allow-scripts allow-same-origin',
+    it('should not detect traking iframe in amp container', function* () {
+      const ampIframeRealTracking = createAmpIframe(env, {
+        src: iframeSrc,
         width: 5,
         height: 5,
-        poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg',
       });
-      const ampIframe2 = createAmpIframe(env, {
-        src: clickableIframeSrc,
-        sandbox: 'allow-scripts allow-same-origin',
-        width: 10,
-        height: 10,
-        poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg',
-      });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe1);
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe2);
-      expect(ampIframe1.querySelector('iframe')).to.not.be.null;
-      expect(doc.querySelectorAll('iframe')).to.have.length(1);
-      ampIframe1.implementation_.isTrackingFrame_ = false;
-      yield Services.timerFor(env.win).promise(21);
-      return ampIframe2.implementation_.layoutCallback().then(() => {
-        expect(doc.querySelectorAll('iframe')).to.have.length(2);
-      });
+      const ampIframeInLightbox = createAmpIframe(env, {
+        src: iframeSrc,
+        width: 5,
+        height: 5,
+      }, undefined, undefined, undefined, 'amp-lightbox');
+      const ampIframe = createAmpIframe(env);
+      yield waitForAmpIframeLayoutPromise(doc, ampIframeRealTracking);
+      yield waitForAmpIframeLayoutPromise(doc, ampIframeInLightbox);
+      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+
+      expect(ampIframeRealTracking.implementation_.looksLikeTrackingIframe_())
+          .to.be.true;
+      expect(ampIframe.implementation_.looksLikeTrackingIframe_())
+          .to.be.false;
+      expect(ampIframeInLightbox.implementation_.looksLikeTrackingIframe_())
+          .to.be.false;
     });
 
     it('should correctly classify ads', () => {
@@ -736,43 +727,5 @@ describes.realWin('amp-iframe', {
           expect(impl.iframeSrc).to.contain(newSrc);
           expect(iframe.getAttribute('src')).to.contain(newSrc);
         });
-
-    it('should allow relayout when in special amp-conponent', function* () {
-      const ampIframeRealTracking = createAmpIframe(env, {
-        src: iframeSrc,
-        width: 5,
-        height: 5,
-      });
-      const ampIframeRealTracking2 = createAmpIframe(env, {
-        src: iframeSrc,
-        width: 5,
-        height: 5,
-      });
-      const ampIframeTop = createAmpIframe(env, undefined, 0);
-      const ampIframeInLightbox = createAmpIframe(env, {
-        src: iframeSrc,
-        width: 5,
-        height: 5,
-      }, undefined, undefined, undefined, 'amp-lightbox');
-      const ampIframe = createAmpIframe(env);
-      yield waitForAmpIframeLayoutPromise(doc, ampIframeRealTracking);
-      yield waitForAmpIframeLayoutPromise(doc, ampIframeRealTracking2);
-      yield waitForAmpIframeLayoutPromise(doc, ampIframeInLightbox);
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-
-      expect(ampIframeRealTracking.implementation_.isRelayoutNeeded())
-          .to.be.false;
-      expect(ampIframeRealTracking2.implementation_.isRelayoutNeeded())
-          .to.be.false;
-      expect(ampIframeTop.implementation_.isRelayoutNeeded()).to.be.false;
-      expect(ampIframe.implementation_.isRelayoutNeeded()).to.be.false;
-      expect(ampIframeInLightbox.implementation_.isRelayoutNeeded()).to.be.true;
-      // relayout ampIframeInLightbox should update.
-      ampIframeInLightbox.implementation_.isTrackingFrame_ = false;
-      yield Services.timerFor(env.win).promise(21);
-      ampIframeInLightbox.implementation_.layoutCallback();
-      expect(ampIframeInLightbox.implementation_.isRelayoutNeeded())
-          .to.be.false;
-    });
   });
 });
