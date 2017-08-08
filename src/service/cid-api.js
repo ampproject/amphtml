@@ -60,11 +60,12 @@ export class GoogleCidApi {
   }
 
   /**
-   * @param {string} scope
    * @param {string} apiClient
+   * @param {string} scope
+   * @param {string=} opt_cookieName
    * @return {!Promise<?string>}
    */
-  getScopedCid(scope, apiClient) {
+  getScopedCid(apiClient, scope, opt_cookieName) {
     const url = this.getUrl_(apiClient);
     if (!url) {
       return Promise.resolve(/** @type {?string} */(null));
@@ -73,6 +74,7 @@ export class GoogleCidApi {
     if (this.cidPromise_[scope]) {
       return this.cidPromise_[scope];
     }
+    const cookieName = opt_cookieName || scope;
     let token;
     // Block the request if a previous request is on flight
     // Poll every 200ms. Longer interval means longer latency for the 2nd CID.
@@ -84,18 +86,18 @@ export class GoogleCidApi {
         return null;
       }
       if (token === TokenStatus.ERROR) {
-        return getCookie(this.win_, scope);
+        return getCookie(this.win_, cookieName);
       }
 
       if (!token) {
         this.persistToken_(TokenStatus.RETRIEVING, TIMEOUT);
       }
       return this.fetchCid_(dev().assertString(url), scope, token)
-          .then(this.handleResponse_.bind(this, scope))
+          .then(this.handleResponse_.bind(this, cookieName))
           .catch(e => {
             this.persistToken_(TokenStatus.ERROR, TIMEOUT);
             dev().error(TAG, e);
-            return getCookie(this.win_, scope);
+            return getCookie(this.win_, cookieName);
           });
     });
   }
@@ -125,22 +127,22 @@ export class GoogleCidApi {
   }
 
   /**
-   * @param {string} scope
+   * @param {string} cookieName
    * @param {!JsonObject} res
    * @return {?string}
    */
-  handleResponse_(scope, res) {
+  handleResponse_(cookieName, res) {
     if (res['optOut']) {
       this.persistToken_(TokenStatus.OPT_OUT, YEAR);
       return null;
     }
     if (res['clientId']) {
       this.persistToken_(res['securityToken'], YEAR);
-      setCookie(this.win_, scope, res['clientId'], this.expiresIn_(YEAR));
+      setCookie(this.win_, cookieName, res['clientId'], this.expiresIn_(YEAR));
       return res['clientId'];
     } else {
       this.persistToken_(TokenStatus.ERROR, DAY);
-      return getCookie(this.win_, scope);
+      return getCookie(this.win_, cookieName);
     }
   }
 
