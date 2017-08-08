@@ -17,6 +17,7 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
+import {Signals} from '../../src/utils/signals';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {Services} from '../../src/services';
 import * as sinon from 'sinon';
@@ -35,6 +36,7 @@ describe('Resource', () => {
     sandbox = sinon.sandbox.create();
 
     attributes = {};
+    const signals = new Signals();
     element = {
       ownerDocument: {defaultView: window},
       tagName: 'AMP-AD',
@@ -68,6 +70,7 @@ describe('Resource', () => {
       nodeType: 1,
       removeAttribute: () => {},
       setAttribute: () => {},
+      signals: () => signals,
     };
     elementMock = sandbox.mock(element);
 
