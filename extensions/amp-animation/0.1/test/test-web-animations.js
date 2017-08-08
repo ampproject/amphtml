@@ -1452,6 +1452,8 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     it('should block AMP elements', () => {
       const r1 = resources.getResourceForElement(amp1);
       const r2 = resources.getResourceForElement(amp2);
+      sandbox.stub(r1, 'whenBuilt', () => Promise.resolve());
+      sandbox.stub(r2, 'whenBuilt', () => Promise.resolve());
       sandbox.stub(r1, 'isDisplayed', () => true);
       sandbox.stub(r2, 'isDisplayed', () => true);
       let runner;

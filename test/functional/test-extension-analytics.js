@@ -189,9 +189,10 @@ describes.realWin('extension-analytics', {
       parentEle = env.win.document.createElement('amp-test');
       parentEle.setAttribute('layout', 'nodisplay');
       env.win.document.body.appendChild(parentEle);
-      parentEle.build();
+      const buildPromise = parentEle.build();
       builder = new CustomEventReporterBuilder(parentEle);
       reporter = builder.track('test', 'fake.com').build();
+      return buildPromise;
     });
 
     it('replace eventType with new name', function* () {
@@ -270,7 +271,7 @@ describes.realWin('extension-analytics', {
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
-        parentEle.build();
+        return parentEle.build();
       });
 
       it('should insert analytics after LOAD_START', function* () {
@@ -328,7 +329,7 @@ describes.realWin('extension-analytics', {
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
-        parentEle.build();
+        return parentEle.build();
       });
 
       it('should insert and remove analytics', function* () {
@@ -362,7 +363,7 @@ describes.realWin('extension-analytics', {
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
-        parentEle.build();
+        return parentEle.build();
       });
 
       it('should NOT insert analytics when relayout', function* () {
@@ -411,7 +412,7 @@ describes.realWin('extension-analytics', {
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
-        parentEle.build();
+        return parentEle.build();
       });
 
       it('should insert analytics when relayout', function* () {

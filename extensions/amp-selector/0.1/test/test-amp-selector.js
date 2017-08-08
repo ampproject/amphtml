@@ -91,11 +91,11 @@ describes.realWin('amp-selector', {
       impl.keyDownHandler_(event);
     }
 
-    it('should build properly', () => {
+    it('should build properly', function* () {
       let ampSelector = getSelector({});
       let impl = ampSelector.implementation_;
       let initSpy = sandbox.spy(impl, 'init_');
-      ampSelector.build();
+      yield ampSelector.build();
       expect(impl.isMultiple_).to.be.false;
       expect(initSpy).to.be.calledOnce;
 
@@ -111,7 +111,7 @@ describes.realWin('amp-selector', {
       });
       impl = ampSelector.implementation_;
       initSpy = sandbox.spy(impl, 'init_');
-      ampSelector.build();
+      yield ampSelector.build();
       expect(impl.isMultiple_).to.be.true;
       expect(initSpy).to.be.calledOnce;
 
@@ -127,19 +127,19 @@ describes.realWin('amp-selector', {
       });
       impl = ampSelector.implementation_;
       initSpy = sandbox.spy(impl, 'init_');
-      ampSelector.build();
+      yield ampSelector.build();
       expect(impl.isMultiple_).to.be.true;
       expect(initSpy).to.be.calledOnce;
     });
 
-    it('should init properly for single select', () => {
+    it('should init properly for single select', function* () {
 
       let ampSelector = getSelector({});
       let impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
       let setInputsSpy = sandbox.spy(impl, 'setInputs_');
       let initSpy = sandbox.spy(impl, 'init_');
-      ampSelector.build();
+      yield ampSelector.build();
       expect(impl.isMultiple_).to.be.false;
       expect(initSpy).to.have.been.calledOnce;
       expect(impl.selectedOptions_.length).to.equal(0);
@@ -155,7 +155,7 @@ describes.realWin('amp-selector', {
       impl = ampSelector.implementation_;
       setInputsSpy = sandbox.spy(impl, 'setInputs_');
       initSpy = sandbox.spy(impl, 'init_');
-      ampSelector.build();
+      yield ampSelector.build();
       expect(impl.isMultiple_).to.be.false;
       expect(initSpy).to.have.been.calledOnce;
       expect(impl.selectedOptions_.length).to.equal(1);
@@ -165,7 +165,7 @@ describes.realWin('amp-selector', {
       expect(setInputsSpy).to.have.been.calledOnce;
     });
 
-    it('should init properly for multiselect', () => {
+    it('should init properly for multiselect', function* () {
       const ampSelector = getSelector({
         attributes: {
           multiple: true,
@@ -178,14 +178,14 @@ describes.realWin('amp-selector', {
       const impl = ampSelector.implementation_;
       const initSpy = sandbox.spy(impl, 'init_');
       const setInputsSpy = sandbox.spy(impl, 'setInputs_');
-      ampSelector.build();
+      yield ampSelector.build();
       expect(impl.isMultiple_).to.be.true;
       expect(initSpy).to.have.been.calledOnce;
       expect(impl.selectedOptions_.length).to.equal(2);
       expect(setInputsSpy).to.have.been.calledOnce;
     });
 
-    it('should init properly for selector with disabled options', () => {
+    it('should init properly for selector with disabled options', function* () {
       const ampSelector = getSelector({
         attributes: {
           multiple: true,
@@ -199,7 +199,7 @@ describes.realWin('amp-selector', {
       const impl = ampSelector.implementation_;
       const initSpy = sandbox.spy(impl, 'init_');
       const setInputsSpy = sandbox.spy(impl, 'setInputs_');
-      ampSelector.build();
+      yield ampSelector.build();
 
       expect(impl.isMultiple_).to.be.true;
       expect(initSpy).to.have.been.calledOnce;
@@ -209,7 +209,7 @@ describes.realWin('amp-selector', {
     });
 
 
-    it('should setSelection for single select', () => {
+    it('should setSelection for single select', function* () {
       const ampSelector = getSelector({
         config: {
           count: 5,
@@ -221,7 +221,7 @@ describes.realWin('amp-selector', {
       const initSpy = sandbox.spy(impl, 'init_');
       const setInputsSpy = sandbox.spy(impl, 'setInputs_');
       const clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
-      ampSelector.build();
+      yield ampSelector.build();
 
       expect(impl.isMultiple_).to.be.false;
       expect(initSpy).to.have.been.calledOnce;
@@ -240,7 +240,7 @@ describes.realWin('amp-selector', {
 
     });
 
-    it('should setSelection for multi select', () => {
+    it('should setSelection for multi select', function* () {
       const ampSelector = getSelector({
         attributes: {
           multiple: true,
@@ -254,8 +254,7 @@ describes.realWin('amp-selector', {
       const impl = ampSelector.implementation_;
       const initSpy = sandbox.spy(impl, 'init_');
       const setInputsSpy = sandbox.spy(impl, 'setInputs_');
-      ampSelector.build();
-
+      yield ampSelector.build();
 
       expect(impl.isMultiple_).to.be.true;
       expect(initSpy).to.have.been.calledOnce;
@@ -276,7 +275,7 @@ describes.realWin('amp-selector', {
     });
 
 
-    it('should clearSelection', () => {
+    it('should clearSelection', function* () {
       const ampSelector = getSelector({
         attributes: {
           multiple: true,
@@ -290,7 +289,7 @@ describes.realWin('amp-selector', {
       const impl = ampSelector.implementation_;
       const initSpy = sandbox.spy(impl, 'init_');
       const setInputsSpy = sandbox.spy(impl, 'setInputs_');
-      ampSelector.build();
+      yield ampSelector.build();
 
       expect(impl.isMultiple_).to.be.true;
       expect(initSpy).to.have.been.calledOnce;
@@ -311,10 +310,10 @@ describes.realWin('amp-selector', {
 
     });
 
-    it('should setInputs properly', () => {
+    it('should setInputs properly', function* () {
       let ampSelector = getSelector({});
       let impl = ampSelector.implementation_;
-      ampSelector.build();
+      yield ampSelector.build();
       expect(impl.inputs_.length).to.equal(0);
 
       ampSelector = getSelector({
@@ -324,7 +323,7 @@ describes.realWin('amp-selector', {
       });
 
       impl = ampSelector.implementation_;
-      ampSelector.build();
+      yield ampSelector.build();
       expect(impl.inputs_.length).to.equal(0);;
 
       ampSelector = getSelector({
@@ -337,7 +336,7 @@ describes.realWin('amp-selector', {
         },
       });
       impl = ampSelector.implementation_;
-      ampSelector.build();
+      yield ampSelector.build();
       expect(impl.inputs_.length).to.equal(0);
 
       ampSelector = getSelector({
@@ -350,7 +349,7 @@ describes.realWin('amp-selector', {
         },
       });
       impl = ampSelector.implementation_;
-      ampSelector.build();
+      yield ampSelector.build();
       expect(impl.inputs_.length).to.equal(1);
       expect(impl.selectedOptions_).to.include.members([impl.options_[1]]);
 
@@ -371,7 +370,7 @@ describes.realWin('amp-selector', {
         },
       });
       impl = ampSelector.implementation_;
-      ampSelector.build();
+      yield ampSelector.build();
       expect(impl.inputs_.length).to.equal(2);
       expect(impl.selectedOptions_).to.include.members([
         impl.options_[0],
@@ -388,7 +387,7 @@ describes.realWin('amp-selector', {
       ]);
     });
 
-    it('should not create hidden inputs for disabled options', () => {
+    it('should not create hidden inputs for disabled options', function* () {
       const ampSelector = getSelector({
         attributes: {
           name: 'muti_select',
@@ -401,7 +400,7 @@ describes.realWin('amp-selector', {
         },
       });
       const impl = ampSelector.implementation_;
-      ampSelector.build();
+      yield ampSelector.build();
       expect(impl.inputs_.length).to.equal(0);
 
       impl.setSelection_(impl.options_[3]);
@@ -409,7 +408,7 @@ describes.realWin('amp-selector', {
       expect(impl.inputs_.length).to.equal(0);
     });
 
-    it('should handle clicks', () => {
+    it('should handle clicks', function* () {
       let ampSelector = getSelector({
         attributes: {
           name: 'single_select',
@@ -421,7 +420,7 @@ describes.realWin('amp-selector', {
       });
       let impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
-      ampSelector.build();
+      yield ampSelector.build();
       let clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       let setSelectionSpy = sandbox.spy(impl, 'setSelection_');
 
@@ -464,7 +463,7 @@ describes.realWin('amp-selector', {
 
       impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
-      ampSelector.build();
+      yield ampSelector.build();
       clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       setSelectionSpy = sandbox.spy(impl, 'setSelection_');
 
@@ -507,7 +506,7 @@ describes.realWin('amp-selector', {
 
       impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
-      ampSelector.build();
+      yield ampSelector.build();
       clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       setSelectionSpy = sandbox.spy(impl, 'setSelection_');
 
@@ -520,7 +519,7 @@ describes.realWin('amp-selector', {
       expect(clearSelectionSpy).to.not.have.been.called;
     });
 
-    it('should handle keyboard selection', () => {
+    it('should handle keyboard selection', function* () {
       let ampSelector = getSelector({
         attributes: {
           name: 'single_select',
@@ -532,7 +531,7 @@ describes.realWin('amp-selector', {
       });
       let impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
-      ampSelector.build();
+      yield ampSelector.build();
       let clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       let setSelectionSpy = sandbox.spy(impl, 'setSelection_');
       keyPress(ampSelector, KeyCodes.ENTER, impl.options_[3]);
@@ -559,7 +558,7 @@ describes.realWin('amp-selector', {
 
       impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
-      ampSelector.build();
+      yield ampSelector.build();
       clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       setSelectionSpy = sandbox.spy(impl, 'setSelection_');
 
@@ -594,7 +593,7 @@ describes.realWin('amp-selector', {
 
       impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
-      ampSelector.build();
+      yield ampSelector.build();
       clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       setSelectionSpy = sandbox.spy(impl, 'setSelection_');
 
@@ -776,8 +775,8 @@ describes.realWin('amp-selector', {
             multiple: true,
           },
         });
-        expect(() => ampSelector.build())
-            .to.throw(/not supported for multiple selection amp-selector​​​/);
+        return expect(ampSelector.build()).to.eventually.be.rejectedWith(
+            /not supported for multiple selection amp-selector​​​/);
       });
 
       it('should ONLY change selection in `select` mode', () => {
@@ -807,7 +806,7 @@ describes.realWin('amp-selector', {
     });
 
     describe('clear action',() => {
-      it('should clear selection of a single select', () => {
+      it('should clear selection of a single select', function* () {
         const ampSelector = getSelector({
           attributes: {
             id: 'ampSelector',
@@ -818,7 +817,7 @@ describes.realWin('amp-selector', {
           },
         });
         ampSelector.children[1].setAttribute('selected', '');
-        ampSelector.build();
+        yield ampSelector.build();
 
         const button = win.document.createElement('button');
         button.setAttribute('on', 'tap:ampSelector.clear');
@@ -829,7 +828,7 @@ describes.realWin('amp-selector', {
         expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
       });
 
-      it('should clear selection of a multiselect', () => {
+      it('should clear selection of a multiselect', function* () {
         const ampSelector = getSelector({
           attributes: {
             id: 'ampSelector',
@@ -841,7 +840,7 @@ describes.realWin('amp-selector', {
         });
         ampSelector.children[0].setAttribute('selected', '');
         ampSelector.children[3].setAttribute('selected', '');
-        ampSelector.build();
+        yield ampSelector.build();
 
         const button = win.document.createElement('button');
         button.setAttribute('on', 'tap:ampSelector.clear');

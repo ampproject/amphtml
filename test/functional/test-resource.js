@@ -17,6 +17,7 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
+import {Signals} from '../../src/utils/signals';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {Services} from '../../src/services';
 import * as sinon from 'sinon';
@@ -35,6 +36,7 @@ describe('Resource', () => {
     sandbox = sinon.sandbox.create();
 
     attributes = {};
+    const signals = new Signals();
     element = {
       ownerDocument: {defaultView: window},
       tagName: 'AMP-AD',
@@ -68,6 +70,7 @@ describe('Resource', () => {
       nodeType: 1,
       removeAttribute: () => {},
       setAttribute: () => {},
+      signals: () => signals,
     };
     elementMock = sandbox.mock(element);
 
@@ -113,17 +116,19 @@ describe('Resource', () => {
     elementMock.expects('build').never();
     elementMock.expects('updateLayoutBox').never();
 
-    resource.build();
+    expect(resource.build()).to.be.null;
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
   });
 
 
   it('should build after upgraded', () => {
+    const buildPromise = Promise.resolve();
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').once();
+    elementMock.expects('build').returns(buildPromise).once();
     elementMock.expects('updateLayoutBox').never();
-    resource.build();
-    expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    return resource.build().then(() => {
+      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    });
   });
 
   it('should not build if permission is not granted', () => {
@@ -131,44 +136,52 @@ describe('Resource', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     sandbox.stub(resources, 'grantBuildPermission', () => permission);
     elementMock.expects('updateLayoutBox').never();
-    resource.build();
+    expect(resource.build()).to.be.null;
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
 
     permission = true;
-    resource.build();
-    expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    elementMock.expects('build').returns(Promise.resolve()).once();
+    return resource.build().then(() => {
+      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    });
   });
 
   it('should blacklist on build failure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').throws('Failed').once();
+    elementMock.expects('build')
+        .returns(Promise.reject(new Error('intentional'))).once();
     elementMock.expects('updateLayoutBox').never();
-    resource.build();
-    expect(resource.blacklisted_).to.equal(true);
-    expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
+    return resource.build().then(() => {
+      throw new Error('must have failed');
+    }, () => {
+      expect(resource.blacklisted_).to.equal(true);
+      expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
+    });
   });
 
   it('should mark as ready for layout if already measured', () => {
     const box = layoutRectLtwh(0, 0, 100, 200);
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').once();
+    elementMock.expects('build').returns(Promise.resolve()).once();
     elementMock.expects('updateLayoutBox')
         .withExactArgs(box)
         .once();
     const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(true);
     resource.layoutBox_ = box;
-    resource.build(false);
-    expect(stub).to.be.calledOnce;
-    expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+    return resource.build().then(() => {
+      expect(stub).to.be.calledOnce;
+      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+    });
   });
 
   it('should mark as not laid out if not yet measured', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').once();
+    elementMock.expects('build').returns(Promise.resolve()).once();
     const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(false);
-    resource.build(false);
-    expect(stub.calledOnce).to.be.true;
-    expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    return resource.build().then(() => {
+      expect(stub.calledOnce).to.be.true;
+      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    });
   });
 
   it('should allow to measure when not upgraded', () => {
@@ -202,42 +215,42 @@ describe('Resource', () => {
 
   it('should measure and update state', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').once();
-    resource.build();
-
-    elementMock.expects('getBoundingClientRect')
-        .returns({left: 11, top: 12, width: 111, height: 222})
-        .once();
-    elementMock.expects('updateLayoutBox')
-        .withExactArgs(sinon.match(data => {
-          return data.width == 111 && data.height == 222;
-        }))
-        .once();
-    resource.measure();
-    expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
-    expect(resource.getLayoutBox().left).to.equal(11);
-    expect(resource.getLayoutBox().top).to.equal(12);
-    expect(resource.getLayoutBox().width).to.equal(111);
-    expect(resource.getLayoutBox().height).to.equal(222);
-    expect(resource.isFixed()).to.be.false;
+    elementMock.expects('build').returns(Promise.resolve()).once();
+    return resource.build().then(() => {
+      elementMock.expects('getBoundingClientRect')
+          .returns({left: 11, top: 12, width: 111, height: 222})
+          .once();
+      elementMock.expects('updateLayoutBox')
+          .withExactArgs(sinon.match(data => {
+            return data.width == 111 && data.height == 222;
+          }))
+          .once();
+      resource.measure();
+      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+      expect(resource.getLayoutBox().left).to.equal(11);
+      expect(resource.getLayoutBox().top).to.equal(12);
+      expect(resource.getLayoutBox().width).to.equal(111);
+      expect(resource.getLayoutBox().height).to.equal(222);
+      expect(resource.isFixed()).to.be.false;
+    });
   });
 
   it('should update initial box only on first measure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').once();
-    resource.build();
+    elementMock.expects('build').returns(Promise.resolve()).once();
+    return resource.build().then(() => {
+      element.getBoundingClientRect = () =>
+          ({left: 11, top: 12, width: 111, height: 222});
+      resource.measure();
+      expect(resource.getLayoutBox().top).to.equal(12);
+      expect(resource.getInitialLayoutBox().top).to.equal(12);
 
-    element.getBoundingClientRect = () =>
-        ({left: 11, top: 12, width: 111, height: 222});
-    resource.measure();
-    expect(resource.getLayoutBox().top).to.equal(12);
-    expect(resource.getInitialLayoutBox().top).to.equal(12);
-
-    element.getBoundingClientRect = () =>
-        ({left: 11, top: 22, width: 111, height: 222});
-    resource.measure();
-    expect(resource.getLayoutBox().top).to.equal(22);
-    expect(resource.getInitialLayoutBox().top).to.equal(12);
+      element.getBoundingClientRect = () =>
+          ({left: 11, top: 22, width: 111, height: 222});
+      resource.measure();
+      expect(resource.getLayoutBox().top).to.equal(22);
+      expect(resource.getInitialLayoutBox().top).to.equal(12);
+    });
   });
 
   it('should noop request measure when not built', () => {
@@ -362,11 +375,10 @@ describe('Resource', () => {
       element.parentElement = document.createElement('amp-iframe');
       element.parentElement.__AMP__RESOURCE = {};
       elementMock.expects('isUpgraded').returns(true).atLeast(1);
-      elementMock.expects('build').once();
-      resource = new Resource(1, element, resources);
-      resource.build();
-
+      elementMock.expects('build').returns(Promise.resolve()).once();
       rect = {left: 11, top: 12, width: 111, height: 222};
+      resource = new Resource(1, element, resources);
+      return resource.build();
     });
 
     it('should measure placeholder with stubbed parent', () => {
