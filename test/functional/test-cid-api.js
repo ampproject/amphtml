@@ -84,23 +84,24 @@ describes.realWin('test-cid-api', {}, env => {
           };
         },
       }));
-      return api.getScopedCid('googleanalytics', 'scope-a', 'cookie-a').then(cid => {
-        expect(cid).to.equal('amp-12345');
-        expect(getCookie(win, 'scope-a')).to.be.null;
-        expect(getCookie(win, 'cookie-a')).to.equal('amp-12345');
-        expect(getCookie(win, 'AMP_TOKEN')).to.equal('amp-token-123');
-        expect(fetchJsonStub).to.be.calledWith(
-            'https://ampcid.google.com/v1/publisher:getClientId?key=AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
-            {
-              method: 'POST',
-              ampCors: false,
-              credentials: 'include',
-              mode: 'cors',
-              body: {
-                originScope: 'scope-a',
-              },
-            });
-      });
+      return api.getScopedCid('googleanalytics', 'scope-a', 'cookie-a')
+          .then(cid => {
+            expect(cid).to.equal('amp-12345');
+            expect(getCookie(win, 'scope-a')).to.be.null;
+            expect(getCookie(win, 'cookie-a')).to.equal('amp-12345');
+            expect(getCookie(win, 'AMP_TOKEN')).to.equal('amp-token-123');
+            expect(fetchJsonStub).to.be.calledWith(
+                'https://ampcid.google.com/v1/publisher:getClientId?key=AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
+                {
+                  method: 'POST',
+                  ampCors: false,
+                  credentials: 'include',
+                  mode: 'cors',
+                  body: {
+                    originScope: 'scope-a',
+                  },
+                });
+          });
     });
 
     it('should get CID when AMP_TOKEN exists', () => {
