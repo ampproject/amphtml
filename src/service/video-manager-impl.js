@@ -22,7 +22,6 @@ import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
-import {setStyles} from '../style';
 import {isFiniteNumber} from '../types';
 import {mapRange} from '../utils/math';
 import {startsWith} from '../string.js';
@@ -48,6 +47,7 @@ import {
   parseFavicon,
   setMediaSession,
 } from '../mediasession-helper';
+import {CustomControls} from '../video-custom-controls';
 import {Animation} from '../animation';
 import * as st from '../style';
 import * as tr from '../transition';
@@ -444,7 +444,7 @@ export class VideoManager {
 /**
  * VideoEntry represents an entry in the VideoManager's list.
  */
-class VideoEntry {
+export class VideoEntry {
   /**
    * @param {!VideoManager} manager
    * @param {!../video-interface.VideoInterface} video
@@ -460,7 +460,7 @@ class VideoEntry {
     /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
-    /** @package @const {!../video-interface.VideoInterface} */
+    /** @const {!../video-interface.VideoInterface} */
     this.video = video;
 
     /** @private {?Element} */
@@ -512,9 +512,6 @@ class VideoEntry {
 
     /** @private {?Element} */
     this.internalElement_ = null;
-
-    /** @private {?Element} */
-    this.draggingMask_ = null;
 
     /** @private {boolean} */
     this.muted_ = false;
@@ -572,6 +569,16 @@ class VideoEntry {
     /** @private {Array<!UnlistenDef>} */
     this.dragUnlisteners_ = [];
 
+    // Custom Controls Variables
+    this.customControls_ = null;
+
+    // Media Session API Variables
+
+    /** @private {!../mediasession-helper.MetadataDef} */
+    this.metadata_ = EMPTY_METADATA;
+
+    // Public Variables
+
     this.hasCustomCtrls = element.hasAttribute(VideoAttributes.CUSTOM_CTRLS);
 
     this.hasDocking = element.hasAttribute(VideoAttributes.DOCK);
@@ -584,11 +591,6 @@ class VideoEntry {
 
     this.hasFullscreenOnLandscape = fsOnLandscapeAttr == ''
                                     || fsOnLandscapeAttr == 'always';
-
-    // Media Session API Variables
-
-    /** @private {!../mediasession-helper.MetadataDef} */
-    this.metadata_ = EMPTY_METADATA;
 
     listenOncePromise(element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
@@ -607,15 +609,14 @@ class VideoEntry {
    */
   videoBuilt_() {
     this.updateVisibility();
+    if (this.hasCustomCtrls || this.hasDocking) {
+      this.customCtrlsVideoBuilt_();
+    }
     if (this.hasAutoplay) {
       this.autoplayVideoBuilt_();
     }
     if (this.hasDocking) {
       this.dockableVideoBuilt_();
-    }
-    if (this.hasCustomCtrls) {
-      console.log('building custom controls');
-      this.customCtrlsVideoBuild_();
     }
   }
 
@@ -628,7 +629,7 @@ class VideoEntry {
 
     if (!this.video.preimplementsMediaSessionAPI()) {
       const playHandler = () => {
-        this.video.play(/*isAutoplay*/ false);
+        this.video.play(/*autoplay*/ false);
       };
       const pauseHandler = () => {
         this.video.pause();
@@ -695,6 +696,22 @@ class VideoEntry {
       // Handles the case when the video becomes visible before loading
       this.loadedVideoVisibilityChanged_();
     }
+  }
+
+  /**
+   * Returns whether the video is currently playing or not
+   * @return {boolean}
+   */
+  isPlaying() {
+    return this.isPlaying_;
+  }
+
+  /**
+   * Returns whether the video is currently muted or not
+   * @return {boolean}
+   */
+  isMuted() {
+    return this.muted_;
   }
 
   /**
@@ -825,14 +842,14 @@ class VideoEntry {
     // and showing the controls quickly becomes a bad user experience for the
     // common case where autoplay is supported.
     if (this.video.isInteractive()) {
-      this.video.hideControls();
+      this.hideControls();
     }
 
     this.boundSupportsAutoplay_().then(supportsAutoplay => {
       if (!supportsAutoplay && this.video.isInteractive()) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
-        this.video.showControls();
+        this.showControls();
         return;
       }
 
@@ -859,7 +876,7 @@ class VideoEntry {
     };
 
     // Hide the controls.
-    this.video.hideControls();
+    this.hideControls();
 
     // Create autoplay animation and the mask to detect user interaction.
     const animation = this.createAutoplayAnimation_();
@@ -888,7 +905,7 @@ class VideoEntry {
 
     function onInteraction() {
       this.userInteractedWithAutoPlay_ = true;
-      this.video.showControls();
+      this.showControls();
       this.video.unmute();
       unlisteners.forEach(unlistener => {
         unlistener();
@@ -990,8 +1007,10 @@ class VideoEntry {
         this.measureMinimizedRect_();
       },
       mutate: () => {
-        this.repositionMinimizedVideo_();
-        this.realignDraggingMask_();
+        if (this.dockState_ != DockStates.INLINE) {
+          this.repositionMinimizedVideo_();
+          this.realignMiniControls_();
+        }
       },
     });
   }
@@ -1037,12 +1056,12 @@ class VideoEntry {
   }
 
   /**
-   * Re-aligns the dragging mask with the position of the minimized video,
+   * Re-aligns the mini controls with the position of the minimized video,
    * usually following a device orientation change
    * @private
    */
-  realignDraggingMask_() {
-    if (!this.draggingMask_ || !this.internalElement_) {
+  realignMiniControls_() {
+    if (!this.customControls_ || !this.internalElement_) {
       return;
     }
 
@@ -1052,7 +1071,7 @@ class VideoEntry {
         return st.getStyle(dev().assertElement(internalElement), prop);
       };
 
-      st.setStyles(dev().assertElement(this.draggingMask_), {
+      st.setStyles(dev().assertElement(this.customControls_.getElement()), {
         'top': cloneStyle('top'),
         'left': cloneStyle('left'),
         'bottom': cloneStyle('bottom'),
@@ -1064,7 +1083,6 @@ class VideoEntry {
         'height': cloneStyle('height'),
         'position': 'fixed',
         'z-index': '17',
-        'background': 'transparent',
       });
     });
   }
@@ -1233,7 +1251,8 @@ class VideoEntry {
    * @private
    */
   initializeDocking_() {
-    this.video.hideControls();
+    this.hideControls(false);
+    this.customControls_.toggleMinimalControls(true);
     this.internalElement_.classList.add(DOCK_CLASS);
     st.setStyles(dev().assertElement(this.internalElement_), {
       'height': st.px(this.inlineVidRect_.height),
@@ -1374,11 +1393,13 @@ class VideoEntry {
         this.measureMinimizedRect_();
       },
       mutate: () => {
-        this.createDraggingMask_();
+        this.customControls_.toggleMinimalControls(true);
+        this.showControls(true);
+        this.realignMiniControls_();
 
         // Desktop listeners
         this.addDragListener_(
-            dev().assertElement(this.draggingMask_),
+            dev().assertElement(this.customControls_.getElement()),
             'mousedown',
             e => {
               e.preventDefault();
@@ -1394,6 +1415,7 @@ class VideoEntry {
           // in which case, drag would call itself again to finish the animation
           this.drag_();
         });
+
         this.addDragListener_(this.ampdoc_.win.document, 'mousemove', e => {
           this.isDragging_ = this.isTouched_;
           if (this.isDragging_) {
@@ -1406,7 +1428,7 @@ class VideoEntry {
         });
         // Touch listeners
         this.addDragListener_(
-            dev().assertElement(this.draggingMask_),
+            dev().assertElement(this.customControls_.getElement()),
             'touchstart',
             e => {
               e.preventDefault();
@@ -1536,7 +1558,7 @@ class VideoEntry {
               || dragCoord.position.y != newPosY) {
             this.isSnapping_ = true;
             // Snap to the calculated corner
-            this.animateSnap_(this.draggingMask_, newPosX, newPosY);
+            this.animateSnap_(this.customControls_.getElement(), newPosX, newPosY);
             this.animateSnap_(this.internalElement_, newPosX, newPosY);
             this.dockState_ = DockStates.DOCKED;
           }
@@ -1544,7 +1566,7 @@ class VideoEntry {
 
         // Update the video's position
         if (!this.isSnapping_) {
-          this.dragMove_(this.draggingMask_);
+          this.dragMove_(this.customControls_.getElement());
           this.dragMove_(this.internalElement_);
         }
 
@@ -1565,7 +1587,10 @@ class VideoEntry {
   finishDragging_() {
     this.vsync_.mutate(() => {
       this.unlistenToDragEvents_();
-      this.removeDraggingMask_();
+      this.customControls_.hideControls();
+      this.customControls_.toggleMinimalControls(false);
+      this.customControls_.enableControls();
+      this.customControls_.getElement().setAttribute('style', '');
     });
   }
 
@@ -1629,7 +1654,7 @@ class VideoEntry {
     // Remove draggable mask and listeners
     this.finishDragging_();
     // Re-enable controls
-    this.video.showControls();
+    this.showControls();
     // Restore the video inline
     this.internalElement_.classList.remove(DOCK_CLASS);
     this.internalElement_.setAttribute('style', '');
@@ -1735,30 +1760,6 @@ class VideoEntry {
   }
 
   /**
-   * Creates a mask to overlay on top of a minimized video to capture drag
-   * and drop events on iframe-based players
-   * @private
-   */
-  createDraggingMask_() {
-    const doc = this.ampdoc_.win.document;
-    this.draggingMask_ = doc.createElement('i-amphtml-dragging-mask');
-    this.realignDraggingMask_();
-    this.video.element.appendChild(this.draggingMask_);
-  }
-
-  /**
-   * Removes the draggable mask so that the video can be interacted with
-   * again when inline
-   * @private
-   */
-  removeDraggingMask_() {
-    if (this.draggingMask_) {
-      removeElement(this.draggingMask_);
-      this.draggingMask_ = null;
-    }
-  }
-
-  /**
    * Called by all possible events that might change the visibility of the video
    * such as scrolling or {@link ../video-interface.VideoEvents#VISIBILITY}.
    * @package
@@ -1852,91 +1853,63 @@ class VideoEntry {
    * Called when a video with custom controls is built.
    * @private
    */
-  customCtrlsVideoBuild_() {
+  customCtrlsVideoBuilt_() {
+    // Hide native controls
+    this.hideControls(false);
 
+    const skinAttr = this.video.element.getAttribute(
+        VideoAttributes.CUSTOM_CTRLS_SKIN
+    );
+    const skin = skinAttr == 'dark' ? true : false;
+
+    const mainCtrlsAttr = this.video.element.getAttribute(
+        VideoAttributes.CUSTOM_CTRLS_MAIN
+    );
+    const mainCtrls = mainCtrlsAttr ? mainCtrlsAttr.split(' ') : undefined;
+
+    const miniCtrlsAttr = this.video.element.getAttribute(
+        VideoAttributes.CUSTOM_CTRLS_MINI
+    );
+    const miniCtrls = miniCtrlsAttr ? miniCtrlsAttr.split(' ') : undefined;
+
+    const floatingCtrlAttr = this.video.element.getAttribute(
+        VideoAttributes.CUSTOM_CTRLS_FLOATING
+    );
+    const floatingCtrl = floatingCtrlAttr ? floatingCtrlAttr : undefined;
+
+    this.customControls_ = new CustomControls(
+      this.ampdoc_,
+      this,
+      skin,
+      mainCtrls,
+      miniCtrls,
+      floatingCtrl
+    );
+  }
+
+  hideControls(customToo = true, disableToo = true) {
     // Hide native controls
     this.video.hideControls();
-    this.createCustomControls();
-  }
-
-  createCustomControls() {
-    console.log('creating custom controls');
-
-
-    // <ul id="video-controls" class="controls">
-    //    <li><button id="playpause" type="button">Play/Pause</button></li>
-    //    <li><button id="stop" type="button">Stop</button></li>
-    //    <li class="progress">
-    //       <progress id="progress" value="0" min="0">
-    //          <span id="progress-bar"></span>
-    //       </progress>
-    //    </li>
-    //    <li><button id="mute" type="button">Mute/Unmute</button></li>
-    //    <li><button id="volinc" type="button">Vol+</button></li>
-    //    <li><button id="voldec" type="button">Vol-</button></li>
-    //    <li><button id="fs" type="button">Fullscreen</button></li>
-    // </ul>
-
-    // Set up controls
-    const doc = this.ampdoc_.win.document;
-    const ctrlContainer = doc.createElement('custom-ctrls');
-
-    // Critical controls
-    const playpauseBtn = doc.createElement('custom-ctrls-playpause');
-
-    // progress-bar
-    const progressBar = null;
-
-    // Volume controls
-    const volumeContainer = doc.createElement('custom-ctrls-volume');
-    const volumeIndicator = doc.createElement('custom-ctrls-volume-indicator');
-    const volumeSlider = doc.createElement('input');
-    volumeSlider.setAttribute('type', 'range');
-    volumeSlider.setAttribute('min', '0');
-    volumeSlider.setAttribute('max', '100');
-    volumeSlider.setAttribute('value', '30');
-    volumeSlider.classList.add('custom-ctrls-volume-indicator');
-    const muteBtn = doc.createElement('custom-ctrls-mute');
-
-    // Add to the element
-    this.vsync_.mutate(() => {
-      playpauseBtn.appendChild(this.customControlIcon('play'));
-      ctrlContainer.appendChild(playpauseBtn);
-      volumeContainer.appendChild(volumeIndicator);
-      muteBtn.appendChild(this.customControlIcon('mute'));
-      volumeContainer.appendChild(muteBtn);
-      volumeContainer.appendChild(volumeSlider);
-      ctrlContainer.appendChild(volumeContainer);
-      this.video.element.appendChild(ctrlContainer);
-      console.log('done');
-    });
-  }
-
-  customControlIcon(name) {
-    /*eslint-disable */
-    const icons = {
-      'play':
-        `<path d="M8 5v14l11-7z"></path>
-         <path d="M0 0h24v24H0z" fill="none"></path>`,
-      'pause':
-        `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
-         <path d="M0 0h24v24H0z" fill="none"></path>`,
-      'mute':
-        `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path>
-         <path d="M0 0h24v24H0z" fill="none"></path>`,
-      'volume_max':
-        `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
-         <path d="M0 0h24v24H0z" fill="none"></path>`,
+    // Hide custom controls
+    if (customToo && this.hasCustomCtrls && this.customControls_) {
+      if (disableToo) {
+        this.customControls_.disableControls();
+      }
+      this.customControls_.hideControls();
     }
-    /*eslint-enable */
-    const doc = this.ampdoc_.win.document;
-    const icon = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    icon.setAttributeNS(null, 'fill', '#FFFFFF');
-    icon.setAttributeNS(null, 'height', '100%');
-    icon.setAttributeNS(null, 'width', '100%');
-    icon.setAttributeNS(null, 'viewBox', '0 0 24 24');
-    icon.innerHTML = icons[name];
-    return icon;
+  }
+
+  showControls(showToo = false) {
+    if ((this.hasCustomCtrls || this.hasDocking) && this.customControls_) {
+      // Show custom controls
+      this.customControls_.enableControls();
+      if (showToo) {
+        this.customControls_.showControls();
+      }
+    } else {
+      // Show native controls
+      this.video.showControls();
+    }
   }
 }
 
@@ -1983,7 +1956,7 @@ export function supportsAutoplay(win, isLiteViewer) {
   detectionElement.webkitPlaysinline = true;
   detectionElement.setAttribute('height', '0');
   detectionElement.setAttribute('width', '0');
-  setStyles(detectionElement, {
+  st.setStyles(detectionElement, {
     position: 'fixed',
     top: '0',
     width: '0',

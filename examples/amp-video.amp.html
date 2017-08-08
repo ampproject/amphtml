@@ -33,34 +33,8 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <h1>amp-video</h1>
-
-  <amp-video
-      id="myVideo"
-      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
-      width="720"
-      height="405"
-      layout="responsive"
-      controls>
-    <div placeholder>
-      This is a placeholder
-    </div>
-    <div fallback>
-      This is a fallback
-    </div>
-  </amp-video>
-  <h3>Actions</h3>
-  <button on="tap:myVideo.play">Play</button>
-  <button on="tap:myVideo.pause">Pause</button>
-  <button on="tap:myVideo.mute">Mute</button>
-  <button on="tap:myVideo.unmute">Unmute</button>
-  <button on="tap:myVideo.fullscreen">Fullscreen</button>
-
-  <h2>MediaSession API</h2>
-  <p>
-     If you play this on a mobile device, the playback notification will have
-     a proper poster, artist, album and title.
-  </p>
+  <h2>Custom-controls</h2>
+  <h3>Light Skin</h3>
   <amp-video
     autoplay
     title="Big Buck Bunny"
@@ -71,27 +45,17 @@
     src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
     width="720"
     height="405"
-    layout="responsive"
-    controls>
+    layout="responsive">
   </amp-video>
-
-  <h2>Autoplay</h2>
+  <h3>Dark Skin</h3>
   <amp-video
-    autoplay
-    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+    custom-ctrls
+    custom-ctrls-skin='dark'
+    poster="https://peach.blender.org/wp-content/uploads/bbb-splash.png"
+    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
     width="720"
     height="405"
-    layout="responsive"
-    controls>
-  </amp-video>
-
-  <h2>Custom-controls</h2>
-  <amp-video
-    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
-    width="720"
-    height="405"
-    layout="responsive"
-    custom-controls>
+    layout="responsive">
   </amp-video>
   <div class="spacer"></div>
 </body>

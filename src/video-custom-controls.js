@@ -1,0 +1,624 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {Animation} from './animation';
+import {dev} from './log';
+import {listen} from './event-helper';
+import {Services} from './services';
+import {VideoEvents} from './video-interface';
+import {formatTime} from './utils/datetime';
+import * as st from './style';
+import * as tr from './transition';
+
+export class CustomControls {
+
+  constructor(
+    ampdoc,
+    entry,
+    darkSkin = false,
+    mainCtrls = ['time', 'spacer', 'volume', 'fullscreen'],
+    miniCtrls = ['play', 'volume', 'fullscreen'],
+    floating = 'play'
+  ) {
+
+    /** @const {!./service/ampdoc-impl.AmpDoc}  */
+    this.ampdoc_ = ampdoc;
+
+    /** @private {!./service/video-manager-impl.VideoEntry} */
+    this.entry_ = entry;
+
+    /** @private @const {!./service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
+
+    /** @private {boolean} */
+    this.darkSkin_ = darkSkin;
+
+    /** @private {Node} */
+    this.ctrlContainer_ = null;
+
+    /** @private {Node} */
+    this.ctrlBarContainer_ = null;
+
+    /** @private {Node} */
+    this.ctrlBarWrapper_ = null;
+
+    /** @private {Node} */
+    this.floatingContainer_ = null;
+
+    /** @private {Node} */
+    this.miniCtrlsContainer_ = null;
+
+    /** @private {Node} */
+    this.miniCtrlsWrapper_ = null;
+
+    /** @private {Node} */
+    this.ctrlBg_ = null;
+
+    /** @private {?number} */
+    this.controlsTimer_ = null;
+
+    /** @private {boolean} */
+    this.controlsShown_ = false;
+
+    /** @private {boolean} */
+    this.controlsShowing_ = false;
+
+    /** @private {boolean} */
+    this.controlsDisabled_ = true;
+
+    /** @private {boolean} */
+    this.minimal_ = false;
+
+    this.createCustomControls_(mainCtrls, miniCtrls, floating);
+  }
+
+  /**
+   * Returns the element that wraps all the controls
+   * @return {Element}
+   */
+  getElement() {
+    return this.ctrlContainer_;
+  }
+
+  /**
+   * Fullscreen Button
+   * @return {!Element}
+   * @private
+   */
+  createFullscreenBtn_() {
+    const doc = this.ampdoc_.win.document;
+    const fullscreenBtnWrap = doc.createElement('amp-custom-ctrls-fullscreen');
+    const fullscreenBtn = this.createIcon_('fullscreen');
+    fullscreenBtnWrap.appendChild(fullscreenBtn);
+    listen(fullscreenBtnWrap, 'click', () => {
+      if (this.entry_.video.isFullscreen()) {
+        this.entry_.video.fullscreenExit();
+      } else {
+        this.entry_.video.fullscreenEnter();
+      }
+    });
+    return fullscreenBtnWrap;
+  }
+
+  /**
+   * Volume controls
+   * @return {!Element}
+   * @private
+   */
+  createVolumeControls_() {
+    const doc = this.ampdoc_.win.document;
+    const volumeContainer = doc.createElement('amp-custom-ctrls-volume');
+    const volumeSlider = doc.createElement('input');
+    volumeSlider.setAttribute('type', 'range');
+    volumeSlider.setAttribute('min', '0');
+    volumeSlider.setAttribute('max', '100');
+    volumeSlider.setAttribute('value', '30');
+    volumeSlider.classList.add('amp-custom-ctrls-volume-indicator');
+    const muteBtnWrap = doc.createElement('amp-custom-ctrls-mute');
+    const muteBtn = this.createIcon_(
+        this.entry_.isMuted() ? 'mute' : 'volume-max'
+    );
+    muteBtnWrap.appendChild(muteBtn);
+    volumeContainer.appendChild(muteBtnWrap);
+    volumeContainer.appendChild(volumeSlider);
+    listen(muteBtnWrap, 'click', () => {
+      if (this.entry_.isMuted()) {
+        this.entry_.video.unmute();
+      } else {
+        this.entry_.video.mute();
+      }
+    });
+    [VideoEvents.MUTED, VideoEvents.UNMUTED].forEach(e => {
+      listen(this.entry_.video.element, e, () => {
+        if (e == VideoEvents.MUTED) {
+          this.changeIcon_(muteBtn, 'mute');
+        } else {
+          this.changeIcon_(muteBtn, 'volume-max');
+        }
+      });
+    });
+    return volumeContainer;
+  }
+
+  /**
+   * Spacer that separates the left/right portions of the controls bar
+   * @return {!Element}
+   * @private
+   */
+  createSpacer_() {
+    const doc = this.ampdoc_.win.document;
+    const spacer = doc.createElement('amp-custom-ctrls-spacer');
+    return spacer;
+  }
+
+  /**
+   * Play/Pause Button
+   * @return {!Element}
+   * @private
+   */
+  createPlayPauseBtn_() {
+    const doc = this.ampdoc_.win.document;
+    const playpauseBtnWrap = doc.createElement('amp-custom-ctrls-playpause');
+    const playpauseBtn = this.createIcon_('play');
+    playpauseBtnWrap.appendChild(playpauseBtn);
+    listen(playpauseBtnWrap, 'click', () => {
+      if (this.entry_.isPlaying()) {
+        this.entry_.video.pause();
+      } else {
+        this.entry_.video.play(/*autoplay*/ false);
+      }
+    });
+    [VideoEvents.PLAYING, VideoEvents.PAUSE].forEach(e => {
+      listen(this.entry_.video.element, e, () => {
+        if (e == VideoEvents.PAUSE) {
+          this.changeIcon_(playpauseBtn, 'play');
+          this.showControls();
+          if (this.controlsTimer_) {
+            clearTimeout(this.controlsTimer_);
+          }
+        } else {
+          this.changeIcon_(playpauseBtn, 'pause');
+        }
+      });
+    });
+    return playpauseBtnWrap;
+  }
+
+  /**
+   * Duration/Played time indicator
+   * @return {!Element}
+   * @private
+   */
+  createProgressTime_() {
+    const doc = this.ampdoc_.win.document;
+    const progressTime = doc.createElement('amp-custom-ctrls-progress-time');
+    progressTime.innerText = '0:00 / 0:00';
+    // Update played time
+    const updateProgress = () => {
+      const current = this.entry_.video.getCurrentTime() || 0;
+      const currentFormatted = formatTime(current);
+      const total = this.entry_.video.getDuration() || 0;
+      const totalFormatted = formatTime(total);
+      progressTime.innerText = currentFormatted + ' / ' + totalFormatted;
+    };
+
+    [VideoEvents.TIME_UPDATE, VideoEvents.LOAD].forEach(e => {
+      listen(this.entry_.video.element, e, updateProgress.bind(this));
+    });
+
+    return progressTime;
+  }
+
+  /**
+   * Progress bar
+   * @return {!Element}
+   * @private
+   */
+  createProgressBar_() {
+    const doc = this.ampdoc_.win.document;
+    const progressBar = doc.createElement('amp-custom-ctrls-progress-bar');
+    const totalBar = doc.createElement('amp-custom-ctrls-total-bar');
+    const currentBar = doc.createElement('amp-custom-ctrls-current-bar');
+    const scrubber = doc.createElement('amp-custom-ctrls-scrubber');
+    let scrubberTouched = false;
+    let scrubberDragging = false;
+    totalBar.appendChild(currentBar);
+    totalBar.appendChild(scrubber);
+    progressBar.appendChild(totalBar);
+    // Seek
+    listen(totalBar, 'click', e => {
+      // TODO(@wassgha) Seek when implemented
+      const left = progressBar.offsetLeft;
+      const total = progressBar.offsetWidth;
+      const newPercent = Math.min(100,
+          Math.max(0, 100 * (e.clientX - left) / total)
+      );
+      st.setStyles(scrubber, {
+        'left': st.percent(newPercent),
+      });
+      st.setStyles(currentBar, {
+        'width': st.percent(newPercent),
+      });
+    });
+
+    ['mousedown', 'touchdown'].forEach(event => {
+      listen(totalBar, event, e => {
+        e.preventDefault();
+        scrubberTouched = true;
+      });
+      listen(scrubber, event, e => {
+        e.preventDefault();
+        scrubberTouched = true;
+      });
+    });
+
+    ['mousemove', 'touchmove'].forEach(event => {
+      listen(doc, event, e => {
+        e.preventDefault();
+        // TODO(@wassgha) Seek when implemented
+        scrubberDragging = scrubberTouched;
+        const left = progressBar.offsetLeft;
+        const total = progressBar.offsetWidth;
+        const newPercent = Math.min(100,
+            Math.max(0, 100 * (e.clientX - left) / total)
+        );
+        if (scrubberDragging) {
+          st.setStyles(scrubber, {
+            'left': st.percent(newPercent),
+          });
+          st.setStyles(currentBar, {
+            'width': st.percent(newPercent),
+          });
+        }
+      });
+    });
+
+    ['mouseup', 'touchend'].forEach(event => {
+      listen(doc, event, e => {
+        e.preventDefault();
+        scrubberTouched = false;
+        scrubberDragging = false;
+      });
+    });
+
+    // Update progress bar
+    const updateProgress = () => {
+      const current = this.entry_.video.getCurrentTime() || 0;
+      const total = this.entry_.video.getDuration() || 0;
+      const percent = total ? Math.floor(current * (100 / total)) : 0;
+      st.setStyles(currentBar, {
+        'width': st.percent(percent),
+      });
+      st.setStyles(scrubber, {
+        'left': st.percent(percent),
+      });
+    };
+
+    [VideoEvents.TIME_UPDATE, VideoEvents.LOAD].forEach(e => {
+      listen(this.entry_.video.element, e, updateProgress.bind(this));
+    });
+
+    return progressBar;
+  }
+
+  createIcon_(name) {
+    const doc = this.ampdoc_.win.document;
+    const icon = doc.createElement('amp-custom-ctrls-icon');
+    icon.className = 'amp-custom-ctrls-icon-' + name;
+    return icon;
+  }
+
+  changeIcon_(icon, name) {
+    icon.className = 'amp-custom-ctrls-icon-' + name;
+  }
+
+  /**
+   * Creates a button element from the button's name
+   * @param {string} btn
+   * @return {!Element}
+   * @private
+   */
+  elementFromButton_(btn) {
+    const doc = this.ampdoc_.win.document;
+    switch (btn) {
+      case 'play':
+        return this.createPlayPauseBtn_();
+      case 'time':
+        return this.createProgressTime_();
+      case 'spacer':
+        return this.createSpacer_();
+      case 'volume':
+        return this.createVolumeControls_();
+      case 'fullscreen':
+        return this.createFullscreenBtn_();
+      default:
+        return doc.createElement('span');
+    };
+  }
+
+  /**
+   * Create the custom controls shim and insert it inside the video
+   * @param {Array<string>} mainCtrls List of orderd controls (main bar)
+   * @param {Array<string>} miniCtrls List of orderd controls (minimized ctrls)
+   * @param {string} floating Name of the primary floating button (usually play)
+   * @private
+   */
+  createCustomControls_(mainCtrls, miniCtrls, floating) {
+    // Set up controls
+    const doc = this.ampdoc_.win.document;
+    this.ctrlContainer_ = doc.createElement('amp-custom-ctrls');
+    this.ctrlContainer_.classList.toggle('light', !this.darkSkin_);
+    this.ctrlBg_ = doc.createElement('amp-custom-ctrls-bg');
+    this.ctrlBarWrapper_ = doc.createElement('amp-custom-ctrls-bar-wrapper');
+    this.ctrlBarContainer_ = doc.createElement('amp-custom-ctrls-bar');
+    this.miniCtrlsWrapper_ = doc.createElement('amp-custom-ctrls-mini-wrapper');
+    this.miniCtrlsContainer_ = doc.createElement('amp-custom-ctrls-mini');
+    this.floatingContainer_ = doc.createElement('amp-custom-ctrls-floating');
+
+    // Shadow filter
+    const shadowFilter = this.createIcon_('shadow');
+    st.setStyles(shadowFilter, {
+      'width': '0px',
+      'height': '0px',
+      'position': 'absolute',
+    });
+
+    // Show controls when mouse is over
+    [this.entry_.video.element,
+      this.floatingContainer_,
+      this.ctrlContainer_,
+      this.ctrlBarContainer_,
+    ].forEach(element => {
+      let oldCoords = '0-0';
+      ['mousemove', 'touchmove'].forEach(event => {
+        listen(element, event, e => {
+          if (e.type == 'mousemove'
+          && e.clientX + '-' + e.clientY != oldCoords) {
+            this.showControls();
+            oldCoords = e.clientX + '-' + e.clientY;
+          } else if (e.type != 'mousemove') {
+            this.showControls();
+          }
+        });
+      });
+    });
+
+    // Hide controls when mouse is outside
+    listen(this.ctrlContainer_, 'mouseleave', () => {
+      if (this.controlsTimer_) {
+        clearTimeout(this.controlsTimer_);
+      }
+      this.hideControls();
+    });
+
+    // Toggle controls when video is clicked
+    listen(this.ctrlContainer_, 'click', e => {
+      if (e.target != this.ctrlContainer_
+          && e.target != this.miniCtrlsWrapper_) {
+        return;
+      }
+
+      if (this.controlsTimer_) {
+        clearTimeout(this.controlsTimer_);
+      }
+      if (this.controlsShown_) {
+        this.hideControls(true);
+      } else {
+        this.showControls();
+      }
+    });
+
+    // Add to the element
+    this.vsync_.mutate(() => {
+      // Add SVG shadow
+      this.ctrlContainer_.appendChild(shadowFilter);
+
+      // Floating controls
+      this.floatingContainer_.appendChild(this.elementFromButton_(floating));
+      this.ctrlContainer_.appendChild(this.floatingContainer_);
+
+      // Add background
+      this.ctrlContainer_.appendChild(this.ctrlBg_);
+
+      // Add main controls
+      mainCtrls.forEach(btn => {
+        this.ctrlBarContainer_.appendChild(this.elementFromButton_(btn));
+      });
+      this.ctrlBarWrapper_.appendChild(this.ctrlBarContainer_);
+      this.ctrlBarWrapper_.appendChild(this.createProgressBar_());
+      this.ctrlContainer_.appendChild(this.ctrlBarWrapper_);
+
+      // Add mini controls
+      miniCtrls.forEach(btn => {
+        this.miniCtrlsContainer_.appendChild(this.elementFromButton_(btn));
+      });
+      this.miniCtrlsWrapper_.appendChild(this.miniCtrlsContainer_);
+      this.miniCtrlsWrapper_.appendChild(this.createProgressBar_());
+      this.ctrlContainer_.appendChild(this.miniCtrlsWrapper_);
+
+      // Add main buttons container
+      this.entry_.video.element.appendChild(this.ctrlContainer_);
+    });
+  }
+
+  /**
+   * Enables controls if disabled
+   */
+  enableControls() {
+    this.controlsDisabled_ = false;
+  }
+
+  /**
+   * Disables controls (showControls would no longer work)
+   */
+  disableControls() {
+    this.controlsDisabled_ = true;
+  }
+
+  /**
+   * Fades out the custom controls
+   * @param {boolean} override hide controls even when video is not playing
+   */
+  hideControls(override = false) {
+    if (!this.ctrlBarWrapper_
+        || !this.floatingContainer_
+        || !this.ctrlBg_
+        || (!this.entry_.isPlaying() && !override)) {
+      return;
+    }
+
+    const oldDisabled = this.controlsDisabled_;
+    this.controlsDisabled_ = true;
+
+    if (this.minimal_) {
+      Animation.animate(dev().assertElement(this.miniCtrlsContainer_),
+          tr.setStyles(dev().assertElement(this.miniCtrlsContainer_), {
+            'opacity': tr.numeric(1, 0),
+          })
+      , 200).thenAlways(() => {
+        st.setStyles(dev().assertElement(this.miniCtrlsContainer_), {
+          'display': 'none',
+        });
+        this.controlsShown_ = false;
+        this.controlsDisabled_ = oldDisabled;
+      });
+
+      st.setStyles(dev().assertElement(this.ctrlBg_), {
+        'display': 'none',
+      });
+
+      st.setStyles(dev().assertElement(this.floatingContainer_), {
+        'display': 'none',
+      });
+    } else {
+      Animation.animate(dev().assertElement(this.ctrlBarWrapper_),
+          tr.setStyles(dev().assertElement(this.ctrlBarWrapper_), {
+            'opacity': tr.numeric(1, 0),
+          })
+      , 200).thenAlways(() => {
+        st.setStyles(dev().assertElement(this.ctrlBarWrapper_), {
+          'display': 'none',
+        });
+      });
+
+      Animation.animate(dev().assertElement(this.ctrlBg_),
+          tr.setStyles(dev().assertElement(this.ctrlBg_), {
+            'opacity': tr.numeric(1, 0),
+          })
+      , 200).thenAlways(() => {
+        st.setStyles(dev().assertElement(this.ctrlBg_), {
+          'display': 'none',
+        });
+      });
+
+      Animation.animate(dev().assertElement(this.floatingContainer_),
+          tr.setStyles(dev().assertElement(this.floatingContainer_), {
+            'opacity': tr.numeric(1, 0),
+          })
+      , 200).thenAlways(() => {
+        st.setStyles(dev().assertElement(this.floatingContainer_), {
+          'display': 'none',
+        });
+        this.controlsShown_ = false;
+        this.controlsDisabled_ = oldDisabled;
+      });
+
+      st.setStyles(dev().assertElement(this.miniCtrlsWrapper_), {
+        'display': 'none',
+      });
+    }
+  }
+
+  /**
+   * Fades-in the custom controls
+   */
+  showControls() {
+    if (!this.ctrlBarWrapper_
+        || !this.floatingContainer_
+        || !this.ctrlBg_
+        || this.controlsDisabled_) {
+      return;
+    }
+
+    if (this.controlsTimer_) {
+      clearTimeout(this.controlsTimer_);
+    }
+    this.controlsTimer_ = setTimeout(() => {
+      this.hideControls();
+    }, 3000);
+
+    if (this.controlsShown_ || this.controlsShowing_) {
+      return;
+    }
+
+    this.controlsShowing_ = true;
+
+    if (this.minimal_) {
+      st.setStyles(dev().assertElement(this.miniCtrlsWrapper_), {
+        'display': 'flex',
+        'opacity': 1,
+      });
+      st.setStyles(dev().assertElement(this.miniCtrlsContainer_), {
+        'display': 'flex',
+      });
+      Animation.animate(dev().assertElement(this.miniCtrlsContainer_),
+          tr.setStyles(dev().assertElement(this.miniCtrlsContainer_), {
+            'opacity': tr.numeric(0, 1),
+          })
+      , 200).thenAlways(() => {
+        this.controlsShown_ = true;
+        this.controlsShowing_ = false;
+        this.controlsDisabled_ = false;
+      });
+    } else {
+      st.setStyles(dev().assertElement(this.ctrlBarWrapper_), {
+        'display': 'flex',
+      });
+      Animation.animate(dev().assertElement(this.ctrlBarWrapper_),
+          tr.setStyles(dev().assertElement(this.ctrlBarWrapper_), {
+            'opacity': tr.numeric(0, 1),
+          })
+      , 200);
+
+      st.setStyles(dev().assertElement(this.ctrlBg_), {
+        'display': 'flex',
+      });
+      Animation.animate(dev().assertElement(this.ctrlBg_),
+          tr.setStyles(dev().assertElement(this.ctrlBg_), {
+            'opacity': tr.numeric(0, 1),
+          })
+      , 200);
+
+      st.setStyles(dev().assertElement(this.floatingContainer_), {
+        'display': 'flex',
+      });
+      Animation.animate(dev().assertElement(this.floatingContainer_),
+          tr.setStyles(dev().assertElement(this.floatingContainer_), {
+            'opacity': tr.numeric(0, 1),
+          })
+      , 200).thenAlways(() => {
+        this.controlsShown_ = true;
+        this.controlsShowing_ = false;
+        this.controlsDisabled_ = false;
+      });
+    }
+  }
+
+  toggleMinimalControls(enable = true) {
+    this.ctrlContainer_.classList.toggle('minimal', enable);
+    this.minimal_ = enable;
+  }
+}

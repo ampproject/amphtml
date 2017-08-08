@@ -225,12 +225,40 @@ export const VideoAttributes = {
    */
   FULLSCREEN_ON_LANDSCAPE: 'fullscreen-on-landscape',
   /**
-   * custom-controls
+   * custom-ctrls
    *
    * When this attribute is specified, native controls are hidden and
    * customizable AMP controls are added to the video element
    */
-   CUSTOM_CTRLS: 'custom-controls',
+  CUSTOM_CTRLS: 'custom-ctrls',
+  /**
+   * custom-ctrls-skin
+   *
+   * This attribute takes one of 'dark' or 'light' and describes the theme
+   * of the custom controls
+   */
+  CUSTOM_CTRLS_SKIN: 'custom-ctrls-skin',
+  /**
+   * custom-ctrls-main
+   *
+   * A space-separated ordered list of the buttons to include in the bottom
+   * control bar
+   */
+  CUSTOM_CTRLS_MAIN: 'custom-ctrls-main',
+  /**
+   * custom-ctrls-mini
+   *
+   * An ordered space-separated list of three buttons to include in the
+   * mobile/small screen overlay controls
+   */
+  CUSTOM_CTRLS_MINI: 'custom-ctrls-mini',
+  /**
+   * custom-ctrls-floating
+   *
+   * A button to display floating in the middle of the video player as the main
+   * action (usually the play/pause action).
+   */
+  CUSTOM_CTRLS_FLOATING: 'custom-ctrls-floating',
 };
 
 
@@ -353,6 +381,14 @@ export const VideoEvents = {
    * @event ad_end
    */
   AD_END: 'ad_end',
+  /**
+   * time_update
+   *
+   * Fired everytime the video is playing, seeking or its duration changed.
+   *
+   * @event time_update
+   */
+  TIME_UPDATE: 'time_update',
 };
 
 

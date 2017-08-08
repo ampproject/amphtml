@@ -716,43 +716,349 @@ i-amphtml-video-mask, i-amp-video-mask {
 /**
  * Custom Video Controls
  */
-custom-ctrls {
+amp-custom-ctrls {
   position: absolute;
-  bottom: 0;
-  height: 44px;
-  background-image: -webkit-linear-gradient(bottom,rgba(0,0,0,.25) 0%,transparent 100%);
-  background-image: linear-gradient(0deg,rgba(0,0,0,.25) 0%,transparent 100%);
-  display: block;
-  padding: 10px;
-  box-sizing: border-box;
+  top: 0;
+  left: 0;
+  height: 100%;
   width: 100%;
 }
 
-custom-ctrls-playpause {
+amp-custom-ctrls-bg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAADICAQAAABozPh9AAAAqElEQVQoz4WSSRIFIQhDk1fe/8r9F2o34PA3FjKEBPAjCf19JMmW+9dMS61bM9Dk13fJg5CXaskAO9/3bbL8wbcVFESlVgC0ALDxjTLHKFklnQtNZAlEqzAtPUZy1HYoI0odtd5wHs0/VlM+m6nRUdYRT23U5l+AQOMu2gQfesYQiTsqIzkyPU6Stfa8gDveTuV9M+/5+LqoTpIDF+W5OF9d3e9y6KnvD7s0BYLOf/xtAAAAAElFTkSuQmCC');
+  clip-path: polygon(0% 0%,0% 100%,20px 100%,20px 74px,calc(100% - 20px) 74px,calc(100% - 20px) 76px,20px 76px,20px 100%,100% 100%,100% 0%);
+  background-size: 1px 100px;
+  background-position: bottom;
+  background-repeat-y: no-repeat;
+  z-index: 1;
+}
+
+amp-custom-ctrls-bar {
+  display: flex;
+  padding: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+amp-custom-ctrls-volume,
+amp-custom-ctrls-mute,
+amp-custom-ctrls-fullscreen,
+amp-custom-ctrls-playpause {
   width: 24px;
   height: 24px;
   display: inline-block;
   vertical-align: middle;
+  cursor: pointer;
 }
 
-custom-ctrls-volume {
-  width: 24px;
-  height: 24px;
-  display: inline-block;
+amp-custom-ctrls-volume,
+amp-custom-ctrls-mute,
+amp-custom-ctrls-fullscreen,
+amp-custom-ctrls-playpause,
+amp-custom-ctrls-progress-time {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+amp-custom-ctrls-volume, amp-custom-ctrls-progress-time {
+  margin-right: 15px;
+}
+
+amp-custom-ctrls-progress-time {
+  color: white;
+  font-family: Helvetica, Arial, sans-serif;
+  text-shadow: 0px 0px 20px rgba(0, 0, 0, .5);
+}
+
+input.amp-custom-ctrls-volume-indicator {
+  display: none;
   vertical-align: middle;
 }
 
-custom-ctrls-mute {
-  width: 24px;
-  height: 24px;
-  display: inline-block;
-  vertical-align: middle;
+amp-custom-ctrls-spacer {
+  flex-grow: 1;
 }
 
-input.custom-ctrls-volume-indicator {
-  display: inline-block;
-  vertical-align: middle;
+amp-custom-ctrls-total-bar {
+  width: 100%;
+  height: 10px;
+  display: flex;
+  border-radius: 10px;
+  position: relative;
+  align-items: center;
 }
+
+amp-custom-ctrls-progress-bar {
+  display: flex;
+  z-index: 2;
+}
+
+amp-custom-ctrls-current-bar {
+  background-color: rgba(255, 255, 255, 0.8);
+  width: 0%;
+  height: 2px;
+  display: block;
+  border-radius: 10px;
+}
+
+amp-custom-ctrls-scrubber {
+  border-radius: 50%;
+  width: 13px;
+  height: 13px;
+  background: white;
+  display: block;
+  position: absolute;
+  margin-top: -2px;
+  margin-left: -6px;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, .25);
+  left: 0%;
+  top: 0px;
+}
+
+amp-custom-ctrls-scrubber:active {
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  margin-left: -9px;
+  box-shadow: 0px 0px 20px 5px rgba(0, 0, 0, .6);
+}
+
+amp-custom-ctrls-floating:not(.multiple)  {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  top: 50%;
+  left: 50%;
+  margin-top: -40px;
+  margin-left: -40px;
+  background: rgba(0, 0, 0, .8);
+  box-shadow: 0px 0px 20px 5px rgba(0,0,0,.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+amp-custom-ctrls-floating amp-custom-ctrls-playpause {
+  width: 48px;
+  height: 48px;
+}
+
+amp-custom-ctrls-bar-wrapper {
+  position: absolute;
+  padding: 20px;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+amp-custom-ctrls-mini-wrapper {
+  display: none;
+}
+
+/* Light theme */
+
+amp-custom-ctrls.light:not(.minimal) amp-custom-ctrls-bg {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAADICAQAAABozPh9AAAAbElEQVQoz62TwQ7AIAhDnx33/f8n7ht22C4mLkGZGC9NoQWJgfIUEIDRY0qrg4oK+oaxz/WbZf4hBwpmdrUKa1tOoVrm1ZUwtmizLz/Bnn6LOas/3sA4MjsUb1Nqw35Z7z56EF+ecYJxg3HBCwTCBp+nLpJ4AAAAAElFTkSuQmCC');
+}
+
+amp-custom-ctrls.light:not(.minimal) amp-custom-ctrls-progress-time {
+  color: black;
+  text-shadow: 0px 0px 20px rgba(255, 255, 255, .5);
+}
+
+amp-custom-ctrls.light:not(.minimal) amp-custom-ctrls-scrubber {
+  background: black;
+  box-shadow: 0px 0px 20px rgba(255, 255, 255, .25);
+}
+
+amp-custom-ctrls.light:not(.minimal) amp-custom-ctrls-scrubber:active {
+  box-shadow: 0px 0px 20px 5px rgba(255, 255, 255, .6);
+}
+
+amp-custom-ctrls.light:not(.minimal) amp-custom-ctrls-current-bar {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+amp-custom-ctrls.light:not(.minimal) amp-custom-ctrls-floating:not(.multiple) {
+  box-shadow: 0px 0px 20px 5px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Custom controls dark icons */
+amp-custom-ctrls-icon {
+  width: 100%;
+  padding-bottom: 100%;
+  display: block;
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
+
+amp-custom-ctrls-icon.amp-custom-ctrls-icon-play {
+  background-image: url('data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF" width="24" height="24" viewbox="0 0 24 24" style="filter:url(#i-amphtml-svg-shadow)"><path d="M8 5v14l11-7z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>');
+}
+
+amp-custom-ctrls-icon.amp-custom-ctrls-icon-pause {
+  background-image: url('data:image/svg+xml;utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
+}
+
+amp-custom-ctrls-icon.amp-custom-ctrls-icon-mute {
+  background-image: url('data:image/svg+xml;utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
+}
+
+amp-custom-ctrls-icon.amp-custom-ctrls-icon-volume-max {
+  background-image: url('data:image/svg+xml;utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
+}
+
+amp-custom-ctrls-icon.amp-custom-ctrls-icon-shadow {
+  width: 0 !important;
+  height: 0 !important;
+  visibility: hidden;
+  background-image: url('data:image/svg+xml;utf-8,<svg fill="#000000" height="0" viewBox="0 0 24 24" width="0" xmlns="http://www.w3.org/2000/svg"><defs><filter id="i-amphtml-svg-shadow"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="rgba(0,0,0,0.4)" /></filter></defs></svg>')
+}
+
+amp-custom-ctrls-icon.amp-custom-ctrls-icon-fullscreen {
+  background-image: url('data:image/svg+xml;utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>')
+}
+
+/* Custom controls light icons */
+amp-custom-ctrls.light:not(.minimal) amp-custom-ctrls-icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
+
+amp-custom-ctrls.light:not(.minimal) amp-custom-ctrls-icon.amp-custom-ctrls-icon-play {
+  background-image: url('data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="#000000" width="24" height="24" viewbox="0 0 24 24" style="filter:url(#i-amphtml-svg-shadow)"><path d="M8 5v14l11-7z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>');
+}
+
+amp-custom-ctrls.light:not(.minimal) amp-custom-ctrls-icon.amp-custom-ctrls-icon-pause {
+  background-image: url('data:image/svg+xml;utf-8,<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
+}
+
+amp-custom-ctrls.light:not(.minimal) amp-custom-ctrls-icon.amp-custom-ctrls-icon-mute {
+  background-image: url('data:image/svg+xml;utf-8,<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
+}
+
+amp-custom-ctrls.light:not(.minimal) amp-custom-ctrls-icon.amp-custom-ctrls-icon-volume-max {
+  background-image: url('data:image/svg+xml;utf-8,<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
+}
+
+amp-custom-ctrls.light:not(.minimal) amp-custom-ctrls-icon.amp-custom-ctrls-icon-shadow {
+  width: 0 !important;
+  height: 0 !important;
+  visibility: hidden;
+  background-image: url('data:image/svg+xml;utf-8,<svg fill="#FFFFFF" height="0" viewBox="0 0 24 24" width="0" xmlns="http://www.w3.org/2000/svg"><defs><filter id="i-amphtml-svg-shadow"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="rgba(0,0,0,0.4)" /></filter></defs></svg>')
+}
+
+amp-custom-ctrls.light:not(.minimal) amp-custom-ctrls-icon.amp-custom-ctrls-icon-fullscreen {
+  background-image: url('data:image/svg+xml;utf-8,<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>')
+}
+
+/* Minimal Controls */
+
+amp-custom-ctrls.minimal {
+  padding: 0px;
+  width: 100%;
+  height: 100%;
+}
+
+amp-custom-ctrls.minimal amp-custom-ctrls-bg {
+  display: none;
+}
+
+amp-custom-ctrls.minimal amp-custom-ctrls-bar-wrapper {
+  padding: 0px;
+}
+
+amp-custom-ctrls.minimal amp-custom-ctrls-floating {
+  display: none;
+}
+
+amp-custom-ctrls.minimal amp-custom-ctrls-mini-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+amp-custom-ctrls.minimal amp-custom-ctrls-mini {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+amp-custom-ctrls.minimal amp-custom-ctrls-playpause,
+amp-custom-ctrls.minimal amp-custom-ctrls-volume,
+amp-custom-ctrls.minimal amp-custom-ctrls-fullscreen {
+  height: auto;
+  flex-grow: 1;
+  margin: 30px;
+}
+
+amp-custom-ctrls.minimal  amp-custom-ctrls-mute {
+  width: 100%;
+  height: 100%;
+}
+
+amp-custom-ctrls.minimal amp-custom-ctrls-scrubber {
+  display: none;
+}
+
+amp-custom-ctrls.minimal amp-custom-ctrls-progress-bar {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+}
+
+amp-custom-ctrls.minimal amp-custom-ctrls-total-bar {
+  height: 10px;
+  border-radius: 0px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+amp-custom-ctrls.minimal.white amp-custom-ctrls-total-bar {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+amp-custom-ctrls.minimal amp-custom-ctrls-current-bar {
+  height: 10px;
+  border-radius: 0px;
+}
+
+amp-custom-ctrls.minimal amp-custom-ctrls-scrubber {
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  margin-left: -8px;
+  box-shadow: 0px 0px 20px 5px rgba(0, 0, 0, 0.2);
+}
+
+amp-custom-ctrls.minimal amp-custom-ctrls-bar {
+  display: none;
+}
+
+
 /**
  * amp-accordion to avoid FOUC.
  */

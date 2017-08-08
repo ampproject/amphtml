@@ -245,6 +245,11 @@ class AmpVideo extends AMP.BaseElement {
     listen(video, 'ended', () => {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
     });
+    ['durationchange', 'timeupdate', 'seeking'].map(e => {
+      listen(video, e, () => {
+        this.element.dispatchCustomEvent(VideoEvents.TIME_UPDATE);
+      });
+    });
   }
 
   /** @override */
@@ -272,7 +277,8 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   isInteractive() {
-    return this.element.hasAttribute('controls');
+    return this.element.hasAttribute('controls')
+           || this.element.hasAttribute('custom-ctrls');
   }
 
   /**
