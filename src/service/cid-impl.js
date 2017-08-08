@@ -180,7 +180,8 @@ export class Cid {
       const apiClient =
           ViewerCidApi.scopeOptedInForCidApi(this.ampdoc.win, scope);
       if (apiClient) {
-        return this.cidApi_.getScopedCid(scope, apiClient);
+        return this.cidApi_.getScopedCid(
+            apiClient, scope, getCidStruct.cookieName);
       }
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
