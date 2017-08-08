@@ -27,6 +27,8 @@ import {getPlacementsFromConfigObj} from './placement';
 /** @const */
 const TAG = 'amp-auto-ads';
 
+/** @const */
+const AD_TAG = 'amp-ad';
 
 export class AmpAutoAds extends AMP.BaseElement {
 
@@ -44,6 +46,8 @@ export class AmpAutoAds extends AMP.BaseElement {
     if (!adNetwork.isEnabled(this.win)) {
       return;
     }
+
+    Services.extensionsFor(this.win)./*OK*/loadElementClass(AD_TAG);
 
     const configPromise = this.getConfig_(adNetwork.getConfigUrl());
     const docPromise = this.getAmpDoc().whenReady();
