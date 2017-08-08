@@ -561,6 +561,21 @@ describe('SlideScroll', () => {
     });
   });
 
+  it('should relayout the current slide on layoutCallback', () => {
+    return getAmpSlideScroll().then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+      const scheduleLayoutSpy_ = sandbox.spy(impl, 'scheduleLayout');
+      impl.slideIndex_ = null;
+      impl.layoutCallback();
+      expect(scheduleLayoutSpy_).to.have.been.calledWith(impl.slides_[0]);
+
+      impl.showSlide_(1);
+      impl.layoutCallback();
+      expect(scheduleLayoutSpy_).to.have.been.calledWith(impl.slides_[1]);
+    });
+  });
+
   describe('Looping', () => {
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
