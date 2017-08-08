@@ -416,7 +416,6 @@ export class HistoryBindingNatural_ {
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);
 
-
     /**
      * Used to ignore `popstate` handler for cases where we know we caused the
      * popstate event through the use of location.replace.
@@ -428,7 +427,6 @@ export class HistoryBindingNatural_ {
       if (this.lastNavigatedHash_ == this.win.location.hash) {
         return;
       }
-      this.lastNavigatedHash_ = this.win.location.hash;
       dev().fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
           JSON.stringify(e.state));
       this.onHistoryEvent_();
@@ -476,9 +474,6 @@ export class HistoryBindingNatural_ {
     // On pop, stack is not allowed to go prior to the starting point.
     stackIndex = Math.max(stackIndex, this.startIndex_);
     return this.whenReady_(() => {
-      // Popping history forget the last navigated hash since we can't really
-      // know what hash the browser is going to go to.
-      this.lastNavigatedHash_ = null;
       return this.back_(this.stackIndex_ - stackIndex + 1);
     });
   }
