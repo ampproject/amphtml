@@ -63,6 +63,10 @@ describes.realWin('amp-auto-ads', {
     toggleExperiment(env.win, 'amp-auto-ads', true);
     sandbox = env.sandbox;
 
+    const extensions = Services.extensionsFor(env.win);
+    sandbox.stub(extensions, 'loadElementClass',
+        () => Promise.resolve(() => {}));
+
     const viewportMock =
         sandbox.mock(Services.viewportForDoc(env.win.document));
     viewportMock.expects('getSize').returns(

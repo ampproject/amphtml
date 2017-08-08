@@ -727,6 +727,8 @@ var forbiddenTermsSrcInclusive = {
       'src/service/extensions-impl.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-auto-ads/0.1/amp-auto-ads.js',
+      'extensions/amp-auto-ads/0.1/anchor-ad-strategy.js',
     ],
   },
   'reject\\(\\)': {
