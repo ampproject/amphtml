@@ -299,10 +299,10 @@ const command = {
     timedExecOrDie(`${gulp} presubmit`);
   },
   buildValidatorWebUI: function() {
-    timedExecOrDie('cd validator/webui && python build.py');
+    timedExecOrDie(`${gulp} validator-webui`);
   },
   buildValidator: function() {
-    timedExecOrDie('cd validator && python build.py');
+    timedExecOrDie(`${gulp} validator`);
   },
 };
 
@@ -409,12 +409,6 @@ function main(argv) {
         command.runUnitTests();
       }
     }
-    if (buildTargets.has('VALIDATOR_WEBUI')) {
-      command.buildValidatorWebUI();
-    }
-    if (buildTargets.has('VALIDATOR')) {
-      command.buildValidator();
-    }
   }
 
   if (process.env.BUILD_SHARD == "integration_tests") {
@@ -434,6 +428,12 @@ function main(argv) {
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
       command.runVisualDiffTests(/* opt_mode */ 'skip');
+    }
+    if (buildTargets.has('VALIDATOR_WEBUI')) {
+      command.buildValidatorWebUI();
+    }
+    if (buildTargets.has('VALIDATOR')) {
+      command.buildValidator();
     }
   }
 

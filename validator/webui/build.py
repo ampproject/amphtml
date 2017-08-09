@@ -158,8 +158,9 @@ def CreateWebuiAppengineDist(out_dir):
 
 def Main():
   """The main method, which executes all build steps and runs the tests."""
-  logging.basicConfig(format='[[%(filename)s %(funcName)s]] - %(message)s',
-                      level=logging.INFO)
+  logging.basicConfig(
+      format='[[%(filename)s %(funcName)s]] - %(message)s',
+      level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
   nodejs_cmd = GetNodeJsCmd()
   CheckPrereqs()
   InstallNodeDependencies()
