@@ -153,7 +153,7 @@ export class AmpAdExit extends AMP.BaseElement {
     this.element.setAttribute('aria-hidden', 'true');
 
     this.defaultFilters_.push(
-        createFilter('minDelay', makeClickDelaySpec(1000)));
+        createFilter('minDelay', makeClickDelaySpec(1000), this.win));
 
     const children = this.element.children;
     user().assert(children.length == 1,
