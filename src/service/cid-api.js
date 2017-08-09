@@ -36,7 +36,8 @@ const TokenStatus = {
 };
 
 const TIMEOUT = 30000;
-const DAY = 24 * 60 * 60 * 1000;
+const HOUR = 60 * 60 * 1000;
+const DAY = 24 * HOUR;
 const YEAR = 365 * DAY;
 
 /**
@@ -143,7 +144,7 @@ export class GoogleCidApi {
       setCookie(this.win_, cookieName, res['clientId'], this.expiresIn_(YEAR));
       return res['clientId'];
     } else {
-      this.persistToken_(TokenStatus.NOT_FOUND, DAY);
+      this.persistToken_(TokenStatus.NOT_FOUND, HOUR);
       return getCookie(this.win_, cookieName);
     }
   }
