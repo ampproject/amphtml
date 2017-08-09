@@ -155,7 +155,7 @@ describes.realWin('test-cid-api', {}, env => {
     }));
     return api.getScopedCid('googleanalytics', 'scope-a').then(cid => {
       expect(cid).to.equal('amp-cid-from-cookie');
-      expect(getCookie(win, 'AMP_TOKEN')).to.equal('$ERROR');
+      expect(getCookie(win, 'AMP_TOKEN')).to.equal('$NOT_FOUND');
     });
   });
 
@@ -165,7 +165,7 @@ describes.realWin('test-cid-api', {}, env => {
     }));
     return api.getScopedCid('googleanalytics', 'scope-a').then(cid => {
       expect(cid).to.be.null;
-      expect(getCookie(win, 'AMP_TOKEN')).to.equal('$ERROR');
+      expect(getCookie(win, 'AMP_TOKEN')).to.equal('$NOT_FOUND');
     });
   });
 
@@ -192,6 +192,15 @@ describes.realWin('test-cid-api', {}, env => {
     return api.getScopedCid('googleanalytics', 'scope-a').then(cid => {
       expect(cid).to.equal('amp-cid-from-cookie');
       expect(getCookie(win, 'AMP_TOKEN')).to.equal('$ERROR');
+    });
+  });
+
+  it('should return CID from cookie if AMP_TOKEN=$NOT_FOUND', () => {
+    persistCookie('AMP_TOKEN', '$NOT_FOUND');
+    persistCookie('scope-a', 'amp-cid-from-cookie');
+    return api.getScopedCid('googleanalytics', 'scope-a').then(cid => {
+      expect(cid).to.equal('amp-cid-from-cookie');
+      expect(getCookie(win, 'AMP_TOKEN')).to.equal('$NOT_FOUND');
     });
   });
 
