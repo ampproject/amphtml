@@ -78,6 +78,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {?../../../src/layout-rect.LayoutRectDef} */
     this.viewportRect_ = null;
 
+    /** @private {?string} */
+    this.targetSelector_ = null;
+
     /** @private {!number} */
     this.scrollProgress_ = 0;
   }
@@ -101,8 +104,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   init_() {
     this.parseAttributes_();
-    // TODO(aghassemi): support target selector, special case `body`
-    this.scene_ = this.element.parentNode;
+    this.discoverScene_();
     this.action_ = Services.actionServiceForDoc(this.element);
     this.maybeInstallPositionObserver_();
     this.positionObserver_.observe(this.scene_, PositionObserverFidelity.HIGH,
@@ -268,6 +270,28 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       if (topBottom[1]) {
         this.bottomMarginExpr_ = topBottom[1];
       }
+    }
+
+    this.targetSelector_ = this.element.getAttribute('target-selector');
+  }
+
+  /**
+   * Finds the container scene. Either parent of the component or specified by
+   * `target-selector` attribute
+   * @private
+   */
+  discoverScene_() {
+    if (this.targetSelector_) {
+      const root = this.getAmpDoc().getRootNode();
+      this.scene_ = user().assertElement(
+          root.querySelector(this.targetSelector_),
+          'No element found with query selector:' + this.targetSelector_);
+    } else {
+      this.scene_ = this.element.parentNode;
+    }
+    // Hoist body to root
+    if (this.scene_.tagName == 'BODY') {
+      this.scene_ = this.win.document.documentElement;
     }
   }
 
