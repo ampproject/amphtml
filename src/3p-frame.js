@@ -282,6 +282,7 @@ function getCustomBootstrapBaseUrl(
     return null;
   }
   if (opt_disallowCustom) {
+    //TODO(tiendt) get element from window
     user().error(TAG, `3p iframe url disabled for ${opt_type || 'unknown'}`);
     return null;
   }
