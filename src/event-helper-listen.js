@@ -27,6 +27,7 @@
  * @param {boolean=} opt_capture
  * @param {boolean=} opt_passive
  * @return {!UnlistenDef}
+ * @suppress {checkTypes}
  */
 export function internalListenImplementation(element, eventType, listener,
     opt_capture, opt_passive) {
