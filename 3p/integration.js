@@ -516,41 +516,41 @@ function installContextUsingStandardImpl(win, data) {
   const embedType = getEmbedType();
   const contextState = getContextState();
 
-  win.context = dict({
+  win.context = {
     // read from context state
-    'ampcontextFilepath': contextState.ampcontextFilepath,
-    'ampcontextVersion': contextState.ampcontextVersion,
-    'canary': contextState.canary,
-    'canonicalUrl': contextState.canonicalUrl,
-    'clientId': contextState.clientId,
-    'container': contextState.container,
-    'domFingerprint': contextState.domFingerprint,
-    'hidden': contextState.hidden,
-    'initialIntersection': contextState.initialIntersection,
-    'initialLayoutRect': contextState.initialLayoutRect,
-    'mode': contextState.mode,
-    'pageViewId': contextState.pageViewId,
-    'referrer': contextState.referrer,
-    'sentinel': contextState.sentinel,
-    'sourceUrl': contextState.sourceUrl,
-    'startTime': contextState.startTime,
-    'tagName': contextState.tagName,
+    ampcontextFilepath: contextState.ampcontextFilepath,
+    ampcontextVersion: contextState.ampcontextVersion,
+    canary: contextState.canary,
+    canonicalUrl: contextState.canonicalUrl,
+    clientId: contextState.clientId,
+    container: contextState.container,
+    domFingerprint: contextState.domFingerprint,
+    hidden: contextState.hidden,
+    initialIntersection: contextState.initialIntersection,
+    initialLayoutRect: contextState.initialLayoutRect,
+    mode: contextState.mode,
+    pageViewId: contextState.pageViewId,
+    referrer: contextState.referrer,
+    sentinel: contextState.sentinel,
+    sourceUrl: contextState.sourceUrl,
+    startTime: contextState.startTime,
+    tagName: contextState.tagName,
 
     // read from iframe name
-    'data': data,
-    'location': getLocation(),
+    data: data,
+    location: getLocation(),
 
     // locally defined APIs
-    'addContextToIframe': iframe => { iframe.name = iframeName; },
-    'computeInMasterFrame': computeInMasterFrame,
-    'getHtml': getHtml,
-    'noContentAvailable': triggerNoContentAvailable,
-    'onResizeDenied': onResizeDenied,
-    'onResizeSuccess': onResizeSuccess,
-    'renderStart': triggerRenderStart,
-    'reportRenderedEntityIdentifier': reportRenderedEntityIdentifier,
-    'requestResize': triggerResizeRequest,
-  });
+    addContextToIframe: iframe => { iframe.name = iframeName; },
+    computeInMasterFrame: computeInMasterFrame,
+    getHtml: getHtml,
+    noContentAvailable: triggerNoContentAvailable,
+    onResizeDenied: onResizeDenied,
+    onResizeSuccess: onResizeSuccess,
+    renderStart: triggerRenderStart,
+    reportRenderedEntityIdentifier: reportRenderedEntityIdentifier,
+    requestResize: triggerResizeRequest,
+  };
 
   // Define master related properties to be lazily read.
   Object.defineProperties(win.context, {
