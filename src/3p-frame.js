@@ -283,7 +283,8 @@ function getCustomBootstrapBaseUrl(
   }
   if (opt_disallowCustom) {
     //TODO(tiendt) get element from window
-    user().error(TAG, `3p iframe url disabled for ${opt_type || 'unknown'}`);
+    user(parentWindow.document.documentElement).error(
+        TAG, `3p iframe url disabled for ${opt_type || 'unknown'}`);
     return null;
   }
   const url = assertHttpsUrl(meta.getAttribute('content'), meta);
