@@ -447,12 +447,11 @@ class IntegrationFixture {
   setup(env) {
     const body = typeof this.spec.body == 'function' ?
           this.spec.body() : this.spec.body;
-    const meta = this.spec.meta || '';
     const experiments = this.spec.experiments || [''];
     return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
         src: addParamsToUrl('/amp4test/compose-doc',
-            {body, meta, experiments: experiments.join(' ')}) + `#${this.hash}`,
+            {body, experiments: experiments.join(' ')}) + `#${this.hash}`,
       });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;

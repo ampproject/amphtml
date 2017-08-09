@@ -19,12 +19,10 @@ const app = module.exports = require('express').Router();
 
 app.use('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
-
-  const meta = req.query.meta;
   const experiments = req.query.experiments.split(' ');
   let metaTag;
-  if (meta != '' || experiments != ['']) {
-    metaTag = '<meta ' + meta + ' content="' +
+  if (experiments != ['']) {
+    metaTag = '<meta name="amp-experiments-opt-in" content="' +
         experiments.map(function(experiment) {
           return experiment;
         }).join(',') + '">';
