@@ -19,9 +19,9 @@ import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {computedStyle, setImportantStyles} from '../../../src/style';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {setImportantStyles} from '../../../src/style';
 import {Services} from '../../../src/services';
 import * as st from '../../../src/style';
 
@@ -340,18 +340,27 @@ class AmpLightbox extends AMP.BaseElement {
  * @private
  */
 function setTransparentBody(win, body) {
-  Services.vsyncFor(win).mutate(() => {
-    setImportantStyles(body, {background: 'transparent'});
-  });
+  Services.vsyncFor(win).run({
+    measure(state) {
+      state.alreadyTransparent =
+          computedStyle(win, body)['background-color'] == 'rgba(0, 0, 0, 0)';
+    },
+    mutate(state) {
+      if (!state.alreadyTransparent &&
+          getMode().development && !getMode().test) {
 
-  if (getMode().development && !getMode().test) {
-    // TODO(alanorozco): Create documentation page and link it here once the
-    // A4A lightbox experiment is turned on.
-    user().warn(TAG,
-        'The background of the <body> element has been forced to ' +
-        'transparent. If you need to set background, use an intermediate ' +
-        'container.');
-  }
+        // TODO(alanorozco): Create documentation page and link it here once the
+        // A4A lightbox experiment is turned on.
+        user().warn(TAG,
+            'The background of the <body> element has been forced to ' +
+            'transparent. If you need to set background, use an intermediate ' +
+            'container.');
+      }
+
+      // set as !important regardless to prevent changes
+      setImportantStyles(body, {background: 'transparent'});
+    },
+  }, {});
 }
 
 
