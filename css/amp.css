@@ -997,13 +997,14 @@ amp-custom-ctrls.minimal amp-custom-ctrls-floating {
 amp-custom-ctrls.minimal amp-custom-ctrls-mini-wrapper {
   width: 100%;
   height: 100%;
+  display: flex;
 }
 
 amp-custom-ctrls.minimal amp-custom-ctrls-mini {
   width: 100%;
   height: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: space-evenly;
   align-items: center;
   background: rgba(0, 0, 0, 0.3);
 }
@@ -1013,7 +1014,8 @@ amp-custom-ctrls.minimal amp-custom-ctrls-volume,
 amp-custom-ctrls.minimal amp-custom-ctrls-fullscreen {
   height: auto;
   flex-grow: 1;
-  margin: 30px;
+  width: 30%;
+  max-width: 80px;
 }
 
 amp-custom-ctrls.minimal  amp-custom-ctrls-mute {
@@ -1032,7 +1034,7 @@ amp-custom-ctrls.minimal amp-custom-ctrls-progress-bar {
 }
 
 amp-custom-ctrls.minimal amp-custom-ctrls-total-bar {
-  height: 10px;
+  height: 8px;
   border-radius: 0px;
   background: rgba(255, 255, 255, 0.6);
 }
@@ -1042,7 +1044,7 @@ amp-custom-ctrls.minimal.white amp-custom-ctrls-total-bar {
 }
 
 amp-custom-ctrls.minimal amp-custom-ctrls-current-bar {
-  height: 10px;
+  height: 8px;
   border-radius: 0px;
 }
 

@@ -19,6 +19,7 @@ import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
+  scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -210,7 +211,7 @@ class AmpVideo extends AMP.BaseElement {
     this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_LAYOUT, this.video_,
         /* opt_removeMissingAttrs */ true);
 
-    this.getRealChildNodes().forEach(child => {
+    scopedQuerySelectorAll(this.element, 'source track').forEach(child => {
       // Skip the video we already added to the element.
       if (this.video_ === child) {
         return;

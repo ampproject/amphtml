@@ -71,13 +71,13 @@ export class CustomControls {
     this.controlsTimer_ = null;
 
     /** @private {boolean} */
-    this.controlsShown_ = false;
+    this.controlsShown_ = true;
 
     /** @private {boolean} */
     this.controlsShowing_ = false;
 
     /** @private {boolean} */
-    this.controlsDisabled_ = true;
+    this.controlsDisabled_ = false;
 
     /** @private {boolean} */
     this.minimal_ = false;
@@ -254,13 +254,11 @@ export class CustomControls {
       });
     });
 
-    ['mousedown', 'touchdown'].forEach(event => {
+    ['mousedown', 'touchstart'].forEach(event => {
       listen(totalBar, event, e => {
-        e.preventDefault();
         scrubberTouched = true;
       });
       listen(scrubber, event, e => {
-        e.preventDefault();
         scrubberTouched = true;
       });
     });
@@ -288,7 +286,6 @@ export class CustomControls {
 
     ['mouseup', 'touchend'].forEach(event => {
       listen(doc, event, e => {
-        e.preventDefault();
         scrubberTouched = false;
         scrubberDragging = false;
       });
@@ -377,37 +374,36 @@ export class CustomControls {
     });
 
     // Show controls when mouse is over
+    let oldCoords = '0-0';
+    const showCtrlsIfNewPos = e => {
+      if (e.type == 'mousemove'
+      && e.clientX + '-' + e.clientY != oldCoords) {
+        this.showControls();
+        oldCoords = e.clientX + '-' + e.clientY;
+      } else if (e.type != 'mousemove') {
+        this.showControls();
+      }
+    };
     [this.entry_.video.element,
       this.floatingContainer_,
       this.ctrlContainer_,
       this.ctrlBarContainer_,
     ].forEach(element => {
-      let oldCoords = '0-0';
-      ['mousemove', 'touchmove'].forEach(event => {
-        listen(element, event, e => {
-          if (e.type == 'mousemove'
-          && e.clientX + '-' + e.clientY != oldCoords) {
-            this.showControls();
-            oldCoords = e.clientX + '-' + e.clientY;
-          } else if (e.type != 'mousemove') {
-            this.showControls();
-          }
-        });
-      });
+      listen(element, 'mousemove', showCtrlsIfNewPos.bind(this));
     });
 
     // Hide controls when mouse is outside
-    listen(this.ctrlContainer_, 'mouseleave', () => {
+    const hideCtrls = () => {
       if (this.controlsTimer_) {
         clearTimeout(this.controlsTimer_);
       }
       this.hideControls();
-    });
+    };
+    listen(this.ctrlContainer_, 'mouseleave', hideCtrls.bind(this));
 
-    // Toggle controls when video is clicked
-    listen(this.ctrlContainer_, 'click', e => {
+    const toggleCtrls = e => {
       if (e.target != this.ctrlContainer_
-          && e.target != this.miniCtrlsWrapper_) {
+          && e.target != this.miniCtrlsContainer_) {
         return;
       }
 
@@ -419,7 +415,10 @@ export class CustomControls {
       } else {
         this.showControls();
       }
-    });
+    };
+
+    // Toggle controls when video is clicked
+    listen(this.ctrlContainer_, 'click', toggleCtrls.bind(this));
 
     // Add to the element
     this.vsync_.mutate(() => {
@@ -473,148 +472,102 @@ export class CustomControls {
    * @param {boolean} override hide controls even when video is not playing
    */
   hideControls(override = false) {
-    if (!this.ctrlBarWrapper_
-        || !this.floatingContainer_
-        || !this.ctrlBg_
-        || (!this.entry_.isPlaying() && !override)) {
-      return;
-    }
+    this.vsync_.mutate(() => {
+      if (!this.ctrlBarWrapper_
+          || !this.floatingContainer_
+          || !this.ctrlBg_
+          || (!this.entry_.isPlaying() && !override)
+          || !this.controlsShown_) {
+        return;
+      }
 
-    const oldDisabled = this.controlsDisabled_;
-    this.controlsDisabled_ = true;
-
-    if (this.minimal_) {
       Animation.animate(dev().assertElement(this.miniCtrlsContainer_),
           tr.setStyles(dev().assertElement(this.miniCtrlsContainer_), {
             'opacity': tr.numeric(1, 0),
           })
-      , 200).thenAlways(() => {
-        st.setStyles(dev().assertElement(this.miniCtrlsContainer_), {
-          'display': 'none',
-        });
-        this.controlsShown_ = false;
-        this.controlsDisabled_ = oldDisabled;
-      });
+      , 200);
 
-      st.setStyles(dev().assertElement(this.ctrlBg_), {
-        'display': 'none',
-      });
-
-      st.setStyles(dev().assertElement(this.floatingContainer_), {
-        'display': 'none',
-      });
-    } else {
       Animation.animate(dev().assertElement(this.ctrlBarWrapper_),
           tr.setStyles(dev().assertElement(this.ctrlBarWrapper_), {
             'opacity': tr.numeric(1, 0),
           })
-      , 200).thenAlways(() => {
-        st.setStyles(dev().assertElement(this.ctrlBarWrapper_), {
-          'display': 'none',
-        });
-      });
+      , 200);
 
       Animation.animate(dev().assertElement(this.ctrlBg_),
           tr.setStyles(dev().assertElement(this.ctrlBg_), {
             'opacity': tr.numeric(1, 0),
           })
-      , 200).thenAlways(() => {
-        st.setStyles(dev().assertElement(this.ctrlBg_), {
-          'display': 'none',
-        });
-      });
+      , 200);
 
       Animation.animate(dev().assertElement(this.floatingContainer_),
           tr.setStyles(dev().assertElement(this.floatingContainer_), {
             'opacity': tr.numeric(1, 0),
           })
       , 200).thenAlways(() => {
-        st.setStyles(dev().assertElement(this.floatingContainer_), {
-          'display': 'none',
-        });
         this.controlsShown_ = false;
-        this.controlsDisabled_ = oldDisabled;
       });
-
-      st.setStyles(dev().assertElement(this.miniCtrlsWrapper_), {
-        'display': 'none',
-      });
-    }
+    });
   }
 
   /**
    * Fades-in the custom controls
    */
   showControls() {
-    if (!this.ctrlBarWrapper_
-        || !this.floatingContainer_
-        || !this.ctrlBg_
-        || this.controlsDisabled_) {
-      return;
-    }
+    this.vsync_.mutate(() => {
+      if (!this.ctrlBarWrapper_
+          || !this.floatingContainer_
+          || !this.ctrlBg_
+          || this.controlsDisabled_) {
+        return;
+      }
 
-    if (this.controlsTimer_) {
-      clearTimeout(this.controlsTimer_);
-    }
-    this.controlsTimer_ = setTimeout(() => {
-      this.hideControls();
-    }, 3000);
+      if (this.controlsTimer_) {
+        clearTimeout(this.controlsTimer_);
+      }
+      this.controlsTimer_ = setTimeout(() => {
+        this.hideControls();
+      }, 3000);
 
-    if (this.controlsShown_ || this.controlsShowing_) {
-      return;
-    }
+      if (this.controlsShown_ || this.controlsShowing_) {
+        return;
+      }
 
-    this.controlsShowing_ = true;
+      this.controlsShowing_ = true;
 
-    if (this.minimal_) {
-      st.setStyles(dev().assertElement(this.miniCtrlsWrapper_), {
-        'display': 'flex',
-        'opacity': 1,
-      });
-      st.setStyles(dev().assertElement(this.miniCtrlsContainer_), {
-        'display': 'flex',
-      });
-      Animation.animate(dev().assertElement(this.miniCtrlsContainer_),
-          tr.setStyles(dev().assertElement(this.miniCtrlsContainer_), {
-            'opacity': tr.numeric(0, 1),
-          })
-      , 200).thenAlways(() => {
-        this.controlsShown_ = true;
-        this.controlsShowing_ = false;
-        this.controlsDisabled_ = false;
-      });
-    } else {
-      st.setStyles(dev().assertElement(this.ctrlBarWrapper_), {
-        'display': 'flex',
-      });
-      Animation.animate(dev().assertElement(this.ctrlBarWrapper_),
-          tr.setStyles(dev().assertElement(this.ctrlBarWrapper_), {
-            'opacity': tr.numeric(0, 1),
-          })
-      , 200);
+      if (this.minimal_) {
+        Animation.animate(dev().assertElement(this.miniCtrlsContainer_),
+            tr.setStyles(dev().assertElement(this.miniCtrlsContainer_), {
+              'opacity': tr.numeric(0, 1),
+            })
+        , 200).thenAlways(() => {
+          this.controlsShown_ = true;
+          this.controlsShowing_ = false;
+          this.controlsDisabled_ = false;
+        });
+      } else {
+        Animation.animate(dev().assertElement(this.ctrlBarWrapper_),
+            tr.setStyles(dev().assertElement(this.ctrlBarWrapper_), {
+              'opacity': tr.numeric(0, 1),
+            })
+        , 200);
 
-      st.setStyles(dev().assertElement(this.ctrlBg_), {
-        'display': 'flex',
-      });
-      Animation.animate(dev().assertElement(this.ctrlBg_),
-          tr.setStyles(dev().assertElement(this.ctrlBg_), {
-            'opacity': tr.numeric(0, 1),
-          })
-      , 200);
+        Animation.animate(dev().assertElement(this.ctrlBg_),
+            tr.setStyles(dev().assertElement(this.ctrlBg_), {
+              'opacity': tr.numeric(0, 1),
+            })
+        , 200);
 
-      st.setStyles(dev().assertElement(this.floatingContainer_), {
-        'display': 'flex',
-      });
-      Animation.animate(dev().assertElement(this.floatingContainer_),
-          tr.setStyles(dev().assertElement(this.floatingContainer_), {
-            'opacity': tr.numeric(0, 1),
-          })
-      , 200).thenAlways(() => {
-        this.controlsShown_ = true;
-        this.controlsShowing_ = false;
-        this.controlsDisabled_ = false;
-      });
-    }
+        Animation.animate(dev().assertElement(this.floatingContainer_),
+            tr.setStyles(dev().assertElement(this.floatingContainer_), {
+              'opacity': tr.numeric(0, 1),
+            })
+        , 200).thenAlways(() => {
+          this.controlsShown_ = true;
+          this.controlsShowing_ = false;
+          this.controlsDisabled_ = false;
+        });
+      }
+    });
   }
 
   toggleMinimalControls(enable = true) {
