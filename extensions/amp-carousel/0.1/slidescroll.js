@@ -516,7 +516,7 @@ export class AmpSlideScroll extends BaseSlides {
         this.showSlide_(index);
       }
     } else {
-      user().error(TAG, 'Invalid [slide] value: %s', value);
+      user(this.element).error(TAG, 'Invalid [slide] value: %s', value);
     }
   }
 
