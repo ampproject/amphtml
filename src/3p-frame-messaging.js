@@ -54,6 +54,10 @@ export const MessageType = {
 
   // For user-error-in-iframe
   USER_ERROR_IN_IFRAME: 'user-error-in-iframe',
+
+  // For position-observer, still under development
+  SEND_POSITIONS_HIGH_FIDELITY: 'send-positions-high-fidelity',
+  POSITION_HIGH_FIDELITY: 'position-high-fidelity',
 };
 
 /**

@@ -23,7 +23,7 @@ import {Observable} from '../../src/observable';
 import {throttle} from '../../src/utils/rate-limit';
 import {
   PosObViewportInfoDef,
-} from '../../src/service/position-observer-impl';
+} from '../../src/service/position-observer/position-observer-viewport-info';
 
 
 /**

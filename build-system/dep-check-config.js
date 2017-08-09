@@ -190,6 +190,8 @@ exports.rules = [
           'src/service/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
           'src/service/position-observer-impl.js',
+      'extensions/amp-animation/0.1/scrollbound-scene.js->' +
+          'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
     ],

@@ -37,12 +37,13 @@ import {isExperimentOn} from '../../../src/experiments';
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {
   installPositionObserverServiceForDoc,
+} from '../../../src/service/position-observer/position-observer-impl';
+import {
   PositionObserverFidelity,
   SEND_POSITIONS_HIGH_FIDELITY,
   POSITION_HIGH_FIDELITY,
-} from '../../../src/service/position-observer-impl';
+} from '../../../src/service/position-observer/position-observer-fidelity';
 import {throttle} from '../../../src/utils/rate-limit';
-
 
 const VISIBILITY_TIMEOUT = 10000;
 
@@ -78,7 +79,6 @@ export class AmpAdXOriginIframeHandler {
 
     /** @private {?SubscriptionApi} */
     this.positionObserverHighFidelityApi_ = null;
-
     /** @private {?SubscriptionApi} */
     this.inaboxPositionApi_ = null;
 
@@ -88,7 +88,8 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?SubscriptionApi} */
     this.inaboxRequestPositionApi_ = null;
 
-    /** @private {?../../../src/service/position-observer-impl.PositionObserver} */
+
+    /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
     /** @private {!Array<!Function>} functions to unregister listeners */
@@ -144,7 +145,7 @@ export class AmpAdXOriginIframeHandler {
 
       // to be removed
       this.positionObserverHighFidelityApi_ = new SubscriptionApi(
-        this.iframe, SEND_POSITIONS_HIGH_FIDELITY, true, () => {
+        this.iframe, MessageType.SEND_POSITIONS_HIGH_FIDELITY, true, () => {
           const ampdoc = this.baseInstance_.getAmpDoc();
           // TODO (#9232) May crash PWA
           if (!posObInstalled) {
@@ -160,7 +161,7 @@ export class AmpAdXOriginIframeHandler {
                 // Valid cast because it is an external object.
                 const posCast = /** @type {!JsonObject} */ (pos);
                 this.positionObserverHighFidelityApi_.send(
-                    POSITION_HIGH_FIDELITY,
+                    MessageType.POSITION_HIGH_FIDELITY,
                     posCast);
               });
         });

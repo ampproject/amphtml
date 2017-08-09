@@ -41,6 +41,7 @@ import {maybeValidate} from '../validator-integration';
 import {maybeTrackImpression} from '../impression';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {installInaboxViewportService} from './inabox-viewport';
+import {installInaboxPositionObserver} from './inabox-position-observer';
 import {installAnchorClickInterceptor} from '../anchor-click-interceptor';
 import {getMode} from '../mode';
 
@@ -88,7 +89,7 @@ startupChunk(self.document, function initial() {
       // runtime tries to install the normal one.
       installViewerServiceForDoc(ampdoc);
       installInaboxViewportService(ampdoc);
-
+      installInaboxPositionObserver(ampdoc);
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();

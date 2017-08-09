@@ -16,9 +16,13 @@
 
 import {
   PositionObserver,
+} from '../../src/service/position-observer/position-observer-impl';
+import {
   PositionObserverFidelity,
+} from '../../src/service/position-observer/position-observer-fidelity';
+import {
   PosObViewportInfoAmpDoc,
-} from '../../src/service/position-observer-impl';
+} from '../../src/service/position-observer/position-observer-viewport-info';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {Services} from '../../src/services';
 import {setStyles} from '../../src/style';
@@ -67,7 +71,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
 
     describe('API functions includes observe/unobserve/changeFidelity', () => {
       it('should observe identical element and start', () => {
-        const spy = sandbox.spy(posOb, 'startCallback');
+        const spy = sandbox.spy(posOb, 'startCallback_');
         posOb.observe(elem, PositionObserverFidelity.LOW, () => {});
         posOb.observe(elem1, PositionObserverFidelity.LOW, () => {});
         expect(posOb.entries_).to.have.length(2);
@@ -85,7 +89,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
       });
 
       it('should unobserve and stop', () => {
-        const spy = sandbox.spy(posOb, 'stopCallback');
+        const spy = sandbox.spy(posOb, 'stopCallback_');
         posOb.observe(elem, PositionObserverFidelity.LOW, () => {});
         posOb.observe(elem1, PositionObserverFidelity.LOW, () => {});
         posOb.unobserve(elem);
