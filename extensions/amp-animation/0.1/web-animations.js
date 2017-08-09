@@ -118,10 +118,10 @@ export class WebAnimationRunner {
   }
 
   /**
+   * Initialized the players but does not change the state
    */
   init() {
     dev().assert(!this.players_);
-    this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
@@ -143,6 +143,16 @@ export class WebAnimationRunner {
         }
       };
     });
+  }
+
+  /**
+   * Initializes the players and starts playing the animations
+   */
+  start() {
+    if (!this.players_) {
+      this.init();
+    }
+    this.resume();
   }
 
   /**

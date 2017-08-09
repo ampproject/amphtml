@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -41,16 +41,16 @@ limitations under the License.
 
 [TOC]
 
-## What is `amp-visibility-observer`?
+## What is amp-visibility-observer?
 `amp-visibility-observer` is a functional component that monitors visibility of
 an element within the viewport and dispatches
 `enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**)
 which can be used to trigger actions (**Only Low Trust Actions**) on other components.
 It is only useful when used with other components and does not do anything on its own.
 
-## What can I do with `amp-visibility-observer`?
+## What can I do with amp-visibility-observer?
 Currently [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
-and several video players are the only components that allow low-trust events
+and several video players in AMP are the only components that allow low-trust events
 to trigger their actions such as starting the animation, seeking to a position
 within the animation, pausing a video, etc...
 

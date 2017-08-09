@@ -1494,10 +1494,10 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
 
   class WebAnimationStub {
     play() {
-      throw new Error('not implemented');
+      return;
     }
     pause() {
-      throw new Error('not implemented');
+      return;
     }
     reverse() {
       throw new Error('not implemented');
@@ -1549,7 +1549,26 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     return style;
   }
 
-  it('should call start on all animatons', () => {
+  it('should call init on all animations and stay in PAUSED state', () => {
+    target1Mock.expects('animate')
+        .withExactArgs(keyframes1, timing1)
+        .returns(anim1)
+        .once();
+    target2Mock.expects('animate')
+        .withExactArgs(keyframes2, timing2)
+        .returns(anim2)
+        .once();
+
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+    runner.init();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+    expect(runner.players_).to.have.length(2);
+    expect(runner.players_[0]).equal(anim1);
+    expect(runner.players_[1]).equal(anim2);
+    expect(playStateSpy).not.to.be.called;
+  });
+
+  it('should call start on all animations', () => {
     target1Mock.expects('animate')
         .withExactArgs(keyframes1, timing1)
         .returns(anim1)
@@ -1565,14 +1584,14 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     expect(runner.players_).to.have.length(2);
     expect(runner.players_[0]).equal(anim1);
     expect(runner.players_[1]).equal(anim2);
-    expect(playStateSpy).to.be.calledOnce;
+    expect(playStateSpy).to.have.been.calledOnce;
     expect(playStateSpy.args[0][0]).to.equal(WebAnimationPlayState.RUNNING);
   });
 
-  it('should fail to start twice', () => {
-    runner.start();
+  it('should fail to init twice', () => {
+    runner.init();
     expect(() => {
-      runner.start();
+      runner.init();
     }).to.throw();
   });
 
@@ -1702,5 +1721,18 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
     expect(anim1.currentTime).to.equal(101);
     expect(anim2.currentTime).to.equal(101);
+  });
+
+  it('should seek percent all animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    sandbox.stub(runner, 'getTotalDuration_').returns(500);
+    anim1Mock.expects('pause').once();
+    anim2Mock.expects('pause').once();
+    runner.seekToPercent(0.5);
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
+    expect(anim1.currentTime).to.equal(250);
+    expect(anim2.currentTime).to.equal(250);
   });
 });

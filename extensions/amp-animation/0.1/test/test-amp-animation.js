@@ -223,7 +223,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
           {duration: 1001, animations: []});
       anim.activate();
       anim.visible_ = true;
-      runnerMock.expects('start').once();
+      runnerMock.expects('resume').once();
       runnerMock.expects('finish').never();
       return anim.startOrResume_().then(() => {
         expect(anim.triggered_).to.be.true;
@@ -236,7 +236,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
           {duration: 1001, animations: []});
       anim.activate();
       anim.visible_ = true;
-      runnerMock.expects('start').once();
+      runnerMock.expects('resume').once();
       runnerMock.expects('finish').once();
       return anim.startOrResume_().then(() => {
         anim.finish_();
@@ -250,7 +250,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
           {duration: 1001, animations: []});
       anim.activate();
       anim.visible_ = true;
-      runnerMock.expects('start').once();
+      runnerMock.expects('resume').once();
       runnerMock.expects('pause').once();
       return anim.startOrResume_().then(() => {
         anim.pause_();
@@ -476,6 +476,14 @@ describes.sandboxed('AmpAnimation', {}, () => {
           invocation = {
             method: 'seekTo',
             args: {time: 200},
+            satisfiesTrust: () => true,
+          };
+          anim.executeAction(invocation);
+
+          runnerMock.expects('seekToPercent').withExactArgs(0.5).once();
+          invocation = {
+            method: 'seekTo',
+            args: {percent: 0.5},
             satisfiesTrust: () => true,
           };
           anim.executeAction(invocation);
