@@ -1,0 +1,228 @@
+<!---
+Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS-IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+# <a name="amp-visibility-observer"></a> `amp-visibility-observer`
+
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Monitors visibility of an element and dispatches `enter`, `exit` and `scroll` events that can be used with other components such as `<amp-animation>`</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-visibility-observer" src="https://cdn.ampproject.org/v0/amp-visibility-observer-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>nodisplay</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-visibility-observer.amp.html">amp-visibility-observer</a></td>
+  </tr>
+</table>
+
+[TOC]
+
+## What is `amp-visibility-observer`?
+`amp-visibility-observer` is a functional component that monitors visibility of
+an element within the viewport and dispatches
+`enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**)
+which can be used to trigger actions (**Only Low Trust Actions**) on other components.
+It is only useful when used with other components and does not do anything on its own.
+
+## What can I do with `amp-visibility-observer`?
+Currently [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
+and several video players are the only components that allow low-trust events
+to trigger their actions such as starting the animation, seeking to a position
+within the animation, pausing a video, etc...
+
+### Scroll-bound animations
+`amp-animation` exposes a `seekTo` action that can be tied to the `scroll` event
+of `amp-visibility-observer` to implement scroll-bound animations
+
+### Example:
+Imagine an animation where the hour hand of a clock rotates as user scrolls
+the page.
+
+<TODO IMAGE>
+
+```html
+<!-- An animation that rotates a clock hand 180 degrees. -->
+<!--
+   Note that we are NOT setting `trigger=visibility`
+   since we will manually trigger the animation
+-->
+<amp-animation id="clockAnim" layout="nodisplay">
+  <script type="application/json">
+    {
+    "duration": "3s",
+    "fill": "both",
+    "direction": "alternate",
+    "animations": [
+      {
+        "selector": "#clock-scene .clock-hand",
+        "keyframes": [
+          { "transform": "rotate(-180deg)" },
+          { "transform": "rotate(0deg)" }
+        ]
+      }
+    ]
+  }
+  </script>
+</amp-animation>
+
+<!-- The clock container -->
+<div id="clock-scene">
+  <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
+    <div class="clock-hand"></div>
+  </amp-img>
+</div>
+
+<!--
+  Use amp-visibility-observer to tie the movement of the clock scene within
+  the viewport to the timeline of the animation
+-->
+
+<amp-visibility-observer
+  target-selector="#clock-scene"
+  intersection-ratios="1"
+  on="scroll:clockAnim.seekTo(percent=event.percent)"
+  layout="nodisplay">
+</amp-visibility-observer>
+```
+
+### Animation scenes that start/pause based on visibility in the viewport
+`amp-animation` also exposes `start` and `start` actions that can be tied to the
+`enter` and `exit` events of `amp-visibility-observer` to control when animation
+starts/pauses based on visibility.
+
+`amp-visibility-observer` exposes various visibility configurations such as
+`intersection-ratios` and `exclusion-margins` (similar to [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)) that
+can be used to fine-tune when the target is considered visible.
+
+## Example
+Consider the same clock animation, but this time the hand animates with time, except
+we like the animation to start when clock is at least 50% visible and pause as soon
+as clock becomes less than 50% visible.
+
+<TODO IMAGE>
+
+```html
+<!-- An animation that rotates a clock hand 180 degrees. -->
+<!--
+   Note that we are NOT setting `trigger=visibility`
+   since we will manually trigger the animation
+-->
+<!--
+   Also note that this is the same animation as the scroll-bound version above
+   the animation is the same, just the triggering mechanism with
+   `amp-visibility-observer` is different!
+-->
+<amp-animation id="clockAnim" layout="nodisplay">
+  <script type="application/json">
+    {
+    "duration": "3s",
+    "fill": "both",
+    "direction": "alternate",
+    "animations": [
+      {
+        "selector": "#clock-scene .clock-hand",
+        "keyframes": [
+          { "transform": "rotate(-180deg)" },
+          { "transform": "rotate(0deg)" }
+        ]
+      }
+    ]
+  }
+  </script>
+</amp-animation>
+
+<!-- The clock container -->
+<div id="clock-scene">
+  <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
+    <div class="clock-hand"></div>
+  </amp-img>
+</div>
+
+<!--
+  Use amp-visibility-observer to tie the start/pause of the animation with
+  the visibility of the scene.
+-->
+
+<amp-visibility-observer
+  target-selector="#clock-scene"
+  intersection-ratios="0.5"
+  on="enter:clockAnim.start;exit:clockAnim.pause"
+  layout="nodisplay">
+</amp-visibility-observer>
+```
+
+## Attributes
+
+#### target-selector (optional)
+Specifies what element to observe.
+If **not specified** the **parent** of `<amp-visibility-observer>` will be used as the target
+
+#### intersection-ratios (optional)
+
+A number between 0 and 1 which defines how much of the target should be visible in
+the viewport before `<amp-visibility-observer>` triggers any of its events.
+
+Different ratios for top vs. bottom can be specified by providing two values. (`<top> <bottom>`)
+
+Defaults to 0.
+
+`intersection-ratios="0"` means `enter` is triggered as soon as a single pixel
+of the target comes into viewport and `exit` is triggered as soon as the very last pixel
+of the target goes out of the viewport
+
+`intersection-ratios="0.5"` means `enter` is triggered as soon as 50% of
+of the target comes into viewport and `exit` is triggered as soon as less than
+50% of the target is in the viewport.
+
+
+`intersection-ratios="1"` means `enter` is triggered when target is fully visible
+and `exit` is triggered as soon as a single pixel goes out of the viewport.
+
+
+`intersection-ratios="0 1"` makes the conditions different depending on whether
+the target is entering/exiting from top (0 will be used) or bottom (1 will be used).
+
+
+#### exclusion-margins (optional)
+
+A `px` or `vh` value which can be used to shrink the area of the viewport used
+for visibility calculations. A number without a unit will be assumed `px`
+
+Different values for top vs. bottom can be specified by providing two values. (`<top> <bottom>`)
+
+Defaults to 0
+
+`intersection-ratios="100px"` means shrink the viewport by 100px from the top and 100px from the bottom.
+
+`intersection-ratios="25vh"` means shrink the viewport by 25% from the top and 25% from the bottom.
+Effectively only considering the middle 50% of the viewport.
+
+`intersection-ratios="100px 10vh"` means shrink the viewport by 100px from the top and 10% from the bottom.
+
+## Validation
+
+See [amp-visibility-observer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-visibility-observer/validator-amp-visibility-observer.protoascii) in the AMP validator specification.
