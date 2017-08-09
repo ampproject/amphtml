@@ -478,14 +478,14 @@ export class AmpIframe extends AMP.BaseElement {
    */
   updateSize_(height, width) {
     if (!this.isResizable_) {
-      user().error(TAG_,
+      user(this.element).error(TAG_,
           'Ignoring embed-size request because this iframe is not resizable',
           this.element);
       return;
     }
 
     if (height < 100) {
-      user().error(TAG_,
+      user(this.element).error(TAG_,
           'Ignoring embed-size request because the resize height is less ' +
           'than 100px. If you are using amp-iframe to display ads, consider ' +
           'using amp-ad instead.',
@@ -521,7 +521,7 @@ export class AmpIframe extends AMP.BaseElement {
         }
       }, () => {});
     } else {
-      user().error(TAG_,
+      user(this.element).error(TAG_,
           'Ignoring embed-size request because '
           + 'no width or height value is provided',
           this.element);
