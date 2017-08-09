@@ -62,7 +62,7 @@ of `amp-visibility-observer` to implement scroll-bound animations
 Imagine an animation where the hour hand of a clock rotates as user scrolls
 the page.
 
-<TODO IMAGE>
+![Scrollbound animation demo](https://user-images.githubusercontent.com/2099009/29105493-e22a6500-7c82-11e7-9f5e-95c33c76f362.gif)
 
 ```html
 <!-- An animation that rotates a clock hand 180 degrees. -->
@@ -123,7 +123,8 @@ Consider the same clock animation, but this time the hand animates with time, ex
 we like the animation to start when clock is at least 50% visible and pause as soon
 as clock becomes less than 50% visible.
 
-<TODO IMAGE>
+![visibility demo](https://user-images.githubusercontent.com/2099009/29105727-a7d9a80a-7c84-11e7-8d4a-794f38ea5a5c.gif)
+
 
 ```html
 <!-- An animation that rotates a clock hand 180 degrees. -->
