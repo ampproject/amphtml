@@ -193,6 +193,9 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(AMP.AmpAdUIHandler);
     dev().assert(AMP.AmpAdXOriginIframeHandler);
 
+    /** @private {?Promise<undefined>} */
+    this.keysetPromise_ = null;
+
     /** @private {?Promise<?CreativeMetaDataDef>} */
     this.adPromise_ = null;
 
@@ -349,11 +352,14 @@ export class AmpA4A extends AMP.BaseElement {
     });
 
     this.uiHandler = new AMP.AmpAdUIHandler(this);
+
     const verifier = signatureVerifierFor(this.win);
-    const visible = Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible();
-    this.getSigningServiceNames().forEach(signingServiceName => {
-      verifier.loadKeyset(signingServiceName, visible);
-    });
+    this.keysetPromise_ =
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
+          this.getSigningServiceNames().forEach(signingServiceName => {
+            verifier.loadKeyset(signingServiceName);
+          });
+        });
   }
 
   /** @override */
@@ -562,7 +568,7 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Rendering fails => return false
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
-    this.adPromise_ = Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+    this.adPromise_ = this.keysetPromise_
         .then(() => {
           checkStillCurrent();
           // See if experiment that delays request until slot is within
