@@ -37,7 +37,7 @@ describes.sandboxed('amp-visibility-selector', {}, () => {
   function init(ratios = '0', margins = '0') {
     const elem = {
       getAttribute(attr) {
-        if (attr == 'intersection-ratio') {
+        if (attr == 'intersection-ratios') {
           return ratios;
         }
         if (attr == 'exclusion-margins') {

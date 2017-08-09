@@ -104,7 +104,7 @@
 
     <div id="clock-scene-1" class="clock-scene">
       <amp-visibility-observer
-        intersection-ratio="1"
+        intersection-ratios="1"
         exclusion-margins="10vh"
         on="scroll:clockAnim1.seekTo(percent=event.percent)"
         layout="nodisplay">
@@ -122,7 +122,7 @@
 
     <div id="clock-scene-2" class="clock-scene">
       <amp-visibility-observer
-        intersection-ratio="0.5"
+        intersection-ratios="0.5"
         on="enter:clockAnim2.start;exit:clockAnim2.pause"
         layout="nodisplay">
       </amp-visibility-observer>

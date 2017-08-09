@@ -248,7 +248,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   parseAttributes_() {
     // Ratio is either "<top-bottom:{0,1}>" or "<top:{0,1}> <bottom:{0,1}>"
     // e.g, "0.5 1": use 50% visibility at top and 100% at the bottom of viewport
-    const ratios = this.element.getAttribute('intersection-ratio');
+    const ratios = this.element.getAttribute('intersection-ratios');
     if (ratios) {
       const topBottom = ratios.trim().split(' ');
       this.topRatio_ = this.validateAndResolveRatio_(topBottom[0]);
