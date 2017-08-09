@@ -552,7 +552,8 @@ def RunTests(out_dir, nodejs_cmd):
 def Main():
   """The main method, which executes all build steps and runs the tests."""
   logging.basicConfig(
-      format='[[%(filename)s %(funcName)s]] - %(message)s', level=logging.INFO)
+      format='[[%(filename)s %(funcName)s]] - %(message)s',
+      level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
   nodejs_cmd = GetNodeJsCmd()
   CheckPrereqs()
   InstallNodeDependencies()
