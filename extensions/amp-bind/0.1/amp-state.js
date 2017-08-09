@@ -98,7 +98,8 @@ export class AmpState extends AMP.BaseElement {
     const TAG = this.getName_();
     const children = this.element.children;
     if (children.length != 1) {
-      user(this.element).error(TAG, 'Should contain exactly one <script> child.');
+      user(this.element).error(
+          TAG, 'Should contain exactly one <script> child.');
       return;
     }
     const firstChild = children[0];
@@ -108,7 +109,8 @@ export class AmpState extends AMP.BaseElement {
       return;
     }
     const json = tryParseJson(firstChild.textContent, e => {
-      user(this.element).error(TAG, 'Failed to parse state. Is it valid JSON?', e);
+      user(this.element).error(
+          TAG, 'Failed to parse state. Is it valid JSON?', e);
     });
     this.updateState_(json, /* isInit */ true);
   }

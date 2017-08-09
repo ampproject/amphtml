@@ -675,7 +675,7 @@ export class AmpA4A extends AMP.BaseElement {
                   // TODO(@taymonbeal, #9274): differentiate between these
                   case VerificationStatus.ERROR_KEY_NOT_FOUND:
                   case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
-                    user().error(
+                    user(this.element).error(
                         TAG, this.element.getAttribute('type'),
                         'Signature verification failed');
                     return null;
@@ -800,7 +800,7 @@ export class AmpA4A extends AMP.BaseElement {
     assignAdUrlToError(/** @type {!Error} */(error), this.adUrl_);
 
     if (getMode().development || getMode().localDev || getMode().log) {
-      user().error(TAG, error);
+      user(this.element).error(TAG, error);
     } else {
       user().warn(TAG, error);
       // Report with 1% sampling as an expected dev error.
@@ -867,7 +867,7 @@ export class AmpA4A extends AMP.BaseElement {
             checkStillCurrent();
             // Failed to render via AMP creative path so fallback to non-AMP
             // rendering within cross domain iframe.
-            user().error(TAG, this.element.getAttribute('type'),
+            user(this.element).error(TAG, this.element.getAttribute('type'),
                 'Error injecting creative in friendly frame', err);
             this.promiseErrorHandler_(err);
             return this.renderNonAmpCreative_();
@@ -1032,7 +1032,7 @@ export class AmpA4A extends AMP.BaseElement {
     const match = /^([0-9]+)x([0-9]+)$/.exec(headerValue);
     if (!match) {
       // TODO(@taymonbeal, #9274): replace this with real error reporting
-      user().error(TAG, `Invalid size header: ${headerValue}`);
+      user(this.element).error(TAG, `Invalid size header: ${headerValue}`);
       return null;
     }
     return /** @type {?SizeInfoDef} */ (
@@ -1355,7 +1355,8 @@ export class AmpA4A extends AMP.BaseElement {
         default:
           // Shouldn't be able to get here, but...  Because of the assert, above,
           // we can only get here in non-dev mode, so give user feedback.
-          user().error('A4A', 'A4A received unrecognized cross-domain name'
+          user(this.element).error(
+              'A4A', 'A4A received unrecognized cross-domain name'
               + ' attribute iframe rendering mode request: %s.  Unable to'
               + ' render a creative for'
               + ' slot %s.', method, this.element.getAttribute('id'));
