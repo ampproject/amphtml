@@ -115,6 +115,42 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
       csa(win, getAds(AD_TYPE.AFSH_BACKFILL));
       expect(googCsaSpy.args[0][0]).to.equal('plas');
     });
+
+    it('should throw an error: missing afsAdblockOptions', () => {
+      let error = null;
+      const missingAdblock = {
+        ampSlotIndex: '0',
+        height: 300,
+        type: 'csa',
+        afsPageOptions: '{"pubId": "gtech-codegen", "query": "flowers"}',
+      };
+      try {
+        csa(win, missingAdblock);
+      } catch (e) {
+        error = e;
+      }
+      expect(error).to.not.be.null;
+      const message = 'Missing attribute for csa: afsAdblockOptions.​​​';
+      expect(error.message).to.equal(message);
+    });
+
+    it('should throw an error: missing afsPageOptions', () => {
+      let error = null;
+      const missingPage = {
+        ampSlotIndex: '0',
+        height: 300,
+        type: 'csa',
+        afsAdblockOptions: '{"width": "auto", "maxTop": 1}',
+      };
+      try {
+        csa(win, missingPage);
+      } catch (e) {
+        error = e;
+      }
+      expect(error).to.not.be.null;
+      const message = 'Missing attribute for csa: afsPageOptions.​​​';
+      expect(error.message).to.equal(message);
+    });
   });
 
   describe('callback', () => {
