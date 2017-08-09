@@ -19,7 +19,6 @@ import {getServiceForDoc} from '../../../src/service';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {scopedQuerySelector} from '../../../src/dom';
 import {
   RelativePositions,
   layoutRectsRelativePos,
@@ -283,9 +282,8 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   discoverScene_() {
     if (this.targetSelector_) {
-      const root = this.getAmpDoc().getRootNode();
       this.scene_ = user().assertElement(
-          scopedQuerySelector(root, this.targetSelector_),
+          this.getAmpDoc().getRootNode().querySelector(this.targetSelector_),
           'No element found with query selector:' + this.targetSelector_);
     } else {
       this.scene_ = this.element.parentNode;
