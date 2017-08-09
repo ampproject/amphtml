@@ -416,19 +416,7 @@ export class HistoryBindingNatural_ {
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);
 
-
-    /**
-     * Used to ignore `popstate` handler for cases where we know we caused the
-     * popstate event through the use of location.replace.
-     * @private {?string}
-     **/
-    this.lastNavigatedHash_ = null;
-
     this.popstateHandler_ = e => {
-      if (this.lastNavigatedHash_ == this.win.location.hash) {
-        return;
-      }
-      this.lastNavigatedHash_ = this.win.location.hash;
       dev().fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
           JSON.stringify(e.state));
       this.onHistoryEvent_();
@@ -476,9 +464,6 @@ export class HistoryBindingNatural_ {
     // On pop, stack is not allowed to go prior to the starting point.
     stackIndex = Math.max(stackIndex, this.startIndex_);
     return this.whenReady_(() => {
-      // Popping history forget the last navigated hash since we can't really
-      // know what hash the browser is going to go to.
-      this.lastNavigatedHash_ = null;
       return this.back_(this.stackIndex_ - stackIndex + 1);
     });
   }
@@ -643,15 +628,19 @@ export class HistoryBindingNatural_ {
   replaceStateForTarget(target) {
     dev().assert(target[0] == '#', 'target should start with a #');
     this.whenReady_(() => {
-      // location.replace will fire a popstate event, this is not a history
-      // event. This tells the popstate handler to not handle it by setting
-      // the lastNavigatedHash_ to the future hash we know we're going toward.
+      // location.replace will fire a popstate event which is not a history
+      // event, so temporarily remove the event listener and re-add it after.
       // As explained above in the function comment, typically we'd just do
       // replaceState here but in order to trigger :target re-eval we have to
       // use location.replace.
-      this.lastNavigatedHash_ = target;
-      // TODO(mkhatib, #6095): Chrome iOS will add extra states for location.replace.
-      this.win.location.replace(target);
+      this.win.removeEventListener('popstate', this.popstateHandler_);
+      try {
+        // TODO(mkhatib, #6095): Chrome iOS will add extra states for
+        // location.replace.
+        this.win.location.replace(target);
+      } finally {
+        this.win.addEventListener('popstate', this.popstateHandler_);
+      }
       this.historyReplaceState_();
       return Promise.resolve();
     });
