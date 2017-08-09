@@ -51,7 +51,8 @@ export class AmpAnim extends AMP.BaseElement {
     // only read "Graphic" when using only 'alt'.
     if (this.element.getAttribute('role') == 'img') {
       this.element.removeAttribute('role');
-      user().error('AMP-ANIM', 'Setting role=img on amp-anim elements ' +
+      user(this.element).error(
+          'AMP-ANIM', 'Setting role=img on amp-anim elements ' +
           'breaks screen readers. Please just set alt or ARIA attributes, ' +
           'they will be correctly propagated for the underlying <img> ' +
           'element.');
