@@ -195,7 +195,7 @@ export class VariableService {
    */
   expandTemplate(template, options) {
     if (options.iterations < 0) {
-      user().error(TAG, 'Maximum depth reached while expanding variables. ' +
+      user(this.element).error(TAG, 'Maximum depth reached while expanding variables. ' +
           'Please ensure that the variables are not recursive.');
       return Promise.resolve(template);
     }
