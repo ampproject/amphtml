@@ -22,7 +22,7 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
+import {removeElement, closest} from '../../../src/dom';
 import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
 import {Services} from '../../../src/services';
 import {user, dev} from '../../../src/log';
@@ -548,15 +548,9 @@ export class AmpIframe extends AMP.BaseElement {
     }
     // Iframe is not tracking iframe if open with user interaction
     if (this.isInContainer_ === undefined) {
-      let ele = this.element;
-      do {
-        ele = ele.parentElement;
-        if (CONTAINER_LIST.includes(ele.tagName)) {
-          this.isInContainer_ = true;
-          break;
-        }
-      } while (ele && ele.tagName != 'BODY');
-      this.isInContainer_ = this.isInContainer_ || false;
+      this.isInContainer_ = !!closest(this.element, element => {
+        return CONTAINER_LIST.includes(element.tagName);
+      });
     }
     return !this.isInContainer_;
   }

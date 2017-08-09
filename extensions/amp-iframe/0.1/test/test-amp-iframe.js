@@ -613,7 +613,7 @@ describes.realWin('amp-iframe', {
       expect(impl3.looksLikeTrackingIframe_()).to.be.false;
       expect(impl3.getPriority()).to.equal(0);
       yield Services.timerFor(env.win).promise(21);
-      expect(doc.querySelectorAll('[amp-removed]')).to.have.length(2);
+      expect(doc.querySelectorAll('[amp-removed]')).to.have.length(1);
       expect(doc.querySelectorAll('iframe')).to.have.length(1);
       expect(ampIframe3.querySelector('iframe')).to.not.be.null;
     });
