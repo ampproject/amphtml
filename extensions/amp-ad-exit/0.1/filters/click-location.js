@@ -9,7 +9,7 @@ export class ClickLocationFilter extends Filter {
    * @param {string} name The user-defined name of the filter.
    * @param {!../config.ClickLocationConfig} spec
    */
-  constructor(name, spec) {
+  constructor(name, spec, win) {
     super(name);
     user().assert(isValidClickLocationSpec(spec), 'Invaid ClickLocation spec');
 
@@ -27,18 +27,23 @@ export class ClickLocationFilter extends Filter {
 
     /** @private {string|undefined} */
     this.relativeTo_ = spec.relativeTo;
+
+    /** @private {!Window} */
+    this.win_ = win;
   }
 
   /** @override */
   filter(event) {
     let left = 0;
     let top = 0;
-    let right = window.innerWidth;
-    let bottom = window.innerHeight;
+    let right = this.win_./*REVIEW*/innerWidth;
+    let bottom = this.win_./*REVIEW*/innerHeight;
     if (this.relativeTo_) {
-      const relativeElement = document.querySelector(this.relativeTo_);
-      user().assert(relativeElement, `relativeTo element ${this.relativeTo_} not found.`);
-      const elementRect = relativeElement.getBoundingClientRect();
+      const relativeElement = this.win_.document.querySelector(
+          this.relativeTo_);
+      user().assert(relativeElement,
+          `relativeTo element ${this.relativeTo_} not found.`);
+      const elementRect = relativeElement./*REVIEW*/getBoundingClientRect();
       left = elementRect.left;
       top = elementRect.top;
       right = elementRect.right;
@@ -64,6 +69,7 @@ function isValidClickLocationSpec(spec) {
       (typeof spec.right == 'undefined' || typeof spec.right == 'number') &&
       (typeof spec.top == 'undefined' || typeof spec.top == 'number') &&
       (typeof spec.bottom == 'undefined' || typeof spec.bottom == 'number') &&
-      (typeof spec.relativeTo == 'undefined' || typeof spec.relativeTo == 'string') ;
+      (typeof spec.relativeTo == 'undefined'
+       || typeof spec.relativeTo == 'string') ;
 }
 

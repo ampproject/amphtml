@@ -446,8 +446,8 @@ describes.realWin('amp-ad-exit', {
     adDiv.style.position = 'absolute';
     adDiv.style.left = '100px';
     adDiv.style.top = '200px';
-    adDiv.style.right = '300px';
-    adDiv.style.bottom = '400px';
+    adDiv.style.width = '200px';
+    adDiv.style.height = '200px';
     win.document.body.appendChild(adDiv);
 
     // The click is within the top border.
@@ -488,7 +488,7 @@ describes.realWin('amp-ad-exit', {
     element.implementation_.executeAction({
       method: 'exit',
       args: {target: 'borderProtectionRelativeTo'},
-      event: makeClickEvent(1001, 300, 300),
+      event: makeClickEvent(1001, 200, 300),
       satisfiesTrust: () => true,
     });
     expect(open).to.have.been.calledTwice;

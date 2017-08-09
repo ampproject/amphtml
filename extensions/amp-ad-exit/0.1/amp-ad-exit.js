@@ -167,7 +167,7 @@ export class AmpAdExit extends AMP.BaseElement {
       const config = assertConfig(parseJson(child.textContent));
       const userFilters = {};
       for (const name in config.filters) {
-        userFilters[name] = createFilter(name, config.filters[name]);
+        userFilters[name] = createFilter(name, config.filters[name], this.win);
       }
       for (const name in config.targets) {
         const target = config.targets[name];
