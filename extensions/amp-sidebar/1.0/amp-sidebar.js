@@ -109,7 +109,7 @@ export class AmpSidebar extends AMP.BaseElement {
         this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
           ampdoc));
       } catch (e) {
-        user(this.element).error(TAG, 'Failed to instantiate toolbar', e);
+        user().error(TAG, 'Failed to instantiate toolbar', e);
       }
     });
 
