@@ -42,7 +42,7 @@ export class AmpState extends AMP.BaseElement {
   activate(unusedInvocation) {
     // TODO(choumx): Remove this after a few weeks in production.
     const TAG = this.getName_();
-    user().error(TAG,
+    user(this.element).error(TAG,
         'Please use AMP.setState() action explicitly, e.g. ' +
         'on="submit-success:AMP.setState({myAmpState: event.response})"');
   }
@@ -98,17 +98,17 @@ export class AmpState extends AMP.BaseElement {
     const TAG = this.getName_();
     const children = this.element.children;
     if (children.length != 1) {
-      user().error(TAG, 'Should contain exactly one <script> child.');
+      user(this.element).error(TAG, 'Should contain exactly one <script> child.');
       return;
     }
     const firstChild = children[0];
     if (!isJsonScriptTag(firstChild)) {
-      user().error(TAG,
+      user(this.element).error(TAG,
           'State should be in a <script> tag with type="application/json".');
       return;
     }
     const json = tryParseJson(firstChild.textContent, e => {
-      user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
+      user(this.element).error(TAG, 'Failed to parse state. Is it valid JSON?', e);
     });
     this.updateState_(json, /* isInit */ true);
   }
