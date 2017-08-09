@@ -55,7 +55,7 @@ export class AmpFreshManager {
     this.docPromise_ = this.fetchDocument_().then(doc => {
       this.update_(doc);
     }).catch(() => {
-      this.onFetchDocumentFailure_();
+      this.onFetchDocumentFailure_(ampdoc);
     });
   }
 
@@ -105,10 +105,12 @@ export class AmpFreshManager {
   /**
    * Make sure to mark all amp-fresh instances to visible
    * even on failures.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @private
    */
-  onFetchDocumentFailure_() {
-    user().error('AMP-FRESH', 'Failed fetching fresh document through ' +
+  onFetchDocumentFailure_(ampdoc) {
+    user(ampdoc.win.document.documentElement).error(
+        'AMP-FRESH', 'Failed fetching fresh document through ' +
         'amp-fresh');
     return this.ampdoc.whenReady().then(() => {
       Object.keys(this.ampFreshInstances_).forEach(id => {
