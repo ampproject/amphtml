@@ -22,7 +22,7 @@ import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {isProxyOrigin, parseUrl} from '../../../src/url';
+import {parseUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {
@@ -88,13 +88,10 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 export function isGoogleAdsA4AValidEnvironment(win) {
   const supportsNativeCrypto = win.crypto &&
       (win.crypto.subtle || win.crypto.webkitSubtle);
-  // Note: Theoretically, isProxyOrigin is the right way to do this, b/c it
-  // will be kept up to date with known proxies.  However, it doesn't seem to
-  // be compatible with loading the example files from localhost.  To hack
-  // around that, just say that we're A4A eligible if we're in local dev
-  // mode, regardless of origin path.
+  const googleCdnProxyRegex =
+      /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/;
   return supportsNativeCrypto &&
-      (isProxyOrigin(win.location) || getMode(win).localDev ||
+      (googleCdnProxyRegex.test(win.location.origin) || getMode(win).localDev ||
        getMode(win).test);
 }
 
