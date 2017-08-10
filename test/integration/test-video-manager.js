@@ -114,8 +114,8 @@ describe.configure().ifChrome().skipOldChrome().run('VideoManager', function() {
 
     });
 
-    it(`autoplay - autoplay not supported should behave
-        like manual play`, () => {
+    it.configure().skipSauceLabs().run(`autoplay - autoplay not supported
+        should behave like manual play`, () => {
 
       video.setAttribute('autoplay', '');
       videoManager.register(impl);
