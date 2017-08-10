@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpVisibilityObserver} from '../amp-visibility-observer';
+import {AmpVisibilityObserver} from '../amp-position-observer';
 import {layoutRectLtwh, RelativePositions} from '../../../../src/layout-rect';
 
 /**

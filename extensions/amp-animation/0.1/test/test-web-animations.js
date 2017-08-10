@@ -1735,4 +1735,133 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     expect(anim1.currentTime).to.equal(250);
     expect(anim2.currentTime).to.equal(250);
   });
+
+  describe('total duration', () => {
+    it('single request, 0 total', () => {
+      const timing = {
+        duration: 0,
+        delay: 0,
+        endDelay: 0,
+        iterations: 1,
+        iterationStart: 0,
+      };
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing},
+      ]);
+      expect(runner.getTotalDuration_()).to.equal(0);
+    });
+
+    it('single request, 0 iteration', () => {
+      const timing = {
+        duration: 100,
+        delay: 100,
+        endDelay: 100,
+        iterations: 0,
+        iterationStart: 0,
+      };
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing},
+      ]);
+
+      // 200 for delays
+      expect(runner.getTotalDuration_()).to.equal(200);
+    });
+
+    it('single request, 1 iteration', () => {
+      const timing = {
+        duration: 100,
+        delay: 100,
+        endDelay: 100,
+        iterations: 1,
+        iterationStart: 0,
+      };
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing},
+      ]);
+      expect(runner.getTotalDuration_()).to.equal(300);
+    });
+
+    it('single request, multiple iterations', () => {
+      const timing = {
+        duration: 100,
+        delay: 100,
+        endDelay: 100,
+        iterations: 3,
+        iterationStart: 0,
+      };
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing},
+      ]);
+      expect(runner.getTotalDuration_()).to.equal(500); // 3*100 + 100 + 100
+    });
+
+    it('single request, multiple iterations with iterationStart', () => {
+      const timing = {
+        duration: 100,
+        delay: 100,
+        endDelay: 100,
+        iterations: 3,
+        iterationStart: 2.5,
+      };
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing},
+      ]);
+      // because iterationStart is 2.5, the first 2.5/3 iterations are ignored.
+      expect(runner.getTotalDuration_()).to.equal(250);// 0.5*100 + 100 + 100
+    });
+
+    it('multiple requests - bigger by duration', () => {
+      // 300
+      const timing1 = {
+        duration: 100,
+        delay: 100,
+        endDelay: 100,
+        iterations: 1,
+        iterationStart: 0,
+      };
+
+      // 500 - bigger
+      const timing2 = {
+        duration: 300,
+        delay: 100,
+        endDelay: 100,
+        iterations: 1,
+        iterationStart: 0,
+      };
+
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing: timing1},
+        {target: target1, keyframes: keyframes1, timing: timing2},
+      ]);
+
+      expect(runner.getTotalDuration_()).to.equal(500);
+    });
+
+    it('multiple requests - bigger by iteration', () => {
+      // 800 - bigger
+      const timing1 = {
+        duration: 200,
+        delay: 100,
+        endDelay: 100,
+        iterations: 3,
+        iterationStart: 0,
+      };
+
+      // 500
+      const timing2 = {
+        duration: 300,
+        delay: 100,
+        endDelay: 100,
+        iterations: 1,
+        iterationStart: 0,
+      };
+
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing: timing1},
+        {target: target1, keyframes: keyframes1, timing: timing2},
+      ]);
+
+      expect(runner.getTotalDuration_()).to.equal(800);
+    });
+  });
 });

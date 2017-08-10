@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-visibility-observer"></a> `amp-visibility-observer`
+# <a name="amp-position-observer"></a> `amp-position-observer`
 
 <table>
   <tr>
@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-visibility-observer" src="https://cdn.ampproject.org/v0/amp-visibility-observer-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -35,20 +35,20 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-visibility-observer.amp.html">amp-visibility-observer</a></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-position-observer.amp.html">amp-position-observer</a></td>
   </tr>
 </table>
 
 [TOC]
 
-## What is amp-visibility-observer?
-`amp-visibility-observer` is a functional component that monitors visibility of
-an element within the viewport and dispatches
+## What is amp-position-observer?
+`amp-position-observer` is a functional component that monitors visibility
+and position of an element within the viewport and dispatches
 `enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**)
 which can be used to trigger actions (**Only Low Trust Actions**) on other components.
 It is only useful when used with other components and does not do anything on its own.
 
-## What can I do with amp-visibility-observer?
+## What can I do with amp-position-observer?
 Currently [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
 and several video players in AMP are the only components that allow low-trust events
 to trigger their actions such as starting the animation, seeking to a position
@@ -56,7 +56,7 @@ within the animation, pausing a video, etc...
 
 ### Scroll-bound animations
 `amp-animation` exposes a `seekTo` action that can be tied to the `scroll` event
-of `amp-visibility-observer` to implement scroll-bound animations
+of `amp-position-observer` to implement scroll-bound animations
 
 ### Example:
 Imagine an animation where the hour hand of a clock rotates as user scrolls
@@ -97,24 +97,24 @@ the page.
 </div>
 
 <!--
-  Use amp-visibility-observer to tie the movement of the clock scene within
+  Use amp-position-observer to tie the movement of the clock scene within
   the viewport to the timeline of the animation
 -->
 
-<amp-visibility-observer
+<amp-position-observer
   target-selector="#clock-scene"
   intersection-ratios="1"
   on="scroll:clockAnim.seekTo(percent=event.percent)"
   layout="nodisplay">
-</amp-visibility-observer>
+</amp-position-observer>
 ```
 
 ### Animation scenes that start/pause based on visibility in the viewport
 `amp-animation` also exposes `start` and `start` actions that can be tied to the
-`enter` and `exit` events of `amp-visibility-observer` to control when animation
+`enter` and `exit` events of `amp-position-observer` to control when animation
 starts/pauses based on visibility.
 
-`amp-visibility-observer` exposes various visibility configurations such as
+`amp-position-observer` exposes various visibility configurations such as
 `intersection-ratios` and `exclusion-margins` (similar to [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)) that
 can be used to fine-tune when the target is considered visible.
 
@@ -135,7 +135,7 @@ as clock becomes less than 50% visible.
 <!--
    Also note that this is the same animation as the scroll-bound version above
    the animation is the same, just the triggering mechanism with
-   `amp-visibility-observer` is different!
+   `amp-position-observer` is different!
 -->
 <amp-animation id="clockAnim" layout="nodisplay">
   <script type="application/json">
@@ -164,28 +164,28 @@ as clock becomes less than 50% visible.
 </div>
 
 <!--
-  Use amp-visibility-observer to tie the start/pause of the animation with
+  Use amp-position-observer to tie the start/pause of the animation with
   the visibility of the scene.
 -->
 
-<amp-visibility-observer
+<amp-position-observer
   target-selector="#clock-scene"
   intersection-ratios="0.5"
   on="enter:clockAnim.start;exit:clockAnim.pause"
   layout="nodisplay">
-</amp-visibility-observer>
+</amp-position-observer>
 ```
 
 ## Attributes
 
 #### target-selector (optional)
 Specifies what element to observe.
-If **not specified** the **parent** of `<amp-visibility-observer>` will be used as the target
+If **not specified** the **parent** of `<amp-position-observer>` will be used as the target
 
 #### intersection-ratios (optional)
 
 A number between 0 and 1 which defines how much of the target should be visible in
-the viewport before `<amp-visibility-observer>` triggers any of its events.
+the viewport before `<amp-position-observer>` triggers any of its events.
 
 Different ratios for top vs. bottom can be specified by providing two values. (`<top> <bottom>`)
 
@@ -226,4 +226,4 @@ Effectively only considering the middle 50% of the viewport.
 
 ## Validation
 
-See [amp-visibility-observer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-visibility-observer/validator-amp-visibility-observer.protoascii) in the AMP validator specification.
+See [amp-position-observer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-position-observer/validator-amp-position-observer.protoascii) in the AMP validator specification.

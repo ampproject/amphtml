@@ -262,7 +262,8 @@ export class WebAnimationRunner {
       if (timing.iterations == Infinity && timing.duration > 0) {
         return Infinity;
       }
-      const totalDuration = (timing.duration * timing.iterations) +
+      const iteration = timing.iterations - timing.iterationStart;
+      const totalDuration = (timing.duration * iteration) +
           timing.delay + timing.endDelay;
 
       if (totalDuration > maxTotalDuration) {

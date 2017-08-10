@@ -37,7 +37,7 @@ import {
   PositionInViewportEntryDef,
 } from '../../../src/service/position-observer-impl';
 
-const TAG = 'amp-visibility-observer';
+const TAG = 'amp-position-observer';
 
 export class AmpVisibilityObserver extends AMP.BaseElement {
 
@@ -371,4 +371,4 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-visibility-observer', AmpVisibilityObserver);
+AMP.registerElement('amp-position-observer', AmpVisibilityObserver);

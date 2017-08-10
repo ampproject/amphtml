@@ -17,16 +17,16 @@ tags: {
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-visibility-observer"
+    name: "amp-position-observer"
     allowed_versions: "0.1"
     allowed_versions: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-visibility-observer>
+tags: {  # <amp-position-observer>
   html_format: AMP
-  tag_name: "AMP-VISIBILITY-OBSERVER"
-  requires_extension: "amp-visibility-observer"
+  tag_name: "amp-position-observer"
+  requires_extension: "amp-position-observer"
   attrs: {
     name: "intersection-ratios"
     # "0", "0.1" , "1", "0 1", "0 0.5", "0.5 1", "1 1", etc...
