@@ -53,25 +53,28 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
     });
   });
 
-  describes.fakeWin('webview window init', {
-    amp: {
-      params: {
-        webview: '1',
-        origin: null,
+  describe.configure()
+      .ifChrome().skipOldChrome().run('webview window init', function() {
+    describes.fakeWin('webview window init', {
+      amp: {
+        params: {
+          webview: '1',
+          origin: null,
+        },
       },
-    },
-  }, env => {
-    let integr;
+    }, env => {
+      let integr;
 
-    beforeEach(() => {
-      integr = new AmpViewerIntegration(env.win);
-    });
+      beforeEach(() => {
+        integr = new AmpViewerIntegration(env.win);
+      });
 
-    it('should set source and origin for webview', () => {
-      const stub = sandbox.stub(integr, 'webviewPreHandshakePromise_',
-          () => new Promise(() => {}));
-      integr.init();
-      expect(stub).to.be.calledWith(/* source */ null, /* origin */ '');
+      it('should set source and origin for webview', () => {
+        const stub = sandbox.stub(integr, 'webviewPreHandshakePromise_',
+            () => new Promise(() => {}));
+        integr.init();
+        expect(stub).to.be.calledWith(/* source */ null, /* origin */ '');
+      });
     });
   });
 });
