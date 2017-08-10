@@ -19,38 +19,35 @@ import {
 } from '../viewer-initiated-handshake-viewer-for-testing';
 
 
-describe.configure()
-    .ifChrome().skipOldChrome().run('AmpWebviewViewerIntegration', function() {
-  describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
-    const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
-    describe('Handshake', function() {
-      let viewerEl;
-      let viewer;
+describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
+  const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
+  describe.configure().skipSauceLabs().run('Handshake', function() {
+    let viewerEl;
+    let viewer;
 
-      beforeEach(() => {
-        const loc = window.location;
-        const ampDocUrl =
-          `${loc.protocol}//iframe.${loc.hostname}:${loc.port}${ampDocSrc}`;
+    beforeEach(() => {
+      const loc = window.location;
+      const ampDocUrl =
+        `${loc.protocol}//iframe.${loc.hostname}:${loc.port}${ampDocSrc}`;
 
-        viewerEl = document.createElement('div');
-        document.body.appendChild(viewerEl);
-        viewer = new WebviewViewerForTesting(viewerEl, '1', ampDocUrl, true);
-      });
+      viewerEl = document.createElement('div');
+      document.body.appendChild(viewerEl);
+      viewer = new WebviewViewerForTesting(viewerEl, '1', ampDocUrl, true);
+    });
 
-      afterEach(() => {
-        document.body.removeChild(viewerEl);
-      });
+    afterEach(() => {
+      document.body.removeChild(viewerEl);
+    });
 
-      it('should confirm the handshake', () => {
-        return viewer.waitForHandshakeResponse();
-      });
+    it('should confirm the handshake', () => {
+      return viewer.waitForHandshakeResponse();
+    });
 
-      it('should handle unload correctly', () => {
-        viewer.waitForHandshakeResponse().then(() => {
-          const stub = sandbox.stub(viewer, 'handleUnload_');
-          window.eventListeners.fire({type: 'unload'});
-          expect(stub).to.be.calledOnce;
-        });
+    it('should handle unload correctly', () => {
+      viewer.waitForHandshakeResponse().then(() => {
+        const stub = sandbox.stub(viewer, 'handleUnload_');
+        window.eventListeners.fire({type: 'unload'});
+        expect(stub).to.be.calledOnce;
       });
     });
   });
