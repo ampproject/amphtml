@@ -99,74 +99,76 @@ function waitForEvent(env, name) {
   });
 }
 
-describe.configure().skipSauceLabs().run('Bind', function() {
+describe.configure().ifChrome().skipOldChrome().run('Bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
 
-  describes.realWin('in FIE', {
-    amp: {
-      ampdoc: 'fie',
-      runtimeOn: false,
-    },
-  }, env => {
-    let bind;
-    let container;
-
-    beforeEach(() => {
-      // Make sure we have a chunk instance for testing.
-      chunkInstanceForTesting(env.ampdoc);
-
-      bind = new Bind(env.ampdoc, env.win);
-      container = env.embed.getBodyElement();
-    });
-
-    it('should scan for bindings when ampdoc is ready', () => {
-      createElement(env, container, '[text]="1+1"');
-      expect(bind.numberOfBindings()).to.equal(0);
-      return onBindReady(env, bind).then(() => {
-        expect(bind.numberOfBindings()).to.equal(1);
-      });
-    });
-
-    describe('with Bind in parent window', () => {
-      let parentBind;
-      let parentContainer;
+  describe.configure().skipSauceLabs().run('in FIE', function() {
+    describes.realWin('in FIE', {
+      amp: {
+        ampdoc: 'fie',
+        runtimeOn: false,
+      },
+    }, env => {
+      let bind;
+      let container;
 
       beforeEach(() => {
-        parentBind = new Bind(env.ampdoc);
-        parentContainer = env.ampdoc.getBody();
+        // Make sure we have a chunk instance for testing.
+        chunkInstanceForTesting(env.ampdoc);
+
+        bind = new Bind(env.ampdoc, env.win);
+        container = env.embed.getBodyElement();
       });
 
-      it('should only scan elements in provided window', () => {
+      it('should scan for bindings when ampdoc is ready', () => {
         createElement(env, container, '[text]="1+1"');
-        createElement(env, parentContainer, '[text]="2+2"');
-        return Promise.all([
-          onBindReady(env, bind),
-          onBindReady(env, parentBind),
-        ]).then(() => {
+        expect(bind.numberOfBindings()).to.equal(0);
+        return onBindReady(env, bind).then(() => {
           expect(bind.numberOfBindings()).to.equal(1);
-          expect(parentBind.numberOfBindings()).to.equal(1);
         });
       });
 
-      it('should not be able to access variables from other windows', () => {
-        const element =
-            createElement(env, container, '[text]="foo + bar"');
-        const parentElement =
-            createElement(env, parentContainer, '[text]="foo + bar"');
-        const promises = [
-          onBindReadyAndSetState(env, bind, {foo: '123', bar: '456'}),
-          onBindReadyAndSetState(env, parentBind, {foo: 'ABC', bar: 'DEF'}),
-        ];
-        return Promise.all(promises).then(() => {
-          // `element` only sees `foo` and `parentElement` only sees `bar`.
-          expect(element.textContent).to.equal('123456');
-          expect(parentElement.textContent).to.equal('ABCDEF');
+      describe('with Bind in parent window', () => {
+        let parentBind;
+        let parentContainer;
+
+        beforeEach(() => {
+          parentBind = new Bind(env.ampdoc);
+          parentContainer = env.ampdoc.getBody();
+        });
+
+        it('should only scan elements in provided window', () => {
+          createElement(env, container, '[text]="1+1"');
+          createElement(env, parentContainer, '[text]="2+2"');
+          return Promise.all([
+            onBindReady(env, bind),
+            onBindReady(env, parentBind),
+          ]).then(() => {
+            expect(bind.numberOfBindings()).to.equal(1);
+            expect(parentBind.numberOfBindings()).to.equal(1);
+          });
+        });
+
+        it('should not be able to access variables from other windows', () => {
+          const element =
+              createElement(env, container, '[text]="foo + bar"');
+          const parentElement =
+              createElement(env, parentContainer, '[text]="foo + bar"');
+          const promises = [
+            onBindReadyAndSetState(env, bind, {foo: '123', bar: '456'}),
+            onBindReadyAndSetState(env, parentBind, {foo: 'ABC', bar: 'DEF'}),
+          ];
+          return Promise.all(promises).then(() => {
+            // `element` only sees `foo` and `parentElement` only sees `bar`.
+            expect(element.textContent).to.equal('123456');
+            expect(parentElement.textContent).to.equal('ABCDEF');
+          });
         });
       });
-    });
-  }); // in FIE
+    }); // in FIE
+  });
 
   describes.realWin('in shadow ampdoc', {
     amp: {
