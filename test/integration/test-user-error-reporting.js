@@ -29,7 +29,7 @@ describe('user-error', function() {
   describes.integration('user-error integration test', {
     extensions: ['amp-analytics'],
     hash: 'log=0',
-    experimentId: 'user-error-reporting',
+    experiments: ['user-error-reporting'],
     body: () => `   
     <amp-analytics><script type="application/json">
           {
@@ -56,7 +56,7 @@ describe('user-error', function() {
   describes.integration('user-error integration test', {
     extensions: ['amp-analytics'],
     hash: 'log=0',
-    experimentId: 'user-error-reporting',
+    experiments: ['user-error-reporting'],
 
     body: () => `
     <amp-img

@@ -449,11 +449,14 @@ class IntegrationFixture {
     const body = typeof this.spec.body == 'function' ?
           this.spec.body() : this.spec.body;
     const experiments = this.spec.experiments;
+    const extensions = this.spec.extensions || [''];
+
     return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
         src: addParamsToUrl('/amp4test/compose-doc',
             {body, experiments: experiments == undefined ?
-                undefined : experiments.join(',')}) + `#${this.hash}`,
+                undefined : experiments.join(','),
+              extensions: extensions.join(' ')}) + `#${this.hash}`,
       });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
@@ -469,7 +472,6 @@ class IntegrationFixture {
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
     }
-    toggleExperiment(window, this.experimentId, false);
   }
 }
 
