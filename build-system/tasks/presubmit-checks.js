@@ -457,6 +457,7 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js',
       'src/service/viewer-impl.js',
       'src/error.js',
+      'src/window-interface.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
