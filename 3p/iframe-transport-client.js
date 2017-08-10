@@ -39,7 +39,7 @@ export class IframeTransportClient {
     /** @protected {!IframeMessagingClient} */
     this.client_ = new IframeMessagingClient(win);
     this.client_.setHostWindow(this.win_.parent);
-    this.client_.setSentinel(user().assertString(
+    this.client_.setSentinel(dev().assertString(
         tryParseJson(this.win_.name)['sentinel'],
         'Invalid/missing sentinel on iframe name attribute' + this.win_.name));
     this.client_.makeRequest(

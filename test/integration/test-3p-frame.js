@@ -33,9 +33,10 @@ import {loadPromise} from '../../src/event-helper';
 import {toggleExperiment} from '../../src/experiments';
 import {preconnectForElement} from '../../src/preconnect';
 import {validateData} from '../../3p/3p';
+import {DomFingerprint} from '../../src/utils/dom-fingerprint';
 import * as sinon from 'sinon';
 
-describe('3p-frame', () => {
+describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
 
   let clock;
   let sandbox;
@@ -136,7 +137,7 @@ describe('3p-frame', () => {
   });
 
   // TODO(bradfrizzell) break this out into a test-iframe-attributes
-  it('should create an iframe', () => {
+  it.configure().skipSauceLabs().run('should create an iframe', () => {
     window.AMP_MODE = {
       localDev: true,
       development: false,
@@ -169,6 +170,9 @@ describe('3p-frame', () => {
         .once();
 
     container.appendChild(div);
+
+    sandbox.stub(DomFingerprint, 'generate', () => 'MY-MOCK-FINGERPRINT');
+
     const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
     const src = iframe.src;
     const locationHref = location.href;
@@ -230,6 +234,7 @@ describe('3p-frame', () => {
     return loadPromise(iframe).then(() => {
       const win = iframe.contentWindow;
       expect(win.context.canonicalUrl).to.equal(docInfo.canonicalUrl);
+      expect(win.context.domFingerprint).to.equal('MY-MOCK-FINGERPRINT');
       expect(win.context.sourceUrl).to.equal(locationHref);
       expect(win.context.location.href).to.equal(locationHref);
       expect(win.context.location.origin).to.equal('http://localhost:9876');

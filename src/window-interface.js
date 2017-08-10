@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {childElementByTag} from './dom';
-import {dev} from './log';
 
 /**
- * @param {!HTMLBodyElement} bodyElement
- * @return {!Element}
+ * An interface to interact with browser window object.
+ * Mainly used to mock out read only APIs in test.
+ * See test-helper.js#mockWindowInterface
  */
-export function getFixedContainer(bodyElement) {
-  return dev().assertElement(childElementByTag(
-      dev().assertElement(bodyElement), 'amp-ad-banner'));
+export class WindowInterface {
+
+  static getDocumentReferrer(win) {
+    return win.document.referrer;
+  }
 }

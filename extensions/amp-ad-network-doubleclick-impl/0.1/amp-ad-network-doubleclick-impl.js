@@ -99,7 +99,7 @@ const DOUBLECLICK_BASE_URL =
 /** @const {number} */
 const RTC_TIMEOUT = 1000;
 
-/** @private {?Promise<!Object<string,string>>} */
+/** @private {?Promise<?Object>} */
 let rtcPromise = null;
 
 /** @private {?JsonObject|undefined} */
@@ -334,7 +334,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           /** @type {!Object<string, !ExperimentInfo>} */ ({});
       experimentInfoMap[CORRELATOR_CLEAR_EXP_NAME] = {
         isTrafficEligible: () => true,
-        branches: Object.values(CORRELATOR_CLEAR_EXP_BRANCHES),
+        branches: ['22302764','22302765'],
       };
       randomlySelectUnsetExperiments(this.win, experimentInfoMap);
       const expId = getExperimentBranch(this.win, CORRELATOR_CLEAR_EXP_NAME);
@@ -670,15 +670,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * model.
    * The targeting info from the RTC updates the targeting info on
    * this object within mergeRtc.
-   * @return {?Promise<?Object>} An object of parameters to add to
+   * @param {Document=} opt_doc Optional document for testing.
+   * @return {!Promise<?Object>} An object of parameters to add to
    *   the ad request url.
    * @private
    */
-  executeRtc_() {
+  executeRtc_(opt_doc) {
+    const doc = opt_doc || this.element.ownerDocument;
     if (rtcPromise) {
       return this.mergeRtc();
     }
-    const ampRtcPageElement = document.getElementById('amp-rtc');
+    const ampRtcPageElement = doc.getElementById('amp-rtc');
     if (!ampRtcPageElement) {
       return Promise.resolve();
     }
@@ -746,7 +748,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Merges the RTC response into the jsonTargeting of this.
    * If it can't merge, or there is no response, potentially
    * rejects.
-   * @return {Promise<?Object>} Resolves if ad request is
+   * @return {!Promise<?Object>} Resolves if ad request is
    *     to be sent, with object of params to add to request,
    *     otherwise rejects with a reject message if we have one.
    */
@@ -796,7 +798,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * the ad request on RTC failure. If yes, we return a resolve,
    * if not, we return a reject.
    * @param {string} errMessage
-   * @return {Promise<?number|?string>}
+   * @return {!Promise<?Object>}
    */
   shouldSendRequestWithoutRtc(errMessage) {
     user().error(TAG, errMessage);

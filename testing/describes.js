@@ -437,10 +437,6 @@ class IntegrationFixture {
     /** @const {string} */
     this.hash = spec.hash || '';
     delete spec.hash;
-
-    /** @const {string} */
-    this.experimentId = spec.experimentId || '';
-    delete spec.experimentId;
   }
 
   /** @override */
@@ -451,16 +447,13 @@ class IntegrationFixture {
   /** @override */
   setup(env) {
     const body = typeof this.spec.body == 'function' ?
-        this.spec.body() : this.spec.body;
-    const extensions = this.spec.extensions || [''];
-
-    if (this.experimentId != '') {
-      toggleExperiment(window, this.experimentId, true);
-    }
+          this.spec.body() : this.spec.body;
+    const experiments = this.spec.experiments;
     return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
         src: addParamsToUrl('/amp4test/compose-doc',
-                    {body, extensions: extensions.join(' ')}) + `#${this.hash}`,
+            {body, experiments: experiments == undefined ?
+                undefined : experiments.join(',')}) + `#${this.hash}`,
       });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;

@@ -221,8 +221,9 @@ export class Xhr {
           'body must be of type object or array. %s',
           init.body
       );
-
-      init.headers['Content-Type'] = 'application/json;charset=utf-8';
+      // Content should be 'text/plain' to avoid CORS preflight.
+      init.headers['Content-Type'] = init.headers['Content-Type'] ||
+          'text/plain;charset=utf-8';
       // Cast is valid, because we checked that it is not form data above.
       init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
     }

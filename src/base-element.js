@@ -320,6 +320,11 @@ export class BaseElement {
    * class set on it.
    *
    * This callback is executed early after the element has been attached to DOM.
+   *
+   * This callback can either immediately return or return a promise if the
+   * build steps are asynchronous.
+   *
+   * @return {!Promise|undefined}
    */
   buildCallback() {
     // Subclasses may override.

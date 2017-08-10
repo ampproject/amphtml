@@ -900,24 +900,51 @@ class ChildTagMatcher {
     if (!this.isEnabled()) {
       return;
     }
-    const expected = this.parentSpec_.childTags.mandatoryNumChildTags;
-    if (expected === -1 || expected === this.numChildTagsSeen_) {
-      return;
+
+    const expectedNumChildTags =
+        this.parentSpec_.childTags.mandatoryNumChildTags;
+    if (expectedNumChildTags !== -1 &&
+        expectedNumChildTags !== this.numChildTagsSeen_) {
+      if (amp.validator.LIGHT) {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      } else {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS,
+            this.getLineCol(),
+            /* params */
+            [
+              getTagSpecName(this.parentSpec_), expectedNumChildTags.toString(),
+              this.numChildTagsSeen_.toString()
+            ],
+            getTagSpecUrl(this.parentSpec_), result);
+        return;
+      }
     }
-    if (amp.validator.LIGHT) {
-      result.status = amp.validator.ValidationResult.Status.FAIL;
-      return;
+
+    const expectedMinNumChildTags =
+        this.parentSpec_.childTags.mandatoryMinNumChildTags;
+    if (expectedMinNumChildTags !== -1 &&
+        this.numChildTagsSeen_ < expectedMinNumChildTags) {
+      if (amp.validator.LIGHT) {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      } else {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.INCORRECT_MIN_NUM_CHILD_TAGS,
+            this.getLineCol(),
+            /* params */
+            [
+              getTagSpecName(this.parentSpec_),
+              expectedMinNumChildTags.toString(),
+              this.numChildTagsSeen_.toString()
+            ],
+            getTagSpecUrl(this.parentSpec_), result);
+        return;
+      }
     }
-    context.addError(
-        amp.validator.ValidationError.Severity.ERROR,
-        amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS,
-        this.getLineCol(),
-        /* params */
-        [
-          getTagSpecName(this.parentSpec_), expected.toString(),
-          this.numChildTagsSeen_.toString()
-        ],
-        getTagSpecUrl(this.parentSpec_), result);
   }
 }
 
@@ -1139,8 +1166,17 @@ class ReferencePointMatcher {
   }
 }
 
+// Instances of this class specify which tag names (|allowedTags|)
+// are allowed as descendent tags of a particular tag (|tagName|).
 /**
  * @typedef {{ tagName: string,
+ *             allowedTags: !Array<string>}}
+ */
+let DescendantConstraints;
+
+/**
+ * @typedef {{ tagName: string,
+ *             hasDescendantConstraintLists: boolean,
  *             childTagMatcher: ?ChildTagMatcher,
  *             referencePointMatcher: ?ReferencePointMatcher,
  *             dataAmpReportTestValue: ?string }}
@@ -1177,6 +1213,12 @@ class TagStack {
      * @private
      */
     this.cdataMatcher_ = null;
+
+    /**
+     * @type {!Array<DescendantConstraints>}
+     * @private
+     */
+    this.allowedDescendantsList_ = [];
   }
 
   /**
@@ -1203,6 +1245,7 @@ class TagStack {
     }
     this.stack_.push({
       tagName: tagName,
+      hasDescendantConstraintLists: false,
       childTagMatcher: null,
       referencePointMatcher: null,
       dataAmpReportTestValue: maybeDataAmpReportTestValue
@@ -1216,6 +1259,16 @@ class TagStack {
    */
   setChildTagMatcher(matcher) {
     this.stack_[this.stack_.length - 1].childTagMatcher = matcher;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setHasDescendantConstraintLists(value) {
+    if (this.stack_.length <= 0) {
+      return;
+    }
+    this.stack_[this.stack_.length - 1].hasDescendantConstraintLists = value;
   }
 
   /**
@@ -1288,6 +1341,8 @@ class TagStack {
    */
   exitTag(tagName, context, result) {
     this.cdataMatcher_ = null;
+    this.unRegisterDescendantConstraintList();
+
     const topStackEntry = this.stack_.pop();
     if (topStackEntry.childTagMatcher !== null) {
       topStackEntry.childTagMatcher.exitTag(context, result);
@@ -1338,6 +1393,46 @@ class TagStack {
       }
     }
     return false;
+  }
+
+  /**
+   * @param {string} tagName The tag that has constraints.
+   * @param {!Array<string>} allowedTags The tags whitelisted as descendents of
+   * tagName.
+   */
+  registerDescendantConstraintList(tagName, allowedTags) {
+    this.allowedDescendantsList_.push(
+        {tagName: tagName, allowedTags: allowedTags});
+    this.setHasDescendantConstraintLists(true);
+  }
+
+  /**
+   * @return {boolean} true if the tag introduced descendant constraints.
+   * Else false.
+   */
+  hasDescendantConstraintLists() {
+    if (this.stack_.length <= 0) {
+      return false;
+    }
+    return this.stack_[this.stack_.length - 1].hasDescendantConstraintLists;
+  }
+
+  /**
+   * Updates the allowed descendants list if a tag introduced constraints. This
+   * is called when exiting a tag.
+   */
+  unRegisterDescendantConstraintList() {
+    if (this.hasDescendantConstraintLists()) {
+      this.allowedDescendantsList_.pop();
+      this.setHasDescendantConstraintLists(false);
+    }
+  }
+
+  /**
+   * @return {!Array<DescendantConstraints>}
+   */
+  allowedDescendantsList() {
+    return this.allowedDescendantsList_;
   }
 }
 
@@ -2169,6 +2264,22 @@ class Context {
   getEncounteredBodyLineCol() {
     return this.encounteredBodyLineCol_;
   }
+
+  /**
+   * @param {string} tagName The tag that has constraints.
+   * @param {!Array<string>} allowedTags The tags whitelisted as descendents of
+   * tagName.
+   */
+  registerDescendantConstraintList(tagName, allowedTags) {
+    this.tagStack_.registerDescendantConstraintList(tagName, allowedTags);
+  }
+
+  /**
+   * @return {!Array<DescendantConstraints>}
+   */
+  allowedDescendantsList() {
+    return this.tagStack_.allowedDescendantsList();
+  }
 }
 
 /**
@@ -2932,6 +3043,42 @@ function validateParentTag(parsedTagSpec, context, validationResult) {
           spec.mandatoryParent.toLowerCase()
         ],
         getTagSpecUrl(spec), validationResult);
+  }
+}
+
+/**
+ * Validates that this tag is an allowed descendant tag type.
+ * Registers new descendent constraints if they are set.
+ * @param {!ParsedTagSpec} parsedTagSpec
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} validationResult
+ * @param {!ParsedValidatorRules} parsedRules
+ */
+function validateDescendantTags(
+    parsedTagSpec, context, validationResult, parsedRules) {
+  const spec = parsedTagSpec.getSpec();
+  const tagName = parsedTagSpec.getSpec().tagName;
+
+  for (var ii = 0; ii < context.allowedDescendantsList().length; ++ii) {
+    const allowedDescendantsList = context.allowedDescendantsList()[ii];
+    // If the tag we're validating is not whitelisted for a specific ancestor,
+    // then throw an error.
+    if (!allowedDescendantsList.allowedTags.includes(tagName)) {
+      if (amp.validator.LIGHT) {
+        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      } else {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
+            context.getDocLocator(),
+            /* params */
+            [tagName.toLowerCase(),
+             allowedDescendantsList.tagName.toLowerCase()],
+            getTagSpecUrl(spec), validationResult);
+        return;
+      }
+    }
   }
 }
 
@@ -3798,6 +3945,36 @@ function validateTagAgainstSpec(
       encounteredAttrs, resultForAttempt);
   validateParentTag(parsedSpec, context, resultForAttempt);
   validateAncestorTags(parsedSpec, context, resultForAttempt);
+  validateDescendantTags(parsedSpec, context, resultForAttempt, parsedRules);
+
+  // Set Descendent Constraint rules.
+  const descendantTagLists = parsedRules.getDescendantTagLists();
+  if (!!descendantTagLists) {
+    const spec = parsedSpec.getSpec();
+
+    // Register new Descendant Constraints (if they exist).
+    let allowedDescendantsForThisTag = [];
+
+    // Go through each list_name in for this tag.
+    for (const listName of spec.descendantTagLists) {
+      for (const list of descendantTagLists) {
+        goog.asserts.assert(list !== null);
+
+        // Get the lists associated with this tag.
+        if (list.name == listName) {
+          for (const tag of list.allowedTags) {
+            allowedDescendantsForThisTag.push(tag);
+          }
+        }
+      }
+    }
+
+    if (allowedDescendantsForThisTag.length > 0) {
+      context.registerDescendantConstraintList(
+          context.getTagStack().getCurrent(), allowedDescendantsForThisTag);
+    }
+  }
+  // End set Descendent Constraint rules.
 
   if (resultForAttempt.status === amp.validator.ValidationResult.Status.FAIL) {
     if (amp.validator.LIGHT) {
@@ -4457,6 +4634,13 @@ class ParsedValidatorRules {
    */
   getParsedAttrSpecs() {
     return this.parsedAttrSpecs_;
+  }
+
+  /**
+   * @return {!Array<amp.validator.DescendantTagList>}
+   */
+  getDescendantTagLists() {
+    return this.rules_.descendantTagLists;
   }
 
   /**

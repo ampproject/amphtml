@@ -17,16 +17,6 @@
 import {ActionTrust} from './action-trust'; /* eslint no-unused-vars: 0 */
 
 /**
- * @typedef {{
- *   artwork: Array,
- *   title: string,
- *   album: string,
- *   artist: string,
- * }}
- */
-export let VideoMetaDef;
-
-/**
  * VideoInterface defines a common video API which any AMP component that plays
  * videos is expected to implement.
  *
@@ -121,7 +111,7 @@ export class VideoInterface {
    * title (string): Name of the video
    * artist (string): Name of the video's author/artist
    * album (string): Name of the video's album if it exists
-   * @return {!VideoMetaDef|undefined} metadata
+   * @return {!./mediasession-helper.MetadataDef|undefined} metadata
    */
   getMetadata() {}
 

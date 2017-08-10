@@ -299,6 +299,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  engageya: {},
+
   eplanning: {
     prefetch: 'https://us.img.e-planning.net/layers/epl-amp.js',
   },
@@ -629,6 +631,11 @@ export const adConfig = {
   smartclip: {
     prefetch: 'https://cdn.smartclip.net/amp/amp.v0.js',
     preconnect: 'https://des.smartclip.net',
+    renderStartImplemented: true,
+  },
+
+  sogouad: {
+    prefetch: 'https://theta.sogoucdn.com/wap/js/aw.js',
     renderStartImplemented: true,
   },
 
