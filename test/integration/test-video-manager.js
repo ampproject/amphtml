@@ -28,7 +28,7 @@ import {
 } from './test-video-players-helper';
 import * as sinon from 'sinon';
 
-describe.configure().skipSauceLabs().run(`Fake Video Player
+describe.configure().ifChrome().skipOldChrome().run(`Fake Video Player
     Integration Tests`, () => {
   // We run the video player integration tests on a fake video player as part
   // of functional testing. Same tests run on real video players such as
@@ -40,7 +40,7 @@ describe.configure().skipSauceLabs().run(`Fake Video Player
   });
 });
 
-describe.configure().skipSauceLabs().run('VideoManager', function() {
+describe.configure().ifChrome().skipOldChrome().run('VideoManager', function() {
   describes.fakeWin('VideoManager', {
     amp: {
       ampdoc: 'single',
@@ -114,8 +114,8 @@ describe.configure().skipSauceLabs().run('VideoManager', function() {
 
     });
 
-    it(`autoplay - autoplay not supported should behave
-        like manual play`, () => {
+    it.configure().skipSauceLabs().run(`autoplay - autoplay not supported
+        should behave like manual play`, () => {
 
       video.setAttribute('autoplay', '');
       videoManager.register(impl);
@@ -248,7 +248,7 @@ describe.configure().skipSauceLabs().run('VideoManager', function() {
   });
 });
 
-describe.configure().skipSauceLabs().run('Supports Autoplay', () => {
+describe.configure().ifChrome().skipOldChrome().run('Supports Autoplay', () => {
   let sandbox;
 
   let win;
