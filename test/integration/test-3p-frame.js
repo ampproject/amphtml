@@ -137,7 +137,7 @@ describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
   });
 
   // TODO(bradfrizzell) break this out into a test-iframe-attributes
-  it('should create an iframe', () => {
+  it.configure().skipSauceLabs().run('should create an iframe', () => {
     window.AMP_MODE = {
       localDev: true,
       development: false,
