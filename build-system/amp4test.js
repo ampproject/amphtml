@@ -21,11 +21,12 @@ app.use('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
   const experiments = req.query.experiments;
   let metaTag = '';
+  let experimentString = '';
   if (!!experiments) {
     metaTag = '<meta name="amp-experiments-opt-in" content="' +
       experiments + '">';
+    experimentString = '"' + experiments.split(',').join('","') + '"';
   }
-  const experimentString = '"' + experiments.split(',').join('","') + '"';
 
   res.send(`
 <!doctype html>
