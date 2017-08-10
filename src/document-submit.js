@@ -96,7 +96,7 @@ export function onDocumentFormSubmit_(e) {
   } else if (method == 'POST') {
     if (action) {
       const TAG = 'form';
-      user().error(TAG,
+      user(form[0]).error(TAG,
           'action attribute is invalid for method=POST: %s', form);
     }
 
