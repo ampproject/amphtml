@@ -24,8 +24,9 @@ import {
   isInExperiment,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
+import {urls} from '../../../../src/config';
 import {forceExperimentBranch} from '../../../../src/experiments';
-import {parseUrl} from '../../../../src/url';
+import {isProxyOrigin, parseUrl} from '../../../../src/url';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 
@@ -59,6 +60,19 @@ describe('adsense-a4a-config', () => {
       mockWin.location = parseUrl(
           'https://cdn.ampproject.org/some/path/to/content.html');
       const elem = testFixture.doc.createElement('div');
+      testFixture.doc.body.appendChild(elem);
+      expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.false;
+    });
+
+    it('should not enable a4a when on a non-Google AMP cache', () => {
+      mockWin.location = parseUrl(
+          'https://amp.cloudflare.com/some/path/to/content.html');
+      sandbox.stub(
+          urls, 'cdnProxyRegex',
+          /^https:\/\/([a-zA-Z0-9_-]+\.)?amp\.cloudflare\.com/);
+      expect(isProxyOrigin(mockWin.location)).to.be.true;
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('data-ad-client', 'ca-pub-somepub');
       testFixture.doc.body.appendChild(elem);
       expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.false;
     });
