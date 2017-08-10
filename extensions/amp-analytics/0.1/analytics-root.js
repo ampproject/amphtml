@@ -447,7 +447,6 @@ function matchesNoInline(el, selector) {
   try {
     return matches(el, selector);
   } catch (e) {
-    //TODO(tiendt): element
     user().error(TAG, 'Bad query selector.', selector, e);
     return false;
   }
