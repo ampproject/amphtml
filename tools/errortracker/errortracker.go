@@ -97,7 +97,6 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Errorf(c, "Error redirecting to experiment %v", resp)
 		}
-		return
 	}
 	logc, err := logging.NewClient(c, appengine.AppID(c), "javascript.errors")
 	if err != nil {
