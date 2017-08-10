@@ -662,7 +662,8 @@ export class AmpA4A extends AMP.BaseElement {
               })
               .then(status => {
                 this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
-                if (this.element.getAttribute('type') == 'fake') {
+                if (getMode().localDev &&
+                    this.element.getAttribute('type') == 'fake') {
                   // do not verify signature for fake type ad
                   status = VerificationStatus.OK;
                 }
