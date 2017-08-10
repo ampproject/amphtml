@@ -586,9 +586,15 @@ export class Resources {
     if (!promise || !schedulePass) {
       return promise;
     }
-    // TODO(dvoytenko): Consider removing "blacklisted" resources
-    // altogether from the list of resources.
-    return promise.then(() => this.schedulePass());
+    return promise.then(() => this.schedulePass(), error => {
+      // Build failed: remove the resource. No other state changes are
+      // needed.
+      const index = this.resources_.indexOf(resource);
+      if (index != -1) {
+        this.resources_.splice(index, 1);
+      }
+      throw error;
+    });
   }
 
   /**
@@ -1335,7 +1341,7 @@ export class Resources {
     let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT && !r.isBlacklisted()) {
+      if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true,
             /* scheduleWhenBuilt */ false);
       }
