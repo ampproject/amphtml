@@ -589,10 +589,7 @@ export class Resources {
     return promise.then(() => this.schedulePass(), error => {
       // Build failed: remove the resource. No other state changes are
       // needed.
-      const index = this.resources_.indexOf(resource);
-      if (index != -1) {
-        this.resources_.splice(index, 1);
-      }
+      this.removeResource_(resource);
       throw error;
     });
   }
@@ -620,9 +617,11 @@ export class Resources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
-    resource.pauseOnRemove();
-    if (opt_disconnect) {
-      resource.disconnect();
+    if (resource.isBuilt()) {
+      resource.pauseOnRemove();
+      if (opt_disconnect) {
+        resource.disconnect();
+      }
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'element removed:', resource.debugid);
