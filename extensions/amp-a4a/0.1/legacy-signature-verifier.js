@@ -147,6 +147,7 @@ export class LegacySignatureVerifier {
                 jwkSetObj['keys'].every(isObject)) {
               return jwkSetObj['keys'];
             } else {
+              //TODO(tiendt): element
               user().error(
                   TAG,
                   `Invalid response from signing server ${signingServiceName}`);

@@ -499,6 +499,7 @@ export class GlobalVariableSource extends VariableSource {
         // Access service is not installed.
         user().error(TAG, 'Access service is not installed to access: ', expr);
         return null;
+        //TODO(tiendt): ignore
       }
       return getter(accessService);
     });
