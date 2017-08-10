@@ -16,7 +16,7 @@
 
 import {GoogleCidApi} from '../../src/service/cid-api';
 import {installTimerService} from '../../src/service/timer-impl';
-import {stubService} from '../../testing/test-helper';
+import {stubService, mockWindowInterface} from '../../testing/test-helper';
 import {getCookie, setCookie} from '../../src/cookies';
 
 describes.realWin('test-cid-api', {}, env => {
@@ -198,9 +198,31 @@ describes.realWin('test-cid-api', {}, env => {
   it('should return CID from cookie if AMP_TOKEN=$NOT_FOUND', () => {
     persistCookie('AMP_TOKEN', '$NOT_FOUND');
     persistCookie('scope-a', 'amp-cid-from-cookie');
+    const windowInterface = mockWindowInterface(env.sandbox);
+    windowInterface.getDocumentReferrer.returns('https://example.org/');
     return api.getScopedCid('googleanalytics', 'scope-a').then(cid => {
       expect(cid).to.equal('amp-cid-from-cookie');
       expect(getCookie(win, 'AMP_TOKEN')).to.equal('$NOT_FOUND');
+    });
+  });
+
+  it('should fetch CID from API if AMP_TOKEN=$NOT_FOUND ' +
+      'and document referrer is proxy origin', () => {
+    fetchJsonStub.returns(Promise.resolve({
+      json: () => {
+        return {
+          clientId: 'amp-12345',
+          securityToken: 'amp-token-123',
+        };
+      },
+    }));
+    const windowInterface = mockWindowInterface(env.sandbox);
+    windowInterface.getDocumentReferrer.returns('https://cdn.ampproject.org/');
+    persistCookie('AMP_TOKEN', '$NOT_FOUND');
+    persistCookie('scope-a', 'amp-cid-from-cookie');
+    return api.getScopedCid('googleanalytics', 'scope-a').then(cid => {
+      expect(cid).to.equal('amp-12345');
+      expect(getCookie(win, 'AMP_TOKEN')).to.equal('amp-token-123');
     });
   });
 
