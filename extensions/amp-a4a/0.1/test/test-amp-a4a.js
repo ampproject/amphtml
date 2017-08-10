@@ -1757,7 +1757,8 @@ describe('amp-a4a', () => {
     let devExpectedErrorStub;
 
     beforeEach(() => {
-      userErrorStub = sandbox.stub(user(), 'error');
+      userErrorStub = sandbox.stub(
+          user(window.document.documentElement), 'error');
       userWarnStub = sandbox.stub(user(), 'warn');
       devExpectedErrorStub = sandbox.stub(dev(), 'expectedError');
       return createIframePromise().then(fixture => {
