@@ -18,6 +18,8 @@ import {getCookie, setCookie} from '../cookies';
 import {Services} from '../services';
 import {dev} from '../log';
 import {dict} from '../utils/object';
+import {isProxyOrigin} from '../url';
+import {WindowInterface} from '../window-interface';
 
 const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
 const API_KEYS = {
@@ -87,12 +89,17 @@ export class GoogleCidApi {
       if (token === TokenStatus.OPT_OUT) {
         return null;
       }
+      // If the page referrer is proxy origin, we force to use API even the
+      // token indicates a previous fetch returned nothing
+      const forceFetch =
+          token === TokenStatus.NOT_FOUND && this.isReferrerProxyOrigin_();
+
       // Token is in a special state, fallback to existing cookie
-      if (token && token[0] === '$') {
+      if (!forceFetch && this.isStatusToken_(token)) {
         return getCookie(this.win_, cookieName);
       }
 
-      if (!token) {
+      if (!token || this.isStatusToken_(token)) {
         this.persistToken_(TokenStatus.RETRIEVING, TIMEOUT);
       }
       return this.fetchCid_(dev().assertString(url), scope, token)
@@ -177,5 +184,13 @@ export class GoogleCidApi {
    */
   expiresIn_(time) {
     return this.win_.Date.now() + time;
+  }
+
+  isReferrerProxyOrigin_() {
+    return isProxyOrigin(WindowInterface.getDocumentReferrer(this.win_));
+  }
+
+  isStatusToken_(token) {
+    return token && token[0] === '$';
   }
 }
