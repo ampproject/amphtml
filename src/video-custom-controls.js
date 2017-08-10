@@ -46,25 +46,25 @@ export class CustomControls {
     /** @private {boolean} */
     this.darkSkin_ = darkSkin;
 
-    /** @private {Node} */
+    /** @private {Element} */
     this.ctrlContainer_ = null;
 
-    /** @private {Node} */
+    /** @private {Element} */
     this.ctrlBarContainer_ = null;
 
-    /** @private {Node} */
+    /** @private {Element} */
     this.ctrlBarWrapper_ = null;
 
-    /** @private {Node} */
+    /** @private {Element} */
     this.floatingContainer_ = null;
 
-    /** @private {Node} */
+    /** @private {Element} */
     this.miniCtrlsContainer_ = null;
 
-    /** @private {Node} */
+    /** @private {Element} */
     this.miniCtrlsWrapper_ = null;
 
-    /** @private {Node} */
+    /** @private {Element} */
     this.ctrlBg_ = null;
 
     /** @private {?number} */
@@ -166,23 +166,31 @@ export class CustomControls {
 
   /**
    * Play/Pause Button
+   * @param {?Element|string} loadingElement
    * @return {!Element}
    * @private
    */
-  createPlayPauseBtn_() {
+  createPlayPauseBtn_(loadingElement) {
     const doc = this.ampdoc_.win.document;
     const playpauseBtnWrap = doc.createElement('amp-custom-ctrls-playpause');
     const playpauseBtn = this.createIcon_('play');
     playpauseBtnWrap.appendChild(playpauseBtn);
+    if (loadingElement == 'self') {
+      loadingElement = playpauseBtnWrap;
+    }
     listen(playpauseBtnWrap, 'click', () => {
       if (this.entry_.isPlaying()) {
+        this.changeIcon_(playpauseBtn, 'play');
         this.entry_.video.pause();
       } else {
+        this.changeIcon_(playpauseBtn, 'pause');
         this.entry_.video.play(/*autoplay*/ false);
+        loadingElement.classList.toggle('amp-custom-ctrls-loading', true);
       }
     });
     [VideoEvents.PLAYING, VideoEvents.PAUSE].forEach(e => {
       listen(this.entry_.video.element, e, () => {
+        loadingElement.classList.toggle('amp-custom-ctrls-loading', false);
         if (e == VideoEvents.PAUSE) {
           this.changeIcon_(playpauseBtn, 'play');
           this.showControls();
@@ -255,17 +263,16 @@ export class CustomControls {
     });
 
     ['mousedown', 'touchstart'].forEach(event => {
-      listen(totalBar, event, e => {
+      listen(totalBar, event, () => {
         scrubberTouched = true;
       });
-      listen(scrubber, event, e => {
+      listen(scrubber, event, () => {
         scrubberTouched = true;
       });
     });
 
     ['mousemove', 'touchmove'].forEach(event => {
       listen(doc, event, e => {
-        e.preventDefault();
         // TODO(@wassgha) Seek when implemented
         scrubberDragging = scrubberTouched;
         const left = progressBar.offsetLeft;
@@ -285,7 +292,7 @@ export class CustomControls {
     });
 
     ['mouseup', 'touchend'].forEach(event => {
-      listen(doc, event, e => {
+      listen(doc, event, () => {
         scrubberTouched = false;
         scrubberDragging = false;
       });
@@ -325,14 +332,15 @@ export class CustomControls {
   /**
    * Creates a button element from the button's name
    * @param {string} btn
+   * @param {?Element|string} opt_loadingElement
    * @return {!Element}
    * @private
    */
-  elementFromButton_(btn) {
+  elementFromButton_(btn, opt_loadingElement = null) {
     const doc = this.ampdoc_.win.document;
     switch (btn) {
       case 'play':
-        return this.createPlayPauseBtn_();
+        return this.createPlayPauseBtn_(opt_loadingElement);
       case 'time':
         return this.createProgressTime_();
       case 'spacer':
@@ -406,7 +414,7 @@ export class CustomControls {
           && e.target != this.miniCtrlsContainer_) {
         return;
       }
-
+      e.stopPropagation();
       if (this.controlsTimer_) {
         clearTimeout(this.controlsTimer_);
       }
@@ -426,7 +434,9 @@ export class CustomControls {
       this.ctrlContainer_.appendChild(shadowFilter);
 
       // Floating controls
-      this.floatingContainer_.appendChild(this.elementFromButton_(floating));
+      this.floatingContainer_.appendChild(
+          this.elementFromButton_(floating, this.floatingContainer_)
+      );
       this.ctrlContainer_.appendChild(this.floatingContainer_);
 
       // Add background
@@ -434,7 +444,9 @@ export class CustomControls {
 
       // Add main controls
       mainCtrls.forEach(btn => {
-        this.ctrlBarContainer_.appendChild(this.elementFromButton_(btn));
+        this.ctrlBarContainer_.appendChild(
+            this.elementFromButton_(btn)
+        );
       });
       this.ctrlBarWrapper_.appendChild(this.ctrlBarContainer_);
       this.ctrlBarWrapper_.appendChild(this.createProgressBar_());
@@ -442,7 +454,9 @@ export class CustomControls {
 
       // Add mini controls
       miniCtrls.forEach(btn => {
-        this.miniCtrlsContainer_.appendChild(this.elementFromButton_(btn));
+        this.miniCtrlsContainer_.appendChild(
+            this.elementFromButton_(btn)
+        );
       });
       this.miniCtrlsWrapper_.appendChild(this.miniCtrlsContainer_);
       this.miniCtrlsWrapper_.appendChild(this.createProgressBar_());
@@ -504,6 +518,7 @@ export class CustomControls {
             'opacity': tr.numeric(1, 0),
           })
       , 200).thenAlways(() => {
+        this.ctrlContainer_.classList.toggle('amp-custom-ctrls-hidden', true);
         this.controlsShown_ = false;
       });
     });
@@ -532,6 +547,7 @@ export class CustomControls {
         return;
       }
 
+      this.ctrlContainer_.classList.toggle('amp-custom-ctrls-hidden', false);
       this.controlsShowing_ = true;
 
       if (this.minimal_) {
@@ -571,7 +587,7 @@ export class CustomControls {
   }
 
   toggleMinimalControls(enable = true) {
-    this.ctrlContainer_.classList.toggle('minimal', enable);
+    this.ctrlContainer_.classList.toggle('amp-custom-ctrls-minimal', enable);
     this.minimal_ = enable;
   }
 }

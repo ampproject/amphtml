@@ -211,7 +211,8 @@ class AmpVideo extends AMP.BaseElement {
     this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_LAYOUT, this.video_,
         /* opt_removeMissingAttrs */ true);
 
-    scopedQuerySelectorAll(this.element, 'source track').forEach(child => {
+    const children = scopedQuerySelectorAll(this.element, 'source track');
+    Array.prototype.forEach.call(children, child => {
       // Skip the video we already added to the element.
       if (this.video_ === child) {
         return;

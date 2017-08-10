@@ -52,6 +52,12 @@ const TAG_ = 'Viewport';
 /** @const {string} */
 const A4A_LIGHTBOX_EXPERIMENT = 'amp-lightbox-a4a-proto';
 
+/** @enum {number} */
+export const SizeReportingFidelity = {
+  HIGH: 1,
+  LOW: 0,
+};
+
 
 /**
  * @typedef {{
@@ -300,10 +306,11 @@ export class Viewport {
 
   /**
    * Returns the size of the viewport.
+   * @param {SizeReportingFidelity} fidelity
    * @return {!{width: number, height: number}}
    */
-  getSize() {
-    if (this.size_) {
+  getSize(fidelity = SizeReportingFidelity.LOW) {
+    if (this.size_ && fidelity == SizeReportingFidelity.LOW) {
       return this.size_;
     }
     this.size_ = this.binding_.getSize();
@@ -322,18 +329,20 @@ export class Viewport {
 
   /**
    * Returns the height of the viewport.
+   * @param {SizeReportingFidelity} fidelity
    * @return {number}
    */
-  getHeight() {
-    return this.getSize().height;
+  getHeight(fidelity = SizeReportingFidelity.LOW) {
+    return this.getSize(fidelity).height;
   }
 
   /**
    * Returns the width of the viewport.
+   * @param {SizeReportingFidelity} fidelity
    * @return {number}
    */
-  getWidth() {
-    return this.getSize().width;
+  getWidth(fidelity = SizeReportingFidelity.LOW) {
+    return this.getSize(fidelity).width;
   }
 
   /**
@@ -362,11 +371,11 @@ export class Viewport {
    * Returns the rect of the viewport which includes scroll positions and size.
    * @return {!../../layout-rect.LayoutRectDef}}
    */
-  getRect() {
+  getRect(fidelity = SizeReportingFidelity.LOW) {
     if (this.rect_ == null) {
       const scrollTop = this.getScrollTop();
       const scrollLeft = this.getScrollLeft();
-      const size = this.getSize();
+      const size = this.getSize(fidelity);
       this.rect_ =
           layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
     }
@@ -855,7 +864,7 @@ export class Viewport {
    * @private
    */
   changed_(relayoutAll, velocity) {
-    const size = this.getSize();
+    const size = this.getSize(SizeReportingFidelity.HIGH);
     const scrollTop = this.getScrollTop();
     const scrollLeft = this.getScrollLeft();
     dev().fine(TAG_, 'changed event:',
@@ -951,7 +960,7 @@ export class Viewport {
     this.rect_ = null;
     const oldSize = this.size_;
     this.size_ = null;  // Need to recalc.
-    const newSize = this.getSize();
+    const newSize = this.getSize(SizeReportingFidelity.HIGH);
     this.fixedLayer_.update().then(() => {
       const widthChanged = !oldSize || oldSize.width != newSize.width;
       this.changed_(/*relayoutAll*/widthChanged, 0);
