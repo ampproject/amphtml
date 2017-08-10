@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {googleCdnProxyRegex} from '../../../src/config';
 import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
@@ -89,6 +88,8 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 export function isGoogleAdsA4AValidEnvironment(win) {
   const supportsNativeCrypto = win.crypto &&
       (win.crypto.subtle || win.crypto.webkitSubtle);
+  const googleCdnProxyRegex =
+      /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/;
   return supportsNativeCrypto &&
       (googleCdnProxyRegex.test(win.location.origin) || getMode(win).localDev ||
        getMode(win).test);
