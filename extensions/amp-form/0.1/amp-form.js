@@ -499,7 +499,8 @@ export class AmpForm {
       this.renderTemplate_(json || {});
       this.maybeHandleRedirect_(response);
     }, error => {
-      user().error(TAG, `Failed to parse response JSON: ${error}`);
+      user(this.win_.document.documentElement).error(
+          TAG, `Failed to parse response JSON: ${error}`);
     });
   }
 
@@ -521,7 +522,8 @@ export class AmpForm {
       this.setState_(FormState_.SUBMIT_ERROR);
       this.renderTemplate_(responseJson || {});
       this.maybeHandleRedirect_(error.response);
-      user().error(TAG, `Form submission failed: ${error}`);
+      user(this.win_.document.documentElement).error(
+          TAG, `Form submission failed: ${error}`);
     });
   }
 

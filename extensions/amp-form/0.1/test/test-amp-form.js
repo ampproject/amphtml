@@ -1547,7 +1547,8 @@ describes.repeated('', {
         it('should redirect on error and header is set', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchRejectPromise);
           redirectToValue = 'https://example2.com/hello';
-          const logSpy = sandbox.spy(user(), 'error');
+          const logSpy = sandbox.spy(user(
+              env.win.document.documentElement), 'error');
           ampForm.handleSubmitAction_(/* invocation */ {});
 
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
