@@ -184,7 +184,7 @@ function isVisualDiffFile(filePath) {
  * @return {boolean}
  */
 function isIntegrationTest(filePath) {
-  return filePath.startsWith('test/integration/');
+  return filePath.includes('test/integration/');
 }
 
 /**

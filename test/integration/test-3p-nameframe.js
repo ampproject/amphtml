@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-describe.configure().skipSauceLabs().run('alt nameframe', function() {
+describe.configure().ifChrome().skipOldChrome().run(`alt
+    nameframe`, function() {
   describes.sandboxed('alt nameframe', {}, () => {
     describes.realWin('nameframe', {allowExternalResources: true}, env => {
       let fixture;
