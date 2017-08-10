@@ -68,6 +68,11 @@
  *   pass `false` to `spec.amp` to disable the AMP runtime if you just need
  *   a plain, non-AMP window.
  *
+ *  - `fakeWin()` and `realWin` both read spec.xhrMock. Unless spec.xhrMock
+ *  is explicitly declared as false, the fetch method will be mocked out.
+ *  You can access the mock through env.xhr, specify the mocking using
+ *  env.expectFetch(url,response).
+ *
  *   Several AMP runtime objects (e.g. AmpDoc, AmpDocService) are returned to
  *   the test method in `env.amp`. See AmpTestEnv for details.
  *
@@ -112,7 +117,7 @@ import {resetLoadingCheckForTests} from '../src/element-stub';
 import {resetScheduledElementForTesting} from '../src/custom-element';
 import {setStyles} from '../src/style';
 import * as sinon from 'sinon';
-
+import fetchMock from 'fetch-mock';
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
 
@@ -187,7 +192,8 @@ export const sandboxed = describeEnv(spec => []);
  * A test with a fake window.
  * @param {string} name
  * @param {{
- *   win: !FakeWindowSpec,
+ *   win: !FakeWindow
+Spec,
  *   amp: (boolean|!AmpTestSpec|undefined),
  * }} spec
  * @param {function({
@@ -341,7 +347,8 @@ function describeEnv(factory) {
 
   /**
    * @param {string} name
-   * @param {!Object} spec
+   * @param {!Object} specconsole.log(fetchMock.sandbox());
+          debugger;
    * @param {function(!Object)} fn
    */
   const mainFunc = function(name, spec, fn) {
@@ -363,7 +370,6 @@ function describeEnv(factory) {
 
   return mainFunc;
 }
-
 
 /** @interface */
 class Fixture {
@@ -403,8 +409,6 @@ class SandboxFixture {
 
   /** @override */
   setup(env) {
-    const spec = this.spec;
-
     // Sandbox.
     let sandbox = global.sandbox;
     if (!sandbox) {
@@ -483,14 +487,24 @@ class FakeWinFixture {
 
   /** @override */
   setup(env) {
+    const spec = this.spec;
     env.win = new FakeWindow(this.spec.win || {});
+    if (!(spec.xhrMock === false)) {
+      fetchMock.constructor.global = env.win;
+      fetchMock._mock();
+      env.expectFetch = function(url, response) {
+        return fetchMock.mock(url, response);
+      };
+    }
   }
 
   /** @override */
   teardown(env) {
+    if (!(this.spec.xhrMock === false)) {
+      fetchMock.restore();
+    }
   }
 }
-
 
 /** @implements {Fixture} */
 class RealWinFixture {
@@ -503,6 +517,7 @@ class RealWinFixture {
   constructor(spec) {
     /** @const */
     this.spec = spec;
+    // throw spec.toString();
   }
 
   /** @override */
@@ -556,7 +571,13 @@ class RealWinFixture {
         interceptEventListeners(win.document.documentElement);
         interceptEventListeners(win.document.body);
         env.interceptEventListeners = interceptEventListeners;
-
+        if (!(spec.xhrMock === false)) {
+          fetchMock.constructor.global = env.win;
+          fetchMock._mock();
+          env.expectFetch = function(url, response) {
+            return fetchMock.mock(url, response);
+          };
+        }
         resolve();
       };
       iframe.onerror = reject;
@@ -570,9 +591,11 @@ class RealWinFixture {
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
     }
+    if (!(this.spec.xhrMock === false)) {
+      fetchMock.restore();
+    }
   }
 }
-
 
 /** @implements {Fixture} */
 class AmpFixture {
@@ -609,7 +632,7 @@ class AmpFixture {
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
     installDocService(win, singleDoc);
     const ampdocService = Services.ampdocServiceFor(win);
-    env.ampdocService  = ampdocService;
+    env.ampdocService = ampdocService;
     installExtensionsService(win);
     env.extensions = Services.extensionsFor(win);
     installBuiltinElements(win);

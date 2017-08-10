@@ -74,7 +74,7 @@ var forbiddenTerms = {
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
-  '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
+  '(\\w*([sS]py|[sS]tub|\\.[mM]ock|clock).restore)': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
   'sinon\\.useFake\\w+': {

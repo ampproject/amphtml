@@ -94,7 +94,7 @@ function waitForEvent(env, name) {
     function callback() {
       resolve();
       env.win.removeEventListener(name, callback);
-    };
+    }
     env.win.addEventListener(name, callback);
   });
 }
@@ -109,6 +109,7 @@ describe.configure().skipSauceLabs().run('Bind', function() {
       ampdoc: 'fie',
       runtimeOn: false,
     },
+    xhrMock: false,
   }, env => {
     let bind;
     let container;
@@ -149,7 +150,6 @@ describe.configure().skipSauceLabs().run('Bind', function() {
           expect(parentBind.numberOfBindings()).to.equal(1);
         });
       });
-
       it('should not be able to access variables from other windows', () => {
         const element =
             createElement(env, container, '[text]="foo + bar"');
@@ -168,11 +168,13 @@ describe.configure().skipSauceLabs().run('Bind', function() {
     });
   }); // in FIE
 
+
   describes.realWin('in shadow ampdoc', {
     amp: {
       ampdoc: 'shadow',
       runtimeOn: false,
     },
+    xhrMock: false,
   }, env => {
     let bind;
     let container;
@@ -199,6 +201,7 @@ describe.configure().skipSauceLabs().run('Bind', function() {
       ampdoc: 'single',
       runtimeOn: false,
     },
+    xhrMock: false,
   }, env => {
     let bind;
     let container;

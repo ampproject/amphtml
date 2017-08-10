@@ -21,12 +21,10 @@ import {
 import {LegacySignatureVerifier} from '../legacy-signature-verifier';
 
 describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
-
   let fetchMock;
   let keysetBody;
   let verifier;
   let result;
-
   beforeEach(() => {
     fetchMock = new FetchMock(env.win);
     fetchMock.getOnce(
