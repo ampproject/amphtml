@@ -20,12 +20,15 @@ const app = module.exports = require('express').Router();
 app.use('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
   const mode = process.env.SERVE_MODE == 'compiled' ? '' : 'max.';
-  const extensions = req.query.extensions.split(' ');
-  const extensionScripts = extensions.map(function(extension) {
-    return '<script async custom-element="'
-        + extension + '" src=/dist/v0/'
-        + extension + '-0.1.' + mode + 'js></script>';
-  }).join('\n');
+  const extensions = req.query.extensions;
+  let extensionScripts = '';
+  if (!!extensions) {
+    extensionScripts = extensions.split(',').map(function(extension) {
+      return '<script async custom-element="'
+              + extension + '" src=/dist/v0/'
+              + extension + '-0.1.' + mode + 'js></script>';
+    }).join('\n');
+  }
 
   const experiments = req.query.experiments;
   let metaTag = '';
