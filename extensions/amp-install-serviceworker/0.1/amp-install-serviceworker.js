@@ -86,7 +86,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
         return install(this.win, src);
       });
     } else {
-      user().error(TAG,
+      user(this.element).error(TAG,
           'Did not install ServiceWorker because it does not ' +
           'match the current origin: ' + src);
     }
@@ -294,7 +294,8 @@ function install(win, src) {
     }
     return registration;
   }, function(e) {
-    user().error(TAG, 'ServiceWorker registration failed:', e);
+    user(win.document.documentElement).error(
+        TAG, 'ServiceWorker registration failed:', e);
   });
 }
 
