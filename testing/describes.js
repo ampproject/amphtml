@@ -455,10 +455,8 @@ class IntegrationFixture {
       });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
-        console.log('resolve onload');
         resolve();
       };
-      console.log('reject onload, doc append iframe');
       env.iframe.onerror = reject;
       document.body.appendChild(env.iframe);
     });
