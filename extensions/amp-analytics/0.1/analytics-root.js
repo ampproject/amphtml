@@ -447,7 +447,7 @@ function matchesNoInline(el, selector) {
   try {
     return matches(el, selector);
   } catch (e) {
-    user().error(TAG, 'Bad query selector.', selector, e);
+    user(el).error(TAG, 'Bad query selector.', selector, e);
     return false;
   }
 }
