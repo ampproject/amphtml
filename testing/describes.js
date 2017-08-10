@@ -451,12 +451,14 @@ class IntegrationFixture {
     return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
         src: addParamsToUrl('/amp4test/compose-doc',
-            {body, experiments: experiments.join(' ')}) + `#${this.hash}`,
+            {body, experiments: experiments.join(',')}) + `#${this.hash}`,
       });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
+        console.log('resolve onload');
         resolve();
       };
+      console.log('reject onload, doc append iframe');
       env.iframe.onerror = reject;
       document.body.appendChild(env.iframe);
     });
