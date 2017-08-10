@@ -21,7 +21,7 @@ app.use('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
   const experiments = req.query.experiments;
   let metaTag = '';
-  if (experiments != '') {
+  if (!!experiments) {
     metaTag = '<meta name="amp-experiments-opt-in" content="' +
       experiments + '">';
   }
