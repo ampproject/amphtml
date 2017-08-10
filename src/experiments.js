@@ -204,10 +204,6 @@ export function isExperimentOnForOriginTrial(win, experimentId) {
  * @return {boolean}
  */
 export function isExperimentOn(win, experimentId) {
-  if (win.AMP_CONFIG
-        && Array.isArray(win.AMP_CONFIG['allow-doc-opt-in'])
-        && win.AMP_CONFIG['allow-doc-opt-in'].length > 0) {
-  }
   const toggles = experimentToggles(win);
   return !!toggles[experimentId];
 }
