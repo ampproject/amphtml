@@ -98,7 +98,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 			log.Errorf(c, "Error redirecting to experiment %v", resp)
 		}
 	}
-	logc, err := logging.NewClient(c, ppengine.AppID(c), "javascript.errors")
+	logc, err := logging.NewClient(c, appengine.AppID(c), "javascript.errors")
 	if err != nil {
 		http.Error(w, "Cannot connect to Google Cloud Logging",
 			http.StatusInternalServerError)
