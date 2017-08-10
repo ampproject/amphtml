@@ -76,7 +76,6 @@ func init() {
 // Get an auth context for logging RPC.
 func cloudAuthContext(r *http.Request) (context.Context, error) {
 	c := appengine.NewContext(r)
-
 	hc := &http.Client{
 		Transport: &oauth2.Transport{
 			Source: google.AppEngineTokenSource(c, logging.Scope),
@@ -88,6 +87,17 @@ func cloudAuthContext(r *http.Request) (context.Context, error) {
 
 func handle(w http.ResponseWriter, r *http.Request) {
 	c, _ := cloudAuthContext(r)
+	randomVal := rand.Float64()
+	redirectionRate := 0.1;
+	if randomVal < redirectionRate {
+		client := &http.Client{}
+		urlString := strings.Replace(r.URL.String(), "amp-error-reporting", "amp-error-reporting-js", 1)
+		req, _ := http.NewRequest("GET", urlString, nil)
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Errorf(c, "Error redirecting to experiment %v", resp)
+		}
+	}
 	logc, err := logging.NewClient(c, appengine.AppID(c), "javascript.errors")
 	if err != nil {
 		http.Error(w, "Cannot connect to Google Cloud Logging",
@@ -95,7 +105,6 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		log.Errorf(c, "Cannot connect to Google Cloud Logging: %v", err)
 		return
 	}
-
 	// Note: Error Reporting currently ignores non-GCE and non-AWS logs.
 	logc.ServiceName = "compute.googleapis.com"
 	logc.CommonLabels = map[string]string{
