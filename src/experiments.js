@@ -259,7 +259,6 @@ export function experimentToggles(win) {
       }
     }
   }
-
   // Read document level override from meta tag.
   if (win.AMP_CONFIG
       && Array.isArray(win.AMP_CONFIG['allow-doc-opt-in'])
