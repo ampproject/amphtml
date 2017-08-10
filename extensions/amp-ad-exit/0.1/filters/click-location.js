@@ -78,11 +78,11 @@ export class ClickLocationFilter extends Filter {
  */
 function isValidClickLocationSpec(spec) {
   return spec.type == FilterType.CLICK_LOCATION &&
-      (typeof spec.left == 'undefined' || typeof spec.left == 'number') &&
-      (typeof spec.right == 'undefined' || typeof spec.right == 'number') &&
-      (typeof spec.top == 'undefined' || typeof spec.top == 'number') &&
-      (typeof spec.bottom == 'undefined' || typeof spec.bottom == 'number') &&
-      (typeof spec.relativeTo == 'undefined' ||
-       typeof spec.relativeTo == 'string') ;
+      (typeof spec.left === 'undefined' || typeof spec.left === 'number') &&
+      (typeof spec.right == 'undefined' || typeof spec.right === 'number') &&
+      (typeof spec.top === 'undefined' || typeof spec.top === 'number') &&
+      (typeof spec.bottom === 'undefined' || typeof spec.bottom === 'number') &&
+      (typeof spec.relativeTo === 'undefined' ||
+       typeof spec.relativeTo === 'string') ;
 }
 
