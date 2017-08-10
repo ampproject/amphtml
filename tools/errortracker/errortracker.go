@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -91,21 +92,21 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	redirectionRate := 0.1;
 	if randomVal < redirectionRate {
 		client := &http.Client{}
-		req, _ := http.NewRequest("GET", "https://amp-error-reporting-js.appspot.com/r", nil)
-		req.URL.RawQuery = r.URL.Query().Encode()
+		urlString := strings.Replace(r.URL.String(), "amp-error-reporting", "amp-error-reporting-js", 1)
+		req, _ := http.NewRequest("GET", urlString, nil)
 		resp, err := client.Do(req)
 		if err != nil {
 			log.Errorf(c, "Error redirecting to experiment %v", resp)
 		}
 	}
-	logc, err := logging.NewClient(c, appengine.AppID(c), "javascript.errors")
+	logc, err := logging.NewClient(c, ppengine.AppID(c), "javascript.errors")
 	if err != nil {
 		http.Error(w, "Cannot connect to Google Cloud Logging",
 			http.StatusInternalServerError)
 		log.Errorf(c, "Cannot connect to Google Cloud Logging: %v", err)
 		return
 	}
-
+s
 	// Note: Error Reporting currently ignores non-GCE and non-AWS logs.
 	logc.ServiceName = "compute.googleapis.com"
 	logc.CommonLabels = map[string]string{
