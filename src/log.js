@@ -231,7 +231,6 @@ export class Log {
    * @return {!Error|undefined}
    */
   error(tag, var_args) {
-    console.log('error called: ' + tag + ' ' + var_args);
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.name = tag || error.name;
