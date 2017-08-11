@@ -136,7 +136,8 @@ export class ActionInvocation {
       return false;
     }
     if (this.trust < minimumTrust) {
-      user().error(TAG_, `Trust for '${this.method}' (${this.trust}) ` +
+      user(/** @type {!Element} */(this.source)).error(
+          TAG_, `Trust for '${this.method}' (${this.trust}) ` +
           `insufficient (min: ${minimumTrust}).`);
       return false;
     }
