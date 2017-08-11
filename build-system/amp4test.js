@@ -46,7 +46,7 @@ app.use('/compose-doc', function(req, res) {
   <meta charset="utf-8">
   <link rel="canonical" href="http://nonblocking.io/" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-       ${metaTag}
+  ${metaTag}
   <script>
     window.AMP_CONFIG = window.AMP_CONFIG || {};
     window.AMP_CONFIG['allow-doc-opt-in'] =

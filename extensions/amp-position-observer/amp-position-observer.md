@@ -220,12 +220,12 @@ Different values for top vs. bottom can be specified by providing two values (`<
 
 Defaults to 0.
 
-`intersection-ratios="100px"` means shrink the viewport by 100px from the top and 100px from the bottom.
+`exclusion-margins="100px"` means shrink the viewport by 100px from the top and 100px from the bottom.
 
-`intersection-ratios="25vh"` means shrink the viewport by 25% from the top and 25% from the bottom.
+`exclusion-margins="25vh"` means shrink the viewport by 25% from the top and 25% from the bottom.
 Effectively only considering the middle 50% of the viewport.
 
-`intersection-ratios="100px 10vh"` means shrink the viewport by 100px from the top and 10% from the bottom.
+`exclusion-margins="100px 10vh"` means shrink the viewport by 100px from the top and 10% from the bottom.
 
 ## Validation
 
