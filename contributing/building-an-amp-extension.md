@@ -2,7 +2,7 @@
 
 ## A word on contributing
 
-We suggest opening an “Intent to Implement” GitHub issue for your
+We suggest opening an "Intent to Implement" GitHub issue for your
 extension as early as you can, so we can advise on next steps or provide
 early feedback on the implementation or naming. See [CONTRIBUTING.md
 for more details](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md).
@@ -12,9 +12,9 @@ for more details](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING
 AMP can be extended to allow more functionality and components through
 building open source extensions (aka custom elements). For example, AMP
 provides `amp-carousel`, `amp-sidebar` and `amp-access` as
-extensions. If you’d like to add an extension to support your company
+extensions. If you'd like to add an extension to support your company
 video player, rich embed or just a general UI component like a star
-rating viewer, you’d do this by building an extension.
+rating viewer, you'd do this by building an extension.
 
 ## Naming
 
@@ -33,15 +33,15 @@ The directory structure is below:
         -   test/
             -   **test-amp-my-element.js** (Unit test suite for your element)
             -   More test JS files (Optional)
-        -   **amp-my-element.js** (Contains your element’s implementation)
+        -   **amp-my-element.js** (Contains your element's implementation)
         -   **amp-my-element.css** (Optional)
         -   More JS files (Optional)
         -   validator-amp-my-element.protoascii (Validator rules)
     -   **amp-my-element.md** (Main usage documentation for your element)
     -   More documentation in .md files (Optional)
 
-In most cases you’ll only create the bolded files. If your element does
-not need custom CSS you don’t need to create the CSS file.
+In most cases you'll only create the bolded files. If your element does
+not need custom CSS you don't need to create the CSS file.
 
 ## Extend AMP.BaseElement
 
@@ -118,11 +118,11 @@ element, platform)
 create your DOM structure and append it to the element. You can also
 read the attributes (e.g. width, height…) the user provided on your
 element in this callback.
-- **Warning**: Don’t load remote resources during the buildCallback. This
+- **Warning**: Don't load remote resources during the buildCallback. This
 only circumvents the AMP resources manager, but it will also lead to
 higher data charges for users because all these resources will be loaded
 before layouting needs to happen.
-- **Warning 2**: Do the least needed work here, and don’t build DOM that
+- **Warning 2**: Do the least needed work here, and don't build DOM that
 is not needed at this point.
 
 #### preconnectCallback
@@ -145,7 +145,7 @@ to instagram hosts.
 - **Vsync Context**: Mutate
 - **Override**: Sometimes. If your component provides a way to dynamically
 create a lightweight placeholder. This gets called only if the element
-doesn’t already have a publisher-provided placeholder (through [the
+doesn't already have a publisher-provided placeholder (through [the
 placeholder
 attribute](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#placeholder)).
 - **Usage**: Create placeholder DOM and return it. For example,
@@ -155,7 +155,7 @@ loading to layoutCallback.
 - **Warning**: Only use amp-elements for creating placeholders that
 require external resource loading. This allows runtime to create this
 early but still defer the resource loading and management to AMP
-resources manager. Don’t create or load heavyweight resources (e.g.
+resources manager. Don't create or load heavyweight resources (e.g.
 iframe…).
 - **Example Usage**: amp-instagram.
 
@@ -175,9 +175,9 @@ iframe…).
 - **Usage**: Use this to actually render the final version of your
 element. If the element should load a video, this is where you load the
 video. This needs to return a promise that resolves when the element is
-considered “laid out” - usually this means load event has fired but can
+considered "laid out" - usually this means load event has fired but can
 be different from element to element. Note that load events usually are
-fired very early so if there’s another event that your element can
+fired very early so if there's another event that your element can
 listen to that have a better meaning of ready-ness, use that to resolve
 your promise instead - for example: [amp-youtube](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/0.1/amp-youtube.js) uses the
 playerready event that the underlying YT Player
@@ -185,9 +185,9 @@ iframe sends to resolve the layoutCallback promise.
 
 #### firstLayoutCompleted
 
-- **Default**: Hide element’s placeholder.
+- **Default**: Hide element's placeholder.
 - **Vsync Context**: Mutate
-- **Override**: Sometimes. If you’d like to override default behavior and
+- **Override**: Sometimes. If you'd like to override default behavior and
 not hide the placeholder when the element is considered first laid out.
 Sometimes you wanna control when to hide the placeholder.
 - **Example Usage**: amp-anim
@@ -200,7 +200,7 @@ Sometimes you wanna control when to hide the placeholder.
 children of lightbox when you close a lightbox instance, called on
 carousel children when the slide is not the active slide. And possibly
 other places.
-- **Override**: Sometimes. Most likely if you’re building a player.
+- **Override**: Sometimes. Most likely if you're building a player.
 - **Usage**: Use to pause video, slideshow auto-advance...etc
 - **Example Usage**: amp-video, amp-youtube
 
@@ -210,14 +210,14 @@ other places.
 - **Vsync Context**: Mutate
 - **Override**: Sometimes.
 - **Usage**: Use to restart the slideshow auto-advance.
-- **Note**: This is not used widely yet because it’s not possible to
+- **Note**: This is not used widely yet because it's not possible to
 resume video playback for example on mobile.
 
 #### unlayoutOnPause
 
 - **Default**: Returns false.
 - **Vsync Context**: Mutate
-- **Override**: If your element doesn’t provide a pausing mechanism,
+- **Override**: If your element doesn't provide a pausing mechanism,
 instead override this to unlayout the element when AMP tries to pause
 it.
 - **Return**: True if you want unlayoutCallback to be called when paused.
@@ -246,7 +246,7 @@ and when it goes out of it for finer control.
 You can write a stylesheet to style your element to provide a minimal
 visual appeal, your element structure should account for whether you
 want users (publishers and developers using your element) to customize
-the default styling you’re providing and allow for easy CSS classes
+the default styling you're providing and allow for easy CSS classes
 and/or well-structure DOM elements.
 
 Element styles are loaded when the element script itself is included in
@@ -270,7 +270,7 @@ AMP.registerElement('amp-carousel', CarouselSelector, CSS);
 ## Element usage documentation and tests
 
 Make sure to write pretty comprehensive unit tests for your element.
-Also don’t forget to write an .md file documenting how to use this
+Also don't forget to write an .md file documenting how to use this
 element along with its attributes requirements and examples.
 
 An extra step that you can do is to write a small AMP doc inside
@@ -288,7 +288,7 @@ and react to it, for example, by launching a lightbox to display a
 message.
 
 The other part of the event-system in AMP is actions. When listening to
-an event on an element usually you’d like to trigger an action (possibly
+an event on an element usually you'd like to trigger an action (possibly
 on other elements). For example, in the example above, the publisher is
 executing the `open` action on `lightbox`.
 
@@ -299,7 +299,7 @@ The syntax for using this on elements is as follow:
 </form>
 ```
 
-To fire events on your element use AMP’s action service and the
+To fire events on your element use AMP's action service and the
 `.trigger` method.
 
 ```javascript
@@ -363,7 +363,7 @@ current slide when the user moves to it.
   this.schedulePreload(nextSlide);
 ```
 
-It’s important to understand that the parent/owner element is
+It's important to understand that the parent/owner element is
 responsible for managing all of its children (except for placeholders,
 see below). This means you need to make sure your element updates
 whether the child is in viewport and when to schedule different phases
@@ -389,19 +389,19 @@ nested amp-elements that are placeholders.
 
 ## Allowing proper validations
 
-One of AMP’s features is that a document can be checked against
-validation rules to confirm it’s AMP-valid. When you implement your
+One of AMP's features is that a document can be checked against
+validation rules to confirm it's AMP-valid. When you implement your
 element, AMP validator needs to be updated to add rules for your element
 to keep documents using your element valid. In order to do that you need
-to file an issue on the GitHub repo select “Related to: Validator” and
+to file an issue on the GitHub repo select "Related to: Validator" and
 mention what rules the validator needs to validate. This usually
 includes
 
 -   Your element tag-name
 -   Required attributes for the element
--   Specific values that an attribute accept (e.g. `myattr=”TYPE1|TYPE2”`)
+-   Specific values that an attribute accept (e.g. `myattr="TYPE1|TYPE2"`)
 -   Layouts your element supports (see [Layout specs](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md) and [Layouts supported in your element](#layouts-supported-in-your-element))
--   If there are restrictions where your element can or can’t appear (e.g. disallowed_ancestory, mandatory_parent...)
+-   If there are restrictions where your element can or can't appear (e.g. disallowed_ancestory, mandatory_parent...)
 
 For more details take a look at [Contributing Component Validator
 Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-validator-rules.md).
@@ -412,29 +412,29 @@ Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-
 
 Another enabling feature of instant-web in AMP is support for
 prerendering in a way that does not consume loads of data and does not
-waste too much of the user’s device resources. AMP does this by strictly
+waste too much of the user's device resources. AMP does this by strictly
 controlling resource loading and rendering.
 
 If your extension is lightweight, it might be worth enabling
 pre-rendering of your elements so that users will be able to see it
 appear instantly when they click on an article.
 
-Sometimes fully pre-rendering the element isn’t an option because it is
+Sometimes fully pre-rendering the element isn't an option because it is
 heavyweight. Your element might want to opt into creating a dynamic
-placeholder for itself (in case a placeholder wasn’t provided by the
+placeholder for itself (in case a placeholder wasn't provided by the
 developer/publisher who is using your element). This allows elements to
 display content as fast as possible and allow prerendering that
 placeholder. Learn [more about placeholder
 elements](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#placeholder).
 
 NOTE: Make sure not to request external resources in the pre-render
-phase. Requests to the publisher’s origin itself are OK. If in doubt,
+phase. Requests to the publisher's origin itself are OK. If in doubt,
 please flag this in review.
 
-AMP will automatically call your element’s
+AMP will automatically call your element's
 [createPlaceholderCallback](#createplaceholdercallback) during
-build step if it didn’t detect a placeholder was provided. This allows
-you to create your own placeholder. Here’s an example of how
+build step if it didn't detect a placeholder was provided. This allows
+you to create your own placeholder. Here's an example of how
 `amp-instagram` element used this callback to create a dynamic
 placeholder of an `amp-img` element to avoid loading the heavyweight
 instagram iframe embed during pre-rendering and instead loads just the
@@ -519,7 +519,7 @@ the viewport. This will only happen if your element sets
 `unlayoutOnPause`. Carousel by default only pauses the elements that
 are outside its viewport.
 
-Here’s an example of how `amp-instagram` destroys the iframe it has
+Here's an example of how `amp-instagram` destroys the iframe it has
 embedded when `unlayoutCallback` is called.
 
 ```javascript
@@ -615,7 +615,7 @@ Most newly created elements are initially launched as
 This allows people to experiment with using the new element and provide
 the author(s) with feedback. It also provides the AMP Team with the
 opportunity to monitor for any potential errors. This is especially
-required if the validator hasn’t been updated yet to allow your newly
+required if the validator hasn't been updated yet to allow your newly
 created extension, otherwise people using it in production will
 invalidate all their AMP documents.
 
@@ -639,16 +639,16 @@ const EXPERIMENTS = [
 ```
 
 And then protecting your code with a check `isExperimentOn(win,
-‘amp-my-element’)` and only execute your code when it is on.
+'amp-my-element')` and only execute your code when it is on.
 
 ```javascript
-import {isExperimentOn} from ‘../src/experiments;
+import {isExperimentOn} from '../src/experiments';
 
 /** @const */
-const EXPERIMENT = ‘amp-my-element’;
+const EXPERIMENT = 'amp-my-element';
 
 /** @const */
-const TAG = ‘amp-my-element’;
+const TAG = 'amp-my-element';
 
 Class AmpMyElement extends AMP.BaseElement {
 
@@ -684,7 +684,7 @@ Class AmpMyElement extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement(‘amp-my-element’, AmpMyElement, CSS);
+AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 ```
 
 ### Enable experiment
@@ -744,7 +744,7 @@ for all checked in code. We use the following frameworks for testing:
 - [Sinon](http://sinonjs.org/), spies, stubs and mocks.
 
 For faster testing during development, consider using --files argument
-to only run your extensions’ tests.
+to only run your extensions' tests.
 
 ```shell
 $ gulp test --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
@@ -769,7 +769,7 @@ $ gulp check-types
   - [Teads](https://github.com/ampproject/amphtml/commit/654ade680d796527345af8ff298a41a7532ee074)
   - [EPlanning](https://github.com/ampproject/amphtml/commit/a007543518a07ff77d48297e76bd264cadf36f57)
   - [Taboola](https://github.com/ampproject/amphtml/commit/79a58e545939cca0b75e62b2e62147829c59602a)
-- Adding embeds that’s not iframe-based (requires JS SDK)
+- Adding embeds that's not iframe-based (requires JS SDK)
   - [amp-facebook](https://github.com/ampproject/amphtml/commit/6679db198d8b9d9c38854d93aa04801e8cf6999f)
 - Adding iframe based embeds
   - [amp-soundcloud](https://github.com/ampproject/amphtml/commit/2ac845641c8eea9e67f17a1d471cfb9bab459fd1)
