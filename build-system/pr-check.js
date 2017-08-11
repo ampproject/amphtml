@@ -90,9 +90,9 @@ function timedExecOrDie(cmd) {
  */
 function filesInPr() {
   const files =
-      getStdout('git diff --name-only master...HEAD').trim().split('\n');
+      getStdout(`git diff --name-only master...HEAD`).trim().split('\n');
   const changeSummary =
-      getStdout('git -c color.ui=always diff --stat master...HEAD');
+      getStdout(`git -c color.ui=always diff --stat master...HEAD`);
   console.log(fileLogPrefix,
       'Testing the following changes at commit',
       util.colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
@@ -137,7 +137,7 @@ function isBuildSystemFile(filePath) {
  * @return {boolean}
  */
 function isValidatorFile(filePath) {
-  if (filePath.startsWith('validator/')) {return true;}
+  if (filePath.startsWith('validator/')) return true;
 
   // validator files for each extension
   if (!filePath.startsWith('extensions/')) {
@@ -154,7 +154,7 @@ function isValidatorFile(filePath) {
   const name = path.basename(filePath);
   return name.startsWith('validator-') &&
       (name.endsWith('.out') || name.endsWith('.html') ||
-      name.endsWith('.protoascii'));
+       name.endsWith('.protoascii'));
 }
 
 /**
@@ -207,14 +207,14 @@ function isFlagConfig(filePath) {
 function determineBuildTargets(filePaths) {
   if (filePaths.length == 0) {
     return new Set([
-      'BUILD_SYSTEM',
-      'VALIDATOR_WEBUI',
-      'VALIDATOR',
-      'RUNTIME',
-      'INTEGRATION_TEST',
-      'DOCS',
-      'FLAG_CONFIG',
-      'VISUAL_DIFF']);
+        'BUILD_SYSTEM',
+        'VALIDATOR_WEBUI',
+        'VALIDATOR',
+        'RUNTIME',
+        'INTEGRATION_TEST',
+        'DOCS',
+        'FLAG_CONFIG',
+        'VISUAL_DIFF']);
   }
   const targetSet = new Set();
   for (let i = 0; i < filePaths.length; i++) {
