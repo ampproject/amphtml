@@ -146,7 +146,8 @@ export class WebAnimationRunner {
   }
 
   /**
-   * Initializes the players and starts playing the animations
+   * Initializes the players if not already initialized,
+   * and starts playing the animations.
    */
   start() {
     if (!this.players_) {
@@ -201,16 +202,12 @@ export class WebAnimationRunner {
 
   /**
    * Seeks to a relative position within the animation timeline given a
-   * percentage (0 to 1 number)
+   * percentage (0 to 1 number).
    * @param {number} percent between 0 and 1
    */
   seekToPercent(percent) {
     dev().assert(percent >= 0 && percent <= 1);
     const totalDuration = this.getTotalDuration_();
-    user().assert(isFinite(totalDuration), 'Animation has infinite timeline,' +
-        ' we can not seek to a relative position within an infinite timeline.' +
-        ' Use "time" for seekTo or remove infinite iterations');
-
     const time = totalDuration * percent;
     this.seekTo(time);
   }
@@ -253,15 +250,18 @@ export class WebAnimationRunner {
   }
 
   /**
-   * @return {!number} total duration in milliseconds or infinity
+   * @return {!number} total duration in milliseconds.
+   * @throws {Error} If timeline is infinite.
    */
   getTotalDuration_() {
     let maxTotalDuration = 0;
     for (let i = 0; i < this.requests_.length; i++) {
       const timing = this.requests_[i].timing;
-      if (timing.iterations == Infinity && timing.duration > 0) {
-        return Infinity;
-      }
+
+      user().assert(isFinite(timing.iterations), 'Animation has infinite ' +
+      'timeline, we can not seek to a relative position within an infinite ' +
+      'timeline. Use "time" for seekTo or remove infinite iterations');
+
       const iteration = timing.iterations - timing.iterationStart;
       const totalDuration = (timing.duration * iteration) +
           timing.delay + timing.endDelay;

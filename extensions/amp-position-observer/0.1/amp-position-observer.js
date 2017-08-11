@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 
   /**
-   * Dispatches the `enter` event
+   * Dispatches the `enter` event.
    * @private
    */
   triggerEnter_() {
@@ -125,7 +125,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 
   /**
-   * Dispacthes the `exit` event
+   * Dispatches the `exit` event.
    * @private
    */
   triggerExit_() {
@@ -135,7 +135,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 
   /**
-   * Dispacthes the `scroll` event
+   * Dispatches the `scroll` event.
    * @private
    */
   triggerScroll_() {
@@ -147,7 +147,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /**
    * Called by position observer.
-   * It calculated visibility and progress and triggers the appropriate events.
+   * It calculates visibility and progress, and triggers the appropriate events.
    * @private
    */
   positionChanged_(entry) {
@@ -157,25 +157,26 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     this.viewportRect_ = entry.viewportRect;
 
     if (prevViewportHeight != entry.viewportRect.height) {
+      // Margins support viewport sizing.
       this.recalculateMargins_();
     }
 
-    // Adjust numbers for based on exclusion margins
+    // Adjust viewport based on exclusion margins
     const adjViewportRect = this.applyMargins_(entry.viewportRect);
-    const adjPositionRect = entry.positionRect;
+    const positionRect = entry.positionRect;
 
-    // Relative position of the element to the adjusted viewport
+    // Relative position of the element to the adjusted viewport.
     let relPos;
-    if (!adjPositionRect) {
+    if (!positionRect) {
       this.isVisible_ = false;
       relPos = entry.relativePos;
     } else {
-      relPos = layoutRectsRelativePos(adjPositionRect, adjViewportRect);
-      this.updateVisibility_(adjPositionRect, adjViewportRect, relPos);
+      relPos = layoutRectsRelativePos(positionRect, adjViewportRect);
+      this.updateVisibility_(positionRect, adjViewportRect, relPos);
     }
 
     if (wasVisible && !this.isVisible_) {
-      // Send final scroll progress state before exiting.
+      // Send final scroll progress state before exiting to handle fast-scroll.
       this.scrollProgress_ = relPos == RelativePositions.BOTTOM ? 0 : 1;
       this.triggerScroll_();
       this.triggerExit_();
@@ -185,19 +186,19 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       this.triggerEnter_();
     }
 
-    // Send scroll progress if visible
+    // Send scroll progress if visible.
     if (this.isVisible_) {
-      this.updateScrollProgress_(adjPositionRect, adjViewportRect);
+      this.updateScrollProgress_(positionRect, adjViewportRect);
       this.triggerScroll_();
     }
   }
 
   /**
-   * Calculates whether the item is visible considering ratios and margins.
+   * Calculates whether the scene is visible considering ratios and margins.
    * @private
    */
   updateVisibility_(positionRect, adjustedViewportRect, relativePos) {
-    // Fully inside margin-adjusted viewport
+    // Fully inside margin-adjusted viewport.
     if (relativePos == RelativePositions.INSIDE) {
       this.isVisible_ = true;
       return;
@@ -221,12 +222,13 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   /**
    * Calculates the current scroll progress as a percentage.
    * Scroll progress is a decimal between 0-1 and shows progress between
-   * enter and exit.
-   * When items becomes visible^ (enters), progress is 0
-   * as it moves toward the top, progress increases until it becomes invisible^
-   * (exits).
+   * enter and exit, considering ratio and margins.
+   * When a scene becomes visible (enters based on ratio and margins), from
+   * bottom, progress is 0 as it moves toward the top, progress increases until
+   * it becomes exists with 1 from the top.
    *
-   * ^visibility as configured by ratios and margins.
+   * Entering from the top gives the reverse values, 1 at enter, 0 at exit.
+   *
    * @private
    */
   updateScrollProgress_(positionRect, adjustedViewportRect) {
@@ -251,7 +253,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   parseAttributes_() {
     // Ratio is either "<top-bottom:{0,1}>" or "<top:{0,1}> <bottom:{0,1}>"
-    // e.g, "0.5 1": use 50% visibility at top and 100% at the bottom of viewport
+    // e.g, "0.5 1": use 50% visibility at top and 100% at the bottom of viewport.
     const ratios = this.element.getAttribute('intersection-ratios');
     if (ratios) {
       const topBottom = ratios.trim().split(' ');
@@ -263,7 +265,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     }
 
     // Margin is either "<top-bottom:{px,vh}>" or "<top:{px,vh}> <bottom:{px,vh}>"
-    // e.g, "100px 10vh": exclude 100px from top and 10vh from bottom of viewport
+    // e.g, "100px 10vh": exclude 100px from top and 10vh from bottom of viewport.
     const margins = this.element.getAttribute('exclusion-margins');
     if (margins) {
       const topBottom = margins.trim().split(' ');
@@ -279,7 +281,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /**
    * Finds the container scene. Either parent of the component or specified by
-   * `target-selector` attribute
+   * `target-selector` attribute.
    * @private
    */
   discoverScene_() {
@@ -290,7 +292,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     } else {
       this.scene_ = this.element.parentNode;
     }
-    // Hoist body to root
+    // Hoist body to documentElement.
     if (this.scene_.tagName == 'BODY') {
       this.scene_ = this.win.document.documentElement;
     }
@@ -305,7 +307,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     const unit = getLengthUnits(val);
     let num = getLengthNumeral(val);
     user().assert(unit == 'px' || unit == 'vh', 'Only pixel or vh are valid ' +
-      'values for exclusion margin: ' + val);
+      'as units for exclusion margins: ' + val);
 
     if (unit == 'vh') {
       num = (num / 100) * this.viewportRect_.height;
@@ -342,7 +344,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 
   /**
-   * Readjusts the given rect using the configured margins.
+   * Readjusts the given rect using the configured exclusion margins.
    * @private
    */
   applyMargins_(rect) {

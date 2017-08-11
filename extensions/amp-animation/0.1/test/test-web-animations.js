@@ -1584,7 +1584,7 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     expect(runner.players_).to.have.length(2);
     expect(runner.players_[0]).equal(anim1);
     expect(runner.players_[1]).equal(anim2);
-    expect(playStateSpy).to.have.been.calledOnce;
+    expect(playStateSpy).to.be.calledOnce;
     expect(playStateSpy.args[0][0]).to.equal(WebAnimationPlayState.RUNNING);
   });
 
@@ -1806,8 +1806,22 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
       const runner = new WebAnimationRunner([
         {target: target1, keyframes: keyframes1, timing},
       ]);
-      // because iterationStart is 2.5, the first 2.5/3 iterations are ignored.
+      // iterationStart is 2.5, the first 2.5 out of 3 iterations are ignored.
       expect(runner.getTotalDuration_()).to.equal(250);// 0.5*100 + 100 + 100
+    });
+
+    it('single request, infinite iteration', () => {
+      const timing = {
+        duration: 100,
+        delay: 100,
+        endDelay: 100,
+        iterations: 'infinity',
+        iterationStart: 0,
+      };
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing},
+      ]);
+      expect(() => runner.getTotalDuration_()).to.throw(/has infinite/);
     });
 
     it('multiple requests - bigger by duration', () => {
@@ -1863,5 +1877,32 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
 
       expect(runner.getTotalDuration_()).to.equal(800);
     });
+
+    it('multiple request, infinite iteration', () => {
+      const timing1 = {
+        duration: 100,
+        delay: 100,
+        endDelay: 100,
+        iterations: 'infinity',
+        iterationStart: 0,
+      };
+
+      // 500
+      const timing2 = {
+        duration: 300,
+        delay: 100,
+        endDelay: 100,
+        iterations: 1,
+        iterationStart: 0,
+      };
+
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing: timing1},
+        {target: target1, keyframes: keyframes1, timing: timing2},
+      ]);
+
+      expect(() => runner.getTotalDuration_()).to.throw(/has infinite/);
+    });
+
   });
 });

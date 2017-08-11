@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import {layoutRectLtwh, RelativePositions} from '../../../../src/layout-rect';
  * Functional tests that create:
  * - 1000px viewport
  * - 200px container
- * - moves the container in the viewport and tests enter, exit, progress values
+ * - moves the container in the viewport and tests enter, exit, progress values,
  *   with various ratio and margin configurations
  */
-describes.sandboxed('amp-visibility-selector', {}, () => {
+describes.sandboxed('amp-position-observer', {}, () => {
   let impl;
   let enterSpy;
   let exitSpy;
@@ -61,6 +61,7 @@ describes.sandboxed('amp-visibility-selector', {}, () => {
     exitSpy.reset();
     scrollSpy.reset();
   }
+
   function setPosition(top) {
     const viewportRect = layoutRectLtwh(0, 0, 500, 1000);
     let positionRect = layoutRectLtwh(0, top, 500, 200);
@@ -83,7 +84,7 @@ describes.sandboxed('amp-visibility-selector', {}, () => {
 
   describe('no ratio, no margin', () => {
     /**
-     * with no ratio, no margin, element progresses as soon as partially
+     * With no ratio, no margin, element progresses as soon as partially visible
      * until it is fully invisible.
      *
      *    *******

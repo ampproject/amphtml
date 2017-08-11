@@ -19,7 +19,10 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Monitors visibility of an element and dispatches `enter`, `exit` and `scroll` events that can be used with other components such as `<amp-animation>`</td>
+    <td>Monitors position of an element within the viewport as user scrolls
+        and dispatches `enter`, `exit` and `scroll` events that can be used with
+        other components such as `<amp-animation>`
+    </td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -42,8 +45,8 @@ limitations under the License.
 [TOC]
 
 ## What is amp-position-observer?
-`amp-position-observer` is a functional component that monitors visibility
-and position of an element within the viewport and dispatches
+`amp-position-observer` is a functional component that monitors position of an
+element within the viewport as user scrolls and dispatches
 `enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**)
 which can be used to trigger actions (**Only Low Trust Actions**) on other components.
 It is only useful when used with other components and does not do anything on its own.
@@ -51,12 +54,12 @@ It is only useful when used with other components and does not do anything on it
 ## What can I do with amp-position-observer?
 Currently [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
 and several video players in AMP are the only components that allow low-trust events
-to trigger their actions such as starting the animation, seeking to a position
+to trigger their actions such as starting an animation, seeking to a position
 within the animation, pausing a video, etc...
 
 ### Scroll-bound animations
 `amp-animation` exposes a `seekTo` action that can be tied to the `scroll` event
-of `amp-position-observer` to implement scroll-bound animations
+of `amp-position-observer` to implement scroll-bound animations.
 
 ### Example:
 Imagine an animation where the hour hand of a clock rotates as user scrolls
@@ -68,7 +71,7 @@ the page.
 <!-- An animation that rotates a clock hand 180 degrees. -->
 <!--
    Note that we are NOT setting `trigger=visibility`
-   since we will manually trigger the animation
+   since we will manually trigger the animation.
 -->
 <amp-animation id="clockAnim" layout="nodisplay">
   <script type="application/json">
@@ -110,7 +113,7 @@ the page.
 ```
 
 ### Animation scenes that start/pause based on visibility in the viewport
-`amp-animation` also exposes `start` and `start` actions that can be tied to the
+`amp-animation` also exposes `start` and `pause` actions that can be tied to the
 `enter` and `exit` events of `amp-position-observer` to control when animation
 starts/pauses based on visibility.
 
@@ -180,20 +183,20 @@ as clock becomes less than 50% visible.
 
 #### target-selector (optional)
 Specifies what element to observe.
-If **not specified** the **parent** of `<amp-position-observer>` will be used as the target
+If **not specified** the **parent** of `<amp-position-observer>` will be used as the target.
 
 #### intersection-ratios (optional)
 
 A number between 0 and 1 which defines how much of the target should be visible in
 the viewport before `<amp-position-observer>` triggers any of its events.
 
-Different ratios for top vs. bottom can be specified by providing two values. (`<top> <bottom>`)
+Different ratios for top vs. bottom can be specified by providing two values (`<top> <bottom>`).
 
 Defaults to 0.
 
 `intersection-ratios="0"` means `enter` is triggered as soon as a single pixel
 of the target comes into viewport and `exit` is triggered as soon as the very last pixel
-of the target goes out of the viewport
+of the target goes out of the viewport.
 
 `intersection-ratios="0.5"` means `enter` is triggered as soon as 50% of
 of the target comes into viewport and `exit` is triggered as soon as less than
@@ -213,9 +216,9 @@ the target is entering/exiting from top (0 will be used) or bottom (1 will be us
 A `px` or `vh` value which can be used to shrink the area of the viewport used
 for visibility calculations. A number without a unit will be assumed `px`
 
-Different values for top vs. bottom can be specified by providing two values. (`<top> <bottom>`)
+Different values for top vs. bottom can be specified by providing two values (`<top> <bottom>`).
 
-Defaults to 0
+Defaults to 0.
 
 `intersection-ratios="100px"` means shrink the viewport by 100px from the top and 100px from the bottom.
 
