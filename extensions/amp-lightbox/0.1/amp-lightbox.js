@@ -346,8 +346,7 @@ function setTransparentBody(win, body) {
           computedStyle(win, body)['background-color'] == 'rgba(0, 0, 0, 0)';
     },
     mutate(state) {
-      if (!state.alreadyTransparent &&
-          getMode().development && !getMode().test) {
+      if (!state.alreadyTransparent && !getMode().test) {
 
         // TODO(alanorozco): Create documentation page and link it here once the
         // A4A lightbox experiment is turned on.
@@ -364,6 +363,8 @@ function setTransparentBody(win, body) {
 }
 
 
+// TODO(alanorozco): refactor this somehow so we don't need to do a direct
+// getMode() check
 if (getMode().runtime == 'inabox') {
   setTransparentBody(window, /** @type {!HTMLBodyElement} */ (
       dev().assert(document.body)));
