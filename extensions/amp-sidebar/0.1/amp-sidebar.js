@@ -100,6 +100,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.element.classList.add('i-amphtml-overlay');
 
     this.side_ = this.element.getAttribute('side');
 

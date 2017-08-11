@@ -77,6 +77,11 @@ class AmpLightbox extends AMP.BaseElement {
     return layout == Layout.NODISPLAY;
   }
 
+  /** @override */
+  buildCallback() {
+    this.element.classList.add('i-amphtml-overlay');
+  }
+
   /**
    * Lazily builds the lightbox DOM on the first open.
    * @private

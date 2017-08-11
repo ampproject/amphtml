@@ -119,7 +119,8 @@ describes.realWin('amp-iframe', {
         ampIframe.appendChild(img);
       }
       if (opt_container) {
-        const container = doc.createElement(opt_container);
+        const container = doc.createElement('div');
+        container.classList.add('i-amphtml-overlay');
         container.appendChild(ampIframe);
         doc.body.appendChild(container);
       } else {
@@ -628,7 +629,7 @@ describes.realWin('amp-iframe', {
         src: iframeSrc,
         width: 5,
         height: 5,
-      }, undefined, undefined, undefined, 'amp-lightbox');
+      }, undefined, undefined, undefined, true);
       const ampIframe = createAmpIframe(env);
       yield waitForAmpIframeLayoutPromise(doc, ampIframeRealTracking);
       yield waitForAmpIframeLayoutPromise(doc, ampIframeInLightbox);

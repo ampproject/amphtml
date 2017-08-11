@@ -22,7 +22,7 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement, closest} from '../../../src/dom';
+import {removeElement, closestBySelector} from '../../../src/dom';
 import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
 import {Services} from '../../../src/services';
 import {user, dev} from '../../../src/log';
@@ -548,9 +548,8 @@ export class AmpIframe extends AMP.BaseElement {
     }
     // Iframe is not tracking iframe if open with user interaction
     if (this.isInContainer_ === undefined) {
-      this.isInContainer_ = !!closest(this.element, element => {
-        return CONTAINER_LIST.includes(element.tagName);
-      });
+      this.isInContainer_ =
+          !!closestBySelector(this.element, '.i-amphtml-overlay');
     }
     return !this.isInContainer_;
   }

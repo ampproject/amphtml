@@ -138,6 +138,13 @@ describes.realWin('amp-sidebar 0.1 version', {
       sandbox.restore();
     });
 
+    it('should apply overlay class', () => {
+      return getAmpSidebar().then(obj => {
+        const sidebarElement = obj.ampSidebar;
+        expect(sidebarElement.classList.contains('i-amphtml-overlay'));
+      });
+    });
+
     it('should replace text to screen reader \
     button in data-close-button-aria-label', () => {
       return getAmpSidebar({'closeText':
