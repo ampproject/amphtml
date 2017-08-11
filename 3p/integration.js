@@ -567,11 +567,11 @@ function installContextUsingStandardImpl(win, data) {
       embedType === 'github') {
     // Only make this available to selected embeds until the
     // generic solution is available.
-    win.context['updateDimensions'] = triggerDimensions;
+    win.context.updateDimensions = triggerDimensions;
   }
 
   // This only actually works for ads.
-  win.context['observeIntersection'] = cb => {
+  win.context.observeIntersection = cb => {
     const unlisten = observeIntersection(cb);
     // Call the callback with the value that was transmitted when the
     // iframe was drawn. Called in nextTick, so that callers don't
