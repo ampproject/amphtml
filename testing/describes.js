@@ -118,6 +118,7 @@ import {resetScheduledElementForTesting} from '../src/custom-element';
 import {setStyles} from '../src/style';
 import * as sinon from 'sinon';
 import fetchMock from 'fetch-mock';
+
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
 
@@ -193,7 +194,6 @@ export const sandboxed = describeEnv(spec => []);
  * @param {string} name
  * @param {{
  *   win: !FakeWindow
-Spec,
  *   amp: (boolean|!AmpTestSpec|undefined),
  * }} spec
  * @param {function({
@@ -488,8 +488,8 @@ class FakeWinFixture {
   /** @override */
   setup(env) {
     const spec = this.spec;
-    env.win = new FakeWindow(this.spec.win || {});
-    if (!(spec.xhrMock === false)) {
+    env.win = new FakeWindow(spec.win || {});
+    if (!!this.spec.xhrMock) {
       fetchMock.constructor.global = env.win;
       fetchMock._mock();
       env.expectFetch = function(url, response) {
@@ -500,7 +500,7 @@ class FakeWinFixture {
 
   /** @override */
   teardown(env) {
-    if (!(this.spec.xhrMock === false)) {
+    if (!!this.spec.xhrMock) {
       fetchMock.restore();
     }
   }
@@ -517,7 +517,6 @@ class RealWinFixture {
   constructor(spec) {
     /** @const */
     this.spec = spec;
-    // throw spec.toString();
   }
 
   /** @override */
@@ -591,7 +590,7 @@ class RealWinFixture {
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
     }
-    if (!(this.spec.xhrMock === false)) {
+    if (!!this.spec.xhrMock) {
       fetchMock.restore();
     }
   }
