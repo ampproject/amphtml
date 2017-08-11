@@ -58,8 +58,8 @@ function stopTimer(functionName, startTime) {
   const mins = executionTime.getMinutes();
   const secs = executionTime.getSeconds();
   console.log(
-	  fileLogPrefix, 'Done running', util.colors.cyan(functionName),
-	  'Total time:', util.colors.green(mins + 'm ' + secs + 's'));
+      fileLogPrefix, 'Done running', util.colors.cyan(functionName),
+      'Total time:', util.colors.green(mins + 'm ' + secs + 's'));
 }
 
 /**
@@ -90,12 +90,12 @@ function timedExecOrDie(cmd) {
  */
 function filesInPr() {
   const files =
-	  getStdout('git diff --name-only master...HEAD').trim().split('\n');
+      getStdout(`git diff --name-only master...HEAD`).trim().split('\n');
   const changeSummary =
-	  getStdout('git -c color.ui=always diff --stat master...HEAD');
+      getStdout('git -c color.ui=always diff --stat master...HEAD');
   console.log(fileLogPrefix,
-	  'Testing the following changes at commit',
-	  util.colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
+      'Testing the following changes at commit',
+      util.colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
   console.log(changeSummary);
   return files;
 }
@@ -137,7 +137,7 @@ function isBuildSystemFile(filePath) {
  * @return {boolean}
  */
 function isValidatorFile(filePath) {
-  if (filePath.startsWith('validator/')) {return true;}
+  if (filePath.startsWith('validator/')) return true;
 
   // validator files for each extension
   if (!filePath.startsWith('extensions/')) {
@@ -207,14 +207,14 @@ function isFlagConfig(filePath) {
 function determineBuildTargets(filePaths) {
   if (filePaths.length == 0) {
     return new Set([
-	  'BUILD_SYSTEM',
-	  'VALIDATOR_WEBUI',
-	  'VALIDATOR',
-	  'RUNTIME',
-	  'INTEGRATION_TEST',
-	  'DOCS',
-	  'FLAG_CONFIG',
-	  'VISUAL_DIFF']);
+	    'BUILD_SYSTEM',
+	    'VALIDATOR_WEBUI',
+	    'VALIDATOR',
+	    'RUNTIME',
+	    'INTEGRATION_TEST',
+	    'DOCS',
+	    'FLAG_CONFIG',
+	    'VISUAL_DIFF']);
   }
   const targetSet = new Set();
   for (let i = 0; i < filePaths.length; i++) {
@@ -308,7 +308,7 @@ const command = {
 
 function runAllCommands() {
   // Run different sets of independent tasks in parallel to reduce build time.
-  if (process.env.BUILD_SHARD == 'unit_tests') {
+  if (process.env.BUILD_SHARD == "unit_tests") {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
@@ -320,7 +320,7 @@ function runAllCommands() {
     command.buildValidatorWebUI();
     command.buildValidator();
   }
-  if (process.env.BUILD_SHARD == 'integration_tests') {
+  if (process.env.BUILD_SHARD == "integration_tests") {
     command.cleanBuild();
     command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
@@ -391,7 +391,7 @@ function main(argv) {
 	  util.colors.cyan(sortedBuildTargets.join(', ')));
 
   // Run different sets of independent tasks in parallel to reduce build time.
-  if (process.env.BUILD_SHARD == 'unit_tests') {
+  if (process.env.BUILD_SHARD == "unit_tests") {
     if (buildTargets.has('BUILD_SYSTEM')) {
       command.testBuildSystem();
     }
@@ -411,7 +411,7 @@ function main(argv) {
     }
   }
 
-  if (process.env.BUILD_SHARD == 'integration_tests') {
+  if (process.env.BUILD_SHARD == "integration_tests") {
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME') ||
         buildTargets.has('VISUAL_DIFF')) {
