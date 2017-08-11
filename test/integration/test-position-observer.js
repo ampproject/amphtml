@@ -16,7 +16,10 @@
 
 import {poll} from '../../testing/iframe';
 
-describe.configure().skipSauceLabs().run('amp-position-observer', function() {
+//TODO(aghassemi,#10878): Run in all platforms.
+//TODO(aghasemi, #10877): in-a-box, FIE integration tests.
+const config = describe.configure().ifChrome().skipOldChrome();
+config.run('amp-position-observer', function() {
   this.timeout(100000);
 
   const css = `
@@ -205,5 +208,3 @@ function ensureOpacityIsNoChangingAnymore(win) {
 function getViewportHeight(win) {
   return win.document.querySelector('.spacer').offsetHeight;
 };
-
-//TODO(aghasemi, #10877): in-a-box, FIE integration tests.
