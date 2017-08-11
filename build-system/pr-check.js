@@ -90,7 +90,7 @@ function timedExecOrDie(cmd) {
  */
 function filesInPr() {
   const files =
-      getStdout(`git diff --name-only master...HEAD`).trim().split('\n');
+      getStdout('git diff --name-only master...HEAD').trim().split('\n');
   const changeSummary =
       getStdout('git -c color.ui=always diff --stat master...HEAD');
   console.log(fileLogPrefix,
@@ -118,15 +118,15 @@ function isValidatorWebuiFile(filePath) {
  */
 function isBuildSystemFile(filePath) {
   return filePath.startsWith('build-system') &&
-	  // Exclude textproto from build-system since we want it to trigger
-	  // tests and type check.
-	  path.extname(filePath) != '.textproto' &&
-	  // Exclude config files from build-system since we want it to trigger
-	  // the flag config check.
-	  !isFlagConfig(filePath) &&
-	  // Exclude visual diff files from build-system since we want it to trigger
-	  // visual diff tests.
-	  !isVisualDiffFile(filePath);
+      // Exclude textproto from build-system since we want it to trigger
+      // tests and type check.
+      path.extname(filePath) != '.textproto' &&
+      // Exclude config files from build-system since we want it to trigger
+      // the flag config check.
+      !isFlagConfig(filePath) &&
+      // Exclude visual diff files from build-system since we want it to trigger
+      // visual diff tests.
+      !isVisualDiffFile(filePath);
 }
 
 /**
@@ -137,7 +137,7 @@ function isBuildSystemFile(filePath) {
  * @return {boolean}
  */
 function isValidatorFile(filePath) {
-  if (filePath.startsWith('validator/')) return true;
+  if (filePath.startsWith('validator/')) {return true;}
 
   // validator files for each extension
   if (!filePath.startsWith('extensions/')) {
@@ -146,15 +146,15 @@ function isValidatorFile(filePath) {
 
   const pathArray = path.dirname(filePath).split(path.sep);
   if (pathArray.length < 2) {
-	// At least 2 with ['extensions', '{$name}']
+    // At least 2 with ['extensions', '{$name}']
     return false;
   }
 
   // Validator files take the form of validator-.*\.(html|out|protoascii)
   const name = path.basename(filePath);
   return name.startsWith('validator-') &&
-	  (name.endsWith('.out') || name.endsWith('.html') ||
-	  name.endsWith('.protoascii'));
+      (name.endsWith('.out') || name.endsWith('.html') ||
+      name.endsWith('.protoascii'));
 }
 
 /**
@@ -174,8 +174,8 @@ function isDocFile(filePath) {
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
   return (filename == 'visual-diff.rb' ||
-  filename == 'visual-tests.json' ||
-  filePath.startsWith('examples/visual-tests/'));
+          filename == 'visual-tests.json' ||
+          filePath.startsWith('examples/visual-tests/'));
 }
 
 /**
@@ -207,34 +207,34 @@ function isFlagConfig(filePath) {
 function determineBuildTargets(filePaths) {
   if (filePaths.length == 0) {
     return new Set([
-	    'BUILD_SYSTEM',
-	    'VALIDATOR_WEBUI',
-	    'VALIDATOR',
-	    'RUNTIME',
-	    'INTEGRATION_TEST',
-	    'DOCS',
-	    'FLAG_CONFIG',
-	    'VISUAL_DIFF']);
+      'BUILD_SYSTEM',
+      'VALIDATOR_WEBUI',
+      'VALIDATOR',
+      'RUNTIME',
+      'INTEGRATION_TEST',
+      'DOCS',
+      'FLAG_CONFIG',
+      'VISUAL_DIFF']);
   }
   const targetSet = new Set();
   for (let i = 0; i < filePaths.length; i++) {
     const p = filePaths[i];
     if (isBuildSystemFile(p)) {
-	  targetSet.add('BUILD_SYSTEM');
+      targetSet.add('BUILD_SYSTEM');
     } else if (isValidatorWebuiFile(p)) {
-	  targetSet.add('VALIDATOR_WEBUI');
+      targetSet.add('VALIDATOR_WEBUI');
     } else if (isValidatorFile(p)) {
-	  targetSet.add('VALIDATOR');
+      targetSet.add('VALIDATOR');
     } else if (isDocFile(p)) {
-	  targetSet.add('DOCS');
+      targetSet.add('DOCS');
     } else if (isFlagConfig(p)) {
-	  targetSet.add('FLAG_CONFIG');
+      targetSet.add('FLAG_CONFIG');
     } else if (isIntegrationTest(p)) {
-	  targetSet.add('INTEGRATION_TEST');
+      targetSet.add('INTEGRATION_TEST');
     } else if (isVisualDiffFile(p)) {
-	  targetSet.add('VISUAL_DIFF');
+      targetSet.add('VISUAL_DIFF');
     } else {
-	  targetSet.add('RUNTIME');
+      targetSet.add('RUNTIME');
     }
   }
   return targetSet;
@@ -289,9 +289,9 @@ const command = {
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     let cmd = 'ruby build-system/tasks/visual-diff.rb';
     if (opt_mode === 'skip') {
-	  cmd += ' --skip';
+      cmd += ' --skip';
     } else if (opt_mode === 'master') {
-	  cmd += ' --master';
+      cmd += ' --master';
     }
     timedExec(cmd);
   },
@@ -337,9 +337,9 @@ function runAllCommands() {
 function main(argv) {
   const startTime = startTimer('pr-check.js');
   console.log(
-	  fileLogPrefix, 'Running build shard',
-	  util.colors.cyan(process.env.BUILD_SHARD),
-	  '\n');
+      fileLogPrefix, 'Running build shard',
+      util.colors.cyan(process.env.BUILD_SHARD),
+      '\n');
 
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
@@ -387,8 +387,8 @@ function main(argv) {
   sortedBuildTargets.sort();
 
   console.log(
-	  fileLogPrefix, 'Detected build targets:',
-	  util.colors.cyan(sortedBuildTargets.join(', ')));
+      fileLogPrefix, 'Detected build targets:',
+      util.colors.cyan(sortedBuildTargets.join(', ')));
 
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == "unit_tests") {
