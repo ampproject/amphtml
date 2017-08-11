@@ -235,7 +235,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
           {duration: 1001, animations: []});
       anim.activate();
       anim.visible_ = true;
-      runnerMock.expects('resume').once();
+      runnerMock.expects('start').once();
       runnerMock.expects('finish').never();
       return anim.startOrResume_().then(() => {
         expect(anim.triggered_).to.be.true;
@@ -248,7 +248,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
           {duration: 1001, animations: []});
       anim.activate();
       anim.visible_ = true;
-      runnerMock.expects('resume').once();
+      runnerMock.expects('start').once();
       runnerMock.expects('finish').once();
       return anim.startOrResume_().then(() => {
         anim.finish_();
@@ -262,7 +262,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
           {duration: 1001, animations: []});
       anim.activate();
       anim.visible_ = true;
-      runnerMock.expects('resume').once();
+      runnerMock.expects('start').once();
       runnerMock.expects('pause').once();
       return anim.startOrResume_().then(() => {
         anim.pause_();

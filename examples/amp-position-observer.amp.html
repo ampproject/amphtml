@@ -8,7 +8,6 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
   <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
-  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <style amp-custom>
     main {
       font-family: Helvetica, sans-serif;
@@ -17,10 +16,7 @@
       margin: auto;
     }
 
-    h1,
-    h2,
-    h3,
-    h4 {
+    h1, h2, h3, h4 {
       font-weight: normal;
     }
 
@@ -109,7 +105,7 @@
 
     <div id="clock-scene-1" class="clock-scene">
       <amp-position-observer
-        intersection-ratios="1"
+        intersection-ratios="0.8"
         exclusion-margins="10vh"
         on="scroll:clockAnim1.seekTo(percent=event.percent)"
         layout="nodisplay">
@@ -141,5 +137,4 @@
     <div class="spacer"></div>
   </main>
 </body>
-
 </html>

@@ -334,12 +334,12 @@ export class AmpAnimation extends AMP.BaseElement {
     }
 
     return this.maybeCreateRunner_(opt_args).then(() => {
-      this.runner_.resume();
+      this.runner_.start();
     });
   }
 
   /**
-   * Creates the runner but animations will not start (paused)
+   * Creates the runner but animations will not start.
    * @param {?JsonObject=} opt_args
    * @return {!Promise}
    * @private
