@@ -33,6 +33,9 @@ import {
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';
 
+/** @const @private */
+const SCROLL_TIMEOUT = 500;
+
 
 export class PositionObserver {
   /**
@@ -44,7 +47,7 @@ export class PositionObserver {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {!Array<!Object>} */
+    /** @private {!Array<!PositionObserverEntry>} */
     this.entries_ = [];
 
     /** @private {!../vsync-impl.Vsync} */
@@ -65,10 +68,10 @@ export class PositionObserver {
     /** @private {function()} */
     this.boundStopScroll_ = debounce(this.win_, () => {
       this.inScroll_ = false;
-    }, 500);
+    }, SCROLL_TIMEOUT);
 
     /** @private {boolean} */
-    this.needRefreshOnMessage_ = false;
+    this.needRefreshInIframePos_ = false;
   }
 
   /**
@@ -96,7 +99,6 @@ export class PositionObserver {
   unobserve(element) {
     for (let i = 0; i < this.entries_.length; i++) {
       if (this.entries_[i].element == element) {
-        this.entries_[i].handler = null;
         this.entries_.splice(i, 1);
         if (this.entries_.length == 0) {
           this.stopCallback_();
@@ -157,29 +159,30 @@ export class PositionObserver {
 
   /**
    * This should always be called in vsync.
-   * @param {boolean=} force
-   * @param {boolean=} opt_remeasure
+   * @param {boolean=} opt_force
    * @visibleForTesting
   */
-  updateAllEntries(force, opt_remeasure) {
+  updateAllEntries(opt_force) {
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
-      if (opt_remeasure) {
-        entry.element.inIframePositionRect = null;
+      if (this.needRefreshInIframePos_) {
+        entry.element['inIframePositionRect'] = null;
       }
-      if (!force && entry.turn != 0) {
-        // Not ready for their turn yet.
-        entry.turn--;
+
+      if (opt_force) {
+        this.updateSingleEntry_(entry);
         continue;
       }
-      // Reset entry.turn value.
-      if (!force) {
-        if (entry.fidelity == PositionObserverFidelity.LOW) {
-          entry.turn = LOW_FIDELITY_FRAME_COUNT;
-        }
+
+      if (entry.turn == 0) {
+        this.updateSingleEntry_(entry);
+        entry.turn = (entry.fidelity == PositionObserverFidelity.LOW) ?
+            LOW_FIDELITY_FRAME_COUNT : 0;
+      } else {
+        entry.turn--;
       }
-      this.updateSingleEntry_(entry);
     }
+    this.needRefreshInIframePos_ = false;
   }
 
   /**
@@ -189,10 +192,6 @@ export class PositionObserver {
    * @private
    */
   updateSingleEntry_(entry) {
-    if (this.needRefreshOnMessage_) {
-      entry.element.inIframePositionRect = null;
-    }
-
     const elementBox =
         this.viewport_.getLayoutRect(entry.element);
 
@@ -218,7 +217,6 @@ export class PositionObserver {
    * @private
    */
   onScrollHandler_() {
-    this.needRefreshOnMessage_ = true;
     this.boundStopScroll_();
     this.inScroll_ = true;
     if (!this.measure_) {
@@ -231,7 +229,7 @@ export class PositionObserver {
    * @private
    */
   onResizeHandler_() {
-    this.needRefreshOnMessage_ = true;
+    this.needRefreshInIframePos_ = true;
     this.vsync_.measure(() => {
       this.updateAllEntries(true);
     });
@@ -264,7 +262,7 @@ export class PositionObserver {
 
     // do this in vsyn.measure
     this.vsync_.measure(() => {
-      this.updateAllEntries();
+      this.updateAllEntries(true);
     });
   }
 
@@ -284,6 +282,7 @@ export class PositionObserver {
       this.measure_ = false;
       return;
     }
+    this.needRefreshInIframePos_ = true;
     this.vsync_.measure(() => {
       this.updateAllEntries();
       this.schedulePass_();

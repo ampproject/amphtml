@@ -16,9 +16,7 @@
 
 import {Services} from '../../src/services';
 import {registerServiceBuilderForDoc} from '../../src/service';
-import {
-  moveLayoutRect,
-} from '../../src/layout-rect';
+import {moveLayoutRect} from '../../src/layout-rect';
 import {
   serializeMessage,
   MessageType,
@@ -43,8 +41,11 @@ class PosObViewportInfoInabox {
     this.ampdoc = ampdoc;
     this.win_ = ampdoc.win;
     this.onMessageReceivedObservers_ = new Observable();
+    this.onViewportResizeObservers_ = new Observable();
     this.boundOnMessageEventListener_ =
         event => this.onMessageReceivedObservers_.fire(event);
+    this.boundOnViewportResizeListener_ =
+        () => this.onViewportResizeObservers_.fire();
     this.viewportBox_ = null;
     this.iframePosition_ = null;
     this.sentinel = null;
@@ -52,6 +53,7 @@ class PosObViewportInfoInabox {
 
   connect() {
     this.win_.addEventListener('message', this.boundOnMessageEventListener_);
+    this.win_.addEventListener('resize', this.boundOnViewportResizeListener_);
     const object = {};
     const dataObject = tryParseJson(this.win_.name);
     if (dataObject) {
@@ -66,6 +68,8 @@ class PosObViewportInfoInabox {
 
   disconnect() {
     this.win_.removeEventListener('message', this.boundOnMessageEventListener_);
+    this.win_.removeEventListener('resize',
+        this.boundOnViewportResizeListener_);
   }
 
   /**
@@ -77,11 +81,11 @@ class PosObViewportInfoInabox {
   }
 
   /**
-   * @param {function(?)} unusedCallback
+   * @param {function(?)} callback
    * @return {function()}
    */
-  onResize(unusedCallback) {
-    return () => {};
+  onResize(callback) {
+    return this.onMessageReceivedObservers_.add(callback);
   }
 
   /**
@@ -104,13 +108,13 @@ class PosObViewportInfoInabox {
       // If not receive iframe position from host, or if iframe is outside vp
       return null;
     }
-    if (!element.inIframePositionRect) {
+    if (!element['inIframePositionRect']) {
       // Not receive element position in iframe from ampDocPositionObserver
-      element.inIframePositionRect = element./*OK*/getBoundingClientRect();
+      element['inIframePositionRect'] = element./*OK*/getBoundingClientRect();
     }
 
     const iframeBox = this.iframePosition_;
-    const elementBox = element.inIframePositionRect;
+    const elementBox = element['inIframePositionRect'];
     return moveLayoutRect(elementBox, iframeBox.left, iframeBox.top);
   }
 

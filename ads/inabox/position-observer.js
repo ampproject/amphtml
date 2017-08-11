@@ -39,7 +39,6 @@ export class PosObViewportInfoNonAmpHost {
   }
 
   connect() {
-    //console.log('connect but do nothing! should fail');
     this.win_.addEventListener('scroll', this.boundScrollEventListener_);
     this.win_.addEventListener('resize', this.boundResizeEventListener_);
   }

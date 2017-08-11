@@ -73,7 +73,7 @@ export class PositionObserverEntry {
     if (prePos
         && layoutRectEquals(prePos.positionRect, position.positionRect)
         && layoutRectEquals(prePos.viewportRect, position.viewportRect)) {
-      // position doesn't change, do nothing.
+      // position didn't change, do nothing.
       return;
     }
 

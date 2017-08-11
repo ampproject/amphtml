@@ -50,9 +50,7 @@ export class PosObViewportInfoDef {
    * @param {function(?)} unusedCallback
    * @return {function()}
    */
-  onHostMessage(unusedCallback) {
-
-  }
+  onHostMessage(unusedCallback) {}
 
   /**
    * Returns the size of top window viewport.
