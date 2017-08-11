@@ -207,8 +207,8 @@ describes.sandboxed('AmpAnimation', {}, () => {
       expect(startStub).to.be.calledOnce;  // Doesn't change.
     });
 
-    it('should NOT resume when visible if "trigger != visibility"', () => {
-      const anim = createAnim({}, {duration: 1001});
+    it('should NOT resume when visible if trigger!=visibility', function* () {
+      const anim = yield createAnim({}, {duration: 1001});
       const startStub = sandbox.stub(anim, 'startOrResume_');
       anim.activate();
       expect(anim.triggered_).to.be.true;
