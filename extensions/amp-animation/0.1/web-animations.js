@@ -118,7 +118,7 @@ export class WebAnimationRunner {
   }
 
   /**
-   * Initialized the players but does not change the state
+   * Initializes the players but does not change the state.
    */
   init() {
     dev().assert(!this.players_);
@@ -208,7 +208,7 @@ export class WebAnimationRunner {
     dev().assert(percent >= 0 && percent <= 1);
     const totalDuration = this.getTotalDuration_();
     user().assert(isFinite(totalDuration), 'Animation has infinite timeline,' +
-        'it can not seek to a relative position withing an infinite timeline.' +
+        ' we can not seek to a relative position within an infinite timeline.' +
         ' Use "time" for seekTo or remove infinite iterations');
 
     const time = totalDuration * percent;

@@ -115,7 +115,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 
   /**
-   * Dispacthes the `enter` event
+   * Dispatches the `enter` event
    * @private
    */
   triggerEnter_() {

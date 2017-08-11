@@ -1549,7 +1549,7 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     return style;
   }
 
-  it('should call init on all animations and stay in PAUSED state', () => {
+  it('should call init on all animations and stay in IDLE state', () => {
     target1Mock.expects('animate')
         .withExactArgs(keyframes1, timing1)
         .returns(anim1)
