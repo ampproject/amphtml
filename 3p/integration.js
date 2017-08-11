@@ -537,18 +537,18 @@ function installContextUsingStandardImpl(win, data) {
     tagName: contextState.tagName,
 
     // read from iframe name
-    data: data,
+    data,
     location: getLocation(),
 
     // locally defined APIs
     addContextToIframe: iframe => { iframe.name = iframeName; },
-    computeInMasterFrame: computeInMasterFrame,
-    getHtml: getHtml,
+    computeInMasterFrame,
+    getHtml,
     noContentAvailable: triggerNoContentAvailable,
-    onResizeDenied: onResizeDenied,
-    onResizeSuccess: onResizeSuccess,
+    onResizeDenied,
+    onResizeSuccess,
     renderStart: triggerRenderStart,
-    reportRenderedEntityIdentifier: reportRenderedEntityIdentifier,
+    reportRenderedEntityIdentifier,
     requestResize: triggerResizeRequest,
   };
 
