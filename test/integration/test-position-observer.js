@@ -16,7 +16,7 @@
 
 import {poll} from '../../testing/iframe';
 
-describe.configure().run('amp-position-observer', function() {
+describe.configure().skipSauceLabs().run('amp-position-observer', function() {
   this.timeout(100000);
 
   const css = `
@@ -205,3 +205,5 @@ function ensureOpacityIsNoChangingAnymore(win) {
 function getViewportHeight(win) {
   return win.document.querySelector('.spacer').offsetHeight;
 };
+
+//TODO(aghasemi, #10877): in-a-box, FIE integration tests.
