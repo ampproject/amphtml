@@ -100,17 +100,18 @@ export class CustomControls {
    */
   createFullscreenBtn_() {
     const doc = this.ampdoc_.win.document;
-    const fullscreenBtnWrap = doc.createElement('amp-custom-ctrls-fullscreen');
-    const fullscreenBtn = this.createIcon_('fullscreen');
-    fullscreenBtnWrap.appendChild(fullscreenBtn);
-    listen(fullscreenBtnWrap, 'click', () => {
+    const fsBtnWrap = doc.createElement('amp-custom-ctrls-icon-wrapper');
+    fsBtnWrap.classList.add('amp-custom-ctrls-fullscreen');
+    const fsBtn = this.createIcon_('fullscreen');
+    fsBtnWrap.appendChild(fsBtn);
+    listen(fsBtnWrap, 'click', () => {
       if (this.entry_.video.isFullscreen()) {
         this.entry_.video.fullscreenExit();
       } else {
         this.entry_.video.fullscreenEnter();
       }
     });
-    return fullscreenBtnWrap;
+    return fsBtnWrap;
   }
 
   /**
@@ -127,7 +128,8 @@ export class CustomControls {
     volumeSlider.setAttribute('max', '100');
     volumeSlider.setAttribute('value', '30');
     volumeSlider.classList.add('amp-custom-ctrls-volume-indicator');
-    const muteBtnWrap = doc.createElement('amp-custom-ctrls-mute');
+    const muteBtnWrap = doc.createElement('amp-custom-ctrls-icon-wrapper');
+    muteBtnWrap.classList.add('amp-custom-ctrls-mute');
     const muteBtn = this.createIcon_(
         this.entry_.isMuted() ? 'mute' : 'volume-max'
     );
@@ -172,7 +174,8 @@ export class CustomControls {
    */
   createPlayPauseBtn_(loadingElement) {
     const doc = this.ampdoc_.win.document;
-    const playpauseBtnWrap = doc.createElement('amp-custom-ctrls-playpause');
+    const playpauseBtnWrap = doc.createElement('amp-custom-ctrls-icon-wrapper');
+    playpauseBtnWrap.classList.add('amp-custom-ctrls-playpause');
     const playpauseBtn = this.createIcon_('play');
     playpauseBtnWrap.appendChild(playpauseBtn);
     if (loadingElement == 'self') {
@@ -213,14 +216,14 @@ export class CustomControls {
   createProgressTime_() {
     const doc = this.ampdoc_.win.document;
     const progressTime = doc.createElement('amp-custom-ctrls-progress-time');
-    progressTime.innerText = '0:00 / 0:00';
+    progressTime./*OK*/innerText = '0:00 / 0:00';
     // Update played time
     const updateProgress = () => {
       const current = this.entry_.video.getCurrentTime() || 0;
       const currentFormatted = formatTime(current);
       const total = this.entry_.video.getDuration() || 0;
       const totalFormatted = formatTime(total);
-      progressTime.innerText = currentFormatted + ' / ' + totalFormatted;
+      progressTime./*OK*/innerText = currentFormatted + ' / ' + totalFormatted;
     };
 
     [VideoEvents.TIME_UPDATE, VideoEvents.LOAD].forEach(e => {
@@ -246,11 +249,15 @@ export class CustomControls {
     totalBar.appendChild(currentBar);
     totalBar.appendChild(scrubber);
     progressBar.appendChild(totalBar);
+    let size = null;
     // Seek
     listen(totalBar, 'click', e => {
       // TODO(@wassgha) Seek when implemented
-      const left = progressBar.offsetLeft;
-      const total = progressBar.offsetWidth;
+      if (!size) {
+        size = progressBar./*OK*/getBoundingClientRect();
+      }
+      const left = size.left;
+      const total = size.width;
       const newPercent = Math.min(100,
           Math.max(0, 100 * (e.clientX - left) / total)
       );
@@ -274,12 +281,15 @@ export class CustomControls {
     ['mousemove', 'touchmove'].forEach(event => {
       listen(doc, event, e => {
         // TODO(@wassgha) Seek when implemented
-        scrubberDragging = scrubberTouched;
-        const left = progressBar.offsetLeft;
-        const total = progressBar.offsetWidth;
+        if (!size) {
+          size = progressBar./*OK*/getBoundingClientRect();
+        }
+        const left = size.left;
+        const total = size.width;
         const newPercent = Math.min(100,
             Math.max(0, 100 * (e.clientX - left) / total)
         );
+        scrubberDragging = scrubberTouched;
         if (scrubberDragging) {
           st.setStyles(scrubber, {
             'left': st.percent(newPercent),

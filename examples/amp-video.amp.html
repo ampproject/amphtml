@@ -60,6 +60,7 @@
      a proper poster, artist, album and title.
   </p>
   <amp-video
+    autoplay
     title="Big Buck Bunny"
     artist="Blender Foundation"
     poster="img/bigbuckbunny.jpg"
@@ -68,7 +69,7 @@
     width="720"
     height="405"
     layout="responsive"
-    custom-ctrls>
+    controls>
   </amp-video>
 
   <h2>Autoplay</h2>
@@ -79,6 +80,26 @@
     height="405"
     layout="responsive"
     controls>
+  </amp-video>
+
+  <h2>Custom Controls</h2>
+  <p>
+     Custom controls replace native controls and can be customized through CSS.
+  </p>
+  <amp-video
+    custom-ctrls
+    custom-ctrls-skin = "light"
+    custom-ctrls-main = "time spacer volume fullscreen"
+    custom-ctrls-mini = "play volume fullscreen"
+    custom-ctrls-floating = "play"
+    title="Big Buck Bunny"
+    artist="Blender Foundation"
+    poster="img/bigbuckbunny.jpg"
+    album="The Peach Open Movie Project"
+    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+    width="720"
+    height="405"
+    layout="responsive">
   </amp-video>
   <div class="spacer"></div>
 </body>
