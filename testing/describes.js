@@ -469,7 +469,7 @@ class IntegrationFixture {
   /** @override */
   teardown(env) {
     if (env.iframe.parentNode) {
-      //env.iframe.parentNode.removeChild(env.iframe);
+      env.iframe.parentNode.removeChild(env.iframe);
     }
   }
 }
