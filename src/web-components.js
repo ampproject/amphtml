@@ -49,24 +49,23 @@ export function isShadowDomSupported() {
 
 /**
  * Returns `true` if Shadow CSS encapsulation is supported.
+ * @param {!Element} shadowRoot - a shadowRoot element created by createShadowRoot in shadowEmbed.js
  * @return {boolean}
  */
-export function isShadowCssSupported() {
+export function isShadowCssSupported(shadowRoot) {
   if (!isShadowDomSupported()) {
     return false;
   }
 
   // DO NOT SUBMIT
   //TODO: Find a better way to test CSS encapsulation
-  // Currently, just checks if we Loaded ShadyCSS, and if the browser is not chrome
-  if (!!!window.chrome && window.ShadyCSS) {
-    console.log('Shady Css is detected,\
-    and chrome is not currently detected. Shadow Css not supported');
+  if (shadowRoot.toString() !== '[object ShadowRoot]') {
+    console.log(`Shadow Root is not a Shadow Root Object,
+    Shadow Css not supported`);
     return false;
   }
 
-  console.log('No Shady Css, or the browser is chrome...');
-
+  console.log('Shadow Root is a Shadow Root Object, Shadow Css is supported');
   return true;
 }
 

@@ -79,9 +79,11 @@ export function createShadowRoot(hostElement) {
   }
 
   // Ensure that Shadow CSS is supported, and add an id if not
-  if (!isShadowCssSupported()) {
-    const randomId = Math.floor(Math.random() * 10000);
-    shadowRoot.id = `i-amphtml-sd-${randomId}`;
+  const randomId = Math.floor(Math.random() * 10000);
+  const rootId = `i-amphtml-sd-${randomId}`;
+  if (!isShadowDomSupported() || !isShadowCssSupported(shadowRoot)) {
+    shadowRoot.id = rootId;
+    shadowRoot.host.classList.add(rootId);
   }
 
   return shadowRoot;
@@ -190,7 +192,7 @@ export function getShadowRootNode(node) {
 export function importShadowBody(shadowRoot, body, deep) {
   const doc = shadowRoot.ownerDocument;
   let resultBody;
-  if (isShadowCssSupported()) {
+  if (isShadowCssSupported(shadowRoot)) {
     resultBody = dev().assertElement(doc.importNode(body, deep));
   } else {
     resultBody = doc.createElement('amp-body');
@@ -225,7 +227,7 @@ export function importShadowBody(shadowRoot, body, deep) {
  * @return {string}
  */
 export function transformShadowCss(shadowRoot, css) {
-  if (isShadowCssSupported()) {
+  if (isShadowCssSupported(shadowRoot)) {
     return css;
   }
   return scopeShadowCss(shadowRoot, css);
@@ -236,7 +238,7 @@ export function transformShadowCss(shadowRoot, css) {
  * Transforms CSS to isolate AMP CSS within the shadow root and reduce the
  * possibility of high-level conflicts. There are two types of transformations:
  * 1. Root transformation: `body` -> `amp-body`, etc.
- * 2. Scoping: `a {}` -> `#i-amphtml-sd-123 a {}`.
+ * 2. Scoping: `a {}` -> `.i-amphtml-sd-123 a {}`.
  *
  * @param {!ShadowRoot} shadowRoot
  * @param {string} css
@@ -271,7 +273,7 @@ export function scopeShadowCss(shadowRoot, css) {
   // Invoke `ShadowCSS.scopeRules` via `call` because the way it uses `this`
   // internally conflicts with Closure compiler's advanced optimizations.
   const scopeRules = ShadowCSS.scopeRules;
-  return scopeRules.call(ShadowCSS, rules, `#${id}`, transformRootSelectors);
+  return scopeRules.call(ShadowCSS, rules, `.${id}`, transformRootSelectors);
 }
 
 
