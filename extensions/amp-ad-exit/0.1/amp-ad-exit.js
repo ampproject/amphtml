@@ -37,15 +37,6 @@ const TAG = 'amp-ad-exit';
  */
 let NavigationTarget;  // eslint-disable-line no-unused-vars
 
-/**
- * @typedef {{
- *   defaultValue: string,
- *   vendorAnalyticsSource: string,
- *   vendorAnalyticsResponseKey: string
- * }}
- */
-let VariableFrom3pAnalytics;  // eslint-disable-line no-unused-vars
-
 export class AmpAdExit extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -115,13 +106,14 @@ export class AmpAdExit extends AMP.BaseElement {
       for (const customVar in target.vars) {
         if (customVar[0] == '_') {
           const vals =
-              /** @type {VariableFrom3pAnalytics} */ (target.vars[customVar]);
+              /** @type {./config.Variable} */ (target.vars[customVar]);
           vars[customVar] = () => {
             if (vals.vendorAnalyticsSource) {
               const map = IframeTransportResponseMap.get(this.getAmpDoc(),
                   vals.vendorAnalyticsSource,
-                  /** @type {!string} */ (this.win.document.baseURI));
-              if (map && map[vals.vendorAnalyticsResponseKey]) {
+                  /** @type {string} */ (this.win.document.baseURI));
+              if (map && vals.vendorAnalyticsResponseKey &&
+                  map[vals.vendorAnalyticsResponseKey]) {
                 return map[vals.vendorAnalyticsResponseKey];
               }
             }

@@ -16,6 +16,7 @@
 
 /**
  * A class for holding AMP Analytics third-party vendors' responses to frames.
+ * These may be substituted into creatives' exit target URLs by amp-ad-exit.
  */
 export class IframeTransportResponseMap {
   /**
@@ -24,7 +25,8 @@ export class IframeTransportResponseMap {
    * @param {!string} frameType The identifier for the third-party frame that
    * responded
    * @param {!string} creativeUrl The URL of the creative being responded to
-   * @param {Object<string,string>} response What the response was
+   * @param {!Object<string,string>} response The response object sent from
+   * the third-party vendor's iframe
    */
   static add(ampDoc, frameType, creativeUrl, response) {
     const map = ampDoc.getIframeTransportResponses();

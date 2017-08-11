@@ -16,6 +16,7 @@
 
 import {user} from '../../../src/log';
 import {FilterType} from './filters/filter';
+import {ANALYTICS_CONFIG} from '../../amp-analytics/0.1/vendors';
 
 /**
  * @typedef {{
@@ -144,7 +145,8 @@ function assertTarget(name, target, config) {
       user().assert(
           pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
           variable, pattern);
-      // TODO(clawr): Verify vendor name?
+      const vendor = variable.substr(1);
+      user().assert(ANALYTICS_CONFIG[vendor], 'Unknown vendor: ' + vendor);
       user().assert(
           target.vars[variable]['vendorAnalyticsSource'] === undefined ||
           target.vars[variable]['vendorAnalyticsResponseKey'],
