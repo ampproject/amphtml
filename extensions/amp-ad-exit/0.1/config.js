@@ -148,9 +148,9 @@ function assertTarget(name, target, config) {
       user().assert(
           pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
           variable, pattern);
-      const vendor = config.targets.variableFrom3pAnalytics.vars[variable] &&
-          config.targets.variableFrom3pAnalytics.vars[variable]
-          .vendorAnalyticsSource;
+      const vars3p = config.targets['variableFrom3pAnalytics'];
+      const vendor = vars3p.vars[variable] &&
+          vars3p.vars[variable].vendorAnalyticsSource;
       if (getMode().test) {
         if (!ANALYTICS_CONFIG[vendor]) {
           dev().warn(TAG, 'Please add ' + vendor + ' to vendors.js!');
