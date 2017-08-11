@@ -23,7 +23,7 @@ import {
  * An interface that get the current doc position to the top level viewport via host
  * @interface
  */
-export class PosObViewportInfoDef {
+export class PosObHostInterfaceDef {
   /**
    * Connect to listen to host viewport scroll/resize event.
    */
@@ -60,10 +60,10 @@ export class PosObViewportInfoDef {
 
   /**
    * Returns the rect of the element to the top window viewport.
-   * @param {!Element} unusedElement
+   * @param {!./position-observer-entry.PositionObserverEntry} unusedEntry
    * @return {?../../layout-rect.LayoutRectDef}
    */
-  getLayoutRect(unusedElement) {}
+  getLayoutRect(unusedEntry) {}
 
   /**
    * TODO: remove after using iframeClient to make request
@@ -79,10 +79,10 @@ export class PosObViewportInfoDef {
 }
 
 /**
- * @implements {PosObViewportInfoDef}
+ * @implements {PosObHostInterfaceDef}
  * @visibleForTesting
  */
-export class PosObViewportInfoAmpDoc {
+export class PosObAmpdocHostInterface {
   constructor(ampdoc) {
     this.ampdoc = ampdoc;
     this.viewport_ = Services.viewportForDoc(ampdoc);
@@ -128,13 +128,12 @@ export class PosObViewportInfoAmpDoc {
   }
 
   /**
-   * @param {!Element} element
+   * @param {!./position-observer-entry.PositionObserverEntry} entry
    * @return {?../../layout-rect.LayoutRectDef}
    */
-  getLayoutRect(element) {
-    //return this.viewport_.getLayoutRect(element);
+  getLayoutRect(entry) {
     return layoutRectFromDomRect(
-        element./*OK*/getBoundingClientRect());
+        entry.element./*OK*/getBoundingClientRect());
   }
 
   /**

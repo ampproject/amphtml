@@ -21,8 +21,8 @@ import {
   PositionObserverFidelity,
 } from '../../src/service/position-observer/position-observer-fidelity';
 import {
-  PosObViewportInfoAmpDoc,
-} from '../../src/service/position-observer/position-observer-viewport-info';
+  PosObAmpdocHostInterface,
+} from '../../src/service/position-observer/position-observer-host-interface';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {Services} from '../../src/services';
 import {setStyles} from '../../src/style';
@@ -38,19 +38,19 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
 
   describe('PositionObserver for AMP doc', () => {
     let posOb;
-    let posObViewportInfo;
+    let host;
     let elem;
     let elem1;
     let clock;
     beforeEach(() => {
-      posObViewportInfo = new PosObViewportInfoAmpDoc(ampdoc);
+      host = new PosObAmpdocHostInterface(ampdoc);
       const vsync = Services.vsyncFor(ampdoc.win);
       clock = lolex.install(win);
       sandbox.stub(vsync, 'measure', callback => {
         win.setTimeout(callback, 1);
       });
       posOb = new PositionObserver(
-          win, Services.vsyncFor(ampdoc.win), posObViewportInfo);
+          win, Services.vsyncFor(ampdoc.win), host);
       elem = win.document.createElement('div');
       win.document.body.appendChild(elem);
       setStyles(elem, {

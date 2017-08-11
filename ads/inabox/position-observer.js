@@ -22,14 +22,14 @@ import {
 import {Observable} from '../../src/observable';
 import {throttle} from '../../src/utils/rate-limit';
 import {
-  PosObViewportInfoDef,
-} from '../../src/service/position-observer/position-observer-viewport-info';
+  PosObHostInterfaceDef,
+} from '../../src/service/position-observer/position-observer-host-interface';
 
 
 /**
- * @implements {PosObViewportInfoDef}
+ * @implements {PosObHostInterfaceDef}
  */
-export class PosObViewportInfoNonAmpHost {
+export class PosObNonAmpHostInterface {
   constructor(win) {
     this.win_ = win;
     this.scrollObservable_ = new Observable();
@@ -67,8 +67,8 @@ export class PosObViewportInfoNonAmpHost {
     };
   }
 
-  getLayoutRect(element) {
-    return layoutRectFromDomRect(element./*OK*/getBoundingClientRect());
+  getLayoutRect(entry) {
+    return layoutRectFromDomRect(entry.element./*OK*/getBoundingClientRect());
   }
 
   getSentinel() {}

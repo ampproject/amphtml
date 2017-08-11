@@ -16,7 +16,10 @@
 
 import {Services} from '../../src/services';
 import {registerServiceBuilderForDoc} from '../../src/service';
-import {moveLayoutRect} from '../../src/layout-rect';
+import {
+  moveLayoutRect,
+  layoutRectFromDomRect,
+} from '../../src/layout-rect';
 import {
   serializeMessage,
   MessageType,
@@ -24,16 +27,16 @@ import {
 import {tryParseJson} from '../../src/json.js';
 import {Observable} from '../../src/observable';
 import {
-  PosObViewportInfoDef,
-} from '../service/position-observer/position-observer-viewport-info';
+  PosObHostInterfaceDef,
+} from '../service/position-observer/position-observer-host-interface';
 import {
   PositionObserver,
 } from '../service/position-observer/position-observer-impl';
 
 /**
- * @implements {PosObViewportInfoDef}
+ * @implements {PosObHostInterfaceDef}
  */
-class PosObViewportInfoInabox {
+class PosObInaboxHostInterface {
   /**
    * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
    */
@@ -101,20 +104,21 @@ class PosObViewportInfoInabox {
   }
 
   /**
-   * @param {!Element} element
+   * @param {!../service/position-observer/position-observer-entry.PositionObserverEntry} entry
    */
-  getLayoutRect(element) {
+  getLayoutRect(entry) {
     if (!this.iframePosition_) {
       // If not receive iframe position from host, or if iframe is outside vp
       return null;
     }
-    if (!element['inIframePositionRect']) {
+    if (!entry.inIframePositionRect) {
       // Not receive element position in iframe from ampDocPositionObserver
-      element['inIframePositionRect'] = element./*OK*/getBoundingClientRect();
+      entry.inIframePositionRect =
+          layoutRectFromDomRect(entry.element./*OK*/getBoundingClientRect());
     }
 
     const iframeBox = this.iframePosition_;
-    const elementBox = element['inIframePositionRect'];
+    const elementBox = entry.inIframePositionRect;
     return moveLayoutRect(elementBox, iframeBox.left, iframeBox.top);
   }
 
@@ -140,11 +144,11 @@ class PosObViewportInfoInabox {
  */
 export function installInaboxPositionObserver(ampdoc) {
   const vsync = Services.vsyncFor(ampdoc.win);
-  const viewportInfo = new PosObViewportInfoInabox(ampdoc);
+  const host = new PosObInaboxHostInterface(ampdoc);
   registerServiceBuilderForDoc(ampdoc,
       'position-observer',
       function() {
-        return new PositionObserver(ampdoc.win, vsync, viewportInfo);
+        return new PositionObserver(ampdoc.win, vsync, host);
       },
       /* opt_instantiate */ true);
 }

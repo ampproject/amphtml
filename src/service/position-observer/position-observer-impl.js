@@ -24,8 +24,8 @@ import {debounce} from '../../utils/rate-limit';
 import {MessageType} from '../../3p-frame-messaging';
 import {PositionObserverEntry} from './position-observer-entry';
 import {
-  PosObViewportInfoAmpDoc,
-} from './position-observer-viewport-info';
+  PosObAmpdocHostInterface,
+} from './position-observer-host-interface';
 import {
   PositionObserverFidelity,
   LOW_FIDELITY_FRAME_COUNT,
@@ -41,9 +41,9 @@ export class PositionObserver {
   /**
    * @param {!Window} win
    * @param {!../vsync-impl.Vsync} vsync
-   * @param {!./position-observer-viewport-info.PosObViewportInfoDef} posObViewportInfo
+   * @param {!./position-observer-host-interface.PosObHostInterfaceDef} host
    */
-  constructor(win, vsync, posObViewportInfo) {
+  constructor(win, vsync, host) {
     /** @private {!Window} */
     this.win_ = win;
 
@@ -53,8 +53,8 @@ export class PositionObserver {
     /** @private {!../vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
-    /** @private {!./position-observer-viewport-info.PosObViewportInfoDef} */
-    this.viewport_ = posObViewportInfo;
+    /** @private {!./position-observer-host-interface.PosObHostInterfaceDef} */
+    this.host_ = host;
 
     /** @private {Array<function()>} */
     this.unlisteners_ = [];
@@ -114,15 +114,15 @@ export class PositionObserver {
    * @private
    */
   startCallback_() {
-    this.viewport_.connect();
+    this.host_.connect();
     // listen to viewport scroll event to help pass determine if need to
-    this.unlisteners_.push(this.viewport_.onScroll(() => {
+    this.unlisteners_.push(this.host_.onScroll(() => {
       this.onScrollHandler_();
     }));
-    this.unlisteners_.push(this.viewport_.onResize(() => {
+    this.unlisteners_.push(this.host_.onResize(() => {
       this.onResizeHandler_();
     }));
-    this.unlisteners_.push(this.viewport_.onHostMessage(event => {
+    this.unlisteners_.push(this.host_.onHostMessage(event => {
       this.onHostMessageHandler_(event);
     }));
   }
@@ -132,7 +132,7 @@ export class PositionObserver {
    * @private
    */
   stopCallback_() {
-    this.viewport_.disconnect();
+    this.host_.disconnect();
     while (this.unlisteners_.length) {
       const unlisten = this.unlisteners_.pop();
       unlisten();
@@ -166,7 +166,7 @@ export class PositionObserver {
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
       if (this.needRefreshInIframePos_) {
-        entry.element['inIframePositionRect'] = null;
+        entry.inIframePositionRect = null;
       }
 
       if (opt_force) {
@@ -188,14 +188,14 @@ export class PositionObserver {
   /**
    * To update the position of single element.
    * Called when updateAllEntries, or when first observe an element.
-   * @param {!Object} entry
+   * @param {!./position-observer-entry.PositionObserverEntry} entry
    * @private
    */
   updateSingleEntry_(entry) {
     const elementBox =
-        this.viewport_.getLayoutRect(entry.element);
+        this.host_.getLayoutRect(entry);
 
-    const viewportSize = this.viewport_.getSize();
+    const viewportSize = this.host_.getSize();
     if (!elementBox || !viewportSize) {
       // Viewport is not ready yet.
       return;
@@ -248,7 +248,7 @@ export class PositionObserver {
     // Parse JSON only once per message.
     const data = parseJson(
         dev().assertString(getData(event)).substr(4));
-    if (data['sentinel'] != this.viewport_.getSentinel()) {
+    if (data['sentinel'] != this.host_.getSentinel()) {
       return;
     }
 
@@ -258,7 +258,7 @@ export class PositionObserver {
 
     const iframePosition = data;
 
-    this.viewport_.storeIframePosition(iframePosition);
+    this.host_.storeIframePosition(iframePosition);
 
     // do this in vsyn.measure
     this.vsync_.measure(() => {
@@ -296,7 +296,7 @@ export class PositionObserver {
 export function installPositionObserverServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'position-observer', () => {
     const vsync = Services.vsyncFor(ampdoc.win);
-    const viewportInfo = new PosObViewportInfoAmpDoc(ampdoc);
-    return new PositionObserver(ampdoc.win, vsync, viewportInfo);
+    const host = new PosObAmpdocHostInterface(ampdoc);
+    return new PositionObserver(ampdoc.win, vsync, host);
   });
 }

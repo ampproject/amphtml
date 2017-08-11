@@ -59,6 +59,9 @@ export class PositionObserverEntry {
 
     /** @type {?PositionInViewportEntryDef} */
     this.position = null;
+
+    /** @type {?../../layout-rect.LayoutRectDef} */
+    this.inIframePositionRect = null;
   }
 
   /**
