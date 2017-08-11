@@ -19,6 +19,17 @@ const app = module.exports = require('express').Router();
 
 app.use('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
+  const mode = process.env.SERVE_MODE == 'compiled' ? '' : 'max.';
+  const extensions = req.query.extensions;
+  let extensionScripts = '';
+  if (!!extensions) {
+    extensionScripts = extensions.split(',').map(function(extension) {
+      return '<script async custom-element="'
+              + extension + '" src=/dist/v0/'
+              + extension + '-0.1.' + mode + 'js></script>';
+    }).join('\n');
+  }
+
   const experiments = req.query.experiments;
   let metaTag = '';
   let experimentString = '';
@@ -43,6 +54,7 @@ app.use('/compose-doc', function(req, res) {
   </script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="/dist/${process.env.SERVE_MODE == 'compiled' ? 'v0' : 'amp'}.js"></script>
+  ${extensionScripts}
 </head>
 <body>
 ${req.query.body}
