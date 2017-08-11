@@ -236,7 +236,7 @@ tags: {
                  "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
                  "https://cloud\\.typography\\.com/"
                  "[0-9]*/[0-9]*/css/fonts\\.css|"
-                 "https://(use|p)\\.typekit\\.net/\\w+\\.css"
+                 "https://use\\.typekit\\.net/\\w+\\.css"
   }
   attrs: {
     name: "rel"
