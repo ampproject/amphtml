@@ -101,103 +101,78 @@ AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 
 #### upgradeCallback
 
-**Default**: Does nothing
-
-**Override**: Rarely.
-
-**[Vsync](https://github.com/ampproject/amphtml/blob/master/src/service/vsync-impl.js#L44) Context**: None
-
-**Usage**: If your extension provides different implementations
+- **Default**: Does nothing
+- **Override**: Rarely.
+- **[Vsync](https://github.com/ampproject/amphtml/blob/master/src/service/vsync-impl.js#L44) Context**: None
+- **Usage**: If your extension provides different implementations
 depending on a late runtime condition (e.g. type attribute on the
 element, platform)
-
-**Example Usage**: amp-ad, amp-app-banner
+- **Example Usage**: amp-ad, amp-app-banner
 
 #### buildCallback
 
-**Default**: Does nothing
-
-**Override**: Almost always
-
-**Vsync Context**: Mutate
-
-**Usage**: If your element has UI elements this is where you should
+- **Default**: Does nothing
+- **Override**: Almost always
+- **Vsync Context**: Mutate
+- **Usage**: If your element has UI elements this is where you should
 create your DOM structure and append it to the element. You can also
 read the attributes (e.g. width, height…) the user provided on your
 element in this callback.
-
-**Warning**: Don’t load remote resources during the buildCallback. This
+- **Warning**: Don’t load remote resources during the buildCallback. This
 only circumvents the AMP resources manager, but it will also lead to
 higher data charges for users because all these resources will be loaded
 before layouting needs to happen.
-
-**Warning 2**: Do the least needed work here, and don’t build DOM that
+- **Warning 2**: Do the least needed work here, and don’t build DOM that
 is not needed at this point.
 
 #### preconnectCallback
 
-**Default**: Does nothing.
-
-**Vsync Context**: None (Neither mutate nor measure)
-
-**Override**: Sometimes, if your element will be loading remote
+- **Default**: Does nothing.
+- **Vsync Context**: None (Neither mutate nor measure)
+- **Override**: Sometimes, if your element will be loading remote
 resources.
-
-**Usage**: Use to instruct AMP which hosts to preconnect to and which
+- **Usage**: Use to instruct AMP which hosts to preconnect to and which
 resources to preload/prefetch this allows AMP to delegate to the browser
 to get a performance boost by preconnecting, preloading and prefetching
 resources via preconnect service.
-
-**Example Usage**: [Instagram uses this to
+- **Example Usage**: [Instagram uses this to
 preconnect](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/0.1/amp-instagram.js#L46)
 to instagram hosts.
 
 #### createPlaceholderCallback
 
-**Default**: Does nothing.
-
-**Vsync Context**: Mutate
-
-**Override**: Sometimes. If your component provides a way to dynamically
+- **Default**: Does nothing.
+- **Vsync Context**: Mutate
+- **Override**: Sometimes. If your component provides a way to dynamically
 create a lightweight placeholder. This gets called only if the element
 doesn’t already have a publisher-provided placeholder (through [the
 placeholder
 attribute](https://github.com/ampproject/amphtml/blob/c44a48fbb1dbd0de0b5a9e20f8f69bb920705dde/spec/amp-html-layout.md#placeholder)).
-
-**Usage**: Create placeholder DOM and return it. For example,
+- **Usage**: Create placeholder DOM and return it. For example,
 amp-instagram uses this to create a placeholder dynamically by creating
 an amp-img placeholder instead of loading the iframe, leaving the iframe
 loading to layoutCallback.
-
-**Warning**: Only use amp-elements for creating placeholders that
+- **Warning**: Only use amp-elements for creating placeholders that
 require external resource loading. This allows runtime to create this
 early but still defer the resource loading and management to AMP
 resources manager. Don’t create or load heavyweight resources (e.g.
 iframe…).
-
-**Example Usage**: amp-instagram.
+- **Example Usage**: amp-instagram.
 
 #### onLayoutMeasure
 
-**Default**: Does nothing.
-
-**Vsync Context**: Measure.
-
-**Override**: Rarely.
-
-**Usage**: Use to measure layouts for your element.
-
-**Example Usage**: amp-iframe
+- **Default**: Does nothing.
+- **Vsync Context**: Measure.
+- **Override**: Rarely.
+- **Usage**: Use to measure layouts for your element.
+- **Example Usage**: amp-iframe
 
 #### layoutCallback
 
-**Default**: Does nothing.
-
-**Vsync Context**: Mutate
-
-**Override**: Almost always.
-
-**Usage**: Use this to actually render the final version of your
+- **Default**: Does nothing.
+- **Vsync Context**: Mutate
+- **Override**: Almost always.
+- **Usage**: Use this to actually render the final version of your
 element. If the element should load a video, this is where you load the
 video. This needs to return a promise that resolves when the element is
 considered “laid out” - usually this means load event has fired but can
@@ -211,85 +186,61 @@ sends to resolve the layoutCallback promise.
 
 #### firstLayoutCompleted
 
-**Default**: Hide element’s placeholder.
-
-**Vsync Context**: Mutate
-
-**Override**: Sometimes. If you’d like to override default behavior and
+- **Default**: Hide element’s placeholder.
+- **Vsync Context**: Mutate
+- **Override**: Sometimes. If you’d like to override default behavior and
 not hide the placeholder when the element is considered first laid out.
 Sometimes you wanna control when to hide the placeholder.
-
-**Example Usage**: amp-anim
+- **Example Usage**: amp-anim
 
 #### pauseCallback
 
-**Default**: Does nothing.
-
-**Vsync Context**: Mutate
-
-**Called**: When you swipe away from a document in a viewer. Called on
+- **Default**: Does nothing.
+- **Vsync Context**: Mutate
+- **Called**: When you swipe away from a document in a viewer. Called on
 children of lightbox when you close a lightbox instance, called on
 carousel children when the slide is not the active slide. And possibly
 other places.
-
-**Override**: Sometimes. Most likely if you’re building a player.
-
-**Usage**: Use to pause video, slideshow auto-advance...etc
-
-**Example Usage**: amp-video, amp-youtube
+- **Override**: Sometimes. Most likely if you’re building a player.
+- **Usage**: Use to pause video, slideshow auto-advance...etc
+- **Example Usage**: amp-video, amp-youtube
 
 #### resumeCallback
 
-**Default**: Does nothing.
-
-**Vsync Context**: Mutate
-
-**Override**: Sometimes.
-
-**Usage**: Use to restart the slideshow auto-advance.
-
-**Note**: This is not used widely yet because it’s not possible to
+- **Default**: Does nothing.
+- **Vsync Context**: Mutate
+- **Override**: Sometimes.
+- **Usage**: Use to restart the slideshow auto-advance.
+- **Note**: This is not used widely yet because it’s not possible to
 resume video playback for example on mobile.
 
 #### unlayoutOnPause
 
-**Default**: Returns false.
-
-**Vsync Context**: Mutate
-
-**Override**: If your element doesn’t provide a pausing mechanism,
+- **Default**: Returns false.
+- **Vsync Context**: Mutate
+- **Override**: If your element doesn’t provide a pausing mechanism,
 instead override this to unlayout the element when AMP tries to pause
 it.
-
-**Return**: True if you want unlayoutCallback to be called when paused.
-
-**Usage Example**: amp-brightcove
+- **Return**: True if you want unlayoutCallback to be called when paused.
+- **Usage Example**: amp-brightcove
 
 #### unlayoutCallback
 
-**Default**: Does nothing.
-
-**Vsync Context**: Mutate
-
-**Override**: Sometimes.
-
-**Usage**: Use to remove and unload heavyweight resources like iframes,
+- **Default**: Does nothing.
+- **Vsync Context**: Mutate
+- **Override**: Sometimes.
+- **Usage**: Use to remove and unload heavyweight resources like iframes,
 video, audio and others that your element has created.
-
-**Return**: **True** if your element need to re-layout.
-
-**Usage Example**: amp-iframe
+- **Return**: **True** if your element need to re-layout.
+- **Usage Example**: amp-iframe
 
 #### viewportCallback
 
-**Default**: Does nothing.
-
-**Override**: Rarely.
-
-**Usage**: Use if your element need to know when it comes into viewport
+- **Default**: Does nothing.
+- **Override**: Rarely.
+- **Usage**: Use if your element need to know when it comes into viewport
 and when it goes out of it for finer control.
-
-**Usage Example**: amp-carousel, amp-anim
+- **Usage Example**: amp-carousel, amp-anim
 
 ## Element styling
 
