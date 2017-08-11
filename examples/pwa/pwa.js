@@ -220,8 +220,11 @@ class AmpViewer {
     /** @private @const {...} */
     this.amp_ = null;
 
-    // Immediately install amp-shadow.js.
-    this.installScript_('/dist/amp-shadow.js');
+    // Install amp-shadow once our 3P polyfills are ready
+    this.win.addEventListener('WebComponentsReady', () => {
+      console.log('Web Components are ready');
+      this.installScript_('/dist/amp-shadow.js');
+    });
   }
 
   /**

@@ -11,32 +11,7 @@
     if (window.location.pathname.indexOf('/examples') == 0) {
       window.location.assign('/pwa');
     }
-
-    function loadScript(url, callback) {
-        var script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = url;
-
-        // Then bind the event to the callback function.
-        // There are several events for cross browser compatibility.
-        script.onreadystatechange = callback;
-        script.onload = callback;
-
-        document.head.appendChild(script);
-    }
-
-    // Using this explicitly, as firefox errors due to our polyfills
-    loadScript("https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.3/webcomponents-sd-ce.js", function() {
-      console.log('Started loading webcomponents polyfill!');
-    });
-
-    setTimeout(function() {
-      loadScript("/pwa/pwa.js", function() {
-        console.log('Started loading pwa.js!');
-      });
-    }, 2000);
   </script>
-
   <style>
     body {
       margin: 0;
@@ -60,7 +35,8 @@
 
     .container {
       min-height: 100vh;
-      /*background: #eee;*/
+      /* DO NOT SUBMIT */
+      /* background: #eee; */
       overflow: hidden;
     }
 
@@ -146,5 +122,8 @@
       </div>
     </template>
   </div>
+  <!-- Must be in the very end. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.3/webcomponents-sd-ce.js"></script>
+  <script src="/pwa/pwa.js"></script>
 </body>
 </html>

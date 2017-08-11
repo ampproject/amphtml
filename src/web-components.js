@@ -56,6 +56,7 @@ export function isShadowCssSupported() {
     return false;
   }
 
+  // DO NOT SUBMIT
   //TODO: Find a better way to test CSS encapsulation
   // Currently, just checks if we Loaded ShadyCSS, and if the browser is not chrome
   if (!!!window.chrome && window.ShadyCSS) {
