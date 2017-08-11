@@ -593,6 +593,13 @@ export class MeasureScanner extends Scanner {
   onKeyframeAnimation(spec) {
     this.with_(spec, () => {
       const target = user().assertElement(this.target_, 'No target specified');
+      if (spec && spec.ticker) {
+        user().error('Experimental `ticker` property has been removed. ' +
+          'For scroll-bound animations, please see the new approach at ' +
+          'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+          'amp-position-observer/amp-position-observer.md'
+        );
+      }
       const keyframes = this.createKeyframes_(target, spec);
       this.requests_.push({
         target,

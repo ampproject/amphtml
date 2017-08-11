@@ -198,7 +198,19 @@ describes.sandboxed('AmpAnimation', {}, () => {
       // Go to hidden state.
       viewer.setVisibilityState_('hidden');
       expect(pauseStub).to.be.calledOnce;
-      expect(startStub).to.be.calledOnce;  // Doesn't chnage.
+      expect(startStub).to.be.calledOnce;  // Doesn't change.
+    });
+
+    it('should NOT resume when visible if "trigger != visibility"', () => {
+      const anim = createAnim({trigger: ''}, {duration: 1001});
+      const startStub = sandbox.stub(anim, 'startOrResume_');
+      anim.activate();
+      expect(anim.triggered_).to.be.true;
+
+      // Go to visible state. Start should not get called since
+      // user specified `trigger` was not `visibility`
+      viewer.setVisibilityState_('visible');
+      expect(startStub).to.not.be.called;
     });
 
     it('should NOT resume/pause when visible, but not triggered', () => {

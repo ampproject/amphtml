@@ -18,6 +18,7 @@ import {ActionTrust} from '../../../src/action-trust';
 import {getServiceForDoc} from '../../../src/service';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
+import {isExperimentOn} from '../../../src/experiments';
 import {dev, user} from '../../../src/log';
 import {
   RelativePositions,
@@ -92,6 +93,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    user().assert(isExperimentOn(this.win, TAG), `${TAG} experiment is off.`);
     // Since this is a functional component and not visual,
     // layoutCallback is meaningless. We delay the heavy work until
     // we become visible.
@@ -371,4 +373,4 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-position-observer', AmpVisibilityObserver);
+AMP.registerElement(TAG, AmpVisibilityObserver);
