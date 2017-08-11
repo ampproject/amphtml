@@ -41,7 +41,7 @@ limitations under the License.
 
 `amp-iframe` has several important differences from vanilla iframes that are designed to make it more secure and avoid AMP files that are dominated by a single iframe:
 
-- An `amp-iframe` may not appear close to the top of the document (except for iframes that use `placeholder` as described [below](#iframe-with-placeholder)). The iframe must be either 600 px away from the top or not within the first 75% of the viewport when scrolled to the top, whichever is smaller. 
+- An `amp-iframe` may not appear close to the top of the document (except for iframes that use `placeholder` as described [below](#iframe-with-placeholder)). The iframe must be either 600 px away from the top or not within the first 75% of the viewport when scrolled to the top, whichever is smaller.
 - By default, an amp-iframe is sandboxed (see [details](#sandbox)).
 - An `amp-iframe` must only request resources via HTTPS, from a data-URI, or via the `srcdoc` attribute.
 - An `amp-iframe` must not be in the same origin as the container unless they do not allow `allow-same-origin` in the `sandbox` attribute. See the ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) doc for further details on allowed origins for iframes.
@@ -57,7 +57,7 @@ limitations under the License.
 </amp-iframe>
 ```
 
-Renders as: 
+Renders as:
 
 <amp-iframe width="200" height="100"
     sandbox="allow-scripts allow-same-origin"
@@ -224,6 +224,46 @@ We strongly recommend using [`amp-analytics`](../amp-analytics/amp-analytics.md)
 AMP only allows a single iframe that is used for analytics and tracking purposes, per page. To conserve resources, these iframes will be removed from the DOM 5 seconds after they loaded, which should be sufficient time to complete whatever work is needed to be done.
 
 Iframes are identified as tracking/analytics iframes if they appear to serve no direct user purpose such as being invisible or small.
+
+## Substitutions
+
+The `amp-iframe` allows all standard URL variable substitutions for `src`.
+See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more information.
+
+In the following example, a request might be made to something like `https://foo.com/pixel?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
+
+```html
+<amp-iframe src="https://foo.com/pixel?RANDOM"></amp-iframe>
+```
+
+Allowed substitutions:
+  - `RANDOM`
+  - `CANONICAL_URL`
+  - `CANONICAL_HOST`
+  - `CANONICAL_HOSTNAME`
+  - `CANONICAL_PATH`
+  - `DOCUMENT_REFERRER`
+  - `AMPDOC_URL`
+  - `AMPDOC_HOST`
+  - `AMPDOC_HOSTNAME`
+  - `SOURCE_URL`
+  - `SOURCE_HOST`
+  - `SOURCE_HOSTNAME`
+  - `SOURCE_PATH`
+  - `TIMESTAMP`
+  - `TIMEZONE`
+  - `VIEWPORT_HEIGHT`
+  - `VIEWPORT_WIDTH`
+  - `SCREEN_WIDTH`
+  - `SCREEN_HEIGHT`
+  - `AVAILABLE_SCREEN_HEIGHT`
+  - `AVAILABLE_SCREEN_WIDTH`
+  - `SCREEN_COLOR_DEPTH`
+  - `DOCUMENT_CHARSET`
+  - `BROWSER_LANGUAGE`
+  - `AMP_VERSION`
+  - `BACKGROUND_STATE`
+  - `USER_AGENT`
 
 ## Guideline: Use existing AMP components over amp-iframe
 

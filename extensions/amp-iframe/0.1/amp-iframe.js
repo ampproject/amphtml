@@ -30,6 +30,7 @@ import {utf8EncodeSync} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {setStyle} from '../../../src/style';
+import {SRC_AVAILABLE_VARS} from './src-vars-whitelist';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -84,6 +85,9 @@ export class AmpIframe extends AMP.BaseElement {
      * @private {?../../../src/layout-rect.LayoutRectDef}
      */
     this.iframeLayoutBox_ = null;
+
+    /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacement_ = Services.urlReplacementsForDoc(element);
 
     /** @private  {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -156,6 +160,27 @@ export class AmpIframe extends AMP.BaseElement {
   }
 
   /**
+   * Substitutes variables in a URL.
+   * See /spec/amp-var-substitutions.md
+   *
+   * @param {?string} url
+   * @private
+   */
+  substituteVariables_(url) {
+    if (!url) {
+      return;
+    }
+
+    // Replace using whitelist (./src-vars-whitelist)
+    return this.urlReplacement_.expandUrlSync(
+        url,
+        undefined,
+        undefined,
+        SRC_AVAILABLE_VARS
+    );
+  }
+
+  /**
    * Transforms the src attribute. When possible, it adds `#amp=1` fragment
    * to indicate that the iframe is running in AMP environment.
    * @param {?string} src
@@ -171,12 +196,15 @@ export class AmpIframe extends AMP.BaseElement {
     if (url.protocol == 'data:') {
       return src;
     }
+
+    const varSubstitutedSrc = this.substituteVariables_(src);
+
     // If fragment already exists, it's not modified.
     if (url.hash && url.hash != '#') {
-      return src;
+      return varSubstitutedSrc;
     }
     // Add `#amp=1` fragment.
-    return removeFragment(src) + '#amp=1';
+    return removeFragment(varSubstitutedSrc) + '#amp=1';
   }
 
   /**
