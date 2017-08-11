@@ -202,7 +202,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
     });
 
     it('should NOT resume when visible if "trigger != visibility"', () => {
-      const anim = createAnim({trigger: ''}, {duration: 1001});
+      const anim = createAnim({}, {duration: 1001});
       const startStub = sandbox.stub(anim, 'startOrResume_');
       anim.activate();
       expect(anim.triggered_).to.be.true;
