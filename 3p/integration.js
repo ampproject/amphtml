@@ -542,7 +542,6 @@ function installContextUsingStandardImpl(win, data) {
 
     // locally defined APIs
     addContextToIframe: iframe => { iframe.name = iframeName; },
-    computeInMasterFrame,
     getHtml,
     noContentAvailable: triggerNoContentAvailable,
     onResizeDenied,
@@ -550,6 +549,11 @@ function installContextUsingStandardImpl(win, data) {
     renderStart: triggerRenderStart,
     reportRenderedEntityIdentifier,
     requestResize: triggerResizeRequest,
+
+    // Using quotes due to bug related to imported variables in object property
+    // shorthand + object shorthand lint rule.
+    // https://github.com/google/closure-compiler/issues/2219
+    'computeInMasterFrame': computeInMasterFrame,
   };
 
   // Define master related properties to be lazily read.
