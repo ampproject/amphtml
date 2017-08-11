@@ -234,7 +234,9 @@ tags: {
                  "https://fast\\.fonts\\.net/.*|"
                  "https://maxcdn\\.bootstrapcdn\\.com/font-awesome/"
                  "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
-                 "https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css"
+                 "https://cloud\\.typography\\.com/"
+                 "[0-9]*/[0-9]*/css/fonts\\.css|"
+                 "https://(use|p)\\.typekit\\.net/\\w+\\.css"
   }
   attrs: {
     name: "rel"
