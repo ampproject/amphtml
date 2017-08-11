@@ -145,9 +145,6 @@ export class Resource {
     /** @private {boolean} */
     this.isBuilding_ = false;
 
-    /** @private {boolean} */
-    this.blacklisted_ = false;
-
     /** @private {!AmpElement|undefined|null} */
     this.owner_ = undefined;
 
@@ -296,14 +293,6 @@ export class Resource {
   }
 
   /**
-   * Returns whether the resource has been blacklisted.
-   * @return {boolean}
-   */
-  isBlacklisted() {
-    return this.blacklisted_;
-  }
-
-  /**
    * Returns promise that resolves when the element has been built.
    * @return {!Promise}
    */
@@ -319,7 +308,6 @@ export class Resource {
    */
   build() {
     if (this.isBuilding_ ||
-        this.blacklisted_ ||
         !this.element.isUpgraded() ||
         !this.resources_.grantBuildPermission()) {
       return null;
@@ -341,7 +329,6 @@ export class Resource {
     }, reason => {
       dev().error(TAG, 'failed to build:', this.debugid, reason);
       this.isBuilding_ = false;
-      this.blacklisted_ = true;
       this.element.signals().rejectSignal('res-built', reason);
       throw reason;
     });
