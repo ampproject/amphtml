@@ -7,7 +7,7 @@ extension as early as you can, so we can advise on next steps or provide
 early feedback on the implementation or naming. See [CONTRIBUTING.md
 for more details](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md).
 
-## Getting Started
+## Getting started
 
 AMP can be extended to allow more functionality and components through
 building open source extensions (aka custom elements). For example, AMP
@@ -23,7 +23,7 @@ with `amp-`. Make sure to choose a proper clear name for your
 extension. For example, video players are also suffixed with `-player`
 (e.g. amp-brid-player).
 
-## Directory Structure
+## Directory structure
 
 You create your extensions’ files inside the `extensions/` directory.
 The directory structure is below:
@@ -52,7 +52,7 @@ the BaseElement Callbacks section, and are also explained inline in the
 [BaseElement](https://github.com/ampproject/amphtml/blob/master/src/base-element.js#L26)
 class.
 
-### Element Class
+### Element class
 
 The following shows the overall structure of your element implementation
 file (extensions/amp-my-element/0.1/amp-my-element.js).
@@ -97,7 +97,7 @@ class AmpMyElement extends AMP.BaseElement {
 AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 ```
 
-### BaseElement Callbacks
+### BaseElement callbacks
 
 #### upgradeCallback
 
@@ -205,7 +205,7 @@ be different from element to element. Note that load events usually are
 fired very early so if there’s another event that your element can
 listen to that have a better meaning of ready-ness, use that to resolve
 your promise instead - for example: [amp-youtube uses the
-*playerready** *event that the underlying YT Player
+playerready event that the underlying YT Player
 iframe](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/0.1/amp-youtube.js#L136)
 sends to resolve the layoutCallback promise.
 
@@ -291,7 +291,7 @@ and when it goes out of it for finer control.
 
 **Usage Example**: amp-carousel, amp-anim
 
-## Element Styling
+## Element styling
 
 You can write a stylesheet to style your element to provide a minimal
 visual appeal, your element structure should account for whether you
@@ -307,7 +307,7 @@ Class names prefixed with `-amp-` are considered private and
 publishers are not allowed to use to customize (enforced by AMP
 validator).
 
-## Register Element with AMP
+## Register element with AMP
 
 Once you have implemented your AMP element, you need to register it with
 AMP, all AMP extensions are prefixed with `amp-`. This is where you
@@ -317,7 +317,7 @@ tell AMP which class to use for this tag name and which CSS to load.
 AMP.registerElement('amp-carousel', CarouselSelector, CSS);
 ```
 
-## Element Usage Documentation and Tests
+## Element usage documentation and tests
 
 Make sure to write pretty comprehensive unit tests for your element.
 Also don’t forget to write an .md file documenting how to use this
@@ -327,7 +327,7 @@ An extra step that you can do is to write a small AMP doc inside
 examples/ directory to provide easy examples for users to preview and
 for developers to manually test and visually inspect your element.
 
-## Actions and Events
+## Actions and events
 
 AMP provides a framework for [elements to fire their own
 events](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md)
@@ -371,7 +371,7 @@ default case.
 Make sure your element documentation documents the events and actions it
 exposes.
 
-## Sub-elements Ownership
+## Sub-elements ownership
 
 AMP elements are usually discovered and scheduled by the AMP runtime
 automatically and managed through Resources. In some cases an AMP
@@ -419,7 +419,7 @@ see below). This means you need to make sure your element updates
 whether the child is in viewport and when to schedule different phases
 for the element.
 
-### Nested Sub-elements
+### Nested sub-elements
 
 Your element should anticipate its sub-elements to nest some more
 amp-elements and schedule preload or layout for these as well, otherwise
@@ -437,13 +437,13 @@ nested amp-elements that are placeholders.
 </amp-carousel>
 ```
 
-## Allowing Proper Validations
+## Allowing proper validations
 
 One of AMP’s features is that a document can be checked against
 validation rules to confirm it’s AMP-valid. When you implement your
 element, AMP validator needs to be updated to add rules for your element
 to keep documents using your element valid. In order to do that you need
-to file an issue on the github repo select “Related to: Validator” and
+to file an issue on the GitHub repo select “Related to: Validator” and
 mention what rules the validator needs to validate. This usually
 includes
 
@@ -456,9 +456,9 @@ includes
 For more details take a look at [Contributing Component Validator
 Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-validator-rules.md).
 
-## Performance Considerations
+## Performance considerations
 
-### Pre-rendering and Placeholders
+### Pre-rendering and placeholders
 
 Another enabling feature of instant-web in AMP is support for
 prerendering in a way that does not consume loads of data and does not
@@ -482,7 +482,7 @@ phase. Requests to the publisher’s origin itself are OK. If in doubt,
 please flag this in review.
 
 AMP will automatically call your element’s
-`[createPlaceholderCallback](#createplaceholdercallback)` during
+[createPlaceholderCallback](#createplaceholdercallback) during
 build step if it didn’t detect a placeholder was provided. This allows
 you to create your own placeholder. Here’s an example of how
 `amp-instagram` element used this callback to create a dynamic
@@ -535,7 +535,7 @@ instagram case above. This still allows AMP resource manager to control
 when these resources get loaded and rendered as oppose to using the
 HTML-native `img` tag which will be out of AMP resource management.
 
-#### Loading Indicators
+#### Loading indicators
 
 Consider showing a loading indicator if your element is expected to take
 a long time to load (for example, loading a GIF, video or iframe). AMP
@@ -551,7 +551,7 @@ export const LOADING_ELEMENTS_ = {
 }
 ```
 
-### Destroying Heavyweight Resources
+### Destroying heavyweight resources
 
 To stay good to our promise of lowering resources usage especially on
 mobile, elements that create and load heavyweight resources (e.g.
@@ -600,7 +600,7 @@ measure utility method that will synchronize all measuring happening in
 short period of time together and then do all the mutating in a
 requestAnimationFrame or similar cycles.
 
-### Loading External Resources
+### Loading external resources
 
 If your extension needs to load external resources (like an sdk) then
 you might need to add proper third party integration for it to work and
@@ -618,7 +618,7 @@ to be loaded in order to embed a post, instead it provides an
 iframe-based embedding allowing amp-instagram extension to use a normal
 iframe with no 3p integration needed, similarly, amp-youtube and others.
 
-## Layouts Supported in your Element
+## Layouts supported in your element
 
 AMP defines different layouts that elements can choose whether or not to
 support Your element needs to announce which layouts it supports through
@@ -628,7 +628,7 @@ System](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.m
 and [Layout
 Types](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#layout-types).
 
-### What Layout should your Element Support?
+### What layout should your element support?
 
 After understanding each layout type, if it makes sense, support all of
 them. Otherwise choose what makes sense to your element. A popular
@@ -658,8 +658,7 @@ class AmpSlides extends AMP.BaseElement {
 }
 ```
 
-Experiments
------------
+## Experiments
 
 Most newly created elements are initially launched as
 [experiments](https://github.com/ampproject/amphtml/blob/bbbb7e6dccd8159fe9f139b7c65715a4a3526754/tools/experiments/README.md).
@@ -738,7 +737,7 @@ Class AmpMyElement extends AMP.BaseElement {
 AMP.registerElement(‘amp-my-element’, AmpMyElement, CSS);
 ```
 
-### Enable Experiment
+### Enable experiment
 
 Users wanting to experiment with your element can then go to the
 [experiments page](https://cdn.ampproject.org/experiments.html) and
@@ -747,7 +746,7 @@ enable your experiment.
 If test on localhost, use the command `AMP.toggleExperiment(id,
 true/false)` to enable.
 
-## Example of Using your Extension
+## Example of using your extension
 
 This is optional but it greatly helps users to understand and demo how
 your element works and provides an easy start-point for them to
@@ -759,9 +758,9 @@ extensions.
 
 Also consider contributing to
 [ampbyexample.com](https://ampbyexample.com/) on
-[github](https://github.com/ampproject/amp-by-example).
+[GitHub](https://github.com/ampproject/amp-by-example).
 
-## Updating Build Configs
+## Updating build configs
 
 In order for your element to build correctly you would need to make few
 changes to gulpfile.js to tell it about your extension, its files and
@@ -785,7 +784,7 @@ directory next to your 0.1.
 If your extension is still in experiments breaking changes usually are
 fine so you can just update the same version.
 
-## Unit Tests
+## Unit tests
 
 Make sure you write good coverage for your code. We require unit tests
 for all checked in code. We use the following frameworks for testing:
@@ -801,7 +800,7 @@ to only run your extensions’ tests.
 $ gulp test --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
 ```
 
-## Type Checking
+## Type checking
 
 We use Closure Compiler to perform type checking. Please see
 [Annotating JavaScript for the Closure
