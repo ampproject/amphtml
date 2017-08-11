@@ -151,10 +151,12 @@ describe('Resource', () => {
     elementMock.expects('build')
         .returns(Promise.reject(new Error('intentional'))).once();
     elementMock.expects('updateLayoutBox').never();
-    return resource.build().then(() => {
+    const buildPromise = resource.build();
+    expect(resource.isBuilding()).to.be.true;
+    return buildPromise.then(() => {
       throw new Error('must have failed');
     }, () => {
-      expect(resource.blacklisted_).to.equal(true);
+      expect(resource.isBuilding()).to.be.false;
       expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
     });
   });

@@ -1530,36 +1530,6 @@ describe('Resources discoverWork', () => {
     expect(schedulePassStub).to.not.be.called;
   });
 
-  it('should not build a blacklisted resource', () => {
-    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
-    sandbox.stub(resources, 'schedule_');
-    resources.documentReady_ = true;
-    resource1.state_ = ResourceState.NOT_BUILT;
-    resource1.element.isBuilt = () => false;
-    resource1.blacklisted_ = true;
-    resource1.build = sandbox.spy();
-
-    resources.discoverWork_();
-
-    expect(resource1.build).to.not.be.called;
-    expect(schedulePassStub).to.not.be.called;
-  });
-
-  it('should not build a blacklisted resource before doc ready', () => {
-    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
-    sandbox.stub(resources, 'schedule_');
-    resource1.nextSibling = {};
-    resource1.state_ = ResourceState.NOT_BUILT;
-    resource1.element.isBuilt = () => false;
-    resource1.blacklisted_ = true;
-    resource1.build = sandbox.spy();
-
-    resources.discoverWork_();
-
-    expect(resource1.build).to.not.be.called;
-    expect(schedulePassStub).to.not.be.called;
-  });
-
   describe('getResourcesInRect', () => {
 
     beforeEach(() => {
@@ -2830,11 +2800,13 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
     resources.add(child1);
     const resource1 = stubBuild(Resource.forElementOptional(child1));
     resources.upgraded(child1);
+    expect(resources.get()).to.contain(resource1);
     return resource1.buildPromise.then(() => {
       throw new Error('must have failed');
     }, () => {
       expect(child1BuildSpy).to.be.calledOnce;
       expect(schedulePassStub).to.not.be.called;
+      expect(resources.get()).to.not.contain(resource1);
     });
   });
 
@@ -2852,6 +2824,12 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
     expect(child2.build.called).to.be.false;
     expect(resources.pendingBuildResources_.length).to.be.equal(2);
     expect(resources.buildReadyResources_.calledTwice).to.be.true;
+    const resource1 = Resource.forElementOptional(child1);
+    const resource2 = Resource.forElementOptional(child2);
+    expect(resources.get()).to.contain(resource1);
+    expect(resources.get()).to.contain(resource2);
+    expect(resource1.isBuilding()).to.be.false;
+    expect(resource2.isBuilding()).to.be.false;
   });
 
   describe('buildReadyResources_', () => {
@@ -2864,6 +2842,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
       resource1 = stubBuild(resource1);
       resource2 = stubBuild(resource2);
       parentResource = stubBuild(parentResource);
+      resources.resources_ = [resource1, resource2];
     });
 
     it('should build ready resources and remove them from pending', () => {
@@ -2880,17 +2859,24 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
       expect(child2.build.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(1);
       expect(resources.pendingBuildResources_[0]).to.be.equal(resource2);
+      expect(resource1.isBuilding()).to.be.true;
+      expect(resource2.isBuilding()).to.be.false;
       return resource1.buildPromise.then(() => {
         expect(resources.schedulePass.calledOnce).to.be.true;
 
         child2.parentNode = parent;
         parent.nextSibling = true;
         resources.buildReadyResources_();
-        expect(child1.build.calledTwice).to.be.false;
+        expect(child1.build).to.be.calledOnce;
         expect(child2.build.called).to.be.true;
         expect(resources.pendingBuildResources_.length).to.be.equal(0);
+        expect(resource2.isBuilding()).to.be.true;
         return resource2.buildPromise;
       }).then(() => {
+        expect(resources.get()).to.contain(resource1);
+        expect(resources.get()).to.contain(resource2);
+        expect(resource1.isBuilding()).to.be.false;
+        expect(resource2.isBuilding()).to.be.false;
         expect(resources.schedulePass.calledTwice).to.be.true;
       });
     });
@@ -2972,6 +2958,12 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
         }),
       ]).then(() => {
         expect(schedulePassStub).to.be.calledTwice;
+        // Failed build.
+        expect(resources.get()).to.not.contain(resource1);
+        expect(resource1.isBuilding()).to.be.false;
+        // Successful build.
+        expect(resources.get()).to.contain(resource2);
+        expect(resource2.isBuilding()).to.be.false;
       });
     });
 
@@ -2991,6 +2983,8 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
         throw new Error('must have failed');
       }, () => {
         expect(schedulePassStub).to.not.be.called;
+        expect(resources.get()).to.not.contain(resource1);
+        expect(resource1.isBuilding()).to.be.false;
       });
     });
   });
@@ -3003,7 +2997,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
       const pauseOnRemoveStub = sandbox.stub(resource, 'pauseOnRemove');
       const disconnectStub = sandbox.stub(resource, 'disconnect');
       resources.remove(child1);
-      expect(resources.resources_.indexOf(resource)).to.equal(-1);
+      expect(resources.get()).to.not.contain(resource);
       expect(pauseOnRemoveStub).to.be.calledOnce;
       expect(disconnectStub).to.not.be.called;
     });
@@ -3017,7 +3011,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
       const childWin = {};
       resource.hostWin = childWin;
       resources.removeForChildWindow(childWin);
-      expect(resources.resources_.indexOf(resource)).to.equal(-1);
+      expect(resources.get()).to.not.contain(resource);
       expect(pauseOnRemoveStub).to.be.calledOnce;
       expect(disconnectStub).to.be.called;
     });
@@ -3040,7 +3034,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
     it('should keep reference to the resource', () => {
       expect(resource).to.not.be.null;
       expect(Resource.forElementOptional(child1)).to.equal(resource);
-      expect(resources.resources_).to.not.contain(resource);
+      expect(resources.get()).to.not.contain(resource);
       expect(scheduleBuildStub).to.be.calledOnce;
       expect(resource.isMeasureRequested()).to.be.false;
     });
