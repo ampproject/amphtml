@@ -25,7 +25,7 @@ extension. For example, video players are also suffixed with `-player`
 
 ## Directory structure
 
-You create your extensions’ files inside the `extensions/` directory.
+You create your extension's files inside the `extensions/` directory.
 The directory structure is below:
 
 -   extensions/amp-my-element/
@@ -103,7 +103,7 @@ AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 
 - **Default**: Does nothing
 - **Override**: Rarely.
-- **[Vsync](https://github.com/ampproject/amphtml/blob/master/src/service/vsync-impl.js#L44) Context**: None
+- **[Vsync](https://github.com/ampproject/amphtml/blob/master/src/service/vsync-impl.js) Context**: None
 - **Usage**: If your extension provides different implementations
 depending on a late runtime condition (e.g. type attribute on the
 element, platform)
@@ -136,7 +136,7 @@ resources to preload/prefetch this allows AMP to delegate to the browser
 to get a performance boost by preconnecting, preloading and prefetching
 resources via preconnect service.
 - **Example Usage**: [Instagram uses this to
-preconnect](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/0.1/amp-instagram.js#L46)
+preconnect](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/0.1/amp-instagram.js)
 to instagram hosts.
 
 #### createPlaceholderCallback
@@ -147,7 +147,7 @@ to instagram hosts.
 create a lightweight placeholder. This gets called only if the element
 doesn’t already have a publisher-provided placeholder (through [the
 placeholder
-attribute](https://github.com/ampproject/amphtml/blob/c44a48fbb1dbd0de0b5a9e20f8f69bb920705dde/spec/amp-html-layout.md#placeholder)).
+attribute](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#placeholder)).
 - **Usage**: Create placeholder DOM and return it. For example,
 amp-instagram uses this to create a placeholder dynamically by creating
 an amp-img placeholder instead of loading the iframe, leaving the iframe
@@ -179,10 +179,9 @@ considered “laid out” - usually this means load event has fired but can
 be different from element to element. Note that load events usually are
 fired very early so if there’s another event that your element can
 listen to that have a better meaning of ready-ness, use that to resolve
-your promise instead - for example: [amp-youtube uses the
+your promise instead - for example: [amp-youtube](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/0.1/amp-youtube.js) uses the
 playerready event that the underlying YT Player
-iframe](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/0.1/amp-youtube.js#L136)
-sends to resolve the layoutCallback promise.
+iframe sends to resolve the layoutCallback promise.
 
 #### firstLayoutCompleted
 
@@ -348,11 +347,11 @@ this.cells_.forEach(cell => {
 });
 ```
 
-An element can then later call *schedulePreload* or *scheduleLayout* to
+An element can then later call `schedulePreload` or `scheduleLayout` to
 schedule preload or layout respectively. For example, &lt;amp-carousel
 type=slider&gt; (Slider instance of amp-carousel) calls
-*schedulePreload* for the next/previous slide when the user moves
-forward/backward in the slides and then calls *scheduleLayout* for the
+`schedulePreload` for the next/previous slide when the user moves
+forward/backward in the slides and then calls `scheduleLayout` for the
 current slide when the user moves to it.
 
 ```javascript
@@ -400,8 +399,8 @@ includes
 
 -   Your element tag-name
 -   Required attributes for the element
--   Specific values that an attribute accept (e.g. myattr=”TYPE1|TYPE2”)
--   Layouts your element supports (see [Layout specs](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md) and [Layouts Supported in your Element](#layouts-supported-in-your-element))
+-   Specific values that an attribute accept (e.g. `myattr=”TYPE1|TYPE2”`)
+-   Layouts your element supports (see [Layout specs](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md) and [Layouts supported in your element](#layouts-supported-in-your-element))
 -   If there are restrictions where your element can or can’t appear (e.g. disallowed_ancestory, mandatory_parent...)
 
 For more details take a look at [Contributing Component Validator
@@ -426,7 +425,7 @@ placeholder for itself (in case a placeholder wasn’t provided by the
 developer/publisher who is using your element). This allows elements to
 display content as fast as possible and allow prerendering that
 placeholder. Learn [more about placeholder
-elements](https://github.com/ampproject/amphtml/blob/bbbb7e6dccd8159fe9f139b7c65715a4a3526754/spec/amp-html-layout.md#placeholder).
+elements](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#placeholder).
 
 NOTE: Make sure not to request external resources in the pre-render
 phase. Requests to the publisher’s origin itself are OK. If in doubt,
@@ -562,7 +561,7 @@ security and performance reasons. Take a look at adding
 extension PR for examples of 3p integration.
 
 Read about [Inclusion of third party software, embeds and services into
-AMP](https://github.com/ampproject/amphtml/blob/bbbb7e6dccd8159fe9f139b7c65715a4a3526754/3p/README.md).
+AMP](https://github.com/ampproject/amphtml/blob/master/3p/README.md).
 
 For contrast, take a look at amp-instagram which does NOT require an SDK
 to be loaded in order to embed a post, instead it provides an
@@ -577,7 +576,7 @@ overriding the `isLayoutSupported(layout)` callback and returning true
 if the element supports that layout. [Read more about AMP Layout
 System](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md)
 and [Layout
-Types](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#layout-types).
+Types](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#layout).
 
 ### What layout should your element support?
 
@@ -612,7 +611,7 @@ class AmpSlides extends AMP.BaseElement {
 ## Experiments
 
 Most newly created elements are initially launched as
-[experiments](https://github.com/ampproject/amphtml/blob/bbbb7e6dccd8159fe9f139b7c65715a4a3526754/tools/experiments/README.md).
+[experiments](https://github.com/ampproject/amphtml/blob/master/tools/experiments/README.md).
 This allows people to experiment with using the new element and provide
 the author(s) with feedback. It also provides the AMP Team with the
 opportunity to monitor for any potential errors. This is especially
@@ -766,11 +765,11 @@ $ gulp check-types
 
 ## Example PRs
 
-- Adding new Ad-provider
+- Adding new ad-provider
   - [Teads](https://github.com/ampproject/amphtml/commit/654ade680d796527345af8ff298a41a7532ee074)
   - [EPlanning](https://github.com/ampproject/amphtml/commit/a007543518a07ff77d48297e76bd264cadf36f57)
   - [Taboola](https://github.com/ampproject/amphtml/commit/79a58e545939cca0b75e62b2e62147829c59602a)
-- Adding Embeds that’s not iframe-based (requires JS SDK)
+- Adding embeds that’s not iframe-based (requires JS SDK)
   - [amp-facebook](https://github.com/ampproject/amphtml/commit/6679db198d8b9d9c38854d93aa04801e8cf6999f)
 - Adding iframe based embeds
   - [amp-soundcloud](https://github.com/ampproject/amphtml/commit/2ac845641c8eea9e67f17a1d471cfb9bab459fd1)
@@ -779,7 +778,7 @@ $ gulp check-types
 - Adding non-visual elements
   - [amp-font](https://github.com/ampproject/amphtml/commit/ef040b60664a5aad465cb83507d37fae5e361772)
   - [amp-install-serviceworker](https://github.com/ampproject/amphtml/commit/e6199cfb5b9d13b0e4bb590b80c09ba3614877e6)
-- Adding General UI components
- - [amp-sidebar](https://github.com/ampproject/amphtml/commit/99634b18310129f4260e4172cb2750ae7b8ffbf0)
- - [amp-image-lightbox](https://github.com/ampproject/amphtml/commit/e6006f9ca516ae5d7d79267976d3df39cc1f9636)
- - [amp-accordion](https://github.com/ampproject/amphtml/commit/1aae4eee37ec80c6ea9b822fb43ecce73feb7df6)
+- Adding general UI components
+  - [amp-sidebar](https://github.com/ampproject/amphtml/commit/99634b18310129f4260e4172cb2750ae7b8ffbf0)
+  - [amp-image-lightbox](https://github.com/ampproject/amphtml/commit/e6006f9ca516ae5d7d79267976d3df39cc1f9636)
+  - [amp-accordion](https://github.com/ampproject/amphtml/commit/1aae4eee37ec80c6ea9b822fb43ecce73feb7df6)
