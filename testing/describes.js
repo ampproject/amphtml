@@ -111,7 +111,6 @@ import {
 import {resetLoadingCheckForTests} from '../src/element-stub';
 import {resetScheduledElementForTesting} from '../src/custom-element';
 import {setStyles} from '../src/style';
-import {toggleExperiment} from '../src/experiments';
 import * as sinon from 'sinon';
 
 /** Should have something in the name, otherwise nothing is shown. */
