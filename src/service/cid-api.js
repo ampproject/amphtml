@@ -18,6 +18,8 @@ import {getCookie, setCookie} from '../cookies';
 import {Services} from '../services';
 import {dev} from '../log';
 import {dict} from '../utils/object';
+import {isProxyOrigin} from '../url';
+import {WindowInterface} from '../window-interface';
 
 const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
 const API_KEYS = {
@@ -31,11 +33,13 @@ const AMP_TOKEN = 'AMP_TOKEN';
 const TokenStatus = {
   RETRIEVING: '$RETRIEVING',
   OPT_OUT: '$OPT_OUT',
+  NOT_FOUND: '$NOT_FOUND',
   ERROR: '$ERROR',
 };
 
 const TIMEOUT = 30000;
-const DAY = 24 * 60 * 60 * 1000;
+const HOUR = 60 * 60 * 1000;
+const DAY = 24 * HOUR;
 const YEAR = 365 * DAY;
 
 /**
@@ -60,11 +64,12 @@ export class GoogleCidApi {
   }
 
   /**
-   * @param {string} scope
    * @param {string} apiClient
+   * @param {string} scope
+   * @param {string=} opt_cookieName
    * @return {!Promise<?string>}
    */
-  getScopedCid(scope, apiClient) {
+  getScopedCid(apiClient, scope, opt_cookieName) {
     const url = this.getUrl_(apiClient);
     if (!url) {
       return Promise.resolve(/** @type {?string} */(null));
@@ -73,6 +78,7 @@ export class GoogleCidApi {
     if (this.cidPromise_[scope]) {
       return this.cidPromise_[scope];
     }
+    const cookieName = opt_cookieName || scope;
     let token;
     // Block the request if a previous request is on flight
     // Poll every 200ms. Longer interval means longer latency for the 2nd CID.
@@ -83,19 +89,25 @@ export class GoogleCidApi {
       if (token === TokenStatus.OPT_OUT) {
         return null;
       }
-      if (token === TokenStatus.ERROR) {
-        return getCookie(this.win_, scope);
+      // If the page referrer is proxy origin, we force to use API even the
+      // token indicates a previous fetch returned nothing
+      const forceFetch =
+          token === TokenStatus.NOT_FOUND && this.isReferrerProxyOrigin_();
+
+      // Token is in a special state, fallback to existing cookie
+      if (!forceFetch && this.isStatusToken_(token)) {
+        return getCookie(this.win_, cookieName);
       }
 
-      if (!token) {
+      if (!token || this.isStatusToken_(token)) {
         this.persistToken_(TokenStatus.RETRIEVING, TIMEOUT);
       }
       return this.fetchCid_(dev().assertString(url), scope, token)
-          .then(this.handleResponse_.bind(this, scope))
+          .then(this.handleResponse_.bind(this, cookieName))
           .catch(e => {
             this.persistToken_(TokenStatus.ERROR, TIMEOUT);
             dev().error(TAG, e);
-            return getCookie(this.win_, scope);
+            return getCookie(this.win_, cookieName);
           });
     });
   }
@@ -125,22 +137,22 @@ export class GoogleCidApi {
   }
 
   /**
-   * @param {string} scope
+   * @param {string} cookieName
    * @param {!JsonObject} res
    * @return {?string}
    */
-  handleResponse_(scope, res) {
+  handleResponse_(cookieName, res) {
     if (res['optOut']) {
       this.persistToken_(TokenStatus.OPT_OUT, YEAR);
       return null;
     }
     if (res['clientId']) {
       this.persistToken_(res['securityToken'], YEAR);
-      setCookie(this.win_, scope, res['clientId'], this.expiresIn_(YEAR));
+      setCookie(this.win_, cookieName, res['clientId'], this.expiresIn_(YEAR));
       return res['clientId'];
     } else {
-      this.persistToken_(TokenStatus.ERROR, DAY);
-      return getCookie(this.win_, scope);
+      this.persistToken_(TokenStatus.NOT_FOUND, HOUR);
+      return getCookie(this.win_, cookieName);
     }
   }
 
@@ -172,5 +184,13 @@ export class GoogleCidApi {
    */
   expiresIn_(time) {
     return this.win_.Date.now() + time;
+  }
+
+  isReferrerProxyOrigin_() {
+    return isProxyOrigin(WindowInterface.getDocumentReferrer(this.win_));
+  }
+
+  isStatusToken_(token) {
+    return token && token[0] === '$';
   }
 }

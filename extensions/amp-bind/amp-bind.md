@@ -45,8 +45,6 @@ limitations under the License.
   </tr>
 </table>
 
-[TOC]
-
 ## Overview
 
 The `amp-bind` component allows you to add custom stateful interactivity to your AMP pages via data binding and JS-like expressions.
@@ -323,7 +321,7 @@ Only binding to the following components and attributes are allowed:
     <td>When binding to <code>[src]</code>, make sure you also bind to <code>[srcset]</code> in order to make the binding work on cache.<br>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-img#attributes">amp-img attributes</a>.</td>
   </tr>
   <tr>
-    <td rowspan=2><code>&lt;amp-list&gt;</code></td>
+    <td><code>&lt;amp-list&gt;</code></td>
     <td><code>[src]</code></td>
     <td>
       If expression is a string, fetches and renders JSON from the string URL.

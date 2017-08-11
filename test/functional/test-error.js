@@ -551,7 +551,7 @@ describes.fakeWin('user error reporting', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     analyticsEventSpy = sandbox.spy(analytics, 'triggerAnalyticsEvent');
-    toggleExperiment(window, 'user-error-reporting', true);
+    toggleExperiment(win, 'user-error-reporting', true);
   });
 
   it('should trigger triggerAnalyticsEvent with correct arguments', () => {
