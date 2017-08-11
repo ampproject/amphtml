@@ -54,14 +54,16 @@ describe('amp-analytics.VariableService', function() {
     };
 
     it('expands zeros', () => {
-      return variables.expandTemplate('${5}', new ExpansionOptions(vars))
+      return variables.expandTemplate('${5}',
+          new ExpansionOptions(vars), window.document.documentElement)
           .then(actual =>
           expect(actual).to.equal('0')
       );
     });
 
     it('expands nested vars', () => {
-      return variables.expandTemplate('${1}', new ExpansionOptions(vars))
+      return variables.expandTemplate(
+          '${1}', new ExpansionOptions(vars), window.document.documentElement)
           .then(actual =>
           expect(actual).to.equal('123%24%7B4%7D')
       );
@@ -69,7 +71,8 @@ describe('amp-analytics.VariableService', function() {
 
     it('expands nested vars (no encode)', () => {
       return variables.expandTemplate('${1}',
-          new ExpansionOptions(vars, undefined, true))
+          new ExpansionOptions(vars, undefined, true),
+          window.document.documentElement)
           .then(actual =>
           expect(actual).to.equal('123${4}')
         );
@@ -77,12 +80,14 @@ describe('amp-analytics.VariableService', function() {
 
     it('expands nested vars without double encoding', () => {
       return expect(variables.expandTemplate('${a}',
-          new ExpansionOptions(vars))).to.eventually.equal(
+          new ExpansionOptions(vars),
+          window.document.documentElement)).to.eventually.equal(
           'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2');
     });
 
     it('limits the recursion to n', () => {
-      return variables.expandTemplate('${1}', new ExpansionOptions(vars, 3))
+      return variables.expandTemplate('${1}',
+          new ExpansionOptions(vars, 3), window.document.documentElement)
           .then(actual =>
           expect(actual).to.equal('1234%24%7B1%7D'))
           .then(() =>
@@ -94,21 +99,24 @@ describe('amp-analytics.VariableService', function() {
 
     it('works with complex params (1)', () => {
       const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM(foo,bar)'});
-      return variables.expandTemplate('${fooParam}', vars)
+      return variables.expandTemplate('${fooParam}',
+          vars, window.document.documentElement)
           .then(actual =>
           expect(actual).to.equal('QUERY_PARAM(foo,bar)'));
     });
 
     it('works with complex params (2)', () => {
       const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM'});
-      return variables.expandTemplate('${fooParam(foo,bar)}', vars)
+      return variables.expandTemplate('${fooParam(foo,bar)}',
+          vars, window.document.documentElement)
           .then(actual => expect(actual).to.equal('QUERY_PARAM(foo,bar)'));
     });
   });
 
   it('default filterdoesn\'t work when experiment is off' , () =>
       variables.expandTemplate('${bar|default:baz}',
-          new ExpansionOptions({'foo': ' Hello world! '}))
+          new ExpansionOptions({'foo': ' Hello world! '}),
+          window.document.documentElement)
           .then(actual => expect(actual).to.equal('')));
 
   describe('filter:', () => {
@@ -119,7 +127,8 @@ describe('amp-analytics.VariableService', function() {
     });
 
     function check(input, output) {
-      return variables.expandTemplate(input, vars).then(actual =>
+      return variables.expandTemplate(input, vars,
+          window.document.documentElement).then(actual =>
           expect(actual).to.equal(output));
     }
 
