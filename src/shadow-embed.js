@@ -550,12 +550,12 @@ export class ShadowDomWriterStreamer {
 
   /** @override */
   get closed() {
-    return this.eof_;
+    return Promise.resolve(this.eof_);
   }
 
   /** @override */
   get desiredSize() {
-    return 1; // noop
+    return this.eof_ ? 0 : 1; // noop
   }
 
   /** @override */
@@ -688,12 +688,12 @@ export class ShadowDomWriterBulk {
 
   /** @override */
   get closed() {
-    return this.eof_;
+    return Promise.resolve(this.eof_);
   }
 
   /** @override */
   get desiredSize() {
-    return 1; // noop
+    return this.eof_ ? 0 : 1; // noop
   }
 
   /** @override */
