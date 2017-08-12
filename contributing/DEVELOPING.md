@@ -287,7 +287,7 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 
 - [Life of an AMP *](https://docs.google.com/document/d/1WdNj3qNFDmtI--c2PqyRYrPrxSg2a-93z5iX0SzoQS0/edit#)
 - [AMP Layout system](../spec/amp-html-layout.md)
-- [Building an AMP Extension](https://docs.google.com/document/d/19o7eDta6oqPGF4RQ17LvZ9CHVQN53whN-mCIeIMM8Qk/edit#)
+- [Building an AMP Extension](building-an-amp-extension.md)
 
 We also recommend scanning the [spec](../spec/). The non-element part should help understand some of the design aspects.
 
