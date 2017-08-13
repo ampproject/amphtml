@@ -984,6 +984,7 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
       });
 }
 
+
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Window} embedWin
