@@ -374,10 +374,18 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
-  it('should replace TIMESTAMP_FORMATTED', () => {
-    return expandAsync('?tsf=TIMESTAMP_FORMATTED').then(res => {
+  it('should replace TIMESTAMP_ISO', () => {
+    return expandAsync('?tsf=TIMESTAMP_ISO').then(res => {
       expect(res).to.match(/tsf=\d+/);
     });
+  });
+
+  it('should return correct ISO timestamp', () => {
+    const fakeTime = 1499979336612;
+    sandbox.useFakeTimers(fakeTime);
+    return expect(expandAsync('?tsf=TIMESTAMP_ISO'))
+        .to.eventually.equal(
+        '?tsf=' + encodeURIComponent('2017-07-13T20:55:36.612Z'));
   });
 
   it('should replace TIMEZONE', () => {
@@ -1316,18 +1324,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
           'NDrFP4BtPQJMyxE4jb9FDlp37OJL'))
           .to.equal('amp-JTHCVn-4iMhzv5oEIZIspaXUSnEF0PwNVoxs' +
           'NDrFP4BtPQJMyxE4jb9FDlp37OJL');
-    });
-  });
-
-  describe('formatted timestamp', () => {
-    it('should return correct formatted timestamp', () => {
-      const fakeTime = 1499979336612;
-      // Offset to make sure the fake time is the same with all browser timezones
-      const offset = new Date(fakeTime).getTimezoneOffset() * 60000;
-      sandbox.useFakeTimers(fakeTime + offset);
-      return expect(expandAsync('?tsf=TIMESTAMP_FORMATTED'))
-          .to.eventually.equal(
-          '?tsf=' + encodeURIComponent('2017-07-13 20:55:36'));
     });
   });
 });

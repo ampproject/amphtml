@@ -41,8 +41,7 @@ import {
   getTimingDataAsync,
 } from './variable-source';
 import {isProtocolValid} from '../url';
-import {padStart} from '../string';
-;
+
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
@@ -315,17 +314,8 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     //Returns the human readable timestamp in format of 2011-01-01 11:11:11.
-    this.set('TIMESTAMP_FORMATTED', () => {
-      const current = new Date();
-      const year = current.getFullYear();
-      const month = this.formatNum_(current.getMonth() + 1);
-      const date = this.formatNum_(current.getDate());
-      const hour = this.formatNum_(current.getHours());
-      const min = this.formatNum_(current.getMinutes());
-      const sec = this.formatNum_(current.getSeconds());
-      const time = year + '-' + month + '-' + date + ' ' +
-          hour + ':' + min + ':' + sec;
-      return time;
+    this.set('TIMESTAMP_ISO', () => {
+      return new Date().toISOString();
     });
 
     // Returns the user's time-zone offset from UTC, in minutes.
@@ -567,16 +557,6 @@ export class GlobalVariableSource extends VariableSource {
       return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
     });
   }
-
-  /**
-   * Format number to have 2 digits if number is smaller than 10
-   * @param num
-   * @returns {string} after formatted
-   * @private
-   */
-  formatNum_(num) {
-    return padStart(num.toString(), 2, '0');
-  };
 }
 
 /*

@@ -107,14 +107,3 @@ describe('expandTemplate', () => {
     expect(expandTemplate('${loop1}', testGetter), 10).to.equal('${loop2}');
   });
 });
-
-describe('padStart', () => {
-  it('should return string with correct length after padding', () => {
-    expect(padStart('a', 5)).to.equal('    a');
-    expect(padStart('aa', 2)).to.equal('aa');
-    expect(padStart('aaaaa', 2)).to.equal('aaaaa');
-    expect(padStart('a', 2, '0')).to.equal('0a');
-    expect(padStart('aaaaa', 1, '0')).to.equal('aaaaa');
-    expect(padStart('', 5, '-')).to.equal('-----');
-  });
-});
