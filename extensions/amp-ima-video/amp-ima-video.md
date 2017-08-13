@@ -48,13 +48,14 @@ limitations under the License.
 
 You can use the `amp-ima-video` component to embed an [IMA SDK](https://developers.google.com/interactive-media-ads/docs/sdks/html5/) enabled video player.
 
-The `amp-ima-video` component HTML accepts up to two unique types of HTML nodes
-as children - `source` tags for content video, and `track` tags for subtitles.
-Both of these can be used in the same way as the standard `video` tag.
-
 The component requires an ad tag, provided in `data-tag`, which is a URL to a
 VAST-compliant ad response (for examples, see
 [IMA Sample Tags](https://developers.google.com/interactive-media-ads/docs/sdks/html5/tags)).
+
+The component HTML accepts the following types of HTML nodes as children:
+* `source` tags for content video, used in the same way as the standard `video` tag.
+* `track` tags for subtitles, in the same way as the standard `video` tag.
+* a `script` tag of type `application/json` used to provide [ImaSdkSettings](https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/apis#ima.ImaSdkSettings). Provide the property-translation of the setters in the linked documentation (e.g. to call `setNumRedirects(4)`, provide `{"numRedirects": 4}`).
 
 ## Example
 
@@ -65,6 +66,12 @@ VAST-compliant ad response (for examples, see
   <source src="foo.mp4" type="video/mp4">
   <source src="foo.webm" type="video/webm">
   <track label="English subtitles" kind="subtitles" srclang="en" src="subtitles.vtt">
+  <script type="application/json">
+  {
+    "locale": "en",
+    "numRedirects": 4
+  }
+  </script>
 </amp-ima-video>
 ```
 

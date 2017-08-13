@@ -23,7 +23,9 @@ import {
 import {
   USER_ERROR_SENTINEL,
   isUserErrorMessage,
+  isUserErrorEmbed,
   duplicateErrorIfNecessary,
+  dev,
 } from './log';
 import {isProxyOrigin} from './url';
 import {isCanary, experimentTogglesOrNull} from './experiments';
@@ -31,6 +33,9 @@ import {makeBodyVisible} from './style-installer';
 import {startsWith} from './string';
 import {urls} from './config';
 import {AmpEvents} from './amp-events';
+import {triggerAnalyticsEvent} from './analytics';
+import {isExperimentOn} from './experiments';
+import {Services} from './services';
 
 /**
  * @const {string}
@@ -85,6 +90,19 @@ function tryJsonStringify(value) {
  * Safari JS engine.
  */
 let detectedJsEngine;
+
+/**
+ * @param {!Window} win
+ * @param {*} error
+ * @param {!Element=} opt_associatedElement
+ */
+export function reportErrorForWin(win, error, opt_associatedElement) {
+  reportError(error, opt_associatedElement);
+  if (error && !!win && isUserErrorMessage(error.message)
+      && !isUserErrorEmbed(error.message)) {
+    reportErrorToAnalytics(/** @type {!Error} */(error), win);
+  }
+}
 
 /**
  * Reports an error. If the error has an "associatedElement" property
@@ -358,7 +376,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
   url += `&jse=${detectedJsEngine}`;
 
   const exps = [];
-  const experiments = experimentTogglesOrNull();
+  const experiments = experimentTogglesOrNull(self);
   for (const exp in experiments) {
     const on = experiments[exp];
     exps.push(`${exp}=${on ? '1' : '0'}`);
@@ -472,4 +490,28 @@ export function detectJsEngineFromStack() {
   }
 
   return 'unknown';
+}
+
+/**
+ * @param {!Error} error
+ * @param {!Window} win
+ */
+export function reportErrorToAnalytics(error, win) {
+  if (isExperimentOn(win, 'user-error-reporting')) {
+    const vars = {
+      'errorName': error.name,
+      'errorMessage': error.message,
+    };
+    triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
+  }
+}
+
+/**
+ * @param {!Window} win
+ * @return {!Element}
+ * @private
+ */
+function getRootElement_(win) {
+  const root = Services.ampdocServiceFor(win).getAmpDoc().getRootNode();
+  return dev().assertElement(root.documentElement || root.body || root);
 }

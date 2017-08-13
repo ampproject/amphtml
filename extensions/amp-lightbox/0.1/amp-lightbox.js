@@ -20,9 +20,7 @@ import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {dev} from '../../../src/log';
-import {historyForDoc} from '../../../src/services';
-import {vsyncFor} from '../../../src/services';
-import {timerFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import * as st from '../../../src/style';
 
 /** @const {string} */
@@ -141,7 +139,7 @@ class AmpLightbox extends AMP.BaseElement {
         // TODO(dvoytenko): use new animations support instead.
         transition: 'opacity 0.1s ease-in',
       });
-      vsyncFor(this.win).mutate(() => {
+      Services.vsyncFor(this.win).mutate(() => {
         st.setStyle(this.element, 'opacity', '');
       });
     }).then(() => {
@@ -227,7 +225,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   waitForScroll_(startingScrollTop) {
-    this.scrollTimerId_ = timerFor(this.win).delay(() => {
+    this.scrollTimerId_ = Services.timerFor(this.win).delay(() => {
       if (Math.abs(startingScrollTop - this.pos_) < 30) {
         dev().fine(TAG, 'slow scrolling: ' + startingScrollTop + ' - '
             + this.pos_);
@@ -309,7 +307,7 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   getHistory_() {
-    return historyForDoc(this.getAmpDoc());
+    return Services.historyForDoc(this.getAmpDoc());
   }
 }
 

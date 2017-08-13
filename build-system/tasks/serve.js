@@ -23,6 +23,7 @@ var nodemon = require('nodemon');
 var host = argv.host || 'localhost';
 var port = argv.port || process.env.PORT || 8000;
 var useHttps = argv.https != undefined;
+var quiet = argv.quiet != undefined;
 
 /**
  * Starts a simple http server at the repository root
@@ -51,16 +52,23 @@ function serve() {
       'SERVE_PORT': port,
       'SERVE_HOST': host,
       'SERVE_USEHTTPS': useHttps,
-      'SERVE_PROCESS_ID': process.pid
+      'SERVE_PROCESS_ID': process.pid,
+      'SERVE_QUIET': quiet
     },
   })
   .once('exit', function () {
+    process.nextTick(function() {
+      process.exit();
+    });
+  })
+  .once('quit', function () {
     util.log(util.colors.green('Shutting down server'));
-    process.exit();
   });
-  util.log(util.colors.yellow('Run `gulp build` then go to '
-      + getHost() + '/examples/article.amp.html'
-  ));
+  if (!quiet) {
+    util.log(util.colors.yellow('Run `gulp build` then go to '
+        + getHost() + '/examples/article.amp.html'
+    ));
+  }
 }
 
 gulp.task(
@@ -71,7 +79,8 @@ gulp.task(
       options: {
         'host': '  Hostname or IP address to bind to (default: localhost)',
         'port': '  Specifies alternative port (default: 8000)',
-        'https': '  Use HTTPS server (default: false)'
+        'https': '  Use HTTPS server (default: false)',
+        'quiet': '  Do not log HTTP requests (default: false)'
       }
     }
 );

@@ -52,16 +52,14 @@ limitations under the License.
 
 ## Behavior
 Given a sufficient number of valid placements (supplied in the configuration),
-`amp-auto-ads` tries to insert additional ads within the following
-constraints:
+`amp-auto-ads` tries to insert additional ads while adhering to a set of
+constraints specified by the ad network. These constraints will limit:
 <ul>
-  <li>No more than 3 ads on the page (including any existing ads)</li>
-  <li>No injected ad within 500px (measured vertically) of another ad</li>
-  <li>
-    An injected ad does not cause any unacceptable re-flow (as determined by
-    attemptChangeSize).
-  </li>
+  <li>The total number of ads that can be inserted</li>
+  <li>The minimum distance that there should be between any adjacent ads</li>
 </ul>
+In addition to this, ads will only be inserted in locations on the page that do
+not cause an unacceptable re-flow (as determined by attemptChangeSize).
 
 The `<amp-auto-ads>` tag should be placed as the first child of the `<body>`.
 

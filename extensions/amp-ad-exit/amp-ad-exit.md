@@ -25,7 +25,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -94,7 +94,7 @@ exposes an "exit" action to other elements in the [A4A (AMP for Ads)](../amp-a4a
 </script>
 </amp-ad-exit>
 
-<h1 on="tap:exit-api.exit(target='landing')">Artisan Baking Supplies</h1>
+<h1 on="tap:exit-api.exit(target='landingPage')">Artisan Baking Supplies</h1>
 <div id="product0" on="tap:exit-api.exit(target='flour')">
   <p>Rye flour</p>
   <amp-img src="..." width="..." height="..."></amp-img>
@@ -103,7 +103,7 @@ exposes an "exit" action to other elements in the [A4A (AMP for Ads)](../amp-a4a
   <p>Bannetons</p>
   <amp-img src="..." width="..." height="..."></amp-img>
 </div>
-<div id="footer" on="tap:exit-api.exit(target='landing', _clickArea='footer')">
+<div id="footer" on="tap:exit-api.exit(target='landingPage', _clickArea='footer')">
   example.com/artisan-baking
 </div>
 ```

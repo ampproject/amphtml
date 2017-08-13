@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,18 @@
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {closestByTag, tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
-import {dev} from '../../../src/log';
-import {historyForDoc} from '../../../src/services';
-import {platformFor} from '../../../src/services';
-import {setStyles, toggle} from '../../../src/style';
+import {Services} from '../../../src/services';
+import {Toolbar} from './toolbar';
+import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
+import {dev, user} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
 import {removeFragment, parseUrl} from '../../../src/url';
-import {vsyncFor} from '../../../src/services';
-import {timerFor} from '../../../src/services';
+import {setStyles, toggle} from '../../../src/style';
+import {toArray} from '../../../src/types';
+
+/** @const */
+const TAG = 'amp-sidebar toolbar';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;
@@ -41,7 +44,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_ = null;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private {?Element} */
     this.maskElement_ = null;
@@ -55,7 +58,13 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?string} */
     this.side_ = null;
 
-    const platform = platformFor(this.win);
+    /** @private {Array} */
+    this.toolbars_ = [];
+
+    /** @private {boolean} */
+    this.isToolbarExperimentEnabled_ = isExperimentOn(this.win, TAG);
+
+    const platform = Services.platformFor(this.win);
 
     /** @private @const {boolean} */
     this.isIos_ = platform.isIos();
@@ -70,7 +79,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.bottomBarCompensated_ = false;
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(this.win);
+    this.timer_ = Services.timerFor(this.win);
 
     /** @private {number|string|null} */
     this.openOrCloseTimeOut_ = null;
@@ -83,6 +92,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+
     this.side_ = this.element.getAttribute('side');
 
     this.viewport_ = this.getViewport();
@@ -90,12 +100,24 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
 
     if (this.side_ != 'left' && this.side_ != 'right') {
-      const pageDir =
-          this.document_.body.getAttribute('dir') ||
-          this.documentElement_.getAttribute('dir') ||
-          'ltr';
-      this.side_ = (pageDir == 'rtl') ? 'right' : 'left';
+      this.side_ = isRTL(this.document_) ? 'right' : 'left';
       this.element.setAttribute('side', this.side_);
+    }
+
+    if (this.isToolbarExperimentEnabled_) {
+      const ampdoc = this.getAmpDoc();
+      // Get the toolbar attribute from the child navs.
+      const toolbarElements =
+        toArray(this.element.querySelectorAll('nav[toolbar]'));
+
+      toolbarElements.forEach(toolbarElement => {
+        try {
+          this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
+            ampdoc));
+        } catch (e) {
+          user().error(TAG, 'Failed to instantiate toolbar', e);
+        }
+      });
     }
 
     if (this.isIos_) {
@@ -140,6 +162,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
+
     this.element.addEventListener('click', e => {
       const target = closestByTag(dev().assertElement(e.target), 'A');
       if (target && target.href) {
@@ -161,6 +184,29 @@ export class AmpSidebar extends AMP.BaseElement {
     }, true);
   }
 
+  /** @override */
+  activate() {
+    this.open_();
+  }
+
+  /** @override */
+  onLayoutMeasure() {
+    if (this.isToolbarExperimentEnabled_) {
+      // Check our toolbars for changes
+      this.toolbars_.forEach(toolbar => {
+        toolbar.onLayoutChange(() => this.onToolbarOpen_());
+      });
+    }
+  }
+
+  /**
+   * Function called whenever a tollbar is opened.
+   * @private
+   */
+  onToolbarOpen_() {
+    this.close_();
+  }
+
   /**
    * Returns true if the sidebar is opened.
    * @returns {boolean}
@@ -169,12 +215,6 @@ export class AmpSidebar extends AMP.BaseElement {
   isOpen_() {
     return this.element.hasAttribute('open');
   }
-
-  /** @override */
-  activate() {
-    this.open_();
-  }
-
 
   /**
    * Toggles the open/close state of the sidebar.
@@ -325,7 +365,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private @return {!../../../src/service/history-impl.History}
    */
   getHistory_() {
-    return historyForDoc(this.getAmpDoc());
+    return Services.historyForDoc(this.getAmpDoc());
   }
 }
 

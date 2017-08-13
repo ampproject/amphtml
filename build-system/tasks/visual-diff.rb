@@ -30,15 +30,19 @@ require 'phantomjs'
 
 ENV['PERCY_DEBUG'] = '0'
 ENV['PHANTOMJS_DEBUG'] = 'false'
+ENV['WEBSERVER_QUIET'] = '--quiet'
 # CSS widths: iPhone: 375, Pixel: 411, Macbook Pro 15": 1440.
 DEFAULT_WIDTHS = [375, 411, 1440]
 HOST = 'localhost'
 PORT = '8000'
+CONFIGS = ['prod', 'canary']
+AMP_RUNTIME_FILE = 'dist/amp.js'
 
 
 # Colorize logs.
 def red(text); "\e[31m#{text}\e[0m"; end
 def cyan(text); "\e[36m#{text}\e[0m"; end
+def green(text); "\e[32m#{text}\e[0m"; end
 
 
 # Launches a background AMP webserver for unminified js using gulp.
@@ -46,14 +50,9 @@ def cyan(text); "\e[36m#{text}\e[0m"; end
 # Returns:
 # - Process ID of server process.
 def launchWebServer()
-  webserverCmd = "gulp serve --host #{HOST} --port #{PORT}"
-  webserverUrl = "http://#{HOST}:#{PORT}"
-  @pid = fork do
-    Signal.trap("INT") { exit }
-    exec webserverCmd
-  end
-  Process.detach(@pid)
-  @pid
+  webserverCmd =
+      "gulp serve --host #{HOST} --port #{PORT} #{ENV['WEBSERVER_QUIET']}"
+  spawn(webserverCmd)
 end
 
 
@@ -92,6 +91,7 @@ end
 def closeWebServer(pid)
   Process.kill("INT", pid)
   Process.wait(pid, Process::WNOHANG)
+  sleep(0.1)  # The child node process has an asynchronous stdout. See #10409.
 end
 
 
@@ -125,44 +125,43 @@ def generateSnapshots(pagesToSnapshot)
     page.driver.options[:js_errors] = true
     page.driver.options[:phantomjs_options] =
         ["--debug=#{ENV['PHANTOMJS_DEBUG']}"]
-    webpages.each do |webpage|
-      url = webpage["url"]
-      name = webpage["name"]
-      forbidden_css = webpage["forbidden_css"]
-      loading_incomplete_css = webpage["loading_incomplete_css"]
-      loading_complete_css = webpage["loading_complete_css"]
-      generateSnapshot(
-          page,
-          url,
-          name,
-          forbidden_css,
-          loading_incomplete_css,
-          loading_complete_css)
+    # Include a blank snapshot on master, to allow for PR builds to be skipped.
+    if ARGV.include? '--master'
+      Percy::Capybara.snapshot(page, name: 'Blank page')
+    end
+    for config in CONFIGS
+      puts green('Generating snapshots using the ') + cyan("#{config}") +
+          green(' AMP config')
+      system("gulp prepend-global --target #{AMP_RUNTIME_FILE} --#{config}")
+      webpages.each do |webpage|
+        url = webpage["url"]
+        name = "#{webpage["name"]} (#{config})"
+        forbidden_css = webpage["forbidden_css"]
+        loading_incomplete_css = webpage["loading_incomplete_css"]
+        loading_complete_css = webpage["loading_complete_css"]
+        page.visit(url)
+        verifyCssElements(
+            page, forbidden_css, loading_incomplete_css, loading_complete_css)
+        Percy::Capybara.snapshot(page, name: name)
+      end
+      system("gulp prepend-global --target #{AMP_RUNTIME_FILE} --remove")
     end
   end
 end
 
 
-# Generates a percy snapshot for a given webpage.
+# Verifies that all CSS elements are as expected before taking a snapshot.
 #
 # Args:
 # - page: Page object used by Percy for snapshotting.
-# - url: Relative URL of page to be snapshotted.
-# - name: Name of snapshot on Percy.
 # - forbidden_css:
 #       Array of CSS elements that must not be found in the page.
 # - loading_incomplete_css:
 #       Array of CSS elements that must eventually be removed from the page.
 # - loading_complete_css:
 #       Array of CSS elements that must eventually appear on the page.
-def generateSnapshot(
-    page,
-    url,
-    name,
-    forbidden_css,
-    loading_incomplete_css,
-    loading_complete_css)
-  page.visit(url)
+def verifyCssElements(
+    page, forbidden_css, loading_incomplete_css, loading_complete_css)
   page.has_no_css?('.i-amphtml-loader-dot')  # Implicitly waits for page load.
   if forbidden_css
     forbidden_css.each do |css|
@@ -187,7 +186,6 @@ def generateSnapshot(
       end
     end
   end
-  Percy::Capybara.snapshot(page, name: name)
 end
 
 
@@ -196,6 +194,7 @@ def setDebuggingLevel()
   if ARGV.include? '--debug'
     ENV['PERCY_DEBUG'] = '1'
     ENV['PHANTOMJS_DEBUG'] = 'true'
+    ENV['WEBSERVER_QUIET'] = ''
   end
   if ARGV.include? '--percy_debug'
     ENV['PERCY_DEBUG'] = '1'
@@ -203,11 +202,34 @@ def setDebuggingLevel()
   if ARGV.include? '--phantomjs_debug'
     ENV['PHANTOMJS_DEBUG'] = 'true'
   end
+  if ARGV.include? '--webserver_debug'
+    ENV['WEBSERVER_QUIET'] = ''
+  end
+end
+
+
+# Enables us to require percy checks on GitHub, and yet, not have to do a full
+# build for every PR.
+def createEmptyBuild()
+  puts "Skipping visual diff tests and generating a blank Percy build..."
+  Percy.config.default_widths = [375]
+  server = 'http://localhost'  # Not actually used.
+  blank_assets_dir = File.expand_path(
+      "../../../examples/visual-tests/blank-page",
+      __FILE__)
+  Percy::Capybara::Anywhere.run(server, blank_assets_dir, '') do |page|
+    page.driver.options[:phantomjs] = Phantomjs.path
+    Percy::Capybara.snapshot(page, name: 'Blank page')
+  end
 end
 
 
 # Launches a webserver, loads test pages, and generates Percy snapshots.
 def main()
+  if ARGV.include? '--skip'
+    createEmptyBuild()
+    exit
+  end
   setDebuggingLevel()
   pid = launchWebServer()
   if not waitForWebServer()

@@ -17,7 +17,7 @@
 
 import {AdTracker, getExistingAds} from '../ad-tracker';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {resourcesForDoc} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 describe('ad-tracker', () => {
@@ -30,7 +30,7 @@ describe('ad-tracker', () => {
     doc = window.document;
     sandbox = sinon.sandbox.create();
 
-    resources = resourcesForDoc(doc);
+    resources = Services.resourcesForDoc(doc);
     sandbox.stub(resources, 'getElementLayoutBox', element => {
       return Promise.resolve(element.layoutBox);
     });

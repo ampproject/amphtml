@@ -35,10 +35,11 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Overview
 
 AMP Animations rely on [Web Animations API](https://www.w3.org/TR/web-animations/) to define and run animations in AMP documents.
-
 
 ## Format
 
@@ -78,14 +79,14 @@ will be removed in the near future.
 Each animation component is a [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect)
 and is comprised of:
  - Target element(s) referenced by a selector
- - Conditions, such as media query
+ - Conditions: media query and supports condition
  - Timing properties
  - Keyframes
 
 ```text
 {
   "selector": "#target-id",
-  "media": "(min-width:300px)",
+  // Conditions
   // Variables
   // Timing properties
   // Subtargets
@@ -94,18 +95,73 @@ and is comprised of:
 }
 ```
 
-
 ### Conditions
 
 Conditions can specify whether this animation component is included in the final animation. Currently, only `media` expression is supported.
 
 #### Media query
 
-Media query can be specified using the `media` property. This attribute can contain any expression allowed
-for [Window.matchMedia](https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia) API.
+Media query can be specified using the `media` property. This property can contain any expression allowed
+for [Window.matchMedia](https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia) API and corresponds to `@media` CSS rule.
 
 If value is specified for an animation component, the animation component will only be included if the
 media query will match the current environment.
+
+#### Supports condition
+
+Supports condition can be specified using the `supports` property. This property can contain any expression allowed
+for [CSS.supports](https://developer.mozilla.org/en-US/docs/Web/API/CSS/supports) API and corresponds to `@supports` CSS rule.
+
+If value is specified for an animation component, the animation component will only be included if the
+supports condition will match the current environment.
+
+
+### Animation `switch` statement
+
+In some cases it's convenient to combine multiple [conditional animations](#conditions) with an optional default into a single animation. This can be done using `switch` animation statement in this format:
+
+```
+{
+  // Optional selector, vars, timing
+  ...
+  "switch": [
+    {
+      "media": "(min-width: 320px)",
+      "keyframes": {...},
+    },
+    {
+      "supports": "offset-distance: 0",
+      "keyframes": {...},
+    },
+    {
+      // Optional default: no conditionals
+    }
+  ]
+}
+```
+
+In `switch` animation, the candidates are evaluated in the defined order and the first animation that matches [conditional statements](#conditions) is executed and the rest are ignored.
+
+For instance, this animation runs motion-path animation if supported and falls back to transform:
+```
+{
+  "selector": "#target1",
+  "duration": "1s",
+  "switch": [
+    {
+      "supports": "offset-distance: 0",
+      "keyframes": {
+        "offsetDistance": [0, '300px']
+      }
+    },
+    {
+      "keyframes": {
+        "transform": [0, '300px']
+      }
+    }
+  ]
+}
+```
 
 
 ### Variables
@@ -346,7 +402,7 @@ Another way to specify keyframes is in the document's stylesheet (`<style>` tag)
 CSS `@keyframes` are mostly equivalent to inlining keyframes definition in the JSON per [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument). However, there are some nuances:
  - For broad-platform support, vendor prefixes, e.g. `@-ms-keyframes {}` or `-moz-transform` may be needed. Vendor prefixes are not needed and not allowed in the JSON format, but in CSS they could be necessary.
  - Platforms that do not support `calc()` and `var()` will not be able to take advantage of `amp-animation` polyfills when keyframes are specified in CSS. It's thus recommended to always include fallback values in CSS.
- - CSS extensions such as [`width()`, `height()` and `rand()`](#css-extensions) cannot be used in CSS.
+ - CSS extensions such as [`width()`, `height()`, `rand()` and `index()`](#css-extensions) cannot be used in CSS.
 
 
 #### Whitelisted properties for keyframes
@@ -357,6 +413,8 @@ performance. Currently the list contains:
  - `opacity`
  - `transform`
  - `visibility`
+ - 'offsetDistance'
+
 
 Notice that the use of vendor prefixed CSS properties is neither needed nor allowed.
 
@@ -500,6 +558,18 @@ Animation components can specify their own variables as `--var-name` fields. The
 
 `amp-animation` provides several CSS extensions for typical animations needs: `rand()`, `width()`, and `height()`. These functions can be used everywhere where CSS values can be used within `amp-animation`, including timing and keyframes values.
 
+#### CSS `index()` extension
+
+The `index()` function returns an index of the current target element in the animation effect. This is most relevant when multiple targets are animated with the same effect using `selector` property. The first target matched by the selector will have index `0`, the second will have index `1` and so on.
+
+Among other things, this property can be combined with `calc()` expressions and be used to create staggered effect. For instance:
+```
+{
+  "selector": ".class-x",
+  "delay": "calc(200ms * index())"
+}
+```
+
 #### CSS `rand()` extension
 
 The `rand()` function returns a random CSS value. There are two forms.
@@ -507,14 +577,14 @@ The `rand()` function returns a random CSS value. There are two forms.
 The form without arguments simply returns the random number between 0 and 1.
 ```
 {
-  "animation-delay": "calc(10s * rand())"
+  "delay": "calc(10s * rand())"
 }
 ```
 
 The second form has two arguments and returns the random value between these two arguments.
 ```
 {
-  "animation-delay": "rand(5s, 10s)"
+  "delay": "rand(5s, 10s)"
 }
 ```
 
@@ -535,6 +605,17 @@ These functions can be combined with `calc()`, `var()` and other CSS expressions
   "transform": "translateX(calc(width('#container') + 10px))"
 }
 ```
+
+
+### SVG animations
+
+SVGs are awesome and we certainly recommend their use for animations!
+
+SVG animations are supported via the same CSS properties described in [Whitelisted properties for keyframes](#whitelisted-properties-for-keyframes) with some nuances:
+
+- IE/Edge SVG elements [do not support CSS `transform` properties](https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/1173754/). The `transform` animation itself is polyfilled. However, initial state defined in a stylesheet is not applied. If the initial transformed state is important on IE/Edge, it's recommended to duplicate it via [SVG `transform` attribute](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform).
+- While `transform` CSS is polyfilled for IE/Edge, unfortunately, it's impossible to polyfill `transform-origin`. Thus, where compatibility with IE/Edge is desired, it's recommended to only use the default `transform-origin`.
+- Most of the browsers currently have issues interpreting `transform-origin` CSS correctly. See issues for [Chrome](https://bugs.chromium.org/p/chromium/issues/detail?id=740300), [Safari](https://bugs.webkit.org/show_bug.cgi?id=174285) and [Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=1379340). Most of this confusion should be resolved once [CSS `transform-box`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-box) is implemented. Where `transform-origin` is important, it's recommended to also include the desired `transform-box` CSS for future compatibility.
 
 
 ## Triggering animation

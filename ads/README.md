@@ -44,30 +44,31 @@ The ad itself is hosted within a document that has an origin different from the 
 ### Available information
 We will provide the following information to the ad:
 
-- `window.context.referrer` contains the origin of the referrer value of the primary document if available.
-- `document.referrer` will typically contain the URL of the primary document. This may change in the future (See next value for a more reliable method).
+- [ad viewability](#ad-viewability)
+- `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
+- `window.context.clientId` contains a unique id that is persistently the same for a given user and AMP origin site in their current browser until local data is deleted or the value expires (expiration is currently set to 1 year).
+  - Ad networks must register their cid scope in the variable `clientIdScope` in [_config.js](./_config.js). Use `clientIdCookieName` to provide a cookie name for non-proxy case, otherwise value of `clientIdScope` is used.
+  - Only available on pages that load `amp-analytics`. The clientId will be null if `amp-analytics` was not loaded on the given page.
+- `window.context.container` contains the ad container extension name if the current ad slot has one as its DOM ancestor. An valid ad container is one of the following AMP extensions: `amp-sticky-ad`, `amp-fx-flying-carpet`, `amp-lightbox`. As they provide non-trivial user experience, ad networks might want to use this info to select their serving strategies.
+- `window.context.domFingerprint` contains a string key based on where in the page the ad slot appears. Its purpose is to identify the same ad slot across many page views. It is formed by listing the ancestor tags and their ordinal position, up to 25 levels. For example, if its value is `amp-ad.0,td.1,tr.0,table.0,div/id2.0,div/id1.0` this would mean the first amp-ad child of the second td child of the first tr child of... etc.
 - `window.context.location` contains the sanitized `Location` object of the primary document.
   This object contains keys like `href`, `origin` and other keys common for [Location](https://developer.mozilla.org/en-US/docs/Web/API/Location) objects.
   In browsers that support `location.ancestorOrigins` you can trust that the `origin` of the
   location is actually correct (So rogue pages cannot claim they represent an origin they do not actually represent).
-- `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
-- `window.context.sourceUrl` contains the source URL of the original AMP document. See details [here](../spec/amp-var-substitutions.md#source-url).
-- `window.context.clientId` contains a unique id that is persistently the same for a given user and AMP origin site in their current browser until local data is deleted or the value expires (expiration is currently set to 1 year).
-  - Ad networks must register their cid scope in the variable `clientIdScope` in [_config.js](./_config.js). Use `clientIdCookieName` to provide a cookie name for non-proxy case, otherwise value of `clientIdScope` is used.
-  - Only available on pages that load `amp-analytics`. The clientId will be null if `amp-analytics` was not loaded on the given page.
 - `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
-- [ad viewability](#ad-viewability)
+- `window.context.referrer` contains the origin of the referrer value of the primary document if available.
+  - `document.referrer` will typically contain the URL of the primary document. This may change in the future (See window.context.location for a more reliable method).
+- `window.context.sourceUrl` contains the source URL of the original AMP document. See details [here](../spec/amp-var-substitutions.md#source-url).
 - `window.context.startTime` contains the time at which processing of the amp-ad element started.
-- `window.context.container` contains the ad container extension name if the current ad slot has one as its DOM ancestor. An valid ad container is one of the following AMP extensions: `amp-sticky-ad`, `amp-fx-flying-carpet`, `amp-lightbox`. As they provide non-trivial user experience, ad networks might want to use this info to select their serving strategies.
 
 More information can be provided in a similar fashion if needed (Please file an issue).
 
 ### Available APIs
 
-- `window.context.renderStart(opt_data)` is a method to inform AMP runtime when the ad starts rendering. The ad will then become visible to user. The optional param `opt_data` is an object of form `{width, height}` to request an [ad resize](#ad-resizing) if the size of the returned ad doesn't match the ad slot. To enable this method, add a line `renderStartImplemented=true` to the corresponding ad config in [_config.js](./_config.js).
-- `window.context.noContentAvailable()` is a method to inform AMP runtime that the ad slot cannot be filled. The ad slot will then display the fallback content if provided, otherwise try to collapse.
-- `window.context.reportRenderedEntityIdentifier()` MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.
 - `window.context.getHtml (selector, attrs, callback)` is a method that retrieves specified node's content from the parent window which cannot be accessed directly because of security restrictions caused by AMP rules and iframe's usage. `selector` is a CSS selector of the node to take content from. `attrs` takes an array of tag attributes to be left in the stringified HTML representation (for instance, ['id', 'class']). All not specified attributes will be cut off from the result string. `callback` takes a function to be called when the content is ready. `getHtml` invokes callback with the only argument of type string.
+- `window.context.noContentAvailable()` is a method to inform AMP runtime that the ad slot cannot be filled. The ad slot will then display the fallback content if provided, otherwise try to collapse.
+- `window.context.renderStart(opt_data)` is a method to inform AMP runtime when the ad starts rendering. The ad will then become visible to user. The optional param `opt_data` is an object of form `{width, height}` to request an [ad resize](#ad-resizing) if the size of the returned ad doesn't match the ad slot. To enable this method, add a line `renderStartImplemented=true` to the corresponding ad config in [_config.js](./_config.js).
+- `window.context.reportRenderedEntityIdentifier()` MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.
 
 ### Exceptions to available APIs and information
 Depending on the ad server / provider some methods of rendering ads involve a second iframe inside the AMP iframe. In these cases, the iframe sandbox methods and information will be unavailable to the ad. We are working on a creative level API that will enable this information to be accessible in such iframed cases and this README will be updated when that is available. Refer to the documentation for the relevant ad servers / providers (e.g., [doubleclick.md](./google/doubleclick.md)) for more details on how to handle such cases.

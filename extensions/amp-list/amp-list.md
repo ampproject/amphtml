@@ -40,7 +40,7 @@ using a supplied template.</td>
 
 ## Usage
 
-The `amp-list` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains an array, which is rendered in the specified template.  
+The `amp-list` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains an array, which is rendered in the specified template.
 
 {% call callout('Important', type='caution') %}
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
@@ -50,7 +50,7 @@ You can specify a template in one of two ways:
 
 - a `template` attribute that references an ID of an existing `template` element.
 - a `template` element nested directly inside the `amp-list` element.
-  
+
 For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
 
 *Example: Displaying a dynamic list*
@@ -108,6 +108,13 @@ that the AMP runtime can resize them.
 By default, `amp-list` adds a `list` ARIA role to the list element and a `listitem` role to item
 elements rendered via the template.
 
+### XHR batching
+
+AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-list` elements) on an AMP page.  For example, if your `amp-list` makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR. 
+
+In `amp-list`, you can use the [`items`](#items-optional) attribute to render a subset of the JSON response, allowing you to have multiple `amp-list` elements rendering different content but sharing a single XHR.
+
+
 ### Specifying an overflow
 
 Optionally, the `amp-list` element can contain an element with an `overflow` attribute. This element is shown if the AMP Runtime cannot resize the `amp-list` element as requested.
@@ -137,6 +144,22 @@ Here's the CSS for the `overflow`:
   left: 0;
   right: 0;
 }
+```
+
+### Placeholder and fallback
+
+Optionally, `amp-list` supports a placeholder and/or fallback.
+
+- A *placeholder* is a child element with the `placeholder` attribute. This element is shown until the `amp-list` loads successfully. If a fallback is also provided, the placeholder is hidden when the `amp-list` fails to load.
+- A *fallback* is a child element with the `fallback` attribute. This element is shown if the `amp-list` fails to load.
+
+Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders). Note that a child element cannot be both a placeholder and a fallback.
+
+```html
+<amp-list src="https://foo.com/list.json">
+  <div placeholder>Loading ...</div>
+  <div fallback>Failed to load data.</div>
+</amp-list>
 ```
 
 ## Attributes
