@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  dashToCamelCase,
-  expandTemplate,
-  endsWith,
-  padStart,
-} from '../../src/string';
+import {dashToCamelCase, expandTemplate, endsWith} from '../../src/string';
 
 describe('dashToCamelCase', () => {
   it('should transform dashes to camel case.', () => {

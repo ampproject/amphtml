@@ -313,7 +313,7 @@ export class GlobalVariableSource extends VariableSource {
       return Date.now();
     });
 
-    //Returns the human readable timestamp in format of 2011-01-01 11:11:11.
+    //Returns the human readable timestamp in format of 2011-01-01T11:11:11.612Z.
     this.set('TIMESTAMP_ISO', () => {
       return new Date().toISOString();
     });
@@ -559,7 +559,7 @@ export class GlobalVariableSource extends VariableSource {
   }
 }
 
-/*
+/**
  * This class replaces substitution variables with their values.
  * Document new values in ../spec/amp-var-substitutions.md
  * @package For export
