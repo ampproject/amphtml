@@ -115,6 +115,7 @@ declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '1.0', true);
 declareExtension('amp-selector', '0.1', true);
+declareExtension('amp-web-push', '0.1', true);
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -266,6 +267,17 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       include3pDirectories: true,
       includePolyfills: false,
     }),
+    compileJs('./3p/', 'iframe-transport-client-lib.js',
+        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+      minifiedName: 'iframe-transport-client-v0.js',
+      checkTypes: opt_checkTypes,
+      watch: watch,
+      minify: shouldMinify,
+      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+      externs: ['ads/ads.extern.js',],
+      include3pDirectories: true,
+      includePolyfills: false,
+    }),
     // For compilation with babel we start with the amp-babel entry point,
     // but then rename to the amp.js which we've been using all along.
     compileJs('./src/', 'amp-babel.js', './dist', {
@@ -373,6 +385,13 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
  * @return {!Promise}
  */
 function compileCss() {
+  // Print a message that could help speed up local development.
+  if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
+    $$.util.log(
+        $$.util.colors.green('To skip building during future test runs, use',
+            $$.util.colors.cyan('--nobuild'), 'with your',
+            $$.util.colors.cyan('gulp test'), 'command.'));
+  }
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
   .then(function(css) {
@@ -598,6 +617,7 @@ function dist() {
       buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
       buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true}),
       buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+      buildWebPushPublisherFiles({minify: true, watch: false, preventRemoveAndMakeDir: true}),
       copyCss(),
     ]);
   }).then(() => {
@@ -664,6 +684,13 @@ function checkTypes() {
         }),
       closureCompile(['./3p/ampcontext-lib.js'], './dist',
         'ampcontext-check-types.js', {
+          externs: ['ads/ads.extern.js'],
+          include3pDirectories: true,
+          includePolyfills: true,
+          checkTypes: true,
+        }),
+      closureCompile(['./3p/iframe-transport-client-lib.js'], './dist',
+        'iframe-transport-client-check-types.js', {
           externs: ['ads/ads.extern.js'],
           include3pDirectories: true,
           includePolyfills: true,
@@ -910,6 +937,92 @@ function buildExperiments(options) {
 
 
 /**
+ * Build amp-web-push publisher files HTML page.
+ *
+ * @param {!Object} options
+ */
+function buildWebPushPublisherFiles(options) {
+  return buildWebPushPublisherFilesVersion('0.1', options);
+}
+
+
+/**
+ * Build amp-web-push publisher files HTML page.
+ *
+ * @param {!Object} options
+ */
+function buildWebPushPublisherFilesVersion(version, options) {
+  options = options || {};
+  var watch = options.watch;
+  if (watch === undefined) {
+    watch = argv.watch || argv.w;
+  }
+
+  // Building extensions is a 2 step process because of the renaming
+  // and CSS inlining. This watcher watches the original file, copies
+  // it to the destination and adds the CSS.
+  if (watch) {
+    // Do not set watchers again when we get called by the watcher.
+    var copy = Object.create(options);
+    copy.watch = false;
+    $$.watch(path + '/*', function() {
+      buildWebPushPublisherFiles(version, copy);
+    });
+  }
+
+  var fileNames = ['amp-web-push-helper-frame', 'amp-web-push-permission-dialog'];
+  var promises = [];
+
+  mkdirSync('dist');
+  mkdirSync('dist/v0');
+
+  for (var i = 0; i < fileNames.length; i++) {
+    var fileName = fileNames[i];
+    promises.push(buildWebPushPublisherFile(version, fileName, watch, options));
+  }
+
+  return Promise.all(promises);
+}
+
+function buildWebPushPublisherFile(version, fileName, watch, options) {
+  var basePath = 'extensions/amp-web-push/' + version + '/';
+  var tempBuildDir = 'build/all/v0/';
+  var distDir = 'dist/v0';
+
+  // Build Helper Frame JS
+  var js = fs.readFileSync(basePath + fileName + '.js', 'utf8');
+  var builtName = fileName + '.js';
+  var minifiedName = fileName + '.js';
+  return toPromise(gulp.src(basePath + '/*.js')
+    .pipe($$.file(builtName, js))
+    .pipe(gulp.dest(tempBuildDir)))
+    .then(function () {
+      return compileJs('./' + tempBuildDir, builtName, './' + distDir, {
+        watch: watch,
+        includePolyfills: true,
+        minify: options.minify || argv.minify,
+        minifiedName: minifiedName,
+        preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+      });
+    })
+    .then(function () {
+      if (fs.existsSync(distDir + '/' + minifiedName)) {
+        // Build Helper Frame HTML
+        var fileContents = fs.readFileSync(basePath + fileName + '.html', 'utf8');
+        fileContents = fileContents.replace(
+          '<!-- [GULP-MAGIC-REPLACE ' + fileName + '.js] -->',
+          '<script>' + fs.readFileSync(distDir + '/' + minifiedName, 'utf8') +
+          '</script>'
+        );
+
+        fs.writeFileSync('dist/v0/' + fileName + '.html',
+          fileContents);
+      }
+    });
+}
+
+
+/**
  * Build "Login Done" page.
  *
  * @param {!Object} options
@@ -1113,6 +1226,7 @@ function toPromise(readable) {
  * Gulp tasks
  */
 gulp.task('build', 'Builds the AMP library', build);
+gulp.task('check-all', 'Run through all presubmit checks', ['lint', 'dep-check', 'check-types', 'presubmit']);
 gulp.task('check-types', 'Check JS types', checkTypes);
 gulp.task('css', 'Recompile css to build directory', compileCss);
 gulp.task('default', 'Same as "watch"', ['watch', 'serve']);

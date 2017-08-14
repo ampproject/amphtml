@@ -49,6 +49,24 @@ export class VideoInterface {
   isInteractive() {}
 
   /**
+   * Current playback time in seconds at time of trigger
+   * @return {number}
+   */
+  getCurrentTime() {}
+
+  /**
+   * Total duration of the video in seconds
+   * @return {number}
+   */
+  getDuration() {}
+
+  /**
+   * Get a 2d array of start and stop times that the user has watched.
+   * @return {!Array<Array<number>>}
+   */
+  getPlayedRanges() {}
+
+  /**
    * Plays the video..
    *
    * @param {boolean} unusedIsAutoplay Whether the call to the `play` method is
@@ -87,6 +105,28 @@ export class VideoInterface {
   hideControls() {}
 
   /**
+   * Returns video's meta data (artwork, title, artist, album, etc.) for use
+   * with the Media Session API
+   * artwork (Array): URL to the poster image (preferably a 512x512 PNG)
+   * title (string): Name of the video
+   * artist (string): Name of the video's author/artist
+   * album (string): Name of the video's album if it exists
+   * @return {!./mediasession-helper.MetadataDef|undefined} metadata
+   */
+  getMetadata() {}
+
+  /**
+   * If this returns true then it will be assumed that the player implements
+   * the MediaSession API internally so that the video manager does not override
+   * it. If not, the video manager will use the metadata variable as well as
+   * inferred meta-data to update the video's Media Session notification.
+   *
+   * @return {boolean}
+   */
+  preimplementsMediaSessionAPI() {}
+
+
+  /**
    * Automatically comes from {@link ./base-element.BaseElement}
    *
    * @return {!AmpElement}
@@ -101,6 +141,28 @@ export class VideoInterface {
   isInViewport() {}
 
   /**
+   * Enables fullscreen on the internal video element
+   * NOTE: While implementing, keep in mind that Safari/iOS do not allow taking
+   * any element other than <video> to fullscreen, if the player has an internal
+   * implementation of fullscreen (flash for example) then check
+   * if Services.platformFor(this.win).isSafari is true and use the internal
+   * implementation instead. If not, it is recommended to take the iframe
+   * to fullscreen using fullscreenEnter from dom.js
+   */
+  fullscreenEnter() {}
+
+  /**
+   * Quits fullscreen mode
+   */
+  fullscreenExit() {}
+
+  /**
+   * Returns whether the video is currently in fullscreen mode or not
+   * @return {boolean}
+   */
+  isFullscreen() {}
+
+  /**
    * Automatically comes from {@link ./base-element.BaseElement}
    *
    * @param {string} unusedMethod
@@ -109,36 +171,6 @@ export class VideoInterface {
    * @public
    */
   registerAction(unusedMethod, unusedHandler, unusedMinTrust) {}
-}
-
-
-/**
- * @interface
- */
-export class VideoInterfaceWithAnalytics extends VideoInterface {
-  /**
-   * Should return true.
-   * @return {boolean}
-   */
-  supportsAnalytics() {}
-
-  /**
-   * Current playback time in seconds at time of trigger
-   * @return {number}
-   */
-  getCurrentTime() {}
-
-  /**
-   * Total duration of the video in seconds
-   * @return {number}
-   */
-  getDuration() {}
-
-  /**
-   * Get a 2d array of start and stop times that the user has watched.
-   * @return {!Array<Array<number>>}
-   */
-  getPlayedRanges() {}
 }
 
 
@@ -179,6 +211,19 @@ export const VideoAttributes = {
    * to the corner when scrolled out of view and has been interacted with.
    */
   DOCK: 'dock',
+  /**
+   * fullscreen-on-landscape
+   *
+   * If enabled, this automatically expands the currently visible video and
+   * playing to fullscreen when the user changes the device's orientation to
+   * landscape if the video was started following a user interaction
+   * (not autoplay)
+   *
+   * Dependent upon browser support of
+   * http://caniuse.com/#feat=screen-orientation
+   * and http://caniuse.com/#feat=fullscreen
+   */
+  FULLSCREEN_ON_LANDSCAPE: 'fullscreen-on-landscape',
 };
 
 
@@ -191,6 +236,16 @@ export const VideoAttributes = {
  * @constant {!Object<string, string>}
  */
 export const VideoEvents = {
+  /**
+   * registered
+   *
+   * Fired when the video player element is built and has been registered with
+   * the video manager.
+   *
+   * @event registered
+   */
+  REGISTERED: 'registered',
+
   /**
    * load
    *
@@ -265,17 +320,6 @@ export const VideoEvents = {
    * @event ended
    */
   ENDED: 'ended',
-
-  /**
-   * amp:video:analytics
-   *
-   * Fired when an analytics event occurs
-   *
-   * @event amp:video:analytics
-   * @property {!VideoAnalyticsType} type The type of the video analytics event.
-   * @property {!VideoAnalyticsDetailsDef} details
-   */
-  ANALYTICS: 'amp:video:analytics',
 };
 
 
@@ -319,31 +363,61 @@ export const PlayingStates = {
 
 
 /** @enum {string} */
-export const VideoAnalyticsType = {
+export const VideoAnalyticsEvents = {
   /**
+   * video-ended
+   *
    * Indicates that a video ended.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-ended
    */
   ENDED: 'video-ended',
 
   /**
+   * video-pause
+   *
    * Indicates that a video paused.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-pause
    */
   PAUSE: 'video-pause',
 
   /**
+   * video-play
+   *
    * Indicates that a video began to play.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-play
    */
   PLAY: 'video-play',
 
   /**
+   * video-session
+   *
    * Indicates that some segment of the video played.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-session
    */
   SESSION: 'video-session',
 
   /**
+   * video-session-visible
+   *
    * Indicates that some segment of the video played in the viewport.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-session-visible
    */
   SESSION_VISIBLE: 'video-session-visible',
+
+  /**
+   * video-seconds-played
+   *
+   * Indicates that a video was playing when the
+   * video-seconds-played interval fired.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-session-visible
+   */
+  SECONDS_PLAYED: 'video-seconds-played',
 };
 
 

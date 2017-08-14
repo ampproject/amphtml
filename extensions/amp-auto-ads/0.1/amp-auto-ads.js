@@ -18,7 +18,7 @@ import {AdTracker, getExistingAds} from './ad-tracker';
 import {AdStrategy} from './ad-strategy';
 import {AnchorAdStrategy} from './anchor-ad-strategy';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {getAdNetworkConfig} from './ad-network-config';
 import {isExperimentOn} from '../../../src/experiments';
 import {getAttributesFromConfigObj} from './attributes';
@@ -27,12 +27,15 @@ import {getPlacementsFromConfigObj} from './placement';
 /** @const */
 const TAG = 'amp-auto-ads';
 
+/** @const */
+const AD_TAG = 'amp-ad';
 
 export class AmpAutoAds extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(self, 'amp-auto-ads'), 'Experiment is off');
+    user().assert(
+        isExperimentOn(this.win, 'amp-auto-ads'), 'Experiment is off');
 
     const type = this.element.getAttribute('type');
     user().assert(type, 'Missing type attribute');
@@ -43,6 +46,8 @@ export class AmpAutoAds extends AMP.BaseElement {
     if (!adNetwork.isEnabled(this.win)) {
       return;
     }
+
+    Services.extensionsFor(this.win)./*OK*/loadElementClass(AD_TAG);
 
     const configPromise = this.getConfig_(adNetwork.getConfigUrl());
     const docPromise = this.getAmpDoc().whenReady();
@@ -83,7 +88,7 @@ export class AmpAutoAds extends AMP.BaseElement {
       credentials: 'omit',
       requireAmpResponseSourceOrigin: false,
     };
-    return xhrFor(this.win)
+    return Services.xhrFor(this.win)
         .fetchJson(configUrl, xhrInit)
         .then(res => res.json())
         .catch(reason => {

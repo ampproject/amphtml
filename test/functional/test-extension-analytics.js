@@ -25,7 +25,7 @@ import {
     CustomEventReporterBuilder,
 } from '../../src/extension-analytics';
 import {createAmpElementProto} from '../../src/custom-element';
-import {timerFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {BaseElement} from '../../src/base-element';
 import {macroTask} from '../../testing/yield';
 import * as sinon from 'sinon';
@@ -40,10 +40,10 @@ describes.realWin('extension-analytics', {
 
   describe('insertAnalyticsElement', () => {
     class MockInstrumentation {
-        };
+    };
 
     beforeEach(() => {
-      timer = timerFor(env.win);
+      timer = Services.timerFor(env.win);
       ampdoc = env.ampdoc;
       win = env.win;
     });
@@ -189,9 +189,10 @@ describes.realWin('extension-analytics', {
       parentEle = env.win.document.createElement('amp-test');
       parentEle.setAttribute('layout', 'nodisplay');
       env.win.document.body.appendChild(parentEle);
-      parentEle.build();
+      const buildPromise = parentEle.build();
       builder = new CustomEventReporterBuilder(parentEle);
       reporter = builder.track('test', 'fake.com').build();
+      return buildPromise;
     });
 
     it('replace eventType with new name', function* () {
@@ -270,7 +271,7 @@ describes.realWin('extension-analytics', {
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
-        parentEle.build();
+        return parentEle.build();
       });
 
       it('should insert analytics after LOAD_START', function* () {
@@ -328,7 +329,7 @@ describes.realWin('extension-analytics', {
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
-        parentEle.build();
+        return parentEle.build();
       });
 
       it('should insert and remove analytics', function* () {
@@ -362,7 +363,7 @@ describes.realWin('extension-analytics', {
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
-        parentEle.build();
+        return parentEle.build();
       });
 
       it('should NOT insert analytics when relayout', function* () {
@@ -411,7 +412,7 @@ describes.realWin('extension-analytics', {
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
-        parentEle.build();
+        return parentEle.build();
       });
 
       it('should insert analytics when relayout', function* () {

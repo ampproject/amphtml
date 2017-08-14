@@ -197,6 +197,9 @@ export class AmpImg extends BaseElement {
     this.getVsync().mutate(() => {
       this.img_.classList.add('i-amphtml-ghost');
       this.toggleFallback(true);
+      // Hide placeholders, as browsers that don't support webp
+      // Would show the placeholder underneath a transparent fallback
+      this.togglePlaceholder(false);
     });
   }
 };

@@ -21,6 +21,7 @@ import {nextTick} from './3p';
 import {tryParseJson} from '../src/json';
 import {isObject} from '../src/types';
 import {AmpEvents} from '../src/amp-events';
+import {parseUrl} from '../src/url';
 
 export class AbstractAmpContext {
 
@@ -58,8 +59,11 @@ export class AbstractAmpContext {
     /** @type {?string|undefined} */
     this.container = null;
 
-    /** @type {?Object<String, *>} */
+    /** @type {?Object<string, *>} */
     this.data = null;
+
+    /** @type {?string} */
+    this.domFingerprint = null;
 
     /** @type {?boolean} */
     this.hidden = null;
@@ -235,6 +239,7 @@ export class AbstractAmpContext {
    *  @private
    */
   setupMetadata_(data) {
+    // TODO(alanorozco): Use metadata utils in 3p/frame-metadata
     const dataObject = dev().assert(
         typeof data === 'string' ? tryParseJson(data) : data,
         'Could not setup metadata.');
@@ -243,14 +248,21 @@ export class AbstractAmpContext {
 
     this.data = dataObject.attributes || dataObject;
 
+    // TODO(alanorozco, #10576): This is really ugly. Find a better structure
+    // than passing context values via data.
+    if ('_context' in this.data) {
+      delete this.data['_context'];
+    }
+
     this.canary = context.canary;
     this.canonicalUrl = context.canonicalUrl;
     this.clientId = context.clientId;
     this.container = context.container;
+    this.domFingerprint = context.domFingerprint;
     this.hidden = context.hidden;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
-    this.location = context.location;
+    this.location = parseUrl(context.location.href);
     this.mode = context.mode;
     this.pageViewId = context.pageViewId;
     this.referrer = context.referrer;

@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
+import {Services} from './services';
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
-import {
-  ampdocServiceFor,
-  extensionsFor,
-  platformFor,
-  vsyncFor,
-} from './services';
 import {dev} from './log';
 import {closestNode, escapeCssSelectorIdent} from './dom';
 import {insertStyleElement} from './style-installer';
@@ -174,8 +169,8 @@ export function createShadowEmbedRoot(hostElement, extensionIds) {
 
   const win = hostElement.ownerDocument.defaultView;
   /** @const {!./service/extensions-impl.Extensions} */
-  const extensions = extensionsFor(win);
-  const ampdocService = ampdocServiceFor(win);
+  const extensions = Services.extensionsFor(win);
+  const ampdocService = Services.ampdocServiceFor(win);
   const ampdoc = ampdocService.getAmpDoc(hostElement);
 
   // Instal runtime CSS.
@@ -408,7 +403,7 @@ function calcShadowDomStreamingSupported(win) {
   }
   // Firefox does not support DOM streaming.
   // See: https://bugzilla.mozilla.org/show_bug.cgi?id=867102
-  if (platformFor(win).isFirefox()) {
+  if (Services.platformFor(win).isFirefox()) {
     return false;
   }
   // Assume full streaming support.
@@ -491,7 +486,7 @@ export class ShadowDomWriterStreamer {
     this.parser_.open();
 
     /** @const @private */
-    this.vsync_ = vsyncFor(win);
+    this.vsync_ = Services.vsyncFor(win);
 
     /** @private @const */
     this.boundMerge_ = this.merge_.bind(this);
@@ -551,6 +546,31 @@ export class ShadowDomWriterStreamer {
     this.eof_ = true;
     this.schedule_();
     return this.success_;
+  }
+
+  /** @override */
+  abort(unusedReason) {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  releaseLock() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get closed() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get desiredSize() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get ready() {
+    throw new Error('Not implemented');
   }
 
   /** @private */
@@ -613,7 +633,7 @@ export class ShadowDomWriterBulk {
     this.fullHtml_ = [];
 
     /** @const @private */
-    this.vsync_ = vsyncFor(win);
+    this.vsync_ = Services.vsyncFor(win);
 
     /** @private {?function(!Document):!Element} */
     this.onBody_ = null;
@@ -664,6 +684,31 @@ export class ShadowDomWriterBulk {
     this.eof_ = true;
     this.vsync_.mutate(() => this.complete_());
     return this.success_;
+  }
+
+  /** @override */
+  abort(unusedReason) {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  releaseLock() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get closed() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get desiredSize() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get ready() {
+    throw new Error('Not implemented');
   }
 
   /** @private */

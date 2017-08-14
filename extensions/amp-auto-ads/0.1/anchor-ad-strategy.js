@@ -16,10 +16,13 @@
 import {createElementWithAttributes} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {viewportForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 /** @const */
 const TAG = 'amp-auto-ads';
+
+/** @const */
+const STICKY_AD_TAG = 'amp-sticky-ad';
 
 /** @const */
 const OPT_IN_STATUS_ANCHOR_ADS = 2;
@@ -53,6 +56,7 @@ export class AnchorAdStrategy {
       user().warn(TAG, 'exists <amp-sticky-ad>');
       return Promise.resolve(false);
     }
+    Services.extensionsFor(this.win_)./*OK*/loadElementClass(STICKY_AD_TAG);
     this.placeStickyAd_();
     return Promise.resolve(true);
   }
@@ -83,7 +87,8 @@ export class AnchorAdStrategy {
   }
 
   placeStickyAd_() {
-    const viewportWidth = viewportForDoc(this.win_.document).getWidth();
+    const viewportWidth =
+        Services.viewportForDoc(this.win_.document).getWidth();
     const attributes = /** @type {!JsonObject} */ (
         Object.assign(dict(), this.baseAttributes_, dict({
           'width': String(viewportWidth),

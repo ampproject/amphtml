@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ampdocServiceFor, viewerForDoc} from '../services';
+import {Services} from '../services';
 import {dev, user} from '../log';
 import {registerServiceBuilder, getService} from '../service';
 import {
@@ -93,7 +93,7 @@ export class Xhr {
     /** @private {?./ampdoc-impl.AmpDoc} */
     this.ampdocSingle_ = null;
     if (!getMode().test) {
-      const ampdocService = ampdocServiceFor(win);
+      const ampdocService = Services.ampdocServiceFor(win);
       this.ampdocSingle_ = ampdocService.isSingleDoc() ?
           ampdocService.getAmpDoc() :
           null;
@@ -113,7 +113,7 @@ export class Xhr {
     if (this.ampdocSingle_ &&
         Math.random() < 0.01 &&
         parseUrl(input).origin != this.win.location.origin &&
-        !viewerForDoc(this.ampdocSingle_).hasBeenVisible()) {
+        !Services.viewerForDoc(this.ampdocSingle_).hasBeenVisible()) {
       dev().error('XHR', 'attempted to fetch %s before viewer was visible',
           input);
     }
@@ -221,8 +221,9 @@ export class Xhr {
           'body must be of type object or array. %s',
           init.body
       );
-
-      init.headers['Content-Type'] = 'application/json;charset=utf-8';
+      // Content should be 'text/plain' to avoid CORS preflight.
+      init.headers['Content-Type'] = init.headers['Content-Type'] ||
+          'text/plain;charset=utf-8';
       // Cast is valid, because we checked that it is not form data above.
       init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
     }

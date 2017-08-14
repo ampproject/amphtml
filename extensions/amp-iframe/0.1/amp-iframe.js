@@ -22,9 +22,9 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
+import {removeElement, closestBySelector} from '../../../src/dom';
 import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
-import {timerFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {user, dev} from '../../../src/log';
 import {utf8EncodeSync} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';
@@ -106,6 +106,9 @@ export class AmpIframe extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.container_ = null;
+
+    /** @private {boolean|undefined} */
+    this.isInContainer_ = undefined;
   }
 
   /** @override */
@@ -350,14 +353,13 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.onload = () => {
       // Chrome does not reflect the iframe readystate.
       iframe.readyState = 'complete';
-
       this.activateIframe_();
 
       if (this.isTrackingFrame_) {
         // Prevent this iframe from ever being recreated.
         this.iframeSrc = null;
 
-        timerFor(this.win).promise(trackingIframeTimeout).then(() => {
+        Services.timerFor(this.win).promise(trackingIframeTimeout).then(() => {
           removeElement(iframe);
           this.element.setAttribute('amp-removed', '');
           this.iframe_ = null;
@@ -380,7 +382,7 @@ export class AmpIframe extends AMP.BaseElement {
       // container. To avoid this problem, we set the `overflow:auto` property
       // 1s later via `amp-active` class.
       if (this.container_ != this.element) {
-        timerFor(this.win).delay(() => {
+        Services.timerFor(this.win).delay(() => {
           this.deferMutate(() => {
             this.container_.classList.add('amp-active');
           });
@@ -538,7 +540,12 @@ export class AmpIframe extends AMP.BaseElement {
     if (box.width > 10 && box.height > 10) {
       return false;
     }
-    return true;
+    // Iframe is not tracking iframe if open with user interaction
+    if (this.isInContainer_ === undefined) {
+      this.isInContainer_ =
+          !!closestBySelector(this.element, '.i-amphtml-overlay');
+    }
+    return !this.isInContainer_;
   }
 };
 

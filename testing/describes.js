@@ -90,11 +90,7 @@ import {
 } from './fake-dom';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {doNotLoadExternalResourcesInTest} from './iframe';
-import {
-  ampdocServiceFor,
-  extensionsFor,
-  resourcesForDoc,
-} from '../src/services';
+import {Services} from '../src/services';
 import {
   adopt,
   adoptShadowMode,
@@ -112,6 +108,7 @@ import {
   installExtensionsService,
   registerExtension,
 } from '../src/service/extensions-impl';
+import {resetLoadingCheckForTests} from '../src/element-stub';
 import {resetScheduledElementForTesting} from '../src/custom-element';
 import {setStyles} from '../src/style';
 import * as sinon from 'sinon';
@@ -448,10 +445,17 @@ class IntegrationFixture {
 
   /** @override */
   setup(env) {
-    const body = this.spec.body;
+    const body = typeof this.spec.body == 'function' ?
+          this.spec.body() : this.spec.body;
+    const experiments = this.spec.experiments == undefined ?
+        undefined : this.spec.experiments.join(',');
+    const extensions = this.spec.extensions == undefined ?
+        undefined : this.spec.extensions.join(',');
+
     return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
-        src: addParamsToUrl('/amp4test/compose-doc', {body}) + `#${this.hash}`,
+        src: addParamsToUrl('/amp4test/compose-doc',
+            {body, experiments, extensions}) + `#${this.hash}`,
       });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
@@ -611,10 +615,10 @@ class AmpFixture {
     const ampdocType = spec.ampdoc || 'single';
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
     installDocService(win, singleDoc);
-    const ampdocService = ampdocServiceFor(win);
-    env.ampdocService  = ampdocService;
+    const ampdocService = Services.ampdocServiceFor(win);
+    env.ampdocService = ampdocService;
     installExtensionsService(win);
-    env.extensions = extensionsFor(win);
+    env.extensions = Services.extensionsFor(win);
     installBuiltinElements(win);
     installRuntimeServices(win);
     env.flushVsync = function() {
@@ -627,7 +631,7 @@ class AmpFixture {
       env.ampdoc = ampdoc;
       installAmpdocServices(ampdoc, spec.params);
       adopt(win);
-      resourcesForDoc(ampdoc).ampInitComplete();
+      Services.resourcesForDoc(ampdoc).ampInitComplete();
     } else if (ampdocType == 'multi' || ampdocType == 'shadow') {
       adoptShadowMode(win);
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
@@ -715,6 +719,7 @@ class AmpFixture {
     if (env.embed) {
       env.embed.destroy();
     }
+    resetLoadingCheckForTests();
     if (win.customElements && win.customElements.elements) {
       for (const k in win.customElements.elements) {
         resetScheduledElementForTesting(win, k);

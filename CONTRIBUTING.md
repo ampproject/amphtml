@@ -93,7 +93,7 @@ Because Extended Components may have significant impact on AMP HTML performance,
 In particular we strive to design the overall component set, so that a large number of use cases can be composed from them. Instead of creating a new component it may thus be a better solution to combine existing components to a similar effect.
 
 We have a few additional resources that provide an introduction to contributing extended components:
-* ["Building an AMP Extension"](https://docs.google.com/document/d/19o7eDta6oqPGF4RQ17LvZ9CHVQN53whN-mCIeIMM8Qk/edit) has a detailed description of how to build an AMP component.
+* ["Building an AMP Extension"](contributing/building-an-amp-extension.md) has a detailed description of how to build an AMP component.
 * ["Creating your first AMP Component" codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/#0) provides a quick overview of the steps you need to go through to create a component with examples you can modify for your component.
 * The ["Building a new AMP component" talk at AMP Conf 2017](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) provides an introduction to contributing AMP components.
 
@@ -101,9 +101,15 @@ For further detail on integrating third party services, fonts, embeds, etc. see 
 
 ## Contributor License Agreement
 
-The AMP Project hosted at GitHub requires all contributors to sign a Contributor License Agreement ([individual](https://developers.google.com/open-source/cla/individual) or [corporation](https://developers.google.com/open-source/cla/corporate)) in order to protect contributors, users and Google in issues of intellectual property.
+The AMP Project hosted at GitHub requires all contributors to sign a Contributor License Agreement in order to protect contributors and users in issues of intellectual property.
 
-When you create a Pull Request a check will be run to ensure that you have signed the CLA.  Make sure that you sign the CLA with the same email address you associate with your commits (likely via the `user.email` Git config as described on GitHub's [Set up Git](https://help.github.com/articles/set-up-git/) page).
+We recommend signing the CLA *before* you send a pull request to avoid problems, though this is not absolutely necessary until your code is ready to be merged in.
+
+**Make sure that you sign the CLA with the same email address you associate with your commits (likely via the `user.email` Git config as described on GitHub's [Set up Git](https://help.github.com/articles/set-up-git/) page).**
+
+* If you are contributing code on your own behalf you can sign the ([individual CLA](https://developers.google.com/open-source/cla/individual) instantly online.
+* If you are planning on contributing code on behalf of your company your company will need to agree to a [corporate CLA](https://developers.google.com/open-source/cla/corporate) if it has not already done so.  Although this is a relatively straightforward process, it requires approval from an authorized signer at your company and a manual verification process, so to ensure you can get your code reviewed and merged quickly please start this process as soon as possible.
+* If your company has already agreed to a corporate CLA you can indicate agreement to the CLA by having the appropriate person at your company add your email address added to the Google Group associated with your corporate CLA.
 
 ## Ongoing participation
 

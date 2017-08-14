@@ -37,11 +37,18 @@ import {
   run,
   setExperimentToggles,
 } from './3p';
+import {
+  getAmpConfig,
+  getAttributeData,
+  getContextState,
+  getEmbedType,
+  getLocation,
+} from './frame-metadata';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseJson} from '../src/json';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
-import {dev, initLogConstructor, setReportError, user} from '../src/log';
+import {initLogConstructor, setReportError, user} from '../src/log';
 import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
 import {startsWith} from '../src/string.js';
@@ -67,6 +74,7 @@ import {adhese} from '../ads/adhese';
 import {adition} from '../ads/adition';
 import {adman} from '../ads/adman';
 import {admanmedia} from '../ads/admanmedia';
+import {adocean} from '../ads/adocean';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
 import {adsnative} from '../ads/adsnative';
@@ -94,11 +102,13 @@ import {colombia} from '../ads/colombia';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
 import {csa} from '../ads/google/csa';
+import {dable} from '../ads/dable';
 import {distroscale} from '../ads/distroscale';
 import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eas} from '../ads/eas';
+import {engageya} from '../ads/engageya';
 import {eplanning} from '../ads/eplanning';
 import {f1e} from '../ads/f1e';
 import {f1h} from '../ads/f1h';
@@ -116,6 +126,7 @@ import {imedia} from '../ads/imedia';
 import {imobile} from '../ads/imobile';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
+import {innity} from '../ads/innity';
 import {ix} from '../ads/ix';
 import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
@@ -155,6 +166,7 @@ import {slimcutmedia} from '../ads/slimcutmedia';
 import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
 import {sortable} from '../ads/sortable';
+import {sogouad} from '../ads/sogouad';
 import {sovrn} from '../ads/sovrn';
 import {spotx} from '../ads/spotx';
 import {sunmedia} from '../ads/sunmedia';
@@ -163,6 +175,7 @@ import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {valuecommerce} from '../ads/valuecommerce';
+import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
 import {widespace} from '../ads/widespace';
@@ -185,6 +198,8 @@ import {zucks} from '../ads/zucks';
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
   bringhub: true,
+  dable: true,
+  engageya: true,
   'mantis-recommend': true,
   mywidget: true,
   outbrain: true,
@@ -195,29 +210,13 @@ const AMP_EMBED_ALLOWED = {
 };
 
 
-/** @const {!JsonObject} */
-const FALLBACK_CONTEXT_DATA = dict({
-  '_context': dict(),
-});
-
-
 // Need to cache iframeName as it will be potentially overwritten by
 // masterSelection, as per below.
 const iframeName = window.name;
 
-// TODO(alanorozco): Remove references to this and try to find a more suitable
-//    data structure.
-const data = getData(iframeName);
 
-window.context = data['_context'];
+init(window);
 
-// This should only be invoked after window.context is set
-initLogConstructor();
-setReportError(console.error.bind(console));
-
-// Experiment toggles
-setExperimentToggles(window.context.experimentToggles);
-delete window.context.experimentToggles;
 
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
@@ -236,6 +235,7 @@ register('adhese', adhese);
 register('adition', adition);
 register('adman', adman);
 register('admanmedia', admanmedia);
+register('adocean', adocean);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adsnative', adsnative);
@@ -263,10 +263,12 @@ register('colombia', colombia);
 register('contentad', contentad);
 register('criteo', criteo);
 register('csa', csa);
+register('dable', dable);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
 register('eas', eas);
+register('engageya', engageya);
 register('eplanning', eplanning);
 register('ezoic', ezoic);
 register('f1e', f1e);
@@ -288,6 +290,7 @@ register('imobile', imobile);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
+register('innity', innity);
 register('ix', ix);
 register('kargo', kargo);
 register('kiosked', kiosked);
@@ -329,6 +332,7 @@ register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
 register('smartclip', smartclip);
 register('sortable', sortable);
+register('sogouad', sogouad);
 register('sovrn', sovrn);
 register('spotx', spotx);
 register('sunmedia', sunmedia);
@@ -338,6 +342,7 @@ register('teads', teads);
 register('triplelift', triplelift);
 register('twitter', twitter);
 register('valuecommerce', valuecommerce);
+register('vmfive', vmfive);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
 register('widespace', widespace);
@@ -368,21 +373,19 @@ const defaultAllowedTypesInCustomFrame = [
 
 
 /**
- * Gets data encoded in iframe name attribute.
- * @return {!JsonObject}
+ * Initialize 3p frame.
+ * @param {!Window} win
  */
-function getData(iframeName) {
-  try {
-    // TODO(bradfrizzell@): Change the data structure of the attributes
-    //    to make it less terrible.
-    return parseJson(iframeName)['attributes'];
-  } catch (err) {
-    if (!getMode().test) {
-      dev().info(
-          'INTEGRATION', 'Could not parse context from:', iframeName);
-    }
-    return FALLBACK_CONTEXT_DATA;
-  }
+function init(win) {
+  const config = getAmpConfig();
+
+  // Overriding to short-circuit src/mode#getMode()
+  win.AMP_MODE = config.mode;
+
+  initLogConstructor();
+  setReportError(console.error.bind(console));
+
+  setExperimentToggles(config.experimentToggles);
 }
 
 
@@ -398,10 +401,10 @@ function getData(iframeName) {
  *     on this.
  */
 export function draw3p(win, data, configCallback) {
-  const type = data.type;
+  const type = data['type'];
 
-  user().assert(isTagNameAllowed(data.type, win.context.tagName),
-      'Embed type %s not allowed with tag %s', data.type, win.context.tagName);
+  user().assert(isTagNameAllowed(type, win.context.tagName),
+      'Embed type %s not allowed with tag %s', type, win.context.tagName);
   if (configCallback) {
     configCallback(data, data => {
       user().assert(data,
@@ -435,16 +438,16 @@ function isMaster() {
 window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     opt_allowedEmbeddingOrigins) {
   try {
-    const location = parseUrl(data['_context']['location']['href']);
+    const data = getAttributeData();
+    const location = getLocation();
 
     ensureFramed(window);
     validateParentOrigin(window, location);
-    validateAllowedTypes(window, data['type'], opt_allowed3pTypes);
+    validateAllowedTypes(window, getEmbedType(), opt_allowed3pTypes);
     if (opt_allowedEmbeddingOrigins) {
       validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
     }
-    installContext(window);
-    delete data['_context'];
+    installContext(window, data);
     manageWin(window);
     installEmbedStateListener();
 
@@ -485,14 +488,15 @@ function isAmpContextExperimentOn() {
 /**
  * Installs window.context API.
  * @param {!Window} win
+ * @param {!JsonObject} data
  */
-function installContext(win) {
+function installContext(win, data) {
   if (isAmpContextExperimentOn()) {
     installContextUsingExperimentalImpl(win);
     return;
   }
 
-  installContextUsingStandardImpl(win);
+  installContextUsingStandardImpl(win, data);
 }
 
 
@@ -508,50 +512,79 @@ function installContextUsingExperimentalImpl(win) {
 /**
  * Installs window.context using standard (to be deprecated) implementation.
  * @param {!Window} win
+ * @param {!JsonObject} data
  */
-function installContextUsingStandardImpl(win) {
+function installContextUsingStandardImpl(win, data) {
+  const embedType = getEmbedType();
+  const contextState = getContextState();
+
+  win.context = {
+    // read from context state
+    ampcontextFilepath: contextState.ampcontextFilepath,
+    ampcontextVersion: contextState.ampcontextVersion,
+    canary: contextState.canary,
+    canonicalUrl: contextState.canonicalUrl,
+    clientId: contextState.clientId,
+    container: contextState.container,
+    domFingerprint: contextState.domFingerprint,
+    hidden: contextState.hidden,
+    initialIntersection: contextState.initialIntersection,
+    initialLayoutRect: contextState.initialLayoutRect,
+    mode: contextState.mode,
+    pageViewId: contextState.pageViewId,
+    referrer: contextState.referrer,
+    sentinel: contextState.sentinel,
+    sourceUrl: contextState.sourceUrl,
+    startTime: contextState.startTime,
+    tagName: contextState.tagName,
+
+    // read from iframe name
+    data,
+    location: getLocation(),
+
+    // locally defined APIs
+    addContextToIframe: iframe => { iframe.name = iframeName; },
+    getHtml,
+    noContentAvailable: triggerNoContentAvailable,
+    onResizeDenied,
+    onResizeSuccess,
+    renderStart: triggerRenderStart,
+    reportRenderedEntityIdentifier,
+    requestResize: triggerResizeRequest,
+
+    // Using quotes due to bug related to imported variables in object property
+    // shorthand + object shorthand lint rule.
+    // https://github.com/google/closure-compiler/issues/2219
+    'computeInMasterFrame': computeInMasterFrame,
+  };
+
   // Define master related properties to be lazily read.
   Object.defineProperties(win.context, {
     master: {
-      get: () => masterSelection(win, data['type']),
+      get: () => masterSelection(win, embedType),
     },
     isMaster: {
       get: isMaster,
     },
   });
 
-  win.context.data = data;
-  win.context.location = parseUrl(data['_context']['location']['href']);
-  win.context.noContentAvailable = triggerNoContentAvailable;
-  win.context.requestResize = triggerResizeRequest;
-  win.context.renderStart = triggerRenderStart;
-
-  const type = data['type'];
-  if (type === 'facebook' || type === 'twitter' || type === 'github') {
+  if (embedType === 'facebook' ||
+      embedType === 'twitter' ||
+      embedType === 'github') {
     // Only make this available to selected embeds until the
     // generic solution is available.
     win.context.updateDimensions = triggerDimensions;
   }
 
   // This only actually works for ads.
-  const initialIntersection = win.context.initialIntersection;
   win.context.observeIntersection = cb => {
     const unlisten = observeIntersection(cb);
     // Call the callback with the value that was transmitted when the
     // iframe was drawn. Called in nextTick, so that callers don't
     // have to specially handle the sync case.
-    nextTick(win, () => cb([initialIntersection]));
+    nextTick(win, () => cb([contextState.initialIntersection]));
     return unlisten;
   };
-  win.context.onResizeSuccess = onResizeSuccess;
-  win.context.onResizeDenied = onResizeDenied;
-  win.context.reportRenderedEntityIdentifier =
-      reportRenderedEntityIdentifier;
-  win.context.computeInMasterFrame = computeInMasterFrame;
-  win.context.addContextToIframe = iframe => {
-    iframe.name = iframeName;
-  };
-  win.context.getHtml = getHtml;
 }
 
 

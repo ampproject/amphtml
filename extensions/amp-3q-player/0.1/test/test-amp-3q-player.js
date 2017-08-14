@@ -21,7 +21,7 @@ import {
 import '../amp-3q-player';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {adopt} from '../../../../src/runtime';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import * as sinon from 'sinon';
 
@@ -30,7 +30,7 @@ adopt(window);
 describe('amp-3q-player', function() {
   this.timeout(10000);
   let sandbox;
-  const timer = timerFor(window);
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -68,14 +68,12 @@ describe('amp-3q-player', function() {
           expect(iframe).to.not.be.null;
           expect(iframe.src).to.equal('https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true');
         });
-  })
-;
+  });
 
   it('requires data-id', () => {
     return get3QElement('').should.eventually.be.rejectedWith(
         /The data-id attribute is required/);
-  })
-;
+  });
 
   it('should forward events from amp-3q-player to the amp element', () => {
     return get3QElement(
