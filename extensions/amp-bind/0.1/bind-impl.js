@@ -111,28 +111,34 @@ export class Bind {
     this.boundElements_ = [];
 
     /**
-     * Upper limit on number of bindings for performance.
-     * @private {number}
-     */
-    this.maxNumberOfBindings_ = 2000; // Based on ~1ms to parse an expression.
-
-    /**
      * Maps expression string to the element(s) that contain it.
      * @private @const {!Object<string, !Array<!Element>>}
      */
     this.expressionToElements_ = Object.create(null);
 
-    /** @const @private {!./bind-validator.BindValidator} */
-    this.validator_ = new BindValidator();
+    /** @private {../../../src/service/history-impl.History} */
+    this.history_ = Services.historyForDoc(ampdoc);
 
-    /** @const @private {!JsonObject} */
-    this.scope_ = dict();
+    /**
+     * Upper limit on number of bindings for performance.
+     * @private {number}
+     */
+    this.maxNumberOfBindings_ = 2000; // Based on ~1ms to parse an expression.
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
+    /**
+     * The current values of all bound expressions on the page.
+     * @const @private {!JsonObject}
+     */
+    this.state_ = /** @type {!JsonObject} */ (map());
+
     /** @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
+
+    /** @const @private {!./bind-validator.BindValidator} */
+    this.validator_ = new BindValidator();
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
@@ -142,7 +148,7 @@ export class Bind {
             .then(() => dev().assertElement(opt_win.document.body))
         : ampdoc.whenBodyAvailable();
 
-    /**c.
+    /**
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
@@ -151,12 +157,7 @@ export class Bind {
           return this.initialize_(body);
         });
 
-    /** @const @private {!Function} */
-    this.boundOnDomUpdate_ = this.onDomUpdate_.bind(this);
-
-    /**
-     * @private {?Promise}
-     */
+    /** @private {Promise} */
     this.setStatePromise_ = null;
 
     // Expose for testing on dev.
@@ -182,9 +183,9 @@ export class Bind {
   setState(state, opt_skipEval, opt_isAmpStateMutation) {
     // TODO(choumx): What if `state` contains references to globals?
     try {
-      deepMerge(this.scope_, state, MAX_MERGE_DEPTH);
+      deepMerge(this.state_, state, MAX_MERGE_DEPTH);
     } catch (e) {
-      user().error(TAG, 'Failed to merge scope.', e);
+      user().error(TAG, 'Failed to merge result from AMP.setState().', e);
     }
 
     if (opt_skipEval) {
@@ -207,29 +208,39 @@ export class Bind {
   }
 
   /**
-   * Parses and evaluates an expression with a given scope and merges the
+   * Parses and evaluates an expression with a given state and merges the
    * resulting object into current state.
    * @param {string} expression
    * @param {!Object} scope
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    this.setStatePromise_ = this.initializePromise_.then(() => {
-      // Allow expression to reference current scope in addition to event scope.
-      Object.assign(scope, this.scope_);
-      return this.ww_('bind.evaluateExpression', [expression, scope]);
-    }).then(returnValue => {
-      const {result, error} = returnValue;
-      if (error) {
-        const userError = user().createError(`${TAG}: AMP.setState() failed `
-            + `with error: ${error.message}`);
-        userError.stack = error.stack;
-        reportError(userError);
-      } else {
-        return this.setState(result);
-      }
-    });
+    this.setStatePromise_ = this.evaluateExpression_(expression, scope)
+        .then(result => this.setState(result));
     return this.setStatePromise_;
+  }
+
+  /**
+   * @param {string} expression
+   * @param {!Object} scope
+   * @param {string=} opt_title
+   * @param {string=} opt_url
+   */
+  pushStateWithExpression(expression, scope, opt_title, opt_url) {
+    this.evaluateExpression_(expression, scope).then(result => {
+      // Store the current values of each referenced variable in `expression`
+      // so that we can restore them on history-pop.
+      const oldState = map();
+      Object.keys(result).forEach(variable => {
+        // Replace `undefined` values with `null`.
+        oldState[variable] = (this.state_[variable] || null);
+      });
+
+      const onPop = () => this.setState(oldState);
+      this.history_.push(onPop);
+
+      this.setState(result);
+    });
   }
 
   /**
@@ -560,10 +571,33 @@ export class Bind {
     return null;
   }
 
+  /**
+   * Evaluates a single expression and returns its result.
+   * @param {string} expression
+   * @param {!Object} scope
+   * @return {!Promise<?JsonObject>}
+   */
+  evaluateExpression_(expression, scope) {
+    return this.initializePromise_.then(() => {
+      // Allow expression to reference current state in addition to event state.
+      Object.assign(scope, this.state_);
+      return this.ww_('bind.evaluateExpression', [expression, scope]);
+    }).then(returnValue => {
+      const {result, error} = returnValue;
+      if (error) {
+        const userError = user().createError(`${TAG}: Expression eval failed `
+            + `with error: ${error.message}`);
+        userError.stack = error.stack;
+        reportError(userError);
+        throw userError;
+      } else {
+        return result;
+      }
+    });
+  }
 
   /**
-   * Asynchronously reevaluates all expressions and returns a map of
-   * expression strings to evaluated results.
+   * Reevaluates all expressions and returns a map of expressions to results.
    * @return {!Promise<
    *     !Object<string, ./bind-expression.BindExpressionResultDef>
    * >}
@@ -571,7 +605,7 @@ export class Bind {
    */
   evaluate_() {
     user().fine(TAG, 'Asking worker to re-evaluate expressions...');
-    const evaluatePromise = this.ww_('bind.evaluateBindings', [this.scope_]);
+    const evaluatePromise = this.ww_('bind.evaluateBindings', [this.state_]);
     return evaluatePromise.then(returnValue => {
       const {results, errors} = returnValue;
       // Report evaluation errors.
@@ -610,7 +644,7 @@ export class Bind {
 
   /**
    * Determines which properties to update based on results of evaluation
-   * of all bound expression strings with the current scope. This method
+   * of all bound expression strings with the current state. This method
    * will only return properties that need to be updated along with their
    * new value.
    * @param {!Array<!BoundPropertyDef>} boundProperties
@@ -949,7 +983,7 @@ export class Bind {
    */
   printState_() {
     const seen = [];
-    const s = JSON.stringify(this.scope_, (key, value) => {
+    const s = JSON.stringify(this.state_, (key, value) => {
       if (isObject(value)) {
         if (seen.includes(value)) {
           return '[Circular]';

@@ -99,6 +99,9 @@ export class StandardActions {
    */
   handleAmpTarget(invocation) {
     switch (invocation.method) {
+      case 'pushState':
+        this.handleAmpPushState_(invocation);
+        return;
       case 'setState':
         this.handleAmpSetState_(invocation);
         return;
@@ -120,6 +123,22 @@ export class StandardActions {
    * @private
    */
   handleAmpSetState_(invocation) {
+    this.handleAmpBindAction_(invocation);
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpPushState_(invocation) {
+    this.handleAmpBindAction_(invocation, /* opt_pushState */ true);
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpBindAction_(invocation, opt_pushState) {
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return;
     }
@@ -134,7 +153,11 @@ export class StandardActions {
         if (event && event.detail) {
           scope['event'] = event.detail;
         }
-        bind.setStateWithExpression(objectString, scope);
+        if (opt_pushState) {
+          bind.pushStateWithExpression(objectString, scope);
+        } else {
+          bind.setStateWithExpression(objectString, scope);
+        }
       } else {
         user().error('AMP-BIND', 'Please use the object-literal syntax, '
             + 'e.g. "AMP.setState({foo: \'bar\'})" instead of '
