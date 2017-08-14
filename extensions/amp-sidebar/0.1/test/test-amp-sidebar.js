@@ -138,6 +138,13 @@ describes.realWin('amp-sidebar 0.1 version', {
       sandbox.restore();
     });
 
+    it('should apply overlay class', () => {
+      return getAmpSidebar().then(obj => {
+        const sidebarElement = obj.ampSidebar;
+        expect(sidebarElement.classList.contains('i-amphtml-overlay'));
+      });
+    });
+
     it('should replace text to screen reader \
     button in data-close-button-aria-label', () => {
       return getAmpSidebar({'closeText':
@@ -609,6 +616,41 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         expect(sidebarElement.style.display).to.equal('');
         expect(impl.schedulePause).to.have.not.been.called;
+      });
+    });
+
+    it('should listen to animationend/transitionend event', () => {
+      return getAmpSidebar().then(obj => {
+        const sidebarElement = obj.ampSidebar;
+        const impl = sidebarElement.implementation_;
+        impl.boundReschedule_ = sandbox.spy();
+        impl.vsync_ = {
+          mutate(callback) {
+            callback();
+          },
+        };
+        sandbox.stub(timer, 'delay', function(callback) {
+          callback();
+        });
+        impl.toggle_();
+        const animationEndEventObj = new Event(
+          'animationend',
+          {bubbles: true}
+        );
+        sidebarElement.firstChild.dispatchEvent(animationEndEventObj);
+        expect(impl.boundReschedule_).to.be.calledOnce;
+        impl.boundReschedule_.reset();
+        const transitionEndEvent = new Event(
+          'transitionend',
+          {bubbles: true}
+        );
+        sidebarElement.firstChild.dispatchEvent(transitionEndEvent);
+        expect(impl.boundReschedule_).to.be.calledOnce;
+        impl.boundReschedule_.reset();
+        impl.toggle_();
+        sidebarElement.firstChild.dispatchEvent(animationEndEventObj);
+        sidebarElement.firstChild.dispatchEvent(transitionEndEvent);
+        expect(impl.boundReschedule_).to.not.be.called;
       });
     });
   });
