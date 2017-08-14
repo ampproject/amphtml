@@ -521,7 +521,7 @@ export class FriendlyIframeEmbed {
         const iframeRect = this.iframe./*OK*/getBoundingClientRect();
 
         state.bodyStyle = {
-          'background': 'transparent', // TODO(alanorozco): do this early
+          'background': 'transparent',
           'position': 'absolute',
           'top': px(iframeRect.top),
           'left': px(iframeRect.left),
