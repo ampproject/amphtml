@@ -15,15 +15,11 @@
  */
 
  /**
- * Variable that holds whether the browser supports options as a parameter of
- * addEventListener or not
- * @enum {string}
- */
- const optTest = {
-   NOT_RUN: 'not_run',
-   NOT_SUPPORTED: 'not_supported',
-   SUPPORTED: 'supported',
- };
+  * Whether addEventListener supports options or only takes capture as a boolean
+  * @type {boolean|undefined}
+  * @visibleForTesting
+  */
+ let optsSupported;
 
 /**
  * Listens for the specified event on the element.
@@ -54,7 +50,7 @@
    };
    const optsSupported = detectEvtListenerOptsSupport();
    let capture = false;
-   if (opt_evtListenerOpts && opt_evtListenerOpts.capture) {
+   if (opt_evtListenerOpts) {
      capture = opt_evtListenerOpts.capture;
    }
    localElement.addEventListener(
@@ -85,35 +81,29 @@
  * @suppress {checkTypes}
  */
  export function detectEvtListenerOptsSupport() {
-   if (!self.optsSupported) {
-     self.optsSupported = optTest.NOT_RUN;
-   }
    // Only run the test once
-   if (self.optsSupported != optTest.NOT_RUN) {
-     return self.optsSupported == optTest.SUPPORTED;
+   if (typeof optsSupported != 'undefined') {
+     return optsSupported;
    }
 
-   self.optsSupported = optTest.NOT_SUPPORTED;
+   optsSupported = false;
    // Test whether browser supports EventListenerOptions or not
    try {
-     let optsSupported = self.optsSupported;
-     const options = Object.defineProperty({}, 'capture', {
-       get: function() {
-         optsSupported = optTest.SUPPORTED;
+     const options = {
+       get capture() {
+         optsSupported = true;
        },
-     });
+     };
      self.addEventListener('test-opts', null, options);
-     self.optsSupported = optsSupported;
-     return self.optsSupported == optTest.SUPPORTED;
    } catch (err) {
      // EventListenerOptions are not supported
    }
-   return false;
+   return optsSupported;
  }
 
  /**
   * Resets the test for whether addEventListener supports options or not.
   */
  export function resetEvtListenerOptsSupport() {
-   self.optsSupported = optTest.NOT_RUN;
+   optsSupported = undefined;
  }
