@@ -549,6 +549,16 @@ export class ShadowDomWriterStreamer {
   }
 
   /** @override */
+  abort(unusedReason) {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  releaseLock() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
   get closed() {
     throw new Error('Not implemented');
   }
@@ -560,16 +570,6 @@ export class ShadowDomWriterStreamer {
 
   /** @override */
   get ready() {
-    throw new Error('Not implemented');
-  }
-
-  /** @override */
-  abort(unusedReason) {
-    throw new Error('Not implemented');
-  }
-
-  /** @override */
-  releaseLock() {
     throw new Error('Not implemented');
   }
 
@@ -687,6 +687,16 @@ export class ShadowDomWriterBulk {
   }
 
   /** @override */
+  abort(unusedReason) {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  releaseLock() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
   get closed() {
     throw new Error('Not implemented');
   }
@@ -698,16 +708,6 @@ export class ShadowDomWriterBulk {
 
   /** @override */
   get ready() {
-    throw new Error('Not implemented');
-  }
-
-  /** @override */
-  abort(unusedReason) {
-    throw new Error('Not implemented');
-  }
-
-  /** @override */
-  releaseLock() {
     throw new Error('Not implemented');
   }
 
