@@ -34,7 +34,7 @@ describe('amp-img', () => {
     sandbox.stub(BaseElement.prototype, 'getViewport', () => {
       return {
         getWidth: () => windowWidth,
-      }
+      };
     });
   });
 
@@ -200,7 +200,7 @@ describe('amp-img', () => {
         return {
           getWidth: () => windowWidth,
         };
-      }
+      };
     });
 
     it('should not display fallback if loading succeeds', () => {
