@@ -110,11 +110,14 @@ export class Bind {
     /** @private {!Array<BoundElementDef>} */
     this.boundElements_ = [];
 
+    /** @const @private {!Function} */
+    this.boundOnDomUpdate_ = this.onDomUpdate_.bound(this);
+
     /**
      * Maps expression string to the element(s) that contain it.
      * @private @const {!Object<string, !Array<!Element>>}
      */
-    this.expressionToElements_ = Object.create(null);
+    this.expressionToElements_ = map();
 
     /** @private {../../../src/service/history-impl.History} */
     this.history_ = Services.historyForDoc(ampdoc);
@@ -132,7 +135,7 @@ export class Bind {
      * The current values of all bound expressions on the page.
      * @const @private {!JsonObject}
      */
-    this.state_ = /** @type {!JsonObject} */ (map());
+    this.state_ = dict(map());
 
     /** @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
@@ -175,7 +178,7 @@ export class Bind {
   /**
    * Merges `state` into the current state and immediately triggers an
    * evaluation unless `opt_skipEval` is false.
-   * @param {!Object} state
+   * @param {!JsonObject} state
    * @param {boolean=} opt_skipEval
    * @param {boolean=} opt_isAmpStateMutation
    * @return {!Promise}
@@ -225,7 +228,7 @@ export class Bind {
    * Popping the new history stack entry will restore the values of variables
    * in `expression`.
    * @param {string} expression
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    */
   pushStateWithExpression(expression, scope) {
     this.evaluateExpression_(expression, scope).then(result => {
@@ -459,7 +462,7 @@ export class Bind {
     /** @type {!Array<./bind-evaluator.BindingDef>} */
     const bindings = [];
     /** @type {!Object<string, !Array<!Element>>} */
-    const expressionToElements = Object.create(null);
+    const expressionToElements = map();
 
     const doc = dev().assert(node.ownerDocument, 'ownerDocument is null.');
     // Third and fourth params of `createTreeWalker` are not optional on IE11.
@@ -577,7 +580,7 @@ export class Bind {
    * Evaluates a single expression and returns its result.
    * @param {string} expression
    * @param {!Object} scope
-   * @return {!Promise<?JsonObject>}
+   * @return {!Promise<!JsonObject>}
    */
   evaluateExpression_(expression, scope) {
     return this.initializePromise_.then(() => {

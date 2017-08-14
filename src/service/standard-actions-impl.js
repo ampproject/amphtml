@@ -20,6 +20,7 @@ import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
 import {dev, user} from '../log';
+import {dict} from '../utils/object';
 import {isProtocolValid} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
 import {tryFocus} from '../dom';
@@ -136,6 +137,7 @@ export class StandardActions {
 
   /**
    * @param {!./action-impl.ActionInvocation} invocation
+   * @param {boolean=} opt_pushState
    * @private
    */
   handleAmpBindAction_(invocation, opt_pushState) {
@@ -147,8 +149,7 @@ export class StandardActions {
       const args = invocation.args;
       const objectString = args[OBJECT_STRING_ARGS_KEY];
       if (objectString) {
-        // Object string arg.
-        const scope = Object.create(null);
+        const scope = dict();
         const event = invocation.event;
         if (event && event.detail) {
           scope['event'] = event.detail;

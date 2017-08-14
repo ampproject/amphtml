@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview "Unit" test for bind-impl.js. Runs as an integration test
+ *               because it requires building web-worker binary.
+ */
+
 import * as sinon from 'sinon';
 import {AmpEvents} from '../../../../../src/amp-events';
 import {Bind} from '../../bind-impl';
@@ -365,7 +370,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
-    it('should support parsing exprs in `setStateWithExpression`', () => {
+    it('should support parsing exprs in setStateWithExpression()', () => {
       const element = createElement(env, container, '[text]="onePlusOne"');
       expect(element.textContent).to.equal('');
       const promise = onBindReadyAndSetStateWithExpression(
@@ -375,7 +380,11 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
-    it('should ignore <amp-state> updates if specified in `setState`', () => {
+    it('should support pushStateWithExpression()', () => {
+      // TODO(choumx)
+    });
+
+    it('should ignore <amp-state> updates if specified in setState()', () => {
       const element = createElement(env, container, '[src]="foo"', 'amp-state');
       expect(element.getAttribute('src')).to.be.null;
       const promise = onBindReadyAndSetState(env, bind,
