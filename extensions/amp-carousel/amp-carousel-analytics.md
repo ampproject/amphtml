@@ -50,7 +50,7 @@ The `amp-carousel-next` event is issued when there is a travesal to the next sli
 
 ### Previous trigger (`"on": "amp-carousel-prev"`)
 
-The `amp-carousel-next` event is issued when there is a travesal to the previous slide. Use these configurations to fire a request for this event.
+The `amp-carousel-prev` event is issued when there is a travesal to the previous slide. Use these configurations to fire a request for this event.
 
 ```javascript
 "triggers": {
