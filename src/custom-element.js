@@ -104,6 +104,7 @@ export function createCustomElementClass(win, name) {
   class CustomAmpElement extends baseCustomElement {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
+     * @suppress {checkTypes}
      */
     constructor(self) {
       return super(self);

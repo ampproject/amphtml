@@ -22,7 +22,7 @@ import {
 } from './dom';
 import {dev} from './log';
 import {dict} from './utils/object';
-import {isArray} from './types';
+import {isArray, toWin} from './types';
 import {triggerAnalyticsEvent} from './analytics';
 
 /**
