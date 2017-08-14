@@ -35,35 +35,4 @@ class WritableStreamDefaultWriter {
    * @return {!Promise}
    */
   close() {}
-
-  /**
-  * @type {!Promise<undefined>}
-  * @see https://streams.spec.whatwg.org/#default-writer-closed
-  */
-  get closed() {}
-
-  /**
-   * @type {number}
-   * @see https://streams.spec.whatwg.org/#default-writer-desiredSize
-   */
-  get desiredSize() {}
-
-  /**
-   * @type {!Promise<number>}
-   * @see https://streams.spec.whatwg.org/#default-writer-ready
-   */
-  get ready() {}
-
-  /**
-   * @param {*} reason
-   * @return {!Promise<undefined>}
-   * @see https://streams.spec.whatwg.org/#default-writer-abort
-   */
-  abort(reason) {}
-
-  /**
-   * @return {undefined}
-   * @see https://streams.spec.whatwg.org/#default-writer-release-lock
-   */
-  releaseLock() {}
 }
