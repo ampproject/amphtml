@@ -14,7 +14,7 @@
 # limitations under the license.
 #
 
-tags: {  # amp-web-push script tag
+tags: {  # amp-web-push
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
@@ -24,38 +24,38 @@ tags: {  # amp-web-push script tag
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-web-push> element tag
+tags: {  # <amp-web-push>
   html_format: AMP
   tag_name: "AMP-WEB-PUSH"
   requires_extension: "amp-web-push"
   attrs: {
-    name: "id"
-    value_regex: "amp-web-push"
-    mandatory: true
-  }
-  attrs: {
     name: "helper-iframe-url"
+    mandatory: true
     value_url: {
       allowed_protocol: "https"
       allow_relative: false
     }
+  }
+  attrs: {
+    name: "id"
     mandatory: true
+    value_regex: "amp-web-push"
   }
   attrs: {
     name: "permission-dialog-url"
+    mandatory: true
     value_url: {
       allowed_protocol: "https"
       allow_relative: false
     }
-    mandatory: true
   }
   attrs: {
     name: "service-worker-url"
+    mandatory: true
     value_url: {
       allowed_protocol: "https"
       allow_relative: false
     }
-    mandatory: true
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-web-push"
@@ -63,14 +63,14 @@ tags: {  # <amp-web-push> element tag
     supported_layouts: NODISPLAY
   }
 }
-tags: {  # <amp-web-push-widget> widget element tag
+tags: {  # <amp-web-push-widget>
   html_format: AMP
   tag_name: "AMP-WEB-PUSH-WIDGET"
   requires_extension: "amp-web-push"
   attrs: {
     name: "visibility"
-    value_regex: "(subscribed|unsubscribed|blocked)"
     mandatory: true
+    value_regex: "(blocked|subscribed|unsubscribed)"
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-web-push"
