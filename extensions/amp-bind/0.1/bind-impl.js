@@ -230,8 +230,9 @@ export class Bind {
       // so that we can restore them on history-pop.
       const oldState = map();
       Object.keys(result).forEach(variable => {
-        // Replace `undefined` values with `null`.
-        oldState[variable] = (this.state_[variable] || null);
+        const s = map();
+        s[variable] = this.state_[variable] || null; // `undefined` -> `null`.
+        deepMerge(oldState, s, MAX_MERGE_DEPTH);
       });
 
       const onPop = () => this.setState(oldState);
