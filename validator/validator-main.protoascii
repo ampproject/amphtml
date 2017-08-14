@@ -25,7 +25,7 @@ min_validator_revision_required: 238
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 462
+spec_file_revision: 464
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
@@ -234,9 +234,7 @@ tags: {
                  "https://fast\\.fonts\\.net/.*|"
                  "https://maxcdn\\.bootstrapcdn\\.com/font-awesome/"
                  "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
-                 "https://cloud\\.typography\\.com/"
-                 "[0-9]*/[0-9]*/css/fonts\\.css|"
-                 "https://use\\.typekit\\.net/\\w+\\.css"
+                 "https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css"
   }
   attrs: {
     name: "rel"
