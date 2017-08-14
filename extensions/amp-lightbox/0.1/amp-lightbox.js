@@ -364,7 +364,7 @@ function setTransparentBody(win, body) {
 
 
 // TODO(alanorozco): refactor this somehow so we don't need to do a direct
-// getMode() check
+// getMode check
 if (getMode().runtime == 'inabox') {
   setTransparentBody(window, /** @type {!HTMLBodyElement} */ (
       dev().assert(document.body)));
