@@ -223,10 +223,8 @@ export class Bind {
   /**
    * @param {string} expression
    * @param {!Object} scope
-   * @param {string=} opt_title
-   * @param {string=} opt_url
    */
-  pushStateWithExpression(expression, scope, opt_title, opt_url) {
+  pushStateWithExpression(expression, scope) {
     this.evaluateExpression_(expression, scope).then(result => {
       // Store the current values of each referenced variable in `expression`
       // so that we can restore them on history-pop.
