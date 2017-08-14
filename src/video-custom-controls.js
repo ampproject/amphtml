@@ -23,8 +23,23 @@ import {formatTime} from './utils/datetime';
 import * as st from './style';
 import * as tr from './transition';
 
+
+/**
+ * CustomControls is a class that given a video manager entry
+ * ({@link ./service/video-manager-impl.VideoEntry}), adds an overlay of
+ * customizable controls to the video element and manages their behavior.
+ */
 export class CustomControls {
 
+  /**
+   * Initializes variables and creates the custom controls
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./service/video-manager-impl.VideoEntry} entry
+   * @param {boolean} darkSkin whether to use dark or light theme
+   * @param {string} mainCtrls list of controls to add to the main bar
+   * @param {string} miniCtrls list of controls to add to the minimized overlay
+   * @param {string} floating single control button to use as the main action
+   */
   constructor(
     ampdoc,
     entry,
@@ -34,7 +49,7 @@ export class CustomControls {
     floating = 'play'
   ) {
 
-    /** @const {!./service/ampdoc-impl.AmpDoc}  */
+    /** @private {!./service/ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = ampdoc;
 
     /** @private {!./service/video-manager-impl.VideoEntry} */
@@ -46,25 +61,25 @@ export class CustomControls {
     /** @private {boolean} */
     this.darkSkin_ = darkSkin;
 
-    /** @private {Element} */
+    /** @private {?Element} */
     this.ctrlContainer_ = null;
 
-    /** @private {Element} */
+    /** @private {?Element} */
     this.ctrlBarContainer_ = null;
 
-    /** @private {Element} */
+    /** @private {?Element} */
     this.ctrlBarWrapper_ = null;
 
-    /** @private {Element} */
+    /** @private {?Element} */
     this.floatingContainer_ = null;
 
-    /** @private {Element} */
+    /** @private {?Element} */
     this.miniCtrlsContainer_ = null;
 
-    /** @private {Element} */
+    /** @private {?Element} */
     this.miniCtrlsWrapper_ = null;
 
-    /** @private {Element} */
+    /** @private {?Element} */
     this.ctrlBg_ = null;
 
     /** @private {?number} */
@@ -87,10 +102,10 @@ export class CustomControls {
 
   /**
    * Returns the element that wraps all the controls
-   * @return {Element}
+   * @return {!Element}
    */
   getElement() {
-    return this.ctrlContainer_;
+    return dev.assertElement(this.ctrlContainer_);
   }
 
   /**
@@ -100,8 +115,8 @@ export class CustomControls {
    */
   createFullscreenBtn_() {
     const doc = this.ampdoc_.win.document;
-    const fsBtnWrap = doc.createElement('amp-custom-ctrls-icon-wrapper');
-    fsBtnWrap.classList.add('amp-custom-ctrls-fullscreen');
+    const fsBtnWrap = doc.createElement('amp-custom-controls-icon-wrapper');
+    fsBtnWrap.classList.add('amp-custom-controls-fullscreen');
     const fsBtn = this.createIcon_('fullscreen');
     fsBtnWrap.appendChild(fsBtn);
     listen(fsBtnWrap, 'click', () => {
@@ -121,15 +136,15 @@ export class CustomControls {
    */
   createVolumeControls_() {
     const doc = this.ampdoc_.win.document;
-    const volumeContainer = doc.createElement('amp-custom-ctrls-volume');
+    const volumeContainer = doc.createElement('amp-custom-controls-volume');
     const volumeSlider = doc.createElement('input');
     volumeSlider.setAttribute('type', 'range');
     volumeSlider.setAttribute('min', '0');
     volumeSlider.setAttribute('max', '100');
     volumeSlider.setAttribute('value', '30');
-    volumeSlider.classList.add('amp-custom-ctrls-volume-indicator');
-    const muteBtnWrap = doc.createElement('amp-custom-ctrls-icon-wrapper');
-    muteBtnWrap.classList.add('amp-custom-ctrls-mute');
+    volumeSlider.classList.add('amp-custom-controls-volume-indicator');
+    const muteBtnWrap = doc.createElement('amp-custom-controls-icon-wrapper');
+    muteBtnWrap.classList.add('amp-custom-controls-mute');
     const muteBtn = this.createIcon_(
         this.entry_.isMuted() ? 'mute' : 'volume-max'
     );
@@ -162,7 +177,7 @@ export class CustomControls {
    */
   createSpacer_() {
     const doc = this.ampdoc_.win.document;
-    const spacer = doc.createElement('amp-custom-ctrls-spacer');
+    const spacer = doc.createElement('amp-custom-controls-spacer');
     return spacer;
   }
 
@@ -174,8 +189,8 @@ export class CustomControls {
    */
   createPlayPauseBtn_(loadingElement) {
     const doc = this.ampdoc_.win.document;
-    const playpauseBtnWrap = doc.createElement('amp-custom-ctrls-icon-wrapper');
-    playpauseBtnWrap.classList.add('amp-custom-ctrls-playpause');
+    const playpauseBtnWrap = doc.createElement('amp-custom-controls-icon-wrapper');
+    playpauseBtnWrap.classList.add('amp-custom-controls-playpause');
     const playpauseBtn = this.createIcon_('play');
     playpauseBtnWrap.appendChild(playpauseBtn);
     if (loadingElement == 'self') {
@@ -188,12 +203,12 @@ export class CustomControls {
       } else {
         this.changeIcon_(playpauseBtn, 'pause');
         this.entry_.video.play(/*autoplay*/ false);
-        loadingElement.classList.toggle('amp-custom-ctrls-loading', true);
+        loadingElement.classList.toggle('amp-custom-controls-loading', true);
       }
     });
     [VideoEvents.PLAYING, VideoEvents.PAUSE].forEach(e => {
       listen(this.entry_.video.element, e, () => {
-        loadingElement.classList.toggle('amp-custom-ctrls-loading', false);
+        loadingElement.classList.toggle('amp-custom-controls-loading', false);
         if (e == VideoEvents.PAUSE) {
           this.changeIcon_(playpauseBtn, 'play');
           this.showControls();
@@ -215,7 +230,7 @@ export class CustomControls {
    */
   createProgressTime_() {
     const doc = this.ampdoc_.win.document;
-    const progressTime = doc.createElement('amp-custom-ctrls-progress-time');
+    const progressTime = doc.createElement('amp-custom-controls-progress-time');
     progressTime./*OK*/innerText = '0:00 / 0:00';
     // Update played time
     const updateProgress = () => {
@@ -240,10 +255,10 @@ export class CustomControls {
    */
   createProgressBar_() {
     const doc = this.ampdoc_.win.document;
-    const progressBar = doc.createElement('amp-custom-ctrls-progress-bar');
-    const totalBar = doc.createElement('amp-custom-ctrls-total-bar');
-    const currentBar = doc.createElement('amp-custom-ctrls-current-bar');
-    const scrubber = doc.createElement('amp-custom-ctrls-scrubber');
+    const progressBar = doc.createElement('amp-custom-controls-progress-bar');
+    const totalBar = doc.createElement('amp-custom-controls-total-bar');
+    const currentBar = doc.createElement('amp-custom-controls-current-bar');
+    const scrubber = doc.createElement('amp-custom-controls-scrubber');
     let scrubberTouched = false;
     let scrubberDragging = false;
     totalBar.appendChild(currentBar);
@@ -330,13 +345,13 @@ export class CustomControls {
 
   createIcon_(name) {
     const doc = this.ampdoc_.win.document;
-    const icon = doc.createElement('amp-custom-ctrls-icon');
-    icon.className = 'amp-custom-ctrls-icon-' + name;
+    const icon = doc.createElement('amp-custom-controls-icon');
+    icon.className = 'amp-custom-controls-icon-' + name;
     return icon;
   }
 
   changeIcon_(icon, name) {
-    icon.className = 'amp-custom-ctrls-icon-' + name;
+    icon.className = 'amp-custom-controls-icon-' + name;
   }
 
   /**
@@ -374,14 +389,14 @@ export class CustomControls {
   createCustomControls_(mainCtrls, miniCtrls, floating) {
     // Set up controls
     const doc = this.ampdoc_.win.document;
-    this.ctrlContainer_ = doc.createElement('amp-custom-ctrls');
+    this.ctrlContainer_ = doc.createElement('amp-custom-controls');
     this.ctrlContainer_.classList.toggle('light', !this.darkSkin_);
-    this.ctrlBg_ = doc.createElement('amp-custom-ctrls-bg');
-    this.ctrlBarWrapper_ = doc.createElement('amp-custom-ctrls-bar-wrapper');
-    this.ctrlBarContainer_ = doc.createElement('amp-custom-ctrls-bar');
-    this.miniCtrlsWrapper_ = doc.createElement('amp-custom-ctrls-mini-wrapper');
-    this.miniCtrlsContainer_ = doc.createElement('amp-custom-ctrls-mini');
-    this.floatingContainer_ = doc.createElement('amp-custom-ctrls-floating');
+    this.ctrlBg_ = doc.createElement('amp-custom-controls-bg');
+    this.ctrlBarWrapper_ = doc.createElement('amp-custom-controls-bar-wrapper');
+    this.ctrlBarContainer_ = doc.createElement('amp-custom-controls-bar');
+    this.miniCtrlsWrapper_ = doc.createElement('amp-custom-controls-mini-wrapper');
+    this.miniCtrlsContainer_ = doc.createElement('amp-custom-controls-mini');
+    this.floatingContainer_ = doc.createElement('amp-custom-controls-floating');
 
     // Shadow filter
     const shadowFilter = this.createIcon_('shadow');
@@ -528,7 +543,8 @@ export class CustomControls {
             'opacity': tr.numeric(1, 0),
           })
       , 200).thenAlways(() => {
-        this.ctrlContainer_.classList.toggle('amp-custom-ctrls-hidden', true);
+        const classes = this.ctrlContainer_.classList;
+        classes.toggle('amp-custom-controls-hidden', true);
         this.controlsShown_ = false;
       });
     });
@@ -557,7 +573,7 @@ export class CustomControls {
         return;
       }
 
-      this.ctrlContainer_.classList.toggle('amp-custom-ctrls-hidden', false);
+      this.ctrlContainer_.classList.toggle('amp-custom-controls-hidden', false);
       this.controlsShowing_ = true;
 
       if (this.minimal_) {
@@ -597,7 +613,7 @@ export class CustomControls {
   }
 
   toggleMinimalControls(enable = true) {
-    this.ctrlContainer_.classList.toggle('amp-custom-ctrls-minimal', enable);
+    this.ctrlContainer_.classList.toggle('amp-custom-controls-minimal', enable);
     this.minimal_ = enable;
   }
 }

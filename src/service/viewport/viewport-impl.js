@@ -959,7 +959,6 @@ export class Viewport {
   resize_() {
     this.rect_ = null;
     const oldSize = this.size_;
-    this.size_ = null;  // Need to recalc.
     const newSize = this.getSize(SizeReportingFidelity.HIGH);
     this.fixedLayer_.update().then(() => {
       const widthChanged = !oldSize || oldSize.width != newSize.width;

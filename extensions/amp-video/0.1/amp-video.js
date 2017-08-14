@@ -280,7 +280,7 @@ class AmpVideo extends AMP.BaseElement {
    */
   isInteractive() {
     return this.element.hasAttribute('controls')
-           || this.element.hasAttribute('custom-ctrls');
+           || this.element.hasAttribute('custom-controls');
   }
 
   /**

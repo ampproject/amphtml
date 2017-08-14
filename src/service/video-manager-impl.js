@@ -633,7 +633,7 @@ export class VideoEntry {
 
     if (!this.video.preimplementsMediaSessionAPI()) {
       const playHandler = () => {
-        this.video.play(/*autoplay*/ false);
+        this.video.play(/* autoplay */ false);
       };
       const pauseHandler = () => {
         this.video.pause();
@@ -938,7 +938,7 @@ export class VideoEntry {
   autoplayLoadedVideoVisibilityChanged_() {
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
-      this.video.play(/*autoplay*/ true);
+      this.video.play(/* autoplay */ true);
       this.playCalledByAutoplay_ = true;
     } else {
       if (this.isPlaying_) {
@@ -1264,15 +1264,15 @@ export class VideoEntry {
     this.hideControls(true, true);
     this.customControls_.toggleMinimalControls(true);
     this.video.element.classList.add(DOCK_CLASS);
-    st.setStyles(dev().assertElement(this.internalElement_), {
-      'height': st.px(this.inlineVidRect_.height),
-      'width': st.px(this.inlineVidRect_.width),
-      'maxWidth': st.px(this.inlineVidRect_.width),
-    });
-    st.setStyles(dev().assertElement(this.customControls_.getElement()), {
-      'height': st.px(this.inlineVidRect_.height),
-      'width': st.px(this.inlineVidRect_.width),
-      'maxWidth': st.px(this.inlineVidRect_.width),
+    [
+      this.customControls_.getElement(),
+      this.internalElement_,
+    ].forEach(element => {
+      st.setStyles(dev().assertElement(element), {
+        'height': st.px(this.inlineVidRect_.height),
+        'width': st.px(this.inlineVidRect_.width),
+        'maxWidth': st.px(this.inlineVidRect_.width),
+      });
     });
     st.setStyles(dev().assertElement(this.video.element), {
       'background-color': '#222',
@@ -1568,8 +1568,12 @@ export class VideoEntry {
 
         // Update the video's position
         if (!this.isSnapping_) {
-          this.dragMove_(this.customControls_.getElement());
-          this.dragMove_(this.internalElement_);
+          [
+            this.customControls_.getElement(),
+            this.internalElement_,
+          ].forEach(element => {
+            this.dragMove_(element);
+          })
         }
 
         if (!this.isDragging_) {
@@ -1649,20 +1653,18 @@ export class VideoEntry {
       this.customControls_.toggleMinimalControls(false);
       // Restore the video inline
       this.video.element.classList.remove(DOCK_CLASS);
-      st.resetStyles(dev().assertElement(this.internalElement_),
-          [
-            'transform', 'position', 'top', 'width', 'height', 'opacity',
-            'background-color', 'left', 'bottom', 'right', 'transform-origin',
-            'borderRadius', 'z-index', 'background-color', 'maxWidth',
-          ]
-      );
-      st.resetStyles(this.customControls_.getElement(),
-          [
-            'transform', 'position', 'top', 'width', 'height', 'opacity',
-            'background-color', 'left', 'bottom', 'right', 'transform-origin',
-            'borderRadius', 'z-index', 'background-color', 'maxWidth',
-          ]
-      );
+      [
+        this.customControls_.getElement(),
+        this.internalElement_,
+      ].forEach(element => {
+        st.resetStyles(dev().assertElement(element),
+            [
+              'transform', 'position', 'top', 'width', 'height', 'opacity',
+              'background-color', 'left', 'bottom', 'right', 'transform-origin',
+              'borderRadius', 'z-index', 'background-color', 'maxWidth',
+            ]
+        );
+      });
       st.setStyles(dev().assertElement(this.video.element), {
         'background-color': 'transparent',
       });
