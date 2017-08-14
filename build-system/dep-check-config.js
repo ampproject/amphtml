@@ -68,6 +68,7 @@ exports.rules = [
     filesMatching: '3p/**/*.js',
     mustNotDependOn: 'src/**/*.js',
     whitelist: [
+      '3p/**->src/utils/function.js',
       '3p/**->src/utils/object.js',
       '3p/**->src/log.js',
       '3p/**->src/types.js',
