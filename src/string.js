@@ -32,7 +32,7 @@ export function dashToCamelCase(name) {
   return name.replace(/-([a-z])/g, toUpperCase);
 }
 
-/*
+/**
  * Converts a string that is in camelCase to one that is in dash-case.
  *
  * @param {string} string The string to convert.
