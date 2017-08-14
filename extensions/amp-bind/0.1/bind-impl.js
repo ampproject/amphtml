@@ -173,7 +173,7 @@ export class Bind {
   }
 
   /**
-   * Merges `state` into the current scope and immediately triggers an
+   * Merges `state` into the current state and immediately triggers an
    * evaluation unless `opt_skipEval` is false.
    * @param {!Object} state
    * @param {boolean=} opt_skipEval
@@ -208,7 +208,7 @@ export class Bind {
   }
 
   /**
-   * Parses and evaluates an expression with a given state and merges the
+   * Parses and evaluates an expression with a given scope and merges the
    * resulting object into current state.
    * @param {string} expression
    * @param {!Object} scope
@@ -221,6 +221,9 @@ export class Bind {
   }
 
   /**
+   * Same as setStateWithExpression() except also pushes new history.
+   * Popping the new history stack entry will restore the values of variables
+   * in `expression`.
    * @param {string} expression
    * @param {!Object} scope
    */
@@ -588,7 +591,8 @@ export class Bind {
             + `with error: ${error.message}`);
         userError.stack = error.stack;
         reportError(userError);
-        throw userError;
+
+        throw userError; // Reject promise.
       } else {
         return result;
       }
