@@ -44,12 +44,6 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'scrolling',
 ];
 
-/** @const {!Array<string>} */
-const CONTAINER_LIST = [
-  'AMP-LIGHTBOX',
-  'AMP-SIDEBAR',
-];
-
 /** @type {number}  */
 let count = 0;
 
