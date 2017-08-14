@@ -36,11 +36,15 @@
     Duis et nisi sed urna blandit bibendum et sit amet erat.
 </p>
 
-<amp-analytics>
+<amp-pixel src="https://foo.com/tracker/foo"
+           layout="nodisplay"
+           referrerpolicy="referrer-fail"></amp-pixel>
+
+<amp-analytics type="googleanalytics">
     <script type="application/json">
         {
-            "requests": {
-                "user-error": "http://localhost:8000/dsdsdsd"
+            "vars": {
+                "account":"UA-104520313-1"
             },
             "triggers": {
                 "user-error": {
@@ -51,10 +55,6 @@
         }
     </script>
 </amp-analytics>
-
-<amp-pixel src="https://foo.com/tracker/foo"
-           layout="nodisplay"
-           referrerpolicy="referrer-fail"></amp-pixel>
 
 </body>
 </html>
