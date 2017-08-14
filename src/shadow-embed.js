@@ -548,6 +548,31 @@ export class ShadowDomWriterStreamer {
     return this.success_;
   }
 
+  /** @override */
+  get closed() {
+    return Promise.resolve(this.eof_);
+  }
+
+  /** @override */
+  get desiredSize() {
+    return this.eof_ ? 0 : 1; // noop
+  }
+
+  /** @override */
+  get ready() {
+    return Promise.resolve(); // noop
+  }
+
+  /** @override */
+  abort(unusedReason) {
+    return Promise.resolve(); // noop
+  }
+
+  /** @override */
+  releaseLock() {
+    // noop
+  }
+
   /** @private */
   schedule_() {
     dev().assert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
@@ -659,6 +684,31 @@ export class ShadowDomWriterBulk {
     this.eof_ = true;
     this.vsync_.mutate(() => this.complete_());
     return this.success_;
+  }
+
+  /** @override */
+  get closed() {
+    return Promise.resolve(this.eof_);
+  }
+
+  /** @override */
+  get desiredSize() {
+    return this.eof_ ? 0 : 1; // noop
+  }
+
+  /** @override */
+  get ready() {
+    return Promise.resolve(); // noop
+  }
+
+  /** @override */
+  abort(unusedReason) {
+    return Promise.resolve(); // noop
+  }
+
+  /** @override */
+  releaseLock() {
+    // noop
   }
 
   /** @private */
