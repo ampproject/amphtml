@@ -49,7 +49,7 @@ export function createCustomEvent(win, type, detail, opt_eventInit) {
  * @param {!EventTarget} element
  * @param {string} eventType
  * @param {function(!Event)} listener
- * @param {AddEventListenerOptions=} opt_evtListenerOpts
+ * @param {Object=} opt_evtListenerOpts
  * @return {!UnlistenDef}
  */
 export function listen(element, eventType, listener, opt_evtListenerOpts) {
@@ -72,7 +72,7 @@ export function getData(event) {
  * @param {!EventTarget} element
  * @param {string} eventType
  * @param {function(!Event)} listener
- * @param {AddEventListenerOptions=} opt_evtListenerOpts
+ * @param {Object=} opt_evtListenerOpts
  * @return {!UnlistenDef}
  */
 export function listenOnce(element, eventType, listener, opt_evtListenerOpts) {
@@ -95,7 +95,7 @@ export function listenOnce(element, eventType, listener, opt_evtListenerOpts) {
  * fired on the element.
  * @param {!EventTarget} element
  * @param {string} eventType
- * @param {AddEventListenerOptions=} opt_evtListenerOpts
+ * @param {Object=} opt_evtListenerOpts
  * @param {function(!UnlistenDef)=} opt_cancel An optional function that, when
  *     provided, will be called with the unlistener. This gives the caller
  *     access to the unlistener, so it may be called manually when necessary.
