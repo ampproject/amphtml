@@ -111,7 +111,7 @@ export class Bind {
     this.boundElements_ = [];
 
     /** @const @private {!Function} */
-    this.boundOnDomUpdate_ = this.onDomUpdate_.bound(this);
+    this.boundOnDomUpdate_ = this.onDomUpdate_.bind(this);
 
     /**
      * Maps expression string to the element(s) that contain it.
@@ -119,7 +119,7 @@ export class Bind {
      */
     this.expressionToElements_ = map();
 
-    /** @private {../../../src/service/history-impl.History} */
+    /** @private {!../../../src/service/history-impl.History} */
     this.history_ = Services.historyForDoc(ampdoc);
 
     /**
@@ -229,9 +229,10 @@ export class Bind {
    * in `expression`.
    * @param {string} expression
    * @param {!JsonObject} scope
+   * @return {!Promise}
    */
   pushStateWithExpression(expression, scope) {
-    this.evaluateExpression_(expression, scope).then(result => {
+    return this.evaluateExpression_(expression, scope).then(result => {
       // Store the current values of each referenced variable in `expression`
       // so that we can restore them on history-pop.
       const oldState = map();
@@ -244,7 +245,7 @@ export class Bind {
       const onPop = () => this.setState(oldState);
       this.history_.push(onPop);
 
-      this.setState(result);
+      return this.setState(result);
     });
   }
 
@@ -318,6 +319,11 @@ export class Bind {
    */
   setMaxNumberOfBindingsForTesting(value) {
     this.maxNumberOfBindings_ = value;
+  }
+
+  /** @return {!../../../src/service/history-impl.History} */
+  historyForTesting() {
+    return this.history_;
   }
 
   /**

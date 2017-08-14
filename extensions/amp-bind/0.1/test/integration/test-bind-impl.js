@@ -381,7 +381,23 @@ describe.configure().ifNewChrome().run('Bind', function() {
     });
 
     it('should support pushStateWithExpression()', () => {
-      // TODO(choumx)
+      const pushHistorySpy =
+          env.sandbox.spy(bind.historyForTesting(), 'push');
+
+      const element = createElement(env, container, '[text]="foo"');
+      expect(element.textContent).to.equal('');
+      const promise = bind.pushStateWithExpression('{"foo": "bar"}', {});
+      return promise.then(() => {
+        env.flushVsync();
+        expect(element.textContent).to.equal('bar');
+
+        expect(pushHistorySpy).calledOnce;
+        // Pop callback should restore `foo` to original value (null).
+        const onPopCallback = pushHistorySpy.firstCall.args[0];
+        return onPopCallback();
+      }).then(() => {
+        expect(element.textContent).to.equal('null');
+      });
     });
 
     it('should ignore <amp-state> updates if specified in setState()', () => {
