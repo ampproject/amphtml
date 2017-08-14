@@ -548,6 +548,31 @@ export class ShadowDomWriterStreamer {
     return this.success_;
   }
 
+  /** @override */
+  abort(unusedReason) {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  releaseLock() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get closed() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get desiredSize() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get ready() {
+    throw new Error('Not implemented');
+  }
+
   /** @private */
   schedule_() {
     dev().assert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
@@ -659,6 +684,31 @@ export class ShadowDomWriterBulk {
     this.eof_ = true;
     this.vsync_.mutate(() => this.complete_());
     return this.success_;
+  }
+
+  /** @override */
+  abort(unusedReason) {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  releaseLock() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get closed() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get desiredSize() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get ready() {
+    throw new Error('Not implemented');
   }
 
   /** @private */
