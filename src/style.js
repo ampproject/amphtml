@@ -98,8 +98,10 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
  * @param {!Object<string, *>} styles
  */
 export function setImportantStyles(element, styles) {
-  element.style.cssText +=
-      Object.keys(styles).map(k => `${k}:${styles[k]}!important;`).join('');
+  for (const k in styles) {
+    element.style.setProperty(
+        getVendorJsPropertyName(styles, k), styles[k].toString(), 'important');
+  }
 }
 
 
