@@ -17,14 +17,13 @@
  /**
  * Variable that holds whether the browser supports options as a parameter of
  * addEventListener or not
- * @enum {number}
+ * @enum {string}
  */
- const optsTest = {
-   NOT_RUN: -1,
-   NOT_SUPPORTED: 0,
-   SUPPORTED: 1,
+ const optTest = {
+   NOT_RUN: 'not_run',
+   NOT_SUPPORTED: 'not_supported',
+   SUPPORTED: 'supported',
  };
- let optsSupported = optsTest.NOT_RUN;
 
 /**
  * Listens for the specified event on the element.
@@ -53,7 +52,7 @@
        throw e;
      }
    };
-   detectEvtListenerOptsSupport();
+   const optsSupported = detectEvtListenerOptsSupport();
    let capture = false;
    if (opt_evtListenerOpts && opt_evtListenerOpts.capture) {
      capture = opt_evtListenerOpts.capture;
@@ -61,14 +60,14 @@
    localElement.addEventListener(
        eventType,
        wrapped,
-       optsSupported == optsTest.SUPPORTED ? opt_evtListenerOpts : capture
+       optsSupported ? opt_evtListenerOpts : capture
    );
    return () => {
      if (localElement) {
        localElement.removeEventListener(
            eventType,
            wrapped,
-           optsSupported == optsTest.SUPPORTED ? opt_evtListenerOpts : capture
+           optsSupported ? opt_evtListenerOpts : capture
        );
      }
      // Ensure these are GC'd
@@ -86,23 +85,35 @@
  * @suppress {checkTypes}
  */
  export function detectEvtListenerOptsSupport() {
+   if (!self.optsSupported) {
+     self.optsSupported = optTest.NOT_RUN;
+   }
    // Only run the test once
-   if (optsSupported != optsTest.NOT_RUN) {
-     return;
+   if (self.optsSupported != optTest.NOT_RUN) {
+     return self.optsSupported == optTest.SUPPORTED;
    }
 
-   optsSupported = optsTest.NOT_SUPPORTED;
+   self.optsSupported = optTest.NOT_SUPPORTED;
    // Test whether browser supports EventListenerOptions or not
    try {
+     let optsSupported = self.optsSupported;
      const options = Object.defineProperty({}, 'capture', {
        get: function() {
-         optsSupported = optsTest.SUPPORTED;
+         optsSupported = optTest.SUPPORTED;
        },
      });
      self.addEventListener('test-opts', null, options);
-     return optsSupported == optsTest.SUPPORTED;
+     self.optsSupported = optsSupported;
+     return self.optsSupported == optTest.SUPPORTED;
    } catch (err) {
      // EventListenerOptions are not supported
-     return false;
    }
+   return false;
+ }
+
+ /**
+  * Resets the test for whether addEventListener supports options or not.
+  */
+ export function resetEvtListenerOptsSupport() {
+   self.optsSupported = optTest.NOT_RUN;
  }

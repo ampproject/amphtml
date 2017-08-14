@@ -22,6 +22,10 @@ import {
   listenOncePromise,
   loadPromise,
 } from '../../src/event-helper';
+import {
+  detectEvtListenerOptsSupport,
+  resetEvtListenerOptsSupport,
+} from '../../src/event-helper-listen';
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
 
@@ -38,6 +42,7 @@ describe('EventHelper', () => {
   let element;
   let loadObservable;
   let errorObservable;
+  let addEventListenerStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -243,6 +248,47 @@ describe('EventHelper', () => {
     };
     createCustomEvent(win, 'foo', {bar: 123});
     expect(initCustomEventSpy).to.be.calledOnce;
+  });
+
+  it('should detect when addEventListener options are supported', () => {
+    // Simulate an addEventListener that accepts options
+    addEventListenerStub = sandbox.stub(self, 'addEventListener',
+        (type, listener, options) => {
+          const getCapture = options.capture;
+          if (getCapture) {
+            // Added to bypass linter (never used warning)
+          }
+        }
+    );
+    resetEvtListenerOptsSupport();
+    expect(detectEvtListenerOptsSupport()).to.be.true;
+    expect(addEventListenerStub.called).to.be.true;
+    resetEvtListenerOptsSupport();
+  });
+
+  it('should cache the result of the test and only do it once', () => {
+    resetEvtListenerOptsSupport();
+    expect(detectEvtListenerOptsSupport()).to.be.true;
+    expect(addEventListenerStub.called).to.be.true;
+    expect(detectEvtListenerOptsSupport()).to.be.true;
+    expect(addEventListenerStub.calledOnce).to.be.true;
+  });
+
+  it('should detect when addEventListener options are not supported', () => {
+    // Simulate an addEventListener that does not accept options
+    addEventListenerStub = sandbox.stub(self, 'addEventListener',
+        (type, listener, capture) => {
+          const getCapture = capture;
+          if (getCapture) {
+            // Added to bypass linter (never used warning)
+          }
+        }
+    );
+    resetEvtListenerOptsSupport();
+    expect(detectEvtListenerOptsSupport()).to.be.false;
+    expect(addEventListenerStub.called).to.be.true;
+    expect(detectEvtListenerOptsSupport()).to.be.false;
+    expect(addEventListenerStub.calledOnce).to.be.true;
   });
 
 });
