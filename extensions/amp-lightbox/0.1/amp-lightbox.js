@@ -23,6 +23,7 @@ import {computedStyle, setImportantStyles} from '../../../src/style';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {Services} from '../../../src/services';
+import {debounce} from '../../../src/utils/rate-limit';
 import * as st from '../../../src/style';
 
 /** @const {string} */
@@ -64,6 +65,13 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @private {?number} */
     this.scrollTimerId_ = null;
+
+    /** @const {function()} */
+    this.boundReschedule_ = debounce(this.win, () => {
+      const container = dev().assertElement(this.container_);
+      this.scheduleLayout(container);
+      this.scheduleResume(container);
+    }, 500);
   }
 
   /** @override */
@@ -74,6 +82,11 @@ class AmpLightbox extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
+  }
+
+  /** @override */
+  buildCallback() {
+    this.element.classList.add('i-amphtml-overlay');
   }
 
   /**
@@ -159,6 +172,8 @@ class AmpLightbox extends AMP.BaseElement {
       }
       // TODO: instead of laying out children all at once, layout children based
       // on visibility.
+      this.element.addEventListener('transitionend', this.boundReschedule_);
+      this.element.addEventListener('animationend', this.boundReschedule_);
       this.scheduleLayout(container);
       this.scheduleResume(container);
     });
@@ -202,6 +217,8 @@ class AmpLightbox extends AMP.BaseElement {
     }
     this.win.document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
+    this.element.removeEventListener('transitionend', this.boundReschedule_);
+    this.element.removeEventListener('animationend', this.boundReschedule_);
     this.boundCloseOnEscape_ = null;
     this.schedulePause(dev().assertElement(this.container_));
     this.active_ = false;
