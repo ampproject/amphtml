@@ -76,17 +76,13 @@ class AmpLightbox extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.element.classList.add('i-amphtml-overlay');
     this.maybeSetTransparentBody_();
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
-  }
-
-  /** @override */
-  buildCallback() {
-    this.element.classList.add('i-amphtml-overlay');
   }
 
   /**
