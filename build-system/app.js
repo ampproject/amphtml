@@ -1041,32 +1041,32 @@ function replaceUrls(mode, file, hostName, inabox) {
   hostName = hostName || '';
   if (mode == 'default') {
     file = file.replace(
-        'https://cdn.ampproject.org/v0.js',
+        /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
         hostName + '/dist/amp.js');
     file = file.replace(
-        'https://cdn.ampproject.org/amp4ads-v0.js',
+        /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
         hostName + '/dist/amp-inabox.js');
     file = file.replace(
-        /https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g,
+        /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
         hostName + '/dist/v0/$1.max.js');
     if (inabox) {
-      file = file.replace('/dist/amp.js', '/dist/amp-inabox.js');
+      file = file.replace(/\/dist\/amp\.js/g, '/dist/amp-inabox.js');
     }
   } else if (mode == 'compiled') {
     file = file.replace(
-        'https://cdn.ampproject.org/v0.js',
+        /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
         hostName + '/dist/v0.js');
     file = file.replace(
-        'https://cdn.ampproject.org/amp4ads-v0.js',
+        /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
         hostName + '/dist/amp4ads-v0.js');
     file = file.replace(
-        /https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g,
+        /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
         hostName + '/dist/v0/$1.js');
     file = file.replace(
-        /\/dist.3p\/current\/(.*)\.max.html/,
+        /\/dist.3p\/current\/(.*)\.max.html/g,
         hostName + '/dist.3p/current-min/$1.html');
     if (inabox) {
-      file = file.replace('/dist/v0.js', '/dist/amp4ads-v0.js');
+      file = file.replace(/\/dist\/v0\.js/g, '/dist/amp4ads-v0.js');
     }
   }
   return file;
