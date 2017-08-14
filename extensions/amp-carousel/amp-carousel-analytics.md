@@ -63,4 +63,4 @@ The `amp-carousel-next` event is issued when there is a travesal to the previous
 
 ### Vars
 
-Description of the variables can be found in the [analytics-vars.md](/extensions/amp-analytics/analytics-vars.md#fromslide) file.
+Description of the variables can be found in the [analytics-vars.md](../amp-analytics/analytics-vars.md#fromslide) file.
