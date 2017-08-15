@@ -33,10 +33,6 @@ attr_lists: { # amp-audio attributes that are common to both AMP and A4A format.
   attrs: { name: "loop"  value: "" }
   attrs: { name: "muted" value: "" }
   attrs: {
-    # deprecated use artwork instead
-    name: "poster"
-  }
-  attrs: {
     name: "src"
     value_url: {
       allowed_protocol: "https"

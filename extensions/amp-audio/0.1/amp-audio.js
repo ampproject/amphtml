@@ -16,7 +16,7 @@
 
 import {Layout} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {listen} from '../../../src/event-helper';
 import {
   EMPTY_METADATA,
@@ -25,8 +25,6 @@ import {
   parseFavicon,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-
-const TAG = 'amp-audio';
 
 /**
  * Visible for testing only.
@@ -86,11 +84,6 @@ export class AmpAudio extends AMP.BaseElement {
                   || this.element.getAttribute('aria-label')
                   || doc.title;
     const album = this.element.getAttribute('album');
-    if (this.element.getAttribute('poster')) {
-      // TODO(@aghassemi, #10931) Remove warning after usage check.
-      user().warn(TAG, `The poster attribute is deprecated and will no longer
-        be used on MediaSessionAPI, please use the artwork attribute instead.`);
-    }
     const artwork = this.element.getAttribute('artwork')
                    || parseSchemaImage(doc)
                    || parseOgImage(doc)

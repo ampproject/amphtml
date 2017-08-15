@@ -86,8 +86,6 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 `amp-audio` implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session) enabling developers to specify more information about the audio file that is playing to be displayed in the notification center of user's devices (along with play/pause controls).
 
-##### poster (deprecated)
-
 ##### artwork
 
 URL to a PNG/JPG/ICO image serving as the audio's artwork. If not present, the MediaSessionAPI Helper will use either the `image` field in the `schema.org` definition, the `og:image` or the website's `favicon`.
