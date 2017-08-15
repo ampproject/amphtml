@@ -276,7 +276,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           } else if (trigger['selector']) {
             // Expand the selector using variable expansion.
             return this.variableService_.expandTemplate(
-                trigger['selector'], expansionOptions, this.element)
+                trigger['selector'], expansionOptions)
                 .then(selector => {
                   trigger['selector'] = selector;
                   this.addTriggerNoInline_(trigger);
@@ -582,7 +582,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           this.config_['vars']['requestCount']++;
           const expansionOptions = this.expansionOptions_(event, trigger);
           return this.variableService_
-              .expandTemplate(request, expansionOptions, this.element);
+              .expandTemplate(request, expansionOptions);
         })
         .then(request => {
           const whiteList =
@@ -616,8 +616,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       for (const k in params) {
         if (typeof params[k] == 'string') {
           requestPromises.push(
-              this.variableService_
-                  .expandTemplate(params[k], expansionOptions, this.element)
+              this.variableService_.expandTemplate(params[k], expansionOptions)
                   .then(value => { params[k] = value; }));
         }
       }
@@ -706,8 +705,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   expandTemplateWithUrlParams_(spec, expansionOptions) {
-    return this.variableService_.expandTemplate(
-        spec, expansionOptions, this.element)
+    return this.variableService_.expandTemplate(spec, expansionOptions)
         .then(key => Services.urlReplacementsForDoc(
             this.element).expandUrlAsync(key));
   }

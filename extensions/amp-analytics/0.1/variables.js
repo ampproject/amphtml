@@ -191,13 +191,11 @@ export class VariableService {
   /**
    * @param {string} template The template to expand
    * @param {!ExpansionOptions} options configuration to use for expansion
-   * @param {!Element} element
    * @return {!Promise<!string>} The expanded string
    */
-  expandTemplate(template, options, element) {
+  expandTemplate(template, options) {
     if (options.iterations < 0) {
-      user(element).error(
-          TAG, 'Maximum depth reached while expanding variables. ' +
+      user().error(TAG, 'Maximum depth reached while expanding variables. ' +
           'Please ensure that the variables are not recursive.');
       return Promise.resolve(template);
     }
@@ -222,7 +220,7 @@ export class VariableService {
         // Expand string values further.
         p = this.expandTemplate(raw,
             new ExpansionOptions(options.vars, options.iterations - 1,
-                true /* noEncode */), element);
+                true /* noEncode */));
       } else {
         // Values can also be arrays and objects. Don't expand them.
         p = Promise.resolve(raw);
