@@ -87,15 +87,13 @@ func cloudAuthContext(r *http.Request) (context.Context, error) {
 
 func handle(w http.ResponseWriter, r *http.Request) {
 	c, _ := cloudAuthContext(r)
-	randomVal := rand.Float64()
-	redirectionRate := 0.1;
-	if randomVal < redirectionRate {
-		client := &http.Client{}
+	if rand.Float64() < 0.1 {
 		urlString := strings.Replace(r.URL.String(), "amp-error-reporting", "amp-error-reporting-js", 1)
-		req, _ := http.NewRequest("GET", urlString, nil)
-		resp, err := client.Do(req)
-		if err != nil {
-			log.Errorf(c, "Error redirecting to experiment %v", resp)
+		_, err := http.Get(urlString)
+		if err == nil {
+			log.Infof(c, "Forwarded report to %s", urlString)
+		} else {
+			log.Errorf(c, "Error forwarding report to %s", urlString)
 		}
 	}
 	logc, err := logging.NewClient(c, appengine.AppID(c), "javascript.errors")
