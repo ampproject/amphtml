@@ -119,7 +119,7 @@ export class StandardActions {
 
   /**
    * @param {!./action-impl.ActionInvocation} invocation
-   * @return {!Promise}
+   * @return {?Promise}
    * @private
    */
   handleAmpSetState_(invocation) {
@@ -141,7 +141,7 @@ export class StandardActions {
    */
   handleAmpBindAction_(invocation, opt_pushState) {
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return Promise.resolve();
+      return null;
     }
     return Services.bindForDocOrNull(invocation.target).then(bind => {
       user().assert(bind, 'AMP-BIND is not installed.');

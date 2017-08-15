@@ -713,17 +713,15 @@ describe('Multiple handlers action method', () => {
     onEnqueue1 = sandbox.spy();
     onEnqueue2 = sandbox.spy();
     targetElement = document.createElement('target');
-    const id1 = 'elementFoo';
-    const id2 = 'elementBar';
-    targetElement.setAttribute('on', `tap:${id1}.method1,${id2}.method2`);
+    targetElement.setAttribute('on', `tap:foo.method1,bar.method2`);
     parent = document.createElement('parent');
     child = document.createElement('child');
     parent.appendChild(targetElement);
     targetElement.appendChild(child);
     document.body.appendChild(parent);
 
-    execElement1 = createExecElement(id1, onEnqueue1);
-    execElement2 = createExecElement(id2, onEnqueue2);
+    execElement1 = createExecElement('foo', onEnqueue1);
+    execElement2 = createExecElement('bar', onEnqueue2);
 
     parent.appendChild(execElement1);
     parent.appendChild(execElement2);
@@ -741,6 +739,50 @@ describe('Multiple handlers action method', () => {
         targetElement);
     assertInvocation(onEnqueue2.getCall(0).args[0], execElement2, 'method2',
         targetElement);
+  });
+
+  it('should chain asynchronous actions', () => {
+    let resolveAbc;
+    const promiseAbc = new Promise(resolve => { resolveAbc = resolve; });
+    const abc = sandbox.stub().returns(promiseAbc);
+    action.addGlobalTarget('ABC', abc);
+
+    let resolveXyz;
+    const promiseXyz = new Promise(resolve => { resolveXyz = resolve; });
+    const xyz = sandbox.stub().returns(promiseXyz);
+    action.addGlobalTarget('XYZ', xyz);
+
+    const element = document.createElement('target');
+    element.setAttribute('on',
+        'tap:ABC.abc, foo.method1, XYZ.xyz, bar.method2');
+    parent.appendChild(element);
+
+    action.trigger(element, 'tap', null);
+
+    expect(abc).calledOnce;
+    expect(onEnqueue1).to.not.have.been.called;
+    expect(xyz).to.not.have.been.called;
+    expect(onEnqueue2).to.not.have.been.called;
+
+    // Invocation of chained actions are branched on promiseAbc/promiseXyz,
+    // so wait for macro-task to ensure all queued promises are resolved.
+    const macroTask = () => new Promise(resolve => setTimeout(resolve, 0));
+
+    resolveAbc();
+    return macroTask().then(() => {
+      expect(abc).calledOnce;
+      expect(onEnqueue1).calledOnce;
+      expect(xyz).calledOnce;
+      expect(onEnqueue2).to.not.have.been.called;
+
+      resolveXyz();
+      return macroTask();
+    }).then(() => {
+      expect(abc).calledOnce;
+      expect(onEnqueue1).calledOnce;
+      expect(xyz).calledOnce;
+      expect(onEnqueue2).calledOnce;
+    });
   });
 });
 

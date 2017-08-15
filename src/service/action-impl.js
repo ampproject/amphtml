@@ -392,14 +392,13 @@ export class ActionService {
 
     // Invoke actions serially, where each action waits for its predecessor
     // to complete. `currentPromise` is the i'th promise in the chain.
-    let currentPromise = Promise.resolve();
+    let currentPromise = null;
 
     action.actionInfos.forEach(actionInfo => {
       // Replace any variables in args with data in `event`.
       const args = dereferenceExprsInArgs(actionInfo.args, event);
 
-      // Wait for the previous action, if applicable.
-      currentPromise = currentPromise.then(() => {
+      const invoke = () => {
         // Global target, e.g. `AMP`.
         const globalTarget = this.globalTargets_[actionInfo.target];
         if (globalTarget) {
@@ -416,7 +415,12 @@ export class ActionService {
         } else {
           this.actionInfoError_('target not found', actionInfo, target);
         }
-      });
+      };
+
+      // Wait for the previous action, if applicable.
+      currentPromise = (currentPromise)
+          ? currentPromise.then(() => invoke())
+          : invoke();
     });
   }
 
