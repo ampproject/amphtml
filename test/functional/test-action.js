@@ -713,7 +713,7 @@ describe('Multiple handlers action method', () => {
     onEnqueue1 = sandbox.spy();
     onEnqueue2 = sandbox.spy();
     targetElement = document.createElement('target');
-    targetElement.setAttribute('on', `tap:foo.method1,bar.method2`);
+    targetElement.setAttribute('on', 'tap:foo.method1,bar.method2');
     parent = document.createElement('parent');
     child = document.createElement('child');
     parent.appendChild(targetElement);
