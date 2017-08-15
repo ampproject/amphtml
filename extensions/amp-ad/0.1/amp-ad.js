@@ -89,9 +89,12 @@ export class AmpAd extends AMP.BaseElement {
 
       const extensionTagName = networkImplementationTag(type);
       this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
+      const startTime = (this.win.performance && this.win.performance.now) ?
+          this.win.performance.now() : Date.now();
       return Services.extensionsFor(this.win).loadElementClass(extensionTagName)
-          .then(ctor => new ctor(this.element))
+          .then(ctor => new ctor(this.element, startTime))
           .catch(error => {
+            console.log(error);
           // Work around presubmit restrictions.
             const TAG = this.element.tagName;
           // Report error and fallback to 3p

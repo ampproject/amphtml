@@ -249,7 +249,11 @@ describe('Ad loader', () => {
           };
           ampAdElement.setAttribute('type', 'zort');
           const zortInstance = {};
-          const zortConstructor = function() { return zortInstance; };
+          const zortConstructor = function(element, upgradeTime) {
+            expect(element.getAttribute('type')).to.equal('zort');
+            expect(upgradeTime).is.number;
+            return zortInstance;
+          };
           const extensions = Services.extensionsFor(fixture.win);
           const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
               .withArgs('amp-ad-network-zort-impl')

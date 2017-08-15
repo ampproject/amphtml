@@ -223,9 +223,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * @param {!Element} element
+   * @param {=number} upgradeStartTime
    */
-  constructor(element) {
+  constructor(element, opt_upgradeStartTime) {
     super(element);
+
+    /**
+     * Time of delay imposed by upgrade path.
+     * @type {?number}
+     */
+    this.upgradeDelayMs_ =
+        opt_upgradeStartTime ? (this.getNow() - opt_upgradeStartTime) : null;
+    dev().info(TAG, 'upgrade delay', this.upgradeDelayMs_);
 
     /**
      * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
@@ -307,6 +316,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
+    this.protectedEmitLifecycleEvent_('upgradeDelay', this.upgradeDelayMs_);
     if (this.win['dbclk_a4a_viz_change']) {
       // Only create one per page but ensure all slots get experiment
       // selection.

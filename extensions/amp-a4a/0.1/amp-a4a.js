@@ -145,6 +145,7 @@ export const LIFECYCLE_STAGES = {
   iniLoad: '26',
   resumeCallback: '27',
   visIniLoad: '29',
+  upgradeDelay: '30',
 };
 
 /**
@@ -190,8 +191,9 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @param {!Element} element
+   * @param {=number} opt_upgradeStartTime
    */
-  constructor(element) {
+  constructor(element, opt_upgradeStartTime) {
     super(element);
     dev().assert(AMP.AmpAdUIHandler);
     dev().assert(AMP.AmpAdXOriginIframeHandler);
@@ -256,9 +258,8 @@ export class AmpA4A extends AMP.BaseElement {
      * returned.
      *
      * @const {function():number}
-     * @private
      */
-    this.getNow_ = (this.win.performance && this.win.performance.now) ?
+    this.getNow = (this.win.performance && this.win.performance.now) ?
         this.win.performance.now.bind(this.win.performance) : Date.now;
 
     /**
@@ -832,12 +833,12 @@ export class AmpA4A extends AMP.BaseElement {
     // There's no real throttling with A4A, but this is the signal that is
     // most comparable with the layout callback for 3p ads.
     this.protectedEmitLifecycleEvent_('preAdThrottle');
-    const layoutCallbackStart = this.getNow_();
+    const layoutCallbackStart = this.getNow();
     const checkStillCurrent = this.verifyStillCurrent();
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
       checkStillCurrent();
-      const delta = this.getNow_() - layoutCallbackStart;
+      const delta = this.getNow() - layoutCallbackStart;
       this.protectedEmitLifecycleEvent_('layoutAdPromiseDelay', {
         layoutAdPromiseDelay: Math.round(delta),
         isAmpCreative: !!creativeMetaData,
