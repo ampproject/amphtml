@@ -20,7 +20,6 @@ import {listen} from './event-helper';
 import {Services} from './services';
 import {VideoEvents} from './video-interface';
 import {secsToHHMMSS} from './utils/datetime';
-import {createElementWithAttributes} from './dom';
 import * as st from './style';
 import * as tr from './transition';
 
@@ -488,12 +487,6 @@ export class CustomControls {
       // Add SVG shadow
       this.ctrlContainer_.appendChild(shadowFilter);
 
-      // Floating controls
-      this.floatingContainer_.appendChild(
-          this.elementFromButton_(floating, this.floatingContainer_)
-      );
-      this.ctrlContainer_.appendChild(this.floatingContainer_);
-
       // Add background
       this.ctrlContainer_.appendChild(this.ctrlBg_);
 
@@ -517,6 +510,12 @@ export class CustomControls {
       this.miniCtrlsWrapper_.appendChild(this.createProgressBar_());
       this.ctrlContainer_.appendChild(this.miniCtrlsWrapper_);
 
+      // Floating controls
+      this.floatingContainer_.appendChild(
+          this.elementFromButton_(floating, this.floatingContainer_)
+      );
+      this.ctrlContainer_.appendChild(this.floatingContainer_);
+
       // Add main buttons container
       this.entry_.video.element.appendChild(this.ctrlContainer_);
     });
@@ -527,6 +526,9 @@ export class CustomControls {
    */
   enableControls() {
     this.controlsDisabled_ = false;
+    if (this.ctrlContainer_) {
+      st.resetStyles(this.ctrlContainer_, ['pointer-events']);
+    }
   }
 
   /**
@@ -534,6 +536,11 @@ export class CustomControls {
    */
   disableControls() {
     this.controlsDisabled_ = true;
+    if (this.ctrlContainer_) {
+      st.setStyles(this.ctrlContainer_, {
+        'pointer-events': 'none',
+      });
+    }
   }
 
   /**
@@ -646,9 +653,9 @@ export class CustomControls {
    * Switches between full controls (with control bar and floating main action)
    * and minimal controls (overlayed actions and a minimal progress bar).
    * Minimal controls are used by default for docked videos.
-   * @param {boolean} enabled enable/disable minimal controls
+   * @param {boolean} enable enable/disable minimal controls
    */
-  toggleMinimalControls(enabled = true) {
+  toggleMinimalControls(enable = true) {
     this.ctrlContainer_.classList.toggle('amp-custom-controls-minimal', enable);
     this.minimal_ = enable;
   }

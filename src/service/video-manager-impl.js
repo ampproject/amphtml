@@ -853,7 +853,10 @@ export class VideoEntry {
       if (!supportsAutoplay && this.video.isInteractive()) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
-        this.showControls();
+        this.showControls(
+            /* showToo */ true,
+            /* enableToo */ this.hasCustomCtrls
+        );
         return;
       }
 
@@ -909,7 +912,10 @@ export class VideoEntry {
 
     function onInteraction() {
       this.userInteractedWithAutoPlay_ = true;
-      this.showControls(true);
+      this.showControls(
+          /* showToo */ true,
+          /* enableToo */ this.hasCustomCtrls
+      );
       this.video.unmute();
       unlisteners.forEach(unlistener => {
         unlistener();
@@ -1261,7 +1267,7 @@ export class VideoEntry {
     if (this.manager_.isDocked(this) && !reset) {
       return;
     }
-    this.hideControls(true, true);
+    this.hideControls(/* customToo */ true, /* disableToo */ true);
     this.customControls_.toggleMinimalControls(/* enabled */ true);
     this.video.element.classList.add(DOCK_CLASS);
     [
@@ -1452,7 +1458,7 @@ export class VideoEntry {
         this.measureMinimizedRect_();
       },
       mutate: () => {
-        this.showControls(false);
+        this.showControls(/* showToo */ false, /* enableToo */ true);
         this.realignMiniControls_();
       },
     });
@@ -1645,8 +1651,14 @@ export class VideoEntry {
     // Remove draggable mask and listeners
     this.vsync_.mutate(() => {
       this.unlistenAll_();
-      this.hideControls(true, false);
-      this.showControls(false);
+      this.hideControls(
+          /* customToo */ true,
+          /* disableToo */ !this.hasCustomCtrls
+      );
+      this.showControls(
+          /* showToo */ false,
+          /* enableToo */ this.hasCustomCtrls
+      );
       this.customControls_.toggleMinimalControls(/* enabled */ false);
       // Restore the video inline
       this.video.element.classList.remove(DOCK_CLASS);
@@ -1860,7 +1872,7 @@ export class VideoEntry {
    */
   customCtrlsVideoBuilt_() {
     // Hide native controls
-    this.hideControls(false, false);
+    this.hideControls(/* customToo */ false, /* disableToo */ false);
 
     const skinAttr = this.video.element.getAttribute(
         VideoAttributes.CUSTOM_CTRLS_SKIN
@@ -1898,16 +1910,20 @@ export class VideoEntry {
 
     // If we only use custom controls for docked videos then we hide them
     // until the video is docked.
-    if (!this.hasCustomCtrls) {
-      this.hideControls(true, true);
-    }
+    this.vsync_.mutate(() => {
+      if (!this.hasCustomCtrls) {
+        this.hideControls(/* customToo */ true, /* disableToo */ true);
+      }
+    });
   }
 
   hideControls(customToo = true, disableToo = true) {
     // Hide native controls
     this.video.hideControls();
     // Hide custom controls
-    if (customToo && this.hasCustomCtrls && this.customControls_) {
+    if (customToo
+        && this.customControls_
+        && (this.hasCustomCtrls || this.hasDocking)) {
       if (disableToo) {
         this.customControls_.disableControls();
       }
@@ -1915,11 +1931,13 @@ export class VideoEntry {
     }
   }
 
-  showControls(showToo = false) {
+  showControls(showToo = false, enableToo = false) {
     if ((this.hasCustomCtrls || this.hasDocking) && this.customControls_) {
       // Show custom controls
-      this.customControls_.enableControls();
-      if (showToo) {
+      if (enableToo) {
+        this.customControls_.enableControls();
+      }
+      if (this.hasCustomCtrls && showToo) {
         this.customControls_.showControls();
       }
     } else {

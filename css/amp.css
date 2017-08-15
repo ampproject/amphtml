@@ -714,7 +714,7 @@ i-amphtml-video-mask, i-amp-video-mask {
 }
 
 .i-amphtml-dockable-video-minimizing amp-custom-controls.amp-custom-controls-minimal {
-  z-index: 16;
+  z-index: 17;
   border-radius: 6px;
   position: fixed !important;
 }
@@ -749,6 +749,7 @@ amp-custom-controls {
   left: 0;
   height: 100%;
   width: 100%;
+  z-index: 1;
 }
 
 /* Background shown behind custom controls (white/black gradient) */
@@ -763,6 +764,7 @@ amp-custom-controls-bg {
   background-size: 1px 100px;
   background-position: bottom;
   background-repeat-y: no-repeat;
+  z-index: 1;
 }
 
 /* Main controls bar (usually contains progress time,
@@ -1022,11 +1024,13 @@ amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-mini {
   background: rgba(0, 0, 0, 0.3);
 }
 
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-icon-wrapper {
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-icon-wrapper,
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-volume {
   height: auto;
   flex-grow: 1;
   width: 30%;
   max-width: 80px;
+  margin-right: 0px;
 }
 
 amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-icon-wrapper.amp-custom-controls-mute {
