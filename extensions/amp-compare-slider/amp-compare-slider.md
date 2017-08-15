@@ -16,38 +16,25 @@ limitations under the License.
 
 # <a name="`amp-compare-slider`"></a> `amp-compare-slider`
 
-## Tool is Under Development!
 
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
+    <td>
+      Photo-Split-Compare allows for two images to transition from one to the other through a touch interaction. This specific extension will allow the developer to customize the direction in which the second photo is revealed, the appearance of the split between the photos and the touch interactions.
+   </td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Tool is Under Development!</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-compare-slider-0.1.js">&lt;/script></code></td>
+    <td></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL THIS IN</td>
+    <td>Responsive</td>
   </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
+  
 </table>
-
-## Behavior
-
-FILL THIS IN. What does this extension do?
-
-## Attributes
-
-FILL THIS IN. Does this extension allow for properties to configure?
-
-## Validation
-See [amp-compare-slider rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-compare-slider/0.1/validator-amp-compare-slider.protoascii) in the AMP validator specification.
