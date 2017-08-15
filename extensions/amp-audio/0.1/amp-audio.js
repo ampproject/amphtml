@@ -87,6 +87,7 @@ export class AmpAudio extends AMP.BaseElement {
                   || doc.title;
     const album = this.element.getAttribute('album');
     if (this.element.getAttribute('poster')) {
+      // TODO(@aghassemi, #10931) Remove warning after usage check.
       user().warn(TAG, `The poster attribute is deprecated and will no longer
         be used on MediaSessionAPI, please use the artwork attribute instead.`);
     }
