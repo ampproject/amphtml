@@ -44,12 +44,12 @@ describes.sandboxed('utils/math', {}, () => {
     it('should not clamp if within the range', () => {
       expect(clamp(0.5, 0, 1)).to.equal(0.5);
       expect(clamp(-10, -20, 0)).to.equal(-10);
-      expect(clamp(1000, -Infinity, Infinity)).to.equal(-10);
+      expect(clamp(1000, -Infinity, Infinity)).to.equal(1000);
     });
 
     it('should be inclusive of the range', () => {
       expect(clamp(1, 0, 1)).to.equal(1);
-      expect(clamp(0, 0, 1)).to.equal(1);
+      expect(clamp(0, 0, 1)).to.equal(0);
       expect(clamp(-20, -20, 0)).to.equal(-20);
       expect(clamp(0, -20, 0)).to.equal(0);
     });

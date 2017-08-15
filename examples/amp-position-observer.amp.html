@@ -134,6 +134,30 @@
     </div>
 
     <div class="spacer"></div>
+    <h2>Custom visibility end with amp-position-observer and amp-video</h2>
+    <h3>If played, the following video will pause when 20% invisible</h3>
+    <div>
+      <amp-position-observer
+        intersection-ratios="0.8"
+        on="exit:myVideo.pause"
+        layout="nodisplay">
+      </amp-position-observer>
+
+      <amp-video
+        id=myVideo
+        title="Big Buck Bunny"
+        artist="Blender Foundation"
+        poster="img/bigbuckbunny.jpg"
+        album="The Peach Open Movie Project"
+        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        width="720"
+        height="405"
+        layout="responsive"
+        controls>
+    </amp-video>
+    </div>
+
+    <div class="spacer"></div>
     <div class="spacer"></div>
   </main>
 </body>
