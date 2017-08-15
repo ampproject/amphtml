@@ -97,6 +97,10 @@ export class StandardActions {
    * See `amp-actions-and-events.md` for documentation.
    *
    * @param {!./action-impl.ActionInvocation} invocation
+   * @return {Promise} Returns a Promise if the action invocation should be
+   *     allowed to complete before invoking the next action (if any).
+   *     Otherwise, returns null.
+   * @throws {Error} If action is not recognized.
    */
   handleAmpTarget(invocation) {
     switch (invocation.method) {
@@ -104,17 +108,13 @@ export class StandardActions {
         this.handleAmpPushState_(invocation);
         return;
       case 'setState':
-        this.handleAmpSetState_(invocation);
-        return;
+        return this.handleAmpSetState_(invocation);
       case 'navigateTo':
-        this.handleAmpNavigateTo_(invocation);
-        return;
+        return this.handleAmpNavigateTo_(invocation);
       case 'goBack':
-        this.handleAmpGoBack_(invocation);
-        return;
+        return this.handleAmpGoBack_(invocation);
       case 'print':
-        this.handleAmpPrint_(invocation);
-        return;
+        return this.handleAmpPrint_(invocation);
     }
     throw user().createError('Unknown AMP action ', invocation.method);
   }

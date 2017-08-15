@@ -381,24 +381,27 @@ export class ActionService {
       return;
     }
 
-    for (let i = 0; i < action.actionInfos.length; i++) {
-      const actionInfo = action.actionInfos[i];
-
-      // Replace any expressions in args with data in `event`.
+    let chain = Promise.resolve();
+    action.actionInfos.forEach(actionInfo => {
+      // Replace any variables in args with data in `event`.
       const args = dereferenceExprsInArgs(actionInfo.args, event);
 
-      // Global target, e.g. `AMP`.
-      const globalTarget = this.globalTargets_[actionInfo.target];
-      if (globalTarget) {
-        const invocation = new ActionInvocation(
-            this.root_,
-            actionInfo.method,
-            args,
-            action.node,
-            event,
-            trust);
-        globalTarget(invocation);
-      } else {
+      // Wait for the previous action, if applicable.
+      chain = chain.then(() => {
+        // Global target, e.g. `AMP`.
+        const globalTarget = this.globalTargets_[actionInfo.target];
+        if (globalTarget) {
+          const invocation = new ActionInvocation(
+              this.root_,
+              actionInfo.method,
+              args,
+              action.node,
+              event,
+              trust);
+          return globalTarget(invocation);
+        }
+
+        // Element target by `id`.
         const target = this.root_.getElementById(actionInfo.target);
         if (target) {
           this.invoke_(target, actionInfo.method, args,
@@ -406,8 +409,8 @@ export class ActionService {
         } else {
           this.actionInfoError_('target not found', actionInfo, target);
         }
-      }
-    }
+      });
+    });
   }
 
   /**
