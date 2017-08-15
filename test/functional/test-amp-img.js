@@ -17,7 +17,7 @@
 import {createIframePromise} from '../../testing/iframe';
 import {BaseElement} from '../../src/base-element';
 import {installImg, AmpImg} from '../../builtins/amp-img';
-import {resourcesForDoc} from '../../src/services';
+import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('amp-img', () => {
@@ -82,6 +82,21 @@ describe('amp-img', () => {
     });
   });
 
+  it('should preconnect the src url', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
+    }).then(ampImg => {
+      const impl = ampImg.implementation_;
+      sandbox.stub(impl.preconnect, 'url');
+      impl.preconnectCallback(true);
+      const preconnecturl = impl.preconnect.url;
+      expect(preconnecturl.called).to.be.true;
+      expect(preconnecturl).to.have.been.calledWith('/examples/img/sample.jpg');
+    });
+  });
+
   it('should load an img with srcset', () => {
     return getImg({
       srcset: 'bad.jpg 2000w, /examples/img/sample.jpg 1000w',
@@ -95,6 +110,23 @@ describe('amp-img', () => {
     });
   });
 
+  it('should preconnect to the the first srcset url if src is not set', () => {
+    return getImg({
+      srcset: 'http://google.com/bad.jpg 2000w, /examples/img/sample.jpg 1000w',
+      width: 300,
+      height: 200,
+    }).then(ampImg => {
+      const impl = ampImg.implementation_;
+      sandbox.stub(impl.preconnect, 'url');
+      impl.preconnectCallback(true);
+      expect(impl.preconnect.url.called).to.be.true;
+      expect(impl.preconnect.url).to.have.been.calledWith(
+          'http://google.com/bad.jpg'
+      );
+    });
+  });
+
+
   describe('#fallback on initial load', () => {
     let el;
     let impl;
@@ -105,7 +137,7 @@ describe('amp-img', () => {
       el.setAttribute('src', 'test.jpg');
       el.setAttribute('width', 100);
       el.setAttribute('height', 100);
-      el.getResources = () => resourcesForDoc(document);
+      el.getResources = () => Services.resourcesForDoc(document);
       impl = new AmpImg(el);
       impl.createdCallback();
       sandbox.stub(impl, 'getLayoutWidth').returns(100);
@@ -114,7 +146,7 @@ describe('amp-img', () => {
 
       impl.getVsync = function() {
         return {
-          mutate: function(fn) {
+          mutate(fn) {
             fn();
           },
         };

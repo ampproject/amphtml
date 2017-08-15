@@ -16,6 +16,7 @@
 
 import {
   resolveUrlAttr,
+  rewriteAttributeValue,
   sanitizeFormattingHtml,
   sanitizeHtml,
 } from '../../src/sanitizer';
@@ -37,7 +38,7 @@ describe('sanitizeHtml', () => {
         '<h1>a<i>b</i>c' +
         '<amp-img src="http://example.com/1.png"></amp-img></h1>'))
         .to.be.equal(
-            '<h1>a<i>b</i>c' +
+        '<h1>a<i>b</i>c' +
             '<amp-img src="http://example.com/1.png"></amp-img></h1>');
   });
 
@@ -213,13 +214,27 @@ describe('sanitizeHtml', () => {
 });
 
 
+describe('rewriteAttributeValue', () => {
+
+  it('should be case-insensitive to tag and attribute name', () => {
+    expect(rewriteAttributeValue('a', 'href', '/doc2'))
+        .to.equal(rewriteAttributeValue('A', 'HREF', '/doc2'));
+    expect(rewriteAttributeValue('amp-img', 'src', '/jpeg1'))
+        .to.equal(rewriteAttributeValue('AMP-IMG', 'SRC', '/jpeg1'));
+    expect(rewriteAttributeValue('amp-img', 'srcset', '/jpeg2 2x, /jpeg1 1x'))
+        .to.equal(rewriteAttributeValue(
+            'AMP-IMG', 'SRCSET', '/jpeg2 2x, /jpeg1 1x'));
+  });
+});
+
+
 describe('resolveUrlAttr', () => {
 
   it('should throw if __amp_source_origin is set', () => {
     expect(() => resolveUrlAttr('a', 'href',
         '/doc2?__amp_source_origin=https://google.com',
         'http://acme.org/doc1'))
-            .to.throw(/Source origin is not allowed in/);
+        .to.throw(/Source origin is not allowed in/);
   });
 
   it('should be called by sanitizer', () => {

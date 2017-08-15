@@ -19,8 +19,7 @@ import {
   BaseLifecycleReporter,
 } from '../performance';
 import {createIframePromise} from '../../../../testing/iframe';
-import {viewerForDoc} from '../../../../src/services';
-import {toArray} from '../../../../src/types';
+import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 /**
@@ -33,24 +32,6 @@ function expectMatchesAll(address, matchList) {
   matchList.forEach(m => {
     expect(address).to.match(m);
   });
-}
-
-/**
- * Verify that `element` has at least one sibling DOM node that is an
- * `img` tag whose `src` matches all of the patterns in `matchList`.
- *
- * @param {!Element} element
- * @param {!Array<!RegExp>} matchList
- */
-function expectHasSiblingImgMatchingAll(element, matchList) {
-  const imgSiblings = toArray(element.parentElement.querySelectorAll('img'));
-  expect(imgSiblings).to.not.be.empty;
-  const result = imgSiblings.some(e => {
-    const src = e.getAttribute('src');
-    return matchList.map(m => m.test(src)).every(x => x);
-  });
-  expect(result, 'No element sibling of ' + element + ' matched all patterns')
-      .to.be.true;
 }
 
 describe('BaseLifecycleReporter', () => {
@@ -99,11 +80,10 @@ describe('GoogleAdLifecycleReporter', () => {
     iframe = createIframePromise(false).then(iframeFixture => {
       const win = iframeFixture.win;
       const doc = iframeFixture.doc;
-      const viewer = viewerForDoc(doc);
+      const viewer = Services.viewerForDoc(doc);
       const elem = doc.createElement('div');
       doc.body.appendChild(elem);
-      const reporter = new GoogleAdLifecycleReporter(
-          win, elem, 'test_foo', 42);
+      const reporter = new GoogleAdLifecycleReporter(win, elem, 42);
       reporter.setPingAddress('/');
       reporter.setPingParameters({
         's': 'AD_SLOT_NAMESPACE',
@@ -115,7 +95,7 @@ describe('GoogleAdLifecycleReporter', () => {
         'p_v1': 'AD_PAGE_FIRST_VISIBLE_TIME',
         'p_v2': 'AD_PAGE_LAST_VISIBLE_TIME',
       });
-      return {win, doc, viewer, elem, reporter};
+      return {win, doc, viewer, reporter};
     });
   });
   afterEach(() => {
@@ -123,8 +103,8 @@ describe('GoogleAdLifecycleReporter', () => {
   });
 
   describe('#sendPing', () => {
-    it('should request a single ping and insert into DOM', () => {
-      return iframe.then(({viewer, elem, reporter}) => {
+    it('should request a single ping', () => {
+      return iframe.then(({viewer, reporter}) => {
         const iniTime = reporter.initTime_;
         sandbox.stub(viewer, 'getFirstVisibleTime', () => iniTime + 11);
         sandbox.stub(viewer, 'getLastVisibleTime', () => iniTime + 12);
@@ -133,7 +113,7 @@ describe('GoogleAdLifecycleReporter', () => {
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
-          /[&?]s=test_foo(&|$)/,
+          /[&?]s=amp(&|$)/,
           // In unit tests, internalRuntimeVersion is not substituted.  %24 ==
           // ASCII encoding of '$'.
           /[&?]rls=%24internalRuntimeVersion%24(&|$)/,
@@ -145,18 +125,16 @@ describe('GoogleAdLifecycleReporter', () => {
           /[&?]p_v2=12(&|$)/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
 
     it('should request multiple pings and write all to the DOM', () => {
-      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+      return iframe.then(({unusedWin, unusedDoc, reporter}) => {
         const stages = {
           adSlotCleared: '-1',
           urlBuilt: '1',
           adRequestStart: '2',
           adRequestEnd: '3',
-          extractCreativeAndSignature: '4',
           adResponseValidateStart: '5',
           renderFriendlyStart: '6',
           renderCrossDomainStart: '7',
@@ -173,7 +151,7 @@ describe('GoogleAdLifecycleReporter', () => {
         count = 0;
         for (const k in stages) {
           const expectations = [
-            /[&?]s=test_foo(&|$)/,
+            /[&?]s=amp(&|$)/,
             // In unit tests, internalRuntimeVersion is not substituted.  %24 ==
             // ASCII encoding of '$'.
             /[&?]rls=%24internalRuntimeVersion%24(&|$)/,
@@ -183,13 +161,12 @@ describe('GoogleAdLifecycleReporter', () => {
           ];
           const arg = emitPingSpy.getCall(count++).args[0];
           expectMatchesAll(arg, expectations);
-          expectHasSiblingImgMatchingAll(elem, expectations);
         }
       });
     });
 
     it('should use diff slot IDs, but the same correlator', () => {
-      return iframe.then(({win, doc, unusedElem, unusedReporter}) => {
+      return iframe.then(({win, doc, unusedReporter}) => {
         const stages = {
           adSlotBuilt: '0',
           adResponseValidateStart: '5',
@@ -203,8 +180,7 @@ describe('GoogleAdLifecycleReporter', () => {
           const elem = doc.createElement('div');
           elem.setAttribute('id', i);
           doc.body.appendChild(elem);
-          const reporter = new GoogleAdLifecycleReporter(win, elem, 'test_foo',
-              i + 1);
+          const reporter = new GoogleAdLifecycleReporter(win, elem, i + 1);
           reporter.setPingAddress('/');
           reporter.setPingParameters({
             's': 'AD_SLOT_NAMESPACE',
@@ -219,13 +195,11 @@ describe('GoogleAdLifecycleReporter', () => {
           }
         });
         expect(emitPingSpy.callCount).to.equal(nSlots * nStages);
-        const allImgNodes = toArray(doc.querySelectorAll('img'));
-        expect(allImgNodes.length).to.equal(nSlots * nStages);
         let commonCorrelator;
         const slotCounts = {};
-        allImgNodes.forEach(n => {
-          const src = n.getAttribute('src');
-          expect(src).to.match(/[?&]s=test_foo(&|$)/);
+        for (let i = 0; i < emitPingSpy.callCount; ++i) {
+          const src = emitPingSpy.getCall(i).args[0];
+          expect(src).to.match(/[?&]s=amp(&|$)/);
           expect(src).to.match(/[?&]c=[0-9]+/);
           const corr = /[?&]c=([0-9]+)/.exec(src)[1];
           commonCorrelator = commonCorrelator || corr;
@@ -233,7 +207,7 @@ describe('GoogleAdLifecycleReporter', () => {
           expect(corr).to.equal(commonCorrelator);
           slotCounts[slotId] = slotCounts[slotId] || 0;
           ++slotCounts[slotId];
-        });
+        };
         // SlotId 0 corresponds to unusedReporter, so ignore it.
         for (let s = 1; s <= nSlots; ++s) {
           expect(slotCounts[s], 'slotCounts[' + s + ']').to.equal(nStages);
@@ -244,7 +218,7 @@ describe('GoogleAdLifecycleReporter', () => {
 
   describe('#setPingParameter', () => {
     it('should pass through static ping variables', () => {
-      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+      return iframe.then(({unusedWin, unusedDoc, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
         reporter.setPingParameter('zort', 314159);
         reporter.setPingParameter('gack', 'flubble');
@@ -253,17 +227,16 @@ describe('GoogleAdLifecycleReporter', () => {
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
           // Be sure that existing ping not deleted by args.
-          /[&?]s=test_foo/,
+          /[&?]s=amp/,
           /zort=314159/,
           /gack=flubble/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
 
     it('does not allow empty args', () => {
-      return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
+      return iframe.then(({unusedWin, unusedDoc, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
         reporter.setPingParameter('', '');
         reporter.setPingParameter('foo', '');
@@ -280,7 +253,7 @@ describe('GoogleAdLifecycleReporter', () => {
     });
 
     it('does allow value === 0', () => {
-      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+      return iframe.then(({unusedWin, unusedDoc, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
         reporter.setPingParameter('foo', 0);
         reporter.setPingParameter('bar', 0.0);
@@ -294,12 +267,11 @@ describe('GoogleAdLifecycleReporter', () => {
           /baz=0/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
 
     it('should uri encode extra params', () => {
-      return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
+      return iframe.then(({unusedWin, unusedDoc, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
         reporter.setPingParameter('evil',
             '<script src="https://evil.com">doEvil()</script>');
@@ -311,17 +283,17 @@ describe('GoogleAdLifecycleReporter', () => {
         expect(arg).not.to.have.string(
             '<script src="https://evil.com">doEvil()</script>');
         expect(arg).to.have.string('&evil=' + encodeURIComponent(
-                '<script src="https://evil.com">doEvil()</script>'));
+            '<script src="https://evil.com">doEvil()</script>'));
         expect(arg).not.to.have.string(
             '<script src="https://very.evil.com">doMoreEvil()</script>');
         expect(arg).to.have.string('&' + encodeURIComponent(
-                '<script src="https://very.evil.com">doMoreEvil()</script>') +
+            '<script src="https://very.evil.com">doMoreEvil()</script>') +
             '=3');
       });
     });
 
     it('should expand URL parameters in extra params', () => {
-      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+      return iframe.then(({unusedWin, unusedDoc, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
         reporter.setPingParameter('zort', 'RANDOM');
         reporter.sendPing('adRequestStart');
@@ -329,18 +301,17 @@ describe('GoogleAdLifecycleReporter', () => {
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
           // Be sure that existing ping not deleted by args.
-          /[&?]s=test_foo/,
+          /[&?]s=amp/,
           /zort=[0-9.]+/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
   });
 
   describe('#setPingParameters', () => {
     it('should do nothing on an an empty input', () => {
-      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+      return iframe.then(({unusedWin, unusedDoc, reporter}) => {
         const setPingParameterSpy = sandbox.spy(reporter, 'setPingParameter');
         expect(emitPingSpy).to.not.be.called;
         reporter.setPingParameters({});
@@ -350,15 +321,14 @@ describe('GoogleAdLifecycleReporter', () => {
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
           // Be sure that existing ping not deleted by args.
-          /[&?]s=test_foo/,
+          /[&?]s=amp/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
 
     it('should set a singleton input', () => {
-      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+      return iframe.then(({unusedWin, unusedDoc, reporter}) => {
         const setPingParameterSpy = sandbox.spy(reporter, 'setPingParameter');
         expect(emitPingSpy).to.not.be.called;
         reporter.setPingParameters({zort: '12345'});
@@ -368,16 +338,15 @@ describe('GoogleAdLifecycleReporter', () => {
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
           // Be sure that existing ping not deleted by args.
-          /[&?]s=test_foo/,
+          /[&?]s=amp/,
           /zort=12345/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
 
     it('should set multiple inputs', () => {
-      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+      return iframe.then(({unusedWin, unusedDoc, reporter}) => {
         const setPingParameterSpy = sandbox.spy(reporter, 'setPingParameter');
         expect(emitPingSpy).to.not.be.called;
         reporter.setPingParameters({zort: '12345', gax: 99, flub: 0});
@@ -387,13 +356,12 @@ describe('GoogleAdLifecycleReporter', () => {
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
           // Be sure that existing ping not deleted by args.
-          /[&?]s=test_foo/,
+          /[&?]s=amp/,
           /zort=12345/,
           /gax=99/,
           /flub=0/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
   });

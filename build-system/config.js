@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var commonTestPaths = [
   'test/_init_tests.js',
@@ -55,6 +56,12 @@ var testPaths = commonTestPaths.concat([
   'extensions/**/test/**/*.js',
 ]);
 
+var unitTestPaths = commonTestPaths.concat([
+  'test/functional/**/*.js',
+  'ads/**/test/test-*.js',
+  'extensions/**/test/*.js',
+]);
+
 var integrationTestPaths = commonTestPaths.concat([
   'test/integration/**/*.js',
   'test/functional/test-error.js',
@@ -65,6 +72,7 @@ var integrationTestPaths = commonTestPaths.concat([
 module.exports = {
   commonTestPaths: commonTestPaths,
   testPaths: testPaths,
+  unitTestPaths: unitTestPaths,
   integrationTestPaths: integrationTestPaths,
   lintGlobs: [
     '**/*.js',
@@ -79,7 +87,13 @@ module.exports = {
     '!karma.conf.js',
     '!**/local-amp-chrome-extension/background.js',
     '!extensions/amp-access/0.1/access-expr-impl.js',
+    '!extensions/amp-animation/0.1/css-expr-impl.js',
     '!extensions/amp-bind/0.1/bind-expr-impl.js',
+  ],
+  jsonGlobs: [
+    '**/*.json',
+    '!{node_modules,build,dist,dist.3p,dist.tools,' +
+        'third_party,build-system}/**/*.*',
   ],
   presubmitGlobs: [
     '**/*.{css,js,go}',
@@ -89,6 +103,7 @@ module.exports = {
     '!{node_modules,build,dist,dist.tools,' +
         'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
     '!dist.3p/current/**/ampcontext-lib.js',
+    '!dist.3p/current/**/iframe-transport-client-lib.js',
     '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
     '!validator/nodejs/node_modules/**/*.*',

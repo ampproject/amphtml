@@ -51,7 +51,10 @@ import {PinWidget} from './pin-widget';
  */
 class AmpPinterest extends AMP.BaseElement {
 
-  /** @override */
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     // preconnect to widget APIpinMedia
     this.preconnect.url('https://widgets.pinterest.com', onLayout);
@@ -65,8 +68,8 @@ class AmpPinterest extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const selector = user().assert(this.element.getAttribute('data-do'),
-      'The data-do attribute is required for <amp-pinterest> %s',
-      this.element);
+        'The data-do attribute is required for <amp-pinterest> %s',
+        this.element);
 
     return this.render(selector).then(node => {
       return this.element.appendChild(node);

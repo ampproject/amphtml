@@ -23,6 +23,8 @@ import {
   rethrowAsync,
   setReportError,
   user,
+  duplicateErrorIfNecessary,
+  isUserErrorEmbed,
 } from '../../src/log';
 import * as sinon from 'sinon';
 
@@ -53,12 +55,15 @@ describe('Logging', () => {
         log: logSpy,
       },
       setTimeout: timeoutSpy,
+      reportError: error => error,
     };
+    sandbox.stub(self, 'reportError', error => error);
   });
 
   afterEach(() => {
     sandbox.restore();
     sandbox = null;
+    window.AMP_MODE = undefined;
   });
 
   describe('Level', () => {
@@ -292,8 +297,7 @@ describe('Logging', () => {
       log = new Log(win, RETURNS_FINE, USER_ERROR_SENTINEL);
     });
 
-    // TODO(amphtml): Unskip when #8387 is fixed.
-    it.skip('should fail', () => {
+    it('should fail', () => {
       expect(function() {
         log.assert(false, 'xyz');
       }).to.throw(/xyz/);
@@ -384,25 +388,21 @@ describe('Logging', () => {
       expect(error.expected).to.be.undefined;
       expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.true;
-      expect(error.message).to.contain('test');
+      expect(error.message).to.equal('test' + USER_ERROR_SENTINEL);
     });
 
     it('should create suffixed errors from error', () => {
       const error = log.createError(new Error('test'));
       expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.true;
-      expect(error.message).to.contain('test');
+      expect(error.message).to.equal('test' + USER_ERROR_SENTINEL);
     });
 
     it('should only add suffix once', () => {
       const error = log.createError(new Error('test' + USER_ERROR_SENTINEL));
+      expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.true;
-      expect(error.message).to.contain('test');
-
-      let message = error.message;
-      expect(message.indexOf(USER_ERROR_SENTINEL)).to.not.equal(-1);
-      message = message.replace(USER_ERROR_SENTINEL, '');
-      expect(message.indexOf(USER_ERROR_SENTINEL)).to.equal(-1);
+      expect(error.message).to.equal('test' + USER_ERROR_SENTINEL);
     });
 
     it('should strip suffix if not available', () => {
@@ -419,7 +419,7 @@ describe('Logging', () => {
       const error = log.createError('test');
       expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.false;
-      expect(error.message).to.contain('test-other');
+      expect(error.message).to.equal('test-other');
     });
 
     it('should pass for elements', () => {
@@ -533,6 +533,45 @@ describe('Logging', () => {
     });
   });
 
+  describe('error', () => {
+    let log;
+    let reportedError;
+
+    beforeEach(function() {
+      log = new Log(win, RETURNS_OFF);
+      setReportError(function(e) {
+        reportedError = e;
+      });
+    });
+
+    it('reuse errors', () => {
+      let error = new Error('test');
+
+      log.error('TAG', error);
+      expect(reportedError).to.equal(error);
+      expect(error.message).to.equal('test');
+
+      log.error('TAG', 'should fail', 'XYZ', error);
+      expect(reportedError).to.equal(error);
+      expect(error.message).to.equal('should fail XYZ: test');
+
+      // #8917
+      try {
+        // This is an intentionally bad query selector
+        document.body.querySelector('#');
+      } catch (e) {
+        error = e;
+      }
+
+      log.error('TAG', error);
+      expect(reportedError).not.to.equal(error);
+      expect(reportedError.message).to.equal(error.message);
+
+      log.error('TAG', 'should fail', 'XYZ', error);
+      expect(reportedError).not.to.equal(error);
+      expect(reportedError.message).to.contain('should fail XYZ:');
+    });
+  });
 
   describe('rethrowAsync', () => {
     let clock;
@@ -599,4 +638,83 @@ describe('Logging', () => {
       expect(isUserErrorMessage(error.message)).to.be.true;
     });
   });
+
+  describe('duplicateErrorIfNecessary', () => {
+    it('should not duplicate if message is writeable', () => {
+      const error = {message: 'test'};
+
+      expect(duplicateErrorIfNecessary(error)).to.equal(error);
+    });
+
+    it('should duplicate if message is non-writable', () => {
+      const error = {};
+      Object.defineProperty(error, 'message', {
+        value: 'test',
+        writable: false,
+      });
+
+      expect(duplicateErrorIfNecessary(error)).to.not.equal(error);
+    });
+
+    it('copies all the tidbits', () => {
+      const error = {
+        stack: 'stack',
+        args: [1, 2, 3],
+        associatedElement: error,
+      };
+
+      Object.defineProperty(error, 'message', {
+        value: 'test',
+        writable: false,
+      });
+
+      const duplicate = duplicateErrorIfNecessary(error);
+      expect(duplicate.stack).to.equal(error.stack);
+      expect(duplicate.args).to.equal(error.args);
+      expect(duplicate.associatedElement).to.equal(error.associatedElement);
+    });
+  });
+
+  describe('embed error', () => {
+    let sandbox;
+    let iframe;
+    let element;
+    let element1;
+    let element2;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+      document.body.removeChild(iframe);
+    });
+
+    it('should return logger for user-error', () => {
+      const error = user().createError();
+      expect(isUserErrorEmbed(error.message)).to.be.false;
+      expect(isUserErrorMessage(error.message)).to.be.true;
+    });
+
+    it('should return logger for embed-error', () => {
+      element = document.createElement('embed');
+      iframe.contentWindow.document.body.appendChild(element);
+      const error = user(element).createError();
+      expect(isUserErrorEmbed(error.message)).to.be.true;
+    });
+
+    it('should not create extra identical loggers', () => {
+      element1 = document.createElement('embed_1');
+      element2 = document.createElement('embed_2');
+      iframe.contentWindow.document.body.appendChild(element1);
+      iframe.contentWindow.document.body.appendChild(element2);
+      expect(user()).to.equal(user(this.element));
+      expect(user(element1)).to.equal(user(element2));
+      expect(user()).to.not.equal(user(element1));
+    });
+  });
 });
+

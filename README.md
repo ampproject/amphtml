@@ -6,7 +6,7 @@ You can learn more at [ampproject.org](https://www.ampproject.org/) including [w
 
 ## We'd ❤️️ your help making AMP better!
 
-There are a lot of ways you can [contribute](CONTRIBUTING.md) to making AMP better! You can [report bugs and feature requests](CONTRIBUTING.md#filing-issues) or ideally become an [ongoing participant](CONTRIBUTING.md#ongoing-participation) in the AMP Project community and [contribute code to the open source project](CONTRIBUTING.md#contributing-code).
+There are a lot of ways you can [contribute](CONTRIBUTING.md) to making AMP better! You can [report bugs and feature requests](CONTRIBUTING.md#reporting-issues-with-amp) or ideally become an [ongoing participant](CONTRIBUTING.md#ongoing-participation) in the AMP Project community and [contribute code to the open source project](CONTRIBUTING.md#contributing-code).
 
 We enthusiastically welcome new contributors to the AMP Project **_even if you have no experience being part of an open source project_**.  We've got some [tips for new contributors](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#tips-for-new-open-source-contributors) and guides to getting started (both a [detailed version](contributing/getting-started-e2e.md) and a [TL;DR](contributing/getting-started-quick.md)).
 
@@ -39,3 +39,7 @@ The AMP Project accepts responsible security disclosures through the [Google App
 ## Code of conduct
 
 The AMP Project strives for a positive and growing project community that provides a safe environment for everyone.  All members, committers and volunteers in the community are required to act according to the [code of conduct](CODE_OF_CONDUCT.md).
+
+## License
+
+AMP HTML is licensed under the [Apache License, Version 2.0](LICENSE).

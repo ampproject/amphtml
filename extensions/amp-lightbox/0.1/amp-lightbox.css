@@ -16,7 +16,7 @@
 amp-lightbox {
     display: none;
     position: fixed !important;
-    z-index: 1000 !important;
+    z-index: 1000;
     top: 0 !important;
     left: 0 !important;
     bottom: 0 !important;

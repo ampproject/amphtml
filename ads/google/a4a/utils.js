@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
 import {isCanary} from '../../../src/experiments';
-import {getAdCid} from '../../../src/ad-cid';
-import {documentInfoForDoc} from '../../../src/services';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {isProxyOrigin} from '../../../src/url';
-import {viewerForDoc} from '../../../src/services';
-import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
-import {domFingerprint} from '../../../src/utils/dom-fingerprint';
-
-/** @const {string} */
-const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
-
-/** @const {string} */
-const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
+import {parseUrl} from '../../../src/url';
+import {parseJson} from '../../../src/json';
+import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
+import {
+  isExperimentOn,
+  toggleExperiment,
+} from '../../../src/experiments';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -46,9 +44,10 @@ const AmpAdImplementation = {
 
 /** @const {!Object} */
 export const ValidAdContainerTypes = {
-  'AMP-STICKY-AD': 'sa',
+  'AMP-CAROUSEL': 'ac',
   'AMP-FX-FLYING-CARPET': 'fc',
   'AMP-LIGHTBOX': 'lb',
+  'AMP-STICKY-AD': 'sa',
 };
 
 /** @const {string} */
@@ -71,6 +70,12 @@ export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
 export let AmpAnalyticsConfigDef;
 
 /**
+ * @const {!./url-builder.QueryParameterDef}
+ * @visibleForTesting
+ */
+export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
+
+/**
  * Check whether Google Ads supports the A4A rendering pathway is valid for the
  * environment by ensuring native crypto support and page originated in the
  * the {@code cdn.ampproject.org} CDN <em>or</em> we must be running in local
@@ -83,144 +88,171 @@ export let AmpAnalyticsConfigDef;
 export function isGoogleAdsA4AValidEnvironment(win) {
   const supportsNativeCrypto = win.crypto &&
       (win.crypto.subtle || win.crypto.webkitSubtle);
-  // Note: Theoretically, isProxyOrigin is the right way to do this, b/c it
-  // will be kept up to date with known proxies.  However, it doesn't seem to
-  // be compatible with loading the example files from localhost.  To hack
-  // around that, just say that we're A4A eligible if we're in local dev
-  // mode, regardless of origin path.
+  const googleCdnProxyRegex =
+      /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/;
   return supportsNativeCrypto &&
-      (isProxyOrigin(win.location) || getMode().localDev || getMode().test);
+      (googleCdnProxyRegex.test(win.location.origin) || getMode(win).localDev ||
+       getMode(win).test);
+}
+
+/**
+ * @param {!AMP.BaseElement} ampElement The element on whose lifecycle this
+ *    reporter will be reporting.
+ * @return {boolean} whether reporting is enabled for this element
+ */
+export function isReportingEnabled(ampElement) {
+  // Carve-outs: We only want to enable profiling pingbacks when:
+  //   - The ad is from one of the Google networks (AdSense or Doubleclick).
+  //   - The ad slot is in the A4A-vs-3p amp-ad control branch (either via
+  //     internal, client-side selection or via external, Google Search
+  //     selection).
+  //   - We haven't turned off profiling via the rate controls in
+  //     build-system/global-config/{canary,prod}-config.json
+  // If any of those fail, we use the `BaseLifecycleReporter`, which is a
+  // a no-op (sends no pings).
+  const type = ampElement.element.getAttribute('type');
+  const win = ampElement.win;
+  const experimentName = 'a4aProfilingRate';
+  // In local dev mode, neither the canary nor prod config files is available,
+  // so manually set the profiling rate, for testing/dev.
+  if (getMode().localDev) {
+    toggleExperiment(win, experimentName, true, true);
+  }
+  return (type == 'doubleclick' || type == 'adsense') &&
+      isExperimentOn(win, experimentName);
+}
+
+/**
+ * Has side-effect of incrementing ifi counter on window.
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
+ * @param {!Array<string>=} opt_experimentIds Any experiments IDs (in addition
+ *     to those specified on the ad element) that should be included in the
+ *     request.
+ * @return {!Object<string,null|number|string>} block level parameters
+ */
+export function googleBlockParameters(a4a, opt_experimentIds) {
+  const adElement = a4a.element;
+  const win = a4a.win;
+  const slotRect = a4a.getPageLayoutBox();
+  const iframeDepth = iframeNestingDepth(win);
+  const enclosingContainers = getEnclosingContainerTypes(adElement);
+  const pfx = enclosingContainers.includes(
+      ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) ||
+      enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
+  let eids = adElement.getAttribute('data-experiment-id');
+  if (opt_experimentIds) {
+    eids = mergeExperimentIds(opt_experimentIds, eids);
+  }
+  return {
+    'adf': DomFingerprint.generate(adElement),
+    'nhd': iframeDepth,
+    'eid': eids,
+    'adx': slotRect.left,
+    'ady': slotRect.top,
+    'oid': '2',
+    'pfx': pfx ? '1' : '0',
+    'act': enclosingContainers.length ? enclosingContainers.join() : null,
+  };
+}
+
+/**
+ * @param {!Window} win
+ * @param {string} type matching typing attribute.
+ * @param {!function(!Element):string} groupFn
+ * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
+ */
+export function groupAmpAdsByType(win, type, groupFn) {
+  return Services.resourcesForDoc(win.document).getMeasuredResources(win,
+      r => r.element.tagName == 'AMP-AD' &&
+        r.element.getAttribute('type') == type)
+      .then(resources => {
+        const result = {};
+        resources.forEach(r => {
+          const groupId = groupFn(r.element);
+          (result[groupId] || (result[groupId] = [])).push(r.element.getImpl());
+        });
+        return result;
+      });
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} doc
+ * @param {number} startTime
+ * @param {string=} output default is 'html'
+ * @return {!Promise<!Object<string,null|number|string>>}
+ */
+export function googlePageParameters(win, doc, startTime, output = 'html') {
+  const referrerPromise = Services.viewerForDoc(doc).getReferrerUrl();
+  return getOrCreateAdCid(doc, 'AMP_ECID_GOOGLE', '_ga')
+      .then(clientId => referrerPromise.then(referrer => {
+        const documentInfo = Services.documentInfoForDoc(doc);
+        // Read by GPT for GA/GPT integration.
+        win.gaGlobal = win.gaGlobal ||
+        {cid: clientId, hid: documentInfo.pageViewId};
+        const screen = win.screen;
+        const viewport = Services.viewportForDoc(doc);
+        const viewportRect = viewport.getRect();
+        const viewportSize = viewport.getSize();
+        return {
+          'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
+          'amp_v': '$internalRuntimeVersion$',
+          'd_imp': '1',
+          'c': getCorrelator(win, clientId),
+          'dt': startTime,
+          output,
+          'biw': viewportRect.width,
+          'bih': viewportRect.height,
+          'u_aw': screen ? screen.availWidth : null,
+          'u_ah': screen ? screen.availHeight : null,
+          'u_cd': screen ? screen.colorDepth : null,
+          'u_w': screen ? screen.width : null,
+          'u_h': screen ? screen.height : null,
+          'u_tz': -new Date().getTimezoneOffset(),
+          'u_his': getHistoryLength(win),
+          'isw': win != win.top ? viewportSize.width : null,
+          'ish': win != win.top ? viewportSize.height : null,
+          'art': isCanary(win) ? '2' : null,
+          'url': documentInfo.canonicalUrl,
+          'top': win != win.top ? topWindowUrlOrDomain(win) : null,
+          'loc': win.location.href == documentInfo.canonicalUrl ?
+          null : win.location.href,
+          'ref': referrer,
+        };
+      }));
 }
 
 /**
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {string} baseUrl
  * @param {number} startTime
- * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
- * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
- *     Parameters that will be put at the end of the URL, where they may be
- *     elided for length reasons. Intended for parameters with potentially
- *     long values, like URLs.
+ * @param {!Object<string,null|number|string>} parameters
+ * @param {!Array<string>=} opt_experimentIds Any experiments IDs (in addition
+ *     to those specified on the ad element) that should be included in the
+ *     request.
  * @return {!Promise<string>}
  */
 export function googleAdUrl(
-    a4a, baseUrl, startTime, queryParams, unboundedQueryParams) {
+    a4a, baseUrl, startTime, parameters, opt_experimentIds) {
   // TODO: Maybe add checks in case these promises fail.
-  /** @const {!Promise<string>} */
-  const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
-  return getAdCid(a4a).then(clientId => referrerPromise.then(referrer => {
-    const adElement = a4a.element;
-    window['ampAdGoogleIfiCounter'] = window['ampAdGoogleIfiCounter'] || 1;
-    const slotNumber = window['ampAdGoogleIfiCounter']++;
-    const win = a4a.win;
-    const documentInfo = documentInfoForDoc(adElement);
-      // Read by GPT for GA/GPT integration.
-    win.gaGlobal = win.gaGlobal ||
-      {cid: clientId, hid: documentInfo.pageViewId};
-    const slotRect = a4a.getPageLayoutBox ?
-        a4a.getPageLayoutBox() : a4a.getLayoutBox();
-    const screen = win.screen;
-    const viewport = a4a.getViewport();
-    const viewportRect = viewport.getRect();
-    const iframeDepth = iframeNestingDepth(win);
-    const viewportSize = viewport.getSize();
-    // Detect container types.
-    const containerTypeSet = {};
-    for (let el = adElement.parentElement, counter = 0;
-        el && counter < 20; el = el.parentElement, counter++) {
-      const tagName = el.tagName.toUpperCase();
-      if (ValidAdContainerTypes[tagName]) {
-        containerTypeSet[ValidAdContainerTypes[tagName]] = true;
-      }
-    }
-    const pfx =
-        (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
-         || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']])
-        ? '1' : '0';
-    queryParams.push({name: 'act', value:
-      Object.keys(containerTypeSet).join()});
-    if (isCanary(win)) {
-      queryParams.push({name: 'isc', value: '1'});
-    }
-    const allQueryParams = queryParams.concat(
-      [
-        {
-          name: 'is_amp',
-          value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
-        },
-        {name: 'amp_v', value: '$internalRuntimeVersion$'},
-        {name: 'd_imp', value: '1'},
-        {name: 'dt', value: startTime},
-        {name: 'ifi', value: slotNumber},
-        {name: 'adf', value: domFingerprint(adElement)},
-        {name: 'c', value: getCorrelator(win, clientId)},
-        {name: 'output', value: 'html'},
-        {name: 'nhd', value: iframeDepth},
-        {name: 'iu', value: adElement.getAttribute('data-ad-slot')},
-        {name: 'eid', value: adElement.getAttribute('data-experiment-id')},
-        {name: 'biw', value: viewportRect.width},
-        {name: 'bih', value: viewportRect.height},
-        {name: 'adx', value: slotRect.left},
-        {name: 'ady', value: slotRect.top},
-        {name: 'u_aw', value: screen ? screen.availWidth : null},
-        {name: 'u_ah', value: screen ? screen.availHeight : null},
-        {name: 'u_cd', value: screen ? screen.colorDepth : null},
-        {name: 'u_w', value: screen ? screen.width : null},
-        {name: 'u_h', value: screen ? screen.height : null},
-        {name: 'u_tz', value: -new Date().getTimezoneOffset()},
-        {name: 'u_his', value: getHistoryLength(win)},
-        {name: 'oid', value: '2'},
-        {name: 'brdim', value: additionalDimensions(win, viewportSize)},
-        {name: 'isw', value: viewportSize.width},
-        {name: 'ish', value: viewportSize.height},
-        {name: 'pfx', value: pfx},
-      ],
-      unboundedQueryParams,
-      [
-        {name: 'url', value: documentInfo.canonicalUrl},
-        {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(win) : null},
-        {
-          name: 'loc',
-          value: win.location.href == documentInfo.canonicalUrl ?
-            null : win.location.href,
-        },
-        {name: 'ref', value: referrer},
-      ]
-    );
-    const url = buildUrl(baseUrl, allQueryParams, MAX_URL_LENGTH - 10,
-                         {name: 'trunc', value: '1'});
-    return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
-  }));
+  const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
+  return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime)
+      .then(pageLevelParameters => {
+        Object.assign(parameters, blockLevelParameters, pageLevelParameters);
+        return truncAndTimeUrl(baseUrl, parameters, startTime);
+      });
 }
 
 /**
- * @param {!ArrayBuffer} creative
- * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
- * @return {!Promise<!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef>}
+ * @param {string} baseUrl
+ * @param {!Object<string,null|number|string>} parameters
+ * @param {number} startTime
+ * @return {string}
  */
-export function extractGoogleAdCreativeAndSignature(
-    creative, responseHeaders) {
-  let signature = null;
-  let size = null;
-  try {
-    if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
-      signature =
-        base64UrlDecodeToBytes(dev().assertString(
-            responseHeaders.get(AMP_SIGNATURE_HEADER)));
-    }
-    if (responseHeaders.has(CREATIVE_SIZE_HEADER)) {
-      const sizeHeader = responseHeaders.get(CREATIVE_SIZE_HEADER);
-      dev().assert(new RegExp('[0-9]+x[0-9]+').test(sizeHeader));
-      const sizeArr = sizeHeader
-          .split('x')
-          .map(dim => Number(dim));
-      size = {width: sizeArr[0], height: sizeArr[1]};
-    }
-  } finally {
-    return Promise.resolve(/** @type {
-          !../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */ (
-          {creative, signature, size}));
-  }
+export function truncAndTimeUrl(baseUrl, parameters, startTime) {
+  return buildUrl(
+      baseUrl, parameters, MAX_URL_LENGTH - 10, TRUNCATION_PARAM)
+    + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
 }
 
 /**
@@ -261,21 +293,21 @@ function topWindowUrlOrDomain(win) {
     const origin = win.location.origin;
     const topOrigin = ancestorOrigins[ancestorOrigins.length - 1];
     if (origin == topOrigin) {
-      return win.top.location.href;
+      return win.top.location.hostname;
     }
     const secondFromTop = secondWindowFromTop(win);
     if (secondFromTop == win ||
         origin == ancestorOrigins[ancestorOrigins.length - 2]) {
-      return secondFromTop./*REVIEW*/document.referrer;
+      return parseUrl(secondFromTop./*OK*/document.referrer).hostname;
     }
-    return topOrigin;
+    return parseUrl(topOrigin).hostname;
   } else {
     try {
-      return win.top.location.href;
+      return win.top.location.hostname;
     } catch (e) {}
     const secondFromTop = secondWindowFromTop(win);
     try {
-      return secondFromTop./*REVIEW*/document.referrer;
+      return parseUrl(secondFromTop./*OK*/document.referrer).hostname;
     } catch (e) {}
     return null;
   }
@@ -315,12 +347,14 @@ function elapsedTimeWithCeiling(time, start) {
 /**
  * @param {!Window} win
  * @param {string=} opt_cid
+ * @param {(!Node|!../../../src/service/ampdoc-impl.AmpDoc)=} opt_nodeOrDoc
  * @return {number} The correlator.
  */
-export function getCorrelator(win, opt_cid) {
+export function getCorrelator(win, opt_cid, opt_nodeOrDoc) {
   if (!win.ampAdPageCorrelator) {
     win.ampAdPageCorrelator = makeCorrelator(
-        opt_cid, documentInfoForDoc(win.document).pageViewId);
+        opt_cid,
+        Services.documentInfoForDoc(opt_nodeOrDoc || win.document).pageViewId);
   }
   return win.ampAdPageCorrelator;
 }
@@ -348,15 +382,15 @@ export function additionalDimensions(win, viewportSize) {
     innerHeight = viewportSize.height;
   } catch (e) {}
   return [win.screenLeft,
-          win.screenTop,
-          screenX,
-          screenY,
-          win.screen ? win.screen.availWidth : undefined,
-          win.screen ? win.screen.availTop : undefined,
-          outerWidth,
-          outerHeight,
-          innerWidth,
-          innerHeight].join();
+    win.screenTop,
+    screenX,
+    screenY,
+    win.screen ? win.screen.availWidth : undefined,
+    win.screen ? win.screen.availTop : undefined,
+    outerWidth,
+    outerHeight,
+    innerWidth,
+    innerHeight].join();
 };
 
 /**
@@ -366,28 +400,22 @@ export function additionalDimensions(win, viewportSize) {
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
- * @param {number=} opt_deltaTime The time difference, in ms, between the
- *   lifecycle reporter's initialization and now.
- * @param {number=} opt_initTime The initialization time, in ms, of the
- *   lifecycle reporter.
- *   TODO(levitzky) Remove the above two params once AV numbers stabilize.
- * @return {?JSONType} config or null if invalid/missing.
+ * @return {?JsonObject} config or null if invalid/missing.
  */
-export function extractAmpAnalyticsConfig(
-    a4a, responseHeaders, opt_deltaTime = -1, opt_initTime = -1) {
+export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
   if (!responseHeaders.has(AMP_ANALYTICS_HEADER)) {
     return null;
   }
   try {
     const analyticsConfig =
-      JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
+        parseJson(responseHeaders.get(AMP_ANALYTICS_HEADER));
     dev().assert(Array.isArray(analyticsConfig['url']));
-    const urls = analyticsConfig.url;
+    const urls = analyticsConfig['url'];
     if (!urls.length) {
       return null;
     }
 
-    const config = /** @type {JSONType}*/ ({
+    const config = /** @type {JsonObject}*/ ({
       'transport': {'beacon': false, 'xhrpost': false},
       'triggers': {
         'continuousVisible': {
@@ -411,7 +439,9 @@ export function extractAmpAnalyticsConfig(
         },
       },
     });
-    const requests = {};
+
+    // Discover and build visibility endpoints.
+    const requests = dict();
     for (let idx = 1; idx <= urls.length; idx++) {
       // TODO: Ensure url is valid and not freeform JS?
       requests[`visibility${idx}`] = `${urls[idx - 1]}`;
@@ -420,32 +450,120 @@ export function extractAmpAnalyticsConfig(
     config['requests'] = requests;
     config['triggers']['continuousVisible']['request'] =
         Object.keys(requests);
-    // Add CSI pingbacks.
-    const correlator = getCorrelator(a4a.win);
-    const slotId = a4a.element.getAttribute('data-amp-slot-index');
-    const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
-        ? responseHeaders.get(QQID_HEADER) : 'null';
-    const eids = encodeURIComponent(
-        a4a.element.getAttribute(EXPERIMENT_ATTRIBUTE));
-    const adType = a4a.element.getAttribute('type');
-    const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
-        `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
-        `&dt=${opt_initTime}` +
-        (eids != 'null' ? `&e.${slotId}=${eids}` : ``) +
-        `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
-    opt_deltaTime = Math.round(opt_deltaTime);
-    config['requests']['iniLoadCsi'] = baseCsiUrl +
-        `&met.a4a.${slotId}=iniLoadCsi.${opt_deltaTime}`;
-    config['requests']['renderStartCsi'] = baseCsiUrl +
-        `&met.a4a.${slotId}=renderStartCsi.${opt_deltaTime}`;
-    config['triggers']['continuousVisibleIniLoad']['request'] =
-        'iniLoadCsi';
-    config['triggers']['continuousVisibleRenderStart']['request'] =
-        'renderStartCsi';
     return config;
   } catch (err) {
     dev().error('AMP-A4A', 'Invalid analytics', err,
         responseHeaders.get(AMP_ANALYTICS_HEADER));
   }
   return null;
+}
+
+/**
+ * Add new experiment IDs to a (possibly empty) existing set of experiment IDs.
+ * The {@code currentIdString} may be {@code null} or {@code ''}, but if it is
+ * populated, it must contain a comma-separated list of integer experiment IDs
+ * (per {@code parseExperimentIds()}).  Returns the new set of IDs, encoded
+ * as a comma-separated list.  Does not de-duplicate ID entries.
+ *
+ * @param {!Array<string>} newIds IDs to merge in. Should contain stringified
+ *     integer (base 10) experiment IDs.
+ * @param {?string} currentIdString  If present, a string containing a
+ *   comma-separated list of integer experiment IDs.
+ * @returns {string}  New experiment list string, including newId iff it is
+ *   a valid (integer) experiment ID.
+ * @see parseExperimentIds, validateExperimentIds
+ */
+export function mergeExperimentIds(newIds, currentIdString) {
+  const newIdString = newIds.filter(newId => Number(newId)).join(',');
+  currentIdString = currentIdString || '';
+  return currentIdString + (currentIdString && newIdString ? ',' : '')
+      + newIdString;
+}
+
+/**
+ * Adds two CSI signals to the given amp-analytics configuration object, one
+ * for render-start, and one for ini-load.
+ *
+ * @param {!Window} win
+ * @param {!Element} element The ad slot.
+ * @param {!JsonObject} config The original config object.
+ * @param {?string} qqid
+ * @param {boolean} isVerifiedAmpCreative
+ * @param {number} deltaTime The time difference, in ms, between the lifecycle
+ *   reporter's initialization and now.
+ * @param {number} initTime The initialization time, in ms, of the lifecycle
+ *   reporter.
+ * @return {?JsonObject} config or null if invalid/missing.
+ */
+export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
+    qqid, isVerifiedAmpCreative, deltaTime, initTime) {
+  // Add CSI pingbacks.
+  const correlator = getCorrelator(win);
+  const slotId = Number(element.getAttribute('data-amp-slot-index'));
+  const eids = encodeURIComponent(
+      element.getAttribute(EXPERIMENT_ATTRIBUTE));
+  const adType = element.getAttribute('type');
+  const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
+      `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
+      `&dt=${initTime}` +
+      (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
+      `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
+  deltaTime = Math.round(deltaTime);
+  const isAmpSuffix = isVerifiedAmpCreative ? 'Friendly' : 'CrossDomain';
+  config['requests']['iniLoadCsi'] = baseCsiUrl +
+      `&met.a4a.${slotId}=iniLoadCsi${isAmpSuffix}.${deltaTime}`;
+  config['requests']['renderStartCsi'] = baseCsiUrl +
+      `&met.a4a.${slotId}=renderStartCsi${isAmpSuffix}.${deltaTime}`;
+  config['triggers']['continuousVisibleIniLoad']['request'] =
+      'iniLoadCsi';
+  config['triggers']['continuousVisibleRenderStart']['request'] =
+      'renderStartCsi';
+
+  // Add CSI ping for visibility.
+  config['requests']['visibilityCsi'] = baseCsiUrl +
+      `&met.a4a.${slotId}=visibilityCsi.${deltaTime}`;
+  config['triggers']['continuousVisible']['request'].push('visibilityCsi');
+  return config;
+}
+
+/**
+ * Returns an array of two-letter codes representing the amp-ad containers
+ * enclosing the given ad element.
+ *
+ * @param {!Element} adElement
+ * @return {!Array<string>}
+ */
+export function getEnclosingContainerTypes(adElement) {
+  const containerTypeSet = {};
+  for (let el = adElement.parentElement, counter = 0;
+      el && counter < 20; el = el.parentElement, counter++) {
+    const tagName = el.tagName.toUpperCase();
+    if (ValidAdContainerTypes[tagName]) {
+      containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+    }
+  }
+  return Object.keys(containerTypeSet);
+}
+
+/**
+ * Appends parameter to ad request indicating error state so long as error
+ * parameter is not already present or url has been truncated.
+ * @param {string} adUrl used for network request
+ * @param {string} parameterValue to be appended
+ * @return {string|undefined} potentially modified url, undefined
+ */
+export function maybeAppendErrorParameter(adUrl, parameterValue) {
+  dev().assert(!!adUrl && !!parameterValue);
+  // Add parameter indicating error so long as the url has not already been
+  // truncated and error parameter is not already present.  Note that we assume
+  // that added, error parameter length will be less than truncation parameter
+  // so adding will not cause length to exceed maximum.
+  if (new RegExp(`[?|&](${encodeURIComponent(TRUNCATION_PARAM.name)}=` +
+      `${encodeURIComponent(String(TRUNCATION_PARAM.value))}|aet=[^&]*)$`)
+      .test(adUrl)) {
+    return;
+  }
+  const modifiedAdUrl = adUrl + `&aet=${parameterValue}`;
+  dev().assert(modifiedAdUrl.length <= MAX_URL_LENGTH);
+  return modifiedAdUrl;
 }

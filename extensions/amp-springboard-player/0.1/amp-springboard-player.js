@@ -109,8 +109,6 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('amp-img');
 
-    // TODO(#5327): Investigate a better poster image for a better match with first
-    // frame when the player loaded to avoid big visual jump.
     placeholder.setAttribute('src',
         'https://www.springboardplatform.com/storage/' +
         encodeURIComponent(this.domain_) + '/snapshots/' +
@@ -118,7 +116,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     /** Show default image for playlist */
     if (this.mode_ == 'playlist') {
       placeholder.setAttribute('src',
-        'https://www.springboardplatform.com/storage/default/' +
+          'https://www.springboardplatform.com/storage/default/' +
         'snapshots/default_snapshot.png');
     }
     placeholder.setAttribute('placeholder', '');

@@ -20,6 +20,7 @@ import {getMode} from './mode';
 import {urls} from './config';
 import {isArray} from './types';
 import {parseQueryString_} from './url-parse-query-string';
+import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
@@ -37,6 +38,12 @@ let cache;
 
 /** @private @const Matches amp_js_* paramters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
+
+const INVALID_PROTOCOLS = [
+  /*eslint no-script-url: 0*/ 'javascript:',
+  /*eslint no-script-url: 0*/ 'data:',
+  /*eslint no-script-url: 0*/ 'vbscript:',
+];
 
 /** @const {string} */
 export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
@@ -60,11 +67,31 @@ export function parseUrl(url, opt_nocache) {
   if (fromCache) {
     return fromCache;
   }
+
+  const info = parseUrlWithA(a, url);
+
+  // Freeze during testing to avoid accidental mutation.
+  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
+
+  if (opt_nocache) {
+    return frozen;
+  }
+  return cache[url] = frozen;
+}
+
+/**
+ * Returns a Location-like object for the given URL. If it is relative,
+ * the URL gets resolved.
+ * @param {!HTMLAnchorElement} a
+ * @param {string} url
+ * @return {!Location}
+ * @restricted
+ */
+export function parseUrlWithA(a, url) {
   a.href = url;
+
   // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick.
-  // TODO(lannka, #3449): Remove all the polyfills once we don't support IE11
-  // and it passes tests in all browsers.
+  // Assigning to itself again does the trick #3449.
   if (!a.protocol) {
     a.href = a.href;
   }
@@ -104,13 +131,7 @@ export function parseUrl(url, opt_nocache) {
   } else {
     info.origin = info.protocol + '//' + info.host;
   }
-  // Freeze during testing to avoid accidental mutation.
-  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
-
-  if (opt_nocache) {
-    return frozen;
-  }
-  return cache[url] = frozen;
+  return info;
 }
 
 /**
@@ -156,7 +177,7 @@ export function addParamToUrl(url, key, value, opt_addToFront) {
  * Appends query string fields and values to a url. The `params` objects'
  * `key`s and `value`s will be transformed into query string keys/values.
  * @param {string} url
- * @param {!Object<string, string|!Array<string>>} params
+ * @param {!JsonObject<string, string|!Array<string>>} params
  * @return {string}
  */
 export function addParamsToUrl(url, params) {
@@ -166,7 +187,7 @@ export function addParamsToUrl(url, params) {
 /**
  * Serializes the passed parameter map into a query string with both keys
  * and values encoded.
- * @param {!Object<string, string|!Array<string>>} params
+ * @param {!JsonObject<string, string|!Array<string>>} params
  * @return {string}
  */
 export function serializeQueryString(params) {
@@ -248,7 +269,7 @@ export function assertAbsoluteHttpOrHttpsUrl(urlString) {
  * dependency.
  *
  * @param {string} queryString
- * @return {!Object<string>}
+ * @return {!JsonObject}
  */
 export function parseQueryString(queryString) {
   return parseQueryString_(queryString);
@@ -307,6 +328,22 @@ export function isLocalhostOrigin(url) {
 }
 
 /**
+ * Returns whether the URL has valid protocol.
+ * Deep link protocol is valid, but not javascript etc.
+ * @param {string|!Location} url
+ * @return {boolean}
+ */
+export function isProtocolValid(url) {
+  if (!url) {
+    return true;
+  }
+  if (typeof url == 'string') {
+    url = parseUrl(url);
+  }
+  return !INVALID_PROTOCOLS.includes(url.protocol);
+}
+
+/**
  * Removes parameters that start with amp js parameter pattern and returns the new
  * search string.
  * @param {string} urlSearch
@@ -344,7 +381,7 @@ export function getSourceUrl(url) {
   // The /s/ is optional and signals a secure origin.
   const path = url.pathname.split('/');
   const prefix = path[1];
-  user().assert(prefix == 'c' || prefix == 'v',
+  user().assert(prefix == 'a' || prefix == 'c' || prefix == 'v',
       'Unknown path prefix in url %s', url.href);
   const domainOrHttpsSignal = path[2];
   const origin = domainOrHttpsSignal == 's'
@@ -440,4 +477,16 @@ export function checkCorsUrl(url) {
   const query = parseQueryString(parsedUrl.search);
   user().assert(!(SOURCE_ORIGIN_PARAM in query),
       'Source origin is not allowed in %s', url);
+}
+
+/**
+ * Tries to decode a URI component, falling back to opt_fallback (or an empty
+ * string)
+ *
+ * @param {string} component
+ * @param {string=} opt_fallback
+ * @return {string}
+ */
+export function tryDecodeUriComponent(component, opt_fallback) {
+  return tryDecodeUriComponent_(component, opt_fallback);
 }

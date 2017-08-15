@@ -19,24 +19,22 @@ import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {Resource, ResourceState} from './resource';
+import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
 import {installInputService} from '../input';
+import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
-import {inputFor} from '../services';
-import {viewerForDoc} from '../services';
-import {viewportForDoc} from '../services';
-import {vsyncFor} from '../services';
 import {isArray} from '../types';
 import {dev} from '../log';
+import {dict} from '../utils/object';
 import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
-import {documentInfoForDoc} from '../services';
 import {computedStyle} from '../style';
 
 const TAG_ = 'Resources';
@@ -51,6 +49,7 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
+const DOC_BOTTOM_OFFSET_LIMIT_ = 1000;
 
 
 /**
@@ -87,10 +86,16 @@ export class Resources {
     this.win = ampdoc.win;
 
     /** @const @private {!./viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(ampdoc);
+    this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
+
+    /**
+     * Used primarily for testing to allow build phase to proceed.
+     * @const @private {boolean}
+     */
+    this.isBuildOn_ = false;
 
     /** @private @const {number} */
     this.maxDpr_ = this.win.devicePixelRatio || 1;
@@ -147,8 +152,14 @@ export class Resources {
     /** @private {number} */
     this.lastVelocity_ = 0;
 
-    /** @const {!Pass} */
-    this.pass_ = new Pass(this.win, () => this.doPass_());
+    /** @const @private {!Pass} */
+    this.pass_ = new Pass(this.win, () => this.doPass());
+
+    /** @const @private {!Pass} */
+    this.remeasurePass_ = new Pass(this.win, () => {
+      this.relayoutAll_ = true;
+      this.schedulePass();
+    });
 
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();
@@ -174,10 +185,10 @@ export class Resources {
     this.isCurrentlyBuildingPendingResources_ = false;
 
     /** @private @const {!./viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(this.ampdoc);
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -235,17 +246,33 @@ export class Resources {
       this.buildReadyResources_();
       this.pendingBuildResources_ = null;
       const fixPromise = ieMediaCheckAndFix(this.win);
+      const remeasure = () => this.remeasurePass_.schedule();
       if (fixPromise) {
-        fixPromise.then(() => {
-          this.relayoutAll_ = true;
-          this.schedulePass();
-        });
+        fixPromise.then(remeasure);
       } else {
         // No promise means that there's no problem.
-        this.relayoutAll_ = true;
+        remeasure();
       }
-      this.schedulePass();
       this.monitorInput_();
+
+      // Safari 10 and under incorrectly estimates font spacing for
+      // `@font-face` fonts. This leads to wild measurement errors. The best
+      // course of action is to remeasure everything on window.onload or font
+      // timeout (3s), whichever is earlier. This has to be done on the global
+      // window because this is where the fonts are always added.
+      // Unfortunately, `document.fonts.ready` cannot be used here due to
+      // https://bugs.webkit.org/show_bug.cgi?id=174030.
+      // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
+      Promise.race([
+        loadPromise(this.win),
+        Services.timerFor(this.win).promise(3100),
+      ]).then(remeasure);
+
+      // Remeasure the document when all fonts loaded.
+      if (this.win.document.fonts &&
+          this.win.document.fonts.status != 'loaded') {
+        this.win.document.fonts.ready.then(remeasure);
+      }
     });
   }
 
@@ -274,15 +301,15 @@ export class Resources {
     this.ampdoc.signals().signal(CommonSignals.RENDER_START);
   }
 
+
   /**
    * Returns a subset of resources which are (1) belong to the specified host
-   * window, and (2) positioned in the specified rect.
+   * window, and (2) meet the filterFn given.
    * @param {!Window} hostWin
-   * @param {!../layout-rect.LayoutRectDef} rect
-   * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
+   * @param {!function(!Resource):boolean} filterFn
    * @return {!Promise<!Array<!Resource>>}
    */
-  getResourcesInRect(hostWin, rect, opt_isInPrerender) {
+  getMeasuredResources(hostWin, filterFn) {
     // First, wait for the `ready-scan` signal. Waiting for each element
     // individually is too expensive and `ready-scan` will cover most of
     // the initially parsed elements.
@@ -292,37 +319,41 @@ export class Resources {
       // Second, wait for any left-over elements to complete measuring.
       const measurePromiseArray = [];
       this.resources_.forEach(r => {
-        if (!r.hasBeenMeasured() &&
-            r.hostWin == hostWin &&
-            !r.hasOwner()) {
+        if (!r.hasBeenMeasured() && r.hostWin == hostWin && !r.hasOwner()) {
           measurePromiseArray.push(this.ensuredMeasured_(r));
         }
       });
       return Promise.all(measurePromiseArray);
-    }).then(() => {
-      // Finally, filter visible resources.
-      return this.resources_.filter(r => {
-        if (r.hostWin != hostWin ||
-            r.hasOwner() ||
-            !r.hasBeenMeasured() ||
-            !r.isDisplayed() ||
-            // TODO(jridgewell): Remove isFixed check here once the position
-            // is calculted correctly in a separate layer for embeds.
-            (!r.overlaps(rect) && !r.isFixed())) {
-          return false;
-        }
-        if (opt_isInPrerender && !r.prerenderAllowed()) {
-          return false;
-        }
-        return true;
-      });
+    }).then(() => this.resources_.filter(r => {
+      return r.hostWin == hostWin && !r.hasOwner() && r.hasBeenMeasured() &&
+        filterFn(r);
+    }));
+  }
+
+  /**
+   * Returns a subset of resources which are (1) belong to the specified host
+   * window, and (2) positioned in the specified rect.
+   * @param {!Window} hostWin
+   * @param {!../layout-rect.LayoutRectDef} rect
+   * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
+   * @return {!Promise<!Array<!Resource>>}
+   */
+  getResourcesInRect(hostWin, rect, opt_isInPrerender) {
+    return this.getMeasuredResources(hostWin, r => {
+      // TODO(jridgewell): Remove isFixed check here once the position
+      // is calculted correctly in a separate layer for embeds.
+      if (!r.isDisplayed() || (!r.overlaps(rect) && !r.isFixed()) ||
+          (opt_isInPrerender && !r.prerenderAllowed())) {
+        return false;
+      }
+      return true;
     });
   }
 
   /** @private */
   monitorInput_() {
     installInputService(this.win);
-    const input = inputFor(this.win);
+    const input = Services.inputFor(this.win);
     input.onTouchDetected(detected => {
       this.toggleInputClass_('amp-mode-touch', detected);
     }, true);
@@ -461,6 +492,7 @@ export class Resources {
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
+    this.remeasurePass_.schedule(1000);
   }
 
   /**
@@ -489,16 +521,11 @@ export class Resources {
    */
   buildOrScheduleBuildForResource_(resource, checkForDupes = false,
       scheduleWhenBuilt = true) {
-    if (this.isRuntimeOn_) {
+    if (this.isRuntimeOn_ || this.isBuildOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
-        resource.build();
-        if (scheduleWhenBuilt && !resource.isBlacklisted()) {
-          // TODO(dvoytenko): Consider removing "blacklisted" resources
-          // altogether from the list of resources.
-          this.schedulePass();
-        }
-      } else if (!resource.element.isBuilt()) {
+        this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
+      } else if (!resource.isBuilt() && !resource.isBuilding()) {
         if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
           this.pendingBuildResources_.push(resource);
@@ -532,27 +559,39 @@ export class Resources {
    * @private
    */
   buildReadyResourcesUnsafe_(scheduleWhenBuilt = true) {
-    let builtElementsCount = 0;
     // This will loop over all current pending resources and those that
     // get added by other resources build-cycle, this will make sure all
     // elements get a chance to be built.
     for (let i = 0; i < this.pendingBuildResources_.length; i++) {
       const resource = this.pendingBuildResources_[i];
       if (this.documentReady_ ||
-          hasNextNodeInDocumentOrder(resource.element)) {
+          hasNextNodeInDocumentOrder(
+              resource.element, this.ampdoc.getRootNode())) {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
-        resource.build();
-        if (!resource.isBlacklisted()) {
-          builtElementsCount++;
-        }
+        this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
       }
     }
+  }
 
-    if (scheduleWhenBuilt && builtElementsCount > 0) {
-      this.schedulePass();
+  /**
+   * @param {!Resource} resource
+   * @param {boolean} schedulePass
+   * @return {?Promise}
+   * @private
+   */
+  buildResourceUnsafe_(resource, schedulePass) {
+    const promise = resource.build();
+    if (!promise || !schedulePass) {
+      return promise;
     }
+    return promise.then(() => this.schedulePass(), error => {
+      // Build failed: remove the resource. No other state changes are
+      // needed.
+      this.removeResource_(resource);
+      throw error;
+    });
   }
 
   /**
@@ -578,9 +617,11 @@ export class Resources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
-    resource.pauseOnRemove();
-    if (opt_disconnect) {
-      resource.disconnect();
+    if (resource.isBuilt()) {
+      resource.pauseOnRemove();
+      if (opt_disconnect) {
+        resource.disconnect();
+      }
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'element removed:', resource.debugid);
@@ -615,6 +656,40 @@ export class Resources {
    */
   setOwner(element, owner) {
     Resource.setOwner(element, owner);
+  }
+
+  /**
+   * Requires the layout of the specified element or top-level sub-elements
+   * within.
+   * @param {!Element} element
+   * @param {number=} opt_parentPriority
+   * @return {!Promise}
+   * @restricted
+   */
+  requireLayout(element, opt_parentPriority) {
+    const promises = [];
+    this.discoverResourcesForElement_(element, resource => {
+      if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
+        return;
+      }
+      if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
+        promises.push(resource.whenBuilt().then(() => {
+          resource.measure();
+          if (!resource.isDisplayed()) {
+            return;
+          }
+          this.scheduleLayoutOrPreload_(
+              resource,
+              /* layout */ true,
+              opt_parentPriority,
+              /* forceOutsideViewport */ true);
+          return resource.loadedOnce();
+        }));
+      } else if (resource.isDisplayed()) {
+        promises.push(resource.loadedOnce());
+      }
+    });
+    return Promise.all(promises);
   }
 
   /**
@@ -770,13 +845,13 @@ export class Resources {
   attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(Resource.forElement(element), newHeight,
-        newWidth, opt_newMargins, /* force */ false, success => {
-          if (success) {
-            resolve();
-          } else {
-            reject(new Error('changeSize attempt denied'));
-          }
-        });
+          newWidth, opt_newMargins, /* force */ false, success => {
+            if (success) {
+              resolve();
+            } else {
+              reject(new Error('changeSize attempt denied'));
+            }
+          });
     });
   }
 
@@ -924,7 +999,7 @@ export class Resources {
       return;
     }
     this.vsyncScheduled_ = true;
-    this.vsync_.mutate(() => this.doPass_());
+    this.vsync_.mutate(() => this.doPass());
   }
 
   /**
@@ -936,8 +1011,7 @@ export class Resources {
     this.schedulePass();
   }
 
-  /** @private */
-  doPass_() {
+  doPass() {
     if (!this.isRuntimeOn_) {
       dev().fine(TAG_, 'runtime is off');
       return;
@@ -951,23 +1025,22 @@ export class Resources {
     if (firstPassAfterDocumentReady) {
       this.firstPassAfterDocumentReady_ = false;
       const doc = this.win.document;
-      this.viewer_.sendMessage('documentLoaded', {
-        title: doc.title,
-        sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
-        serverLayout: doc.documentElement.hasAttribute('i-amphtml-element'),
-        linkRels: documentInfoForDoc(this.ampdoc).linkRels,
-      }, /* cancelUnsent */true);
+      this.viewer_.sendMessage('documentLoaded', dict({
+        'title': doc.title,
+        'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
+        'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
+        'linkRels': Services.documentInfoForDoc(this.ampdoc).linkRels,
+      }), /* cancelUnsent */true);
 
       this.scrollHeight_ = this.viewport_.getScrollHeight();
       this.viewer_.sendMessage('documentHeight',
-          {height: this.scrollHeight_}, /* cancelUnsent */true);
+          dict({'height': this.scrollHeight_}), /* cancelUnsent */true);
       dev().fine(TAG_, 'document height on load: ' + this.scrollHeight_);
     }
 
     const viewportSize = this.viewport_.getSize();
-    const now = Date.now();
-    dev().fine(TAG_, 'PASS: at ' + now +
-        ', visible=', this.visible_,
+    dev().fine(TAG_,
+        'PASS: visible=', this.visible_,
         ', relayoutAll=', this.relayoutAll_,
         ', relayoutTop=', this.relayoutTop_,
         ', viewportSize=', viewportSize.width, viewportSize.height,
@@ -992,7 +1065,7 @@ export class Resources {
         const measuredScrollHeight = this.viewport_.getScrollHeight();
         if (measuredScrollHeight != this.scrollHeight_) {
           this.viewer_.sendMessage('documentHeight',
-              {height: measuredScrollHeight}, /* cancelUnsent */true);
+              dict({'height': measuredScrollHeight}), /* cancelUnsent */true);
           this.scrollHeight_ = measuredScrollHeight;
           dev().fine(TAG_, 'document height changed: ' + this.scrollHeight_);
         }
@@ -1032,7 +1105,8 @@ export class Resources {
     const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
-    const docBottomOffset = scrollHeight * 0.85;
+    const maxDocBottomOffset = scrollHeight - DOC_BOTTOM_OFFSET_LIMIT_;
+    const docBottomOffset = Math.max(scrollHeight * 0.85, maxDocBottomOffset);
     const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
@@ -1250,7 +1324,6 @@ export class Resources {
    * @private
    */
   discoverWork_() {
-
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
     const now = Date.now();
@@ -1267,7 +1340,7 @@ export class Resources {
     let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT && !r.isBlacklisted()) {
+      if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true,
             /* scheduleWhenBuilt */ false);
       }
@@ -1289,7 +1362,8 @@ export class Resources {
             relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.hasOwner()) {
+        if (r.hasOwner() && !r.isMeasureRequested()) {
+          // If element has owner, and measure is not requested, do nothing.
           continue;
         }
         if (relayoutAll ||
@@ -1407,7 +1481,6 @@ export class Resources {
    */
   work_() {
     const now = Date.now();
-    const visibility = this.viewer_.getVisibilityState();
 
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
@@ -1431,13 +1504,20 @@ export class Resources {
         const reschedule = this.reschedule_.bind(this, task);
         executing.promise.then(reschedule, reschedule);
       } else {
-        task.promise = task.callback(visibility == 'visible');
-        task.startTime = now;
-        dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
-        this.exec_.enqueue(task);
-        task.promise.then(this.taskComplete_.bind(this, task, true),
-            this.taskComplete_.bind(this, task, false))
-            .catch(/** @type {function (*)} */ (reportError));
+        task.resource.measure();
+        if (this.isLayoutAllowed_(
+            task.resource, task.forceOutsideViewport)) {
+          task.promise = task.callback();
+          task.startTime = now;
+          dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
+          this.exec_.enqueue(task);
+          task.promise.then(this.taskComplete_.bind(this, task, true),
+              this.taskComplete_.bind(this, task, false))
+              .catch(/** @type {function (*)} */ (reportError));
+        } else {
+          dev().fine(TAG_, 'cancelled', task.id);
+          task.resource.layoutCanceled();
+        }
       }
 
       task = this.queue_.peek(this.boundTaskScorer_);
@@ -1684,40 +1764,69 @@ export class Resources {
   }
 
   /**
-   * Schedules layout or preload for the specified resource.
+   * Returns whether the resource should be preloaded at this time.
+   * The element must be measured by this time.
    * @param {!Resource} resource
-   * @param {boolean} layout
-   * @param {number=} opt_parentPriority
+   * @param {boolean} forceOutsideViewport
+   * @return {boolean}
    * @private
    */
-  scheduleLayoutOrPreload_(resource, layout, opt_parentPriority) {
-    dev().assert(resource.getState() != ResourceState.NOT_BUILT &&
-        resource.isDisplayed(),
-        'Not ready for layout: %s (%s)',
-        resource.debugid, resource.getState());
+  isLayoutAllowed_(resource, forceOutsideViewport) {
+    // Only built and displayed elements can be loaded.
+    if (resource.getState() == ResourceState.NOT_BUILT ||
+        !resource.isDisplayed()) {
+      return false;
+    }
 
     // Don't schedule elements when we're not visible, or in prerender mode
     // (and they can't prerender).
     if (!this.visible_) {
-      if (this.viewer_.getVisibilityState() != VisibilityState.PRERENDER) {
-        return;
-      } else if (!resource.prerenderAllowed()) {
-        return;
+      if (this.viewer_.getVisibilityState() != VisibilityState.PRERENDER ||
+          !resource.prerenderAllowed()) {
+        return false;
       }
     }
 
-    if (!resource.isInViewport() && !resource.renderOutsideViewport()) {
+    // The element has to be in its rendering corridor.
+    if (!forceOutsideViewport &&
+        !resource.isInViewport() &&
+        !resource.renderOutsideViewport()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Schedules layout or preload for the specified resource.
+   * @param {!Resource} resource
+   * @param {boolean} layout
+   * @param {number=} opt_parentPriority
+   * @param {boolean=} opt_forceOutsideViewport
+   * @private
+   */
+  scheduleLayoutOrPreload_(resource, layout, opt_parentPriority,
+      opt_forceOutsideViewport) {
+    dev().assert(resource.getState() != ResourceState.NOT_BUILT &&
+        resource.isDisplayed(),
+        'Not ready for layout: %s (%s)',
+        resource.debugid, resource.getState());
+    const forceOutsideViewport = opt_forceOutsideViewport || false;
+    if (!this.isLayoutAllowed_(resource, forceOutsideViewport)) {
       return;
     }
+
     if (layout) {
       this.schedule_(resource,
           LAYOUT_TASK_ID_, LAYOUT_TASK_OFFSET_,
           opt_parentPriority || 0,
+          forceOutsideViewport,
           resource.startLayout.bind(resource));
     } else {
       this.schedule_(resource,
           PRELOAD_TASK_ID_, PRELOAD_TASK_OFFSET_,
           opt_parentPriority || 0,
+          forceOutsideViewport,
           resource.startLayout.bind(resource));
     }
   }
@@ -1731,21 +1840,30 @@ export class Resources {
    * @private
    */
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
-    const resources = [];
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      if (resource.getState() != ResourceState.NOT_BUILT) {
-        resources.push(resource);
+      if (resource.getState() == ResourceState.NOT_BUILT) {
+        resource.whenBuilt().then(() => {
+          this.measureAndScheduleIfAllowed_(resource, layout,
+              parentResource.getPriority());
+        });
+      } else {
+        this.measureAndScheduleIfAllowed_(resource, layout,
+            parentResource.getPriority());
       }
     });
-    if (resources.length > 0) {
-      resources.forEach(resource => {
-        resource.measure();
-        if (resource.getState() == ResourceState.READY_FOR_LAYOUT &&
-                resource.isDisplayed()) {
-          this.scheduleLayoutOrPreload_(resource, layout,
-              parentResource.getPriority());
-        }
-      });
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @param {boolean} layout
+   * @param {number} parentPriority
+   * @private
+   */
+  measureAndScheduleIfAllowed_(resource, layout, parentPriority) {
+    resource.measure();
+    if (resource.getState() == ResourceState.READY_FOR_LAYOUT &&
+        resource.isDisplayed()) {
+      this.scheduleLayoutOrPreload_(resource, layout, parentPriority);
     }
   }
 
@@ -1755,10 +1873,17 @@ export class Resources {
    * @param {string} localId
    * @param {number} priorityOffset
    * @param {number} parentPriority
-   * @param {function(boolean):!Promise} callback
+   * @param {boolean} forceOutsideViewport
+   * @param {function():!Promise} callback
    * @private
    */
-  schedule_(resource, localId, priorityOffset, parentPriority, callback) {
+  schedule_(
+      resource,
+      localId,
+      priorityOffset,
+      parentPriority,
+      forceOutsideViewport,
+      callback) {
     const taskId = resource.getTaskId(localId);
 
     const task = {
@@ -1766,6 +1891,7 @@ export class Resources {
       resource,
       priority: Math.max(resource.getPriority(), parentPriority) +
           priorityOffset,
+      forceOutsideViewport,
       callback,
       scheduleTime: Date.now(),
       startTime: 0,

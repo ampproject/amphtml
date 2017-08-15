@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 - There can be only one `<amp-sticky-ad>` in an AMP document. The `<amp-sticky-ad>` should only have one direct child: `<amp-ad>`. **Note**: Make sure you include any required scripts for the `<amp-ad>` component.
@@ -63,7 +65,7 @@ Example:
 
 ## Attributes
 
-**layout** (required)
+##### layout (required)
 
 Must be set to `nodisplay`.
 
@@ -77,4 +79,4 @@ The `amp-sticky-ad` component can be styled with standard CSS.
 
 ## Validation
 
-See [amp-sticky-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-sticky-ad/0.1/validator-amp-sticky-ad.protoascii) in the AMP validator specification.
+See [amp-sticky-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-sticky-ad/validator-amp-sticky-ad.protoascii) in the AMP validator specification.

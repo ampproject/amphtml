@@ -18,22 +18,16 @@ import {AmpAdNetworkCloudflareImpl} from '../amp-ad-network-cloudflare-impl';
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {utf8Encode} from '../../../../src/utils/bytes';
-import * as sinon from 'sinon';
 import {cloudflareIsA4AEnabled} from '../cloudflare-a4a-config';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {createIframePromise} from '../../../../testing/iframe';
 import * as vendors from '../vendors';
 
-describe('cloudflare-a4a-config', () => {
+describes.realWin('cloudflare-a4a-config', {amp: true}, env => {
   let doc;
   let win;
   beforeEach(() => {
-    return createIframePromise().then(f => {
-      doc = f.doc;
-      win = f.win;
-    });
+    win = env.win;
+    doc = env.win.document;
   });
   it('should pass a4a config predicate', () => {
     const el = createElementWithAttributes(doc, 'amp-ad', {
@@ -45,23 +39,24 @@ describe('cloudflare-a4a-config', () => {
   });
 });
 
-describe('amp-ad-network-cloudflare-impl', () => {
+describes.realWin('amp-ad-network-cloudflare-impl', {amp: true}, env => {
 
-  let sandbox;
   let cloudflareImpl;
   let el;
+  let doc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    el = document.createElement('amp-ad');
+    doc = env.win.document;
+    el = doc.createElement('amp-ad');
     el.setAttribute('type', 'cloudflare');
     el.setAttribute('data-cf-network', 'cloudflare');
     el.setAttribute('src',
-      'https://firebolt.cloudflaredemo.com/a4a-ad.html');
-    sandbox.stub(AmpAdNetworkCloudflareImpl.prototype, 'getSigningServiceNames',
-      () => {
-        return ['cloudflare','cloudflare-dev'];
-      });
+        'https://firebolt.cloudflaredemo.com/a4a-ad.html');
+    sandbox.stub(
+        AmpAdNetworkCloudflareImpl.prototype, 'getSigningServiceNames',
+        () => {
+          return ['cloudflare','cloudflare-dev'];
+        });
     sandbox.stub(vendors, 'NETWORKS', {
       cloudflare: {
         base: 'https://firebolt.cloudflaredemo.com',
@@ -72,7 +67,7 @@ describe('amp-ad-network-cloudflare-impl', () => {
         src: 'https://cf-test.com/path/ad?width=SLOT_WIDTH&height=SLOT_HEIGHT',
       },
     });
-    document.body.appendChild(el);
+    doc.body.appendChild(el);
     cloudflareImpl = new AmpAdNetworkCloudflareImpl(el);
   });
 
@@ -85,7 +80,7 @@ describe('amp-ad-network-cloudflare-impl', () => {
       expect(cloudflareImpl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
-      el = document.createElement('amp-ad-network-cloudflare-impl');
+      el = doc.createElement('amp-ad-network-cloudflare-impl');
       el.setAttribute('type', 'cloudflare');
       cloudflareImpl = new AmpAdNetworkCloudflareImpl(el);
       expect(cloudflareImpl.isValidElement()).to.be.false;
@@ -93,29 +88,30 @@ describe('amp-ad-network-cloudflare-impl', () => {
   });
 
   describe('#getAdUrl', () => {
+
     it('should be valid', () => {
       expect(cloudflareImpl.getAdUrl()).to.equal(
-        'https://firebolt.cloudflaredemo.com/_a4a/a4a-ad.html');
+          'https://firebolt.cloudflaredemo.com/_a4a/a4a-ad.html');
     });
 
     it('should handle non-a4a URLs', () => {
       el.setAttribute('data-cf-a4a', 'false');
       expect(cloudflareImpl.getAdUrl()).to.equal(
-        'https://firebolt.cloudflaredemo.com/a4a-ad.html');
+          'https://firebolt.cloudflaredemo.com/a4a-ad.html');
     });
 
     it('should accept a4a src', () => {
       el.setAttribute('src',
-        'https://firebolt.cloudflaredemo.com/_a4a/a4a-ad.html');
+          'https://firebolt.cloudflaredemo.com/_a4a/a4a-ad.html');
       expect(cloudflareImpl.getAdUrl()).to.equal(
-        'https://firebolt.cloudflaredemo.com/_a4a/a4a-ad.html');
+          'https://firebolt.cloudflaredemo.com/_a4a/a4a-ad.html');
     });
 
     it('should handle additional templated width/height', () => {
       el.setAttribute('src', 'https://firebolt.cloudflaredemo.com/'
         + 'ad?width=SLOT_WIDTH&height=SLOT_HEIGHT');
       expect(cloudflareImpl.getAdUrl()).to.equal(
-        'https://firebolt.cloudflaredemo.com/_a4a/ad?width=0&height=0');
+          'https://firebolt.cloudflaredemo.com/_a4a/ad?width=0&height=0');
     });
 
     function parseQuery(query) {
@@ -156,37 +152,6 @@ describe('amp-ad-network-cloudflare-impl', () => {
         height: '0',
         key: 'value',
         width: '0',
-      });
-    });
-  });
-
-  describe('#extractCreativeAndSignature', () => {
-    it('without signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        return expect(cloudflareImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function() { return undefined; },
-            has: function() { return false; },
-          })).to.eventually.deep.equal(
-            {creative, signature: null}
-          );
-      });
-    });
-    it('with signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        return expect(cloudflareImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function(name) {
-              return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-            },
-            has: function(name) {
-              return name === 'X-AmpAdSignature';
-            },
-          })).to.eventually.deep.equal(
-            {creative, signature: base64UrlDecodeToBytes('AQAB')}
-          );
       });
     });
   });

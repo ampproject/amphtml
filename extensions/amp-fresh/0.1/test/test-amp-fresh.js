@@ -67,7 +67,7 @@ describe('amp-fresh', () => {
     fresh.buildCallback();
     expect(fresh.element.innerHTML).to.equal('<span>hello</span>');
     const doc = {
-      getElementById: function(id) {
+      getElementById(id) {
         const el = document.createElement('amp-fresh');
         el.innerHTML = '<span>hello</span><div>world</div>!';
         el.setAttribute('id', id);
@@ -77,5 +77,16 @@ describe('amp-fresh', () => {
     manager.update_(doc);
     expect(fresh.element.innerHTML).to.equal(
         '<span>hello</span><div>world</div>!');
+  });
+
+  it('should have aria-live=polite by default', () => {
+    fresh.buildCallback();
+    expect(fresh.element.getAttribute('aria-live')).to.equal('polite');
+  });
+
+  it('should use explicitly defined aria-live attribute value', () => {
+    elem.setAttribute('aria-live', 'assertive');
+    fresh.buildCallback();
+    expect(fresh.element.getAttribute('aria-live')).to.equal('assertive');
   });
 });

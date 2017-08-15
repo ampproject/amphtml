@@ -19,7 +19,9 @@ globals.amphtmlRegex = new RegExp('(^\s*)amphtml(\s*$)');
 globals.ampCaches = [
   {
     'getAmpHref': function() {
-      if (window.location.pathname.startsWith('/c/s')) {
+      if (window.location.pathname.startsWith('/a/s') ||
+          window.location.pathname.startsWith('/c/s') ||
+          window.location.pathname.startsWith('/v/s')) {
         return 'https://' + window.location.pathname.slice(5);
       } else if (window.location.pathname.startsWith('/c')) {
         return 'http://' + window.location.pathname.slice(3);

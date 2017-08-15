@@ -23,8 +23,6 @@ describes.realWin('amp-anim', {
   },
 }, env => {
 
-  // TODO(#5589): Add more tests for amp-anim.
-
   it('should propagate ARIA attributes', () => {
     const el = env.win.document.createElement('amp-anim');
     el.setAttribute('src', 'test.jpg');

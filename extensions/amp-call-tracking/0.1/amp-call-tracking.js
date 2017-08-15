@@ -16,9 +16,8 @@
 
 import {assertHttpsUrl} from '../../../src/url';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {urlReplacementsForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/services';
 
 
 /**
@@ -32,18 +31,20 @@ let cachedResponsePromises_ = {};
  * Fetches vendor response.
  * @param {!Window} win
  * @param {!string} url
- * @return {!Promise<Object>}
+ * @return {!Promise<JsonObject>}
  */
 function fetch_(win, url) {
   if (!(url in cachedResponsePromises_)) {
-    cachedResponsePromises_[url] = xhrFor(win).fetchJson(url);
+    cachedResponsePromises_[url] = Services.xhrFor(win)
+        .fetchJson(url, {credentials: 'include'})
+        .then(res => res.json());
   }
   return cachedResponsePromises_[url];
 }
 
 
-/** Visible for testing. */
-export function clearResponseCache() {
+/** @visibleForTesting */
+export function clearResponseCacheForTesting() {
   cachedResponsePromises_ = {};
 }
 
@@ -80,18 +81,18 @@ export class AmpCallTracking extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return urlReplacementsForDoc(this.getAmpDoc())
-      .expandAsync(user().assertString(this.configUrl_))
-      .then(url => fetch_(this.win, url))
-      .then(data => {
-        user().assert('phoneNumber' in data,
-          'Response must contain a non-empty phoneNumber field %s',
-          this.element);
+    return Services.urlReplacementsForDoc(this.getAmpDoc())
+        .expandAsync(user().assertString(this.configUrl_))
+        .then(url => fetch_(this.win, url))
+        .then(data => {
+          user().assert('phoneNumber' in data,
+              'Response must contain a non-empty phoneNumber field %s',
+              this.element);
 
-        this.hyperlink_.setAttribute('href', `tel:${data['phoneNumber']}`);
-        this.hyperlink_.textContent = data['formattedPhoneNumber']
+          this.hyperlink_.setAttribute('href', `tel:${data['phoneNumber']}`);
+          this.hyperlink_.textContent = data['formattedPhoneNumber']
             || data['phoneNumber'];
-      });
+        });
   }
 }
 

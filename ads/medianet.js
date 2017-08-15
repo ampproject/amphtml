@@ -19,22 +19,22 @@ import {getSourceUrl} from '../src/url';
 import {doubleclick} from '../ads/google/doubleclick';
 
 const mandatoryParams = ['tagtype', 'cid'],
-  optionalParams = [
-    'timeout', 'crid', 'misc',
-    'slot', 'targeting', 'categoryExclusions',
-    'tagForChildDirectedTreatment', 'cookieOptions',
-    'overrideWidth', 'overrideHeight', 'loadingStrategy',
-    'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
-    'experimentId', 'multiSize', 'multiSizeValidation',
-  ],
-  dfpParams = [
-    'slot', 'targeting', 'categoryExclusions',
-    'tagForChildDirectedTreatment', 'cookieOptions',
-    'overrideWidth', 'overrideHeight', 'loadingStrategy',
-    'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
-    'experimentId', 'multiSize', 'multiSizeValidation',
-  ],
-  dfpDefaultTimeout = 1000;
+    optionalParams = [
+      'timeout', 'crid', 'misc',
+      'slot', 'targeting', 'categoryExclusions',
+      'tagForChildDirectedTreatment', 'cookieOptions',
+      'overrideWidth', 'overrideHeight', 'loadingStrategy',
+      'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
+      'experimentId', 'multiSize', 'multiSizeValidation',
+    ],
+    dfpParams = [
+      'slot', 'targeting', 'categoryExclusions',
+      'tagForChildDirectedTreatment', 'cookieOptions',
+      'overrideWidth', 'overrideHeight', 'loadingStrategy',
+      'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
+      'experimentId', 'multiSize', 'multiSizeValidation',
+    ],
+    dfpDefaultTimeout = 1000;
 
 /**
  * @param {!Window} global
@@ -45,7 +45,7 @@ export function medianet(global, data) {
 
   const publisherUrl = global.context.canonicalUrl ||
       getSourceUrl(global.context.location.href),
-    referrerUrl = global.context.referrer;
+      referrerUrl = global.context.referrer;
 
   if (data.tagtype === 'headerbidder') { //parameter tagtype is used to identify the product the publisher is using. Going ahead we plan to support more product types.
     loadHBTag(global, data, publisherUrl, referrerUrl);

@@ -15,24 +15,28 @@
  */
 
 /**
- * @const {!JSONType}
+ * @const {!JsonObject}
  */
-export const NETWORKS = /** @type {!JSONType} */ ({
-  cloudflare: {
-    base: 'https://firebolt.cloudflaredemo.com',
+export const NETWORKS = /** @type {!JsonObject} */ ({
+  'cloudflare': {
+    'base': 'https://firebolt.cloudflaredemo.com',
   },
 
-  adzerk: {
-    base: 'https://engine.betazerk.com',
+  'adzerk': {
+    'base': 'https://engine.betazerk.com',
   },
 
-  dianomi: {
-    base: 'https://www.dianomi.com',
-    src: 'https://www.dianomi.com/smartads.pl?format=a4a',
+  'celtra': {
+    'base': 'https://ads-amp.celtra.com',
   },
 
-  yieldmo: {
-    base: 'https://yieldmo-amp.club',
-    src: 'https://yieldmo-amp.club/ads',
+  'dianomi': {
+    'base': 'https://www.dianomi.com',
+    'src': 'https://www.dianomi.com/smartads.pl?format=a4a',
+  },
+
+  'yieldmo': {
+    'base': 'https://yieldmo-amp.club',
+    'src': 'https://yieldmo-amp.club/ads',
   },
 });

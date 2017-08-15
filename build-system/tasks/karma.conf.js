@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 /**
  * @param {!Object} config
@@ -43,7 +44,34 @@ module.exports = {
     bundleDelay: 900,
   },
 
-  reporters: [process.env.TRAVIS ? 'dots' : 'progress'],
+  reporters: process.env.TRAVIS ? ['super-dots', 'mocha'] : ['dots', 'mocha'],
+
+  superDotsReporter: {
+    color: {
+      success : 'green',
+      failure : 'red',
+      ignore  : 'yellow'
+    },
+    icon: {
+      success : '●',
+      failure : '●',
+      ignore  : '○',
+    },
+  },
+
+  mochaReporter: {
+    output: 'minimal',
+    colors: {
+      success: 'green',
+      error: 'red',
+      info: 'yellow',
+    },
+    symbols: {
+      success : '●',
+      error: '●',
+      info: '○',
+    },
+  },
 
   port: 9876,
 
@@ -59,15 +87,18 @@ module.exports = {
     '/test/': '/base/test/',
   },
 
-  // Can't import Karma constants config.LOG_ERROR & config.LOG_WARN,
-  // so we hard code the strings here. Hopefully they'll never change.
-  logLevel: process.env.TRAVIS ? 'ERROR' : 'WARN',
+  // Can't import the Karma constant config.LOG_ERROR, so we hard code it here.
+  // Hopefully it'll never change.
+  logLevel: 'ERROR',
 
   autoWatch: true,
 
   browsers: [
     process.env.TRAVIS ? 'Chrome_travis_ci' : 'Chrome_no_extensions',
   ],
+
+  // Number of sauce tests to start in parallel
+  concurrency: 6,
 
   customLaunchers: {
     /*eslint "google-camelcase/google-camelcase": 0*/
@@ -86,10 +117,12 @@ module.exports = {
     SL_Chrome_android: {
       base: 'SauceLabs',
       browserName: 'android',
+      version: 'latest',
     },
     SL_Chrome_latest: {
       base: 'SauceLabs',
       browserName: 'chrome',
+      version: 'latest',
     },
     SL_Chrome_45: {
       base: 'SauceLabs',
@@ -114,6 +147,7 @@ module.exports = {
     SL_Firefox_latest: {
       base: 'SauceLabs',
       browserName: 'firefox',
+      version: 'latest',
     },
     SL_IE_11: {
       base: 'SauceLabs',
@@ -123,6 +157,7 @@ module.exports = {
     SL_Edge_latest: {
       base: 'SauceLabs',
       browserName: 'microsoftedge',
+      version: 'latest',
     },
     SL_Safari_9: {
       base: 'SauceLabs',
@@ -163,7 +198,7 @@ module.exports = {
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
-  middleware: ['custom'],
+  beforeMiddleware: ['custom'],
   plugins: [
     'karma-browserify',
     'karma-chai',
@@ -174,9 +209,11 @@ module.exports = {
     'karma-fixture',
     'karma-html2js-preprocessor',
     'karma-mocha',
+    'karma-mocha-reporter',
     'karma-safari-launcher',
     'karma-sauce-launcher',
     'karma-sinon-chai',
+    'karma-super-dots-reporter',
     {
       'middleware:custom': ['factory', function() {
         return require(require.resolve('../app.js'));

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from './action-trust';
 import {Layout} from './layout';
+import {getData} from './event-helper';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
-import {viewportForDoc} from './services';
-import {vsyncFor} from './services';
+import {Services} from './services';
 import {user} from './log';
-
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -142,7 +142,13 @@ export class BaseElement {
     /** @public @const {!Window} */
     this.win = element.ownerDocument.defaultView;
 
-    /** @private {?Object<string, function(!./service/action-impl.ActionInvocation)>} */
+    /**
+     * Maps action name to struct containing the action handler and minimum
+     * trust required to invoke the handler.
+     * @private {?Object<string, {
+     *   handler: function(!./service/action-impl.ActionInvocation),
+     *   minTrust: ActionTrust,
+     * }>} */
     this.actionMap_ = null;
 
     /** @public {!./preconnect.Preconnect} */
@@ -228,7 +234,7 @@ export class BaseElement {
 
   /** @public @return {!./service/vsync-impl.Vsync} */
   getVsync() {
-    return vsyncFor(this.win);
+    return Services.vsyncFor(this.win);
   }
 
   /**
@@ -314,6 +320,11 @@ export class BaseElement {
    * class set on it.
    *
    * This callback is executed early after the element has been attached to DOM.
+   *
+   * This callback can either immediately return or return a promise if the
+   * build steps are asynchronous.
+   *
+   * @return {!Promise|undefined}
    */
   buildCallback() {
     // Subclasses may override.
@@ -492,6 +503,14 @@ export class BaseElement {
   }
 
   /**
+   * Minimum event trust required for activate().
+   * @return {ActionTrust}
+   */
+  activationTrust() {
+    return ActionTrust.HIGH;
+  }
+
+  /**
    * Returns a promise that will resolve or fail based on the element's 'load'
    * and 'error' events.
    * @param {T} element
@@ -512,13 +531,18 @@ export class BaseElement {
 
   /**
    * Registers the action handler for the method with the specified name.
+   *
+   * The handler is only invoked by events with trust equal to or greater than
+   * `minTrust`. Otherwise, a user error is logged.
+   *
    * @param {string} method
    * @param {function(!./service/action-impl.ActionInvocation)} handler
+   * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(method, handler) {
+  registerAction(method, handler, minTrust = ActionTrust.HIGH) {
     this.initActionMap_();
-    this.actionMap_[method] = handler;
+    this.actionMap_[method] = {handler, minTrust};
   }
 
   /**
@@ -533,13 +557,18 @@ export class BaseElement {
    */
   executeAction(invocation, unusedDeferred) {
     if (invocation.method == 'activate') {
-      this.activate(invocation);
+      if (invocation.satisfiesTrust(this.activationTrust())) {
+        this.activate(invocation);
+      }
     } else {
       this.initActionMap_();
-      const handler = this.actionMap_[invocation.method];
-      user().assert(handler, `Method not found: ${invocation.method} in %s`,
+      const holder = this.actionMap_[invocation.method];
+      user().assert(holder, `Method not found: ${invocation.method} in %s`,
           this);
-      handler(invocation);
+      const {handler, minTrust} = holder;
+      if (invocation.satisfiesTrust(minTrust)) {
+        handler(invocation);
+      }
     }
   }
 
@@ -592,9 +621,18 @@ export class BaseElement {
     events = isArray(events) ? events : [events];
     for (let i = 0; i < events.length; i++) {
       element.addEventListener(events[i], event => {
-        this.element.dispatchCustomEvent(events[i], event.data || {});
+        this.element.dispatchCustomEvent(events[i], getData(event) || {});
       });
     }
+  }
+
+  /**
+   * Must be executed in the mutate context. Removes `display:none` from the
+   * element set via `layout=nodisplay`.
+   * @param {boolean} displayOn
+   */
+  toggleLayoutDisplay(displayOn) {
+    this.element.toggleLayoutDisplay(displayOn);
   }
 
   /**
@@ -696,7 +734,7 @@ export class BaseElement {
    * @return {!./service/viewport-impl.Viewport}
    */
   getViewport() {
-    return viewportForDoc(this.getAmpDoc());
+    return Services.viewportForDoc(this.getAmpDoc());
   }
 
   /**
@@ -897,23 +935,11 @@ export class BaseElement {
    * @note Boolean attributes have a value of `true` and `false` when
    *       present and missing, respectively.
    * @param {
-   *   !Object<string, (null|boolean|string|number|Array|Object)>
+   *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
    * } unusedMutations
    */
   mutatedAttributesCallback(unusedMutations) {
     // Subclasses may override.
-  }
-
-  /**
-   * Returns an array of elements in this element's subtree that this
-   * element owns that could have children added or removed dynamically.
-   * The array should not contain any ancestors of this element, but could
-   * contain this element itself.
-   * @return {!Array<!Element>}
-   * @public
-   */
-  getDynamicElementContainers() {
-    return [];
   }
 
   /**

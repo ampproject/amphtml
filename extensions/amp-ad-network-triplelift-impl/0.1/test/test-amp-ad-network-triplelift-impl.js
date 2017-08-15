@@ -21,8 +21,6 @@ import {
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {utf8Encode} from '../../../../src/utils/bytes';
 import * as sinon from 'sinon';
 import {tripleliftIsA4AEnabled} from '../triplelift-a4a-config';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -76,12 +74,12 @@ describe('amp-ad-network-triplelift-impl', () => {
     tripleliftImplElem = document.createElement('amp-ad');
     tripleliftImplElem.setAttribute('type', 'triplelift');
     tripleliftImplElem.setAttribute('src',
-'https://ib.3lift.com/ttj?inv_code=ampforadstest_main_feed');
+        'https://ib.3lift.com/ttj?inv_code=ampforadstest_main_feed');
     tripleliftImplElem.setAttribute('data-use-a4a','true');
     sandbox.stub(AmpAdNetworkTripleliftImpl.prototype, 'getSigningServiceNames',
-      () => {
-        return ['cloudflare'];
-      });
+        () => {
+          return ['cloudflare'];
+        });
     tripleliftImpl = new AmpAdNetworkTripleliftImpl(tripleliftImplElem);
   });
 
@@ -105,38 +103,7 @@ document.createElement('amp-ad-network-triplelift-impl');
   describe('#getAdUrl', () => {
     it('should be valid', () => {
       expect(tripleliftImpl.getAdUrl()).to.equal(
-'https://amp.3lift.com/_a4a/amp/auction?inv_code=ampforadstest_main_feed');
-    });
-  });
-
-  describe('#extractCreativeAndSignature', () => {
-    it('without signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        return expect(tripleliftImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function() { return undefined; },
-            has: function() { return false; },
-          })).to.eventually.deep.equal(
-            {creative, signature: null}
-          );
-      });
-    });
-    it('with signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        return expect(tripleliftImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function(name) {
-              return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-            },
-            has: function(name) {
-              return name === 'X-AmpAdSignature';
-            },
-          })).to.eventually.deep.equal(
-            {creative, signature: base64UrlDecodeToBytes('AQAB')}
-          );
-      });
+          'https://amp.3lift.com/_a4a/amp/auction?inv_code=ampforadstest_main_feed');
     });
   });
 });

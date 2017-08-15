@@ -16,8 +16,9 @@
 
 import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
+import * as sinon from 'sinon';
 
-describes.realWin('inabox-host:position-observer', {}, env => {
+describes.realWin('inabox-host:messaging', {}, env => {
 
   let win;
   let host;
@@ -154,5 +155,68 @@ describes.realWin('inabox-host:position-observer', {}, env => {
       callback({x: 1});
       expect(postMessageSpy).to.be.calledOnce;
     });
+  });
+
+  describe('full-overlay-frame', () => {
+
+    let iframePostMessageSpy;
+
+    beforeEach(() => {
+      iframe1.contentWindow.postMessage = iframePostMessageSpy = sandbox.stub();
+    });
+
+
+    it('should accept request and expand', () => {
+      const boxRect = {a: 1, b: 2}; // we don't care
+
+      const expandFrame = sandbox./*OK*/stub(
+          host.frameOverlayManager_, 'expandFrame', (iframe, callback) => {
+            callback(boxRect);
+          });
+
+      host.processMessage({
+        source: iframe1.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'full-overlay-frame',
+        }),
+      });
+
+      const message = deserializeMessage(
+          iframePostMessageSpy.getCall(0).args[0]);
+
+      expect(expandFrame).calledWith(iframe1, sinon.match.any);
+      expect(message.type).to.equal('full-overlay-frame-response');
+      expect(message.success).to.be.true;
+      expect(message.boxRect).to.deep.equal(boxRect);
+    });
+
+    it('should accept reset request and collapse', () => {
+      const boxRect = {c: 1, d: 2}; // we don't care
+
+      const collapseFrame = sandbox./*OK*/stub(
+          host.frameOverlayManager_, 'collapseFrame', (iframe, callback) => {
+            callback(boxRect);
+          });
+
+      host.processMessage({
+        source: iframe1.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'cancel-full-overlay-frame',
+        }),
+      });
+
+      const message = deserializeMessage(
+          iframePostMessageSpy.getCall(0).args[0]);
+
+      expect(collapseFrame).calledWith(iframe1, sinon.match.any);
+      expect(message.type).to.equal('cancel-full-overlay-frame-response');
+      expect(message.success).to.be.true;
+      expect(message.boxRect).to.deep.equal(boxRect);
+    });
+
   });
 });

@@ -59,8 +59,11 @@ export class AmpFresh extends AMP.BaseElement {
 
     installAmpFreshManagerForDoc(this.element);
     this.manager_ = ampFreshManagerForDoc(this.element);
-
     this.manager_.register(this.ampFreshId_, this);
+
+    if (!this.element.hasAttribute('aria-live')) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
   }
 
   /**
@@ -72,7 +75,7 @@ export class AmpFresh extends AMP.BaseElement {
     // importing it shouldn't trigger.
     /** @const {!Element} */
     const orphanSurrogate = dev().assertElement(
-      this.win.document.adoptNode(surrogateAmpFresh));
+        this.win.document.adoptNode(surrogateAmpFresh));
     this.mutateElement(() => {
       this.element.textContent = '';
       copyChildren(orphanSurrogate, this.element);

@@ -14,10 +14,60 @@
  * limitations under the License.
  */
 
+/** @externs */
+
+/**
+ * A type for Objects that can be JSON serialized or that come from
+ * JSON serialization. Requires the objects fields to be accessed with
+ * bracket notation object['name'] to make sure the fields do not get
+ * obfuscated.
+ * @constructor
+ * @dict
+ */
+function JsonObject() {}
+
+/**
+ * Force the dataset property to be handled as a JsonObject.
+ * @type {!JsonObject}
+ */
+Element.prototype.dataset;
+
+/**
+ * - n is the name.
+ * - f is the function body of the extension.
+ * - p is the priority. Only supported value is "high".
+ *   high means, that the extension is not subject to chunking.
+ *   This should be used for work, that should always happen
+ *   as early as possible. Currently this is primarily used
+ *   for viewer communication setup.
+ * - v is the release version
+ * @constructor @struct
+ */
+function ExtensionPayload() {}
+
+/** @type {string} */
+ExtensionPayload.prototype.n;
+
+/** @type {function(!Object)} */
+ExtensionPayload.prototype.f;
+
+/** @type {string|undefined} */
+ExtensionPayload.prototype.p;
+
+/** @type {string} */
+ExtensionPayload.prototype.v;
+
+
+/**
+ * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}
+ */
+var JsonValue;
+
 // Node.js global
 var process = {};
 process.env;
-process.end.NODE_ENV;
+process.env.NODE_ENV;
+process.env.SERVE_MODE;
 
 // Exposed to ads.
 window.context = {};
@@ -48,20 +98,57 @@ window.draw3p;
 window.AMP_TEST;
 window.AMP_TEST_IFRAME;
 window.AMP_TAG;
-window.AMP_CONFIG = {};
 window.AMP = {};
 
-window.AMP_CONFIG.thirdPartyUrl;
-window.AMP_CONFIG.thirdPartyFrameHost;
-window.AMP_CONFIG.thirdPartyFrameRegex;
-window.AMP_CONFIG.cdnUrl;
-window.AMP_CONFIG.errorReportingUrl;
+/** @constructor */
+function AmpConfigType() {}
+
+/* @public {string} */
+AmpConfigType.prototype.thirdPartyUrl;
+/* @public {string} */
+AmpConfigType.prototype.thirdPartyFrameHost;
+/* @public {string} */
+AmpConfigType.prototype.thirdPartyFrameRegex;
+/* @public {string} */
+AmpConfigType.prototype.cdnUrl;
+/* @public {string} */
+AmpConfigType.prototype.errorReportingUrl;
+/* @public {string} */
+AmpConfigType.prototype.localDev;
+/* @public {string} */
+AmpConfigType.prototype.v;
+/* @public {boolean} */
+AmpConfigType.prototype.canary;
+
+/** @type {!AmpConfigType}  */
+window.AMP_CONFIG;
 
 window.AMP_CONTEXT_DATA;
 
+/** @constructor @struct */
+function AmpViewerMessage() {}
+
+/** @public {string}  */
+AmpViewerMessage.prototype.app;
+/** @public {string}  */
+AmpViewerMessage.prototype.type;
+/** @public {number}  */
+AmpViewerMessage.prototype.requestid;
+/** @public {string}  */
+AmpViewerMessage.prototype.name;
+/** @public {*}  */
+AmpViewerMessage.prototype.data;
+/** @public {boolean|undefined}  */
+AmpViewerMessage.prototype.rsvp;
+/** @public {string|undefined}  */
+AmpViewerMessage.prototype.error;
+
+// AMP-Analytics Cross-domain iframes
+let IframeTransportEvent;
+
 // amp-viz-vega related externs.
 /**
- * @typedef {{spec: function(!JSONType, function())}}
+ * @typedef {{spec: function(!JsonObject, function())}}
  */
 let VegaParser;
 /**
@@ -74,6 +161,11 @@ window.vg;
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
 IntersectionObserverEntry.prototype.rootBounds;
+
+// TODO (remove after we update closure compiler externs)
+window.PerformancePaintTiming;
+window.PerformanceObserver;
+Object.prototype.entryTypes
 
 // Externed explicitly because this private property is read across
 // binaries.
@@ -98,12 +190,12 @@ var AmpElement;
 // Temp until we figure out forward declarations
 /** @constructor */
 var AccessService = function() {};
-/** @constructor */
+/** @constructor @struct */
 var UserNotificationManager = function() {};
 UserNotificationManager.prototype.get;
-/** @constructor */
+/** @constructor @struct */
 var Cid = function() {};
-/** @constructor */
+/** @constructor @struct */
 var Activity = function() {};
 
 // data
@@ -139,9 +231,7 @@ amp.validator.validateUrlAndLog = function(string, doc, filter) {}
 
 // Temporary Access types (delete when amp-access is compiled
 // for type checking).
-var Activity;
 Activity.prototype.getTotalEngagedTime = function() {};
-var AccessService;
 AccessService.prototype.getAccessReaderId = function() {};
 AccessService.prototype.getAuthdataField = function(field) {};
 // Same for amp-analytics
@@ -155,7 +245,6 @@ AccessService.prototype.getAuthdataField = function(field) {};
  * }}
  */
 var GetCidDef;
-var Cid;
 /**
  * @param {string|!GetCidDef} externalCidScope Name of the fallback cookie
  *     for the case where this doc is not served by an AMP proxy. GetCidDef
@@ -190,7 +279,7 @@ window.AMP;
  * This uses the internal name of the type, because there appears to be no
  * other way to reference an ES6 type from an extern that is defined in
  * the app.
- * @constructor
+ * @constructor @struct
  * @extends {BaseElement$$module$src$base_element}
  */
 AMP.BaseElement = class {
@@ -202,7 +291,7 @@ AMP.BaseElement = class {
  * This uses the internal name of the type, because there appears to be no
  * other way to reference an ES6 type from an extern that is defined in
  * the app.
- * @constructor
+ * @constructor @struct
  * @extends {AmpAdXOriginIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_xorigin_iframe_handler}
  */
 AMP.AmpAdXOriginIframeHandler = class {
@@ -216,7 +305,7 @@ AMP.AmpAdXOriginIframeHandler = class {
  * This uses the internal name of the type, because there appears to be no
  * other way to reference an ES6 type from an extern that is defined in
  * the app.
- * @constructor
+ * @constructor @struct
  * @extends {AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui}
  */
 AMP.AmpAdUIHandler = class {

@@ -50,7 +50,7 @@ describe('amp-kaltura-player', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-                'https://cdnapisec.kaltura.com/p/1281471/sp/128147100/embedIframeJs/uiconf_id/33502051/partner_id/1281471?iframeembed=true&playerId=kaltura_player_amp&entry_id=1_3ts1ms9c');
+          'https://cdnapisec.kaltura.com/p/1281471/sp/128147100/embedIframeJs/uiconf_id/33502051/partner_id/1281471?iframeembed=true&playerId=kaltura_player_amp&entry_id=1_3ts1ms9c');
     });
   });
 
@@ -70,7 +70,7 @@ describe('amp-kaltura-player', () => {
     return getKaltura({}).then(kp => {
       kp.build();
     }).should.eventually.be.rejectedWith(
-            /The data-partner attribute is required for/);
+        /The data-partner attribute is required for/);
   });
 
   it('should pass data-param-* attributes to the iframe src', () => {

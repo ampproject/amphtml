@@ -20,6 +20,7 @@
   <button on="tap:AMP.setState({selected: 4})">4</button>
 
   <p [text]="'$' + selectedRange">$0</p>
+  <p>Color Selection: <span [text]="colorSelection || 'red'">red</span>
 
   <h4>Enter your name and email.</h4>
   <form method="post"
@@ -35,7 +36,16 @@
             <input type="email" name="email" id="email1" required>
           </label>
           <label>
-            <span>Your Offer</span>
+            <span>Your choice</span>
+            <select on="change:AMP.setState({colorSelection: event.value})">
+              <option value="red">red</option>
+              <option value="green">green</option>
+              <option value="blue">blue</option>
+              <option value="yellow">yellow</option>
+            </select>
+          </label>
+          <label>
+            <span>Your offer</span>
             $100
             <input type="range" min="100" max="200" step="10" on="change:AMP.setState({selectedRange: event.value})"/>
             $200

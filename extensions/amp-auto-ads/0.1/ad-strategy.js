@@ -15,7 +15,7 @@
  */
 
 import {DataAttributeDef, PlacementState} from './placement';
-import {dev} from '../../../src/log';
+import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -32,14 +32,15 @@ export class AdStrategy {
 
   /**
    * @param {!Array<!./placement.Placement>} placements
-   * @param {!Object<string, string>} baseAttributes Any attributes that should
-   *     be added to any inserted ads. These will be combined with any
+   * @param {!JsonObject<string, string>} baseAttributes Any attributes that
+   *     should be added to any inserted ads. These will be combined with any
    *     additional data atrributes specified by the placement.
    * @param {!./ad-tracker.AdTracker} adTracker
    */
   constructor(placements, baseAttributes, adTracker) {
     this.availablePlacements_ = placements.slice(0);
 
+    /** @private {!JsonObject<string, string>} */
     this.baseAttributes_ = baseAttributes;
 
     /** @type {!./ad-tracker.AdTracker} */
@@ -85,7 +86,7 @@ export class AdStrategy {
   placeNextAd_() {
     const nextPlacement = this.availablePlacements_.shift();
     if (!nextPlacement) {
-      dev().warn(TAG, 'unable to fulfill ad strategy');
+      user().warn(TAG, 'unable to fulfill ad strategy');
       return Promise.resolve(false);
     }
     return nextPlacement.placeAd(this.baseAttributes_, this.adTracker_)

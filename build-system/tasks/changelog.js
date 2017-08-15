@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 /**
  * @fileoverview Creates a gulp task that fetches the titles and files
@@ -330,6 +331,9 @@ function buildSections(gitMetadata) {
 function getLastGitTag(gitMetadata) {
   return request(latestReleaseOptions).then(res => {
     var body = JSON.parse(res.body);
+    if (!body.tag_name) {
+      throw new Error('getLastGitTag: ' + body.message);
+    }
     gitMetadata.tag = body.tag_name;
     return gitMetadata;
   });

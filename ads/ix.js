@@ -49,52 +49,18 @@ export function ix(global, data) {
       doubleclick(global, data);
     };
 
-    data.targeting = data.targeting || {};
     if (typeof data.ixId === 'undefined' || isNaN(data.ixId)) {
       callDoubleclick(EVENT_BADTAG);
       return;
-    } else {
-      data.ixId = parseInt(data.ixId, 10);
-    }
-
-    if (typeof data.ixSlot === 'undefined' || isNaN(data.ixSlot)) {
-      data.ixSlot = 1;
-    } else {
-      data.ixSlot = parseInt(data.ixSlot, 10);
-    }
-
-    if (typeof global._IndexRequestData === 'undefined') {
-      global._IndexRequestData = {};
-      global._IndexRequestData.impIDToSlotID = {};
-      global._IndexRequestData.reqOptions = {};
-      global._IndexRequestData.targetIDToBid = {};
     }
 
     global.IndexArgs = {
-      siteID: data.ixId,
-      slots: [{
-        width: data.width,
-        height: data.height,
-        id: data.ixSlot,
-      }],
-      callback: (responseID, bids) => {
-        if (typeof bids !== 'undefined' && bids.length > 0) {
-          const target = bids[0].target.substring(0,2) === 'O_' ? 'IOM' : 'IPM';
-          data.targeting[target] = bids[0].target.substring(2);
-        }
-        callDoubleclick(EVENT_SUCCESS);
-      },
+      ampCallback: callDoubleclick,
+      ampSuccess: EVENT_SUCCESS,
+      ampError: EVENT_ERROR,
     };
 
-    global.addEventListener('message', event => {
-      if (typeof event.data !== 'string' ||
-        event.data.substring(0,11) !== 'ix-message-') {
-        return;
-      }
-      indexAmpRender(document, event.data.substring(11), global);
-    });
-
-    loadScript(global, 'https://js-sec.indexww.com/apl/apl6.js', undefined, () => {
+    loadScript(global, 'https://js-sec.indexww.com/apl/amp.js', undefined, () => {
       callDoubleclick(EVENT_ERROR);
     });
   }
@@ -106,6 +72,7 @@ function prepareData(data) {
       delete data[attr];
     }
   }
+  data.targeting = data.targeting || {};
   data.targeting['IX_AMP'] = '1';
 }
 
@@ -140,29 +107,4 @@ function reportStats(siteID, slotID, dfpSlot, start, code) {
     xhttp.setRequestHeader('Content-Type', 'application/json');
     xhttp.send(stats);
   } catch (e) {};
-}
-
-function indexAmpRender(doc, targetID, global) {
-  try {
-    const ad = global._IndexRequestData.targetIDToBid[targetID].pop();
-    if (ad != null) {
-      const admFrame = document.createElement('iframe');
-      const w = global.IndexArgs.slots[0].width;
-      const h = global.IndexArgs.slots[0].height;
-      let style = 'position:absolute;top:0;left:0;border:none;';
-      style += 'width:' + w + 'px;height:' + h + 'px;';
-      admFrame.setAttribute('style', style);
-      admFrame.setAttribute('scrolling', 'no');
-      document.getElementById('c').appendChild(admFrame);
-      const ifdoc = admFrame.contentWindow.document;
-      ifdoc.open();
-      ifdoc.write('<html><head><base target="_top"></head>');
-      ifdoc.write('<body style="margin:0;">' + ad + '</body></html>');
-      ifdoc.close();
-    } else {
-      global.context.noContentAvailable();
-    }
-  } catch (e) {
-    global.context.noContentAvailable();
-  };
 }

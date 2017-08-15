@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays the Springboard Player used in the <a href="http://publishers.springboardplatform.com">Springboard</a> Video Platform.
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-springboard-player" src="https://cdn.ampproject.org/v0/amp-springboard-player-0.1.js">&lt;/script></code></td>
   </tr>
@@ -39,6 +35,8 @@ limitations under the License.
   </tr>
   </tr>
 </table>
+
+[TOC]
 
 ## Example
 
@@ -58,34 +56,34 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 
 ## Attributes
 
-**data-site-id** (required)
+##### data-site-id (required)
 
 The SpringBoard site ID. Specific to every partner.
 
-**data-mode** (required)
+##### data-mode (required)
 
 The SpringBoard player mode: `video` or `playlist`.
 
-**data-content-id** (required)
+##### data-content-id (required)
 
 The SpringBoard player content ID (video or playlist ID).
 
-**data-player-id** (required)
+##### data-player-id (required)
 
 The Springboard player ID.
 
-**data-domain** (required)
+##### data-domain (required)
 
 The Springboard partner domain.
 
-**data-items** (required)
+##### data-items (required)
 
 The number of videos in the playlist.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-springboard-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/0.1/validator-amp-springboard-player.protoascii) in the AMP validator specification.
+See [amp-springboard-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/validator-amp-springboard-player.protoascii) in the AMP validator specification.

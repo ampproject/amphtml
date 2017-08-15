@@ -16,6 +16,8 @@
 import {AbstractAmpContext} from './ampcontext';
 import {computeInMasterFrame} from './3p';
 import {dev, user} from '../src/log';
+import {dict} from '../src/utils/object';
+import {adConfig} from '../ads/_config';
 
 
 /**
@@ -28,8 +30,11 @@ import {dev, user} from '../src/log';
  * @return {!Window}
  */
 export function masterSelection(win, type) {
+  type = type.toLowerCase();
   // The master has a special name.
-  const masterName = 'frame_' + type + '_master';
+  const masterName = 'frame_' +
+      (adConfig[type] && adConfig[type]['masterFrameAccessibleType'] || type) +
+      '_master';
   let master;
   try {
     // Try to get the master from the parent. If it does not
@@ -101,7 +106,7 @@ export class IntegrationAmpContext extends AbstractAmpContext {
   }
 
   /**
-   * @param {{width, height}=} opt_data
+   * @param {!JsonObject=} opt_data Fields: width, height
    */
   renderStart(opt_data) {
     this.client_.sendMessage('render-start', opt_data);
@@ -119,9 +124,9 @@ export class IntegrationAmpContext extends AbstractAmpContext {
    * @param {string} entityId See comment above for content.
    */
   reportRenderedEntityIdentifier(entityId) {
-    this.client_.sendMessage('entity-id', {
-      id: user().assertString(entityId),
-    });
+    this.client_.sendMessage('entity-id', dict({
+      'id': user().assertString(entityId),
+    }));
   }
 
   /**

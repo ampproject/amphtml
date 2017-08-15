@@ -15,10 +15,10 @@
  */
 
 import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
+import {Services} from '../../../../src/services';
 import {
-  getService,
-  getServiceForDoc,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../../../src/service';
 import {loadPromise} from '../../../../src/event-helper';
@@ -44,7 +44,7 @@ describes.realWin('amp-install-serviceworker', {
     doc = env.win.document;
     sandbox = env.sandbox;
     clock = sandbox.useFakeTimers();
-    ampdoc = ampdocServiceFor(env.win).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(env.win).getAmpDoc();
     container = doc.createElement('div');
     env.win.document.body.appendChild(container);
     maybeInstallUrlRewriteStub = sandbox.stub(
@@ -190,13 +190,13 @@ describes.realWin('amp-install-serviceworker', {
         sourceUrl: 'https://source.example.com/path',
       };
       resetServiceForTesting(env.win, 'documentInfo');
-      getServiceForDoc(doc, 'documentInfo', () => {
+      registerServiceBuilderForDoc(doc, 'documentInfo', function() {
         return {
           get: () => docInfo,
         };
       });
       whenVisible = Promise.resolve();
-      getService(win, 'viewer', () => {
+      registerServiceBuilder(win, 'viewer', function() {
         return {
           whenFirstVisible: () => whenVisible,
           isVisible: () => true,

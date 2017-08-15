@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 /**
  * @fileoverview This file is executed by Travis (configured via
@@ -23,13 +24,16 @@
  * This script attempts to introduce some granularity for our
  * presubmit checking, via the determineBuildTargets method.
  */
-const child_process = require('child_process');
-const path = require('path');
+const atob = require('atob');
+const exec = require('./exec.js').exec;
+const execOrDie = require('./exec.js').execOrDie;
+const getStdout = require('./exec.js').getStdout;
 const minimist = require('minimist');
+const path = require('path');
+const util = require('gulp-util');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
-const fileLogPrefix =
-    '\x1b[33;1m' + 'pr-check.js' + '\x1b[0m: ';  // Yellow, bold.
+const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
 
 /**
  * Starts a timer to measure the execution time of the given function.
@@ -39,8 +43,7 @@ const fileLogPrefix =
 function startTimer(functionName) {
   const startTime = Date.now();
   console.log(
-      '\n' + fileLogPrefix + 'Running ' + '\x1b[36m' +  // Cyan.
-      functionName + '\x1b[0m' + '...');
+      '\n' + fileLogPrefix, 'Running', util.colors.cyan(functionName) + '...');
   return startTime;
 }
 
@@ -55,46 +58,46 @@ function stopTimer(functionName, startTime) {
   const mins = executionTime.getMinutes();
   const secs = executionTime.getSeconds();
   console.log(
-      fileLogPrefix + 'Done running ' +
-      '\x1b[36m' + functionName + '\x1b[0m' +  // Cyan.
-      '. ' + 'Total time: ' +
-      '\x1b[32m' + mins + 'm ' + secs + 's.' + '\x1b[0m');  // Green.
+      fileLogPrefix, 'Done running', util.colors.cyan(functionName),
+      'Total time:', util.colors.green(mins + 'm ' + secs + 's'));
 }
 
 /**
- * Executes the provided command, returning its stdout as an array of lines.
- * This will throw an exception if something goes wrong.
- * @param {string} cmd
- * @return {!Array<string>}
- */
-function exec(cmd) {
-  return child_process.execSync(cmd, {'encoding': 'utf-8'}).trim().split('\n');
-}
-
-/**
- * Executes the provided command; terminates this program in case of failure.
+ * Executes the provided command and times it.
  * @param {string} cmd
  */
-function execOrDie(cmd) {
+function timedExec(cmd) {
   const startTime = startTimer(cmd);
-  const p =
-      child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
-  if (p.status != 0) {
-    console.error(`\n${fileLogPrefix}exiting due to failing command: ${cmd}`);
-    stopTimer(cmd, startTime);
-    process.exit(p.status)
-  }
+  exec(cmd);
   stopTimer(cmd, startTime);
 }
 
 /**
- * For a provided commit range identifiying a pull request (PR),
- * yields the list of files.
- * @param {string} travisCommitRange
+ * Executes the provided command and times it. The program terminates in case of
+ * failure.
+ * @param {string} cmd
+ */
+function timedExecOrDie(cmd) {
+  const startTime = startTimer(cmd);
+  execOrDie(cmd);
+  stopTimer(cmd, startTime);
+}
+
+/**
+ * Returns a list of files in the commit range within this pull request (PR)
+ * after filtering out commits to master from other PRs.
  * @return {!Array<string>}
  */
-function filesInPr(travisCommitRange) {
-  return exec(`git diff --name-only ${travisCommitRange}`);
+function filesInPr() {
+  const files =
+      getStdout(`git diff --name-only master...HEAD`).trim().split('\n');
+  const changeSummary =
+      getStdout(`git -c color.ui=always diff --stat master...HEAD`);
+  console.log(fileLogPrefix,
+      'Testing the following changes at commit',
+      util.colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
+  console.log(changeSummary);
+  return files;
 }
 
 /**
@@ -120,7 +123,10 @@ function isBuildSystemFile(filePath) {
       path.extname(filePath) != '.textproto' &&
       // Exclude config files from build-system since we want it to trigger
       // the flag config check.
-      !isFlagConfig(filePath);
+      !isFlagConfig(filePath) &&
+      // Exclude visual diff files from build-system since we want it to trigger
+      // visual diff tests.
+      !isVisualDiffFile(filePath);
 }
 
 /**
@@ -132,9 +138,19 @@ function isBuildSystemFile(filePath) {
  */
 function isValidatorFile(filePath) {
   if (filePath.startsWith('validator/')) return true;
-  if (!path.dirname(filePath).endsWith('0.1') &&
-      !path.dirname(filePath).endsWith('test'))
+
+  // validator files for each extension
+  if (!filePath.startsWith('extensions/')) {
     return false;
+  }
+
+  const pathArray = path.dirname(filePath).split(path.sep);
+  if (pathArray.length < 2) {
+    // At least 2 with ['extensions', '{$name}']
+    return false;
+  }
+
+  // Validator files take the form of validator-.*\.(html|out|protoascii)
   const name = path.basename(filePath);
   return name.startsWith('validator-') &&
       (name.endsWith('.out') || name.endsWith('.html') ||
@@ -142,11 +158,33 @@ function isValidatorFile(filePath) {
 }
 
 /**
+ * Determines if the given file is a markdown file containing documentation.
  * @param {string} filePath
  * @return {boolean}
  */
 function isDocFile(filePath) {
   return path.extname(filePath) == '.md';
+}
+
+/**
+ * Determines if the given file is related to the visual diff tests.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isVisualDiffFile(filePath) {
+  const filename = path.basename(filePath);
+  return (filename == 'visual-diff.rb' ||
+          filename == 'visual-tests.json' ||
+          filePath.startsWith('examples/visual-tests/'));
+}
+
+/**
+ * Determines if the given file is an integration test.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isIntegrationTest(filePath) {
+  return filePath.includes('test/integration/');
 }
 
 /**
@@ -173,11 +211,14 @@ function determineBuildTargets(filePaths) {
         'VALIDATOR_WEBUI',
         'VALIDATOR',
         'RUNTIME',
+        'INTEGRATION_TEST',
         'DOCS',
-        'FLAG_CONFIG']);
+        'FLAG_CONFIG',
+        'VISUAL_DIFF']);
   }
   const targetSet = new Set();
-  for (p of filePaths) {
+  for (let i = 0; i < filePaths.length; i++) {
+    const p = filePaths[i];
     if (isBuildSystemFile(p)) {
       targetSet.add('BUILD_SYSTEM');
     } else if (isValidatorWebuiFile(p)) {
@@ -188,6 +229,10 @@ function determineBuildTargets(filePaths) {
       targetSet.add('DOCS');
     } else if (isFlagConfig(p)) {
       targetSet.add('FLAG_CONFIG');
+    } else if (isIntegrationTest(p)) {
+      targetSet.add('INTEGRATION_TEST');
+    } else if (isVisualDiffFile(p)) {
+      targetSet.add('VISUAL_DIFF');
     } else {
       targetSet.add('RUNTIME');
     }
@@ -198,46 +243,89 @@ function determineBuildTargets(filePaths) {
 
 const command = {
   testBuildSystem: function() {
-    execOrDie('npm run ava');
+    timedExecOrDie(`${gulp} ava`);
+  },
+  testDocumentLinks: function(files) {
+    timedExecOrDie(`${gulp} check-links`);
+  },
+  cleanBuild: function() {
+    timedExecOrDie(`${gulp} clean`);
+  },
+  runJsonAndLintChecks: function() {
+    timedExecOrDie(`${gulp} json-syntax`);
+    timedExecOrDie(`${gulp} lint`);
+  },
+  buildCss: function() {
+    timedExecOrDie(`${gulp} css`);
   },
   buildRuntime: function() {
-    execOrDie(`${gulp} clean`);
-    execOrDie(`${gulp} lint`);
-    execOrDie(`${gulp} build`);
-    execOrDie(`${gulp} check-types`);
-    execOrDie(`${gulp} dist --fortesting`);
+    timedExecOrDie(`${gulp} build`);
   },
-  testRuntime: function() {
-    // dep-check needs to occur after build since we rely on build to generate
-    // the css files into js files.
-    execOrDie(`${gulp} dep-check`);
+  buildRuntimeMinified: function() {
+    timedExecOrDie(`${gulp} dist --fortesting`);
+  },
+  runDepAndTypeChecks: function() {
+    timedExecOrDie(`${gulp} dep-check`);
+    timedExecOrDie(`${gulp} check-types`);
+  },
+  runUnitTests: function() {
     // Unit tests with Travis' default chromium
-    execOrDie(`${gulp} test --nobuild --compiled`);
-    // Integration tests with all saucelabs browsers
-    execOrDie(`${gulp} test --nobuild --saucelabs --integration --compiled`);
+    timedExecOrDie(`${gulp} test --unit --nobuild`);
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
-    execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+    // timedExecOrDie(
+    //     `${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
   },
-  presubmit: function() {
-    execOrDie(`${gulp} presubmit`);
+  runIntegrationTests: function(compiled) {
+    // Integration tests with all saucelabs browsers
+    let cmd = `${gulp} test --nobuild --saucelabs --integration`;
+    if (compiled) {
+      cmd += ' --compiled';
+    }
+    timedExecOrDie(cmd);
+  },
+  runVisualDiffTests: function(opt_mode) {
+    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
+    let cmd = 'ruby build-system/tasks/visual-diff.rb';
+    if (opt_mode === 'skip') {
+      cmd += ' --skip';
+    } else if (opt_mode === 'master') {
+      cmd += ' --master';
+    }
+    timedExec(cmd);
+  },
+  runPresubmitTests: function() {
+    timedExecOrDie(`${gulp} presubmit`);
   },
   buildValidatorWebUI: function() {
-    execOrDie('cd validator/webui && python build.py');
+    timedExecOrDie(`${gulp} validator-webui`);
   },
   buildValidator: function() {
-    execOrDie('cd validator && python build.py');
+    timedExecOrDie(`${gulp} validator`);
   },
 };
 
 function runAllCommands() {
-  command.testBuildSystem();
-  command.buildRuntime();
-  command.presubmit();
-  command.testRuntime();
-  command.buildValidatorWebUI();
-  command.buildValidator();
+  // Run different sets of independent tasks in parallel to reduce build time.
+  if (process.env.BUILD_SHARD == "unit_tests") {
+    command.testBuildSystem();
+    command.cleanBuild();
+    command.buildRuntime();
+    command.runVisualDiffTests(/* opt_mode */ 'master');
+    command.runJsonAndLintChecks();
+    command.runDepAndTypeChecks();
+    command.runUnitTests();
+    // command.testDocumentLinks() is skipped during push builds.
+    command.buildValidatorWebUI();
+    command.buildValidator();
+  }
+  if (process.env.BUILD_SHARD == "integration_tests") {
+    command.cleanBuild();
+    command.buildRuntimeMinified();
+    command.runPresubmitTests();  // Needs runtime to be built and served.
+    command.runIntegrationTests(/* compiled */ true);
+  }
 }
 
 /**
@@ -248,41 +336,49 @@ function runAllCommands() {
  */
 function main(argv) {
   const startTime = startTimer('pr-check.js');
+  console.log(
+      fileLogPrefix, 'Running build shard',
+      util.colors.cyan(process.env.BUILD_SHARD),
+      '\n');
+
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
-    console.log('Running all commands on push build.');
+    console.log(fileLogPrefix, 'Running all commands on push build.');
     runAllCommands();
     stopTimer('pr-check.js', startTime);
     return 0;
   }
-  const travisCommitRange = `master...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
-  const files = filesInPr(travisCommitRange);
+  const files = filesInPr();
   const buildTargets = determineBuildTargets(files);
 
-  if (buildTargets.has('FLAG_CONFIG')) {
-    files.forEach((file) => {
-      if (!isFlagConfig(file)) {
-        console.log('A pull request may not contain a mix of flag-config and ' +
-            'non-flag-config files. Please make your changes in separate ' +
-            'pull requests. First offending file: ' + file);
-        stopTimer('pr-check.js', startTime);
-        process.exit(1);
-      }
-    });
-  }
-
-  if (buildTargets.length == 1 && buildTargets.has('DOCS')) {
-    console.log('Only docs were updated, stopping build process.');
+  // Exit early if flag-config files are mixed with non-flag-config files.
+  if (buildTargets.has('FLAG_CONFIG') && buildTargets.size !== 1) {
+    console.log(fileLogPrefix, util.colors.red('ERROR:'),
+        'Looks like your PR contains',
+        util.colors.cyan('{prod|canary}-config.json'),
+        'in addition to some other files');
+    const nonFlagConfigFiles = files.filter(file => !isFlagConfig(file));
+    console.log(fileLogPrefix, util.colors.red('ERROR:'),
+        'Please move these files to a separate PR:',
+        util.colors.cyan(nonFlagConfigFiles.join(', ')));
     stopTimer('pr-check.js', startTime);
-    return 0;
+    process.exit(1);
   }
 
-  //if (files.includes('package.json') ?
-        //!files.includes('yarn.lock') : files.includes('yarn.lock')) {
-    //console.error('pr-check.js - any update to package.json or yarn.lock ' +
-        //'must include the other file. Please update through yarn.');
-    //process.exit(1);
-  //}
+  // Make sure changes to package.json also update yarn.lock.
+  if (files.indexOf('package.json') != -1 && files.indexOf('yarn.lock') == -1) {
+    console.error(fileLogPrefix, util.colors.red('ERROR:'),
+        'Updates to', util.colors.cyan('package.json'),
+        'must be accompanied by a corresponding update to',
+        util.colors.cyan('yarn.lock'));
+    console.error(fileLogPrefix, util.colors.yellow('NOTE:'),
+        'To update', util.colors.cyan('yarn.lock'), 'after changing',
+        util.colors.cyan('package.json') + ',', 'run',
+        '"' + util.colors.cyan('yarn install') + '"',
+        'and include the change to', util.colors.cyan('yarn.lock'),
+        'in your PR.');
+    process.exit(1);
+  }
 
   const sortedBuildTargets = [];
   for (const t of buildTargets) {
@@ -291,33 +387,54 @@ function main(argv) {
   sortedBuildTargets.sort();
 
   console.log(
-      '\npr-check.js: detected build targets: ' +
-      sortedBuildTargets.join(', ') + '\n');
+      fileLogPrefix, 'Detected build targets:',
+      util.colors.cyan(sortedBuildTargets.join(', ')));
 
-  if (buildTargets.has('BUILD_SYSTEM')) {
-    command.testBuildSystem();
+  // Run different sets of independent tasks in parallel to reduce build time.
+  if (process.env.BUILD_SHARD == "unit_tests") {
+    if (buildTargets.has('BUILD_SYSTEM')) {
+      command.testBuildSystem();
+    }
+    if (buildTargets.has('DOCS')) {
+      command.testDocumentLinks(files);
+    }
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('INTEGRATION_TEST')) {
+      command.cleanBuild();
+      command.buildCss();
+      command.runJsonAndLintChecks();
+      command.runDepAndTypeChecks();
+      // Run unit tests only if the PR contains runtime changes.
+      if (buildTargets.has('RUNTIME')) {
+        command.runUnitTests();
+      }
+    }
   }
 
-  if (buildTargets.has('RUNTIME')) {
-    command.buildRuntime();
-  }
-
-  // Presubmit needs to run after `gulp dist` as some checks runs through the
-  // dist/ folder.
-  // Also presubmit always needs to run even for just docs to check for
-  // copyright at the top.
-  command.presubmit();
-
-  if (buildTargets.has('RUNTIME')) {
-    command.testRuntime();
-  }
-
-  if (buildTargets.has('VALIDATOR_WEBUI')) {
-    command.buildValidatorWebUI();
-  }
-
-  if (buildTargets.has('VALIDATOR')) {
-    command.buildValidator();
+  if (process.env.BUILD_SHARD == "integration_tests") {
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('VISUAL_DIFF')) {
+      command.cleanBuild();
+      command.buildRuntime();
+      command.runVisualDiffTests();
+      // Run presubmit and integration tests only if the PR contains runtime
+      // changes or modifies an integration test.
+      if (buildTargets.has('INTEGRATION_TEST') ||
+          buildTargets.has('RUNTIME')) {
+        command.runPresubmitTests();
+        command.runIntegrationTests(/* compiled */ false);
+      }
+    } else {
+      // Generates a blank Percy build to satisfy the required Github check.
+      command.runVisualDiffTests(/* opt_mode */ 'skip');
+    }
+    if (buildTargets.has('VALIDATOR_WEBUI')) {
+      command.buildValidatorWebUI();
+    }
+    if (buildTargets.has('VALIDATOR')) {
+      command.buildValidator();
+    }
   }
 
   stopTimer('pr-check.js', startTime);

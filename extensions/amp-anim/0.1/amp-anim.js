@@ -16,7 +16,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {srcsetFromElement} from '../../../src/srcset';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import * as st from '../../../src/style';
 
 export class AmpAnim extends AMP.BaseElement {
@@ -25,8 +25,8 @@ export class AmpAnim extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @const {!Element} */
-    this.img_ = new Image();
+    /** @private {?Element} */
+    this.img_ = null;
 
     /** @private {?../../../src/srcset.Srcset} */
     this.srcset_ = null;
@@ -42,6 +42,7 @@ export class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.img_ = new Image();
     this.propagateAttributes(['alt', 'aria-label',
       'aria-describedby', 'aria-labelledby'], this.img_);
     this.applyFillContent(this.img_, true);
@@ -57,7 +58,8 @@ export class AmpAnim extends AMP.BaseElement {
     }
 
     // The image is initially hidden if a placeholder is available.
-    st.toggle(this.img_, !this.getPlaceholder());
+    st.toggle(dev().assertElement(this.img_),
+        !this.getPlaceholder());
 
     this.element.appendChild(this.img_);
   }
@@ -94,7 +96,8 @@ export class AmpAnim extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     // Release memory held by the image - animations are typically large.
-    this.img_.src = '';
+    this.img_.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///' +
+        'yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     this.hasLoaded_ = false;
     return true;
   }
@@ -103,7 +106,7 @@ export class AmpAnim extends AMP.BaseElement {
   updateInViewport_() {
     const inViewport = this.isInViewport();
     this.togglePlaceholder(!inViewport);
-    st.toggle(this.img_, inViewport);
+    st.toggle(dev().assertElement(this.img_), inViewport);
   }
 
   /**

@@ -17,21 +17,25 @@
 import {
   AmpForm,
   AmpFormService,
-  onInputInteraction_,
+  checkUserValidityAfterInteraction_,
 } from '../amp-form';
 import {
   setReportValiditySupportedForTesting,
   setCheckValiditySupportedForTesting,
 } from '../form-validators';
+import {
+  CONFIG_KEY,
+} from '../form-verifiers';
 import * as sinon from 'sinon';
-import {timerFor} from '../../../../src/services';
 import '../../../amp-mustache/0.1/amp-mustache';
-import {actionServiceForDoc} from '../../../../src/services';
 import {
   cidServiceForDocForTesting,
-} from '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {documentInfoForDoc} from '../../../../src/services';
+} from '../../../../src/service/cid-impl';
+import {Services} from '../../../../src/services';
 import '../../../amp-selector/0.1/amp-selector';
+import {user} from '../../../../src/log';
+import {whenCalled} from '../../../../testing/test-helper.js';
+import {AmpEvents} from '../../../../src/amp-events';
 
 describes.repeated('', {
   'single ampdoc': {ampdoc: 'single'},
@@ -47,14 +51,12 @@ describes.repeated('', {
   }, env => {
 
     let sandbox;
-    const timer = timerFor(window);
+    const timer = Services.timerFor(window);
 
-    function getAmpForm(button1 = true, button2 = false, button3 = false,
-                        canonical = 'https://example.com/amps.html') {
+    function getAmpForm(form, canonical = 'https://example.com/amps.html') {
       new AmpFormService(env.ampdoc);
-      documentInfoForDoc(env.ampdoc).canonicalUrl = canonical;
+      Services.documentInfoForDoc(env.ampdoc).canonicalUrl = canonical;
       cidServiceForDocForTesting(env.ampdoc);
-      const form = getForm(env.ampdoc.win.document, button1, button2, button3);
       env.ampdoc.getBody().appendChild(form);
       const ampForm = new AmpForm(form, 'amp-form-test-id');
       return Promise.resolve(ampForm);
@@ -92,6 +94,21 @@ describes.repeated('', {
 
       return form;
     }
+
+    function getVerificationForm(doc = document) {
+      const form = getForm(doc);
+      form.setAttribute('verify-xhr', '');
+      return form;
+    }
+
+    const asyncVerifyConfig = `{
+      "${CONFIG_KEY}": [
+        {
+          "name": "",
+          "elements": ["name"]
+        }
+      ]
+    }`;
 
     beforeEach(() => {
       sandbox = env.sandbox;
@@ -297,7 +314,7 @@ describes.repeated('', {
 
     it('should check validity and report when invalid', () => {
       setReportValiditySupportedForTesting(false);
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
         const emailInput = document.createElement('input');
         emailInput.setAttribute('name', 'email');
@@ -364,15 +381,16 @@ describes.repeated('', {
         // Check xhr goes through when form is valid.
         emailInput.value = 'cool@bea.ns';
         ampForm.handleSubmitEvent_(event);
-        return timer.promise(10).then(() => {
-          expect(ampForm.xhr_.fetch).to.have.been.called;
+
+        return whenCalled(ampForm.xhr_.fetch).then(() => {
+          expect(ampForm.xhr_.fetch).to.have.been.calledOnce;
         });
       });
     });
 
     it('should not check validity if .checkValidity is not supported', () => {
       setCheckValiditySupportedForTesting(false);
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
         const emailInput = document.createElement('input');
         emailInput.setAttribute('name', 'email');
@@ -400,7 +418,7 @@ describes.repeated('', {
         };
 
         ampForm.handleSubmitEvent_(event);
-        return timer.promise(1).then(() => {
+        return whenCalled(ampForm.xhr_.fetch).then(() => {
           expect(event.stopImmediatePropagation).to.not.be.called;
           expect(form.checkValidity).to.not.be.called;
           expect(ampForm.xhr_.fetch).to.be.called;
@@ -408,8 +426,86 @@ describes.repeated('', {
       });
     });
 
+    it('should allow verifying elements with a presubmit request', () => {
+      const formPromise = getAmpForm(getVerificationForm(
+          env.win.document));
+      const fetchRejectPromise = Promise.reject({
+        response: {
+          status: 400,
+          json() {
+            return Promise.resolve({
+              verifyErrors: [{
+                name: 'name',
+                message: 'This name is just wrong.',
+              }],
+            });
+          },
+        },
+      });
+
+      return formPromise.then(ampForm => {
+        sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchRejectPromise);
+
+        const form = ampForm.form_;
+        const input = form.name;
+        form.name.value = 'Frank';
+
+        return ampForm.verifier_.onCommit().then(() => {
+          expect(input.validity.customError).to.be.true;
+          expect(input.validationMessage).to.equal('This name is just wrong.');
+        });
+      });
+    });
+
+    it('should only use the more recent verify request', () => {
+      const formPromise = getAmpForm(getVerificationForm(
+          env.win.document, asyncVerifyConfig));
+
+      return formPromise.then(ampForm => {
+        const xhrStub = sandbox.stub(ampForm.xhr_, 'fetch');
+        xhrStub.onCall(0).returns(Promise.reject({
+          response: {
+            status: 400,
+            json() {
+              return Promise.resolve({
+                verifyErrors: [{name: 'name', message: 'First request error'}],
+              });
+            },
+          },
+        }));
+        xhrStub.onCall(1).returns(new Promise((res, reject) => {
+          setTimeout(() => {
+            reject({
+              response: {
+                status: 400,
+                json() {
+                  return Promise.resolve({
+                    verifyErrors: [{
+                      name: 'name',
+                      message: 'Second request error',
+                    }],
+                  });
+                },
+              },
+            });
+          }, 10);
+        }));
+        const form = ampForm.form_;
+        const input = form.name;
+        input.value = 'Carlos';
+
+        return ampForm.verifier_.onCommit().then(() => {
+          input.value = 'Frank';
+          return ampForm.verifier_.onCommit();
+        }).then(() => {
+          expect(input.validity.customError).to.be.true;
+          expect(input.validationMessage).to.equal('Second request error');
+        });
+      });
+    });
+
     it('should allow rendering responses through templates', () => {
-      return getAmpForm(true).then(ampForm => {
+      return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
         const form = ampForm.form_;
         // Add a div[submit-error] with a template child.
         const errorContainer = document.createElement('div');
@@ -422,8 +518,14 @@ describes.repeated('', {
         errorContainer.appendChild(errorTemplate);
         let renderedTemplate = document.createElement('div');
         renderedTemplate.innerText = 'Error: hello there';
-        sandbox.stub(ampForm.xhr_, 'fetch')
-            .returns(Promise.reject({responseJson: {message: 'hello there'}}));
+        sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.reject({
+          response: {
+            status: 400,
+            json() {
+              return Promise.resolve({message: 'hello there'});
+            },
+          },
+        }));
         sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
             .returns(Promise.resolve(renderedTemplate));
         const event = {
@@ -446,7 +548,7 @@ describes.repeated('', {
     });
 
     it('should replace previously rendered responses', () => {
-      return getAmpForm(true).then(ampForm => {
+      return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
         const form = ampForm.form_;
         const successContainer = document.createElement('div');
         successContainer.setAttribute('submit-success', '');
@@ -471,15 +573,18 @@ describes.repeated('', {
                 return Promise.resolve({'message': 'What What'});
               },
             }));
-        sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
-            .returns(Promise.resolve(newRender));
+        const findAndRenderTemplateStub = sandbox.stub(ampForm.templates_,
+            'findAndRenderTemplate');
+        findAndRenderTemplateStub.returns(Promise.resolve(newRender));
         const event = {
           stopImmediatePropagation: sandbox.spy(),
           target: form,
           preventDefault: sandbox.spy(),
         };
         ampForm.handleSubmitEvent_(event);
-        return timer.promise(5).then(() => {
+        return whenCalled(findAndRenderTemplateStub).then(() => {
+          return ampForm.renderTemplatePromiseForTesting();
+        }).then(() => {
           expect(ampForm.templates_.findAndRenderTemplate).to.be.called;
           expect(ampForm.templates_.findAndRenderTemplate.calledWith(
               successContainer, {'message': 'What What'})).to.be.true;
@@ -492,9 +597,52 @@ describes.repeated('', {
       });
     });
 
+    it('should dispatch "amp:template-rendered" event after render', () => {
+      return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
+        const form = ampForm.form_;
+
+        const successContainer = document.createElement('div');
+        successContainer.setAttribute('submit-success', '');
+        form.appendChild(successContainer);
+        const successTemplate = document.createElement('template');
+        successTemplate.setAttribute('type', 'amp-mustache');
+        successContainer.appendChild(successTemplate);
+        const renderedTemplate = document.createElement('div');
+
+        const spy = sandbox.spy(successContainer, 'dispatchEvent');
+        sandbox.stub(ampForm.xhr_, 'fetch')
+            .returns(Promise.resolve({
+              json() {
+                return Promise.resolve({'message': 'What What'});
+              },
+            }));
+        const findAndRenderTemplateStub = sandbox.stub(ampForm.templates_,
+            'findAndRenderTemplate');
+        findAndRenderTemplateStub.returns(Promise.resolve(renderedTemplate));
+
+        const event = {
+          stopImmediatePropagation: sandbox.spy(),
+          target: form,
+          preventDefault: sandbox.spy(),
+        };
+        ampForm.handleSubmitEvent_(event);
+
+        return ampForm.xhrSubmitPromiseForTesting().then(() => {
+          return ampForm.renderTemplatePromiseForTesting();
+        }).then(() => {
+          expect(spy.calledOnce).to.be.true;
+          expect(spy).calledWithMatch({
+            type: AmpEvents.DOM_UPDATE,
+            bubbles: true,
+          });
+        });
+      });
+    });
+
     it('should call fetch with the xhr action and form data', () => {
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+
         const event = {
           stopImmediatePropagation: sandbox.spy(),
           target: ampForm.form_,
@@ -502,7 +650,7 @@ describes.repeated('', {
         };
         ampForm.handleSubmitEvent_(event);
         expect(event.preventDefault).to.be.calledOnce;
-        return timer.promise(1).then(() => {
+        return whenCalled(ampForm.xhr_.fetch).then(() => {
           expect(ampForm.xhr_.fetch).to.be.calledOnce;
           expect(ampForm.xhr_.fetch).to.be.calledWith('https://example.com');
 
@@ -516,9 +664,10 @@ describes.repeated('', {
     });
 
     it('should trigger amp-form-submit analytics event with form data', () => {
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
         sandbox.stub(ampForm, 'analyticsEvent_');
+
         const event = {
           stopImmediatePropagation: sandbox.spy(),
           target: ampForm.form_,
@@ -530,7 +679,7 @@ describes.repeated('', {
         };
         ampForm.handleSubmitEvent_(event);
         expect(event.preventDefault).to.be.calledOnce;
-        return timer.promise(1).then(() => {
+        return whenCalled(ampForm.xhr_.fetch).then(() => {
           expect(ampForm.xhr_.fetch).to.be.calledOnce;
           expect(ampForm.xhr_.fetch).to.be.calledWith('https://example.com');
 
@@ -548,7 +697,7 @@ describes.repeated('', {
     });
 
     it('should trigger amp-form-submit after variables substitution', () => {
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
         const clientIdField = document.createElement('input');
         clientIdField.setAttribute('name', 'clientId');
@@ -562,11 +711,13 @@ describes.repeated('', {
         canonicalUrlField.value = 'CANONICAL_URL';
         canonicalUrlField.setAttribute('data-amp-replace', 'CANONICAL_URL');
         form.appendChild(canonicalUrlField);
+
         sandbox.stub(form, 'checkValidity').returns(true);
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
         sandbox.spy(ampForm.urlReplacement_, 'expandInputValueAsync');
         sandbox.stub(ampForm.urlReplacement_, 'expandInputValueSync');
         sandbox.stub(ampForm, 'analyticsEvent_');
+
         ampForm.submit_();
         const expectedFormData = {
           'formId': '',
@@ -576,32 +727,34 @@ describes.repeated('', {
         };
         expect(ampForm.xhr_.fetch).to.have.not.been.called;
         expect(ampForm.urlReplacement_.expandInputValueSync)
-              .to.not.have.been.called;
+            .to.not.have.been.called;
         expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.have.been.calledTwice;
+            .to.have.been.calledTwice;
         expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.have.been.calledWith(clientIdField);
+            .to.have.been.calledWith(clientIdField);
         expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.have.been.calledWith(canonicalUrlField);
-        return timer.promise(10).then(() => {
+            .to.have.been.calledWith(canonicalUrlField);
+        return whenCalled(ampForm.xhr_.fetch).then(() => {
           expect(ampForm.xhr_.fetch).to.be.called;
           expect(clientIdField.value).to.match(/amp-.+/);
           expect(canonicalUrlField.value).to.equal(
-                  'https%3A%2F%2Fexample.com%2Famps.html');
+              'https%3A%2F%2Fexample.com%2Famps.html');
 
           expect(ampForm.analyticsEvent_).to.be.calledWithMatch(
-                  'amp-form-submit',
-                  expectedFormData);
+              'amp-form-submit',
+              expectedFormData);
         });
       });
     });
 
     it('should block multiple submissions and disable buttons', () => {
-      return getAmpForm(true, true, true).then(ampForm => {
+      const formPromise =
+          getAmpForm(getForm(env.win.document, true, true, true));
+      return formPromise.then(ampForm => {
         let fetchResolver;
-        sandbox.stub(ampForm.xhr_, 'fetch').returns(new Promise(resolve => {
-          fetchResolver = resolve;
-        }));
+        sandbox.stub(ampForm.xhr_, 'fetch').returns(
+            new Promise(resolve => fetchResolver = resolve));
+
         const form = ampForm.form_;
         const event = {
           stopImmediatePropagation: sandbox.spy(),
@@ -614,9 +767,11 @@ describes.repeated('', {
         expect(button1.hasAttribute('disabled')).to.be.false;
         expect(button2.hasAttribute('disabled')).to.be.false;
         expect(button3.hasAttribute('disabled')).to.be.false;
+
         ampForm.handleSubmitEvent_(event);
         expect(ampForm.state_).to.equal('submitting');
-        return timer.promise(1).then(() => {
+
+        return whenCalled(ampForm.xhr_.fetch).then(() => {
           expect(ampForm.xhr_.fetch.calledOnce).to.be.true;
           expect(button1.hasAttribute('disabled')).to.be.true;
           expect(button2.hasAttribute('disabled')).to.be.true;
@@ -631,7 +786,9 @@ describes.repeated('', {
           expect(form.className).to.not.contain('amp-form-submit-error');
           expect(form.className).to.not.contain('amp-form-submit-success');
           fetchResolver({json: () => Promise.resolve()});
-          return timer.promise(20).then(() => {
+          sandbox.stub(ampForm, 'maybeHandleRedirect_');
+
+          return whenCalled(ampForm.maybeHandleRedirect_).then(() => {
             expect(button1.hasAttribute('disabled')).to.be.false;
             expect(button2.hasAttribute('disabled')).to.be.false;
             expect(ampForm.state_).to.equal('submit-success');
@@ -644,7 +801,7 @@ describes.repeated('', {
     });
 
     it('should manage form state classes (submitting, success)', () => {
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         let fetchResolver;
         sandbox.stub(ampForm.xhr_, 'fetch').returns(new Promise(resolve => {
           fetchResolver = resolve;
@@ -664,7 +821,8 @@ describes.repeated('', {
         expect(form.className).to.not.contain('amp-form-submit-error');
         expect(form.className).to.not.contain('amp-form-submit-success');
         fetchResolver({json: () => Promise.resolve()});
-        return timer.promise(5).then(() => {
+
+        return ampForm.xhrSubmitPromiseForTesting().then(() => {
           expect(ampForm.actions_.trigger).to.be.called;
           expect(ampForm.actions_.trigger).to.be.calledWith(form, 'submit');
           expect(ampForm.state_).to.equal('submit-success');
@@ -677,12 +835,14 @@ describes.repeated('', {
               /** CustomEvent */ sinon.match.has('detail'));
           expect(ampForm.analyticsEvent_).to.be.calledWith(
               'amp-form-submit-success');
+        }, () => {
+          assert.fail('Submit should have succeeded.');
         });
       });
     });
 
     it('should manage form state classes (submitting, error)', () => {
-      return getAmpForm(true, true).then(ampForm => {
+      return getAmpForm(getForm(env.win.document, true, true)).then(ampForm => {
         let fetchRejecter;
         sandbox.stub(ampForm, 'analyticsEvent_');
         sandbox.stub(ampForm.xhr_, 'fetch')
@@ -710,7 +870,10 @@ describes.repeated('', {
         expect(form.className).to.not.contain('amp-form-submit-error');
         expect(form.className).to.not.contain('amp-form-submit-success');
         fetchRejecter();
-        return timer.promise(5).then(() => {
+
+        return ampForm.xhrSubmitPromiseForTesting().then(() => {
+          assert.fail('Submit should have failed.');
+        }, () => {
           expect(button1.hasAttribute('disabled')).to.be.false;
           expect(button2.hasAttribute('disabled')).to.be.false;
           expect(ampForm.state_).to.equal('submit-error');
@@ -730,9 +893,10 @@ describes.repeated('', {
 
     describe('GET requests', () => {
       it('should allow GET submissions', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           ampForm.method_ = 'GET';
           ampForm.form_.setAttribute('method', 'GET');
+
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
           const event = {
             stopImmediatePropagation: sandbox.spy(),
@@ -741,7 +905,7 @@ describes.repeated('', {
           };
           ampForm.handleSubmitEvent_(event);
           expect(event.preventDefault).to.be.calledOnce;
-          return timer.promise(1).then(() => {
+          return whenCalled(ampForm.xhr_.fetch).then(() => {
             expect(ampForm.xhr_.fetch).to.be.calledOnce;
             expect(ampForm.xhr_.fetch).to.be.calledWith(
                 'https://example.com?name=John%20Miller');
@@ -756,10 +920,11 @@ describes.repeated('', {
       });
 
       it('should not send disabled or nameless inputs', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           ampForm.method_ = 'GET';
           form.setAttribute('method', 'GET');
+
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
           const fieldset = document.createElement('fieldset');
           const emailInput = document.createElement('input');
@@ -783,18 +948,20 @@ describes.repeated('', {
           emailInput.value = 'cool@bea.ns';
           ampForm.handleSubmitEvent_(event);
           expect(event.preventDefault).to.be.calledOnce;
-          return timer.promise(1).then(() => {
+          return whenCalled(ampForm.xhr_.fetch).then(() => {
             expect(ampForm.xhr_.fetch).to.be.calledOnce;
             expect(ampForm.xhr_.fetch).to.be.calledWith(
                 'https://example.com?name=John%20Miller&email=cool%40bea.ns');
 
             ampForm.setState_('submit-success');
+
             ampForm.xhr_.fetch.reset();
             usernameInput.removeAttribute('disabled');
             usernameInput.value = 'coolbeans';
             emailInput.value = 'cool@bea.ns';
             ampForm.handleSubmitEvent_(event);
-            return timer.promise(1).then(() => {
+
+            return whenCalled(ampForm.xhr_.fetch).then(() => {
               expect(ampForm.xhr_.fetch).to.be.calledOnce;
               expect(ampForm.xhr_.fetch).to.be.calledWith(
                   'https://example.com?name=John%20Miller&email=cool%40bea.ns&' +
@@ -805,19 +972,21 @@ describes.repeated('', {
               fieldset.disabled = true;
               ampForm.handleSubmitEvent_(event);
 
-              return timer.promise(1).then(() => {
+              return whenCalled(ampForm.xhr_.fetch).then(() => {
                 expect(ampForm.xhr_.fetch).to.be.calledOnce;
                 expect(ampForm.xhr_.fetch).to.be.calledWith(
                     'https://example.com?name=John%20Miller');
 
                 ampForm.setState_('submit-success');
                 ampForm.xhr_.fetch.reset();
+
                 fieldset.removeAttribute('disabled');
                 usernameInput.removeAttribute('name');
                 emailInput.removeAttribute('required');
                 emailInput.value = '';
                 ampForm.handleSubmitEvent_(event);
-                return timer.promise(1).then(() => {
+
+                return whenCalled(ampForm.xhr_.fetch).then(() => {
                   expect(ampForm.xhr_.fetch).to.be.calledOnce;
                   expect(ampForm.xhr_.fetch).to.be.calledWith(
                       'https://example.com?name=John%20Miller&email=');
@@ -830,10 +999,11 @@ describes.repeated('', {
 
 
       it('should properly serialize inputs to query params', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           ampForm.method_ = 'GET';
           form.setAttribute('method', 'GET');
+
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
 
           const otherNamesFS = document.createElement('fieldset');
@@ -900,7 +1070,8 @@ describes.repeated('', {
 
           ampForm.handleSubmitEvent_(event);
           expect(event.preventDefault).to.be.calledOnce;
-          return timer.promise(1).then(() => {
+
+          return whenCalled(ampForm.xhr_.fetch).then(() => {
             expect(ampForm.xhr_.fetch).to.be.calledOnce;
             expect(ampForm.xhr_.fetch).to.be.calledWith(
                 'https://example.com?name=John%20Miller&name=&name=&' +
@@ -911,7 +1082,8 @@ describes.repeated('', {
             foodCB.checked = true;
             footballCB.checked = true;
             ampForm.handleSubmitEvent_(event);
-            return timer.promise(1).then(() => {
+
+            return whenCalled(ampForm.xhr_.fetch).then(() => {
               expect(ampForm.xhr_.fetch).to.be.calledOnce;
               expect(ampForm.xhr_.fetch).to.be.calledWith(
                   'https://example.com?name=John%20Miller&name=&name=' +
@@ -921,8 +1093,9 @@ describes.repeated('', {
               femaleRadio.checked = true;
               otherName1Input.value = 'John Maller';
               ampForm.xhr_.fetch.reset();
+
               ampForm.handleSubmitEvent_(event);
-              return timer.promise(1).then(() => {
+              return whenCalled(ampForm.xhr_.fetch).then(() => {
                 expect(ampForm.xhr_.fetch).to.be.calledOnce;
                 expect(ampForm.xhr_.fetch).to.be.calledWith(
                     'https://example.com?name=John%20Miller&name=John%20Maller' +
@@ -938,7 +1111,7 @@ describes.repeated('', {
     describe('User Validity', () => {
       it('should manage valid/invalid on input/fieldset/form on submit', () => {
         setReportValiditySupportedForTesting(false);
-        return getAmpForm(true).then(ampForm => {
+        return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
           const form = ampForm.form_;
           const fieldset = document.createElement('fieldset');
           const emailInput = document.createElement('input');
@@ -950,7 +1123,6 @@ describes.repeated('', {
           sandbox.spy(form, 'checkValidity');
           sandbox.spy(emailInput, 'checkValidity');
           sandbox.spy(fieldset, 'checkValidity');
-          sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
 
           const event = {
             target: ampForm.form_,
@@ -976,7 +1148,7 @@ describes.repeated('', {
 
       it('should manage valid/invalid on input user interaction', () => {
         setReportValiditySupportedForTesting(false);
-        return getAmpForm(true).then(ampForm => {
+        return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
           const form = ampForm.form_;
           const fieldset = document.createElement('fieldset');
           const emailInput = document.createElement('input');
@@ -994,7 +1166,7 @@ describes.repeated('', {
           sandbox.spy(fieldset, 'checkValidity');
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
 
-          onInputInteraction_({target: emailInput});
+          checkUserValidityAfterInteraction_(emailInput);
           expect(form.checkValidity).to.be.called;
           expect(emailInput.checkValidity).to.be.called;
           expect(fieldset.checkValidity).to.be.called;
@@ -1008,7 +1180,7 @@ describes.repeated('', {
 
 
           emailInput.value = 'cool@bea.ns';
-          onInputInteraction_({target: emailInput});
+          checkUserValidityAfterInteraction_(emailInput);
           expect(emailInput.className).to.contain('user-valid');
           expect(form.className).to.contain('user-invalid');
 
@@ -1018,7 +1190,7 @@ describes.repeated('', {
 
           // Both inputs back to invalid.
           emailInput.value = 'invalid-value';
-          onInputInteraction_({target: emailInput});
+          checkUserValidityAfterInteraction_(emailInput);
           expect(emailInput.className).to.contain('user-invalid');
           expect(form.className).to.contain('user-invalid');
 
@@ -1028,14 +1200,14 @@ describes.repeated('', {
 
           // Only email input is invalid now.
           usernameInput.value = 'coolbeans';
-          onInputInteraction_({target: usernameInput});
+          checkUserValidityAfterInteraction_(usernameInput);
           expect(emailInput.className).to.contain('user-invalid');
           expect(form.className).to.contain('user-invalid');
           expect(usernameInput.className).to.contain('user-valid');
 
           // Both input are finally valid.
           emailInput.value = 'cool@bea.ns';
-          onInputInteraction_({target: emailInput});
+          checkUserValidityAfterInteraction_(emailInput);
           expect(emailInput.className).to.contain('user-valid');
           expect(usernameInput.className).to.contain('user-valid');
           expect(form.className).to.contain('user-valid');
@@ -1044,7 +1216,7 @@ describes.repeated('', {
 
       it('should propagates user-valid only when going from invalid', () => {
         setReportValiditySupportedForTesting(false);
-        return getAmpForm(true).then(ampForm => {
+        return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
           const form = ampForm.form_;
           const fieldset = document.createElement('fieldset');
           const emailInput = document.createElement('input');
@@ -1059,8 +1231,7 @@ describes.repeated('', {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
 
           emailInput.value = 'cool@bea.ns';
-          const event = {target: emailInput};
-          onInputInteraction_(event);
+          checkUserValidityAfterInteraction_(emailInput);
 
           expect(emailInput.checkValidity).to.be.called;
           expect(form.checkValidity).to.not.be.called;
@@ -1074,57 +1245,62 @@ describes.repeated('', {
     it('should install action handler and handle submit action', () => {
       const form = getForm();
       document.body.appendChild(form);
-      const actions = actionServiceForDoc(form.ownerDocument);
+      const actions = Services.actionServiceForDoc(form.ownerDocument);
+
       sandbox.stub(actions, 'installActionHandler');
       const ampForm = new AmpForm(form);
       sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+
       expect(actions.installActionHandler).to.be.calledWith(form);
       sandbox.spy(ampForm, 'handleSubmitAction_');
       ampForm.actionHandler_({method: 'anything'});
       expect(ampForm.handleSubmitAction_).to.have.not.been.called;
       ampForm.actionHandler_({method: 'submit'});
-      return timer.promise(1).then(() => {
-        expect(ampForm.handleSubmitAction_).to.have.been.called;
+
+      return whenCalled(ampForm.xhr_.fetch).then(() => {
+        expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
         document.body.removeChild(form);
       });
     });
 
     it('should submit after timeout of waiting for amp-selector', function() {
       this.timeout(3000);
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
         const selector = env.win.document.createElement('amp-selector');
         selector.setAttribute('name', 'color');
         form.appendChild(selector);
+
         sandbox.stub(selector, 'whenBuilt')
             .returns(new Promise(unusedResolve => {}));
-        sandbox.stub(ampForm.xhr_, 'fetch')
-            .returns(Promise.resolve());
         sandbox.spy(ampForm, 'handleSubmitAction_');
+
         ampForm.actionHandler_({method: 'submit'});
         expect(ampForm.handleSubmitAction_).to.have.not.been.called;
         return timer.promise(1).then(() => {
           expect(ampForm.handleSubmitAction_).to.have.not.been.called;
           return timer.promise(2000);
         }).then(() => {
-          expect(ampForm.handleSubmitAction_).to.have.been.called;
+          expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
         });
       });
     });
 
     it('should wait for amp-selector to build before submitting', () => {
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         let builtPromiseResolver_;
         const form = ampForm.form_;
         const selector = env.win.document.createElement('amp-selector');
         selector.setAttribute('name', 'color');
         form.appendChild(selector);
+
         sandbox.stub(selector, 'whenBuilt').returns(new Promise(resolve => {
           builtPromiseResolver_ = resolve;
         }));
         sandbox.stub(ampForm.xhr_, 'fetch')
             .returns(Promise.resolve());
         sandbox.spy(ampForm, 'handleSubmitAction_');
+
         ampForm.actionHandler_({method: 'submit'});
         expect(ampForm.handleSubmitAction_).to.have.not.been.called;
         return timer.promise(1).then(() => {
@@ -1135,14 +1311,14 @@ describes.repeated('', {
           builtPromiseResolver_();
           return timer.promise(1);
         }).then(() => {
-          expect(ampForm.handleSubmitAction_).to.have.been.called;
+          expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
         });
       });
     });
 
     describe('Var Substitution', () => {
       it('should substitute hidden fields variables in XHR async', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           const clientIdField = document.createElement('input');
           clientIdField.setAttribute('name', 'clientId');
@@ -1156,10 +1332,13 @@ describes.repeated('', {
           canonicalUrlField.value = 'CANONICAL_URL';
           canonicalUrlField.setAttribute('data-amp-replace', 'CANONICAL_URL');
           form.appendChild(canonicalUrlField);
+
           sandbox.stub(form, 'checkValidity').returns(true);
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+          sandbox.stub(ampForm, 'handleXhrSubmitSuccess_');
           sandbox.spy(ampForm.urlReplacement_, 'expandInputValueAsync');
           sandbox.stub(ampForm.urlReplacement_, 'expandInputValueSync');
+
           ampForm.submit_();
           expect(ampForm.xhr_.fetch).to.have.not.been.called;
           expect(ampForm.urlReplacement_.expandInputValueSync)
@@ -1170,7 +1349,7 @@ describes.repeated('', {
               .to.have.been.calledWith(clientIdField);
           expect(ampForm.urlReplacement_.expandInputValueAsync)
               .to.have.been.calledWith(canonicalUrlField);
-          return timer.promise(10).then(() => {
+          return whenCalled(ampForm.xhr_.fetch).then(() => {
             expect(ampForm.xhr_.fetch).to.be.called;
             expect(clientIdField.value).to.match(/amp-.+/);
             expect(canonicalUrlField.value).to.equal(
@@ -1180,7 +1359,7 @@ describes.repeated('', {
       });
 
       it('should send request if vars did not resolve after a timeout', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const expandAsyncStringResolvers = [];
           const form = ampForm.form_;
           const clientIdField = document.createElement('input');
@@ -1195,13 +1374,16 @@ describes.repeated('', {
           canonicalUrlField.setAttribute('data-amp-replace', 'CANONICAL_URL');
           canonicalUrlField.value = 'CANONICAL_URL';
           form.appendChild(canonicalUrlField);
+
           sandbox.stub(form, 'checkValidity').returns(true);
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+          sandbox.stub(ampForm, 'handleXhrSubmitSuccess_');
           sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync')
               .returns(new Promise(resolve => {
                 expandAsyncStringResolvers.push(resolve);
               }));
           sandbox.stub(ampForm.urlReplacement_, 'expandInputValueSync');
+
           ampForm.submit_();
           expect(ampForm.xhr_.fetch).to.have.not.been.called;
           expect(ampForm.urlReplacement_.expandInputValueSync)
@@ -1212,7 +1394,8 @@ describes.repeated('', {
               .to.have.been.calledWith(clientIdField);
           expect(ampForm.urlReplacement_.expandInputValueAsync)
               .to.have.been.calledWith(canonicalUrlField);
-          return timer.promise(210).then(() => {
+
+          return whenCalled(ampForm.xhr_.fetch).then(() => {
             expect(ampForm.xhr_.fetch).to.be.called;
             expect(clientIdField.value).to.equal('CLIENT_ID(form)');
             expect(canonicalUrlField.value).to.equal('CANONICAL_URL');
@@ -1222,7 +1405,7 @@ describes.repeated('', {
 
       it('should substitute hidden fields variables ' +
           'in non-XHR via sync', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           ampForm.method_ = 'GET';
           ampForm.xhrAction_ = null;
@@ -1238,12 +1421,14 @@ describes.repeated('', {
           canonicalUrlField.setAttribute('data-amp-replace', 'CANONICAL_URL');
           canonicalUrlField.value = 'CANONICAL_URL';
           form.appendChild(canonicalUrlField);
+
           sandbox.stub(form, 'submit');
           sandbox.stub(form, 'checkValidity').returns(true);
-          sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+          sandbox.stub(ampForm, 'handleXhrSubmitSuccess_');
           sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
           sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
-          ampForm.handleSubmitAction_();
+
+          ampForm.handleSubmitAction_(/* invocation */ {});
           expect(ampForm.urlReplacement_.expandInputValueAsync)
               .to.not.have.been.called;
           expect(ampForm.urlReplacement_.expandInputValueSync)
@@ -1252,117 +1437,12 @@ describes.repeated('', {
               .to.have.been.calledWith(clientIdField);
           expect(ampForm.urlReplacement_.expandInputValueSync)
               .to.have.been.calledWith(canonicalUrlField);
-          return timer.promise(10).then(() => {
-            expect(form.submit).to.have.been.called;
+
+          return whenCalled(form.submit).then(() => {
+            expect(form.submit).to.have.been.calledOnce;
             expect(clientIdField.value).to.equal('');
             expect(canonicalUrlField.value).to.equal(
                 'https%3A%2F%2Fexample.com%2Famps.html');
-          });
-        });
-      });
-
-      it('should not substitute variables if xhr-POST non-canonical', () => {
-        return getAmpForm().then(ampForm => {
-          const form = ampForm.form_;
-          ampForm.xhrAction_ = 'https://anotherexample.com';
-          const clientIdField = document.createElement('input');
-          clientIdField.setAttribute('name', 'clientId');
-          clientIdField.setAttribute('type', 'hidden');
-          clientIdField.setAttribute('data-amp-replace', 'CLIENT_ID');
-          clientIdField.value = 'CLIENT_ID(form)';
-          form.appendChild(clientIdField);
-          const canonicalUrlField = document.createElement('input');
-          canonicalUrlField.setAttribute('name', 'clientId');
-          canonicalUrlField.setAttribute('type', 'hidden');
-          canonicalUrlField.setAttribute('data-amp-replace', 'CANONICAL_URL');
-          canonicalUrlField.value = 'CANONICAL_URL';
-          form.appendChild(canonicalUrlField);
-          sandbox.stub(form, 'submit');
-          sandbox.stub(form, 'checkValidity').returns(true);
-          sandbox.stub(ampForm.xhr_, 'fetch')
-              .returns(Promise.resolve());
-          sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
-          sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
-          ampForm.handleSubmitAction_();
-          expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.not.have.been.called;
-          expect(ampForm.urlReplacement_.expandInputValueSync)
-              .to.have.not.been.called;
-          return timer.promise(10).then(() => {
-            expect(clientIdField.value).to.equal('CLIENT_ID(form)');
-            expect(canonicalUrlField.value).to.equal('CANONICAL_URL');
-          });
-        });
-      });
-
-      it('should not substitute variables if xhr-GET non-canonical', () => {
-        return getAmpForm().then(ampForm => {
-          const form = ampForm.form_;
-          ampForm.method_ = 'GET';
-          ampForm.xhrAction_ = 'https://anotherexample.com';
-          const clientIdField = document.createElement('input');
-          clientIdField.setAttribute('name', 'clientId');
-          clientIdField.setAttribute('type', 'hidden');
-          clientIdField.setAttribute('data-amp-replace', 'CLIENT_ID');
-          clientIdField.value = 'CLIENT_ID(form)';
-          form.appendChild(clientIdField);
-          const canonicalUrlField = document.createElement('input');
-          canonicalUrlField.setAttribute('name', 'clientId');
-          canonicalUrlField.setAttribute('type', 'hidden');
-          canonicalUrlField.setAttribute('data-amp-replace', 'CANONICAL_URL');
-          canonicalUrlField.value = 'CANONICAL_URL';
-          form.appendChild(canonicalUrlField);
-          sandbox.stub(form, 'submit');
-          sandbox.stub(form, 'checkValidity').returns(true);
-          sandbox.stub(ampForm.xhr_, 'fetch')
-              .returns(Promise.resolve());
-          sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
-          sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
-          ampForm.handleSubmitAction_();
-          expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.not.have.been.called;
-          expect(ampForm.urlReplacement_.expandInputValueSync)
-              .to.have.not.been.called;
-          return timer.promise(10).then(() => {
-            expect(clientIdField.value).to.equal('CLIENT_ID(form)');
-            expect(canonicalUrlField.value).to.equal('CANONICAL_URL');
-          });
-        });
-      });
-
-      it('should not substitute variables if non-xhr-GET non-canonical', () => {
-        return getAmpForm().then(ampForm => {
-          const form = ampForm.form_;
-          ampForm.method_ = 'GET';
-          ampForm.xhrAction_ = null;
-          form.removeAttribute('action-xhr');
-          form.setAttribute('action', 'https://anotherexample.com');
-          const clientIdField = document.createElement('input');
-          clientIdField.setAttribute('name', 'clientId');
-          clientIdField.setAttribute('type', 'hidden');
-          clientIdField.setAttribute('data-amp-replace', 'CLIENT_ID');
-          clientIdField.value = 'CLIENT_ID(form)';
-          form.appendChild(clientIdField);
-          const canonicalUrlField = document.createElement('input');
-          canonicalUrlField.setAttribute('name', 'clientId');
-          canonicalUrlField.setAttribute('type', 'hidden');
-          canonicalUrlField.setAttribute('data-amp-replace', 'CANONICAL_URL');
-          canonicalUrlField.value = 'CANONICAL_URL';
-          form.appendChild(canonicalUrlField);
-          sandbox.stub(form, 'submit');
-          sandbox.stub(form, 'checkValidity').returns(true);
-          sandbox.stub(ampForm.xhr_, 'fetch')
-              .returns(Promise.resolve());
-          sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
-          sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
-          ampForm.handleSubmitAction_();
-          expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.not.have.been.called;
-          expect(ampForm.urlReplacement_.expandInputValueSync)
-              .to.have.not.been.called;
-          return timer.promise(10).then(() => {
-            expect(clientIdField.value).to.equal('CLIENT_ID(form)');
-            expect(canonicalUrlField.value).to.equal('CANONICAL_URL');
           });
         });
       });
@@ -1393,10 +1473,14 @@ describes.repeated('', {
         json: () => Promise.resolve(),
         headers: headersMock,
       });
-      const fetchRejectPromise = Promise.reject({
-        responseJson: null,
+      const error = new Error('Error');
+      error.response = {
         headers: headersMock,
-      });
+        json() {
+          return Promise.resolve();
+        },
+      };
+      const fetchRejectPromise = Promise.reject(error);
       fetchRejectPromise.catch(() => {
         // Just avoiding a global uncaught promise exception.
       });
@@ -1413,8 +1497,9 @@ describes.repeated('', {
         it('should redirect users if header is set', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = 'https://google.com/';
-          ampForm.handleSubmitAction_();
-          return timer.promise(10).then(() => {
+          ampForm.handleSubmitAction_(/* invocation */ {});
+
+          return ampForm.xhrSubmitPromiseForTesting().then(() => {
             expect(env.win.top.location.href).to.be.equal(redirectToValue);
           });
         });
@@ -1422,8 +1507,11 @@ describes.repeated('', {
         it('should fail to redirect to non-secure urls', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = 'http://google.com/';
-          ampForm.handleSubmitAction_();
-          return timer.promise(10).then(() => {
+          ampForm.handleSubmitAction_(/* invocation */ {});
+
+          return ampForm.xhrSubmitPromiseForTesting().then(() => {
+            assert.fail('Submit should have failed.');
+          }, () => {
             expect(env.win.top.location.href).to.be.equal(
                 'https://example-top.com/');
           });
@@ -1432,8 +1520,11 @@ describes.repeated('', {
         it('should fail to redirect to non-absolute urls', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = '/hello';
-          ampForm.handleSubmitAction_();
-          return timer.promise(10).then(() => {
+          ampForm.handleSubmitAction_(/* invocation */ {});
+
+          return ampForm.xhrSubmitPromiseForTesting().then(() => {
+            assert.fail('Submit should have failed.');
+          }, () => {
             expect(env.win.top.location.href).to.be.equal(
                 'https://example-top.com/');
           });
@@ -1443,8 +1534,11 @@ describes.repeated('', {
           ampForm.target_ = '_blank';
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = 'http://google.com/';
-          ampForm.handleSubmitAction_();
-          return timer.promise(10).then(() => {
+          ampForm.handleSubmitAction_(/* invocation */ {});
+
+          return ampForm.xhrSubmitPromiseForTesting().then(() => {
+            assert.fail('Submit should have failed.');
+          }, () => {
             expect(env.win.top.location.href).to.be.equal(
                 'https://example-top.com/');
           });
@@ -1453,21 +1547,13 @@ describes.repeated('', {
         it('should redirect on error and header is set', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchRejectPromise);
           redirectToValue = 'https://example2.com/hello';
-          const errors = [];
-          const realSetTimeout = window.setTimeout;
-          sandbox.stub(window, 'setTimeout', (callback, delay) => {
-            realSetTimeout(() => {
-              try {
-                callback();
-              } catch (e) {
-                errors.push(e);
-              }
-            }, delay);
-          });
-          ampForm.handleSubmitAction_();
-          return timer.promise(10).then(() => {
-            expect(errors.length).to.equal(1);
-            expect(errors[0]).to.match(/Form submission failed/);
+          const logSpy = sandbox.spy(user(), 'error');
+          ampForm.handleSubmitAction_(/* invocation */ {});
+
+          return ampForm.xhrSubmitPromiseForTesting().then(() => {
+            expect(logSpy).to.be.calledOnce;
+            const error = logSpy.getCall(0).args[1];
+            expect(error).to.match(/Form submission failed/);
             expect(env.win.top.location.href).to.be.equal(redirectToValue);
           });
         });
@@ -1476,20 +1562,20 @@ describes.repeated('', {
 
     describe('non-XHR GET', () => {
       it('should execute form submit when not triggered through event', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           ampForm.method_ = 'GET';
           ampForm.xhrAction_ = null;
           sandbox.stub(form, 'submit');
           sandbox.stub(form, 'checkValidity').returns(true);
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
-          ampForm.handleSubmitAction_();
+          ampForm.handleSubmitAction_(/* invocation */ {});
           expect(form.submit).to.have.been.called;
         });
       });
 
       it('should not execute form submit when triggered through event', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           ampForm.method_ = 'GET';
           ampForm.xhrAction_ = null;
@@ -1508,7 +1594,7 @@ describes.repeated('', {
     });
 
     it('should trigger amp-form-submit analytics event with form data', () => {
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
         form.id = 'registration';
 
@@ -1529,7 +1615,7 @@ describes.repeated('', {
         sandbox.stub(form, 'checkValidity').returns(true);
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
         sandbox.stub(ampForm, 'analyticsEvent_');
-        ampForm.handleSubmitAction_();
+        ampForm.handleSubmitAction_(/* invocation */ {});
         const expectedFormData = {
           'formId': 'registration',
           'formFields[name]': 'John Miller',
@@ -1537,14 +1623,14 @@ describes.repeated('', {
         };
         expect(form.submit).to.have.been.called;
         expect(ampForm.analyticsEvent_).to.be.calledWith(
-          'amp-form-submit',
-          expectedFormData
+            'amp-form-submit',
+            expectedFormData
         );
       });
     });
 
     it('should trigger amp-form-submit after variables substitution', () => {
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
         form.id = 'registration';
         ampForm.method_ = 'GET';
@@ -1561,13 +1647,15 @@ describes.repeated('', {
         canonicalUrlField.setAttribute('data-amp-replace', 'CANONICAL_URL');
         canonicalUrlField.value = 'CANONICAL_URL';
         form.appendChild(canonicalUrlField);
+
         sandbox.stub(form, 'submit');
         sandbox.stub(form, 'checkValidity').returns(true);
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
         sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
         sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
         sandbox.stub(ampForm, 'analyticsEvent_');
-        ampForm.handleSubmitAction_();
+        ampForm.handleSubmitAction_(/* invocation */ {});
+
         const expectedFormData = {
           'formId': 'registration',
           'formFields[name]': 'John Miller',
@@ -1575,8 +1663,8 @@ describes.repeated('', {
           'formFields[clientId]': '',
         };
         expect(ampForm.analyticsEvent_).to.be.calledWith(
-          'amp-form-submit',
-          expectedFormData
+            'amp-form-submit',
+            expectedFormData
         );
         expect(ampForm.urlReplacement_.expandInputValueAsync)
             .to.not.have.been.called;
@@ -1586,8 +1674,9 @@ describes.repeated('', {
             .to.have.been.calledWith(clientIdField);
         expect(ampForm.urlReplacement_.expandInputValueSync)
             .to.have.been.calledWith(canonicalUrlField);
-        return timer.promise(10).then(() => {
-          expect(form.submit).to.have.been.called;
+
+        return whenCalled(form.submit).then(() => {
+          expect(form.submit).to.have.been.calledOnce;
           expect(clientIdField.value).to.equal('');
           expect(canonicalUrlField.value).to.equal(
               'https%3A%2F%2Fexample.com%2Famps.html');

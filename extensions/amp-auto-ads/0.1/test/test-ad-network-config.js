@@ -15,7 +15,15 @@
  */
 
 import {getAdNetworkConfig} from '../ad-network-config';
-import {viewportForDoc} from '../../../../src/services';
+import {
+  toggleExperiment,
+  forceExperimentBranch,
+} from '../../../../src/experiments';
+import {Services} from '../../../../src/services';
+import {
+  ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+  AdSenseAmpAutoAdsHoldoutBranches,
+} from '../../../../ads/google/adsense-amp-auto-ads';
 
 describes.realWin('ad-network-config', {
   amp: {
@@ -46,11 +54,52 @@ describes.realWin('ad-network-config', {
       ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
     });
 
+    it('should report enabled when holdout experiment not on', () => {
+      toggleExperiment(
+          env.win, ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME, false);
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      expect(adNetwork.isEnabled(env.win)).to.equal(true);
+    });
+
+    it('should report enabled when holdout experiment on and experiment ' +
+        'branch picked', () => {
+      forceExperimentBranch(env.win,
+          ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+          AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      expect(adNetwork.isEnabled(env.win)).to.equal(true);
+    });
+
+    it('should report disabled when holdout experiment on and control ' +
+        'branch picked', () => {
+      forceExperimentBranch(env.win,
+          ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+          AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      expect(adNetwork.isEnabled(env.win)).to.equal(false);
+    });
+
     it('should generate the config fetch URL', () => {
       const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
       expect(adNetwork.getConfigUrl()).to.equal(
           '//pagead2.googlesyndication.com/getconfig/ama?client=' +
-          AD_CLIENT + '&plah=foo.bar&ama_t=amp');
+          AD_CLIENT + '&plah=foo.bar&ama_t=amp&' +
+          'url=https%3A%2F%2Ffoo.bar%2Fbaz');
+    });
+
+    it('should truncate the URL if it\'s too long', () => {
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+
+      const canonicalUrl = 'http://foo.bar/' + 'a'.repeat(4050)
+          + 'shouldnt_be_included';
+
+      const docInfo = Services.documentInfoForDoc(ampAutoAdsElem);
+      sandbox.stub(docInfo, 'canonicalUrl', canonicalUrl);
+
+      const url = adNetwork.getConfigUrl();
+      expect(url).to.contain('ama_t=amp');
+      expect(url).to.contain('url=http%3A%2F%2Ffoo.bar');
+      expect(url).not.to.contain('shouldnt_be_included');
     });
 
     it('should generate the attributes', () => {
@@ -62,7 +111,8 @@ describes.realWin('ad-network-config', {
     });
 
     it('should get the ad constraints', () => {
-      const viewportMock = sandbox.mock(viewportForDoc(env.win.document));
+      const viewportMock =
+          sandbox.mock(Services.viewportForDoc(env.win.document));
       viewportMock.expects('getSize').returns(
           {width: 320, height: 500}).atLeast(1);
 

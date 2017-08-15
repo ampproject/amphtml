@@ -15,14 +15,30 @@
  */
 
 import {
+  publicJwk,
+  correctToken,
+  tokenWithBadVersion,
+  tokenWithBadConfigLength,
+  tokenWithBadSignature,
+  tokenWithExpiredExperiment,
+} from './testdata-experiments';
+import {Services} from '../../src/services';
+import {installCryptoService} from '../../src/service/crypto-impl';
+import {
+  enableExperimentsForOriginTrials,
   isCanary,
   isExperimentOn,
+  isExperimentOnForOriginTrial,
   experimentToggles,
   toggleExperiment,
   resetExperimentTogglesForTesting,
   getExperimentToglesFromCookieForTesting,
+  RANDOM_NUMBER_GENERATORS,
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
 } from '../../src/experiments';
 import {createElementWithAttributes} from '../../src/dom';
+import {user} from '../../src/log';
 import * as sinon from 'sinon';
 
 describe('experimentToggles', () => {
@@ -49,6 +65,48 @@ describe('experimentToggles', () => {
       // "v" should not appear here
     });
   });
+
+  it('should cache experiment toggles on window', () => {
+    const win = {
+      document: {
+        cookie: 'AMP_EXP=-exp3,exp4,exp5',
+      },
+      AMP_CONFIG: {
+        exp1: 1,
+        exp2: 0,
+        exp3: 1,
+        exp4: 0,
+        v: '12345667',
+      },
+    };
+    resetExperimentTogglesForTesting(window);
+    expect(experimentToggles(win)).to.deep.equal({
+      exp1: true,
+      exp2: false,
+      exp3: false, // overridden in cookie
+      exp4: true, // overridden in cookie
+      exp5: true,
+      // "v" should not appear here
+    });
+
+    expect(win['__AMP__EXPERIMENT_TOGGLES']).to.deep.equal({
+      exp1: true,
+      exp2: false,
+      exp3: false,
+      exp4: true,
+      exp5: true,
+    });
+
+    win['__AMP__EXPERIMENT_TOGGLES'].exp1 = false;
+
+    expect(experimentToggles(win)).to.deep.equal({
+      exp1: false,
+      exp2: false,
+      exp3: false,
+      exp4: true,
+      exp5: true,
+    });
+  });
 });
 
 describe('isExperimentOn', () => {
@@ -64,6 +122,7 @@ describe('isExperimentOn', () => {
       AMP_CONFIG: {},
       location: {
         hash: '',
+        href: 'http://foo.bar',
       },
     };
   });
@@ -73,7 +132,7 @@ describe('isExperimentOn', () => {
   });
 
   function expectExperiment(cookieString, experimentId) {
-    resetExperimentTogglesForTesting(window);
+    resetExperimentTogglesForTesting(win);
     win.document.cookie = cookieString;
     return expect(isExperimentOn(win, experimentId));
   }
@@ -385,6 +444,7 @@ describe('toggleExperiment', () => {
       },
       location: {
         hostname: 'test.test',
+        href: 'http://foo.bar',
       },
     };
 
@@ -394,21 +454,21 @@ describe('toggleExperiment', () => {
     expect(toggleExperiment(win, 'e1')).to.be.false;
     expect(isExperimentOn(win, 'e1')).to.be.false;
 
-    // The new setting should be persisted in cookie, so cache reset should not
-    // affect its status.
-    resetExperimentTogglesForTesting(window);
-    expect(isExperimentOn(win, 'e1')).to.be.false;
+    // Calling cache reset testing function clears cookies on window object
+    // it is called with.
+    resetExperimentTogglesForTesting(win);
+    expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Now let's explicitly toggle to true
     expect(toggleExperiment(win, 'e1', true)).to.be.true;
     expect(isExperimentOn(win, 'e1')).to.be.true;
-    resetExperimentTogglesForTesting(window);
+    resetExperimentTogglesForTesting(win);
     expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Toggle transiently should still work
     expect(toggleExperiment(win, 'e1', false, true)).to.be.false;
     expect(isExperimentOn(win, 'e1')).to.be.false;
-    resetExperimentTogglesForTesting(window); // cache reset should bring it back to true
+    resetExperimentTogglesForTesting(win); // cache reset should bring it back to true
     expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Sanity check, the global setting should never be changed.
@@ -517,3 +577,448 @@ describe('isCanary', () => {
   });
 });
 
+describe('experiment branch tests', () => {
+
+  describe('#randomlySelectUnsetExperiments', () => {
+    let sandbox;
+    let accurateRandomStub;
+    let cachedAccuratePrng;
+    let testExperimentSet;
+
+    beforeEach(() => {
+      const experimentFrequency = 1.0;
+      testExperimentSet = {
+        testExperimentId: {
+          isTrafficEligible: () => true,
+          branches: ['branch1_id', 'branch2_id'],
+        },
+      };
+      sandbox = sinon.sandbox.create();
+      sandbox.win = {
+        location: {
+          hostname: 'test.server.name.com',
+        },
+        AMP_CONFIG: {
+          testExperimentId: experimentFrequency,
+        },
+        document: {
+          cookie: null,
+          querySelector: () => {},
+        },
+      };
+      accurateRandomStub = sandbox.stub().returns(-1);
+      cachedAccuratePrng = RANDOM_NUMBER_GENERATORS.accuratePrng;
+      RANDOM_NUMBER_GENERATORS.accuratePrng = accurateRandomStub;
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+      RANDOM_NUMBER_GENERATORS.accuratePrng = cachedAccuratePrng;
+    });
+
+    it('handles empty experiments list', () => {
+      // Opt out of experiment.
+      toggleExperiment(sandbox.win, 'testExperimentId', false, true);
+      randomlySelectUnsetExperiments(sandbox.win, {});
+      expect(isExperimentOn(sandbox.win, 'testExperimentId'),
+          'experiment is on').to.be.false;
+      expect(sandbox.win.experimentBranches).to.be.empty;
+    });
+
+    it('handles experiment not diverted path', () => {
+      // Opt out of experiment.
+      toggleExperiment(sandbox.win, 'testExperimentId', false, true);
+      randomlySelectUnsetExperiments(sandbox.win, testExperimentSet);
+      expect(isExperimentOn(sandbox.win, 'testExperimentId'),
+          'experiment is on').to.be.false;
+      expect(getExperimentBranch(sandbox.win,
+          'testExperimentId')).to.not.be.ok;
+    });
+
+    it('handles experiment diverted path 1', () => {
+      // Force experiment on.
+      toggleExperiment(sandbox.win, 'testExperimentId', true, true);
+      // force the control branch to be chosen by making the accurate PRNG
+      // return a value < 0.5.
+      RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.3);
+      randomlySelectUnsetExperiments(sandbox.win, testExperimentSet);
+      expect(isExperimentOn(sandbox.win, 'testExperimentId'),
+          'experiment is on').to.be.true;
+      expect(getExperimentBranch(sandbox.win, 'testExperimentId')).to.equal(
+          'branch1_id');
+    });
+
+    it('handles experiment diverted path 2', () => {
+      // Force experiment on.
+      toggleExperiment(sandbox.win, 'testExperimentId', true, true);
+      // Force the experiment branch to be chosen by making the accurate PRNG
+      // return a value > 0.5.
+      RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.6);
+      randomlySelectUnsetExperiments(sandbox.win, testExperimentSet);
+      expect(isExperimentOn(sandbox.win, 'testExperimentId'),
+          'experiment is on').to.be.true;
+      expect(getExperimentBranch(sandbox.win, 'testExperimentId')).to.equal(
+          'branch2_id');
+    });
+
+    it('picks a branch if traffic eligible', () => {
+      toggleExperiment(sandbox.win, 'expt_0', true, true);
+      sandbox.win.trafficEligible = true;
+      const experimentInfo = {
+        'expt_0': {
+          isTrafficEligible: win => { return win.trafficEligible; },
+          branches: ['0_0', '0_1'],
+        },
+      };
+      RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
+      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(isExperimentOn(sandbox.win, 'expt_0')).to.be.true;
+      expect(getExperimentBranch(sandbox.win, 'expt_0')).to.equal('0_0');
+    });
+
+    it('doesn\'t pick a branch if traffic ineligible', () => {
+      toggleExperiment(sandbox.win, 'expt_0', true, true);
+      sandbox.win.trafficEligible = false;
+      const experimentInfo = {
+        'expt_0': {
+          isTrafficEligible: win => { return win.trafficEligible; },
+          branches: ['0_0', '0_1'],
+        },
+      };
+      RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
+      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(isExperimentOn(sandbox.win, 'expt_0')).to.be.true;
+      expect(getExperimentBranch(sandbox.win, 'expt_0')).to.be.null;
+    });
+
+    it('doesn\'t pick a branch if no traffic eligibility function', () => {
+      toggleExperiment(sandbox.win, 'expt_0', true, true);
+      const experimentInfo = {
+        'expt_0': {
+          isTrafficEligible: undefined,
+          branches: ['0_0', '0_1'],
+        },
+      };
+      RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
+      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(isExperimentOn(sandbox.win, 'expt_0')).to.be.true;
+      expect(getExperimentBranch(sandbox.win, 'expt_0')).to.be.null;
+    });
+
+    it('doesn\'t pick a branch if traffic becomes eligible after first ' +
+        'diversion', () => {
+      toggleExperiment(sandbox.win, 'expt_0', true, true);
+      sandbox.win.trafficEligible = false;
+      const experimentInfo = {
+        'expt_0': {
+          isTrafficEligible: win => { return win.trafficEligible; },
+          branches: ['0_0', '0_1'],
+        },
+      };
+      RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
+
+      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(isExperimentOn(sandbox.win, 'expt_0')).to.be.true;
+      expect(getExperimentBranch(sandbox.win, 'expt_0')).to.be.null;
+
+      sandbox.win.trafficEligible = true;
+
+      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(isExperimentOn(sandbox.win, 'expt_0')).to.be.true;
+      expect(getExperimentBranch(sandbox.win, 'expt_0')).to.be.null;
+    });
+
+    it('handles multiple experiments', () => {
+      toggleExperiment(sandbox.win, 'expt_0', true, true);
+      toggleExperiment(sandbox.win, 'expt_1', false, true);
+      toggleExperiment(sandbox.win, 'expt_2', true, true);
+      toggleExperiment(sandbox.win, 'expt_3', true, true);
+
+      const experimentInfo = {
+        'expt_0': {
+          isTrafficEligible: () => true,
+          branches: ['0_c', '0_e'],
+        },
+        'expt_1': {
+          isTrafficEligible: () => true,
+          branches: ['1_c', '1_e'],
+        },
+        'expt_2': {
+          isTrafficEligible: () => true,
+          branches: ['2_c', '2_e'],
+        },
+        // expt_3 omitted.
+      };
+      RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.6);
+      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(isExperimentOn(sandbox.win, 'expt_0'),
+          'expt_0 is on').to.be.true;
+      expect(isExperimentOn(sandbox.win, 'expt_1'),
+          'expt_1 is on').to.be.false;
+      expect(isExperimentOn(sandbox.win, 'expt_2'),
+          'expt_2 is on').to.be.true;
+      // Note: calling isExperimentOn('expt_3') would actually evaluate the
+      // frequency for expt_3, possibly enabling it.  Since we wanted it to be
+      // omitted altogether, we'll evaluate it only via its branch.
+      expect(getExperimentBranch(sandbox.win, 'expt_0')).to.equal(
+          '0_e');
+      expect(getExperimentBranch(sandbox.win, 'expt_1')).to.not.be.ok;
+      expect(getExperimentBranch(sandbox.win, 'expt_2')).to.equal(
+          '2_e');
+      expect(getExperimentBranch(sandbox.win, 'expt_3')).to.not.be.ok;
+    });
+
+    it('handles multi-way branches', () => {
+      toggleExperiment(sandbox.win, 'expt_0', true, true);
+      const experimentInfo = {
+        'expt_0': {
+          isTrafficEligible: () => true,
+          branches: ['0_0', '0_1', '0_2', '0_3', '0_4'],
+        },
+      };
+      RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.7);
+      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(isExperimentOn(sandbox.win, 'expt_0'),
+          'expt_0 is on').to.be.true;
+      expect(getExperimentBranch(sandbox.win, 'expt_0')).to.equal(
+          '0_3');
+    });
+
+    it('handles multiple experiments with multi-way branches', () => {
+      toggleExperiment(sandbox.win, 'expt_0', true, true);
+      toggleExperiment(sandbox.win, 'expt_1', false, true);
+      toggleExperiment(sandbox.win, 'expt_2', true, true);
+      toggleExperiment(sandbox.win, 'expt_3', true, true);
+
+      const experimentInfo = {
+        'expt_0': {
+          isTrafficEligible: () => true,
+          branches: ['0_0', '0_1', '0_2', '0_3', '0_4'],
+        },
+        'expt_1': {
+          isTrafficEligible: () => true,
+          branches: ['1_0', '1_1', '1_2', '1_3', '1_4'],
+        },
+        'expt_2': {
+          isTrafficEligible: () => true,
+          branches: ['2_0', '2_1', '2_2', '2_3', '2_4'],
+        },
+      };
+      RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.7);
+      RANDOM_NUMBER_GENERATORS.accuratePrng.onSecondCall().returns(0.3);
+      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(isExperimentOn(sandbox.win, 'expt_0'),
+          'expt_0 is on').to.be.true;
+      expect(isExperimentOn(sandbox.win, 'expt_1'),
+          'expt_1 is on').to.be.false;
+      expect(isExperimentOn(sandbox.win, 'expt_2'),
+          'expt_2 is on').to.be.true;
+      // Note: calling isExperimentOn('expt_3') would actually evaluate the
+      // frequency for expt_3, possibly enabling it.  Since we wanted it to be
+      // omitted altogether, we'll evaluate it only via its branch.
+      expect(getExperimentBranch(sandbox.win, 'expt_0')).to.equal(
+          '0_3');
+      expect(getExperimentBranch(sandbox.win, 'expt_1')).to.not.be.ok;
+      expect(getExperimentBranch(sandbox.win, 'expt_2')).to.equal(
+          '2_1');
+      expect(getExperimentBranch(sandbox.win, 'expt_3')).to.not.be.ok;
+    });
+
+    it('should not process the same experiment twice', () => {
+      const exptAInfo = {
+        'fooExpt': {
+          isTrafficEligible: () => true,
+          branches: ['012345', '987654'],
+        },
+      };
+      const exptBInfo = {
+        'fooExpt': {
+          isTrafficEligible: () => true,
+          branches: ['246810', '108642'],
+        },
+      };
+      toggleExperiment(sandbox.win, 'fooExpt', false, true);
+      randomlySelectUnsetExperiments(sandbox.win, exptAInfo);
+      randomlySelectUnsetExperiments(sandbox.win, exptBInfo);
+      // Even though we tried to set up a second time, using a config
+      // parameter that should ensure that the experiment was activated, the
+      // experiment framework should evaluate each experiment only once per
+      // page and should not enable it.
+      expect(isExperimentOn(sandbox.win, 'fooExpt')).to.be.false;
+      expect(getExperimentBranch(sandbox.win, 'fooExpt')).to.not.be.ok;
+    });
+  });
+});
+
+describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
+
+  let win;
+  let sandbox;
+  let crypto;
+
+  let warnStub;
+
+  beforeEach(() => {
+    win = {
+      document: env.win.document,
+      location: {
+        href: 'https://www.google.com',
+      },
+      crypto: env.win.crypto,
+    };
+    sandbox = env.sandbox;
+
+    installCryptoService(win);
+    crypto = Services.cryptoFor(win);
+
+    warnStub = sandbox.stub(user(), 'warn');
+
+    // Ensure that tests don't appear to pass because fake window object
+    // doesn't have crypto when the window actually has it.
+    installCryptoService(env.win);
+    expect(Services.cryptoFor(env.win).isPkcsAvailable())
+        .to.equal(Services.cryptoFor(win).isPkcsAvailable());
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  function setupMetaTagWith(token) {
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'amp-experiment-token');
+    meta.setAttribute('content', token);
+    win.document.head.appendChild(meta);
+  }
+
+  it('should return false if no token is found', () => {
+    // No meta tag ever added
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be.false;
+  });
+
+  it('should return false if public key is not present', () => {
+    setupMetaTagWith(correctToken);
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be.false;
+  });
+
+  it('should return false if crypto is unavailable', () => {
+    sandbox.stub(crypto, 'isPkcsAvailable').returns(false);
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be.false;
+  });
+
+  it('should throw for missing token', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith('');
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    }).then(result => {
+      expect(result).to.be.false;
+      expect(warnStub).to.have.been
+          .calledWith('experiments', 'Unable to read experiments token');
+    });
+  });
+
+  it('should throw for an unknown token version number', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(tokenWithBadVersion);
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    }).then(result => {
+      expect(result).to.be.false;
+      expect(warnStub).to.have.been.calledWith(
+          'experiments',
+          sinon.match({
+            message: sinon.match(/Unrecognized experiments token version/),
+          }));
+    });
+  });
+
+  it('should throw if config length exceeds byte length', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(tokenWithBadConfigLength);
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    }).then(result => {
+      expect(result).to.be.false;
+      expect(warnStub).to.have.been.calledWith(
+          'experiments',
+          sinon.match({message: 'Specified len extends past end of buffer'}));
+    });
+  });
+
+  it('should throw if signature cannot be verified', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(tokenWithBadSignature);
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    }).then(result => {
+      expect(result).to.be.false;
+      expect(warnStub).to.have.been.calledWith(
+          'experiments',
+          sinon.match({message: 'Failed to verify config signature'}));
+    });
+  });
+
+  it('should throw if approved origin is not current origin', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(correctToken);
+    win.location.href = 'https://www.not-google.com';
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    }).then(result => {
+      expect(result).to.be.false;
+      expect(warnStub).to.have.been.calledWith(
+          'experiments',
+          sinon.match({message: 'Config does not match current origin'}));
+    });
+  });
+
+  it('should return false if requested experiment is not in config', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(correctToken);
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      const p =
+          isExperimentOnForOriginTrial(win, 'amp-not-in-config', publicJwk);
+      return expect(p).to.eventually.be.false;
+    });
+  });
+
+  it('should return false if trial has expired', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(tokenWithExpiredExperiment);
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      return isExperimentOnForOriginTrial(win, 'amp-expired', publicJwk);
+    }).then(result => {
+      expect(result).to.be.false;
+      expect(warnStub).to.have.been.calledWith(
+          'experiments',
+          sinon.match({message: 'Experiment amp-expired has expired'}));
+    });
+  });
+
+  it('should return true for a well-formed token for an experiment ' +
+     'that has not yet expired', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(correctToken);
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      const p =
+          isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+      return expect(p).to.eventually.be.true;
+    });
+  });
+
+  it('should return true for a correct token if the approved origin has ' +
+     'a trailing slash', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(correctToken);
+    win.location.href = 'https://www.google.com/';
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      const p =
+          isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+      return expect(p).to.eventually.be.true;
+    });
+  });
+});

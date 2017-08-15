@@ -16,14 +16,20 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
-import {removeElement} from '../../../src/dom';
+import {user, dev} from '../../../src/log';
+import {
+  removeElement,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isObject} from '../../../src/types';
+import {getData, listen} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -42,6 +48,9 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
 
   /**
@@ -58,34 +67,24 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       this.playerReadyResolver_ = resolve;
     });
 
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    this.iframe_ = iframe;
-
-    this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], iframe);
-    this.applyFillContent(iframe, true);
-    this.element.appendChild(iframe);
-
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
-
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @override */
   layoutCallback() {
     const embedCode = user().assert(
-      this.element.getAttribute('data-embedcode'),
-      'The data-embedcode attribute is required for <amp-ooyala-player> %s',
-      this.element);
+        this.element.getAttribute('data-embedcode'),
+        'The data-embedcode attribute is required for <amp-ooyala-player> %s',
+        this.element);
     const pCode = user().assert(
-      this.element.getAttribute('data-pcode'),
-      'The data-pcode attribute is required for <amp-ooyala-player> %s',
-      this.element);
+        this.element.getAttribute('data-pcode'),
+        'The data-pcode attribute is required for <amp-ooyala-player> %s',
+        this.element);
     const playerId = user().assert(
-      this.element.getAttribute('data-playerid'),
-      'The data-playerid attribute is required for <amp-ooyala-player> %s',
-      this.element);
+        this.element.getAttribute('data-playerid'),
+        'The data-playerid attribute is required for <amp-ooyala-player> %s',
+        this.element);
 
     let src = 'https://player.ooyala.com/iframe.html?platform=html5-priority';
     const playerVersion = this.element.getAttribute('data-playerversion') || '';
@@ -100,16 +99,25 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     src += '&ec=' + encodeURIComponent(embedCode) +
       '&pbid=' + encodeURIComponent(playerId);
-    this.iframe_.src = src;
 
-    window.addEventListener('message',
-                            event => this.handleOoyalaMessages_(event));
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    this.applyFillContent(iframe, true);
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.src = src;
 
-    return this.loadPromise(this.iframe_)
-      .then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
-        this.playerReadyResolver_(this.iframe_);
-      });
+    this.iframe_ = iframe;
+
+    this.unlistenMessage_ = listen(this.win, 'message', event => {
+      this.handleOoyalaMessages_(event);
+    });
+
+    this.element.appendChild(this.iframe_);
+    const loaded = this.loadPromise(this.iframe_).then(() => {
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
+    this.playerReadyResolver_(loaded);
+    return loaded;
   }
 
   /** @override */
@@ -118,6 +126,15 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
+
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
     return true;
   }
 
@@ -143,49 +160,57 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @private */
   handleOoyalaMessages_(event) {
-    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
+    /** @const {?JsonObject|undefined} */
+    const data = /** @type {?JsonObject} */ (isObject(getData(event))
+        ? getData(event)
+        : tryParseJson(getData(event)));
     if (data === undefined) {
       return; // We only process valid JSON.
     }
-    if (data.data == 'playing') {
-      this.element.dispatchCustomEvent(VideoEvents.PLAY);
-    } else if (data.data == 'paused') {
+    if (data['data'] == 'playing') {
+      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+    } else if (data['data'] == 'paused') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    } else if (data.data == 'muted') {
+    } else if (data['data'] == 'muted') {
       this.element.dispatchCustomEvent('mute');
-    } else if (data.data == 'unmuted') {
+    } else if (data['data'] == 'unmuted') {
       this.element.dispatchCustomEvent('unmute');
     }
+  }
+
+  /**
+   * Sends a command to the player through postMessage.
+   * @param {string} command
+   * @private
+   */
+  sendCommand_(command) {
+    this.playerReadyPromise_.then(() => {
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        this.iframe_.contentWindow./*OK*/postMessage(command, '*');
+      }
+    });
   }
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 
   /** @override */
   play(unusedIsAutoplay) {
-    this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('play', '*');
-    });
+    this.sendCommand_('play');
   }
 
   /** @override */
   pause() {
-    this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('pause', '*');
-    });
+    this.sendCommand_('pause');
   }
 
   /** @override */
   mute() {
-    this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('mute', '*');
-    });
+    this.sendCommand_('mute');
   }
 
   /** @override */
   unmute() {
-    this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('unmute', '*');
-    });
+    this.sendCommand_('unmute');
   }
 
   /** @override */
@@ -204,6 +229,62 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   hideControls() {
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 };
 

@@ -22,6 +22,7 @@ import {
 import {dev} from '../log';
 import {startsWith} from '../string';
 import {toggle, computedStyle} from '../style';
+import {AmpEvents} from '../amp-events';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -142,7 +143,7 @@ export class Resource {
     this.isPlaceholder_ = element.hasAttribute('placeholder');
 
     /** @private {boolean} */
-    this.blacklisted_ = false;
+    this.isBuilding_ = false;
 
     /** @private {!AmpElement|undefined|null} */
     this.owner_ = undefined;
@@ -174,6 +175,12 @@ export class Resource {
 
     /** @private {boolean} */
     this.isInViewport_ = false;
+
+    /** @private {?Promise} */
+    this.renderOutsideViewportPromise_ = null;
+
+    /** @private {?Function} */
+    this.renderOutsideViewportResolve_ = null;
 
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
@@ -270,38 +277,61 @@ export class Resource {
   }
 
   /**
-   * Returns whether the resource has been blacklisted.
+   * Returns whether the resource has been fully built.
    * @return {boolean}
    */
-  isBlacklisted() {
-    return this.blacklisted_;
+  isBuilt() {
+    return this.element.isBuilt();
+  }
+
+  /**
+   * Returns whether the resource is currently being built.
+   * @return {boolean}
+   */
+  isBuilding() {
+    return this.isBuilding_;
+  }
+
+  /**
+   * Returns promise that resolves when the element has been built.
+   * @return {!Promise}
+   */
+  whenBuilt() {
+    // TODO(dvoytenko): merge with the standard BUILT signal.
+    return this.element.signals().whenSignal('res-built');
   }
 
   /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
+   * @return {?Promise}
    */
   build() {
-    if (this.blacklisted_ || !this.element.isUpgraded()
-        || !this.resources_.grantBuildPermission()) {
-      return;
+    if (this.isBuilding_ ||
+        !this.element.isUpgraded() ||
+        !this.resources_.grantBuildPermission()) {
+      return null;
     }
-    try {
-      this.element.build();
-    } catch (e) {
-      dev().error(TAG, 'failed to build:', this.debugid, e);
-      this.blacklisted_ = true;
-      return;
-    }
-
-    if (this.hasBeenMeasured()) {
-      this.state_ = ResourceState.READY_FOR_LAYOUT;
-    } else {
-      this.state_ = ResourceState.NOT_LAID_OUT;
-    }
-    // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
-    // in PROD.
-    this.element.dispatchCustomEvent('amp:built');
+    this.isBuilding_ = true;
+    return this.element.build().then(() => {
+      this.isBuilding_ = false;
+      if (this.hasBeenMeasured()) {
+        this.state_ = ResourceState.READY_FOR_LAYOUT;
+        this.element.updateLayoutBox(this.layoutBox_);
+      } else {
+        this.state_ = ResourceState.NOT_LAID_OUT;
+      }
+      // TODO(dvoytenko): merge with the standard BUILT signal.
+      this.element.signals().signal('res-built');
+      // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
+      // in PROD.
+      this.element.dispatchCustomEvent(AmpEvents.BUILT);
+    }, reason => {
+      dev().error(TAG, 'failed to build:', this.debugid, reason);
+      this.isBuilding_ = false;
+      this.element.signals().rejectSignal('res-built', reason);
+      throw reason;
+    });
   }
 
   /**
@@ -528,7 +558,9 @@ export class Resource {
    * @return {boolean}
    */
   isDisplayed() {
-    return this.layoutBox_.height > 0 && this.layoutBox_.width > 0;
+    return (this.layoutBox_.height > 0 && this.layoutBox_.width > 0 &&
+        !!this.element.ownerDocument &&
+        !!this.element.ownerDocument.defaultView);
   }
 
   /**
@@ -557,6 +589,35 @@ export class Resource {
   }
 
   /**
+   * @return {!Promise} resolves when underlying element is built and within the
+   *    range specified by implementation's renderOutsideViewport
+   */
+  whenWithinRenderOutsideViewport() {
+    if (!this.isLayoutPending()) {
+      return Promise.resolve();
+    }
+    if (this.renderOutsideViewportPromise_) {
+      return this.renderOutsideViewportPromise_;
+    }
+    return this.renderOutsideViewportPromise_ = new Promise(resolver => {
+      this.renderOutsideViewportResolve_ = resolver;
+    });
+  }
+
+  /**
+   * @private resolves render outside viewport promise if one was created via
+   *    whenWithinRenderOutsideViewport.
+   */
+  resolveRenderOutsideViewport_() {
+    if (!this.renderOutsideViewportResolve_) {
+      return;
+    }
+    this.renderOutsideViewportResolve_();
+    this.renderOutsideViewportPromise_ = null;
+    this.renderOutsideViewportResolve_ = null;
+  }
+
+  /**
    * Whether this is allowed to render when not in viewport.
    * @return {boolean}
    */
@@ -568,6 +629,7 @@ export class Resource {
     // outside of viewport. For now, blindly trust that owner knows what it's
     // doing.
     if (this.hasOwner()) {
+      this.resolveRenderOutsideViewport_();
       return true;
     }
 
@@ -575,6 +637,9 @@ export class Resource {
     // Boolean interface, element is either always allowed or never allowed to
     // render outside viewport.
     if (renders === true || renders === false) {
+      if (renders === true) {
+        this.resolveRenderOutsideViewport_();
+      }
       return renders;
     }
     // Numeric interface, element is allowed to render outside viewport when it
@@ -608,9 +673,14 @@ export class Resource {
       }
     } else {
       // Element is in viewport
+      this.resolveRenderOutsideViewport_();
       return true;
     }
-    return distance < viewportBox.height * multipler / scrollPenalty;
+    const result = distance < viewportBox.height * multipler / scrollPenalty;
+    if (result) {
+      this.resolveRenderOutsideViewport_();
+    }
+    return result;
   }
 
   /**
@@ -621,13 +691,23 @@ export class Resource {
   }
 
   /**
+   * Undoes `layoutScheduled`.
+   */
+  layoutCanceled() {
+    this.state_ =
+        this.hasBeenMeasured() ?
+        ResourceState.READY_FOR_LAYOUT :
+        ResourceState.NOT_LAID_OUT;
+  }
+
+  /**
    * Starts the layout of the resource. Returns the promise that will yield
    * once layout is complete. Only allowed to be called on a upgraded, built
    * and displayed element.
-   * @param {boolean} isDocumentVisible
    * @return {!Promise}
+   * @package
    */
-  startLayout(isDocumentVisible) {
+  startLayout() {
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
@@ -640,30 +720,10 @@ export class Resource {
 
     dev().assert(this.state_ != ResourceState.NOT_BUILT,
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
+    dev().assert(this.isDisplayed(),
+        'Not displayed for layout: %s', this.debugid);
 
-    if (!isDocumentVisible && !this.prerenderAllowed()) {
-      dev().fine(TAG, 'layout canceled due to non pre-renderable element:',
-          this.debugid, this.state_);
-      this.state_ = ResourceState.READY_FOR_LAYOUT;
-      return Promise.resolve();
-    }
-
-    if (!this.isInViewport() && !this.renderOutsideViewport()) {
-      dev().fine(TAG, 'layout canceled due to element not being in viewport:',
-          this.debugid, this.state_);
-      this.state_ = ResourceState.READY_FOR_LAYOUT;
-      return Promise.resolve();
-    }
-
-    // Double check that the element has not disappeared since scheduling
-    this.measure();
-    if (!this.isDisplayed()) {
-      dev().fine(TAG, 'layout canceled due to element loosing display:',
-          this.debugid, this.state_);
-      return Promise.resolve();
-    }
-
-    // Not-wanted re-layouts are ignored.
+    // Unwanted re-layouts are ignored.
     if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
       dev().fine(TAG, 'layout canceled since it wasn\'t requested:',
           this.debugid, this.state_);
@@ -750,7 +810,11 @@ export class Resource {
    * @param {boolean} inViewport
    */
   setInViewport(inViewport) {
-    if (inViewport == this.isInViewport_) {
+    // TODO(dvoytenko, #9177): investigate/cleanup viewport signals for
+    // elements in dead iframes.
+    if (inViewport == this.isInViewport_ ||
+        !this.element.ownerDocument ||
+        !this.element.ownerDocument.defaultView) {
       return;
     }
     dev().fine(TAG, 'inViewport:', this.debugid, inViewport);

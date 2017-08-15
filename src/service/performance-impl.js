@@ -16,14 +16,12 @@
 
 import {layoutRectLtwh} from '../layout-rect';
 import {registerServiceBuilder, getService} from '../service';
-import {resourcesForDoc} from '../services';
-import {viewerForDoc} from '../services';
-import {viewportForDoc} from '../services';
+import {Services} from '../services';
 import {whenDocumentComplete} from '../document-ready';
-import {urls} from '../config';
 import {getMode} from '../mode';
 import {isCanary} from '../experiments';
-import {rateLimit} from '../utils/rate-limit';
+import {throttle} from '../utils/rate-limit';
+import {dict, map} from '../utils/object';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -33,11 +31,13 @@ import {rateLimit} from '../utils/rate-limit';
 const QUEUE_LIMIT = 50;
 
 /**
- * @typedef {{
+ * Fields:
+ * {{
  *   label: string,
  *   delta: (number|null|undefined),
  *   value: (number|null|undefined)
  * }}
+ * @typedef {!JsonObject}
  */
 let TickEventDef;
 
@@ -92,14 +92,24 @@ export class Performance {
     /** @private {boolean} */
     this.isPerformanceTrackingOn_ = false;
 
-    /** @private {?string} */
-    this.enabledExperiments_ = null;
+    /** @private {!Object<string,boolean>} */
+    this.enabledExperiments_ = map();
+    /** @private {string} */
+    this.ampexp_ = '';
+
+    // Add RTV version as experiment ID, so we can slice the data by version.
+    this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
+    if (isCanary(this.win)) {
+      this.addEnabledExperiment('canary');
+    }
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => {
       this.onload_();
       this.flush();
     });
+
+    this.registerPaintTimingObserver_();
   }
 
   /**
@@ -107,8 +117,8 @@ export class Performance {
    * @return {!Promise}
    */
   coreServicesAvailable() {
-    this.viewer_ = viewerForDoc(this.win.document);
-    this.resources_ = resourcesForDoc(this.win.document);
+    this.viewer_ = Services.viewerForDoc(this.win.document);
+    this.resources_ = Services.resourcesForDoc(this.win.document);
 
     this.isPerformanceTrackingOn_ = this.viewer_.isEmbedded() &&
         this.viewer_.getParam('csi') === '1';
@@ -154,13 +164,52 @@ export class Performance {
 
   onload_() {
     this.tick('ol');
+    this.tickLegacyFirstPaintTime_();
+  }
+
+  /**
+   * Reports first pain and first contentful paint timings.
+   * See https://github.com/WICG/paint-timing
+   */
+  registerPaintTimingObserver_() {
+    if (!this.win.PerformancePaintTiming) {
+      return;
+    }
+    const observer = new this.win.PerformanceObserver(list => {
+      list.getEntries().forEach(entry => {
+        if (entry.name == 'first-paint') {
+          this.tickDelta('fp', entry.startTime + entry.duration);
+        }
+        else if (entry.name == 'first-contentful-paint') {
+          this.tickDelta('fcp', entry.startTime + entry.duration);
+        }
+      });
+    });
+
+    observer.observe({entryTypes: ['paint']});
+  }
+
+  /**
+   * Tick fp time based on Chrome's legacy paint timing API when
+   * appropriate.
+   * `registerPaintTimingObserver_` calls the standards based API and this
+   * method does nothing if it is available.
+   */
+  tickLegacyFirstPaintTime_() {
     // Detect deprecated first pain time API
     // https://bugs.chromium.org/p/chromium/issues/detail?id=621512
     // We'll use this until something better is available.
-    if (this.win.chrome && typeof this.win.chrome.loadTimes == 'function') {
-      this.tickDelta('fp',
-          this.win.chrome.loadTimes().firstPaintTime * 1000 -
-              this.win.performance.timing.navigationStart);
+    if (!this.win.PerformancePaintTiming
+        && this.win.chrome
+        && typeof this.win.chrome.loadTimes == 'function') {
+      const fpTime = this.win.chrome.loadTimes().firstPaintTime
+          * 1000 - this.win.performance.timing.navigationStart;
+      if (fpTime <= 1) {
+        // Throw away bad data generated from an apparent Chrome bug
+        // that is fixed in later Chrome versions.
+        return;
+      }
+      this.tickDelta('fp', fpTime);
     }
   }
 
@@ -215,10 +264,10 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
-    const size = viewportForDoc(this.win.document).getSize();
+    const size = Services.viewportForDoc(this.win.document).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.getResourcesInRect(
-            this.win, rect, /* isInPrerender */ true)
+        this.win, rect, /* isInPrerender */ true)
         .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
   }
 
@@ -234,12 +283,12 @@ export class Performance {
   tick(label, opt_delta) {
     const value = (opt_delta == undefined) ? this.win.Date.now() : undefined;
 
-    const data = {
-      label,
-      value,
-      // Delta can be 0 or negative, but will always be changed to 1.
-      delta: opt_delta != null ? Math.max(opt_delta, 1) : undefined,
-    };
+    const data = dict({
+      'label': label,
+      'value': value,
+      // Delta can negative, but will always be changed to 0.
+      'delta': opt_delta != null ? Math.max(opt_delta, 0) : undefined,
+    });
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.sendMessage('tick', data);
     } else {
@@ -281,11 +330,9 @@ export class Performance {
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      const experiments = this.getEnabledExperiments_();
-      const payload = experiments === '' ? undefined : {
-        ampexp: experiments,
-      };
-      this.viewer_.sendMessage('sendCsi', payload, /* cancelUnsent */true);
+      this.viewer_.sendMessage('sendCsi', dict({
+        'ampexp': this.ampexp_,
+      }), /* cancelUnsent */true);
     }
   }
 
@@ -295,36 +342,17 @@ export class Performance {
   throttledFlush() {
     if (!this.throttledFlush_) {
       /** @private {function()} */
-      this.throttledFlush_ = rateLimit(this.win, this.flush, 100);
+      this.throttledFlush_ = throttle(this.win, this.flush.bind(this), 100);
     }
     this.throttledFlush_();
   }
 
   /**
-   * @returns {string} comma-separated list of experiment IDs
-   * @private
+   * @param {string} experimentId
    */
-  getEnabledExperiments_() {
-    if (this.enabledExperiments_ !== null) {
-      return this.enabledExperiments_;
-    }
-    const experiments = [];
-    // Add RTV version as experiment ID, so we can slice the data by version.
-    if (getMode(this.win).rtvVersion) {
-      experiments.push(getMode(this.win).rtvVersion);
-    }
-    if (isCanary(this.win)) {
-      experiments.push('canary');
-    }
-    // Check if it's the legacy CDN domain.
-    if (this.getHostname_() == urls.cdn.split('://')[1]) {
-      experiments.push('legacy-cdn-domain');
-    }
-    return this.enabledExperiments_ = experiments.join(',');
-  }
-
-  getHostname_() {
-    return this.win.location.hostname;
+  addEnabledExperiment(experimentId) {
+    this.enabledExperiments_[experimentId] = true;
+    this.ampexp_ = Object.keys(this.enabledExperiments_).join(',');
   }
 
   /**
@@ -370,7 +398,7 @@ export class Performance {
    */
   prerenderComplete_(value) {
     if (this.viewer_) {
-      this.viewer_.sendMessage('prerenderComplete', {value},
+      this.viewer_.sendMessage('prerenderComplete', dict({'value': value}),
           /* cancelUnsent */true);
     }
   }

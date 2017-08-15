@@ -16,7 +16,7 @@
 
 import {dev} from '../../../src/log';
 import {ValidationBubble} from './validation-bubble';
-import {getAmpDoc} from '../../../src/ampdoc';
+import {getAmpdoc} from '../../../src/service';
 
 
 /** @type {boolean|undefined} */
@@ -51,6 +51,7 @@ export function setCheckValiditySupportedForTesting(isSupported) {
 const CustomValidationTypes = {
   AsYouGo: 'as-you-go',
   ShowAllOnSubmit: 'show-all-on-submit',
+  InteractAndSubmit: 'interact-and-submit',
   ShowFirstOnSubmit: 'show-first-on-submit',
 };
 
@@ -69,7 +70,7 @@ export class FormValidator {
     this.form = form;
 
     /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc = getAmpDoc(form);
+    this.ampdoc = getAmpdoc(form);
 
     /** @protected @const {!Document} */
     this.doc = /** @type {!Document} */ (form.ownerDocument);
@@ -337,15 +338,17 @@ export class AsYouGoValidator extends AbstractCustomValidator {
 }
 
 
+/** @private visible for testing */
+export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
+  /** @override */
+  shouldValidateOnInteraction(unusedInput) {
+    return true;
+  }
+}
+
+
 /**
  * Returns the form validator instance.
- *
- * TODO(#5000): Consider allowing multiple custom validators to be registered to a form.
- *     This allows for example a form to have as-you-go AND show-all-on-submit
- *     validators instead of having to stick with one.
- *
- * TODO(#5004): Consider setting a form-level class to indicate that the form was blocked
- *    from submission after being invalid (like .amp-form-submit-invalid).
  *
  * @param {!HTMLFormElement} form
  * @return {!FormValidator}
@@ -358,6 +361,8 @@ export function getFormValidator(form) {
       return new AsYouGoValidator(form);
     case CustomValidationTypes.ShowAllOnSubmit:
       return new ShowAllOnSubmitValidator(form);
+    case CustomValidationTypes.InteractAndSubmit:
+      return new InteractAndSubmitValidator(form);
     case CustomValidationTypes.ShowFirstOnSubmit:
       return new ShowFirstOnSubmitValidator(form);
   }

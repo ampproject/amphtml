@@ -39,6 +39,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## What is Vega?
 Vega is a visualization grammar, a declarative format for creating and saving
 interactive visualization designs. Vega's runtime uses [D3](https://github.com/d3/d3)
@@ -124,7 +126,7 @@ to learn more and play with samples.
 
 ## Attributes
 
-**src**
+##### src
 
 This attribute can be used to load a Vega specification data file
 from a specified remote URL. The URL must use https scheme.
@@ -134,8 +136,7 @@ as the only child of `<amp-viz-vega>`.
 
 Only either `src` or `<script>` should be specified. Using both will result in error.
 
-
-**use-data-width** and **use-data-height**
+##### use-data-width and use-data-height
 
 To support responsive visualization, by default `<amp-viz-vega>` overrides `width`
 and `height` values defined in the Vega specification data with the actual width

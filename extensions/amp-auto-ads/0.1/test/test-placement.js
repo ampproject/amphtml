@@ -15,7 +15,7 @@
  */
 
 import {AdTracker} from '../ad-tracker';
-import {resourcesForDoc} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 
 describes.realWin('placement', {
@@ -517,7 +517,7 @@ describes.realWin('placement', {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const resource = resourcesForDoc(anchor);
+      const resource = Services.resourcesForDoc(anchor);
       sandbox.stub(resource, 'attemptChangeSize', () => {
         return Promise.resolve();
       });
@@ -547,7 +547,7 @@ describes.realWin('placement', {
       return placements[0].placeAd(attributes, adTracker)
           .then(placementState => {
             expect(resource.attemptChangeSize).to.have.been.calledWith(
-                anchor.firstChild, 100, undefined);
+                anchor.firstChild, 250, undefined);
             expect(placementState).to.equal(PlacementState.PLACED);
           });
     });
@@ -557,7 +557,7 @@ describes.realWin('placement', {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const resource = resourcesForDoc(anchor);
+      const resource = Services.resourcesForDoc(anchor);
       sandbox.stub(resource, 'attemptChangeSize', () => {
         return Promise.reject(new Error('Resize failed'));
       });
@@ -587,7 +587,7 @@ describes.realWin('placement', {
       return placements[0].placeAd(attributes, adTracker)
           .then(placementState => {
             expect(resource.attemptChangeSize).to.have.been.calledWith(
-                anchor.firstChild, 100, undefined);
+                anchor.firstChild, 250, undefined);
             expect(placementState).to.equal(PlacementState.RESIZE_FAILED);
           });
     });

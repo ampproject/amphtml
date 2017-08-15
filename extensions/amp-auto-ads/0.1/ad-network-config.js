@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+import {
+  AdSenseAmpAutoAdsHoldoutBranches,
+  getAdSenseAmpAutoAdsExpBranch,
+} from '../../../ads/google/adsense-amp-auto-ads';
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
-import {documentInfoForDoc} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
+import {Services} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
-import {viewportForDoc} from '../../../src/services';
 
 
 /**
@@ -28,6 +32,13 @@ import {viewportForDoc} from '../../../src/services';
 class AdNetworkConfigDef {
 
   /**
+   * Indicates whether amp-auto-ads should be enabled on this pageview.
+   * @param {!Window} unusedWin
+   * @return {boolean} true if amp-auto-ads should be enabled on this pageview.
+   */
+  isEnabled(unusedWin) {}
+
+  /**
    * @return {string}
    */
   getConfigUrl() {}
@@ -35,7 +46,7 @@ class AdNetworkConfigDef {
   /**
    * Any attributes derived from either the page or the auto-amp-ads tag that
    * should be applied to any ads inserted.
-   * @return {!Object<string, string>}
+   * @return {!JsonObject<string, string>}
    */
   getAttributes() {}
 
@@ -70,34 +81,38 @@ class AdSenseNetworkConfig {
     this.autoAmpAdsElement_ = autoAmpAdsElement;
   }
 
+  /**
+   * @param {!Window} win
+   */
+  isEnabled(win) {
+    const branch = getAdSenseAmpAutoAdsExpBranch(win);
+    return branch != AdSenseAmpAutoAdsHoldoutBranches.CONTROL;
+  }
+
   /** @override */
   getConfigUrl() {
-    const docInfo = documentInfoForDoc(this.autoAmpAdsElement_);
+    const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
     const canonicalHostname = parseUrl(docInfo.canonicalUrl).hostname;
-    return buildUrl('//pagead2.googlesyndication.com/getconfig/ama', [
-      {
-        name: 'client',
-        value: this.autoAmpAdsElement_.getAttribute('data-ad-client'),
-      },
-      {
-        name: 'plah',
-        value: canonicalHostname},
-      {name: 'ama_t', value: 'amp'},
-    ], 4096);
+    return buildUrl('//pagead2.googlesyndication.com/getconfig/ama', {
+      'client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
+      'plah': canonicalHostname,
+      'ama_t': 'amp',
+      'url': docInfo.canonicalUrl,
+    }, 4096);
   }
 
   /** @override */
   getAttributes() {
-    return {
+    return dict({
       'type': 'adsense',
       'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
-    };
+    });
   }
 
   /** @override */
   getAdConstraints() {
     const viewportHeight =
-        viewportForDoc(this.autoAmpAdsElement_).getSize().height;
+        Services.viewportForDoc(this.autoAmpAdsElement_).getSize().height;
     return {
       initialMinSpacing: viewportHeight,
       subsequentMinSpacing: [

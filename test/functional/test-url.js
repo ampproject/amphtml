@@ -23,6 +23,7 @@ import {
   getSourceUrl,
   isProxyOrigin,
   isLocalhostOrigin,
+  isProtocolValid,
   isSecureUrl,
   parseQueryString,
   parseUrl,
@@ -477,6 +478,28 @@ describe('isLocalhostOrigin', () => {
       'http://www.example.com/foo.html', false);
 });
 
+describe('isProtocolValid', () => {
+  function testProtocolValid(href, bool) {
+    it('should return whether it is a valid protocol for ' + href, () => {
+      expect(isProtocolValid(href)).to.equal(bool);
+    });
+  }
+
+  testProtocolValid('http://foo.com', true);
+  testProtocolValid('https://foo.com', true);
+  testProtocolValid('bar://foo.com', true);
+  testProtocolValid('', true);
+  testProtocolValid('foo', true);
+  testProtocolValid('./foo', true);
+  testProtocolValid('/foo', true);
+  testProtocolValid('//foo.com', true);
+  testProtocolValid(undefined, true);
+  testProtocolValid(null, true);
+  testProtocolValid('javascript:alert("hello world!");', false);
+  testProtocolValid('data:12345', false);
+  testProtocolValid('vbscript:foo', false);
+});
+
 describe('getSourceOrigin/Url', () => {
 
   function testOrigin(href, sourceHref) {
@@ -505,6 +528,9 @@ describe('getSourceOrigin/Url', () => {
   testOrigin(
       'https://cdn.ampproject.org/c/s/origin.com%3A81/foo/?f=0',
       'https://origin.com:81/foo/?f=0');
+  testOrigin(
+      'https://cdn.ampproject.org/a/www.origin.com/foo/?f=0#h',
+      'http://www.origin.com/foo/?f=0#h');
 
   // Prefixed CDN
   testOrigin(

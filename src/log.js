@@ -18,7 +18,6 @@ import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
 
-
 /** @const Time when this JS loaded.  */
 const start = Date.now();
 
@@ -35,10 +34,25 @@ export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
 
 
 /**
+ * Four zero width space.
+ *
+ * @const {string}
+ */
+export const USER_ERROR_EMBED_SENTINEL = '\u200B\u200B\u200B\u200B';
+
+
+/**
  * @return {boolean} Whether this message was a user error.
  */
 export function isUserErrorMessage(message) {
   return message.indexOf(USER_ERROR_SENTINEL) >= 0;
+}
+
+/**
+ * @return {boolean} Whether this message was a a user error from an iframe embed.
+ */
+export function isUserErrorEmbed(message) {
+  return message.indexOf(USER_ERROR_EMBED_SENTINEL) >= 0;
 }
 
 
@@ -65,11 +79,20 @@ export function setReportError(fn) {
 
 /**
  * Logging class.
+ * Use of sentinel string instead of a boolean to check user/dev errors
+ * because errors could be rethrown by some native code as a new error, and only a message would survive.
+ * Also, some browser don’t support a 5th error object argument in window.onerror. List of supporting browser can be found
+ * here: https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
  * @final
  * @private Visible for testing only.
  */
 export class Log {
   /**
+   * opt_suffix will be appended to error message to identify the type of the error message.
+   * We can't rely on the error object to pass along the type because
+   * some browsers do not have this param in its window.onerror API.
+   * See: https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
+   *
    * @param {!Window} win
    * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
    * @param {string=} opt_suffix
@@ -210,6 +233,7 @@ export class Log {
   error(tag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
+      error.name = tag || error.name;
       // reportError is installed globally per window in the entry point.
       self.reportError(error);
     }
@@ -218,10 +242,10 @@ export class Log {
   /**
    * Reports an error message and marks with an expected property. If the
    * logging is disabled, the error is rethrown asynchronously.
-   * @param {string} tag
+   * @param {string} unusedTag
    * @param {...*} var_args
    */
-  expectedError(tag, var_args) {
+  expectedError(unusedTag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.expected = true;
@@ -381,6 +405,7 @@ export class Log {
    * @private
    */
   prepareError_(error) {
+    error = duplicateErrorIfNecessary(error);
     if (this.suffix_) {
       if (!error.message) {
         error.message = this.suffix_;
@@ -392,7 +417,6 @@ export class Log {
     }
   }
 }
-
 
 /**
  * @param {string|!Element} val
@@ -417,6 +441,30 @@ function pushIfNonEmpty(array, val) {
   }
 }
 
+/**
+ * Some exceptions (DOMException, namely) have read-only message.
+ * @param {!Error} error
+ * @return {!Error};
+ */
+export function duplicateErrorIfNecessary(error) {
+  const message = error.message;
+  const test = String(Math.random());
+  error.message = test;
+
+  if (error.message === test) {
+    error.message = message;
+    return error;
+  }
+
+  const e = new Error(error.message);
+  // Copy all the extraneous things we attach.
+  for (const prop in error) {
+    e[prop] = error[prop];
+  }
+  // Ensure these are copied.
+  e.stack = error.stack;
+  return e;
+}
 
 /**
  * @param {...*} var_args
@@ -429,7 +477,7 @@ function createErrorVargs(var_args) {
   for (let i = 0; i < arguments.length; i++) {
     const arg = arguments[i];
     if (arg instanceof Error && !error) {
-      error = arg;
+      error = duplicateErrorIfNecessary(arg);
     } else {
       if (message) {
         message += ' ';
@@ -437,6 +485,7 @@ function createErrorVargs(var_args) {
       message += arg;
     }
   }
+
   if (!error) {
     error = new Error(message);
   } else if (message) {
@@ -464,11 +513,12 @@ export function rethrowAsync(var_args) {
 /**
  * Cache for logs. We do not use a Service since the service module depends
  * on Log and closure literally can't even.
- * @type {{user: ?Log, dev: ?Log}}
+ * @type {{user: ?Log, dev: ?Log, userForEmbed: ?Log}}
  */
 self.log = (self.log || {
   user: null,
   dev: null,
+  userForEmbed: null,
 });
 
 const logs = self.log;
@@ -501,7 +551,6 @@ export function resetLogConstructorForTesting() {
   logConstructor = null;
 }
 
-
 /**
  * Publisher level log.
  *
@@ -510,24 +559,40 @@ export function resetLogConstructorForTesting() {
  *  2. Development mode is enabled via `#development=1` or logging is explicitly
  *     enabled via `#log=D` where D >= 1.
  *
+ * @param {!Element=} opt_element
  * @return {!Log}
  */
-export function user() {
-  if (logs.user) {
-    return logs.user;
+export function user(opt_element) {
+  if (!logs.user) {
+    logs.user = getUserLogger(USER_ERROR_SENTINEL);
   }
+  if (!isFromEmbed(logs.user.win, opt_element)) {
+    return logs.user;
+  } else {
+    if (logs.userForEmbed) {
+      return logs.userForEmbed;
+    }
+    return logs.userForEmbed = getUserLogger(USER_ERROR_EMBED_SENTINEL);
+  }
+}
+
+/**
+ * Getter for user logger
+ * @param {string=} suffix
+ * @returns {!Log}
+ */
+function getUserLogger(suffix) {
   if (!logConstructor) {
     throw new Error('failed to call initLogConstructor');
   }
-  return logs.user = new logConstructor(self, mode => {
+  return new logConstructor(self, mode => {
     const logNum = parseInt(mode.log, 10);
     if (mode.development || logNum >= 1) {
       return LogLevel.FINE;
     }
     return LogLevel.OFF;
-  }, USER_ERROR_SENTINEL);
+  }, suffix);
 }
-
 
 /**
  * AMP development log. Calls to `devLog().assert` and `dev.fine` are stripped in
@@ -556,4 +621,16 @@ export function dev() {
     }
     return LogLevel.OFF;
   });
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element=} opt_element
+ * @returns {boolean} isEmbed
+ */
+export function isFromEmbed(win, opt_element) {
+  if (!opt_element) {
+    return false;
+  }
+  return opt_element.ownerDocument.defaultView != win;
 }

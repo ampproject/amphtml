@@ -15,9 +15,9 @@
  */
 
 import '../amp-call-tracking';
-import {clearResponseCache} from '../amp-call-tracking';
+import {clearResponseCacheForTesting} from '../amp-call-tracking';
 import {createIframePromise} from '../../../../testing/iframe';
-import {xhrFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -27,7 +27,7 @@ describe('amp-call-tracking', () => {
 
   function getTestIframe() {
     return createIframePromise().then(iframe => {
-      xhrMock = sandbox.mock(xhrFor(iframe.win));
+      xhrMock = sandbox.mock(Services.xhrFor(iframe.win));
       return iframe;
     });
   }
@@ -49,8 +49,12 @@ describe('amp-call-tracking', () => {
   function mockXhrResponse(iframe, url, response) {
     xhrMock
         .expects('fetchJson')
-        .withArgs(url)
-        .returns(Promise.resolve(response));
+        .withArgs(url, sandbox.match(init => init.credentials == 'include'))
+        .returns(Promise.resolve({
+          json() {
+            return Promise.resolve(response);
+          },
+        }));
   }
 
   function expectHyperlinkToBe(callTrackingEl, href, textContent) {
@@ -65,7 +69,7 @@ describe('amp-call-tracking', () => {
   });
 
   afterEach(() => {
-    clearResponseCache();
+    clearResponseCacheForTesting();
 
     xhrMock.verify();
     sandbox.restore();
@@ -110,7 +114,7 @@ describe('amp-call-tracking', () => {
         defaultContent,
       }).then(callTrackingEl => {
         expectHyperlinkToBe(
-          callTrackingEl, `tel:${phoneNumber}`, formattedPhoneNumber);
+            callTrackingEl, `tel:${phoneNumber}`, formattedPhoneNumber);
       });
     });
   });

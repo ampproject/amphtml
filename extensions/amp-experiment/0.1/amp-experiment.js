@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {parseJson} from '../../../src/json';
 import {Layout} from '../../../src/layout';
 import {waitForBodyPromise} from '../../../src/dom';
 import {allocateVariant} from './variant';
-import {getService} from '../../../src/service';
+import {registerServiceBuilder} from '../../../src/service';
 
 /** @const */
 const ATTR_PREFIX = 'amp-x-';
@@ -37,19 +38,23 @@ export class AmpExperiment extends AMP.BaseElement {
     const variants = Object.keys(config).map(experimentName => {
       return allocateVariant(
           this.getAmpDoc(), experimentName, config[experimentName])
-              .then(variantName => {
-                results[experimentName] = variantName;
-              });
+          .then(variantName => {
+            results[experimentName] = variantName;
+          });
     });
 
+
     /** @private @const {!Promise<!Object<string, ?string>>} */
-    this.experimentVariants_ = Promise.all(variants)
+    const experimentVariants = Promise.all(variants)
         .then(() => results)
         .then(this.addToBody_.bind(this));
 
-    getService(this.win, 'variant', () => this.experimentVariants_);
+    registerServiceBuilder(this.win, 'variant', function() {
+      return experimentVariants;
+    });
   }
 
+  /** @return {!JsonObject} [description] */
   getConfig_() {
     const children = this.element.children;
     user().assert(
@@ -59,7 +64,8 @@ export class AmpExperiment extends AMP.BaseElement {
         '<amp-experiment> should contain exactly one ' +
         '<script type="application/json"> child.');
 
-    return JSON.parse(children[0].textContent);
+    return /** @type {!JsonObject} */ (
+        dev().assert(parseJson(children[0].textContent)));
   }
 
   /**
@@ -75,7 +81,8 @@ export class AmpExperiment extends AMP.BaseElement {
     return waitForBodyPromise(doc).then(() => {
       for (const name in experiments) {
         if (experiments[name]) {
-          doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
+          doc.body.setAttribute(ATTR_PREFIX + name,
+              dev().assertString(experiments[name]));
         }
       }
       return experiments;

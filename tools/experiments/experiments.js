@@ -58,6 +58,12 @@ const EXPERIMENTS = [
         'README.md#amp-dev-channel',
   },
   {
+    id: 'amp-web-push',
+    name: 'Enable AMP web push',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-web-push/0.1/amp-web-push.md',
+  },
+  {
     id: 'ad-type-custom',
     name: 'Activates support for custom (self-serve) advertisements',
     spec: 'https://github.com/ampproject/amphtml/blob/master/ads/custom.md',
@@ -91,6 +97,12 @@ const EXPERIMENTS = [
     name: 'AMP Auto Ads',
     spec: 'https://github.com/ampproject/amphtml/issues/6196',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
+  },
+  {
+    id: 'amp-auto-ads-adsense-holdout',
+    name: 'AMP Auto Ads AdSense Holdout',
+    spec: 'https://github.com/ampproject/amphtml/issues/6196',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9247',
   },
   {
     id: 'amp-google-vrview-image',
@@ -157,12 +169,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
-    id: 'make-body-relative',
-    name: 'Sets the body to position:relative (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/5667',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5660',
-  },
-  {
     id: 'alp-for-a4a',
     name: 'Enable redirect to landing page directly for A4A',
     spec: 'https://github.com/ampproject/amphtml/issues/5212',
@@ -187,21 +193,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
   {
-    id: 'visibility-v2',
-    name: 'New visibility tracking using native IntersectionObserver',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
-  },
-  {
-    id: 'visibility-v3',
-    name: 'Visibility tracking with FIE and in-a-box support',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8121',
-  },
-  {
-    id: 'amp-accordion-session-state-optout',
-    name: 'AMP Accordion attribute to opt out of preserved state.',
-    Spec: 'https://github.com/ampproject/amphtml/issues/3813',
-  },
-  {
     id: 'variable-filters',
     name: 'Format to apply filters to analytics variables',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
@@ -219,13 +210,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
   },
   {
-    id: 'amp-bind',
-    name: 'AMP extension for dynamic content',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-bind/amp-bind.md',
-  },
-  {
     id: 'web-worker',
     name: 'Web worker for background processing',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
@@ -235,30 +219,10 @@ const EXPERIMENTS = [
     name: 'Display jank meter',
   },
   {
-    id: 'amp-selector',
-    name: 'Amp selector extension- [LAUNCHED]',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-         'amp-selector/amp-selector.md',
-  },
-  {
-    id: 'sticky-ad-early-load',
-    name: 'Load sticky-ad early after user first scroll' +
-        'Only apply to 1.0 version',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7479',
-  },
-  {
     id: 'amp-fx-parallax',
     name: 'Amp extension for a parallax effect',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
     spec: 'https://github.com/ampproject/amphtml/issues/1443',
-  },
-  {
-    id: 'amp-sortable-table',
-    name: 'AMP Sortable Table',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6057',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-sortable-table/amp-sortable-table.md',
   },
   {
     id: 'slidescroll-disable-css-snap',
@@ -277,18 +241,31 @@ const EXPERIMENTS = [
     name: 'Use slot width/height attribute for AdSense size format',
   },
   {
-    id: 'dc-use-attr-for-format',
-    name: 'Use slot width/height attribute for DoubleClick size format',
+    id: 'input-debounced',
+    name: 'A debounced input event for AMP actions',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9413',
+    spec: 'https://github.com/ampproject/amphtml/issues/9277',
   },
   {
-    id: 'ad-loader-v1',
-    name: 'New ad loader version 1',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
+    id: 'amp-ima-video',
+    name: 'IMA-integrated Video Player',
   },
   {
-    id: 'ad-loader-v2',
-    name: 'New ad loader version 2',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
+    id: 'amp-sidebar 1.0',
+    name: 'Amp sidebar 1.0 extension',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9803',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+      'amp-sidebar/1.0/amp-sidebar-1.0.md',
+  },
+  {
+    id: 'user-error-reporting',
+    name: 'Report error to publishers',
+    spec: 'https://github.com/ampproject/amphtml/issues/6415',
+  },
+  {
+    id: 'disable-rtc',
+    name: 'Disable AMP RTC',
+    spec: 'https://github.com/ampproject/amphtml/issues/8551',
   },
 ];
 

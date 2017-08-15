@@ -3,7 +3,7 @@
 build
 .amp-build
 c
-dist
+/dist
 dist.3p
 dist.tools
 examples.min
@@ -17,4 +17,3 @@ typings
 typings.json
 build-system/runner/TESTS-TestSuites.xml
 /test/manual/amp-ad.adtech.html
-yarn.lock

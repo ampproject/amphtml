@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/env python2.7
 #
 # Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 #
@@ -108,7 +108,9 @@ def InstallNodeDependencies():
   # Install the project dependencies specified in package.json into
   # node_modules.
   logging.info('installing AMP Validator webui dependencies ...')
-  subprocess.check_call(['npm', 'install'])
+  subprocess.check_call(
+      ['npm', 'install'],
+      stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('... done')
 
 
@@ -156,8 +158,9 @@ def CreateWebuiAppengineDist(out_dir):
 
 def Main():
   """The main method, which executes all build steps and runs the tests."""
-  logging.basicConfig(format='[[%(filename)s %(funcName)s]] - %(message)s',
-                      level=logging.INFO)
+  logging.basicConfig(
+      format='[[%(filename)s %(funcName)s]] - %(message)s',
+      level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
   nodejs_cmd = GetNodeJsCmd()
   CheckPrereqs()
   InstallNodeDependencies()

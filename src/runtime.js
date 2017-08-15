@@ -17,10 +17,17 @@
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
+import {
+  createShadowDomWriter,
+  createShadowRoot,
+  importShadowBody,
+  installStylesForShadowRoot,
+} from './shadow-embed';
 import {VisibilityState} from './visibility-state';
 import {
   addDocFactoryToExtension,
   addElementToExtension,
+  addServiceToExtension,
   addShadowRootFactoryToExtension,
   installBuiltinElements,
   installExtensionsInShadowDoc,
@@ -28,31 +35,28 @@ import {
   registerExtension,
   stubLegacyElements,
 } from './service/extensions-impl';
-import {ampdocServiceFor} from './ampdoc';
+import {Services} from './services';
 import {startupChunk} from './chunk';
 import {cssText} from '../build/css';
 import {dev, user, initLogConstructor, setReportError} from './log';
-import {reportError} from './error';
+import {reportErrorForWin} from './error';
 import {
   disposeServicesForDoc,
-  getService,
+  registerServiceBuilder,
   registerServiceBuilderForDoc,
 } from './service';
 import {childElementsByTag} from './dom';
-import {
-  createShadowRoot,
-  importShadowBody,
-  installStylesForShadowRoot,
-} from './shadow-embed';
 import {getMode} from './mode';
 import {
   hasRenderDelayingServices,
 } from './render-delaying-services';
 import {installActionServiceForDoc} from './service/action-impl';
+import {installCidService} from './service/cid-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
+import {installDocumentStateService} from './service/document-state';
+import {installGlobalClickListenerForDoc} from './service/document-click';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
-import {extensionsFor} from './services';
 import {installHistoryServiceForDoc} from './service/history-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
@@ -66,9 +70,9 @@ import {installStorageServiceForDoc} from './service/storage-impl';
 import {installStyles} from './style-installer';
 import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
-import {installUrlReplacementsServiceForDoc,} from
+import {installUrlReplacementsServiceForDoc} from
     './service/url-replacements-impl';
-import {installViewerServiceForDoc, setViewerVisibilityState,} from
+import {installViewerServiceForDoc, setViewerVisibilityState} from
     './service/viewer-impl';
 import {installViewportServiceForDoc} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
@@ -79,35 +83,15 @@ import {
   toggleExperiment,
 } from './experiments';
 import {parseUrl} from './url';
-import {platformFor} from './services';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
-import {resourcesForDoc} from './services';
 import {setStyle} from './style';
-import {timerFor} from './services';
-import {viewerForDoc} from './services';
-import {viewportForDoc} from './services';
 import {waitForBody} from './dom';
 import * as config from './config';
 
 initLogConstructor();
-setReportError(reportError);
+setReportError(reportErrorForWin.bind(null, self));
 
-/**
- * - n is the name.
- * - f is the function body of the extension.
- * - p is the priority. Only supported value is "high".
- *   high means, that the extension is not subject to chunking.
- *   This should be used for work, that should always happen
- *   as early as possible. Currently this is primarily used
- *   for viewer communication setup.
- * @typedef {{
- *   n: string,
- *   f: function(!Object),
- *   p: (string|undefined),
- * }}
- */
-let ExtensionPayloadDef;
 
 /** @const @private {string} */
 const TAG = 'runtime';
@@ -121,12 +105,13 @@ const elementsForTesting = {};
  */
 export function installRuntimeServices(global) {
   installCryptoService(global);
+  installBatchedXhrService(global);
+  installDocumentStateService(global);
   installPlatformService(global);
+  installTemplatesService(global);
   installTimerService(global);
   installVsyncService(global);
   installXhrService(global);
-  installBatchedXhrService(global);
-  installTemplatesService(global);
 }
 
 
@@ -136,6 +121,7 @@ export function installRuntimeServices(global) {
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installAmpdocServices(ampdoc, opt_initParams) {
+  installCidService(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   installViewerServiceForDoc(ampdoc, opt_initParams);
   installViewportServiceForDoc(ampdoc);
@@ -145,6 +131,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc);
+  installGlobalClickListenerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }
 
@@ -185,12 +172,12 @@ function adoptShared(global, opts, callback) {
   global.AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
   // of functions
-  /** @const {!Array<function(!Object)|ExtensionPayloadDef>} */
+  /** @const {!Array<function(!Object)|ExtensionPayload>} */
   const preregisteredExtensions = global.AMP || [];
 
   installExtensionsService(global);
   /** @const {!./service/extensions-impl.Extensions} */
-  const extensions = extensionsFor(global);
+  const extensions = Services.extensionsFor(global);
   installRuntimeServices(global);
   stubLegacyElements(global);
 
@@ -262,18 +249,18 @@ function adoptShared(global, opts, callback) {
 
   /**
    * Sets the function to forward tick events to.
-   * @param {function(string,?string=,number=)} fn
+   * @param {function(string,?string=,number=)} unusedFn
    * @param {function()=} opt_flush
    * @deprecated
    * @export
    */
-  global.AMP.setTickFunction = (fn, opt_flush) => {};
+  global.AMP.setTickFunction = (unusedFn, opt_flush) => {};
 
   // Run specific setup for a single-doc or shadow-doc mode.
   callback(global, extensions);
 
   /**
-   * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+   * @param {function(!Object)|ExtensionPayload} fnOrStruct
    */
   function installExtension(fnOrStruct) {
     const register = () => {
@@ -308,7 +295,7 @@ function adoptShared(global, opts, callback) {
    */
   function installAutoLoadExtensions() {
     if (!getMode().test && isExperimentOn(global, 'amp-lightbox-viewer-auto')) {
-      extensionsFor(global).loadExtension('amp-lightbox-viewer');
+      Services.extensionsFor(global).loadExtension('amp-lightbox-viewer');
     }
   }
 
@@ -336,7 +323,7 @@ function adoptShared(global, opts, callback) {
   maybePumpEarlyFrame(global, () => {
     /**
      * Registers a new custom element.
-     * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+     * @param {function(!Object)|ExtensionPayload} fnOrStruct
      */
     global.AMP.push = function(fnOrStruct) {
       if (maybeLoadCorrectVersion(global, fnOrStruct)) {
@@ -367,14 +354,14 @@ function adoptShared(global, opts, callback) {
   // immediately we need to keep pushing onto preregisteredExtensions
   if (!global.AMP.push) {
     global.AMP.push = preregisteredExtensions.push.bind(
-      preregisteredExtensions);
+        preregisteredExtensions);
   }
 
   installAutoLoadExtensions();
 
   // For iOS we need to set `cursor:pointer` to ensure that click events are
   // delivered.
-  if (platformFor(global).isIos()) {
+  if (Services.platformFor(global).isIos()) {
     setStyle(global.document.documentElement, 'cursor', 'pointer');
   }
 }
@@ -390,16 +377,16 @@ export function adopt(global) {
     registerElement: prepareAndRegisterElement,
     registerServiceForDoc: prepareAndRegisterServiceForDoc,
   }, global => {
-    const viewer = viewerForDoc(global.document);
+    const viewer = Services.viewerForDoc(global.document);
 
     global.AMP.viewer = viewer;
 
     if (getMode().development) {
       global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-      global.AMP.resources = resourcesForDoc(global.document);
+      global.AMP.resources = Services.resourcesForDoc(global.document);
     }
 
-    const viewport = viewportForDoc(global.document);
+    const viewport = Services.viewportForDoc(global.document);
 
     global.AMP.viewport = {};
     global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
@@ -421,12 +408,12 @@ export function adoptShadowMode(global) {
 
     const manager = new MultidocManager(
         global,
-        ampdocServiceFor(global),
+        Services.ampdocServiceFor(global),
         extensions,
-        timerFor(global));
+        Services.timerFor(global));
 
     /**
-     * Registers a shadow root document.
+     * Registers a shadow root document via a fully fetched document.
      * @param {!Element} hostElement
      * @param {!Document} doc
      * @param {string} url
@@ -434,6 +421,16 @@ export function adoptShadowMode(global) {
      * @return {!Object}
      */
     global.AMP.attachShadowDoc = manager.attachShadowDoc.bind(manager);
+
+    /**
+     * Registers a shadow root document via a stream.
+     * @param {!Element} hostElement
+     * @param {string} url
+     * @param {!Object<string, string>=} opt_initParams
+     * @return {!Object}
+     */
+    global.AMP.attachShadowDocAsStream =
+        manager.attachShadowDocAsStream.bind(manager);
   });
 }
 
@@ -497,8 +494,8 @@ function registerElementClass(global, name, implementationClass, opt_css) {
       css: opt_css,
     };
   }
-  // Resolve this extension's Service Promise.
-  getService(global, name, emptyService);
+  // Register this extension to resolve its Service Promise.
+  registerServiceBuilder(global, name, emptyService);
 }
 
 
@@ -507,14 +504,14 @@ function registerElementClass(global, name, implementationClass, opt_css) {
  * @param {!Window} global
  * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
- * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
  */
-function prepareAndRegisterServiceForDoc(global, extensions,
-    name, opt_ctor, opt_factory) {
-  const ampdocService = ampdocServiceFor(global);
+function prepareAndRegisterServiceForDoc(global, extensions, name, ctor) {
+  const ampdocService = Services.ampdocServiceFor(global);
   const ampdoc = ampdocService.getAmpDoc();
-  registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory);
+  registerServiceForDoc(ampdoc, name, ctor);
+
+  addServiceToExtension(extensions, name);
 }
 
 
@@ -523,14 +520,15 @@ function prepareAndRegisterServiceForDoc(global, extensions,
  * @param {!Window} global
  * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
- * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
  */
 function prepareAndRegisterServiceForDocShadowMode(global, extensions,
-    name, opt_ctor, opt_factory) {
+    name, ctor) {
   addDocFactoryToExtension(extensions, ampdoc => {
-    registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory);
+    registerServiceForDoc(ampdoc, name, ctor);
   }, name);
+
+  addServiceToExtension(extensions, name);
 }
 
 
@@ -539,17 +537,15 @@ function prepareAndRegisterServiceForDocShadowMode(global, extensions,
  * modes.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} name
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
- * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
  */
-function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
+function registerServiceForDoc(ampdoc, name, ctor) {
   // TODO(kmh287): Investigate removing the opt_instantiate arg after
   // all other services have been refactored.
   registerServiceBuilderForDoc(ampdoc,
-                               name,
-                               opt_ctor,
-                               opt_factory,
-                               /* opt_instantiate */ true);
+      name,
+      ctor,
+      /* opt_instantiate */ true);
 }
 
 
@@ -579,16 +575,15 @@ class MultidocManager {
   }
 
   /**
-   * Implementation for `attachShadowDoc` function. Attaches the shadow doc and
-   * configures ampdoc for it.
+   * Attaches the shadow root and calls the supplied DOM builder.
    * @param {!Element} hostElement
-   * @param {!Document} doc
    * @param {string} url
-   * @param {!Object<string, string>=} opt_initParams
+   * @param {!Object<string, string>|undefined} initParams
+   * @param {function(!Object, !ShadowRoot, !./service/ampdoc-impl.AmpDocShadow):!Promise} builder
    * @return {!Object}
+   * @private
    */
-  attachShadowDoc(hostElement, doc, url, opt_initParams) {
-    dev().fine(TAG, 'Attach shadow doc:', doc);
+  attachShadowDoc_(hostElement, url, initParams, builder) {
     this.purgeShadowRoots_();
 
     setStyle(hostElement, 'visibility', 'hidden');
@@ -614,8 +609,8 @@ class MultidocManager {
         /* opt_isRuntimeCss */ true);
 
     // Instal doc services.
-    installAmpdocServices(ampdoc, opt_initParams || Object.create(null));
-    const viewer = viewerForDoc(ampdoc);
+    installAmpdocServices(ampdoc, initParams || Object.create(null));
+    const viewer = Services.viewerForDoc(ampdoc);
 
     /**
      * Sets the document's visibility state.
@@ -629,7 +624,7 @@ class MultidocManager {
     /**
      * Posts message to the ampdoc.
      * @param {string} eventType
-     * @param {!JSONType} data
+     * @param {!JsonObject} data
      * @param {boolean} unusedAwaitResponse
      * @return {(!Promise<*>|undefined)}
      */
@@ -669,33 +664,16 @@ class MultidocManager {
 
     if (getMode().development) {
       amp.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-      amp.resources = resourcesForDoc(ampdoc);
+      amp.resources = Services.resourcesForDoc(ampdoc);
     }
 
-    // Install extensions.
-    const extensionIds = this.mergeShadowHead_(shadowRoot, doc);
-
-    // Apply all doc extensions.
-    installExtensionsInShadowDoc(this.extensions_, ampdoc, extensionIds);
-
-    // Append body.
-    if (doc.body) {
-      const body = importShadowBody(shadowRoot, doc.body);
-      body.classList.add('amp-shadow');
-      shadowRoot.appendChild(body);
-      shadowDocHasBody(ampdoc, body);
-    }
-
-    // Document is ready.
-    shadowDocReady(ampdoc);
-
-    // TODO(dvoytenko): find a better and more stable way to make content visible.
-    // E.g. integrate with dynamic classes. In shadow case specifically, we have
-    // to wait for stubbing to complete, which may take awhile due to importNode.
-    setTimeout(() => {
+    // Start building the shadow doc DOM.
+    builder(amp, shadowRoot, ampdoc).then(() => {
+      // Document is ready.
+      shadowDocReady(ampdoc);
       ampdoc.signals().signal(CommonSignals.RENDER_START);
       setStyle(hostElement, 'visibility', 'visible');
-    }, 50);
+    });
 
     // Store reference.
     if (!this.shadowRoots_.includes(shadowRoot)) {
@@ -704,6 +682,105 @@ class MultidocManager {
 
     dev().fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
     return amp;
+  }
+
+
+  /**
+   * Implementation for `attachShadowDoc` function. Attaches the shadow doc and
+   * configures ampdoc for it.
+   * @param {!Element} hostElement
+   * @param {!Document} doc
+   * @param {string} url
+   * @param {!Object<string, string>=} opt_initParams
+   * @return {!Object}
+   */
+  attachShadowDoc(hostElement, doc, url, opt_initParams) {
+    dev().fine(TAG, 'Attach shadow doc:', doc);
+    // TODO(dvoytenko, #9490): once stable, port full document case to emulated
+    // stream.
+    return this.attachShadowDoc_(
+        hostElement, url, opt_initParams,
+        (amp, shadowRoot, ampdoc) => {
+          // Install extensions.
+          const extensionIds = this.mergeShadowHead_(shadowRoot, doc);
+          installExtensionsInShadowDoc(this.extensions_, ampdoc, extensionIds);
+
+          // Append body.
+          if (doc.body) {
+            const body = importShadowBody(
+                shadowRoot, doc.body, /* deep */ true);
+            body.classList.add('amp-shadow');
+            shadowRoot.appendChild(body);
+            shadowDocHasBody(ampdoc, body);
+          }
+
+          // TODO(dvoytenko): find a better and more stable way to make content
+          // visible. E.g. integrate with dynamic classes. In shadow case
+          // specifically, we have to wait for stubbing to complete, which may
+          // take awhile due to importNode.
+          setTimeout(() => {
+            ampdoc.signals().signal(CommonSignals.RENDER_START);
+            setStyle(hostElement, 'visibility', 'visible');
+          }, 50);
+
+          return Promise.resolve();
+        });
+  }
+
+  /**
+   * Implementation for `attachShadowDocAsStream` function. Attaches the shadow
+   * doc and configures ampdoc for it.
+   * @param {!Element} hostElement
+   * @param {string} url
+   * @param {!Object<string, string>=} opt_initParams
+   * @return {!Object}
+   */
+  attachShadowDocAsStream(hostElement, url, opt_initParams) {
+    dev().fine(TAG, 'Attach shadow doc as stream');
+    return this.attachShadowDoc_(
+        hostElement, url, opt_initParams,
+        (amp, shadowRoot, ampdoc) => {
+          // Start streaming.
+          let renderStarted = false;
+          const writer = createShadowDomWriter(this.win);
+          amp.writer = writer;
+          writer.onBody(doc => {
+            // Install extensions.
+            const extensionIds = this.mergeShadowHead_(shadowRoot, doc);
+            // Apply all doc extensions.
+            installExtensionsInShadowDoc(
+                this.extensions_, ampdoc, extensionIds);
+
+            // Append shallow body.
+            const body = importShadowBody(
+                shadowRoot,
+                dev().assertElement(doc.body),
+                /* deep */ false);
+            body.classList.add('amp-shadow');
+            shadowRoot.appendChild(body);
+            shadowDocHasBody(ampdoc, body);
+            return body;
+          });
+          writer.onBodyChunk(() => {
+            // TODO(dvoytenko): find a better and more stable way to make
+            // content visible. E.g. integrate with dynamic classes. In shadow
+            // case specifically, we have to wait for stubbing to complete,
+            // which may take awhile due to node importing.
+            if (!renderStarted) {
+              renderStarted = true;
+              setTimeout(() => {
+                ampdoc.signals().signal(CommonSignals.RENDER_START);
+                setStyle(hostElement, 'visibility', 'visible');
+              }, 50);
+            }
+          });
+          return new Promise(resolve => {
+            writer.onEnd(() => {
+              resolve();
+              amp.writer = null;
+            });
+          });
+        });
   }
 
   /**
@@ -836,10 +913,10 @@ class MultidocManager {
         return;
       }
       // Broadcast message asynchronously.
-      const viewer = viewerForDoc(shadowRoot.AMP.ampdoc);
+      const viewer = Services.viewerForDoc(shadowRoot.AMP.ampdoc);
       this.timer_.delay(() => {
         viewer.receiveMessage('broadcast',
-            /** @type {!JSONType} */ (data),
+            /** @type {!JsonObject} */ (data),
             /* awaitResponse */ false);
       }, 0);
     });
@@ -854,7 +931,8 @@ class MultidocManager {
     const amp = shadowRoot.AMP;
     delete shadowRoot.AMP;
     const ampdoc = /** @type {!./service/ampdoc-impl.AmpDoc} */ (amp.ampdoc);
-    setViewerVisibilityState(viewerForDoc(ampdoc), VisibilityState.INACTIVE);
+    setViewerVisibilityState(
+        Services.viewerForDoc(ampdoc), VisibilityState.INACTIVE);
     disposeServicesForDoc(ampdoc);
   }
 
@@ -952,7 +1030,7 @@ export function registerElementForTesting(win, elementName) {
  * to have the same AMP release version.
  *
  * @param {!Window} win
- * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+ * @param {function(!Object)|ExtensionPayload} fnOrStruct
  * @return {boolean}
  */
 function maybeLoadCorrectVersion(win, fnOrStruct) {
@@ -972,7 +1050,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   // The :not is an extra prevention of recursion because it will be
   // added to script tags that go into the code path below.
   const scriptInHead = win.document.head./*OK*/querySelector(
-          `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`);
+      `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`);
   dev().assert(scriptInHead, 'Expected to find script for extension: %s',
       fnOrStruct.n);
   if (!scriptInHead) {
@@ -980,10 +1058,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   }
   // Mark the element as being replace, so that the loadExtension code
   // assumes it as not-present.
-  scriptInHead.removeAttribute('custom-element');
-  scriptInHead.setAttribute('i-amphtml-loaded-new-version', fnOrStruct.n);
-  extensionsFor(win).loadExtension(fnOrStruct.n,
-      /* stubbing not needed, should have already happened. */ false);
+  Services.extensionsFor(win).reloadExtension(fnOrStruct.n, scriptInHead);
   return true;
 }
 
@@ -1009,5 +1084,5 @@ function maybePumpEarlyFrame(win, cb) {
     cb();
     return;
   }
-  timerFor(win).delay(cb, 1);
+  Services.timerFor(win).delay(cb, 1);
 }

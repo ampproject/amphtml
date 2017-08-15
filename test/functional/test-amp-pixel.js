@@ -18,7 +18,6 @@ import {
   installUrlReplacementsForEmbed,
 } from '../../src/service/url-replacements-impl';
 import {VariableSource} from '../../src/service/variable-source';
-import {isReferrerPolicySupported} from '../../builtins/amp-pixel';
 
 describes.realWin('amp-pixel', {amp: true}, env => {
   let win;
@@ -43,8 +42,9 @@ describes.realWin('amp-pixel', {amp: true}, env => {
       pixel.setAttribute('referrerpolicy', referrerPolicy);
     }
     win.document.body.appendChild(pixel);
-    pixel.build();
+    const buildPromise = pixel.build();
     implementation = pixel.implementation_;
+    return buildPromise;
   }
 
   /**
@@ -124,28 +124,16 @@ describes.realWin('amp-pixel', {amp: true}, env => {
     });
   });
 
-  it('should respect referrerpolicy=no-referrer', () => {
-    const url = 'https://pubads.g.doubleclick.net/activity';
-    createPixel(url, 'no-referrer');
-    return trigger(url).then(element => {
-      if (isReferrerPolicySupported()) {
-        expect(element.referrerPolicy).to.equal('no-referrer');
-      }
-      if (!element.src) {
-        // TODO(@lannka): Please remove the temporary fix
-        return;
-      }
-      expect(element.src).to.equal(url);
-    });
-  });
-
   it('should throw for referrerpolicy with value other than ' +
       'no-referrer', () => {
-    expect(() => {
-      createPixel(
-          'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?',
-          'origin');
-    }).to.throw(/referrerpolicy/);
+    return createPixel(
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?',
+        'origin')
+        .then(() => {
+          throw new Error('must have failed.');
+        }, reason => {
+          expect(reason.message).to.match(/referrerpolicy/);
+        });
   });
 });
 

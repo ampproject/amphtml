@@ -16,10 +16,21 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
 class AmpVimeo extends AMP.BaseElement {
 
-  /** @override */
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     this.preconnect.url('https://player.vimeo.com', onLayout);
     // Host that Vimeo uses to serve poster frames needed by player.
@@ -48,7 +59,6 @@ class AmpVimeo extends AMP.BaseElement {
         videoid);
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    /** @private {?Element} */
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
@@ -58,10 +68,10 @@ class AmpVimeo extends AMP.BaseElement {
     if (this.iframe_ && this.iframe_.contentWindow) {
       // See
       // https://developer.vimeo.com/player/js-api
-      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
+      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
         'method': 'pause',
         'value': '',
-      }), '*');
+      })), '*');
     }
   }
 };

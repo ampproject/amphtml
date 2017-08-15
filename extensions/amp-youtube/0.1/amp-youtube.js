@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {
+  getDataParamsFromAttributes,
+  removeElement,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
-import {removeElement} from '../../../src/dom';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {
@@ -26,15 +31,21 @@ import {
 import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
 import {isObject} from '../../../src/types';
+import {dict} from '../../../src/utils/object';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {startsWith} from '../../../src/string';
 
 /**
  * @enum {number}
  * @private
  */
+
+ // Correct PlayerStates taken from
+ // https://developers.google.com/youtube/iframe_api_reference#Playback_status
 const PlayerStates = {
+  UNSTARTED: -1,
+  ENDED: 0,
   PLAYING: 1,
   PAUSED: 2,
 };
@@ -44,7 +55,7 @@ const PlayerStates = {
  * @private
  */
 const PlayerFlags = {
-  /* Config to tell YouTube to hide annotations by default*/
+  // Config to tell YouTube to hide annotations by default
   HIDE_ANNOTATION: 3,
 };
 
@@ -57,7 +68,7 @@ class AmpYoutube extends AMP.BaseElement {
   constructor(element) {
     super(element);
     /** @private {number} */
-    this.playerState_ = 0;
+    this.playerState_ = PlayerStates.UNSTARTED;
 
     /** @private {?string}  */
     this.videoid_ = null;
@@ -112,9 +123,9 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
    /** @override */
-   viewportCallback(visible) {
-     this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-   }
+  viewportCallback(visible) {
+    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+  }
 
   /** @override */
   buildCallback() {
@@ -124,8 +135,8 @@ class AmpYoutube extends AMP.BaseElement {
       this.playerReadyResolver_ = resolve;
     });
 
-    // TODO(#3216): amp-youtube has a special case where 404s are not easily caught
-    // hence the following hacky-solution.
+    // TODO(aghassemi, #3216): amp-youtube has a special case where 404s are not
+    // easily caught hence the following hacky-solution.
     // Please don't follow this behavior in other extensions, instead
     // see BaseElement.createPlaceholderCallback.
     if (!this.getPlaceholder()) {
@@ -133,7 +144,7 @@ class AmpYoutube extends AMP.BaseElement {
     }
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @return {string} */
@@ -188,26 +199,23 @@ class AmpYoutube extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
 
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this.handleYoutubeMessages_.bind(this)
+        this.win,
+        'message',
+        this.handleYoutubeMessages_.bind(this)
     );
 
-    this.win.addEventListener(
-      'message', event => this.handleYoutubeMessages_(event)
-    );
-
-    return this.loadPromise(iframe)
-        .then(() => this.listenToFrame_())
-        .then(() => {
-          this.element.dispatchCustomEvent(VideoEvents.LOAD);
-          this.playerReadyResolver_(this.iframe_);
-        });
+    this.element.appendChild(this.iframe_);
+    const loaded = this.loadPromise(this.iframe_).then(() => {
+      // Tell YT that we want to receive messages
+      this.listenToFrame_();
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
+    this.playerReadyResolver_(loaded);
+    return loaded;
   }
 
   /** @override */
@@ -264,15 +272,15 @@ class AmpYoutube extends AMP.BaseElement {
    * @param {string} command
    * @param {Array=} opt_args
    * @private
-   * */
+   */
   sendCommand_(command, opt_args) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify({
+        const message = JSON.stringify(dict({
           'event': 'command',
           'func': command,
           'args': opt_args || '',
-        });
+        }));
         this.iframe_.contentWindow./*OK*/postMessage(message, '*');
       }
     });
@@ -284,25 +292,30 @@ class AmpYoutube extends AMP.BaseElement {
         event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!event.data || !(isObject(event.data) || startsWith(event.data, '{'))) {
+    if (!getData(event) || !(isObject(getData(event))
+        || startsWith(/** @type {string} */ (getData(event)), '{'))) {
       return;  // Doesn't look like JSON.
     }
-    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
+    /** @const {?JsonObject} */
+    const data = /** @type {?JsonObject} */ (isObject(getData(event))
+        ? getData(event)
+        : tryParseJson(getData(event)));
     if (data === undefined) {
       return; // We only process valid JSON.
     }
-    if (data.event == 'infoDelivery' &&
-        data.info && data.info.playerState !== undefined) {
-      this.playerState_ = data.info.playerState;
-      if (this.playerState_ == PlayerStates.PAUSED) {
+    if (data['event'] == 'infoDelivery' &&
+        data['info'] && data['info']['playerState'] !== undefined) {
+      this.playerState_ = data['info']['playerState'];
+      if (this.playerState_ == PlayerStates.PAUSED ||
+          this.playerState_ == PlayerStates.ENDED) {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
       } else if (this.playerState_ == PlayerStates.PLAYING) {
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       }
-    } else if (data.event == 'infoDelivery' &&
-        data.info && data.info.muted !== undefined) {
-      if (this.muted_ != data.info.muted) {
-        this.muted_ = data.info.muted;
+    } else if (data['event'] == 'infoDelivery' &&
+        data['info'] && data['info']['muted'] !== undefined) {
+      if (this.muted_ != data['info']['muted']) {
+        this.muted_ = data['info']['muted'];
         const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
         this.element.dispatchCustomEvent(evt);
       }
@@ -314,9 +327,9 @@ class AmpYoutube extends AMP.BaseElement {
    * @private
    */
   listenToFrame_() {
-    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
+    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
       'event': 'listening',
-    }), '*');
+    })), '*');
   }
 
   /** @private */
@@ -423,6 +436,64 @@ class AmpYoutube extends AMP.BaseElement {
    */
   hideControls() {
     // Not supported.
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    // Youtube already updates the Media Session so no need for the video
+    // manager to update it too
+    return true;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 };
 

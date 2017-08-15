@@ -16,30 +16,41 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
+import {adConfig} from '../../../../ads/_config';
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {extensionsFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {stubService} from '../../../../testing/test-helper';
-import {timerFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 describe('Ad loader', () => {
   let sandbox;
+  let a4aRegistryBackup;
   let registryBackup;
   const tagNames = ['amp-ad', 'amp-embed'];
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    registryBackup = Object.create(null);
+    a4aRegistryBackup = Object.create(null);
     Object.keys(a4aRegistry).forEach(k => {
-      registryBackup[k] = a4aRegistry[k];
+      a4aRegistryBackup[k] = a4aRegistry[k];
       delete a4aRegistry[k];
     });
+    registryBackup = Object.create(null);
+    Object.keys(adConfig).forEach(k => {
+      registryBackup[k] = adConfig[k];
+      delete adConfig[k];
+    });
+    adConfig['_ping_'] = {};
   });
 
   afterEach(() => {
+    Object.keys(a4aRegistryBackup).forEach(k => {
+      a4aRegistry[k] = a4aRegistryBackup[k];
+    });
+    a4aRegistryBackup = null;
     Object.keys(registryBackup).forEach(k => {
-      a4aRegistry[k] = registryBackup[k];
+      adConfig[k] = registryBackup[k];
     });
     registryBackup = null;
     sandbox.restore();
@@ -83,7 +94,7 @@ describe('Ad loader', () => {
                 throw new Error('upgradeCallback should not resolve without ' +
                   'notification dismissal');
               }),
-              timerFor(fixture.win).promise(25),
+              Services.timerFor(fixture.win).promise(25),
             ]);
           });
         });
@@ -121,7 +132,7 @@ describe('Ad loader', () => {
             return true;
           };
           ampAdElement.setAttribute('type', 'zort');
-          const extensions = extensionsFor(fixture.win);
+          const extensions = Services.extensionsFor(fixture.win);
           const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
               .withArgs('amp-ad-network-zort-impl')
               .returns(Promise.reject(new Error('I failed!')));
@@ -150,6 +161,87 @@ describe('Ad loader', () => {
         });
       });
 
+      it('uses Fast Fetch if just RTC is used', () => {
+        return iframePromise.then(fixture => {
+          const rtcConfig = fixture.doc.createElement('script');
+          rtcConfig.setAttribute('id', 'amp-rtc');
+          fixture.doc.head.appendChild(rtcConfig);
+          a4aRegistry['zort'] = function() {
+            return true;
+          };
+          ampAdElement.setAttribute('type', 'zort');
+          const zortInstance = {};
+          const zortConstructor = function() { return zortInstance; };
+          const extensions = Services.extensionsFor(fixture.win);
+          const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
+              .withArgs('amp-ad-network-zort-impl')
+              .returns(Promise.resolve(zortConstructor));
+          ampAd = new AmpAd(ampAdElement);
+          return ampAd.upgradeCallback().then(baseElement => {
+            expect(extensionsStub).to.be.calledAtLeastOnce;
+            expect(ampAdElement.getAttribute(
+                'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
+            expect(baseElement).to.equal(zortInstance);
+          });
+        });
+      });
+
+      it('uses Fast Fetch if remote.html and RTC are used', () => {
+        return iframePromise.then(fixture => {
+          const meta = fixture.doc.createElement('meta');
+          meta.setAttribute('name', 'amp-3p-iframe-src');
+          meta.setAttribute('content', 'https://example.com/remote.html');
+          fixture.doc.head.appendChild(meta);
+          const rtcConfig = fixture.doc.createElement('script');
+          rtcConfig.setAttribute('id', 'amp-rtc');
+          fixture.doc.head.appendChild(rtcConfig);
+          a4aRegistry['zort'] = function() {
+            return true;
+          };
+          ampAdElement.setAttribute('type', 'zort');
+          const zortInstance = {};
+          const zortConstructor = function() { return zortInstance; };
+          const extensions = Services.extensionsFor(fixture.win);
+          const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
+              .withArgs('amp-ad-network-zort-impl')
+              .returns(Promise.resolve(zortConstructor));
+          ampAd = new AmpAd(ampAdElement);
+          return ampAd.upgradeCallback().then(baseElement => {
+            expect(extensionsStub).to.be.calledAtLeastOnce;
+            expect(ampAdElement.getAttribute(
+                'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
+            expect(baseElement).to.equal(zortInstance);
+          });
+        });
+      });
+
+      it('uses Fast Fetch if remote.html is used but disabled', () => {
+        return iframePromise.then(fixture => {
+          const meta = fixture.doc.createElement('meta');
+          meta.setAttribute('name', 'amp-3p-iframe-src');
+          meta.setAttribute('content', 'https://example.com/remote.html');
+          fixture.doc.head.appendChild(meta);
+          adConfig['zort'] = {remoteHTMLDisabled: true};
+          a4aRegistry['zort'] = function() {
+            return true;
+          };
+          ampAdElement.setAttribute('type', 'zort');
+          const zortInstance = {};
+          const zortConstructor = function() { return zortInstance; };
+          const extensions = Services.extensionsFor(fixture.win);
+          const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
+              .withArgs('amp-ad-network-zort-impl')
+              .returns(Promise.resolve(zortConstructor));
+          ampAd = new AmpAd(ampAdElement);
+          return ampAd.upgradeCallback().then(baseElement => {
+            expect(extensionsStub).to.be.calledAtLeastOnce;
+            expect(ampAdElement.getAttribute(
+                'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
+            expect(baseElement).to.equal(zortInstance);
+          });
+        });
+      });
+
       it('upgrades to registered, A4A type network-specific element', () => {
         return iframePromise.then(fixture => {
           a4aRegistry['zort'] = function() {
@@ -158,7 +250,7 @@ describe('Ad loader', () => {
           ampAdElement.setAttribute('type', 'zort');
           const zortInstance = {};
           const zortConstructor = function() { return zortInstance; };
-          const extensions = extensionsFor(fixture.win);
+          const extensions = Services.extensionsFor(fixture.win);
           const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
               .withArgs('amp-ad-network-zort-impl')
               .returns(Promise.resolve(zortConstructor));

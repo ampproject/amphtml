@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getAttributesFromConfigObj} from './attributes';
-import {resourcesForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {
   closestByTag,
   createElementWithAttributes,
@@ -30,7 +31,7 @@ const TAG = 'amp-auto-ads';
  * TODO: Specify this via the configuration.
  * @const
  */
-const TARGET_AD_HEIGHT_PX = 100;
+const TARGET_AD_HEIGHT_PX = 250;
 
 /**
  * @enum {number}
@@ -88,7 +89,7 @@ export class Placement {
    * @param {!Element} anchorElement
    * @param {!Position} position
    * @param {!function(!Element, !Element)} injector
-   * @param {!Object<string, string>} attributes
+   * @param {!JsonObject<string, string>} attributes
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */
   constructor(win, resources, anchorElement, position, injector, attributes,
@@ -108,7 +109,7 @@ export class Placement {
     /** @const @private {!function(!Element, !Element)} */
     this.injector_ = injector;
 
-    /** @const @private {!Object<string, string>} */
+    /** @const @private {!JsonObject<string, string>} */
     this.attributes_ = attributes;
 
     /**
@@ -164,7 +165,7 @@ export class Placement {
   }
 
   /**
-   * @param {!Object<string, string>} baseAttributes Any attributes to add to
+   * @param {!JsonObject<string, string>} baseAttributes Any attributes to add to
    *     injected <amp-ad>. Specific attributes will override defaults, but be
    *     overridden by placement specific attributes defined in the
    *     configuration.
@@ -182,28 +183,28 @@ export class Placement {
         this.injector_(this.anchorElement_, this.adElement_);
         return this.resources_.attemptChangeSize(this.adElement_,
             TARGET_AD_HEIGHT_PX, undefined, this.margins_)
-                .then(() => {
-                  this.state_ = PlacementState.PLACED;
-                  return this.state_;
-                }, () => {
-                  this.state_ = PlacementState.RESIZE_FAILED;
-                  return this.state_;
-                });
+            .then(() => {
+              this.state_ = PlacementState.PLACED;
+              return this.state_;
+            }, () => {
+              this.state_ = PlacementState.RESIZE_FAILED;
+              return this.state_;
+            });
       });
     });
   }
 
   /**
-   * @param {!Object<string, string>} baseAttributes
+   * @param {!JsonObject<string, string>} baseAttributes
    * @return {!Element}
    * @private
    */
   createAdElement_(baseAttributes) {
-    const attributes = Object.assign({
+    const attributes = /** @type {!JsonObject} */ (Object.assign(dict({
       'layout': 'fixed-height',
       'height': '0',
       'class': 'i-amphtml-layout-awaiting-size',
-    }, baseAttributes, this.attributes_);
+    }), baseAttributes, this.attributes_));
     return createElementWithAttributes(
         this.win_.document, 'amp-ad', attributes);
   }
@@ -211,13 +212,13 @@ export class Placement {
 
 /**
  * @param {!Window} win
- * @param {!JSONType} configObj
+ * @param {!JsonObject} configObj
  * @return {!Array<!Placement>}
  */
 export function getPlacementsFromConfigObj(win, configObj) {
   const placementObjs = configObj['placements'];
   if (!placementObjs) {
-    dev().warn(TAG, 'No placements in config');
+    user().warn(TAG, 'No placements in config');
     return [];
   }
   const placements = [];
@@ -231,24 +232,24 @@ export function getPlacementsFromConfigObj(win, configObj) {
  * Validates that the placementObj represents a valid placement and if so
  * constructs and returns an instance of the Placement class for it.
  * @param {!Window} win
- * @param {!Object} placementObj
+ * @param {!JsonObject} placementObj
  * @param {!Array<!Placement>} placements
  */
 function getPlacementsFromObject(win, placementObj, placements) {
   const injector = INJECTORS[placementObj['pos']];
   if (!injector) {
-    dev().warn(TAG, 'No injector for position');
+    user().warn(TAG, 'No injector for position');
     return;
   }
   const anchor = placementObj['anchor'];
   if (!anchor) {
-    dev().warn(TAG, 'No anchor in placement');
+    user().warn(TAG, 'No anchor in placement');
     return;
   }
   const anchorElements =
       getAnchorElements(win.document.documentElement, anchor);
   if (!anchorElements.length) {
-    dev().warn(TAG, 'No anchor element found');
+    user().warn(TAG, 'No anchor element found');
     return;
   }
   let margins = undefined;
@@ -267,7 +268,7 @@ function getPlacementsFromObject(win, placementObj, placements) {
       return;
     }
     const attributes = getAttributesFromConfigObj(placementObj);
-    placements.push(new Placement(win, resourcesForDoc(anchorElement),
+    placements.push(new Placement(win, Services.resourcesForDoc(anchorElement),
         anchorElement, placementObj['pos'], injector, attributes, margins));
   });
 }
@@ -282,7 +283,7 @@ function getPlacementsFromObject(win, placementObj, placements) {
 function getAnchorElements(rootElement, anchorObj) {
   const selector = anchorObj['selector'];
   if (!selector) {
-    dev().warn(TAG, 'No selector in anchor');
+    user().warn(TAG, 'No selector in anchor');
     return [];
   }
   let elements = [].slice.call(scopedQuerySelectorAll(rootElement, selector));
@@ -323,13 +324,13 @@ function isPositionValid(anchorElement, position) {
       position == Position.BEFORE || position == Position.AFTER ?
           anchorElement.parentElement : anchorElement;
   if (!elementToCheckOrNull) {
-    dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
+    user().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
     return false;
   }
   const elementToCheck = dev().assertElement(elementToCheckOrNull);
   return !BLACKLISTED_ANCESTOR_TAGS.some(tagName => {
     if (closestByTag(elementToCheck, tagName)) {
-      dev().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
+      user().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
       return true;
     }
     return false;

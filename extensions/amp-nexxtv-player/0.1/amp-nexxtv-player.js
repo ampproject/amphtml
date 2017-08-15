@@ -15,17 +15,23 @@
  */
 
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {user, dev} from '../../../src/log';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {removeElement} from '../../../src/dom';
+import {
+  removeElement,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
+import {getData, listen} from '../../../src/event-helper';
 import {isObject} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
-import {listen} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -72,7 +78,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     });
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   getVideoIframeSrc_() {
@@ -81,19 +87,20 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     }
 
     const mediaId = user().assert(
-      this.element.getAttribute('data-mediaid'),
-      'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
-      this.element);
+        this.element.getAttribute('data-mediaid'),
+        'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
+        this.element);
 
     const client = user().assert(this.element.getAttribute('data-client'),
-      'The data-client attribute is required for <amp-nexxtv-player> %s',
-      this.element);
+        'The data-client attribute is required for <amp-nexxtv-player> %s',
+        this.element);
 
     const start = this.element.getAttribute('data-seek-to') || '0';
     const mode = this.element.getAttribute('data-mode') || 'static';
     const streamtype = this.element.getAttribute('data-streamtype') || 'video';
     const origin = this.element.getAttribute('data-origin')
       || 'https://embed.nexx.cloud/';
+    const disableAds = this.element.getAttribute('data-disable-ads');
 
     let src = origin;
 
@@ -105,6 +112,10 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     src += encodeURIComponent(mediaId);
     src += `?start=${encodeURIComponent(start)}`;
     src += `&datamode=${encodeURIComponent(mode)}&amp=1`;
+
+    if (disableAds === '1') {
+      src += '&disableAds=1';
+    }
 
     this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
 
@@ -124,19 +135,19 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = this.getVideoIframeSrc_();
-    this.element.appendChild(iframe);
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.iframe_,'message', event => {
+    this.unlistenMessage_ = listen(this.win, 'message', event => {
       this.handleNexxMessages_(event);
     });
 
-    return this.loadPromise(this.iframe_)
-      .then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
-        this.playerReadyResolver_(this.iframe_);
-      });
+    this.element.appendChild(this.iframe_);
+    const loaded = this.loadPromise(this.iframe_).then(() => {
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
+    this.playerReadyResolver_(loaded);
+    return loaded;
   }
 
   pauseCallback() {
@@ -172,7 +183,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   sendCommand_(command) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
+        this.iframe_.contentWindow./*OK*/postMessage(dict({
           'cmd': command,
         }), '*');
       }
@@ -181,18 +192,25 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
   // emitter
   handleNexxMessages_(event) {
-    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
-    if (data === undefined) {
-      return; // We only process valid JSON.
+    if (!getData(event) || event.source !== this.iframe_.contentWindow) {
+      return;
     }
 
-    if (data.cmd == 'play') {
-      this.element.dispatchCustomEvent(VideoEvents.PLAY);
-    } else if (data.cmd == 'pause') {
+    /** @const {?JsonObject} */
+    const data = /** @type {?JsonObject} */ (isObject(getData(event))
+        ? getData(event)
+        : tryParseJson(getData(event)));
+    if (!data) {
+      return;
+    }
+
+    if (data['event'] == 'play') {
+      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+    } else if (data['event'] == 'pause') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    } else if (data.cmd == 'mute') {
+    } else if (data['event'] == 'mute') {
       this.element.dispatchCustomEvent(VideoEvents.MUTED);
-    } else if (data.cmd == 'unmute') {
+    } else if (data['event'] == 'unmute') {
       this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
     }
   }
@@ -226,6 +244,62 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 
   hideControls() {
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 }
 

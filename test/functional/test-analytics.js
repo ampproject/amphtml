@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {fromClassForDoc} from '../../src/service';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
@@ -22,29 +21,30 @@ import {
 } from '../../src/service';
 import {
   triggerAnalyticsEvent,
-  insertAnalyticsElement,
 } from '../../src/analytics';
-import {timerFor} from '../../src/services';
-import {BaseElement} from '../../src/base-element';
+import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
-describes.realWin('analytics', {amp: true}, env => {
+
+describes.realWin('analytics', {
+  amp: true,
+}, env => {
   let sandbox;
   let timer;
   let ampdoc;
-  let win;
+
   describe('triggerAnalyticsEvent', () => {
     let triggerEventSpy;
 
     class MockInstrumentation {
-      triggerEvent(eventType, opt_vars) {
-        triggerEventSpy(eventType, opt_vars);
+      triggerEventForTarget(nodeOrDoc, eventType, opt_vars) {
+        triggerEventSpy(nodeOrDoc, eventType, opt_vars);
       }
     }
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
-      timer = timerFor(env.win);
+      timer = Services.timerFor(env.win);
       ampdoc = env.ampdoc;
       triggerEventSpy = sandbox.spy();
       resetServiceForTesting(window, 'amp-analytics-instrumentation');
@@ -55,7 +55,7 @@ describes.realWin('analytics', {amp: true}, env => {
     });
 
     it('should not do anything if analytics is not installed', () => {
-      triggerAnalyticsEvent(ampdoc, 'hello');
+      triggerAnalyticsEvent(ampdoc.win.document, 'hello');
       return timer.promise(50).then(() => {
         expect(triggerEventSpy).to.have.not.been.called;
       });
@@ -63,55 +63,14 @@ describes.realWin('analytics', {amp: true}, env => {
 
     it('should trigger analytics event if analytics is installed', () => {
       registerServiceBuilderForDoc(
-        ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
+          ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
       // Force instantiation
       getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
-      triggerAnalyticsEvent(ampdoc, 'hello');
+      triggerAnalyticsEvent(ampdoc.win.document, 'hello');
       return timer.promise(50).then(() => {
         expect(triggerEventSpy).to.have.been.called;
-        expect(triggerEventSpy).to.have.been.calledWith('hello');
-      });
-    });
-  });
-
-  describe('insertAnalyticsElement', () => {
-    class MockInstrumentation {
-    };
-
-    beforeEach(() => {
-      timer = timerFor(env.win);
-      ampdoc = env.ampdoc;
-      win = env.win;
-    });
-
-    it('should create analytics element if analytics is installed', () => {
-      const ele = win.document.createElement('div');
-      win.document.body.appendChild(ele);
-      const baseEle = new BaseElement(ele);
-      fromClassForDoc(
-          ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
-      const config = {
-        'requests': {
-          'pageview': 'https://example.com/analytics',
-        },
-        'triggers': {
-          'trackPageview': {
-            'on': 'visible',
-            'request': 'pageview',
-          },
-        },
-      };
-      expect(baseEle.element.querySelector('amp-analytics')).to.be.null;
-      insertAnalyticsElement(baseEle.element, config, true);
-      return timer.promise(50).then(() => {
-        const analyticsEle = baseEle.element.querySelector('amp-analytics');
-        expect(analyticsEle).to.not.be.null;
-        expect(analyticsEle.getAttribute('sandbox')).to.equal('true');
-        expect(analyticsEle.getAttribute('trigger')).to.equal('immediate');
-        const script = (analyticsEle).querySelector('script');
-        expect(script.textContent).to.jsonEqual(JSON.stringify(config));
-        expect(analyticsEle.CONFIG).to.jsonEqual(config);
-        expect(analyticsEle.getAttribute('sandbox')).to.equal('true');
+        expect(triggerEventSpy).to.have.been.calledWith(
+            ampdoc.win.document, 'hello');
       });
     });
   });

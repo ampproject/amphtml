@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {dict} from '../src/utils/object';
 import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {nextTick} from './3p';
 import {tryParseJson} from '../src/json';
 import {isObject} from '../src/types';
+import {AmpEvents} from '../src/amp-events';
+import {parseUrl} from '../src/url';
 
 export class AbstractAmpContext {
 
@@ -56,8 +59,11 @@ export class AbstractAmpContext {
     /** @type {?string|undefined} */
     this.container = null;
 
-    /** @type {?Object<String, *>} */
+    /** @type {?Object<string, *>} */
     this.data = null;
+
+    /** @type {?string} */
+    this.domFingerprint = null;
 
     /** @type {?boolean} */
     this.hidden = null;
@@ -128,7 +134,7 @@ export class AbstractAmpContext {
   dispatchVisibilityChangeEvent_() {
     const event = this.win_.document.createEvent('Event');
     event.data = {hidden: this.hidden};
-    event.initEvent('amp:visibilitychange', true, true);
+    event.initEvent(AmpEvents.VISIBILITY_CHANGE, true, true);
     this.win_.dispatchEvent(event);
   }
 
@@ -141,7 +147,7 @@ export class AbstractAmpContext {
    */
   onPageVisibilityChange(callback) {
     return this.client_.registerCallback(MessageType.EMBED_STATE, data => {
-      callback({hidden: data.pageHidden});
+      callback({hidden: data['pageHidden']});
     });
   }
 
@@ -163,7 +169,7 @@ export class AbstractAmpContext {
     // Call the callback with the value that was transmitted when the
     // iframe was drawn. Called in nextTick, so that callers don't
     // have to specially handle the sync case.
-    // TODO(#8562): Deprecate this behavior
+    // TODO(lannka, #8562): Deprecate this behavior
     nextTick(this.win_, () => {
       callback([this.initialIntersection]);
     });
@@ -178,7 +184,10 @@ export class AbstractAmpContext {
    *  @param {number} height The new height for the ad we are requesting.
    */
   requestResize(width, height) {
-    this.client_.sendMessage(MessageType.EMBED_SIZE, {width, height});
+    this.client_.sendMessage(MessageType.EMBED_SIZE, dict({
+      'width': width,
+      'height': height,
+    }));
   };
 
   /**
@@ -190,7 +199,7 @@ export class AbstractAmpContext {
    */
   onResizeSuccess(callback) {
     this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, obj => {
-      callback(obj.requestedHeight, obj.requestedWidth); });
+      callback(obj['requestedHeight'], obj['requestedWidth']); });
   };
 
   /**
@@ -202,7 +211,7 @@ export class AbstractAmpContext {
    */
   onResizeDenied(callback) {
     this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, obj => {
-      callback(obj.requestedHeight, obj.requestedWidth);
+      callback(obj['requestedHeight'], obj['requestedWidth']);
     });
   };
 
@@ -230,21 +239,30 @@ export class AbstractAmpContext {
    *  @private
    */
   setupMetadata_(data) {
+    // TODO(alanorozco): Use metadata utils in 3p/frame-metadata
     const dataObject = dev().assert(
         typeof data === 'string' ? tryParseJson(data) : data,
         'Could not setup metadata.');
 
     const context = dataObject._context || dataObject.attributes._context;
 
+    this.data = dataObject.attributes || dataObject;
+
+    // TODO(alanorozco, #10576): This is really ugly. Find a better structure
+    // than passing context values via data.
+    if ('_context' in this.data) {
+      delete this.data['_context'];
+    }
+
     this.canary = context.canary;
     this.canonicalUrl = context.canonicalUrl;
     this.clientId = context.clientId;
     this.container = context.container;
-    this.data = context.tagName;
+    this.domFingerprint = context.domFingerprint;
     this.hidden = context.hidden;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
-    this.location = context.location;
+    this.location = parseUrl(context.location.href);
     this.mode = context.mode;
     this.pageViewId = context.pageViewId;
     this.referrer = context.referrer;

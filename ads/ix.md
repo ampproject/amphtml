@@ -16,22 +16,9 @@ limitations under the License.
 
 # Index Exchange
 
-Index supports both direct ad tags and Header Tag style bidding using Doubleclick as the ad server.
+Index supports Header Tag style bidding using Doubleclick as the ad server.
 
-## Examples
-
-### Ad tag ###
-
-```html
-<amp-ad width=300 height=250
-  type="ix"
-  data-ad-units="4"
-  data-casale-i-d="1"
-  data-version="2"
-</amp-ad>
-```
-
-### Header Tag ###
+## Example
 
 ```html
 <amp-ad width=300 height=250
@@ -47,29 +34,7 @@ For semantics of configuration, please contact your account manager at Index Exc
 
 If you use `remote.html` in your AMP pages, you must add `ix` into the array that outlines the list of acceptable types. For example, `['doubleclick']` should be changed to `['doubleclick', 'ix']`. If you do not use `remote.html`, this step is not required.
 
-Ad size are based on the `width` and `height` attributes of the `amp-ad` tag. Neither width and height override attributes nor multi-size ads are currently supported.
-
-### Ad tag ###
-
-__Required:__
-
-- `data-ad-units`
-- `data-casale-i-d` or `data-app-i-d`
-- `data-version`
-
-__Optional:__
-
-- `data-default-ad-unit`
-- `data-floor`
-- `data-floor-currency`
-- `data-interstitial`
-- `data-position-i-d`
-- `data-pub-default`
-- `data-pub-passback`
-- `data-referrer`
-- `data-ifa`
-
-### Header Tag ###
+Ad size is based on the `width` and `height` attributes of the `amp-ad` tag by default. Both width and height override attributes (`data-override-width` and `data-override-height`) and multi-size ads (via `data-multi-size`) are supported.
 
 __Required:__
 
@@ -80,12 +45,6 @@ __Optional:__
 
 - `data-ix-slot`
 - `data-ix-timeout`
-
-__Unsupported:__
-
-- `data-override-width`
-- `data-override-height`
-- `data-multi-size-validation`
 
 Additional parameters including `json` will be passed through in the resulting call to DFP. For details please see the [Doubleclick documentation](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md).
 
