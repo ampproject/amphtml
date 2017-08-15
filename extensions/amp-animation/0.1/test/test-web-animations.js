@@ -1826,6 +1826,33 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
       expect(() => runner.getTotalDuration_()).to.throw(/has infinite/);
     });
 
+    it('multiple requests - 0 total', () => {
+      // 0 because iteration is 0
+      const timing1 = {
+        duration: 100,
+        delay: 0,
+        endDelay: 0,
+        iterations: 0,
+        iterationStart: 0,
+      };
+
+      // 0 because duration is 0
+      const timing2 = {
+        duration: 0,
+        delay: 0,
+        endDelay: 0,
+        iterations: 1,
+        iterationStart: 0,
+      };
+
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing: timing1},
+        {target: target1, keyframes: keyframes1, timing: timing2},
+      ]);
+
+      expect(runner.getTotalDuration_()).to.equal(0);
+    });
+
     it('multiple requests - bigger by duration', () => {
       // 300
       const timing1 = {

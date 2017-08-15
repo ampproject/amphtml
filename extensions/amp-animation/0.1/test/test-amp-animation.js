@@ -572,6 +572,32 @@ describes.sandboxed('AmpAnimation', {}, () => {
         });
       });
 
+      it('should clamp percent (upper) seekTo', () => {
+        const invocation = {
+          method: 'seekTo',
+          args: {percent: 1.5},
+          satisfiesTrust: () => true,
+        };
+
+        runnerMock.expects('seekToPercent').withExactArgs(1).once();
+        return anim.executeAction(invocation).then(() => {
+          expect(anim.triggered_).to.be.true;
+        });
+      });
+
+      it('should clamp percent (lower) seekTo', () => {
+        const invocation = {
+          method: 'seekTo',
+          args: {percent: -2},
+          satisfiesTrust: () => true,
+        };
+
+        runnerMock.expects('seekToPercent').withExactArgs(0).once();
+        return anim.executeAction(invocation).then(() => {
+          expect(anim.triggered_).to.be.true;
+        });
+      });
+
       it('should trigger reverse after start', () => {
         const args = {};
         const startInvocation = {
