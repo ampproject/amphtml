@@ -92,18 +92,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /**
    * @param {!Element} element
-   * @param {=number} upgradeStartTime
+   * @param {number} upgradeDelayMs
    */
-  constructor(element, opt_upgradeStartTime) {
-    super(element);
-
-    /**
-     * Time of delay imposed by upgrade path.
-     * @type {?number}
-     */
-    this.upgradeDelayMs_ =
-        opt_upgradeStartTime ? (this.getNow() - opt_upgradeStartTime) : null;
-    dev().info(TAG, 'upgrade delay', this.upgradeDelayMs_);
+  constructor(element, upgradeDelayMs) {
+    super(element, upgradeDelayMs);
 
     /**
      * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
@@ -219,12 +211,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     return googleAdUrl(
         this, ADSENSE_BASE_URL, startTime, parameters, experimentIds);
-  }
-
-  /** @override */
-  buildCallback() {
-    super.buildCallback();
-    this.protectedEmitLifecycleEvent_('upgradeDelay', this.upgradeDelayMs_);
   }
 
   /** @override */

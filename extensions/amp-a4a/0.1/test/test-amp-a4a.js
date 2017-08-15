@@ -1921,6 +1921,29 @@ describe('amp-a4a', () => {
     });
   });
 
+  describe('buildCallback', () => {
+    let sandbox;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('should emit upgradeDelay lifecycle ping', () => {
+      return createIframePromise().then(fixture => {
+        const a4a = new MockA4AImpl(createA4aElement(fixture.doc), 12345);
+        const emitLifecycleEventSpy = sandbox.spy(a4a, 'emitLifecycleEvent');
+        a4a.buildCallback();
+        expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
+          'forced_delta': 12345,
+        })).to.be.calledOnce;
+      });
+    });
+  });
+
   // TODO(tdrl): Other cases to handle for parsing JSON metadata:
   //   - Metadata tag(s) missing
   //   - JSON parse failure

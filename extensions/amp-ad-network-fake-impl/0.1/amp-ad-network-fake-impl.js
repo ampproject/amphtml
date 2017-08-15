@@ -27,9 +27,10 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /**
    * @param {!Element} element
+   * @param {number} upgradeStartTime
    */
-  constructor(element) {
-    super(element);
+  constructor(element, upgradeStartTime) {
+    super(element, upgradeStartTime);
   }
 
   /** @override */

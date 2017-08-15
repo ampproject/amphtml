@@ -35,7 +35,7 @@ function createAmpAd(win) {
   });
   ampAdElement.isBuilt = () => {return true;};
 
-  return new AmpAd3PImpl(ampAdElement);
+  return new AmpAd3PImpl(ampAdElement, 12345);
 }
 
 describes.realWin('amp-ad-3p-impl', {
@@ -204,6 +204,16 @@ describes.realWin('amp-ad-3p-impl', {
             'http://ads.localhost:9876/dist.3p/current/frame.max.html"]'))
             .to.be.ok;
       });
+    });
+  });
+
+  describe('buildCallback', () => {
+    it('should emitLifecycleEvent for upgrade delay', () => {
+      const emitLifecycleEventSpy = sandbox.spy(ad3p, 'emitLifecycleEvent');
+      ad3p.buildCallback();
+      expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
+        'forced_delta': 12345,
+      })).to.be.calledOnce;
     });
   });
 

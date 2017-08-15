@@ -49,6 +49,9 @@ export class AmpAd extends AMP.BaseElement {
 
   /** @override */
   upgradeCallback() {
+    const getNow = (this.win.performance && this.win.performance.now) ?
+        this.win.performance.now.bind(this.win.performance) : Date.now;
+    const startTime = getNow();
     // Block whole ad load if a consent is needed.
     /** @const {string} */
     const consentId = this.element.getAttribute('data-consent-notification-id');
@@ -84,23 +87,23 @@ export class AmpAd extends AMP.BaseElement {
         // implementation has explicitly opted not to handle this tag, or this
         // page uses remote.html which is inherently incompatible with Fast
         // Fetch. Fall back to Delayed Fetch.
-        return new AmpAd3PImpl(this.element);
+        return new AmpAd3PImpl(this.element, getNow() - startTime);
       }
 
       const extensionTagName = networkImplementationTag(type);
       this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
-      const startTime = (this.win.performance && this.win.performance.now) ?
-          this.win.performance.now() : Date.now();
-      return Services.extensionsFor(this.win).loadElementClass(extensionTagName)
-          .then(ctor => new ctor(this.element, startTime))
+      const ctorPromise =
+          /** @type {!Promise<function(new:../../../src/base-element.BaseElement, !Element, number)>} */
+          (Services.extensionsFor(this.win).loadElementClass(extensionTagName));
+      return ctorPromise
+          .then(ctor => new ctor(this.element, getNow() - startTime))
           .catch(error => {
-            console.log(error);
           // Work around presubmit restrictions.
             const TAG = this.element.tagName;
           // Report error and fallback to 3p
             user().error(TAG, 'Unable to load ad implementation for type ',
                 type, ', falling back to 3p, error: ', error);
-            return new AmpAd3PImpl(this.element);
+            return new AmpAd3PImpl(this.element, getNow() - startTime);
           });
     });
   }

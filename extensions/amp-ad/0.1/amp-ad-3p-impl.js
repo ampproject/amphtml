@@ -42,8 +42,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /**
    * @param {!AmpElement} element
+   * @param {number} upgradeDelayMs
    */
-  constructor(element) {
+  constructor(element, upgradeDelayMs) {
     super(element);
 
     /** @private {?Element} */
@@ -93,6 +94,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** @private {string|undefined} */
     this.type_ = undefined;
+
+    /**
+     * Time of delay imposed by upgrade path.
+     * @type {number}
+     */
+    this.upgradeDelayMs_ = upgradeDelayMs;
+    dev().info(TAG_3P_IMPL, 'upgrade delay', this.upgradeDelayMs_);
   }
 
   /** @override */
@@ -118,6 +126,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.emitLifecycleEvent('upgradeDelay', {
+      'forced_delta': Math.round(this.upgradeDelayMs_),
+    });
     this.type_ = this.element.getAttribute('type');
 
     this.placeholder_ = this.getPlaceholder();
