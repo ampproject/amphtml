@@ -707,7 +707,8 @@ class VideoEntry {
     const doc = this.ampdoc_.win.document;
 
     if (!this.metadata_.artwork || this.metadata_.artwork.length == 0) {
-      const posterUrl = parseSchemaImage(doc)
+      const posterUrl = this.video.element.getAttribute('artwork')
+                        || parseSchemaImage(doc)
                         || parseOgImage(doc)
                         || parseFavicon(doc);
 
