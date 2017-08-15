@@ -45,7 +45,7 @@ exports.extensionBundles = [
     version: '0.1', options: {hasCss: true},
     type: TYPES.MISC,
   },
-  {name: 'amp-accordion',version: '0.1',type: TYPES.MISC},
+  {name: 'amp-accordion', version: '0.1', type: TYPES.MISC},
   {name: 'amp-ad', version: '0.1', options: {hasCss: true}, type: TYPES.AD},
   {name: 'amp-ad-custom', version: '0.1', type: TYPES.AD},
   {name: 'amp-ad-network-adsense-impl', version: '0.1', type: TYPES.AD},
@@ -113,6 +113,7 @@ exports.extensionBundles = [
   {name: 'amp-crypto-polyfill', version: '0.1', type: TYPES.MISC},
   {name: 'amp-dailymotion', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-date-countdown', version: '0.1', type: TYPES.MISC},
+  {name: 'amp-date-display', version: '0.1', type: TYPES.MISC},
   {name: 'amp-google-document-embed', version: '0.1', type: TYPES.MISC},
   {name: 'amp-dynamic-css-classes', version: '0.1', type: TYPES.MISC},
   {name: 'amp-embedly-card', version: '0.1', type: TYPES.MISC},
@@ -456,17 +457,21 @@ exports.altMainBundles = [
 
 exports.extensionBundles.forEach(c => {
   const strRep = JSON.stringify(c);
-  console./*OK*/assert('name' in c, `name key must exist. Found ${strRep}.`);
-  console./*OK*/assert('version' in c, 'version key must exist. ' +
-      `Found ${strRep}.`);
-  console./*OK*/assert('type' in c, `type key must exist. Found ${strRep}.`);
+  console./*OK*/ assert('name' in c, `name key must exist. Found ${strRep}.`);
+  console./*OK*/ assert(
+      'version' in c,
+      'version key must exist. ' + `Found ${strRep}.`
+  );
+  console./*OK*/ assert('type' in c, `type key must exist. Found ${strRep}.`);
   const validTypes = Object.keys(TYPES).map(x => TYPES[x]);
-  console./*OK*/assert(validTypes.some(x => x === c.type),
+  console./*OK*/ assert(
+      validTypes.some(x => x === c.type),
       `type value must be one of ${validTypes.join(',')}. Found ${c.type} ` +
-      `for ${strRep}.`);
+    `for ${strRep}.`
+  );
 });
 exports.aliasBundles.forEach(c => {
-  console./*OK*/assert('name' in c, 'name key must exist');
-  console./*OK*/assert('version' in c, 'version key must exist');
-  console./*OK*/assert('latestVersion' in c, 'latestVersion key must exist');
+  console./*OK*/ assert('name' in c, 'name key must exist');
+  console./*OK*/ assert('version' in c, 'version key must exist');
+  console./*OK*/ assert('latestVersion' in c, 'latestVersion key must exist');
 });
