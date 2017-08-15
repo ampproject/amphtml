@@ -131,25 +131,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.qqid_ = null;
 
     /**
-     * For full-width responsive ads, the promise issued when we attempt to
-     * change the height.
-     * @type {?Promise}
-     * @private
-     */
-    this.responsiveSizeChangePromise_ = null;
-
-    /**
      * For full-width responsive ads: whether the element has already been
      * aligned to the edges of the viewport.
-     * @type {boolean}
-     * @private
+     * @private {boolean}
      */
     this.responsiveAligned_ = false;
 
     /**
      * The contents of the data-auto-format attribute, or empty string if the
      * attribute was not set.
-     * @private {string}
+     * @private {?string}
      */
     this.autoFormat_ = null;
   }
@@ -192,7 +183,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
     this.size_ = isExperimentOn(this.win, 'as-use-attr-for-format')
-    && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
+          && !this.isResponsive()
+          && !isNaN(width) && width > 0
+          && !isNaN(height) && height > 0
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
@@ -358,11 +351,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.isResponsive()) {
       // Attempt to resize to the correct height.
       const viewport = this.getViewport();
-      this.responsiveSizeChangePromise_ =
-          this.attemptChangeSize(
-              AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-                  viewport.getSize()),
-              undefined);
+      return this.attemptChangeSize(
+        AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+            viewport.getSize()),
+        undefined);
     }
   }
 
@@ -385,15 +377,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           {left: -1 * layoutBox.left});
       setStyle(this.element, 'zIndex', 30);
     }
-  }
-
-  /** @override */
-  layoutCallback() {
-    const callback = super.layoutCallback();
-    if (this.responsiveSizeChangePromise_) {
-      return callback.then(this.responsiveSizeChangePromise_);
-    }
-    return callback;
   }
 
   /** @override */
