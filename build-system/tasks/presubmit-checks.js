@@ -273,7 +273,7 @@ var forbiddenTerms = {
       'src/service/position-observer-impl.js',
       // TODO(@zhouyx, #9213) Remove this item.
       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
-      'extensions/amp-animation/0.1/scrollbound-scene.js',
+      'extensions/amp-position-observer/0.1/amp-position-observer.js',
       'src/service/video-manager-impl.js',
     ],
   },

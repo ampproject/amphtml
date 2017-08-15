@@ -244,7 +244,6 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           easing: 'ease-in',
           direction: 'reverse',
           fill: 'auto',
-          ticker: 'time',
         },
       ],
     });
@@ -257,7 +256,6 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       easing: 'ease-in',
       direction: 'reverse',
       fill: 'auto',
-      ticker: 'time',
     });
   });
 
@@ -1498,10 +1496,10 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
 
   class WebAnimationStub {
     play() {
-      throw new Error('not implemented');
+      return;
     }
     pause() {
-      throw new Error('not implemented');
+      return;
     }
     reverse() {
       throw new Error('not implemented');
@@ -1553,7 +1551,26 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     return style;
   }
 
-  it('should call start on all animatons', () => {
+  it('should call init on all animations and stay in IDLE state', () => {
+    target1Mock.expects('animate')
+        .withExactArgs(keyframes1, timing1)
+        .returns(anim1)
+        .once();
+    target2Mock.expects('animate')
+        .withExactArgs(keyframes2, timing2)
+        .returns(anim2)
+        .once();
+
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+    runner.init();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+    expect(runner.players_).to.have.length(2);
+    expect(runner.players_[0]).equal(anim1);
+    expect(runner.players_[1]).equal(anim2);
+    expect(playStateSpy).not.to.be.called;
+  });
+
+  it('should call start on all animations', () => {
     target1Mock.expects('animate')
         .withExactArgs(keyframes1, timing1)
         .returns(anim1)
@@ -1573,10 +1590,10 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     expect(playStateSpy.args[0][0]).to.equal(WebAnimationPlayState.RUNNING);
   });
 
-  it('should fail to start twice', () => {
-    runner.start();
+  it('should fail to init twice', () => {
+    runner.init();
     expect(() => {
-      runner.start();
+      runner.init();
     }).to.throw();
   });
 
@@ -1706,5 +1723,215 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
     expect(anim1.currentTime).to.equal(101);
     expect(anim2.currentTime).to.equal(101);
+  });
+
+  it('should seek percent all animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    sandbox.stub(runner, 'getTotalDuration_').returns(500);
+    anim1Mock.expects('pause').once();
+    anim2Mock.expects('pause').once();
+    runner.seekToPercent(0.5);
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
+    expect(anim1.currentTime).to.equal(250);
+    expect(anim2.currentTime).to.equal(250);
+  });
+
+  describe('total duration', () => {
+    it('single request, 0 total', () => {
+      const timing = {
+        duration: 0,
+        delay: 0,
+        endDelay: 0,
+        iterations: 1,
+        iterationStart: 0,
+      };
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing},
+      ]);
+      expect(runner.getTotalDuration_()).to.equal(0);
+    });
+
+    it('single request, 0 iteration', () => {
+      const timing = {
+        duration: 100,
+        delay: 100,
+        endDelay: 100,
+        iterations: 0,
+        iterationStart: 0,
+      };
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing},
+      ]);
+
+      // 200 for delays
+      expect(runner.getTotalDuration_()).to.equal(200);
+    });
+
+    it('single request, 1 iteration', () => {
+      const timing = {
+        duration: 100,
+        delay: 100,
+        endDelay: 100,
+        iterations: 1,
+        iterationStart: 0,
+      };
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing},
+      ]);
+      expect(runner.getTotalDuration_()).to.equal(300);
+    });
+
+    it('single request, multiple iterations', () => {
+      const timing = {
+        duration: 100,
+        delay: 100,
+        endDelay: 100,
+        iterations: 3,
+        iterationStart: 0,
+      };
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing},
+      ]);
+      expect(runner.getTotalDuration_()).to.equal(500); // 3*100 + 100 + 100
+    });
+
+    it('single request, multiple iterations with iterationStart', () => {
+      const timing = {
+        duration: 100,
+        delay: 100,
+        endDelay: 100,
+        iterations: 3,
+        iterationStart: 2.5,
+      };
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing},
+      ]);
+      // iterationStart is 2.5, the first 2.5 out of 3 iterations are ignored.
+      expect(runner.getTotalDuration_()).to.equal(250);// 0.5*100 + 100 + 100
+    });
+
+    it('single request, infinite iteration', () => {
+      const timing = {
+        duration: 100,
+        delay: 100,
+        endDelay: 100,
+        iterations: 'infinity',
+        iterationStart: 0,
+      };
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing},
+      ]);
+      expect(() => runner.getTotalDuration_()).to.throw(/has infinite/);
+    });
+
+    it('multiple requests - 0 total', () => {
+      // 0 because iteration is 0
+      const timing1 = {
+        duration: 100,
+        delay: 0,
+        endDelay: 0,
+        iterations: 0,
+        iterationStart: 0,
+      };
+
+      // 0 because duration is 0
+      const timing2 = {
+        duration: 0,
+        delay: 0,
+        endDelay: 0,
+        iterations: 1,
+        iterationStart: 0,
+      };
+
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing: timing1},
+        {target: target1, keyframes: keyframes1, timing: timing2},
+      ]);
+
+      expect(runner.getTotalDuration_()).to.equal(0);
+    });
+
+    it('multiple requests - bigger by duration', () => {
+      // 300
+      const timing1 = {
+        duration: 100,
+        delay: 100,
+        endDelay: 100,
+        iterations: 1,
+        iterationStart: 0,
+      };
+
+      // 500 - bigger
+      const timing2 = {
+        duration: 300,
+        delay: 100,
+        endDelay: 100,
+        iterations: 1,
+        iterationStart: 0,
+      };
+
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing: timing1},
+        {target: target1, keyframes: keyframes1, timing: timing2},
+      ]);
+
+      expect(runner.getTotalDuration_()).to.equal(500);
+    });
+
+    it('multiple requests - bigger by iteration', () => {
+      // 800 - bigger
+      const timing1 = {
+        duration: 200,
+        delay: 100,
+        endDelay: 100,
+        iterations: 3,
+        iterationStart: 0,
+      };
+
+      // 500
+      const timing2 = {
+        duration: 300,
+        delay: 100,
+        endDelay: 100,
+        iterations: 1,
+        iterationStart: 0,
+      };
+
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing: timing1},
+        {target: target1, keyframes: keyframes1, timing: timing2},
+      ]);
+
+      expect(runner.getTotalDuration_()).to.equal(800);
+    });
+
+    it('multiple request, infinite iteration', () => {
+      const timing1 = {
+        duration: 100,
+        delay: 100,
+        endDelay: 100,
+        iterations: 'infinity',
+        iterationStart: 0,
+      };
+
+      // 500
+      const timing2 = {
+        duration: 300,
+        delay: 100,
+        endDelay: 100,
+        iterations: 1,
+        iterationStart: 0,
+      };
+
+      const runner = new WebAnimationRunner([
+        {target: target1, keyframes: keyframes1, timing: timing1},
+        {target: target1, keyframes: keyframes1, timing: timing2},
+      ]);
+
+      expect(() => runner.getTotalDuration_()).to.throw(/has infinite/);
+    });
+
   });
 });

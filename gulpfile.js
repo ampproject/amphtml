@@ -115,6 +115,7 @@ declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '1.0', true);
 declareExtension('amp-selector', '0.1', true);
 declareExtension('amp-web-push', '0.1', true);
+declareExtension('amp-position-observer', '0.1', false);
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
