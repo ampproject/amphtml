@@ -497,7 +497,8 @@ export class GlobalVariableSource extends VariableSource {
     return this.getAccessService_(this.ampdoc).then(accessService => {
       if (!accessService) {
         // Access service is not installed.
-        this.user().error(TAG, 'Access service is not installed to access: ', expr);
+        this.user().error(TAG,
+            'Access service is not installed to access: ', expr);
         return null;
       }
       return getter(accessService);
