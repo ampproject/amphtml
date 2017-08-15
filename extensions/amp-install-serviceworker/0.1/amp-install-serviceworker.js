@@ -294,8 +294,7 @@ function install(win, src) {
     }
     return registration;
   }, function(e) {
-    user(win.document.documentElement).error(
-        TAG, 'ServiceWorker registration failed:', e);
+    user().error(TAG, 'ServiceWorker registration failed:', e);
   });
 }
 
