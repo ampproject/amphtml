@@ -360,7 +360,7 @@ Has a stylesheet of the form: `<link href=https://fonts.googleapis.com/... rel=s
 
 | before | after |
 | --- | --- |
-| `<head>`<br>`...`<br>`<link href=https://fonts.googleapis.com/css?family=Lato rel=stylesheet>`<br>`...`<br>`</head>` | `<head>`<br>`...`<br>`<link href=https://fonts.googleapis.com/css?family=Lato rel=stylesheet>`<br>`<link href=https://fonts.gstatic.com rel="dns-prefetch preconnect">`<br>`...`<br>`</head>` |
+| `<head>`<br>`...`<br>`<link href=https://fonts.googleapis.com/css?family=Lato rel=stylesheet>`<br>`...`<br>`</head>` | `<head>`<br>`...`<br>`<link href=https://fonts.googleapis.com/css?family=Lato rel=stylesheet>`<br>`<link href=https://fonts.gstatic.com rel="dns-prefetch preconnect" crossorigin>`<br>`...`<br>`</head>` |
 
 </details>
 
