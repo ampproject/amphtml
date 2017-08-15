@@ -16,6 +16,8 @@ limitations under the License.
 
 # <a name="`amp-compare-slider`"></a> `amp-compare-slider`
 
+## Tool is Under Development!
+
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
