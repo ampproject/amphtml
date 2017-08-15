@@ -52,7 +52,6 @@ let JSONArrayDef;
  */
 let JSONValueDef;
 
-
 /**
  * Recreates objects with prototype-less copies.
  * @param {!JsonObject} obj
@@ -69,7 +68,6 @@ export function recreateNonProtoObject(obj) {
   }
   return /** @type {!JsonObject} */ (copy);
 }
-
 
 /**
  * Returns a value from an object for a field-based expression. The expression
@@ -135,6 +133,59 @@ export function tryParseJson(json, opt_onFailed) {
     }
     return undefined;
   }
+}
+
+/**
+ * Recursively checks strict equality of items in nested arrays and objects.
+ *
+ * @param {JSONValueDef} a
+ * @param {JSONValueDef} b
+ * @param {number} depth The maximum recursion depth. Must be finite.
+ * @return {boolean}
+ * @throws {Error} If depth argument is not finite.
+ */
+export function recursiveEquals(a, b, depth = 3) {
+  if (!isFinite(depth)) {
+    throw new Error('depth arg must be finite: ' + depth);
+  }
+  if (a === b) {
+    return true;
+  }
+  // Only check shallow equality for depth < 1.
+  if (depth < 1) {
+    return false;
+  }
+  if (typeof a !== typeof b) {
+    return false;
+  }
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (let i = 0; i < a.length; i++) {
+      if (!recursiveEquals(a[i], b[i], depth - 1)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
+    const keysA = Object.keys(/** @type {!Object} */ (a));
+    const keysB = Object.keys(/** @type {!Object} */ (b));
+    if (keysA.length !== keysB.length) {
+      return false;
+    }
+    for (let i = 0; i < keysA.length; i++) {
+      const keyA = keysA[i];
+      const valueA = a[keyA];
+      const valueB = b[keyA];
+      if (!recursiveEquals(valueA, valueB, depth - 1)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
 }
 
 

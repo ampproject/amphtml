@@ -28,7 +28,7 @@ A Viewer is a container in which you can view AMP Documents. An AMP Document is 
 In this section, you'll learn how the AMP Viewer and AMP document establish connections to communicate in mobile web and in webview.
 
 ### Communicating between Doc and Viewer in Mobile Web
-In mobile web, the AMP document is an iframe inside of the Viewer. The Viewer is the parent of the AMP document and the AMP document can easily access the Viewer. The Viewer and document are able to communicate directly by using the `POST` request method.
+In mobile web, the AMP document is an iframe inside of the Viewer. The Viewer is the parent of the AMP document and the AMP document can easily access the Viewer. The Viewer and document are able to communicate directly by using the `postMessage()` method.
 
 #### Establishing a handshake on mobile web
 To establish communication between the Viewer and AMP Document, we need to establish a handshake between the two.  Let's illustrate how to establish a handshake on mobile web.
@@ -94,7 +94,7 @@ Webview is for Native apps.  In Webview, the Viewer can see the AMP document, bu
 
    <img src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-viewer-integration/img/webview-connection3.png" height="300px"></img>
 
-   The message sent from the Viewer to the AMP Doc is done using the `POST` request method. The post contains the following message:
+   The message sent from the Viewer to the AMP Doc is done using the `postMessage()` method. The post contains the following message:
 
    ```javascript
    var message = {
@@ -103,7 +103,7 @@ Webview is for Native apps.  In Webview, the Viewer can see the AMP document, bu
    };
    ```
 
-   In the POST, the Viewer also sends the port to the AMP Doc and it looks like this:
+   When calling `postMessage()`, the Viewer also sends the port to the AMP Doc and it looks like this:
 
    ```javascript
    var channel = new MessageChannel();
@@ -191,7 +191,7 @@ AMP Cache providers must include the [amp-viewer-integration](https://github.com
 
 
 ### Specifying Viewer Init Params
-1. In the Viewer, you need to create initialization parameters in a hash:
+1. In the Viewer, you need to create initialization parameters in an object:
    
    ```javascript
    var initParams = {
@@ -200,11 +200,11 @@ AMP Cache providers must include the [amp-viewer-integration](https://github.com
    };
    ```
 
-2. Using `encodeUriComponent`, convert the hash to query string format:
+2. Using `encodeUriComponent`, convert the object to query string format:
       * Separated by `&`
       * Encoded to UTF-8 (`','` -> `'%2C'`, `':'` -> `'%3A'`, `'/'` -> `'%2F'`, etc)
 
-3. Add the query string to the AMP Cache URL:
+3. Add the query string to the fragment part of the AMP Cache URL:
    ```html
    https://cdn.ampproject.org/v/s/origin?amp_js_v=0.1#origin=http%3A%2F%2FyourAmpDocsOrigin.com&someOtherParam=someValue%2CanotherValue
    ```
@@ -247,7 +247,7 @@ There are two types of handshakes:
 #### AMP Document-initiated handshake
 To establish a handshake initiated by the AMP Document:
 
-1. The AMP Document initiates the handshake by sending a request to the Viewer via `POST`:
+1. The AMP Document initiates the handshake by sending a request to the Viewer via `postMessage()`:
    
    ```javascript
    {
@@ -262,7 +262,7 @@ To establish a handshake initiated by the AMP Document:
      rsvp: true,
    };
    ```
-2. The Viewer needs to acknowledge the request and respond via `POST`:
+2. The Viewer needs to acknowledge the request and respond via `postMessage()`:
 
    ```javascript
    {
@@ -284,7 +284,7 @@ To enable the Webview messaging protocol with port exchange, the Viewer Init Par
 
 In Webview, all messages sent between the Viewer and the AMP Document are serialized by using JSON stringify.
 
-The Viewer should start by sending the following message every x milliseconds via POST:
+The Viewer should start by sending the following message every x milliseconds via `postMessage()`:
 
    ```javascript
    var message = {
@@ -293,7 +293,7 @@ The Viewer should start by sending the following message every x milliseconds vi
    };
    ```
 
-In the `Post`, the Viewer should also send a port to the AMP Document: 
+When calling `postMessage()`, the Viewer should also send a port to the AMP Document: 
 
    ```javascript
    var channel = new MessageChannel();
@@ -339,7 +339,7 @@ __Mobile Web handshake__
 
 In the Viewer Init Params, add the flag `cap="handshakepoll"`. 
 
-_Example: Parameters in a hash_
+_Example: Parameters in an object_
 
    ```javascript
    var initParams = {
@@ -348,7 +348,7 @@ _Example: Parameters in a hash_
    };
    ```
 
-_Example: Parameters in a query string_
+_Example: Parameters in a query string in the fragment part of the URL_
 
    ```html
    https://cdn.ampproject.org/v/s/origin?amp_js_v=0.1#origin=http%3A%2F%2FyourAmpDocsOrigin.com&cap=handshakepoll
@@ -356,7 +356,7 @@ _Example: Parameters in a query string_
 
 This will tell the AMP Document not to send out the first message and, instead, wait for a message from the viewer. 
 
-The Viewer should send the following message every x milliseconds via `POST`:
+The Viewer should send the following message every x milliseconds via `postMessage()`:
 
    ```javascript
    var message = {
@@ -365,7 +365,7 @@ The Viewer should send the following message every x milliseconds via `POST`:
    };
    ```
 
-Eventually, the AMP Document receives and loads the message. The AMP Document sends the following  message to the Viewer via POST:
+Eventually, the AMP Document receives and loads the message. The AMP Document sends the following  message to the Viewer via `postMessage()`:
 
    ```javascript
    {
@@ -381,7 +381,7 @@ Eventually, the AMP Document receives and loads the message. The AMP Document se
    };
    ```
 
-The Viewer needs to respond with the following message via `POST`:
+The Viewer needs to respond with the following message via `postMessage()`:
 
    ```javascript
    {
@@ -409,9 +409,9 @@ A message needs to be sent from the Viewer to the AMP Doc:
                                    // values.Can be “visible” or “hidden”. 
                                    // If “visible”, prerenderSize is 
                                    // ignored and the page loads fully.
-       prerenderSize: 1         // # of Windows of content to prerender. 
-                                // 0=no prerendering. 1=load resources for
-                                // 1st screen, etc. Default is 1.
+       prerenderSize: 1            // # of Windows of content to prerender. 
+                                   // 0=no prerendering. 1=load resources for
+                                   // 1st screen, etc. Default is 1.
      }
      rsvp: true
    };

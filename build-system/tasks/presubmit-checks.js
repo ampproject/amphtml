@@ -365,6 +365,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/cid-impl.js',
+      'src/service/cid-api.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -374,6 +375,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/cid-impl.js',
+      'src/service/cid-api.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -455,6 +457,7 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js',
       'src/service/viewer-impl.js',
       'src/error.js',
+      'src/window-interface.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
@@ -556,6 +559,7 @@ var forbiddenTerms = {
       'src/service-worker/core.js',
       'src/worker-error-reporting.js',
       'tools/experiments/experiments.js',
+      'build-system/amp4test.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -725,6 +729,8 @@ var forbiddenTermsSrcInclusive = {
       'src/service/extensions-impl.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-auto-ads/0.1/amp-auto-ads.js',
+      'extensions/amp-auto-ads/0.1/anchor-ad-strategy.js',
     ],
   },
   'reject\\(\\)': {
@@ -855,8 +861,7 @@ var requiredTerms = {
  */
 function isInTestFolder(path) {
   var dirs = path.split('/');
-  var folder = dirs[dirs.length - 2];
-  return path.startsWith('test/') || folder == 'test';
+  return dirs.indexOf('test') >= 0;
 }
 
 function stripComments(contents) {

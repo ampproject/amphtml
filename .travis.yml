@@ -8,23 +8,17 @@ python:
 notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
-addons:
-  hosts:
-    - ads.localhost
-    - iframe.localhost
-    # Requested by some tests because they need a valid font host,
-    # but should not resolve in tests.
-    - fonts.googleapis.com
-  apt:
-    packages:
-    - protobuf-compiler
-    - python-protobuf
 before_install:
   - export CHROME_BIN=google-chrome
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb
+before_script:
+  - pip install --user protobuf
+  - gem install percy-capybara phantomjs poltergeist
+  # Poltergeist requires an absolute path to find phantomjs. See #10305.
+  - export PATH="`pwd`/node_modules/.bin:$PATH"
 script: node build-system/pr-check.js
 branches:
   only:
@@ -38,16 +32,24 @@ env:
     - NPM_CONFIG_PROGRESS="false"
 matrix:
   include:
-    - env: BUILD_SHARD="pre_build_checks_and_unit_tests"
-      before_script:
-        - pip install --user protobuf
-        - gem install percy-capybara phantomjs poltergeist
-        # Poltergeist requires an absolute path to find phantomjs. See #10305.
-        - export PATH="`pwd`/node_modules/.bin:$PATH"
-    - env: BUILD_SHARD="integration_tests"
-      before_script:
-        - pip install --user protobuf
+    - env: BUILD_SHARD="unit_tests"
       addons:
+        hosts:
+          - ads.localhost
+          - iframe.localhost
+          # Requested by some tests because they need a valid font host,
+          # but should not resolve in tests.
+          - fonts.googleapis.com
+        apt:
+          packages:
+          - protobuf-compiler
+          - python-protobuf
+    - env: BUILD_SHARD="integration_tests"
+      addons:
+        apt:
+          packages:
+          - protobuf-compiler
+          - python-protobuf
         sauce_connect:
           username: "amphtml"
         jwt:

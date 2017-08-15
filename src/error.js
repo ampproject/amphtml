@@ -23,6 +23,7 @@ import {
 import {
   USER_ERROR_SENTINEL,
   isUserErrorMessage,
+  isUserErrorEmbed,
   duplicateErrorIfNecessary,
   dev,
 } from './log';
@@ -97,7 +98,8 @@ let detectedJsEngine;
  */
 export function reportErrorForWin(win, error, opt_associatedElement) {
   reportError(error, opt_associatedElement);
-  if (error && isUserErrorMessage(error.message) && !!win) {
+  if (error && !!win && isUserErrorMessage(error.message)
+      && !isUserErrorEmbed(error.message)) {
     reportErrorToAnalytics(/** @type {!Error} */(error), win);
   }
 }
@@ -374,7 +376,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
   url += `&jse=${detectedJsEngine}`;
 
   const exps = [];
-  const experiments = experimentTogglesOrNull();
+  const experiments = experimentTogglesOrNull(self);
   for (const exp in experiments) {
     const on = experiments[exp];
     exps.push(`${exp}=${on ? '1' : '0'}`);

@@ -384,6 +384,13 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
  * @return {!Promise}
  */
 function compileCss() {
+  // Print a message that could help speed up local development.
+  if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
+    $$.util.log(
+        $$.util.colors.green('To skip building during future test runs, use',
+            $$.util.colors.cyan('--nobuild'), 'with your',
+            $$.util.colors.cyan('gulp test'), 'command.'));
+  }
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
   .then(function(css) {
@@ -1239,4 +1246,3 @@ gulp.task('watch', 'Watches for changes in files, re-build', watch, {
 });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
-

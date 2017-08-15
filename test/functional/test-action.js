@@ -536,6 +536,36 @@ describe('Action findAction', () => {
 
     expect(action.findAction_(element, 'event3')).to.equal(null);
   });
+
+  it('should skip action on disabled elements', () => {
+    const parent = document.createElement('button');
+    parent.setAttribute('on', 'event1:action1');
+    parent.disabled = true;
+
+    expect(action.findAction_(parent, 'event1')).to.equal(null);
+  });
+
+  it('should skip parent action on descendants of disabled elements', () => {
+    const parent = document.createElement('button');
+    parent.setAttribute('on', 'event1:action1');
+    parent.disabled = true;
+    const element = document.createElement('div');
+    parent.appendChild(element);
+
+    expect(action.findAction_(element, 'event1')).to.equal(null);
+  });
+
+  it('should skip action on form control in a disabled fieldset', () => {
+    const parent = document.createElement('fieldset');
+    parent.setAttribute('on', 'event1:action1');
+    parent.disabled = true;
+    const element = document.createElement('button');
+    element.setAttribute('on', 'event2:action2');
+    parent.appendChild(element);
+
+    expect(action.findAction_(element, 'event1')).to.equal(null);
+    expect(action.findAction_(element, 'event2')).to.equal(null);
+  });
 });
 
 
@@ -991,13 +1021,15 @@ describes.fakeWin('Core events', {amp: true}, env => {
     const handler = window.document.addEventListener.getCall(3).args[1];
     const element = document.createElement('input');
     element.setAttribute('type', 'checkbox');
+    element.setAttribute('value', 'foo');
     element.checked = true;
     const event = {target: element};
     handler(event);
     expect(action.trigger).to.have.been.calledWith(
         element,
         'change',
-        sinon.match(object => object.detail.checked));
+        sinon.match(object =>
+            object.detail.checked && object.detail.value == 'foo'));
   });
 
   it('should trigger change event for <input type="range"> elements', () => {
