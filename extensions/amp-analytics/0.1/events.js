@@ -243,7 +243,7 @@ export class ClickEventTracker extends EventTracker {
     /** @private {?Observable<!Event>} */
     this.clickObservable_ = new Observable();
 
-    /** @private {?Function} */
+    /** @private {?function(!Event)} */
     this.boundOnClick_ = e => {
       this.clickObservable_.fire(e);
     };
@@ -429,13 +429,13 @@ class TouchEventTracker extends EventTracker {
   constructor(root, touchEventType) {
     super(root);
 
-    /** @const @private {TouchEventType} */
+    /** @const @private {!TouchEventType} */
     this.touchEventType_ = touchEventType;
 
     /** @private {?Observable<!Event>} */
     this.touchObservable_ = new Observable();
 
-    /** @private {?Function} */
+    /** @private {?function(!Event)} */
     this.boundOnTouch_ = e => {
       this.touchObservable_.fire(e);
     };
@@ -540,7 +540,7 @@ export class VideoEventTracker extends EventTracker {
     /** @private {?Observable<!Event>} */
     this.sessionObservable_ = new Observable();
 
-    /** @private {?Function} */
+    /** @private {?function(!Event)} */
     this.boundOnSession_ = e => {
       this.sessionObservable_.fire(e);
     };
