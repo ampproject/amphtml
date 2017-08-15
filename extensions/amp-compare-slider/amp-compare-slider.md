@@ -26,7 +26,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Tool is Under Development!</td>
+    <td>Under Development!</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
