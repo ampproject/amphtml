@@ -105,7 +105,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     this.parseAttributes_();
     this.action_ = Services.actionServiceForDoc(this.element);
     this.maybeInstallPositionObserver_();
-    this.getAmpdoc().whenReady().then(() => {
+    this.getAmpDoc().whenReady().then(() => {
       const scene = this.discoverScene_();
       this.positionObserver_.observe(scene, PositionObserverFidelity.HIGH,
           this.positionChanged_.bind(this)
@@ -363,9 +363,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     dev().assert(rect);
     return layoutRectLtwh(
         rect.left,
-        rect.top + this.resolvedTopMargin_,
+        (rect.top + this.resolvedTopMargin_),
         rect.width,
-        rect.height - this.resolvedBottomMargin_ - this.resolvedTopMargin_,
+        (rect.height - this.resolvedBottomMargin_ - this.resolvedTopMargin_)
     );
   }
 
