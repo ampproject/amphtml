@@ -349,7 +349,7 @@ If possible, rewrite to use the stable version. Otherwise use the unversioned pa
 
 </details>
 
-#### Insert `<link href=https://fonts.gstatic.com rel="dns-prefetch preconnect">`
+#### Insert `<link href=https://fonts.gstatic.com rel="dns-prefetch preconnect" crossorigin>`
 The AMP Cache adds prefetch hint tags for browsers to assist in loading resources earlier and thus speed up page loads.
 
 *Condition*:
