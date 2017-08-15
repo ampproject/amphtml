@@ -558,7 +558,7 @@ export class BaseElement {
   executeAction(invocation, unusedDeferred) {
     if (invocation.method == 'activate') {
       if (invocation.satisfiesTrust(this.activationTrust())) {
-        this.activate(invocation);
+        return this.activate(invocation);
       }
     } else {
       this.initActionMap_();
@@ -567,7 +567,7 @@ export class BaseElement {
           this);
       const {handler, minTrust} = holder;
       if (invocation.satisfiesTrust(minTrust)) {
-        handler(invocation);
+        return handler(invocation);
       }
     }
   }

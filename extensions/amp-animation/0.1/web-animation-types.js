@@ -93,7 +93,6 @@ export let WebKeyframesDef;
  *   easing: (string|undefined),
  *   direction: (!WebAnimationTimingDirection|undefined),
  *   fill: (!WebAnimationTimingFill|undefined),
- *   ticker: (string|undefined)
  * }}
  */
 export let WebAnimationTimingDef;

@@ -15,11 +15,9 @@
  */
 
 import {AmpAnimation} from '../amp-animation';
-import {Builder, WebAnimationRunner} from '../web-animations';
+import {WebAnimationRunner} from '../web-animations';
 import {WebAnimationPlayState} from '../web-animation-types';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as sinon from 'sinon';
-
 
 describes.sandboxed('AmpAnimation', {}, () => {
 
@@ -204,7 +202,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       // Go to hidden state.
       viewer.setVisibilityState_('hidden');
       expect(pauseStub).to.be.calledOnce;
-      expect(startStub).to.be.calledOnce;  // Doesn't chnage.
+      expect(startStub).to.be.calledOnce;  // Doesn't change.
     });
 
     it('should NOT resume/pause when visible, but not triggered', function* () {
@@ -222,6 +220,20 @@ describes.sandboxed('AmpAnimation', {}, () => {
       viewer.setVisibilityState_('hidden');
       expect(pauseStub).to.not.be.called;
       expect(startStub).to.not.be.called;
+    });
+
+    it('should NOT resume when visible if paused by an action', function* () {
+      const anim = yield createAnim({trigger: 'visibility'}, {duration: 1001});
+      const startStub = sandbox.stub(anim, 'startOrResume_');
+      const pauseStub = sandbox.stub(anim, 'pause_');
+      anim.activate();
+      anim.pausedByAction_ = true;
+      expect(anim.triggered_).to.be.true;
+
+      // Go to visible state.
+      viewer.setVisibilityState_('visible');
+      expect(startStub).to.not.be.called;
+      expect(pauseStub).to.not.be.called;
     });
 
     it('should create runner', function* () {
@@ -364,149 +376,250 @@ describes.sandboxed('AmpAnimation', {}, () => {
         });
       });
 
-      it('should trigger activate via start', () => {
-        const startStub = sandbox.stub(anim, 'startOrResume_');
+      it('should trigger activate', () => {
         const args = {};
         const invocation = {
           method: 'activate',
           args,
           satisfiesTrust: () => true,
         };
-        anim.executeAction(invocation);
-        expect(anim.triggered_).to.be.true;
-        expect(startStub).to.be.calledOnce;
-        expect(startStub).to.be.calledWith(args);
+        expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+        expect(anim.triggered_).to.be.false;
+
+        return anim.executeAction(invocation).then(() => {
+          expect(anim.triggered_).to.be.true;
+          expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+        });
       });
 
       it('should trigger start', () => {
-        const startStub = sandbox.stub(anim, 'startOrResume_');
         const args = {};
         const invocation = {
           method: 'start',
           args,
           satisfiesTrust: () => true,
         };
-        anim.executeAction(invocation);
-        expect(anim.triggered_).to.be.true;
-        expect(startStub).to.be.calledOnce;
-        expect(startStub).to.be.calledWith(args);
-      });
+        expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+        expect(anim.triggered_).to.be.false;
 
-      it('should create runner with args', () => {
-        const args = {};
-        anim.triggered_ = true;
-        createRunnerStub./*OK*/restore();
-        const stub = sandbox.stub(Builder.prototype, 'createRunner',
-            () => runner);
-        return anim.startOrResume_(args).then(() => {
-          expect(anim.runner_).to.exist;
-          expect(stub).to.be.calledWith(sinon.match.any, args);
+        return anim.executeAction(invocation).then(() => {
+          expect(anim.triggered_).to.be.true;
+          expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
         });
       });
 
-      it('should trigger restart via cancel and start', () => {
+      it('should create runner with args', () => {
+        const args = {foo: 'bar'};
+        const invocation = {
+          method: 'start',
+          args,
+          satisfiesTrust: () => true,
+        };
+
+        expect(createRunnerStub).not.to.be.called;
+
+        return anim.executeAction(invocation).then(() => {
+          expect(createRunnerStub).to.be.calledWith(args);
+        });
+      });
+
+      it('should trigger but not start if not visible', () => {
+        anim.visible_ = false;
+        const args = {};
+        const invocation = {
+          method: 'start',
+          args,
+          satisfiesTrust: () => true,
+        };
+        expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+        expect(anim.triggered_).to.be.false;
+
+        return anim.executeAction(invocation).then(() => {
+          expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+          expect(anim.triggered_).to.be.true;
+        });
+      });
+
+      it('should trigger restart', () => {
         const cancelStub = sandbox.stub(anim, 'cancel_');
-        const startStub = sandbox.stub(anim, 'startOrResume_');
         const args = {};
         const invocation = {
           method: 'restart',
           args,
           satisfiesTrust: () => true,
         };
-        anim.executeAction(invocation);
-        expect(anim.triggered_).to.be.true;
-        expect(cancelStub).to.be.calledOnce;
-        expect(startStub).to.be.calledOnce;
-        expect(startStub).to.be.calledWith(args);
+        return anim.executeAction(invocation).then(() => {
+          expect(anim.triggered_).to.be.true;
+          expect(cancelStub).to.be.calledOnce;
+          expect(anim.triggered_).to.be.true;
+          expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+        });
       });
 
       it('should trigger pause after start', () => {
-        anim.triggered_ = true;
-        return anim.startOrResume_().then(() => {
-          runnerMock.expects('pause').once();
-          anim.executeAction({method: 'pause', satisfiesTrust: () => true});
+        const args = {};
+        const startInvocation = {
+          method: 'start',
+          args,
+          satisfiesTrust: () => true,
+        };
+        const pauseInvocation = {
+          method: 'pause',
+          args,
+          satisfiesTrust: () => true,
+        };
+        anim.executeAction(startInvocation);
+        return anim.executeAction(pauseInvocation).then(() => {
+          expect(anim.triggered_).to.be.true;
+          expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
         });
       });
 
       it('should ignore pause before start', () => {
         runnerMock.expects('pause').never();
-        anim.executeAction({method: 'pause', satisfiesTrust: () => true});
+        return anim.executeAction(
+          {method: 'pause', satisfiesTrust: () => true}
+        );
       });
 
-      it('should trigger resume after start', () => {
-        anim.triggered_ = true;
-        return anim.startOrResume_().then(() => {
-          runnerMock.expects('resume').once();
-          anim.executeAction({method: 'resume', satisfiesTrust: () => true});
+      it('should trigger resume after start follwed by pause', () => {
+        const args = {};
+        const startInvocation = {
+          method: 'start',
+          args,
+          satisfiesTrust: () => true,
+        };
+        const pauseInvocation = {
+          method: 'pause',
+          args,
+          satisfiesTrust: () => true,
+        };
+        anim.executeAction(startInvocation);
+        return anim.executeAction(pauseInvocation).then(() => {
+          expect(anim.triggered_).to.be.true;
+          expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
+          const resumeInvocation = {
+            method: 'resume',
+            args,
+            satisfiesTrust: () => true,
+          };
+          return anim.executeAction(resumeInvocation);
+        }).then(() => {
+          expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
         });
       });
 
       it('should ignore resume before start', () => {
         runnerMock.expects('resume').never();
-        anim.executeAction({method: 'resume', satisfiesTrust: () => true});
+        return anim.executeAction(
+          {method: 'resume', satisfiesTrust: () => true}
+        );
       });
 
       it('should toggle pause/resume after start', () => {
-        anim.triggered_ = true;
-        return anim.startOrResume_().then(() => {
-          runnerMock.expects('pause').once();
-          anim.executeAction({
-            method: 'togglePause',
-            satisfiesTrust: () => true,
-          });
-
-          runnerMock.expects('getPlayState')
-              .returns(WebAnimationPlayState.PAUSED);
-          runnerMock.expects('resume').once();
-          anim.executeAction({
-            method: 'togglePause',
-            satisfiesTrust: () => true,
-          });
+        const args = {};
+        const startInvocation = {
+          method: 'start',
+          args,
+          satisfiesTrust: () => true,
+        };
+        const togglePauseInvocation = {
+          method: 'togglePause',
+          args,
+          satisfiesTrust: () => true,
+        };
+        anim.executeAction(startInvocation);
+        return anim.executeAction(togglePauseInvocation).then(() => {
+          expect(anim.triggered_).to.be.true;
+          expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
+          return anim.executeAction(togglePauseInvocation);
+        }).then(() => {
+          expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
         });
       });
 
-      it('should seek-to after start', () => {
-        anim.triggered_ = true;
-        return anim.startOrResume_().then(() => {
-          runnerMock.expects('seekTo').withExactArgs(100).once();
-          let invocation = {
-            method: 'seekTo',
-            args: {time: 100},
-            satisfiesTrust: () => true,
-          };
-          anim.executeAction(invocation);
-
-          runnerMock.expects('seekTo').withExactArgs(200).once();
-          invocation = {
-            method: 'seekTo',
-            args: {time: 200},
-            satisfiesTrust: () => true,
-          };
-          anim.executeAction(invocation);
-        });
+      it('should ignore toggle pause/resume before start', () => {
+        runnerMock.expects('resume').never();
+        runnerMock.expects('pause').never();
+        return anim.executeAction(
+          {method: 'togglePause', satisfiesTrust: () => true}
+        );
       });
 
-      it('should ignore seek-to before start', () => {
-        runnerMock.expects('seekTo').never();
+      it('should seek-to (time) regardless of start', () => {
         const invocation = {
           method: 'seekTo',
           args: {time: 100},
           satisfiesTrust: () => true,
         };
-        anim.executeAction(invocation);
+
+        runnerMock.expects('seekTo').withExactArgs(100).once();
+        return anim.executeAction(invocation).then(() => {
+          expect(anim.triggered_).to.be.true;
+        });
+      });
+
+      it('should seek-to (percent) regardless of start', () => {
+        const invocation = {
+          method: 'seekTo',
+          args: {percent: 0.5},
+          satisfiesTrust: () => true,
+        };
+
+        runnerMock.expects('seekToPercent').withExactArgs(0.5).once();
+        return anim.executeAction(invocation).then(() => {
+          expect(anim.triggered_).to.be.true;
+        });
+      });
+
+      it('should clamp percent (upper) seekTo', () => {
+        const invocation = {
+          method: 'seekTo',
+          args: {percent: 1.5},
+          satisfiesTrust: () => true,
+        };
+
+        runnerMock.expects('seekToPercent').withExactArgs(1).once();
+        return anim.executeAction(invocation).then(() => {
+          expect(anim.triggered_).to.be.true;
+        });
+      });
+
+      it('should clamp percent (lower) seekTo', () => {
+        const invocation = {
+          method: 'seekTo',
+          args: {percent: -2},
+          satisfiesTrust: () => true,
+        };
+
+        runnerMock.expects('seekToPercent').withExactArgs(0).once();
+        return anim.executeAction(invocation).then(() => {
+          expect(anim.triggered_).to.be.true;
+        });
       });
 
       it('should trigger reverse after start', () => {
-        anim.triggered_ = true;
-        return anim.startOrResume_().then(() => {
-          runnerMock.expects('reverse').once();
-          anim.executeAction({method: 'reverse', satisfiesTrust: () => true});
-        });
+        const args = {};
+        const startInvocation = {
+          method: 'start',
+          args,
+          satisfiesTrust: () => true,
+        };
+        const invocation = {
+          method: 'reverse',
+          args,
+          satisfiesTrust: () => true,
+        };
+        anim.executeAction(startInvocation);
+        runnerMock.expects('reverse').once();
+        return anim.executeAction(invocation);
       });
 
       it('should ignore reverse before start', () => {
         runnerMock.expects('reverse').never();
-        anim.executeAction({method: 'reverse', satisfiesTrust: () => true});
+        return anim.executeAction(
+          {method: 'reverse', satisfiesTrust: () => true}
+        );
       });
 
       it('should trigger finish after start', () => {
@@ -522,6 +635,74 @@ describes.sandboxed('AmpAnimation', {}, () => {
         return anim.startOrResume_().then(() => {
           runnerMock.expects('cancel').once();
           anim.executeAction({method: 'cancel', satisfiesTrust: () => true});
+        });
+      });
+
+      it('should set paused by action properly', () => {
+        const args = {};
+        const startInvocation = {
+          method: 'start',
+          args,
+          satisfiesTrust: () => true,
+        };
+        const pauseInvocation = {
+          method: 'pause',
+          args,
+          satisfiesTrust: () => true,
+        };
+        const resumeInvocation = {
+          method: 'resume',
+          args,
+          satisfiesTrust: () => true,
+        };
+        const togglePauseInvocation = {
+          method: 'togglePause',
+          args,
+          satisfiesTrust: () => true,
+        };
+        const cancelInvocation = {
+          method: 'cancel',
+          args,
+          satisfiesTrust: () => true,
+        };
+        expect(anim.pausedByAction_).to.be.false;
+
+        return anim.executeAction(startInvocation).then(() => {
+          expect(anim.pausedByAction_).to.be.false;
+          return anim.executeAction(pauseInvocation);
+        }).then(() => {
+          expect(anim.pausedByAction_).to.be.true;
+          return anim.executeAction(resumeInvocation);
+        }).then(() => {
+          expect(anim.pausedByAction_).to.be.false;
+          return anim.executeAction(togglePauseInvocation);
+        }).then(() => {
+          expect(anim.pausedByAction_).to.be.true;
+          return anim.executeAction(cancelInvocation);
+        }).then(() => {
+          expect(anim.pausedByAction_).to.be.false;
+        });
+      });
+
+      it.skip('should set paused by action flag', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          expect(anim.pausedByAction_).to.be.false;
+          let invocation = {
+            method: 'pause',
+            args: {},
+            satisfiesTrust: () => true,
+          };
+          anim.executeAction(invocation);
+          expect(anim.pausedByAction_).to.be.true;
+
+          invocation = {
+            method: 'resume',
+            args: {},
+            satisfiesTrust: () => true,
+          };
+          anim.executeAction(invocation);
+          expect(anim.pausedByAction_).to.be.false;
         });
       });
     });

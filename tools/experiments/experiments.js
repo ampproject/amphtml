@@ -267,6 +267,13 @@ const EXPERIMENTS = [
     name: 'Disable AMP RTC',
     spec: 'https://github.com/ampproject/amphtml/issues/8551',
   },
+  {
+    id: 'amp-position-observer',
+    name: 'Amp extension for monitoring position of an element within viewport',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/10875',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+      'amp-position-observer/amp-position-observer.md',
+  },
 ];
 
 if (getMode().localDev) {

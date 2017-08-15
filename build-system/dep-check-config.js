@@ -188,7 +188,7 @@ exports.rules = [
       // TODO(@zhouyx, #9213) Remove this item.
       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js->' +
           'src/service/position-observer-impl.js',
-      'extensions/amp-animation/0.1/scrollbound-scene.js->' +
+      'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
           'src/service/position-observer-impl.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
