@@ -19,7 +19,8 @@ import {dev} from './log';
 import {listen} from './event-helper';
 import {Services} from './services';
 import {VideoEvents} from './video-interface';
-import {formatTime} from './utils/datetime';
+import {secsToHHMMSS} from './utils/datetime';
+import {createElementWithAttributes} from './dom';
 import * as st from './style';
 import * as tr from './transition';
 
@@ -35,19 +36,18 @@ export class CustomControls {
    * Initializes variables and creates the custom controls
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!./service/video-manager-impl.VideoEntry} entry
-   * @param {boolean} darkSkin whether to use dark or light theme
-   * @param {string} mainCtrls list of controls to add to the main bar
-   * @param {string} miniCtrls list of controls to add to the minimized overlay
-   * @param {string} floating single control button to use as the main action
+   * @param {{
+   *    darkSkin:(boolean|undefined),
+   *    mainCtrls:(Array<string>|undefined),
+   *    miniCtrls:(Array<string>|undefined),
+   *    floating:(string|undefined),
+   * }=} opt_options
+   *      - darkSkin: whether to use dark or light theme
+   *      - mainCtrls: list of controls to add to the main bar
+   *      - miniCtrls: list of controls to add to the minimized overlay
+   *      - floating: single control button to use as the main action
    */
-  constructor(
-    ampdoc,
-    entry,
-    darkSkin = false,
-    mainCtrls = ['time', 'spacer', 'volume', 'fullscreen'],
-    miniCtrls = ['play', 'volume', 'fullscreen'],
-    floating = 'play'
-  ) {
+  constructor(ampdoc, entry, opt_options) {
 
     /** @private {!./service/ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = ampdoc;
@@ -58,8 +58,12 @@ export class CustomControls {
     /** @private @const {!./service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
 
-    /** @private {boolean} */
-    this.darkSkin_ = darkSkin;
+    this.options_ = opt_options || {
+      darkSkin: false,
+      mainCtrls: ['time', 'spacer', 'volume', 'fullscreen'],
+      miniCtrls: ['play', 'volume', 'fullscreen'],
+      floating: 'play',
+    };
 
     /** @private {?Element} */
     this.ctrlContainer_ = null;
@@ -97,7 +101,7 @@ export class CustomControls {
     /** @private {boolean} */
     this.minimal_ = false;
 
-    this.createCustomControls_(mainCtrls, miniCtrls, floating);
+    this.createCustomControls_(this.options_);
   }
 
   /**
@@ -105,7 +109,7 @@ export class CustomControls {
    * @return {!Element}
    */
   getElement() {
-    return dev.assertElement(this.ctrlContainer_);
+    return dev().assertElement(this.ctrlContainer_);
   }
 
   /**
@@ -137,12 +141,16 @@ export class CustomControls {
   createVolumeControls_() {
     const doc = this.ampdoc_.win.document;
     const volumeContainer = doc.createElement('amp-custom-controls-volume');
-    const volumeSlider = doc.createElement('input');
-    volumeSlider.setAttribute('type', 'range');
-    volumeSlider.setAttribute('min', '0');
-    volumeSlider.setAttribute('max', '100');
-    volumeSlider.setAttribute('value', '30');
-    volumeSlider.classList.add('amp-custom-controls-volume-indicator');
+    // const volumeSlider = createElementWithAttributes(
+    //     doc, 'input',
+    //     {
+    //       'type': 'range',
+    //       'min': '0',
+    //       'max': '100',
+    //       'value': '0',
+    //     }
+    // );
+    // volumeSlider.classList.add('amp-custom-controls-volume-indicator');
     const muteBtnWrap = doc.createElement('amp-custom-controls-icon-wrapper');
     muteBtnWrap.classList.add('amp-custom-controls-mute');
     const muteBtn = this.createIcon_(
@@ -150,7 +158,7 @@ export class CustomControls {
     );
     muteBtnWrap.appendChild(muteBtn);
     volumeContainer.appendChild(muteBtnWrap);
-    volumeContainer.appendChild(volumeSlider);
+    // volumeContainer.appendChild(volumeSlider);
     listen(muteBtnWrap, 'click', () => {
       if (this.entry_.isMuted()) {
         this.entry_.video.unmute();
@@ -158,15 +166,17 @@ export class CustomControls {
         this.entry_.video.mute();
       }
     });
-    [VideoEvents.MUTED, VideoEvents.UNMUTED].forEach(e => {
-      listen(this.entry_.video.element, e, () => {
-        if (e == VideoEvents.MUTED) {
-          this.changeIcon_(muteBtn, 'mute');
-        } else {
-          this.changeIcon_(muteBtn, 'volume-max');
+    this.listenMultiple_(
+        this.entry_.video.element,
+        [VideoEvents.MUTED, VideoEvents.UNMUTED],
+        e => {
+          if (e.type == VideoEvents.MUTED) {
+            this.changeIcon_(muteBtn, 'mute');
+          } else {
+            this.changeIcon_(muteBtn, 'volume-max');
+          }
         }
-      });
-    });
+    );
     return volumeContainer;
   }
 
@@ -189,7 +199,8 @@ export class CustomControls {
    */
   createPlayPauseBtn_(loadingElement) {
     const doc = this.ampdoc_.win.document;
-    const playpauseBtnWrap = doc.createElement('amp-custom-controls-icon-wrapper');
+    const playpauseBtnWrap =
+      doc.createElement('amp-custom-controls-icon-wrapper');
     playpauseBtnWrap.classList.add('amp-custom-controls-playpause');
     const playpauseBtn = this.createIcon_('play');
     playpauseBtnWrap.appendChild(playpauseBtn);
@@ -206,20 +217,21 @@ export class CustomControls {
         loadingElement.classList.toggle('amp-custom-controls-loading', true);
       }
     });
-    [VideoEvents.PLAYING, VideoEvents.PAUSE].forEach(e => {
-      listen(this.entry_.video.element, e, () => {
-        loadingElement.classList.toggle('amp-custom-controls-loading', false);
-        if (e == VideoEvents.PAUSE) {
-          this.changeIcon_(playpauseBtn, 'play');
-          this.showControls();
-          if (this.controlsTimer_) {
-            clearTimeout(this.controlsTimer_);
+    this.listenMultiple_(this.entry_.video.element,
+        [VideoEvents.PLAYING, VideoEvents.PAUSE],
+        e => {
+          loadingElement.classList.toggle('amp-custom-controls-loading', false);
+          if (e.type == VideoEvents.PAUSE) {
+            this.changeIcon_(playpauseBtn, 'play');
+            this.showControls();
+            if (this.controlsTimer_) {
+              clearTimeout(this.controlsTimer_);
+            }
+          } else {
+            this.changeIcon_(playpauseBtn, 'pause');
           }
-        } else {
-          this.changeIcon_(playpauseBtn, 'pause');
         }
-      });
-    });
+    );
     return playpauseBtnWrap;
   }
 
@@ -235,15 +247,17 @@ export class CustomControls {
     // Update played time
     const updateProgress = () => {
       const current = this.entry_.video.getCurrentTime() || 0;
-      const currentFormatted = formatTime(current);
+      const currentFormatted = secsToHHMMSS(current);
       const total = this.entry_.video.getDuration() || 0;
-      const totalFormatted = formatTime(total);
+      const totalFormatted = secsToHHMMSS(total);
       progressTime./*OK*/innerText = currentFormatted + ' / ' + totalFormatted;
     };
 
-    [VideoEvents.TIME_UPDATE, VideoEvents.LOAD].forEach(e => {
-      listen(this.entry_.video.element, e, updateProgress.bind(this));
-    });
+    this.listenMultiple_(
+        this.entry_.video.element,
+        [VideoEvents.TIME_UPDATE, VideoEvents.LOAD],
+        updateProgress.bind(this)
+    );
 
     return progressTime;
   }
@@ -284,43 +298,41 @@ export class CustomControls {
       });
     });
 
-    ['mousedown', 'touchstart'].forEach(event => {
-      listen(totalBar, event, () => {
-        scrubberTouched = true;
-      });
-      listen(scrubber, event, () => {
-        scrubberTouched = true;
-      });
+    const toggleScrubberTouched = () => {
+      scrubberTouched = true;
+    };
+    [totalBar, scrubber].forEach(element => {
+      this.listenMultiple_(
+          element,
+          'mousedown touchstart',
+          toggleScrubberTouched.bind(this)
+      );
     });
 
-    ['mousemove', 'touchmove'].forEach(event => {
-      listen(doc, event, e => {
-        // TODO(@wassgha) Seek when implemented
-        if (!size) {
-          size = progressBar./*OK*/getBoundingClientRect();
-        }
-        const left = size.left;
-        const total = size.width;
-        const newPercent = Math.min(100,
-            Math.max(0, 100 * (e.clientX - left) / total)
-        );
-        scrubberDragging = scrubberTouched;
-        if (scrubberDragging) {
-          st.setStyles(scrubber, {
-            'left': st.percent(newPercent),
-          });
-          st.setStyles(currentBar, {
-            'width': st.percent(newPercent),
-          });
-        }
-      });
+    this.listenMultiple_(doc, 'mousemove touchmove', e => {
+      // TODO(@wassgha) Seek when implemented
+      if (!size) {
+        size = progressBar./*OK*/getBoundingClientRect();
+      }
+      const left = size.left;
+      const total = size.width;
+      const newPercent = Math.min(100,
+          Math.max(0, 100 * (e.clientX - left) / total)
+      );
+      scrubberDragging = scrubberTouched;
+      if (scrubberDragging) {
+        st.setStyles(scrubber, {
+          'left': st.percent(newPercent),
+        });
+        st.setStyles(currentBar, {
+          'width': st.percent(newPercent),
+        });
+      }
     });
 
-    ['mouseup', 'touchend'].forEach(event => {
-      listen(doc, event, () => {
-        scrubberTouched = false;
-        scrubberDragging = false;
-      });
+    this.listenMultiple_(doc, 'mouseup touchend', () => {
+      scrubberTouched = false;
+      scrubberDragging = false;
     });
 
     // Update progress bar
@@ -336,9 +348,11 @@ export class CustomControls {
       });
     };
 
-    [VideoEvents.TIME_UPDATE, VideoEvents.LOAD].forEach(e => {
-      listen(this.entry_.video.element, e, updateProgress.bind(this));
-    });
+    this.listenMultiple_(
+        this.entry_.video.element,
+        [VideoEvents.TIME_UPDATE, VideoEvents.LOAD],
+        updateProgress.bind(this)
+    );
 
     return progressBar;
   }
@@ -361,7 +375,7 @@ export class CustomControls {
    * @return {!Element}
    * @private
    */
-  elementFromButton_(btn, opt_loadingElement = null) {
+  elementFromButton_(btn, opt_loadingElement = 'self') {
     const doc = this.ampdoc_.win.document;
     switch (btn) {
       case 'play':
@@ -381,20 +395,36 @@ export class CustomControls {
 
   /**
    * Create the custom controls shim and insert it inside the video
-   * @param {Array<string>} mainCtrls List of orderd controls (main bar)
-   * @param {Array<string>} miniCtrls List of orderd controls (minimized ctrls)
-   * @param {string} floating Name of the primary floating button (usually play)
+   * @param {{
+   *    darkSkin:(boolean|undefined),
+   *    mainCtrls:(Array<string>|undefined),
+   *    miniCtrls:(Array<string>|undefined),
+   *    floating:(string|undefined),
+   * }=} opt_options
+   *      - darkSkin: whether to use dark or light theme
+   *      - mainCtrls: list of controls to add to the main bar
+   *      - miniCtrls: list of controls to add to the minimized overlay
+   *      - floating: single control button to use as the main action
    * @private
    */
-  createCustomControls_(mainCtrls, miniCtrls, floating) {
+  createCustomControls_(opt_options) {
+    // Set up options
+    const darkSkin = opt_options.darkSkin || false;
+    const mainCtrls = opt_options.mainCtrls
+                      || ['time', 'spacer', 'volume', 'fullscreen'];
+    const miniCtrls = opt_options.miniCtrls
+                      || ['play', 'volume', 'fullscreen'];
+    const floating = opt_options.floating || 'play';
     // Set up controls
     const doc = this.ampdoc_.win.document;
     this.ctrlContainer_ = doc.createElement('amp-custom-controls');
-    this.ctrlContainer_.classList.toggle('light', !this.darkSkin_);
+    const ctrlClasses = this.ctrlContainer_.classList;
+    ctrlClasses.toggle('amp-custom-controls-light-skin', !darkSkin);
     this.ctrlBg_ = doc.createElement('amp-custom-controls-bg');
     this.ctrlBarWrapper_ = doc.createElement('amp-custom-controls-bar-wrapper');
     this.ctrlBarContainer_ = doc.createElement('amp-custom-controls-bar');
-    this.miniCtrlsWrapper_ = doc.createElement('amp-custom-controls-mini-wrapper');
+    this.miniCtrlsWrapper_ =
+      doc.createElement('amp-custom-controls-mini-wrapper');
     this.miniCtrlsContainer_ = doc.createElement('amp-custom-controls-mini');
     this.floatingContainer_ = doc.createElement('amp-custom-controls-floating');
 
@@ -612,8 +642,39 @@ export class CustomControls {
     });
   }
 
-  toggleMinimalControls(enable = true) {
+  /**
+   * Switches between full controls (with control bar and floating main action)
+   * and minimal controls (overlayed actions and a minimal progress bar).
+   * Minimal controls are used by default for docked videos.
+   * @param {boolean} enabled enable/disable minimal controls
+   */
+  toggleMinimalControls(enabled = true) {
     this.ctrlContainer_.classList.toggle('amp-custom-controls-minimal', enable);
     this.minimal_ = enable;
+  }
+
+  /**
+   * Listens for multiple events on an element
+   * @param {!EventTarget} element
+   * @param {string|Array<string>} eventTypes
+   * @param {function(!Event)} listener
+   * @param {Object=} opt_evtListenerOpts
+   * @private
+   */
+  listenMultiple_(element, eventTypes, listener, opt_evtListenerOpts) {
+    let eventTypesArray;
+    if (Array.isArray(eventTypes)) {
+      eventTypesArray = eventTypes;
+    } else {
+      eventTypesArray = eventTypes.split(' ');
+    }
+    eventTypesArray.forEach(eventType => {
+      listen(
+          element,
+          eventType,
+          listener,
+          opt_evtListenerOpts
+      );
+    });
   }
 }

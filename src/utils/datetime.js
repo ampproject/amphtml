@@ -15,12 +15,12 @@
  */
 
 /**
- * Formats seconds to hh:mm:ss
+ * Formats seconds to hh:mm:ss or mm:ss (if no hours are needed)
  * @param {number} secs
  * @return {string}
  * @private
  */
-export function formatTime(secs) {
+export function secsToHHMMSS(secs) {
   let ss = secs;
   const hh = Math.floor(ss / 3600);
   ss %= 3600;

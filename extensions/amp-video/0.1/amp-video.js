@@ -211,7 +211,7 @@ class AmpVideo extends AMP.BaseElement {
     this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_LAYOUT, this.video_,
         /* opt_removeMissingAttrs */ true);
 
-    const children = scopedQuerySelectorAll(this.element, 'source track');
+    const children = scopedQuerySelectorAll(this.element, 'source, track');
     Array.prototype.forEach.call(children, child => {
       // Skip the video we already added to the element.
       if (this.video_ === child) {
@@ -247,10 +247,11 @@ class AmpVideo extends AMP.BaseElement {
     listen(video, 'ended', () => {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
     });
+    const dispatchTimeUpdate = () => {
+      this.element.dispatchCustomEvent(VideoEvents.TIME_UPDATE);
+    };
     ['durationchange', 'timeupdate', 'seeking'].map(e => {
-      listen(video, e, () => {
-        this.element.dispatchCustomEvent(VideoEvents.TIME_UPDATE);
-      });
+      listen(video, e, dispatchTimeUpdate);
     });
   }
 

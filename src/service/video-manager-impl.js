@@ -1262,7 +1262,7 @@ export class VideoEntry {
       return;
     }
     this.hideControls(true, true);
-    this.customControls_.toggleMinimalControls(true);
+    this.customControls_.toggleMinimalControls(/* enabled */ true);
     this.video.element.classList.add(DOCK_CLASS);
     [
       this.customControls_.getElement(),
@@ -1280,41 +1280,38 @@ export class VideoEntry {
     this.dockState_ = DockStates.DOCKING;
     this.manager_.registerDocked(this);
 
-    ['mousedown', 'touchstart'].forEach(event => {
-      this.addListener_(
-          dev().assertElement(this.customControls_.getElement()),
-          event,
-          e => {
-            this.isTouched_ = true;
-            this.isDragging_ = false;
-            this.mouse_(e, true);
-          }
-      );
-    });
-
-    ['mouseup', 'touchend'].forEach(event => {
-      this.addListener_(this.ampdoc_.win.document, event, () => {
-        this.isTouched_ = false;
-        this.isDragging_ = false;
-        // Call drag one last time to see if the velocity is still not null
-        // in which case, drag would call itself again to finish the animation
-        this.drag_();
-      });
-    });
-
-    ['mousemove', 'touchmove'].forEach(event => {
-      this.addListener_(this.ampdoc_.win.document, event, e => {
-        // TODO(@wassgha) Make this passive once the PR goes through
-        // TODO(@wassgha) Unlisten to this event as soon as we stop dragging
-        this.isDragging_ = this.isTouched_;
-        if (this.isDragging_) {
-          e.preventDefault();
-          // Start dragging
-          this.dockState_ = DockStates.DRAGGABLE;
-          this.drag_();
+    this.addListener_(
+        dev().assertElement(this.customControls_.getElement()),
+        'mousedown touchstart',
+        e => {
+          this.isTouched_ = true;
+          this.isDragging_ = false;
+          this.mouse_(e, true);
         }
-        this.mouse_(e);
-      }, true, false);
+    );
+
+    this.addListener_(this.ampdoc_.win.document, 'mouseup touchend', () => {
+      this.isTouched_ = false;
+      this.isDragging_ = false;
+      // Call drag one last time to see if the velocity is still not null
+      // in which case, drag would call itself again to finish the animation
+      this.drag_();
+    });
+
+    this.addListener_(this.ampdoc_.win.document, 'mousemove touchmove', e => {
+      // TODO(@wassgha) Make this passive once the PR goes through
+      // TODO(@wassgha) Unlisten to this event as soon as we stop dragging
+      this.isDragging_ = this.isTouched_;
+      if (this.isDragging_) {
+        e.preventDefault();
+        // Start dragging
+        this.dockState_ = DockStates.DRAGGABLE;
+        this.drag_();
+      }
+      this.mouse_(e);
+    }, {
+      'capture': true,
+      'passive': false,
     });
   }
 
@@ -1414,22 +1411,22 @@ export class VideoEntry {
   /**
    * Listens for the specified event on the element and records unlistener
    * @param {!EventTarget} element
-   * @param {string} eventType
+   * @param {string} eventTypes
    * @param {function(!Event)} listener
-   * @param {boolean} opt_capture
-   * @param {boolean} opt_passive
+   * @param {Object=} opt_evtListenerOpts
    * @private
    */
-  addListener_(element, eventType,
-              listener, opt_capture = false,
-              opt_passive = false) {
-    this.dragUnlisteners_.push(
-        listen(
-            element,
-            eventType,
-            listener
-        )
-    );
+  addListener_(element, eventTypes, listener, opt_evtListenerOpts) {
+    eventTypes.split(' ').forEach(eventType => {
+      this.dragUnlisteners_.push(
+          listen(
+              element,
+              eventType,
+              listener,
+              opt_evtListenerOpts
+          )
+      );
+    });
   }
 
   /**
@@ -1573,7 +1570,7 @@ export class VideoEntry {
             this.internalElement_,
           ].forEach(element => {
             this.dragMove_(element);
-          })
+          });
         }
 
         if (!this.isDragging_) {
@@ -1650,7 +1647,7 @@ export class VideoEntry {
       this.unlistenAll_();
       this.hideControls(true, false);
       this.showControls(false);
-      this.customControls_.toggleMinimalControls(false);
+      this.customControls_.toggleMinimalControls(/* enabled */ false);
       // Restore the video inline
       this.video.element.classList.remove(DOCK_CLASS);
       [
@@ -1868,31 +1865,42 @@ export class VideoEntry {
     const skinAttr = this.video.element.getAttribute(
         VideoAttributes.CUSTOM_CTRLS_SKIN
     );
-    const skin = skinAttr == 'dark' ? true : false;
+    const darkSkin = skinAttr == 'dark' ? true : false;
 
+    // Get main controls (in the control bar)
     const mainCtrlsAttr = this.video.element.getAttribute(
         VideoAttributes.CUSTOM_CTRLS_MAIN
     );
     const mainCtrls = mainCtrlsAttr ? mainCtrlsAttr.split(' ') : undefined;
 
+    // Get mini-controls (used when video is docked)
     const miniCtrlsAttr = this.video.element.getAttribute(
         VideoAttributes.CUSTOM_CTRLS_MINI
     );
     const miniCtrls = miniCtrlsAttr ? miniCtrlsAttr.split(' ') : undefined;
 
+    // Get floating button (main action)
     const floatingCtrlAttr = this.video.element.getAttribute(
         VideoAttributes.CUSTOM_CTRLS_FLOATING
     );
-    const floatingCtrl = floatingCtrlAttr ? floatingCtrlAttr : undefined;
+    const floating = floatingCtrlAttr ? floatingCtrlAttr : undefined;
 
     this.customControls_ = new CustomControls(
-      this.ampdoc_,
-      this,
-      skin,
-      mainCtrls,
-      miniCtrls,
-      floatingCtrl
+        this.ampdoc_,
+        this,
+        {
+          darkSkin,
+          mainCtrls,
+          miniCtrls,
+          floating,
+        }
     );
+
+    // If we only use custom controls for docked videos then we hide them
+    // until the video is docked.
+    if (!this.hasCustomCtrls) {
+      this.hideControls(true, true);
+    }
   }
 
   hideControls(customToo = true, disableToo = true) {
