@@ -147,7 +147,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * attribute was not set.
      * @private {string}
      */
-    this.autoFormat_ = this.element.getAttribute('data-auto-format') || '';
+    this.autoFormat_ = null;
   }
 
   /** @return {boolean} */
@@ -225,6 +225,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'brdim': additionalDimensions(this.win, viewportSize),
       'ifi': this.win['ampAdGoogleIfiCounter']++,
       'rc': this.fromResumeCallback ? 1 : null,
+      'rafmt': this.isResponsive() ? 13 : null,
     };
 
     const experimentIds = [];
@@ -340,6 +341,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
+
+    this.autoFormat_ =
+        this.element.getAttribute('data-auto-format') || '';
 
     if (this.isResponsive()) {
       // Attempt to resize to the correct height.
