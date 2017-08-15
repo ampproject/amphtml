@@ -240,10 +240,10 @@ export class ClickEventTracker extends EventTracker {
   constructor(root) {
     super(root);
 
-    /** @private {!Observable<!Event>} */
+    /** @private {?Observable<!Event>} */
     this.clickObservable_ = new Observable();
 
-    /** @private @const */
+    /** @private {?Function} */
     this.boundOnClick_ = e => {
       this.clickObservable_.fire(e);
     };
@@ -254,6 +254,8 @@ export class ClickEventTracker extends EventTracker {
   dispose() {
     this.root.getRoot().removeEventListener('click', this.boundOnClick_);
     this.clickObservable_.removeAll();
+    this.boundOnClick_ = null;
+    this.clickObservable_ = null;
   }
 
   /** @override */
@@ -407,6 +409,14 @@ export class IniLoadTracker extends EventTracker {
   }
 }
 
+/** @enum {string} */
+const TouchEventType = {
+  TOUCH_START: 'touchstart',
+  TOUCH_MOVE: 'touchmove',
+  TOUCH_END: 'touchend',
+  TOUCH_CANCEL: 'touchcancel',
+};
+
 /**
  * Tracks touch events
  * @abstract
@@ -414,22 +424,18 @@ export class IniLoadTracker extends EventTracker {
 class TouchEventTracker extends EventTracker {
   /**
    * @param {!./analytics-root.AnalyticsRoot} root
-   * @param {string} touchEventType 'touchstart', 'touchmove', 'touchend', or
-   * 'touchcancel'
+   * @param {!TouchEventType} touchEventType Which type of touch event to track
    */
   constructor(root, touchEventType) {
     super(root);
 
-    dev().assert(touchEventType == 'touchstart' ||
-        touchEventType == 'touchmove' || touchEventType == 'touchend' ||
-        touchEventType == 'touchcancel',
-        'touchEventType unsupported: ' + touchEventType);
+    /** @const @private {TouchEventType} */
     this.touchEventType_ = touchEventType;
 
-    /** @private {!Observable<!Event>} */
+    /** @private {?Observable<!Event>} */
     this.touchObservable_ = new Observable();
 
-    /** @private @const */
+    /** @private {?Function} */
     this.boundOnTouch_ = e => {
       this.touchObservable_.fire(e);
     };
@@ -442,6 +448,8 @@ class TouchEventTracker extends EventTracker {
     this.root.getRoot().removeEventListener(this.touchEventType_,
         this.boundOnTouch_);
     this.touchObservable_.removeAll();
+    this.boundOnTouch_ = null;
+    this.touchObservable_ = null;
   }
 
   /** @override */
@@ -479,7 +487,7 @@ export class TouchStartEventTracker extends TouchEventTracker {
    * @param {!./analytics-root.AnalyticsRoot} root
    */
   constructor(root) {
-    super(root, 'touchstart');
+    super(root, TouchEventType.TOUCH_START);
   }
 }
 
@@ -491,7 +499,7 @@ export class TouchMoveEventTracker extends TouchEventTracker {
    * @param {!./analytics-root.AnalyticsRoot} root
    */
   constructor(root) {
-    super(root, 'touchmove');
+    super(root, TouchEventType.TOUCH_MOVE);
   }
 }
 
@@ -503,7 +511,7 @@ export class TouchEndEventTracker extends TouchEventTracker {
    * @param {!./analytics-root.AnalyticsRoot} root
    */
   constructor(root) {
-    super(root, 'touchend');
+    super(root, TouchEventType.TOUCH_END);
   }
 }
 
@@ -515,7 +523,7 @@ export class TouchCancelEventTracker extends TouchEventTracker {
    * @param {!./analytics-root.AnalyticsRoot} root
    */
   constructor(root) {
-    super(root, 'touchcancel');
+    super(root, TouchEventType.TOUCH_CANCEL);
   }
 }
 
