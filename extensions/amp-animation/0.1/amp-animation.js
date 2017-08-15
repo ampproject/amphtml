@@ -197,7 +197,7 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /**
    * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
-   * @return {!Promise}
+   * @return {?Promise}
    * @private
    */
   startAction_(opt_invocation) {
@@ -212,7 +212,7 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /**
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
-   * @return {!Promise}
+   * @return {?Promise}
    * @private
    */
   restartAction_(invocation) {
@@ -227,7 +227,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise}
+   * @return {?Promise}
    * @private
    */
   pauseAction_() {
@@ -241,7 +241,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise}
+   * @return {?Promise}
    * @private
    */
   resumeAction_() {
@@ -257,7 +257,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise}
+   * @return {?Promise}
    * @private
    */
   togglePauseAction_() {
@@ -267,7 +267,7 @@ export class AmpAnimation extends AMP.BaseElement {
     return this.createRunnerIfNeeded_().then(() => {
       if (this.visible_) {
         if (this.runner_.getPlayState() == WebAnimationPlayState.PAUSED) {
-          this.startOrResume_();
+          return this.startOrResume_();
         } else {
           this.pause_();
           this.pausedByAction_ = true;
@@ -278,7 +278,7 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /**
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
-   * @return {!Promise}
+   * @return {?Promise}
    * @private
    */
   seekToAction_(invocation) {
@@ -302,7 +302,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise}
+   * @return {?Promise}
    * @private
    */
   reverseAction_() {
@@ -317,7 +317,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise}
+   * @return {?Promise}
    * @private
    */
   finishAction_() {
@@ -326,7 +326,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise}
+   * @return {?Promise}
    * @private
    */
   cancelAction_() {

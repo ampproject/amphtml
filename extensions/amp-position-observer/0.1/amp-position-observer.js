@@ -151,7 +151,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   /**
    * Called by position observer.
    * It calculates visibility and progress, and triggers the appropriate events.
-   * @param {!../../../src/service/position-observer-impl/PositionInViewportEntryDef} entry PositionObserver entry
+   * @param {!../../../src/service/position-observer-impl.PositionInViewportEntryDef} entry PositionObserver entry
    * @private
    */
   positionChanged_(entry) {
@@ -201,7 +201,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * Calculates whether the scene is visible considering ratios and margins.
    * @param {!../../../src/layout-rect.LayoutRectDef} positionRect position rect as returned by position observer
    * @param {!../../../src/layout-rect.LayoutRectDef} adjustedViewportRect viewport rect adjusted for margins.
-   * @param {!../../../src/layout-rect.layoutRectsRelativePos} relativePos Relative position of rect to viewportRect
+   * @param {!RelativePositions} relativePos Relative position of rect to viewportRect
    * @private
    */
   updateVisibility_(positionRect, adjustedViewportRect, relativePos) {
@@ -233,11 +233,14 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * it becomes exists with 1 from the top.
    *
    * Entering from the top gives the reverse values, 1 at enter, 0 at exit.
-   * @param {!../../../src/layout-rect.LayoutRectDef} positionRect position rect as returned by position observer
+   * @param {?../../../src/layout-rect.LayoutRectDef} positionRect position rect as returned by position observer
    * @param {!../../../src/layout-rect.LayoutRectDef} adjustedViewportRect viewport rect adjusted for margins.
    * @private
    */
   updateScrollProgress_(positionRect, adjustedViewportRect) {
+    if (!positionRect) {
+      return;
+    }
     const totalProgressOffset = (positionRect.height * this.bottomRatio_) +
         (positionRect.height * this.topRatio_);
 
@@ -301,22 +304,26 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       scene = this.element.parentNode;
     }
     // Hoist body to documentElement.
-    if (this.getAmpDoc().getBody() == this.scene_) {
+    if (this.getAmpDoc().getBody() == scene) {
       scene = this.win.document.documentElement;
     }
 
-    return scene;
+    return dev().assertElement(scene);
   }
 
   /**
    * Parses and validates margins.
    * @private
+   * @param {string} val
    * @return {!number} resolved margin
    */
   validateAndResolveMargin_(val) {
     val = assertLength(parseLength(val));
     const unit = getLengthUnits(val);
     let num = getLengthNumeral(val);
+    if (!num) {
+      return 0;
+    }
     user().assert(unit == 'px' || unit == 'vh', 'Only pixel or vh are valid ' +
       'as units for exclusion margins: ' + val);
 
@@ -328,6 +335,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /**
    * Parses and validates ratios.
+   * @param {string} val
    * @return {!number} resolved ratio
    * @private
    */
@@ -357,16 +365,19 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /**
    * Readjusts the given rect using the configured exclusion margins.
+   * @param {!../../../src/layout-rect.LayoutRectDef} adjustedViewportRect viewport rect adjusted for margins.
    * @private
    */
   applyMargins_(rect) {
     dev().assert(rect);
-    return layoutRectLtwh(
+    rect = layoutRectLtwh(
         rect.left,
         (rect.top + this.resolvedTopMargin_),
         rect.width,
         (rect.height - this.resolvedBottomMargin_ - this.resolvedTopMargin_)
     );
+
+    return rect;
   }
 
   /**
