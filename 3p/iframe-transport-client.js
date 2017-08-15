@@ -63,7 +63,7 @@ export class IframeTransportClient {
               this.listener_ &&
                   this.listener_(event.message, event.transportId);
             } catch (e) {
-              user(this.win_.document.documentElement).error(TAG_,
+              user().error(TAG_,
                   'Exception in callback passed to onAnalyticsEvent: ' +
                   e.message);
             }
