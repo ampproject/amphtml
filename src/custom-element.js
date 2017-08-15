@@ -485,6 +485,9 @@ function createBaseCustomElementClass(win) {
       /** @private {boolean} */
       this.built_ = false;
 
+      /** @private {?Promise} */
+      this.buildingPromise_ = null;
+
       /** @type {string} */
       this.readyState = 'loading';
 
@@ -744,41 +747,44 @@ function createBaseCustomElementClass(win) {
      *
      * This method can only be called on a upgraded element.
      *
+     * @return {?Promise}
      * @final @this {!Element}
      */
     build() {
       assertNotTemplate(this);
-      if (this.isBuilt()) {
-        return;
-      }
       dev().assert(this.isUpgraded(), 'Cannot build unupgraded element');
-      try {
-        this.implementation_.buildCallback();
+      if (this.buildingPromise_) {
+        return this.buildingPromise_;
+      }
+      return this.buildingPromise_ = new Promise(resolve => {
+        resolve(this.implementation_.buildCallback());
+      }).then(() => {
         this.preconnect(/* onLayout */false);
         this.built_ = true;
         this.classList.remove('i-amphtml-notbuilt');
         this.classList.remove('amp-notbuilt');
         this.signals_.signal(CommonSignals.BUILT);
-      } catch (e) {
-        this.signals_.rejectSignal(CommonSignals.BUILT, e);
-        reportError(e, this);
-        throw e;
-      }
-      if (this.built_ && this.isInViewport_) {
-        this.updateInViewport_(true);
-      }
-      if (this.actionQueue_) {
-        // Only schedule when the queue is not empty, which should be
-        // the case 99% of the time.
-        Services.timerFor(this.ownerDocument.defaultView)
-            .delay(this.dequeueActions_.bind(this), 1);
-      }
-      if (!this.getPlaceholder()) {
-        const placeholder = this.createPlaceholder();
-        if (placeholder) {
-          this.appendChild(placeholder);
+        if (this.isInViewport_) {
+          this.updateInViewport_(true);
         }
-      }
+        if (this.actionQueue_) {
+          // Only schedule when the queue is not empty, which should be
+          // the case 99% of the time.
+          Services.timerFor(this.ownerDocument.defaultView)
+              .delay(this.dequeueActions_.bind(this), 1);
+        }
+        if (!this.getPlaceholder()) {
+          const placeholder = this.createPlaceholder();
+          if (placeholder) {
+            this.appendChild(placeholder);
+          }
+        }
+      }, reason => {
+        this.signals_.rejectSignal(CommonSignals.BUILT,
+            /** @type {!Error} */ (reason));
+        reportError(reason, this);
+        throw reason;
+      });
     }
 
     /**
@@ -1103,8 +1109,11 @@ function createBaseCustomElementClass(win) {
      */
     dispatchCustomEvent(name, opt_data) {
       const data = opt_data || {};
-      const event = new Event(name, {bubbles: true, cancelable: true});
+      // Constructors of events need to come from the correct window. Sigh.
+      const win = this.ownerDocument.defaultView;
+      const event = win.document.createEvent('Event');
       event.data = data;
+      event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
       this.dispatchEvent(event);
     }
 
@@ -1646,6 +1655,10 @@ function createBaseCustomElementClass(win) {
       // 4. The element has already been laid out (include having loading error);
       // 5. The element is a `placeholder` or a `fallback`;
       // 6. The element's layout is not a size-defining layout.
+      // 7. The document is A4A.
+      if (this.isInA4A_()) {
+        return false;
+      }
       if (this.loadingDisabled_ === undefined) {
         this.loadingDisabled_ = this.hasAttribute('noloading');
       }
@@ -1656,6 +1669,19 @@ function createBaseCustomElementClass(win) {
         return false;
       }
       return true;
+    }
+
+    /**
+     * @return {boolean}
+     * @private
+     */
+    isInA4A_() {
+      return (
+          // in FIE
+          this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView ||
+
+          // in inabox
+          getMode().runtime == 'inabox');
     }
 
     /**

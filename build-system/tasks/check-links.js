@@ -81,6 +81,8 @@ function checkLinks() {
           deadLinksFound = true;
           deadLinksFoundInFile = true;
           util.log('[%s] %s', chalk.red('✖'), result.link);
+        } else if (!process.env.TRAVIS) {
+          util.log('[%s] %s', chalk.green('✔'), result.link);
         }
       });
       if(deadLinksFoundInFile) {
@@ -99,12 +101,12 @@ function checkLinks() {
     if (deadLinksFound) {
         util.log(
             util.colors.red('ERROR'),
-            'Please update',
+            'Please update dead link(s) in',
             util.colors.magenta(filesWithDeadLinks.join(',')),
-            'or whitelist in build-system/tasks/check-links.js');
+            'or whitelist them in build-system/tasks/check-links.js');
         util.log(
-            util.colors.yellow('NOTE:'),
-            'If the links above are examples that aren\'t meant to work,',
+            util.colors.yellow('NOTE'),
+            'If the link(s) above are illustrative and aren\'t meant to work,',
             'surrounding them with backticks or <code></code> will exempt them',
             'from the link checker.');
         process.exit(1);
@@ -147,15 +149,8 @@ function filterWhitelistedLinks(markdown) {
   // Links in script tags (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/src="http.*?"/g, '');
 
-  // Direct links to the https://cdn.ampproject.org domain (not a valid page)
-  filteredMarkdown =
-      filteredMarkdown.replace(/https:\/\/cdn.ampproject.org(?!\/)/g, '');
-
   // Links inside a <code> block (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/<code>(.*?)<\/code>/g, '');
-
-  // Dailymotion link that is marked dead in Travis CI
-  filteredMarkdown = filteredMarkdown.replace(/https:\/\/developer.dailymotion.com\/player#player-parameters/g, '');
 
   // After all whitelisting is done, clean up any remaining empty blocks bounded
   // by backticks. Otherwise, `` will be treated as the start of a code block

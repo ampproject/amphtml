@@ -231,7 +231,7 @@ export class GlobalVariableSource extends VariableSource {
         // If no `opt_userNotificationId` argument is provided then
         // assume consent is given by default.
       if (opt_userNotificationId) {
-        consent = Services.userNotificationManagerFor(this.ampdoc.win)
+        consent = Services.userNotificationManagerForDoc(this.ampdoc)
               .then(service => {
                 return service.get(opt_userNotificationId);
               });
@@ -462,6 +462,15 @@ export class GlobalVariableSource extends VariableSource {
       return Services.viewerForDoc(this.ampdoc).isVisible() ? '0' : '1';
     });
 
+    this.setAsync('VIDEO_STATE', (id, property) => {
+      const root = this.ampdoc.getRootNode();
+      const video = user().assertElement(
+          root.getElementById(/** @type {string} */ (id)),
+          `Could not find an element with id="${id}" for VIDEO_STATE`);
+      return Services.videoManagerForDoc(this.ampdoc)
+          .getVideoAnalyticsDetails(video)
+          .then(details => details ? details[property] : '');
+    });
   }
 
   /**

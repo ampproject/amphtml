@@ -145,9 +145,10 @@ export class AmpAnalytics extends AMP.BaseElement {
         .getAttribute('data-consent-notification-id');
 
     if (this.consentNotificationId_ != null) {
-      this.consentPromise_ = Services.userNotificationManagerFor(this.win)
-          .then(service => service.get(dev().assertString(
-              this.consentNotificationId_)));
+      this.consentPromise_ =
+          Services.userNotificationManagerForDoc(this.element)
+              .then(service => service.get(dev().assertString(
+                  this.consentNotificationId_)));
     }
 
     if (this.element.getAttribute('trigger') == 'immediate') {
@@ -412,11 +413,11 @@ export class AmpAnalytics extends AMP.BaseElement {
           'deprecation');
     }
     const typeConfig = this.predefinedConfig_[type];
-    if (!typeConfig) {
+    if (typeConfig) {
       // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport overwriting
       if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
         const TAG = this.getName_();
-        user().error(TAG, 'Inline or remote config should not' +
+        user().error(TAG, 'Inline or remote config should not ' +
             'overwrite vendor transport settings');
       }
     }

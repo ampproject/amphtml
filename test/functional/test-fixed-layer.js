@@ -187,18 +187,25 @@ describe('FixedLayer', () => {
         visibility: 'visible',
         _top: '',
         get top() {
+          if (elem.computedStyle.transition &&
+              elem.style.transition !== '' &&
+              elem.style.transition !== 'none') {
+            return this._oldTop;
+          }
           if (elem.style.bottom) {
             return elem.autoTop || this._top;
           }
           return this._top;
         },
         set top(val) {
+          this._oldTop = this._top;
           this._top = val;
         },
         bottom: '',
         zIndex: '',
         transform: '',
         position: '',
+        transition: '',
       },
       matches: () => true,
       compareDocumentPosition: other => {
@@ -707,6 +714,29 @@ describe('FixedLayer', () => {
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
       element5.computedStyle['position'] = 'sticky';
+      element5.computedStyle['top'] = '0px';
+      element5.autoTop = '0px';
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.be.true;
+      expect(state['F0'].top).to.equal('0px');
+
+      expect(state['F4'].sticky).to.be.true;
+      expect(state['F4'].top).to.equal('0px');
+    });
+
+    it('should handle transitions', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.computedStyle['transition'] = 'all .4s ease';
+      element1.computedStyle['top'] = '0px';
+      element1.autoTop = '0px';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+      element5.computedStyle['position'] = 'sticky';
+      element5.computedStyle['transition'] = 'all .4s ease';
       element5.computedStyle['top'] = '0px';
       element5.autoTop = '0px';
 

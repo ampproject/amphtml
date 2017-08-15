@@ -58,23 +58,24 @@ describe(TAG, () => {
 
   it('should load a video', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: '/examples/av/video.mp4',
       width: 160,
       height: 90,
     }).then(v => {
       const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
+      preloadSpy.should.have.been.calledWithExactly('/examples/av/video.mp4',
+          undefined);
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
-      expect(video.getAttribute('src')).to.equal('video.mp4');
+      expect(video.getAttribute('src')).to.equal('/examples/av/video.mp4');
       expect(video.hasAttribute('controls')).to.be.false;
     });
   });
 
   it('should load a video', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: '/examples/av/video.mp4',
       width: 160,
       height: 90,
       'controls': '',
@@ -84,7 +85,8 @@ describe(TAG, () => {
     }).then(v => {
       const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
+      preloadSpy.should.have.been.calledWithExactly('/examples/av/video.mp4',
+          undefined);
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.hasAttribute('controls')).to.be.true;
@@ -108,7 +110,7 @@ describe(TAG, () => {
       sources.push(source);
     }
     return getVideo({
-      src: 'video.mp4',
+      src: '/examples/av/video.mp4',
       width: 160,
       height: 90,
       'controls': '',
@@ -118,7 +120,8 @@ describe(TAG, () => {
     }, sources).then(v => {
       const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
+      preloadSpy.should.have.been.calledWithExactly('/examples/av/video.mp4',
+          undefined);
       const video = v.querySelector('video');
       // check that the source tags were propogated
       expect(video.children.length).to.equal(mediatypes.length);
@@ -144,7 +147,7 @@ describe(TAG, () => {
       sources.push(source);
     }
     return expect(getVideo({
-      src: 'video.mp4',
+      src: '/examples/av/video.mp4',
       width: 160,
       height: 90,
       'controls': '',
@@ -156,7 +159,7 @@ describe(TAG, () => {
 
   it('should set poster and controls in prerender mode', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: '/examples/av/video.mp4',
       width: 160,
       height: 90,
       'poster': 'img.png',
@@ -179,7 +182,7 @@ describe(TAG, () => {
 
   it('should not set src or preload in prerender mode', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: '/examples/av/video.mp4',
       width: 160,
       height: 90,
       'preload': 'auto',
@@ -198,7 +201,7 @@ describe(TAG, () => {
 
   it('should remove preload attribute when not provided', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: '/examples/av/video.mp4',
       width: 160,
       height: 90,
       'poster': 'img.png',
@@ -227,7 +230,7 @@ describe(TAG, () => {
       sources.push(source);
     }
     return getVideo({
-      src: 'video.mp4',
+      src: '/examples/av/video.mp4',
       width: 160,
       height: 90,
       'controls': '',
@@ -255,7 +258,7 @@ describe(TAG, () => {
 
   it('should set src and preload in non-prerender mode', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: '/examples/av/video.mp4',
       width: 160,
       height: 90,
       'preload': 'auto',
@@ -275,7 +278,7 @@ describe(TAG, () => {
 
   it('should pause the video when document inactive', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: '/examples/av/video.mp4',
       width: 160,
       height: 90,
     }).then(v => {
@@ -289,7 +292,7 @@ describe(TAG, () => {
 
   it('should fallback if video element is not supported', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: '/examples/av/video.mp4',
       width: 160,
       height: 90,
     }, null, function(element) {
@@ -307,7 +310,7 @@ describe(TAG, () => {
     const playPromise = Promise.reject('The play() request was interrupted');
     const catchSpy = sandbox.spy(playPromise, 'catch');
     return getVideo({
-      src: 'video.mp4',
+      src: '/examples/av/video.mp4',
       width: 160,
       height: 90,
     }, null, function(element) {
@@ -321,7 +324,7 @@ describe(TAG, () => {
 
   it('should propagate ARIA attributes', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: '/examples/av/video.mp4',
       width: 160,
       height: 90,
       'aria-label': 'Hello',

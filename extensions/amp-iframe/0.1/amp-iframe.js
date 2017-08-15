@@ -22,7 +22,7 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
+import {removeElement, closestBySelector} from '../../../src/dom';
 import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
 import {Services} from '../../../src/services';
 import {user, dev} from '../../../src/log';
@@ -106,6 +106,9 @@ export class AmpIframe extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.container_ = null;
+
+    /** @private {boolean|undefined} */
+    this.isInContainer_ = undefined;
   }
 
   /** @override */
@@ -350,7 +353,6 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.onload = () => {
       // Chrome does not reflect the iframe readystate.
       iframe.readyState = 'complete';
-
       this.activateIframe_();
 
       if (this.isTrackingFrame_) {
@@ -538,7 +540,12 @@ export class AmpIframe extends AMP.BaseElement {
     if (box.width > 10 && box.height > 10) {
       return false;
     }
-    return true;
+    // Iframe is not tracking iframe if open with user interaction
+    if (this.isInContainer_ === undefined) {
+      this.isInContainer_ =
+          !!closestBySelector(this.element, '.i-amphtml-overlay');
+    }
+    return !this.isInContainer_;
   }
 };
 

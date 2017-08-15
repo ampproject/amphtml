@@ -37,6 +37,7 @@ import {
   extractAmpAnalyticsConfig,
   addCsiSignalsToAmpAnalyticsConfig,
   QQID_HEADER,
+  maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
@@ -61,6 +62,9 @@ import {
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
+
+/** @const {string} */
+const TAG = 'amp-ad-network-adsense-impl';
 
 /**
  * See `VisibilityState` enum.
@@ -236,6 +240,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     return googleAdUrl(
         this, ADSENSE_BASE_URL, startTime, parameters, experimentIds);
+  }
+
+  /** @override */
+  onNetworkFailure(error, adUrl) {
+    dev().info(TAG, 'network error, attempt adding of error parameter', error);
+    return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
   }
 
   /** @override */

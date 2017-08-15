@@ -320,6 +320,11 @@ export class BaseElement {
    * class set on it.
    *
    * This callback is executed early after the element has been attached to DOM.
+   *
+   * This callback can either immediately return or return a promise if the
+   * build steps are asynchronous.
+   *
+   * @return {!Promise|undefined}
    */
   buildCallback() {
     // Subclasses may override.
@@ -502,7 +507,7 @@ export class BaseElement {
    * @return {ActionTrust}
    */
   activationTrust() {
-    return ActionTrust.MEDIUM;
+    return ActionTrust.HIGH;
   }
 
   /**
@@ -528,15 +533,14 @@ export class BaseElement {
    * Registers the action handler for the method with the specified name.
    *
    * The handler is only invoked by events with trust equal to or greater than
-   * `minTrust` (or ActionTrust.MEDIUM if not provided). Otherwise, a
-   * user error is logged.
+   * `minTrust`. Otherwise, a user error is logged.
    *
    * @param {string} method
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(method, handler, minTrust = ActionTrust.MEDIUM) {
+  registerAction(method, handler, minTrust = ActionTrust.HIGH) {
     this.initActionMap_();
     this.actionMap_[method] = {handler, minTrust};
   }
