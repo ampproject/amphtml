@@ -40,7 +40,7 @@ describes.sandboxed('amp-position-observer', {}, () => {
         if (attr == 'intersection-ratios') {
           return ratios;
         }
-        if (attr == 'exclusion-margins') {
+        if (attr == 'viewport-margins') {
           return margins;
         }
       },

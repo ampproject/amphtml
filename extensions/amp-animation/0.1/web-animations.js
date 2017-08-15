@@ -593,6 +593,7 @@ export class MeasureScanner extends Scanner {
   onKeyframeAnimation(spec) {
     this.with_(spec, () => {
       const target = user().assertElement(this.target_, 'No target specified');
+      //TODO(aghassemi,#10911): Remove this warning later.
       if (spec && spec.ticker) {
         user().error(TAG, 'Experimental `ticker` property has been removed. ' +
           'For scroll-bound animations, please see the new approach at ' +

@@ -94,22 +94,20 @@ the page.
 
 <!-- The clock container -->
 <div id="clock-scene">
+  <!--
+    Use amp-position-observer to tie the movement of the clock scene within
+    the viewport to the timeline of the animation
+  -->
+  <amp-position-observer
+    intersection-ratios="1"
+    on="scroll:clockAnim.seekTo(percent=event.percent)"
+    layout="nodisplay">
+  </amp-position-observer>
   <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
     <div class="clock-hand"></div>
   </amp-img>
 </div>
 
-<!--
-  Use amp-position-observer to tie the movement of the clock scene within
-  the viewport to the timeline of the animation
--->
-
-<amp-position-observer
-  target-selector="#clock-scene"
-  intersection-ratios="1"
-  on="scroll:clockAnim.seekTo(percent=event.percent)"
-  layout="nodisplay">
-</amp-position-observer>
 ```
 
 ### Animation scenes that start/pause based on visibility in the viewport
@@ -118,7 +116,7 @@ the page.
 starts/pauses based on visibility.
 
 `amp-position-observer` exposes various visibility configurations such as
-`intersection-ratios` and `exclusion-margins` (similar to [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)) that
+`intersection-ratios` and `viewport-margins` (similar to [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)) that
 can be used to fine-tune when the target is considered visible.
 
 ## Example
@@ -161,28 +159,28 @@ as clock becomes less than 50% visible.
 
 <!-- The clock container -->
 <div id="clock-scene">
+  <!--
+    Use amp-position-observer to tie the start/pause of the animation with
+    the visibility of the scene.
+  -->
+  <amp-position-observer
+    intersection-ratios="0.5"
+    on="enter:clockAnim.start;exit:clockAnim.pause"
+    layout="nodisplay">
+  </amp-position-observer>
+
   <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
     <div class="clock-hand"></div>
   </amp-img>
 </div>
 
-<!--
-  Use amp-position-observer to tie the start/pause of the animation with
-  the visibility of the scene.
--->
 
-<amp-position-observer
-  target-selector="#clock-scene"
-  intersection-ratios="0.5"
-  on="enter:clockAnim.start;exit:clockAnim.pause"
-  layout="nodisplay">
-</amp-position-observer>
 ```
 
 ## Attributes
 
-#### target-selector (optional)
-Specifies what element to observe.
+#### target-id (optional)
+Specifies what element to observe via its ID.
 If **not specified** the **parent** of `<amp-position-observer>` will be used as the target.
 
 #### intersection-ratios (optional)
@@ -211,7 +209,7 @@ and `exit` is triggered as soon as a single pixel goes out of the viewport.
 the target is entering/exiting from top (0 will be used) or bottom (1 will be used).
 
 
-#### exclusion-margins (optional)
+#### viewport-margins (optional)
 
 A `px` or `vh` value which can be used to shrink the area of the viewport used
 for visibility calculations. A number without a unit will be assumed `px`
@@ -220,12 +218,12 @@ Different values for top vs. bottom can be specified by providing two values (`<
 
 Defaults to 0.
 
-`exclusion-margins="100px"` means shrink the viewport by 100px from the top and 100px from the bottom.
+`viewport-margins="100px"` means shrink the viewport by 100px from the top and 100px from the bottom.
 
-`exclusion-margins="25vh"` means shrink the viewport by 25% from the top and 25% from the bottom.
+`viewport-margins="25vh"` means shrink the viewport by 25% from the top and 25% from the bottom.
 Effectively only considering the middle 50% of the viewport.
 
-`exclusion-margins="100px 10vh"` means shrink the viewport by 100px from the top and 10% from the bottom.
+`viewport-margins="100px 10vh"` means shrink the viewport by 100px from the top and 10% from the bottom.
 
 ## Validation
 

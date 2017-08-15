@@ -123,7 +123,7 @@ config.run('amp-position-observer', function() {
     <div>
       <amp-position-observer
         intersection-ratios="0.5"
-        exclusion-margins="10vh"
+        viewport-margins="10vh"
         on="enter:anim.start;exit:anim.pause"
         layout="nodisplay">
       </amp-position-observer>

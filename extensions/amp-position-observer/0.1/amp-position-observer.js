@@ -49,9 +49,6 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {?Element} */
-    this.scene_ = null;
-
     /** @private {!boolean} */
     this.isVisible_ = false;
 
@@ -80,7 +77,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     this.viewportRect_ = null;
 
     /** @private {?string} */
-    this.targetSelector_ = null;
+    this.targetId_ = null;
 
     /** @private {!number} */
     this.scrollProgress_ = 0;
@@ -106,12 +103,14 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   init_() {
     this.parseAttributes_();
-    this.discoverScene_();
     this.action_ = Services.actionServiceForDoc(this.element);
     this.maybeInstallPositionObserver_();
-    this.positionObserver_.observe(this.scene_, PositionObserverFidelity.HIGH,
-        this.positionChanged_.bind(this)
-    );
+    this.getAmpdoc().whenReady().then(() => {
+      const scene = this.discoverScene_();
+      this.positionObserver_.observe(scene, PositionObserverFidelity.HIGH,
+          this.positionChanged_.bind(this)
+      );
+    });
   }
 
   /**
@@ -120,8 +119,8 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   triggerEnter_() {
     const name = 'enter';
-    const evt = createCustomEvent(this.win, `${TAG}.${name}`, {});
-    this.action_.trigger(this.element, name, evt, ActionTrust.LOW);
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 
   /**
@@ -130,24 +129,29 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   triggerExit_() {
     const name = 'exit';
-    const evt = createCustomEvent(this.win, `${TAG}.${name}`, {});
-    this.action_.trigger(this.element, name, evt, ActionTrust.LOW);
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 
   /**
-   * Dispatches the `scroll` event.
+   * Dispatches the `scroll` event (at most every animation frame)
+   *
+   * This event is triggered only when position-observer triggers which is
+   * at most every animation frame.
+   *
    * @private
    */
   triggerScroll_() {
     const name = 'scroll';
-    const evt = createCustomEvent(this.win, `${TAG}.${name}`,
+    const event = createCustomEvent(this.win, `${TAG}.${name}`,
         {percent: this.scrollProgress_});
-    this.action_.trigger(this.element, name, evt, ActionTrust.LOW);
+    this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 
   /**
    * Called by position observer.
    * It calculates visibility and progress, and triggers the appropriate events.
+   * @param {!../../../src/service/position-observer-impl/PositionInViewportEntryDef} entry PositionObserver entry
    * @private
    */
   positionChanged_(entry) {
@@ -195,6 +199,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /**
    * Calculates whether the scene is visible considering ratios and margins.
+   * @param {!../../../src/layout-rect.LayoutRectDef} positionRect position rect as returned by position observer
+   * @param {!../../../src/layout-rect.LayoutRectDef} adjustedViewportRect viewport rect adjusted for margins.
+   * @param {!../../../src/layout-rect.layoutRectsRelativePos} relativePos Relative position of rect to viewportRect
    * @private
    */
   updateVisibility_(positionRect, adjustedViewportRect, relativePos) {
@@ -211,11 +218,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     if (relativePos == RelativePositions.BOTTOM) {
       this.isVisible_ =
         positionRect.top <= (adjustedViewportRect.bottom - offset);
-      return;
     } else {
       this.isVisible_ =
         positionRect.bottom >= (adjustedViewportRect.top + offset);
-      return;
     }
   }
 
@@ -228,15 +233,16 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * it becomes exists with 1 from the top.
    *
    * Entering from the top gives the reverse values, 1 at enter, 0 at exit.
-   *
+   * @param {!../../../src/layout-rect.LayoutRectDef} positionRect position rect as returned by position observer
+   * @param {!../../../src/layout-rect.LayoutRectDef} adjustedViewportRect viewport rect adjusted for margins.
    * @private
    */
   updateScrollProgress_(positionRect, adjustedViewportRect) {
-    const totalDurationOffset = (positionRect.height * this.bottomRatio_) +
+    const totalProgressOffset = (positionRect.height * this.bottomRatio_) +
         (positionRect.height * this.topRatio_);
 
-    const totalDuration = adjustedViewportRect.height +
-        positionRect.height - totalDurationOffset;
+    const totalProgress = adjustedViewportRect.height +
+        positionRect.height - totalProgressOffset;
 
     const topOffset = Math.abs(
         positionRect.top - this.resolvedTopMargin_ -
@@ -245,7 +251,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
         )
       );
 
-    this.scrollProgress_ = topOffset / totalDuration;
+    this.scrollProgress_ = topOffset / totalProgress;
   }
 
   /**
@@ -266,7 +272,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     // Margin is either "<top-bottom:{px,vh}>" or "<top:{px,vh}> <bottom:{px,vh}>"
     // e.g, "100px 10vh": exclude 100px from top and 10vh from bottom of viewport.
-    const margins = this.element.getAttribute('exclusion-margins');
+    const margins = this.element.getAttribute('viewport-margins');
     if (margins) {
       const topBottom = margins.trim().split(' ');
       this.topMarginExpr_ = topBottom[0];
@@ -276,31 +282,36 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       }
     }
 
-    this.targetSelector_ = this.element.getAttribute('target-selector');
+    this.targetId_ = this.element.getAttribute('target');
   }
 
   /**
    * Finds the container scene. Either parent of the component or specified by
-   * `target-selector` attribute.
+   * `target-id` attribute.
+   * @return {!Element} scene element.
    * @private
    */
   discoverScene_() {
-    if (this.targetSelector_) {
-      this.scene_ = user().assertElement(
-          this.getAmpDoc().getRootNode().querySelector(this.targetSelector_),
-          'No element found with query selector:' + this.targetSelector_);
+    let scene;
+    if (this.targetId_) {
+      scene = user().assertElement(
+          this.getAmpDoc().getElementById(this.targetId_),
+          'No element found with id:' + this.targetId_);
     } else {
-      this.scene_ = this.element.parentNode;
+      scene = this.element.parentNode;
     }
     // Hoist body to documentElement.
-    if (this.scene_.tagName == 'BODY') {
-      this.scene_ = this.win.document.documentElement;
+    if (this.getAmpDoc().getBody() == this.scene_) {
+      scene = this.win.document.documentElement;
     }
+
+    return scene;
   }
 
   /**
    * Parses and validates margins.
    * @private
+   * @return {!number} resolved margin
    */
   validateAndResolveMargin_(val) {
     val = assertLength(parseLength(val));
@@ -317,6 +328,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /**
    * Parses and validates ratios.
+   * @return {!number} resolved ratio
    * @private
    */
   validateAndResolveRatio_(val) {
@@ -349,16 +361,12 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   applyMargins_(rect) {
     dev().assert(rect);
-    const r = layoutRectLtwh(
+    return layoutRectLtwh(
         rect.left,
-        rect.top,
+        rect.top + this.resolvedTopMargin_,
         rect.width,
-        rect.height
+        rect.height - this.resolvedBottomMargin_ - this.resolvedTopMargin_,
     );
-    r.top = r.top + this.resolvedTopMargin_;
-    r.height = r.height - this.resolvedBottomMargin_ - this.resolvedTopMargin_;
-    r.bottom = r.bottom - this.resolvedBottomMargin_;
-    return r;
   }
 
   /**

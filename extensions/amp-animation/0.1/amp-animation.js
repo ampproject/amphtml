@@ -30,6 +30,7 @@ import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {isFiniteNumber} from '../../../src/types';
+import {clamp} from '../../../src/utils/math';
 
 const TAG = 'amp-animation';
 const POLYFILLED = '__AMP_WA';
@@ -46,6 +47,9 @@ export class AmpAnimation extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.visible_ = false;
+
+    /** @private {boolean} */
+    this.pausedByAction_ = false;
 
     /** @private {boolean} */
     this.triggered_ = false;
@@ -112,7 +116,11 @@ export class AmpAnimation extends AMP.BaseElement {
     // Restart with debounce.
     this.restartPass_ = new Pass(
         this.win,
-        this.startOrResume_.bind(this),
+        () => {
+          if (!this.pausedByAction_) {
+            this.startOrResume_();
+          }
+        },
         /* delay */ 50);
 
     // Visibility.
@@ -184,11 +192,12 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /** @override */
   activate(invocation) {
-    this.startAction_(invocation);
+    return this.startAction_(invocation);
   }
 
   /**
    * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
+   * @return {!Promise}
    * @private
    */
   startAction_(opt_invocation) {
@@ -196,12 +205,14 @@ export class AmpAnimation extends AMP.BaseElement {
     // will actually be running.
     this.triggered_ = true;
     if (this.visible_) {
-      this.startOrResume_(opt_invocation ? opt_invocation.args : null);
+      return this.startOrResume_(opt_invocation ? opt_invocation.args : null);
     }
+    return Promise.resolve();
   }
 
   /**
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @return {!Promise}
    * @private
    */
   restartAction_(invocation) {
@@ -210,48 +221,73 @@ export class AmpAnimation extends AMP.BaseElement {
     // will actually be running.
     this.triggered_ = true;
     if (this.visible_) {
-      this.startOrResume_(invocation.args);
+      return this.startOrResume_(invocation.args);
     }
+    return Promise.resolve();
   }
 
-  /** @private */
+  /**
+   * @return {!Promise}
+   * @private
+   */
   pauseAction_() {
-    this.maybeCreateRunner_().then(() => {
-      this.pause_();
-    });
-  }
-
-  /** @private */
-  resumeAction_() {
-    this.maybeCreateRunner_().then(() => {
-      if (this.visible_ && this.triggered_) {
-        this.runner_.resume();
-      }
-    });
-  }
-
-  /** @private */
-  togglePauseAction_() {
-    if (this.runner_ && this.visible_ && this.triggered_) {
-      if (this.runner_.getPlayState() == WebAnimationPlayState.PAUSED) {
-        this.startOrResume_();
-      } else {
-        this.pause_();
-      }
+    if (!this.triggered_) {
+      return Promise.resolve();
     }
+    return this.createRunnerIfNeeded_().then(() => {
+      this.pause_();
+      this.pausedByAction_ = true;
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  resumeAction_() {
+    if (!this.triggered_) {
+      return Promise.resolve();
+    }
+    return this.createRunnerIfNeeded_().then(() => {
+      if (this.visible_) {
+        this.runner_.resume();
+        this.pausedByAction_ = false;
+      }
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  togglePauseAction_() {
+    if (!this.triggered_) {
+      return Promise.resolve();
+    }
+    return this.createRunnerIfNeeded_().then(() => {
+      if (this.visible_) {
+        if (this.runner_.getPlayState() == WebAnimationPlayState.PAUSED) {
+          this.startOrResume_();
+        } else {
+          this.pause_();
+          this.pausedByAction_ = true;
+        }
+      }
+    });
   }
 
   /**
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @return {!Promise}
    * @private
    */
   seekToAction_(invocation) {
-
     // The animation will be triggered (in paused state) and seek will happen
     // regardless of visibility
     this.triggered_ = true;
-    this.maybeCreateRunner_().then(() => {
+    return this.createRunnerIfNeeded_().then(() => {
       this.pause_();
+      this.pausedByAction_ = true;
       // time based seek
       const time = parseFloat(invocation.args && invocation.args['time']);
       if (isFiniteNumber(time)) {
@@ -259,27 +295,43 @@ export class AmpAnimation extends AMP.BaseElement {
       }
       // percent based seek
       const percent = parseFloat(invocation.args && invocation.args['percent']);
-      if (isFiniteNumber(percent) && percent <= 1 && percent >= 0) {
-        this.runner_.seekToPercent(percent);
+      if (isFiniteNumber(percent)) {
+        this.runner_.seekToPercent(clamp(percent, 0, 1));
       }
     });
   }
 
-  /** @private */
+  /**
+   * @return {!Promise}
+   * @private
+   */
   reverseAction_() {
-    if (this.runner_ && this.visible_ && this.triggered_) {
-      this.runner_.reverse();
+    if (!this.triggered_) {
+      return Promise.resolve();
     }
+    return this.createRunnerIfNeeded_().then(() => {
+      if (this.visible_) {
+        this.runner_.reverse();
+      }
+    });
   }
 
-  /** @private */
+  /**
+   * @return {!Promise}
+   * @private
+   */
   finishAction_() {
     this.finish_();
+    return Promise.resolve();
   }
 
-  /** @private */
+  /**
+   * @return {!Promise}
+   * @private
+   */
   cancelAction_() {
     this.cancel_();
+    return Promise.resolve();
   }
 
   /**
@@ -289,9 +341,11 @@ export class AmpAnimation extends AMP.BaseElement {
   setVisible_(visible) {
     if (this.visible_ != visible) {
       this.visible_ = visible;
-      if (this.triggered_ && this.triggerOnVisibility_) {
+      if (this.triggered_) {
         if (this.visible_) {
-          this.startOrResume_();
+          if (!this.pausedByAction_) {
+            this.startOrResume_();
+          }
         } else {
           this.pause_();
         }
@@ -301,18 +355,22 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /** @private */
   onResize_() {
-    // Store the previous `triggered` value since `cancel` may reset it.
+    // Store the previous `triggered` and `pausedByAction` value since
+    // `cancel` may reset it.
     const triggered = this.triggered_;
+    const pausedByAction = this.pausedByAction_;
 
     // Stop animation right away.
     if (this.runner_) {
       this.runner_.cancel();
       this.runner_ = null;
+      this.runnerPromise_ = null;
     }
 
     // Restart the animation, but debounce to avoid re-starting it multiple
     // times per restart.
     this.triggered_ = triggered;
+    this.pausedByAction_ = pausedByAction;
     if (this.triggered_ && this.visible_) {
       this.restartPass_.schedule();
     }
@@ -328,12 +386,14 @@ export class AmpAnimation extends AMP.BaseElement {
       return null;
     }
 
+    this.pausedByAction_ = false;
+
     if (this.runner_) {
       this.runner_.resume();
       return null;
     }
 
-    return this.maybeCreateRunner_(opt_args).then(() => {
+    return this.createRunnerIfNeeded_(opt_args).then(() => {
       this.runner_.start();
     });
   }
@@ -344,8 +404,8 @@ export class AmpAnimation extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  maybeCreateRunner_(opt_args) {
-    if (!this.runnerPromise_ || !this.runner_) {
+  createRunnerIfNeeded_(opt_args) {
+    if (!this.runnerPromise_) {
       this.runnerPromise_ = this.createRunner_(opt_args).then(runner => {
         this.runner_ = runner;
         this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
@@ -359,18 +419,22 @@ export class AmpAnimation extends AMP.BaseElement {
   /** @private */
   finish_() {
     this.triggered_ = false;
+    this.pausedByAction_ = false;
     if (this.runner_) {
       this.runner_.finish();
       this.runner_ = null;
+      this.runnerPromise_ = null;
     }
   }
 
   /** @private */
   cancel_() {
     this.triggered_ = false;
+    this.pausedByAction_ = false;
     if (this.runner_) {
       this.runner_.cancel();
       this.runner_ = null;
+      this.runnerPromise_ = null;
     }
   }
 
