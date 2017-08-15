@@ -407,6 +407,117 @@ export class IniLoadTracker extends EventTracker {
   }
 }
 
+/**
+ * Tracks touch events
+ * @abstract
+ */
+class TouchEventTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   * @param {string} touchEventType 'touchstart', 'touchmove', 'touchend', or
+   * 'touchcancel'
+   */
+  constructor(root, touchEventType) {
+    super(root);
+
+    dev().assert(touchEventType == 'touchstart' ||
+        touchEventType == 'touchmove' || touchEventType == 'touchend' ||
+        touchEventType == 'touchcancel',
+        'touchEventType unsupported: ' + touchEventType);
+    this.touchEventType_ = touchEventType;
+
+    /** @private {!Observable<!Event>} */
+    this.touchObservable_ = new Observable();
+
+    /** @private @const */
+    this.boundOnTouch_ = e => {
+      this.touchObservable_.fire(e);
+    };
+    this.root.getRoot().addEventListener(this.touchEventType_,
+        this.boundOnTouch_);
+  }
+
+  /** @override */
+  dispose() {
+    this.root.getRoot().removeEventListener(this.touchEventType_,
+        this.boundOnTouch_);
+    this.touchObservable_.removeAll();
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    const selector = user().assert(config['selector'],
+        'Missing required selector on touch trigger');
+    const selectionMethod = config['selectionMethod'] || null;
+    return this.touchObservable_.add(this.root.createSelectiveListener(
+        this.handleTouch_.bind(this, listener),
+      (context.parentElement || context),
+        selector,
+        selectionMethod));
+  }
+
+  /**
+   * @param {function(!AnalyticsEvent)} listener
+   * @param {!Element} target
+   * @param {!Event} event
+   * @private
+   */
+  handleTouch_(listener, target, event) {
+    const params = getDataParamsFromAttributes(
+        target,
+        /* computeParamNameFunc */ undefined,
+        VARIABLE_DATA_ATTRIBUTE_KEY);
+    listener(new AnalyticsEvent(target, event.type, params));
+  }
+}
+
+/**
+ * Tracks touchstart events
+ */
+export class TouchStartEventTracker extends TouchEventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root, 'touchstart');
+  }
+}
+
+/**
+ * Tracks touchmove events
+ */
+export class TouchMoveEventTracker extends TouchEventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root, 'touchmove');
+  }
+}
+
+/**
+ * Tracks touchend events
+ */
+export class TouchEndEventTracker extends TouchEventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root, 'touchend');
+  }
+}
+
+/**
+ * Tracks touchcancel events
+ */
+export class TouchCancelEventTracker extends TouchEventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root, 'touchcancel');
+  }
+}
 
 /**
  * Tracks video session events
@@ -499,7 +610,6 @@ export class VideoEventTracker extends EventTracker {
     });
   }
 }
-
 
 /**
  * Tracks visibility events.
