@@ -39,17 +39,6 @@ app.use('/compose-doc', function(req, res) {
     experimentString = '"' + experiments.split(',').join('","') + '"';
   }
 
-  let extensionsString = '';
-  if (req.query.extensions) {
-    const extensions = req.query.extensions.split(',');
-    extensions.forEach(ext => {
-      const minmax = process.env.SERVE_MODE == 'compiled' ? 'min' : 'max';
-      extensionsString += `
-        <script async src="/dist/v0/${ext}-0.1.${minmax}.js"></script>\n
-      `;
-    });
-  }
-
   res.send(`
 <!doctype html>
 <html ⚡>
