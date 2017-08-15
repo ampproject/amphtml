@@ -24,6 +24,14 @@ function toUpperCase(_match, character) {
 }
 
 /**
+ * @param {string} match
+ * @return {string}
+ */
+function prependDashAndToLowerCase(match) {
+  return '-' + match.toLowerCase();
+}
+
+/**
  * @param {string} name Attribute name with dashes
  * @return {string} Dashes removed and character after to upper case.
  * visibleForTesting
@@ -39,7 +47,7 @@ export function dashToCamelCase(name) {
  * @return {string} The string in dash-case.
  */
 export function camelCaseToDash(string) {
-  return string.replace(/(?!^)([A-Z])/g, match => '-' + match.toLowerCase());
+  return string.replace(/(?!^)([A-Z])/g, prependDashAndToLowerCase);
 }
 
 /**
