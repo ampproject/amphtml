@@ -215,6 +215,7 @@ export class AmpForm {
 
   /**
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @return {?Promise}
    * @private
    */
   actionHandler_(invocation) {
@@ -223,6 +224,7 @@ export class AmpForm {
         this.handleSubmitAction_(invocation);
       });
     }
+    return null;
   }
 
   /**

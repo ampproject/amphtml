@@ -88,6 +88,14 @@ let ActionInfoArgsDef;
 let ActionInfoDef;
 
 /**
+ * Function called when an action is invoked.
+ * If the action is chainable, returns a Promise which resolves when the
+ * action is complete. Otherwise, returns null.
+ * @typedef {function(!ActionInvocation):?Promise}
+ */
+let ActionHandlerDef;
+
+/**
  * @typedef {Event|DeferredEvent}
  */
 export let ActionEventDef;
@@ -165,12 +173,12 @@ export class ActionService {
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
 
-    /** @const @private {!Object<string, function(!ActionInvocation)>} */
+    /** @const @private {!Object<string, ActionHandlerDef>} */
     this.globalTargets_ = map();
 
     /**
      * @const @private {!Object<string, {
-      *   handler: function(!ActionInvocation),
+      *   handler: ActionHandlerDef,
       *   minTrust: ActionTrust,
       * }>}
       */
@@ -284,7 +292,7 @@ export class ActionService {
   /**
    * Registers the action target that will receive all designated actions.
    * @param {string} name
-   * @param {function(!ActionInvocation)} handler
+   * @param {ActionHandlerDef} handler
    */
   addGlobalTarget(name, handler) {
     this.globalTargets_[name] = handler;
@@ -293,7 +301,7 @@ export class ActionService {
   /**
    * Registers the action handler for a common method.
    * @param {string} name
-   * @param {function(!ActionInvocation)} handler
+   * @param {ActionHandlerDef} handler
    * @param {ActionTrust} minTrust
    */
   addGlobalMethodHandler(name, handler, minTrust = ActionTrust.HIGH) {
@@ -321,13 +329,14 @@ export class ActionService {
    * @param {ActionTrust} trust
    */
   execute(target, method, args, source, event, trust) {
-    this.invoke_(target, method, args, source, event, trust, null);
+    this.invoke_(target, method, args, source, event, trust,
+        /* actionInfo */ null);
   }
 
   /**
    * Installs action handler for the specified element.
    * @param {!Element} target
-   * @param {function(!ActionInvocation)} handler
+   * @param {ActionHandlerDef} handler
    * @param {ActionTrust} minTrust
    */
   installActionHandler(target, handler, minTrust = ActionTrust.HIGH) {
@@ -381,30 +390,28 @@ export class ActionService {
       return;
     }
 
-    let chain = Promise.resolve();
+    // Invoke actions serially, where each action waits for its predecessor
+    // to complete. `currentPromise` is the i'th promise in the chain.
+    let currentPromise = Promise.resolve();
+
     action.actionInfos.forEach(actionInfo => {
       // Replace any variables in args with data in `event`.
       const args = dereferenceExprsInArgs(actionInfo.args, event);
 
       // Wait for the previous action, if applicable.
-      chain = chain.then(() => {
+      currentPromise = currentPromise.then(() => {
         // Global target, e.g. `AMP`.
         const globalTarget = this.globalTargets_[actionInfo.target];
         if (globalTarget) {
-          const invocation = new ActionInvocation(
-              this.root_,
-              actionInfo.method,
-              args,
-              action.node,
-              event,
-              trust);
+          const invocation = new ActionInvocation(this.root_, actionInfo.method,
+              args, action.node, event, trust);
           return globalTarget(invocation);
         }
 
-        // Element target by `id`.
+        // Element target via `id` attribute.
         const target = this.root_.getElementById(actionInfo.target);
         if (target) {
-          this.invoke_(target, actionInfo.method, args,
+          return this.invoke_(target, actionInfo.method, args,
               action.node, event, trust, actionInfo);
         } else {
           this.actionInfoError_('target not found', actionInfo, target);
@@ -435,6 +442,7 @@ export class ActionService {
    * @param {?ActionEventDef} event
    * @param {ActionTrust} trust
    * @param {?ActionInfoDef} actionInfo
+   * @return {?Promise}
    * @private visible for testing
    */
   invoke_(target, method, args, source, event, trust, actionInfo) {
@@ -444,8 +452,7 @@ export class ActionService {
     // Try a global method handler first.
     const globalMethod = this.globalMethodHandlers_[invocation.method];
     if (globalMethod && invocation.satisfiesTrust(globalMethod.minTrust)) {
-      globalMethod.handler(invocation);
-      return;
+      return globalMethod.handler(invocation);
     }
 
     const lowerTagName = target.tagName.toLowerCase();
@@ -459,7 +466,7 @@ export class ActionService {
             'Did you forget to include it via <script custom-element>?',
             actionInfo, target);
       }
-      return;
+      return null;
     }
 
     // Special elements with AMP ID or known supported actions.
@@ -478,13 +485,14 @@ export class ActionService {
         target[ACTION_QUEUE_] = target[ACTION_QUEUE_] || [];
         target[ACTION_QUEUE_].push(invocation);
       }
-      return;
+      return null;
     }
 
     // Unsupported target.
     this.actionInfoError_(
         'Target element does not support provided action',
         actionInfo, target);
+    return null;
   }
 
   /**
