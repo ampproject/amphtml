@@ -216,7 +216,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (!this.config_['triggers']) {
       const TAG = this.getName_();
-      user(this.element).error(TAG, 'No triggers were found in the ' +
+      this.user().error(TAG, 'No triggers were found in the ' +
           'config. No analytics data will be sent.');
       return Promise.resolve();
     }
@@ -242,11 +242,11 @@ export class AmpAnalytics extends AMP.BaseElement {
             {}, trigger, undefined, true);
         const TAG = this.getName_();
         if (!trigger) {
-          user(this.element).error(TAG, 'Trigger should be an object: ', k);
+          this.user().error(TAG, 'Trigger should be an object: ', k);
           continue;
         }
         if (!trigger['on'] || !trigger['request']) {
-          user(this.element).error(TAG, '"on" and "request" ' +
+          this.user().error(TAG, '"on" and "request" ' +
               'attributes are required for data to be collected.');
           continue;
         }
@@ -255,7 +255,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           const eventType = trigger['on'];
           if (isEnumValue(AnalyticsEventType, eventType) &&
               !WHITELIST_EVENT_IN_SANDBOX.includes(eventType)) {
-            user(this.element).error(TAG, eventType +
+            this.user().error(TAG, eventType +
                 'is not supported for amp-analytics in scope');
             continue;
           }
@@ -325,7 +325,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       for (const replaceMapKey in replaceMap) {
         if (++count > MAX_REPLACES) {
           const TAG = this.getName_();
-          user(this.element).error(TAG,
+          this.user().error(TAG,
               'More than ' + MAX_REPLACES + ' extraUrlParamsReplaceMap rules ' +
               'aren\'t allowed; Skipping the rest');
           break;
@@ -377,7 +377,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           this.remoteConfig_ = jsonValue;
           dev().fine(TAG, 'Remote config loaded', remoteConfigUrl);
         }, err => {
-          user(this.element).error(TAG,
+          this.user().error(TAG,
               'Error loading remote config: ', remoteConfigUrl, err);
         });
   }
@@ -417,7 +417,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport overwriting
       if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
         const TAG = this.getName_();
-        user(this.element).error(TAG, 'Inline or remote config should not ' +
+        this.user().error(TAG, 'Inline or remote config should not ' +
             'overwrite vendor transport settings');
       }
     }
@@ -447,16 +447,16 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (isJsonScriptTag(child)) {
           inlineConfig = parseJson(children[0].textContent);
         } else {
-          user(this.element).error(TAG, 'The analytics config should ' +
+          this.user().error(TAG, 'The analytics config should ' +
               'be put in a <script> tag with type="application/json"');
         }
       } else if (children.length > 1) {
-        user(this.element).error(TAG, 'The tag should contain only one' +
+        this.user().error(TAG, 'The tag should contain only one' +
             ' <script> child.');
       }
     }
     catch (er) {
-      user(this.element).error(TAG, 'Analytics config could not be ' +
+      this.user().error(TAG, 'Analytics config could not be ' +
           'parsed. Is it in a valid JSON format?', er);
     }
     return /** @type {!JsonObject} */ (inlineConfig);
@@ -495,7 +495,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const requests = {};
     if (!this.config_ || !this.config_['requests']) {
       const TAG = this.getName_();
-      user(this.element).error(TAG, 'No request strings defined. Analytics ' +
+      this.user().error(TAG, 'No request strings defined. Analytics ' +
           'data will not be sent from this page.');
       return;
     }
@@ -554,7 +554,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (!request) {
       const TAG = this.getName_();
-      user(this.element).error(TAG, 'Ignoring event. Request string ' +
+      this.user().error(TAG, 'Ignoring event. Request string ' +
           'not found: ', trigger['request']);
       return Promise.resolve();
     }
@@ -641,7 +641,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const sampleOn = spec['sampleOn'];
     if (!sampleOn) {
-      user(this.element).error(TAG, 'Invalid sampleOn value.');
+      this.user().error(TAG, 'Invalid sampleOn value.');
       return resolve;
     }
     const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
@@ -748,7 +748,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   sendRequest_(request, trigger) {
     if (!request) {
       const TAG = this.getName_();
-      user(this.element).error(TAG, 'Request not sent. Contents empty.');
+      this.user().error(TAG, 'Request not sent. Contents empty.');
       return;
     }
     if (trigger['iframePing']) {

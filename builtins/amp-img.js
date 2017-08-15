@@ -18,7 +18,6 @@ import {BaseElement} from '../src/base-element';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/custom-element';
 import {srcsetFromElement} from '../src/srcset';
-import {user} from '../src/log';
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -123,7 +122,7 @@ export class AmpImg extends BaseElement {
     // only read "Graphic" when using only 'alt'.
     if (this.element.getAttribute('role') == 'img') {
       this.element.removeAttribute('role');
-      user(this.element).error(
+      this.user().error(
           'AMP-IMG', 'Setting role=img on amp-img elements breaks ' +
         'screen readers please just set alt or ARIA attributes, they will ' +
         'be correctly propagated for the underlying <img> element.');

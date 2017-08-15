@@ -148,12 +148,12 @@ export class AmpShareTracking extends AMP.BaseElement {
           if (json.fragment) {
             return json.fragment;
           }
-          user(this.element).error(
+          this.user().error(
               TAG, 'The response from [' + vendorUrl + '] does not ' +
             'have a fragment value.');
           return '';
         }, err => {
-          user(this.element).error(
+          this.user().error(
               TAG, 'The request to share-tracking endpoint failed:',
               err);
           return '';
