@@ -221,7 +221,6 @@ class AmpVideo extends AMP.BaseElement {
 
     // loadPromise for media elements listens to `loadstart`
     return this.loadPromise(this.video_).then(() => {
-      throw dev().createError('Failed to load');
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
     });
   }
