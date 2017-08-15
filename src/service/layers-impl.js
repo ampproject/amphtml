@@ -17,6 +17,54 @@
 const LAYOUT_PROP = '__AMP_LAYOUT';
 const LAYOUT_LAYER_PROP = '__AMP_LAYER';
 
+/**
+ * The Size of an element.
+ *
+ * @typedef {{
+ *   height: number,
+ *   width: number,
+ * }}
+ */
+export let SizeDef;
+
+/**
+ * The offset Position of an element.
+ *
+ * @typedef {{
+ *   left: number,
+ *   top: number,
+ * }}
+ */
+export let PositionDef;
+
+/**
+ * Creates a Size.
+ *
+ * @param {number} width
+ * @param {number} height
+ * @return {!SizeDef}
+ */
+function SizeWh(width, height) {
+  return {
+    height,
+    width,
+  };
+}
+
+/**
+ * Creates a Position.
+ *
+ * @param {number} left
+ * @param {number} top
+ * @return {!PositionDef}
+ */
+function PositionLt(left, top) {
+  return {
+    left,
+    top,
+  };
+}
+
 export class LayoutLayers {
   constructor(ampdoc) {
     this.win = ampdoc.win;
@@ -39,7 +87,7 @@ export class LayoutLayers {
    * Calculates the element's intersection with the viewport's rect.
    *
    * @param {!Element} element A regular or AMP Element
-   * @param {!Rect} viewportRect
+   * @param {!LayoutRectDef} viewportRect
    */
   calcIntersectionWithViewport(element) {
     return this.calcIntersectionWithParent(element,
@@ -59,7 +107,7 @@ export class LayoutLayers {
   calcIntersectionWithParent(element, parent, opt_expand) {
     const { left, top } = LayoutElement.getScrolledPosition(element, parent);
     const size = LayoutElement.getSize(element);
-    let parentSize = LayoutElement.getSize(parent);
+    const parentSize = LayoutElement.getSize(parent);
     if (opt_expand) {
       parentSize.width *= 1 + (opt_expand.dw || 0) * 2,
       parentSize.height *= 1 + (opt_expand.dh || 0) * 2,
@@ -99,7 +147,7 @@ export class LayoutLayers {
    * Changes the element's rect size.
    *
    * @param {!AmpElement} element An AMP Element
-   * @param {!Size} size
+   * @param {!SizeDef} size
    * @param {boolean=} force Whether to skip approval/denial logic
    */
   changeSize(element, size, force = false) {
@@ -113,7 +161,6 @@ export class LayoutLayers {
     dev().assert(!LayoutLayer.forOptional(element));
     const layer = new LayoutLayer(element);
     this.layers_.push(layer);
-    return layer;
   }
 
   onResize_() {
@@ -329,8 +376,8 @@ class LayoutElement {
 
     this.parentLayer_ = LayoutLayer.getParentLayer(element);
 
-    this.size_ = {width: 0, height: 0};
-    this.position_ = {top: 0, left: 0};
+    this.size_ = SizeWh(0, 0);
+    this.position_ = PositionLt(0, 0);
 
     element[LAYOUT_PROP] = this;
   }
@@ -373,13 +420,13 @@ class LayoutElement {
     }
 
     const box = element.getBoundingClientRect();
-    const position = { left: box.left, top: box.top };
+    let {left, top} = box;
     if (opt_parent) {
       const parentBox = LayoutElement.getScrolledPosition(opt_parent);
-      position.left -= parentBox.left;
-      position.top -= parentBox.top;
+      left -= parentBox.left;
+      top -= parentBox.top;
     }
-    return position;
+    return PositionLt(left, top);
   }
 
   /**
@@ -395,10 +442,7 @@ class LayoutElement {
     }
 
     const box = element.getBoundingClientRect();
-    return {
-      width: box.width,
-      height: box.height,
-    };
+    return SizeWh(box.width, box.height);
   }
 
   /**
@@ -412,7 +456,7 @@ class LayoutElement {
 
   /**
    * Gets the size of the element.
-   * @return {!{width: number, height: number}}
+   * @return {!SizeDef}
    */
   getSize() {
     return this.size_;
@@ -421,7 +465,7 @@ class LayoutElement {
   /**
    * Gets offsets of the element relative to the parent layer, without taking
    * scroll position into account.
-   * @return {!LayoutRectDef}
+   * @return {!PositionDef}
    */
   getOffsets() {
     return this.position_;
@@ -454,20 +498,20 @@ class LayoutElement {
       }
     }
 
-    return {top: y, left: x};
+    return PositionLt(x, y);
   }
 
   remeasure(opt_relativeTo) {
     let relative = opt_relativeTo;
     if (!relative) {
       const parent = this.getParentLayer();
-      relative = parent ? parent.getScrolledPosition() : { top: 0, left: 0};
+      relative = parent ? parent.getScrolledPosition() : PositionLt(0, 0);
     }
     const box = this.element_.getBoundingClientRect();
-    this.size_ = {width: box.width, height: box.height};
-    this.position_ = {
-      top: box.top - relative.top,
-      left: box.left - relative.left,
-    };
+    this.size_ = SizeWh(box.width, box.height);
+    this.position_ = PositionLt(
+      box.left - relative.left,
+      box.top - relative.top
+    );
   }
 }
