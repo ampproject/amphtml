@@ -51,7 +51,7 @@ module.exports = {
         }
       ],
     ],
-    bundleDelay: 1100,
+    bundleDelay: 900,
   },
 
   reporters: process.env.TRAVIS ? ['super-dots', 'mocha'] : ['dots', 'mocha'],
@@ -201,10 +201,10 @@ module.exports = {
   },
 
   singleRun: true,
-  browserDisconnectTimeout: 10000,
+  browserDisconnectTimeout: 1 * 60 * 1000,
   browserDisconnectTolerance: 2,
-  browserNoActivityTimeout: 4 * 60 * 1000,
-  captureTimeout: 4 * 60 * 1000,
+  browserNoActivityTimeout: 20 * 60 * 1000,
+  captureTimeout: 20 * 60 * 1000,
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
