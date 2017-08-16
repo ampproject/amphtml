@@ -223,7 +223,7 @@ Example:
 {
   "targets": {
     "product": {
-      "finalUrl": "http://example.com/?page=_productCategory&verification=_3pAnalytics"
+      "finalUrl": "http://example.com/?page=_productCategory&verification=_3pAnalytics",
       "vars": {
         "_productCategory": {
           "defaultValue": "none"
