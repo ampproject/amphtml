@@ -208,4 +208,15 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
       expect(serviceInfo['keys']).to.be.empty;
     });
   });
+
+  it('should not fetch from the same service more than once', () => {
+    expect(result).to.be.empty;
+    verifier.loadKeyset('google', Promise.resolve());
+    verifier.loadKeyset('google', Promise.resolve());
+    expect(result).to.be.instanceof(Array);
+    expect(result).to.have.lengthOf(1);
+    return Promise.all(result).then(() => {
+      expect(fetchMock.called('keyset')).to.be.true;
+    });
+  });
 });
