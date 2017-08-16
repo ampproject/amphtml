@@ -215,7 +215,7 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
     verifier.loadKeyset('google', Promise.resolve());
     expect(result).to.be.instanceof(Array);
     expect(result).to.have.lengthOf(1);
-    return Promise.all(result).then(serviceInfos => {
+    return Promise.all(result).then(() => {
       expect(fetchMock.called('keyset')).to.be.true;
     });
   });
