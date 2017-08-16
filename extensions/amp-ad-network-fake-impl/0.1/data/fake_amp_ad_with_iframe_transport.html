@@ -42,9 +42,16 @@
         {
           "targets": {
             "target1": {
-              "finalUrl": "/?product1&x=CLICK_X&y=CLICK_Y&e=_elem&shouldNotBeReplaced=AMP_VERSION",
+              "finalUrl": "/?product1&x=CLICK_X&y=CLICK_Y&e=_elem&foo=_bar&shouldNotBeReplaced=AMP_VERSION",
               "vars": {
-                "_elem": {"defaultValue": "headline"}
+                "_elem": {
+                  "defaultValue": "headline"
+                },
+                "_bar": {
+                  "vendorAnalyticsSource": "example-3p-vendor",
+                  "vendorAnalyticsResponseKey": "collected-data",
+                  "defaultValue": "bar-default"
+                }
               }
             }
           },

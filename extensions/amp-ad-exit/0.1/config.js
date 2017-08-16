@@ -148,20 +148,22 @@ function assertTarget(name, target, config) {
       user().assert(
           pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
           variable, pattern);
-      const vendor = variable.substr(1);
-      if (getMode().test) {
-        if (!ANALYTICS_CONFIG[vendor]) {
-          dev().warn(TAG, 'Please add ' + vendor + ' to vendors.js!');
-          continue;
+      const vendor = target.vars[variable]['vendorAnalyticsSource'];
+      debugger;
+      if (vendor !== undefined) {
+        if (getMode().test) {
+          if (!ANALYTICS_CONFIG[vendor]) {
+            dev().warn(TAG, 'Please add ' + vendor + ' to vendors.js!');
+            continue;
+          }
+        } else {
+          user().assert(ANALYTICS_CONFIG[vendor], 'Unknown vendor: ' + vendor);
         }
-      } else {
-        user().assert(ANALYTICS_CONFIG[vendor], 'Unknown vendor: ' + vendor);
+        user().assert(
+            target.vars[variable]['vendorAnalyticsResponseKey'],
+            'Variable \'%s\': If vendorAnalyticsSource is defined then ' +
+            'vendorAnalyticsResponseKey must also be defined', variable);
       }
-      user().assert(
-          target.vars[variable]['vendorAnalyticsSource'] === undefined ||
-          target.vars[variable]['vendorAnalyticsResponseKey'],
-          'Variable \'%s\': If vendorAnalyticsSource is defined then ' +
-          'vendorAnalyticsResponseKey must also be defined', variable);
     }
   }
 }
