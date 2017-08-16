@@ -17,7 +17,7 @@
 import {tryParseJson} from './json';
 import {isProtocolValid} from './url';
 import {isObject, isArray} from './types';
-import {user} from './log';
+import {dev, user} from './log';
 
 /**
  * @typedef {{
@@ -140,15 +140,12 @@ export function parseFavicon(doc) {
 function validateMetadata(metadata) {
   // Ensure src of artwork has valid protocol
   if (metadata && metadata.artwork) {
-    if (isArray(metadata.artwork)) {
-      metadata.artwork.forEach(artwork => {
-        if (artwork) {
-          const src = isObject(artwork) ? artwork.src : artwork;
-          user().assert(isProtocolValid(src));
-        }
-      });
-    } else {
-      user().assert(isProtocolValid(metadata.artwork));
-    }
+    dev().assert(isArray(metadata.artwork));
+    metadata.artwork.forEach(artwork => {
+      if (artwork) {
+        const src = isObject(artwork) ? artwork.src : artwork;
+        user().assert(isProtocolValid(src));
+      }
+    });
   }
 };

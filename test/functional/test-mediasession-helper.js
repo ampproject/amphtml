@@ -136,7 +136,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
     expect(newMetaData).to.deep.equal(fakeMetaData);
   });
 
-  it('should throw is artwork src is invalid - array - object', () => {
+  it('should throw if artwork src is invalid - object', () => {
     const fakeMetaData = {
       'artist': '',
       'album': '',
@@ -148,7 +148,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
     expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
   });
 
-  it('should throw is artwork src is invalid - array - string', () => {
+  it('should throw if artwork src is invalid - string', () => {
     const fakeMetaData = {
       'artist': '',
       'album': '',
@@ -160,11 +160,11 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
     expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
   });
 
-  it('should throw is artwork src is invalid - string', () => {
+  it('should throw if artwork is not array', () => {
     const fakeMetaData = {
       'artist': '',
       'album': '',
-      'artwork': 'javascript://alert(1)',
+      'artwork': 'https://NotArray',
       'title': '',
     };
     expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
