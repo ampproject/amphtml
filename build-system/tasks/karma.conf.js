@@ -42,14 +42,6 @@ module.exports = {
     debug: true,
     transform: [
       ['babelify'],
-      [
-        'browserify-istanbul',
-        {
-          instrumenterConfig: {
-            embedSource: false
-          }
-        }
-      ]
     ],
     bundleDelay: 900,
   },
