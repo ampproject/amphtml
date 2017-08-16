@@ -320,6 +320,11 @@ export class BaseElement {
    * class set on it.
    *
    * This callback is executed early after the element has been attached to DOM.
+   *
+   * This callback can either immediately return or return a promise if the
+   * build steps are asynchronous.
+   *
+   * @return {!Promise|undefined}
    */
   buildCallback() {
     // Subclasses may override.
@@ -553,7 +558,7 @@ export class BaseElement {
   executeAction(invocation, unusedDeferred) {
     if (invocation.method == 'activate') {
       if (invocation.satisfiesTrust(this.activationTrust())) {
-        this.activate(invocation);
+        return this.activate(invocation);
       }
     } else {
       this.initActionMap_();
@@ -562,7 +567,7 @@ export class BaseElement {
           this);
       const {handler, minTrust} = holder;
       if (invocation.satisfiesTrust(minTrust)) {
-        handler(invocation);
+        return handler(invocation);
       }
     }
   }

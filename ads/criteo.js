@@ -39,7 +39,13 @@ export function criteo(global, data) {
         Criteo.CallRTA(params);
         resultCallback(null);
       }, () => {});
-      setTargeting(global, data);
+      setTargeting(global, data, null);
+    } else if (data.tagtype === 'standalone') {
+      computeInMasterFrame(window, 'call-standalone', resultCallback => {
+        Criteo.PubTag.Adapters.AMP.Standalone(data, resultCallback, targ => {
+          setTargeting(global, data, targ);
+        });
+      }, () => {});
     } else if (!data.tagtype || data.tagtype === 'passback') {
       Criteo.DisplayAd({
         zoneid: data.zone,
@@ -53,8 +59,9 @@ export function criteo(global, data) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @param {?Object} targeting
  */
-function setTargeting(global, data) {
+function setTargeting(global, data, targeting) {
   if (data.adserver === 'DFP') {
     const dblParams = tryParseJson(data.doubleclick) || {};
     dblParams['slot'] = data.slot;
@@ -63,9 +70,11 @@ function setTargeting(global, data) {
     dblParams['height'] = data.height;
     dblParams['type'] = 'criteo';
 
-    const targeting = Criteo.ComputeDFPTargetingForAMP(
-        data.cookiename || Criteo.PubTag.RTA.DefaultCrtgRtaCookieName,
-        data.varname || Criteo.PubTag.RTA.DefaultCrtgContentName);
+    if (!targeting && data.tagtype === 'rta') {
+      targeting = Criteo.ComputeDFPTargetingForAMP(
+          data.cookiename || Criteo.PubTag.RTA.DefaultCrtgRtaCookieName,
+          data.varname || Criteo.PubTag.RTA.DefaultCrtgContentName);
+    }
     for (const i in targeting) {
       dblParams['targeting'][i] = targeting[i];
     }

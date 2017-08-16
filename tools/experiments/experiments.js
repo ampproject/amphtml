@@ -58,6 +58,12 @@ const EXPERIMENTS = [
         'README.md#amp-dev-channel',
   },
   {
+    id: 'amp-web-push',
+    name: 'Enable AMP web push',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-web-push/0.1/amp-web-push.md',
+  },
+  {
     id: 'ad-type-custom',
     name: 'Activates support for custom (self-serve) advertisements',
     spec: 'https://github.com/ampproject/amphtml/blob/master/ads/custom.md',
@@ -260,6 +266,13 @@ const EXPERIMENTS = [
     id: 'disable-rtc',
     name: 'Disable AMP RTC',
     spec: 'https://github.com/ampproject/amphtml/issues/8551',
+  },
+  {
+    id: 'amp-position-observer',
+    name: 'Amp extension for monitoring position of an element within viewport',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/10875',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+      'amp-position-observer/amp-position-observer.md',
   },
 ];
 

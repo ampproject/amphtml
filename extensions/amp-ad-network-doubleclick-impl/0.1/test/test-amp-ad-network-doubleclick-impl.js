@@ -280,7 +280,258 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       // Just ensure extensions is loaded, and analytics element appended.
     });
   });
+  
+    describe('#getAdUrl', () => {
+    beforeEach(() => {
+      const sandbox = env.sandbox;
+      element = doc.createElement('amp-ad');
+      element.setAttribute('type', 'doubleclick');
+      element.setAttribute('data-ad-client', 'doubleclick');
+      element.setAttribute('width', '320');
+      element.setAttribute('height', '50');
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      // Temporary fix for local test failure.
+      sandbox.stub(impl,
+          'getIntersectionElementLayoutBox', () => {
+            return {
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+              width: 320,
+              height: 50,
+            };
+          });
 
+      sandbox.stub(impl, 'getAmpDoc', () => {
+        doc.win = env.win;
+        return doc;
+      });
+      // Reproduced from noopMethods in ads/google/a4a/test/test-utils.js,
+      // to fix failures when this is run after 'gulp build', without a 'dist'.
+      sandbox.stub(impl, 'getPageLayoutBox', () => {
+        return {
+          top: 11, left: 12, right: 0, bottom: 0, width: 0, height: 0,
+        };
+      });
+    });
+
+    afterEach(() => {
+      toggleExperiment(env.win, 'dc-use-attr-for-format', false);
+      doc.body.removeChild(element);
+      env.win['ampAdGoogleIfiCounter'] = 0;
+    });
+
+    it('returns the right URL', () => {
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url => {
+        [
+          /^https:\/\/securepubads\.g\.doubleclick\.net\/gampad\/ads/,
+          /(\?|&)adk=\d+(&|$)/,
+          /(\?|&)gdfp_req=1(&|$)/,
+          /(\?|&)impl=ifr(&|$)/,
+          /(\?|&)sfv=\d+-\d+-\d+(&|$)/,
+          /(\?|&)sz=320x50(&|$)/,
+          /(\?|&)u_sd=[0-9]+(&|$)/,
+          /(\?|&)is_amp=3(&|$)/,
+          /(\?|&)amp_v=%24internalRuntimeVersion%24(&|$)/,
+          /(\?|&)d_imp=1(&|$)/,
+          /(\?|&)dt=[0-9]+(&|$)/,
+          /(\?|&)ifi=[0-9]+(&|$)/,
+          /(\?|&)adf=[0-9]+(&|$)/,
+          /(\?|&)c=[0-9]+(&|$)/,
+          /(\?|&)output=html(&|$)/,
+          /(\?|&)nhd=1(&|$)/,
+          /(\?|&)biw=[0-9]+(&|$)/,
+          /(\?|&)bih=[0-9]+(&|$)/,
+          /(\?|&)adx=-?[0-9]+(&|$)/,
+          /(\?|&)ady=-?[0-9]+(&|$)/,
+          /(\?|&)u_aw=[0-9]+(&|$)/,
+          /(\?|&)u_ah=[0-9]+(&|$)/,
+          /(\?|&)u_cd=24(&|$)/,
+          /(\?|&)u_w=[0-9]+(&|$)/,
+          /(\?|&)u_h=[0-9]+(&|$)/,
+          /(\?|&)u_tz=-?[0-9]+(&|$)/,
+          /(\?|&)u_his=[0-9]+(&|$)/,
+          /(\?|&)oid=2(&|$)/,
+          /(\?|&)isw=[0-9]+(&|$)/,
+          /(\?|&)ish=[0-9]+(&|$)/,
+          /(\?|&)pfx=(1|0)(&|$)/,
+          /(\?|&)eid=([^&]+%2c)*108809080(%2c[^&]+)*(&|$)/,
+          /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%]+(&|$)/,
+          /(\?|&)top=localhost(&|$)/,
+          /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+(&|$)/,
+          /(\?|&)dtd=[0-9]+(&|$)/,
+        ].forEach(regexp => expect(url).to.match(regexp));
+      });
+    });
+
+    it('handles tagForChildDirectedTreatment', () => {
+      element.setAttribute('json', '{"tagForChildDirectedTreatment": 1}');
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/&tfcd=1&/);
+      });
+    });
+
+    it('handles categoryExclusions without targeting', () => {
+      element.setAttribute('json', '{"categoryExclusions": "sports"}');
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/&scp=excl_cat%3Dsports&/);
+      });
+    });
+
+    it('has correct format when height == "auto"', () => {
+      element.setAttribute('height', 'auto');
+      new AmpAd(element).upgradeCallback();
+      expect(impl.element.getAttribute('height')).to.equal('auto');
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url =>
+          // With exp dc-use-attr-for-format off, we can't test for specific
+          // numbers, but we know that the values should be numeric.
+          expect(url).to.match(/sz=[0-9]+x[0-9]+/));
+    });
+    it('has correct format when width == "auto"',
+        () => {
+          element.setAttribute('width', 'auto');
+          new AmpAd(element).upgradeCallback();
+          expect(impl.element.getAttribute('width')).to.equal('auto');
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+             // Ensure that "auto" doesn't appear anywhere here:
+             expect(url).to.match(/sz=[0-9]+x[0-9]+/));
+        });
+    it('should add RTC params if RTC is used', () => {
+      const rtcConf = createElementWithAttributes(
+          doc, 'script',
+          {type: 'application/json', id: 'amp-rtc'});
+      rtcConf.innerHTML = `{
+          "endpoint": "https://example-publisher.com/rtc/",
+          "sendAdRequestOnFailure": false
+          }`;
+      doc.head.appendChild(rtcConf);
+      const rtcResponse = {targeting: {age: '18-24'}};
+      const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+      xhrMock.returns(
+          Promise.resolve({
+            redirected: false,
+            status: 200,
+            text: () => {
+              return Promise.resolve(JSON.stringify(rtcResponse));
+            },
+          })
+          );
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/(\?|&)artc=[0-9]+(&|$)/);
+        expect(url).to.match(
+            /(\?|&)ard=example-publisher.com/);
+        expect(url).to.match(/(\?|&)ati=2(&|$)/);
+      });
+
+    });
+    it('should add param artc=-1 if RTC request times out', () => {
+      const rtcConf = createElementWithAttributes(
+          doc, 'script',
+          {type: 'application/json', id: 'amp-rtc'});
+      rtcConf.innerHTML = `{
+          "endpoint": "https://example-publisher.com/rtc/",
+          "sendAdRequestOnFailure": false
+          }`;
+      doc.head.appendChild(rtcConf);
+      const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+      // never resolve this promise
+      const xhrResponse = new Promise(() => {});
+      xhrMock.returns(xhrResponse);
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().catch(err => {
+        expect(err.message.match(/^timeout.*/)).to.be.ok;
+      });
+
+    });
+    it('has correct format with height/width override',
+        () => {
+          element.setAttribute('data-override-width', '123');
+          element.setAttribute('data-override-height', '456');
+          new AmpAd(element).upgradeCallback();
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+             expect(url).to.contain('sz=123x456&'));
+        });
+    it('has correct format with height/width override and multiSize',
+        () => {
+          element.setAttribute('data-override-width', '123');
+          element.setAttribute('data-override-height', '456');
+          element.setAttribute('data-multi-size', '1x2,3x4');
+          element.setAttribute('data-multi-size-validation', 'false');
+          new AmpAd(element).upgradeCallback();
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+             expect(url).to.contain('sz=123x456%7C1x2%7C3x4&'));
+        });
+    it('has correct format with auto height/width and multiSize',
+        () => {
+          element.setAttribute('data-override-width', '123');
+          element.setAttribute('data-override-height', '456');
+          element.setAttribute('data-multi-size', '1x2,3x4');
+          element.setAttribute('data-multi-size-validation', 'false');
+          new AmpAd(element).upgradeCallback();
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+             // Ensure that "auto" doesn't appear anywhere here:
+             expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
+        });
+    it('should have the correct ifi numbers - no refresh', function() {
+      // When ran locally, this test tends to exceed 2000ms timeout.
+      this.timeout(5000);
+      // Reset counter for purpose of this test.
+      delete env.win['ampAdGoogleIfiCounter'];
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url1 => {
+        expect(url1).to.match(/ifi=1/);
+        return impl.getAdUrl().then(url2 => {
+          expect(url2).to.match(/ifi=2/);
+          return impl.getAdUrl().then(url3 => {
+            expect(url3).to.match(/ifi=3/);
+          });
+        });
+      });
+    });
+    it('has correct rc and ifi after refresh', () => {
+      // We don't really care about the behavior of the following methods, so
+      // we'll just stub them out so that refresh() can run without tripping any
+      // unrelated errors.
+      sandbox.stub(AmpA4A.prototype, 'initiateAdRequest',
+          () => impl.adPromise_ = Promise.resolve());
+      const tearDownSlotMock = sandbox.stub(AmpA4A.prototype, 'tearDownSlot');
+      tearDownSlotMock.returns(undefined);
+      const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
+      destroyFrameMock.returns(undefined);
+      impl.mutateElement = func => func();
+      impl.togglePlaceholder = sandbox.spy();
+      impl.win.document.win = impl.win;
+      impl.getAmpDoc = () => impl.win.document;
+      impl.getResource = () => {
+        return {
+          layoutCanceled: () => {},
+        };
+      };
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url1 => {
+        expect(url1).to.not.match(/(\?|&)rc=[0-9]+(&|$)/);
+        expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
+        return impl.refresh(() => {}).then(() => {
+          return impl.getAdUrl().then(url2 => {
+            expect(url2).to.match(/(\?|&)rc=1(&|$)/);
+            expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
+          });
+        });
+      });
+    });
+  });
+});
 
   describe('#unlayoutCallback', () => {
     it('should call #resetSlot, remove child iframe, but keep other children',
@@ -633,257 +884,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
   });
 
-  describe('#getAdUrl', () => {
-    beforeEach(() => {
-      const sandbox = env.sandbox;
-      element = doc.createElement('amp-ad');
-      element.setAttribute('type', 'doubleclick');
-      element.setAttribute('data-ad-client', 'doubleclick');
-      element.setAttribute('width', '320');
-      element.setAttribute('height', '50');
-      doc.body.appendChild(element);
-      impl = new AmpAdNetworkDoubleclickImpl(element);
-      // Temporary fix for local test failure.
-      sandbox.stub(impl,
-          'getIntersectionElementLayoutBox', () => {
-            return {
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0,
-              width: 320,
-              height: 50,
-            };
-          });
-
-      sandbox.stub(impl, 'getAmpDoc', () => {
-        doc.win = env.win;
-        return doc;
-      });
-      // Reproduced from noopMethods in ads/google/a4a/test/test-utils.js,
-      // to fix failures when this is run after 'gulp build', without a 'dist'.
-      sandbox.stub(impl, 'getPageLayoutBox', () => {
-        return {
-          top: 11, left: 12, right: 0, bottom: 0, width: 0, height: 0,
-        };
-      });
-    });
-
-    afterEach(() => {
-      toggleExperiment(env.win, 'dc-use-attr-for-format', false);
-      doc.body.removeChild(element);
-      env.win['ampAdGoogleIfiCounter'] = 0;
-    });
-
-    it('returns the right URL', () => {
-      new AmpAd(element).upgradeCallback();
-      return impl.getAdUrl().then(url => {
-        [
-          /^https:\/\/securepubads\.g\.doubleclick\.net\/gampad\/ads/,
-          /(\?|&)adk=\d+(&|$)/,
-          /(\?|&)gdfp_req=1(&|$)/,
-          /(\?|&)impl=ifr(&|$)/,
-          /(\?|&)sfv=\d+-\d+-\d+(&|$)/,
-          /(\?|&)sz=320x50(&|$)/,
-          /(\?|&)u_sd=[0-9]+(&|$)/,
-          /(\?|&)is_amp=3(&|$)/,
-          /(\?|&)amp_v=%24internalRuntimeVersion%24(&|$)/,
-          /(\?|&)d_imp=1(&|$)/,
-          /(\?|&)dt=[0-9]+(&|$)/,
-          /(\?|&)ifi=[0-9]+(&|$)/,
-          /(\?|&)adf=[0-9]+(&|$)/,
-          /(\?|&)c=[0-9]+(&|$)/,
-          /(\?|&)output=html(&|$)/,
-          /(\?|&)nhd=1(&|$)/,
-          /(\?|&)biw=[0-9]+(&|$)/,
-          /(\?|&)bih=[0-9]+(&|$)/,
-          /(\?|&)adx=-?[0-9]+(&|$)/,
-          /(\?|&)ady=-?[0-9]+(&|$)/,
-          /(\?|&)u_aw=[0-9]+(&|$)/,
-          /(\?|&)u_ah=[0-9]+(&|$)/,
-          /(\?|&)u_cd=24(&|$)/,
-          /(\?|&)u_w=[0-9]+(&|$)/,
-          /(\?|&)u_h=[0-9]+(&|$)/,
-          /(\?|&)u_tz=-?[0-9]+(&|$)/,
-          /(\?|&)u_his=[0-9]+(&|$)/,
-          /(\?|&)oid=2(&|$)/,
-          /(\?|&)isw=[0-9]+(&|$)/,
-          /(\?|&)ish=[0-9]+(&|$)/,
-          /(\?|&)pfx=(1|0)(&|$)/,
-          /(\?|&)eid=([^&]+%2c)*108809080(%2c[^&]+)*(&|$)/,
-          /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%]+(&|$)/,
-          /(\?|&)top=localhost(&|$)/,
-          /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+(&|$)/,
-          /(\?|&)dtd=[0-9]+(&|$)/,
-        ].forEach(regexp => expect(url).to.match(regexp));
-      });
-    });
-
-    it('handles tagForChildDirectedTreatment', () => {
-      element.setAttribute('json', '{"tagForChildDirectedTreatment": 1}');
-      new AmpAd(element).upgradeCallback();
-      return impl.getAdUrl().then(url => {
-        expect(url).to.match(/&tfcd=1&/);
-      });
-    });
-
-    it('handles categoryExclusions without targeting', () => {
-      element.setAttribute('json', '{"categoryExclusions": "sports"}');
-      new AmpAd(element).upgradeCallback();
-      return impl.getAdUrl().then(url => {
-        expect(url).to.match(/&scp=excl_cat%3Dsports&/);
-      });
-    });
-
-    it('has correct format when height == "auto"', () => {
-      element.setAttribute('height', 'auto');
-      new AmpAd(element).upgradeCallback();
-      expect(impl.element.getAttribute('height')).to.equal('auto');
-      impl.onLayoutMeasure();
-      return impl.getAdUrl().then(url =>
-          // With exp dc-use-attr-for-format off, we can't test for specific
-          // numbers, but we know that the values should be numeric.
-          expect(url).to.match(/sz=[0-9]+x[0-9]+/));
-    });
-    it('has correct format when width == "auto"',
-        () => {
-          element.setAttribute('width', 'auto');
-          new AmpAd(element).upgradeCallback();
-          expect(impl.element.getAttribute('width')).to.equal('auto');
-          impl.onLayoutMeasure();
-          return impl.getAdUrl().then(url =>
-             // Ensure that "auto" doesn't appear anywhere here:
-             expect(url).to.match(/sz=[0-9]+x[0-9]+/));
-        });
-    it('should add RTC params if RTC is used', () => {
-      const rtcConf = createElementWithAttributes(
-          doc, 'script',
-          {type: 'application/json', id: 'amp-rtc'});
-      rtcConf.innerHTML = `{
-          "endpoint": "https://example-publisher.com/rtc/",
-          "sendAdRequestOnFailure": false
-          }`;
-      doc.head.appendChild(rtcConf);
-      const rtcResponse = {targeting: {age: '18-24'}};
-      const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
-      xhrMock.returns(
-          Promise.resolve({
-            redirected: false,
-            status: 200,
-            text: () => {
-              return Promise.resolve(JSON.stringify(rtcResponse));
-            },
-          })
-          );
-      new AmpAd(element).upgradeCallback();
-      return impl.getAdUrl().then(url => {
-        expect(url).to.match(/(\?|&)artc=[0-9]+(&|$)/);
-        expect(url).to.match(
-            /(\?|&)ard=example-publisher.com/);
-        expect(url).to.match(/(\?|&)ati=2(&|$)/);
-      });
-
-    });
-    it('should add param artc=-1 if RTC request times out', () => {
-      const rtcConf = createElementWithAttributes(
-          doc, 'script',
-          {type: 'application/json', id: 'amp-rtc'});
-      rtcConf.innerHTML = `{
-          "endpoint": "https://example-publisher.com/rtc/",
-          "sendAdRequestOnFailure": false
-          }`;
-      doc.head.appendChild(rtcConf);
-      const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
-      // never resolve this promise
-      const xhrResponse = new Promise(() => {});
-      xhrMock.returns(xhrResponse);
-      new AmpAd(element).upgradeCallback();
-      return impl.getAdUrl().catch(err => {
-        expect(err.message.match(/^timeout.*/)).to.be.ok;
-      });
-
-    });
-    it('has correct format with height/width override',
-        () => {
-          element.setAttribute('data-override-width', '123');
-          element.setAttribute('data-override-height', '456');
-          new AmpAd(element).upgradeCallback();
-          impl.onLayoutMeasure();
-          return impl.getAdUrl().then(url =>
-             expect(url).to.contain('sz=123x456&'));
-        });
-    it('has correct format with height/width override and multiSize',
-        () => {
-          element.setAttribute('data-override-width', '123');
-          element.setAttribute('data-override-height', '456');
-          element.setAttribute('data-multi-size', '1x2,3x4');
-          element.setAttribute('data-multi-size-validation', 'false');
-          new AmpAd(element).upgradeCallback();
-          impl.onLayoutMeasure();
-          return impl.getAdUrl().then(url =>
-             expect(url).to.contain('sz=123x456%7C1x2%7C3x4&'));
-        });
-    it('has correct format with auto height/width and multiSize',
-        () => {
-          element.setAttribute('data-override-width', '123');
-          element.setAttribute('data-override-height', '456');
-          element.setAttribute('data-multi-size', '1x2,3x4');
-          element.setAttribute('data-multi-size-validation', 'false');
-          new AmpAd(element).upgradeCallback();
-          impl.onLayoutMeasure();
-          return impl.getAdUrl().then(url =>
-             // Ensure that "auto" doesn't appear anywhere here:
-             expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
-        });
-    it('should have the correct ifi numbers - no refresh', function() {
-      // When ran locally, this test tends to exceed 2000ms timeout.
-      this.timeout(5000);
-      // Reset counter for purpose of this test.
-      delete env.win['ampAdGoogleIfiCounter'];
-      new AmpAd(element).upgradeCallback();
-      return impl.getAdUrl().then(url1 => {
-        expect(url1).to.match(/ifi=1/);
-        return impl.getAdUrl().then(url2 => {
-          expect(url2).to.match(/ifi=2/);
-          return impl.getAdUrl().then(url3 => {
-            expect(url3).to.match(/ifi=3/);
-          });
-        });
-      });
-    });
-    it('has correct rc and ifi after refresh', () => {
-      // We don't really care about the behavior of the following methods, so
-      // we'll just stub them out so that refresh() can run without tripping any
-      // unrelated errors.
-      sandbox.stub(AmpA4A.prototype, 'initiateAdRequest',
-          () => impl.adPromise_ = Promise.resolve());
-      const tearDownSlotMock = sandbox.stub(AmpA4A.prototype, 'tearDownSlot');
-      tearDownSlotMock.returns(undefined);
-      const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
-      destroyFrameMock.returns(undefined);
-      impl.mutateElement = func => func();
-      impl.togglePlaceholder = sandbox.spy();
-      impl.win.document.win = impl.win;
-      impl.getAmpDoc = () => impl.win.document;
-      impl.getResource = () => {
-        return {
-          layoutCanceled: () => {},
-        };
-      };
-      new AmpAd(element).upgradeCallback();
-      return impl.getAdUrl().then(url1 => {
-        expect(url1).to.not.match(/(\?|&)rc=[0-9]+(&|$)/);
-        expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
-        return impl.refresh(() => {}).then(() => {
-          return impl.getAdUrl().then(url2 => {
-            expect(url2).to.match(/(\?|&)rc=1(&|$)/);
-            expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
-          });
-        });
-      });
-    });
-  });
-});
 
 describes.realWin('additional amp-ad-network-doubleclick-impl', realWinConfigAmpAd, env => {
   let doc;

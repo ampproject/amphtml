@@ -27,70 +27,77 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-analytics/">Annotated code example for amp-analytics</a></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-analytics/">amp-analytics example</a>.</td>
   </tr>
 </table>
 
 [TOC]
 
-## Overview
+## Sending analytics to a vendor or in-house?
 
-You can use the `<amp-analytics>` element to measure activity on an AMP document. In the `<amp-analytics>` element, you specify a JSON configuration object that contains the details for what to measure and where to send the analytics data. You can send the tracking data to an analytics vendor and/or to a URL. There are many analytics vendors that are pre-configured for `<amp-analytics>`, see [Analytics Vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) for details.
+Before you start using AMP analytics on your site, you need to decide whether you will you use third-party analytics tools to analyze user engagement, or your own in-house solution.
 
-**Example**
+{% call callout('Read on', type='read') %}
+Learn all about AMP analytics in the [Configure Analytics](https://www.ampproject.org/docs/guides/analytics_amp) guide.
+{% endcall %}
 
-In the following example, we send analytics data to `https://example.com/analytics` when the AMP document is first loaded, and each time an `<a>` tag is clicked:
+### Sending data to an analytics vendor <a name="analytics-vendors"></a>
+
+AMP analytics is specifically designed to measure once and report to many. If you are already working with one or more analytics vendors, check the list of [Analytics Vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) to see if they’ve integrated their solution with AMP.
+
+For integrated AMP analytics vendors:
+
+1.  In the `<amp-analytics>` tag, add the `type`attribute and set its value to the specified [vendor](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html).
+2. Determine what data you want to capture and track, and specify those details in the configuration data. See the vendor's documentation for  instructions on how to capture analytics data.
+
+If the analytics vendor hasn’t integrated with AMP, reach out to the vendor to ask for their support. We also encourage you to create an issue in the AMP project requesting that the vendor be added. See also [Integrating your analytics tools in AMP HTML](../amp-analytics/integrating-analytics.md). Alternatively, work with your vendor to send the data to their specified URL. Learn more in the [Sending data in-house](#sending-data-in-house) section below.
+
+*Example: Sending data to a third-party analytics provider*
+
+In the following example, analytics data is sent to Nielsen, a third-party analytics provider that has integrated with AMP. Details for configuring analytics data for Nielsen can be found in the [Nielsen](https://engineeringportal.nielsen.com/docs/DCR_Static_Google_AMP_Cloud_API) documentation.
+
+```html
+<amp-analytics type="nielsen">
+    <script type="application/json">
+    {
+      "vars": {
+        "apid": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+        "apv": "1.0",
+        "apn": "My AMP Website",
+        "section": "Entertainment",
+        "segA": "Music",
+        "segB": "News",
+        "segC": "Google AMP"
+      }
+    }
+    </script>
+</amp-analytics>
+```
+
+### Sending data in-house
+
+If you have your own in-house solution for measuring user engagement, the only thing you will need to integrate AMP analytics with that solution is a URL. This is where you will send the data. You can also send data to various URLs. For example, you can send page view data to one URL, and social engagement data to another URL.
+
+
+{% call callout('Note', type='note') %}
+If your in-house solution involves working with an analytics vendor that hasn't integrated with AMP, work with the vendor to determine what configuration information is required.
+{% endcall %}
+
+To send data to a specific URL:
+
+1.  Determine what data you want to capture and track, and [specify those details in the configuration data](#specifying-configuration-data).
+2.  In the [`requests`](#requests) configuration object, specify the type of request to track (e.g., pageview, specific triggered events) and the url(s) of where you want to send the tracking data to.
+
+*Example: Sending data to a URL*
+
+Here's a simple example that tracks page views.  Every time a page is visible, the trigger event fires, and sends the pageview data to a defined URL along with a random ID.
 
 ```html
 <amp-analytics>
 <script type="application/json">
 {
   "requests": {
-    "pageview": "https://example.com/analytics?url=${canonicalUrl}&title=${title}&acct=${account}",
-    "event": "https://example.com/analytics?eid=${eventId}&elab=${eventLabel}&acct=${account}"
-  },
-  "vars": {
-    "account": "ABC123"
-  },
-  "triggers": {
-    "trackPageview": {
-      "on": "visible",
-      "request": "pageview"
-    },
-    "trackAnchorClicks": {
-      "on": "click",
-      "selector": "a",
-      "request": "event",
-      "vars": {
-        "eventId": "42",
-        "eventLabel": "clicked on a link"
-      }
-    }
-  }
-}
-</script>
-</amp-analytics>
-```
-
-## Attributes
-
-**type**
-
-Specifies the type of vendor.  For details, see the [Analytics vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) page.
-
-**config**
-
-This is an optional attribute that can be used to load a configuration from a specified remote URL. The URL specified should use the HTTPS scheme. See also the `data-include-credentials` attribute below. The URL may include [AMP URL vars](../../spec/amp-var-substitutions.md). The response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
-
-Example:
-
-```html
-<amp-analytics config="https://example.com/analytics.config.json"></amp-analytics>
-<amp-analytics type="googleanalytics" id="analytics1">
-<script type="application/json">
-{
-  "vars": {
-    "account": "UA-12345-Y"
+    "pageview": "https://foo.com/pixel?RANDOM",
   },
   "triggers": {
     "trackPageview": {
@@ -103,25 +110,16 @@ Example:
 </amp-analytics>
 ```
 
-{% call callout('Read on', type='read') %}
-Learn more about AMP Analytics in the [Deep Dive into AMP Analytics](https://www.ampproject.org/docs/guides/analytics/deep_dive_analytics) guide.
+{% call callout('Tip', type='success') %}
+For some common tracking use cases (e.g., page views, page clicks, scrolling, etc.) see [Analytics: Use Cases](https://www.ampproject.org/docs/guides/analytics/use_cases).
 {% endcall %}
 
-## Analytics vendors
 
-See [Analytics Vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) for a list of vendors that provide built-in support for `amp-analytics`.
+## Specifying configuration data
 
-## Configuration
+In the `<amp-analytics>` element, you specify a JSON configuration object that contains the details for what to measure and where to send the analytics data. 
 
-Configuration data may be specified inline (as shown in the example above) or fetched remotely by specifying a URL in the
-`config` attribute. Additionally, built-in configuration for popular analytics vendors can be selected by using
-the `type` attribute.
-
-If configuration data from more than one of these sources is used, the configuration objects (vars, requests and triggers) will
-be merged together such that **(i) remote configuration takes precedence over inline configuration and (ii) inline configuration
-takes precedence over vendor configuration**.
-
-The `<amp-analytics>` configuration object uses the following format:
+The configuration object for `<amp-analytics>` uses the following format:
 
 ```javascript
 {
@@ -149,10 +147,32 @@ The `<amp-analytics>` configuration object uses the following format:
 }
 ```
 
-### Requests
-The `requests` configuration object specifies the URLs used to transmit data to an analytics platform. The `request-name` is used
-in the trigger configuration to specify what request should be sent in response to a particular event. The `request-value`
-is an https URL. These values may include placeholder tokens that can reference other requests or variables.
+
+### Inline or remote configuration
+
+The configuration data may be specified inline or fetched remotely by specifying a URL in the `config` attribute. Additionally, built-in configuration for popular analytics vendors can be selected by using the `type` attribute.
+
+If configuration data from more than one of these sources is used, the configuration objects (vars, requests and triggers) will
+be merged together such that:
+
+1.  Remote configuration takes precedence over in-line configuration and
+2.  Inline configuration takes precedence over vendor configuration.
+
+
+#### Loading remote configuration 
+
+To load a remote configuration, in the `<amp-analytics>` element, specify the `config` attribute and the URL for the configuration data. The URL specified should use the HTTPS scheme. The URL may include [AMP URL vars](../../spec/amp-var-substitutions.md). To access cookies, see the [`data-credentials`](#data-credentials) attribute. The response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+
+In this example, we specify the `config` attribute to load the configuration data from the specified URL.
+
+```html
+<amp-analytics config="https://example.com/analytics.account.config.json">
+```
+
+###  Configuration data objects
+
+####  Requests
+The `requests` configuration object specifies the URLs used to transmit data to an analytics platform. The `request-name` specifies what request should be sent in response to a particular event (e.g., `pageview`, `event`, etc.) . The `request-value` is an https URL. These values may include placeholder tokens that can reference other requests or variables.
 
 ```javascript
 "requests": {
@@ -161,8 +181,9 @@ is an https URL. These values may include placeholder tokens that can reference 
   "event": "${base}&type=event&eventId=${eventId}"
 }
 ```
+Some analytics providers have an already-provided configuration, which you use via the `type` attribute. If you are using an analytics provider, you may not need to include requests information. See your vendor documentation to find out if requests need to be configured, and how.
 
-### Vars
+#### Vars
 
 The `amp-analytics` component defines many basic variables that can be used in requests. A list of all such variables is available in the  [`amp-analytics` Variables Guide](./analytics-vars.md). In addition, all of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) are also supported.
 
@@ -176,7 +197,7 @@ The `vars` configuration object can be used to define new key-value pairs or ove
 }
 ```
 
-### Extra URL Params
+#### Extra URL Params
 
 The `extraUrlParams` configuration object specifies additional parameters to append to the query string of a request URL via the usual "&foo=baz" convention.
 
@@ -194,7 +215,7 @@ The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that
 
 `extraUrlParamsReplaceMap` is not required to use `extraUrlParams`. If `extraUrlParamsReplaceMap` is not defined, then no string substitution will happens and the strings defined in `extraUrlParams` are used as-is.
 
-### Triggers
+#### Triggers
 
 The `triggers` configuration object describes when an analytics request should be sent. The `triggers` attribute contains a key-value pair of trigger-name and  trigger-configuration. A trigger-name can be any string comprised of alphanumeric characters (a-zA-Z0-9). Triggers from a  configuration with lower precedence are overridden by triggers with the same names from a configuration with higher precedence.
 
@@ -243,7 +264,7 @@ The selector properties are:
   - `selectionMethod` When specified, this property can have one of two values: `scope` or `closest`. `scope` allows selection of element within the parent element of `amp-analytics` tag. `closest` searches for the closest ancestor of the `amp-analytics` tag that satisfies the given selector. The default value is `scope`.
 
 
-#### Embed render start trigger
+##### Embed render start trigger
 
 AMP elements that embed other documents in iframes (e.g., ads) may report a render start event (`"on": "render-start"`). This event
 is typically emitted as soon as it's possible to confirm that rendering of the embedded document has started. Consult the documentation of a particular AMP element to see whether it emits this event.
@@ -269,7 +290,7 @@ The render start event is also emitted by the document itself and can be configu
 }
 ```
 
-#### Initial load trigger
+##### Initial load trigger
 
 The initial load event (`"on": "ini-load"`) is triggered when the initial contents of an AMP element or an AMP document have been loaded.
 
@@ -300,7 +321,7 @@ The initial load event is also emitted by the document itself and can be configu
 }
 ```
 
-#### Page and element visibility trigger
+##### Page and element visibility trigger
 
 Use the page visibility trigger (`"on": "visible"`) to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`.
 
@@ -360,7 +381,7 @@ In addition to the conditions above, `visibilitySpec` also enables certain varia
 In addition to the variables provided as part of triggers you can also specify additional / overrides for [variables as data attribute](./analytics-vars.md#variables-as-data-attribute). If used, these data attributes have to be part of element specified as the [`selector`](#element-selector).
 
 
-#### Click trigger
+##### Click trigger
 
 Use the click trigger (`"on": "click"`) to fire a request when a specified element is clicked. Use [`selector`](#element-selector) to control which elements will cause this request to fire. The trigger will fire for all elements matched by the specified selector.
 
@@ -384,7 +405,7 @@ Use the click trigger (`"on": "click"`) to fire a request when a specified eleme
 In addition to the variables provided as part of triggers you can also specify additional / overrides for [variables as data attribute](./analytics-vars.md#variables-as-data-attribute). If used, these data attributes have to be part of element specified as the `selector`
 
 
-#### Scroll trigger
+##### Scroll trigger
 Use the scroll trigger (`"on": "scroll"`) to fire a request under certain conditions when the page is scrolled. This trigger provides [special vars](./analytics-vars.md#interaction) that indicate the boundaries that triggered a request to be sent. Use `scrollSpec` to control when this will fire:
   - `scrollSpec` This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width. To keep the page performant, the scroll boundaries are rounded to the nearest multiple of `5`.
 
@@ -402,7 +423,7 @@ Use the scroll trigger (`"on": "scroll"`) to fire a request under certain condit
 }
 ```
 
-#### Timer trigger
+##### Timer trigger
 Use the timer trigger (`"on": "timer"`) to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
   - `timerSpec` Specification for triggers of type `timer`. The timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
@@ -422,7 +443,7 @@ Use the timer trigger (`"on": "timer"`) to fire a request on a regular time inte
 }
 ```
 
-#### Hidden trigger
+##### Hidden trigger
 
 Use the hidden trigger (`"on": "hidden"`) to fire a request when the page becomes hidden.
 
@@ -453,12 +474,12 @@ The above configuration translates to:
 > When page becomes hidden, fire a request if the element #anim-id has been visible (more than 20% area in viewport) for more than 3s in total.
 
 
-#### Access triggers
+##### Access triggers
 
 AMP Access system issues numerous events for different states in the access flow. For details on access triggers (`"on": "amp-access-*"`), see [AMP Access and Analytics](../amp-access/amp-access-analytics.md).
 
 
-### Transport
+#### Transport
 
 The `transport` configuration object specifies how to send a request. The value is an object with fields that
 indicate which transport methods are acceptable.
@@ -479,7 +500,11 @@ In the example below, `beacon` and `xhrpost` are set to `false`, so they will no
 }
 ```
 
-## Attributes
+## Validation
+
+See [amp-analytics rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/validator-amp-analytics.protoascii) in the AMP validator specification.
+
+### Valid attributes for `<amp-analytics>`
 
 These are the valid attributes for the `amp-analytics` component:
 
@@ -504,14 +529,10 @@ Example:
 <amp-analytics config="https://example.com/analytics.config.json"></amp-analytics>
 ```
 
-**data-credentials**
+**data-credentials**<a name="data-credentials"></a>
 
 If set to `include`, this turns on the ability to read and write cookies on the request specified via the `config` attribute. This is an optional attribute.
 
 **data-consent-notification-id**
 
 If provided, the page will not process analytics requests until an [amp-user-notification](../../extensions/amp-user-notification/amp-user-notification.md) with the given HTML element id is confirmed (accepted) by the user. This is an optional attribute.
-
-## Validation
-
-See [amp-analytics rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/validator-amp-analytics.protoascii) in the AMP validator specification.

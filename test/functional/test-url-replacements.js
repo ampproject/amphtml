@@ -137,6 +137,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
             return {href: canonical};
           }
         },
+        getElementById: () => {},
         cookie: '',
       },
       Math: window.Math,
@@ -370,6 +371,19 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace TIMESTAMP_ISO', () => {
+    return expandAsync('?tsf=TIMESTAMP_ISO').then(res => {
+      expect(res).to.match(/tsf=\d+/);
+    });
+  });
+
+  it('should return correct ISO timestamp', () => {
+    const fakeTime = 1499979336612;
+    sandbox.useFakeTimers(fakeTime);
+    return expect(expandAsync('?tsf=TIMESTAMP_ISO'))
+        .to.eventually.equal('?tsf=2017-07-13T20%3A55%3A36.612Z');
+  });
+
   it('should replace TIMEZONE', () => {
     return expandAsync('?tz=TIMEZONE').then(res => {
       expect(res).to.match(/tz=-?\d+/);
@@ -456,6 +470,25 @@ describes.sandboxed('UrlReplacements', {}, () => {
         .expandAsync('?sh=BACKGROUND_STATE')
         .then(res => {
           expect(res).to.equal('?sh=1');
+        });
+  });
+
+  it('Should replace VIDEO_STATE(video,parameter) with video data', () => {
+    const win = getFakeWindow();
+    sandbox.stub(Services, 'videoManagerForDoc')
+        .returns({
+          getVideoAnalyticsDetails(unusedVideo) {
+            return Promise.resolve({currentTime: 1.5});
+          },
+        });
+    sandbox.stub(win.document, 'getElementById')
+        .withArgs('video')
+        .returns(document.createElement('video'));
+
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .expandAsync('?sh=VIDEO_STATE(video,currentTime)')
+        .then(res => {
+          expect(res).to.equal('?sh=1.5');
         });
   });
 

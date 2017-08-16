@@ -49,6 +49,16 @@
         href="http://xss.com/https://fonts.googleapis.com/css?foobar">
 
   <!--
+    Regexp to allow typekit fonts.
+    href value_regex: "https://use\\.typekit\\.net/\\w+\\.css"
+    The first example is valid, the second example is invalid.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://use.typekit.net/oeg4hgb.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://use.typekit.net/css/oeg4hgb.css">
+
+  <!--
     Regexp to allow font-awesome css, but not path traversal.
     The first example is valid, the second is not.
   -->
