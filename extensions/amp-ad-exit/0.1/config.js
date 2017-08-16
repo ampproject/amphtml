@@ -143,17 +143,17 @@ function assertTarget(name, target, config) {
     });
   }
   if (target.vars) {
-    const pattern = /^_[a-zA-Z0-9_-]+$/;
+    const vendorPattern = /^_[a-zA-Z0-9_-]+$/;
     for (const variable in target.vars) {
       user().assert(
-          pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
-          variable, pattern);
-      const vars3p = config.targets['variableFrom3pAnalytics'];
-      const vendor = vars3p.vars[variable] &&
-          vars3p.vars[variable].vendorAnalyticsSource;
+          vendorPattern.test(variable),
+          'Vendor names must start with an underscore. Found: \'%s\'',
+          variable);
+      const vendor = variable.substr(1);
       if (getMode().test) {
         if (!ANALYTICS_CONFIG[vendor]) {
           dev().warn(TAG, 'Please add ' + vendor + ' to vendors.js!');
+          continue;
         }
       } else {
         user().assert(ANALYTICS_CONFIG[vendor], 'Unknown vendor: ' + vendor);
