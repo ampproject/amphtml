@@ -381,8 +381,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     const fakeTime = 1499979336612;
     sandbox.useFakeTimers(fakeTime);
     return expect(expandAsync('?tsf=TIMESTAMP_ISO'))
-        .to.eventually.equal(
-        '?tsf=' + encodeURIComponent('2017-07-13T20:55:36.612Z'));
+        .to.eventually.equal('?tsf=2017-07-13T20%3A55%3A36.612Z');
   });
 
   it('should replace TIMEZONE', () => {
