@@ -183,9 +183,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
     this.size_ = isExperimentOn(this.win, 'as-use-attr-for-format')
-          && !this.isResponsive()
-          && !isNaN(width) && width > 0
-          && !isNaN(height) && height > 0
+    && !this.isResponsive()
+    && !isNaN(width) && width > 0
+    && !isNaN(height) && height > 0
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
@@ -352,9 +352,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Attempt to resize to the correct height.
       const viewport = this.getViewport();
       return this.attemptChangeSize(
-        AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-            viewport.getSize()),
-        undefined);
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+              viewport.getSize()),
+          undefined);
     }
   }
 
@@ -371,10 +371,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // order to align the element correctly, so we use changeSize rather than
       // attemptChangeSize here. But it doesn't actually change the size (it
       // just changes the horizontal margins).
-      // TODO(charliereams): This is wrong for RTL.
+      // TODO(charliereams): Is this the right way to get direction?
+      const parentDirection =
+          computedStyle(this.win, this.element)['direction'];
+      const marginChange =
+          parentDirection == 'rtl'
+              ? {right: layoutBox.left}
+              : {left: -1 * layoutBox.left};
       this.element.getResources()./*OK*/changeSize(
           this.element, undefined, undefined, undefined,
-          {left: -1 * layoutBox.left});
+          marginChange);
       setStyle(this.element, 'zIndex', 30);
     }
   }
