@@ -661,12 +661,14 @@ export class AmpA4A extends AMP.BaseElement {
                 this.protectedEmitLifecycleEvent_(eventName, extraVariables);
               })
               .then(status => {
-                this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
                 if (getMode().localDev &&
                     this.element.getAttribute('type') == 'fake') {
                   // do not verify signature for fake type ad
                   status = VerificationStatus.OK;
                 }
+                this.protectedEmitLifecycleEvent_('adResponseValidateEnd', {
+                  result: status,
+                });
                 switch (status) {
                   case VerificationStatus.OK:
                     return bytes;
@@ -1316,7 +1318,9 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaCachedContentIframe_(adUrl) {
-    this.protectedEmitLifecycleEvent_('renderCrossDomainStart');
+    this.protectedEmitLifecycleEvent_('renderCrossDomainStart', {
+      isAmpCreative: this.isVerifiedAmpCreative_,
+    });
     return this.iframeRenderHelper_(dict({
       'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
       'name': JSON.stringify(
@@ -1338,7 +1342,9 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
         method == XORIGIN_MODE.NAMEFRAME,
         'Unrecognized A4A cross-domain rendering mode: %s', method);
-    this.protectedEmitLifecycleEvent_('renderSafeFrameStart');
+    this.protectedEmitLifecycleEvent_('renderSafeFrameStart', {
+      isAmpCreative: this.isVerifiedAmpCreative_,
+    });
     const checkStillCurrent = this.verifyStillCurrent();
     return utf8Decode(creativeBody).then(creative => {
       checkStillCurrent();
