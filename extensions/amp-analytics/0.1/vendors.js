@@ -697,9 +697,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'clt=${contentLoadTime}&' +
           'dit=${domInteractiveTime}' +
           '${baseSuffix}',
-      'user-error': '${host}/r/collect?${basePrefix}&' +
-          'em=${errorMessage}' +
-          '${baseSuffix}',
     },
     'triggers': {
       'performanceTiming': {
@@ -791,9 +788,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'pdt=${pageDownloadTime}&' +
       'clt=${contentLoadTime}&' +
       'dit=${domInteractiveTime}' +
-      '${baseSuffix}',
-      'user-error': '${host}/r/collect?${basePrefix}&' +
-      'em=${errorMessage}' +
       '${baseSuffix}',
     },
     'triggers': {
