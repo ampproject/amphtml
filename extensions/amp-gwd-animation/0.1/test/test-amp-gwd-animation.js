@@ -85,8 +85,8 @@ describes.sandboxed('AMP GWD runtime', {}, () => {
 
       beforeEach(() => {
         ampdoc = env.ampdoc;
-        ampdoc.getBody().innerHTML = `
-            <amp-carousel id="pagedeck"
+        ampdoc.getBody().innerHTML =
+            `<amp-carousel id="pagedeck"
                 on="slideChange:someDiv.hide;someEvent:someDiv.show">
               <div id="page1" class="${GWD_PAGE_WRAPPER_CLASS}">
                 <div>
@@ -96,8 +96,7 @@ describes.sandboxed('AMP GWD runtime', {}, () => {
                 </div>
               </div>
               <div id="page2" class="${GWD_PAGE_WRAPPER_CLASS}"></div>
-            </amp-carousel>
-            `;
+            </amp-carousel>`;
         element = createGwdAnimationElement(ampdoc, {
               'id': 'gwdAnim',
               'timeline-event-prefix': 'foo123',
@@ -134,7 +133,7 @@ describes.sandboxed('AMP GWD runtime', {}, () => {
         });
       });
 
-      it('should install slideChange listeners on the pagedeck', () => {
+      it('should install slideChange listeners on the GWD pagedeck', () => {
         return ampdoc.whenBodyAvailable().then(() => {
           const pagedeck = ampdoc.getRootNode().getElementById(GWD_PAGEDECK_ID);
           expect(pagedeck.getAttribute('on')).to.contain('setCurrentPage');
