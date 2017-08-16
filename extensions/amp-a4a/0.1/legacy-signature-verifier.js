@@ -102,6 +102,13 @@ export class LegacySignatureVerifier {
     this.keys_ = [];
 
     /**
+     * The set of signing services whose keys have been loaded.
+     *
+     * @private @const {!Object<string, boolean>}
+     */
+    this.signingServiceNames_ = {};
+
+    /**
      * Gets a notion of current time, in ms.  The value is not necessarily
      * absolute, so should be used only for computing deltas.  When available,
      * the performance system will be used; otherwise Date.now() will be
@@ -131,6 +138,10 @@ export class LegacySignatureVerifier {
     }
     const url = signingServerURLs[signingServiceName];
     if (url) {
+      if (this.signingServiceNames_[signingServiceName]) {
+        return;
+      }
+      this.signingServiceNames_[signingServiceName] = true;
       // Delay request until document is not in a prerender state.
       this.keys_.push(waitFor.then(() =>
           Services.xhrFor(this.win_).fetchJson(url, {
