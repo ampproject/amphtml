@@ -38,6 +38,7 @@ tags: {  # <amp-video>
   attrs: { name: "album" }
   attrs: { name: "alt" }
   attrs: { name: "artist" }
+  attrs: { name: "artwork" }
   attrs: { name: "attribution" }
   attrs: {
     name: "autoplay"

@@ -84,7 +84,7 @@ export class AmpAudio extends AMP.BaseElement {
                   || this.element.getAttribute('aria-label')
                   || doc.title;
     const album = this.element.getAttribute('album');
-    const poster = this.element.getAttribute('poster')
+    const artwork = this.element.getAttribute('artwork')
                    || parseSchemaImage(doc)
                    || parseOgImage(doc)
                    || parseFavicon(doc);
@@ -93,7 +93,7 @@ export class AmpAudio extends AMP.BaseElement {
       'artist': artist || '',
       'album': album || '',
       'artwork': [
-        {'src': poster || ''},
+        {'src': artwork || ''},
       ],
     };
 
