@@ -305,6 +305,11 @@ export class GlobalVariableSource extends VariableSource {
       return Date.now();
     });
 
+    //Returns the human readable timestamp in format of 2011-01-01T11:11:11.612Z.
+    this.set('TIMESTAMP_ISO', () => {
+      return new Date().toISOString();
+    });
+
     // Returns the user's time-zone offset from UTC, in minutes.
     this.set('TIMEZONE', () => {
       return new Date().getTimezoneOffset();
@@ -989,6 +994,7 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
       });
 }
 
+
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Window} embedWin
@@ -998,7 +1004,6 @@ export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
   installServiceInEmbedScope(embedWin, 'url-replace',
       new UrlReplacements(ampdoc, varSource));
 }
-
 
 /**
  * @typedef {{
