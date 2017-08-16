@@ -698,7 +698,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'dit=${domInteractiveTime}' +
           '${baseSuffix}',
       'user-error': '${host}/r/collect?${basePrefix}&' +
-          'em=${errorMessage}' +
+          'exDescription=${errorMessage}' +
           '${baseSuffix}',
     },
     'triggers': {
@@ -744,57 +744,57 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'requests': {
       'host': 'https://www.google-analytics.com',
       'basePrefix': 'v=1&' +
-      '_v=a1&' +
-      'ds=${dataSource}&' +
-      '${anonymizeIP}&' +
-      '_s=${requestCount}&' +
-      'dt=${title}&' +
-      'sr=${screenWidth}x${screenHeight}&' +
-      '_utmht=${timestamp}&' +
-      'cid=${clientId}&' +
-      'tid=${account}&' +
-      'dl=${documentLocation}&' +
-      'dr=${documentReferrer}&' +
-      'sd=${screenColorDepth}&' +
-      'ul=${browserLanguage}&' +
-      'de=${documentCharset}',
+          '_v=a1&' +
+          'ds=${dataSource}&' +
+          '${anonymizeIP}&' +
+          '_s=${requestCount}&' +
+          'dt=${title}&' +
+          'sr=${screenWidth}x${screenHeight}&' +
+          '_utmht=${timestamp}&' +
+          'cid=${clientId}&' +
+          'tid=${account}&' +
+          'dl=${documentLocation}&' +
+          'dr=${documentReferrer}&' +
+          'sd=${screenColorDepth}&' +
+          'ul=${browserLanguage}&' +
+          'de=${documentCharset}',
       'baseSuffix': '&a=${pageViewId}&' +
-      'z=${random}',
+          'z=${random}',
       'pageview': '${host}/r/collect?${basePrefix}&' +
-      't=pageview&' +
-      'jid=${random}&' +
-      '_r=1' +
-      '${baseSuffix}',
+          't=pageview&' +
+          'jid=${random}&' +
+          '_r=1' +
+          '${baseSuffix}',
       'event': '${host}/collect?${basePrefix}&' +
-      't=event&' +
-      'jid=&' +
-      'ec=${eventCategory}&' +
-      'ea=${eventAction}&' +
-      'el=${eventLabel}&' +
-      'ev=${eventValue}' +
-      '${baseSuffix}',
+          't=event&' +
+          'jid=&' +
+          'ec=${eventCategory}&' +
+          'ea=${eventAction}&' +
+          'el=${eventLabel}&' +
+          'ev=${eventValue}' +
+          '${baseSuffix}',
       'social': '${host}/collect?${basePrefix}&' +
-      't=social&' +
-      'jid=&' +
-      'sa=${socialAction}&' +
-      'sn=${socialNetwork}&' +
-      'st=${socialTarget}' +
-      '${baseSuffix}',
+          't=social&' +
+          'jid=&' +
+          'sa=${socialAction}&' +
+          'sn=${socialNetwork}&' +
+          'st=${socialTarget}' +
+          '${baseSuffix}',
       'timing': '${host}/collect?${basePrefix}&' +
-      't=${timingRequestType}&' +
-      'jid=&' +
-      'plt=${pageLoadTime}&' +
-      'dns=${domainLookupTime}&' +
-      'tcp=${tcpConnectTime}&' +
-      'rrt=${redirectTime}&' +
-      'srt=${serverResponseTime}&' +
-      'pdt=${pageDownloadTime}&' +
-      'clt=${contentLoadTime}&' +
-      'dit=${domInteractiveTime}' +
-      '${baseSuffix}',
+          't=${timingRequestType}&' +
+          'jid=&' +
+          'plt=${pageLoadTime}&' +
+          'dns=${domainLookupTime}&' +
+          'tcp=${tcpConnectTime}&' +
+          'rrt=${redirectTime}&' +
+          'srt=${serverResponseTime}&' +
+          'pdt=${pageDownloadTime}&' +
+          'clt=${contentLoadTime}&' +
+          'dit=${domInteractiveTime}' +
+          '${baseSuffix}',
       'user-error': '${host}/r/collect?${basePrefix}&' +
-      'em=${errorMessage}' +
-      '${baseSuffix}',
+          'exDescription=${errorMessage}' +
+          '${baseSuffix}',
     },
     'triggers': {
       'performanceTiming': {
