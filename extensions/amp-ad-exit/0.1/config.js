@@ -149,7 +149,6 @@ function assertTarget(name, target, config) {
           pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
           variable, pattern);
       const vendor = target.vars[variable]['vendorAnalyticsSource'];
-      debugger;
       if (vendor !== undefined) {
         if (getMode().test) {
           if (!ANALYTICS_CONFIG[vendor]) {
