@@ -82,19 +82,20 @@
  */
  export function detectEvtListenerOptsSupport() {
    // Only run the test once
-   if (typeof optsSupported != 'undefined') {
+   if (optsSupported !== undefined) {
      return optsSupported;
    }
 
    optsSupported = false;
-   // Test whether browser supports EventListenerOptions or not
    try {
+     // Test whether browser supports EventListenerOptions or not
      const options = {
        get capture() {
          optsSupported = true;
        },
      };
-     self.addEventListener('test-opts', null, options);
+     self.addEventListener('test-options', null, options);
+     self.removeEventListener('test-options', null, options);
    } catch (err) {
      // EventListenerOptions are not supported
    }
@@ -104,6 +105,6 @@
  /**
   * Resets the test for whether addEventListener supports options or not.
   */
- export function resetEvtListenerOptsSupport() {
+ export function resetEvtListenerOptsSupportForTesting() {
    optsSupported = undefined;
  }
