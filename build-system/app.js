@@ -1044,6 +1044,9 @@ function replaceUrls(mode, file, hostName, inabox) {
         /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
         hostName + '/dist/amp.js');
     file = file.replace(
+        /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
+        hostName + '/dist/amp-shadow.js');
+    file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
         hostName + '/dist/amp-inabox.js');
     file = file.replace(
@@ -1056,6 +1059,9 @@ function replaceUrls(mode, file, hostName, inabox) {
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
         hostName + '/dist/v0.js');
+    file = file.replace(
+        /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
+        hostName + '/dist/shadow-v0.js');
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
         hostName + '/dist/amp4ads-v0.js');
