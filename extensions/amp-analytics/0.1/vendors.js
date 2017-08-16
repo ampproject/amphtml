@@ -795,7 +795,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'user-error': '${host}/r/collect?${basePrefix}&' +
       'em=${errorMessage}' +
       '${baseSuffix}',
-
     },
     'triggers': {
       'performanceTiming': {
