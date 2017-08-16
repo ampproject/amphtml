@@ -26,11 +26,8 @@ tags: {  # amp-brid-player
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-brid-player>
-  html_format: AMP
-  tag_name: "AMP-BRID-PLAYER"
-  disallowed_ancestor: "AMP-SIDEBAR"
-  requires_extension: "amp-brid-player"
+attr_lists: { # <amp-brid-player> attributes that are common to both AMP & A4A.
+  name: "amp-brid-player-common"
   attrs: {
     name: "data-partner"
     mandatory: true
@@ -51,8 +48,33 @@ tags: {  # <amp-brid-player>
     mandatory_oneof: "['data-playlist', 'data-video']"
     value_regex: "[0-9]+"
   }
+}
+tags: {  # <amp-brid-player> for AMP
+  html_format: AMP
+  tag_name: "AMP-BRID-PLAYER"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  requires_extension: "amp-brid-player"
   attr_lists: "extended-amp-global"
-  attr_lists: "implements-video-interface"
+  attr_lists: "amp-brid-player-common"
+  attr_lists: "implements-video-interface-amp"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-brid-player"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-brid-player> for A4A
+  html_format: AMP4ADS
+  tag_name: "AMP-BRID-PLAYER"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  requires_extension: "amp-brid-player"
+  attr_lists: "extended-amp-global"
+  attr_lists: "amp-brid-player-common"
+  attr_lists: "implements-video-interface-amp4ads"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-brid-player"
   amp_layout: {
     supported_layouts: FILL

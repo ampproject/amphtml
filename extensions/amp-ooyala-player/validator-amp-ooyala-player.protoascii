@@ -24,10 +24,9 @@ tags: {  # amp-ooyala-player
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-ooyala-player>
-  html_format: AMP
-  tag_name: "AMP-OOYALA-PLAYER"
-  requires_extension: "amp-ooyala-player"
+
+attr_lists: { # <amp-ooyala-player> attributes that are common to both AMP & A4A.
+  name: "amp-ooyala-player-common"
   attrs: {
     name: "data-embedcode"
     mandatory: true
@@ -40,8 +39,30 @@ tags: {  # <amp-ooyala-player>
     name: "data-playerid"
     mandatory: true
   }
+}
+
+tags: {  # <amp-ooyala-player> for AMP
+  html_format: AMP
+  tag_name: "AMP-OOYALA-PLAYER"
+  requires_extension: "amp-ooyala-player"
   attr_lists: "extended-amp-global"
-  attr_lists: "implements-video-interface"
+  attr_lists: "amp-ooyala-player-common"
+  attr_lists: "implements-video-interface-amp"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FLEX_ITEM
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {  # <amp-ooyala-player> for A4A
+  html_format: AMP4ADS
+  tag_name: "AMP-OOYALA-PLAYER"
+  requires_extension: "amp-ooyala-player"
+  attr_lists: "extended-amp-global"
+  attr_lists: "amp-ooyala-player-common"
+  attr_lists: "implements-video-interface-amp4ads"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

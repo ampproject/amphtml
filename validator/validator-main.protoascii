@@ -3388,7 +3388,7 @@ attr_lists: {
 # Video Interface attributes for AMP. These attributes can be attached to any
 # element that implements the video interface
 attr_lists: {
-  name: "implements-video-interface-AMP"
+  name: "implements-video-interface-amp"
   attrs: {
     name: "autoplay"
     value: ""
@@ -3402,13 +3402,9 @@ attr_lists: {
 # Video Interface attributes for A4A. These attributes can be attached to any
 # element that implements the video interface
 attr_lists: {
-  name: "implements-video-interface-A4A"
+  name: "implements-video-interface-amp4ads"
   attrs: {
     name: "autoplay"
-    value: ""
-  }
-  attrs: {
-    name: "fullscreen-on-landscape"
     value: ""
   }
 }

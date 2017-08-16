@@ -71,14 +71,14 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 
 Required if no `<source>` children are present. Must be HTTPS.
 
-##### poster
+##### poster (optional)
 
 The image for the frame to be displayed before video playback has started. By
 default, the first frame is displayed.
 
 Alternatively, you can present a click-to-play overlay. For details, see the [Click-to-Play overlay](#click-to-play-overlay) section below.
 
-##### autoplay
+##### autoplay (optional)
 
 If this attribute is present, and the browser supports autoplay:
 
@@ -88,11 +88,16 @@ If this attribute is present, and the browser supports autoplay:
 * when the user taps the video, the video is unmuted
 * if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
 
-##### controls
+##### fullscreen-on-landscape (optional)
+
+If this attribute is present, the video will automatically go to fullscreen when the
+device is rotated to landscape (Currently not supported on Safari iOS).
+
+##### controls (optional)
 
 This attribute is similar to the `controls` attribute in the HTML5 `video`. If this attribute is present, the browser offers controls to allow the user to control video playback.
 
-##### loop
+##### loop (optional)
 
 If present, the video will automatically loop back to the start upon reaching the end.
 

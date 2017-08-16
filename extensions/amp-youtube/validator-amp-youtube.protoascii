@@ -25,10 +25,9 @@ tags: {  # amp-youtube
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-youtube>
-  tag_name: "AMP-YOUTUBE"
-  disallowed_ancestor: "AMP-SIDEBAR"
-  requires_extension: "amp-youtube"
+
+attr_lists: { # <amp-youtube> attributes that are common to both AMP & A4A.
+  name: "amp-youtube-common"
   attrs: {
     name: "data-videoid"
     mandatory: true
@@ -36,8 +35,34 @@ tags: {  # <amp-youtube>
   }
   # <amp-bind>
   attrs: { name: "[data-videoid]" }
+}
+
+tags: {  # <amp-youtube> for AMP
+  html_format: AMP
+  tag_name: "AMP-YOUTUBE"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  requires_extension: "amp-youtube"
   attr_lists: "extended-amp-global"
-  attr_lists: "implements-video-interface"
+  attr_lists: "amp-youtube-common"
+  attr_lists: "implements-video-interface-amp"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {  # <amp-youtube> for A4A
+  html_format: AMP4ADS
+  tag_name: "AMP-YOUTUBE"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  requires_extension: "amp-youtube"
+  attr_lists: "extended-amp-global"
+  attr_lists: "amp-youtube-common"
+  attr_lists: "implements-video-interface-amp4ads"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

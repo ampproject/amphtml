@@ -90,6 +90,21 @@ The URL of your video content. A relative URL or a URL that uses https protocol.
 An image for the frame to be displayed before video playback has started. By
 default, the first frame is displayed.
 
+##### autoplay (optional)
+
+If this attribute is present, and the browser supports autoplay:
+
+* the video is automatically muted before autoplay starts
+* when the video is scrolled out of view, the video is paused
+* when the video is scrolled into view, the video resumes playback
+* when the user taps the video, the video is unmuted
+* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
+
+##### fullscreen-on-landscape (optional)
+
+If this attribute is present, the video will automatically go to fullscreen when the
+device is rotated to landscape (Currently not supported on Safari iOS).
+
 ##### common attributes
 
 This element includes
