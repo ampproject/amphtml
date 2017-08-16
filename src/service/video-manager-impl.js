@@ -50,6 +50,9 @@ import {
 import {Animation} from '../animation';
 import * as st from '../style';
 import * as tr from '../transition';
+
+const TAG = 'video-manager';
+
 /**
  * @const {number} Percentage of the video that should be in viewport before it
  * is considered visible.
@@ -156,7 +159,7 @@ export class VideoManager {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const */
-    this.boundSecondsPlaying_ = () => this.secondsPlaying_();;
+    this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
@@ -350,8 +353,38 @@ export class VideoManager {
         return this.entries_[i];
       }
     }
-    dev().assert(false, 'video is not registered to this video manager');
+    dev().error(TAG, 'video is not registered to this video manager');
     return null;
+  }
+
+  /**
+   * Returns the entry in the video manager corresponding to the element
+   * provided
+   *
+   * @param {!AmpElement} element
+   * @return {VideoEntry} entry
+   * @private
+   */
+  getEntryForElement_(element) {
+    for (let i = 0; i < this.entries_.length; i++) {
+      const entry = this.entries_[i];
+      if (entry.video.element === element) {
+        return entry;
+      }
+    }
+    dev().error(TAG, 'video is not registered to this video manager');
+    return null;
+  }
+
+  /**
+   * Get the current analytics details for the given video.
+   * Silently fail if the video is not found in this manager.
+   * @param {!AmpElement} videoElement
+   * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>|!Promise<undefined>}
+   */
+  getVideoAnalyticsDetails(videoElement) {
+    const entry = this.getEntryForElement_(videoElement);
+    return entry ? entry.getAnalyticsDetails() : Promise.resolve();
   }
 
   /**
@@ -549,7 +582,7 @@ class VideoEntry {
 
     // Media Session API Variables
 
-    /** @private {!../video-interface.VideoMetaDef} */
+    /** @private {!../mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
 
     listenOncePromise(element, VideoEvents.LOAD)
@@ -593,7 +626,7 @@ class VideoEntry {
       };
       // Update the media session
       setMediaSession(
-          this.ampdoc_,
+          this.ampdoc_.win,
           this.metadata_,
           playHandler,
           pauseHandler
@@ -665,14 +698,18 @@ class VideoEntry {
     }
 
     if (this.video.getMetadata()) {
-      const mapped = map(this.video.getMetadata());
-      this.metadata_ = /** @type {!../video-interface.VideoMetaDef} */ (mapped);
+      this.metadata_ = map(
+          /** @type {!../mediasession-helper.MetadataDef} */
+          (this.video.getMetadata())
+      );
     }
 
+    const doc = this.ampdoc_.win.document;
+
     if (!this.metadata_.artwork || this.metadata_.artwork.length == 0) {
-      const posterUrl = parseSchemaImage(this.ampdoc_)
-                        || parseOgImage(this.ampdoc_)
-                        || parseFavicon(this.ampdoc_);
+      const posterUrl = parseSchemaImage(doc)
+                        || parseOgImage(doc)
+                        || parseFavicon(doc);
 
       if (posterUrl) {
         this.metadata_.artwork = [{
@@ -686,7 +723,7 @@ class VideoEntry {
                     || this.video.element.getAttribute('aria-label')
                     || this.internalElement_.getAttribute('title')
                     || this.internalElement_.getAttribute('aria-label')
-                    || this.ampdoc_.win.document.title;
+                    || doc.title;
       if (title) {
         this.metadata_.title = title;
       }

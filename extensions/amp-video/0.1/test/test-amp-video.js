@@ -52,7 +52,14 @@ describe(TAG, () => {
               v.appendChild(children[key]);
             }
           }
-          return iframe.addElement(v);
+          return iframe.addElement(v).catch(e => {
+            // Ignore failed to load errors since sources are fake.
+            if (e.toString().indexOf('Failed to load') > -1) {
+              return v;
+            } else {
+              throw e;
+            }
+          });
         });
   }
 
@@ -64,7 +71,8 @@ describe(TAG, () => {
     }).then(v => {
       const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
+      preloadSpy.should.have.been.calledWithExactly('video.mp4',
+          undefined);
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.getAttribute('src')).to.equal('video.mp4');
@@ -84,7 +92,8 @@ describe(TAG, () => {
     }).then(v => {
       const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
+      preloadSpy.should.have.been.calledWithExactly('video.mp4',
+          undefined);
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.hasAttribute('controls')).to.be.true;
@@ -118,7 +127,8 @@ describe(TAG, () => {
     }, sources).then(v => {
       const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
+      preloadSpy.should.have.been.calledWithExactly('video.mp4',
+          undefined);
       const video = v.querySelector('video');
       // check that the source tags were propogated
       expect(video.children.length).to.equal(mediatypes.length);

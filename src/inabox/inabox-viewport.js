@@ -42,7 +42,7 @@ export function prepareBodyForOverlay(win, bodyElement) {
     mutate: state => {
       // We need to override runtime-level !important rules
       setImportantStyles(bodyElement, {
-        'background': 'transparent', // TODO(alanorozco): do this early
+        'background': 'transparent',
         'left': '50%',
         'top': '50%',
         'right': 'auto',
@@ -61,8 +61,8 @@ export function prepareBodyForOverlay(win, bodyElement) {
 /** @visibleForTesting */
 export function resetBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).mutatePromise(() => {
-    // we're not resetting background here as we need to set it to
-    // transparent permanently (see TODO)
+    // We're not resetting background here as it's supposed to remain
+    // transparent.
     resetStyles(bodyElement, [
       'position',
       'left',

@@ -17,6 +17,7 @@
 import {ActionTrust} from '../action-trust';
 import {KeyCodes} from '../utils/key-codes';
 import {debounce} from '../utils/rate-limit';
+import {isEnabled} from '../dom';
 import {dev, user} from '../log';
 import {
   registerServiceBuilderForDoc,
@@ -253,27 +254,28 @@ export class ActionService {
   addInputDetails_(event) {
     const detail = /** @type {!JsonObject} */ (map());
     const target = event.target;
-    switch (target.tagName) {
-      case 'INPUT':
-        const type = target.getAttribute('type');
-        // Some <input> elements have special properties for content values.
-        // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
+    const tagName = target.tagName;
+
+    // Expose `value` property on HTMLInputElement and HTMLSelectElement.
+    if (tagName == 'INPUT' || tagName == 'SELECT') {
+      const type = target.getAttribute('type');
+
+      // TODO(blueyedgeek, #10729): Provide valueAsNumber instead of casting.
+      detail['value'] = (type == 'range') ? Number(target.value) : target.value;
+
+      // Expose HTMLInputElement properties based on type.
+      if (tagName == 'INPUT') {
         if (type == 'checkbox' || type == 'radio') {
           detail['checked'] = target.checked;
         } else if (type == 'range') {
-          // TODO(choumx): min/max are also available on date pickers.
+          // TODO(choumx): Perhaps we shouldn't cast since min/max is also
+          // available on input[type="date|time|number"].
           detail['min'] = Number(target.min);
           detail['max'] = Number(target.max);
-          // TODO(choumx): HTMLInputElement.valueAsNumber instead?
-          detail['value'] = Number(target.value);
-        } else {
-          detail['value'] = target.value;
         }
-        break;
-      case 'SELECT':
-        detail['value'] = target.value;
-        break;
+      }
     }
+
     if (Object.keys(detail).length > 0) {
       event.detail = detail;
     }
@@ -492,7 +494,7 @@ export class ActionService {
     let n = target;
     while (n) {
       const actionInfos = this.matchActionInfos_(n, actionEventType);
-      if (actionInfos) {
+      if (actionInfos && isEnabled(n)) {
         return {node: n, actionInfos: dev().assert(actionInfos)};
       }
       n = n.parentElement;

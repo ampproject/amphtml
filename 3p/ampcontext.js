@@ -62,6 +62,9 @@ export class AbstractAmpContext {
     /** @type {?Object<string, *>} */
     this.data = null;
 
+    /** @type {?string} */
+    this.domFingerprint = null;
+
     /** @type {?boolean} */
     this.hidden = null;
 
@@ -236,6 +239,7 @@ export class AbstractAmpContext {
    *  @private
    */
   setupMetadata_(data) {
+    // TODO(alanorozco): Use metadata utils in 3p/frame-metadata
     const dataObject = dev().assert(
         typeof data === 'string' ? tryParseJson(data) : data,
         'Could not setup metadata.');
@@ -254,6 +258,7 @@ export class AbstractAmpContext {
     this.canonicalUrl = context.canonicalUrl;
     this.clientId = context.clientId;
     this.container = context.container;
+    this.domFingerprint = context.domFingerprint;
     this.hidden = context.hidden;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
