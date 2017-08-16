@@ -21,6 +21,10 @@ const gulp = require('gulp-help')(require('gulp'));
 const glob = BBPromise.promisify(require('glob'));
 const intercept = require('gulp-intercept');
 const path = require('path');
+const minimist = require('minimist');
+const util = require('gulp-util');
+
+const argv = minimist(process.argv.slice(2));
 
 /**
  * @param {!Object<string, !Array>} dirs
@@ -77,6 +81,11 @@ function buildCodeownersFile(dirs) {
  * @return {!Stream}
  */
 function generate(root, target, writeToDisk) {
+  // Allow flags to override values.
+  root = argv.root || root;
+  target = argv.target || target;
+  writeToDisk = argv.writeToDisk || writeToDisk;
+
   const dirs = Object.create(null);
   return gulp.src(`${root}/**/OWNERS.yaml`)
       .pipe(intercept(function(file) {
@@ -90,7 +99,7 @@ function generate(root, target, writeToDisk) {
           fs.writeFileSync(target, codeowners);
         } else {
           const codeowners = buildCodeownersFile(dirs, target, writeToDisk);
-          console.log(codeowners);
+          util.log(codeowners);
         }
       });
 }

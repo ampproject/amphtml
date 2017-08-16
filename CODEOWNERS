@@ -61,6 +61,7 @@ extensions/amp-o2-player/* @aghassemi, @yevheniiminin
 extensions/amp-ooyala-player/* @aghassemi, @mityaha
 extensions/amp-pinterest/* @kentbrew
 extensions/amp-playbuzz/* @buzzdan
+extensions/amp-position-observer/* @aghassemi
 extensions/amp-reach-player/* @aghassemi, @mikepmtl
 extensions/amp-reddit/* @samiamorwas
 extensions/amp-selector/* @camelburrito

@@ -15,8 +15,12 @@
  */
 'use strict';
 
-var test = require('ava');
-var m = require('./');
+const test = require('ava');
+const m = require('./');
+const BBPromise = require('bluebird');
+const fs = BBPromise.promisifyAll(require('fs-extra'));
+const exec = require('child_process').execSync;
+const util = require('gulp-util');
 
 test('sync - build out correct CODEOWNERS', t => {
   const owners = {
@@ -37,4 +41,24 @@ some/deeply/nested/dir/* @username5
 some/deeply/nested/dir/some.js @ampproject/group2
 `;
   t.is(expected, result);
+});
+
+test('CODEOWNERS must be in sync with OWNERS.yaml', t => {
+  t.plan(1);
+  // Run through exec instead of directly invoking `generate` through
+  // the module import since this changes the `process.cwd` to be
+  // ../gen-codeowners
+  exec('gulp gen-codeowners ' +
+      '--target build-system/tasks/gen-codeowners/CODEOWNERS');
+  const realFile = fs.readFileSync(`${process.cwd()}/../../../CODEOWNERS`);
+  const testFile = fs.readFileSync('./CODEOWNERS');
+  const isInSync = testFile.toString() === realFile.toString();
+  t.true(isInSync,
+      'CODEOWNERS is out of sync. Please re-generate CODEOWNERS by ' +
+      'running `gulp gen-codeowners`');
+  if (!isInSync) {
+    util.log(util.colors.red('CODEOWNERS is out of sync. Please re-generate ' +
+        'CODEOWNERS by running `gulp gen-codeowners`'));
+  }
+  fs.removeSync('./CODEOWNERS');
 });
