@@ -15,6 +15,9 @@
  */
 
 import {tryParseJson} from './json';
+import {isProtocolValid} from './url';
+import {isObject, isArray} from './types';
+import {user} from './log';
 
 /**
  * @typedef {{
@@ -52,7 +55,9 @@ export function setMediaSession(win,
     // Clear mediaSession (required to fix a bug when switching between two
     // videos)
     navigator.mediaSession.metadata = new win.MediaMetadata(EMPTY_METADATA);
+
     // Add metadata
+    validateMetadata(metadata);
     navigator.mediaSession.metadata = new win.MediaMetadata(metadata);
 
     navigator.mediaSession.setActionHandler('play', playHandler);
@@ -128,3 +133,22 @@ export function parseFavicon(doc) {
     return;
   }
 }
+
+/**
+ * @private
+ */
+function validateMetadata(metadata) {
+  // Ensure src of artwork has valid protocol
+  if (metadata && metadata.artwork) {
+    if (isArray(metadata.artwork)) {
+      metadata.artwork.forEach(artwork => {
+        if (artwork) {
+          const src = isObject(artwork) ? artwork.src : artwork;
+          user().assert(isProtocolValid(src));
+        }
+      });
+    } else {
+      user().assert(isProtocolValid(metadata.artwork));
+    }
+  }
+};
