@@ -280,8 +280,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       // Just ensure extensions is loaded, and analytics element appended.
     });
   });
-  
-    describe('#getAdUrl', () => {
+
+  describe('#getAdUrl', () => {
     beforeEach(() => {
       const sandbox = env.sandbox;
       element = doc.createElement('amp-ad');
@@ -531,7 +531,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
     });
   });
-});
 
   describe('#unlayoutCallback', () => {
     it('should call #resetSlot, remove child iframe, but keep other children',
@@ -883,6 +882,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           .to.be.true;
     });
   });
+});
 
 
 describes.realWin('additional amp-ad-network-doubleclick-impl', realWinConfigAmpAd, env => {
