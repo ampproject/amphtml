@@ -143,12 +143,11 @@ function assertTarget(name, target, config) {
     });
   }
   if (target.vars) {
-    const vendorPattern = /^_[a-zA-Z0-9_-]+$/;
+    const pattern = /^_[a-zA-Z0-9_-]+$/;
     for (const variable in target.vars) {
       user().assert(
-          vendorPattern.test(variable),
-          'Vendor names must start with an underscore. Found: \'%s\'',
-          variable);
+          pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
+          variable, pattern);
       const vendor = variable.substr(1);
       if (getMode().test) {
         if (!ANALYTICS_CONFIG[vendor]) {
