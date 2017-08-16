@@ -51,7 +51,7 @@ module.exports = {
         }
       ]
     ],
-    bundleDelay: 900,
+    bundleDelay: 1500,
   },
 
   reporters: process.env.TRAVIS ? ['super-dots', 'mocha'] : ['dots', 'mocha'],
