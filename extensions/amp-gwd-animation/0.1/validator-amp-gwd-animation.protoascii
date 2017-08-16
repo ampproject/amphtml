@@ -1,5 +1,5 @@
 #
-# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,10 @@ tags: {  # <amp-gwd-animation>
   html_format: AMP4ADS
   tag_name: "AMP-GWD-ANIMATION"
   requires_extension: "amp-gwd-animation"
+  attrs: {
+    name: "timeline-event-prefix"
+    value: ""
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: NODISPLAY

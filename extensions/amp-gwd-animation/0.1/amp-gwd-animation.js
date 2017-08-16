@@ -34,7 +34,7 @@ export const GWD_PAGEDECK_ID = 'pagedeck';
  * Actions supported by the extension and the parameters each requires, as a
  * string identifying the path to the data in an AMP action invocation object.
  * For example, 'args.id' will map to the data at `invocation.args.id`.
- * Each action name currently corresponds to identically-named method in the
+ * Each action name currently corresponds to an identically-named method in the
  * GWD runtime service, which is invoked with the evaluated arguments
  * (@see getActionImplArgs and createAction_).
  * @const {!Object<string, !Array<string>>}
@@ -135,8 +135,8 @@ export class GwdAnimation extends AMP.BaseElement {
    * Returns a registrable AMP action function which invokes the corresponding
    * GWD runtime method with arguments extracted from the invocation object
    * (@see getActionImplArgs).
-   * @param {string} actionName Name of the action (currently identical to the
-   *     corresponding service method) to invoke.
+   * @param {string} actionName Name of the action to invoke (currently
+   *     identical to the corresponding service method)
    * @return {!function(!../../../src/service/action-impl.ActionInvocation)}
    * @private
    */
