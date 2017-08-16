@@ -42,8 +42,16 @@ module.exports = {
     debug: true,
     transform: [
       ['babelify'],
+      [
+        'browserify-istanbul',
+        {
+          instrumenterConfig: {
+            embedSource: true
+          }
+        }
+      ],
     ],
-    bundleDelay: 900,
+    bundleDelay: 2000,
   },
 
   reporters: process.env.TRAVIS ? ['super-dots', 'mocha'] : ['dots', 'mocha'],
@@ -206,7 +214,6 @@ module.exports = {
     'karma-chai',
     'karma-chai-as-promised',
     'karma-chrome-launcher',
-    'karma-coverage',
     'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',
