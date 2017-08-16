@@ -77,6 +77,44 @@ export const GWD_SERVICE_NAME = 'gwd';
 const LOG_ID = 'GWD';
 
 /**
+ * @param {!Element} receiver
+ * @param {string} counterName
+ * @private
+ */
+const getOrInitCounter = function(receiver, counterName) {
+  initCounterIfNotExists(receiver, counterName);
+  return receiver.gwdGotoCounters[counterName];
+}
+
+/**
+ * @param {!Element} receiver
+ * @param {string} counterName
+ * @param {number} val Counter value to set.
+ * @private
+ */
+const setCounter = function(receiver, counterName, val) {
+  initCounterIfNotExists(receiver, counterName);
+  receiver.gwdGotoCounters[counterName] = val;
+}
+
+/**
+ * Initializes the counters map if it is not yet initialized, and initializes
+ * an entry for the given counter with an initial value of 0 if there is no
+ * entry yet.
+ * @param {!Element} receiver
+ * @param {string} counterName
+ * @private
+ */
+const initCounterIfNotExists = function(receiver, counterName) {
+  if (!receiver.gwdGotoCounters) {
+    receiver.gwdGotoCounters = {};
+  }
+  if (!receiver.gwdGotoCounters.hasOwnProperty(counterName)) {
+    receiver.gwdGotoCounters[counterName] = 0;
+  }
+}
+
+/**
  * AMP GWD animation runtime service.
  * @implements {../../../src/service.Disposable}
  */
@@ -231,11 +269,17 @@ class AmpGwdRuntimeService {
    * @param {string} id Receiver id.
    * @param {string} label The name of the label animation to go to.
    * @param {number} count The number of times to repeat this gotoAndPlay.
-   * @param {string} eventName The name of the original event.
+   * @param {string} eventName The timeline event name, used to record an
+   *     counter for this gotoAndPlayNTimes invocation.
    */
   gotoAndPlayNTimes(id, label, count, eventName) {
     if (count <= 0) {
       user().warn(LOG_ID, `Invalid count parameter ${count}.`);
+      return;
+    }
+
+    if (!eventName) {
+      user().warn(LOG_ID, `Invalid event name ${eventName}.`);
       return;
     }
 
@@ -246,10 +290,10 @@ class AmpGwdRuntimeService {
 
     // Invoke gotoAndPlay up to the requested number of times.
     const counterName = `${eventName}_${label}`;
-    const currentCount = this.getOrInitCounter_(receiver, counterName);
+    const currentCount = getOrInitCounter(receiver, counterName);
     if (currentCount < count) {
       this.playLabelAnimation_(receiver, label);
-      this.setCounter_(receiver, counterName, currentCount + 1);
+      setCounter(receiver, counterName, currentCount + 1);
     }
   }
 
@@ -330,44 +374,6 @@ class AmpGwdRuntimeService {
         `${GWD_TIMELINE_EVENT}`,
         {eventName: userEventName, sourceEvent: event});
     this.ampdoc_.win.dispatchEvent(timelineEvent);
-  }
-
-  /**
-   * @param {!Element} receiver
-   * @param {string} counterName
-   * @private
-   */
-  getOrInitCounter_(receiver, counterName) {
-    this.initCounterIfNotExists_(receiver, counterName);
-    return receiver.gwdGotoCounters[counterName];
-  }
-
-  /**
-   * @param {!Element} receiver
-   * @param {string} counterName
-   * @param {number} val Counter value to set.
-   * @private
-   */
-  setCounter_(receiver, counterName, val) {
-    this.initCounterIfNotExists_(receiver, counterName);
-    receiver.gwdGotoCounters[counterName] = val;
-  }
-
-  /**
-   * Initializes the counters map if it is not yet initialized, and initializes
-   * an entry for the given counter with an initial value of 0 if there is no
-   * entry yet.
-   * @param {!Element} receiver
-   * @param {string} counterName
-   * @private
-   */
-  initCounterIfNotExists_(receiver, counterName) {
-    if (!receiver.gwdGotoCounters) {
-      receiver.gwdGotoCounters = {};
-    }
-    if (!receiver.gwdGotoCounters.hasOwnProperty(counterName)) {
-      receiver.gwdGotoCounters[counterName] = 0;
-    }
   }
 
   /**

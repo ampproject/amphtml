@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {actionServiceForDoc} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {adopt} from '../../../../src/runtime';
 import {getServiceForDoc} from '../../../../src/service';
 import {
@@ -260,38 +260,8 @@ describes.sandboxed('AMP GWD runtime', {}, () => {
       it('should execute gotoAndPlayNTimes', () => {
         const invocation = {
           method: 'gotoAndPlayNTimes',
-          args: {id: 'page1', label: 'foo', count: 2, eventName: 'event-1'},
-          satisfiesTrust: () => true,
-        };
-
-        // gotoAndPlay call #1.
-        impl.executeAction(invocation);
-        expect(page1Elem.classList.contains('foo')).to.be.true;
-
-        page1Elem.classList.remove('foo');
-
-        // gotoAndPlay call #2.
-        impl.executeAction(invocation);
-        expect(page1Elem.classList.contains('foo')).to.be.true;
-
-        page1Elem.classList.remove('foo');
-
-        // gotoAndPlay call #3. The number of invocations is now past the
-        // specified count, so this and subsequent gotoAndPlayNTimes invocations
-        // should have no effect.
-        impl.executeAction(invocation);
-        expect(page1Elem.classList.contains('foo')).to.be.false;
-        impl.executeAction(invocation);
-        expect(page1Elem.classList.contains('foo')).to.be.false;
-
-        // Test handling missing arguments.
-        invokeWithSomeArgsUndefined(impl, invocation);
-      });
-
-      it('should execute gotoAndPlayNTimes', () => {
-        const invocation = {
-          method: 'gotoAndPlayNTimes',
-          args: {id: 'page1', label: 'foo', count: 2, eventName: 'event-1'},
+          args: {id: 'page1', label: 'foo', N: 2},
+          event: {eventName: 'event-1'},
           satisfiesTrust: () => true,
         };
 
@@ -322,7 +292,7 @@ describes.sandboxed('AMP GWD runtime', {}, () => {
       it('should trigger timeline events', () => {
         const triggeredAmpEventNames = [];
         const triggeredEvents = [];
-        sandbox.stub(actionServiceForDoc(ampdoc), 'trigger',
+        sandbox.stub(Services.actionServiceForDoc(ampdoc), 'trigger',
             (target, name, event) => {
               triggeredAmpEventNames.push(name);
               triggeredEvents.push(event);

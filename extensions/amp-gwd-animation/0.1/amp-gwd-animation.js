@@ -15,7 +15,7 @@
  */
 import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
-import {actionServiceForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {getServiceForDoc} from '../../../src/service';
 import {
   GWD_SERVICE_NAME,
@@ -31,21 +31,51 @@ export const TAG = 'amp-gwd-animation';
 export const GWD_PAGEDECK_ID = 'pagedeck';
 
 /**
- * The names of actions supported by this extension, which correspond to
- * identically-named methods in the GWD runtime service, and the parameters they
- * require.
- * This map is used to automatically generate and register AMP actions for each
- * of these runtime methods (@see buildCallback).
+ * Actions supported by the extension and the parameters each requires, as a
+ * string identifying the path to the data in an AMP action invocation object.
+ * For example, 'args.id' will map to the data at `invocation.args.id`.
+ * Each action name currently corresponds to identically-named method in the
+ * GWD runtime service, which is invoked with the evaluated arguments
+ * (@see getActionImplArgs and createAction_).
  * @const {!Object<string, !Array<string>>}
  */
-const ACTIONS_PARAMS = {
-  'play': ['id'],
-  'pause': ['id'],
-  'togglePlay': ['id'],
-  'gotoAndPlay': ['id', 'label'],
-  'gotoAndPause': ['id', 'label'],
-  'gotoAndPlayNTimes': ['id', 'label', 'count', 'eventName'],
-  'setCurrentPage': ['index'],
+const ACTION_IMPL_ARGS = {
+  'play': ['args.id'],
+  'pause': ['args.id'],
+  'togglePlay': ['args.id'],
+  'gotoAndPlay': ['args.id', 'args.label'],
+  'gotoAndPause': ['args.id', 'args.label'],
+  'gotoAndPlayNTimes': ['args.id', 'args.label', 'args.N', 'event.eventName'],
+  'setCurrentPage': ['args.index'],
+};
+
+/**
+ * Given an action name, extracts its required argumnents from an invocation
+ * payload, which may contain the data needed by this action in its `args` or
+ * `events` child objects. The arguments required by each action are specified
+ * in ACTION_IMPL_ARGS as path strings.
+ * @param {string} actionName
+ * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+ * @return {!Array<string>}
+ */
+const getActionImplArgs = function(actionName, invocation) {
+  const argDefs = user().assert(
+      ACTION_IMPL_ARGS[actionName],
+      `The action ${actionName} is not a supported action.`);
+
+  return argDefs.map((argDef) => {
+    // Walk the invocation object to get the requested property by
+    // its path, e.g., 'args.id' == invocation.args.id
+    let obj = invocation;
+    for (const prop of argDef.split('.')) {
+      if (!obj) {
+        return undefined;
+      }
+      obj = obj[prop];
+    }
+
+    return obj;
+  });
 };
 
 export class GwdAnimation extends AMP.BaseElement {
@@ -95,26 +125,28 @@ export class GwdAnimation extends AMP.BaseElement {
           `${this.element.id}.setCurrentPage(index=event.index)`);
     }
 
-    // Register supported actions.
-    for (const name in ACTIONS_PARAMS) {
-      this.registerAction(name, this.createAction_(name, ACTIONS_PARAMS[name]));
+    // Register handlers for supported actions.
+    for (const name in ACTION_IMPL_ARGS) {
+      this.registerAction(name, this.createAction_(name));
     }
   }
 
   /**
-   * Returns a registrable AMP action function which invokes the provided GWD
-   * runtime method with the provided arguments extracted from the invocation
-   * detail. The GWD runtime service is expected to already be registered.
-   * @param {string} methodName Runtime method to invoke.
-   * @param {!Array<string>} args Invocation arguments.
+   * Returns a registrable AMP action function which invokes the corresponding
+   * GWD runtime method with arguments extracted from the invocation object
+   * (@see getActionImplArgs).
+   * @param {string} actionName Name of the action (currently identical to the
+   *     corresponding service method) to invoke.
    * @return {!function(!../../../src/service/action-impl.ActionInvocation)}
    * @private
    */
-  createAction_(methodName, args) {
-    const service = getServiceForDoc(this.getAmpDoc(), GWD_SERVICE_NAME);
+  createAction_(actionName) {
     return (invocation) => {
-      service[methodName].apply(
-          service, args.map((arg) => invocation.args[arg]));
+      const service = user().assert(
+          getServiceForDoc(this.getAmpDoc(), GWD_SERVICE_NAME),
+          `Cannot execute action because the GWD service is not registered.`);
+      const actionArgs = getActionImplArgs(actionName, invocation);
+      service[actionName].apply(service, actionArgs);
     };
   }
 
@@ -126,7 +158,7 @@ export class GwdAnimation extends AMP.BaseElement {
    * @private
    */
   onGwdTimelineEvent_(event) {
-    actionServiceForDoc(this.getAmpDoc()).trigger(
+    Services.actionServiceForDoc(this.getAmpDoc()).trigger(
         this.element,
         `${this.timelineEventPrefix_}${event.detail.eventName}`,
         event.detail,
@@ -154,10 +186,11 @@ export const insertEventActionBinding = function(element, event, actionStr) {
   const eventPrefix = `${event}:`;
 
   let newOnAttrVal;
-  const existingActionsDefIndex = currentOnAttrVal.indexOf(eventPrefix);
-  if (existingActionsDefIndex != -1) {
+
+  const eventDefIndex = currentOnAttrVal.indexOf(eventPrefix);
+  if (eventDefIndex != -1) {
     // Some actions already defined for this event. Splice in the new action.
-    const actionsDefIndex = existingActionsDefIndex + eventPrefix.length;
+    const actionsDefIndex = eventDefIndex + eventPrefix.length;
     newOnAttrVal = currentOnAttrVal.substr(0, actionsDefIndex) +
         actionStr + ',' +
         currentOnAttrVal.substr(actionsDefIndex);
