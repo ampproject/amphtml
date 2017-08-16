@@ -657,7 +657,7 @@ For instance:
 - `pause` - Pauses the currently running animation.
 - `resume` - Resumes the currently running animation.
 - `togglePause` - Toggles pause/resume actions.
-- `seekTo` - Pauses the animation and seeks to the point of time specified by the `time` argument in milliseconds.
+- `seekTo` - Pauses the animation and seeks to the point of time specified by the `time` argument in milliseconds or `percent` argument as a percentage point in the timeline.
 - `reverse` - Reverses the animation.
 - `finish` - Finishes the animation.
 - `cancel` - Cancels the animation.

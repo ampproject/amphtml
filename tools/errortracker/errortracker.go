@@ -87,17 +87,6 @@ func cloudAuthContext(r *http.Request) (context.Context, error) {
 
 func handle(w http.ResponseWriter, r *http.Request) {
 	c, _ := cloudAuthContext(r)
-	randomVal := rand.Float64()
-	redirectionRate := 0.1;
-	if randomVal < redirectionRate {
-		client := &http.Client{}
-		urlString := strings.Replace(r.URL.String(), "amp-error-reporting", "amp-error-reporting-js", 1)
-		req, _ := http.NewRequest("GET", urlString, nil)
-		resp, err := client.Do(req)
-		if err != nil {
-			log.Errorf(c, "Error redirecting to experiment %v", resp)
-		}
-	}
 	logc, err := logging.NewClient(c, appengine.AppID(c), "javascript.errors")
 	if err != nil {
 		http.Error(w, "Cannot connect to Google Cloud Logging",
@@ -182,6 +171,14 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "THROTTLED\n")
 		return
+	}
+	if rand.Float64() < 0.1 {
+		urlString := strings.Replace(r.URL.String(), "amp-error-reporting", "amp-error-reporting-js", 1)
+		client := urlfetch.Client(c)
+		_, err := client.Get(urlString)
+		if err != nil {
+			log.Errorf(c, "Error forwarding report: %v", err)
+		}
 	}
 
 	exception := r.URL.Query().Get("s")

@@ -135,4 +135,40 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
     const newMetaData = ampdoc.win.navigator.mediaSession.metadata;
     expect(newMetaData).to.deep.equal(fakeMetaData);
   });
+
+  it('should throw if artwork src is invalid - object', () => {
+    const fakeMetaData = {
+      'artist': '',
+      'album': '',
+      'artwork': [
+        /*eslint no-script-url: 0*/
+        {'src': 'javascript://alert(1)'},
+      ],
+      'title': '',
+    };
+    expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+  });
+
+  it('should throw if artwork src is invalid - string', () => {
+    const fakeMetaData = {
+      'artist': '',
+      'album': '',
+      'artwork': [
+        /*eslint no-script-url: 0*/
+        'javascript://alert(1)',
+      ],
+      'title': '',
+    };
+    expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+  });
+
+  it('should throw if artwork is not array', () => {
+    const fakeMetaData = {
+      'artist': '',
+      'album': '',
+      'artwork': 'https://NotArray',
+      'title': '',
+    };
+    expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+  });
 });
