@@ -46,7 +46,7 @@ module.exports = {
         'browserify-istanbul',
         {
           instrumenterConfig: {
-            embedSource: true
+            embedSource: false
           }
         }
       ]
