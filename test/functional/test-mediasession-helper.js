@@ -141,6 +141,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       'artist': '',
       'album': '',
       'artwork': [
+        /*eslint no-script-url: 0*/
         {'src': 'javascript://alert(1)'},
       ],
       'title': '',
@@ -153,6 +154,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       'artist': '',
       'album': '',
       'artwork': [
+        /*eslint no-script-url: 0*/
         'javascript://alert(1)',
       ],
       'title': '',
