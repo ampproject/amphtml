@@ -57,9 +57,10 @@ export class ViewerCidApi {
    * @returns {!Promise<boolean>}
    */
   isSupported() {
-    return this.viewer_.isTrustedViewer().then(trusted => {
-      return trusted && this.viewer_.hasCapability('cid');
-    });
+    if (!this.viewer_.hasCapability('cid')) {
+      return Promise.resolve(false);
+    }
+    return this.viewer_.isTrustedViewer();
   }
 
   /**
