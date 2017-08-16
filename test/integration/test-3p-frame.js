@@ -186,7 +186,7 @@ describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
         '"type":"_ping_",' +
         '"_context":{"referrer":"http://acme.org/",' +
         '"ampcontextVersion": "$internalRuntimeVersion$",' +
-        '"ampcontextFilepath": "https://cdn.ampproject.org/' +
+        '"ampcontextFilepath": "https://3p.ampproject.net/' +
         '$internalRuntimeVersion$/ampcontext-v0.js",' +
         '"canonicalUrl":"' + docInfo.canonicalUrl + '",' +
         '"sourceUrl":"' + locationHref + '",' +
