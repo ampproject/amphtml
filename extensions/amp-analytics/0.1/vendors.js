@@ -698,7 +698,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'dit=${domInteractiveTime}' +
           '${baseSuffix}',
       'user-error': '${host}/r/collect?${basePrefix}&' +
-          'exDescription=${errorMessage}' +
+          'exd=${errorMessage}' +
           '${baseSuffix}',
     },
     'triggers': {
@@ -793,7 +793,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'dit=${domInteractiveTime}' +
           '${baseSuffix}',
       'user-error': '${host}/r/collect?${basePrefix}&' +
-          'exDescription=${errorMessage}' +
+          'exd=${errorMessage}' +
           '${baseSuffix}',
     },
     'triggers': {
