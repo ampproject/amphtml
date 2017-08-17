@@ -42,14 +42,7 @@ module.exports = {
     debug: true,
     transform: process.env.TRAVIS ? ['babelify'] : [
       ['babelify'],
-      [
-        'browserify-istanbul',
-        {
-          instrumenterConfig: {
-            embedSource: true
-          }
-        }
-      ]
+      ['browserify-istanbul', { instrumenterConfig: { embedSource: true }}]
     ],
     bundleDelay: 900,
   },
