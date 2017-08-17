@@ -213,6 +213,13 @@ class AmpViewer {
       log('AMP LOADED:', AMP);
     });
 
+    this.shadowDomReadyPromise_ =
+    Element.prototype.attachShadow || Element.prototype.createShadowRoot ?
+    Promise.resolve() :   // Already there.
+    new Promise(resolve => {   // Wait for polyfill to arrive
+      this.win.addEventListener('WebComponentsReady', resolve);
+    });
+
     /** @private @const {string} */
     this.baseUrl_ = null;
     /** @private @const {?Element} */
@@ -220,11 +227,8 @@ class AmpViewer {
     /** @private @const {...} */
     this.amp_ = null;
 
-    // Install amp-shadow once our 3P polyfills are ready
-    this.win.addEventListener('WebComponentsReady', () => {
-      console.log('Web Components are ready');
-      this.installScript_('/dist/amp-shadow.js');
-    });
+    // Immediately install amp-shadow.js.
+    this.installScript_('/dist/amp-shadow.js');
   }
 
   /**
@@ -259,12 +263,14 @@ class AmpViewer {
 
     this.container.appendChild(this.host_);
 
-    this.ampReadyPromise_.then(AMP => {
-      this.amp_ = AMP.attachShadowDoc(this.host_, doc, url, {});
-      this.win.document.title = this.amp_.title || '';
-      this.amp_.onMessage(this.onMessage_.bind(this));
-      this.amp_.setVisibilityState('visible');
-    });
+    Promise.all([this.ampReadyPromise_, this.shadowDomReadyPromise_])
+        .then(AMP => {
+          console.log(AMP);
+          this.amp_ = AMP.attachShadowDoc(this.host_, doc, url, {});
+          this.win.document.title = this.amp_.title || '';
+          this.amp_.onMessage(this.onMessage_.bind(this));
+          this.amp_.setVisibilityState('visible');
+        });
   }
 
   /**
@@ -289,13 +295,14 @@ class AmpViewer {
 
     this.container.appendChild(this.host_);
 
-    return this.ampReadyPromise_.then(AMP => {
-      this.amp_ = AMP.attachShadowDocAsStream(this.host_, url, {});
-      this.win.document.title = this.amp_.title || '';
-      this.amp_.onMessage(this.onMessage_.bind(this));
-      this.amp_.setVisibilityState('visible');
-      return this.amp_;
-    });
+    return Promise.all([this.ampReadyPromise_, this.shadowDomReadyPromise_])
+        .then(AMP => {
+          this.amp_ = AMP.attachShadowDocAsStream(this.host_, url, {});
+          this.win.document.title = this.amp_.title || '';
+          this.amp_.onMessage(this.onMessage_.bind(this));
+          this.amp_.setVisibilityState('visible');
+          return this.amp_;
+        });
   }
 
   /**

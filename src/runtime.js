@@ -588,6 +588,7 @@ class MultidocManager {
                 shadowRoot, doc.body, /* deep */ true);
             body.classList.add('amp-shadow');
             // TODO (torch2424): Understand why the body is duplicated, when we are creating the shadow root element
+            // DO NOT SUBMIT
             if (!body.tagName.includes('amp-')) {
               shadowRoot.appendChild(body);
             }
@@ -636,6 +637,7 @@ class MultidocManager {
                 dev().assertElement(doc.body),
                 /* deep */ false);
             // TODO (torch2424): Understand why this duplicates the body, when we are creating the shadow root element
+            // DO NOT SUBMIT
             body.classList.add('amp-shadow');
             if (!body.tagName.includes('amp-')) {
               shadowRoot.appendChild(body);

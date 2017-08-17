@@ -29,7 +29,7 @@ html {
 html, body {
   height: auto !important;
   /* DO NOT SUBMIT This is to test CSS Isolation on Amp Shadow */
-  background: red !important;
+  background: red !important; 
 }
 
 /**

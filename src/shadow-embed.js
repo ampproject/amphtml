@@ -81,10 +81,8 @@ export function createShadowRoot(hostElement) {
   // Ensure that Shadow CSS is supported, and add an id if not
   const randomId = Math.floor(Math.random() * 10000);
   const rootId = `i-amphtml-sd-${randomId}`;
-  if (!isShadowDomSupported() || !isShadowCssSupported(shadowRoot)) {
-    shadowRoot.id = rootId;
-    shadowRoot.host.classList.add(rootId);
-  }
+  shadowRoot.id = rootId;
+  shadowRoot.host.classList.add(rootId);
 
   return shadowRoot;
 }
@@ -113,8 +111,6 @@ function createShadowRootPolyfill(hostElement) {
       // Cast to ShadowRoot even though it is an Element
       // TODO(@dvoytenko) Consider to switch to a type union instead.
       /** @type {?}  */ (doc.createElement('i-amphtml-shadow-root')));
-  // NOTE (torch2424): Moved shadowRoot.id to createShadowRoot(), as browsers can have a shadowDom version (thefore not calling this fucntion), and not support CSS encapsulation
-  //shadowRoot.id = 'i-amphtml-sd-' + Math.floor(win.Math.random() * 10000);
   hostElement.appendChild(shadowRoot);
   hostElement.shadowRoot = hostElement.__AMP_SHADOW_ROOT = shadowRoot;
 
@@ -212,8 +208,8 @@ export function importShadowBody(shadowRoot, body, deep) {
   //    For example: getRootNode().firstChild , should return a style element
   const shadowRootElement = doc.createElement('i-amphtml-shadow-root');
   shadowRootElement.id = shadowRoot.id;
-  shadowRootElement.appendChild(resultBody);
-  shadowRoot.appendChild(shadowRootElement);
+  //shadowRootElement.appendChild(resultBody);
+  //shadowRoot.appendChild(shadowRootElement);
   Object.defineProperty(shadowRoot, 'body', {value: resultBody});
   return resultBody;
 }
