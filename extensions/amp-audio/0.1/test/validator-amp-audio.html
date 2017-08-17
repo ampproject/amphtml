@@ -35,5 +35,10 @@
     <source type="audio/mpeg" src="foo.mp3">
       <source type="audio/ogg" src="foo.ogg">
   </amp-audio>
+
+  <!-- test controlslist attr, which is often provided in camelCase -->
+  <amp-audio width="400" height="300"
+             controlsList="nofullscreen nodownload noremote foobar">
+  </amp-audio>
 </body>
 </html>
