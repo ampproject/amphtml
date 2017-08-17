@@ -27,7 +27,7 @@ const util = require('gulp-util');
 const argv = minimist(process.argv.slice(2));
 
 /**
- * @param {!Object<string, !Array>} dirs
+ * @param {!Object<string, !Array<string>>} dirs
  * @return {string}
  */
 function buildCodeownersFile(dirs) {

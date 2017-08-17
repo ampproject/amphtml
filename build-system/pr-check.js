@@ -117,7 +117,7 @@ function isValidatorWebuiFile(filePath) {
  * @return {boolean}
  */
 function isBuildSystemFile(filePath) {
-  return filePath.startsWith('build-system') &&
+  return (filePath.startsWith('build-system') &&
       // Exclude textproto from build-system since we want it to trigger
       // tests and type check.
       path.extname(filePath) != '.textproto' &&
@@ -126,7 +126,9 @@ function isBuildSystemFile(filePath) {
       !isFlagConfig(filePath) &&
       // Exclude visual diff files from build-system since we want it to trigger
       // visual diff tests.
-      !isVisualDiffFile(filePath);
+      !isVisualDiffFile(filePath))
+      // yaml files should trigger build system
+      || filePath.extname('.yaml');
 }
 
 /**

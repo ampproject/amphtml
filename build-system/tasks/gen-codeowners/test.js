@@ -45,13 +45,14 @@ some/deeply/nested/dir/some.js @ampproject/group2
 
 test('CODEOWNERS must be in sync with OWNERS.yaml', t => {
   t.plan(1);
+  const tmppath = '/tmp/amphtml/CODEOWNERS';
+  fs.ensureDirSync('/tmp/amphtml');
   // Run through exec instead of directly invoking `generate` through
   // the module import since this changes the `process.cwd` to be
   // ../gen-codeowners
-  exec('gulp gen-codeowners ' +
-      '--target build-system/tasks/gen-codeowners/CODEOWNERS');
+  exec(`gulp gen-codeowners --target ${tmppath}`);
   const realFile = fs.readFileSync(`${process.cwd()}/../../../CODEOWNERS`);
-  const testFile = fs.readFileSync('./CODEOWNERS');
+  const testFile = fs.readFileSync(tmppath);
   const isInSync = testFile.toString() === realFile.toString();
   t.true(isInSync,
       'CODEOWNERS is out of sync. Please re-generate CODEOWNERS by ' +
@@ -60,5 +61,5 @@ test('CODEOWNERS must be in sync with OWNERS.yaml', t => {
     util.log(util.colors.red('CODEOWNERS is out of sync. Please re-generate ' +
         'CODEOWNERS by running `gulp gen-codeowners`'));
   }
-  fs.removeSync('./CODEOWNERS');
+  fs.removeSync(tmppath);
 });
