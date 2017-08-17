@@ -40,7 +40,7 @@ module.exports = {
   browserify: {
     watch: true,
     debug: true,
-    transform: [
+    transform: process.env.TRAVIS ? ['babelify'] : [
       ['babelify'],
       [
         'browserify-istanbul',
@@ -51,7 +51,7 @@ module.exports = {
         }
       ]
     ],
-    bundleDelay: 2000,
+    bundleDelay: 900,
   },
 
   reporters: process.env.TRAVIS ? ['super-dots', 'mocha'] : ['dots', 'mocha'],
