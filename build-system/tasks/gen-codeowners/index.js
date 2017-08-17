@@ -34,7 +34,7 @@ function buildCodeownersFile(dirs) {
   const dirpaths = Object.keys(dirs);
   let codeowners = '';
   dirpaths.forEach(function(dirpath) {
-    codeowners += `${dirpath === '*' ? dirpath : `${dirpath}/*`} `;
+    codeowners += `${dirpath === '*' ? dirpath : `${dirpath}/`} `;
     dirs[dirpath].forEach(function(item, i, arr) {
       if (typeof item === 'string') {
         // Allow leading `@` to be optional

@@ -36,8 +36,8 @@ test('sync - build out correct CODEOWNERS', t => {
   const result = m.buildCodeownersFile(owners);
   const expected = `* @username1, @username2
 */*.protoascii @ampproject/group
-ads/* @username3, @username1
-some/deeply/nested/dir/* @username5
+ads/ @username3, @username1
+some/deeply/nested/dir/ @username5
 some/deeply/nested/dir/some.js @ampproject/group2
 `;
   t.is(expected, result);
