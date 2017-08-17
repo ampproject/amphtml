@@ -22,6 +22,7 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
 import {ElementStub, stubbedElements} from './element-stub';
 import {Services} from './services';
 import {Signals} from './utils/signals';
+import {addDeclaredExtension} from './service/ampdoc-impl';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
 import {
@@ -111,6 +112,10 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     registerElement(win, name, /** @type {!Function} */ (toClass));
     return;
   }
+  if (knownElements[name] == toClass) {
+    // Already registered this instance.
+    return;
+  }
   user().assert(knownElements[name] == ElementStub,
       '%s is already registered. The script tag for ' +
       '%s is likely included twice in the page.', name, name);
@@ -150,23 +155,17 @@ function tryUpgradeElementNoInline(element, toClass) {
 }
 
 /**
- * Stub extended elements missing an implementation.
- * @param {!Window} win
+ * Stub extended elements missing an implementation. It can be called multiple
+ * times and on partial document in order to start stubbing as early as
+ * possible.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function stubElements(win) {
-  const knownElements = getExtendedElements(win);
-  const list = win.document.head.querySelectorAll('script[custom-element]');
+export function stubElementsForDoc(ampdoc) {
+  const list = ampdoc.getHeadNode().querySelectorAll('script[custom-element]');
   for (let i = 0; i < list.length; i++) {
     const name = list[i].getAttribute('custom-element');
-    if (knownElements[name]) {
-      continue;
-    }
-    registerElement(win, name, ElementStub);
-  }
-  // Repeat stubbing when HEAD is complete.
-  if (!win.document.body) {
-    const docState = Services.documentStateFor(win);
-    docState.onBodyAvailable(() => stubElements(win));
+    addDeclaredExtension(ampdoc, name);
+    stubElementIfNotKnown(ampdoc.win, name);
   }
 }
 
@@ -180,15 +179,6 @@ export function stubElementIfNotKnown(win, name) {
   if (!knownElements[name]) {
     registerElement(win, name, ElementStub);
   }
-}
-
-/**
- * Stub element in the child window.
- * @param {!Window} childWin
- * @param {string} name
- */
-export function stubElementInChildWindow(childWin, name) {
-  registerElement(childWin, name, ElementStub);
 }
 
 /**
@@ -1005,9 +995,17 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
-        const ampdocService = Services.ampdocServiceFor(
-            this.ownerDocument.defaultView);
-        this.ampdoc_ = ampdocService.getAmpDoc(this);
+        const win = this.ownerDocument.defaultView;
+        const ampdocService = Services.ampdocServiceFor(win);
+        const ampdoc = ampdocService.getAmpDoc(this);
+        this.ampdoc_ = ampdoc;
+        // Load the pre-stubbed extension if needed.
+        const extensionId = this.tagName.toLowerCase();
+        if (isStub(this.implementation_) &&
+            !ampdoc.declaresExtension(extensionId)) {
+          Services.extensionsFor(win).installExtensionForDoc(
+              ampdoc, extensionId);
+        }
       }
       if (!this.resources_) {
         // Resources can now be initialized since the ampdoc is now available.

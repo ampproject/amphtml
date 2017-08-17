@@ -37,7 +37,6 @@ import {Services} from '../../src/services';
 import {runChunksForTesting} from '../../src/chunk';
 import {toggleExperiment} from '../../src/experiments';
 import * as ext from '../../src/service/extensions-impl';
-import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
