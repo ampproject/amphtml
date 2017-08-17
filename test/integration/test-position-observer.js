@@ -18,7 +18,7 @@ import {poll} from '../../testing/iframe';
 
 //TODO(aghassemi,#10878): Run in all platforms.
 //TODO(aghasemi, #10877): in-a-box, FIE integration tests.
-const config = describe.configure().ifChrome().skipOldChrome();
+const config = describe.configure().ifNewChrome();
 config.run('amp-position-observer', function() {
   this.timeout(100000);
 

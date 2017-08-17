@@ -136,6 +136,10 @@ class TestConfig {
     return this;
   }
 
+  ifNewChrome() {
+    return this.ifChrome().skipOldChrome();
+  }
+
   ifChrome() {
     return this.if(this.platform.isChrome.bind(this.platform));
   }
@@ -162,10 +166,6 @@ class TestConfig {
   if(fn) {
     this.ifMatchers.push(fn);
     return this;
-  }
-
-  skipSauceLabs() {
-    return this.skip(() => window.ampTestRuntimeConfig.saucelabs);
   }
 
   retryOnSaucelabs() {
