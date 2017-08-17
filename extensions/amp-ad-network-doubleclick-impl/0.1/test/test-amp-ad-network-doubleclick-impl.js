@@ -439,7 +439,10 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           /(\?|&)top=localhost(&|$)/,
           /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+(&|$)/,
           /(\?|&)dtd=[0-9]+(&|$)/,
-        ].forEach(regexp => expect(url).to.match(regexp));
+        ].forEach(regexp => {
+          expect(url).to.match(regexp);
+          expect(true).to.be.false;
+        });
       });
     });
 
