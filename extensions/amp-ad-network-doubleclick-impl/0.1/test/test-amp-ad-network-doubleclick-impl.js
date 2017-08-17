@@ -53,6 +53,11 @@ import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {VisibilityState} from '../../../../src/visibility-state';
 import * as sinon from 'sinon';
+// Need the following side-effect import because in actual production code,
+// Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
+// always available for them. However, when we test an impl in isolation,
+// AmpAd is not loaded already, so we need to load it separately.
+import '../../../amp-ad/0.1/amp-ad';
 
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
