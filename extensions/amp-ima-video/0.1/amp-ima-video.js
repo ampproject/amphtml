@@ -41,6 +41,7 @@ import {
 import {user, dev} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
+import {isEnumValue} from '../../../src/types';
 
 /** @const */
 const TAG = 'amp-ima-video';
@@ -219,14 +220,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
     if (isObject(eventData)) {
       const videoEvent = eventData['event'];
-      if (videoEvent == VideoEvents.AD_START ||
-          videoEvent == VideoEvents.AD_END ||
-          videoEvent == VideoEvents.LOAD ||
-          videoEvent == VideoEvents.PLAYING ||
-          videoEvent == VideoEvents.PAUSE ||
-          videoEvent == VideoEvents.ENDED ||
-          videoEvent == VideoEvents.MUTED ||
-          videoEvent == VideoEvents.UNMUTED) {
+      if (isEnumValue(VideoEvents, videoEvent)) {
         if (videoEvent == VideoEvents.LOAD) {
           this.playerReadyResolver_(this.iframe_);
         }
