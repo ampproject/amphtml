@@ -327,6 +327,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
   // for analyzing production issues.
   let url = urls.errorReporting +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
+      '&rtv=' + encodeURIComponent(getMode().rtvVersion) +
       '&noAmp=' + (hasNonAmpJs ? 1 : 0) +
       '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
       '&a=' + (isUserError ? 1 : 0);
