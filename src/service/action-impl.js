@@ -21,7 +21,6 @@ import {debounce} from '../utils/rate-limit';
 import {dev, user} from '../log';
 import {isArray, isFiniteNumber} from '../types';
 import {isEnabled} from '../dom';
-import {filterSplice} from '../utils/array';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
 import {map} from '../utils/object';
@@ -86,13 +85,19 @@ let ActionInfoArgsDef;
  *   str: string
  * }}
  */
-let ActionInfoDef;
+export let ActionInfoDef;
 
 /**
  * Function called when an action is invoked.
+ *
+ * Optionally, takes this action's position within all actions triggered by
+ * the same event, as well as said action array, as params.
+ *
  * If the action is chainable, returns a Promise which resolves when the
  * action is complete. Otherwise, returns null.
- * @typedef {function(!ActionInvocation):?Promise}
+ *
+ * @typedef {function(
+ *     !ActionInvocation, number=, !Array<!ActionInfoDef>=):?Promise}
  */
 let ActionHandlerDef;
 
@@ -357,26 +362,11 @@ export class ActionService {
       return;
     }
 
-    // Only allow one amp-bind action per action chain.
-    let numberOfBindActions = 0;
-    filterSplice(action.actionInfos, actionInfo => {
-      if (actionInfo.target == 'AMP' &&
-          actionInfo.method.indexOf('State') >= 0) {
-        numberOfBindActions++;
-        if (numberOfBindActions > 1) {
-          this.actionInfoError_('Only one amp-bind action allowed per event',
-              actionInfo, /* target */ null);
-          return false;
-        }
-      }
-      return true;
-    });
-
     // Invoke actions serially, where each action waits for its predecessor
     // to complete. `currentPromise` is the i'th promise in the chain.
     let currentPromise = null;
 
-    action.actionInfos.forEach(actionInfo => {
+    action.actionInfos.forEach((actionInfo, i) => {
       // Replace any variables in args with data in `event`.
       const args = dereferenceExprsInArgs(actionInfo.args, event);
 
@@ -386,7 +376,7 @@ export class ActionService {
         if (globalTarget) {
           const invocation = new ActionInvocation(this.root_, actionInfo.method,
               args, action.node, event, trust);
-          return globalTarget(invocation);
+          return globalTarget(invocation, i, action.actionInfos);
         }
 
         // Element target via `id` attribute.

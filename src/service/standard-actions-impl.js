@@ -21,6 +21,7 @@ import {Services} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
 import {dev, user} from '../log';
 import {dict} from '../utils/object';
+import {findIndex} from '../utils/array';
 import {isProtocolValid} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
 import {tryFocus} from '../dom';
@@ -97,15 +98,26 @@ export class StandardActions {
    * See `amp-actions-and-events.md` for documentation.
    *
    * @param {!./action-impl.ActionInvocation} invocation
+   * @param {number=} opt_actionIndex
+   * @param {!Array<!./action-impl.ActionInfoDef>=} opt_actionInfos
    * @return {?Promise}
    * @throws {Error} If action is not recognized.
    */
-  handleAmpTarget(invocation) {
+  handleAmpTarget(invocation, opt_actionIndex, opt_actionInfos) {
     switch (invocation.method) {
       case 'pushState':
         this.handleAmpPushState_(invocation);
         return;
       case 'setState':
+        const actionInfos =
+            /** @type {!Array} */ (dev().assert(opt_actionInfos));
+        const firstSetState = findIndex(actionInfos, actionInfo => {
+          return actionInfo.target == 'AMP' && actionInfo.method == 'setState';
+        });
+        if (dev().assertNumber(opt_actionIndex) > firstSetState) {
+          user().error('AMP-BIND', 'Only one state action allowed per event.');
+          return null;
+        }
         return this.handleAmpSetState_(invocation);
       case 'navigateTo':
         return this.handleAmpNavigateTo_(invocation);
