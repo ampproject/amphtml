@@ -164,10 +164,6 @@ class TestConfig {
     return this;
   }
 
-  skipSauceLabs() {
-    return this.skip(() => window.ampTestRuntimeConfig.saucelabs);
-  }
-
   retryOnSaucelabs() {
     if (!window.ampTestRuntimeConfig.saucelabs) {
       return this;

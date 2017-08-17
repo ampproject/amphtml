@@ -20,7 +20,8 @@ import {getVendorJsPropertyName} from '../../src/style';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 import {createCustomEvent} from '../../src/event-helper';
 
-describe.configure().skipSauceLabs().run('Viewer Visibility State', () => {
+describe.configure().ifChrome().skipOldChrome().run(`Viewer Visibility
+    State`, () => {
 
   function noop() {}
 

@@ -104,7 +104,7 @@ describe.configure().ifChrome().skipOldChrome().run('Bind', function() {
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
 
-  describe.configure().skipSauceLabs().run('in FIE', function() {
+  describe.configure().ifChrome().skipOldChrome().run('in FIE', function() {
     describes.realWin('in FIE', {
       amp: {
         ampdoc: 'fie',

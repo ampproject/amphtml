@@ -54,7 +54,7 @@ export function runVideoPlayerIntegrationTests(
     return button;
   }
 
-  describe.configure().skipSauceLabs()
+  describe.configure().ifChrome().skipOldChrome()
       .run('Video Interface', function() {
         this.timeout(TIMEOUT);
 
@@ -77,7 +77,7 @@ export function runVideoPlayerIntegrationTests(
         afterEach(cleanUp);
       });
 
-  describe.configure().skipSauceLabs().run('Actions', function() {
+  describe.configure().ifChrome().skipOldChrome().run('Actions', function() {
     this.timeout(TIMEOUT);
 
     it.skip('should support mute, play, pause, unmute actions', function() {
@@ -131,7 +131,8 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().skipSauceLabs().run('Analytics Triggers', function() {
+  describe.configure().ifChrome().skipOldChrome().run(`Analytics
+      Triggers`, function() {
     this.timeout(TIMEOUT);
     let video;
 
@@ -319,7 +320,8 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().skipSauceLabs().run('Video Docking', function() {
+  describe.configure().ifChrome().skipOldChrome().run(`Video
+      Docking`, function() {
     this.timeout(TIMEOUT);
 
     describe('General Behavior', () => {
@@ -497,7 +499,7 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().skipSauceLabs().run('Autoplay', function() {
+  describe.configure().ifChrome().skipOldChrome().run('Autoplay', function() {
     this.timeout(TIMEOUT);
 
     describe('play/pause', () => {
