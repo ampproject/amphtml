@@ -61,7 +61,7 @@ export let ClickDelayConfig;
  */
 export let ClickLocationConfig;
 
-/** @typedef {!ClickDelayConfig|ClickLocationConfig} */
+/** @typedef {!ClickDelayConfig|!ClickLocationConfig} */
 export let FilterConfig;
 
 /** @enum {string} */
@@ -107,7 +107,8 @@ function assertFilters(filters) {
     user().assert(
         filters[name].type == FilterType.CLICK_DELAY ||
         filters[name].type == FilterType.CLICK_LOCATION,
-        'Only ClickDelayFilter or ClickLocationDelay is currently supported.');
+        'Only ClickDelayFilter and ClickLocationDelay are currently ' +
+        'supported.');
   }
 }
 

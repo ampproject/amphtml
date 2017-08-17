@@ -115,10 +115,23 @@ describes.realWin('amp-ad-exit', {
     return el.build().then(() => el);
   }
 
+  // Ad ad div or the relativeTo element cannot be found.
+  function addAdDiv() {
+    const adDiv = win.document.createElement('div');
+    adDiv.id = 'ad';
+    adDiv.style.position = 'absolute';
+    adDiv.style.left = '100px';
+    adDiv.style.top = '200px';
+    adDiv.style.width = '200px';
+    adDiv.style.height = '200px';
+    win.document.body.appendChild(adDiv);
+  }
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create({useFakeTimers: true});
     win = env.win;
     toggleExperiment(win, 'amp-ad-exit', true);
+    addAdDiv();
     return makeElementWithConfig(EXIT_CONFIG).then(el => {
       element = el;
     });
@@ -127,6 +140,7 @@ describes.realWin('amp-ad-exit', {
   afterEach(() => {
     sandbox.restore();
     env.win.document.body.removeChild(element);
+    env.win.document.body.removeChild(env.win.document.getElementById('ad'));
     element = undefined;
   });
 
@@ -389,6 +403,11 @@ describes.realWin('amp-ad-exit', {
 
     win.innerWidth = 1000;
     win.innerHeight = 2000;
+    // Replace the getVsync function so that the measure can happen at once.
+    element.implementation_.getVsync = () => {
+      return {measure: callback => callback()};
+    };
+    element.implementation_.onLayoutMeasure();
 
     // The click is within the top border.
     element.implementation_.executeAction({
@@ -441,14 +460,11 @@ describes.realWin('amp-ad-exit', {
       return {name: 'fakeWin'};
     });
 
-    const adDiv = win.document.createElement('div');
-    adDiv.id = 'ad';
-    adDiv.style.position = 'absolute';
-    adDiv.style.left = '100px';
-    adDiv.style.top = '200px';
-    adDiv.style.width = '200px';
-    adDiv.style.height = '200px';
-    win.document.body.appendChild(adDiv);
+    // Replace the getVsync function so that the measure can happen at once.
+    element.implementation_.getVsync = () => {
+      return {measure: callback => callback()};
+    };
+    element.implementation_.onLayoutMeasure();
 
     // The click is within the top border.
     element.implementation_.executeAction({
@@ -494,8 +510,6 @@ describes.realWin('amp-ad-exit', {
     expect(open).to.have.been.calledTwice;
     expect(open).to.have.been.calledWith(
         EXIT_CONFIG.targets.borderProtection.finalUrl, '_blank');
-
-    win.document.body.removeChild(adDiv);
   });
 });
 
