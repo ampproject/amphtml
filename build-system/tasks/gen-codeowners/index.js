@@ -64,7 +64,7 @@ function buildCodeownersFile(dirs) {
         let username = subItemUsername.indexOf('@') !== 0 ?
             `@${subItemUsername}` : subItemUsername;
         item[subItemUsername].forEach(function(pattern) {
-          codeowners += `${subItemUsername === '*' ? dirpath :
+          codeowners += `${dirpath === '*' ? pattern :
               `${dirpath}/${pattern}`} ${username}`;
         });
       }

@@ -1,5 +1,5 @@
 * @cramforce, @dvoytenko, @jridgewell
-*/*.protoascii @ampproject/validator
+*.protoascii @ampproject/validator
 ads/ @lannka, @zhouyx
 build-system/ @erwinmombay, @cramforce
 contributing/ @jrozier
