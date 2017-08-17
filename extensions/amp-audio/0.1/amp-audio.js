@@ -63,7 +63,7 @@ export class AmpAudio extends AMP.BaseElement {
     }
     this.propagateAttributes(
         ['src', 'autoplay', 'muted', 'loop', 'aria-label',
-          'aria-describedby', 'aria-labelledby'],
+          'aria-describedby', 'aria-labelledby', 'controlsList'],
         audio);
 
     this.applyFillContent(audio);
