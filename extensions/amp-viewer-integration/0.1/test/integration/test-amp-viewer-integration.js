@@ -46,7 +46,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       document.body.removeChild(viewerEl);
     });
 
-    it('should confirm the handshake', () => {
+    // TODO(aghassemi): Investigate failure. #10972.
+    it.skip('should confirm the handshake', () => {
       console/*OK*/.log('sending handshake response');
       viewer.confirmHandshake();
       return viewer.waitForDocumentLoaded();

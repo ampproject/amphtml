@@ -114,8 +114,9 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
 
     });
 
-    it.skip(`autoplay - autoplay not supported should behave
-        like manual play`, () => {
+    // TODO(aghassemi): Investigate failure. #10972.
+    it.skip('autoplay - autoplay not supported should behave' +
+        'like manual play', () => {
 
       video.setAttribute('autoplay', '');
       videoManager.register(impl);

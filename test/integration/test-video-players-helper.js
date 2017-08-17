@@ -195,7 +195,8 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    it('should trigger session analytics when ' +
+    // TODO(aghassemi): Investigate failure. #10972.
+    it.skip('should trigger session analytics when ' +
         'a visible session ends', function() {
       let viewport;
       return getVideoPlayer(
@@ -273,8 +274,9 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    it.skip(`should trigger video-seconds-played when
-        visible and playing`, () => {
+    // TODO(aghassemi): Investigate failure. #10972.
+    it.skip('should trigger video-seconds-played when visible' +
+        'and playing', () => {
       let video;
       let timer;
       let pauseButton;

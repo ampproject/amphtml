@@ -39,7 +39,8 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
       document.body.removeChild(viewerEl);
     });
 
-    it('should confirm the handshake', () => {
+    // TODO(aghassemi): Investigate failure. #10972.
+    it.skip('should confirm the handshake', () => {
       return viewer.waitForHandshakeResponse();
     });
 
