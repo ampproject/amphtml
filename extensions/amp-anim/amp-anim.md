@@ -22,10 +22,6 @@ limitations under the License.
     <td>A runtime-managed animated image, typically a GIF.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js">&lt;/script></code></td>
   </tr>
@@ -38,6 +34,8 @@ limitations under the License.
     <td><a href="https://ampbyexample.com/components/amp-anim/">Annotated code example for amp-anim</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## Behavior
 
@@ -54,29 +52,29 @@ In the future, additional functionality, such as animation playback control, cou
 
 ## Attributes
 
-**src**
+##### src
 
 Similar to the `src` attribute on the `img` tag. The value must be a URL that
 points to a publicly-cacheable image file. Cache providers may rewrite these
 URLs when ingesting AMP files to point to a cached version of the image.
 
-**srcset**
+##### srcset
 
 Same as `srcset` attribute on the `img` tag.
 
-**alt**
+##### alt
 
 A string of alternate text, similar to the `alt` attribute on `img`.
 
-**attribution**
+#####  attribution
 
 A string that indicates the attribution of the image. For example, `attribution="CC courtesy of Cats on Flicker"`.
 
-**height** and **width**
+##### height and width
 
 An explicit size of the image, which is used by the AMP runtime to determine the aspect ratio without fetching the image. 
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
@@ -92,4 +90,4 @@ amp-anim {
 ```
 ## Validation
 
-See [amp-anim rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/0.1/validator-amp-anim.protoascii) in the AMP validator specification.
+See [amp-anim rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/validator-amp-anim.protoascii) in the AMP validator specification.

@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays an <a href="https://www.ooyala.com/">Ooyala</a> video.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-ooyala-player" src="https://cdn.ampproject.org/v0/amp-ooyala-player-0.1.js">&lt;/script></code></td>
   </tr>
@@ -34,6 +30,8 @@ limitations under the License.
     <td>fill, fixed, flex-item, responsive</td>
   </tr>
 </table>
+
+[TOC]
 
 ## Example
 
@@ -47,30 +45,30 @@ limitations under the License.
 
 ## Attributes
 
-**data-embedcode** (required)
+##### data-embedcode (required)
 
 The video embed code from [Backlot](https://backlot.ooyala.com).
 
-**data-playerid** (required)
+##### data-playerid (required)
 
 The ID of the player to load from [Backlot](https://backlot.ooyala.com).
 
-**data-pcode** (required)
+##### data-pcode (required)
 
 The provider code for the account owning the embed code and player.
 
-**data-playerversion** (optional)
+##### data-playerversion (optional)
 
 Specifies which version of the Ooyala player to use, V3 or V4. Defaults to V3.
 
-**data-config** (optional)
+##### data-config (optional)
 
 Specifies a skin.json config file URL for player V4.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-ooyala-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ooyala-player/0.1/validator-amp-ooyala-player.protoascii) in the AMP validator specification.
+See [amp-ooyala-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ooyala-player/validator-amp-ooyala-player.protoascii) in the AMP validator specification.

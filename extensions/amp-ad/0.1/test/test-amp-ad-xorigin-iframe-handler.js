@@ -17,13 +17,12 @@
 import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
 import {Signals} from '../../../../src/utils/signals';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {
   createIframeWithMessageStub,
   expectPostMessage,
 } from '../../../../testing/iframe';
 import {AmpAdUIHandler} from '../amp-ad-ui';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 describe('amp-ad-xorigin-iframe-handler', () => {
@@ -37,7 +36,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    const ampdocService = ampdocServiceFor(window);
+    const ampdocService = Services.ampdocServiceFor(window);
     const ampdoc = ampdocService.getAmpDoc();
     const adElement = document.createElement('container-element');
     adElement.getAmpDoc = () => ampdoc;
@@ -192,7 +191,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           const clock = sandbox.useFakeTimers();
           clock.tick(0);
           const timeoutPromise =
-              timerFor(window).timeoutPromise(2000, initPromise);
+              Services.timerFor(window).timeoutPromise(2000, initPromise);
           clock.tick(2001);
           return expect(timeoutPromise).to.eventually
               .be.rejectedWith(/timeout/);
@@ -217,31 +216,33 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should trigger render-start on message "bootstrap-loaded" if' +
-       ' render-start is NOT implemented', done => {
+       ' render-start is NOT implemented', () => {
       initPromise = iframeHandler.init(iframe);
       iframe.postMessageToParent({
         sentinel: 'amp3ptest' + testIndex,
         type: 'bootstrap-loaded',
       });
       const renderStartPromise = signals.whenSignal('render-start');
-      renderStartPromise.then(() => {
+      return renderStartPromise.then(() => {
         expect(renderStartedSpy).to.be.calledOnce;
-        done();
       });
     });
 
-    it('should trigger visibility on timeout', done => {
+    it('should trigger visibility on timeout', () => {
       const clock = sandbox.useFakeTimers();
       iframe.name = 'test_master';
       initPromise = iframeHandler.init(iframe);
-      iframe.onload = () => {
-        clock.tick(10000);
-        initPromise.then(() => {
-          expect(iframe.style.visibility).to.equal('');
-          expect(renderStartedSpy).to.not.be.called;
-          done();
-        });
-      };
+      return new Promise(resolve => {
+        iframe.onload = () => {
+          clock.tick(10000);
+          initPromise.then(() => {
+            resolve();
+          });
+        };
+      }).then(() => {
+        expect(iframe.style.visibility).to.equal('');
+        expect(renderStartedSpy).to.not.be.called;
+      });
     });
 
     it('should be immediately visible if it is A4A', () => {

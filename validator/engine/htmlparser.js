@@ -199,6 +199,22 @@ class TagNameStack {
      * @private
      */
     this.isBodyStarted_ = false;
+
+    /**
+     * Keeps track of the attributes from all body tags encountered within the
+     * document.
+     * @type {!Array<string>}
+     * @private
+     */
+    this.effectiveBodyAttribs_ = [];
+  }
+
+  /**
+   * Returns the attributes from all body tags within the document.
+   * @return {!Array<string>}
+   */
+  effectiveBodyAttribs() {
+    return this.effectiveBodyAttribs_;
   }
 
   /**
@@ -209,6 +225,15 @@ class TagNameStack {
    * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
    */
   startTag(tagName, encounteredAttrs) {
+    // We only report the first body for each document - either
+    // a manufactured one, or the first one encountered. However,
+    // we collect all attributes in this.effectiveBodyAttribs_.
+    if (tagName === 'BODY') {
+      for (var ii = 0; ii < encounteredAttrs.length; ii++) {
+        this.effectiveBodyAttribs_.push(encounteredAttrs[ii]);
+      }
+    }
+
     // This section deals with manufacturing <head>, </head>, and <body> tags
     // if the document has left them out or placed them in the wrong location.
     switch (this.region_) {
@@ -250,7 +275,8 @@ class TagNameStack {
         break;
       case TagRegion.IN_BODY:
         if (tagName === 'BODY') {
-          // If we've manufactured a body, then ignore the later body.
+          // We only report the first body for each document - either
+          // a manufactured one, or the first one encountered.
           return;
         }
         // Check implicit tag closing due to opening tags.
@@ -496,6 +522,9 @@ amp.htmlparser.HtmlParser = class {
               amp.htmlparser.HtmlParser.Elements[tagName] :
               amp.htmlparser.HtmlParser.EFlags.UNKNOWN_OR_CUSTOM;
         } else if (m[4]) {  // Text.
+          if (!inTag && locator) {
+            locator.snapshotPos();
+          }
           tagStack.pcdata(m[4]);
         } else if (m[5]) {  // Cruft.
           switch (m[5]) {
@@ -518,6 +547,7 @@ amp.htmlparser.HtmlParser = class {
     }
     // Lets the handler know that we are done parsing the document.
     tagStack.exitRemainingTags();
+    handler.effectiveBodyTag(tagStack.effectiveBodyAttribs());
     handler.endDoc();
   }
 

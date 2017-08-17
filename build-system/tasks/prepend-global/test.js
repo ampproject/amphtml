@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 
 var BBPromise = require('bluebird');
@@ -48,7 +49,7 @@ test('sync - sanityCheck', t => {
   var goodStr = 'self.AMP_CONFIG||(self.AMP_CONFIG={"hello":"world"})' +
       '/*AMP_CONFIG*/' +
       'var x = 1 + 1;';
-  t.false(m.sanityCheck(badStr));
-  t.true(m.sanityCheck(goodStr));
-  t.false(m.sanityCheck(badStr2));
+  t.false(m.numConfigs(badStr) == 1);
+  t.true(m.numConfigs(goodStr) == 1);
+  t.false(m.numConfigs(badStr2) == 1);
 });

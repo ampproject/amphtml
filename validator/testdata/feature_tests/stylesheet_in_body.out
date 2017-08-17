@@ -1,0 +1,2 @@
+FAIL
+feature_tests/stylesheet_in_body.html:41:2 The parent tag of tag 'link rel=stylesheet for fonts' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [DISALLOWED_HTML]

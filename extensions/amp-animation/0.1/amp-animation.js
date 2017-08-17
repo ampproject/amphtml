@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-import {MeasureScanner} from './web-animations';
-import {ScrollboundScene} from './scrollbound-scene';
+import {Builder} from './web-animations';
+import {ActionTrust} from '../../../src/action-trust';
 import {Pass} from '../../../src/pass';
 import {WebAnimationPlayState} from './web-animation-types';
 import {childElementByTag} from '../../../src/dom';
-import {getFriendlyIframeEmbedOptional,}
+import {getFriendlyIframeEmbedOptional}
     from '../../../src/friendly-iframe-embed';
-import {getMode} from '../../../src/mode';
 import {getParentWindowFrameElement} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {installWebAnimations} from 'web-animations-js/web-animations.install';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
-import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
-import {user, dev} from '../../../src/log';
-import {viewerForDoc} from '../../../src/services';
+import {user} from '../../../src/log';
+import {Services} from '../../../src/services';
+import {isFiniteNumber} from '../../../src/types';
+import {clamp} from '../../../src/utils/math';
 
 const TAG = 'amp-animation';
+const POLYFILLED = '__AMP_WA';
 
 
 export class AmpAnimation extends AMP.BaseElement {
@@ -48,16 +49,22 @@ export class AmpAnimation extends AMP.BaseElement {
     this.visible_ = false;
 
     /** @private {boolean} */
+    this.pausedByAction_ = false;
+
+    /** @private {boolean} */
     this.triggered_ = false;
 
     /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
     this.embed_ = null;
 
-    /** @private {?JSONType} */
+    /** @private {?JsonObject} */
     this.configJson_ = null;
 
     /** @private {?./web-animations.WebAnimationRunner} */
     this.runner_ = null;
+
+    /** @private {?Promise} */
+    this.runnerPromise_ = null;
 
     /** @private {?Pass} */
     this.restartPass_ = null;
@@ -109,7 +116,11 @@ export class AmpAnimation extends AMP.BaseElement {
     // Restart with debounce.
     this.restartPass_ = new Pass(
         this.win,
-        this.startOrResume_.bind(this),
+        () => {
+          if (!this.pausedByAction_) {
+            this.startOrResume_();
+          }
+        },
         /* delay */ 50);
 
     // Visibility.
@@ -125,23 +136,51 @@ export class AmpAnimation extends AMP.BaseElement {
       });
       listen(this.embed_.win, 'resize', () => this.onResize_());
     } else {
-      const viewer = viewerForDoc(ampdoc);
+      const viewer = Services.viewerForDoc(ampdoc);
       this.setVisible_(viewer.isVisible());
       viewer.onVisibilityChanged(() => {
         this.setVisible_(viewer.isVisible());
       });
-      this.getViewport().onChanged(e => {
+      this.getViewport().onResize(e => {
         if (e.relayoutAll) {
           this.onResize_();
         }
       });
     }
+
+    // Actions.
+    this.registerAction('start',
+        this.startAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('restart',
+        this.restartAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('pause',
+        this.pauseAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('resume',
+        this.resumeAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('togglePause',
+        this.togglePauseAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('seekTo',
+        this.seekToAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('reverse',
+        this.reverseAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('finish',
+        this.finishAction_.bind(this), ActionTrust.LOW);
+    this.registerAction('cancel',
+        this.cancelAction_.bind(this), ActionTrust.LOW);
+  }
+
+  /**
+   * Returns the animation spec.
+   * @return {?JsonObject}
+   */
+  getAnimationSpec() {
+    return /** @type {?JsonObject} */ (this.configJson_);
   }
 
   /** @override */
   layoutCallback() {
     if (this.triggerOnVisibility_) {
-      this.activate();
+      this.startAction_();
     }
     return Promise.resolve();
   }
@@ -152,23 +191,147 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /** @override */
-  activate() {
+  activate(invocation) {
+    return this.startAction_(invocation);
+  }
+
+  /**
+   * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
+   * @return {?Promise}
+   * @private
+   */
+  startAction_(opt_invocation) {
     // The animation has been triggered, but there's no guarantee that it
     // will actually be running.
     this.triggered_ = true;
     if (this.visible_) {
-      this.startOrResume_();
+      return this.startOrResume_(opt_invocation ? opt_invocation.args : null);
     }
+    return Promise.resolve();
   }
 
   /**
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @return {?Promise}
+   * @private
    */
-  finish() {
-    this.triggered_ = false;
-    if (this.runner_) {
-      this.runner_.finish();
-      this.runner_ = null;
+  restartAction_(invocation) {
+    this.cancel_();
+    // The animation has been triggered, but there's no guarantee that it
+    // will actually be running.
+    this.triggered_ = true;
+    if (this.visible_) {
+      return this.startOrResume_(invocation.args);
     }
+    return Promise.resolve();
+  }
+
+  /**
+   * @return {?Promise}
+   * @private
+   */
+  pauseAction_() {
+    if (!this.triggered_) {
+      return Promise.resolve();
+    }
+    return this.createRunnerIfNeeded_().then(() => {
+      this.pause_();
+      this.pausedByAction_ = true;
+    });
+  }
+
+  /**
+   * @return {?Promise}
+   * @private
+   */
+  resumeAction_() {
+    if (!this.triggered_) {
+      return Promise.resolve();
+    }
+    return this.createRunnerIfNeeded_().then(() => {
+      if (this.visible_) {
+        this.runner_.resume();
+        this.pausedByAction_ = false;
+      }
+    });
+  }
+
+  /**
+   * @return {?Promise}
+   * @private
+   */
+  togglePauseAction_() {
+    if (!this.triggered_) {
+      return Promise.resolve();
+    }
+    return this.createRunnerIfNeeded_().then(() => {
+      if (this.visible_) {
+        if (this.runner_.getPlayState() == WebAnimationPlayState.PAUSED) {
+          return this.startOrResume_();
+        } else {
+          this.pause_();
+          this.pausedByAction_ = true;
+        }
+      }
+    });
+  }
+
+  /**
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @return {?Promise}
+   * @private
+   */
+  seekToAction_(invocation) {
+    // The animation will be triggered (in paused state) and seek will happen
+    // regardless of visibility
+    this.triggered_ = true;
+    return this.createRunnerIfNeeded_().then(() => {
+      this.pause_();
+      this.pausedByAction_ = true;
+      // time based seek
+      const time = parseFloat(invocation.args && invocation.args['time']);
+      if (isFiniteNumber(time)) {
+        this.runner_.seekTo(time);
+      }
+      // percent based seek
+      const percent = parseFloat(invocation.args && invocation.args['percent']);
+      if (isFiniteNumber(percent)) {
+        this.runner_.seekToPercent(clamp(percent, 0, 1));
+      }
+    });
+  }
+
+  /**
+   * @return {?Promise}
+   * @private
+   */
+  reverseAction_() {
+    if (!this.triggered_) {
+      return Promise.resolve();
+    }
+    return this.createRunnerIfNeeded_().then(() => {
+      if (this.visible_) {
+        this.runner_.reverse();
+      }
+    });
+  }
+
+  /**
+   * @return {?Promise}
+   * @private
+   */
+  finishAction_() {
+    this.finish_();
+    return Promise.resolve();
+  }
+
+  /**
+   * @return {?Promise}
+   * @private
+   */
+  cancelAction_() {
+    this.cancel_();
+    return Promise.resolve();
   }
 
   /**
@@ -180,7 +343,9 @@ export class AmpAnimation extends AMP.BaseElement {
       this.visible_ = visible;
       if (this.triggered_) {
         if (this.visible_) {
-          this.startOrResume_();
+          if (!this.pausedByAction_) {
+            this.startOrResume_();
+          }
         } else {
           this.pause_();
         }
@@ -190,72 +355,118 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /** @private */
   onResize_() {
-    // Store the previous `triggered` value since `cancel` may reset it.
+    // Store the previous `triggered` and `pausedByAction` value since
+    // `cancel` may reset it.
     const triggered = this.triggered_;
+    const pausedByAction = this.pausedByAction_;
 
     // Stop animation right away.
     if (this.runner_) {
       this.runner_.cancel();
       this.runner_ = null;
+      this.runnerPromise_ = null;
     }
 
     // Restart the animation, but debounce to avoid re-starting it multiple
     // times per restart.
     this.triggered_ = triggered;
+    this.pausedByAction_ = pausedByAction;
     if (this.triggered_ && this.visible_) {
       this.restartPass_.schedule();
     }
   }
 
   /**
+   * @param {?JsonObject=} opt_args
    * @return {?Promise}
    * @private
    */
-  startOrResume_() {
+  startOrResume_(opt_args) {
     if (!this.triggered_ || !this.visible_) {
       return null;
     }
+
+    this.pausedByAction_ = false;
 
     if (this.runner_) {
       this.runner_.resume();
       return null;
     }
 
-    return this.createRunner_().then(runner => {
-      this.runner_ = runner;
-      this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
-      this.setupScrollboundAnimations_();
+    return this.createRunnerIfNeeded_(opt_args).then(() => {
       this.runner_.start();
     });
   }
 
   /**
+   * Creates the runner but animations will not start.
+   * @param {?JsonObject=} opt_args
+   * @return {!Promise}
+   * @private
+   */
+  createRunnerIfNeeded_(opt_args) {
+    if (!this.runnerPromise_) {
+      this.runnerPromise_ = this.createRunner_(opt_args).then(runner => {
+        this.runner_ = runner;
+        this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
+        this.runner_.init();
+      });
+    }
+
+    return this.runnerPromise_;
+  }
+
+  /** @private */
+  finish_() {
+    this.triggered_ = false;
+    this.pausedByAction_ = false;
+    if (this.runner_) {
+      this.runner_.finish();
+      this.runner_ = null;
+      this.runnerPromise_ = null;
+    }
+  }
+
+  /** @private */
+  cancel_() {
+    this.triggered_ = false;
+    this.pausedByAction_ = false;
+    if (this.runner_) {
+      this.runner_.cancel();
+      this.runner_ = null;
+      this.runnerPromise_ = null;
+    }
+  }
+
+  /**
+   * @param {?JsonObject=} opt_args
    * @return {!Promise<!./web-animations.WebAnimationRunner>}
    * @private
    */
-  createRunner_() {
+  createRunner_(opt_args) {
     // Force cast to `WebAnimationDef`. It will be validated during preparation
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
         this.configJson_);
+    const args = /** @type {?./web-animation-types.WebAnimationDef} */ (
+        opt_args || null);
 
     // Ensure polyfill is installed.
-    if (!this.win.Element.prototype.animate) {
-      installWebAnimations(this.win);
-    }
+    ensurePolyfillInstalled(this.win);
 
-    const vsync = this.getVsync();
+    const ampdoc = this.getAmpDoc();
     const readyPromise = this.embed_ ? this.embed_.whenReady() :
-        this.getAmpDoc().whenReady();
+        ampdoc.whenReady();
+    const hostWin = this.embed_ ? this.embed_.win : this.win;
+    const baseUrl = this.embed_ ? this.embed_.getUrl() : ampdoc.getUrl();
     return readyPromise.then(() => {
-      const measurer = new MeasureScanner(this.win, {
-        resolveTarget: this.resolveTarget_.bind(this),
-        queryTargets: this.queryTargets_.bind(this),
-      }, /* validate */ true);
-      return vsync.measurePromise(() => {
-        measurer.scan(configJson);
-        return measurer.createRunner(this.element.getResources());
-      });
+      const builder = new Builder(
+          hostWin,
+          this.getRootNode_(),
+          baseUrl,
+          this.getVsync(),
+          this.element.getResources());
+      return builder.createRunner(configJson, args);
     });
   }
 
@@ -267,29 +478,6 @@ export class AmpAnimation extends AMP.BaseElement {
     return this.embed_ ?
         this.embed_.win.document :
         this.getAmpDoc().getRootNode();
-  }
-
-  /**
-   * @param {string} id
-   * @return {?Element}
-   * @private
-   * TODO(dvoytenko, #9129): cleanup deprecated string targets.
-   */
-  resolveTarget_(id) {
-    return this.getRootNode_().getElementById(id);
-  }
-
-  /**
-   * @param {string} selector
-   * @return {!Array<!Element>}
-   * @private
-   */
-  queryTargets_(selector) {
-    try {
-      return toArray(this.getRootNode_().querySelectorAll(selector));
-    } catch (e) {
-      throw user().createError('Invalid selector: ', selector);
-    }
   }
 
   /** @private */
@@ -305,38 +493,18 @@ export class AmpAnimation extends AMP.BaseElement {
    */
   playStateChanged_(playState) {
     if (playState == WebAnimationPlayState.FINISHED) {
-      this.finish();
+      this.finish_();
     }
   }
+}
 
-  /**
-   * @private
-   */
-  setupScrollboundAnimations_() {
-    dev().assert(this.runner_);
-    if (!this.runner_.hasScrollboundAnimations()) {
-      return;
-    }
-
-    // TODO(aghassemi): Remove restriction when we fully support scenes through
-    // scene-id attribute and/or allowing parent of `amp-animation` to be the
-    // scene container.
-    user().assert(this.embed_ || getMode().runtime == 'inabox',
-        'scroll-bound animations are only supported in embeds at the moment');
-
-    let sceneElement;
-    if (this.embed_) {
-      sceneElement = this.embed_.iframe;
-    } else {
-      sceneElement = this.win.document.documentElement;
-    }
-
-    new ScrollboundScene(
-      this.getAmpDoc(),
-      sceneElement,
-      this.runner_.scrollTick.bind(this.runner_), /* onScroll */
-      this.runner_.updateScrollDuration.bind(this.runner_) /* onDurationChanged */
-    );
+/**
+ * @param {!Window} win
+ */
+function ensurePolyfillInstalled(win) {
+  if (!win[POLYFILLED]) {
+    win[POLYFILLED] = true;
+    installWebAnimations(win);
   }
 }
 

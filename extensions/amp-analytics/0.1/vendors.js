@@ -15,9 +15,9 @@
  */
 
 /**
- * @const {!JSONType}
+ * @const {!JsonObject}
  */
-export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
+export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
 
   // Default parent configuration applied to all amp-analytics tags.
   'default': {
@@ -73,38 +73,12 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'timezone': 'TIMEZONE',
       'title': 'TITLE',
       'totalEngagedTime': 'TOTAL_ENGAGED_TIME',
+      'userAgent': 'USER_AGENT',
       'viewer': 'VIEWER',
       'viewportHeight': 'VIEWPORT_HEIGHT',
       'viewportWidth': 'VIEWPORT_WIDTH',
     },
   },
-
-  'baiduanalytics': {
-    'requests': {
-      'host': 'https://hm.baidu.com',
-      'base': '${host}/hm.gif?' +
-          'si=${token}&nv=0&st=4&v=pixel-1.0&rnd=${timestamp}',
-      'pageview': '${base}&et=0',
-      'trackEvent': '${base}&ep=${CATEGORY}*${ACTION}*' +
-          '${LABEL}*${VALUE}&et=4&api=8_0',
-    },
-    'triggers': {
-      'pageview': {
-        'on': 'visible',
-        'request': 'base',
-      },
-      'trackAnchorClick': {
-        'on': 'click',
-        'request': 'trackEvent',
-      },
-    },
-    'transport': {
-      'beacon': false,
-      'xhrpost': false,
-      'image': true,
-    },
-  },
-
   'acquialift': {
     'vars': {
       'decisionApiUrl': 'us-east-1-decisionapi.lift.acquia.com',
@@ -180,6 +154,22 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'p=${label}&' +
         's2=${level2Click}&' +
         'type=click&click=${type}${suffix}',
+    },
+  },
+
+  'baiduanalytics': {
+    'requests': {
+      'host': 'https://hm.baidu.com',
+      'base': '${host}/hm.gif?' +
+          'si=${token}&nv=0&st=4&v=pixel-1.0&rnd=${timestamp}',
+      'pageview': '${base}&et=0',
+      'event': '${base}&ep=${category}*${action}*' +
+          '${label}*${value}&et=4&api=8_0',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
     },
   },
 
@@ -509,6 +499,89 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'facebookpixel': {
+    'vars': {
+      'pixelId': 'PIXEL-ID',
+    },
+    'requests': {
+      'host': 'https://www.facebook.com',
+      'base': '${host}/tr?noscript=1',
+      'pageview': '${base}&ev=PageView&' +
+          'id=${pixelId}',
+      'event': '${base}&ev=${eventName}&' +
+          'id=${pixelId}' +
+          '&cd[content_name]=${content_name}',
+      'eventViewContent': '${base}&ev=ViewContent&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_type]=${content_type}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventSearch': '${base}&ev=Search&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_category]=${content_category}' +
+          '&cd[content_ids]=${content_ids}' +
+          '&cd[search_string]=${search_string}',
+      'eventAddToCart': '${base}&ev=AddToCart&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_type]=${content_type}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventAddToWishlist': '${base}&ev=AddToWishlist&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_category]=${content_category}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventInitiateCheckout': '${base}&ev=InitiateCheckout&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_category]=${content_category}' +
+          '&cd[num_items]=${num_items}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventAddPaymentInfo': '${base}&ev=AddPaymentInfo&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_category]=${content_category}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventPurchase': '${base}&ev=Purchase&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_type]=${content_type}' +
+          '&cd[content_ids]=${content_ids}' +
+          '&cd[num_items]=${num_items}',
+      'eventLead': '${base}&ev=Lead&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_category]=${content_category}',
+      'eventCompleteRegistration': '${base}&ev=CompleteRegistration&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[status]=${status}',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
+
   'gemius': {
     'requests': {
       'base': 'https://${prefix}.hit.gemius.pl/_${timestamp}/redot.gif?l=91&id=${identifier}&screen=${screenWidth}x${screenHeight}&window=${viewportWidth}x${viewportHeight}&fr=1&href=${sourceUrl}&ref=${documentReferrer}&extra=gemamp%3D1%7Campid%3D${clientId(gemius)}%7C${extraparams}',
@@ -569,7 +642,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'vars': {
       'eventValue': '0',
       'documentLocation': 'SOURCE_URL',
-      'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE)',
+      'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE,,_ga)',
       'dataSource': 'AMP',
       'anonymizeIP': 'aip',
     },
@@ -661,7 +734,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'vars': {
       'eventValue': '0',
       'documentLocation': 'SOURCE_URL',
-      'clientId': 'CLIENT_ID(_ga)',
+      'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE,,_ga)',
       'dataSource': 'AMP',
       'anonymizeIP': 'aip',
     },
@@ -916,6 +989,40 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'nielsen': {
+    'vars': {
+      'sessionId': 'CLIENT_ID(imrworldwide)',
+    },
+    'requests': {
+      'session': 'https://uaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P${apid}&sessionId=${sessionId}&pingtype=4&enc=false&c61=createtm,${timestamp}&rnd=${random}',
+      'cloudapi': 'https://cloudapi.imrworldwide.com/nmapi/v2/${apid}/${sessionId}/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22${sessionId}%22%2C%22apn%22%3A%22${apn}%22%2C%22apv%22%3A%22${apv}%22%2C%22apid%22%3A%22${apid}%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22${section}%22%2C%22assetid%22%3A%22${pageViewId}%22%2C%22segA%22%3A%22${segA}%22%2C%22segB%22%3A%22${segB}%22%2C%22segC%22%3A%22${segC}%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22${timestamp}%22%2C%22data%22%3A%7B%22hidden%22%3A%22${backgroundState}%22%2C%22blur%22%3A%22${backgroundState}%22%2C%22position%22%3A%22${timestamp}%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22${timestamp}%22%2C%22index%22%3A%22${requestCount}%22%7D',
+    },
+    'triggers': {
+      'visible': {
+        'on': 'visible',
+        'request': ['session', 'cloudapi'],
+      },
+      'hidden': {
+        'on': 'hidden',
+        'request': 'cloudapi',
+      },
+      'duration': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 10,
+          'maxTimerLength': 86400,
+          'immediate': false,
+        },
+        'request': 'cloudapi',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'oewadirect': {
     'transport': {'beacon': false, 'xhrpost': false, 'image': true},
     'requests': {
@@ -1093,7 +1200,9 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         '&referrer=${documentReferrer}' +
         '&page_url=${sourceUrl}' +
         '&user_id=${clientId(sr_amp_id)}' +
-        '&domain=${canonicalHost}',
+        '&domain=${canonicalHost}' +
+        '&article_id=${article_id}' +
+        '&ignore_metadata=${ignore_metadata}',
       'visible': '${host}/n?${baseParams}',
       'timer': '${host}/t?${baseParams}' +
         '&t=5000' +
@@ -1148,13 +1257,16 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
   },
 
   'snowplow': {
+    'vars': {
+      'duid': 'CLIENT_ID(_sp_id)',
+    },
     'requests': {
       'aaVersion': 'amp-0.2',
       'basePrefix': 'https://${collectorHost}/i?url=${canonicalUrl}&page=${title}&' +
           'res=${screenWidth}x${screenHeight}&stm=${timestamp}&' +
           'tz=${timezone}&aid=${appId}&p=web&tv=${aaVersion}&' +
           'cd=${screenColorDepth}&cs=${documentCharset}&' +
-          'duid=${clientId}&' +
+          'duid=${duid}&' +
           'lang=${browserLanguage}&refr=${documentReferrer}&stm=${timezone}&' +
           'vp=${viewportWidth}x${viewportHeight}',
       'pageView': '${basePrefix}&e=pv',
@@ -1170,6 +1282,41 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'top100': {
+    'vars': {
+      'pid': '',
+      'rid': 'PAGE_VIEW_ID',
+      'ruid': 'CLIENT_ID(ruid)',
+      'version': '1.0.0',
+    },
+    'requests': {
+      'host': 'https://kraken.rambler.ru',
+      'base': '${host}/cnt/?pid=${pid}' +
+                          '&rid=${rid}' +
+                          '&v=${version}' +
+                          '&rn=${random}' +
+                          '&ruid=${ruid}' +
+                          '&ct=amp',
+      'pageview': '${base}&et=pv' +
+                  '${_pageData}' +
+                  '${_screenData}',
+      '_screenData': '&sr=${screenWidth}x${screenHeight}' +
+                     '&cd=${screenColorDepth}-bit' +
+                     '&bs=${scrollWidth}x${scrollHeight}',
+      '_pageData': '&pt=${title}' +
+                   '&rf=${documentReferrer}' +
+                   '&en=${documentCharset}' +
+                   '&la=${browserLanguage}' +
+                   '&tz=${timezone}',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
+
   'webtrekk': {
     'requests': {
       'trackURL': 'https://${trackDomain}/${trackId}/wt',
@@ -1178,7 +1325,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         '${timestamp},${documentReferrer},${viewportWidth}x' +
         '${viewportHeight},0&tz=${timezone}' +
         '&eid=${clientId(amp-wt3-eid)}&la=${browserLanguage}',
-      'parameterSuffix': '&pu=${canonicalUrl}',
+      'parameterSuffix': '&pu=${sourceUrl}',
       'pageParameter': '&cp1=${pageParameter1}' +
         '&cp2=${pageParameter2}&cp3=${pageParameter3}' +
         '&cp4=${pageParameter4}&cp5=${pageParameter5}' +
@@ -1396,6 +1543,39 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       },
     },
   },
+
+  'topmailru': {
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+    'vars': {
+      'url': '${sourceUrl}',
+      'referrer': '${documentReferrer}',
+    },
+    'requests': {
+      'pageView': '${_domain}/counter?${_basicMessage};title=${title}',
+      'reachGoal': '${_domain}/tracker?${_basicMessage};title=${title}' +
+                   ';e=RG%3A${value}%2F${goal}',
+      'sendEvent': '${_domain}/tracker?${_basicMessage}' +
+                   ';e=CE%3A${value}%2F${category}%3B${action}%3B${label}',
+      '_domain': 'https://top-fwz1.mail.ru',
+      '_basicMessage': 'js=13;id=${id};u=${url};r=${referrer}' +
+                       ';s=${screenWidth}*${screenHeight}' +
+                       ';vp=${viewportWidth}*${viewportHeight}' +
+                       ';st=${start};gender=${gender};age=${age}' +
+                       ';pid=${pid};userid=${userid};device=${device}' +
+                       ';params=${params};_=${random}',
+    },
+    'triggers': {
+      'pageView': {
+        'on': 'visible',
+        'request': 'pageView',
+      },
+    },
+  },
+
 });
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;

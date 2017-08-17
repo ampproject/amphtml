@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {urlReplacementsForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {
   VariableSource,
   getNavigationData,
@@ -64,6 +64,7 @@ const WHITELISTED_VARIABLES = [
   'VIEWER',
   'TOTAL_ENGAGED_TIME',
   'AMP_VERSION',
+  'USER_AGENT',
 ];
 
 
@@ -76,7 +77,7 @@ export class A4AVariableSource extends VariableSource {
   constructor(ampdoc, embedWin) {
     super();
     /** @private {VariableSource} global variable source for fallback. */
-    this.globalVariableSource_ = urlReplacementsForDoc(ampdoc)
+    this.globalVariableSource_ = Services.urlReplacementsForDoc(ampdoc)
         .getVariableSource();
 
     /** @private {!Window} */

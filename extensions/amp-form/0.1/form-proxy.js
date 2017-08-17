@@ -187,7 +187,7 @@ function setupLegacyProxy(form, proxy) {
           actual = current;
         }
         Object.defineProperty(proxy, name, {
-          get: function() {
+          get() {
             return actual;
           },
         });
@@ -196,7 +196,7 @@ function setupLegacyProxy(form, proxy) {
         // with a minimal type conversion.
         const attr = desc.attr || name;
         Object.defineProperty(proxy, name, {
-          get: function() {
+          get() {
             let value = proxy.getAttribute(attr);
             if (value == null && desc.def !== undefined) {
               value = desc.def;
@@ -211,7 +211,7 @@ function setupLegacyProxy(form, proxy) {
             }
             return value;
           },
-          set: function(value) {
+          set(value) {
             if (desc.type == LegacyPropDataType.TOGGLE) {
               if (value) {
                 value = '';
@@ -232,10 +232,10 @@ function setupLegacyProxy(form, proxy) {
     } else {
       // Not a known property - proxy directly.
       Object.defineProperty(proxy, name, {
-        get: function() {
+        get() {
           return form[name];
         },
-        set: function(value) {
+        set(value) {
           form[name] = value;
         },
       });

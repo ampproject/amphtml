@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var fs = require('fs-extra');
 var argv = require('minimist')(process.argv.slice(2));
@@ -96,9 +97,6 @@ function compile(entryModuleFilenames, outputDir,
     const checkTypes = options.checkTypes || argv.typecheck_only;
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
-    if (!process.env.TRAVIS) {
-      util.log('Starting closure compiler for', entryModuleFilenames);
-    }
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
     if (!options.preventRemoveAndMakeDir) {
@@ -151,6 +149,10 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-bind/**/*.js',
       // Needed to access form impl from other extensions
       'extensions/amp-form/**/*.js',
+      // Needed for AccessService
+      'extensions/amp-access/**/*.js',
+      // Needed to access UserNotificationManager from other extensions
+      'extensions/amp-user-notification/**/*.js',
       'src/*.js',
       'src/!(inabox)*/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
@@ -219,7 +221,9 @@ function compile(entryModuleFilenames, outputDir,
     var externs = [
       'build-system/amp.extern.js',
       'third_party/closure-compiler/externs/intersection_observer.js',
+      'third_party/closure-compiler/externs/performance_observer.js',
       'third_party/closure-compiler/externs/shadow_dom.js',
+      'third_party/closure-compiler/externs/streams.js',
       'third_party/closure-compiler/externs/web_animations.js',
     ];
     if (options.externs) {
@@ -269,12 +273,15 @@ function compile(entryModuleFilenames, outputDir,
           'third_party/caja/',
           'third_party/closure-library/sha384-generated.js',
           'third_party/d3/',
+          'third_party/mustache/',
           'third_party/vega/',
           'third_party/webcomponentsjs/',
           'node_modules/',
           'build/patched-module/',
           // Can't seem to suppress `(0, win.eval)` suspicious code warning
           '3p/environment.js',
+          // Generated code.
+          'extensions/amp-access/0.1/access-expr-impl.js',
         ],
         jscomp_error: [],
       }
@@ -336,10 +343,6 @@ function compile(entryModuleFilenames, outputDir,
         .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
         .pipe(gulp.dest(outputDir))
         .on('end', function() {
-          if (!process.env.TRAVIS) {
-            util.log('Compiled', entryModuleFilename, 'to',
-                outputDir + '/' + outputFilename, 'via', intermediateFilename);
-          }
           gulp.src(intermediateFilename + '.map')
               .pipe(rename(outputFilename + '.map'))
               .pipe(gulp.dest(outputDir))

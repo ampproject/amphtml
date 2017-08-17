@@ -15,9 +15,10 @@
  */
 
 import {Viewer} from '../../src/service/viewer-impl';
-import {ampdocServiceFor} from '../../src/ampdoc';
+import {Services} from '../../src/services';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
+import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {parseUrl, removeFragment} from '../../src/url';
@@ -67,7 +68,7 @@ describe('Viewer', () => {
       defaultView: windowApi,
       hidden: false,
       visibilityState: 'visible',
-      addEventListener: function(type, listener) {
+      addEventListener(type, listener) {
         events[type] = listener;
       },
       referrer: '',
@@ -83,7 +84,8 @@ describe('Viewer', () => {
       windowApi.location.href = url;
     });
     installDocService(windowApi, /* isSingleDoc */ true);
-    ampdoc = ampdocServiceFor(windowApi).getAmpDoc();
+    installDocumentStateService(windowApi);
+    ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
     installPlatformService(windowApi);
     installTimerService(windowApi);
     events = {};
@@ -1009,15 +1011,15 @@ describe('Viewer', () => {
     });
 
     describe('should NOT trust wrong or non-whitelisted domain variations',
-      () => {
-        test('https://google.net', false);
-        test('https://google.other.com', false);
-        test('https://www.google.other.com', false);
-        test('https://withgoogle.com', false);
-        test('https://acme.com', false);
-        test('https://google', false);
-        test('https://www.google', false);
-      });
+        () => {
+          test('https://google.net', false);
+          test('https://google.other.com', false);
+          test('https://www.google.other.com', false);
+          test('https://withgoogle.com', false);
+          test('https://acme.com', false);
+          test('https://google', false);
+          test('https://www.google', false);
+        });
 
     describe('tests for b/32626673', () => {
       test('www.google.com', true, true);

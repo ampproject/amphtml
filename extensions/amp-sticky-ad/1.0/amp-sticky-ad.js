@@ -20,18 +20,11 @@ import {Layout} from '../../../src/layout';
 import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {toggle, computedStyle} from '../../../src/style';
-import {isExperimentOn} from '../../../src/experiments';
-import {timerFor} from '../../../src/services';
 import {
   setStyle,
   removeAlphaFromColor,
 } from '../../../src/style';
-
-/** @const */
-const EARLY_LOAD_EXPERIMENT = 'sticky-ad-early-load';
-
-/** @const */
-const TAG = 'amp-sticky-ad';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -70,31 +63,17 @@ class AmpStickyAd extends AMP.BaseElement {
     this.ad_ = children[0];
     this.setAsOwner(this.ad_);
 
-    // TODO(@zhouyx, #9126): cleanup once research
-    // on custom-element stubbing is complete.
-    let customApiResolver;
-    const customApiPromise = new Promise(resolve => {
-      customApiResolver = resolve;
-    });
-    if (this.ad_.whenBuilt) {
-      customApiResolver();
-    } else {
-      // Give 1s for amp-ad to stub. Report 1% error.
-      if (Math.random() < 0.01) {
-        dev().error(TAG, 'race condition on customElement stubbing');
-      }
-      timerFor(this.win).delay(customApiResolver, 1000);
-    }
-    customApiPromise.then(() => {
-      this.ad_.whenBuilt().then(() => {
-        this.mutateElement(() => {
-          toggle(this.element, true);
-        });
+    whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then(ad => {
+      return ad.whenBuilt();
+    }).then(() => {
+      this.mutateElement(() => {
+        toggle(this.element, true);
       });
     });
 
     const paddingBar = this.win.document.createElement(
-         'amp-sticky-ad-top-padding');
+        'amp-sticky-ad-top-padding');
+    paddingBar.classList.add('amp-sticky-ad-top-padding');
     this.element.insertBefore(paddingBar, this.ad_);
 
     // On viewport scroll, check requirements for amp-stick-ad to display.
@@ -157,14 +136,8 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   onScroll_() {
     const scrollTop = this.viewport_.getScrollTop();
-    if (isExperimentOn(this.win, EARLY_LOAD_EXPERIMENT) && scrollTop > 1) {
-      this.display_();
-      return;
-    }
-
-    const viewportHeight = this.viewport_.getSize().height;
-    // Check user has scrolled at least one viewport from init position.
-    if (scrollTop > viewportHeight) {
+    if (scrollTop > 1) {
+      // Check greater than 1 because AMP set scrollTop to 1 in iOS.
       this.display_();
     }
   }
@@ -190,7 +163,9 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   scheduleLayoutForAd_() {
-    this.ad_.whenBuilt().then(this.layoutAd_.bind(this));
+    whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then(ad => {
+      ad.whenBuilt().then(this.layoutAd_.bind(this));
+    });
   }
 
   /**

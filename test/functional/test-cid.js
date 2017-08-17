@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-import {ampdocServiceFor} from '../../src/ampdoc';
-import {
-  cidForDoc,
-  extensionsFor,
-  timerFor,
-  viewerForDoc,
-} from '../../src/services';
+import {Services} from '../../src/services';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
-  viewerBaseCid,
-} from '../../extensions/amp-analytics/0.1/cid-impl';
+  optOutOfCid,
+  isOptedOutOfCid,
+} from '../../src/service/cid-impl';
+import {ViewerCidApi} from '../../src/service/viewer-cid-api';
 import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
-import {cryptoFor} from '../../src/crypto';
 import {installDocService} from '../../src/service/ampdoc-impl';
+import {installDocumentStateService} from '../../src/service/document-state';
 import {parseUrl} from '../../src/url';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
@@ -39,7 +35,12 @@ import {
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
+import {stubServiceForDoc} from '../../testing/test-helper';
+import {macroTask} from '../../testing/yield';
+import * as url from '../../src/url';
+import {setCookie} from '../../src/cookies';
 import * as sinon from 'sinon';
+import * as lolex from 'lolex';
 
 const DAY = 24 * 3600 * 1000;
 
@@ -58,9 +59,10 @@ describe('cid', () => {
   let whenFirstVisible;
   let trustedViewer;
   let shouldSendMessageTimeout;
+  let storageGetStub;
 
   const hasConsent = Promise.resolve();
-  const timer = timerFor(window);
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     let call = 1;
@@ -100,15 +102,17 @@ describe('cid', () => {
       },
       navigator: window.navigator,
       setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
-    ampdoc = ampdocServiceFor(fakeWin).getAmpDoc();
+    installDocumentStateService(fakeWin);
+    ampdoc = Services.ampdocServiceFor(fakeWin).getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
 
     installExtensionsService(fakeWin);
-    const extensions = extensionsFor(fakeWin);
+    const extensions = Services.extensionsFor(fakeWin);
     // stub extensions service to provide crypto-polyfill
     sandbox.stub(extensions, 'loadExtension', extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
@@ -117,12 +121,14 @@ describe('cid', () => {
     });
 
     installViewerServiceForDoc(ampdoc);
-    viewer = viewerForDoc(ampdoc);
+    storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
+    viewer = Services.viewerForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
     });
     sandbox.stub(viewer, 'isTrustedViewer',
         () => Promise.resolve(trustedViewer));
+    sandbox.stub(ViewerCidApi, 'scopeOptedInForCidApi', () => null);
     viewerSendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse',
         (eventType, opt_data) => {
           if (eventType != 'cid') {
@@ -139,7 +145,7 @@ describe('cid', () => {
 
     cid = cidServiceForDocForTesting(ampdoc);
     installCryptoService(fakeWin);
-    crypto = cryptoFor(fakeWin);
+    crypto = Services.cryptoFor(fakeWin);
   });
 
   afterEach(() => {
@@ -272,6 +278,18 @@ describe('cid', () => {
           'sha384(YYYhttp://www.origin.come2)');
     });
 
+    it('should return empty if opted out', () => {
+      storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(true));
+
+      storage['amp-cid'] = JSON.stringify({
+        cid: 'YYY',
+        time: Date.now(),
+      });
+      return compare(
+          'e2',
+          '');
+    });
+
     it('should read from viewer storage if embedded', () => {
       fakeWin.parent = {};
       const expectedBaseCid = 'from-viewer';
@@ -326,17 +344,6 @@ describe('cid', () => {
       });
     });
 
-    it('should time out reading from viewer', () => {
-      shouldSendMessageTimeout = true;
-      const promise = viewerBaseCid(ampdoc);
-      return Promise.resolve().then(() => {
-        clock.tick(10001);
-        return promise;
-      }).then(cid => {
-        expect(cid).to.be.undefined;
-      });
-    });
-
     it('should store to viewer storage if embedded', () => {
       fakeWin.parent = {};
       const expectedBaseCid = 'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])';
@@ -366,44 +373,6 @@ describe('cid', () => {
       return compare(
           'e2',
           'sha384(in-storagehttp://www.origin.come2)');
-    });
-
-    it('should work without mocking', () => {
-      // Can't stub Window's readonly properties nor access properties via
-      // __proto__ (as of Chrome 57), so we must wrap individual props like so.
-      const win = {
-        crypto: window.crypto,
-        document: {
-          body: {},
-        },
-        location: {
-          href: 'https://cdn.ampproject.org/v/www.origin.com/',
-          search: '',
-        },
-        name: window.name,
-        navigator: window.navigator,
-        services: {},
-      };
-      installDocService(win, /* isSingleDoc */ true);
-      const ampdoc2 = ampdocServiceFor(win).getAmpDoc();
-      expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
-      installTimerService(win);
-      installPlatformService(win);
-      installViewerServiceForDoc(ampdoc2);
-      cidServiceForDocForTesting(ampdoc2);
-      installCryptoService(win);
-      return cidForDoc(ampdoc2).then(cid => {
-        return cid.get({scope: 'foo'}, hasConsent).then(c1 => {
-          return cid.get({scope: 'foo'}, hasConsent).then(c2 => {
-            expect(c1).to.equal(c2);
-            window.localStorage.removeItem('amp-cid');
-            removeMemoryCacheOfCid(cid);
-            return cid.get({scope: 'foo'}, hasConsent).then(c3 => {
-              expect(c1).to.not.equal(c3);
-            });
-          });
-        });
-      });
     });
 
     it('should expire on read after 365 days', () => {
@@ -602,11 +571,30 @@ describe('cid', () => {
       fakeWin.location.href =
           'https://foo.abc.org/v/www.DIFFERENT.com/foo/?f=0';
       fakeWin.location.hostname = 'foo.abc.org';
+      fakeWin.crypto.getRandomValues = array => {
+        array[0] = 0;
+        array[1] = 2;
+        array[2] = 4;
+        array[3] = 8;
+        array[4] = 16;
+        array[5] = 32;
+        array[6] = 64;
+        array[7] = 128;
+        array[8] = 255;
+        array[9] = 7;
+        array[10] = 11;
+        array[11] = 22;
+        array[12] = 33;
+        array[13] = 66;
+        array[14] = 200;
+        array[15] = 39;
+      };
       return cid.get({scope: 'scope_name', createCookieIfNotPresent: true},
           hasConsent).then(c => {
             expect(c).to.exist;
-            expect(c).to
-                .equal('amp-sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])');
+            // Since various parties depend on the cookie values, please be careful
+            // about changing the format.
+            expect(c).to.equal('amp-AAIECBAgQID_BwsWIULIJw');
             expect(fakeWin.document.cookie).to.equal(
                 'scope_name=' + encodeURIComponent(c) +
                 '; path=/' +
@@ -625,8 +613,7 @@ describe('cid', () => {
         cookieName: 'cookie_name',
       }, hasConsent).then(c => {
         expect(c).to.exist;
-        expect(c).to
-            .equal('amp-sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])');
+        expect(c).to.equal('amp-AQIDAAAAAAAAAAAAAAAADw');
         expect(fakeWin.document.cookie).to.equal(
             'cookie_name=' + encodeURIComponent(c) +
             '; path=/' +
@@ -643,7 +630,7 @@ describe('cid', () => {
 
       return cid.get({scope: 'cookie_name'}, hasConsent).then(c => {
         expect(fakeWin.document.cookie).to.equal(
-          'cookie_name=' + encodeURIComponent(c) +
+            'cookie_name=' + encodeURIComponent(c) +
           '; path=/' +
           '; domain=abc.org' +
           '; expires=Fri, 01 Jan 1971 00:00:00 GMT'  // 1 year from 0.
@@ -718,4 +705,130 @@ describe('getProxySourceOrigin', () => {
       getProxySourceOrigin(parseUrl('https://abc.org/v/foo.com/'));
     }).to.throw(/Expected proxy origin/);
   });
+});
+
+describes.realWin('cid', {amp: true}, env => {
+  let cid;
+  let win;
+  let ampdoc;
+  let sandbox;
+  let clock;
+  const hasConsent = Promise.resolve();
+
+  beforeEach(() => {
+    win = env.win;
+    ampdoc = env.ampdoc;
+    sandbox = env.sandbox;
+    clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+    cid = cidServiceForDocForTesting(ampdoc);
+  });
+
+  it('should store CID in cookie when not in Viewer', function *() {
+    setCookie(win, 'foo', '', 0);
+    const fooCid = yield cid.get({
+      scope: 'foo',
+      createCookieIfNotPresent: true,
+    }, hasConsent);
+    expect(fooCid).to.have.string('amp-');
+    const fooCid2 = yield cid.get({
+      scope: 'foo',
+      createCookieIfNotPresent: true,
+    }, hasConsent);
+    expect(fooCid).to.equal(fooCid2);
+  });
+
+  it('get method should return CID when in Viewer', () => {
+    win.parent = {};
+    stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
+        .returns(Promise.resolve('cid-from-viewer'));
+    stubServiceForDoc(sandbox, ampdoc, 'viewer', 'isTrustedViewer')
+        .returns(Promise.resolve(true));
+    stubServiceForDoc(sandbox, ampdoc, 'viewer', 'hasCapability')
+        .withArgs('cid').returns(true);
+    sandbox.stub(url, 'isProxyOrigin').returns(true);
+    return expect(cid.get({scope: 'foo'}, hasConsent))
+        .to.eventually.equal('cid-from-viewer');
+  });
+
+  it('get method should time out when in Viewer', function *() {
+    win.parent = {};
+    stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
+        .returns(new Promise(() => {}));
+    stubServiceForDoc(sandbox, ampdoc, 'viewer', 'isTrustedViewer')
+        .returns(Promise.resolve(true));
+    sandbox.stub(url, 'isProxyOrigin').returns(true);
+    let scopedCid = undefined;
+    let resolved = false;
+    cid.get({scope: 'foo'}, hasConsent)
+        .then(result => {
+          scopedCid = result;
+          resolved = true;
+        });
+    yield macroTask();
+    clock.tick(9999);
+    yield macroTask();
+    expect(resolved).to.be.false;
+    clock.tick(1);
+    yield macroTask();
+    expect(resolved).to.be.true;
+    expect(scopedCid).to.be.undefined;
+  });
+});
+
+describes.fakeWin('cid optout:', {amp: true}, env => {
+  let storageGetStub;
+  let storageSetStub;
+  let viewerSendMessageStub;
+  let ampdoc;
+
+  beforeEach(() => {
+    ampdoc = env.ampdoc;
+    storageSetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'set');
+    storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
+    viewerSendMessageStub = stubServiceForDoc(sandbox, ampdoc,
+        'viewer', 'sendMessage');
+  });
+
+  describe('optOutOfCid()', () => {
+    it('should send a message to viewer', () => {
+      return optOutOfCid(ampdoc).then(() => {
+        expect(viewerSendMessageStub).to.be.calledWith('cidOptOut');
+      });
+    });
+
+    it('should save bit in storage', () => {
+      optOutOfCid(ampdoc).then(() => {
+        expect(storageSetStub).to.be.calledWith('amp-cid-optout', true);
+      });
+    });
+
+    it('should reject promise if storage set fails', () => {
+      storageSetStub.returns(Promise.reject('failed!'));
+      return optOutOfCid(ampdoc).should.eventually.be.rejectedWith('failed!');
+    });
+  });
+
+  describe('isOptedOutOfCid()', () => {
+    it('should return true if bit is set in storage', () => {
+      storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(true));
+      return isOptedOutOfCid(ampdoc).then(isOut => {
+        expect(isOut).to.be.true;
+      });
+    });
+
+    it('should return false if bit is not set in storage', () => {
+      storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(null));
+      return isOptedOutOfCid(ampdoc).then(isOut => {
+        expect(isOut).to.be.false;
+      });
+    });
+
+    it('should return false if storage get fails', () => {
+      storageGetStub.withArgs('amp-cid-optout').returns(Promise.reject('Fail'));
+      return isOptedOutOfCid(ampdoc).then(isOut => {
+        expect(isOut).to.be.false;
+      });
+    });
+  });
+
 });

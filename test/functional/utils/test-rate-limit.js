@@ -68,14 +68,13 @@ describe('function utils', () => {
 
     it('should throttle recursive callback', () => {
       let totalCalls = 0;
-      let throttledCallback;
       function recursive(countdown) {
         totalCalls++;
         if (countdown > 0) {
           throttledCallback(countdown - 1);
         }
       }
-      throttledCallback = throttle(window, recursive, 100);
+      const throttledCallback = throttle(window, recursive, 100);
 
       // recursive 3 times
       throttledCallback(3);
@@ -128,14 +127,13 @@ describe('function utils', () => {
 
     it('should debounce recursive callback', () => {
       let totalCalls = 0;
-      let debounced;
       function recursive(countdown) {
         totalCalls++;
         if (countdown > 0) {
           debounced(countdown - 1);
         }
       }
-      debounced = debounce(window, recursive, 100);
+      const debounced = debounce(window, recursive, 100);
 
       // recursive 3 times
       debounced(2);

@@ -47,7 +47,6 @@ export class AmpCompareSlider extends AMP.BaseElement {
     return layout == Layout.RESPONSIVE;
   }
   
-  
   buildCompareSliderElements() {
     this.element.style.height = this.element.getAttribute('height') + 'px';
     this.element.style.width = this.element.getAttribute('width') + 'px';

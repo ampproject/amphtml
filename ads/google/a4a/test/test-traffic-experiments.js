@@ -14,39 +14,17 @@
  * limitations under the License.
  */
 
-import {ampdocServiceFor} from '../../../../src/ampdoc';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
   addExperimentIdToElement,
   isInExperiment,
-  isExternallyTriggeredExperiment,
-  isInternallyTriggeredExperiment,
   validateExperimentIds,
   googleAdsIsA4AEnabled,
 } from '../traffic-experiments';
 import {
   RANDOM_NUMBER_GENERATORS,
   toggleExperiment,
-  forceExperimentBranch,
 } from '../../../../src/experiments';
-import {installPlatformService} from '../../../../src/service/platform-impl';
-import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
-import {
-  registerServiceBuilder,
-  resetServiceForTesting,
-} from '../../../../src/service';
-import {
-  installDocumentStateService,
-} from '../../../../src/service/document-state';
-import {
-  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-  DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-  DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-  DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-} from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config.js'; // eslint-disable-line
 import {EXPERIMENT_ATTRIBUTE} from '../utils';
-import * as sinon from 'sinon';
 
 describe('all-traffic-experiments-tests', () => {
 
@@ -67,6 +45,7 @@ describe('all-traffic-experiments-tests', () => {
       sandbox.win = {
         location: {
           hostname: 'test.server.name.com',
+          origin: 'https://cdn.ampproject.org',
         },
         AMP_CONFIG: {
           testExperimentId: experimentFrequency,
@@ -107,8 +86,38 @@ describe('all-traffic-experiments-tests', () => {
       expect(isInExperiment(element, '34')).to.be.true;
       expect(isInExperiment(element, '56')).to.be.false;
       expect(isInExperiment(element, '78')).to.be.false;
-      expect(isExternallyTriggeredExperiment(element)).to.be.true;
-      expect(isInternallyTriggeredExperiment(element)).to.be.false;
+    });
+
+    it('should use AdSense specific A4A experiment from URL', () => {
+      element.setAttribute('type', 'adsense');
+      const externalBranches = {control: '12', experiment: '34'};
+      const internalBranches = {control: '56', experiment: '78'};
+      const externalDelayedBranches = {control: '90', experiment: '13'};
+
+      sandbox.win.location.search = '?exp=a4a:1,aa:2,da:0';
+
+      const renderViaA4a = googleAdsIsA4AEnabled(
+          sandbox.win, element, 'exp_name', externalBranches, internalBranches,
+          externalDelayedBranches);
+      expect(renderViaA4a).to.be.true;
+      expect(isInExperiment(element, '12')).to.be.false;
+      expect(isInExperiment(element, '34')).to.be.true;
+    });
+
+    it('should use Doubleclick specific A4A experiment from URL', () => {
+      element.setAttribute('type', 'doubleclick');
+      const externalBranches = {control: '12', experiment: '34'};
+      const internalBranches = {control: '56', experiment: '78'};
+      const externalDelayedBranches = {control: '90', experiment: '13'};
+
+      sandbox.win.location.search = '?exp=a4a:0,aa:1,da:2';
+
+      const renderViaA4a = googleAdsIsA4AEnabled(
+          sandbox.win, element, 'exp_name', externalBranches, internalBranches,
+          externalDelayedBranches);
+      expect(renderViaA4a).to.be.true;
+      expect(isInExperiment(element, '12')).to.be.false;
+      expect(isInExperiment(element, '34')).to.be.true;
     });
 
     it('should enable the external A4A control from the URL', () => {
@@ -126,8 +135,6 @@ describe('all-traffic-experiments-tests', () => {
       expect(isInExperiment(element, '34')).to.be.false;
       expect(isInExperiment(element, '56')).to.be.false;
       expect(isInExperiment(element, '78')).to.be.false;
-      expect(isExternallyTriggeredExperiment(element)).to.be.true;
-      expect(isInternallyTriggeredExperiment(element)).to.be.false;
     });
 
     it('should enable the internal A4A experiment', () => {
@@ -146,8 +153,6 @@ describe('all-traffic-experiments-tests', () => {
       expect(isInExperiment(element, '34')).to.be.false;
       expect(isInExperiment(element, '56')).to.be.false;
       expect(isInExperiment(element, '78')).to.be.true;
-      expect(isExternallyTriggeredExperiment(element)).to.be.false;
-      expect(isInternallyTriggeredExperiment(element)).to.be.true;
     });
 
     it('should enable the internal A4A control', () => {
@@ -166,8 +171,6 @@ describe('all-traffic-experiments-tests', () => {
       expect(isInExperiment(element, '34')).to.be.false;
       expect(isInExperiment(element, '56')).to.be.true;
       expect(isInExperiment(element, '78')).to.be.false;
-      expect(isExternallyTriggeredExperiment(element)).to.be.false;
-      expect(isInternallyTriggeredExperiment(element)).to.be.true;
     });
   });
 
@@ -258,221 +261,6 @@ describe('all-traffic-experiments-tests', () => {
       expect(isInExperiment(element, 'frob')).to.be.true;
       expect(isInExperiment(element, 'gunk')).to.be.true;
       expect(isInExperiment(element, 'zort')).to.be.true;
-    });
-  });
-
-  describe('A4A Launch Flags', () => {
-    let sandbox;
-    let win;
-    let events;
-    let element;
-    let addEnabledExperimentSpy;
-
-    beforeEach(() => {
-      sandbox = sinon.sandbox.create();
-      win = {
-        AMP_MODE: {
-          localDev: true,
-        },
-        location: {
-          href: 'https://cdn.ampproject.org/fnord',
-          pathname: '/fnord',
-          origin: 'https://cdn.ampproject.org',
-          hash: '',
-          hostname: 'cdn.ampproject.org',
-        },
-        document: {
-          nodeType: /* DOCUMENT */ 9,
-          hidden: false,
-          cookie: null,
-          visibilityState: 'visible',
-          addEventListener: function(type, listener) {
-            events[type] = listener;
-          },
-        },
-        crypto: {
-          subtle: true,
-          webkitSubtle: true,
-        },
-        navigator: window.navigator,
-        pageExperimentBranches: {},
-      };
-      win.document.defaultView = win;
-      installDocService(win, /* isSingleDoc */ true);
-      const ampdoc = ampdocServiceFor(win).getAmpDoc();
-      events = {};
-      installDocumentStateService(win);
-      installPlatformService(win);
-      installViewerServiceForDoc(ampdoc);
-      element = document.createElement('div');
-      document.body.appendChild(element);
-      addEnabledExperimentSpy = sandbox.stub();
-      registerServiceBuilder(win, 'performance', function() {
-        return {
-          addEnabledExperiment: addEnabledExperimentSpy,
-        };
-      });
-    });
-
-    afterEach(() => {
-      resetServiceForTesting(win, 'viewer');
-      sandbox.restore();
-      document.body.removeChild(element);
-    });
-
-    function expectCorrectBranchOnly(element, expectedBranchId) {
-      const branchIds = [
-        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
-        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
-        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
-        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
-        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
-        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
-        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
-        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
-      ];
-      for (const bId in branchIds) {
-        expect(isInExperiment(element, bId)).to.equal(bId === expectedBranchId);
-      }
-    }
-
-    const tests = [
-      {
-        branchType: 'filler',
-        adType: 'doubleclick',
-        hasLaunched: false,
-        shouldServeFastFetch: false,
-        branchId: null,
-      },
-      {
-        branchType: 'control',
-        adType: 'doubleclick',
-        hasLaunched: false,
-        shouldServeFastFetch: false,
-        branchId:
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
-      },
-      {
-        branchType: 'experiment',
-        adType: 'doubleclick',
-        hasLaunched: false,
-        shouldServeFastFetch: true,
-        branchId:
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
-      },
-      {
-        adType: 'doubleclick',
-        hasLaunched: true,
-        shouldServeFastFetch: true,
-        branchType: 'filler',
-        branchId: null,
-      },
-      {
-        adType: 'doubleclick',
-        hasLaunched: true,
-        shouldServeFastFetch: true,
-        branchType: 'control',
-        branchId:
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
-      },
-      {
-        adType: 'doubleclick',
-        hasLaunched: true,
-        shouldServeFastFetch: false,
-        branchType: 'experiment',
-        branchId:
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
-      },
-      {
-        adType: 'doubleclick',
-        hasLaunched: false,
-        shouldServeFastFetch: false,
-        urlParam: '?exp=a4a:0',
-        branchType: 'filler',
-        branchId: null,
-      },
-      {
-        adType: 'doubleclick',
-        hasLaunched: false,
-        shouldServeFastFetch: false,
-        urlParam: '?exp=a4a:1',
-        branchType: 'control',
-        branchId:
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
-      },
-      {
-        adType: 'doubleclick',
-        hasLaunched: false,
-        shouldServeFastFetch: true,
-        urlParam: '?exp=a4a:2',
-        branchType: 'experiment',
-        branchId:
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
-      },
-      {
-        adType: 'doubleclick',
-        hasLaunched: true,
-        shouldServeFastFetch: true,
-        urlParam: '?exp=a4a:0',
-        branchType: 'filler',
-        branchId: null,
-      },
-      {
-        adType: 'doubleclick',
-        hasLaunched: true,
-        shouldServeFastFetch: true,
-        urlParam: '?exp=a4a:1',
-        branchType: 'control',
-        branchId:
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
-      },
-      {
-        adType: 'doubleclick',
-        hasLaunched: true,
-        shouldServeFastFetch: false,
-        urlParam: '?exp=a4a:2',
-        branchType: 'experiment',
-        branchId:
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
-      },
-      // TODO(jonkeller): Need AdSense tests also
-    ];
-
-    tests.forEach(test => {
-      const desc = `should serve ` +
-        `${test.shouldServeFastFetch ? 'Fast' : 'Delayed'} Fetch to ` +
-        `${test.hasLaunched ? 'launched' : 'unlaunched'} ` +
-        `${test.adType} ${test.branchType} ` +
-        `${test.urlParam ? 'via URL ' : ''}`;
-      it(desc, () => {
-        element.setAttribute('type', test.adType);
-        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched',
-          test.hasLaunched, true);
-        if (test.urlParam) {
-          win.location.search = test.urlParam;
-        } else if (test.branchId != null) {
-          toggleExperiment(win, 'expDoubleclickA4A', true, true);
-          forceExperimentBranch(win, 'expDoubleclickA4A', test.branchId);
-        }
-        const external = test.hasLaunched ?
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
-        const internal = test.hasLaunched ?
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
-        expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
-          external, internal,
-          DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH))
-          .to.equal(test.shouldServeFastFetch);
-        expectCorrectBranchOnly(element, test.branchId);
-        expect(win.document.cookie).to.be.null;
-        if (test.branchId) {
-          expect(addEnabledExperimentSpy)
-              .to.be.calledWith('expDoubleclickA4A-' + test.branchId);
-        } else {
-          expect(addEnabledExperimentSpy).to.not.be.called;
-        }
-      });
     });
   });
 });

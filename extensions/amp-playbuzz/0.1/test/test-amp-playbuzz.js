@@ -40,11 +40,11 @@ describe('amp-playbuzz', () => {
 
   function createItemSrc() {
     return {
-      withUrl: function(itemUrl) {
+      withUrl(itemUrl) {
         this.itemUrl = itemUrl;
         return this;
       },
-      withItemId: function(itemId) {
+      withItemId(itemId) {
         this.itemId = itemId;
         return this;
       },
@@ -107,9 +107,9 @@ describe('amp-playbuzz', () => {
       const iframe = ins.querySelector('iframe');
       testIframe(iframe, '//www.playbuzz.com/bob/bobs-life');
       expect(iframe.src)
-        .to.contain('&useComments=false')
-        .and.to.contain('&gameInfo=false')
-        .and.to.contain('&useShares=false');
+          .to.contain('&useComments=false')
+          .and.to.contain('&gameInfo=false')
+          .and.to.contain('&useShares=false');
     });
   });
 
@@ -138,9 +138,9 @@ describe('amp-playbuzz', () => {
       const iframe = ins.querySelector('iframe');
       testIframe(iframe, '//www.playbuzz.com/bob/bobs-life');
       expect(iframe.src)
-        .to.contain('&useComments=true')
-        .and.to.contain('&gameInfo=true')
-        .and.to.contain('&useShares=true');
+          .to.contain('&useComments=true')
+          .and.to.contain('&gameInfo=true')
+          .and.to.contain('&useShares=true');
     });
   });
 
@@ -171,6 +171,6 @@ describe('amp-playbuzz', () => {
   it('requires item attribute', () => {
     const src = createItemSrc().withUrl('');
     expect(getIns(src)).to.be.rejectedWith(
-      /The item attribute is required for/);
+        /The item attribute is required for/);
   });
 });

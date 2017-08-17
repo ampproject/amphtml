@@ -42,8 +42,9 @@ describes.realWin('amp-pixel', {amp: true}, env => {
       pixel.setAttribute('referrerpolicy', referrerPolicy);
     }
     win.document.body.appendChild(pixel);
-    pixel.build();
+    const buildPromise = pixel.build();
     implementation = pixel.implementation_;
+    return buildPromise;
   }
 
   /**
@@ -125,11 +126,14 @@ describes.realWin('amp-pixel', {amp: true}, env => {
 
   it('should throw for referrerpolicy with value other than ' +
       'no-referrer', () => {
-    expect(() => {
-      createPixel(
-          'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?',
-          'origin');
-    }).to.throw(/referrerpolicy/);
+    return createPixel(
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?',
+        'origin')
+        .then(() => {
+          throw new Error('must have failed.');
+        }, reason => {
+          expect(reason.message).to.match(/referrerpolicy/);
+        });
   });
 });
 

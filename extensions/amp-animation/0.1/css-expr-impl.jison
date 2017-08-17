@@ -35,7 +35,7 @@ Z         [Zz]
 num       [+-]?[0-9]+("."[0-9]+)?([eE][+\-]?[0-9]+)?|[+-]?"."[0-9]+([eE][+\-]?[0-9]+)?
 hex       [a-fA-F0-9]+
 str       \'[^\']*\'|\"[^\"]*\"
-ident     \-?[a-zA-Z_][a-zA-Z0-9_]*
+ident     \-?[a-zA-Z_][\-a-zA-Z0-9_]*
 
 %%
 \s+                       /* skip whitespace */
@@ -66,14 +66,19 @@ ident     \-?[a-zA-Z_][a-zA-Z0-9_]*
 
 "#"{hex}                            return 'HEXCOLOR';
 
-{U}{R}{L}"("{str}")"                return 'URL'
+{U}{R}{L}\(                         return 'URL_START'
 {C}{A}{L}{C}\(                      return 'CALC_START'
-{V}{A}{R}"("                        return 'VAR_START'
+{V}{A}{R}\(                         return 'VAR_START'
 {T}{R}{A}{N}{S}{L}{A}{T}{E}\(       return 'TRANSLATE_START'
 {T}{R}{A}{N}{S}{L}{A}{T}{E}{X}\(    return 'TRANSLATE_X_START'
 {T}{R}{A}{N}{S}{L}{A}{T}{E}{Y}\(    return 'TRANSLATE_Y_START'
 {T}{R}{A}{N}{S}{L}{A}{T}{E}{Z}\(    return 'TRANSLATE_Z_START'
 {T}{R}{A}{N}{S}{L}{A}{T}{E}3{D}\(   return 'TRANSLATE_3D_START'
+{R}{A}{N}{D}\(                      return 'RAND_START'
+{I}{N}{D}{E}{X}\(                   return 'INDEX_START'
+{W}{I}{D}{T}{H}\(                   return 'WIDTH_START'
+{H}{E}{I}{G}{H}{T}\(                return 'HEIGHT_START'
+{C}{L}{O}{S}{E}{S}{T}\(             return 'CLOSEST_START'
 {ident}\(                           return 'FUNCTION_START'
 {ident}                             return 'IDENT'
 \-\-{ident}                         return 'VAR_NAME';
@@ -170,8 +175,8 @@ literal:
       {$$ = $1;}
   | time
       {$$ = $1;}
-  | URL
-      {$$ = new ast.CssUrlNode($1);}
+  | url
+      {$$ = $1;}
   | HEXCOLOR
       {$$ = new ast.CssPassthroughNode($1);}
   | IDENT
@@ -243,6 +248,12 @@ function:
       {$$ = $1;}
   | translate_function
       {$$ = $1;}
+  | dim_function
+      {$$ = $1;}
+  | rand_function
+      {$$ = $1;}
+  | index_function
+      {$$ = $1;}
   | any_function
       {$$ = $1;}
   ;
@@ -273,6 +284,19 @@ args:
 
 
 /**
+ * CSS `url()` function.
+ * - `url("https://acme.org/img")`
+ * - `url(`https://acme.org/img`)`
+ * - `url(`data:...`)`
+ * - `url("/img")`
+ */
+url:
+    URL_START STRING ')'
+      {$$ = new ast.CssUrlNode($2.slice(1, -1));}
+  ;
+
+
+/**
  * Translate set (https://developer.mozilla.org/en-US/docs/Web/CSS/transform):
  * - `translate(x, y)`
  * - `translateX(x)`
@@ -291,6 +315,52 @@ translate_function:
       {$$ = new ast.CssTranslateNode('z', $2);}
   | TRANSLATE_3D_START args ')'
       {$$ = new ast.CssTranslateNode('3d', $2);}
+  ;
+
+
+/**
+ * AMP-specific `width()` and `height()` functions:
+ * - `width(".selector")`
+ * - `height(".selector")`
+ * - `width(closest(".selector"))`
+ * - `height(closest(".selector"))`
+ */
+dim_function:
+    WIDTH_START ')'
+      {$$ = new ast.CssDimSizeNode('w');}
+  | HEIGHT_START ')'
+      {$$ = new ast.CssDimSizeNode('h');}
+  | WIDTH_START STRING ')'
+      {$$ = new ast.CssDimSizeNode('w', $2.slice(1, -1));}
+  | HEIGHT_START STRING ')'
+      {$$ = new ast.CssDimSizeNode('h', $2.slice(1, -1));}
+  | WIDTH_START CLOSEST_START STRING ')' ')'
+      {$$ = new ast.CssDimSizeNode('w', $3.slice(1, -1), 'closest');}
+  | HEIGHT_START CLOSEST_START STRING ')' ')'
+      {$$ = new ast.CssDimSizeNode('h', $3.slice(1, -1), 'closest');}
+  ;
+
+
+/**
+ * AMP-specific `rand()` functions:
+ * - `rand()` - a random value between 0 and 1
+ * - `rand(min, max)` - a random value between min and max
+ */
+rand_function:
+    RAND_START ')'
+      {$$ = new ast.CssRandNode();}
+  | RAND_START literal_or_function ',' literal_or_function ')'
+      {$$ = new ast.CssRandNode($2, $4);}
+  ;
+
+
+/**
+ * AMP-specific `index()` function that returns 0-based index of the current
+ * target in a list of all selected targets.
+ */
+index_function:
+    INDEX_START ')'
+      {$$ = new ast.CssIndexNode();}
   ;
 
 

@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays a Vine simple embed.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-0.1.js">&lt;/script></code></td>
   </tr>
@@ -39,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Example
 
 A Vine simple embed has equal width and height:
@@ -51,14 +49,14 @@ A Vine simple embed has equal width and height:
 
 ## Attributes
 
-**data-vineid** (required)
+##### data-vineid (required)
 
 The ID of the Vine. In a URL like https://vine.co/v/MdKjXez002d, `MdKjXez002d` is the vineID.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-vine rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/0.1/validator-amp-vine.protoascii) in the AMP validator specification.
+See [amp-vine rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/validator-amp-vine.protoascii) in the AMP validator specification.

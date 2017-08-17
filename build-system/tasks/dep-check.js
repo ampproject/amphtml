@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 
 var $$ = require('gulp-load-plugins')();
@@ -142,21 +143,21 @@ var rules = depCheckConfig.rules.map(config => new Rule(config));
 
 /**
  * Returns a list of entryPoint modules.
- * extenstions/0.1/*.js/amp.js/integration.js
+ * extensions/{$extension}/{$version}/{$extension}.js
+ * src/amp.js
+ * 3p/integration.js
  *
  * @return {!Promise<!Array<string>>}
  */
 function getSrcs() {
   return fs.readdirAsync('extensions').then(dirItems => {
     // Look for extension entry points
-    return dirItems
+    return flatten(dirItems
       .map(x => `extensions/${x}`)
       .filter(x => fs.statSync(x).isDirectory())
-      // If we ever need more than 0.1, just return an array and flatten
-      // the Array.
       .map(getEntryModule)
       // Concat the core binary and integration binary as entry points.
-      .concat(`src/amp.js`, `3p/integration.js`);
+      .concat(`src/amp.js`, `3p/integration.js`));
   });
 }
 
@@ -201,8 +202,13 @@ function getGraph(entryModule) {
  * @return {!Array<!ModuleDef>}
  */
 function getEntryModule(extensionFolder) {
-  // TODO: handle more than just 0.1
-  return `${extensionFolder}/0.1/${path.basename(extensionFolder)}.js`;
+  var extension = path.basename(extensionFolder);
+  return fs.readdirSync(extensionFolder)
+      .map(x => `${extensionFolder}/${x}`)
+      .filter(x => fs.statSync(x).isDirectory())
+      .map(x => `${x}/${extension}.js`)
+      .filter(x => fs.existsSync(x))
+      .filter(x => fs.statSync(x).isFile());
 }
 
 /**
@@ -295,4 +301,8 @@ function flatten(arr) {
   return [].concat.apply([], arr);
 }
 
-gulp.task('dep-check', 'Runs a dependency check on each module', depCheck);
+gulp.task(
+    'dep-check',
+    'Runs a dependency check on each module',
+    ['css'],  // Defined in gulpfile.js, and must be run before dep-check.
+    depCheck);

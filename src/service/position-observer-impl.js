@@ -15,7 +15,7 @@
  */
 
 import {registerServiceBuilderForDoc} from '../service';
-import {viewportForDoc, vsyncFor} from '../services';
+import {Services} from '../services';
 import {getMode} from '../mode';
 import {dev} from '../log';
 import {
@@ -24,10 +24,11 @@ import {
   layoutRectsOverlap,
   layoutRectFromDomRect,
   layoutRectLtwh,
+  layoutRectsRelativePos,
 } from '../layout-rect';
-import {isExperimentOn} from '../../src/experiments';
 import {serializeMessage} from '../../src/3p-frame-messaging';
-import {tryParseJson} from '../../src/json.js';
+import {parseJson, tryParseJson} from '../../src/json.js';
+import {getData} from '../../src/event-helper';
 
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';
@@ -45,6 +46,7 @@ export const POSITION_HIGH_FIDELITY = 'position-high-fidelity';
  * @typedef {{
  *  positionRect: ?../layout-rect.LayoutRectDef,
  *  viewportRect: !../layout-rect.LayoutRectDef,
+ *  relativePos: string,
  * }}
  */
 export let PositionInViewportEntryDef;
@@ -69,10 +71,10 @@ class AbstractPositionObserver {
     this.entries_ = [];
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(ampdoc.win);
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     /** @private {!./viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(ampdoc);
+    this.viewport_ = Services.viewportForDoc(ampdoc);
 
   }
 
@@ -90,15 +92,23 @@ class AbstractPositionObserver {
       position: null,
       turn: (fidelity == PositionObserverFidelity.LOW) ?
           Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0,
-      trigger: function(position) {
+      trigger(position) {
         const prePos = entry.position;
+
         if (prePos
             && layoutRectEquals(prePos.positionRect, position.positionRect)
             && layoutRectEquals(prePos.viewportRect, position.viewportRect)) {
           // position doesn't change, do nothing.
           return;
         }
+
+        // Add the relative position of the element to its viewport
+        position.relativePos = layoutRectsRelativePos(
+            position.positionRect, position.viewportRect
+        );
+
         if (layoutRectsOverlap(position.positionRect, position.viewportRect)) {
+          // Update position
           entry.position = position;
           // Only call handler if entry element overlap with viewport.
           try {
@@ -225,9 +235,7 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
       }
       timeout = setTimeout(stopScroll.bind(this), 500);
     }));
-    this.unlisteners_.push(this.viewport_.onChanged(() => {
-      // TODO (@zhouyx, #9208): Consider doing this only when event.relayoutAll
-      // is true.
+    this.unlisteners_.push(this.viewport_.onResize(() => {
       this.vsync_.measure(() => {
         this.pass_(true);
       });
@@ -351,29 +359,29 @@ export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
     const dataObject = tryParseJson(this.ampdoc_.win.name);
     let sentinel = null;
     if (dataObject) {
-      sentinel = dataObject._context.sentinel;
+      sentinel = dataObject['_context']['sentinel'];
     }
     const win = this.ampdoc_.win;
     object.type = SEND_POSITIONS_HIGH_FIDELITY;
     this.ampdoc_.win.parent./*OK*/postMessage(serializeMessage(
-    SEND_POSITIONS_HIGH_FIDELITY, sentinel),
-    '*'
+        SEND_POSITIONS_HIGH_FIDELITY, sentinel),
+        '*'
     );
 
     this.ampdoc_.win.addEventListener('message', event => {
     // Cheap operations first, so we don't parse JSON unless we have to.
-      if (event.source != win.parent || typeof event.data != 'string' ||
-          event.data.indexOf('amp-') != 0) {
+      if (event.source != win.parent || typeof getData(event) != 'string' ||
+          dev().assertString(getData(event)).indexOf('amp-') != 0) {
         return;
       }
       // Parse JSON only once per message.
-      const data = /** @type {!Object} */ (
-      JSON.parse(event.data.substr(4)));
-      if (data.sentinel != sentinel) {
+      const data = parseJson(
+          dev().assertString(getData(event)).substr(4));
+      if (data['sentinel'] != sentinel) {
         return;
       }
 
-      if (data.type != POSITION_HIGH_FIDELITY) {
+      if (data['type'] != POSITION_HIGH_FIDELITY) {
         return;
       }
 
@@ -439,8 +447,6 @@ export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installPositionObserverServiceForDoc(ampdoc) {
-  dev().assert(isExperimentOn(ampdoc.win, 'amp-animation'),
-     'PositionObserver is experimental and used by amp-animation only for now');
   registerServiceBuilderForDoc(ampdoc, 'position-observer', () => {
     if (getMode(ampdoc.win).runtime == 'inabox') {
       return new InaboxAmpDocPositionObserver(ampdoc);

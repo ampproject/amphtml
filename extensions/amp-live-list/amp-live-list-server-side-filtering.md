@@ -1,15 +1,15 @@
-#Server side filtering for `amp-live-list`
+# Server side filtering for `amp-live-list`
 
-##Overview
+## Overview
 The `amp-live-list` component is allowed to make requests to its server (depending on where the file is hosted from, the server could be the Google AMP Cache, another AMP cache, or the publisher’s server) for the the latest AMP document and update the current DOM with information from the received AMP document. It can work with a full AMP document as the response, but to reduce the payload and save on bandwidth and CPU cycles `amp-live-list` has defined the minimum HTML structure, the tags and its attributes needed by the component to correctly make an update to the live DOM. This spec depends on the [`amp-live-list` spec](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list.md) and defines its [Server side filtering](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list.md#server-side-filtering) section.
 
-##Design
+## Design
 To reduce the payload size and reduce expensive HTML parsing, the server can filter out the document and only return a document with the very minimum markup for a valid HTML document (like `html`, `body`, `doctype`) and the actual `amp-live-list` element(s). The server can further filter out the `amp-live-list` subtree by filtering out all direct children elements except the `items` and `pagination` reference points. The server can filter the `items` reference point using the `amp_latest_update_time` URL parameter from the request.
 
-##Detailed Design
+## Detailed Design
 Below is a recap of attributes on the `amp-live-list` and the `items` children elements. These attributes are important as they are what we use primarily to make decisions.
 
-###Required and Optional attributes on `amp-live-list`:
+### Required and Optional attributes on `amp-live-list`:
 **id** (Required)
 
 To uniquely identify an `amp-live-list` (since multiple `amp-live-list`s are allowed on a document)
@@ -27,7 +27,7 @@ Maximum number of child entries.
 No polling will occur.
 
 
-###Required and Optional attributes on `items` children elements:
+### Required and Optional attributes on `items` children elements:
 **id (Required)**
 
 `Id` of the entry must never change.

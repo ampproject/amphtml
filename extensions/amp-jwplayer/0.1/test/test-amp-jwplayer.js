@@ -70,7 +70,7 @@ describe('amp-jwplayer', () => {
     return getjwplayer({
       'data-player-id': 'sDZEo0ea',
     }).should.eventually.be.rejectedWith(
-      /Either the data-media-id or the data-playlist-id attributes must be/
+        /Either the data-media-id or the data-playlist-id attributes must be/
     );
   });
 
@@ -78,7 +78,7 @@ describe('amp-jwplayer', () => {
     return getjwplayer({
       'data-media-id': 'Wferorsv',
     }).should.eventually.be.rejectedWith(
-      /The data-player-id attribute is required for/
+        /The data-player-id attribute is required for/
     );
   });
 

@@ -96,17 +96,17 @@ Only these variables are supported:
 
 ### Per-use opt-in
 
-Link substitution requires per-use opt-in as an added security measure and to affirm the intention to use variable substitution. This is done by specifying an additional attribute called `data-amp-replace` with a string value containing a comma-delimited listing of the desired variables to substitute. An example is below.
+Link substitution requires per-use opt-in as an added security measure and to affirm the intention to use variable substitution. This is done by specifying an additional attribute called `data-amp-replace` with a string value containing a space-delimited listing of the desired variables to substitute. An example is below.
 
 ``` text
-<a href="https://example.com?client_id=CLIENT_ID(bar)&abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID,QUERY_PARAM">Go to my site</a>
+<a href="https://example.com?client_id=CLIENT_ID(bar)&abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID QUERY_PARAM">Go to my site</a>
 ```
 
 #### Appending parameters to the href
 If you need to append dynamic parameters to the href, specify the parameters by using the `data-amp-addparams` attribute. Any substitution parameters that you specify in `data-amp-addparams` must also be specified in `data-amp-replace`, as in the following example
 
 ``` text
-<a href="https://example.com?abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID,QUERY_PARAM" data-amp-addparams="client_id=CLIENT_ID(bar)&linkid=l123">Go to my site</a>
+<a href="https://example.com?abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID QUERY_PARAM" data-amp-addparams="client_id=CLIENT_ID(bar)&linkid=l123">Go to my site</a>
 ```
 
 ### Whitelisted domains for link substitution
@@ -186,6 +186,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Scroll Left](#scroll-left)         | `SCROLL_LEFT`     | `${scrollLeft}`     |
 | [Scroll Top](#scroll-top)           | `SCROLL_TOP`      | `${scrollTop}`      |
 | [Timezone](#timezone)               | `TIMEZONE`        | `${timezone}`       |
+| [User Agent](#user-agent)           | `USER_AGENT`      | `${userAgent}`      |
 | [Viewport Height](#viewport-height) | `VIEWPORT_HEIGHT` | `${viewportHeight}` |
 | [Viewport Width](#viewport-width)   | `VIEWPORT_WIDTH`  | `${viewportWidth}`  |
 
@@ -420,7 +421,7 @@ Provides a per document-source-origin (the origin of the website where you publi
 
 * **platform variable**: `CLIENT_ID`
   *  Example: <br>
-  
+
   ```html
   <amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name)"></amp-pixel>
 
@@ -974,6 +975,18 @@ Provides the total time for which the element has met the `visiblitySpec `condit
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${totalVisibleTime}`
+
+#### User Agent
+
+Provides a string representing the user agent of the requesting software, usually tells about user's browser operating system.
+
+* **platform variable**: `USER_AGENT`
+  *  Example: <br>
+  ```html
+  <amp-pixel src="https://foo.com/pixel?sh=USER_AGENT"></amp-pixel>
+  ```
+* **amp-analytics variable**: `${userAgent}`
+  * Example value: `Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0`
 
 #### Vertical Scroll Boundary
 

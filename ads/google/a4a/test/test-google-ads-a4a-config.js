@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {ampdocServiceFor} from '../../../../src/ampdoc';
+import {Services} from '../../../../src/services';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
-    googleAdsIsA4AEnabled,
-    isInExperiment,
-    isInManualExperiment,
-    isExternallyTriggeredExperiment,
-    isInternallyTriggeredExperiment,
+  googleAdsIsA4AEnabled,
+  isInExperiment,
+  isInManualExperiment,
 } from '../traffic-experiments';
 import {toggleExperiment} from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
@@ -81,30 +79,6 @@ function expectThereCanBeOnlyOne(element, id) {
           'data-experiment-id')}`).to.be.true;
 }
 
-/**
- * Checks that element's data-element-id contains the "is internally triggered"
- * experiment ID and that it does not contain the "is externally triggered"
- * eid.
- *
- * @param {!Element} element
- */
-function expectInternallyTriggered(element) {
-  expect(isInternallyTriggeredExperiment(element)).to.be.true;
-  expect(isExternallyTriggeredExperiment(element)).to.be.false;
-}
-
-/**
- * Checks that element's data-element-id contains the "is externally triggered"
- * experiment ID and that it does not contain the "is internally triggered"
- * eid.
- *
- * @param {!Element} element
- */
-function expectExternallyTriggered(element) {
-  expect(isInternallyTriggeredExperiment(element)).to.be.false;
-  expect(isExternallyTriggeredExperiment(element)).to.be.true;
-}
-
 describe('a4a_config', () => {
   let sandbox;
   let win;
@@ -131,7 +105,7 @@ describe('a4a_config', () => {
         hidden: false,
         cookie: null,
         visibilityState: 'visible',
-        addEventListener: function(type, listener) {
+        addEventListener(type, listener) {
           events[type] = listener;
         },
       },
@@ -144,7 +118,7 @@ describe('a4a_config', () => {
     };
     win.document.defaultView = win;
     installDocService(win, /* isSingleDoc */ true);
-    const ampdoc = ampdocServiceFor(win).getAmpDoc();
+    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
     events = {};
     installDocumentStateService(win);
     installPlatformService(win);
@@ -164,10 +138,9 @@ describe('a4a_config', () => {
     rand.returns(0.75);  // Random value to select the 2nd branch
     expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
         EXTERNAL_BRANCHES, INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES),
-           'googleAdsIsA4AEnabled').to.be.true;
+        'googleAdsIsA4AEnabled').to.be.true;
     expect(win.document.cookie).to.be.null;
     expectThereCanBeOnlyOne(element, INTERNAL_BRANCHES.experiment);
-    expectInternallyTriggered(element);
   });
 
   it('should attach control ID and return false when control is on', () => {
@@ -177,7 +150,6 @@ describe('a4a_config', () => {
         .to.be.false;
     expect(win.document.cookie).to.be.null;
     expectThereCanBeOnlyOne(element, INTERNAL_BRANCHES.control);
-    expectInternallyTriggered(element);
   });
 
   it('should not attach ID and return false when selected out', () => {
@@ -238,8 +210,8 @@ describe('a4a_config', () => {
       win.location.search = urlBase.replace('PARAM', 'a4a:spaz');
       toggleExperiment(win, EXP_ID, false, true);
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
-        INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-        .to.be.false;
+          INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES),
+          'googleAdsIsA4AEnabled').to.be.false;
       expect(win.document.cookie).to.be.null;
       expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
     });
@@ -249,8 +221,8 @@ describe('a4a_config', () => {
       // Force random client-side selection off.
       toggleExperiment(win, EXP_ID, false, true);
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
-        INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-        .to.be.false;
+          INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES),
+          'googleAdsIsA4AEnabled').to.be.false;
       expect(win.document.cookie).to.be.null;
       expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
     });
@@ -259,22 +231,20 @@ describe('a4a_config', () => {
       win.location.search = urlBase.replace('PARAM', 'a4a:spaz');
       rand.returns(0.75);  // Random value to select the 2nd branch
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
-        INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-        .to.be.true;
+          INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES),
+          'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
       expectThereCanBeOnlyOne(element, INTERNAL_BRANCHES.experiment);
-      expectInternallyTriggered(element);
     });
 
     it('should fall back to client-side eid when param is empty', () => {
       win.location.search = urlBase.replace('PARAM', 'a4a:');
       rand.returns(0.75);  // Random value to select the 2nd branch
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
-        INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-        .to.be.true;
+          INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES),
+          'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
       expectThereCanBeOnlyOne(element, INTERNAL_BRANCHES.experiment);
-      expectInternallyTriggered(element);
     });
 
     const externalIdTestCases = [
@@ -283,7 +253,7 @@ describe('a4a_config', () => {
       {param: '2', expId: EXTERNAL_BRANCHES.experiment, a4aEnabled: true},
       {param: '3', expId: EXTERNAL_DELAYED_BRANCHES.control, a4aEnabled: false},
       {param: '4', expId: EXTERNAL_DELAYED_BRANCHES.experiment,
-       a4aEnabled: true},
+        a4aEnabled: true},
     ];
     externalIdTestCases.forEach(testCase => {
       it(`should force experiment from URL param ${testCase.param}`,
@@ -291,13 +261,12 @@ describe('a4a_config', () => {
             win.location.search =
               urlBase.replace('PARAM', `a4a:${testCase.param}`);
             expect(googleAdsIsA4AEnabled(
-              win, element, EXP_ID, EXTERNAL_BRANCHES, INTERNAL_BRANCHES,
-              EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-              .to.equal(testCase.a4aEnabled);
+                win, element, EXP_ID, EXTERNAL_BRANCHES, INTERNAL_BRANCHES,
+                EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
+                .to.equal(testCase.a4aEnabled);
             expect(win.document.cookie).to.be.null;
             if (testCase.expId) {
               expectThereCanBeOnlyOne(element, testCase.expId);
-              expectExternallyTriggered(element);
             } else {
               expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
             }
@@ -309,8 +278,8 @@ describe('a4a_config', () => {
       // Should not register as 'A4A enabled', but should still attach the
       // control experiment ID.
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
-        INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-        .to.be.true;
+          INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES),
+          'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
       expect(isInManualExperiment(element), 'element in manual experiment')
           .to.be.true;
@@ -359,7 +328,7 @@ describe('a4a_config hash param parsing', () => {
         hidden: false,
         cookie: null,
         visibilityState: 'visible',
-        addEventListener: function(type, listener) {
+        addEventListener(type, listener) {
           events[type] = listener;
         },
       },
@@ -371,7 +340,7 @@ describe('a4a_config hash param parsing', () => {
     };
     win.document.defaultView = win;
     installDocService(win, /* isSingleDoc */ true);
-    ampdoc = ampdocServiceFor(win).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
     events = {};
     installPlatformService(win);
     installDocumentStateService(win);
@@ -402,8 +371,8 @@ describe('a4a_config hash param parsing', () => {
       // Should not register as 'A4A enabled', but should still attach the
       // control experiment ID.
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
-        INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-        .to.be.true;
+          INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES),
+          'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
       expect(isInManualExperiment(element), 'element in manual experiment')
           .to.be.true;
@@ -427,11 +396,10 @@ describe('a4a_config hash param parsing', () => {
       win.location.hash = hashBase.replace('PARAM', 'a4a:2');
       installViewerServiceForDoc(ampdoc);
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
-        INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-        .to.be.true;
+          INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES),
+          'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
       expectThereCanBeOnlyOne(element, EXTERNAL_BRANCHES.experiment);
-      expectExternallyTriggered(element);
     });
   });
 });

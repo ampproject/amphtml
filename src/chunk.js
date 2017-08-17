@@ -16,9 +16,10 @@
 
 import PriorityQueue from './utils/priority-queue';
 import {dev} from './log';
+import {getData} from './event-helper';
 import {registerServiceBuilderForDoc, getServiceForDoc} from './service';
 import {makeBodyVisible} from './style-installer';
-import {viewerPromiseForDoc} from './services';
+import {Services} from './services';
 
 /**
  * @const {string}
@@ -314,10 +315,10 @@ class Chunks {
     this.boundExecute_ = this.execute_.bind(this);
 
     /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
-    this.viewerPromise_ = viewerPromiseForDoc(ampDoc);
+    this.viewerPromise_ = Services.viewerPromiseForDoc(ampDoc);
 
     this.win_.addEventListener('message', e => {
-      if (e.data == 'amp-macro-task') {
+      if (getData(e) == 'amp-macro-task') {
         this.execute_(/* idleDeadline */ null);
       }
     });

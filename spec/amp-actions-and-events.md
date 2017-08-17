@@ -31,7 +31,7 @@ This is the name of the event that an element exposes.
 
 **targetId**
 __required__
-This is the DOM id for the element you'd like to execute an action on in response to the event. In the following example, the `targetId` is the DOM id of the `amp-lightbox` target, `photo-slides`.
+This is the DOM id for the element, or a predefined [special target](#special-targets) you'd like to execute an action on in response to the event. In the following example, the `targetId` is the DOM id of the `amp-lightbox` target, `photo-slides`.
 
 ```html
 <amp-lightbox id="photo-slides"></amp-lightbox>
@@ -81,6 +81,7 @@ For example, the following is possible in AMP.
 ```
 
 ## Element Specific Events
+
 ### * - all elements
 <table>
   <tr>
@@ -88,37 +89,24 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
-    <td>tap</td>
+    <td><code>tap</code></td>
     <td>Fired when the element is clicked/tapped.</td>
   </tr>
 </table>
 
-
-### Input Elements (any that fires `change` event)
-
-Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and `select`.
-
+### Input Elements
 <table>
   <tr>
     <th>Event</th>
     <th>Description</th>
+    <th>Elements</th>
     <th>Data</th>
   </tr>
+  <!-- change -->
   <tr>
-    <td>change</td>
-    <td>Fired when the value of the element is changed.</td>
-    <td>Various, see below.</td>
-  </tr>
-</table>
-
-#### `change` event data
-<table>
-  <tr>
-    <th>Input Type</th>
-    <th>Data</th>
-  </tr>
-  <tr>
-    <td>Range</td>
+    <td rowspan=3><code>change</code></td>
+    <td rowspan=3>Fired when the value of the element is changed and committed.</td>
+    <td>input[type="range"]</td>
     <td>
       <code>event.min</code> : The minimum value of the range<br>
       <code>event.value</code> : The current value of the range<br>
@@ -126,15 +114,25 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     </td>
   </tr>
   <tr>
-    <td>Radio</td>
-    <td><code>event.checked</code> : If the element is checked</td>
+    <td>input[type="radio"], input[type="checkbox"]</td>
+    <td>
+      <code>event.checked</code> : If the element is checked
+    </td>
   </tr>
   <tr>
-    <td>Checkbox</td>
-    <td><code>event.checked</code> : If the element is checked</td>
+    <td>input[type="text"], select</td>
+    <td>
+      <code>event.value</code> : String of the text or selected option
+    </td>
+  </tr>
+  <!-- input-debounced -->
+  <tr>
+    <td><code>input-debounced</code></td>
+    <td>Fired when the value of the element is changed. This is similar to the standard <code>input</code> event, but it only fires when 300ms have passed after the value of the input has stopped changing.</td>
+    <td>Elements that fire <code>input</code> event.</td>
+    <td>Same as above.</td>
   </tr>
 </table>
-
 
 ### amp-carousel[type="slides"]
 <table>
@@ -144,7 +142,7 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     <th>Data</th>
   </tr>
   <tr>
-    <td>slideChange</td>
+    <td><code>slideChange</code></td>
     <td>Fired when the user manually changes the carousel's current slide. Does not fire on autoplay or the <code>goToSlide</code> action.</td>
     <td><code>event.index</code> : slide number</td>
   </tr>
@@ -158,7 +156,7 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     <th>Data</th>
   </tr>
   <tr>
-    <td>select</td>
+    <td><code>select</code></td>
     <td>Fired when the user manually selects an option.</td>
     <td><code>event.targetOption</code> : The <code>option</code> attribute value of the selected element</td>
   </tr>
@@ -172,17 +170,17 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     <th>Data</th>
   </tr>
   <tr>
-    <td>submit</td>
+    <td><code>submit</code></td>
     <td>Fired when the form is submitted.</td>
     <td></td>
   </tr>
   <tr>
-    <td>submit-success</td>
+    <td><code>submit-success</code></td>
     <td>Fired when the form submission response is success.</td>
     <td><code>event.response</code> : JSON response</td>
   </tr>
   <tr>
-    <td>submit-error</td>
+    <td><code>submit-error</code></td>
     <td>Fired when the form submission response is an error.</td>
     <td><code>event.response</code> : JSON response</td>
   </tr>
@@ -197,8 +195,44 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     <th>Description</th>
   </tr>
   <tr>
-    <td>hide</td>
+    <td><code>hide</code></td>
     <td>Hides the target element.</td>
+  </tr>
+  <tr>
+    <td><code>show</code></td>
+    <td>Shows the target element.</td>
+  </tr>
+  <tr>
+    <td><code>toggleVisibility</code></td>
+    <td>Toggles the visibility of the target element.</td>
+  </tr>
+  <tr>
+    <td><code>scrollTo(duration=INTEGER, position=STRING)</code></td>
+    <td>Scrolls an element into view with a smooth animation. If defined,
+    <code>duration</code> specifies the length of the animation in milliseconds
+    (default is 500ms). <code>position</code> is optional and takes one of
+    <code>top</code>, <code>center</code> or <code>bottom</code> defining where
+    in the viewport the element will be at the end of the scroll (default is
+    <code>top</code>).</td>
+  </tr>
+  <tr>
+    <td><code>focus</code></td>
+    <td>Makes the target element gain focus. To lose focus, <code>focus</code>
+    on another element (usually parent element). We strongly advise against
+    losing focus by focusing on <code>body</code>/<code>documentElement</code>
+    for accessibility reasons.</td>
+  </tr>
+</table>
+
+### amp-carousel[type="slides"]
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>goToSlide(index=INTEGER)</code></td>
+    <td>Advances the carousel to a specified slide index.</td>
   </tr>
 </table>
 
@@ -209,7 +243,7 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     <th>Description</th>
   </tr>
   <tr>
-    <td>open (default)</td>
+    <td><code>open (default)</code></td>
     <td>Opens the image lightbox with the source image being the one that triggered the action.</td>
   </tr>
 </table>
@@ -221,11 +255,11 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     <th>Description</th>
   </tr>
   <tr>
-    <td>open (default)</td>
+    <td><code>open (default)</code></td>
     <td>Opens the lightbox.</td>
   </tr>
   <tr>
-    <td>close</td>
+    <td><code>close</code></td>
     <td>Closes the lightbox.</td>
   </tr>
 </table>
@@ -237,7 +271,7 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     <th>Description</th>
   </tr>
   <tr>
-    <td>update (default)</td>
+    <td><code>update (default)</code></td>
     <td>Updates the DOM items to show updated content.</td>
   </tr>
 </table>
@@ -249,15 +283,15 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     <th>Description</th>
   </tr>
   <tr>
-    <td>open (default)</td>
+    <td><code>open (default)</code></td>
     <td>Opens the sidebar.</td>
   </tr>
   <tr>
-    <td>close</td>
+    <td><code>close</code></td>
     <td>Closes the sidebar.</td>
   </tr>
   <tr>
-    <td>toggle</td>
+    <td><code>toggle</code></td>
     <td>Toggles the state of the sidebar.</td>
   </tr>
 </table>
@@ -269,7 +303,7 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     <th>Description</th>
   </tr>
   <tr>
-    <td>(default)</td>
+    <td><code>(default)</code></td>
     <td>Updates the amp-state's data with the data contained in the event. Requires
       <a href="../extensions/amp-bind/amp-bind.md">amp-bind</a>.
     </td>
@@ -283,50 +317,58 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     <th>Description</th>
   </tr>
   <tr>
-    <td>dismiss (default)</td>
+    <td><code>dismiss (default)</code></td>
     <td>Hides the referenced user notification element.</td>
   </tr>
 </table>
 
-### amp-carousel[type="slides"]
+### amp-video, amp-youtube, amp-3q-player, amp-brid-player, amp-dailymotion, amp-ima-video
 <table>
   <tr>
     <th>Action</th>
     <th>Description</th>
   </tr>
   <tr>
-    <td>goToSlide(index=INTEGER)</td>
-    <td>Advances the carousel to a specified slide index.</td>
-  </tr>
-</table>
-
-### amp-video, amp-youtube
-<table>
-  <tr>
-    <th>Action</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>play</td>
+    <td><code>play</code></td>
     <td>Plays the video.</td>
   </tr>
   <tr>
-    <td>pause</td>
+    <td><code>pause</code></td>
     <td>Pauses the video.</td>
   </tr>
   <tr>
-    <td>mute</td>
+    <td><code>mute</code></td>
     <td>Mutes the video.</td>
   </tr>
   <tr>
-    <td>unmute</td>
+    <td><code>unmute</code></td>
     <td>Unmutes the video.</td>
+  </tr>
+  <tr>
+    <td><code>fullscreen</code></td>
+    <td>Takes the video to fullscreen</td>
   </tr>
 </table>
 
-## `AMP` target
+### form
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>submit</code></td>
+    <td>Submits the form.</td>
+  </tr>
+</table>
 
-`AMP` target is a special target. It's provided by the AMP runtime and implements top-level
+## Special targets
+
+The following are targets provided by the AMP system that have special requirements:
+
+### `AMP`
+
+The `AMP` target is provided by the AMP runtime and implements top-level
 actions that apply to the whole document.
 
 <table>
@@ -335,11 +377,29 @@ actions that apply to the whole document.
     <th>Description</th>
   </tr>
   <tr>
-    <td>goBack</td>
+    <td><code>navigateTo(url=STRING)</code></td>
+    <td>Navigates current window to given URL. Supports <a href="./amp-var-substitutions.md">standard URL subsitutions</a>.</td>
+  </tr>
+  <tr>
+    <td><code>goBack</code></td>
     <td>Navigates back in history.</td>
   </tr>
   <tr>
-    <td>setState</td>
+    <td><code>setState</code></td>
     <td>Updates <code>amp-bind</code>'s state. See <a href="../extensions/amp-bind/amp-bind.md#ampsetstate">details</a>.</td>
   </tr>
+  <tr>
+    <td><code>print</code></td>
+    <td>Opens the Print Dialog to print the current page.</td>
+  </tr>
 </table>
+
+### `amp-access`
+
+The `amp-access` target is provided by the [AMP Access extension](../extensions/amp-access/amp-access.md).
+
+It's special because
+1. You can't give an arbitrary ID to this target. The target is always `amp-access`.
+2. The actions for `amp-access` are dynamic depending on the structure of the [AMP Access Configruation](../extensions/amp-access/amp-access.md#configuration).
+
+See [details](../extensions/amp-access/amp-access.md#login-link) about using the `amp-access` target.

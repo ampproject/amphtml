@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+form.amp-form-submitting [submitting],
 form.amp-form-submit-success [submit-success],
 form.amp-form-submit-error [submit-error] {
   display: block;

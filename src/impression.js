@@ -16,15 +16,13 @@
 
 import {dev, user} from './log';
 import {isExperimentOn} from './experiments';
-import {viewerForDoc} from './services';
-import {xhrFor} from './services';
+import {Services} from './services';
 import {
   isProxyOrigin,
   parseUrl,
   parseQueryString,
   addParamsToUrl,
 } from './url';
-import {timerFor} from './services';
 import {getMode} from './mode';
 
 const TIMEOUT_VALUE = 8000;
@@ -49,7 +47,7 @@ export function resetTrackImpressionPromiseForTesting() {
 
 /**
  * Emit a HTTP request to a destination defined on the incoming URL.
- * Protected by experiment.
+ * Launched for trusted viewer. Otherwise guarded by experiment.
  * @param {!Window} win
  */
 export function maybeTrackImpression(win) {
@@ -59,12 +57,29 @@ export function maybeTrackImpression(win) {
     resolveImpression = resolve;
   });
 
-  if (!isExperimentOn(win, 'alp')) {
-    resolveImpression();
-    return;
-  }
+  const viewer = Services.viewerForDoc(win.document);
+  viewer.isTrustedViewer().then(isTrusted => {
+    // Currently this feature is launched for trusted viewer, but still
+    // experiment guarded for all AMP docs.
+    if (!isTrusted && !isExperimentOn(win, 'alp')) {
+      resolveImpression();
+      return;
+    }
 
-  const viewer = viewerForDoc(win.document);
+    trackImpressionFromClickParam(win, viewer, resolveImpression);
+  });
+}
+
+
+/**
+ * Actually perform the impression request if it has been provided via
+ * the click param in the viewer arguments.
+ * @param {!Window} win
+ * @param {!./service/viewer-impl.Viewer} viewer
+ * @param {!Function} resolveImpression Call when the impression has been
+ *     tracked.
+ */
+function trackImpressionFromClickParam(win, viewer, resolveImpression) {
   /** @const {string|undefined} */
   const clickUrl = viewer.getParam('click');
 
@@ -93,8 +108,8 @@ export function maybeTrackImpression(win) {
     });
 
     // Timeout invoke promise after 8s and resolve trackImpressionPromise.
-    resolveImpression(timerFor(win).timeoutPromise(TIMEOUT_VALUE, promise,
-        'timeout waiting for ad server response').catch(() => {}));
+    resolveImpression(Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
+        promise, 'timeout waiting for ad server response').catch(() => {}));
   });
 }
 
@@ -109,22 +124,22 @@ export function doNotTrackImpression() {
  * Send the url to ad server and wait for its response
  * @param {!Window} win
  * @param {string} clickUrl
- * @return {!Promise<!JSONType>}
+ * @return {!Promise<!JsonObject>}
  */
 function invoke(win, clickUrl) {
   if (getMode().localDev && !getMode().test) {
     clickUrl = 'http://localhost:8000/impression-proxy?url=' + clickUrl;
   }
-  return xhrFor(win).fetchJson(clickUrl, {
+  return Services.xhrFor(win).fetchJson(clickUrl, {
     credentials: 'include',
-  });
+  }).then(res => res.json());
 }
 
 /**
  * parse the response back from ad server
  * Set for analytics purposes
  * @param {!Window} win
- * @param {!Object} response
+ * @param {!JsonObject} response
  */
 function applyResponse(win, viewer, response) {
   const adLocation = response['location'];

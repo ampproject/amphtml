@@ -19,7 +19,7 @@ import {
   BaseLifecycleReporter,
 } from '../performance';
 import {createIframePromise} from '../../../../testing/iframe';
-import {viewerForDoc} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 /**
@@ -80,11 +80,10 @@ describe('GoogleAdLifecycleReporter', () => {
     iframe = createIframePromise(false).then(iframeFixture => {
       const win = iframeFixture.win;
       const doc = iframeFixture.doc;
-      const viewer = viewerForDoc(doc);
+      const viewer = Services.viewerForDoc(doc);
       const elem = doc.createElement('div');
       doc.body.appendChild(elem);
-      const reporter = new GoogleAdLifecycleReporter(
-          win, elem, 'test_foo', 42);
+      const reporter = new GoogleAdLifecycleReporter(win, elem, 42);
       reporter.setPingAddress('/');
       reporter.setPingParameters({
         's': 'AD_SLOT_NAMESPACE',
@@ -114,7 +113,7 @@ describe('GoogleAdLifecycleReporter', () => {
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
-          /[&?]s=test_foo(&|$)/,
+          /[&?]s=amp(&|$)/,
           // In unit tests, internalRuntimeVersion is not substituted.  %24 ==
           // ASCII encoding of '$'.
           /[&?]rls=%24internalRuntimeVersion%24(&|$)/,
@@ -136,7 +135,6 @@ describe('GoogleAdLifecycleReporter', () => {
           urlBuilt: '1',
           adRequestStart: '2',
           adRequestEnd: '3',
-          extractCreativeAndSignature: '4',
           adResponseValidateStart: '5',
           renderFriendlyStart: '6',
           renderCrossDomainStart: '7',
@@ -153,7 +151,7 @@ describe('GoogleAdLifecycleReporter', () => {
         count = 0;
         for (const k in stages) {
           const expectations = [
-            /[&?]s=test_foo(&|$)/,
+            /[&?]s=amp(&|$)/,
             // In unit tests, internalRuntimeVersion is not substituted.  %24 ==
             // ASCII encoding of '$'.
             /[&?]rls=%24internalRuntimeVersion%24(&|$)/,
@@ -182,8 +180,7 @@ describe('GoogleAdLifecycleReporter', () => {
           const elem = doc.createElement('div');
           elem.setAttribute('id', i);
           doc.body.appendChild(elem);
-          const reporter = new GoogleAdLifecycleReporter(win, elem, 'test_foo',
-              i + 1);
+          const reporter = new GoogleAdLifecycleReporter(win, elem, i + 1);
           reporter.setPingAddress('/');
           reporter.setPingParameters({
             's': 'AD_SLOT_NAMESPACE',
@@ -202,7 +199,7 @@ describe('GoogleAdLifecycleReporter', () => {
         const slotCounts = {};
         for (let i = 0; i < emitPingSpy.callCount; ++i) {
           const src = emitPingSpy.getCall(i).args[0];
-          expect(src).to.match(/[?&]s=test_foo(&|$)/);
+          expect(src).to.match(/[?&]s=amp(&|$)/);
           expect(src).to.match(/[?&]c=[0-9]+/);
           const corr = /[?&]c=([0-9]+)/.exec(src)[1];
           commonCorrelator = commonCorrelator || corr;
@@ -230,7 +227,7 @@ describe('GoogleAdLifecycleReporter', () => {
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
           // Be sure that existing ping not deleted by args.
-          /[&?]s=test_foo/,
+          /[&?]s=amp/,
           /zort=314159/,
           /gack=flubble/,
         ];
@@ -286,11 +283,11 @@ describe('GoogleAdLifecycleReporter', () => {
         expect(arg).not.to.have.string(
             '<script src="https://evil.com">doEvil()</script>');
         expect(arg).to.have.string('&evil=' + encodeURIComponent(
-                '<script src="https://evil.com">doEvil()</script>'));
+            '<script src="https://evil.com">doEvil()</script>'));
         expect(arg).not.to.have.string(
             '<script src="https://very.evil.com">doMoreEvil()</script>');
         expect(arg).to.have.string('&' + encodeURIComponent(
-                '<script src="https://very.evil.com">doMoreEvil()</script>') +
+            '<script src="https://very.evil.com">doMoreEvil()</script>') +
             '=3');
       });
     });
@@ -304,7 +301,7 @@ describe('GoogleAdLifecycleReporter', () => {
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
           // Be sure that existing ping not deleted by args.
-          /[&?]s=test_foo/,
+          /[&?]s=amp/,
           /zort=[0-9.]+/,
         ];
         expectMatchesAll(arg, expectations);
@@ -324,7 +321,7 @@ describe('GoogleAdLifecycleReporter', () => {
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
           // Be sure that existing ping not deleted by args.
-          /[&?]s=test_foo/,
+          /[&?]s=amp/,
         ];
         expectMatchesAll(arg, expectations);
       });
@@ -341,7 +338,7 @@ describe('GoogleAdLifecycleReporter', () => {
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
           // Be sure that existing ping not deleted by args.
-          /[&?]s=test_foo/,
+          /[&?]s=amp/,
           /zort=12345/,
         ];
         expectMatchesAll(arg, expectations);
@@ -359,7 +356,7 @@ describe('GoogleAdLifecycleReporter', () => {
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
           // Be sure that existing ping not deleted by args.
-          /[&?]s=test_foo/,
+          /[&?]s=amp/,
           /zort=12345/,
           /gax=99/,
           /flub=0/,

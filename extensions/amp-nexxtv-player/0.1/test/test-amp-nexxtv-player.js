@@ -20,7 +20,7 @@ import {
 import '../amp-nexxtv-player';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {adopt} from '../../../../src/runtime';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import * as sinon from 'sinon';
 
@@ -29,7 +29,7 @@ adopt(window);
 describe('amp-nexxtv-player', () => {
 
   let sandbox;
-  const timer = timerFor(window);
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -78,12 +78,12 @@ describe('amp-nexxtv-player', () => {
 
   it('fails without mediaid', () => {
     return getNexxtv(null, '583').should.eventually.be.rejectedWith(
-      /The data-mediaid attribute is required/);
+        /The data-mediaid attribute is required/);
   });
 
   it('fails without client', () => {
     return getNexxtv('PTPFEC4U184674', null).should.eventually.be.rejectedWith(
-      /The data-client attribute is required/);
+        /The data-client attribute is required/);
   });
 
 
@@ -92,26 +92,26 @@ describe('amp-nexxtv-player', () => {
       const iframe = nexxtv.querySelector('iframe');
 
       return Promise.resolve()
-        .then(() => {
-          const p = listenOncePromise(nexxtv, VideoEvents.PLAY);
-          sendFakeMessage(nexxtv, iframe, {event: 'play'});
-          return p;
-        })
-        .then(() => {
-          const p = listenOncePromise(nexxtv, VideoEvents.MUTED);
-          sendFakeMessage(nexxtv, iframe, {event: 'mute'});
-          return p;
-        })
-        .then(() => {
-          const p = listenOncePromise(nexxtv, VideoEvents.PAUSE);
-          sendFakeMessage(nexxtv, iframe, {event: 'pause'});
-          return p;
-        })
-        .then(() => {
-          const p = listenOncePromise(nexxtv, VideoEvents.UNMUTED);
-          sendFakeMessage(nexxtv, iframe, {event: 'unmute'});
-          return p;
-        });
+          .then(() => {
+            const p = listenOncePromise(nexxtv, VideoEvents.PLAYING);
+            sendFakeMessage(nexxtv, iframe, {event: 'play'});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(nexxtv, VideoEvents.MUTED);
+            sendFakeMessage(nexxtv, iframe, {event: 'mute'});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(nexxtv, VideoEvents.PAUSE);
+            sendFakeMessage(nexxtv, iframe, {event: 'pause'});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(nexxtv, VideoEvents.UNMUTED);
+            sendFakeMessage(nexxtv, iframe, {event: 'unmute'});
+            return p;
+          });
     });
   });
 

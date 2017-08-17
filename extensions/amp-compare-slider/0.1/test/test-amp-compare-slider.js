@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpCompareSlider} from '../amp-compare-slider';
+
+import '../amp-compare-slider';
 
 describes.realWin('amp-compare-slider', {
   amp: {
     extensions: ['amp-compare-slider'],
-  }
+  },
 }, env => {
 
   let win;
@@ -31,8 +32,5 @@ describes.realWin('amp-compare-slider', {
     win.document.body.appendChild(element);
   });
 
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
-  });
+
 });

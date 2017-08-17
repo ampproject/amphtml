@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var argv = require('minimist')(process.argv.slice(2));
 var dirname = require('path').dirname;
@@ -66,7 +67,7 @@ function doScreenshot(host, path, output, device, verbose, cb) {
 /**
  * Make a golden image of the url.
  * Ex:
- * `gulp make-golden --path=examples/everything.amp.max.html \
+ * `gulp make-golden --path=examples/everything.amp.html \
  *     --host=http://localhost:8000`
  *  @param {function} cb callback function
  */

@@ -52,10 +52,10 @@ describe('ios-scrollfreeze-bug', () => {
     bodyBottom = '0px';
     bodySetSpy = sandbox.spy();
     Object.defineProperty(windowApi.document.body.style, 'bottom', {
-      get: function() {
+      get() {
         return bodyBottom;
       },
-      set: function(value) {
+      set(value) {
         bodySetSpy(value);
         bodyBottom = value;
       },

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var argv = require('minimist')(process.argv.slice(2));
 var fs = require('fs-extra');
@@ -147,7 +148,7 @@ FILL THIS IN. What does this extension do?
 FILL THIS IN. Does this extension allow for properties to configure?
 
 ## Validation
-See [${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions/${name}/0.1/validator-${name}.protoascii) in the AMP validator specification.
+See [${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions/${name}/validator-${name}.protoascii) in the AMP validator specification.
 `;
 }
 
@@ -278,10 +279,10 @@ function makeExtension() {
   fs.mkdirpSync(`extensions/${name}/0.1/test`);
   fs.writeFileSync(`extensions/${name}/${name}.md`,
       getMarkdownExtensionFile(name));
+  fs.writeFileSync(`extensions/${name}/validator-${name}.protoascii`,
+      getValidatorFile(name));
   fs.writeFileSync(`extensions/${name}/0.1/${name}.js`,
       getJsExtensionFile(name));
-  fs.writeFileSync(`extensions/${name}/0.1/validator-${name}.protoascii`,
-      getValidatorFile(name));
   fs.writeFileSync(`extensions/${name}/0.1/test/test-${name}.js`,
       getJsTestExtensionFile(name));
   fs.writeFileSync(`examples/${name}.amp.html`,

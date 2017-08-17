@@ -25,11 +25,10 @@ import {
 } from '../../src/friendly-iframe-embed';
 import {Signals} from '../../src/utils/signals';
 import {getStyle} from '../../src/style';
-import {extensionsFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {installServiceInEmbedScope} from '../../src/service';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-import {resourcesForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -43,8 +42,8 @@ describe('friendly-iframe-embed', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
 
-    const extensions = extensionsFor(window);
-    const resources = resourcesForDoc(window.document);
+    const extensions = Services.extensionsFor(window);
+    const resources = Services.resourcesForDoc(window.document);
     extensionsMock = sandbox.mock(extensions);
     resourcesMock = sandbox.mock(resources);
 
@@ -252,8 +251,8 @@ describe('friendly-iframe-embed', () => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-            sinon.match(arg => arg == iframe.contentWindow),
-            sinon.match(arg =>
+        sinon.match(arg => arg == iframe.contentWindow),
+        sinon.match(arg =>
                 arg.left == 0 &&
                 arg.top == 0 &&
                 arg.width == iframe.contentWindow.innerWidth &&
@@ -286,8 +285,8 @@ describe('friendly-iframe-embed', () => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-            sinon.match(arg => arg == iframe.contentWindow),
-            sinon.match(arg =>
+        sinon.match(arg => arg == iframe.contentWindow),
+        sinon.match(arg =>
                 arg.left == 10 &&
                 arg.top == 10 &&
                 arg.width == 100 &&
@@ -507,12 +506,12 @@ describe('friendly-iframe-embed', () => {
             loadExtension: () => {},
           }},
         },
-        setInterval: function() {
+        setInterval() {
           const interval = window.setInterval.apply(window, arguments);
           polls.push(interval);
           return interval;
         },
-        clearInterval: function(interval) {
+        clearInterval(interval) {
           window.clearInterval.apply(window, arguments);
           const index = polls.indexOf(interval);
           if (index != -1) {
@@ -643,6 +642,120 @@ describe('friendly-iframe-embed', () => {
       return embedPromise.then(() => {
         expect(polls).to.have.length(0);
       });
+    });
+
+  });
+
+  describe('full overlay mode', () => {
+    const x = 10;
+    const y = 500;
+    const w = 400;
+    const h = 300;
+
+    const winW = 600;
+    const winH = 800;
+
+    const vsyncMock = {
+      measure: fn => fn(),
+    };
+
+    const resourcesMock = {
+      mutateElement: (unusedEl, fn) => {
+        fn();
+        return Promise.resolve();
+      },
+    };
+
+    let win;
+    let iframe;
+    let fie;
+
+    beforeEach(() => {
+      win = {
+        innerWidth: winW,
+        innerHeight: winH,
+      };
+      iframe = document.createElement('iframe');
+
+      sandbox./*OK*/stub(iframe, 'getBoundingClientRect', () => ({
+        right: x + w,
+        left: x,
+        top: y,
+        bottom: y + h,
+        width: w,
+        height: h,
+      }));
+
+      fie = new FriendlyIframeEmbed(iframe, {
+        url: 'https://acme.org/url1',
+        html: '<body></body>',
+      }, Promise.resolve());
+
+      sandbox.stub(fie, 'getVsync', () => vsyncMock);
+      sandbox.stub(fie, 'getResources', () => resourcesMock);
+      sandbox.stub(fie, 'win', win);
+    });
+
+    it('should resize body and fixed container when entering', function* () {
+      const bodyElementMock = document.createElement('div');
+
+      const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
+
+      sandbox.stub(fie, 'getBodyElement', () => bodyElementMock);
+
+      yield fie.enterFullOverlayMode();
+
+      expect(bodyElementMock.style.background).to.equal('transparent');
+      expect(bodyElementMock.style.position).to.equal('absolute');
+      expect(bodyElementMock.style.width).to.equal(`${w}px`);
+      expect(bodyElementMock.style.height).to.equal(`${h}px`);
+      expect(bodyElementMock.style.top).to.equal(`${y}px`);
+      expect(bodyElementMock.style.left).to.equal(`${x}px`);
+      expect(bodyElementMock.style.right).to.equal('auto');
+      expect(bodyElementMock.style.bottom).to.equal('auto');
+
+      expect(iframe.style.position).to.equal('fixed');
+      expect(iframe.style.left).to.equal('0px');
+      expect(iframe.style.right).to.equal('0px');
+      expect(iframe.style.top).to.equal('0px');
+      expect(iframe.style.bottom).to.equal('0px');
+      expect(iframe.style.width).to.equal('100vw');
+      expect(iframe.style.height).to.equal('100vh');
+
+      // ensuring that the resource scheduler knows about the iframe change
+      expect(mutateElementSpy)
+          .to.have.been.calledWith(iframe, sinon.match.any);
+    });
+
+    it('should reset body and fixed container when leaving', function* () {
+      const bodyElementMock = document.createElement('div');
+
+      const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
+
+      sandbox.stub(fie, 'getBodyElement', () => bodyElementMock);
+
+      yield fie.enterFullOverlayMode();
+      yield fie.leaveFullOverlayMode();
+
+      expect(bodyElementMock.style.position).to.be.empty;
+      expect(bodyElementMock.style.width).to.be.empty;
+      expect(bodyElementMock.style.height).to.be.empty;
+      expect(bodyElementMock.style.top).to.be.empty;
+      expect(bodyElementMock.style.left).to.be.empty;
+      expect(bodyElementMock.style.right).to.be.empty;
+      expect(bodyElementMock.style.bottom).to.be.empty;
+
+      expect(iframe.style.position).to.be.empty;
+      expect(iframe.style.left).to.be.empty;
+      expect(iframe.style.right).to.be.empty;
+      expect(iframe.style.top).to.be.empty;
+      expect(iframe.style.bottom).to.be.empty;
+      expect(iframe.style.width).to.be.empty;
+      expect(iframe.style.height).to.be.empty;
+
+      // ensuring that the resource scheduler knows about the iframe change
+      expect(mutateElementSpy)
+          .to.have.been.calledWith(iframe, sinon.match.any);
     });
   });
 });

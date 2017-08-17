@@ -20,12 +20,17 @@ import {Signals} from './utils/signals';
 import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
-import {extensionsFor} from './services';
+import {Services} from './services';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
-import {resourcesForDoc} from './services';
-import {setStyle, setStyles} from './style';
+import {
+  px,
+  resetStyles,
+  setImportantStyles,
+  setStyle,
+  setStyles,
+} from './style';
 
 
 /** @const {string} */
@@ -121,7 +126,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   /** @const {!Window} */
   const win = getTopWindow(iframe.ownerDocument.defaultView);
   /** @const {!./service/extensions-impl.Extensions} */
-  const extensions = extensionsFor(win);
+  const extensions = Services.extensionsFor(win);
 
   setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
@@ -336,7 +341,7 @@ export class FriendlyIframeEmbed {
    * Ensures that all resources from this iframe have been released.
    */
   destroy() {
-    resourcesForDoc(this.iframe).removeForChildWindow(this.win);
+    Services.resourcesForDoc(this.iframe).removeForChildWindow(this.win);
     disposeServicesForEmbed(this.win);
   }
 
@@ -345,6 +350,14 @@ export class FriendlyIframeEmbed {
    */
   getStartTime() {
     return this.startTime_;
+  }
+
+  /**
+   * Returns the base URL for the embedded document.
+   * @return {string}
+   */
+  getUrl() {
+    return this.spec.url;
   }
 
   /** @return {!Signals} */
@@ -444,6 +457,127 @@ export class FriendlyIframeEmbed {
       this.visibilityObservable_.fire(this.visible_);
     }
   }
+
+  /**
+   * @return {!HTMLBodyElement}
+   * @visibleForTesting
+   */
+  getBodyElement() {
+    return /** @type {!HTMLBodyElement} */ (
+        (this.iframe.contentDocument || this.iframe.contentWindow.document)
+            .body);
+  }
+
+  /**
+   * @return {!./service/vsync-impl.Vsync}
+   * @visibleForTesting
+   */
+  getVsync() {
+    return Services.vsyncFor(this.win);
+  }
+
+  /**
+   * @return {!./service/resources-impl.Resources}
+   * @visibleForTesting
+   */
+  getResources() {
+    return Services.resourcesForDoc(this.iframe);
+  }
+
+  /**
+   * Runs a measure/mutate cycle ensuring that the iframe change is propagated
+   * to the resource manager.
+   * @param {{measure: (Function|undefined), mutate: (Function|undefined)}} task
+   * @param {!Object=} opt_state
+   * @return {!Promise}
+   * @private
+   */
+  runVsyncOnIframe_(task, opt_state) {
+    if (task.mutate && !task.measure) {
+      return this.getResources().mutateElement(this.iframe, () => {
+        task.mutate(opt_state);
+      });
+    }
+    return new Promise(resolve => {
+      this.getVsync().measure(() => {
+        task.measure(opt_state);
+
+        if (!task.mutate) {
+          return resolve();
+        }
+
+        this.runVsyncOnIframe_({mutate: task.mutate}, opt_state)
+            .then(resolve);
+      });
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  enterFullOverlayMode() {
+    return this.runVsyncOnIframe_({
+      measure: state => {
+        const iframeRect = this.iframe./*OK*/getBoundingClientRect();
+
+        state.bodyStyle = {
+          'background': 'transparent',
+          'position': 'absolute',
+          'top': px(iframeRect.top),
+          'left': px(iframeRect.left),
+          'width': px(iframeRect.width),
+          'height': px(iframeRect.height),
+          'bottom': 'auto',
+          'right': 'auto',
+        };
+      },
+      mutate: state => {
+        setStyles(this.iframe, {
+          'position': 'fixed',
+          'left': 0,
+          'right': 0,
+          'top': 0,
+          'bottom': 0,
+          'width': '100vw',
+          'height': '100vh',
+        });
+
+        // We need to override runtime-level !important rules
+        setImportantStyles(this.getBodyElement(), state.bodyStyle);
+      },
+    }, {});
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  leaveFullOverlayMode() {
+    return this.runVsyncOnIframe_({
+      mutate: () => {
+        resetStyles(this.iframe, [
+          'position',
+          'left',
+          'right',
+          'top',
+          'bottom',
+          'width',
+          'height',
+        ]);
+
+        // we're not resetting background here as we need to set it to
+        // transparent permanently (see TODO)
+        resetStyles(this.getBodyElement(), [
+          'position',
+          'top',
+          'left',
+          'width',
+          'height',
+          'bottom',
+          'right',
+        ]);
+      },
+    });
+  }
 }
 
 
@@ -456,7 +590,7 @@ export class FriendlyIframeEmbed {
  * @return {!Promise}
  */
 export function whenContentIniLoad(context, hostWin, rect) {
-  return resourcesForDoc(context)
+  return Services.resourcesForDoc(context)
       .getResourcesInRect(hostWin, rect)
       .then(resources => {
         const promises = [];

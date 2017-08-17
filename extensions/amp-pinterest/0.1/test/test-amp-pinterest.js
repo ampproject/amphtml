@@ -44,9 +44,9 @@ describes.realWin('amp-pinterest', {
 
   it('renders', () => {
     return getPin('buttonPin',
-      'http://www.flickr.com/photos/kentbrew/6851755809/',
-      'http://c2.staticflickr.com/8/7027/6851755809_df5b2051c9_b.jpg',
-      'Next stop: Pinterest'
+        'http://www.flickr.com/photos/kentbrew/6851755809/',
+        'http://c2.staticflickr.com/8/7027/6851755809_df5b2051c9_b.jpg',
+        'Next stop: Pinterest'
     ).then(pin => {
       const a = pin.querySelector('a');
       const href = a.href.replace(/&guid=\w+/, '');

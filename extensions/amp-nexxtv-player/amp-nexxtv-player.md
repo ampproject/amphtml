@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays a media stream from the nexxOMNIA platform.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-nexxtv-player" src="https://cdn.ampproject.org/v0/amp-nexxtv-player-0.1.js">&lt;/script></code></td>
   </tr>
@@ -34,6 +30,8 @@ limitations under the License.
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
 </table>
+
+[TOC]
 
 ## Example
 
@@ -47,21 +45,22 @@ With the responsive layout, the width and height from the example should yield c
     data-seek-to="2"
     data-mode="static"
     data-origin="https://embed.nexx.cloud/"
+    data-disable-ads="1"
     layout="responsive"
     width="480" height="270"></amp-nexxtv-player>
 ```
 
 ## Attributes
 
-**data-mediaid** (required)
+##### data-mediaid (required)
 
 Represents the ID of the media you want to play.
 
-**data-client** (required)
+##### data-client (required)
 
 Your domain ID.
 
-**data-streamtype** (optional)
+##### data-streamtype (optional)
 
 Indicates the media streaming type, which can be one of the following:
 
@@ -73,23 +72,26 @@ Indicates the media streaming type, which can be one of the following:
 * `album`: An audio playlist.
 
 
-**data-seek-to** (optional)
+##### data-seek-to (optional)
 
 Indicates the starting point of your media (in seconds).  For example, video starting 1:30min.
 
-**data-mode** (optional)
+##### data-mode (optional)
 
 Indicates the data mode, which can be `static` (default) or `api`.
 
-**data-origin** (optional)
+##### data-origin (optional)
 
 Indicates the source from which the embedded domain media is played. By default this is set to `https://embed.nexx.cloud/`.
 
+##### data-disable-ads (optional)
 
-**common attributes**
+Ads are enabled by default. Set value to 1 to disable.
+
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-nexxtv-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-nexxtv-player/0.1/validator-amp-nexxtv-player.protoascii) in the AMP validator specification.
+See [amp-nexxtv-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-nexxtv-player/validator-amp-nexxtv-player.protoascii) in the AMP validator specification.

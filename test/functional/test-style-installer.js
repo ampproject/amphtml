@@ -16,13 +16,10 @@
 
 import {getStyle} from '../../src/style';
 import * as rds from '../../src/render-delaying-services';
-import {
-  installPerformanceService,
-  performanceFor,
-} from '../../src/service/performance-impl';
+import {installPerformanceService} from '../../src/service/performance-impl';
 import {createIframePromise} from '../../testing/iframe';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
-import {resourcesForDoc} from '../../src/services';
+import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 import * as styles from '../../src/style-installer';
 
@@ -44,10 +41,10 @@ describe('Styles', () => {
       win = iframe.win;
       doc = win.document;
       installPerformanceService(doc.defaultView);
-      const perf = performanceFor(doc.defaultView);
+      const perf = Services.performanceFor(doc.defaultView);
       tickSpy = sandbox.spy(perf, 'tick');
       installResourcesServiceForDoc(doc);
-      resources = resourcesForDoc(doc);
+      resources = Services.resourcesForDoc(doc);
       ampdoc = resources.ampdoc;
       schedulePassSpy = sandbox.spy(resources, 'schedulePass');
       waitForServicesStub = sandbox.stub(rds, 'waitForServices');
@@ -82,7 +79,7 @@ describe('Styles', () => {
       expect(ampdoc.signals().get('render-start')).to.be.null;
     });
 
-    it('should wait for render delaying services', done => {
+    it('should wait for render delaying services', () => {
       expect(getStyle(doc.body, 'opacity')).to.equal('');
       expect(getStyle(doc.body, 'visibility')).to.equal('');
       expect(getStyle(doc.body, 'animation')).to.equal('');
@@ -92,26 +89,28 @@ describe('Styles', () => {
           .returns(Promise.resolve(['service1', 'service2']));
       styles.makeBodyVisible(doc, true);
       styles.makeBodyVisible(doc, true); // 2nd call should make no difference
-      setTimeout(() => {
+      return new Promise(resolve => {
+        setTimeout(resolve, 0);
+      }).then(() => {
         expect(getStyle(doc.body, 'opacity')).to.equal('1');
         expect(getStyle(doc.body, 'visibility')).to.equal('visible');
         expect(getStyle(doc.body, 'animation')).to.equal('none');
         expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
         expect(schedulePassSpy.withArgs(1, true)).to.be.calledOnce;
         expect(ampdoc.signals().get('render-start')).to.be.ok;
-        done();
-      }, 0);
+      });
     });
 
-    it('should skip schedulePass if no render delaying services', done => {
+    it('should skip schedulePass if no render delaying services', () => {
       waitForServicesStub.withArgs(win).returns(Promise.resolve([]));
       styles.makeBodyVisible(doc, true);
-      setTimeout(() => {
+      return new Promise(resolve => {
+        setTimeout(resolve, 0);
+      }).then(() => {
         expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
         expect(schedulePassSpy).to.not.be.calledWith(sinon.match.number, true);
         expect(ampdoc.signals().get('render-start')).to.be.ok;
-        done();
-      }, 0);
+      });
     });
   });
 
