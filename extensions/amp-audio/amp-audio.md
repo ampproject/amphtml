@@ -78,6 +78,10 @@ If present, the audio will automatically loop back to the start upon reaching th
 
 If present, will mute the audio by default.
 
+##### controlsList
+
+If its value is set to `nodownload`, the download button will be hidden.
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
