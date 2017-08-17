@@ -54,30 +54,29 @@ export function runVideoPlayerIntegrationTests(
     return button;
   }
 
-  describe.configure().ifChrome().skipOldChrome()
-      .run('Video Interface', function() {
-        this.timeout(TIMEOUT);
+  describe.configure().ifNewChrome() .run('Video Interface', function() {
+    this.timeout(TIMEOUT);
 
-        it('should override the video interface methods', function() {
-          this.timeout(TIMEOUT);
-          return getVideoPlayer({outsideView: false, autoplay: true})
-              .then(r => {
-                const impl = r.video.implementation_;
-                const methods = Object.getOwnPropertyNames(
-                    Object.getPrototypeOf(new VideoInterface()));
+    it('should override the video interface methods', function() {
+      this.timeout(TIMEOUT);
+      return getVideoPlayer({outsideView: false, autoplay: true})
+          .then(r => {
+            const impl = r.video.implementation_;
+            const methods = Object.getOwnPropertyNames(
+                Object.getPrototypeOf(new VideoInterface()));
 
-                expect(methods.length).to.be.above(1);
-                for (let i = 0; i < methods.length; i++) {
-                  const methodName = methods[i];
-                  expect(impl[methodName]).to.exist;
-                }
-              });
-        });
+            expect(methods.length).to.be.above(1);
+            for (let i = 0; i < methods.length; i++) {
+              const methodName = methods[i];
+              expect(impl[methodName]).to.exist;
+            }
+          });
+    });
 
-        afterEach(cleanUp);
-      });
+    afterEach(cleanUp);
+  });
 
-  describe.configure().ifChrome().skipOldChrome().run('Actions', function() {
+  describe.configure().ifNewChrome().run('Actions', function() {
     this.timeout(TIMEOUT);
 
     it.skip('should support mute, play, pause, unmute actions', function() {
@@ -131,8 +130,7 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().ifChrome().skipOldChrome().run(`Analytics
-      Triggers`, function() {
+  describe.configure().ifNewChrome().run('Analytics Triggers', function() {
     this.timeout(TIMEOUT);
     let video;
 
@@ -321,8 +319,7 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().ifChrome().skipOldChrome().run(`Video
-      Docking`, function() {
+  describe.configure().ifNewChrome().run('Video Docking', function() {
     this.timeout(TIMEOUT);
 
     describe('General Behavior', () => {
@@ -500,7 +497,7 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().ifChrome().skipOldChrome().run('Autoplay', function() {
+  describe.configure().ifNewChrome().run('Autoplay', function() {
     this.timeout(TIMEOUT);
 
     describe('play/pause', () => {

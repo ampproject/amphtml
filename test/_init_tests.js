@@ -136,6 +136,10 @@ class TestConfig {
     return this;
   }
 
+  ifNewChrome() {
+    return this.ifChrome().skipOldChrome();
+  }
+
   ifChrome() {
     return this.if(this.platform.isChrome.bind(this.platform));
   }
