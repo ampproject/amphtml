@@ -8,4 +8,4 @@ There are many ways to get help for questions and issues related to AMP:
   - [ampstart.com](https://ampstart.com) provides templates you can use to create AMP sites from scratch
 - if you **encounter a bug in AMP or have a feature request for AMP**, see [Reporting issues with AMP](CONTRIBUTING.md#reporting-issues-with-amp) for information on filing an issue
 - for questions or issues related to **AMP on Google Search** please use [Google's AMP forum](https://goo.gl/utQ1KZ)
-- if you are **contributing code to the AMP Project** the [Contributing Code section of CONTRIBUTING.md](CONTRIBUTING.md#contributing-code) provides ways to get help
+- if you are **contributing code to the AMP Project** the [Contributing code section of CONTRIBUTING.md](CONTRIBUTING.md#contributing-code) provides ways to get help
