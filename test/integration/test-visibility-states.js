@@ -162,7 +162,7 @@ describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
           });
         });
 
-        // TODO(aghassemi): Investigate failure. #10972.
+        // TODO(aghassemi): Investigate failure. #10974.
         it.skip('does not call callbacks when going to INACTIVE', () => {
           viewer.receiveMessage('visibilitychange',
               {state: VisibilityState.INACTIVE});
@@ -223,7 +223,7 @@ describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
           });
         });
 
-        // TODO(aghassemi): Investigate failure. #10972.
+        // TODO(aghassemi): Investigate failure. #10974.
         it.skip('does not call callbacks when going to INACTIVE', () => {
           viewer.receiveMessage('visibilitychange',
               {state: VisibilityState.INACTIVE});
@@ -386,7 +386,7 @@ describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
         });
       });
 
-      // TODO(aghassemi): Investigate failure. #10972.
+      // TODO(aghassemi): Investigate failure. #10974.
       it.skip('does not call callbacks when going to INACTIVE', () => {
         return waitForNextPass().then(() => {
           expect(layoutCallback).not.to.have.been.called;

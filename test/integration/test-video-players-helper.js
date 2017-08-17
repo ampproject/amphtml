@@ -195,7 +195,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    // TODO(aghassemi): Investigate failure. #10972.
+    // TODO(aghassemi): Investigate failure. #10974.
     it.skip('should trigger session analytics when ' +
         'a visible session ends', function() {
       let viewport;
@@ -274,7 +274,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    // TODO(aghassemi): Investigate failure. #10972.
+    // TODO(aghassemi): Investigate failure. #10974.
     it.skip('should trigger video-seconds-played when visible' +
         'and playing', () => {
       let video;

@@ -114,7 +114,7 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
 
     });
 
-    // TODO(aghassemi): Investigate failure. #10972.
+    // TODO(aghassemi): Investigate failure. #10974.
     it.skip('autoplay - autoplay not supported should behave' +
         'like manual play', () => {
 

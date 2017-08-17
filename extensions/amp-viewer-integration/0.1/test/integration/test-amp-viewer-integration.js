@@ -46,7 +46,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       document.body.removeChild(viewerEl);
     });
 
-    // TODO(aghassemi): Investigate failure. #10972.
+    // TODO(aghassemi): Investigate failure. #10974.
     it.skip('should confirm the handshake', () => {
       console/*OK*/.log('sending handshake response');
       viewer.confirmHandshake();
