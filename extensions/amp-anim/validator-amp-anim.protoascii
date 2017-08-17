@@ -17,7 +17,7 @@
 tags: {  # amp-anim
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-anim"
+    name: "amp-anim-this-is-a-test"
     allowed_versions: "0.1"
     allowed_versions: "latest"
     requires_usage: DEPRECATED_WARNING
