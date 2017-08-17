@@ -16,18 +16,19 @@
 
 import {ActionTrust} from '../action-trust';
 import {KeyCodes} from '../utils/key-codes';
+import {Services} from '../services';
 import {debounce} from '../utils/rate-limit';
-import {isEnabled} from '../dom';
 import {dev, user} from '../log';
+import {isArray, isFiniteNumber} from '../types';
+import {isEnabled} from '../dom';
+import {filterSplice} from '../utils/array';
+import {getMode} from '../mode';
+import {getValueForExpr} from '../json';
+import {map} from '../utils/object';
 import {
   registerServiceBuilderForDoc,
   installServiceInEmbedScope,
 } from '../service';
-import {getMode} from '../mode';
-import {getValueForExpr} from '../json';
-import {isArray, isFiniteNumber} from '../types';
-import {map} from '../utils/object';
-import {Services} from '../services';
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.
@@ -255,41 +256,6 @@ export class ActionService {
   }
 
   /**
-   * Given a browser 'change' or 'input' event, add `details` property
-   * containing the relevant information for the change that generated it.
-   * @param {!ActionEventDef} event
-   */
-  addInputDetails_(event) {
-    const detail = /** @type {!JsonObject} */ (map());
-    const target = event.target;
-    const tagName = target.tagName;
-
-    // Expose `value` property on HTMLInputElement and HTMLSelectElement.
-    if (tagName == 'INPUT' || tagName == 'SELECT') {
-      const type = target.getAttribute('type');
-
-      // TODO(blueyedgeek, #10729): Provide valueAsNumber instead of casting.
-      detail['value'] = (type == 'range') ? Number(target.value) : target.value;
-
-      // Expose HTMLInputElement properties based on type.
-      if (tagName == 'INPUT') {
-        if (type == 'checkbox' || type == 'radio') {
-          detail['checked'] = target.checked;
-        } else if (type == 'range') {
-          // TODO(choumx): Perhaps we shouldn't cast since min/max is also
-          // available on input[type="date|time|number"].
-          detail['min'] = Number(target.min);
-          detail['max'] = Number(target.max);
-        }
-      }
-    }
-
-    if (Object.keys(detail).length > 0) {
-      event.detail = detail;
-    }
-  }
-
-  /**
    * Registers the action target that will receive all designated actions.
    * @param {string} name
    * @param {ActionHandlerDef} handler
@@ -329,8 +295,9 @@ export class ActionService {
    * @param {ActionTrust} trust
    */
   execute(target, method, args, source, event, trust) {
-    this.invoke_(target, method, args, source, event, trust,
-        /* actionInfo */ null);
+    const invocation =
+        new ActionInvocation(target, method, args, source, event, trust);
+    this.invoke_(invocation, /* actionInfo */ null);
   }
 
   /**
@@ -390,6 +357,21 @@ export class ActionService {
       return;
     }
 
+    // Only allow one amp-bind action per action chain.
+    let numberOfBindActions = 0;
+    filterSplice(action.actionInfos, actionInfo => {
+      if (actionInfo.target == 'AMP' &&
+          actionInfo.method.indexOf('State') >= 0) {
+        numberOfBindActions++;
+        if (numberOfBindActions > 1) {
+          this.actionInfoError_('Only one amp-bind action allowed per event',
+              actionInfo, /* target */ null);
+          return false;
+        }
+      }
+      return true;
+    });
+
     // Invoke actions serially, where each action waits for its predecessor
     // to complete. `currentPromise` is the i'th promise in the chain.
     let currentPromise = null;
@@ -410,8 +392,9 @@ export class ActionService {
         // Element target via `id` attribute.
         const target = this.root_.getElementById(actionInfo.target);
         if (target) {
-          return this.invoke_(target, actionInfo.method, args,
-              action.node, event, trust, actionInfo);
+          const invocation = new ActionInvocation(target, actionInfo.method,
+              args, action.node, event, trust);
+          return this.invoke_(invocation, actionInfo);
         } else {
           this.actionInfoError_('target not found', actionInfo, target);
         }
@@ -439,22 +422,17 @@ export class ActionService {
   }
 
   /**
-   * @param {!Element} target
-   * @param {string} method
-   * @param {?JsonObject} args
-   * @param {?Element} source
-   * @param {?ActionEventDef} event
-   * @param {ActionTrust} trust
-   * @param {?ActionInfoDef} actionInfo
+   * @param {!ActionInvocation} invocation
+   * @param {?ActionInfoDef} actionInfo TODO(choumx): Remove this param.
    * @return {?Promise}
    * @private visible for testing
    */
-  invoke_(target, method, args, source, event, trust, actionInfo) {
-    const invocation = new ActionInvocation(target, method, args,
-        source, event, trust);
+  invoke_(invocation, actionInfo) {
+    const target = dev().assertElement(invocation.target);
+    const method = invocation.method;
 
     // Try a global method handler first.
-    const globalMethod = this.globalMethodHandlers_[invocation.method];
+    const globalMethod = this.globalMethodHandlers_[method];
     if (globalMethod && invocation.satisfiesTrust(globalMethod.minTrust)) {
       return globalMethod.handler(invocation);
     }
@@ -478,7 +456,7 @@ export class ActionService {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = target.getAttribute('id') || '';
     if ((targetId && targetId.substring(0, 4) == 'amp-') ||
-        (supportedActions && supportedActions.indexOf(method) != -1)) {
+        (supportedActions && supportedActions.indexOf(method) > -1)) {
       const holder = target[ACTION_HANDLER_];
       if (holder) {
         const {handler, minTrust} = holder;
@@ -493,9 +471,9 @@ export class ActionService {
     }
 
     // Unsupported target.
-    this.actionInfoError_(
-        'Target element does not support provided action',
+    this.actionInfoError_('Target element does not support provided action',
         actionInfo, target);
+
     return null;
   }
 
@@ -545,6 +523,43 @@ export class ActionService {
     }
     return actionMap;
   }
+
+  /**
+   * Given a browser 'change' or 'input' event, add `details` property
+   * containing the relevant information for the change that generated it.
+   * @param {!ActionEventDef} event
+   * @private
+   */
+  addInputDetails_(event) {
+    const detail = /** @type {!JsonObject} */ (map());
+    const target = event.target;
+    const tagName = target.tagName;
+
+    // Expose `value` property on HTMLInputElement and HTMLSelectElement.
+    if (tagName == 'INPUT' || tagName == 'SELECT') {
+      const type = target.getAttribute('type');
+
+      // TODO(blueyedgeek, #10729): Provide valueAsNumber instead of casting.
+      detail['value'] = (type == 'range') ? Number(target.value) : target.value;
+
+      // Expose HTMLInputElement properties based on type.
+      if (tagName == 'INPUT') {
+        if (type == 'checkbox' || type == 'radio') {
+          detail['checked'] = target.checked;
+        } else if (type == 'range') {
+          // TODO(choumx): Perhaps we shouldn't cast since min/max is also
+          // available on input[type="date|time|number"].
+          detail['min'] = Number(target.min);
+          detail['max'] = Number(target.max);
+        }
+      }
+    }
+
+    if (Object.keys(detail).length > 0) {
+      event.detail = detail;
+    }
+  }
+
 }
 
 
