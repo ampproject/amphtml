@@ -15,23 +15,46 @@
  */
 
 amp-compare-slider {
-  width: 100%;
-  height: 100%;
+  position: initial !important;
+  max-width: 100%;
 }
 
 .topElementContainer {
-  border-right: 4px solid blue;
   z-index: 3;
   width: 50%;
 }
 
 .topElementContainer,
 .bottomElementContainer {
+  height: 100%;
   position: absolute;
   left: 0px;
   overflow: hidden;
+}
+
+.topElement {
+  width: 400px;
+}
+
+.topElement,
+.bottomElement{
   height: 100%;
+}
+
+.bottomElement,
+.bottomElementContainer {
   width: 100%;
+}
+
+.draggable {
+  width: 4px;
+  height: 100%;
+  position: absolute;
+  cursor: ew-resize;
+  background-color: blue;
+  bottom: 0; 
+  top: 0;
+  right: 0;
 }
 
 i-amphtml-sizer {

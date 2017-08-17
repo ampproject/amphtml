@@ -29,11 +29,16 @@ export class AmpCompareSlider extends AMP.BaseElement {
     /** @private {?Element} */
     this.bottomElementContainer_ = null;
     
+    /** @private {?Element} */
+    this.draggable_ = null;
+    
+    
   }
 
   /** @override */
   buildCallback() {
     this.buildCompareSliderElements();
+    this.createListeners();
   }
   
   /** @override */
@@ -41,22 +46,57 @@ export class AmpCompareSlider extends AMP.BaseElement {
     return layout == Layout.RESPONSIVE;
   }
   
-  buildCompareSliderElements {
+  
+  buildCompareSliderElements() {
+    this.element.style.height = this.element.getAttribute('height') + 'px';
+    this.element.style.width = this.element.getAttribute('width') + 'px';
+    
     const originalChildren = this.element.children;
     
     this.topElementContainer_ = document.createElement('div');
     this.bottomElementContainer_ = document.createElement('div');
+    this.draggable_ = document.createElement('div');
     
     //Make Elements children of newly created divs
-    this.topElementContainer_.appendChild(originalChildren[0]);
-    this.bottomElementContainer_.appendChild(originalChildren[0]);
+    // the first child is i-amphtml-sizer
+    this.topElementContainer_.appendChild(originalChildren[1]);
+    this.bottomElementContainer_.appendChild(originalChildren[1]);
+    this.topElementContainer_.appendChild(this.draggable_);
+    this.draggable_.className = 'draggable';
     this.topElementContainer_.className = 'topElementContainer';
     this.bottomElementContainer_.className = 'bottomElementContainer';
     
     // Add newly created elements to the view
     this.element.appendChild(this.topElementContainer_);
     this.element.appendChild(this.bottomElementContainer_);
+    this.topElementContainer_.style.maxWidth = this.element.getAttribute('width') + 'px';
+    this.bottomElementContainer_.style.width = this.element.getAttribute('width') + 'px';
   }
+  
+  createListeners() {
+    this.draggable_.addEventListener('mousedown', 
+                                  this.sliderBeginsMoving.bind(this));
+    this.draggable_.addEventListener('touchstart',
+                                  this.sliderBeginsMoving.bind(this));
+    this.draggable_.addEventListener('touchmove',
+                                  this.whileSliderMoving.bind(this));
+    this.draggable_.addEventListener('touchend',
+                                  this.whenSliderStops.bind(this));
+  }
+  
+  sliderBeginsMoving(e) {
+    this.startX = e.touches[0].pageX;
+    this.startWidth = parseInt(window.getComputedStyle(this.element).width, 10);
+  }
+  
+  whileSliderMoving(e) {
+    this.topElementContainer_.style.width = 
+      e.touches[0].pageX - this.topElementContainer_.offsetLeft < this.element.getAttribute('width') ? (e.touches[0].pageX - this.topElementContainer_.offsetLeft) + 'px' : this.element.getAttribute('width') + 'px';
+  }
+  
+  whenSliderStops(e){
+  }
+  
   
 }
 
