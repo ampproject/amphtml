@@ -109,6 +109,7 @@ export class StandardActions {
         this.handleAmpPushState_(invocation);
         return;
       case 'setState':
+        // Only allow one AMP.setState action per event.
         const actionInfos =
             /** @type {!Array} */ (dev().assert(opt_actionInfos));
         const firstSetState = findIndex(actionInfos, actionInfo => {
