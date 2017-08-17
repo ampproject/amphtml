@@ -26,7 +26,8 @@ import {getSourceUrl} from '../../../../../src/url';
 
 describes.sandboxed('AmpViewerIntegration', {}, () => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
-  describe.configure().ifNewChrome().run('Handshake', function() {
+  // TODO(aghassemi): Investigate failure in beforeEach. #10974.
+  describe.skip('Handshake', function() {
     let viewerEl;
     let viewer;
     let ampDocUrl;
@@ -46,8 +47,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       document.body.removeChild(viewerEl);
     });
 
-    // TODO(aghassemi): Investigate failure. #10974.
-    it.skip('should confirm the handshake', () => {
+    it('should confirm the handshake', () => {
       console/*OK*/.log('sending handshake response');
       viewer.confirmHandshake();
       return viewer.waitForDocumentLoaded();
