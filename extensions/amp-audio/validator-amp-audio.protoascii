@@ -30,9 +30,12 @@ attr_lists: { # amp-audio attributes that are common to both AMP and A4A format.
   attrs: { name: "artist" }
   attrs: { name: "artwork" }
   attrs: { name: "controls" }
+  attrs: {
+    name: "controlsList"
+    value: "nodownload"
+  }
   attrs: { name: "loop"  value: "" }
   attrs: { name: "muted" value: "" }
-  attrs: { name: "controlsList" }
   attrs: {
     name: "src"
     value_url: {
