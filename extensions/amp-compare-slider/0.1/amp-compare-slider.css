@@ -51,18 +51,18 @@ amp-compare-slider {
   height: 100%;
   position: absolute;
   cursor: ew-resize;
-  background-color: blue;
+  background-color: black;
   bottom: 0; 
   top: 0;
   right: 0;
 }
 
 .dragHint {
-  height: 15px;
-  background-color: red;
-  width: 45px;
+  height: 25px;
+  background: black url("data:image/svg+xml;utf8,<svg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='32px' height='32px' viewBox='0 0 32 32' enable-background='new 0 0 32 32' xml:space='preserve'> <polygon fill='#FFFFFF' points='13,21 8,16 13,11'/> <polygon fill='#FFFFFF' points='19,11 24,16 19,21 '/></svg>") no-repeat center center;
+  width: 70px;
   position: absolute;
-  right: 46%;
+  right: 43%;
   bottom: 50%;
   margin: auto;
   text-align: center;

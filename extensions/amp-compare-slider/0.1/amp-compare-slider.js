@@ -89,19 +89,17 @@ export class AmpCompareSlider extends AMP.BaseElement {
   
   whenCompareSliderTapped(e) {
     this.topElementContainer_.style.width = e.touches[0].pageX + 'px';
-    console.log(document.getElementsByClassName('dragHint').style.display);
-    this.win.document.getElementsByClassName('dragHint').style.display = "none !important";
-    console.log(this.win.document.getElementsByClassName('dragHint').style.display);
+    this.draggingHint_.style.display = "none";
   }
   
   whileSliderMoving(e) {
     this.topElementContainer_.style.width = 
       e.touches[0].pageX - this.topElementContainer_.offsetLeft < this.element.getAttribute('width') ? (e.touches[0].pageX - this.topElementContainer_.offsetLeft) + 'px' : this.element.getAttribute('width') + 'px';
-    this.draggingHint_.style.display = "none !important";
+    this.draggingHint_.style.display = "none";
   }
   
   whenSliderStops(e){
-    this.draggingHint_.style.display = "none !important";
+   this.draggingHint_.style.display = "none";
   }
   
 }
