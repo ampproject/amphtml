@@ -22,13 +22,14 @@ import {writeScript, validateData} from '../3p/3p';
  */
 export function widespace(global, data) {
 
-  const WS_AMP_CODE_VER = '1.0.0';
+  const WS_AMP_CODE_VER = '1.0.1';
+  const demographParams = ['demoGender', 'demoCountry', 'demoRegion', 'demoCity', 'demoPostal', 'demoYob'];
 
-  validateData(data, ['sid'], []);
+  validateData(data, ['sid'], demographParams);
 
   const url = 'https://engine.widespace.com/map/engine/dynamic?isamp=1'
       + '&ampver=' + WS_AMP_CODE_VER
-      + '&sid=' + encodeURIComponent(data.sid);
+      + '&#sid=' + encodeURIComponent(data.sid);
 
   writeScript(global, url);
 }
