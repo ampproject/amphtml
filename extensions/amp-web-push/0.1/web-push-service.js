@@ -15,9 +15,7 @@
  */
 
 import {getMode} from '../../../src/mode';
-import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
-import {urls} from '../../../src/config';
 import {CSS} from '../../../build/amp-web-push-0.1.css';
 import {IFrameHost} from './iframehost';
 import {WindowMessenger} from './window-messenger';
@@ -111,11 +109,6 @@ export class WebPushService {
   constructor(ampdoc) {
     /** @const */
     this.ampdoc = ampdoc;
-
-    // Enable our AMP extension for development and test environments
-    this.enableAmpExperimentForDevelopment_();
-    // On all other environments, error if experiment is not enabled
-    this.ensureAmpExperimentEnabled_();
 
     // Install styles.
     if (ampdoc.isSingleDoc()) {
@@ -248,29 +241,6 @@ export class WebPushService {
       urlWithoutFragment.replace(
           `&${WebPushService.PERMISSION_POPUP_URL_FRAGMENT}`, '');
     return urlWithoutFragment;
-  }
-
-  /**
-   * When developing locally, call this function otherwise we can't run our
-   * extension in the example sandbox. Turns off in unit test mode.
-   * @private
-   */
-  enableAmpExperimentForDevelopment_() {
-    if ((getMode().localDev && !getMode().test)) {
-      AMP.toggleExperiment(TAG, true);
-    }
-  }
-
-  /**
-   * Checks that the user enabled this AMP experiment and allows integration
-   * tests to access this class in testing mode.
-   * @private
-   */
-  ensureAmpExperimentEnabled_() {
-    // Allow integration tests to access this class in testing mode.
-    const isExperimentEnabled = isExperimentOn(this.ampdoc.win, TAG);
-    user().assert(isExperimentEnabled, `Experiment "${TAG}" is disabled. ` +
-      `Enable it on ${urls.cdn}/experiments.html.`);
   }
 
   /**
