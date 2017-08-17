@@ -214,7 +214,7 @@ export class Bind {
    * Parses and evaluates an expression with a given scope and merges the
    * resulting object into current state.
    * @param {string} expression
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
@@ -238,7 +238,8 @@ export class Bind {
       const oldState = map();
       Object.keys(result).forEach(variable => {
         const s = map();
-        s[variable] = this.state_[variable] || null; // `undefined` -> `null`.
+        const value = this.state_[variable];
+        s[variable] = (value === undefined) ? null : value;
         deepMerge(oldState, s, MAX_MERGE_DEPTH);
       });
 
@@ -585,7 +586,7 @@ export class Bind {
   /**
    * Evaluates a single expression and returns its result.
    * @param {string} expression
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    * @return {!Promise<!JsonObject>}
    */
   evaluateExpression_(expression, scope) {
