@@ -57,6 +57,19 @@ amp-compare-slider {
   right: 0;
 }
 
+.dragHint {
+  height: 15px;
+  background-color: red;
+  width: 45px;
+  position: absolute;
+  right: 46%;
+  bottom: 50%;
+  margin: auto;
+  text-align: center;
+  display: inline-block;
+  z-index: 4;
+}
+
 i-amphtml-sizer {
   padding: 0px !important;
 }
