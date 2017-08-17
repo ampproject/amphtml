@@ -49,24 +49,36 @@ export function isShadowDomSupported() {
 
 /**
  * Returns `true` if Shadow CSS encapsulation is supported.
- * @param {!Element} shadowRoot - a shadowRoot element created by createShadowRoot in shadowEmbed.js
  * @return {boolean}
  */
-export function isShadowCssSupported(shadowRoot) {
+export function isShadowCssSupported() {
   if (!isShadowDomSupported()) {
     return false;
   }
 
   // DO NOT SUBMIT
   //TODO: Find a better way to test CSS encapsulation
-  if (shadowRoot.toString() !== '[object ShadowRoot]') {
-    console.log(`Shadow Root is not a Shadow Root Object,
-    Shadow Css not supported`);
-    return false;
+  if (isNative(Element.prototype.attachShadow) ||
+    isNative(Element.prototype.createShadowRoot)) {
+    return true;
   }
 
-  console.log('Shadow Root is a Shadow Root Object, Shadow Css is supported');
-  return true;
+  // DO NOT SUBMIT - this console.log should be removed after finishing testing purposes.
+  console.log(`.attachShadow() or .createShadowRoot() Do not exist, or are not native functions.
+  ShadowCSS is not supported.`);
+  return false;
+}
+
+/**
+ * Returns `true` if the passed function is native to the browser, and is not polyfilled
+ * @param {function|undefined} func - a function that is attatched to a JS object.
+ * @return {boolean}
+ */
+function isNative(func) {
+  if (!func) {
+    return false;
+  }
+  return func.toString().indexOf('[native code]') != -1;
 }
 
 /**

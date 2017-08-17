@@ -264,8 +264,8 @@ class AmpViewer {
     this.container.appendChild(this.host_);
 
     Promise.all([this.ampReadyPromise_, this.shadowDomReadyPromise_])
-        .then(AMP => {
-          console.log(AMP);
+        .then(response => {
+          const AMP = response[0];
           this.amp_ = AMP.attachShadowDoc(this.host_, doc, url, {});
           this.win.document.title = this.amp_.title || '';
           this.amp_.onMessage(this.onMessage_.bind(this));
@@ -296,7 +296,8 @@ class AmpViewer {
     this.container.appendChild(this.host_);
 
     return Promise.all([this.ampReadyPromise_, this.shadowDomReadyPromise_])
-        .then(AMP => {
+        .then(response => {
+          const AMP = response[0];
           this.amp_ = AMP.attachShadowDocAsStream(this.host_, url, {});
           this.win.document.title = this.amp_.title || '';
           this.amp_.onMessage(this.onMessage_.bind(this));

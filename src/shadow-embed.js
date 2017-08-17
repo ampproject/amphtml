@@ -188,7 +188,7 @@ export function getShadowRootNode(node) {
 export function importShadowBody(shadowRoot, body, deep) {
   const doc = shadowRoot.ownerDocument;
   let resultBody;
-  if (isShadowCssSupported(shadowRoot)) {
+  if (isShadowCssSupported()) {
     resultBody = dev().assertElement(doc.importNode(body, deep));
   } else {
     resultBody = doc.createElement('amp-body');
@@ -206,10 +206,6 @@ export function importShadowBody(shadowRoot, body, deep) {
   setStyle(resultBody, 'position', 'relative');
   // DO NOT SUBMIT: Find a solution, this is wrong place. Fix the problem above, the style elements need to be placed as the first child
   //    For example: getRootNode().firstChild , should return a style element
-  const shadowRootElement = doc.createElement('i-amphtml-shadow-root');
-  shadowRootElement.id = shadowRoot.id;
-  //shadowRootElement.appendChild(resultBody);
-  //shadowRoot.appendChild(shadowRootElement);
   Object.defineProperty(shadowRoot, 'body', {value: resultBody});
   return resultBody;
 }
@@ -223,7 +219,7 @@ export function importShadowBody(shadowRoot, body, deep) {
  * @return {string}
  */
 export function transformShadowCss(shadowRoot, css) {
-  if (isShadowCssSupported(shadowRoot)) {
+  if (isShadowCssSupported()) {
     return css;
   }
   return scopeShadowCss(shadowRoot, css);
