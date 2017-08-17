@@ -127,8 +127,8 @@ function isBuildSystemFile(filePath) {
       // Exclude visual diff files from build-system since we want it to trigger
       // visual diff tests.
       !isVisualDiffFile(filePath))
-      // yaml files should trigger build system
-      || filePath.extname('.yaml');
+      // OWNERS.yaml files should trigger build system to run tests
+      || isOwnersFile(filePath);
 }
 
 /**
@@ -157,6 +157,15 @@ function isValidatorFile(filePath) {
   return name.startsWith('validator-') &&
       (name.endsWith('.out') || name.endsWith('.html') ||
        name.endsWith('.protoascii'));
+}
+
+/**
+ * Determines if the given path has a OWNERS.yaml basename.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isOwnersFile(filePath) {
+  return path.basename(filePath) === 'OWNERS.yaml';
 }
 
 /**
