@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpCompareSlider} from '../amp-compare-slider';
+import '../amp-compare-slider';
 
 describes.realWin('amp-compare-slider', {
   amp: {
     extensions: ['amp-compare-slider'],
-  }
+  },
 }, env => {
 
   let win;
