@@ -69,20 +69,21 @@ Linkedin is one of the pre-configured providers, so you do not need to provide t
 
 ## Attributes
 
-**type** (__required__)
+##### type (required)
 
 Selects a provider type. This is required for both pre-configured and non-configured providers.
 
-**data-share-endpoint** (__required__ for non-configured providers)
+##### data-share-endpoint
+
+This attribute is **required for non-configured providers**.
 
 Some popular providers have pre-configured share endpoints. For details, see the [Pre-configured Providers](#pre-configured-providers) section.  For non-configured providers, you'll need to specify the share endpoint.
 
-**data-param-***
+##### data-param-*
 
 All `data-param-*` prefixed attributes are turned into URL parameters and passed to the share endpoint.
 
-
-## Pre-configured Providers
+## Pre-configured providers
 The `amp-social-share` component provides [some pre-configured providers](0.1/amp-social-share-config.js) that know their sharing endpoints as well as some default parameters.
 
 <table>
@@ -121,6 +122,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td>Pinterest</td>
     <td>
       <ul>
+        <li><code>data-param-media</code>: optional (but highly recommended to be set), defaults to: none. Url for the media to be shared on Pinterest. If not set, the end user will be requested to upload a media by Pinterest.</li>
         <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
         <li><code>data-param-description</code>: optional, defaults to: Current page title</li>
       </ul>
@@ -228,7 +230,6 @@ You can use [global AMP variables substitution](https://github.com/ampproject/am
     Share on Whatsapp
 </amp-social-share>
 ```
-
 
 ## Validation
 

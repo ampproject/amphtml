@@ -21,10 +21,8 @@ import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
-import {urlReplacementsForDoc} from '../../../src/services';
-import {userNotificationManagerFor} from '../../../src/services';
-import {cryptoFor} from '../../../src/crypto';
-import {timerFor, viewerForDoc, xhrFor} from '../../../src/services';
+import {IframeTransport} from './iframe-transport';
+import {Services} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {parseJson} from '../../../src/json';
@@ -112,10 +110,13 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.variableService_ = variableServiceFor(this.win);
 
     /** @private {!../../../src/service/crypto-impl.Crypto} */
-    this.cryptoService_ = cryptoFor(this.win);
+    this.cryptoService_ = Services.cryptoFor(this.win);
 
     /** @private {?Promise} */
     this.iniPromise_ = null;
+
+    /** @private {?IframeTransport} */
+    this.iframeTransport_ = null;
   }
 
   /** @override */
@@ -144,9 +145,10 @@ export class AmpAnalytics extends AMP.BaseElement {
         .getAttribute('data-consent-notification-id');
 
     if (this.consentNotificationId_ != null) {
-      this.consentPromise_ = userNotificationManagerFor(this.win)
-          .then(service => service.get(dev().assertString(
-              this.consentNotificationId_)));
+      this.consentPromise_ =
+          Services.userNotificationManagerForDoc(this.element)
+              .then(service => service.get(dev().assertString(
+                  this.consentNotificationId_)));
     }
 
     if (this.element.getAttribute('trigger') == 'immediate') {
@@ -167,6 +169,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
+    if (this.iframeTransport_) {
+      this.iframeTransport_.detach();
+    }
   }
 
   /**
@@ -179,9 +184,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     toggle(this.element, false);
     this.iniPromise_ =
-        viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
             // Rudimentary "idle" signal.
-            .then(() => timerFor(this.win).promise(1))
+            .then(() => Services.timerFor(this.win).promise(1))
             .then(() => this.consentPromise_)
             .then(this.fetchRemoteConfig_.bind(this))
             .then(() => instrumentationServicePromiseForDoc(this.getAmpDoc()))
@@ -221,6 +226,12 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
+
+    if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
+        this.element.getAttribute('type'),
+        this.config_['transport']);
+    }
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -354,10 +365,12 @@ export class AmpAnalytics extends AMP.BaseElement {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
     const ampdoc = this.getAmpDoc();
-    return urlReplacementsForDoc(this.element).expandAsync(remoteConfigUrl)
+    return Services.urlReplacementsForDoc(this.element)
+        .expandAsync(remoteConfigUrl)
         .then(expandedUrl => {
           remoteConfigUrl = expandedUrl;
-          return xhrFor(ampdoc.win).fetchJson(remoteConfigUrl, fetchConfig);
+          return Services.xhrFor(ampdoc.win).fetchJson(
+              remoteConfigUrl, fetchConfig);
         })
         .then(res => res.json())
         .then(jsonValue => {
@@ -399,10 +412,18 @@ export class AmpAnalytics extends AMP.BaseElement {
           'amp-analytics config attribute unless you plan to migrate before ' +
           'deprecation');
     }
-    const typeConfig = this.predefinedConfig_[type] || {};
+    const typeConfig = this.predefinedConfig_[type];
+    if (typeConfig) {
+      // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport overwriting
+      if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
+        const TAG = this.getName_();
+        user().error(TAG, 'Inline or remote config should not ' +
+            'overwrite vendor transport settings');
+      }
+    }
 
     this.mergeObjects_(defaultConfig, config);
-    this.mergeObjects_(typeConfig, config, /* predefined */ true);
+    this.mergeObjects_((typeConfig || {}), config, /* predefined */ true);
     this.mergeObjects_(inlineConfig, config);
     this.mergeObjects_(this.remoteConfig_, config);
     return config;
@@ -568,7 +589,7 @@ export class AmpAnalytics extends AMP.BaseElement {
               this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
           // For consistency with amp-pixel we also expand any url
           // replacements.
-          return urlReplacementsForDoc(this.element).expandAsync(
+          return Services.urlReplacementsForDoc(this.element).expandAsync(
               request, undefined, whiteList);
         })
         .then(request => {
@@ -685,7 +706,8 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   expandTemplateWithUrlParams_(spec, expansionOptions) {
     return this.variableService_.expandTemplate(spec, expansionOptions)
-        .then(key => urlReplacementsForDoc(this.element).expandUrlAsync(key));
+        .then(key => Services.urlReplacementsForDoc(
+            this.element).expandUrlAsync(key));
   }
 
   /**
@@ -731,6 +753,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       user().assert(trigger['on'] == 'visible',
           'iframePing is only available on page view requests.');
       sendRequestUsingIframe(this.win, request);
+    } else if (this.config_['transport'] &&
+        this.config_['transport']['iframe']) {
+      this.iframeTransport_.sendRequest(request);
     } else {
       sendRequest(this.win, request, this.config_['transport'] || {});
     }

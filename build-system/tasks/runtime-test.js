@@ -28,6 +28,12 @@ var webserver = require('gulp-webserver');
 var app = require('../test-server').app;
 var karmaDefault = require('./karma.conf');
 
+
+const green = util.colors.green;
+const yellow = util.colors.yellow;
+const cyan = util.colors.cyan;
+
+
 /**
  * Read in and process the configuration settings for karma
  * @return {!Object} Karma configuration
@@ -51,7 +57,7 @@ function getConfig() {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
     return Object.assign({}, karmaDefault, {
-      reporters: ['dots', 'saucelabs'],
+      reporters: ['dots', 'saucelabs', 'mocha'],
       browsers: argv.oldchrome
           ? ['SL_Chrome_45']
           : [
@@ -104,10 +110,63 @@ function getAdTypes() {
   return adTypes;
 }
 
+
+/**
+ * Prints help messages for args if tests are being run for local development.
+ */
+function printArgvMessages() {
+  const argvMessages = {
+    safari: 'Running tests on Safari.',
+    firefox: 'Running tests on Firefox.',
+    edge: 'Running tests on Edge.',
+    saucelabs: 'Running tests on Sauce Labs.',
+    nobuild: 'Skipping build.',
+    watch: 'Enabling watch mode. Editing and saving a file will cause the' +
+        ' tests for that file to be re-run in the same browser instance.',
+    verbose: 'Enabling verbose mode. Expect lots of output!',
+    testnames: 'Listing the names of all tests being run.',
+    files: 'Running tests in the file(s): ' + cyan(argv.files),
+    integration: 'Running only the integration tests. Requires ' +
+        cyan('gulp build') +  ' to have been run first.',
+    unit: 'Running only the unit tests. Requires ' +
+        cyan('gulp css') +  ' to have been run first.',
+    randomize: 'Randomizing the order in which tests are run.',
+    testlist: 'Running the tests listed in ' + cyan(argv.testlist),
+    compiled:  'Running tests against minified code.',
+    grep: 'Only running tests that match the pattern "' +
+        cyan(argv.grep) + '".'
+  };
+  if (!process.env.TRAVIS) {
+    util.log(green('Run', cyan('gulp help'),
+        'to see a list of all test flags. (Use', cyan('--nohelp'),
+        'to silence these messages.)'));
+    if (!argv.unit && !argv.integration && !argv.files) {
+      util.log(green('Running all tests. Use',
+          cyan('--unit'), 'or', cyan('--integration'),
+          'to run just the unit tests or integration tests.'));
+    }
+    if (!argv.compiled) {
+      util.log(green('Running tests against unminified code.'));
+    }
+    Object.keys(argv).forEach(arg => {
+      const message = argvMessages[arg];
+      if (message) {
+        util.log(yellow('--' + arg + ':'), green(message));
+      }
+    });
+  }
+}
+
+
 /**
  * Run tests.
  */
-gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
+gulp.task('test', 'Runs tests',
+    argv.nobuild ? [] : (argv.unit ? ['css'] : ['build']), function(done) {
+  if (!argv.nohelp) {
+    printArgvMessages();
+  }
+
   if (!argv.integration && process.env.AMPSAUCE_REPO) {
     console./*OK*/info('Deactivated for ampsauce repo')
   }
@@ -122,12 +181,20 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     c.client.captureConsole = true;
   }
 
+  if (argv.testnames) {
+    c.reporters = ['mocha'];
+    c.mochaReporter.output = 'full';
+  }
+
   if (argv.files) {
     c.files = [].concat(config.commonTestPaths, argv.files);
+    c.reporters = argv.saucelabs ? ['dots', 'saucelabs', 'mocha'] : ['mocha'];
+    c.mochaReporter.output = argv.saucelabs ? 'minimal' : 'full';
   } else if (argv.integration) {
     c.files = config.integrationTestPaths;
+  } else if (argv.unit) {
+    c.files = config.unitTestPaths;
   } else if (argv.randomize || argv.glob || argv.a4a) {
-    /** Randomize the order of the test running */
     var testPaths;
     if (argv.a4a) {
       testPaths = [
@@ -158,7 +225,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     c.files = config.commonTestPaths.concat(testFiles);
 
     util.log(util.colors.blue(JSON.stringify(c.files)));
-    util.log(util.colors.yellow("Save the above files in a .json file to reuse"));
+    util.log(yellow("Save the above files in a .json file to reuse"));
 
   } else if (argv.testlist) {
     var file = read.file(argv.testlist);
@@ -196,18 +263,24 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
         host: 'localhost',
         directoryListing: true,
         middleware: [app],
+      })
+      .on('kill', function () {
+        util.log(yellow(
+            'Shutting down test responses server on localhost:31862'));
+        process.nextTick(function() {
+          process.exit();
+        });
       }));
-  util.log(util.colors.yellow(
+  util.log(yellow(
       'Started test responses server on localhost:31862'));
 
   new Karma(c, function(exitCode) {
-    util.log(util.colors.yellow(
-        'Shutting down test responses server on localhost:31862'));
     server.emit('kill');
     if (exitCode) {
-      var error = new Error(
-          util.colors.red('Karma test failed (error code: ' + exitCode + ')'));
-      done(error);
+      util.log(
+          util.colors.red('ERROR:'),
+          yellow('Karma test failed with exit code', exitCode));
+      process.exit(exitCode);
     } else {
       done();
     }
@@ -215,21 +288,24 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
 }, {
   options: {
     'verbose': '  With logging enabled',
+    'testnames': '  Lists the name of each test being run',
     'watch': '  Watches for changes in files, runs corresponding test(s)',
     'saucelabs': '  Runs test on saucelabs (requires setup)',
     'safari': '  Runs tests in Safari',
     'firefox': '  Runs tests in Firefox',
     'edge': '  Runs tests in Edge',
-    'integration': 'Run only integration tests.',
-    'compiled': 'Changes integration tests to use production JS ' +
+    'unit': '  Run only unit tests.',
+    'integration': '  Run only integration tests.',
+    'compiled': '  Changes integration tests to use production JS ' +
         'binaries for execution',
-    'oldchrome': 'Runs test with an old chrome. Saucelabs only.',
-    'grep': 'Runs tests that match the pattern',
-    'files': 'Runs tests for specific files',
-    'randomize': 'Runs entire test suite in random order',
-    'testlist': 'Runs tests specified in JSON by supplied file',
-    'glob': 'Explicitly expands test paths using glob before passing ' +
+    'oldchrome': '  Runs test with an old chrome. Saucelabs only.',
+    'grep': '  Runs tests that match the pattern',
+    'files': '  Runs tests for specific files',
+    'randomize': '  Runs entire test suite in random order',
+    'testlist': '  Runs tests specified in JSON by supplied file',
+    'glob': '  Explicitly expands test paths using glob before passing ' +
         'to Karma',
+    'nohelp': '  Silence help messages that are printed prior to test run',
   }
 });
 

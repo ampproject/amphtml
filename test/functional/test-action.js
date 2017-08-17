@@ -536,6 +536,36 @@ describe('Action findAction', () => {
 
     expect(action.findAction_(element, 'event3')).to.equal(null);
   });
+
+  it('should skip action on disabled elements', () => {
+    const parent = document.createElement('button');
+    parent.setAttribute('on', 'event1:action1');
+    parent.disabled = true;
+
+    expect(action.findAction_(parent, 'event1')).to.equal(null);
+  });
+
+  it('should skip parent action on descendants of disabled elements', () => {
+    const parent = document.createElement('button');
+    parent.setAttribute('on', 'event1:action1');
+    parent.disabled = true;
+    const element = document.createElement('div');
+    parent.appendChild(element);
+
+    expect(action.findAction_(element, 'event1')).to.equal(null);
+  });
+
+  it('should skip action on form control in a disabled fieldset', () => {
+    const parent = document.createElement('fieldset');
+    parent.setAttribute('on', 'event1:action1');
+    parent.disabled = true;
+    const element = document.createElement('button');
+    element.setAttribute('on', 'event2:action2');
+    parent.appendChild(element);
+
+    expect(action.findAction_(element, 'event1')).to.equal(null);
+    expect(action.findAction_(element, 'event2')).to.equal(null);
+  });
 });
 
 
@@ -666,10 +696,6 @@ describe('installActionHandler', () => {
     expect(handlerSpy).to.not.be.called;
 
     action.invoke_(target, 'submit', /* args */ null,
-        'button', 'tap', ActionTrust.MEDIUM);
-    expect(handlerSpy).to.not.be.called;
-
-    action.invoke_(target, 'submit', /* args */ null,
         'button', 'tap', ActionTrust.HIGH);
     expect(handlerSpy).to.be.calledOnce;
   });
@@ -773,9 +799,9 @@ describe('Action interceptor', () => {
 
   it('should dequeue actions after handler set', () => {
     action.invoke_(target, 'method1', /* args */ null, 'source1', 'event1',
-        ActionTrust.MEDIUM);
+        ActionTrust.HIGH);
     action.invoke_(target, 'method2', /* args */ null, 'source2', 'event2',
-        ActionTrust.MEDIUM);
+        ActionTrust.HIGH);
 
     expect(Array.isArray(getQueue())).to.be.true;
     expect(getActionHandler()).to.be.undefined;
@@ -802,7 +828,7 @@ describe('Action interceptor', () => {
     expect(inv1.event).to.equal('event2');
 
     action.invoke_(target, 'method3', /* args */ null, 'source3', 'event3',
-        ActionTrust.MEDIUM);
+        ActionTrust.HIGH);
     expect(handler).to.have.callCount(3);
     const inv2 = handler.getCall(2).args[0];
     expect(inv2.target).to.equal(target);
@@ -856,10 +882,6 @@ describe('Action common handler', () => {
 
     action.invoke_(target, 'foo', /* args */ null, 'source1', 'event1',
         ActionTrust.LOW);
-    expect(handler).to.not.be.called;
-
-    action.invoke_(target, 'foo', /* args */ null, 'source1', 'event1',
-        ActionTrust.MEDIUM);
     expect(handler).to.not.be.called;
 
     action.invoke_(target, 'foo', /* args */ null, 'source1', 'event1',
@@ -995,7 +1017,22 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(action.trigger).to.have.been.calledWith(element, 'change', event);
   });
 
-  it('should trigger change event with details for whitelisted inputs', () => {
+  it('should trigger change event for <input type="checkbox"> elements', () => {
+    const handler = window.document.addEventListener.getCall(3).args[1];
+    const element = document.createElement('input');
+    element.setAttribute('type', 'checkbox');
+    element.setAttribute('value', 'foo');
+    element.checked = true;
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'change',
+        sinon.match(object =>
+            object.detail.checked && object.detail.value == 'foo'));
+  });
+
+  it('should trigger change event for <input type="range"> elements', () => {
     const handler = window.document.addEventListener.getCall(3).args[1];
     const element = document.createElement('input');
     element.setAttribute('type', 'range');
@@ -1007,14 +1044,26 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(action.trigger).to.have.been.calledWith(
         element,
         'change',
-        // Event doesn't seem to play well with sinon matchers
-        sinon.match(object => {
-          const detail = object.detail;
+        sinon.match(e => {
+          const detail = e.detail;
           return detail.min == 0 && detail.max == 10 && detail.value == 5;
         }));
   });
 
-  it('should trigger change event with details for select elements', () => {
+  it('should trigger change event for <input type="search"> elements', () => {
+    const handler = window.document.addEventListener.getCall(3).args[1];
+    const element = document.createElement('input');
+    element.setAttribute('type', 'search');
+    element.value = 'foo';
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'change',
+        sinon.match(e => e.detail.value == 'foo'));
+  });
+
+  it('should trigger change event with details for <select> elements', () => {
     const handler = window.document.addEventListener.getCall(3).args[1];
     const element = document.createElement('select');
     element.innerHTML =

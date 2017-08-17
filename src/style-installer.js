@@ -15,9 +15,7 @@
  */
 
 import {dev, rethrowAsync} from './log';
-import {documentStateFor} from './service/document-state';
-import {performanceFor} from './services';
-import {resourcesForDoc} from './services';
+import {Services} from './services';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
 
@@ -145,7 +143,7 @@ export function makeBodyVisible(doc, opt_waitForServices) {
     renderStartedNoInline(doc);
   };
   try {
-    documentStateFor(win).onBodyAvailable(() => {
+    Services.documentStateFor(win).onBodyAvailable(() => {
       if (win[bodyVisibleSentinel]) {
         return;
       }
@@ -157,10 +155,11 @@ export function makeBodyVisible(doc, opt_waitForServices) {
         }).then(services => {
           set();
           if (services.length > 0) {
-            resourcesForDoc(doc)./*OK*/schedulePass(1, /* relayoutAll */ true);
+            Services.resourcesForDoc(doc)./*OK*/schedulePass(
+                1, /* relayoutAll */ true);
           }
           try {
-            const perf = performanceFor(win);
+            const perf = Services.performanceFor(win);
             perf.tick('mbv');
             perf.flush();
           } catch (e) {}
@@ -185,7 +184,7 @@ export function makeBodyVisible(doc, opt_waitForServices) {
  */
 function renderStartedNoInline(doc) {
   try {
-    resourcesForDoc(doc).renderStarted();
+    Services.resourcesForDoc(doc).renderStarted();
   } catch (e) {
     // `makeBodyVisible` is called in the error-processing cycle and thus
     // could be triggered when runtime's initialization is incomplete which

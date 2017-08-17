@@ -43,9 +43,10 @@ limitations under the License.
 
 The `amp-video` component loads the video resource specified by its `src` attribute lazily, at a time determined by the runtime. You can control an `amp-video` component much the same way as a standard HTML5 `<video>` tag.
 
-The `amp-video` component accepts up to three unique types of HTML nodes as children:
+The `amp-video` component accepts up to four unique types of HTML nodes as children:
 
 - `source` tags: Just like in the HTML `<video>` tag, you can add `<source>` tag children to specify different source media files to play.
+- `track` tags to enable subtitles in the video. If the track is hosted on a different origin than the document, you must add the `crossorigin` attribute to the `<amp-video>` tag.
 -  a placeholder for before the video starts
 -  a fallback if the browser doesn’t support HTML5 video: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 video is not supported on the user’s browser.
 
@@ -59,7 +60,7 @@ The `amp-video` component accepts up to three unique types of HTML nodes as chil
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampvideo.basic.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 
 </div>
@@ -95,6 +96,10 @@ This attribute is similar to the `controls` attribute in the HTML5 `video`. If t
 
 If present, the video will automatically loop back to the start upon reaching the end.
 
+##### crossorigin
+
+Required if a `track` resource is hosted on a different origin than the document.
+
 ##### muted (deprecated)
 
 The `muted` attribute is deprecated and no longer has any effect. The `autoplay` attribute automatically controls the mute behavior.
@@ -102,6 +107,44 @@ The `muted` attribute is deprecated and no longer has any effect. The `autoplay`
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+
+## Media Session API Attributes
+
+`amp-video` implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session) enabling developers to specify more information about the video file that is playing to be displayed in the notification center of user's devices (along with play/pause controls).
+
+##### artwork
+
+URL to a PNG/JPG/ICO image serving as the video's artwork. If not present, the MediaSessionAPI Helper will use either the `image` field in the `schema.org` definition, the `og:image` or the website's `favicon`.
+
+##### artist
+
+(string) indicates the author of the video file
+
+##### album
+
+(string) indicates the album/collection the video was taken from
+
+##### title
+
+(string) part of the [common attributes](https://www.ampproject.org/docs/reference/common_attributes), doubles as the video's name/title displayed in the MediaSession notification. If not provided, the MediaSessionAPI Helper will use either the `aria-label` attribute or fall back to the page's title.
+
+Example:
+
+Note that this example has both the `poster` and `artwork` attributes, poster will be used as the
+placeholder before the video plays while `artwork` is the image that will be displayed in the
+notification throught the MediaSessionAPI.
+
+```html
+<amp-audio width="400" height="300"
+  src="https://yourhost.com/audios/myaudio.mp3"
+  poster="https://yourhost.com/posters/poster.png"
+  artwork="https://yourhost.com/artworks/artwork.png"
+  title="Awesome music" artist="Awesome singer"
+  album="Amazing album">
+  <source type="audio/mpeg" src="foo.mp3">
+</amp-audio>
+```
 
 ## Click-to-Play overlay
 

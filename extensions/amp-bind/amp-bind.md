@@ -40,12 +40,10 @@ limitations under the License.
     </td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Codelabs</strong></td>
-    <td><a href="https://codelabs.developers.google.com/codelabs/advanced-interactivity-in-amp/">Advanced Interactivity in AMP</a> highlights a sophisticated e-commerce use case.</td>
+    <td class="col-fourty"><strong>Tutorials</strong></td>
+    <td><a href="https://www.ampproject.org/docs/tutorials/interactivity">Create interactive AMP pages</a></td>
   </tr>
 </table>
-
-[TOC]
 
 ## Overview
 
@@ -323,13 +321,12 @@ Only binding to the following components and attributes are allowed:
     <td>When binding to <code>[src]</code>, make sure you also bind to <code>[srcset]</code> in order to make the binding work on cache.<br>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-img#attributes">amp-img attributes</a>.</td>
   </tr>
   <tr>
-    <td rowspan=2><code>&lt;amp-list&gt;</code></td>
+    <td><code>&lt;amp-list&gt;</code></td>
     <td><code>[src]</code></td>
-    <td>Fetches JSON from the new URL and re-renders, replacing old content.</td>
-  </tr>
-  <tr>
-    <td><code>[state]</code></td>
-    <td>Renders using local JSON state at the provided expression.</td>
+    <td>
+      If expression is a string, fetches and renders JSON from the string URL.
+      If expression is an object or array, renders the expression data.
+    </td>
   </tr>
   <tr>
     <td><code>&lt;amp-selector&gt;</code></td>
@@ -491,6 +488,10 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 <amp-state id="myRemoteState" src="https://data.com/articles.json">
 </amp-state>
 ```
+
+#### XHR batching
+
+AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-state` elements) on an AMP page.  For example, if your `amp-state` element makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
 
 #### Attributes
 

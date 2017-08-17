@@ -55,6 +55,7 @@ let AdNetworkConfigDef;
 export const adConfig = {
   _ping_: {
     renderStartImplemented: true,
+    clientIdScope: '_PING_',
   },
 
   a8: {
@@ -106,6 +107,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adocean: {},
+
   adreactor: {},
 
   adsense: {
@@ -114,6 +117,7 @@ export const adConfig = {
     clientIdScope: 'AMP_ECID_GOOGLE',
     clientIdCookieName: '_ga',
     remoteHTMLDisabled: true,
+    masterFrameAccessibleType: 'google_network',
   },
 
   adsnative: {
@@ -254,6 +258,15 @@ export const adConfig = {
     prefetch: 'https://www.google.com/adsense/search/ads.js',
   },
 
+  dable: {
+    preconnect: [
+      'https://static.dable.io',
+      'https://api.dable.io',
+      'https://images.dable.io',
+    ],
+    renderStartImplemented: true,
+  },
+
   distroscale: {
     preconnect: [
       'https://c.jsrdn.com',
@@ -280,12 +293,15 @@ export const adConfig = {
     clientIdScope: 'AMP_ECID_GOOGLE',
     clientIdCookieName: '_ga',
     renderStartImplemented: true,
+    masterFrameAccessibleType: 'google_network',
   },
 
   eas: {
     prefetch: 'https://amp.emediate.eu/amp.v0.js',
     renderStartImplemented: true,
   },
+
+  engageya: {},
 
   eplanning: {
     prefetch: 'https://us.img.e-planning.net/layers/epl-amp.js',
@@ -373,6 +389,12 @@ export const adConfig = {
 
   inmobi: {
     prefetch: 'https://cf.cdn.inmobi.com/ad/inmobi.secure.js',
+    renderStartImplemented: true,
+  },
+
+  innity: {
+    prefetch: 'https://cdn.innity.net/admanager.js',
+    preconnect: 'https://as.innity.com',
     renderStartImplemented: true,
   },
 
@@ -614,6 +636,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  sogouad: {
+    prefetch: 'https://theta.sogoucdn.com/wap/js/aw.js',
+    renderStartImplemented: true,
+  },
+
   sortable: {
     prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
     preconnect: [
@@ -667,6 +694,15 @@ export const adConfig = {
     preconnect: [
       'https://ad.jp.ap.valuecommerce.com',
       'https://ad.omks.valuecommerce.com',
+    ],
+    renderStartImplemented: true,
+  },
+
+  vmfive: {
+    prefetch: 'https://man.vm5apis.com/dist/adn-web-sdk.js',
+    preconnect: [
+      'https://vawpro.vm5apis.com',
+      'https://vahfront.vm5apis.com',
     ],
     renderStartImplemented: true,
   },

@@ -17,8 +17,8 @@
 import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {actionServiceForDoc} from '../../../src/services';
-import {closestBySelector, tryFocus} from '../../../src/dom';
+import {Services} from '../../../src/services';
+import {closestBySelector, tryFocus, isRTL} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 
@@ -77,7 +77,7 @@ export class AmpSelector extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.action_ = actionServiceForDoc(this.element);
+    this.action_ = Services.actionServiceForDoc(this.element);
     this.isMultiple_ = this.element.hasAttribute('multiple');
     this.isDisabled_ = this.element.hasAttribute('disabled');
 
@@ -103,6 +103,8 @@ export class AmpSelector extends AMP.BaseElement {
       kbSelectMode = KEYBOARD_SELECT_MODES.NONE;
     }
     this.kbSelectMode_ = kbSelectMode;
+
+    this.registerAction('clear', this.clearAllSelections_.bind(this));
 
     this.init_();
     if (!this.isDisabled_) {
@@ -292,9 +294,8 @@ export class AmpSelector extends AMP.BaseElement {
               targetOption: el.getAttribute('option'),
               selectedOptions: selectedValues,
             });
-        // TODO(choumx, #9699): HIGH.
         this.action_.trigger(this.element, name, selectEvent,
-            ActionTrust.MEDIUM);
+            ActionTrust.HIGH);
       }
     });
   }
@@ -344,12 +345,12 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   navigationKeyDownHandler_(event) {
-    const isLtr = this.win.document.body.getAttribute('dir') != 'rtl';
+    const doc = this.win.document;
     let dir = 0;
     switch (event.keyCode) {
       case KeyCodes.LEFT_ARROW:
         // Left is considered 'previous' in LTR and 'next' in RTL.
-        dir = isLtr ? -1 : 1;
+        dir = isRTL(doc) ? 1 : -1;
         break;
       case KeyCodes.UP_ARROW:
         // Up is considered 'previous' in both LTR and RTL.
@@ -357,7 +358,7 @@ export class AmpSelector extends AMP.BaseElement {
         break;
       case KeyCodes.RIGHT_ARROW:
         // Right is considered 'next' in LTR and 'previous' in RTL.
-        dir = isLtr ? 1 : -1;
+        dir = isRTL(doc) ? -1 : 1;
         break;
       case KeyCodes.DOWN_ARROW:
         // Down is considered 'next' in both LTR and RTL.

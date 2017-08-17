@@ -19,18 +19,11 @@ import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {Resource, ResourceState} from './resource';
+import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
-import {
-  documentInfoForDoc,
-  inputFor,
-  timerFor,
-  viewerForDoc,
-  viewportForDoc,
-  vsyncFor,
-} from '../services';
 import {expandLayoutRect} from '../layout-rect';
 import {installInputService} from '../input';
 import {loadPromise} from '../event-helper';
@@ -56,6 +49,7 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
+const DOC_BOTTOM_OFFSET_LIMIT_ = 1000;
 
 
 /**
@@ -92,7 +86,7 @@ export class Resources {
     this.win = ampdoc.win;
 
     /** @const @private {!./viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(ampdoc);
+    this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
@@ -191,10 +185,10 @@ export class Resources {
     this.isCurrentlyBuildingPendingResources_ = false;
 
     /** @private @const {!./viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(this.ampdoc);
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -271,7 +265,7 @@ export class Resources {
       // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
       Promise.race([
         loadPromise(this.win),
-        timerFor(this.win).promise(3100),
+        Services.timerFor(this.win).promise(3100),
       ]).then(remeasure);
 
       // Remeasure the document when all fonts loaded.
@@ -359,7 +353,7 @@ export class Resources {
   /** @private */
   monitorInput_() {
     installInputService(this.win);
-    const input = inputFor(this.win);
+    const input = Services.inputFor(this.win);
     input.onTouchDetected(detected => {
       this.toggleInputClass_('amp-mode-touch', detected);
     }, true);
@@ -530,13 +524,8 @@ export class Resources {
     if (this.isRuntimeOn_ || this.isBuildOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
-        resource.build();
-        if (scheduleWhenBuilt && !resource.isBlacklisted()) {
-          // TODO(dvoytenko): Consider removing "blacklisted" resources
-          // altogether from the list of resources.
-          this.schedulePass();
-        }
-      } else if (!resource.element.isBuilt()) {
+        this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
+      } else if (!resource.isBuilt() && !resource.isBuilding()) {
         if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
           this.pendingBuildResources_.push(resource);
@@ -570,7 +559,6 @@ export class Resources {
    * @private
    */
   buildReadyResourcesUnsafe_(scheduleWhenBuilt = true) {
-    let builtElementsCount = 0;
     // This will loop over all current pending resources and those that
     // get added by other resources build-cycle, this will make sure all
     // elements get a chance to be built.
@@ -582,16 +570,28 @@ export class Resources {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
-        resource.build();
-        if (!resource.isBlacklisted()) {
-          builtElementsCount++;
-        }
+        this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
       }
     }
+  }
 
-    if (scheduleWhenBuilt && builtElementsCount > 0) {
-      this.schedulePass();
+  /**
+   * @param {!Resource} resource
+   * @param {boolean} schedulePass
+   * @return {?Promise}
+   * @private
+   */
+  buildResourceUnsafe_(resource, schedulePass) {
+    const promise = resource.build();
+    if (!promise || !schedulePass) {
+      return promise;
     }
+    return promise.then(() => this.schedulePass(), error => {
+      // Build failed: remove the resource. No other state changes are
+      // needed.
+      this.removeResource_(resource);
+      throw error;
+    });
   }
 
   /**
@@ -617,9 +617,11 @@ export class Resources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
-    resource.pauseOnRemove();
-    if (opt_disconnect) {
-      resource.disconnect();
+    if (resource.isBuilt()) {
+      resource.pauseOnRemove();
+      if (opt_disconnect) {
+        resource.disconnect();
+      }
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'element removed:', resource.debugid);
@@ -671,7 +673,7 @@ export class Resources {
         return;
       }
       if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
-        promises.push(resource.element.whenBuilt().then(() => {
+        promises.push(resource.whenBuilt().then(() => {
           resource.measure();
           if (!resource.isDisplayed()) {
             return;
@@ -1027,7 +1029,7 @@ export class Resources {
         'title': doc.title,
         'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
         'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
-        'linkRels': documentInfoForDoc(this.ampdoc).linkRels,
+        'linkRels': Services.documentInfoForDoc(this.ampdoc).linkRels,
       }), /* cancelUnsent */true);
 
       this.scrollHeight_ = this.viewport_.getScrollHeight();
@@ -1103,7 +1105,8 @@ export class Resources {
     const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
-    const docBottomOffset = scrollHeight * 0.85;
+    const maxDocBottomOffset = scrollHeight - DOC_BOTTOM_OFFSET_LIMIT_;
+    const docBottomOffset = Math.max(scrollHeight * 0.85, maxDocBottomOffset);
     const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
@@ -1337,7 +1340,7 @@ export class Resources {
     let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT && !r.isBlacklisted()) {
+      if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true,
             /* scheduleWhenBuilt */ false);
       }
@@ -1839,7 +1842,7 @@ export class Resources {
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
       if (resource.getState() == ResourceState.NOT_BUILT) {
-        resource.element.whenBuilt().then(() => {
+        resource.whenBuilt().then(() => {
           this.measureAndScheduleIfAllowed_(resource, layout,
               parentResource.getPriority());
         });

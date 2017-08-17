@@ -39,7 +39,7 @@ app.use('/amp4test', require('./amp4test'));
 app.use((req, res, next) => {
   if (req.query.csp) {
     res.set({
-      'content-security-policy': "default-src * blob: data:; script-src https://cdn.ampproject.org/rtv/ https://cdn.ampproject.org/v0.js https://cdn.ampproject.org/v0/ https://cdn.ampproject.org/viewer/ http://localhost:8000 https://localhost:8000; object-src 'none'; style-src 'unsafe-inline' https://cloud.typography.com https://fast.fonts.net https://fonts.googleapis.com https://maxcdn.bootstrapcdn.com; report-uri https://csp-collector.appspot.com/csp/amp",
+      'content-security-policy': "default-src * blob: data:; script-src https://cdn.ampproject.org/rtv/ https://cdn.ampproject.org/v0.js https://cdn.ampproject.org/v0/ https://cdn.ampproject.org/viewer/ http://localhost:8000 https://localhost:8000; object-src 'none'; style-src 'unsafe-inline' https://cloud.typography.com https://fast.fonts.net https://fonts.googleapis.com https://use.typekit.net https://p.typekit.net https://maxcdn.bootstrapcdn.com; report-uri https://csp-collector.appspot.com/csp/amp",
     });
   }
   next();
@@ -913,7 +913,7 @@ app.get('/dist/rtv/*/v0/*.js', (req, res, next) => {
  */
 app.get(['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
     (req, res, next) => {
-      // Speical case for entry point script url. Use compiled for testing
+      // Special case for entry point script url. Use compiled for testing
       const mode = pc.env.SERVE_MODE;
       const fileName = path.basename(req.path);
       if (mode == 'cdn') {
@@ -935,6 +935,11 @@ app.get(['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
       }
       next();
     });
+
+app.get('/dist/iframe-transport-client-lib.js', (req, res, next) => {
+  req.url = req.url.replace(/dist/, 'dist.3p/current');
+  next();
+});
 
 /*
  * Start Cache SW LOCALDEV section
@@ -1036,32 +1041,38 @@ function replaceUrls(mode, file, hostName, inabox) {
   hostName = hostName || '';
   if (mode == 'default') {
     file = file.replace(
-        'https://cdn.ampproject.org/v0.js',
+        /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
         hostName + '/dist/amp.js');
     file = file.replace(
-        'https://cdn.ampproject.org/amp4ads-v0.js',
+        /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
+        hostName + '/dist/amp-shadow.js');
+    file = file.replace(
+        /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
         hostName + '/dist/amp-inabox.js');
     file = file.replace(
-        /https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g,
+        /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
         hostName + '/dist/v0/$1.max.js');
     if (inabox) {
-      file = file.replace('/dist/amp.js', '/dist/amp-inabox.js');
+      file = file.replace(/\/dist\/amp\.js/g, '/dist/amp-inabox.js');
     }
   } else if (mode == 'compiled') {
     file = file.replace(
-        'https://cdn.ampproject.org/v0.js',
+        /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
         hostName + '/dist/v0.js');
     file = file.replace(
-        'https://cdn.ampproject.org/amp4ads-v0.js',
+        /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
+        hostName + '/dist/shadow-v0.js');
+    file = file.replace(
+        /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
         hostName + '/dist/amp4ads-v0.js');
     file = file.replace(
-        /https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g,
+        /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
         hostName + '/dist/v0/$1.js');
     file = file.replace(
-        /\/dist.3p\/current\/(.*)\.max.html/,
+        /\/dist.3p\/current\/(.*)\.max.html/g,
         hostName + '/dist.3p/current-min/$1.html');
     if (inabox) {
-      file = file.replace('/dist/v0.js', '/dist/amp4ads-v0.js');
+      file = file.replace(/\/dist\/v0\.js/g, '/dist/amp4ads-v0.js');
     }
   }
   return file;
@@ -1126,6 +1137,11 @@ function enableCors(req, res, origin, opt_exposeHeaders) {
 }
 
 function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
+  // Allow disable CORS check (iframe fixtures have origin 'about:srcdoc').
+  if (req.query.cors == '0') {
+    return;
+  }
+
   const validMethods = opt_validMethods || ['GET', 'POST', 'OPTIONS'];
   const invalidMethod = req.method + ' method is not allowed. Use POST.';
   const invalidOrigin = 'Origin header is invalid.';

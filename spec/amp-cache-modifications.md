@@ -175,6 +175,19 @@ If `<a>` tag does not have attribute `target=_blank` or `target=_top` then add a
 
 ### Insert and Rewrite Tags
 
+#### Insert `<link as=script href=https://cdn.ampproject.org/v0.js rel=preload>`
+
+Before the AMP Runtime `script` tag, insert a `link` tag that tells the browser the AMP Runtime `script` tag is high priority despite being an async `script` tag.
+
+<details>
+<summary>example</summary>
+
+| before | after |
+| --- | --- |
+| `<head>`<br>`...`<br>`<script async src=https://cdn.ampproject.org/v0.js></script>`<br>`...`<br>`</head>` | `<head>`<br>`...`<br>`<link as=script href=https://cdn.ampproject.org/v0.js rel=preload>`<br>`<script async src=https://cdn.ampproject.org/v0.js></script>`<br>`...`<br>`</head>` |
+
+</details>
+
 #### Insert `<link rel=icon>`
 
 When a given AMP document does not have a favicon present, insert one. Inserted tag is of the form `<link href={document_protocol}://{document_domain}/favicon.ico rel=icon>`.
@@ -336,7 +349,7 @@ If possible, rewrite to use the stable version. Otherwise use the unversioned pa
 
 </details>
 
-#### Insert `<link href=https://fonts.gstatic.com rel="dns-prefetch preconnect">`
+#### Insert `<link href=https://fonts.gstatic.com rel="dns-prefetch preconnect" crossorigin>`
 The AMP Cache adds prefetch hint tags for browsers to assist in loading resources earlier and thus speed up page loads.
 
 *Condition*:
@@ -347,7 +360,7 @@ Has a stylesheet of the form: `<link href=https://fonts.googleapis.com/... rel=s
 
 | before | after |
 | --- | --- |
-| `<head>`<br>`...`<br>`<link href=https://fonts.googleapis.com/css?family=Lato rel=stylesheet>`<br>`...`<br>`</head>` | `<head>`<br>`...`<br>`<link href=https://fonts.googleapis.com/css?family=Lato rel=stylesheet>`<br>`<link href=https://fonts.gstatic.com rel="dns-prefetch preconnect">`<br>`...`<br>`</head>` |
+| `<head>`<br>`...`<br>`<link href=https://fonts.googleapis.com/css?family=Lato rel=stylesheet>`<br>`...`<br>`</head>` | `<head>`<br>`...`<br>`<link href=https://fonts.googleapis.com/css?family=Lato rel=stylesheet>`<br>`<link href=https://fonts.gstatic.com rel="dns-prefetch preconnect" crossorigin>`<br>`...`<br>`</head>` |
 
 </details>
 

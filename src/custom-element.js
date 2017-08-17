@@ -20,23 +20,16 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
     parseLayout, parseLength, getNaturalDimensions,
     hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
+import {Services} from './services';
 import {Signals} from './utils/signals';
-import {ampdocServiceFor} from './ampdoc';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
-import {documentStateFor} from './service/document-state';
 import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
-import {
-  resourcesForDoc,
-  performanceForOrNull,
-  timerFor,
-  vsyncFor,
-} from './services';
 import * as dom from './dom';
 import {setStyle, setStyles} from './style';
 import {LayoutDelayMeter} from './layout-delay-meter';
@@ -172,7 +165,7 @@ export function stubElements(win) {
   }
   // Repeat stubbing when HEAD is complete.
   if (!win.document.body) {
-    const docState = documentStateFor(win);
+    const docState = Services.documentStateFor(win);
     docState.onBodyAvailable(() => stubElements(win));
   }
 }
@@ -492,6 +485,9 @@ function createBaseCustomElementClass(win) {
       /** @private {boolean} */
       this.built_ = false;
 
+      /** @private {?Promise} */
+      this.buildingPromise_ = null;
+
       /** @type {string} */
       this.readyState = 'loading';
 
@@ -592,7 +588,7 @@ function createBaseCustomElementClass(win) {
       /** @private @const */
       this.signals_ = new Signals();
 
-      const perf = performanceForOrNull(win);
+      const perf = Services.performanceForOrNull(win);
       /** @private {boolean} */
       this.perfOn_ = perf && perf.isPerformanceTrackingOn();
 
@@ -751,41 +747,44 @@ function createBaseCustomElementClass(win) {
      *
      * This method can only be called on a upgraded element.
      *
+     * @return {?Promise}
      * @final @this {!Element}
      */
     build() {
       assertNotTemplate(this);
-      if (this.isBuilt()) {
-        return;
-      }
       dev().assert(this.isUpgraded(), 'Cannot build unupgraded element');
-      try {
-        this.implementation_.buildCallback();
+      if (this.buildingPromise_) {
+        return this.buildingPromise_;
+      }
+      return this.buildingPromise_ = new Promise(resolve => {
+        resolve(this.implementation_.buildCallback());
+      }).then(() => {
         this.preconnect(/* onLayout */false);
         this.built_ = true;
         this.classList.remove('i-amphtml-notbuilt');
         this.classList.remove('amp-notbuilt');
         this.signals_.signal(CommonSignals.BUILT);
-      } catch (e) {
-        this.signals_.rejectSignal(CommonSignals.BUILT, e);
-        reportError(e, this);
-        throw e;
-      }
-      if (this.built_ && this.isInViewport_) {
-        this.updateInViewport_(true);
-      }
-      if (this.actionQueue_) {
-        // Only schedule when the queue is not empty, which should be
-        // the case 99% of the time.
-        timerFor(this.ownerDocument.defaultView)
-            .delay(this.dequeueActions_.bind(this), 1);
-      }
-      if (!this.getPlaceholder()) {
-        const placeholder = this.createPlaceholder();
-        if (placeholder) {
-          this.appendChild(placeholder);
+        if (this.isInViewport_) {
+          this.updateInViewport_(true);
         }
-      }
+        if (this.actionQueue_) {
+          // Only schedule when the queue is not empty, which should be
+          // the case 99% of the time.
+          Services.timerFor(this.ownerDocument.defaultView)
+              .delay(this.dequeueActions_.bind(this), 1);
+        }
+        if (!this.getPlaceholder()) {
+          const placeholder = this.createPlaceholder();
+          if (placeholder) {
+            this.appendChild(placeholder);
+          }
+        }
+      }, reason => {
+        this.signals_.rejectSignal(CommonSignals.BUILT,
+            /** @type {!Error} */ (reason));
+        reportError(reason, this);
+        throw reason;
+      });
     }
 
     /**
@@ -801,7 +800,7 @@ function createBaseCustomElementClass(win) {
         // If we do early preconnects we delay them a bit. This is kind of
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
-        timerFor(this.ownerDocument.defaultView).delay(() => {
+        Services.timerFor(this.ownerDocument.defaultView).delay(() => {
           this.implementation_.preconnectCallback(onLayout);
         }, 1);
       }
@@ -988,12 +987,13 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
-        const ampdocService = ampdocServiceFor(this.ownerDocument.defaultView);
+        const ampdocService = Services.ampdocServiceFor(
+            this.ownerDocument.defaultView);
         this.ampdoc_ = ampdocService.getAmpDoc(this);
       }
       if (!this.resources_) {
         // Resources can now be initialized since the ampdoc is now available.
-        this.resources_ = resourcesForDoc(this.ampdoc_);
+        this.resources_ = Services.resourcesForDoc(this.ampdoc_);
       }
       this.getResources().add(this);
 
@@ -1312,7 +1312,7 @@ function createBaseCustomElementClass(win) {
         } else {
           // Set a minimum delay in case the element loads very fast or if it
           // leaves the viewport.
-          timerFor(this.ownerDocument.defaultView).delay(() => {
+          Services.timerFor(this.ownerDocument.defaultView).delay(() => {
             // TODO(dvoytenko, #9177): cleanup `this.ownerDocument.defaultView`
             // once investigation is complete. It appears that we get a lot of
             // errors here once the iframe is destroyed due to timer.
@@ -1619,7 +1619,7 @@ function createBaseCustomElementClass(win) {
       }
       // This implementation is notably less efficient then placeholder toggling.
       // The reasons for this are: (a) "not supported" is the state of the whole
-      // element, (b) some realyout is expected and (c) fallback condition would
+      // element, (b) some relayout is expected and (c) fallback condition would
       // be rare.
       this.classList.toggle('amp-notsupported', show);
       if (show == true) {
@@ -1655,6 +1655,10 @@ function createBaseCustomElementClass(win) {
       // 4. The element has already been laid out (include having loading error);
       // 5. The element is a `placeholder` or a `fallback`;
       // 6. The element's layout is not a size-defining layout.
+      // 7. The document is A4A.
+      if (this.isInA4A_()) {
+        return false;
+      }
       if (this.loadingDisabled_ === undefined) {
         this.loadingDisabled_ = this.hasAttribute('noloading');
       }
@@ -1665,6 +1669,19 @@ function createBaseCustomElementClass(win) {
         return false;
       }
       return true;
+    }
+
+    /**
+     * @return {boolean}
+     * @private
+     */
+    isInA4A_() {
+      return (
+          // in FIE
+          this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView ||
+
+          // in inabox
+          getMode().runtime == 'inabox');
     }
 
     /**
@@ -1903,7 +1920,7 @@ function assertNotTemplate(element) {
 function getVsync(element) {
   // TODO(dvoytenko, #9177): consider removing this and always resolving via
   // `createCustomElementClass(win)` object.
-  return vsyncFor(element.ownerDocument.defaultView);
+  return Services.vsyncFor(element.ownerDocument.defaultView);
 };
 
 /**

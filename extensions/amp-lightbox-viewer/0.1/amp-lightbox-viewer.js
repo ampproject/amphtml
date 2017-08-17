@@ -17,11 +17,10 @@
 
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {ampdocServiceFor} from '../../../src/ampdoc';
+import {Services} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
-import {extensionsFor} from '../../../src/services';
 import {toggle, setStyle} from '../../../src/style';
 import {getData, listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
@@ -142,7 +141,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   buildCarousel_() {
     if (!this.carousel_) {
       dev().assert(this.container_);
-      extensionsFor(this.win).loadExtension('amp-carousel');
+      Services.extensionsFor(this.win).loadExtension('amp-carousel');
       this.carousel_ = this.win.document.createElement('amp-carousel');
       this.carousel_.setAttribute('type', 'slides');
       this.carousel_.setAttribute('layout', 'fill');
@@ -299,7 +298,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   animateDescOverflow_(tempOffsetHeight, finalDiffHeight,
-                              duration = 500, curve = 'ease-in') {
+                              duration = 500, curve = 'ease-out') {
     const textArea = dev().assertElement(this.descriptionTextArea_);
     const tr = numeric(0, tempOffsetHeight);
     return Animation.animate(textArea, time => {
@@ -548,7 +547,7 @@ export function installLightboxManager(win) {
   if (isExperimentOn(win, TAG)) {
     // TODO(aghassemi): This only works for singleDoc mode. We will move
     // installation of LightboxManager to core after the experiment, okay for now.
-    const ampdoc = ampdocServiceFor(win).getAmpDoc();
+    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
     manager_ = new LightboxManager(ampdoc);
   }
 }

@@ -21,10 +21,9 @@ import {
   HistoryBindingVirtual_,
   installHistoryServiceForDoc,
 } from '../../src/service/history-impl';
-import {historyForDoc} from '../../src/services';
+import {Services} from '../../src/services';
 import {listenOncePromise} from '../../src/event-helper';
 import {installTimerService} from '../../src/service/timer-impl';
-import {timerFor} from '../../src/services';
 import {parseUrl} from '../../src/url';
 import * as sinon from 'sinon';
 
@@ -191,7 +190,7 @@ describes.sandboxed('History install', {}, () => {
     win = {
       services: {
         'viewer': {obj: viewer},
-        'timer': {obj: timerFor(window)},
+        'timer': {obj: Services.timerFor(window)},
       },
       history: {
         length: 0,
@@ -208,7 +207,7 @@ describes.sandboxed('History install', {}, () => {
   });
 
   it('should create natural binding and make it singleton', () => {
-    const history = historyForDoc(ampdoc);
+    const history = Services.historyForDoc(ampdoc);
     expect(history.binding_).to.be.instanceOf(HistoryBindingNatural_);
     expect(win.services.history.obj).to.equal(history);
     // Ensure that binding is installed as a singleton.
@@ -218,7 +217,7 @@ describes.sandboxed('History install', {}, () => {
 
   it('should create virtual binding', () => {
     viewer.isOvertakeHistory = () => true;
-    const history = historyForDoc(ampdoc);
+    const history = Services.historyForDoc(ampdoc);
     expect(history.binding_).to.be.instanceOf(HistoryBindingVirtual_);
     expect(win.services.history.obj).to.equal(history);
     // Ensure that the global singleton has not been created.
@@ -349,23 +348,43 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
   });
 
   it('should update its state and notify on history.back', () => {
-    return history.push().then(unusedStackIndex => {
-      expect(onStackIndexUpdated).to.be.calledOnce;
-      expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(
-          window.history.length - 1);
-      const histPromise = listenOncePromise(window, 'popstate').then(() => {
+    // Push twice.
+    return Promise.all([history.push(), history.push()]).then(() => {
+      const h = window.history.length;
+
+      expect(onStackIndexUpdated).to.be.calledTwice;
+      expect(onStackIndexUpdated.getCall(0)).to.be.calledWith(h - 2);
+      expect(onStackIndexUpdated.getCall(1)).to.be.calledWith(h - 1);
+
+      // Pop once.
+      const popstate = listenOncePromise(window, 'popstate').then(() => {
         clock.tick(100);
       });
       window.history.go(-1);
-      return histPromise.then(() => {
+      return popstate;
+    }).then(() => {
+      const h = window.history.length - 2;
+
+      clock.tick(100);
+      expect(history.stackIndex_).to.equal(h);
+      expect(history.unsupportedState_['AMP.History']).to.equal(h);
+      expect(onStackIndexUpdated).to.be.calledThrice;
+      expect(onStackIndexUpdated.getCall(2)).to.be.calledWith(h);
+
+      // Pop again.
+      const popstate = listenOncePromise(window, 'popstate').then(() => {
         clock.tick(100);
-        expect(history.stackIndex_).to.equal(window.history.length - 2);
-        expect(history.unsupportedState_['AMP.History']).to.equal(
-            window.history.length - 2);
-        expect(onStackIndexUpdated).to.have.callCount(2);
-        expect(onStackIndexUpdated.getCall(1).args[0]).to.equal(
-            window.history.length - 2);
       });
+      window.history.go(-1);
+      return popstate;
+    }).then(() => {
+      const h = window.history.length - 3;
+
+      clock.tick(100);
+      expect(history.stackIndex_).to.equal(h);
+      expect(history.unsupportedState_['AMP.History']).to.equal(h);
+      expect(onStackIndexUpdated).to.have.callCount(4);
+      expect(onStackIndexUpdated.getCall(3)).to.be.calledWith(h);
     });
   });
 });

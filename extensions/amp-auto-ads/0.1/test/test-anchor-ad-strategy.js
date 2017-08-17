@@ -16,7 +16,7 @@
 
 import '../../../amp-ad/0.1/amp-ad';
 import {waitForChild} from '../../../../src/dom';
-import {viewportForDoc} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {AnchorAdStrategy} from '../anchor-ad-strategy';
 
 describes.realWin('anchor-ad-strategy', {
@@ -32,7 +32,8 @@ describes.realWin('anchor-ad-strategy', {
 
   beforeEach(() => {
     sandbox = env.sandbox;
-    const viewportMock = sandbox.mock(viewportForDoc(env.win.document));
+    const viewportMock =
+        sandbox.mock(Services.viewportForDoc(env.win.document));
     viewportMock.expects('getWidth').returns(360).atLeast(1);
 
     configObj = {
