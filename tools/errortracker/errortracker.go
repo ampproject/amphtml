@@ -175,9 +175,16 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	if rand.Float64() < 0.1 {
 		urlString := strings.Replace(r.URL.String(), "amp-error-reporting", "amp-error-reporting-js", 1)
 		client := urlfetch.Client(c)
-		_, err := client.Get(urlString)
-		if err != nil {
-			log.Errorf(c, "Error forwarding report: %v", err)
+		req, err := http.NewRequest("GET", urlString, nil)
+		if err == nil {
+			req.Header.Set("User-Agent", r.UserAgent())
+			req.Header.Set("Referer", r.Referer())
+			_, err := client.Do(req)
+			if err != nil {
+				log.Errorf(c, "Error forwarding report: %v", err)
+			}
+		} else {
+			log.Errorf(c, "Error making forwarding request: %v", err)
 		}
 	}
 
