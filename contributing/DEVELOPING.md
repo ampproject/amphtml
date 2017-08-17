@@ -50,7 +50,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp test`<sup>[[1]](#footnote-1)</sup>                                | Runs tests in Chrome.                                                 |
 | `gulp test --verbose`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Chrome with logging enabled.                            |
 | `gulp test --nobuild`                                                   | Runs tests without re-build.                                          |
-| `gulp test --coverage`                                                  | Runs code coverage tests.                                             |
+| `gulp test --coverage`                                                  | Runs code coverage tests. After running, the report will be available at test/coverage/report-html/index.html |
 | `gulp test --watch`<sup>[[1]](#footnote-1)</sup>                        | Watches for changes in files, runs corresponding test(s) in Chrome.   |
 | `gulp test --watch --verbose`<sup>[[1]](#footnote-1)</sup>              | Same as `watch`, with logging enabled.                                 |
 | `gulp test --saucelabs`<sup>[[1]](#footnote-1)</sup>                    | Runs test on saucelabs (requires [setup](#testing-on-sauce-labs)).                |
