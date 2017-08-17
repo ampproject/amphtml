@@ -219,9 +219,12 @@ class AmpImaVideo extends AMP.BaseElement {
 
     if (isObject(eventData)) {
       const videoEvent = eventData['event'];
-      if (videoEvent == VideoEvents.LOAD ||
+      if (videoEvent == VideoEvents.AD_START ||
+          videoEvent == VideoEvents.AD_END ||
+          videoEvent == VideoEvents.LOAD ||
           videoEvent == VideoEvents.PLAYING ||
           videoEvent == VideoEvents.PAUSE ||
+          videoEvent == VideoEvents.ENDED ||
           videoEvent == VideoEvents.MUTED ||
           videoEvent == VideoEvents.UNMUTED) {
         if (videoEvent == VideoEvents.LOAD) {
