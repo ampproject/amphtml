@@ -50,7 +50,7 @@ export const adPrefetch = {
   ],
   yieldbot: 'https://cdn.yldbt.com/js/yieldbot.intent.js',
   adstir: 'https://js.ad-stir.com/js/adstir_async.js',
-  colombia: 'https://static.clmbtech.com/ctn/commons/js/colombia-amp.js',
+  colombia: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
 };
 
 /**
