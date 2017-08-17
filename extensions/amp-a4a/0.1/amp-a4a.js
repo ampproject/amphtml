@@ -307,7 +307,7 @@ export class AmpA4A extends AMP.BaseElement {
 
     /**
      * Used as a signal in some of the CSI pings. Canary is shortened to 'ca'
-     * and production to 'pr'. TODO(@glevitzky, #10953) Include other release
+     * and production to 'pr'. TODO(@glevitzky, #10060) Include other release
      * types (control) when available.
      * @private @const {string}
      */
