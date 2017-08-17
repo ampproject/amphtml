@@ -36,7 +36,7 @@ import {validateData} from '../../3p/3p';
 import {DomFingerprint} from '../../src/utils/dom-fingerprint';
 import * as sinon from 'sinon';
 
-describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
+describe.configure().ifNewChrome().run('3p-frame', () => {
 
   let clock;
   let sandbox;
@@ -137,7 +137,7 @@ describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
   });
 
   // TODO(bradfrizzell) break this out into a test-iframe-attributes
-  it.configure().skipSauceLabs().run('should create an iframe', () => {
+  it.configure().ifNewChrome().run('should create an iframe', () => {
     window.AMP_MODE = {
       localDev: true,
       development: false,
