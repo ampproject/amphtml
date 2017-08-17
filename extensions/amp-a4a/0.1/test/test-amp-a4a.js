@@ -251,7 +251,7 @@ describe('amp-a4a', () => {
         expect(child).to.be.visible;
         expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
         expect(lifecycleEventStub).to.be.calledWith('renderSafeFrameStart',
-            {isAmpCreative: false});
+            {'isAmpCreative': false, 'releaseType': 'pr'});
       });
     });
 
@@ -480,7 +480,7 @@ describe('amp-a4a', () => {
               'random illegal value');
           expect(fetchMock.called('ad')).to.be.true;
           expect(lifecycleEventStub).to.be.calledWith('renderCrossDomainStart',
-              {isAmpCreative: false});
+              {'isAmpCreative': false, 'releaseType': 'pr'});
         });
       });
     });
@@ -869,7 +869,10 @@ describe('amp-a4a', () => {
             expect(updatePriorityStub).to.be.calledOnce;
             expect(updatePriorityStub.args[0][0]).to.equal(0);
             expect(lifecycleEventStub).to.be.calledWith(
-                'adResponseValidateEnd', {result: 0});
+                'adResponseValidateEnd', {
+                  'signatureValidationResult': 0,
+                  'releaseType': 'pr',
+                });
           });
         });
       });

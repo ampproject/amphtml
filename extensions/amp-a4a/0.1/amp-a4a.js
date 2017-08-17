@@ -38,7 +38,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {utf8Decode} from '../../../src/utils/bytes';
-import {isExperimentOn} from '../../../src/experiments';
+import {isCanary, isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
@@ -304,6 +304,14 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @protected {boolean} */
     this.isRelayoutNeededFlag = false;
+
+    /**
+     * Used as a signal in some of the CSI pings. Canary is shortened to 'ca'
+     * and production to 'pr'. TODO(levitzky) Include other release types
+     * (control) when available.
+     * @private @const {string}
+     */
+    this.releaseType_ = isCanary(this.win) ? 'ca' : 'pr';
   }
 
   /** @override */
@@ -667,7 +675,8 @@ export class AmpA4A extends AMP.BaseElement {
                   status = VerificationStatus.OK;
                 }
                 this.protectedEmitLifecycleEvent_('adResponseValidateEnd', {
-                  result: status,
+                  'signatureValidationResult': status,
+                  'releaseType': this.releaseType_,
                 });
                 switch (status) {
                   case VerificationStatus.OK:
@@ -1319,7 +1328,8 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaCachedContentIframe_(adUrl) {
     this.protectedEmitLifecycleEvent_('renderCrossDomainStart', {
-      isAmpCreative: this.isVerifiedAmpCreative_,
+      'isAmpCreative': this.isVerifiedAmpCreative_,
+      'releaseType': this.releaseType_,
     });
     return this.iframeRenderHelper_(dict({
       'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
@@ -1343,7 +1353,8 @@ export class AmpA4A extends AMP.BaseElement {
         method == XORIGIN_MODE.NAMEFRAME,
         'Unrecognized A4A cross-domain rendering mode: %s', method);
     this.protectedEmitLifecycleEvent_('renderSafeFrameStart', {
-      isAmpCreative: this.isVerifiedAmpCreative_,
+      'isAmpCreative': this.isVerifiedAmpCreative_,
+      'releaseType': this.releaseType_,
     });
     const checkStillCurrent = this.verifyStillCurrent();
     return utf8Decode(creativeBody).then(creative => {
