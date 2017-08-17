@@ -1157,15 +1157,15 @@ const VideoEvents = {
    */
   AD_START: 'ad_start',
 
-    /**
-     * pre/mid/post Ad ends
-     *
-     * Fired when an Ad ends playing.
-     *
-     * This is used to restore any overlay shims during Ad play during autoplay
-     * or minimized-to-corner version of the player.
-     *
-     * @event ended
-     */
-    AD_END: 'ad_end',
+  /**
+   * pre/mid/post Ad ends
+   *
+   * Fired when an Ad ends playing.
+   *
+   * This is used to restore any overlay shims during Ad play during autoplay
+   * or minimized-to-corner version of the player.
+   *
+   * @event ended
+   */
+  AD_END: 'ad_end',
 };
