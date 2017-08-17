@@ -136,7 +136,7 @@ export function runVideoPlayerIntegrationTests(
     this.timeout(TIMEOUT);
     let video;
 
-    it('should trigger play analytics when the video plays', function() {
+    it.skip('should trigger play analytics when the video plays', function() {
       let playButton;
 
       return getVideoPlayer(
@@ -275,7 +275,8 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    it('should trigger video-seconds-played when visible and playing', () => {
+    it.skip(`should trigger video-seconds-played when
+        visible and playing`, () => {
       let video;
       let timer;
       let pauseButton;
@@ -325,7 +326,7 @@ export function runVideoPlayerIntegrationTests(
     this.timeout(TIMEOUT);
 
     describe('General Behavior', () => {
-      it('should have class when attribute is set (autoplay)', function() {
+      it.skip('should have class when attribute is set (autoplay)', function() {
         return getVideoPlayer(
             {
               outsideView: false,

@@ -163,7 +163,7 @@ describe.configure().ifChrome().skipOldChrome().run(`Viewer Visibility
           });
         });
 
-        it('does not call callbacks when going to INACTIVE', () => {
+        it.skip('does not call callbacks when going to INACTIVE', () => {
           viewer.receiveMessage('visibilitychange',
               {state: VisibilityState.INACTIVE});
           return waitForNextPass().then(() => {
@@ -223,7 +223,7 @@ describe.configure().ifChrome().skipOldChrome().run(`Viewer Visibility
           });
         });
 
-        it('does not call callbacks when going to INACTIVE', () => {
+        it.skip('does not call callbacks when going to INACTIVE', () => {
           viewer.receiveMessage('visibilitychange',
               {state: VisibilityState.INACTIVE});
           return waitForNextPass().then(() => {
@@ -385,7 +385,7 @@ describe.configure().ifChrome().skipOldChrome().run(`Viewer Visibility
         });
       });
 
-      it('does not call callbacks when going to INACTIVE', () => {
+      it.skip('does not call callbacks when going to INACTIVE', () => {
         return waitForNextPass().then(() => {
           expect(layoutCallback).not.to.have.been.called;
           expect(unlayoutCallback).not.to.have.been.called;
