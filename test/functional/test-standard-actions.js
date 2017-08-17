@@ -288,6 +288,41 @@ describes.sandboxed('StandardActions', {}, () => {
       });
     });
 
+    it('should not allow chained setState', () => {
+      const spy = sandbox.spy();
+      window.services.bind = {
+        obj: {
+          setStateWithExpression: spy,
+        },
+      };
+
+      const firstSetState = {
+        method: 'setState',
+        args: {[OBJECT_STRING_ARGS_KEY]: '{foo: 123}'},
+        target: ampdoc,
+        satisfiesTrust: () => true,
+      };
+      const secondSetState = {
+        method: 'setState',
+        args: {[OBJECT_STRING_ARGS_KEY]: '{bar: 456}'},
+        target: ampdoc,
+        satisfiesTrust: () => true,
+      };
+      const actionInfos = [
+        {target: 'AMP', method: 'setState'},
+        {target: 'AMP', method: 'setState'},
+      ];
+      standardActions.handleAmpTarget(firstSetState, 0, actionInfos);
+      standardActions.handleAmpTarget(secondSetState, 1, actionInfos);
+
+      return Services.bindForDocOrNull(ampdoc).then(() => {
+        // Only first setState call should be allowed.
+        expect(spy).to.be.calledOnce;
+        expect(spy).to.be.calledWith('{foo: 123}');
+        expect(spy).to.not.be.calledWith('{bar: 456}');
+      });
+    });
+
     it('should implement print', () => {
       const windowApi = {
         print: () => {},
