@@ -4,7 +4,7 @@ The AMP HTML project strongly encourages technical [contributions](https://www.a
 
 We hope you'll become an ongoing participant in our open source community but we also welcome one-off contributions for the issues you're particularly passionate about.
 
-**If you are have questions about using AMP or are encountering problems using AMP on your site please visit our [support page](SUPPORT.md) for help.**
+**If you have questions about using AMP or are encountering problems using AMP on your site please visit our [support page](SUPPORT.md) for help.**
 
 - [Reporting issues with AMP](#reporting-issues-with-amp)
   * [Bugs](#bugs)
