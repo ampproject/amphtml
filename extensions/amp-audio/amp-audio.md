@@ -80,7 +80,7 @@ If present, will mute the audio by default.
 
 ##### controlsList
 
-If its value is set to `nodownload`, the download button will be hidden.
+Same as [controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) attribute of HTML5 audio element. Only supported by certain browsers. Please see [https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) for details.
 
 ##### common attributes
 
