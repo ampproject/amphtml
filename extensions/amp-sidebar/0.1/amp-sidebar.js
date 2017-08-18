@@ -31,7 +31,7 @@ import {toArray} from '../../../src/types';
 const TAG = 'amp-sidebar toolbar';
 
 /** @const */
-const ANIMATION_TIMEOUT = 550;
+const ANIMATION_TIMEOUT = 350;
 
 /** @const */
 const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
