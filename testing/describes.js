@@ -101,6 +101,7 @@ import {
 import {createElementWithAttributes} from '../src/dom';
 import {addParamsToUrl} from '../src/url';
 import {cssText} from '../build/css';
+import {CSS} from '../build/amp-ad-0.1.css.js';
 import {createAmpElementProto} from '../src/custom-element';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {
@@ -508,7 +509,8 @@ class RealWinFixture {
   /** @param {!{
   *   fakeRegisterElement: boolean,
   *   ampCss: boolean,
-  *   allowExternalResources: boolean
+  *   allowExternalResources: boolean,
+  *   ampAdCss: boolean
   * }} spec */
   constructor(spec) {
     /** @const */
@@ -549,6 +551,11 @@ class RealWinFixture {
         // Install AMP CSS if requested.
         if (spec.ampCss) {
           installRuntimeStylesPromise(win);
+        }
+
+        // Install AMP AD CSS if requested.
+        if (spec.ampAdCss) {
+          installAmpAdStylesPromise(win);
         }
 
         if (spec.fakeRegisterElement) {
@@ -753,6 +760,21 @@ function installRuntimeStylesPromise(win) {
   style./*OK*/textContent = cssText;
   win.document.head.appendChild(style);
 }
+
+/**
+ * @param {!Window} win
+ */
+function installAmpAdStylesPromise(win) {
+  if (win.document.querySelector('style[amp-extension="amp-ad"]')) {
+    // Already installed.
+    return;
+  }
+  const style = document.createElement('style');
+  style.setAttribute('amp-extension', 'amp-ad');
+  style./*OK*/textContent = CSS;
+  win.document.head.appendChild(style);
+}
+
 
 
 /**
