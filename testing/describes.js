@@ -79,6 +79,7 @@
  * and `integration` below.
  */
 
+import fetchMock from 'fetch-mock';
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
 import {BaseElement} from '../src/base-element';
@@ -282,6 +283,14 @@ export const repeated = (function() {
 
   return mainFunc;
 })();
+
+
+/** @param {!Object} env */
+function attachFetchMock(env) {
+  fetchMock.constructor.global = env.win;
+  fetchMock._mock();
+  env.expectFetch = fetchMock.mock.bind(fetchMock);
+}
 
 
 /**
@@ -495,10 +504,17 @@ class FakeWinFixture {
   /** @override */
   setup(env) {
     env.win = new FakeWindow(this.spec.win || {});
+
+    if (!!this.spec.mockFetches) {
+      attachFetchMock(env);
+    }
   }
 
   /** @override */
   teardown(env) {
+    if (!!this.spec.mockFetches) {
+      fetchMock.restore();
+    }
   }
 }
 
@@ -574,6 +590,10 @@ class RealWinFixture {
         interceptEventListeners(win.document.body);
         env.interceptEventListeners = interceptEventListeners;
 
+        if (!!spec.mockFetches) {
+          attachFetchMock(env);
+        }
+
         resolve();
       };
       iframe.onerror = reject;
@@ -586,6 +606,9 @@ class RealWinFixture {
     // TODO(dvoytenko): test that window is returned in a good condition.
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
+    }
+    if (!!this.spec.mockFetches) {
+      fetchMock.restore();
     }
   }
 }
