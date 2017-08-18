@@ -75,30 +75,33 @@ const realWinConfigAmpAd = {
   allowExternalResources: true,
 };
 
+/**
+ * Creates an iframe promise, and instantiates element and impl, adding the
+ * former to the document of the iframe.
+ * @param {{width, height, type}} config
+ * @return The iframe promise.
+ */
+function createImplTag(config, element, impl, env) {
+  config.type = 'doubleclick';
+  element = createElementWithAttributes(env.win.document, 'amp-ad', config);
+  // To trigger CSS styling.
+  element.setAttribute('data-a4a-upgrade-type',
+      'amp-ad-network-doubleclick-impl');
+  // Used to test styling which is targetted at first iframe child of
+  // amp-ad.
+  const iframe = env.win.document.createElement('iframe');
+  element.appendChild(iframe);
+  env.win.document.body.appendChild(element);
+  impl = new AmpAdNetworkDoubleclickImpl(element);
+  impl.iframe = iframe;
+  return [element, impl, env];
+}
+
+
 describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   let doc;
   let element;
   let impl;
-  /**
-   * Creates an iframe promise, and instantiates element and impl, adding the
-   * former to the document of the iframe.
-   * @param {{width, height, type}} config
-   * @return The iframe promise.
-   */
-  function createImplTag(config) {
-    config.type = 'doubleclick';
-    element = createElementWithAttributes(env.win.document, 'amp-ad', config);
-    // To trigger CSS styling.
-    element.setAttribute('data-a4a-upgrade-type',
-        'amp-ad-network-doubleclick-impl');
-    // Used to test styling which is targetted at first iframe child of
-    // amp-ad.
-    const iframe = env.win.document.createElement('iframe');
-    element.appendChild(iframe);
-    env.win.document.body.appendChild(element);
-    impl = new AmpAdNetworkDoubleclickImpl(element);
-    impl.iframe = iframe;
-  }
 
   beforeEach(() => {
     doc = env.win.document;
@@ -530,10 +533,13 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   describe('#unlayoutCallback', () => {
     it('should call #resetSlot, remove child iframe, but keep other children',
         () => {
-          createImplTag({
+          const setup = createImplTag({
             width: '300',
             height: '150',
-          });
+          }, element, impl, env);
+          element = setup[0];
+          impl = setup[1];
+          env = setup[2];
           impl.buildCallback();
           impl.win.ampAdSlotIdCounter = 1;
           const slotIdBefore = impl.element.getAttribute(
@@ -883,27 +889,6 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
       let doc;
       let impl;
       let element;
-      /**
-       * Creates an iframe promise, and instantiates element and impl,
-       * adding the former to the document of the iframe.
-       * @param {{width, height, type}} config
-       * @return The iframe promise.
-       */
-      function createImplTag(config) {
-        config.type = 'doubleclick';
-        element = createElementWithAttributes(
-            env.win.document, 'amp-ad', config);
-        // To trigger CSS styling.
-        element.setAttribute('data-a4a-upgrade-type',
-                             'amp-ad-network-doubleclick-impl');
-        // Used to test styling which is targetted at first iframe child of
-        // amp-ad.
-        const iframe = env.win.document.createElement('iframe');
-        element.appendChild(iframe);
-        env.win.document.body.appendChild(element);
-        impl = new AmpAdNetworkDoubleclickImpl(element);
-        impl.iframe = iframe;
-      }
 
       beforeEach(() => {
         doc = env.win.document;
@@ -948,37 +933,48 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         afterEach(() => env.win.document.body.removeChild(impl.element));
 
         it('centers iframe in slot when height && width', () => {
-      //env.win.AMP_MODE.test = true;
-          createImplTag({
+          const setup = createImplTag({
             width: '300',
             height: '150',
-          });
+          }, element, impl, env);
+          element = setup[0];
+          impl = setup[1];
+          env = setup[2];
           expect(impl.element.getAttribute('width')).to.equal('300');
           expect(impl.element.getAttribute('height')).to.equal('150');
           verifyCss(impl.iframe, size);
         });
         it('centers iframe in slot when !height && !width', () => {
-          createImplTag({
+          const setup = createImplTag({
             layout: 'fixed',
-          });
+          }, element, impl, env);
+          element = setup[0];
+          impl = setup[1];
+          env = setup[2];
           expect(impl.element.getAttribute('width')).to.be.null;
           expect(impl.element.getAttribute('height')).to.be.null;
           verifyCss(impl.iframe, size);
         });
         it('centers iframe in slot when !height && width', () => {
-          createImplTag({
+          const setup = createImplTag({
             width: '300',
             layout: 'fixed',
-          });
+          }, element, impl, env);
+          element = setup[0];
+          impl = setup[1];
+          env = setup[2];
           expect(impl.element.getAttribute('width')).to.equal('300');
           expect(impl.element.getAttribute('height')).to.be.null;
           verifyCss(impl.iframe, size);
         });
         it('centers iframe in slot when height && !width', () => {
-          createImplTag({
+          const setup = createImplTag({
             height: '150',
             layout: 'fixed',
-          });
+          }, element, impl, env);
+          element = setup[0];
+          impl = setup[1];
+          env = setup[2];
           expect(impl.element.getAttribute('width')).to.be.null;
           expect(impl.element.getAttribute('height')).to.equal('150');
           verifyCss(impl.iframe, size);
