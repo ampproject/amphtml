@@ -59,7 +59,7 @@ amp-compare-slider {
 
 .dragHint {
   height: 25px;
-  background: black url("data:image/svg+xml;utf8,<svg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='32px' height='32px' viewBox='0 0 32 32' enable-background='new 0 0 32 32' xml:space='preserve'> <polygon fill='#FFFFFF' points='13,21 8,16 13,11'/> <polygon fill='#FFFFFF' points='19,11 24,16 19,21 '/></svg>") no-repeat center center;
+  background: black url("data:image/svg+xml;charset=utf-8,<svg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='32px' height='32px' viewBox='0 0 32 32' enable-background='new 0 0 32 32' xml:space='preserve'> <polygon fill='#FFFFFF' points='13,21 8,16 13,11'/> <polygon fill='#FFFFFF' points='19,11 24,16 19,21 '/></svg>") no-repeat center center;
   width: 70px;
   position: absolute;
   right: 43%;
@@ -68,6 +68,7 @@ amp-compare-slider {
   text-align: center;
   display: inline-block;
   z-index: 4;
+  border: 1px solid white;
 }
 
 i-amphtml-sizer {

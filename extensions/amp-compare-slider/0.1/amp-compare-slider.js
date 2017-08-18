@@ -16,49 +16,39 @@
 
 import {Layout} from '../../../src/layout';
 import {CSS} from '../../../build/amp-compare-slider-0.1.css';
+import {setStyle} from '../../../src/style';
 
 export class AmpCompareSlider extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    
     /** @private {?Element} */
     this.topElementContainer_ = null;
-    
     /** @private {?Element} */
     this.bottomElementContainer_ = null;
-    
     /** @private {?Element} */
     this.draggable_ = null;
-    
     /** @private {?Element} */
     this.draggingHint_ = null;
   }
-
   /** @override */
   buildCallback() {
     this.buildCompareSliderElements();
     this.createListeners();
   }
-  
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.RESPONSIVE;
   }
-  
-  
   buildCompareSliderElements() {
     this.element.style.height = this.element.getAttribute('height') + 'px';
     this.element.style.width = this.element.getAttribute('width') + 'px';
-    
     const originalChildren = this.element.children;
-    
     this.topElementContainer_ = document.createElement('div');
     this.bottomElementContainer_ = document.createElement('div');
     this.draggable_ = document.createElement('div');
     this.draggingHint_ = document.createElement('div');
-    
     //Make Elements children of newly created divs
     // the first child is i-amphtml-sizer
     this.topElementContainer_.appendChild(originalChildren[1]);
@@ -68,16 +58,15 @@ export class AmpCompareSlider extends AMP.BaseElement {
     this.draggingHint_.className = 'dragHint';
     this.topElementContainer_.className = 'topElementContainer';
     this.bottomElementContainer_.className = 'bottomElementContainer';
-    
     // Add newly created elements to the view
     this.element.appendChild(this.draggingHint_);
     this.element.appendChild(this.topElementContainer_);
     this.element.appendChild(this.bottomElementContainer_);
-    this.topElementContainer_.style.maxWidth = 
-      this.bottomElementContainer_.style.maxWidth = 
-      this.element.getAttribute('width') + 'px';
+    setStyle(this.topElementContainer_, 'max-width', 
+             this.element.getAttribute('width') + 'px');
+    setStyle(this.bottomElementContainer_, 'max-width', 
+             this.element.getAttribute('width') + 'px');
   }
-  
   createListeners() {
     this.draggable_.addEventListener('touchmove',
                                   this.whileSliderMoving.bind(this));
@@ -86,22 +75,23 @@ export class AmpCompareSlider extends AMP.BaseElement {
     this.element.addEventListener('touchstart',
                                   this.whenCompareSliderTapped.bind(this));
   }
-  
   whenCompareSliderTapped(e) {
-    this.topElementContainer_.style.width = e.touches[0].pageX + 'px';
-    this.draggingHint_.style.display = "none";
+    setStyle(this.topElementContainer_, 'width',  e.touches[0].pageX + 'px');
+    setStyle(this.draggingHint_, 'display', 'none');
   }
-  
   whileSliderMoving(e) {
-    this.topElementContainer_.style.width = 
-      e.touches[0].pageX - this.topElementContainer_.offsetLeft < this.element.getAttribute('width') ? (e.touches[0].pageX - this.topElementContainer_.offsetLeft) + 'px' : this.element.getAttribute('width') + 'px';
-    this.draggingHint_.style.display = "none";
+    setStyle(this.topElementContainer_, 'width', 
+             e.touches[0].pageX - this.topElementContainer_.
+             offsetLeft <
+             this.element.getAttribute('width') ?
+             (e.touches[0].pageX - this.topElementContainer_.
+              offsetLeft) + 'px' :
+             this.element.getAttribute('width') + 'px');
+    setStyle(this.draggingHint_, 'display', 'none');
   }
-  
-  whenSliderStops(e){
-   this.draggingHint_.style.display = "none";
+  whenSliderStops(){
+    setStyle(this.draggingHint_, 'display', 'none');
   }
-  
 }
 
 AMP.registerElement('amp-compare-slider', AmpCompareSlider, CSS);
