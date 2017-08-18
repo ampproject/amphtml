@@ -63,6 +63,7 @@ describe('amp-a4a', () => {
   let adResponse;
   let onCreativeRenderSpy;
   let keysetBody;
+  let getResourceStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -74,6 +75,10 @@ describe('amp-a4a', () => {
     getSigningServiceNamesMock.returns(['google']);
     viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     viewerWhenVisibleMock.returns(Promise.resolve());
+    getResourceStub = sandbox.stub(AmpA4A.prototype, 'getResource');
+    getResourceStub.returns({
+      getUpgradeDelayMs: () => 12345,
+    });
     adResponse = {
       headers: {'AMP-Access-Control-Allow-Source-Origin': 'about:srcdoc'},
       body: validCSSAmp.reserialized,
@@ -747,7 +752,7 @@ describe('amp-a4a', () => {
           expect(renderNonAmpCreativeSpy.calledOnce,
               'renderNonAmpCreative_ called exactly once').to.be.true;
           a4a.unlayoutCallback();
-          sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+          getResourceStub.returns(
             {'hasBeenMeasured': () => true, 'isMeasureRequested': () => false});
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
           a4a.resumeCallback();
@@ -807,8 +812,7 @@ describe('amp-a4a', () => {
               'renderNonAmpCreative_ called exactly once').to.be.true;
           a4a.unlayoutCallback();
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
-          sandbox.stub(AmpA4A.prototype, 'getResource').returns(
-            {'hasBeenMeasured': () => false});
+          getResourceStub.returns({'hasBeenMeasured': () => false});
           a4a.resumeCallback();
           expect(onLayoutMeasureSpy).to.not.be.called;
           expect(a4a.fromResumeCallback).to.be.true;
@@ -1262,7 +1266,7 @@ describe('amp-a4a', () => {
         });
       });
       it('should not delay request when in viewport', () => {
-        sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+        getResourceStub.returns(
             {
               renderOutsideViewport: () => true,
               whenWithinRenderOutsideViewport: () => {
@@ -1277,7 +1281,7 @@ describe('amp-a4a', () => {
       });
       it('should delay request until within renderOutsideViewport',() => {
         let whenWithinRenderOutsideViewportResolve;
-        sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+        getResourceStub.returns(
             {
               renderOutsideViewport: () => false,
               whenWithinRenderOutsideViewport: () => new Promise(resolve => {
@@ -1955,9 +1959,6 @@ describe('amp-a4a', () => {
     it('should emit upgradeDelay lifecycle ping', () => {
       return createIframePromise().then(fixture => {
         const a4a = new MockA4AImpl(createA4aElement(fixture.doc));
-        sandbox.stub(a4a, 'getResource').returns({
-          getUpgradeDelayMs: () => 12345,
-        });
         const emitLifecycleEventSpy = sandbox.spy(a4a, 'emitLifecycleEvent');
         a4a.buildCallback();
         expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
