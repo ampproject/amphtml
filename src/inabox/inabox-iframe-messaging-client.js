@@ -60,7 +60,6 @@ function createIframeMessagingClient(win) {
   return iframeClient;
 }
 
-
 /**
  * @param {!Window} win
  * @returns {string}
