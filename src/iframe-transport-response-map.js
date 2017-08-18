@@ -60,8 +60,6 @@ export class IframeTransportResponseMap {
    */
   static remove(ampDoc, frameType) {
     const map = ampDoc.getIframeTransportResponses();
-    if (map[frameType]) {
-      delete map[frameType];
-    }
+    delete map[frameType];
   }
 }

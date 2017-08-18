@@ -108,12 +108,12 @@ export class AmpAdExit extends AMP.BaseElement {
           const vals =
               /** @type {./config.Variable} */ (target.vars[customVar]);
           vars[customVar] = () => {
-            if (vals.vendorAnalyticsSource) {
+            if (vals.hasOwnProperty('vendorAnalyticsSource')) {
               const map = IframeTransportResponseMap.get(this.getAmpDoc(),
                   vals.vendorAnalyticsSource,
                   /** @type {string} */ (this.win.document.baseURI));
-              if (map && vals.vendorAnalyticsResponseKey &&
-                  map[vals.vendorAnalyticsResponseKey]) {
+              if (map && vals.hasOwnProperty('vendorAnalyticsResponseKey') &&
+                  map.hasOwnProperty(vals.vendorAnalyticsResponseKey)) {
                 return map[vals.vendorAnalyticsResponseKey];
               }
             }

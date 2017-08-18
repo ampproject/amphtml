@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import {user, dev} from '../../../src/log';
+import {user} from '../../../src/log';
 import {FilterType} from './filters/filter';
 import {ANALYTICS_CONFIG} from '../../amp-analytics/0.1/vendors';
-import {getMode} from '../../../src/mode';
-
-const TAG = 'AmpAdExitConfig';
 
 /**
  * @typedef {{
@@ -149,15 +146,8 @@ function assertTarget(name, target, config) {
           pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
           variable, pattern);
       const vendor = target.vars[variable]['vendorAnalyticsSource'];
-      if (vendor !== undefined) {
-        if (getMode().test) {
-          if (!ANALYTICS_CONFIG[vendor]) {
-            dev().warn(TAG, 'Please add ' + vendor + ' to vendors.js!');
-            continue;
-          }
-        } else {
-          user().assert(ANALYTICS_CONFIG[vendor], 'Unknown vendor: ' + vendor);
-        }
+      if (vendor) {
+        user().assert(ANALYTICS_CONFIG[vendor], 'Unknown vendor: ' + vendor);
         user().assert(
             target.vars[variable]['vendorAnalyticsResponseKey'],
             'Variable \'%s\': If vendorAnalyticsSource is defined then ' +
