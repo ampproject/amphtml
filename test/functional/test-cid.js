@@ -795,9 +795,10 @@ describes.realWin('cid', {amp: true}, env => {
         cookieName: '_ga',
         createCookieIfNotPresent: true,
       }, hasConsent).then(scopedCid => {
-        expect(getScopedCidStub).to.be
-            .calledWith('googleanalytics', 'AMP_ECID_GOOGLE', '_ga');
+        expect(getScopedCidStub)
+            .to.be.calledWith('googleanalytics', 'AMP_ECID_GOOGLE');
         expect(scopedCid).to.equal('cid-from-api');
+        expect(getCookie(win, '_ga')).to.equal('cid-from-api');
       });
     });
 

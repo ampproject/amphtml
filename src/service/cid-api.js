@@ -21,8 +21,6 @@ import {dict} from '../utils/object';
 import {isProxyOrigin} from '../url';
 import {WindowInterface} from '../window-interface';
 
-export const OPT_OUT = '$OPT_OUT';
-
 const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
 const API_KEYS = {
   'googleanalytics': 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
@@ -32,7 +30,7 @@ const TAG = 'GoogleCidApi';
 const AMP_TOKEN = 'AMP_TOKEN';
 
 /** @enum {string} */
-const TokenStatus = {
+export const TokenStatus = {
   RETRIEVING: '$RETRIEVING',
   OPT_OUT: '$OPT_OUT',
   NOT_FOUND: '$NOT_FOUND',
@@ -68,10 +66,9 @@ export class GoogleCidApi {
   /**
    * @param {string} apiClient
    * @param {string} scope
-   * @param {string=} opt_cookieName
    * @return {!Promise<?string>}
    */
-  getScopedCid(apiClient, scope, opt_cookieName) {
+  getScopedCid(apiClient, scope) {
     const url = this.getUrl_(apiClient);
     if (!url) {
       return Promise.resolve(/** @type {?string} */(null));
@@ -80,7 +77,6 @@ export class GoogleCidApi {
     if (this.cidPromise_[scope]) {
       return this.cidPromise_[scope];
     }
-    const cookieName = opt_cookieName || scope;
     let token;
     // Block the request if a previous request is on flight
     // Poll every 200ms. Longer interval means longer latency for the 2nd CID.
@@ -89,7 +85,7 @@ export class GoogleCidApi {
       return token !== TokenStatus.RETRIEVING;
     }).then(() => {
       if (token === TokenStatus.OPT_OUT) {
-        return OPT_OUT;
+        return TokenStatus.OPT_OUT;
       }
       // If the page referrer is proxy origin, we force to use API even the
       // token indicates a previous fetch returned nothing
@@ -98,18 +94,18 @@ export class GoogleCidApi {
 
       // Token is in a special state, fallback to existing cookie
       if (!forceFetch && this.isStatusToken_(token)) {
-        return getCookie(this.win_, cookieName);
+        return null;
       }
 
       if (!token || this.isStatusToken_(token)) {
         this.persistToken_(TokenStatus.RETRIEVING, TIMEOUT);
       }
       return this.fetchCid_(dev().assertString(url), scope, token)
-          .then(this.handleResponse_.bind(this, cookieName))
+          .then(this.handleResponse_.bind(this))
           .catch(e => {
             this.persistToken_(TokenStatus.ERROR, TIMEOUT);
             dev().error(TAG, e);
-            return getCookie(this.win_, cookieName);
+            return null;
           });
     });
   }
@@ -139,22 +135,20 @@ export class GoogleCidApi {
   }
 
   /**
-   * @param {string} cookieName
    * @param {!JsonObject} res
    * @return {?string}
    */
-  handleResponse_(cookieName, res) {
+  handleResponse_(res) {
     if (res['optOut']) {
       this.persistToken_(TokenStatus.OPT_OUT, YEAR);
-      return null;
+      return TokenStatus.OPT_OUT;
     }
     if (res['clientId']) {
       this.persistToken_(res['securityToken'], YEAR);
-      setCookie(this.win_, cookieName, res['clientId'], this.expiresIn_(YEAR));
       return res['clientId'];
     } else {
       this.persistToken_(TokenStatus.NOT_FOUND, HOUR);
-      return getCookie(this.win_, cookieName);
+      return null;
     }
   }
 
