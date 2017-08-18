@@ -151,7 +151,7 @@ export class ViewportBindingInabox {
           const oldViewportRect = this.viewportRect_;
           this.viewportRect_ = data.viewportRect;
 
-          this.updateBoxRect_(data.positionRect);
+          this.updateBoxRect_(data.targetRect);
 
           if (isResized(this.viewportRect_, oldViewportRect)) {
             this.resizeObservable_.fire();

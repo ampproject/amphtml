@@ -359,7 +359,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       iframe.name = 'test_nomaster';
       iframeHandler.init(iframe);
       sandbox.stub/*OK*/(
-          iframeHandler.viewport_, 'getPositionRectAsync', () => {
+          iframeHandler.viewport_, 'getElementRectAsync', () => {
             return Promise.resolve(layoutRectLtwh(1, 1, 1, 1));
           });
       sandbox.stub/*OK*/(iframeHandler.viewport_, 'getRect', () => {
@@ -371,7 +371,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       });
       return iframe.expectMessageFromParent('position').then(data => {
         expect(data).to.jsonEqual({
-          positionRect: layoutRectLtwh(1, 1, 1, 1),
+          targetRect: layoutRectLtwh(1, 1, 1, 1),
           viewportRect: layoutRectLtwh(1, 1, 1, 1),
           type: 'position',
           sentinel: 'amp3ptest' + testIndex,

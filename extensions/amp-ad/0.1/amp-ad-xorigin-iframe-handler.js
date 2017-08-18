@@ -119,7 +119,6 @@ export class AmpAdXOriginIframeHandler {
 
     // To provide position to inabox.
     if (isExperimentOn(this.win_, 'inabox-position-api')) {
-      console.log('experiment on!!!');
       this.inaboxPositionApi_ = new SubscriptionApi(
           this.iframe, MessageType.SEND_POSITIONS, true, () => {
             this.initPositionApi_();
@@ -446,11 +445,11 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   getIframePositionPromise_() {
-    return this.viewport_.getPositionRectAsync(
+    return this.viewport_.getElementRectAsync(
         dev().assertElement(this.iframe)).then(position => {
           const viewport = this.viewport_.getRect();
           return dict({
-            'positionRect': position,
+            'targetRect': position,
             'viewportRect': viewport,
           });
         });

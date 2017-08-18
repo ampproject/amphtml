@@ -25,7 +25,7 @@ import {throttle} from '../../src/utils/rate-limit';
 /**
  * @typedef {{
  *   viewportRect: !LayoutRectDef,
- *   positionRect: !LayoutRectDef,
+ *   targetRect: !LayoutRectDef,
  * }}
  */
 let PositionEntryDef;
@@ -98,7 +98,7 @@ export class PositionObserver {
     return {
       viewportRect: /** @type {!LayoutRectDef} */(this.viewportRect_),
       // relative position to viewport
-      positionRect:
+      targetRect:
           layoutRectFromDomRect(element./*OK*/getBoundingClientRect()),
     };
   }

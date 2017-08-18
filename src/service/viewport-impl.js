@@ -393,7 +393,7 @@ export class Viewport {
    * @return {!../layout-rect.LayoutRectDef}}
    * @private
    */
-  getPositionRect_(el) {
+  getElementRect_(el) {
     const viewportRect = this.getRect();
     return moveLayoutRect(
         this.getLayoutRect(el), -viewportRect.left, -viewportRect.top);
@@ -404,9 +404,9 @@ export class Viewport {
    * @param {!Element} el
    * @return {!Promise<?../layout-rect.LayoutRectDef>}}
    */
-  getPositionRectAsync(el) {
+  getElementRectAsync(el) {
     return this.vsync_.measurePromise(() => {
-      return this.getPositionRect_(el);
+      return this.getElementRect_(el);
     });
   }
 
