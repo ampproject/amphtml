@@ -172,7 +172,8 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "THROTTLED\n")
 		return
 	}
-	if rand.Float64() < 0.1 {
+	// We're temporarily forwarding 100% of traffic to the JS error tracker.
+	if rand.Float64() < 1 {
 		urlString := strings.Replace(r.URL.String(), "amp-error-reporting", "amp-error-reporting-js", 1)
 		client := urlfetch.Client(c)
 		req, err := http.NewRequest("GET", urlString, nil)
