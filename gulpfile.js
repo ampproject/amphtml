@@ -71,6 +71,7 @@ declareExtension('amp-brightcove', '0.1', false);
 declareExtension('amp-kaltura-player', '0.1', false);
 declareExtension('amp-call-tracking', '0.1', false);
 declareExtension('amp-carousel', '0.1', true);
+declareExtension('amp-compare-slider', '0.1', false);
 declareExtension('amp-crypto-polyfill', '0.1', false);
 declareExtension('amp-dailymotion', '0.1', false);
 declareExtension('amp-dynamic-css-classes', '0.1', false);
@@ -115,6 +116,7 @@ declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '1.0', true);
 declareExtension('amp-selector', '0.1', true);
 declareExtension('amp-web-push', '0.1', true);
+declareExtension('amp-position-observer', '0.1', false);
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.

@@ -45,7 +45,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     });
 
     it('should return false if Viewer has no CID capability', () => {
-      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
+      viewerMock.isTrustedViewer.returns(new Promise(() => {}));
       viewerMock.hasCapability.withArgs('cid').returns(false);
       return expect(api.isSupported()).to.eventually.be.false;
     });

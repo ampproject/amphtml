@@ -36,7 +36,7 @@ import {validateData} from '../../3p/3p';
 import {DomFingerprint} from '../../src/utils/dom-fingerprint';
 import * as sinon from 'sinon';
 
-describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
+describe.configure().ifNewChrome().run('3p-frame', () => {
 
   let clock;
   let sandbox;
@@ -137,7 +137,7 @@ describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
   });
 
   // TODO(bradfrizzell) break this out into a test-iframe-attributes
-  it.configure().skipSauceLabs().run('should create an iframe', () => {
+  it.skip('should create an iframe', () => {
     window.AMP_MODE = {
       localDev: true,
       development: false,
@@ -186,7 +186,7 @@ describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
         '"type":"_ping_",' +
         '"_context":{"referrer":"http://acme.org/",' +
         '"ampcontextVersion": "$internalRuntimeVersion$",' +
-        '"ampcontextFilepath": "https://cdn.ampproject.org/' +
+        '"ampcontextFilepath": "https://3p.ampproject.net/' +
         '$internalRuntimeVersion$/ampcontext-v0.js",' +
         '"canonicalUrl":"' + docInfo.canonicalUrl + '",' +
         '"sourceUrl":"' + locationHref + '",' +

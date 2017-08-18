@@ -242,12 +242,16 @@ describe('amp-a4a', () => {
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
       a4a.buildCallback();
+      const lifecycleEventStub =
+          sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
         expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+        expect(lifecycleEventStub).to.be.calledWith('renderSafeFrameStart',
+            {'isAmpCreative': false, 'releaseType': 'pr'});
       });
     });
 
@@ -435,6 +439,7 @@ describe('amp-a4a', () => {
   describe('cross-domain rendering', () => {
     let a4aElement;
     let a4a;
+    let lifecycleEventStub;
     beforeEach(() => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
@@ -451,6 +456,7 @@ describe('amp-a4a', () => {
         a4a.createdCallback();
         a4a.firstAttachedCallback();
         a4a.buildCallback();
+        lifecycleEventStub = sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
         expect(onCreativeRenderSpy).to.not.be.called;
       });
     });
@@ -473,6 +479,8 @@ describe('amp-a4a', () => {
           expect(devErrLogSpy.getCall(0).args[1]).to.have.string(
               'random illegal value');
           expect(fetchMock.called('ad')).to.be.true;
+          expect(lifecycleEventStub).to.be.calledWith('renderCrossDomainStart',
+              {'isAmpCreative': false, 'releaseType': 'pr'});
         });
       });
     });
@@ -817,6 +825,8 @@ describe('amp-a4a', () => {
         const loadExtensionSpy =
             sandbox.spy(Extensions.prototype, 'loadExtension');
         a4a.buildCallback();
+        const lifecycleEventStub =
+            sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(promiseResult => {
@@ -858,6 +868,11 @@ describe('amp-a4a', () => {
             expect(onCreativeRenderSpy).to.be.calledOnce;
             expect(updatePriorityStub).to.be.calledOnce;
             expect(updatePriorityStub.args[0][0]).to.equal(0);
+            expect(lifecycleEventStub).to.be.calledWith(
+                'adResponseValidateEnd', {
+                  'signatureValidationResult': 0,
+                  'releaseType': 'pr',
+                });
           });
         });
       });
