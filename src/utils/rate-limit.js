@@ -75,7 +75,7 @@ export function debounce(win, callback, minInterval) {
 
   function waiter() {
     locker = 0;
-    const remaining = minInterval - (Date.now() - timestamp);
+    const remaining = minInterval - (win.Date.now() - timestamp);
     if (remaining > 0) {
       locker = win.setTimeout(waiter, remaining);
     } else {
@@ -84,7 +84,7 @@ export function debounce(win, callback, minInterval) {
   }
 
   return function(...args) {
-    timestamp = Date.now();
+    timestamp = win.Date.now();
     nextCallArgs = args;
     if (!locker) {
       locker = win.setTimeout(waiter, minInterval);
