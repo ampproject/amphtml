@@ -40,7 +40,7 @@ import {base64UrlEncodeFromBytes} from '../utils/base64';
 import {parseJson, tryParseJson} from '../json';
 import {user, rethrowAsync} from '../log';
 import {ViewerCidApi} from './viewer-cid-api';
-import {GoogleCidApi} from './cid-api';
+import {GoogleCidApi, TokenStatus} from './cid-api';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
@@ -180,8 +180,17 @@ export class Cid {
       const apiClient =
           ViewerCidApi.scopeOptedInForCidApi(this.ampdoc.win, scope);
       if (apiClient) {
-        return this.cidApi_.getScopedCid(
-            apiClient, scope, getCidStruct.cookieName);
+        return this.cidApi_.getScopedCid(apiClient, scope).then(scopedCid => {
+          if (scopedCid == TokenStatus.OPT_OUT) {
+            return null;
+          }
+          if (scopedCid) {
+            const cookieName = getCidStruct.cookieName || scope;
+            setCidCookie(this.ampdoc.win, cookieName, scopedCid);
+            return scopedCid;
+          }
+          return getOrCreateCookie(this, getCidStruct, persistenceConsent);
+        });
       }
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
