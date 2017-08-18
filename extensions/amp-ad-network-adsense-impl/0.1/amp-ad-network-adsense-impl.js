@@ -49,6 +49,7 @@ import {stringHash32} from '../../../src/string';
 import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {clamp} from '../../../src/utils/math';
 import {
   computedStyle,
   setStyle,
@@ -402,7 +403,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const maxHeight = Math.min(300, viewportSize.height);
     // We aim for a 6:5 aspect ratio.
     const idealHeight = Math.round(viewportSize.width / 1.2);
-    return Math.max(minHeight, Math.min(maxHeight, idealHeight));
+    return clamp(idealHeight, minHeight, maxHeight);
   }
 }
 
