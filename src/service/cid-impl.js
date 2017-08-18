@@ -181,7 +181,12 @@ export class Cid {
           ViewerCidApi.scopeOptedInForCidApi(this.ampdoc.win, scope);
       if (apiClient) {
         return this.cidApi_.getScopedCid(
-            apiClient, scope, getCidStruct.cookieName);
+            apiClient, scope, getCidStruct.cookieName).then(scopedCid => {
+              if (scopedCid) {
+                return scopedCid;
+              }
+              return getOrCreateCookie(this, getCidStruct, persistenceConsent);
+            });
       }
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
