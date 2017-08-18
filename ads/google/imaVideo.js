@@ -519,7 +519,7 @@ export function playAds(global) {
 export function onContentEnded() {
   contentComplete = true;
   adsLoader.contentComplete();
-  window.parent./*OK*/postMessage({event: VideoEvents.ENDED}, '*');
+  window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
 }
 
 /**
@@ -1114,7 +1114,7 @@ const VideoEvents = {
    *
    * Fired when the video is unmuted.
    *
-   * @event pause
+   * @event unmuted
    */
   UNMUTED: 'unmuted',
 
@@ -1137,14 +1137,6 @@ const VideoEvents = {
    * @event reload
    */
   RELOAD: 'reloaded',
-  /**
-   * ended
-   *
-   * Fired when the video ends.
-   *
-   * @event ended
-   */
-  ENDED: 'ended',
   /**
    * pre/mid/post Ad start
    *

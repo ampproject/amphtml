@@ -313,15 +313,6 @@ export const VideoEvents = {
   RELOAD: 'reloaded',
 
   /**
-   * ended
-   *
-   * Fired when the video ends.
-   *
-   * @event ended
-   */
-  ENDED: 'ended',
-
-  /**
    * pre/mid/post Ad start
    *
    * Fired when an Ad starts playing.
