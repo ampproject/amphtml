@@ -56,20 +56,15 @@ import {VisibilityState} from '../../../../src/visibility-state';
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 
-function setupForAdTesting(win) {
-  const doc = win.document;
-  doc.win = win;
-  // TODO(a4a-cam@): This is necessary in the short term, until A4A is
-  // smarter about host document styling.  The issue is that it needs to
-  // inherit the AMP runtime style element in order for shadow DOM-enclosed
-  // elements to behave properly.  So we have to set up a minimal one here.
-  const ampStyle = doc.createElement('style');
-  ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
-  doc.head.appendChild(ampStyle);
-}
-
+/**
+ * We're allowing external resources because otherwise using realWin causes
+ * strange behavior with iframes, as it doesn't load resources that we
+ * normally load in prod.
+ * We're turning on ampAdCss because using realWin means that we don't
+ * inherit that CSS from the parent page anymore.
+ */
 const realWinConfig = {
-  amp: true, //{ampdoc: 'amp-ad'},
+  amp: true,
   ampAdCss: true,
   allowExternalResources: true,
 };
@@ -92,7 +87,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
    */
   function createImplTag(config) {
     config.type = 'doubleclick';
-    setupForAdTesting(env.win);
     element = createElementWithAttributes(env.win.document, 'amp-ad', config);
     // To trigger CSS styling.
     element.setAttribute('data-a4a-upgrade-type',
@@ -108,6 +102,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
   beforeEach(() => {
     doc = env.win.document;
+    // Necessary to disable isProxyOrigin check
     env.win.AMP_MODE.test = true;
   });
 
@@ -153,7 +148,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     const size = {width: 200, height: 50};
 
     beforeEach(() => {
-      setupForAdTesting(env.win);
       element = createElementWithAttributes(doc, 'amp-ad', {
         'width': '200',
         'height': '50',
@@ -202,7 +196,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
   describe('#onCreativeRender', () => {
     beforeEach(() => {
-      setupForAdTesting(env.win);
       doc.win = env.win;
       element = createElementWithAttributes(doc, 'amp-ad', {
         'width': '200',
@@ -597,7 +590,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
   describe('#delayAdRequestEnabled', () => {
     beforeEach(() => {
-      setupForAdTesting(env.win);
       impl = new AmpAdNetworkDoubleclickImpl(
           createElementWithAttributes(doc, 'amp-ad', {
             type: 'doubleclick',
@@ -654,7 +646,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     }
 
     beforeEach(() => {
-      setupForAdTesting(env.win);
       element = createElementWithAttributes(doc, 'amp-ad', {
         'width': '200',
         'height': '50',
@@ -893,21 +884,20 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
       let impl;
       let element;
       /**
-   * Creates an iframe promise, and instantiates element and impl, adding the
-   * former to the document of the iframe.
-   * @param {{width, height, type}} config
-   * @return The iframe promise.
-   */
+       * Creates an iframe promise, and instantiates element and impl,
+       * adding the former to the document of the iframe.
+       * @param {{width, height, type}} config
+       * @return The iframe promise.
+       */
       function createImplTag(config) {
         config.type = 'doubleclick';
-        setupForAdTesting(env.win);
         element = createElementWithAttributes(
             env.win.document, 'amp-ad', config);
-    // To trigger CSS styling.
+        // To trigger CSS styling.
         element.setAttribute('data-a4a-upgrade-type',
-            'amp-ad-network-doubleclick-impl');
-    // Used to test styling which is targetted at first iframe child of
-    // amp-ad.
+                             'amp-ad-network-doubleclick-impl');
+        // Used to test styling which is targetted at first iframe child of
+        // amp-ad.
         const iframe = env.win.document.createElement('iframe');
         element.appendChild(iframe);
         env.win.document.body.appendChild(element);
@@ -922,7 +912,6 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
       describe('#onNetworkFailure', () => {
 
         beforeEach(() => {
-          setupForAdTesting(env.win);
           element = createElementWithAttributes(doc, 'amp-ad', {
             'width': '200',
             'height': '50',
@@ -948,10 +937,10 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           expect(style.left).to.equal('50%');
           expect(style.width).to.equal(expectedSize.width);
           expect(style.height).to.equal(expectedSize.height);
-      // We don't know the exact values by which the frame will be translated,
-      // as this can vary depending on whether we use the height/width
-      // attributes, or the actual size of the frame. To make this less of a
-      // hassle, we'll just match against regexp.
+          // We don't know the exact values by which the frame will be translated,
+          // as this can vary depending on whether we use the height/width
+          // attributes, or the actual size of the frame. To make this less of a
+          // hassle, we'll just match against regexp.
           expect(style.transform).to.match(new RegExp(
           'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
         }

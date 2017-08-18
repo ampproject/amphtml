@@ -509,7 +509,8 @@ class RealWinFixture {
   /** @param {!{
   *   fakeRegisterElement: boolean,
   *   ampCss: boolean,
-  *   allowExternalResources: boolean
+  *   allowExternalResources: boolean,
+  *   ampAdCss: boolean
   * }} spec */
   constructor(spec) {
     /** @const */
@@ -552,6 +553,7 @@ class RealWinFixture {
           installRuntimeStylesPromise(win);
         }
 
+        // Install AMP AD CSS if requested.
         if (spec.ampAdCss) {
           installAmpAdStylesPromise(win);
         }
