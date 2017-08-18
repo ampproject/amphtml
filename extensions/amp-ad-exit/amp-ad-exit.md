@@ -119,12 +119,13 @@ There are two types of filters: location-based and time-based. Other filters (su
 
 The `clickLocation` filter type specifies the minimum distance a click must be from the edges of the creative or viewport (whichever is smaller).  The `clickLocation` filter requires the following properties:
 
-| Property | Value | Meaning |
-| -------- | ----- | ------- |
-| `top`    | `number` | Distance in px from the top edge. |
-| `right`  | `number` | Distance in px from the right edge. |
-| `bottom` | `number` | Distance in px from the bottom edge. |
-| `left`   | `number` | Distance in px from the left edge. |
+| Property     | Value | Meaning |
+| ------------ | ----- | ------- |
+| `top`        | `number` | Distance in px from the top edge. |
+| `right`      | `number` | Distance in px from the right edge. |
+| `bottom`     | `number` | Distance in px from the bottom edge. |
+| `left`       | `number` | Distance in px from the left edge. |
+| `relativeTo` | `string` | Element selector to select the element to which the border protection is applied. |
 
 ### clickDelay filter
 
@@ -155,13 +156,21 @@ The `clickDelay` filter type specifies the time to wait before responding to cli
       "right": 5,
       "bottom": 5,
       "left": 5
-    }
+    },
     "huge-border": {
       "type": "clickLocation",
       "top": 100,
       "right": 100,
       "bottom": 100,
       "left": 100
+    },
+    "border-with-relative-to-element": {
+      type": "clickLocation",
+      "top": 10,
+      "right": 10,
+      "bottom": 10,
+      "left": 10,
+      "relativeTo": "#adContent"
     }
   }
 }
