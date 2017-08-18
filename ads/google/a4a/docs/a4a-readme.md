@@ -79,7 +79,7 @@ Yes. Learn more about it [here](https://github.com/ampproject/amphtml/blob/maste
 Yes. Learn more about it [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/amp-ad-exit.md). 
 
 #### Where can I learn more about AMP Ads?
-The public [website](http://ampproject.org/ads) is a good place to start. 
+The public [website](https://ampproject.org/ads) is a good place to start. 
 
 #### I can’t find what I need, where can I ask questions?
 You can open a [Github Issue](https://github.com/ampproject/amphtml/issues/new). 
