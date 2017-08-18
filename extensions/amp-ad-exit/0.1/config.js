@@ -49,7 +49,19 @@ export let Variables;
  */
 export let ClickDelayConfig;
 
-/** @typedef {!ClickDelayConfig} */
+/**
+ * @typedef {{
+ *   type: !FilterType,
+ *   top: (number|undefined),
+ *   right: (number|undefined),
+ *   bottom: (number|undefined),
+ *   left: (number|undefined),
+ *   relativeTo: (string|undefined)
+ * }}
+ */
+export let ClickLocationConfig;
+
+/** @typedef {!ClickDelayConfig|!ClickLocationConfig} */
 export let FilterConfig;
 
 /** @enum {string} */
@@ -93,8 +105,10 @@ function assertFilters(filters) {
     user().assert(typeof filters[name] == 'object',
         'Filter specification \'%s\' is malformed', name);
     user().assert(
-        filters[name].type == FilterType.CLICK_DELAY,
-        'Only ClickDelayFilter is currently supported.');
+        filters[name].type == FilterType.CLICK_DELAY ||
+        filters[name].type == FilterType.CLICK_LOCATION,
+        'Only ClickDelayFilter and ClickLocationDelay are currently ' +
+        'supported.');
   }
 }
 

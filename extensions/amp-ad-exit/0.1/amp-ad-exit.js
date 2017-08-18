@@ -56,6 +56,8 @@ export class AmpAdExit extends AMP.BaseElement {
       image: true,
     };
 
+    this.userFilters_ = {};
+
     this.registerAction('exit', this.exit.bind(this));
   }
 
@@ -153,7 +155,7 @@ export class AmpAdExit extends AMP.BaseElement {
     this.element.setAttribute('aria-hidden', 'true');
 
     this.defaultFilters_.push(
-        createFilter('minDelay', makeClickDelaySpec(1000)));
+        createFilter('minDelay', makeClickDelaySpec(1000), this));
 
     const children = this.element.children;
     user().assert(children.length == 1,
@@ -165,9 +167,10 @@ export class AmpAdExit extends AMP.BaseElement {
         'be inside a <script> tag with type="application/json"');
     try {
       const config = assertConfig(parseJson(child.textContent));
-      const userFilters = {};
+      // const userFilters = {};
       for (const name in config.filters) {
-        userFilters[name] = createFilter(name, config.filters[name]);
+        this.userFilters_[name] =
+            createFilter(name, config.filters[name], this);
       }
       for (const name in config.targets) {
         const target = config.targets[name];
@@ -176,7 +179,8 @@ export class AmpAdExit extends AMP.BaseElement {
           trackingUrls: target.trackingUrls || [],
           vars: target.vars || {},
           filters:
-              (target.filters || []).map(f => userFilters[f]).filter(f => f),
+              (target.filters || []).map(
+                  f => this.userFilters_[f]).filter(f => f),
         };
       }
       this.transport_.beacon = config.transport[TransportMode.BEACON] !== false;
@@ -190,6 +194,13 @@ export class AmpAdExit extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(unused) {
     return true;
+  }
+
+  /** @override */
+  onLayoutMeasure() {
+    for (const name in this.userFilters_) {
+      this.userFilters_[name].onLayoutMeasure();
+    }
   }
 }
 
