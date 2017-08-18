@@ -25,5 +25,6 @@
   "a4a-measure-get-ad-urls": 1,
   "ad-loader-v2": 1,
   "3p-use-ampcontext": 0,
-  "amp-animation": 1
+  "amp-animation": 1,
+  "amp-sidebar toolbar": 1
 }
