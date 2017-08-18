@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-describe.configure().ifNewChrome().run('alt nameframe', function() {
+describe.skip('alt nameframe', function() {
   describes.sandboxed('alt nameframe', {}, () => {
     describes.realWin('nameframe', {allowExternalResources: true}, env => {
       let fixture;

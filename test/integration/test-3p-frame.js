@@ -137,7 +137,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
   });
 
   // TODO(bradfrizzell) break this out into a test-iframe-attributes
-  it.configure().ifNewChrome().run('should create an iframe', () => {
+  it.skip('should create an iframe', () => {
     window.AMP_MODE = {
       localDev: true,
       development: false,
