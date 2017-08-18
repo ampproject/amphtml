@@ -21,8 +21,6 @@ import {
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {utf8Encode} from '../../../../src/utils/bytes';
 import * as sinon from 'sinon';
 import {gmosspIsA4AEnabled} from '../gmossp-a4a-config';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -76,12 +74,12 @@ describe('amp-ad-network-gmossp-impl', () => {
     gmosspImplElem = document.createElement('amp-ad');
     gmosspImplElem.setAttribute('type', 'gmossp');
     gmosspImplElem.setAttribute('src',
-'https://sp.gmossp-sp.jp/ads/ssp.ad?space_id=33303&is_a4a=1');
+        'https://sp.gmossp-sp.jp/ads/ssp.ad?space_id=33303&is_a4a=1');
     gmosspImplElem.setAttribute('data-use-a4a', 'true');
     sandbox.stub(AmpAdNetworkGmosspImpl.prototype, 'getSigningServiceNames',
-      () => {
-        return ['google'];
-      });
+        () => {
+          return ['google'];
+        });
     gmosspImpl = new AmpAdNetworkGmosspImpl(gmosspImplElem);
   });
 
@@ -106,37 +104,6 @@ document.createElement('amp-ad-network-gmossp-impl');
     it('should be valid', () => {
       const base = 'https://sp.gmossp-sp.jp/ads/ssp.ad?';
       expect(gmosspImpl.getAdUrl().substring(0, base.length)).to.equal(base);
-    });
-  });
-
-  describe('#extractCreativeAndSignature', () => {
-    it('without signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        return expect(gmosspImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function() { return undefined; },
-            has: function() { return false; },
-          })).to.eventually.deep.equal(
-            {creative, signature: null}
-          );
-      });
-    });
-    it('with signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        return expect(gmosspImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function(name) {
-              return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-            },
-            has: function(name) {
-              return name === 'X-AmpAdSignature';
-            },
-          })).to.eventually.deep.equal(
-            {creative, signature: base64UrlDecodeToBytes('AQAB')}
-          );
-      });
     });
   });
 });

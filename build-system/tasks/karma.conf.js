@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 /**
  * @param {!Object} config
@@ -39,11 +40,41 @@ module.exports = {
   browserify: {
     watch: true,
     debug: true,
-    transform: ['babelify'],
+    transform: process.env.TRAVIS ? ['babelify'] : [
+      ['babelify'],
+      ['browserify-istanbul', { instrumenterConfig: { embedSource: true }}]
+    ],
     bundleDelay: 900,
   },
 
-  reporters: [process.env.TRAVIS ? 'dots' : 'progress'],
+  reporters: process.env.TRAVIS ? ['super-dots', 'mocha'] : ['dots', 'mocha'],
+
+  superDotsReporter: {
+    color: {
+      success : 'green',
+      failure : 'red',
+      ignore  : 'yellow'
+    },
+    icon: {
+      success : '●',
+      failure : '●',
+      ignore  : '○',
+    },
+  },
+
+  mochaReporter: {
+    output: 'minimal',
+    colors: {
+      success: 'green',
+      error: 'red',
+      info: 'yellow',
+    },
+    symbols: {
+      success : '●',
+      error: '●',
+      info: '○',
+    },
+  },
 
   port: 9876,
 
@@ -59,9 +90,9 @@ module.exports = {
     '/test/': '/base/test/',
   },
 
-  // Can't import Karma constants config.LOG_ERROR & config.LOG_WARN,
-  // so we hard code the strings here. Hopefully they'll never change.
-  logLevel: process.env.TRAVIS ? 'ERROR' : 'WARN',
+  // Can't import the Karma constant config.LOG_ERROR, so we hard code it here.
+  // Hopefully it'll never change.
+  logLevel: 'ERROR',
 
   autoWatch: true,
 
@@ -170,20 +201,23 @@ module.exports = {
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
-  middleware: ['custom'],
+  beforeMiddleware: ['custom'],
   plugins: [
     'karma-browserify',
     'karma-chai',
     'karma-chai-as-promised',
     'karma-chrome-launcher',
+    'karma-coverage',
     'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',
     'karma-mocha',
+    'karma-mocha-reporter',
     'karma-safari-launcher',
     'karma-sauce-launcher',
     'karma-sinon-chai',
+    'karma-super-dots-reporter',
     {
       'middleware:custom': ['factory', function() {
         return require(require.resolve('../app.js'));

@@ -20,8 +20,7 @@ import {AmpAdCustom} from './amp-ad-custom';
 import {a4aRegistry} from '../../../ads/_a4a-config';
 import {adConfig} from '../../../ads/_config';
 import {user} from '../../../src/log';
-import {extensionsFor} from '../../../src/services';
-import {userNotificationManagerFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {hasOwn} from '../../../src/utils/object';
 
@@ -54,7 +53,7 @@ export class AmpAd extends AMP.BaseElement {
     /** @const {string} */
     const consentId = this.element.getAttribute('data-consent-notification-id');
     const consent = consentId
-        ? userNotificationManagerFor(this.win)
+        ? Services.userNotificationManagerForDoc(this.element)
             .then(service => service.get(consentId))
         : Promise.resolve();
 
@@ -76,7 +75,10 @@ export class AmpAd extends AMP.BaseElement {
 
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       if (!a4aRegistry[type] ||
-          this.win.document.querySelector('meta[name=amp-3p-iframe-src]') ||
+          (!(adConfig[type] || {}).remoteHTMLDisabled &&
+          this.win.document.querySelector('meta[name=amp-3p-iframe-src]') &&
+          !this.win.document.getElementById('amp-rtc')) ||
+          // Note that predicate execution may have side effects.
           !a4aRegistry[type](this.win, this.element)) {
         // Either this ad network doesn't support Fast Fetch, its Fast Fetch
         // implementation has explicitly opted not to handle this tag, or this
@@ -87,16 +89,16 @@ export class AmpAd extends AMP.BaseElement {
 
       const extensionTagName = networkImplementationTag(type);
       this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
-      return extensionsFor(this.win).loadElementClass(extensionTagName)
-        .then(ctor => new ctor(this.element))
-        .catch(error => {
+      return Services.extensionsFor(this.win).loadElementClass(extensionTagName)
+          .then(ctor => new ctor(this.element))
+          .catch(error => {
           // Work around presubmit restrictions.
-          const TAG = this.element.tagName;
+            const TAG = this.element.tagName;
           // Report error and fallback to 3p
-          user().error(TAG, 'Unable to load ad implementation for type ', type,
-              ', falling back to 3p, error: ', error);
-          return new AmpAd3PImpl(this.element);
-        });
+            user().error(TAG, 'Unable to load ad implementation for type ',
+                type, ', falling back to 3p, error: ', error);
+            return new AmpAd3PImpl(this.element);
+          });
     });
   }
 }

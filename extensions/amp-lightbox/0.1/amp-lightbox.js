@@ -16,108 +16,18 @@
 
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Gestures} from '../../../src/gesture';
-import {Keycodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
-import {childElementByTag} from '../../../src/dom.js';
-import {dev} from '../../../src/log';
-import {getParentWindowFrameElement} from '../../../src/service';
-import {historyForDoc} from '../../../src/services';
-import {isExperimentOn} from '../../../src/experiments';
-import {vsyncFor} from '../../../src/services';
-import {timerFor} from '../../../src/services';
+import {computedStyle, setImportantStyles} from '../../../src/style';
+import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {Services} from '../../../src/services';
+import {debounce} from '../../../src/utils/rate-limit';
 import * as st from '../../../src/style';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
-
-/** @const {string} */
-const A4A_PROTOTYPE_EXPERIMENT = 'amp-lightbox-a4a-proto';
-
-
-
-/**
- * @param {!HTMLBodyElement} bodyElement
- * @return {!Element}
- */
- // TODO(alanorozco):
-//   Move this where it makes sense (possibly FriendlyIframeEmbed?)
-function getAdBannerRoot(bodyElement) {
-  return dev().assertElement(childElementByTag(
-      dev().assertElement(bodyElement), 'amp-ad-banner'));
-}
-
-
-// TODO(alanorozco):
-//   Move this where it makes sense (possibly FriendlyIframeEmbed?)
-/**
- * @param {!HTMLIFrameElement} iframe
- * @param {!Window} topLevelWindow
- */
-function enterFrameFullOverlayMode(iframe, topLevelWindow) {
-  // TODO(alanorozco): use viewport service
-  // TODO(alanorozco): move ad banner resizing logic to its extension class
-  // TODO(alanorozco): check for FriendlyIframeEmbed.win.document as iframeDoc
-  //                   fallback.
-  const iframeDoc = iframe.contentDocument;
-  const iframeBody = /** @type {!HTMLBodyElement} */ (iframeDoc.body);
-  const adBannerRoot = getAdBannerRoot(iframeBody);
-
-  vsyncFor(topLevelWindow).run({
-    measure: state => {
-      const iframeRect = iframe./*OK*/getBoundingClientRect();
-
-      const winWidth = topLevelWindow./*OK*/innerWidth;
-      const winHeight = topLevelWindow./*OK*/innerHeight;
-
-      state.adBannerRootStyle = {
-        'position': 'absolute',
-        'top': st.px(iframeRect.top),
-        'right': st.px(winWidth - iframeRect.right),
-        'left': st.px(iframeRect.left),
-        'bottom': st.px(winHeight - iframeRect.bottom),
-        'height': st.px(iframeRect.bottom - iframeRect.top),
-      };
-    },
-    mutate: state => {
-      st.setStyle(iframeBody, 'background', 'transparent');
-
-      st.setStyles(iframe, {
-        'position': 'fixed',
-      });
-
-      st.setStyles(adBannerRoot, state.adBannerRootStyle);
-    },
-  }, {});
-}
-
-
-// TODO(alanorozco):
-//   Move this where it makes sense (possibly FriendlyIframeEmbed?)
-/**
- * @param {!HTMLIFrameElement} iframe
- * @param {!Window} topLevelWindow
- */
-function leaveFrameFullOverlayMode(iframe, topLevelWindow) {
-  const iframeDoc = iframe.contentDocument;
-  const iframeBody = /** @type {!HTMLBodyElement} */ (iframeDoc.body);
-  const adBannerRoot = getAdBannerRoot(iframeBody);
-
-  vsyncFor(topLevelWindow).mutate(() => {
-    st.setStyles(adBannerRoot, {
-      'position': null,
-      'top': null,
-      'right': null,
-      'left': null,
-      'bottom': null,
-      'height': null,
-    });
-
-    st.setStyles(iframe, {
-      'position': null,
-    });
-  });
-}
 
 
 class AmpLightbox extends AMP.BaseElement {
@@ -155,6 +65,19 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @private {?number} */
     this.scrollTimerId_ = null;
+
+    /** @const {function()} */
+    this.boundReschedule_ = debounce(this.win, () => {
+      const container = dev().assertElement(this.container_);
+      this.scheduleLayout(container);
+      this.scheduleResume(container);
+    }, 500);
+  }
+
+  /** @override */
+  buildCallback() {
+    this.element.classList.add('i-amphtml-overlay');
+    this.maybeSetTransparentBody_();
   }
 
   /** @override */
@@ -217,9 +140,11 @@ class AmpLightbox extends AMP.BaseElement {
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);
-    this.maybeEnterFrameFullOverlayMode_();
-    this.getViewport().enterLightboxMode();
+    this.getViewport().enterLightboxMode(this.element)
+        .then(() => this.finalizeOpen_());
+  }
 
+  finalizeOpen_() {
     if (this.isScrollable_) {
       st.setStyle(this.element, 'webkitOverflowScrolling', 'touch');
     }
@@ -230,7 +155,7 @@ class AmpLightbox extends AMP.BaseElement {
         // TODO(dvoytenko): use new animations support instead.
         transition: 'opacity 0.1s ease-in',
       });
-      vsyncFor(this.win).mutate(() => {
+      Services.vsyncFor(this.win).mutate(() => {
         st.setStyle(this.element, 'opacity', '');
       });
     }).then(() => {
@@ -238,10 +163,13 @@ class AmpLightbox extends AMP.BaseElement {
       if (!this.isScrollable_) {
         this.updateInViewport(container, true);
       } else {
+        this.scrollHandler_();
         this.updateChildrenInViewport_(this.pos_, this.pos_);
       }
       // TODO: instead of laying out children all at once, layout children based
       // on visibility.
+      this.element.addEventListener('transitionend', this.boundReschedule_);
+      this.element.addEventListener('animationend', this.boundReschedule_);
       this.scheduleLayout(container);
       this.scheduleResume(container);
     });
@@ -253,55 +181,13 @@ class AmpLightbox extends AMP.BaseElement {
     this.active_ = true;
   }
 
-  /** @private */
-  maybeEnterFrameFullOverlayMode_() {
-    if (!isExperimentOn(this.getAmpDoc().win, A4A_PROTOTYPE_EXPERIMENT)) {
-      return;
-    }
-
-    if (this.isInMainDocument_()) {
-      return;
-    }
-
-    enterFrameFullOverlayMode(this.getIframe_(), this.getAmpDoc().win);
-  }
-
-  /** @private */
-  maybeLeaveFrameFullOverlayMode_() {
-    if (!isExperimentOn(this.getAmpDoc().win, A4A_PROTOTYPE_EXPERIMENT)) {
-      return;
-    }
-
-    if (this.isInMainDocument_()) {
-      return;
-    }
-
-    leaveFrameFullOverlayMode(this.getIframe_(), this.getAmpDoc().win);
-  }
-
-  /** @return {boolean} */
-  isInMainDocument_() {
-    return this.getAmpDoc().win == this.win;
-  }
-
-  /**
-   * @return {!HTMLIFrameElement}
-   * @private
-   */
-  getIframe_() {
-    const frameElement = getParentWindowFrameElement(this.element,
-        this.getAmpDoc().win);
-
-    return /** @type {!HTMLIFrameElement} */ (dev().assert(frameElement));
-  }
-
   /**
    * Handles closing the lightbox when the ESC key is pressed.
    * @param {!Event} event.
    * @private
    */
   closeOnEscape_(event) {
-    if (event.keyCode == Keycodes.ESCAPE) {
+    if (event.keyCode == KeyCodes.ESCAPE) {
       this.close();
     }
   }
@@ -316,14 +202,19 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.isScrollable_) {
       st.setStyle(this.element, 'webkitOverflowScrolling', '');
     }
-    this.getViewport().leaveLightboxMode();
-    this.maybeLeaveFrameFullOverlayMode_();
+    this.getViewport().leaveLightboxMode(this.element)
+        .then(() => this.finalizeClose_());
+  }
+
+  finalizeClose_() {
     this./*OK*/collapse();
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
     }
     this.win.document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
+    this.element.removeEventListener('transitionend', this.boundReschedule_);
+    this.element.removeEventListener('animationend', this.boundReschedule_);
     this.boundCloseOnEscape_ = null;
     this.schedulePause(dev().assertElement(this.container_));
     this.active_ = false;
@@ -336,7 +227,10 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   scrollHandler_() {
-    const currentScrollTop = this.element./*OK*/scrollTop;
+    // If scroll top is 0, it's set to 1 to avoid scroll-freeze issue.
+    const currentScrollTop = this.element./*OK*/scrollTop || 1;
+    this.element./*OK*/scrollTop = currentScrollTop;
+
     this.pos_ = currentScrollTop;
 
     if (this.scrollTimerId_ === null) {
@@ -351,7 +245,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   waitForScroll_(startingScrollTop) {
-    this.scrollTimerId_ = timerFor(this.win).delay(() => {
+    this.scrollTimerId_ = Services.timerFor(this.win).delay(() => {
       if (Math.abs(startingScrollTop - this.pos_) < 30) {
         dev().fine(TAG, 'slow scrolling: ' + startingScrollTop + ' - '
             + this.pos_);
@@ -433,8 +327,61 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   getHistory_() {
-    return historyForDoc(this.getAmpDoc());
+    return Services.historyForDoc(this.getAmpDoc());
+  }
+
+  /**
+   * Sets the document body to transparent to allow for frame "merging" if the
+   * element is under FIE.
+   * The module-level execution of setTransparentBody() only works on inabox,
+   * so we need to perform the check on element build time as well.
+   * @private
+   */
+  maybeSetTransparentBody_() {
+    if (this.getAmpDoc().win != this.win) { // in FIE
+      setTransparentBody(this.getAmpDoc().win, /** @type {!HTMLBodyElement} */ (
+          dev().assert(this.win.document.body)));
+    }
   }
 }
+
+
+/**
+ * Sets the document body to transparent to allow for frame "merging".
+ * @param {!Window} win
+ * @param {!HTMLBodyElement} body
+ * @private
+ */
+function setTransparentBody(win, body) {
+  Services.vsyncFor(win).run({
+    measure(state) {
+      state.alreadyTransparent =
+          computedStyle(win, body)['background-color'] == 'rgba(0, 0, 0, 0)';
+    },
+    mutate(state) {
+      if (!state.alreadyTransparent && !getMode().test) {
+
+        // TODO(alanorozco): Create documentation page and link it here once the
+        // A4A lightbox experiment is turned on.
+        user().warn(TAG,
+            'The background of the <body> element has been forced to ' +
+            'transparent. If you need to set background, use an intermediate ' +
+            'container.');
+      }
+
+      // set as !important regardless to prevent changes
+      setImportantStyles(body, {background: 'transparent'});
+    },
+  }, {});
+}
+
+
+// TODO(alanorozco): refactor this somehow so we don't need to do a direct
+// getMode check
+if (getMode().runtime == 'inabox') {
+  setTransparentBody(window, /** @type {!HTMLBodyElement} */ (
+      dev().assert(document.body)));
+}
+
 
 AMP.registerElement('amp-lightbox', AmpLightbox, CSS);

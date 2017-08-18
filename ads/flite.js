@@ -24,17 +24,17 @@
   // TODO: check mandatory fields
    validateData(data, [], ['guid','mixins']);
    const guid = data.guid, o = global, e = encodeURIComponent, x = 0;
-   let r = '', m, url, dep = '';
+   let r = '', dep = '';
    o.FLITE = o.FLITE || {};
    o.FLITE.config = o.FLITE.config || {};
    o.FLITE.config[guid] = o.FLITE.config[guid] || {};
    o.FLITE.config[guid].cb = Math.random();
    o.FLITE.config[guid].ts = (+Number(new Date()));
    r = global.context.location.href;
-   m = r.match(new RegExp('[A-Za-z]+:[/][/][A-Za-z0-9.-]+'));
+   const m = r.match(new RegExp('[A-Za-z]+:[/][/][A-Za-z0-9.-]+'));
    dep = data.mixins ? '&dep=' + data.mixins : '';
-   url = ['https://r.flite.com/syndication/uscript.js?i=',e(guid),
-   '&v=3',dep,'&x=us',x,'&cb=',o.FLITE.config[guid].cb,'&d=',
-   e((m && m[0]) || r), '&tz=', (new Date()).getTimezoneOffset()].join('');
+   const url = ['https://r.flite.com/syndication/uscript.js?i=',e(guid),
+     '&v=3',dep,'&x=us',x,'&cb=',o.FLITE.config[guid].cb,'&d=',
+     e((m && m[0]) || r), '&tz=', (new Date()).getTimezoneOffset()].join('');
    loadScript(o, url);
  }

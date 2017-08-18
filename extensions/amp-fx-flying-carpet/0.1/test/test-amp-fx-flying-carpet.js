@@ -17,7 +17,7 @@
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {installImg} from '../../../../builtins/amp-img';
-import {viewportForDoc} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 import '../amp-fx-flying-carpet';
 
@@ -48,7 +48,7 @@ describe('amp-fx-flying-carpet', () => {
       iframe.doc.body.appendChild(bodyResizer);
 
       iframe.doc.body.style.position = 'relative';
-      viewport = viewportForDoc(iframe.win.document);
+      viewport = Services.viewportForDoc(iframe.win.document);
       viewport.resize_();
 
       const parent = iframe.doc.querySelector('#parent');
@@ -167,7 +167,7 @@ describe('amp-fx-flying-carpet', () => {
       throw new Error('should never reach this');
     }, ref => {
       expect(ref.error.message).to.have.string(
-        'elements must be positioned after the 75% of first viewport'
+          'elements must be positioned after the 75% of first viewport'
       );
       expect(ref.flyingCarpet).to.not.display;
     });
@@ -186,7 +186,7 @@ describe('amp-fx-flying-carpet', () => {
       throw new Error('should never reach this');
     }, ref => {
       expect(ref.error.message).to.have.string(
-        'elements must be positioned before the last viewport'
+          'elements must be positioned before the last viewport'
       );
       expect(ref.flyingCarpet).to.not.display;
     });

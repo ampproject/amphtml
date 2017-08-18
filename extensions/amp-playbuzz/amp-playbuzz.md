@@ -25,10 +25,6 @@ limitations under the License.
     </td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-playbuzz" src="https://cdn.ampproject.org/v0/amp-playbuzz-0.1.js">&lt;/script></code></td>
   </tr>
@@ -38,7 +34,9 @@ limitations under the License.
   </tr>
 </table>
 
-## Examples:
+[TOC]
+
+## Examples
 
 Playbuzz Item by plain url (without info, share-buttons, comments)
 
@@ -70,7 +68,7 @@ With optional parameters (info, share-buttons, comments):
 </amp-playbuzz>
 ```
 
-## Required Attributes
+## Required attributes
 ### One of the following is required:
 
 **src**
@@ -83,8 +81,9 @@ Can be any item URL taken from <a href="http://www.playbuzz.com">playbuzz.com</a
 The item id for the Playbuzz item.
 Can be taken from the item's embed code (at the item's page at playbuzz website)
 
-** in case both are present data-item will be used
-## Optional Attributes
+**Note**: If both attributes are present, `data-item` is used.
+
+## Optional attributes
 
 **data-item-info** (optional)
 
@@ -108,4 +107,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-playbuzz rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-playbuzz/0.1/validator-amp-playbuzz.protoascii) in the AMP validator specification.
+See [amp-playbuzz rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-playbuzz/validator-amp-playbuzz.protoascii) in the AMP validator specification.

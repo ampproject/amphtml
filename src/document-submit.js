@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {actionServiceForDoc} from './services';
+import {ActionTrust} from './action-trust';
+import {Services} from './services';
 import {dev, user} from './log';
 import {
   assertHttpsUrl,
@@ -128,6 +129,8 @@ export function onDocumentFormSubmit_(e) {
     // handling of the event in cases were we are delegating to action service
     // to deliver the submission event.
     e.stopImmediatePropagation();
-    actionServiceForDoc(form).execute(form, 'submit', /*args*/ null, form, e);
+
+    const actions = Services.actionServiceForDoc(form);
+    actions.execute(form, 'submit', /*args*/ null, form, e, ActionTrust.HIGH);
   }
 }

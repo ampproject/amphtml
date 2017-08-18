@@ -13,10 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var app = module.exports = require('express').Router();
+const app = module.exports = require('express').Router();
 
-app.get('/compose-doc', function(req, res) {
+app.use('/compose-doc', function(req, res) {
+  res.setHeader('X-XSS-Protection', '0');
+  const mode = process.env.SERVE_MODE == 'compiled' ? '' : 'max.';
+  const extensions = req.query.extensions;
+  let extensionScripts = '';
+  if (!!extensions) {
+    extensionScripts = extensions.split(',').map(function(extension) {
+      return '<script async custom-element="'
+              + extension + '" src=/dist/v0/'
+              + extension + '-0.1.' + mode + 'js></script>';
+    }).join('\n');
+  }
+
+  const experiments = req.query.experiments;
+  let metaTag = '';
+  let experimentString = '';
+  if (experiments) {
+    metaTag = '<meta name="amp-experiments-opt-in" content="' +
+      experiments + '">';
+    experimentString = '"' + experiments.split(',').join('","') + '"';
+  }
+
   res.send(`
 <!doctype html>
 <html ⚡>
@@ -24,13 +46,21 @@ app.get('/compose-doc', function(req, res) {
   <meta charset="utf-8">
   <link rel="canonical" href="http://nonblocking.io/" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  ${metaTag}
+  <script>
+    window.AMP_CONFIG = window.AMP_CONFIG || {};
+    window.AMP_CONFIG['allow-doc-opt-in'] =
+    (window.AMP_CONFIG['allow-doc-opt-in'] || []).concat([${experimentString}]);
+  </script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="/dist/${process.env.SERVE_MODE == 'compiled' ? 'v0' : 'amp'}.js"></script>
+  ${extensionScripts}
+  <style amp-custom>${req.query.css}</style>
 </head>
 <body>
 ${req.query.body}
 </body>
-</html>  
+</html>
 `);
 });
 
@@ -38,13 +68,13 @@ ${req.query.body}
  * A server side temporary request storage which is useful for testing
  * browser sent HTTP requests.
  */
-var bank = {};
+const bank = {};
 
 /**
  * Deposit a request. An ID has to be specified. Will override previous request
  * if the same ID already exists.
  */
-app.get('/request-bank/deposit/:id', function(req, res) {
+app.use('/request-bank/deposit/:id', (req, res) => {
   if (typeof bank[req.params.id] === 'function') {
     bank[req.params.id](req);
   } else {
@@ -58,8 +88,8 @@ app.get('/request-bank/deposit/:id', function(req, res) {
  * return it immediately. Otherwise wait until it gets deposited
  * The same request cannot be withdrawn twice at the same time.
  */
-app.get('/request-bank/withdraw/:id', function(req, res) {
-  var result = bank[req.params.id];
+app.use('/request-bank/withdraw/:id', (req, res) => {
+  const result = bank[req.params.id];
   if (typeof result === 'function') {
     return res.status(500).send('another client is withdrawing this ID');
   }

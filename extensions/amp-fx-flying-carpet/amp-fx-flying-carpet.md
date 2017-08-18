@@ -22,10 +22,6 @@ limitations under the License.
     <td>A flying carpet wraps its children in a unique full-screen scrolling container. In particular, this allows you to display a full-screen ad without taking up the entire viewport, making for a better user experience.</td>
   </tr>
   <tr>
-    <td class="col-fourty" width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-fx-flying-carpet" src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js">&lt;/script></code></td>
   </tr>
@@ -34,6 +30,8 @@ limitations under the License.
     <td><a href="https://ampbyexample.com/components/amp-fx-flying-carpet/">Annotated code example for amp-fx-flying-carpet</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## Behavior
 
@@ -53,11 +51,11 @@ The following requirements are imposed on `amp-fx-flying-carpet` positioning:
 
 ## Attributes
 
-**height**
+##### height
 
 The height of the flying carpet's "window".
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
@@ -68,4 +66,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-fx-flying-carpet rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fx-flying-carpet/0.1/validator-amp-fx-flying-carpet.protoascii) in the AMP validator specification.
+See [amp-fx-flying-carpet rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fx-flying-carpet/validator-amp-fx-flying-carpet.protoascii) in the AMP validator specification.

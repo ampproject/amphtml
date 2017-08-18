@@ -22,10 +22,6 @@ limitations under the License.
     <td>Embeds the Facebook comments plugin.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-facebook-comments" src="https://cdn.ampproject.org/v0/amp-facebook-comments-0.1.js">&lt;/script></code></td>
   </tr>
@@ -34,6 +30,8 @@ limitations under the License.
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
 </table>
+
+[TOC]
 
 ## Overview
 
@@ -50,26 +48,26 @@ You can use the `amp-facebook-comments` component to embed the [Facebook comment
 ```
 ## Attributes
 
-**data-href** (required)
+##### data-href (required)
 
 The URL of the comments page. For example, `http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html`.
 
-**data-numposts** (optional)
+##### data-numposts (optional)
 
 The number of comments to show.  For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
-**data-order-by** (optional)
+##### data-order-by (optional)
 
 The order to use when displaying comments. For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
-**data-colorscheme** (optional)
+##### data-colorscheme (optional)
 
 The color scheme. For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-facebook-comments rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook-comments/0.1/validator-amp-facebook-comments.protoascii) in the AMP validator specification.
+See [amp-facebook-comments rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook-comments/validator-amp-facebook-comments.protoascii) in the AMP validator specification.

@@ -17,6 +17,7 @@
 import {getMode} from './mode';
 import {urls} from './config';
 import {startsWith} from './string';
+import {loadPromise} from './event-helper';
 
 /**
  * Triggers validation for the current document if there is a script in the
@@ -25,23 +26,28 @@ import {startsWith} from './string';
  * @param {!Window} win Destination window for the new element.
  */
 export function maybeValidate(win) {
-  if (!getMode().development) {
-    return;
-  }
   const filename = win.location.href;
   if (startsWith(filename, 'about:')) {  // Should only happen in tests.
     return;
   }
 
-  /** @const {!Element} */
-  const s = win.document.createElement('script');
-  // TODO(@cramforce): Introduce a switch to locally built version for local
-  // development.
-  s.src = `${urls.cdn}/v0/validator.js`;
-  s.onload = () => {
-    win.document.head.removeChild(s);
-    /* global amp: false */
-    amp.validator.validateUrlAndLog(filename, win.document, getMode().filter);
-  };
-  win.document.head.appendChild(s);
+  if (getMode().development) {
+    loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
+      /* global amp: false */
+      amp.validator.validateUrlAndLog(
+          filename, win.document, getMode().filter);
+    });
+  } else if (getMode().examiner) {
+    loadScript(win.document, `${urls.cdn}/examiner.js`);
+  }
+}
+
+function loadScript(doc, url) {
+  const script = doc.createElement('script');
+  script.src = url;
+  const promise = loadPromise(script).then(() => {
+    doc.head.removeChild(script);
+  }, () => {});
+  doc.head.appendChild(script);
+  return promise;
 }

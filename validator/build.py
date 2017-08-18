@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/env python2.7
 #
 # Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 #
@@ -131,9 +131,14 @@ def InstallNodeDependencies():
   # Install the project dependencies specified in package.json into
   # node_modules.
   logging.info('installing AMP Validator engine dependencies ...')
-  subprocess.check_call(['npm', 'install'])
+  subprocess.check_call(
+      ['npm', 'install'],
+      stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('installing AMP Validator nodejs dependencies ...')
-  subprocess.check_call(['npm', 'install'], cwd='nodejs')
+  subprocess.check_call(
+      ['npm', 'install'],
+      cwd='nodejs',
+      stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('... done')
 
 
@@ -164,11 +169,11 @@ def GenValidatorProtoascii(out_dir):
   assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
   protoascii_segments = [open('validator-main.protoascii').read()]
-  extensions = glob.glob('extensions/*/0.1/validator-*.protoascii')
+  extensions = glob.glob('extensions/*/validator-*.protoascii')
   # In the Github project, the extensions are located in a sibling directory
   # to the validator rather than a child directory.
   if not extensions:
-    extensions = glob.glob('../extensions/*/0.1/validator-*.protoascii')
+    extensions = glob.glob('../extensions/*/validator-*.protoascii')
   extensions.sort()
   for extension in extensions:
     protoascii_segments.append(open(extension).read())
@@ -239,35 +244,6 @@ def GenValidatorGeneratedLightAmpJs(out_dir):
       out=out)
   out.append('')
   f = open('%s/validator-generated-light-amp.js' % out_dir, 'w')
-  f.write('\n'.join(out))
-  f.close()
-  logging.info('... done')
-
-
-def GenValidatorGeneratedMd(out_dir):
-  """Calls validator_gen_md to generate validator-generated.md.
-
-  Args:
-    out_dir: directory name of the output directory. Must not have slashes,
-      dots, etc.
-  """
-  logging.info('entering ...')
-  assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
-
-  # These imports happen late, within this method because they don't necessarily
-  # exist when the module starts running, and the ones that probably do
-  # are checked by CheckPrereqs.
-  from google.protobuf import text_format
-  from dist import validator_pb2
-  import validator_gen_md
-  out = []
-  validator_gen_md.GenerateValidatorGeneratedMd(
-      specfile='%s/validator.protoascii' % out_dir,
-      validator_pb2=validator_pb2,
-      text_format=text_format,
-      out=out)
-  out.append('')
-  f = open('%s/validator-generated.md' % out_dir, 'w')
   f.write('\n'.join(out))
   f.close()
   logging.info('... done')
@@ -576,17 +552,16 @@ def RunTests(out_dir, nodejs_cmd):
 def Main():
   """The main method, which executes all build steps and runs the tests."""
   logging.basicConfig(
-      format='[[%(filename)s %(funcName)s]] - %(message)s', level=logging.INFO)
+      format='[[%(filename)s %(funcName)s]] - %(message)s',
+      level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
   nodejs_cmd = GetNodeJsCmd()
   CheckPrereqs()
   InstallNodeDependencies()
   SetupOutDir(out_dir='dist')
   GenValidatorProtoascii(out_dir='dist')
   GenValidatorPb2Py(out_dir='dist')
-  GenValidatorProtoascii(out_dir='dist')
   GenValidatorGeneratedJs(out_dir='dist')
   GenValidatorGeneratedLightAmpJs(out_dir='dist')
-  GenValidatorGeneratedMd(out_dir='dist')
   CompileValidatorMinified(out_dir='dist')
   RunSmokeTest(out_dir='dist', nodejs_cmd=nodejs_cmd)
   RunIndexTest(nodejs_cmd=nodejs_cmd)

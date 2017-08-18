@@ -48,7 +48,7 @@ describes.sandboxed('Extension Location', {}, () => {
     it('with remote mode', () => {
       window.AMP_MODE = {rtvVersion: '123'};
       const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.min.html',
+        pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'http:',
       }, 'amp-ad', false);
@@ -79,7 +79,7 @@ describes.sandboxed('Extension Location', {}, () => {
     it('with remote mode', () => {
       window.AMP_MODE = {rtvVersion: '123'};
       const script = calculateEntryPointScriptUrl({
-        pathname: 'examples/ads.amp.min.html',
+        pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'http:',
       }, 'sw', /* isLocalDev */ false);
@@ -90,7 +90,7 @@ describes.sandboxed('Extension Location', {}, () => {
     it('with remote mode & rtv', () => {
       window.AMP_MODE = {rtvVersion: '123'};
       const script = calculateEntryPointScriptUrl({
-        pathname: 'examples/ads.amp.min.html',
+        pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'http:',
       }, 'ww', /* isLocalDev */ false, /* opt_rtv */ true);

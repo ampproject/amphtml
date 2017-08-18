@@ -25,7 +25,7 @@ import {user} from '../src/log';
  * @type {!Array<string>}
  */
 const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
-      'aria-describedby', 'aria-labelledby'];
+  'aria-describedby', 'aria-labelledby'];
 
 export class AmpImg extends BaseElement {
 
@@ -61,6 +61,28 @@ export class AmpImg extends BaseElement {
           value => mutations[value] !== undefined);
       this.propagateAttributes(
           attrs, this.img_, /* opt_removeMissingAttrs */ true);
+    }
+  }
+
+  /** @override */
+  preconnectCallback(onLayout) {
+    // NOTE(@wassgha): since parseSrcset is computationally expensive and can
+    // not be inside the `buildCallback`, we went with preconnecting to the
+    // `src` url if it exists or the first srcset url.
+    const src = this.element.getAttribute('src');
+    if (src) {
+      this.preconnect.url(src, onLayout);
+    } else {
+      const srcset = this.element.getAttribute('srcset');
+      if (!srcset) {
+        return;
+      }
+      // We try to find the first url in the srcset
+      const srcseturls = srcset.match(/https?:\/\/[^\s]+/);
+      // Connect to the first url if it exists
+      if (srcseturls) {
+        this.preconnect.url(srcseturls[0], onLayout);
+      }
     }
   }
 
@@ -175,6 +197,9 @@ export class AmpImg extends BaseElement {
     this.getVsync().mutate(() => {
       this.img_.classList.add('i-amphtml-ghost');
       this.toggleFallback(true);
+      // Hide placeholders, as browsers that don't support webp
+      // Would show the placeholder underneath a transparent fallback
+      this.togglePlaceholder(false);
     });
   }
 };

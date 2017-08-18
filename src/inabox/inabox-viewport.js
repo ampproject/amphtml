@@ -15,10 +15,9 @@
  */
 
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
-import {viewerForDoc} from '../services';
+import {Services} from '../services';
 import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
 import {registerServiceBuilderForDoc} from '../service';
-import {resourcesForDoc} from '../services';
 import {
   nativeIntersectionObserverSupported,
 } from '../../src/intersection-observer-polyfill';
@@ -26,9 +25,58 @@ import {layoutRectLtwh} from '../layout-rect';
 import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
+import {px, setImportantStyles, resetStyles} from '../../src/style';
+
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
+
+
+/** @visibleForTesting */
+export function prepareBodyForOverlay(win, bodyElement) {
+  return Services.vsyncFor(win).runPromise({
+    measure: state => {
+      state.width = win./*OK*/innerWidth;
+      state.height = win./*OK*/innerHeight;
+    },
+    mutate: state => {
+      // We need to override runtime-level !important rules
+      setImportantStyles(bodyElement, {
+        'background': 'transparent',
+        'left': '50%',
+        'top': '50%',
+        'right': 'auto',
+        'bottom': 'auto',
+        'position': 'absolute',
+        'height': px(state.height),
+        'width': px(state.width),
+        'margin-top': px(-state.height / 2),
+        'margin-left': px(-state.width / 2),
+      });
+    },
+  }, {});
+}
+
+
+/** @visibleForTesting */
+export function resetBodyForOverlay(win, bodyElement) {
+  return Services.vsyncFor(win).mutatePromise(() => {
+    // We're not resetting background here as it's supposed to remain
+    // transparent.
+    resetStyles(bodyElement, [
+      'position',
+      'left',
+      'top',
+      'right',
+      'bottom',
+      'width',
+      'height',
+      'margin-left',
+      'margin-top',
+    ]);
+  });
+}
+
 
 /**
  * Implementation of ViewportBindingDef that works inside an non-scrollable
@@ -83,26 +131,26 @@ export class ViewportBindingInabox {
 
   /** @override */
   connect() {
+    this.listenForPosition_();
+  }
+
+  /** @private */
+  listenForPosition_() {
     if (nativeIntersectionObserverSupported(this.win)) {
       // Using native IntersectionObserver, no position data needed
       // from host doc.
       return;
     }
+
     this.iframeClient_.makeRequest(
         MessageType.SEND_POSITIONS, MessageType.POSITION,
         data => {
           dev().fine(TAG, 'Position changed: ', data);
           const oldViewportRect = this.viewportRect_;
-          const oldSelfRect = this.boxRect_;
           this.viewportRect_ = data.viewport;
-          this.boxRect_ = data.target;
-          if (isChanged(this.boxRect_, oldSelfRect)) {
-            // Remeasure all AMP elements once iframe position is changed.
-            // Because all layout boxes are calculated relatively to the
-            // iframe position.
-            this.remeasureAllElements_();
-            // TODO: fire DOM mutation event once we handle them
-          }
+
+          this.updateBoxRect_(data.target);
+
           if (isResized(this.viewportRect_, oldViewportRect)) {
             this.resizeObservable_.fire();
           }
@@ -150,11 +198,124 @@ export class ViewportBindingInabox {
     return this.viewportRect_.left;
   }
 
-  remeasureAllElements_() {
-    const resources = resourcesForDoc(this.win.document).get();
-    for (let i = 0; i < resources.length; i++) {
-      resources[i].measure();
+  /**
+   * @param {!../layout-rect.LayoutRectDef|undefined} boxRect
+   * @private
+   */
+  updateBoxRect_(boxRect) {
+    if (!boxRect) {
+      return;
     }
+    if (isChanged(boxRect, this.boxRect_)) {
+      dev().fine(TAG, 'Updating viewport box rect: ', boxRect);
+
+      this.boxRect_ = boxRect;
+      // Remeasure all AMP elements once iframe position or size are changed.
+      // Because all layout boxes are calculated relatively to the
+      // iframe position.
+      this.remeasureAllElements_();
+      // TODO: fire DOM mutation event once we handle them
+    }
+  }
+
+  /**
+   * @return {!Array<!../service/resource.Resource>}
+   * @visibleForTesting
+   */
+  getChildResources() {
+    return Services.resourcesForDoc(this.win.document).get();
+  }
+
+  /** @private */
+  remeasureAllElements_() {
+    this.getChildResources().forEach(resource => resource.measure());
+  }
+
+  /** @override */
+  updateLightboxMode(lightboxMode) {
+    if (lightboxMode) {
+      return this.tryToEnterOverlayMode_();
+    }
+    return this.leaveOverlayMode_();
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  tryToEnterOverlayMode_() {
+    return this.prepareBodyForOverlay_()
+        .then(() => this.requestFullOverlayFrame_());
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  leaveOverlayMode_() {
+    return this.requestCancelFullOverlayFrame_()
+        .then(() => this.resetBodyForOverlay_());
+  }
+
+  /**
+   * Prepares the "fixed" container before expanding frame.
+   * @return {!Promise}
+   * @private
+   */
+  prepareBodyForOverlay_() {
+    return prepareBodyForOverlay(this.win, this.getBodyElement());
+  }
+
+  /**
+   * Resets the "fixed" container to its original position after collapse.
+   * @return {!Promise}
+   * @private
+   */
+  resetBodyForOverlay_() {
+    return resetBodyForOverlay(this.win, this.getBodyElement());
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  requestFullOverlayFrame_() {
+    return new Promise((resolve, reject) => {
+      const unlisten = this.iframeClient_.makeRequest(
+          MessageType.FULL_OVERLAY_FRAME,
+          MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+          response => {
+            unlisten();
+            if (response.success) {
+              this.updateBoxRect_(response.boxRect);
+              resolve();
+            } else {
+              reject('Request to open lightbox rejected by host document');
+            }
+          });
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  requestCancelFullOverlayFrame_() {
+    return new Promise(resolve => {
+      const unlisten = this.iframeClient_.makeRequest(
+          MessageType.CANCEL_FULL_OVERLAY_FRAME,
+          MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
+          response => {
+            unlisten();
+            this.updateBoxRect_(response.boxRect);
+            resolve();
+          });
+    });
+  }
+
+  /** @visibleForTesting */
+  getBodyElement() {
+    return dev().assertElement(this.win.document.body);
   }
 
   /** @override */ disconnect() {/* no-op */}
@@ -164,7 +325,6 @@ export class ViewportBindingInabox {
   /** @override */ disableScroll() {/* no-op */}
   /** @override */ resetScroll() {/* no-op */}
   /** @override */ ensureReadyForElements() {/* no-op */}
-  /** @override */ updateLightboxMode() {/* no-op */}
   /** @override */ setScrollTop() {/* no-op */}
   /** @override */ getScrollWidth() {return 0;}
   /** @override */ getScrollHeight() {return 0;}
@@ -177,7 +337,7 @@ export class ViewportBindingInabox {
  */
 export function installInaboxViewportService(ampdoc) {
   const binding = new ViewportBindingInabox(ampdoc.win);
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   registerServiceBuilderForDoc(ampdoc,
       'viewport',
       function() {

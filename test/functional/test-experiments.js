@@ -15,8 +15,20 @@
  */
 
 import {
+  publicJwk,
+  correctToken,
+  tokenWithBadVersion,
+  tokenWithBadConfigLength,
+  tokenWithBadSignature,
+  tokenWithExpiredExperiment,
+} from './testdata-experiments';
+import {Services} from '../../src/services';
+import {installCryptoService} from '../../src/service/crypto-impl';
+import {
+  enableExperimentsForOriginTrials,
   isCanary,
   isExperimentOn,
+  isExperimentOnForOriginTrial,
   experimentToggles,
   toggleExperiment,
   resetExperimentTogglesForTesting,
@@ -26,6 +38,7 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../src/experiments';
 import {createElementWithAttributes} from '../../src/dom';
+import {user} from '../../src/log';
 import * as sinon from 'sinon';
 
 describe('experimentToggles', () => {
@@ -52,6 +65,48 @@ describe('experimentToggles', () => {
       // "v" should not appear here
     });
   });
+
+  it('should cache experiment toggles on window', () => {
+    const win = {
+      document: {
+        cookie: 'AMP_EXP=-exp3,exp4,exp5',
+      },
+      AMP_CONFIG: {
+        exp1: 1,
+        exp2: 0,
+        exp3: 1,
+        exp4: 0,
+        v: '12345667',
+      },
+    };
+    resetExperimentTogglesForTesting(window);
+    expect(experimentToggles(win)).to.deep.equal({
+      exp1: true,
+      exp2: false,
+      exp3: false, // overridden in cookie
+      exp4: true, // overridden in cookie
+      exp5: true,
+      // "v" should not appear here
+    });
+
+    expect(win['__AMP__EXPERIMENT_TOGGLES']).to.deep.equal({
+      exp1: true,
+      exp2: false,
+      exp3: false,
+      exp4: true,
+      exp5: true,
+    });
+
+    win['__AMP__EXPERIMENT_TOGGLES'].exp1 = false;
+
+    expect(experimentToggles(win)).to.deep.equal({
+      exp1: false,
+      exp2: false,
+      exp3: false,
+      exp4: true,
+      exp5: true,
+    });
+  });
 });
 
 describe('isExperimentOn', () => {
@@ -67,6 +122,7 @@ describe('isExperimentOn', () => {
       AMP_CONFIG: {},
       location: {
         hash: '',
+        href: 'http://foo.bar',
       },
     };
   });
@@ -76,7 +132,7 @@ describe('isExperimentOn', () => {
   });
 
   function expectExperiment(cookieString, experimentId) {
-    resetExperimentTogglesForTesting(window);
+    resetExperimentTogglesForTesting(win);
     win.document.cookie = cookieString;
     return expect(isExperimentOn(win, experimentId));
   }
@@ -388,6 +444,7 @@ describe('toggleExperiment', () => {
       },
       location: {
         hostname: 'test.test',
+        href: 'http://foo.bar',
       },
     };
 
@@ -397,21 +454,21 @@ describe('toggleExperiment', () => {
     expect(toggleExperiment(win, 'e1')).to.be.false;
     expect(isExperimentOn(win, 'e1')).to.be.false;
 
-    // The new setting should be persisted in cookie, so cache reset should not
-    // affect its status.
-    resetExperimentTogglesForTesting(window);
-    expect(isExperimentOn(win, 'e1')).to.be.false;
+    // Calling cache reset testing function clears cookies on window object
+    // it is called with.
+    resetExperimentTogglesForTesting(win);
+    expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Now let's explicitly toggle to true
     expect(toggleExperiment(win, 'e1', true)).to.be.true;
     expect(isExperimentOn(win, 'e1')).to.be.true;
-    resetExperimentTogglesForTesting(window);
+    resetExperimentTogglesForTesting(win);
     expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Toggle transiently should still work
     expect(toggleExperiment(win, 'e1', false, true)).to.be.false;
     expect(isExperimentOn(win, 'e1')).to.be.false;
-    resetExperimentTogglesForTesting(window); // cache reset should bring it back to true
+    resetExperimentTogglesForTesting(win); // cache reset should bring it back to true
     expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Sanity check, the global setting should never be changed.
@@ -793,3 +850,175 @@ describe('experiment branch tests', () => {
   });
 });
 
+describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
+
+  let win;
+  let sandbox;
+  let crypto;
+
+  let warnStub;
+
+  beforeEach(() => {
+    win = {
+      document: env.win.document,
+      location: {
+        href: 'https://www.google.com',
+      },
+      crypto: env.win.crypto,
+    };
+    sandbox = env.sandbox;
+
+    installCryptoService(win);
+    crypto = Services.cryptoFor(win);
+
+    warnStub = sandbox.stub(user(), 'warn');
+
+    // Ensure that tests don't appear to pass because fake window object
+    // doesn't have crypto when the window actually has it.
+    installCryptoService(env.win);
+    expect(Services.cryptoFor(env.win).isPkcsAvailable())
+        .to.equal(Services.cryptoFor(win).isPkcsAvailable());
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  function setupMetaTagWith(token) {
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'amp-experiment-token');
+    meta.setAttribute('content', token);
+    win.document.head.appendChild(meta);
+  }
+
+  it('should return false if no token is found', () => {
+    // No meta tag ever added
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be.false;
+  });
+
+  it('should return false if public key is not present', () => {
+    setupMetaTagWith(correctToken);
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be.false;
+  });
+
+  it('should return false if crypto is unavailable', () => {
+    sandbox.stub(crypto, 'isPkcsAvailable').returns(false);
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be.false;
+  });
+
+  it('should throw for missing token', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith('');
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    }).then(result => {
+      expect(result).to.be.false;
+      expect(warnStub).to.have.been
+          .calledWith('experiments', 'Unable to read experiments token');
+    });
+  });
+
+  it('should throw for an unknown token version number', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(tokenWithBadVersion);
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    }).then(result => {
+      expect(result).to.be.false;
+      expect(warnStub).to.have.been.calledWith(
+          'experiments',
+          sinon.match({
+            message: sinon.match(/Unrecognized experiments token version/),
+          }));
+    });
+  });
+
+  it('should throw if config length exceeds byte length', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(tokenWithBadConfigLength);
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    }).then(result => {
+      expect(result).to.be.false;
+      expect(warnStub).to.have.been.calledWith(
+          'experiments',
+          sinon.match({message: 'Specified len extends past end of buffer'}));
+    });
+  });
+
+  it('should throw if signature cannot be verified', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(tokenWithBadSignature);
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    }).then(result => {
+      expect(result).to.be.false;
+      expect(warnStub).to.have.been.calledWith(
+          'experiments',
+          sinon.match({message: 'Failed to verify config signature'}));
+    });
+  });
+
+  it('should throw if approved origin is not current origin', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(correctToken);
+    win.location.href = 'https://www.not-google.com';
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    }).then(result => {
+      expect(result).to.be.false;
+      expect(warnStub).to.have.been.calledWith(
+          'experiments',
+          sinon.match({message: 'Config does not match current origin'}));
+    });
+  });
+
+  it('should return false if requested experiment is not in config', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(correctToken);
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      const p =
+          isExperimentOnForOriginTrial(win, 'amp-not-in-config', publicJwk);
+      return expect(p).to.eventually.be.false;
+    });
+  });
+
+  it('should return false if trial has expired', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(tokenWithExpiredExperiment);
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      return isExperimentOnForOriginTrial(win, 'amp-expired', publicJwk);
+    }).then(result => {
+      expect(result).to.be.false;
+      expect(warnStub).to.have.been.calledWith(
+          'experiments',
+          sinon.match({message: 'Experiment amp-expired has expired'}));
+    });
+  });
+
+  it('should return true for a well-formed token for an experiment ' +
+     'that has not yet expired', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(correctToken);
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      const p =
+          isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+      return expect(p).to.eventually.be.true;
+    });
+  });
+
+  it('should return true for a correct token if the approved origin has ' +
+     'a trailing slash', () => {
+    if (!crypto.isPkcsAvailable()) { return; }
+    setupMetaTagWith(correctToken);
+    win.location.href = 'https://www.google.com/';
+    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
+      const p =
+          isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+      return expect(p).to.eventually.be.true;
+    });
+  });
+});

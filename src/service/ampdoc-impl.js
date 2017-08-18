@@ -321,9 +321,7 @@ export class AmpDocSingle extends AmpDoc {
         waitForBodyPromise(this.win.document).then(() => this.getBody());
 
     /** @private @const {!Promise} */
-    this.readyPromise_ = isDocumentReady(this.win.document) ?
-        Promise.resolve() :
-        whenDocumentReady(this.win.document);
+    this.readyPromise_ = whenDocumentReady(this.win.document);
   }
 
   /** @override */

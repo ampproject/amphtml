@@ -16,15 +16,20 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
-import {removeElement} from '../../../src/dom';
+import {user, dev} from '../../../src/log';
+import {
+  removeElement,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isObject} from '../../../src/types';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -63,23 +68,23 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     });
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @override */
   layoutCallback() {
     const embedCode = user().assert(
-      this.element.getAttribute('data-embedcode'),
-      'The data-embedcode attribute is required for <amp-ooyala-player> %s',
-      this.element);
+        this.element.getAttribute('data-embedcode'),
+        'The data-embedcode attribute is required for <amp-ooyala-player> %s',
+        this.element);
     const pCode = user().assert(
-      this.element.getAttribute('data-pcode'),
-      'The data-pcode attribute is required for <amp-ooyala-player> %s',
-      this.element);
+        this.element.getAttribute('data-pcode'),
+        'The data-pcode attribute is required for <amp-ooyala-player> %s',
+        this.element);
     const playerId = user().assert(
-      this.element.getAttribute('data-playerid'),
-      'The data-playerid attribute is required for <amp-ooyala-player> %s',
-      this.element);
+        this.element.getAttribute('data-playerid'),
+        'The data-playerid attribute is required for <amp-ooyala-player> %s',
+        this.element);
 
     let src = 'https://player.ooyala.com/iframe.html?platform=html5-priority';
     const playerVersion = this.element.getAttribute('data-playerversion') || '';
@@ -155,17 +160,20 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @private */
   handleOoyalaMessages_(event) {
-    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
+    /** @const {?JsonObject|undefined} */
+    const data = /** @type {?JsonObject} */ (isObject(getData(event))
+        ? getData(event)
+        : tryParseJson(getData(event)));
     if (data === undefined) {
       return; // We only process valid JSON.
     }
-    if (data.data == 'playing') {
-      this.element.dispatchCustomEvent(VideoEvents.PLAY);
-    } else if (data.data == 'paused') {
+    if (data['data'] == 'playing') {
+      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+    } else if (data['data'] == 'paused') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    } else if (data.data == 'muted') {
+    } else if (data['data'] == 'muted') {
       this.element.dispatchCustomEvent('mute');
-    } else if (data.data == 'unmuted') {
+    } else if (data['data'] == 'unmuted') {
       this.element.dispatchCustomEvent('unmute');
     }
   }
@@ -221,6 +229,62 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   hideControls() {
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 };
 

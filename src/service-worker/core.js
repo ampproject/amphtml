@@ -118,14 +118,14 @@ const CDN_JS_REGEX = new RegExp(
     // Require the CDN URL origin at the beginning.
     `^${urls.cdn.replace(/\./g, '\\.')}` +
     // Allow, but don't require, RTV.
-    `(?:/rtv/(\\d{2}\\d{13,}))?` +
+    '(?:/rtv/(\\d{2}\\d{13,}))?' +
     // Require text "/v0"
-    `(/v0` +
+    '(/v0' +
       // Allow, but don't require, an extension under the v0 directory.
       // We explicitly forbid the `experiments` and `validator` "extension".
-      `(?:/(?!experiments|validator).+)?` +
+      '(?:/(?!experiments|validator).+)?' +
     // Require text ".js" at the end.
-    `\\.js)$`);
+    '\\.js)$');
 
 
 /**

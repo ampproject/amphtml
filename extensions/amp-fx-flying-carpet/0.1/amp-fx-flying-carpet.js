@@ -19,6 +19,7 @@ import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
 import {setStyle} from '../../../src/style';
 import {listen} from '../../../src/event-helper';
+import {AmpEvents} from '../../../src/amp-events';
 
 class AmpFlyingCarpet extends AMP.BaseElement {
 
@@ -112,19 +113,19 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     const minTop = viewportHeight * 0.75;
     const maxTop = docHeight - viewportHeight * 0.95;
     user().assert(
-      layoutBox.top >= minTop,
-      '<amp-fx-flying-carpet> elements must be positioned after the 75% of' +
+        layoutBox.top >= minTop,
+        '<amp-fx-flying-carpet> elements must be positioned after the 75% of' +
       ' first viewport: %s Current position: %s. Min: %s',
-      this.element,
-      layoutBox.top,
-      minTop);
+        this.element,
+        layoutBox.top,
+        minTop);
     user().assert(
-      layoutBox.top <= maxTop,
-      '<amp-fx-flying-carpet> elements must be positioned before the last ' +
+        layoutBox.top <= maxTop,
+        '<amp-fx-flying-carpet> elements must be positioned before the last ' +
       'viewport: %s Current position: %s. Max: %s',
-      this.element,
-      layoutBox.top,
-      maxTop);
+        this.element,
+        layoutBox.top,
+        maxTop);
   }
 
   /** @override */
@@ -137,7 +138,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
       throw e;
     }
     this.scheduleLayout(this.children_);
-    listen(this.element, 'amp:built', this.layoutBuiltChild_.bind(this));
+    listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
     return Promise.resolve();
   }
 

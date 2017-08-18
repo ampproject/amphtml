@@ -192,7 +192,7 @@ export function computeInMasterFrame(global, taskId, work, cb) {
       cbs[i].call(null, result);
     }
     tasks[taskId] = {
-      push: function(cb) {
+      push(cb) {
         cb(result);
       },
     };
@@ -271,6 +271,7 @@ function validateAllowedFields(data, allowedFields) {
     mode: true,
     consentNotificationId: true,
     ampSlotIndex: true,
+    adHolderText: true,
   };
 
   for (const field in data) {

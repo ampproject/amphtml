@@ -21,10 +21,9 @@ import {
   HistoryBindingVirtual_,
   installHistoryServiceForDoc,
 } from '../../src/service/history-impl';
-import {historyForDoc} from '../../src/services';
+import {Services} from '../../src/services';
 import {listenOncePromise} from '../../src/event-helper';
 import {installTimerService} from '../../src/service/timer-impl';
-import {timerFor} from '../../src/services';
 import {parseUrl} from '../../src/url';
 import * as sinon from 'sinon';
 
@@ -191,7 +190,7 @@ describes.sandboxed('History install', {}, () => {
     win = {
       services: {
         'viewer': {obj: viewer},
-        'timer': {obj: timerFor(window)},
+        'timer': {obj: Services.timerFor(window)},
       },
       history: {
         length: 0,
@@ -208,7 +207,7 @@ describes.sandboxed('History install', {}, () => {
   });
 
   it('should create natural binding and make it singleton', () => {
-    const history = historyForDoc(ampdoc);
+    const history = Services.historyForDoc(ampdoc);
     expect(history.binding_).to.be.instanceOf(HistoryBindingNatural_);
     expect(win.services.history.obj).to.equal(history);
     // Ensure that binding is installed as a singleton.
@@ -218,7 +217,7 @@ describes.sandboxed('History install', {}, () => {
 
   it('should create virtual binding', () => {
     viewer.isOvertakeHistory = () => true;
-    const history = historyForDoc(ampdoc);
+    const history = Services.historyForDoc(ampdoc);
     expect(history.binding_).to.be.instanceOf(HistoryBindingVirtual_);
     expect(win.services.history.obj).to.equal(history);
     // Ensure that the global singleton has not been created.
@@ -263,6 +262,14 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
     history2.cleanup_();
     history.origReplaceState_({'AMP.History': window.history.length - 1},
         undefined);
+    expect(onStackIndexUpdated).to.have.not.been.called;
+  });
+
+  it('should preserve the initial state if possible', () => {
+    history.origReplaceState_({'a': 11}, undefined);
+    const history2 = new HistoryBindingNatural_(window);
+    expect(history.getState_()['a']).to.equal(11);
+    history2.cleanup_();
     expect(onStackIndexUpdated).to.have.not.been.called;
   });
 
@@ -341,23 +348,43 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
   });
 
   it('should update its state and notify on history.back', () => {
-    return history.push().then(unusedStackIndex => {
-      expect(onStackIndexUpdated).to.be.calledOnce;
-      expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(
-          window.history.length - 1);
-      const histPromise = listenOncePromise(window, 'popstate').then(() => {
+    // Push twice.
+    return Promise.all([history.push(), history.push()]).then(() => {
+      const h = window.history.length;
+
+      expect(onStackIndexUpdated).to.be.calledTwice;
+      expect(onStackIndexUpdated.getCall(0)).to.be.calledWith(h - 2);
+      expect(onStackIndexUpdated.getCall(1)).to.be.calledWith(h - 1);
+
+      // Pop once.
+      const popstate = listenOncePromise(window, 'popstate').then(() => {
         clock.tick(100);
       });
       window.history.go(-1);
-      return histPromise.then(() => {
+      return popstate;
+    }).then(() => {
+      const h = window.history.length - 2;
+
+      clock.tick(100);
+      expect(history.stackIndex_).to.equal(h);
+      expect(history.unsupportedState_['AMP.History']).to.equal(h);
+      expect(onStackIndexUpdated).to.be.calledThrice;
+      expect(onStackIndexUpdated.getCall(2)).to.be.calledWith(h);
+
+      // Pop again.
+      const popstate = listenOncePromise(window, 'popstate').then(() => {
         clock.tick(100);
-        expect(history.stackIndex_).to.equal(window.history.length - 2);
-        expect(history.unsupportedState_['AMP.History']).to.equal(
-            window.history.length - 2);
-        expect(onStackIndexUpdated).to.have.callCount(2);
-        expect(onStackIndexUpdated.getCall(1).args[0]).to.equal(
-            window.history.length - 2);
       });
+      window.history.go(-1);
+      return popstate;
+    }).then(() => {
+      const h = window.history.length - 3;
+
+      clock.tick(100);
+      expect(history.stackIndex_).to.equal(h);
+      expect(history.unsupportedState_['AMP.History']).to.equal(h);
+      expect(onStackIndexUpdated).to.have.callCount(4);
+      expect(onStackIndexUpdated.getCall(3)).to.be.calledWith(h);
     });
   });
 });
@@ -369,28 +396,28 @@ describe('HistoryBindingVirtual', () => {
   let clock;
   let onStackIndexUpdated;
   let viewerHistoryPoppedHandler;
-  let viewerMock;
   let history;
+  let viewer;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     onStackIndexUpdated = sandbox.spy();
     viewerHistoryPoppedHandler = undefined;
-    const viewer = {
+    viewer = {
       onMessage: (eventType, handler) => {
         viewerHistoryPoppedHandler = handler;
         return () => {};
       },
-      sendMessageAwaitResponse: () => {},
+      sendMessageAwaitResponse: sandbox.spy(() => {
+        return Promise.resolve();
+      }),
     };
-    viewerMock = sandbox.mock(viewer);
     history = new HistoryBindingVirtual_(window, viewer);
     history.setOnStackIndexUpdated(onStackIndexUpdated);
   });
 
   afterEach(() => {
-    viewerMock.verify();
     history.cleanup_();
     sandbox.restore();
   });
@@ -402,9 +429,12 @@ describe('HistoryBindingVirtual', () => {
   });
 
   it('should push new state to viewer and notify', () => {
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'pushHistory', {stackIndex: 1}).once().returns(Promise.resolve());
     return history.push().then(stackIndex => {
+      expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[0])
+          .to.equal('pushHistory');
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].stackIndex)
+          .to.equal(1);
       expect(stackIndex).to.equal(1);
       expect(history.stackIndex_).to.equal(1);
       expect(onStackIndexUpdated).to.be.calledOnce;
@@ -413,11 +443,12 @@ describe('HistoryBindingVirtual', () => {
   });
 
   it('should pop a state from the window.history and notify', () => {
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'pushHistory', {stackIndex: 1}).once().returns(Promise.resolve());
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'popHistory', {stackIndex: 1}).once().returns(Promise.resolve());
     return history.push().then(stackIndex => {
+      expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[0])
+          .to.equal('pushHistory');
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].stackIndex)
+          .to.equal(1);
       expect(stackIndex).to.equal(1);
       expect(onStackIndexUpdated).to.be.calledOnce;
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(1);
@@ -431,9 +462,12 @@ describe('HistoryBindingVirtual', () => {
   });
 
   it('should update its state and notify on history.back', () => {
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'pushHistory', {stackIndex: 1}).once().returns(Promise.resolve());
     return history.push().then(stackIndex => {
+      expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[0])
+          .to.equal('pushHistory');
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].stackIndex)
+          .to.equal(1);
       expect(stackIndex).to.equal(1);
       expect(onStackIndexUpdated).to.be.calledOnce;
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(1);
@@ -621,10 +655,16 @@ describes.fakeWin('Get and update fragment', {}, env => {
         new HistoryBindingVirtual_(env.win, viewer));
     viewerMock.expects('hasCapability').withExactArgs('fragment').once()
         .returns(true);
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'replaceHistory', {fragment: 'fragment'}, true).once()
-        .returns(Promise.resolve());
-    return history.updateFragment('fragment').then(() => {});
+    let called = false;
+    viewer.sendMessageAwaitResponse = function(action, data) {
+      expect(action).to.equal('replaceHistory');
+      expect(data.fragment).to.equal('fragment');
+      called = true;
+      return Promise.resolve();
+    };
+    return history.updateFragment('fragment').then(() => {
+      expect(called).to.be.ok;
+    });
   });
 
   it('should NOT update fragment of the viewer on Virtual ' +

@@ -17,7 +17,7 @@ if (!window.context){
 }
 
 function intersectionCallback(payload){
-  changes = payload.changes;
+  var changes = payload.changes;
   // Code below is simply an example.
   var latestChange = changes[changes.length - 1];
 

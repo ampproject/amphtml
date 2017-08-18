@@ -19,23 +19,27 @@ import {
   withdrawRequest,
 } from '../../testing/test-helper';
 
-describes.integration('amp-pixel integration test', {
-  body: `<amp-pixel src="${depositRequestUrl('has-referrer')}">`,
-}, env => {
-  it('should keep referrer if no referrerpolicy specified', () => {
-    return withdrawRequest(env.win, 'has-referrer').then(request => {
-      expect(request.headers.referer).to.be.ok;
+describe('amp-pixel', function() {
+  this.timeout(15000);
+
+  describes.integration('amp-pixel integration test', {
+    body: `<amp-pixel src="${depositRequestUrl('has-referrer')}">`,
+  }, env => {
+    it('should keep referrer if no referrerpolicy specified', () => {
+      return withdrawRequest(env.win, 'has-referrer').then(request => {
+        expect(request.headers.referer).to.be.ok;
+      });
     });
   });
-});
 
-describes.integration('amp-pixel integration test', {
-  body: `<amp-pixel src="${depositRequestUrl('no-referrer')}"
+  describes.integration('amp-pixel integration test', {
+    body: `<amp-pixel src="${depositRequestUrl('no-referrer')}"
              referrerpolicy="no-referrer">`,
-}, env => {
-  it('should remove referrer if referrerpolicy=no-referrer', () => {
-    return withdrawRequest(env.win, 'no-referrer').then(request => {
-      expect(request.headers.referer).to.not.be.ok;
+  }, env => {
+    it('should remove referrer if referrerpolicy=no-referrer', () => {
+      return withdrawRequest(env.win, 'no-referrer').then(request => {
+        expect(request.headers.referer).to.not.be.ok;
+      });
     });
   });
 });

@@ -52,11 +52,10 @@ let JSONArrayDef;
  */
 let JSONValueDef;
 
-
 /**
  * Recreates objects with prototype-less copies.
- * @param {!JSONObjectDef} obj
- * @return {!JSONObjectDef}
+ * @param {!JsonObject} obj
+ * @return {!JsonObject}
  */
 export function recreateNonProtoObject(obj) {
   const copy = Object.create(null);
@@ -67,9 +66,8 @@ export function recreateNonProtoObject(obj) {
     const v = obj[k];
     copy[k] = isObject(v) ? recreateNonProtoObject(v) : v;
   }
-  return copy;
+  return /** @type {!JsonObject} */ (copy);
 }
-
 
 /**
  * Returns a value from an object for a field-based expression. The expression
@@ -77,9 +75,9 @@ export function recreateNonProtoObject(obj) {
  * field in a chain does not exist or is not an object, the returned value will
  * be `undefined`.
  *
- * @param {!JSONObjectDef} obj
+ * @param {!JsonObject} obj
  * @param {string} expr
- * @return {?JSONValueDef|undefined}
+ * @return {*}
  */
 export function getValueForExpr(obj, expr) {
   // The `.` indicates "the object itself".
@@ -107,23 +105,87 @@ export function getValueForExpr(obj, expr) {
 }
 
 /**
+ * Simple wrapper around JSON.parse that casts the return value
+ * to JsonObject.
+ * Create a new wrapper if an array return value is desired.
+ * @param {*} json JSON string to parse
+ * @return {?JsonObject|undefined} May be extend to parse arrays.
+ */
+export function parseJson(json) {
+  return /** @type {?JsonObject} */(JSON.parse(/** @type {string} */ (json)));
+}
+
+/**
  * Parses the given `json` string without throwing an exception if not valid.
  * Returns `undefined` if parsing fails.
  * Returns the `Object` corresponding to the JSON string when parsing succeeds.
  * @param {*} json JSON string to parse
- * @param {function(!Error)=} opt_onFailed Optional function that will be called with
- *     the error if parsing fails.
- * @return {?JSONValueDef|undefined}
+ * @param {function(!Error)=} opt_onFailed Optional function that will be called
+ *     with the error if parsing fails.
+ * @return {?JsonObject|undefined} May be extend to parse arrays.
  */
 export function tryParseJson(json, opt_onFailed) {
   try {
-    return JSON.parse(/** @type {string} */ (json));
+    return parseJson(json);
   } catch (e) {
     if (opt_onFailed) {
       opt_onFailed(e);
     }
     return undefined;
   }
+}
+
+/**
+ * Recursively checks strict equality of items in nested arrays and objects.
+ *
+ * @param {JSONValueDef} a
+ * @param {JSONValueDef} b
+ * @param {number} depth The maximum recursion depth. Must be finite.
+ * @return {boolean}
+ * @throws {Error} If depth argument is not finite.
+ */
+export function recursiveEquals(a, b, depth = 3) {
+  if (!isFinite(depth)) {
+    throw new Error('depth arg must be finite: ' + depth);
+  }
+  if (a === b) {
+    return true;
+  }
+  // Only check shallow equality for depth < 1.
+  if (depth < 1) {
+    return false;
+  }
+  if (typeof a !== typeof b) {
+    return false;
+  }
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (let i = 0; i < a.length; i++) {
+      if (!recursiveEquals(a[i], b[i], depth - 1)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
+    const keysA = Object.keys(/** @type {!Object} */ (a));
+    const keysB = Object.keys(/** @type {!Object} */ (b));
+    if (keysA.length !== keysB.length) {
+      return false;
+    }
+    for (let i = 0; i < keysA.length; i++) {
+      const keyA = keysA[i];
+      const valueA = a[keyA];
+      const valueB = b[keyA];
+      if (!recursiveEquals(valueA, valueB, depth - 1)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
 }
 
 

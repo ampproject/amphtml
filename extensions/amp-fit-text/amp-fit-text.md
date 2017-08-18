@@ -22,10 +22,6 @@ limitations under the License.
     <td>Expands or shrinks its font size to fit the content within the space given to it.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js">&lt;/script></code></td>
   </tr>
@@ -38,6 +34,8 @@ limitations under the License.
     <td><a href="https://ampbyexample.com/components/amp-fit-text/">Annotated code example that includes amp-fit</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## Behavior
 
@@ -65,15 +63,15 @@ For example:
 
 ## Attributes
 
-**min-font-size**
+##### min-font-size
 
 The minimum font size as an integer that the `amp-fit-text` can use.
 
-**max-font-size**
+##### max-font-size
 
 The maximum font size as an integer that the `amp-fit-text` can use.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
@@ -85,4 +83,4 @@ properties with the main exception of `font-size`.
 
 ## Validation
 
-See [amp-fit-text rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/0.1/validator-amp-fit-text.protoascii) in the AMP validator specification.
+See [amp-fit-text rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/validator-amp-fit-text.protoascii) in the AMP validator specification.

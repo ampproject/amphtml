@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Messaging} from '../messaging';
+import {Messaging} from '../messaging/messaging';
 import {TouchHandler} from '../touch-handler';
 import * as sinon from 'sinon';
 
@@ -44,11 +44,11 @@ function fakeTouchEvent(type) {
     'pageY': 20,
     'thisshouldnotgetcopied': 'bla',
     touches:
-        [{'clientX': 20, 'clientY': 30, 'screenX': 10, 'screenY': 20,
-          'dontcopythis': 234}],
+    [{'clientX': 20, 'clientY': 30, 'screenX': 10, 'screenY': 20,
+      'dontcopythis': 234}],
     changedTouches:
         [{'clientX': 20, 'clientY': 30, 'screenX': 10, 'screenY': 20}],
-    preventDefault: function() {},
+    preventDefault() {},
   };
 }
 

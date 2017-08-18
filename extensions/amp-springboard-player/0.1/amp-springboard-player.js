@@ -116,7 +116,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     /** Show default image for playlist */
     if (this.mode_ == 'playlist') {
       placeholder.setAttribute('src',
-        'https://www.springboardplatform.com/storage/default/' +
+          'https://www.springboardplatform.com/storage/default/' +
         'snapshots/default_snapshot.png');
     }
     placeholder.setAttribute('placeholder', '');

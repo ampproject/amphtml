@@ -32,14 +32,15 @@ export class AdStrategy {
 
   /**
    * @param {!Array<!./placement.Placement>} placements
-   * @param {!Object<string, string>} baseAttributes Any attributes that should
-   *     be added to any inserted ads. These will be combined with any
+   * @param {!JsonObject<string, string>} baseAttributes Any attributes that
+   *     should be added to any inserted ads. These will be combined with any
    *     additional data atrributes specified by the placement.
    * @param {!./ad-tracker.AdTracker} adTracker
    */
   constructor(placements, baseAttributes, adTracker) {
     this.availablePlacements_ = placements.slice(0);
 
+    /** @private {!JsonObject<string, string>} */
     this.baseAttributes_ = baseAttributes;
 
     /** @type {!./ad-tracker.AdTracker} */

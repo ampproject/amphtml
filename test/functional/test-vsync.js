@@ -16,9 +16,8 @@
 
 import {Vsync} from '../../src/service/vsync-impl';
 import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
-import {ampdocServiceFor} from '../../src/ampdoc';
+import {Services} from '../../src/services';
 import {installTimerService} from '../../src/service/timer-impl';
-import {viewerPromiseForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -39,6 +38,8 @@ describe('vsync', () => {
       document: {
         nodeType: /* DOCUMENT */ 9,
         body: {},
+      },
+      navigator: {
       },
       services: {},
       setTimeout: (fn, t) => {
@@ -82,10 +83,10 @@ describe('vsync', () => {
 
     beforeEach(() => {
       installDocService(win, /* isSingleDoc */ true);
-      ampdoc = ampdocServiceFor(win).getAmpDoc();
+      ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
       win.services['viewer'] = {obj: viewer};
       vsync = new Vsync(win);
-      return viewerPromiseForDoc(ampdoc);
+      return Services.viewerPromiseForDoc(ampdoc);
     });
 
     afterEach(() => {
@@ -472,6 +473,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       viewer.isVisible = () => false;
 
+      /*eslint no-unused-vars: 0*/
       let result = '';
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
@@ -489,6 +491,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       viewer.isVisible = () => false;
 
+      /*eslint no-unused-vars: 0*/
       let result = '';
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
@@ -748,6 +751,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       docState.isHidden = () => true;
 
+      /*eslint no-unused-vars: 0*/
       let result = '';
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
@@ -765,6 +769,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       docState.isHidden = () => true;
 
+      /*eslint no-unused-vars: 0*/
       let result = '';
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {

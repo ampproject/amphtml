@@ -23,10 +23,6 @@ limitations under the License.
     tracking. Executes a CORS request to substitute the number.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-call-tracking" src="https://cdn.ampproject.org/v0/amp-call-tracking-0.1.js">&lt;/script></code></td>
   </tr>
@@ -35,6 +31,8 @@ limitations under the License.
     <td>container, fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
 </table>
+
+[TOC]
 
 ## Usage
 
@@ -49,11 +47,13 @@ by a CORS endpoint.
   <a href="tel:123456789">+1 (23) 456-789</a>
 </amp-call-tracking>
 ```
-Note that every unique CORS endpoint will only be called once per page.
+{% call callout('Note', type='note') %}
+Each unique CORS endpoint is called only once per page.
+{% endcall %}
 
 ## Attributes
 
-**config** (required)
+##### config (required)
 
 Defines a CORS URL. The URL's protocol must be HTTPS. The response must consist
 of a valid JSON object with the following fields:
@@ -62,12 +62,12 @@ of a valid JSON object with the following fields:
 - `formattedPhoneNumber` (optional): Specifies the phone number to display. If not specified, the value in `phoneNumber` is used.
 
 {% call callout('Important', type='caution') %}
-Your XHR endpoint needs to follow and implement [CORS Requests in AMP spec](../../spec/amp-cors-requests.md).
+Your XHR endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
 {% endcall %}
 
 ## Validation
 
-See [amp-call-tracking rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-call-tracking/0.1/validator-amp-call-tracking.protoascii) in the AMP validator specification.
+See [amp-call-tracking rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-call-tracking/validator-amp-call-tracking.protoascii) in the AMP validator specification.
 
 ## See also
 

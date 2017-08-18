@@ -251,7 +251,7 @@ export const Curves = {
    * @param {number} n
    * @return {number}
    */
-  LINEAR: function(n) {return n;},
+  LINEAR(n) {return n;},
 
   /**
    * ease

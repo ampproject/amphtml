@@ -16,8 +16,7 @@
 
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {timerFor} from '../../../src/services';
-import {xhrFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 
 /** @const {string} */
@@ -27,19 +26,19 @@ const TAG = 'amp-access-client';
 const DEFAULT_AUTHORIZATION_TIMEOUT = 3000;
 
 
-/** @implements {AccessTypeAdapterDef} */
+/** @implements {./amp-access.AccessTypeAdapterDef} */
 export class AccessClientAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!JSONType} configJson
-   * @param {!AccessTypeAdapterContextDef} context
+   * @param {!JsonObject} configJson
+   * @param {!./amp-access.AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!AccessTypeAdapterContextDef} */
+    /** @const @private {!./amp-access.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
     /** @const @private {string} */
@@ -61,15 +60,15 @@ export class AccessClientAdapter {
     this.authorizationTimeout_ = this.buildConfigAuthorizationTimeout_(
         configJson);
 
-    /** @const @private {!Xhr} */
-    this.xhr_ = xhrFor(ampdoc.win);
+    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
+    this.xhr_ = Services.xhrFor(ampdoc.win);
 
-    /** @const @private {!Timer} */
-    this.timer_ = timerFor(ampdoc.win);
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(ampdoc.win);
   }
 
   /**
-   * @param {!JSONType} configJson
+   * @param {!JsonObject} configJson
    * @return {number}
    */
   buildConfigAuthorizationTimeout_(configJson) {
@@ -126,7 +125,7 @@ export class AccessClientAdapter {
           this.authorizationTimeout_,
           this.xhr_.fetchJson(url, {
             credentials: 'include',
-          }));
+          })).then(res => res.json());
     });
   }
 

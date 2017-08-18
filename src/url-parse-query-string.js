@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
+
 const regex = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
 
 /**
@@ -24,18 +26,20 @@ const regex = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
  * from `src/url.js`.
  *
  * @param {string} queryString
- * @return {!Object<string>}
+ * @return {!JsonObject}
  */
 export function parseQueryString_(queryString) {
-  const params = Object.create(null);
+  const params = /** @type {!JsonObject} */ (Object.create(null));
   if (!queryString) {
     return params;
   }
 
   let match;
   while ((match = regex.exec(queryString))) {
-    const name = decodeURIComponent(match[1]).trim();
-    const value = match[2] ? decodeURIComponent(match[2]).trim() : '';
+    const name = tryDecodeUriComponent_(match[1], match[1]).trim();
+    const value = match[2] ?
+        tryDecodeUriComponent_(match[2], match[2]).trim() :
+        '';
     params[name] = value;
   }
   return params;

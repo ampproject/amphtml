@@ -16,12 +16,11 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
-import {templatesFor} from '../../../src/services';
-import {xhrFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
 import {removeChildren} from '../../../src/dom';
-import {AdDisplayState, AmpAdUIHandler} from './amp-ad-ui';
+import {AmpAdUIHandler} from './amp-ad-ui';
 
 /** @const {!string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
@@ -41,12 +40,12 @@ export class AmpAdCustom extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    /** @private {string} The base URL of the ad server for this ad */
-    this.url_ = element.getAttribute('data-url');
+    /** @private {?string} The base URL of the ad server for this ad */
+    this.url_ = null;
 
-    /** @private {string} A string identifying this ad slot: the server's
+    /** @private {?string} A string identifying this ad slot: the server's
      *  responses will be keyed by slot */
-    this.slot_ = element.getAttribute('data-slot');
+    this.slot_ = null;
 
     /** {?AmpAdUIHandler} */
     this.uiHandler = null;
@@ -66,6 +65,8 @@ export class AmpAdCustom extends AMP.BaseElement {
   }
 
   buildCallback() {
+    this.url_ = this.element.getAttribute('data-url');
+    this.slot_ = this.element.getAttribute('data-slot');
     // Ensure that there are templates in this ad
     const templates = this.element.querySelectorAll('template');
     user().assert(templates.length > 0, 'Missing template in custom ad');
@@ -74,7 +75,6 @@ export class AmpAdCustom extends AMP.BaseElement {
         'custom ad slot should be alphanumeric: ' + this.slot_);
 
     this.uiHandler = new AmpAdUIHandler(this);
-    this.uiHandler.init();
   }
 
   /** @override */
@@ -84,10 +84,10 @@ export class AmpAdCustom extends AMP.BaseElement {
     // If this promise has no URL yet, create one for it.
     if (!(fullUrl in ampCustomadXhrPromises)) {
       // Here is a promise that will return the data for this URL
-      ampCustomadXhrPromises[fullUrl] = xhrFor(this.win).fetchJson(fullUrl);
+      ampCustomadXhrPromises[fullUrl] =
+          Services.xhrFor(this.win).fetchJson(fullUrl).then(res => res.json());
     }
     return ampCustomadXhrPromises[fullUrl].then(data => {
-      this.uiHandler.setDisplayState(AdDisplayState.LOADING);
       const element = this.element;
       // We will get here when the data has been fetched from the server
       let templateData = data;
@@ -97,24 +97,30 @@ export class AmpAdCustom extends AMP.BaseElement {
       }
       // Set UI state
       if (templateData !== null && typeof templateData == 'object') {
-        this.uiHandler.setDisplayState(AdDisplayState.LOADED_RENDER_START);
-        templatesFor(this.win).findAndRenderTemplate(element, templateData)
-          .then(renderedElement => {
-          // Get here when the template has been rendered
-          // Clear out the template and replace it by the rendered version
-            removeChildren(element);
-            element.appendChild(renderedElement);
-          });
+        this.renderStarted();
+        Services.templatesFor(this.win)
+            .findAndRenderTemplate(element, templateData)
+            .then(renderedElement => {
+              // Get here when the template has been rendered
+              // Clear out the template and replace it by the rendered version
+              removeChildren(element);
+              element.appendChild(renderedElement);
+            });
       } else {
-        this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+        this.uiHandler.applyNoContentUI();
       }
     });
   }
 
   /** @override  */
   unlayoutCallback() {
-    this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
+    this.uiHandler.applyUnlayoutUI();
     return true;
+  }
+
+  /** @override */
+  createPlaceholderCallback() {
+    return this.uiHandler.createPlaceholder();
   }
 
   /**
@@ -125,7 +131,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   getFullUrl_() {
     // If this ad doesn't have a slot defined, just return the base URL
     if (this.slot_ === null) {
-      return this.url_;
+      return /** @type {string} */ (this.url_);
     }
     if (ampCustomadFullUrls === null) {
       // The array of ad urls has not yet been built, do so now.
@@ -149,7 +155,7 @@ export class AmpAdCustom extends AMP.BaseElement {
       }
       for (const baseUrl in slots) {
         ampCustomadFullUrls[baseUrl] = addParamToUrl(baseUrl, 'ampslots',
-          slots[baseUrl].join(','));
+            slots[baseUrl].join(','));
       }
     }
     return ampCustomadFullUrls[this.url_];

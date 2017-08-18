@@ -34,12 +34,12 @@ describes.realWin('font-stylesheet-timeout', {
     readyState = 'interactive';
     responseStart = 0;
     Object.defineProperty(win.document, 'readyState', {
-      get: function() {
+      get() {
         return readyState;
       },
     });
     Object.defineProperty(win.performance.timing, 'responseStart', {
-      get: function() {
+      get() {
         return responseStart;
       },
     });
@@ -74,7 +74,7 @@ describes.realWin('font-stylesheet-timeout', {
         'link[rel="stylesheet"]')).to.equal(link);
   });
 
-  it('should time out if doc is not interactive', done => {
+  it('should time out if doc is not interactive', () => {
     readyState = 'loading';
     const link = addLink();
     fontStylesheetTimeout(win);
@@ -89,9 +89,12 @@ describes.realWin('font-stylesheet-timeout', {
     expect(after).to.not.equal(link);
     expect(after.href).to.equal(link.href);
     expect(after.media).to.equal('not-matching');
-    after.addEventListener('load', () => {
+    return new Promise(resolve => {
+      after.addEventListener('load', () => {
+        resolve();
+      });
+    }).then(() => {
       expect(after.media).to.equal('all');
-      done();
     });
   });
 

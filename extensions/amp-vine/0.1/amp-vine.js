@@ -20,7 +20,17 @@ import {user} from '../../../src/log';
 
 class AmpVine extends AMP.BaseElement {
 
-  /** @override */
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     // the Vine iframe
     this.preconnect.url('https://vine.co', onLayout);
@@ -36,8 +46,8 @@ class AmpVine extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const vineid = user().assert(this.element.getAttribute('data-vineid'),
-      'The data-vineid attribute is required for <amp-vine> %s',
-      this.element);
+        'The data-vineid attribute is required for <amp-vine> %s',
+        this.element);
 
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
@@ -47,7 +57,6 @@ class AmpVine extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
 
-    /** @private {?Element} */
     this.iframe_ = iframe;
 
     return this.loadPromise(iframe);

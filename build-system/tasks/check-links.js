@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var argv = require('minimist')(process.argv.slice(2));
+var path = require('path');
 var BBPromise = require('bluebird');
 var chalk = require('chalk');
 var fs = require('fs-extra');
+var getStdout = require('../exec.js').getStdout;
 var gulp = require('gulp-help')(require('gulp'));
 var markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 var path = require('path');
@@ -25,19 +28,37 @@ var util = require('gulp-util');
 
 
 /**
+ * Parses the list of files in argv, or extracts it from the commit log.
+ *
+ * @return {!Array<string>}
+ */
+function getMarkdownFiles() {
+  if (!!argv.files) {
+    return argv.files.split(',');
+  } else {
+    if (!!process.env.TRAVIS_PULL_REQUEST_SHA) {
+      // On Travis, derive the list of .md files from the latest commit.
+      var filesInPr =
+          getStdout(`git diff --name-only master...HEAD`).trim().split('\n');
+      return filesInPr.filter(function(file) {
+        return path.extname(file) == '.md'
+      });
+    } else {
+      // A list of files is required when check-links is run locally.
+      util.log(util.colors.red(
+          'Error: A list of markdown files must be specified via --files'));
+      process.exit(1);
+    }
+  }
+}
+
+/**
  * Parses the list of files in argv and checks for dead links.
  *
  * @return {Promise} Used to wait until all async link checkers finish.
  */
 function checkLinks() {
-  var files = argv.files;
-  if (!files) {
-    util.log(util.colors.red(
-        'Error: A list of markdown files must be specified via --files'));
-    process.exit(1);
-  }
-
-  var markdownFiles = files.split(',');
+  var markdownFiles = getMarkdownFiles();
   var linkCheckers = markdownFiles.map(function(markdownFile) {
     return runLinkChecker(markdownFile);
   });
@@ -51,23 +72,25 @@ function checkLinks() {
         return;
       }
       var deadLinksFoundInFile = false;
-      util.log(
-          'Checking links in',
-          util.colors.magenta(markdownFiles[index]), '...');
       results.forEach(function (result) {
+        // Skip links to files that were introduced by the PR.
+        if (isLinkToFileIntroducedByPR(result.link)) {
+          return;
+        }
         if(result.status === 'dead') {
           deadLinksFound = true;
           deadLinksFoundInFile = true;
           util.log('[%s] %s', chalk.red('✖'), result.link);
+        } else if (!process.env.TRAVIS) {
+          util.log('[%s] %s', chalk.green('✔'), result.link);
         }
       });
       if(deadLinksFoundInFile) {
         filesWithDeadLinks.push(markdownFiles[index]);
         util.log(
-            util.colors.yellow('WARNING'),
+            util.colors.red('ERROR'),
             'Possible dead link(s) found in',
-            util.colors.magenta(markdownFiles[index]),
-            '(please update if necessary).');
+            util.colors.magenta(markdownFiles[index]));
       } else {
         util.log(
             util.colors.green('SUCCESS'),
@@ -77,10 +100,16 @@ function checkLinks() {
     });
     if (deadLinksFound) {
         util.log(
-            util.colors.yellow('WARNING'),
-            'Possible dead link(s) found. Please update',
+            util.colors.red('ERROR'),
+            'Please update dead link(s) in',
             util.colors.magenta(filesWithDeadLinks.join(',')),
-            'if necessary.');
+            'or whitelist them in build-system/tasks/check-links.js');
+        util.log(
+            util.colors.yellow('NOTE'),
+            'If the link(s) above are illustrative and aren\'t meant to work,',
+            'surrounding them with backticks or <code></code> will exempt them',
+            'from the link checker.');
+        process.exit(1);
     } else {
         util.log(
             util.colors.green('SUCCESS'),
@@ -90,22 +119,44 @@ function checkLinks() {
 }
 
 /**
- * Filters out markdown elements that contain localhost links.
- * TODO(rsimha-amp): Simplify this into a single regex.
+ * Determines if a link points to a file added, copied, or renamed in the PR.
+ *
+ * @param {string} link Link being tested.
+ * @return {boolean} True if the link points to a file introduced by the PR.
+ */
+function isLinkToFileIntroducedByPR(link) {
+  var filesAdded =
+      getStdout(`git diff --name-only --diff-filter=ARC master...HEAD`)
+      .trim().split('\n');
+  return filesAdded.some(function(file) {
+    return (file.length > 0 && link.includes(path.parse(file).base));
+  });
+}
+
+/**
+ * Filters out whitelisted links before running the link checker.
  *
  * @param {string} markdown Original markdown.
- * @return {string} Markdown after filtering out localhost links.
+ * @return {string} Markdown after filtering out whitelisted links.
  */
-function filterLocalhostLinks(markdown) {
-  var localhostPattern = 'http:\/\/localhost:8000';
-  var parenLinks = new RegExp('\\('+ localhostPattern + '[^\\)]*\\)', 'g');
-  var bracketLinks = new RegExp('\\['+ localhostPattern + '[^\\]]*\\]', 'g');
-  var rawLinks = new RegExp(localhostPattern, 'g');
-
+function filterWhitelistedLinks(markdown) {
   var filteredMarkdown = markdown;
-  filteredMarkdown = filteredMarkdown.replace(parenLinks, '');
-  filteredMarkdown = filteredMarkdown.replace(bracketLinks, '');
-  filteredMarkdown = filteredMarkdown.replace(rawLinks, '');
+
+  // localhost links optionally preceded by ( or [ (not served on Travis)
+  filteredMarkdown =
+      filteredMarkdown.replace(/(\(|\[)?http:\/\/localhost:8000/g, '');
+
+  // Links in script tags (illustrative, and not always valid)
+  filteredMarkdown = filteredMarkdown.replace(/src="http.*?"/g, '');
+
+  // Links inside a <code> block (illustrative, and not always valid)
+  filteredMarkdown = filteredMarkdown.replace(/<code>(.*?)<\/code>/g, '');
+
+  // After all whitelisting is done, clean up any remaining empty blocks bounded
+  // by backticks. Otherwise, `` will be treated as the start of a code block
+  // and confuse the link extractor.
+  filteredMarkdown = filteredMarkdown.replace(/\ \`\`\ /g, '');
+
   return filteredMarkdown;
 }
 
@@ -122,7 +173,7 @@ function runLinkChecker(markdownFile) {
     return Promise.resolve();
   }
   var markdown = fs.readFileSync(markdownFile).toString();
-  var filteredMarkdown = filterLocalhostLinks(markdown);
+  var filteredMarkdown = filterWhitelistedLinks(markdown);
   var opts = {
     baseUrl : 'file://' + path.dirname(path.resolve((markdownFile)))
   };

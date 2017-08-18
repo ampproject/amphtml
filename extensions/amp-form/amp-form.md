@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Stable with the following Experimental feature: <a href="#verification-experimental-">Verification</a></td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -43,9 +43,9 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-form` extension allows the usage of forms and input fields in an AMP document. The extension allows polyfilling some of the missing behaviors in browsers.
+The `amp-form` extension allows the usage of forms to submit input fields in an AMP document. The extension allows polyfilling some of the missing behaviors in browsers.
 
-The `amp-form` extension **MUST** be loaded if you're using `<form>` or any input tags, otherwise your document will be invalid!
+The `amp-form` extension **MUST** be loaded if you're using `<form>`, otherwise your document will be invalid! Use of `input` tags for purposes other than submitting their values (e.g. inputs not inside a `<form>`) is valid without loading `amp-form` extension.
 
 <div>
   <amp-iframe height="671"
@@ -54,7 +54,7 @@ The `amp-form` extension **MUST** be loaded if you're using `<form>` or any inpu
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampform.basic.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
   </amp-iframe>
 </div>
 
@@ -68,7 +68,7 @@ The value for the `target` attribute must be either `_blank` or `_top`.
 
 For GET submissions, at least one of `action` or `action-xhr` must be provided.
 
-This attribute is required for `method=GET`. The value must be an `https` URL and must not be a link to a CDN (does **NOT** link to https://cdn.ampproject.org). For `method=POST`, the `action` attribute is invalid, use  `action-xhr` instead.
+This attribute is required for `method=GET`. The value must be an `https` URL and must not be a link to a CDN (does **NOT** link to `https://cdn.ampproject.org`). For `method=POST`, the `action` attribute is invalid, use  `action-xhr` instead.
 
 
 {% call callout('Note', type='note') %}
@@ -84,7 +84,7 @@ An XHR request (sometimes called an AJAX request) is where the browser would mak
 The value for `action-xhr` can be the same or a different endpoint than `action` and has the same action requirements above.
 
 {% call callout('Important', type='caution') %}
-See [Security Considerations](#security-considerations) for notes on how to secure your forms endpoints.
+See the [Security Considerations](#security-considerations) section below for notes on how to secure your forms endpoints.
 {% endcall %}
 
 **other form attributes**
@@ -145,7 +145,7 @@ For example, a common use case is to submit a form on input change (selecting a 
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampform.inputevent.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
@@ -191,20 +191,18 @@ You can configure your analytics to send these events as in the example below.
 
 The `amp-form-submit` event fires when a form request is initiated. The `amp-form-submit` event generates a set of variables that correspond to the specific form and the fields in the form. These variables can be used for analytics.
 
-For example, the following form has two fields:
+For example, the following form has one field:
 
 ```html
-<form action-xhr="/register" method="POST" id="registration_form">
-  <input type="text" name="user_name" />
-  <input type="password" name="user_password" />
-  <input type="submit" value="Sign up" />
+<form action-xhr="/comment" method="POST" id="submit_form">
+  <input type="text" name="comment" />
+  <input type="submit" value="Comment" />
 </form>
 ```
 When the `amp-form-submit` event fires, it generates the following variables containing the values that were specified in the form:
 
 * `formId`
-* `formFields[user_name]`
-* `formFields[user_password]`
+* `formFields[comment]`
 
 ## Success/Error Response Rendering
 `amp-form` allows publishers to render the responses using [Extended Templates](../../spec/amp-html-format.md#extended-templates).
@@ -312,7 +310,7 @@ Here's an example:
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampform.customval.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
@@ -333,9 +331,10 @@ The `show-all-on-submit` reporting option shows all validation errors on all inv
 #### As You Go
 The `as-you-go` reporting option allows your user to see validation messages as they're interacting with the input. For example, if the user types an invalid email address, the user will see the error right away.  Once they correct the value, the error goes away.
 
-## Verification (Experimental)
+#### Interact and Submit
+The `interact-and-submit` reporting option combines the behavior of `show-all-on-submit` and `as-you-go`. Individual fields will show any errors immediately after interactions, and on submit the form will show errors on all invalid fields.
 
-This feature is still experimental, so you need to [enable the experiment](https://www.ampproject.org/docs/reference/experimental) to use form verification.
+## Verification
 
 HTML5 validation gives feedback based only on information available on the page, such as if a value matches a certain pattern. With `amp-form` verification you can give the user feedback that HTML5 validation alone cannot. For example, a form can use verification to check if an email address has already been registered. Another use-case is verifying that a city field and a zip code field match each other.
 
@@ -345,22 +344,9 @@ Here's an example:
 <form
   method="post"
   action-xhr="/form/verify-json/post"
+  verify-xhr="/form/verify-json/post"
   target="_blank"
 >
-    <script type="application/json">
-    {
-      "verificationGroups": [
-        {
-          "name": "uniqueEmail",
-          "elements": ["email"]
-        },
-        {
-          "name": "fullAddress",
-          "elements": ["addressLine2", "city", "zip"]
-        },
-      ]
-    }
-    </script>
     <fieldset>
         <label>
             <span>Email</span>
@@ -393,8 +379,12 @@ Here's an example:
         </template>
     </div>
 </form>
+```
 
-The form sends a `__amp_form_verify` field as part of the form data to let the server know the request is a verify request and not a formal submit.
+The form sends a `__amp_form_verify` field as part of the form data as a hint to
+the server that the request is a verify request and not a formal submit.
+This is helpful so the server knows not to store the verify request if the same
+endpoint is used for verification and for submit.
 
 ```
 
@@ -450,10 +440,13 @@ Note how `CANONICAL_HOSTNAME` above did not get replaced because it was not in t
 Substitutions will happen on every subsequent submission. Read more about [variable substitutions in AMP](../../spec/amp-var-substitutions.md).
 
 ## Security Considerations
-Your XHR endpoints need to follow and implement [CORS Requests in AMP spec](../../spec/amp-cors-requests.md).
+
+{% call callout('Important', type='caution') %}
+Your XHR endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
+{% endcall %}
 
 ### Protecting against XSRF
-In addition to following AMP CORS spec, please pay extra attention to [state changing requests note](../../spec/amp-cors-requests.md#note-on-state-changing-requests) to protect against [XSRF attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery) where an attacker can execute unauthorized commands using the current user session without the user knowledge.
+In addition to following the details in the AMP CORS spec, please pay extra attention to the section on ["Verifying state changing requests" ](../../spec/amp-cors-requests.md#verify-state-changing-requests) to protect against [XSRF attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery) where an attacker can execute unauthorized commands using the current user session without the user knowledge.
 
 In general, keep in mind the following points when accepting input from the user:
 
@@ -462,3 +455,9 @@ In general, keep in mind the following points when accepting input from the user
     * non-XHR GET requests are not going to receive accurate origin/headers and backends won't be able to protect against XSRF with the above mechanism.
     * In general use XHR/non-XHR GET requests for navigational or information retrieval only.
 * non-XHR POST requests are not allowed in AMP documents. This is due to inconsistencies of setting `Origin` header on these requests across browsers. And the complications supporting it would introduce in protecting against XSRF. This might be reconsidered and introduced later, please file an issue if you think this is needed.
+
+## Styling
+
+{% call callout('Tip', type='success') %}
+Visit [AMP Start](https://ampstart.com/components#form-elements) for responsive, pre-styled AMP form elements that you can use in your AMP pages.
+{% endcall %}

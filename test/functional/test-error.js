@@ -22,6 +22,7 @@ import {
   isCancellation,
   reportError,
   detectJsEngineFromStack,
+  reportErrorToAnalytics,
 } from '../../src/error';
 import {parseUrl, parseQueryString} from '../../src/url';
 import {user} from '../../src/log';
@@ -30,7 +31,7 @@ import {
   toggleExperiment,
 } from '../../src/experiments';
 import * as sinon from 'sinon';
-
+import * as analytics from '../../src/analytics';
 
 describes.fakeWin('installErrorReporting', {}, env => {
   let win;
@@ -105,7 +106,7 @@ describe('reportErrorToServer', () => {
     const e = new Error('XYZ');
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-          true));
+            true));
     const query = parseQueryString(url.search);
     expect(url.href.indexOf(
         'https://amp-error-reporting.appspot.com/r?')).to.equal(0);
@@ -131,7 +132,7 @@ describe('reportErrorToServer', () => {
     e.ignoreStack = true;
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-          true));
+            true));
     const query = parseQueryString(url.search);
     expect(query.s).to.be.undefined;
 
@@ -149,7 +150,7 @@ describe('reportErrorToServer', () => {
     e.args = {x: 1};
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-          true));
+            true));
     const query = parseQueryString(url.search);
 
     expect(query.args).to.equal(JSON.stringify({x: 1}));
@@ -379,7 +380,7 @@ describe('reportErrorToServer', () => {
     const e = user().createError('123');
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-          true));
+            true));
     const query = parseQueryString(url.search);
     expect(query.s).to.be.undefined;
   });
@@ -393,7 +394,7 @@ describe('reportErrorToServer', () => {
     const e = user().createError('123');
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-          true));
+            true));
     const query = parseQueryString(url.search);
     expect(query.exps).to.equal('test-exp=1,disabled-exp=0');
   });
@@ -537,5 +538,28 @@ describe('detectJsEngineFromStack', () => {
     it.configure().ifEdge().run('detects edge as IE', () => {
       expect(detectJsEngineFromStack()).to.equal('IE');
     });
+  });
+});
+
+
+describes.fakeWin('user error reporting', {amp: true}, env => {
+  let win;
+  sandbox = env.sandbox;
+  const error = new Error('ERROR','user error');
+  let analyticsEventSpy;
+
+  beforeEach(() => {
+    win = env.win;
+    analyticsEventSpy = sandbox.spy(analytics, 'triggerAnalyticsEvent');
+    toggleExperiment(win, 'user-error-reporting', true);
+  });
+
+  it('should trigger triggerAnalyticsEvent with correct arguments', () => {
+    reportErrorToAnalytics(error, win);
+    expect(analyticsEventSpy).to.have.been.called;
+    expect(analyticsEventSpy).to.have.been.calledWith(
+        sinon.match.any,
+        'user-error',
+        {errorName: error.name, errorMessage: error.message});
   });
 });

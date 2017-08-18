@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../action-trust';
 import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Layout, getLayoutClass} from '../layout';
-import {actionServiceForDoc} from '../services';
-import {bindForDoc} from '../services';
-import {dev, user} from '../log';
-import {registerServiceBuilderForDoc} from '../service';
-import {historyForDoc} from '../services';
-import {resourcesForDoc} from '../services';
+import {Services} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
-import {vsyncFor} from '../services';
+import {dev, user} from '../log';
+import {isProtocolValid} from '../url';
+import {registerServiceBuilderForDoc} from '../service';
+import {tryFocus} from '../dom';
 
 /**
  * @param {!Element} element
@@ -33,6 +32,13 @@ function isShowable(element) {
   return getStyle(element, 'display') == 'none'
       || element.hasAttribute('hidden');
 }
+
+/** @const {string} */
+const TAG = 'STANDARD-ACTIONS';
+
+/** @const {Array<string>} */
+const PERMITTED_POSITIONS = ['top','bottom','center'];
+
 
 /**
  * This service contains implementations of some of the most typical actions,
@@ -49,17 +55,23 @@ export class StandardActions {
     this.ampdoc = ampdoc;
 
     /** @const @private {!./action-impl.ActionService} */
-    this.actions_ = actionServiceForDoc(ampdoc);
+    this.actions_ = Services.actionServiceForDoc(ampdoc);
 
     /** @const @private {!./resources-impl.Resources} */
-    this.resources_ = resourcesForDoc(ampdoc);
+    this.resources_ = Services.resourcesForDoc(ampdoc);
+
+    /** @const @private {!./url-replacements-impl.UrlReplacements} */
+    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
+
+    /** @const @private {!./viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(ampdoc);
 
     this.installActions_(this.actions_);
   }
 
   /** @override */
   adoptEmbedWindow(embedWin) {
-    this.installActions_(actionServiceForDoc(embedWin.document));
+    this.installActions_(Services.actionServiceForDoc(embedWin.document));
   }
 
   /**
@@ -71,7 +83,11 @@ export class StandardActions {
     actionService.addGlobalMethodHandler('hide', this.handleHide.bind(this));
     actionService.addGlobalMethodHandler('show', this.handleShow.bind(this));
     actionService.addGlobalMethodHandler(
-      'toggleVisibility', this.handleToggle.bind(this));
+        'toggleVisibility', this.handleToggle.bind(this));
+    actionService.addGlobalMethodHandler(
+        'scrollTo', this.handleScrollTo.bind(this));
+    actionService.addGlobalMethodHandler(
+        'focus', this.handleFocus.bind(this));
   }
 
   /**
@@ -84,29 +100,131 @@ export class StandardActions {
   handleAmpTarget(invocation) {
     switch (invocation.method) {
       case 'setState':
-        bindForDoc(this.ampdoc).then(bind => {
-          const args = invocation.args;
-          const objectString = args[OBJECT_STRING_ARGS_KEY];
-          if (objectString) {
-            // Object string arg.
-            const scope = Object.create(null);
-            const event = invocation.event;
-            if (event && event.detail) {
-              scope['event'] = event.detail;
-            }
-            bind.setStateWithExpression(objectString, scope);
-          } else {
-            user().error('AMP-BIND', `Please use the object-literal syntax, `
-                + `e.g. "AMP.setState({foo: 'bar'})" instead of `
-                + `"AMP.setState(foo='bar')".`);
-          }
-        });
+        this.handleAmpSetState_(invocation);
+        return;
+      case 'navigateTo':
+        this.handleAmpNavigateTo_(invocation);
         return;
       case 'goBack':
-        historyForDoc(this.ampdoc).goBack();
+        this.handleAmpGoBack_(invocation);
+        return;
+      case 'print':
+        this.handleAmpPrint_(invocation);
         return;
     }
     throw user().createError('Unknown AMP action ', invocation.method);
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpSetState_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return;
+    }
+    Services.bindForDocOrNull(invocation.target).then(bind => {
+      user().assert(bind, 'AMP-BIND is not installed.');
+      const args = invocation.args;
+      const objectString = args[OBJECT_STRING_ARGS_KEY];
+      if (objectString) {
+        // Object string arg.
+        const scope = Object.create(null);
+        const event = invocation.event;
+        if (event && event.detail) {
+          scope['event'] = event.detail;
+        }
+        bind.setStateWithExpression(objectString, scope);
+      } else {
+        user().error('AMP-BIND', 'Please use the object-literal syntax, '
+            + 'e.g. "AMP.setState({foo: \'bar\'})" instead of '
+            + '"AMP.setState(foo=\'bar\')".');
+      }
+    });
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpNavigateTo_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return;
+    }
+    const url = invocation.args['url'];
+    if (!isProtocolValid(url)) {
+      user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
+      return;
+    }
+    const expandedUrl = this.urlReplacements_.expandUrlSync(url);
+    const node = invocation.target;
+    const win = (node.ownerDocument || node).defaultView;
+    win.location = expandedUrl;
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpGoBack_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return;
+    }
+    Services.historyForDoc(this.ampdoc).goBack();
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpPrint_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return;
+    }
+    const node = invocation.target;
+    const win = (node.ownerDocument || node).defaultView;
+    win.print();
+  }
+
+  /**
+   * Handles the `scrollTo` action where given an element, we smooth scroll to
+   * it with the given animation duraiton
+   * @param {!./action-impl.ActionInvocation} invocation
+   */
+  handleScrollTo(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return;
+    }
+    const node = dev().assertElement(invocation.target);
+
+    // Duration for scroll animation
+    const duration = invocation.args
+                     && invocation.args['duration']
+                     && invocation.args['duration'] >= 0 ?
+                        invocation.args['duration'] : 500;
+
+    // Position in the viewport at the end
+    const pos = (invocation.args
+                && invocation.args['position']
+                && PERMITTED_POSITIONS.includes(invocation.args['position'])) ?
+                invocation.args['position'] : 'top';
+
+    // Animate the scroll
+    this.viewport_.animateScrollIntoView(node, duration, 'ease-in', pos);
+  }
+
+  /**
+   * Handles the `focus` action where given an element, we give it focus
+   * @param {!./action-impl.ActionInvocation} invocation
+   */
+  handleFocus(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return;
+    }
+    const node = dev().assertElement(invocation.target);
+
+    // Set focus
+    tryFocus(node);
   }
 
   /**
@@ -137,19 +255,19 @@ export class StandardActions {
 
     if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
       user().warn(
-          'STANDARD-ACTIONS',
+          TAG,
           'Elements with layout=nodisplay cannot be dynamically shown.',
           target);
 
       return;
     }
 
-    vsyncFor(ownerWindow).measure(() => {
+    Services.vsyncFor(ownerWindow).measure(() => {
       if (computedStyle(ownerWindow, target).display == 'none' &&
           !isShowable(target)) {
 
         user().warn(
-            'STANDARD-ACTIONS',
+            TAG,
             'Elements can only be dynamically shown when they have the ' +
             '"hidden" attribute set or when they were dynamically hidden.',
             target);

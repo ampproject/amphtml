@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-import {Messaging, WindowPortEmulator, parseMessage} from './messaging';
+import {
+  Messaging,
+  WindowPortEmulator,
+  parseMessage,
+} from './messaging/messaging';
 import {TouchHandler} from './touch-handler';
-import {getAmpDoc} from '../../../src/ampdoc';
+import {getAmpdoc} from '../../../src/service';
 import {isIframed} from '../../../src/dom';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getData} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
-import {viewerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';
@@ -47,9 +53,6 @@ export class AmpViewerIntegration {
     /** @const {!Window} win */
     this.win = win;
 
-    /** @private {?string|undefined} */
-    this.unconfirmedViewerOrigin_ = null;
-
     /** @private {boolean} */
     this.isWebView_ = false;
 
@@ -65,39 +68,30 @@ export class AmpViewerIntegration {
    */
   init() {
     dev().fine(TAG, 'handshake init()');
-    const viewer = viewerForDoc(this.win.document);
+    const viewer = Services.viewerForDoc(this.win.document);
     this.isWebView_ = viewer.getParam('webview') == '1';
     this.isHandShakePoll_ = viewer.hasCapability('handshakepoll');
-    this.unconfirmedViewerOrigin_ = viewer.getParam('origin');
+    const origin = viewer.getParam('origin') || '';
 
-    if (!this.isWebView_ && !this.unconfirmedViewerOrigin_) {
+    if (!this.isWebView_ && !origin) {
       return Promise.resolve();
     }
 
-    const ampdoc = getAmpDoc(this.win.document);
+    const ampdoc = getAmpdoc(this.win.document);
 
     if (this.isWebView_ || this.isHandShakePoll_) {
-      let source;
-      let origin;
-      if (isIframed(this.win)) {
-        source = this.win.parent;
-        origin = dev().assertString(this.unconfirmedViewerOrigin_);
-      } else {
-        source = null;
-        origin = '';
-      }
+      const source = isIframed(this.win) ? this.win.parent : null;
       return this.webviewPreHandshakePromise_(source, origin)
           .then(receivedPort => {
-            return this.openChannelAndStart_(viewer, ampdoc,
-              new Messaging(this.win, receivedPort, this.isWebView_));
+            return this.openChannelAndStart_(viewer, ampdoc, origin,
+                new Messaging(this.win, receivedPort, this.isWebView_));
           });
     }
 
-    const port = new WindowPortEmulator(this.win,
-      dev().assertString(this.unconfirmedViewerOrigin_),
-      this.win.parent/* target */);
+    const port = new WindowPortEmulator(
+      this.win, origin, this.win.parent/* target */);
     return this.openChannelAndStart_(
-      viewer, ampdoc, new Messaging(this.win, port, this.isWebView_));
+        viewer, ampdoc, origin, new Messaging(this.win, port, this.isWebView_));
   }
 
   /**
@@ -109,8 +103,9 @@ export class AmpViewerIntegration {
   webviewPreHandshakePromise_(source, origin) {
     return new Promise(resolve => {
       const unlisten = listen(this.win, 'message', e => {
-        dev().fine(TAG, 'AMPDOC got a pre-handshake message:', e.type, e.data);
-        const data = parseMessage(e.data);
+        dev().fine(TAG, 'AMPDOC got a pre-handshake message:', e.type,
+            getData(e));
+        const data = parseMessage(getData(e));
         if (!data) {
           return;
         }
@@ -125,9 +120,7 @@ export class AmpViewerIntegration {
               'Did not receive communication port from the Viewer!');
           }
           const port = e.ports && e.ports.length > 0 ? e.ports[0] :
-            new WindowPortEmulator(this.win,
-              dev().assertString(this.unconfirmedViewerOrigin_),
-              this.win.parent);
+            new WindowPortEmulator(this.win, origin, this.win.parent);
           resolve(port);
           unlisten();
         }
@@ -138,42 +131,43 @@ export class AmpViewerIntegration {
   /**
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} origin
    * @param {!Messaging} messaging
    * @return {!Promise<undefined>}
    * @private
    */
-  openChannelAndStart_(viewer, ampdoc, messaging) {
+  openChannelAndStart_(viewer, ampdoc, origin, messaging) {
     dev().fine(TAG, 'Send a handshake request');
     const ampdocUrl = ampdoc.getUrl();
     const srcUrl = getSourceUrl(ampdocUrl);
-    return messaging.sendRequest(RequestNames.CHANNEL_OPEN, {
-      url: ampdocUrl,
-      sourceUrl: srcUrl,
-    },
-    true /* awaitResponse */)
-      .then(() => {
-        dev().fine(TAG, 'Channel has been opened!');
-        this.setup_(messaging, viewer);
-      });
+    return messaging.sendRequest(RequestNames.CHANNEL_OPEN, dict({
+      'url': ampdocUrl,
+      'sourceUrl': srcUrl,
+    }),
+        true /* awaitResponse */)
+        .then(() => {
+          dev().fine(TAG, 'Channel has been opened!');
+          this.setup_(messaging, viewer, origin);
+        });
   }
 
   /**
    * @param {!Messaging} messaging
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @param {string} origin
    * @return {Promise<*>|undefined}
    * @private
    */
-  setup_(messaging, viewer) {
+  setup_(messaging, viewer, origin) {
     messaging.setDefaultHandler((type, payload, awaitResponse) => {
       return viewer.receiveMessage(
-        type, /** @type {!JSONType} */ (payload), awaitResponse);
+          type, /** @type {!JsonObject} */ (payload), awaitResponse);
     });
 
-    viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
-      dev().assertString(this.unconfirmedViewerOrigin_));
+    viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging), origin);
 
     listenOnce(
-      this.win, 'unload', this.handleUnload_.bind(this, messaging));
+        this.win, 'unload', this.handleUnload_.bind(this, messaging));
 
     if (viewer.hasCapability('swipe')) {
       this.initTouchHandler_(messaging);
@@ -187,7 +181,7 @@ export class AmpViewerIntegration {
    * @private
    */
   handleUnload_(messaging) {
-    return messaging.sendRequest(RequestNames.UNLOADED, {}, true);
+    return messaging.sendRequest(RequestNames.UNLOADED, dict(), true);
   }
 
   /**

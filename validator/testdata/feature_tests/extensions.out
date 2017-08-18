@@ -1,0 +1,5 @@
+FAIL
+feature_tests/extensions.html:42:2 The tag 'amp-analytics' requires including the 'amp-analytics' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-analytics) [AMP_TAG_PROBLEM]
+feature_tests/extensions.html:43:4 The tag 'amp-analytics extension .json script' requires including the 'amp-analytics' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-analytics) [AMP_TAG_PROBLEM]
+feature_tests/extensions.html:48:7 The extension 'amp-timeago' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
+feature_tests/extensions.html:48:7 The extension 'amp-ad' was found on this page, but is unused (no 'amp-ad' tag seen). This may become an error in the future. [DEPRECATION]

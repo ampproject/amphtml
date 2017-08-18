@@ -108,6 +108,7 @@ const WHITELISTED_ATTRS = [
   'href',
   'on',
   'placeholder',
+  'option',
   /* Attributes added for amp-bind */
   // TODO(kmh287): Add more whitelisted attributes for bind?
   'text',
@@ -383,8 +384,10 @@ export function isValidAttr(tagName, attrName, attrValue) {
  * @return {string}
  */
 export function rewriteAttributeValue(tagName, attrName, attrValue) {
-  if (attrName == 'src' || attrName == 'href' || attrName == 'srcset') {
-    return resolveUrlAttr(tagName, attrName, attrValue, self.location);
+  const tag = tagName.toLowerCase();
+  const attr = attrName.toLowerCase();
+  if (attr == 'src' || attr == 'href' || attr == 'srcset') {
+    return resolveUrlAttr(tag, attr, attrValue, self.location);
   }
   return attrValue;
 }

@@ -22,6 +22,7 @@ import {
 import {dev} from '../log';
 import {startsWith} from '../string';
 import {toggle, computedStyle} from '../style';
+import {AmpEvents} from '../amp-events';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -142,7 +143,7 @@ export class Resource {
     this.isPlaceholder_ = element.hasAttribute('placeholder');
 
     /** @private {boolean} */
-    this.blacklisted_ = false;
+    this.isBuilding_ = false;
 
     /** @private {!AmpElement|undefined|null} */
     this.owner_ = undefined;
@@ -276,39 +277,61 @@ export class Resource {
   }
 
   /**
-   * Returns whether the resource has been blacklisted.
+   * Returns whether the resource has been fully built.
    * @return {boolean}
    */
-  isBlacklisted() {
-    return this.blacklisted_;
+  isBuilt() {
+    return this.element.isBuilt();
+  }
+
+  /**
+   * Returns whether the resource is currently being built.
+   * @return {boolean}
+   */
+  isBuilding() {
+    return this.isBuilding_;
+  }
+
+  /**
+   * Returns promise that resolves when the element has been built.
+   * @return {!Promise}
+   */
+  whenBuilt() {
+    // TODO(dvoytenko): merge with the standard BUILT signal.
+    return this.element.signals().whenSignal('res-built');
   }
 
   /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
+   * @return {?Promise}
    */
   build() {
-    if (this.blacklisted_ || !this.element.isUpgraded()
-        || !this.resources_.grantBuildPermission()) {
-      return;
+    if (this.isBuilding_ ||
+        !this.element.isUpgraded() ||
+        !this.resources_.grantBuildPermission()) {
+      return null;
     }
-    try {
-      this.element.build();
-    } catch (e) {
-      dev().error(TAG, 'failed to build:', this.debugid, e);
-      this.blacklisted_ = true;
-      return;
-    }
-
-    if (this.hasBeenMeasured()) {
-      this.state_ = ResourceState.READY_FOR_LAYOUT;
-      this.element.updateLayoutBox(this.layoutBox_);
-    } else {
-      this.state_ = ResourceState.NOT_LAID_OUT;
-    }
-    // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
-    // in PROD.
-    this.element.dispatchCustomEvent('amp:built');
+    this.isBuilding_ = true;
+    return this.element.build().then(() => {
+      this.isBuilding_ = false;
+      if (this.hasBeenMeasured()) {
+        this.state_ = ResourceState.READY_FOR_LAYOUT;
+        this.element.updateLayoutBox(this.layoutBox_);
+      } else {
+        this.state_ = ResourceState.NOT_LAID_OUT;
+      }
+      // TODO(dvoytenko): merge with the standard BUILT signal.
+      this.element.signals().signal('res-built');
+      // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
+      // in PROD.
+      this.element.dispatchCustomEvent(AmpEvents.BUILT);
+    }, reason => {
+      dev().error(TAG, 'failed to build:', this.debugid, reason);
+      this.isBuilding_ = false;
+      this.element.signals().rejectSignal('res-built', reason);
+      throw reason;
+    });
   }
 
   /**
