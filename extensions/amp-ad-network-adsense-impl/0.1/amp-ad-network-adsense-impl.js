@@ -352,9 +352,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Attempt to resize to the correct height.
       const viewport = this.getViewport();
       return this.attemptChangeSize(
-          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              viewport.getSize()),
-          undefined);
+        AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+            viewport.getSize()),
+        undefined);
     }
   }
 

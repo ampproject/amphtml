@@ -5,123 +5,56 @@
   <title>AdSense full-width ad examples</title>
   <link rel="canonical" href="http://nonblocking.io/">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <style amp-custom>
     body {
       background-color: #DDDDDD;
     }
-
     /** Put all content in unusual margins for testing. */
     .content {
       margin-left: 15px;
       margin-right: 12px;
     }
-
+    .further-indent {
+      margin-left: 30px;
+      margin-right: 30px;
+    }
     h1 {
       padding: 12px 0;
       margin: 0;
     }
-
     p {
       margin: 0;
       padding: 6px 2px;
     }
-
     h1, .everything {
       background-color: #999999;
     }
-
     amp-ad div[placeholder] {
       background-color: lightgray;
     }
-
     amp-ad div[fallback] {
       background-color: black;
     }
-
     amp-ad div[placeholder]::after {
       content: "loading ...";
     }
-
     amp-ad div[fallback]::after {
       content: "No ad";
       color: white;
     }
-
     amp-user-notification {
       background-color: lightgray;
       padding: 5px;
     }
-
     .header-img {
       margin: 0 auto;
       text-align: center;
     }
   </style>
-  <style amp-boilerplate>body {
-    -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-    -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-    -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-    animation: -amp-start 8s steps(1, end) 0s 1 normal both
-  }
-
-  @-webkit-keyframes -amp-start {
-    from {
-      visibility: hidden
-    }
-    to {
-      visibility: visible
-    }
-  }
-
-  @-moz-keyframes -amp-start {
-    from {
-      visibility: hidden
-    }
-    to {
-      visibility: visible
-    }
-  }
-
-  @-ms-keyframes -amp-start {
-    from {
-      visibility: hidden
-    }
-    to {
-      visibility: visible
-    }
-  }
-
-  @-o-keyframes -amp-start {
-    from {
-      visibility: hidden
-    }
-    to {
-      visibility: visible
-    }
-  }
-
-  @keyframes -amp-start {
-    from {
-      visibility: hidden
-    }
-    to {
-      visibility: visible
-    }
-  }</style>
-  <noscript>
-    <style amp-boilerplate>body {
-      -webkit-animation: none;
-      -moz-animation: none;
-      -ms-animation: none;
-      animation: none
-    }</style>
-  </noscript>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-analytics"
-          src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-  <script async custom-element="amp-user-notification"
-          src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
-  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
 </head>
 <body>
 <h1>Content!</h1>
@@ -131,15 +64,6 @@
     <amp-img src="img/hero@1x.jpg"
              width="289" height="216"></amp-img>
   </div>
-
-  <amp-ad
-      layout="responsive"
-      width=300
-      height=75
-      type="adsense"
-      data-ad-client="ca-pub-2383777339857329"
-      data-ad-slot="4121425836">
-  </amp-ad>
 
   <p>
     Canem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -169,17 +93,8 @@
     Nullam in libero nisi.
   </p>
 
-  <amp-ad width="100vw" height=100
-          type="adsense"
-          data-ad-client="ca-pub-2383777339857329"
-          data-ad-slot="4121425836"
-          data-auto-format="rspv">
-    <div overflow></div>
-  </amp-ad>
 
-  <p>
-    Some right-to-left text.
-
+  <div class="further-indent">
     <amp-ad width="100vw" height=100
             type="adsense"
             data-ad-client="ca-pub-2383777339857329"
@@ -188,26 +103,25 @@
       <div overflow></div>
     </amp-ad>
 
-    Some more right-to-left text.
-  </p>
 
+    <p>
+      Sed pharetra semper fringilla. Nulla fringilla, neque eget
+      varius suscipit, mi turpis congue odio, quis dignissim nisi
+      nulla at erat. Duis non nibh vel erat vehicula hendrerit eget
+      vel velit. Donec congue augue magna, nec eleifend dui porttitor
+      sed. Cras orci quam, dignissim nec elementum ac, bibendum et purus.
+      Ut elementum mi eget felis ultrices tempus. Maecenas nec sodales
+      ex. Phasellus ultrices, purus non egestas ullamcorper, felis
+      lorem ultrices nibh, in tristique mauris justo sed ante.
+      Nunc commodo purus feugiat metus bibendum consequat. Duis
+      finibus urna ut ligula auctor, sed vehicula ex hecuba.
+      Sed sed augue auctor, porta turpis ultrices, cursus diam.
+      In venenatis aliquet porta. Sed volutpat fermentum quam,
+      ac molestie nulla porttitor ac. Donec porta risus ut enim
+      pellentesque, id placerat elit ornare.
+    </p>
+  </div>
 
-  <p>
-    Sed pharetra semper fringilla. Nulla fringilla, neque eget
-    varius suscipit, mi turpis congue odio, quis dignissim nisi
-    nulla at erat. Duis non nibh vel erat vehicula hendrerit eget
-    vel velit. Donec congue augue magna, nec eleifend dui porttitor
-    sed. Cras orci quam, dignissim nec elementum ac, bibendum et purus.
-    Ut elementum mi eget felis ultrices tempus. Maecenas nec sodales
-    ex. Phasellus ultrices, purus non egestas ullamcorper, felis
-    lorem ultrices nibh, in tristique mauris justo sed ante.
-    Nunc commodo purus feugiat metus bibendum consequat. Duis
-    finibus urna ut ligula auctor, sed vehicula ex hecuba.
-    Sed sed augue auctor, porta turpis ultrices, cursus diam.
-    In venenatis aliquet porta. Sed volutpat fermentum quam,
-    ac molestie nulla porttitor ac. Donec porta risus ut enim
-    pellentesque, id placerat elit ornare.
-  </p>
   <p id="section1">
     Curabitur convallis, urna quis pulvinar feugiat, purus diam
     posuere turpis, sit amet poodle purus justo et mi. Donec
