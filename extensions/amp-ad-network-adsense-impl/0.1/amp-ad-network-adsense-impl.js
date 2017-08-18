@@ -350,12 +350,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this.element.getAttribute('data-auto-format') || '';
 
     if (this.isResponsive()) {
-      // Attempt to resize to the correct height.
+      // Attempt to resize to the correct height. The width should already be
+      // 100vw, but is fixed here so that future resizes of the viewport don't
+      // affect it.
       const viewport = this.getViewport();
       return this.attemptChangeSize(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
               viewport.getSize()),
-          undefined);
+          viewport.width);
     }
   }
 
