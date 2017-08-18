@@ -21,6 +21,8 @@ import {dict} from '../utils/object';
 import {isProxyOrigin} from '../url';
 import {WindowInterface} from '../window-interface';
 
+export const OPT_OUT = '$OPT_OUT';
+
 const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
 const API_KEYS = {
   'googleanalytics': 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
@@ -87,7 +89,7 @@ export class GoogleCidApi {
       return token !== TokenStatus.RETRIEVING;
     }).then(() => {
       if (token === TokenStatus.OPT_OUT) {
-        return null;
+        return OPT_OUT;
       }
       // If the page referrer is proxy origin, we force to use API even the
       // token indicates a previous fetch returned nothing

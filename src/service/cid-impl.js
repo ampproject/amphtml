@@ -40,7 +40,7 @@ import {base64UrlEncodeFromBytes} from '../utils/base64';
 import {parseJson, tryParseJson} from '../json';
 import {user, rethrowAsync} from '../log';
 import {ViewerCidApi} from './viewer-cid-api';
-import {GoogleCidApi} from './cid-api';
+import {GoogleCidApi, OPT_OUT} from './cid-api';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
@@ -183,7 +183,7 @@ export class Cid {
         return this.cidApi_.getScopedCid(
             apiClient, scope, getCidStruct.cookieName).then(scopedCid => {
               if (scopedCid) {
-                return scopedCid;
+                return (scopedCid == OPT_OUT) ? null : scopedCid;
               }
               return getOrCreateCookie(this, getCidStruct, persistenceConsent);
             });

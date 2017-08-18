@@ -248,7 +248,7 @@ describes.realWin('test-cid-api', {}, env => {
   it('should return null if AMP_TOKEN=$OPT_OUT ', () => {
     persistCookie('AMP_TOKEN', '$OPT_OUT');
     return api.getScopedCid('googleanalytics', 'scope-a').then(cid => {
-      expect(cid).to.be.null;
+      expect(cid).to.equal('$OPT_OUT');
       expect(getCookie(win, 'AMP_TOKEN')).to.equal('$OPT_OUT');
     });
   });
