@@ -25,6 +25,8 @@ import {AmpAdUIHandler} from '../amp-ad-ui';
 import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {toggleExperiment} from '../../../../src/experiments';
+
 
 describe('amp-ad-xorigin-iframe-handler', () => {
   let sandbox;
@@ -350,6 +352,12 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should be able to use send-positions API to send position', () => {
+      toggleExperiment(window, 'inabox-position-api', true);
+      const iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
+      const iframe = createIframeWithMessageStub(window);
+      iframe.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
+      iframe.name = 'test_nomaster';
+      iframeHandler.init(iframe);
       sandbox.stub/*OK*/(
           iframeHandler.viewport_, 'getPositionRectAsync', () => {
             return Promise.resolve(layoutRectLtwh(1, 1, 1, 1));

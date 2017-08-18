@@ -118,10 +118,13 @@ export class AmpAdXOriginIframeHandler {
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
 
     // To provide position to inabox.
-    this.inaboxPositionApi_ = new SubscriptionApi(
+    if (isExperimentOn(this.win_, 'inabox-position-api')) {
+      console.log('experiment on!!!');
+      this.inaboxPositionApi_ = new SubscriptionApi(
           this.iframe, MessageType.SEND_POSITIONS, true, () => {
             this.initPositionApi_();
           });
+    }
 
     // High-fidelity positions for scrollbound animations.
     // Protected by 'amp-animation' experiment for now.
