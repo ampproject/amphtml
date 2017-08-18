@@ -16,6 +16,7 @@
 
 import {registerServiceBuilder, getService} from '../service';
 import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
+import {tryParseJson} from '../json';
 
 /**
  * @param {!Window} win
@@ -42,7 +43,13 @@ export function installIframeMessagingClient(win) {
  */
 function createIframeMessagingClient(win) {
   const iframeClient = new IframeMessagingClient(win);
-  iframeClient.setSentinel(getRandom(win));
+  //  Try read sentinel from window first.
+  const dataObject = tryParseJson(win.name);
+  let sentinel = null;
+  if (dataObject && dataObject['_context']) {
+    sentinel = dataObject['_context']['sentinel'];
+  }
+  iframeClient.setSentinel(sentinel || getRandom(win));
 
   // Bet the top window is the scrollable window and loads host script.
   // TODO(lannka,#9120):
