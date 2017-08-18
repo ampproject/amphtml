@@ -1921,7 +1921,7 @@ describe('amp-a4a', () => {
     });
   });
 
-  describe('buildCallback', () => {
+  describe.only('buildCallback', () => {
     let sandbox;
 
     beforeEach(() => {
@@ -1934,7 +1934,10 @@ describe('amp-a4a', () => {
 
     it('should emit upgradeDelay lifecycle ping', () => {
       return createIframePromise().then(fixture => {
-        const a4a = new MockA4AImpl(createA4aElement(fixture.doc), 12345);
+        const a4a = new MockA4AImpl(createA4aElement(fixture.doc));
+        sandbox.stub(a4a, 'getResource').returns({
+          getUpgradeDelayMs: () => 12345,
+        });
         const emitLifecycleEventSpy = sandbox.spy(a4a, 'emitLifecycleEvent');
         a4a.buildCallback();
         expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {

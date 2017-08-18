@@ -92,10 +92,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /**
    * @param {!Element} element
-   * @param {number} upgradeDelayMs
    */
-  constructor(element, upgradeDelayMs) {
-    super(element, upgradeDelayMs);
+  constructor(element) {
+    super(element);
 
     /**
      * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}

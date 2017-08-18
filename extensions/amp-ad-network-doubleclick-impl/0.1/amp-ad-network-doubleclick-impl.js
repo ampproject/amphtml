@@ -223,10 +223,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * @param {!Element} element
-   * @param {number} upgradeStartTime
    */
-  constructor(element, upgradeStartTime) {
-    super(element, upgradeStartTime);
+  constructor(element) {
+    super(element);
 
     /**
      * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}

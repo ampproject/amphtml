@@ -191,9 +191,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @param {!Element} element
-   * @param {number} upgradeDelayMs
    */
-  constructor(element, upgradeDelayMs) {
+  constructor(element) {
     super(element);
     dev().assert(AMP.AmpAdUIHandler);
     dev().assert(AMP.AmpAdXOriginIframeHandler);
@@ -305,13 +304,6 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @protected {boolean} */
     this.isRelayoutNeededFlag = false;
-
-    /**
-     * Time of delay imposed by upgrade path.
-     * @type {number}
-     */
-    this.upgradeDelayMs_ = upgradeDelayMs;
-    dev().info(TAG, 'upgrade delay', this.upgradeDelayMs_);
   }
 
   /** @override */
@@ -345,8 +337,12 @@ export class AmpA4A extends AMP.BaseElement {
           dev().error(TAG, this.element.getAttribute('type'),
               'Error on emitLifecycleEvent', err, varArgs) ;
         });
+    const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
+    console.log('upgradeDelayMs', upgradeDelayMs);
+    dev().info(TAG,
+      `upgradeDelay ${this.element.getAttribute('type')}: ${upgradeDelayMs}`);
     this.protectedEmitLifecycleEvent_('upgradeDelay', {
-      'forced_delta': Math.round(this.upgradeDelayMs_),
+      'forced_delta': upgradeDelayMs,
     });
 
     this.uiHandler = new AMP.AmpAdUIHandler(this);
