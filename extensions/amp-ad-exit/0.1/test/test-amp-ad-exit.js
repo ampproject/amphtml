@@ -162,14 +162,11 @@ describes.realWin('amp-ad-exit', {
     sandbox = sinon.sandbox.create({useFakeTimers: true});
     win = env.win;
     toggleExperiment(win, 'amp-ad-exit', true);
-<<<<<<< HEAD
     addAdDiv();
-=======
     // TEST_3P_VENDOR must be in ANALYTICS_CONFIG *before* makeElementWithConfig
     ANALYTICS_CONFIG[TEST_3P_VENDOR] = ANALYTICS_CONFIG[TEST_3P_VENDOR] || {
-        iframe: '/nowhere.html'
+        iframe: '/nowhere.html',
       };
->>>>>>> Fixes unit test
     return makeElementWithConfig(EXIT_CONFIG).then(el => {
       element = el;
     });
@@ -562,9 +559,9 @@ describes.realWin('amp-ad-exit', {
 
         env.win.document.baseURI, {
     addToResponseMap(env.ampdoc, TEST_3P_VENDOR, env.win.document.baseURI, {
-          'unused': 'unused',
-          'collected-data': 'abc123',
-        });
+      'unused': 'unused',
+      'collected-data': 'abc123',
+    });
 
     element.implementation_.executeAction({
       method: 'exit',
