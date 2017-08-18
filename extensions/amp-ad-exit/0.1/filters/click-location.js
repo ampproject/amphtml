@@ -21,7 +21,7 @@ export class ClickLocationFilter extends Filter {
   /**
    * @param {string} name The user-defined name of the filter.
    * @param {!../config.ClickLocationConfig} spec
-   * @param {!../AmpAdExit} adExitElement
+   * @param {!../amp-ad-exit.AmpAdExit} adExitElement
    */
   constructor(name, spec, adExitElement) {
     super(name);
@@ -47,7 +47,7 @@ export class ClickLocationFilter extends Filter {
      */
     this.relativeTo_ = spec.relativeTo;
 
-    /** @private {!../AmpAdExit} */
+    /** @private {!../amp-ad-exit.AmpAdExit} */
     this.adExitElement_ = adExitElement;
 
     /**
@@ -76,6 +76,9 @@ export class ClickLocationFilter extends Filter {
 
   /** @override */
   onLayoutMeasure() {
+    // We don't use viewport.getSize() or viewport.getClientRect because
+    // viewport function is to get the coordinate based on current viewport.
+    // However, the coordinate in click event is based on the iframe.
     this.adExitElement_.getVsync().measure(() => {
       const win = this.adExitElement_.win;
       if (this.relativeTo_) {
@@ -83,7 +86,7 @@ export class ClickLocationFilter extends Filter {
             this.relativeTo_);
         user().assert(relativeElement,
             `relativeTo element ${this.relativeTo_} not found.`);
-        const rect = relativeElement./*REVIEW*/getBoundingClientRect();
+        const rect = relativeElement./*OK*/getBoundingClientRect();
         this.allowedRect_.left = rect.left;
         this.allowedRect_.top = rect.top;
         this.allowedRect_.bottom = rect.bottom;
@@ -91,8 +94,8 @@ export class ClickLocationFilter extends Filter {
       } else {
         this.allowedRect_.left = 0;
         this.allowedRect_.top = 0;
-        this.allowedRect_.bottom = win./*REVIEW*/innerHeight;
-        this.allowedRect_.right = win./*REVIEW*/innerWidth;
+        this.allowedRect_.bottom = win./*OK*/innerHeight;
+        this.allowedRect_.right = win./*OK*/innerWidth;
       }
       this.allowedRect_.left += this.leftBorder_;
       this.allowedRect_.top += this.topBorder_;
