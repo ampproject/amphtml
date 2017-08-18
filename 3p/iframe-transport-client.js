@@ -41,31 +41,6 @@ export class IframeTransportClient {
     this.client_.setHostWindow(this.win_.parent);
     this.client_.setSentinel(dev().assertString(
         tryParseJson(this.win_.name)['sentinel'],
-        'Invalid/missing sentinel on iframe name attribute' + this.win_.name);
-    if (!this.sentinel_) {
-      return;
-    }
-
-    /** @protected {!IframeMessagingClient} */
-    this.client_ = new IframeMessagingClient(win);
-    this.client_.setHostWindow(this.win_);
-    this.client_.setSentinel(this.sentinel_);
-
-    /**
-     * Multiple creatives on a page may wish to use the same type of
-     * amp-analytics tag. This object provides a mapping between the
-     * IDs which identify which amp-analytics tag a message is to/from,
-     * with each ID's corresponding CreativeEventRouter,
-     * which is an object that handles messages to/from a particular creative.
-     * @private {!Object<string, !CreativeEventRouter>}
-     */
-    this.creativeEventRouters_ = {};
-
-    /** @protected {!IframeMessagingClient} */
-    this.client_ = new IframeMessagingClient(win);
-    this.client_.setHostWindow(this.win_.parent);
-    this.client_.setSentinel(user().assertString(
-        tryParseJson(this.win_.name)['sentinel'],
         'Invalid/missing sentinel on iframe name attribute' + this.win_.name));
     this.client_.makeRequest(
         MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
