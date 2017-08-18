@@ -90,6 +90,7 @@ export class AmpSidebar extends AMP.BaseElement {
       const children = this.getRealChildren();
       this.scheduleLayout(children);
       this.scheduleResume(children);
+      tryFocus(this.element);
     }, 500);
   }
 
@@ -257,18 +258,8 @@ export class AmpSidebar extends AMP.BaseElement {
         this.openMask_();
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
-        if (this.openOrCloseTimeOut_) {
-          this.timer_.cancel(this.openOrCloseTimeOut_);
-        }
-        this.openOrCloseTimeOut_ = this.timer_.delay(() => {
-          const children = this.getRealChildren();
-          this.scheduleLayout(children);
-          this.scheduleResume(children);
-          this.element.addEventListener('transitionend', this.boundReschedule_);
-          this.element.addEventListener('animationend', this.boundReschedule_);
-          // Focus on the sidebar for a11y.
-          tryFocus(this.element);
-        }, ANIMATION_TIMEOUT);
+        this.element.addEventListener('transitionend', this.boundReschedule_);
+        this.element.addEventListener('animationend', this.boundReschedule_);
       });
     });
     this.getHistory_().push(this.close_.bind(this)).then(historyId => {
