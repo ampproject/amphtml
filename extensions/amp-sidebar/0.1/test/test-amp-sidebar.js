@@ -23,6 +23,7 @@ import {assertScreenReaderElement} from '../../../../testing/test-helper';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 import '../amp-sidebar';
+import * as lolex from 'lolex';
 
 adopt(window);
 
@@ -38,6 +39,7 @@ describes.realWin('amp-sidebar 0.1 version', {
 }, () => {
   let sandbox;
   let platform;
+  let clock;
   let timer;
 
   function getAmpSidebar(options) {
@@ -180,9 +182,6 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
-          callback();
-        });
         impl.open_();
         expect(iframe.doc.querySelectorAll('.i-amphtml-sidebar-mask').length)
             .to.equal(1);
@@ -210,6 +209,7 @@ describes.realWin('amp-sidebar 0.1 version', {
       return getAmpSidebar().then(obj => {
         const sidebarElement = obj.ampSidebar;
         const impl = sidebarElement.implementation_;
+        clock = lolex.install(impl.win, 0, ['Date', 'setTimeout']);
         const historyPushSpy = sandbox.spy();
         const historyPopSpy = sandbox.spy();
         impl.scheduleLayout = sandbox.spy();
@@ -230,23 +230,22 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
-          callback();
-        });
-        timer.cancel = sandbox.spy();
         impl.openOrCloseTimeOut_ = 10;
 
         impl.open_();
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         expect(sidebarElement.getAttribute('role')).to.equal('menu');
-        expect(obj.iframe.doc.activeElement).to.equal(sidebarElement);
-        expect(sidebarElement.style.display).to.equal('');
-        expect(timer.cancel).to.be.calledOnce;
-        expect(impl.scheduleLayout).to.be.calledOnce;
+
         expect(historyPushSpy).to.be.calledOnce;
         expect(historyPopSpy).to.have.not.been.called;
         expect(impl.historyId_).to.not.equal('-1');
+        expect(impl.scheduleLayout).to.not.be.called;
+
+        clock.tick(600);
+        expect(obj.iframe.doc.activeElement).to.equal(sidebarElement);
+        expect(sidebarElement.style.display).to.equal('');
+        expect(impl.scheduleLayout).to.be.calledOnce;
 
         // second call to open_() should be a no-op and not increase call counts.
         impl.open_();
@@ -261,6 +260,7 @@ describes.realWin('amp-sidebar 0.1 version', {
       return getAmpSidebar({'open': true}).then(obj => {
         const sidebarElement = obj.ampSidebar;
         const impl = sidebarElement.implementation_;
+        clock = lolex.install(impl.win, 0, ['Date', 'setTimeout']);
         impl.schedulePause = sandbox.spy();
         const historyPushSpy = sandbox.spy();
         const historyPopSpy = sandbox.spy();
@@ -283,17 +283,13 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
-          callback();
-        });
 
-        timer.cancel = sandbox.spy();
         impl.openOrCloseTimeOut_ = 10;
         impl.close_();
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+        clock.tick(600);
         expect(sidebarElement.style.display).to.equal('none');
-        expect(timer.cancel).to.be.calledOnce;
         expect(impl.schedulePause).to.be.calledOnce;
         expect(historyPopSpy).to.be.calledOnce;
         expect(impl.historyId_).to.equal(-1);
@@ -309,6 +305,7 @@ describes.realWin('amp-sidebar 0.1 version', {
       return getAmpSidebar().then(obj => {
         const sidebarElement = obj.ampSidebar;
         const impl = sidebarElement.implementation_;
+        clock = lolex.install(impl.win, 0, ['Date', 'setTimeout']);
         impl.scheduleLayout = sandbox.spy();
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
@@ -316,9 +313,7 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
-          callback();
-        });
+
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
         expect(sidebarElement.getAttribute('role')).to.equal('menu');
@@ -326,12 +321,14 @@ describes.realWin('amp-sidebar 0.1 version', {
         impl.toggle_();
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+        clock.tick(600);
         expect(obj.iframe.doc.activeElement).to.equal(sidebarElement);
         expect(sidebarElement.style.display).to.equal('');
         expect(impl.scheduleLayout).to.be.calledOnce;
         impl.toggle_();
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+        clock.tick(600);
         expect(sidebarElement.style.display).to.equal('none');
         expect(impl.schedulePause).to.be.calledOnce;
       });
@@ -342,15 +339,13 @@ describes.realWin('amp-sidebar 0.1 version', {
         const iframe = obj.iframe;
         const sidebarElement = obj.ampSidebar;
         const impl = sidebarElement.implementation_;
+        clock = lolex.install(impl.win, 0, ['Date', 'setTimeout']);
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
           mutate(callback) {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
-          callback();
-        });
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         impl.open_();
         expect(sidebarElement.hasAttribute('open')).to.be.true;
@@ -367,6 +362,7 @@ describes.realWin('amp-sidebar 0.1 version', {
             el.dispatchEvent(eventObj) : el.fireEvent('onkeydown', eventObj);
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+        clock.tick(600);
         expect(sidebarElement.style.display).to.equal('none');
         expect(impl.schedulePause).to.be.calledOnce;
       });
@@ -376,6 +372,7 @@ describes.realWin('amp-sidebar 0.1 version', {
       return getAmpSidebar().then(obj => {
         const sidebarElement = obj.ampSidebar;
         const impl = sidebarElement.implementation_;
+        clock = lolex.install(impl.win, 0, ['Date', 'setTimeout']);
         impl.schedulePause = sandbox.spy();
         impl.scheduleResume = sandbox.spy();
         impl.vsync_ = {
@@ -383,26 +380,29 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
-          callback();
-        });
+
         expect(impl.isOpen_()).to.be.false;
+        clock.tick(600);
         expect(impl.schedulePause).to.have.not.been.called;
         expect(impl.scheduleResume).to.have.not.been.called;
         impl.toggle_();
         expect(impl.isOpen_()).to.be.true;
+        clock.tick(600);
         expect(impl.schedulePause).to.have.not.been.called;
         expect(impl.scheduleResume).to.be.calledOnce;
         impl.toggle_();
         expect(impl.isOpen_()).to.be.false;
+        clock.tick(600);
         expect(impl.schedulePause).to.be.calledOnce;
         expect(impl.scheduleResume).to.be.calledOnce;
         impl.toggle_();
         expect(impl.isOpen_()).to.be.true;
+        clock.tick(600);
         expect(impl.schedulePause).to.be.calledOnce;
         expect(impl.scheduleResume).to.have.callCount(2);
         impl.toggle_();
         expect(impl.isOpen_()).to.be.false;
+        clock.tick(600);
         expect(impl.schedulePause).to.have.callCount(2);
         expect(impl.scheduleResume).to.have.callCount(2);
       });
@@ -459,15 +459,13 @@ describes.realWin('amp-sidebar 0.1 version', {
         const anchor = sidebarElement.getElementsByTagName('a')[0];
         anchor.href = '#newloc';
         const impl = sidebarElement.implementation_;
+        clock = lolex.install(impl.win, 0, ['Date', 'setTimeout']);
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
           mutate(callback) {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
-          callback();
-        });
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         impl.open_();
         expect(sidebarElement.hasAttribute('open')).to.be.true;
@@ -491,6 +489,7 @@ describes.realWin('amp-sidebar 0.1 version', {
             anchor.fireEvent('onkeydown', eventObj);
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+        clock.tick(600);
         expect(sidebarElement.style.display).to.equal('none');
         expect(impl.schedulePause).to.be.calledOnce;
       });
@@ -623,34 +622,26 @@ describes.realWin('amp-sidebar 0.1 version', {
       return getAmpSidebar().then(obj => {
         const sidebarElement = obj.ampSidebar;
         const impl = sidebarElement.implementation_;
-        impl.boundReschedule_ = sandbox.spy();
+        clock = lolex.install(impl.win, 0, ['Date', 'setTimeout']);
+        impl.boundOnAnimationEnd_ = sandbox.spy();
+        impl.buildCallback();
         impl.vsync_ = {
           mutate(callback) {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
-          callback();
-        });
-        impl.toggle_();
-        const animationEndEventObj = new Event(
+        const animationEndEvent = new Event(
           'animationend',
           {bubbles: true}
         );
-        sidebarElement.firstChild.dispatchEvent(animationEndEventObj);
-        expect(impl.boundReschedule_).to.be.calledOnce;
-        impl.boundReschedule_.reset();
+        sidebarElement.firstChild.dispatchEvent(animationEndEvent);
+        expect(impl.boundOnAnimationEnd_).to.be.calledOnce;
         const transitionEndEvent = new Event(
           'transitionend',
           {bubbles: true}
         );
         sidebarElement.firstChild.dispatchEvent(transitionEndEvent);
-        expect(impl.boundReschedule_).to.be.calledOnce;
-        impl.boundReschedule_.reset();
-        impl.toggle_();
-        sidebarElement.firstChild.dispatchEvent(animationEndEventObj);
-        sidebarElement.firstChild.dispatchEvent(transitionEndEvent);
-        expect(impl.boundReschedule_).to.not.be.called;
+        expect(impl.boundOnAnimationEnd_).to.be.calledTwice;
       });
     });
   });
