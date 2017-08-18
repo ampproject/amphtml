@@ -89,10 +89,7 @@ export class AmpAd extends AMP.BaseElement {
 
       const extensionTagName = networkImplementationTag(type);
       this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
-      const ctorPromise =
-          /** @type {!Promise<function(new:../../../src/base-element.BaseElement, !Element, number)>} */
-          (Services.extensionsFor(this.win).loadElementClass(extensionTagName));
-      return ctorPromise
+      return Services.extensionsFor(this.win).loadElementClass(extensionTagName)
           .then(ctor => new ctor(this.element))
           .catch(error => {
           // Work around presubmit restrictions.

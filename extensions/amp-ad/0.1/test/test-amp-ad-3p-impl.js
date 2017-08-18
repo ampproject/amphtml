@@ -35,7 +35,7 @@ function createAmpAd(win) {
   });
   ampAdElement.isBuilt = () => {return true;};
 
-  return new AmpAd3PImpl(ampAdElement, 12345);
+  return new AmpAd3PImpl(ampAdElement);
 }
 
 describes.realWin('amp-ad-3p-impl', {
@@ -210,6 +210,9 @@ describes.realWin('amp-ad-3p-impl', {
   describe('buildCallback', () => {
     it('should emitLifecycleEvent for upgrade delay', () => {
       const emitLifecycleEventSpy = sandbox.spy(ad3p, 'emitLifecycleEvent');
+      sandbox.stub(ad3p, 'getResource').returns({
+        getUpgradeDelayMs: () => 12345,
+      });
       ad3p.buildCallback();
       expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
         'forced_delta': 12345,

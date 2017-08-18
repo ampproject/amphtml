@@ -342,9 +342,8 @@ export class AmpA4A extends AMP.BaseElement {
               'Error on emitLifecycleEvent', err, varArgs) ;
         });
     const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
-    console.log('upgradeDelayMs', upgradeDelayMs);
     dev().info(TAG,
-      `upgradeDelay ${this.element.getAttribute('type')}: ${upgradeDelayMs}`);
+        `upgradeDelay ${this.element.getAttribute('type')}: ${upgradeDelayMs}`);
     this.protectedEmitLifecycleEvent_('upgradeDelay', {
       'forced_delta': upgradeDelayMs,
     });
