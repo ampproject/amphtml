@@ -353,9 +353,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Attempt to resize to the correct height.
       const viewport = this.getViewport();
       return this.attemptChangeSize(
-        AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-            viewport.getSize()),
-        undefined);
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+              viewport.getSize()),
+          undefined);
     }
   }
 
@@ -375,14 +375,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // TODO(charliereams): Is this the right way to get direction?
       const parentDirection =
           computedStyle(this.win, this.element)['direction'];
-      const marginChange =
-          parentDirection == 'rtl'
-              ? {right: layoutBox.left}
-              : {left: -1 * layoutBox.left};
-      this.element.getResources()./*OK*/changeSize(
-          this.element, undefined, undefined, undefined,
-          marginChange);
-      setStyle(this.element, 'zIndex', 30);
+      this.getVsync().mutate(() => {
+        if (parentDirection == 'rtl') {
+          setStyle(this.element, 'marginRight', layoutBox.left, 'px');
+        } else {
+          setStyle(this.element, 'marginLeft', -1 * layoutBox.left, 'px');
+        }
+        setStyle(this.element, 'zIndex', 30);
+      });
     }
   }
 
