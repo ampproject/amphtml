@@ -219,9 +219,8 @@ gulp.task('test', 'Runs tests',
     if (argv.randomize) {
       testFiles = shuffleArray(testFiles);
     }
-    // we need to replace the test init with something that won't match
-    // any file. _init_tests gets added twice due to the regex matching.
-    testFiles[testFiles.indexOf('test/_init_tests.js')] = '_WONTMATCH.qqq';
+
+    testFiles.splice(testFiles.indexOf('test/_init_tests.js'),1);
     c.files = config.commonTestPaths.concat(testFiles);
 
     util.log(util.colors.blue(JSON.stringify(c.files)));
