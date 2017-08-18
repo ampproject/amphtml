@@ -17,9 +17,6 @@
 import '../amp-ad-exit';
 import * as sinon from 'sinon';
 import {toggleExperiment} from '../../../../src/experiments';
-import {
-  IframeTransportResponseMap,
-} from '../../../../src/iframe-transport-response-map';
 
 const EXIT_CONFIG = {
   targets: {
@@ -100,6 +97,21 @@ const EXIT_CONFIG = {
     },
   },
 };
+
+/**
+ * Add a response
+ * @param {!../../../../service/ampdoc-impl.AmpDoc} ampDoc
+ * @param {!string} frameType The identifier for the third-party frame that
+ * responded
+ * @param {!string} creativeUrl The URL of the creative being responded to
+ * @param {!Object<string,string>} response The response object sent from
+ * the third-party vendor's iframe
+ */
+function addToResponseMap(ampDoc, frameType, creativeUrl, response) {
+  const map = ampDoc.getIframeTransportResponses();
+  map[frameType] = map[frameType] || {};
+  map[frameType][creativeUrl] = response;
+}
 
 describes.realWin('amp-ad-exit', {
   amp: {
@@ -535,6 +547,9 @@ describes.realWin('amp-ad-exit', {
     });
 
     IframeTransportResponseMap.add(env.ampdoc, '3p-vendor',
+
+    addToResponseMap(env.ampdoc, '3p-vendor',
+
         env.win.document.baseURI, {
           'unused': 'unused',
           'collected-data': 'abc123',

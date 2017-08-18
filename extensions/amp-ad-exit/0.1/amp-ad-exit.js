@@ -21,9 +21,6 @@ import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
-import {
-  IframeTransportResponseMap,
-} from '../../../src/iframe-transport-response-map';
 
 const TAG = 'amp-ad-exit';
 
@@ -107,19 +104,29 @@ export class AmpAdExit extends AMP.BaseElement {
         if (customVar[0] == '_') {
           const vals =
               /** @type {./config.Variable} */ (target.vars[customVar]);
-          vars[customVar] = () => {
-            if (vals.hasOwnProperty('vendorAnalyticsSource')) {
-              const map = IframeTransportResponseMap.get(this.getAmpDoc(),
-                  vals.vendorAnalyticsSource,
-                  /** @type {string} */ (this.win.document.baseURI));
-              if (map && vals.hasOwnProperty('vendorAnalyticsResponseKey') &&
-                  map.hasOwnProperty(vals.vendorAnalyticsResponseKey)) {
-                return map[vals.vendorAnalyticsResponseKey];
+          if (vals) {
+            vars[customVar] = () => {
+              if (vals.hasOwnProperty('vendorAnalyticsSource')) {
+                const responses =
+                    this.getAmpDoc().getIframeTransportResponses();
+                const vaSource =
+                    /** @type {string} */ (vals.vendorAnalyticsSource);
+                if (responses[vaSource]) {
+                  const uri = /** @type {string} */ (this.win.document.baseURI);
+                  const map = responses[vaSource][uri];
+                  if (map &&
+                      vals.hasOwnProperty('vendorAnalyticsResponseKey') &&
+                      map.hasOwnProperty(vals.vendorAnalyticsResponseKey)) {
+                    return map[
+                        /** @type {string} */
+                        (vals.vendorAnalyticsResponseKey)];
+                  }
+                }
               }
-            }
-            return args[customVar] || vals.defaultValue;
-          };
-          whitelist[customVar] = true;
+              return args[customVar] || vals.defaultValue;
+            };
+            whitelist[customVar] = true;
+          }
         }
       }
     }
