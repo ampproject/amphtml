@@ -312,6 +312,13 @@ export class AbstractAmpContext {
       this.setupMetadata_(this.win_.name);
     }
   }
+
+  errorReport_() {
+    this.win_.addEventListener('error', function(event) {
+      console.log('ERR: ' + event.error);
+      //postMessage
+    });
+  }
 }
 
 
