@@ -16,7 +16,10 @@
 
 import '../amp-ad-exit';
 import * as sinon from 'sinon';
+import {ANALYTICS_CONFIG} from '../../../amp-analytics/0.1/vendors';
 import {toggleExperiment} from '../../../../src/experiments';
+
+const TEST_3P_VENDOR = '3p-vendor';
 
 const EXIT_CONFIG = {
   targets: {
@@ -68,7 +71,7 @@ const EXIT_CONFIG = {
       vars: {
         _foo: {
           defaultValue: 'foo-default',
-          vendorAnalyticsSource: '3p-vendor',
+          vendorAnalyticsSource: TEST_3P_VENDOR,
           vendorAnalyticsResponseKey: 'collected-data',
         },
         _bar: {
@@ -101,16 +104,16 @@ const EXIT_CONFIG = {
 /**
  * Add a response
  * @param {!../../../../service/ampdoc-impl.AmpDoc} ampDoc
- * @param {!string} frameType The identifier for the third-party frame that
+ * @param {!string} vendor The identifier for the third-party frame that
  * responded
  * @param {!string} creativeUrl The URL of the creative being responded to
  * @param {!Object<string,string>} response The response object sent from
  * the third-party vendor's iframe
  */
-function addToResponseMap(ampDoc, frameType, creativeUrl, response) {
+function addToResponseMap(ampDoc, vendor, creativeUrl, response) {
   const map = ampDoc.getIframeTransportResponses();
-  map[frameType] = map[frameType] || {};
-  map[frameType][creativeUrl] = response;
+  map[vendor] = map[vendor] || {};
+  map[vendor][creativeUrl] = response;
 }
 
 describes.realWin('amp-ad-exit', {
@@ -159,7 +162,14 @@ describes.realWin('amp-ad-exit', {
     sandbox = sinon.sandbox.create({useFakeTimers: true});
     win = env.win;
     toggleExperiment(win, 'amp-ad-exit', true);
+<<<<<<< HEAD
     addAdDiv();
+=======
+    // TEST_3P_VENDOR must be in ANALYTICS_CONFIG *before* makeElementWithConfig
+    ANALYTICS_CONFIG[TEST_3P_VENDOR] = ANALYTICS_CONFIG[TEST_3P_VENDOR] || {
+        iframe: '/nowhere.html'
+      };
+>>>>>>> Fixes unit test
     return makeElementWithConfig(EXIT_CONFIG).then(el => {
       element = el;
     });
@@ -551,6 +561,7 @@ describes.realWin('amp-ad-exit', {
     addToResponseMap(env.ampdoc, '3p-vendor',
 
         env.win.document.baseURI, {
+    addToResponseMap(env.ampdoc, TEST_3P_VENDOR, env.win.document.baseURI, {
           'unused': 'unused',
           'collected-data': 'abc123',
         });
