@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Tests `fetch-mock` integration in describes.js.
- */
-
+// Test `fetch-mock` integration in describes.
 describe('fetch-mock', () => {
   describes.realWin('on realWin', {
     mockFetches: true,
