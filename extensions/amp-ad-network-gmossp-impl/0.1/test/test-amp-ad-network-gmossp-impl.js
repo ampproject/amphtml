@@ -42,6 +42,13 @@ describe('gmossp-a4a-config', () => {
     });
     expect(gmosspIsA4AEnabled(win, element)).to.be.true;
   });
+  it('should pass a4a config predicate', () => {
+    const element = createElementWithAttributes(doc, 'amp-ad', {
+      src: 'https://amp.sp.gmossp-sp.jp/_a4a/ads/ssp.ad?space_id=33303&is_a4a=1',
+      'data-use-a4a': 'true',
+    });
+    expect(gmosspIsA4AEnabled(win, element)).to.be.true;
+  });
   it('should fail a4a config predicate due to missing use-a4a', () => {
     const element = createElementWithAttributes(doc, 'amp-ad', {
       src: 'https://sp.gmossp-sp.jp/ads/ssp.ad?space_id=33303&is_a4a=1',
@@ -73,8 +80,6 @@ describe('amp-ad-network-gmossp-impl', () => {
     sandbox = sinon.sandbox.create();
     gmosspImplElem = document.createElement('amp-ad');
     gmosspImplElem.setAttribute('type', 'gmossp');
-    gmosspImplElem.setAttribute('src',
-        'https://sp.gmossp-sp.jp/ads/ssp.ad?space_id=33303&is_a4a=1');
     gmosspImplElem.setAttribute('data-use-a4a', 'true');
     sandbox.stub(AmpAdNetworkGmosspImpl.prototype, 'getSigningServiceNames',
         () => {
@@ -89,11 +94,17 @@ describe('amp-ad-network-gmossp-impl', () => {
 
   describe('#isValidElement', () => {
     it('should be valid', () => {
+      gmosspImplElem.setAttribute('src',
+          'https://amp.sp.gmossp-sp.jp/_a4a/ads/ssp.ad?space_id=33303&is_a4a=1');
+      expect(gmosspImpl.isValidElement()).to.be.true;
+    });
+    it('should be valid', () => {
+      gmosspImplElem.setAttribute('src',
+          'https://sp.gmossp-sp.jp/ads/ssp.ad?space_id=33303&is_a4a=1');
       expect(gmosspImpl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
-      gmosspImplElem =
-document.createElement('amp-ad-network-gmossp-impl');
+      gmosspImplElem = document.createElement('amp-ad-network-gmossp-impl');
       gmosspImplElem.setAttribute('type', 'gmossp');
       gmosspImpl = new AmpAdNetworkGmosspImpl(gmosspImplElem);
       expect(gmosspImpl.isValidElement()).to.be.false;
@@ -102,7 +113,15 @@ document.createElement('amp-ad-network-gmossp-impl');
 
   describe('#getAdUrl', () => {
     it('should be valid', () => {
-      const base = 'https://sp.gmossp-sp.jp/ads/ssp.ad?';
+      gmosspImplElem.setAttribute('src',
+          'https://amp.sp.gmossp-sp.jp/_a4a/ads/ssp.ad?space_id=33303&is_a4a=1');
+      const base = 'https://amp.sp.gmossp-sp.jp/_a4a/ads/ssp.ad?';
+      expect(gmosspImpl.getAdUrl().substring(0, base.length)).to.equal(base);
+    });
+    it('should be valid', () => {
+      gmosspImplElem.setAttribute('src',
+          'https://sp.gmossp-sp.jp/ads/ssp.ad?space_id=33303&is_a4a=1');
+      const base = 'https://amp.sp.gmossp-sp.jp/_a4a/ads/ssp.ad?';
       expect(gmosspImpl.getAdUrl().substring(0, base.length)).to.equal(base);
     });
   });
