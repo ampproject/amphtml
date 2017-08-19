@@ -24,7 +24,7 @@ import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../service';
-import {layoutRectLtwh} from '../layout-rect';
+import {layoutRectLtwh, moveLayoutRect} from '../layout-rect';
 import {dev} from '../log';
 import {dict} from '../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
@@ -385,6 +385,29 @@ export class Viewport {
     }
 
     return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
+  }
+
+  /**
+   * Returns the rect of the element within the viewport.
+   * @param {!Element} el
+   * @return {!../layout-rect.LayoutRectDef}}
+   * @private
+   */
+  getElementRect_(el) {
+    const viewportRect = this.getRect();
+    return moveLayoutRect(
+        this.getLayoutRect(el), -viewportRect.left, -viewportRect.top);
+  }
+
+  /**
+   * Returns a promise with rect of the element within the viewport.
+   * @param {!Element} el
+   * @return {!Promise<?../layout-rect.LayoutRectDef>}}
+   */
+  getElementRectAsync(el) {
+    return this.vsync_.measurePromise(() => {
+      return this.getElementRect_(el);
+    });
   }
 
   /**
@@ -1102,7 +1125,9 @@ export class ViewportBindingNatural_ {
     this.resizeObservable_ = new Observable();
 
     /** @const {function()} */
-    this.boundScrollEventListener_ = () => this.scrollObservable_.fire();
+    this.boundScrollEventListener_ = () => {
+      this.scrollObservable_.fire();
+    };
 
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
