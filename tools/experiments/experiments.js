@@ -274,6 +274,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
       'amp-position-observer/amp-position-observer.md',
   },
+  {
+    id: 'inabox-position-api',
+    name: 'Position API for foreign iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/10995',
+  },
 ];
 
 if (getMode().localDev) {
