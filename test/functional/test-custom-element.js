@@ -406,6 +406,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     container.appendChild(element);
     expect(element.isUpgraded()).to.equal(true);
     expect(element.implementation_).to.equal(newImpl);
+    expect(element.upgradeDelayMs_).to.equal(0);
   });
 
   it('Element - re-upgrade to new promised instance', () => {
@@ -413,7 +414,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     expect(element.isUpgraded()).to.equal(false);
     const oldImpl = element.implementation_;
     const newImpl = new TestElement(element);
-    const promise = Promise.resolve(newImpl);
+    const promise = Services.timerFor(window).promise(10).then(() => newImpl);
     oldImpl.upgradeCallback = () => promise;
 
     container.appendChild(element);
@@ -426,6 +427,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.implementation_).to.equal(newImpl);
       expect(element.isUpgraded()).to.equal(true);
       expect(element.upgradeState_).to.equal(/* UPGRADED */ 2);
+      expect(element.upgradeDelayMs_ >= 10).to.be.true;
     });
   });
 

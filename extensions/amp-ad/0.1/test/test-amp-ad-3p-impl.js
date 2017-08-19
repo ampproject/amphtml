@@ -207,6 +207,19 @@ describes.realWin('amp-ad-3p-impl', {
     });
   });
 
+  describe('buildCallback', () => {
+    it('should emitLifecycleEvent for upgrade delay', () => {
+      const emitLifecycleEventSpy = sandbox.spy(ad3p, 'emitLifecycleEvent');
+      sandbox.stub(ad3p, 'getResource').returns({
+        getUpgradeDelayMs: () => 12345,
+      });
+      ad3p.buildCallback();
+      expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
+        'forced_delta': 12345,
+      })).to.be.calledOnce;
+    });
+  });
+
   describe('preconnectCallback', () => {
     it('should add preconnect and prefetch to DOM header', () => {
       ad3p.buildCallback();
