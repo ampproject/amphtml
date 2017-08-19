@@ -211,7 +211,10 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    */
   buildPingAddress_(name) {
     const stageId = LIFECYCLE_STAGES[name] || 9999;
-    const delta = Math.round(this.getDeltaTime());
+    // Allow for forcing delta via extra variable override.
+    const delta = !isNaN(Number(this.extraVariables_['forced_delta'])) ?
+      this.extraVariables_['forced_delta'] : Math.round(this.getDeltaTime());
+    delete this.extraVariables_['forced_delta'];
     // Note: extraParams can end up empty if (a) this.extraVariables_ is empty
     // or (b) if all values are themselves empty or null.
     let extraParams = serializeQueryString(this.extraVariables_);

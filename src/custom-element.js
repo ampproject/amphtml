@@ -570,6 +570,13 @@ function createBaseCustomElementClass(win) {
       this.upgradeState_ = UpgradeState.NOT_UPGRADED;
 
       /**
+       * Time delay imposed by baseElement upgradeCallback.  If no
+       * upgradeCallback specified or not yet executed, delay is 0.
+       * @private {number}
+       */
+      this.upgradeDelayMs_ = 0;
+
+      /**
        * Action queue is initially created and kept around until the element
        * is ready to send actions directly to the implementation.
        * - undefined initially
@@ -679,11 +686,22 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Time delay imposed by baseElement upgradeCallback.  If no
+     * upgradeCallback specified or not yet executed, delay is 0.
+     * @return {number}
+     */
+    getUpgradeDelayMs() {
+      return this.upgradeDelayMs_;
+    }
+
+    /**
      * Completes the upgrade of the element with the provided implementation.
      * @param {!./base-element.BaseElement} newImpl
+     * @param {number} upgradeStartTime
      * @final @private @this {!Element}
      */
-    completeUpgrade_(newImpl) {
+    completeUpgrade_(newImpl, upgradeStartTime) {
+      this.upgradeDelayMs_ = Date.now() - upgradeStartTime;
       this.upgradeState_ = UpgradeState.UPGRADED;
       this.implementation_ = newImpl;
       this.classList.remove('amp-unresolved');
@@ -1065,21 +1083,23 @@ function createBaseCustomElementClass(win) {
       // non-stub class. We may allow nested upgrades later, but they will
       // certainly be bad for performance.
       this.upgradeState_ = UpgradeState.UPGRADE_IN_PROGRESS;
+      const startTime = Date.now();
       const res = impl.upgradeCallback();
       if (!res) {
         // Nothing returned: the current object is the upgraded version.
-        this.completeUpgrade_(impl);
+        this.completeUpgrade_(impl, startTime);
       } else if (typeof res.then == 'function') {
         // It's a promise: wait until it's done.
         res.then(upgrade => {
-          this.completeUpgrade_(upgrade || impl);
+          this.completeUpgrade_(upgrade || impl, startTime);
         }).catch(reason => {
           this.upgradeState_ = UpgradeState.UPGRADE_FAILED;
           rethrowAsync(reason);
         });
       } else {
         // It's an actual instance: upgrade immediately.
-        this.completeUpgrade_(/** @type {!./base-element.BaseElement} */(res));
+        this.completeUpgrade_(
+            /** @type {!./base-element.BaseElement} */(res), startTime);
       }
     }
 

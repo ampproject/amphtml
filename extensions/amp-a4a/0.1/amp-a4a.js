@@ -141,6 +141,7 @@ export const LIFECYCLE_STAGES = {
   iniLoad: '26',
   resumeCallback: '27',
   visIniLoad: '29',
+  upgradeDelay: '30',
 };
 
 /**
@@ -252,7 +253,6 @@ export class AmpA4A extends AMP.BaseElement {
      * returned.
      *
      * @const {function():number}
-     * @private
      */
     this.getNow_ = (this.win.performance && this.win.performance.now) ?
         this.win.performance.now.bind(this.win.performance) : Date.now;
@@ -341,6 +341,12 @@ export class AmpA4A extends AMP.BaseElement {
           dev().error(TAG, this.element.getAttribute('type'),
               'Error on emitLifecycleEvent', err, varArgs) ;
         });
+    const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
+    dev().info(TAG,
+        `upgradeDelay ${this.element.getAttribute('type')}: ${upgradeDelayMs}`);
+    this.protectedEmitLifecycleEvent_('upgradeDelay', {
+      'forced_delta': upgradeDelayMs,
+    });
 
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     const verifier = signatureVerifierFor(this.win);
