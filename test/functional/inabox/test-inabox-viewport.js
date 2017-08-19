@@ -103,8 +103,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
     // Initial position received
     positionCallback({
-      viewport: layoutRectLtwh(0, 0, 100, 100),
-      target: layoutRectLtwh(10, 20, 50, 50),
+      viewportRect: layoutRectLtwh(0, 0, 100, 100),
+      targetRect: layoutRectLtwh(10, 20, 50, 50),
     });
 
     expect(onScrollCallback).to.not.be.called;
@@ -116,8 +116,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
     // Scroll, viewport position changed
     positionCallback({
-      viewport: layoutRectLtwh(0, 10, 100, 100),
-      target: layoutRectLtwh(10, 20, 50, 50),
+      viewportRect: layoutRectLtwh(0, 10, 100, 100),
+      targetRect: layoutRectLtwh(10, 10, 50, 50),
     });
 
     expect(onScrollCallback).to.be.calledOnce;
@@ -129,8 +129,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
     // Resize, viewport size changed
     positionCallback({
-      viewport: layoutRectLtwh(0, 10, 200, 100),
-      target: layoutRectLtwh(10, 20, 50, 50),
+      viewportRect: layoutRectLtwh(0, 10, 200, 100),
+      targetRect: layoutRectLtwh(10, 10, 50, 50),
     });
 
     expect(onScrollCallback).to.not.be.called;
@@ -142,8 +142,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
     // DOM change, target position changed
     positionCallback({
-      viewport: layoutRectLtwh(0, 10, 200, 100),
-      target: layoutRectLtwh(20, 20, 50, 50),
+      viewportRect: layoutRectLtwh(0, 10, 200, 100),
+      targetRect: layoutRectLtwh(20, 10, 50, 50),
     });
 
     expect(onScrollCallback).to.not.be.called;

@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-import {layoutRectLtwh, LayoutRectDef} from '../../src/layout-rect';
+import {
+  layoutRectLtwh,
+  LayoutRectDef,
+  layoutRectFromDomRect,
+} from '../../src/layout-rect';
 import {Observable} from '../../src/observable';
 import {throttle} from '../../src/utils/rate-limit';
 
 /**
  * @typedef {{
- *   viewport: !LayoutRectDef,
- *   target: !LayoutRectDef
+ *   viewportRect: !LayoutRectDef,
+ *   targetRect: !LayoutRectDef,
  * }}
  */
 let PositionEntryDef;
@@ -91,15 +95,11 @@ export class PositionObserver {
    * @private
    */
   getPositionEntry_(element) {
-    const b = element./*OK*/getBoundingClientRect();
     return {
-      viewport: /** @type {!LayoutRectDef} */(this.viewportRect_),
-      // relative position to host doc
-      target: layoutRectLtwh(
-          Math.round(b.left + this.scrollLeft_),
-          Math.round(b.top + this.scrollTop_),
-          Math.round(b.width),
-          Math.round(b.height)),
+      viewportRect: /** @type {!LayoutRectDef} */(this.viewportRect_),
+      // relative position to viewport
+      targetRect:
+          layoutRectFromDomRect(element./*OK*/getBoundingClientRect()),
     };
   }
 }

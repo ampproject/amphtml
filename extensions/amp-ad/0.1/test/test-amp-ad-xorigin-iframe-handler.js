@@ -24,6 +24,9 @@ import {
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
+import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {toggleExperiment} from '../../../../src/experiments';
+
 
 describe('amp-ad-xorigin-iframe-handler', () => {
   let sandbox;
@@ -343,6 +346,34 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           requestedWidth: undefined,
           requestedHeight: 217,
           type: 'embed-size-changed',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
+    });
+
+    it('should be able to use send-positions API to send position', () => {
+      toggleExperiment(window, 'inabox-position-api', true);
+      const iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
+      const iframe = createIframeWithMessageStub(window);
+      iframe.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
+      iframe.name = 'test_nomaster';
+      iframeHandler.init(iframe);
+      sandbox.stub/*OK*/(
+          iframeHandler.viewport_, 'getElementRectAsync', () => {
+            return Promise.resolve(layoutRectLtwh(1, 1, 1, 1));
+          });
+      sandbox.stub/*OK*/(iframeHandler.viewport_, 'getRect', () => {
+        return layoutRectLtwh(1, 1, 1, 1);
+      });
+      iframe.postMessageToParent({
+        type: 'send-positions',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+      return iframe.expectMessageFromParent('position').then(data => {
+        expect(data).to.jsonEqual({
+          targetRect: layoutRectLtwh(1, 1, 1, 1),
+          viewportRect: layoutRectLtwh(1, 1, 1, 1),
+          type: 'position',
           sentinel: 'amp3ptest' + testIndex,
         });
       });

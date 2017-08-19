@@ -21,16 +21,17 @@ import {registerServiceBuilderForDoc} from '../service';
 import {
   nativeIntersectionObserverSupported,
 } from '../../src/intersection-observer-polyfill';
-import {layoutRectLtwh} from '../layout-rect';
+import {
+  layoutRectLtwh,
+  moveLayoutRect,
+} from '../layout-rect';
 import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
 import {px, setImportantStyles, resetStyles} from '../../src/style';
 
-
 /** @const {string} */
 const TAG = 'inabox-viewport';
-
 
 /** @visibleForTesting */
 export function prepareBodyForOverlay(win, bodyElement) {
@@ -136,6 +137,7 @@ export class ViewportBindingInabox {
 
   /** @private */
   listenForPosition_() {
+
     if (nativeIntersectionObserverSupported(this.win)) {
       // Using native IntersectionObserver, no position data needed
       // from host doc.
@@ -147,9 +149,9 @@ export class ViewportBindingInabox {
         data => {
           dev().fine(TAG, 'Position changed: ', data);
           const oldViewportRect = this.viewportRect_;
-          this.viewportRect_ = data.viewport;
+          this.viewportRect_ = data.viewportRect;
 
-          this.updateBoxRect_(data.target);
+          this.updateBoxRect_(data.targetRect);
 
           if (isResized(this.viewportRect_, oldViewportRect)) {
             this.resizeObservable_.fire();
@@ -199,13 +201,17 @@ export class ViewportBindingInabox {
   }
 
   /**
-   * @param {!../layout-rect.LayoutRectDef|undefined} boxRect
+   * @param {?../layout-rect.LayoutRectDef|undefined} positionRect
    * @private
    */
-  updateBoxRect_(boxRect) {
-    if (!boxRect) {
+  updateBoxRect_(positionRect) {
+    if (!positionRect) {
       return;
     }
+
+    const boxRect = moveLayoutRect(positionRect, this.viewportRect_.left,
+        this.viewportRect_.top);
+
     if (isChanged(boxRect, this.boxRect_)) {
       dev().fine(TAG, 'Updating viewport box rect: ', boxRect);
 
