@@ -257,7 +257,7 @@ describe('amp-img', () => {
         expect(toggleSpy).to.be.calledOnce;
         expect(toggleSpy.firstCall.args[0]).to.be.true;
         expect(togglePlaceholderSpy).to.be.calledOnce;
-        expect(togglePlaceholderSpy.firstCall.args[0]).to.be.false; 
+        expect(togglePlaceholderSpy.firstCall.args[0]).to.be.false;
         expect(toggleElSpy.firstCall.args[0]).to.be.true;
       });
     });
