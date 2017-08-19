@@ -390,6 +390,15 @@ export class Resource {
   }
 
   /**
+   * Time delay imposed by baseElement upgradeCallback.  If no
+   * upgradeCallback specified or not yet executed, delay is 0.
+   * @return {number}
+   */
+  getUpgradeDelayMs() {
+    return this.element.getUpgradeDelayMs();
+  }
+
+  /**
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
    */
