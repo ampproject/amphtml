@@ -25,7 +25,8 @@ import {
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, isUserErrorMessage} from '../../../src/log';
+import {reportErrorToAnalytics} from '../../../src/error';
 import {dict} from '../../../src/utils/object';
 import {setStyle} from '../../../src/style';
 import {getData, loadPromise} from '../../../src/event-helper';
@@ -195,6 +196,11 @@ export class AmpAdXOriginIframeHandler {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }));
 
+    this.unlisteners_.push(listenFor(this.iframe, 'user-error',
+        data => {
+          this.userErrorForAnalytics(data['error'], data['message']);
+        }, true, true));
+
     // Iframe.onload normally called by the Ad after full load.
     const iframeLoadPromise = loadPromise(this.iframe).then(() => {
       // Wait just a little to allow `no-content` message to arrive.
@@ -294,6 +300,7 @@ export class AmpAdXOriginIframeHandler {
     // The actual ad load is eariliest of iframe.onload event and no-content.
     return Promise.race([iframeLoadPromise, noContentPromise]);
   }
+  //------------------------------//
 
   /**
    * callback functon on receiving render-start
@@ -493,6 +500,16 @@ export class AmpAdXOriginIframeHandler {
     // have changed. Send an intersection record if needed.
     if (this.intersectionObserver_) {
       this.intersectionObserver_.fire();
+    }
+  }
+
+  /**
+   * @param {!Error} error
+   * @param {string} message
+   */
+  userErrorForAnalytics(error, message) {
+    if (isUserErrorMessage(message)) {
+      reportErrorToAnalytics(error, this.baseInstance_.win);
     }
   }
 }

@@ -313,14 +313,22 @@ export class AbstractAmpContext {
     }
   }
 
+    /**
+     * Send 3p error to parent iframe
+     * @private
+     */
   errorReport_() {
+    const self = this;
     this.win_.addEventListener('error', function(event) {
-      console.log('ERR: ' + event.error);
-      //postMessage
+      if (!!event.error) {
+        self.client_.sendMessage(MessageType.USER_ERROR, dict({
+          'error': event.error,
+          'message': event.error.message,
+        }));
+      }
     });
   }
 }
-
 
 export class AmpContext extends AbstractAmpContext {
   /** @return {boolean} */
