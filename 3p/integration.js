@@ -388,7 +388,7 @@ function init(win) {
 
   setExperimentToggles(config.experimentToggles);
   win.context = new AmpContext(window);
-  win.context.errorReport_();
+  win.context.errorReport();
 }
 
 

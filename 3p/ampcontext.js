@@ -315,9 +315,8 @@ export class AbstractAmpContext {
 
     /**
      * Send 3p error to parent iframe
-     * @private
      */
-  errorReport_() {
+  errorReport() {
     const self = this;
     this.win_.addEventListener('error', function(event) {
       if (!!event.error) {
