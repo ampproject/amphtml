@@ -300,7 +300,6 @@ export class AmpAdXOriginIframeHandler {
     // The actual ad load is eariliest of iframe.onload event and no-content.
     return Promise.race([iframeLoadPromise, noContentPromise]);
   }
-  //------------------------------//
 
   /**
    * callback functon on receiving render-start

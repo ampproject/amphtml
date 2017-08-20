@@ -53,7 +53,6 @@ import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
 import {startsWith} from '../src/string.js';
 import {AmpEvents} from '../src/amp-events';
-import {AmpContext} from './ampcontext';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -387,8 +386,8 @@ function init(win) {
   setReportError(console.error.bind(console));
 
   setExperimentToggles(config.experimentToggles);
-  win.context = new AmpContext(window);
-  win.context.errorReport();
+  // win.context = new AmpContext(window);
+  // win.context.errorReport();
 }
 
 
