@@ -40,9 +40,9 @@ function buildCodeownersFile(dirs) {
         // Allow leading `@` to be optional
         codeowners += item.indexOf('@') !== 0 ? `@${item}` : item;
         let nextItem = arr[i + 1];
-        // Look ahead if we need to add a comma
+        // Look ahead if we need to add a space
         if (nextItem && typeof nextItem  === 'string') {
-          codeowners += ', ';
+          codeowners += ' ';
         }
       } else {
         codeowners += '\n';
