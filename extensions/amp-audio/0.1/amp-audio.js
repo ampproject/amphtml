@@ -25,6 +25,11 @@ import {
   parseFavicon,
   setMediaSession,
 } from '../../../src/mediasession-helper';
+import {isFiniteNumber} from '../../../src/types';
+import {removeElement} from '../../../src/dom.js';
+import {Animation} from '../../../src/animation';
+import * as tr from '../../../src/transition';
+import {CSS} from '../../../build/amp-audio-0.1.css';
 
 /**
  * Visible for testing only.
@@ -40,6 +45,21 @@ export class AmpAudio extends AMP.BaseElement {
 
     /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
+
+    /** @private {?Element} */
+    this.floatingControls_ = null;
+
+    /** @private {boolean} */
+    this.scrollListenerInstalled_ = false;
+
+    /** @private {?UnlistenDef} */
+    this.playingUnlistener_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.pauseUnlistener_ = null;
+
+    /** @private {boolean} */
+    this.hasFpb_ = this.element.hasAttribute('floating-controls');
   }
 
   /** @override */
@@ -98,6 +118,23 @@ export class AmpAudio extends AMP.BaseElement {
     };
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());
+
+    // Activate the floating mute button
+    if (!this.scrollListenerInstalled_ && this.hasFpb_) {
+      const scrollListener = () => {
+        const change = this.element.getIntersectionChangeEntry();
+        const ratio = change.intersectionRatio;
+        const visible = isFiniteNumber(ratio) && ratio != 0;
+        if (visible) {
+          this.removefloatingControls_();
+        } else if (!this.audio_.paused) {
+          this.createfloatingControls_(this.audio_);
+        }
+      };
+      this.getViewport().onScroll(scrollListener);
+      this.scrollListenerInstalled_ = true;
+    }
+
     return this.loadPromise(audio);
   }
 
@@ -123,7 +160,144 @@ export class AmpAudio extends AMP.BaseElement {
         playHandler,
         pauseHandler
     );
+
+  /** @private */
+  createfloatingControls_(audio) {
+    if (this.floatingControls_) {
+      return;
+    }
+    const doc = this.element.ownerDocument;
+    const btn = doc.createElement('amp-audio-floating-controls');
+    // Pause/Play icon
+    const pauseBtn = doc.createElement('amp-audio-pause-btn');
+    pauseBtn.classList.toggle('pause', audio.paused);
+    pauseBtn.classList.toggle('play', !audio.paused);
+    // Scroll to element icon
+    // (Different icon based on whether the original element is above or
+    // below the viewport)
+    const inlineBtn = doc.createElement('amp-audio-scroll-btn');
+    const viewportTop = this.getViewport().getScrollTop();
+    const isTop = viewportTop > this.element./*OK*/offsetTop;
+    inlineBtn.classList.toggle('top', isTop);
+    inlineBtn.classList.toggle('bottom', !isTop);
+    btn.appendChild(pauseBtn);
+    btn.appendChild(inlineBtn);
+    this.element.ownerDocument.body.appendChild(btn);
+
+    // Different positioning based on page direction
+    const pageDir = doc.body.getAttribute('dir')
+                      || doc.documentElement.getAttribute('dir')
+                      || 'ltr';
+
+    btn.classList.toggle('rtl', pageDir != 'ltr');
+
+    // Raise the button if a sticky ad exists
+    const stickyadexists = doc.querySelector('amp-sticky-ad');
+    btn.classList.toggle('sticky-ad-exists', !!stickyadexists);
+
+    // Button pops in
+    this.popIn_(btn);
+
+    listen(dev().assertElement(pauseBtn), 'click', () => {
+      if (audio.paused) {
+        audio.play();
+      } else {
+        audio.pause();
+      }
+      this.pop_(btn);
+    });
+
+    listen(dev().assertElement(inlineBtn), 'click', () => {
+      this.getViewport().animateScrollIntoView(audio, 500, 'ease-in', 'center');
+    });
+
+    // Style the button based on whether the audio is paused or not
+    this.playingUnlistener_ = listen(dev().assertElement(this.audio_),
+        'playing', () => {
+          pauseBtn.classList.toggle('pause', false);
+          pauseBtn.classList.toggle('play', true);
+        });
+
+    this.pauseUnlistener_ = listen(dev().assertElement(this.audio_),
+        'pause', () => {
+          pauseBtn.classList.toggle('pause', true);
+          pauseBtn.classList.toggle('play', false);
+        });
+
+    this.pauseUnlistener_ = listen(dev().assertElement(this.audio_),
+        'ended', () => {
+          pauseBtn.classList.toggle('pause', true);
+          pauseBtn.classList.toggle('play', false);
+        });
+
+    this.floatingControls_ = btn;
+  }
+
+  /** @private */
+  removefloatingControls_() {
+    if (!this.floatingControls_) {
+      return;
+    }
+    const btn = this.floatingControls_;
+
+    // Button pops out
+    this.popOut_(btn).thenAlways(() => {
+      removeElement(btn);
+    });
+
+    this.playingUnlistener_();
+    this.pauseUnlistener_();
+
+    this.floatingControls_ = null;
+  }
+
+  /**
+  @param {!Node} node
+  @return {!Object}
+  @private
+  */
+  pop_(node) {
+    const anim = new Animation(node);
+    anim.add(0, tr.setStyles(dev().assertElement(node), {
+      'transform': tr.scale(tr.numeric(1, 1.3)),
+    }), 0.5);
+    anim.add(0.5, tr.setStyles(dev().assertElement(node), {
+      'transform': tr.scale(tr.numeric(1.3, 1)),
+    }), 0.5);
+    return anim.start(300);
+  }
+
+  /**
+  @param {!Node} node
+  @return {!Object}
+  @private
+  */
+  popIn_(node) {
+    const anim = new Animation(node);
+    anim.add(0, tr.setStyles(dev().assertElement(node), {
+      'transform': tr.scale(tr.numeric(0, 1.3)),
+    }), 0.5);
+    anim.add(0.5, tr.setStyles(dev().assertElement(node), {
+      'transform': tr.scale(tr.numeric(1.3, 1)),
+    }), 0.5);
+    return anim.start(300);
+  }
+
+  /**
+  @param {!Node} node
+  @return {!Object}
+  @private
+  */
+  popOut_(node) {
+    const anim = new Animation(node);
+    anim.add(0, tr.setStyles(dev().assertElement(node), {
+      'transform': tr.scale(tr.numeric(1, 1.3)),
+    }), 0.5);
+    anim.add(0.5, tr.setStyles(dev().assertElement(node), {
+      'transform': tr.scale(tr.numeric(1.3, 0)),
+    }), 0.5);
+    return anim.start(300);
   }
 }
 
-AMP.registerElement('amp-audio', AmpAudio);
+AMP.registerElement('amp-audio', AmpAudio, CSS);
