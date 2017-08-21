@@ -16,7 +16,9 @@
 
 import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 import * as sinon from 'sinon';
+import * as lolex from 'lolex';
 
 describes.realWin('inabox-host:messaging', {}, env => {
 
@@ -91,6 +93,104 @@ describes.realWin('inabox-host:messaging', {}, env => {
           type: 'send-positions',
         }),
       })).to.be.false;
+    });
+  });
+
+  describe('request-position', () => {
+    let postMessageSpy;
+
+    beforeEach(() => {
+      //sandbox.stub(win, 'requestAnimationFrame', cb => cb());
+      iframe1.contentWindow.postMessage = postMessageSpy = sandbox.stub();
+    });
+
+    it('should send position-response back', () => {
+      sandbox.stub(win, 'requestAnimationFrame', cb => cb());
+      win.innerWidth = 100;
+      win.innerHeight = 100;
+      win.document.scrollingElement.scrollLeft = 10;
+      win.document.scrollingElement.scrollTop = 10;
+      iframe1.getBoundingClientRect =
+          () => {return layoutRectLtwh(5, 5, 20, 20);};
+      host.processMessage({
+        source: iframe1.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'request-position',
+        }),
+      });
+      const message = postMessageSpy.getCall(0).args[0];
+      const targetOrigin = postMessageSpy.getCall(0).args[1];
+      expect(deserializeMessage(message)).to.deep.equal({
+        type: 'position-response',
+        sentinel: '0-123',
+        viewportRect: layoutRectLtwh(10, 10, 100, 100),
+        targetRect: layoutRectLtwh(5, 5, 20, 20),
+      });
+      expect(targetOrigin).to.equal('www.example.com');
+    });
+
+    it('should calculate once for each iframe', function* () {
+      const clock = lolex.install(win);
+      sandbox.stub(win, 'requestAnimationFrame', cb => {
+        win.setTimeout(cb, 5);
+      });
+      let postMessageSpy2;
+      iframe2.contentWindow.postMessage = postMessageSpy2 = sandbox.stub();
+      win.innerWidth = 100;
+      win.innerHeight = 100;
+      win.document.scrollingElement.scrollLeft = 10;
+      win.document.scrollingElement.scrollTop = 10;
+      iframe1.getBoundingClientRect =
+          () => {return layoutRectLtwh(5, 5, 20, 20);};
+      iframe2.getBoundingClientRect =
+          () => {return layoutRectLtwh(6, 6, 21, 21);};
+      host.processMessage({
+        source: iframe1.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'request-position',
+        }),
+      });
+      host.processMessage({
+        source: iframe2.contentWindow,
+        origin: 'www.example2.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-321',
+          type: 'request-position',
+        }),
+      });
+      host.processMessage({
+        source: iframe1.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'request-position',
+        }),
+      });
+      clock.tick(5);
+      expect(postMessageSpy).to.be.calledOnce;
+      const message = postMessageSpy.getCall(0).args[0];
+      const targetOrigin = postMessageSpy.getCall(0).args[1];
+      expect(deserializeMessage(message)).to.deep.equal({
+        type: 'position-response',
+        sentinel: '0-123',
+        viewportRect: layoutRectLtwh(10, 10, 100, 100),
+        targetRect: layoutRectLtwh(5, 5, 20, 20),
+      });
+      expect(targetOrigin).to.equal('www.example.com');
+      expect(postMessageSpy2).to.be.calledOnce;
+      const message2 = postMessageSpy2.getCall(0).args[0];
+      const targetOrigin2 = postMessageSpy2.getCall(0).args[1];
+      expect(deserializeMessage(message2)).to.deep.equal({
+        type: 'position-response',
+        sentinel: '0-321',
+        viewportRect: layoutRectLtwh(10, 10, 100, 100),
+        targetRect: layoutRectLtwh(6, 6, 21, 21),
+      });
+      expect(targetOrigin2).to.equal('www.example2.com');
     });
   });
 

@@ -15,7 +15,10 @@
  */
 
 import {FrameOverlayManager} from './frame-overlay-manager';
-import {PositionObserver} from './position-observer';
+import {
+  PositionObserver,
+  getViewportRect,
+} from './position-observer';
 import {
   serializeMessage,
   deserializeMessage,
@@ -24,7 +27,7 @@ import {
 import {dev} from '../../src/log';
 import {getData} from '../../src/event-helper';
 import {dict} from '../../src/utils/object';
-
+import {layoutRectFromDomRect} from '../../src/layout-rect';
 /** @const */
 const TAG = 'InaboxMessagingHost';
 
@@ -70,9 +73,12 @@ export class InaboxMessagingHost {
     this.iframes_ = iframes;
     this.iframeMap_ = Object.create(null);
     this.registeredIframeSentinels_ = Object.create(null);
+    this.positionRequestIframeSentinels_ = Object.create(null);
     this.positionObserver_ = new PositionObserver(win);
     this.msgObservable_ = new NamedObservable();
     this.frameOverlayManager_ = new FrameOverlayManager(win);
+    this.msgObservable_.listen(
+        MessageType.REQUEST_POSITION, this.handlePositionRequest_);
 
     this.msgObservable_.listen(
         MessageType.SEND_POSITIONS, this.handleSendPositions_);
@@ -115,6 +121,35 @@ export class InaboxMessagingHost {
       return false;
     }
 
+    return true;
+  }
+
+  /**
+   *
+   * @param {!HTMLIFrameElement} iframe
+   * @param {!Object} request
+   * @param {!Window} source
+   * @param {string} origin
+   * @return {boolean}
+   */
+  handlePositionRequest_(iframe, request, source, origin) {
+    if (this.positionRequestIframeSentinels_[request.sentinel]) {
+      // Only handle on position request in one animation frame
+      return false;
+    }
+    this.positionRequestIframeSentinels_[request.sentinel] = true;
+    this.win_.requestAnimationFrame(() => {
+      const viewportRect = getViewportRect(this.win_);
+      const targetRect =
+          layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect());
+      source./*OK*/postMessage(
+          serializeMessage(MessageType.POSITION_RESPONSE, request.sentinel,
+              dict({
+                'viewportRect': viewportRect,
+                'targetRect': targetRect,
+              })), origin);
+      this.positionRequestIframeSentinels_[request.sentinel] = false;
+    });
     return true;
   }
 

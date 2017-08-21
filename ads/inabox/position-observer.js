@@ -45,10 +45,6 @@ export class PositionObserver {
     this.positionObservable_ = null;
     /** @private {!Element} */
     this.scrollingElement_ = getScrollingElement(this.win_);
-    /** @private {?number} */
-    this.scrollLeft_ = null;
-    /** @private {?number} */
-    this.scrollTop_ = null;
     /** @private {?LayoutRectDef} */
     this.viewportRect_ = null;
   }
@@ -78,15 +74,7 @@ export class PositionObserver {
   }
 
   update_() {
-    this.scrollLeft_ = this.scrollingElement_./*OK*/scrollLeft
-        || this.win_./*OK*/pageXOffset;
-    this.scrollTop_ = this.scrollingElement_./*OK*/scrollTop
-        || this.win_./*OK*/pageYOffset;
-    this.viewportRect_ = layoutRectLtwh(
-        Math.round(this.scrollLeft_),
-        Math.round(this.scrollTop_),
-        this.win_./*OK*/innerWidth,
-        this.win_./*OK*/innerHeight);
+    this.viewportRect_ = getViewportRect(this.win_, this.scrollingElement_);
   }
 
   /**
@@ -102,6 +90,24 @@ export class PositionObserver {
           layoutRectFromDomRect(element./*OK*/getBoundingClientRect()),
     };
   }
+}
+
+/**
+ *
+ * @param {!Window} win
+ * @param {!Element=} opt_scrollingElement
+ */
+export function getViewportRect(win, opt_scrollingElement) {
+  const scrollingElement = opt_scrollingElement || getScrollingElement(win);
+  const scrollLeft = scrollingElement./*OK*/scrollLeft ||
+      win./*OK*/pageXOffset;
+  const scrollTop = scrollingElement./*OK*/scrollTop ||
+      win./*OK*/pageYOffset;
+  return layoutRectLtwh(
+      Math.round(scrollLeft),
+      Math.round(scrollTop),
+      win./*OK*/innerWidth,
+      win./*OK*/innerHeight);
 }
 
 /**
