@@ -49,6 +49,7 @@
     "eslint": "3.18.0",
     "eslint-plugin-google-camelcase": "0.0.2",
     "express": "4.14.0",
+    "fetch-mock": "5.12.2",
     "file-reader": "1.1.1",
     "formidable": "1.0.17",
     "fs-extra": "0.27.0",
