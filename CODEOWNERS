@@ -1,79 +1,79 @@
 * @cramforce, @dvoytenko, @jridgewell
-*/*.protoascii @ampproject/validator
-ads/* @lannka, @zhouyx
-build-system/* @erwinmombay, @cramforce
-contributing/* @jrozier
-examples/* @camelburrito, @lannka
-src/* @dvoytenko, @jridgewell
-test/* @ampproject/runtime, @ampproject/validator
-validator/* @powdercloud, @Gregable, @honeybadgerdontcare
-ads/google/* @ampproject/a4a
-extensions/amp-a4a/* @ampproject/a4a
-extensions/amp-access/* @dvoytenko
-extensions/amp-access-laterpay/* @trodrigues
-extensions/amp-accordion/* @camelburrito
-extensions/amp-ad/* @zhouyx, @lannka
-extensions/amp-ad-network-adsense-impl/* @ampproject/a4a
-extensions/amp-ad-network-cloudflare-impl/* @oliy
-extensions/amp-ad-network-doubleclick-impl/* @ampproject/a4a
-extensions/amp-ad-network-fake-impl/* @ampproject/a4a
-extensions/amp-ad-network-gmossp-impl/* @ampproject/a4a
-extensions/amp-ad-network-triplelift-impl/* @ampproject/a4a, @szach
-extensions/amp-analytics/* @avimehta, @dvoytenko, @lannka
-extensions/amp-animation/* @aghassemi, @alanorozco, @dvoytenko
-extensions/amp-apester-media/* @mrsufgi
-extensions/amp-app-banner/* @aghassemi
-extensions/amp-audio/* @aghassemi
-extensions/amp-auto-ads/* @tlong2
-extensions/amp-bind/* @choumx, @kmh287
-extensions/amp-brid-player/* @aghassemi, @DarXector
-extensions/amp-brightcove/* @aghassemi, @mister-ben
-extensions/amp-call-tracking/* @alanorozco
-extensions/amp-carousel/* @camelburrito, @dvoytenko
-extensions/amp-crypto-polyfill/* @lannka
-extensions/amp-dailymotion/* @zeno, @erwinmombay, @aghassemi
-extensions/amp-experiment/* @lannka
-extensions/amp-facebook/* @aghassemi
-extensions/amp-facebook-comments/* @ymschaap
-extensions/amp-facebook-like/* @eduardogoncalves
-extensions/amp-font/* @camelburrito
-extensions/amp-form/* @aghassemi, @cvializ
-extensions/amp-fresh/* @erwinmombay
-extensions/amp-fx-flying-carpet/* @jridgewell
-extensions/amp-fx-parallax/* @cvializ
-extensions/amp-gfycat/* @koshka
-extensions/amp-gist/* @levidurfee, @aghassemi
-extensions/amp-google-vrview-image/* @dvoytenko
-extensions/amp-hulu/* @aghassemi, @unbug
-extensions/amp-iframe/* @camelburrito
-extensions/amp-image-lightbox/* @aghassemi, @dvoytenko
-extensions/amp-imgur/* @techhtml
-extensions/amp-instagram/* @aghassemi, @jpettitt, @src-code
-extensions/amp-install-serviceworker/* @jridgewell
-extensions/amp-izlesene/* @aghassemi, @merty
-extensions/amp-jwplayer/* @aghassemi, @pablos1
-extensions/amp-kaltura-player/* @aghassemi, @itaykinnrot
-extensions/amp-lightbox/* @aghassemi, @muxin
-extensions/amp-lightbox-viewer/* @aghassemi, @zhouyx
-extensions/amp-live-list/* @erwinmombay
-extensions/amp-nexxtv-player/* @aghassemi, @neko-fire
-extensions/amp-o2-player/* @aghassemi, @yevheniiminin
-extensions/amp-ooyala-player/* @aghassemi, @mityaha
-extensions/amp-pinterest/* @kentbrew
-extensions/amp-playbuzz/* @buzzdan
-extensions/amp-position-observer/* @aghassemi
-extensions/amp-reach-player/* @aghassemi, @mikepmtl
-extensions/amp-reddit/* @samiamorwas
-extensions/amp-selector/* @camelburrito
-extensions/amp-share-tracking/* @muxin
-extensions/amp-sidebar/* @camelburrito
-extensions/amp-social-share/* @aghassemi, @ithinkihaveacat, @RyanCopley
-extensions/amp-soundcloud/* @asap
-extensions/amp-springboard-player/* @aghassemi, @Em-PredragMilosevic
-extensions/amp-sticky-ad/* @zhouyx
-extensions/amp-video/* @aghassemi
-extensions/amp-viewer-integration/* @chenshay
-extensions/amp-vimeo/* @aghassemi
-extensions/amp-vine/* @aghassemi, @niallkennedy
-extensions/amp-viz-vega/* @aghassemi
-extensions/amp-youtube/* @aghassemi
+*.protoascii @ampproject/validator
+ads/ @lannka, @zhouyx
+build-system/ @erwinmombay, @cramforce
+contributing/ @jrozier
+examples/ @camelburrito, @lannka
+src/ @dvoytenko, @jridgewell
+test/ @ampproject/runtime, @ampproject/validator
+validator/ @powdercloud, @Gregable, @honeybadgerdontcare
+ads/google/ @ampproject/a4a
+extensions/amp-a4a/ @ampproject/a4a
+extensions/amp-access/ @dvoytenko
+extensions/amp-access-laterpay/ @trodrigues
+extensions/amp-accordion/ @camelburrito
+extensions/amp-ad/ @zhouyx, @lannka
+extensions/amp-ad-network-adsense-impl/ @ampproject/a4a
+extensions/amp-ad-network-cloudflare-impl/ @oliy
+extensions/amp-ad-network-doubleclick-impl/ @ampproject/a4a
+extensions/amp-ad-network-fake-impl/ @ampproject/a4a
+extensions/amp-ad-network-gmossp-impl/ @ampproject/a4a
+extensions/amp-ad-network-triplelift-impl/ @ampproject/a4a, @szach
+extensions/amp-analytics/ @avimehta, @dvoytenko, @lannka
+extensions/amp-animation/ @aghassemi, @alanorozco, @dvoytenko
+extensions/amp-apester-media/ @mrsufgi
+extensions/amp-app-banner/ @aghassemi
+extensions/amp-audio/ @aghassemi
+extensions/amp-auto-ads/ @tlong2
+extensions/amp-bind/ @choumx, @kmh287
+extensions/amp-brid-player/ @aghassemi, @DarXector
+extensions/amp-brightcove/ @aghassemi, @mister-ben
+extensions/amp-call-tracking/ @alanorozco
+extensions/amp-carousel/ @camelburrito, @dvoytenko
+extensions/amp-crypto-polyfill/ @lannka
+extensions/amp-dailymotion/ @zeno, @erwinmombay, @aghassemi
+extensions/amp-experiment/ @lannka
+extensions/amp-facebook/ @aghassemi
+extensions/amp-facebook-comments/ @ymschaap
+extensions/amp-facebook-like/ @eduardogoncalves
+extensions/amp-font/ @camelburrito
+extensions/amp-form/ @aghassemi, @cvializ
+extensions/amp-fresh/ @erwinmombay
+extensions/amp-fx-flying-carpet/ @jridgewell
+extensions/amp-fx-parallax/ @cvializ
+extensions/amp-gfycat/ @koshka
+extensions/amp-gist/ @levidurfee, @aghassemi
+extensions/amp-google-vrview-image/ @dvoytenko
+extensions/amp-hulu/ @aghassemi, @unbug
+extensions/amp-iframe/ @camelburrito
+extensions/amp-image-lightbox/ @aghassemi, @dvoytenko
+extensions/amp-imgur/ @techhtml
+extensions/amp-instagram/ @aghassemi, @jpettitt, @src-code
+extensions/amp-install-serviceworker/ @jridgewell
+extensions/amp-izlesene/ @aghassemi, @merty
+extensions/amp-jwplayer/ @aghassemi, @pablos1
+extensions/amp-kaltura-player/ @aghassemi, @itaykinnrot
+extensions/amp-lightbox/ @aghassemi, @muxin
+extensions/amp-lightbox-viewer/ @aghassemi, @zhouyx
+extensions/amp-live-list/ @erwinmombay
+extensions/amp-nexxtv-player/ @aghassemi, @neko-fire
+extensions/amp-o2-player/ @aghassemi, @yevheniiminin
+extensions/amp-ooyala-player/ @aghassemi, @mityaha
+extensions/amp-pinterest/ @kentbrew
+extensions/amp-playbuzz/ @buzzdan
+extensions/amp-position-observer/ @aghassemi
+extensions/amp-reach-player/ @aghassemi, @mikepmtl
+extensions/amp-reddit/ @samiamorwas
+extensions/amp-selector/ @camelburrito
+extensions/amp-share-tracking/ @muxin
+extensions/amp-sidebar/ @camelburrito
+extensions/amp-social-share/ @aghassemi, @ithinkihaveacat, @RyanCopley
+extensions/amp-soundcloud/ @asap
+extensions/amp-springboard-player/ @aghassemi, @Em-PredragMilosevic
+extensions/amp-sticky-ad/ @zhouyx
+extensions/amp-video/ @aghassemi
+extensions/amp-viewer-integration/ @chenshay
+extensions/amp-vimeo/ @aghassemi
+extensions/amp-vine/ @aghassemi, @niallkennedy
+extensions/amp-viz-vega/ @aghassemi
+extensions/amp-youtube/ @aghassemi
