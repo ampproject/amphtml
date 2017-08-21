@@ -520,6 +520,7 @@ export function onContentEnded() {
   contentComplete = true;
   adsLoader.contentComplete();
   window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
+  window.parent./*OK*/postMessage({event: VideoEvents.ENDED}, '*');
 }
 
 /**
@@ -1100,6 +1101,17 @@ const VideoEvents = {
    * @event pause
    */
   PAUSE: 'pause',
+
+  /**
+   * ended
+   *
+   * Fired when the video ends.
+   *
+   * This event should be fired in addition to `pause` when video ends.
+   *
+   * @event pause
+   */
+  ENDED: 'ended',
 
   /**
    * muted

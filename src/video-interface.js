@@ -275,6 +275,17 @@ export const VideoEvents = {
   PAUSE: 'pause',
 
   /**
+   * ended
+   *
+   * Fired when the video ends.
+   *
+   * This event should be fired in addition to `pause` when video ends.
+   *
+   * @event pause
+   */
+  ENDED: 'ended',
+
+  /**
    * muted
    *
    * Fired when the video is muted.

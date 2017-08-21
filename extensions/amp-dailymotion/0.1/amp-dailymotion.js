@@ -204,6 +204,8 @@ class AmpDailymotion extends AMP.BaseElement {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
         break;
       case DailymotionEvents.END:
+        this.element.dispatchCustomEvent(VideoEvents.ENDED);
+        // Don't break, also dispatch pause
       case DailymotionEvents.PAUSE:
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
         this.playerState_ = DailymotionEvents.PAUSE;

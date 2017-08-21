@@ -396,13 +396,18 @@ describe(TAG, () => {
             return listenOncePromise(v, VideoEvents.UNMUTED);
           })
           .then(() => {
-        // Should not send the unmute event twice if already sent once.
+            // Should not send the unmute event twice if already sent once.
             const p = listenOncePromise(v, VideoEvents.UNMUTED).then(() => {
               assert.fail('Should not have dispatch unmute message twice');
             });
             v.querySelector('video').dispatchEvent(new Event('volumechange'));
             const successTimeout = timer.promise(10);
             return Promise.race([p, successTimeout]);
+          }).then(() => {
+            const video = v.querySelector('video');
+            video.currentTime = video.duration - 0.1;
+            impl.play();
+            return listenOncePromise(v, VideoEvents.ENDED);
           });
     });
   });
