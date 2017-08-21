@@ -1146,7 +1146,7 @@ const VideoEvents = {
    * This is used to remove any overlay shims during Ad play during autoplay
    * or minimized-to-corner version of the player.
    *
-   * @event ended
+   * @event ad_start
    */
   AD_START: 'ad_start',
 
@@ -1158,7 +1158,7 @@ const VideoEvents = {
    * This is used to restore any overlay shims during Ad play during autoplay
    * or minimized-to-corner version of the player.
    *
-   * @event ended
+   * @event ad_end
    */
   AD_END: 'ad_end',
 };
