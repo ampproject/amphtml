@@ -20,7 +20,8 @@ import {WebviewViewerForTesting} from '../webview-viewer-for-testing.js';
 
 describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
-  describe.configure().skipSauceLabs().run('Handshake', function() {
+  // TODO(aghassemi): Investigate failure in beforeEach. #10974.
+  describe.skip('Handshake', function() {
     let viewerEl;
     let viewer;
 

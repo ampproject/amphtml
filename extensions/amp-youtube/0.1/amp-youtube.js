@@ -159,7 +159,8 @@ class AmpYoutube extends AMP.BaseElement {
     if ('autoplay' in params) {
       // Autoplay is managed by video manager, do not pass it to YouTube.
       delete params['autoplay'];
-      user().error('AMP-YOUTUBE', 'Use autoplay attribute instead of ' +
+      this.user().error(
+          'AMP-YOUTUBE', 'Use autoplay attribute instead of ' +
           'data-param-autoplay');
     }
 

@@ -99,17 +99,18 @@ function waitForEvent(env, name) {
   });
 }
 
-describe.configure().ifChrome().skipOldChrome().run('Bind', function() {
+describe.configure().ifNewChrome().run('Bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
 
-  describe.configure().skipSauceLabs().run('in FIE', function() {
+  describe.configure().ifNewChrome().run('in FIE', function() {
     describes.realWin('in FIE', {
       amp: {
         ampdoc: 'fie',
         runtimeOn: false,
       },
+      mockFetch: false,
     }, env => {
       let bind;
       let container;
@@ -175,6 +176,7 @@ describe.configure().ifChrome().skipOldChrome().run('Bind', function() {
       ampdoc: 'shadow',
       runtimeOn: false,
     },
+    mockFetch: false,
   }, env => {
     let bind;
     let container;
@@ -201,6 +203,7 @@ describe.configure().ifChrome().skipOldChrome().run('Bind', function() {
       ampdoc: 'single',
       runtimeOn: false,
     },
+    mockFetch: false,
   }, env => {
     let bind;
     let container;

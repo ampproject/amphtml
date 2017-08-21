@@ -79,6 +79,7 @@
  * and `integration` below.
  */
 
+import fetchMock from 'fetch-mock';
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
 import {BaseElement} from '../src/base-element';
@@ -101,6 +102,7 @@ import {
 import {createElementWithAttributes} from '../src/dom';
 import {addParamsToUrl} from '../src/url';
 import {cssText} from '../build/css';
+import {CSS} from '../build/amp-ad-0.1.css.js';
 import {createAmpElementProto} from '../src/custom-element';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {
@@ -281,6 +283,20 @@ export const repeated = (function() {
 
   return mainFunc;
 })();
+
+
+/**
+ * Mocks Window.fetch in the given environment and exposes fetch-mock's mock()
+ * function as `env.expectFetch(matcher, response)`.
+ * @param {!Object} env
+ * @see http://www.wheresrhys.co.uk/fetch-mock/quickstart
+ */
+function attachFetchMock(env) {
+  fetchMock.constructor.global = env.win;
+  fetchMock._mock();
+
+  env.expectFetch = fetchMock.mock.bind(fetchMock);
+}
 
 
 /**
@@ -494,10 +510,17 @@ class FakeWinFixture {
   /** @override */
   setup(env) {
     env.win = new FakeWindow(this.spec.win || {});
+
+    if (this.spec.mockFetch !== false) {
+      attachFetchMock(env);
+    }
   }
 
   /** @override */
   teardown(env) {
+    if (this.spec.mockFetch !== false) {
+      fetchMock./*OK*/restore();
+    }
   }
 }
 
@@ -508,7 +531,8 @@ class RealWinFixture {
   /** @param {!{
   *   fakeRegisterElement: boolean,
   *   ampCss: boolean,
-  *   allowExternalResources: boolean
+  *   allowExternalResources: boolean,
+  *   ampAdCss: boolean
   * }} spec */
   constructor(spec) {
     /** @const */
@@ -551,6 +575,11 @@ class RealWinFixture {
           installRuntimeStylesPromise(win);
         }
 
+        // Install AMP AD CSS if requested.
+        if (spec.ampAdCss) {
+          installAmpAdStylesPromise(win);
+        }
+
         if (spec.fakeRegisterElement) {
           const customElements = new FakeCustomElements(win);
           Object.defineProperty(win, 'customElements', {
@@ -567,6 +596,10 @@ class RealWinFixture {
         interceptEventListeners(win.document.body);
         env.interceptEventListeners = interceptEventListeners;
 
+        if (spec.mockFetch !== false) {
+          attachFetchMock(env);
+        }
+
         resolve();
       };
       iframe.onerror = reject;
@@ -579,6 +612,9 @@ class RealWinFixture {
     // TODO(dvoytenko): test that window is returned in a good condition.
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
+    }
+    if (this.spec.mockFetch !== false) {
+      fetchMock./*OK*/restore();
     }
   }
 }
@@ -753,6 +789,21 @@ function installRuntimeStylesPromise(win) {
   style./*OK*/textContent = cssText;
   win.document.head.appendChild(style);
 }
+
+/**
+ * @param {!Window} win
+ */
+function installAmpAdStylesPromise(win) {
+  if (win.document.querySelector('style[amp-extension="amp-ad"]')) {
+    // Already installed.
+    return;
+  }
+  const style = document.createElement('style');
+  style.setAttribute('amp-extension', 'amp-ad');
+  style./*OK*/textContent = CSS;
+  win.document.head.appendChild(style);
+}
+
 
 
 /**
