@@ -204,4 +204,7 @@ export class AmpAdExit extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-ad-exit', AmpAdExit);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAdExit);
+});

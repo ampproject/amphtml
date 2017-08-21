@@ -57,5 +57,8 @@ export class AmpAdNetworkTripleliftImpl extends AmpA4A {
   }
 }
 
-AMP.registerElement('amp-ad-network-triplelift-impl',
-    AmpAdNetworkTripleliftImpl);
+
+AMP.extension('amp-ad-network-triplelift-impl', '0.1', AMP => {
+  AMP.registerElement('amp-ad-network-triplelift-impl',
+      AmpAdNetworkTripleliftImpl);
+});

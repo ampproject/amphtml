@@ -62,5 +62,8 @@ export class AmpAdNetworkGmosspImpl extends AmpA4A {
 
 }
 
-AMP.registerElement('amp-ad-network-gmossp-impl',
-    AmpAdNetworkGmosspImpl);
+
+AMP.extension('amp-ad-network-gmossp-impl', '0.1', AMP => {
+  AMP.registerElement('amp-ad-network-gmossp-impl',
+      AmpAdNetworkGmosspImpl);
+});

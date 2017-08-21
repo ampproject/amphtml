@@ -115,5 +115,8 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
   }
 }
 
-AMP.registerElement('amp-ad-network-cloudflare-impl',
-    AmpAdNetworkCloudflareImpl);
+
+AMP.extension('amp-ad-network-cloudflare-impl', '0.1', AMP => {
+  AMP.registerElement('amp-ad-network-cloudflare-impl',
+      AmpAdNetworkCloudflareImpl);
+});
