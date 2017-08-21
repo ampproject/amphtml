@@ -117,7 +117,7 @@ function isValidatorWebuiFile(filePath) {
  * @return {boolean}
  */
 function isBuildSystemFile(filePath) {
-  return filePath.startsWith('build-system') &&
+  return (filePath.startsWith('build-system') &&
       // Exclude textproto from build-system since we want it to trigger
       // tests and type check.
       path.extname(filePath) != '.textproto' &&
@@ -126,7 +126,9 @@ function isBuildSystemFile(filePath) {
       !isFlagConfig(filePath) &&
       // Exclude visual diff files from build-system since we want it to trigger
       // visual diff tests.
-      !isVisualDiffFile(filePath);
+      !isVisualDiffFile(filePath))
+      // OWNERS.yaml files should trigger build system to run tests
+      || isOwnersFile(filePath);
 }
 
 /**
@@ -158,6 +160,15 @@ function isValidatorFile(filePath) {
 }
 
 /**
+ * Determines if the given path has a OWNERS.yaml basename.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isOwnersFile(filePath) {
+  return path.basename(filePath) === 'OWNERS.yaml';
+}
+
+/**
  * Determines if the given file is a markdown file containing documentation.
  * @param {string} filePath
  * @return {boolean}
@@ -184,7 +195,7 @@ function isVisualDiffFile(filePath) {
  * @return {boolean}
  */
 function isIntegrationTest(filePath) {
-  return filePath.startsWith('test/integration/');
+  return filePath.includes('test/integration/');
 }
 
 /**
@@ -299,10 +310,10 @@ const command = {
     timedExecOrDie(`${gulp} presubmit`);
   },
   buildValidatorWebUI: function() {
-    timedExecOrDie('cd validator/webui && python build.py');
+    timedExecOrDie(`${gulp} validator-webui`);
   },
   buildValidator: function() {
-    timedExecOrDie('cd validator && python build.py');
+    timedExecOrDie(`${gulp} validator`);
   },
 };
 
@@ -409,12 +420,6 @@ function main(argv) {
         command.runUnitTests();
       }
     }
-    if (buildTargets.has('VALIDATOR_WEBUI')) {
-      command.buildValidatorWebUI();
-    }
-    if (buildTargets.has('VALIDATOR')) {
-      command.buildValidator();
-    }
   }
 
   if (process.env.BUILD_SHARD == "integration_tests") {
@@ -434,6 +439,12 @@ function main(argv) {
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
       command.runVisualDiffTests(/* opt_mode */ 'skip');
+    }
+    if (buildTargets.has('VALIDATOR_WEBUI')) {
+      command.buildValidatorWebUI();
+    }
+    if (buildTargets.has('VALIDATOR')) {
+      command.buildValidator();
     }
   }
 

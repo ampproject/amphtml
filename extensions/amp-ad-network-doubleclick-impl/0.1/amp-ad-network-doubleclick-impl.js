@@ -334,7 +334,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           /** @type {!Object<string, !ExperimentInfo>} */ ({});
       experimentInfoMap[CORRELATOR_CLEAR_EXP_NAME] = {
         isTrafficEligible: () => true,
-        branches: Object.values(CORRELATOR_CLEAR_EXP_BRANCHES),
+        branches: ['22302764','22302765'],
       };
       randomlySelectUnsetExperiments(this.win, experimentInfoMap);
       const expId = getExperimentBranch(this.win, CORRELATOR_CLEAR_EXP_NAME);
@@ -721,7 +721,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   credentials: 'include',
                   headers,
                 }).catch(err => {
-                  user().error(TAG, err.message);
+                  this.user().error(TAG, err.message);
                 });
               }
               // Non-200 status codes are forbidden for RTC.
@@ -801,7 +801,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {!Promise<?Object>}
    */
   shouldSendRequestWithoutRtc(errMessage) {
-    user().error(TAG, errMessage);
+    this.user().error(TAG, errMessage);
     let rtcTotalTime;
     // Have to use match instead of == because AMP
     // custom messages automatically append three
@@ -952,7 +952,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
                 const canceled = isCancellation(error);
                 if (!canceled) {
-                  user().error(TAG, 'SRA request failure', error);
+                  this.user().error(TAG, 'SRA request failure', error);
                 }
                 // Collapse all slots on failure so long as they are not
                 // cancellation.

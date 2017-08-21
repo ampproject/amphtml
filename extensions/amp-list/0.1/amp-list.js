@@ -107,7 +107,7 @@ export class AmpList extends AMP.BaseElement {
         const items = isArray(src) ? src : [src];
         this.renderItems_(items);
       } else {
-        user().error(TAG, 'Unexpected "src" type: ' + src);
+        this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
     } else if (state !== undefined) {
       const items = isArray(state) ? state : [state];

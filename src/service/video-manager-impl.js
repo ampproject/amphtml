@@ -50,6 +50,9 @@ import {
 import {Animation} from '../animation';
 import * as st from '../style';
 import * as tr from '../transition';
+
+const TAG = 'video-manager';
+
 /**
  * @const {number} Percentage of the video that should be in viewport before it
  * is considered visible.
@@ -156,7 +159,7 @@ export class VideoManager {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const */
-    this.boundSecondsPlaying_ = () => this.secondsPlaying_();;
+    this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
@@ -350,8 +353,38 @@ export class VideoManager {
         return this.entries_[i];
       }
     }
-    dev().assert(false, 'video is not registered to this video manager');
+    dev().error(TAG, 'video is not registered to this video manager');
     return null;
+  }
+
+  /**
+   * Returns the entry in the video manager corresponding to the element
+   * provided
+   *
+   * @param {!AmpElement} element
+   * @return {VideoEntry} entry
+   * @private
+   */
+  getEntryForElement_(element) {
+    for (let i = 0; i < this.entries_.length; i++) {
+      const entry = this.entries_[i];
+      if (entry.video.element === element) {
+        return entry;
+      }
+    }
+    dev().error(TAG, 'video is not registered to this video manager');
+    return null;
+  }
+
+  /**
+   * Get the current analytics details for the given video.
+   * Silently fail if the video is not found in this manager.
+   * @param {!AmpElement} videoElement
+   * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>|!Promise<undefined>}
+   */
+  getVideoAnalyticsDetails(videoElement) {
+    const entry = this.getEntryForElement_(videoElement);
+    return entry ? entry.getAnalyticsDetails() : Promise.resolve();
   }
 
   /**
@@ -828,23 +861,43 @@ class VideoEntry {
     });
 
     // Listen to pause, play and user interaction events.
-    const unlistenInteraction = listen(mask, 'click', onInteraction.bind(this));
+    const unlisteners = [];
+    unlisteners.push(listen(mask, 'click', onInteraction.bind(this)));
+    unlisteners.push(listen(animation, 'click', onInteraction.bind(this)));
 
-    const unlistenPause = listen(this.video.element, VideoEvents.PAUSE,
-        toggleAnimation.bind(this, /*playing*/ false));
+    unlisteners.push(listen(this.video.element, VideoEvents.PAUSE,
+        toggleAnimation.bind(this, /*playing*/ false)));
 
-    const unlistenPlaying = listen(this.video.element, VideoEvents.PLAYING,
-        toggleAnimation.bind(this, /*playing*/ true));
+    unlisteners.push(listen(this.video.element, VideoEvents.PLAYING,
+        toggleAnimation.bind(this, /*playing*/ true)));
+
+    unlisteners.push(listen(this.video.element, VideoEvents.AD_START,
+        adStart.bind(this)));
+
+    unlisteners.push(listen(this.video.element, VideoEvents.AD_END,
+        adEnd.bind(this)));
 
     function onInteraction() {
       this.userInteractedWithAutoPlay_ = true;
       this.video.showControls();
       this.video.unmute();
-      unlistenInteraction();
-      unlistenPause();
-      unlistenPlaying();
+      unlisteners.forEach(unlistener => {
+        unlistener();
+      });
       removeElement(animation);
       removeElement(mask);
+    }
+
+    function adStart() {
+      setStyles(mask, {
+        'display': 'none',
+      });
+    }
+
+    function adEnd() {
+      setStyles(mask, {
+        'display': 'block',
+      });
     }
   }
 

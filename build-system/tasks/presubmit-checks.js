@@ -273,7 +273,7 @@ var forbiddenTerms = {
       'src/service/position-observer-impl.js',
       // TODO(@zhouyx, #9213) Remove this item.
       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
-      'extensions/amp-animation/0.1/scrollbound-scene.js',
+      'extensions/amp-position-observer/0.1/amp-position-observer.js',
       'src/service/video-manager-impl.js',
     ],
   },
@@ -365,6 +365,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/cid-impl.js',
+      'src/service/cid-api.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -374,6 +375,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/cid-impl.js',
+      'src/service/cid-api.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -455,6 +457,7 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js',
       'src/service/viewer-impl.js',
       'src/error.js',
+      'src/window-interface.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
@@ -556,6 +559,7 @@ var forbiddenTerms = {
       'src/service-worker/core.js',
       'src/worker-error-reporting.js',
       'tools/experiments/experiments.js',
+      'build-system/amp4test.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -725,6 +729,8 @@ var forbiddenTermsSrcInclusive = {
       'src/service/extensions-impl.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-auto-ads/0.1/amp-auto-ads.js',
+      'extensions/amp-auto-ads/0.1/anchor-ad-strategy.js',
     ],
   },
   'reject\\(\\)': {

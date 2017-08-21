@@ -28,6 +28,12 @@ var webserver = require('gulp-webserver');
 var app = require('../test-server').app;
 var karmaDefault = require('./karma.conf');
 
+
+const green = util.colors.green;
+const yellow = util.colors.yellow;
+const cyan = util.colors.cyan;
+
+
 /**
  * Read in and process the configuration settings for karma
  * @return {!Object} Karma configuration
@@ -51,8 +57,7 @@ function getConfig() {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
     return Object.assign({}, karmaDefault, {
-      reporters: process.env.TRAVIS ?
-          ['super-dots', 'saucelabs', 'mocha'] : ['dots', 'saucelabs', 'mocha'],
+      reporters: ['dots', 'saucelabs', 'mocha'],
       browsers: argv.oldchrome
           ? ['SL_Chrome_45']
           : [
@@ -105,11 +110,63 @@ function getAdTypes() {
   return adTypes;
 }
 
+
+/**
+ * Prints help messages for args if tests are being run for local development.
+ */
+function printArgvMessages() {
+  const argvMessages = {
+    safari: 'Running tests on Safari.',
+    firefox: 'Running tests on Firefox.',
+    edge: 'Running tests on Edge.',
+    saucelabs: 'Running tests on Sauce Labs.',
+    nobuild: 'Skipping build.',
+    watch: 'Enabling watch mode. Editing and saving a file will cause the' +
+        ' tests for that file to be re-run in the same browser instance.',
+    verbose: 'Enabling verbose mode. Expect lots of output!',
+    testnames: 'Listing the names of all tests being run.',
+    files: 'Running tests in the file(s): ' + cyan(argv.files),
+    integration: 'Running only the integration tests. Requires ' +
+        cyan('gulp build') +  ' to have been run first.',
+    unit: 'Running only the unit tests. Requires ' +
+        cyan('gulp css') +  ' to have been run first.',
+    randomize: 'Randomizing the order in which tests are run.',
+    testlist: 'Running the tests listed in ' + cyan(argv.testlist),
+    compiled:  'Running tests against minified code.',
+    grep: 'Only running tests that match the pattern "' +
+        cyan(argv.grep) + '".'
+  };
+  if (!process.env.TRAVIS) {
+    util.log(green('Run', cyan('gulp help'),
+        'to see a list of all test flags. (Use', cyan('--nohelp'),
+        'to silence these messages.)'));
+    if (!argv.unit && !argv.integration && !argv.files) {
+      util.log(green('Running all tests. Use',
+          cyan('--unit'), 'or', cyan('--integration'),
+          'to run just the unit tests or integration tests.'));
+    }
+    if (!argv.compiled) {
+      util.log(green('Running tests against unminified code.'));
+    }
+    Object.keys(argv).forEach(arg => {
+      const message = argvMessages[arg];
+      if (message) {
+        util.log(yellow('--' + arg + ':'), green(message));
+      }
+    });
+  }
+}
+
+
 /**
  * Run tests.
  */
 gulp.task('test', 'Runs tests',
     argv.nobuild ? [] : (argv.unit ? ['css'] : ['build']), function(done) {
+  if (!argv.nohelp) {
+    printArgvMessages();
+  }
+
   if (!argv.integration && process.env.AMPSAUCE_REPO) {
     console./*OK*/info('Deactivated for ampsauce repo')
   }
@@ -138,7 +195,6 @@ gulp.task('test', 'Runs tests',
   } else if (argv.unit) {
     c.files = config.unitTestPaths;
   } else if (argv.randomize || argv.glob || argv.a4a) {
-    /** Randomize the order of the test running */
     var testPaths;
     if (argv.a4a) {
       testPaths = [
@@ -163,13 +219,12 @@ gulp.task('test', 'Runs tests',
     if (argv.randomize) {
       testFiles = shuffleArray(testFiles);
     }
-    // we need to replace the test init with something that won't match
-    // any file. _init_tests gets added twice due to the regex matching.
-    testFiles[testFiles.indexOf('test/_init_tests.js')] = '_WONTMATCH.qqq';
+
+    testFiles.splice(testFiles.indexOf('test/_init_tests.js'),1);
     c.files = config.commonTestPaths.concat(testFiles);
 
     util.log(util.colors.blue(JSON.stringify(c.files)));
-    util.log(util.colors.yellow("Save the above files in a .json file to reuse"));
+    util.log(yellow("Save the above files in a .json file to reuse"));
 
   } else if (argv.testlist) {
     var file = read.file(argv.testlist);
@@ -200,6 +255,33 @@ gulp.task('test', 'Runs tests',
     };
   }
 
+  if (argv.coverage) {
+    util.log(util.colors.blue('Including code coverage tests'));
+    c.reporters = c.reporters.concat(['progress', 'coverage']);
+    if (c.preprocessors['src/**/*.js']) {
+      c.preprocessors['src/**/*.js'].push('coverage');
+    }
+    c.preprocessors['extensions/**/*.js'] &&
+        c.preprocessors['extensions/**/*.js'].push('coverage');
+    c.coverageReporter = {
+      dir: 'test/coverage',
+      reporters: [
+        { type: 'html', subdir: 'report-html' },
+        { type: 'lcov', subdir: 'report-lcov' },
+        { type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt' },
+        { type: 'text', subdir: '.', file: 'text.txt' },
+        { type: 'text-summary', subdir: '.', file: 'text-summary.txt' },
+      ],
+      instrumenterOptions: {
+        istanbul: {
+          noCompact: true,
+        }
+      }
+    };
+    // TODO(jonkeller): Add c.coverageReporter.check as shown in
+    // https://github.com/karma-runner/karma-coverage/blob/master/docs/configuration.md
+  }
+
   // Run fake-server to test XHR responses.
   var server = gulp.src(process.cwd())
       .pipe(webserver({
@@ -209,13 +291,13 @@ gulp.task('test', 'Runs tests',
         middleware: [app],
       })
       .on('kill', function () {
-        util.log(util.colors.yellow(
+        util.log(yellow(
             'Shutting down test responses server on localhost:31862'));
         process.nextTick(function() {
           process.exit();
         });
       }));
-  util.log(util.colors.yellow(
+  util.log(yellow(
       'Started test responses server on localhost:31862'));
 
   new Karma(c, function(exitCode) {
@@ -223,7 +305,7 @@ gulp.task('test', 'Runs tests',
     if (exitCode) {
       util.log(
           util.colors.red('ERROR:'),
-          util.colors.yellow('Karma test failed with exit code', exitCode));
+          yellow('Karma test failed with exit code', exitCode));
       process.exit(exitCode);
     } else {
       done();
@@ -249,6 +331,7 @@ gulp.task('test', 'Runs tests',
     'testlist': '  Runs tests specified in JSON by supplied file',
     'glob': '  Explicitly expands test paths using glob before passing ' +
         'to Karma',
+    'nohelp': '  Silence help messages that are printed prior to test run',
   }
 });
 

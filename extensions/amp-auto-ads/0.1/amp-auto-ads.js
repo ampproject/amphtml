@@ -27,12 +27,15 @@ import {getPlacementsFromConfigObj} from './placement';
 /** @const */
 const TAG = 'amp-auto-ads';
 
+/** @const */
+const AD_TAG = 'amp-ad';
 
 export class AmpAutoAds extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(self, 'amp-auto-ads'), 'Experiment is off');
+    user().assert(
+        isExperimentOn(this.win, 'amp-auto-ads'), 'Experiment is off');
 
     const type = this.element.getAttribute('type');
     user().assert(type, 'Missing type attribute');
@@ -43,6 +46,8 @@ export class AmpAutoAds extends AMP.BaseElement {
     if (!adNetwork.isEnabled(this.win)) {
       return;
     }
+
+    Services.extensionsFor(this.win)./*OK*/loadElementClass(AD_TAG);
 
     const configPromise = this.getConfig_(adNetwork.getConfigUrl());
     const docPromise = this.getAmpDoc().whenReady();
@@ -87,7 +92,8 @@ export class AmpAutoAds extends AMP.BaseElement {
         .fetchJson(configUrl, xhrInit)
         .then(res => res.json())
         .catch(reason => {
-          user().error(TAG, 'amp-auto-ads config xhr failed: ' + reason);
+          this.user().error(
+              TAG, 'amp-auto-ads config xhr failed: ' + reason);
           return null;
         });
   }

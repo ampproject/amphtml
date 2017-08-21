@@ -54,7 +54,7 @@ export function getContextMetadata(
   const layoutRect = element.getPageLayoutBox();
   attributes['_context'] = dict({
     'ampcontextVersion': '$internalRuntimeVersion$',
-    'ampcontextFilepath': urls.cdn + '/$internalRuntimeVersion$' +
+    'ampcontextFilepath': urls.thirdParty + '/$internalRuntimeVersion$' +
         '/ampcontext-v0.js',
     'sourceUrl': docInfo.sourceUrl,
     'referrer': referrer,

@@ -19,8 +19,11 @@ import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
-import {dev} from '../../../src/log';
+import {computedStyle, setImportantStyles} from '../../../src/style';
+import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {Services} from '../../../src/services';
+import {debounce} from '../../../src/utils/rate-limit';
 import * as st from '../../../src/style';
 
 /** @const {string} */
@@ -62,6 +65,19 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @private {?number} */
     this.scrollTimerId_ = null;
+
+    /** @const {function()} */
+    this.boundReschedule_ = debounce(this.win, () => {
+      const container = dev().assertElement(this.container_);
+      this.scheduleLayout(container);
+      this.scheduleResume(container);
+    }, 500);
+  }
+
+  /** @override */
+  buildCallback() {
+    this.element.classList.add('i-amphtml-overlay');
+    this.maybeSetTransparentBody_();
   }
 
   /** @override */
@@ -152,6 +168,8 @@ class AmpLightbox extends AMP.BaseElement {
       }
       // TODO: instead of laying out children all at once, layout children based
       // on visibility.
+      this.element.addEventListener('transitionend', this.boundReschedule_);
+      this.element.addEventListener('animationend', this.boundReschedule_);
       this.scheduleLayout(container);
       this.scheduleResume(container);
     });
@@ -195,6 +213,8 @@ class AmpLightbox extends AMP.BaseElement {
     }
     this.win.document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
+    this.element.removeEventListener('transitionend', this.boundReschedule_);
+    this.element.removeEventListener('animationend', this.boundReschedule_);
     this.boundCloseOnEscape_ = null;
     this.schedulePause(dev().assertElement(this.container_));
     this.active_ = false;
@@ -309,6 +329,59 @@ class AmpLightbox extends AMP.BaseElement {
   getHistory_() {
     return Services.historyForDoc(this.getAmpDoc());
   }
+
+  /**
+   * Sets the document body to transparent to allow for frame "merging" if the
+   * element is under FIE.
+   * The module-level execution of setTransparentBody() only works on inabox,
+   * so we need to perform the check on element build time as well.
+   * @private
+   */
+  maybeSetTransparentBody_() {
+    if (this.getAmpDoc().win != this.win) { // in FIE
+      setTransparentBody(this.getAmpDoc().win, /** @type {!HTMLBodyElement} */ (
+          dev().assert(this.win.document.body)));
+    }
+  }
 }
+
+
+/**
+ * Sets the document body to transparent to allow for frame "merging".
+ * @param {!Window} win
+ * @param {!HTMLBodyElement} body
+ * @private
+ */
+function setTransparentBody(win, body) {
+  Services.vsyncFor(win).run({
+    measure(state) {
+      state.alreadyTransparent =
+          computedStyle(win, body)['background-color'] == 'rgba(0, 0, 0, 0)';
+    },
+    mutate(state) {
+      if (!state.alreadyTransparent && !getMode().test) {
+
+        // TODO(alanorozco): Create documentation page and link it here once the
+        // A4A lightbox experiment is turned on.
+        user().warn(TAG,
+            'The background of the <body> element has been forced to ' +
+            'transparent. If you need to set background, use an intermediate ' +
+            'container.');
+      }
+
+      // set as !important regardless to prevent changes
+      setImportantStyles(body, {background: 'transparent'});
+    },
+  }, {});
+}
+
+
+// TODO(alanorozco): refactor this somehow so we don't need to do a direct
+// getMode check
+if (getMode().runtime == 'inabox') {
+  setTransparentBody(window, /** @type {!HTMLBodyElement} */ (
+      dev().assert(document.body)));
+}
+
 
 AMP.registerElement('amp-lightbox', AmpLightbox, CSS);

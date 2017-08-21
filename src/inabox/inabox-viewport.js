@@ -21,16 +21,17 @@ import {registerServiceBuilderForDoc} from '../service';
 import {
   nativeIntersectionObserverSupported,
 } from '../../src/intersection-observer-polyfill';
-import {layoutRectLtwh} from '../layout-rect';
+import {
+  layoutRectLtwh,
+  moveLayoutRect,
+} from '../layout-rect';
 import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
 import {px, setImportantStyles, resetStyles} from '../../src/style';
 
-
 /** @const {string} */
 const TAG = 'inabox-viewport';
-
 
 /** @visibleForTesting */
 export function prepareBodyForOverlay(win, bodyElement) {
@@ -42,7 +43,7 @@ export function prepareBodyForOverlay(win, bodyElement) {
     mutate: state => {
       // We need to override runtime-level !important rules
       setImportantStyles(bodyElement, {
-        'background': 'transparent', // TODO(alanorozco): do this early
+        'background': 'transparent',
         'left': '50%',
         'top': '50%',
         'right': 'auto',
@@ -61,8 +62,8 @@ export function prepareBodyForOverlay(win, bodyElement) {
 /** @visibleForTesting */
 export function resetBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).mutatePromise(() => {
-    // we're not resetting background here as we need to set it to
-    // transparent permanently (see TODO)
+    // We're not resetting background here as it's supposed to remain
+    // transparent.
     resetStyles(bodyElement, [
       'position',
       'left',
@@ -136,6 +137,7 @@ export class ViewportBindingInabox {
 
   /** @private */
   listenForPosition_() {
+
     if (nativeIntersectionObserverSupported(this.win)) {
       // Using native IntersectionObserver, no position data needed
       // from host doc.
@@ -147,9 +149,9 @@ export class ViewportBindingInabox {
         data => {
           dev().fine(TAG, 'Position changed: ', data);
           const oldViewportRect = this.viewportRect_;
-          this.viewportRect_ = data.viewport;
+          this.viewportRect_ = data.viewportRect;
 
-          this.updateBoxRect_(data.target);
+          this.updateBoxRect_(data.targetRect);
 
           if (isResized(this.viewportRect_, oldViewportRect)) {
             this.resizeObservable_.fire();
@@ -199,13 +201,17 @@ export class ViewportBindingInabox {
   }
 
   /**
-   * @param {!../layout-rect.LayoutRectDef|undefined} boxRect
+   * @param {?../layout-rect.LayoutRectDef|undefined} positionRect
    * @private
    */
-  updateBoxRect_(boxRect) {
-    if (!boxRect) {
+  updateBoxRect_(positionRect) {
+    if (!positionRect) {
       return;
     }
+
+    const boxRect = moveLayoutRect(positionRect, this.viewportRect_.left,
+        this.viewportRect_.top);
+
     if (isChanged(boxRect, this.boxRect_)) {
       dev().fine(TAG, 'Updating viewport box rect: ', boxRect);
 

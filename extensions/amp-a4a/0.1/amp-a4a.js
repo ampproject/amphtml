@@ -38,7 +38,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {utf8Decode} from '../../../src/utils/bytes';
-import {isExperimentOn} from '../../../src/experiments';
+import {isCanary, isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
@@ -54,10 +54,6 @@ import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-
-// Uncomment the next two lines when testing locally.
-//import '../../amp-ad/0.1/amp-ad-ui';
-//import '../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -145,6 +141,7 @@ export const LIFECYCLE_STAGES = {
   iniLoad: '26',
   resumeCallback: '27',
   visIniLoad: '29',
+  upgradeDelay: '30',
 };
 
 /**
@@ -256,7 +253,6 @@ export class AmpA4A extends AMP.BaseElement {
      * returned.
      *
      * @const {function():number}
-     * @private
      */
     this.getNow_ = (this.win.performance && this.win.performance.now) ?
         this.win.performance.now.bind(this.win.performance) : Date.now;
@@ -304,6 +300,14 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @protected {boolean} */
     this.isRelayoutNeededFlag = false;
+
+    /**
+     * Used as a signal in some of the CSI pings. Canary is shortened to 'ca'
+     * and production to 'pr'. TODO(@glevitzky, #10060) Include other release
+     * types (control) when available.
+     * @private @const {string}
+     */
+    this.releaseType_ = isCanary(this.win) ? 'ca' : 'pr';
   }
 
   /** @override */
@@ -337,6 +341,12 @@ export class AmpA4A extends AMP.BaseElement {
           dev().error(TAG, this.element.getAttribute('type'),
               'Error on emitLifecycleEvent', err, varArgs) ;
         });
+    const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
+    dev().info(TAG,
+        `upgradeDelay ${this.element.getAttribute('type')}: ${upgradeDelayMs}`);
+    this.protectedEmitLifecycleEvent_('upgradeDelay', {
+      'forced_delta': upgradeDelayMs,
+    });
 
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     const verifier = signatureVerifierFor(this.win);
@@ -661,7 +671,15 @@ export class AmpA4A extends AMP.BaseElement {
                 this.protectedEmitLifecycleEvent_(eventName, extraVariables);
               })
               .then(status => {
-                this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
+                if (getMode().localDev &&
+                    this.element.getAttribute('type') == 'fake') {
+                  // do not verify signature for fake type ad
+                  status = VerificationStatus.OK;
+                }
+                this.protectedEmitLifecycleEvent_('adResponseValidateEnd', {
+                  'signatureValidationResult': status,
+                  'releaseType': this.releaseType_,
+                });
                 switch (status) {
                   case VerificationStatus.OK:
                     return bytes;
@@ -1311,7 +1329,10 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaCachedContentIframe_(adUrl) {
-    this.protectedEmitLifecycleEvent_('renderCrossDomainStart');
+    this.protectedEmitLifecycleEvent_('renderCrossDomainStart', {
+      'isAmpCreative': this.isVerifiedAmpCreative_,
+      'releaseType': this.releaseType_,
+    });
     return this.iframeRenderHelper_(dict({
       'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
       'name': JSON.stringify(
@@ -1333,7 +1354,10 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
         method == XORIGIN_MODE.NAMEFRAME,
         'Unrecognized A4A cross-domain rendering mode: %s', method);
-    this.protectedEmitLifecycleEvent_('renderSafeFrameStart');
+    this.protectedEmitLifecycleEvent_('renderSafeFrameStart', {
+      'isAmpCreative': this.isVerifiedAmpCreative_,
+      'releaseType': this.releaseType_,
+    });
     const checkStillCurrent = this.verifyStillCurrent();
     return utf8Decode(creativeBody).then(creative => {
       checkStillCurrent();

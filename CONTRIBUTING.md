@@ -4,9 +4,10 @@ The AMP HTML project strongly encourages technical [contributions](https://www.a
 
 We hope you'll become an ongoing participant in our open source community but we also welcome one-off contributions for the issues you're particularly passionate about.
 
+**If you have questions about using AMP or are encountering problems using AMP on your site please visit our [support page](SUPPORT.md) for help.**
+
 - [Reporting issues with AMP](#reporting-issues-with-amp)
   * [Bugs](#bugs)
-  * [Questions about AMP](#questions-about-amp)
   * [Suggestions and feature requests](#suggestions-and-feature-requests)
 - [Contributing code](#contributing-code)
   * [Tips for new open source contributors](#tips-for-new-open-source-contributors)
@@ -28,12 +29,6 @@ We hope you'll become an ongoing participant in our open source community but we
 If you find a bug in AMP, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).  Members of the community are regularly monitoring issues and will try to fix open bugs quickly according to our [prioritization guidelines](https://github.com/ampproject/amphtml/blob/master/contributing/issue-priorities.md).
 
 The best bug reports provide a detailed description of the issue (including screenshots if possible), step-by-step instructions for predictably reproducing the issue, and possibly even a working example that demonstrates the issue.
-
-### Questions about AMP
-
-Questions about how to use AMP or other general questions about AMP should be asked on [Stack Overflow under the AMP HTML tag](http://stackoverflow.com/questions/tagged/amp-html) instead of filing an issue here.
-
-Questions and issues related to Google Search should be asked on [Google's AMP forum](https://goo.gl/utQ1KZ).
 
 ### Suggestions and feature requests
 
@@ -93,7 +88,7 @@ Because Extended Components may have significant impact on AMP HTML performance,
 In particular we strive to design the overall component set, so that a large number of use cases can be composed from them. Instead of creating a new component it may thus be a better solution to combine existing components to a similar effect.
 
 We have a few additional resources that provide an introduction to contributing extended components:
-* ["Building an AMP Extension"](https://docs.google.com/document/d/19o7eDta6oqPGF4RQ17LvZ9CHVQN53whN-mCIeIMM8Qk/edit) has a detailed description of how to build an AMP component.
+* ["Building an AMP Extension"](contributing/building-an-amp-extension.md) has a detailed description of how to build an AMP component.
 * ["Creating your first AMP Component" codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/#0) provides a quick overview of the steps you need to go through to create a component with examples you can modify for your component.
 * The ["Building a new AMP component" talk at AMP Conf 2017](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) provides an introduction to contributing AMP components.
 

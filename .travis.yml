@@ -8,17 +8,6 @@ python:
 notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
-addons:
-  hosts:
-    - ads.localhost
-    - iframe.localhost
-    # Requested by some tests because they need a valid font host,
-    # but should not resolve in tests.
-    - fonts.googleapis.com
-  apt:
-    packages:
-    - protobuf-compiler
-    - python-protobuf
 before_install:
   - export CHROME_BIN=google-chrome
   - export DISPLAY=:99.0
@@ -44,8 +33,23 @@ env:
 matrix:
   include:
     - env: BUILD_SHARD="unit_tests"
+      addons:
+        hosts:
+          - ads.localhost
+          - iframe.localhost
+          # Requested by some tests because they need a valid font host,
+          # but should not resolve in tests.
+          - fonts.googleapis.com
+        apt:
+          packages:
+          - protobuf-compiler
+          - python-protobuf
     - env: BUILD_SHARD="integration_tests"
       addons:
+        apt:
+          packages:
+          - protobuf-compiler
+          - python-protobuf
         sauce_connect:
           username: "amphtml"
         jwt:

@@ -519,6 +519,7 @@ export function playAds(global) {
 export function onContentEnded() {
   contentComplete = true;
   adsLoader.contentComplete();
+  window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
 }
 
 /**
@@ -564,6 +565,7 @@ export function onAdsLoaderError() {
  * @visibleForTesting
  */
 export function onAdError() {
+  window.parent./*OK*/postMessage({event: VideoEvents.AD_END}, '*');
   if (adsManager) {
     adsManager.destroy();
   }
@@ -585,6 +587,7 @@ export function onContentPauseRequested(global) {
     adsManagerHeightOnLoad = null;
   }
   adsActive = true;
+  window.parent./*OK*/postMessage({event: VideoEvents.AD_START}, '*');
   videoPlayer.removeEventListener(interactEvent, showControls);
   setStyle(adContainerDiv, 'display', 'block');
   videoPlayer.removeEventListener('ended', onContentEnded);
@@ -600,6 +603,7 @@ export function onContentPauseRequested(global) {
 export function onContentResumeRequested() {
   adsActive = false;
   videoPlayer.addEventListener(interactEvent, showControls);
+  window.parent./*OK*/postMessage({event: VideoEvents.AD_END}, '*');
   if (!contentComplete) {
     // CONTENT_RESUME will fire after post-rolls as well, and we don't want to
     // resume content in that case.
@@ -1067,6 +1071,7 @@ export function setHideControlsTimeoutForTesting(newTimeout) {
  *
  * @constant {!Object<string, string>}
  */
+// TODO(aghassemi, #9216): Use video-interface.js
 const VideoEvents = {
   /**
    * load
@@ -1110,7 +1115,7 @@ const VideoEvents = {
    *
    * Fired when the video is unmuted.
    *
-   * @event pause
+   * @event unmuted
    */
   UNMUTED: 'unmuted',
 
@@ -1133,4 +1138,27 @@ const VideoEvents = {
    * @event reload
    */
   RELOAD: 'reloaded',
+  /**
+   * pre/mid/post Ad start
+   *
+   * Fired when an Ad starts playing.
+   *
+   * This is used to remove any overlay shims during Ad play during autoplay
+   * or minimized-to-corner version of the player.
+   *
+   * @event ad_start
+   */
+  AD_START: 'ad_start',
+
+  /**
+   * pre/mid/post Ad ends
+   *
+   * Fired when an Ad ends playing.
+   *
+   * This is used to restore any overlay shims during Ad play during autoplay
+   * or minimized-to-corner version of the player.
+   *
+   * @event ad_end
+   */
+  AD_END: 'ad_end',
 };

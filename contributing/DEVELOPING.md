@@ -50,6 +50,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp test`<sup>[[1]](#footnote-1)</sup>                                | Runs tests in Chrome.                                                 |
 | `gulp test --verbose`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Chrome with logging enabled.                            |
 | `gulp test --nobuild`                                                   | Runs tests without re-build.                                          |
+| `gulp test --coverage`                                                  | Runs code coverage tests. After running, the report will be available at test/coverage/report-html/index.html |
 | `gulp test --watch`<sup>[[1]](#footnote-1)</sup>                        | Watches for changes in files, runs corresponding test(s) in Chrome.   |
 | `gulp test --watch --verbose`<sup>[[1]](#footnote-1)</sup>              | Same as `watch`, with logging enabled.                                 |
 | `gulp test --saucelabs`<sup>[[1]](#footnote-1)</sup>                    | Runs test on saucelabs (requires [setup](#testing-on-sauce-labs)).                |
@@ -182,6 +183,7 @@ To run the tests on Sauce Labs:
    ```
 * It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
 
+* If you see "Cannot find module '../build/safe-execute'", this is caused by a caching issue - try uninstalling and reinstalling the 'wd' module as described in [karma-sauce-launcher issue #117](https://github.com/karma-runner/karma-sauce-launcher/issues/117).
 
 ## Visual Diff Tests
 
@@ -287,7 +289,7 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 
 - [Life of an AMP *](https://docs.google.com/document/d/1WdNj3qNFDmtI--c2PqyRYrPrxSg2a-93z5iX0SzoQS0/edit#)
 - [AMP Layout system](../spec/amp-html-layout.md)
-- [Building an AMP Extension](https://docs.google.com/document/d/19o7eDta6oqPGF4RQ17LvZ9CHVQN53whN-mCIeIMM8Qk/edit#)
+- [Building an AMP Extension](building-an-amp-extension.md)
 
 We also recommend scanning the [spec](../spec/). The non-element part should help understand some of the design aspects.
 
