@@ -950,4 +950,8 @@ export class BaseElement {
    * @public
    */
   onLayoutMeasure() {}
+
+  user() {
+    return user(this.element);
+  }
 }

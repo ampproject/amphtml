@@ -16,7 +16,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {srcsetFromElement} from '../../../src/srcset';
-import {dev, user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import * as st from '../../../src/style';
 
 export class AmpAnim extends AMP.BaseElement {
@@ -51,7 +51,8 @@ export class AmpAnim extends AMP.BaseElement {
     // only read "Graphic" when using only 'alt'.
     if (this.element.getAttribute('role') == 'img') {
       this.element.removeAttribute('role');
-      user().error('AMP-ANIM', 'Setting role=img on amp-anim elements ' +
+      this.user().error(
+          'AMP-ANIM', 'Setting role=img on amp-anim elements ' +
           'breaks screen readers. Please just set alt or ARIA attributes, ' +
           'they will be correctly propagated for the underlying <img> ' +
           'element.');

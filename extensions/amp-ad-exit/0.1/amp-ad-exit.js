@@ -186,7 +186,7 @@ export class AmpAdExit extends AMP.BaseElement {
       this.transport_.beacon = config.transport[TransportMode.BEACON] !== false;
       this.transport_.image = config.transport[TransportMode.IMAGE] !== false;
     } catch (e) {
-      user().error(TAG, 'Invalid JSON config', e);
+      this.user().error(TAG, 'Invalid JSON config', e);
       throw e;
     }
   }

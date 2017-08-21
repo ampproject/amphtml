@@ -92,7 +92,8 @@ export class AmpAutoAds extends AMP.BaseElement {
         .fetchJson(configUrl, xhrInit)
         .then(res => res.json())
         .catch(reason => {
-          user().error(TAG, 'amp-auto-ads config xhr failed: ' + reason);
+          this.user().error(
+              TAG, 'amp-auto-ads config xhr failed: ' + reason);
           return null;
         });
   }
