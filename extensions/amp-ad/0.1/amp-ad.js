@@ -95,7 +95,8 @@ export class AmpAd extends AMP.BaseElement {
           // Work around presubmit restrictions.
             const TAG = this.element.tagName;
           // Report error and fallback to 3p
-            user().error(TAG, 'Unable to load ad implementation for type ',
+            this.user().error(
+                TAG, 'Unable to load ad implementation for type ',
                 type, ', falling back to 3p, error: ', error);
             return new AmpAd3PImpl(this.element);
           });
