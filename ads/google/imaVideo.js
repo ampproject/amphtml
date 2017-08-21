@@ -565,6 +565,7 @@ export function onAdsLoaderError() {
  * @visibleForTesting
  */
 export function onAdError() {
+  window.parent./*OK*/postMessage({event: VideoEvents.AD_END}, '*');
   if (adsManager) {
     adsManager.destroy();
   }
