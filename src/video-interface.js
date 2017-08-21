@@ -313,13 +313,28 @@ export const VideoEvents = {
   RELOAD: 'reloaded',
 
   /**
-   * ended
+   * pre/mid/post Ad start
    *
-   * Fired when the video ends.
+   * Fired when an Ad starts playing.
    *
-   * @event ended
+   * This is used to remove any overlay shims during Ad play during autoplay
+   * or minimized-to-corner version of the player.
+   *
+   * @event ad_start
    */
-  ENDED: 'ended',
+  AD_START: 'ad_start',
+
+  /**
+   * pre/mid/post Ad ends
+   *
+   * Fired when an Ad ends playing.
+   *
+   * This is used to restore any overlay shims during Ad play during autoplay
+   * or minimized-to-corner version of the player.
+   *
+   * @event ad_end
+   */
+  AD_END: 'ad_end',
 };
 
 
