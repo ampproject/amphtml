@@ -26,7 +26,7 @@ import {camelCaseToDash} from '../../src/string';
 export function adsense(global, data) {
   // TODO: check mandatory fields
   validateData(data, [],
-      ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
+      ['adClient', 'adSlot', 'adHost', 'adTest', 'tagOrigin', 'experimentId',
         'ampSlotIndex', 'adChannel']);
 
   if (global.context.clientId) {
@@ -41,7 +41,7 @@ export function adsense(global, data) {
   global.document.body.appendChild(s);
 
   const i = global.document.createElement('ins');
-  ['adChannel', 'adClient', 'adSlot', 'adHost', 'adTest', 'tagOrigin']
+  ['adChannel', 'adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin']
       .forEach(datum => {
         if (data[datum]) {
           i.setAttribute('data-' + camelCaseToDash(datum), data[datum]);
