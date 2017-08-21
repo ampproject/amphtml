@@ -110,6 +110,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
         ampdoc: 'fie',
         runtimeOn: false,
       },
+      mockFetch: false,
     }, env => {
       let bind;
       let container;
@@ -175,6 +176,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
       ampdoc: 'shadow',
       runtimeOn: false,
     },
+    mockFetch: false,
   }, env => {
     let bind;
     let container;
@@ -201,6 +203,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
       ampdoc: 'single',
       runtimeOn: false,
     },
+    mockFetch: false,
   }, env => {
     let bind;
     let container;
