@@ -34,8 +34,7 @@ export class AmpAutoAds extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(
-        isExperimentOn(this.win, 'amp-auto-ads'), 'Experiment is off');
+    user().assert(isExperimentOn(this.win, TAG), 'Experiment is off');
 
     const type = this.element.getAttribute('type');
     user().assert(type, 'Missing type attribute');
@@ -99,4 +98,7 @@ export class AmpAutoAds extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-auto-ads', AmpAutoAds);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAutoAds);
+});

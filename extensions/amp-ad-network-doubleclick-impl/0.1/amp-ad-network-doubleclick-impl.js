@@ -979,8 +979,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 }
 
-AMP.registerElement(
-    'amp-ad-network-doubleclick-impl', AmpAdNetworkDoubleclickImpl);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAdNetworkDoubleclickImpl);
+});
 
 
 /** @visibileForTesting */

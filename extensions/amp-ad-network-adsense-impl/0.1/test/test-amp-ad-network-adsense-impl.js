@@ -57,9 +57,36 @@ function createAdsenseImplElement(attributes, doc, opt_tag) {
   return addAttributesToElement(element, attributes);
 }
 
-describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
+describes.realWin('amp-ad-network-adsense-impl', {
+  amp: {
+    extensions: ['amp-ad', 'amp-ad-network-adsense-impl'],
+  },
+}, env => {
+  let win, doc;
   let impl;
   let element;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+    win.AMP_MODE = {test: true};
+    sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
+        () => {
+          return ['google'];
+        });
+    const viewer = win.services.viewer.obj;
+    sandbox.stub(viewer, 'getReferrerUrl',
+        () => Promise.resolve('https://acme.org/'));
+    element = createAdsenseImplElement({
+      'data-ad-client': 'ca-adsense',
+      'width': '320',
+      'height': '50',
+      'data-experiment-id': '8675309',
+    }, doc);
+    sandbox.stub(element, 'tryUpgrade_', () => {});
+    doc.body.appendChild(element);
+    impl = new AmpAdNetworkAdsenseImpl(element);
+  });
 
   /**
    * Instantiates element and impl, adding the former to the document of the
@@ -68,35 +95,21 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
    */
   function createImplTag(config) {
     config.type = 'adsense';
-    element = createElementWithAttributes(env.win.document, 'amp-ad', config);
+    element = createElementWithAttributes(doc, 'amp-ad', config);
     // To trigger CSS styling.
     element.setAttribute('data-a4a-upgrade-type',
         'amp-ad-network-adsense-impl');
     // Used to test styling which is targetted at first iframe child of
     // amp-ad.
-    const iframe = env.win.document.createElement('iframe');
+    const iframe = doc.createElement('iframe');
     element.appendChild(iframe);
-    document.body.appendChild(element);
+    sandbox.stub(element, 'tryUpgrade_', () => {});
+    doc.body.appendChild(element);
     impl = new AmpAdNetworkAdsenseImpl(element);
     impl.buildCallback();
+    element.classList.remove('i-amphtml-notbuilt');
     impl.iframe = iframe;
   }
-
-
-  beforeEach(() => {
-    sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
-        () => {
-          return ['google'];
-        });
-    element = createAdsenseImplElement({
-      'data-ad-client': 'ca-adsense',
-      'width': '320',
-      'height': '50',
-      'data-experiment-id': '8675309',
-    }, env.win.document);
-    document.body.appendChild(element);
-    impl = new AmpAdNetworkAdsenseImpl(element);
-  });
 
   describe('#isValidElement', () => {
     it('should be valid', () => {
@@ -104,7 +117,7 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
     });
     it('should NOT be valid (impl tag name)', () => {
       element = createAdsenseImplElement({'data-ad-client': 'ca-adsense'},
-          env.win.document, 'amp-ad-network-adsense-impl');
+          doc, 'amp-ad-network-adsense-impl');
       impl = new AmpAdNetworkAdsenseImpl(element);
       expect(impl.isValidElement()).to.be.false;
     });
@@ -115,7 +128,7 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
     });
     it('should be valid (amp-embed)', () => {
       element = createAdsenseImplElement({'data-ad-client': 'ca-adsense'},
-          env.win.document, 'amp-embed');
+          doc, 'amp-embed');
       impl = new AmpAdNetworkAdsenseImpl(element);
       // Force test mode to ensure isGoogleAdsA4AValidEnvironment returns
       // true.
@@ -128,7 +141,6 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
     let loadExtensionSpy;
 
     beforeEach(() => {
-      const doc = env.win.document;
       element = createElementWithAttributes(doc, 'amp-ad', {
         'width': '200',
         'height': '50',
@@ -184,7 +196,6 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
 
   describe('#onCreativeRender', () => {
     beforeEach(() => {
-      const doc = env.win.document;
       element = createElementWithAttributes(doc, 'amp-ad', {
         'width': '200',
         'height': '50',
@@ -257,7 +268,7 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
 
     function verifyCss(iframe) {
       expect(iframe).to.be.ok;
-      const style = window.getComputedStyle(iframe);
+      const style = win.getComputedStyle(iframe);
       expect(style.top).to.equal('50%');
       expect(style.left).to.equal('50%');
       // We expect these set, but the exact dimensions will be determined by the
@@ -271,8 +282,6 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
       expect(style.transform).to.match(new RegExp(
           'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
     }
-
-    afterEach(() => document.body.removeChild(impl.element));
 
     it('centers iframe in slot when height && width', () => {
       createImplTag({
@@ -337,11 +346,11 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
 
     it('should contain act', () => {
       const ampStickyAd =
-            createElementWithAttributes(env.win.document, 'amp-sticky-ad', {
+            createElementWithAttributes(doc, 'amp-sticky-ad', {
               'layout': 'nodisplay',
             });
       ampStickyAd.appendChild(element);
-      env.win.document.body.appendChild(ampStickyAd);
+      doc.body.appendChild(ampStickyAd);
       return impl.getAdUrl().then(adUrl => {
         expect(adUrl.indexOf('act=sa') >= 0).to.be.true;
       });
@@ -441,7 +450,7 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
           /(\?|&)pfx=(1|0)(&|$)/,
           /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%]+(&|$)/,
           /(\?|&)top=localhost(&|$)/,
-          /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D\d+(&|$)/,
+          /(\?|&)ref=https%3A%2F%2Facme.org%2F(&|$)/,
           /(\?|&)dtd=\d+(&|$)/,
         ].forEach(regexp => expect(url).to.match(regexp));
       });
@@ -453,28 +462,28 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
       // Reset counter for purpose of this test.
-      delete env.win['ampAdGoogleIfiCounter'];
+      delete win['ampAdGoogleIfiCounter'];
       const elem1 = createAdsenseImplElement({
         'data-ad-client': 'ca-adsense',
         'width': '320',
         'height': '50',
         'data-experiment-id': '8675309',
-      }, env.win.document);
-      env.win.document.body.appendChild(elem1);
+      }, doc);
+      doc.body.appendChild(elem1);
       const elem2 = createAdsenseImplElement({
         'data-ad-client': 'ca-adsense',
         'width': '320',
         'height': '50',
         'data-experiment-id': '8675309',
-      }, env.win.document, 'amp-ad');
-      env.win.document.body.appendChild(elem2);
+      }, doc, 'amp-ad');
+      doc.body.appendChild(elem2);
       const elem3 = createAdsenseImplElement({
         'data-ad-client': 'ca-not-adsense',
         'width': '320',
         'height': '50',
         'data-experiment-id': '8675309',
-      }, env.win.document, 'amp-ad');
-      env.win.document.body.appendChild(elem3);
+      }, doc, 'amp-ad');
+      doc.body.appendChild(elem3);
       const impl1 = new AmpAdNetworkAdsenseImpl(elem1);
       const impl2 = new AmpAdNetworkAdsenseImpl(elem2);
       const impl3 = new AmpAdNetworkAdsenseImpl(elem3);
@@ -517,15 +526,15 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
 
           impl.layoutMeasureExecuted_ = true;
           impl.uiHandler = {applyUnlayoutUI: () => {}};
-          const placeholder = document.createElement('div');
+          const placeholder = doc.createElement('div');
           placeholder.setAttribute('placeholder', '');
-          const fallback = document.createElement('div');
+          const fallback = doc.createElement('div');
           fallback.setAttribute('fallback', '');
           impl.element.appendChild(placeholder);
           impl.element.appendChild(fallback);
           impl.ampAnalyticsConfig_ = {};
           impl.ampAnalyticsElement_ =
-              document.createElement('amp-analytics');
+              doc.createElement('amp-analytics');
           impl.element.appendChild(impl.ampAnalyticsElement_);
 
           expect(impl.iframe).to.be.ok;
@@ -549,7 +558,7 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
     let impl;
     beforeEach(() => {
       impl = new AmpAdNetworkAdsenseImpl(
-        createElementWithAttributes(env.win.document, 'amp-ad', {
+        createElementWithAttributes(doc, 'amp-ad', {
           type: 'adsense',
         }));
     });
