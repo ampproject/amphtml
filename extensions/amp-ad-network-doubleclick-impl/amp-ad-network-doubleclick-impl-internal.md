@@ -124,4 +124,4 @@ Refresh is currently not supported for SRA enabled slots. If a slot is enabled f
 
 #### AMP Ad Container Compatibility
 
-Refresh is currently supported only in amp-sticky-ad and amp-carousel container types.
+The only AMP ad containers in which refresh is currently supported are amp-sticky-ad and amp-carousel container types.
