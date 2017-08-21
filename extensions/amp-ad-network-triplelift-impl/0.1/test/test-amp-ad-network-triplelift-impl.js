@@ -21,19 +21,16 @@ import {
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import * as sinon from 'sinon';
 import {tripleliftIsA4AEnabled} from '../triplelift-a4a-config';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {createIframePromise} from '../../../../testing/iframe';
 
-describe('triplelift-a4a-config', () => {
+
+describes.realWin('triplelift-a4a-config', {amp: false}, env => {
   let doc;
   let win;
   beforeEach(() => {
-    return createIframePromise().then(f => {
-      doc = f.doc;
-      win = f.win;
-    });
+    win = env.win;
+    doc = win.document;
   });
   it('should pass a4a config predicate', () => {
     const element = createElementWithAttributes(doc, 'amp-ad', {
@@ -63,15 +60,20 @@ describe('triplelift-a4a-config', () => {
   });
 });
 
-describe('amp-ad-network-triplelift-impl', () => {
 
-  let sandbox;
+describes.realWin('amp-ad-network-triplelift-impl', {
+  amp: {
+    extensions: ['amp-ad-network-triplelift-impl'],
+  },
+}, env => {
+  let win, doc;
   let tripleliftImpl;
   let tripleliftImplElem;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    tripleliftImplElem = document.createElement('amp-ad');
+    win = env.win;
+    doc = win.document;
+    tripleliftImplElem = doc.createElement('amp-ad');
     tripleliftImplElem.setAttribute('type', 'triplelift');
     tripleliftImplElem.setAttribute('src',
         'https://ib.3lift.com/ttj?inv_code=ampforadstest_main_feed');
@@ -83,17 +85,12 @@ describe('amp-ad-network-triplelift-impl', () => {
     tripleliftImpl = new AmpAdNetworkTripleliftImpl(tripleliftImplElem);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   describe('#isValidElement', () => {
     it('should be valid', () => {
       expect(tripleliftImpl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
-      tripleliftImplElem =
-document.createElement('amp-ad-network-triplelift-impl');
+      tripleliftImplElem = doc.createElement('amp-ad-network-triplelift-impl');
       tripleliftImplElem.setAttribute('type', 'triplelift');
       tripleliftImpl = new AmpAdNetworkTripleliftImpl(tripleliftImplElem);
       expect(tripleliftImpl.isValidElement()).to.be.false;

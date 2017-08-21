@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
-import {Services} from '../../../../src/services';
 import {
     AmpAppBanner,
     AbstractAppBanner,
     AmpIosAppBanner,
     AmpAndroidAppBanner,
 } from '../amp-app-banner';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {Services} from '../../../../src/services';
 
-describes.realWin('amp-app-banner', {amp: true}, () => {
 
+describes.realWin('amp-app-banner', {
+  amp: {
+    extensions: ['amp-app-banner'],
+    canonicalUrl: 'https://example.com/amps.html',
+  },
+}, env => {
+  let win, doc, ampdoc;
   let vsync;
   let platform;
   let isAndroid = false;
@@ -63,82 +67,56 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
     }
   }
 
-  function getTestFrame() {
-    return createIframePromise(true).then(iframe => {
-      const ampdoc = new AmpDocSingle(iframe.win);
-      const viewer = Services.viewerForDoc(ampdoc);
-      sandbox.stub(viewer, 'isEmbedded', () => isEmbedded);
-      sandbox.stub(viewer, 'hasCapability', () => hasNavigateToCapability);
-      platform = Services.platformFor(iframe.win);
-      sandbox.stub(platform, 'isIos', () => isIos);
-      sandbox.stub(platform, 'isAndroid', () => isAndroid);
-      sandbox.stub(platform, 'isChrome', () => isChrome);
-      sandbox.stub(platform, 'isSafari', () => isSafari);
-      sandbox.stub(platform, 'isFirefox', () => isFirefox);
-      sandbox.stub(platform, 'isEdge', () => isEdge);
-
-      vsync = Services.vsyncFor(iframe.win);
-      sandbox.stub(vsync, 'runPromise', (task, state) => {
-        runTask(task, state);
-        return Promise.resolve();
-      });
-      sandbox.stub(vsync, 'run', runTask);
-      return iframe;
-    });
-  }
-
   function getAppBanner(config = {}) {
-    return getTestFrame().then(iframe => {
-      const link = iframe.doc.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      link.setAttribute('href', 'https://example.com/amps.html');
-      iframe.doc.head.appendChild(link);
+    if (config.iosMeta) {
+      const meta = doc.createElement('meta');
+      meta.setAttribute('name', 'apple-itunes-app');
+      meta.setAttribute('content', config.iosMeta.content);
+      doc.head.appendChild(meta);
+    }
 
-      if (config.iosMeta) {
-        const meta = iframe.doc.createElement('meta');
-        meta.setAttribute('name', 'apple-itunes-app');
-        meta.setAttribute('content', config.iosMeta.content);
-        iframe.doc.head.appendChild(meta);
-      }
+    const manifestObj = config.originManifest || config.androidManifest;
+    if (manifestObj) {
+      const rel = config.originManifest ? 'origin-manifest' : 'manifest';
+      const manifest = doc.createElement('link');
+      manifest.setAttribute('rel', rel);
+      manifest.setAttribute('href', manifestObj.href);
+      doc.head.appendChild(manifest);
+      sandbox.mock(Services.xhrFor(win)).expects('fetchJson')
+          .returns(Promise.resolve({
+            json() {
+              return Promise.resolve(manifestObj.content);
+            },
+          }));
+    }
 
-      const manifestObj = config.originManifest || config.androidManifest;
-      if (manifestObj) {
-        const rel = config.originManifest ? 'origin-manifest' : 'manifest';
-        const manifest = iframe.doc.createElement('link');
-        manifest.setAttribute('rel', rel);
-        manifest.setAttribute('href', manifestObj.href);
-        iframe.doc.head.appendChild(manifest);
-        sandbox.mock(Services.xhrFor(iframe.win)).expects('fetchJson')
-            .returns(Promise.resolve({
-              json() {
-                return Promise.resolve(manifestObj.content);
-              },
-            }));
-      }
+    const banner = doc.createElement('amp-app-banner');
+    banner.setAttribute('layout', 'nodisplay');
+    if (!config.noOpenButton) {
+      const openButton = doc.createElement('button');
+      openButton.setAttribute('open-button', '');
+      banner.appendChild(openButton);
+    }
 
-      const banner = iframe.doc.createElement('amp-app-banner');
-      banner.setAttribute('layout', 'nodisplay');
-      banner.getAmpDoc = () => iframe.ampdoc;
-      if (!config.noOpenButton) {
-        const openButton = iframe.doc.createElement('button');
-        openButton.setAttribute('open-button', '');
-        banner.appendChild(openButton);
-      }
-
-      return iframe.addElement(banner);
-    });
+    banner.id = 'banner0';
+    doc.body.appendChild(banner);
+    return banner.build()
+        .then(() => banner.layoutCallback())
+        .then(() => banner);
   }
 
   function testSetupAndShowBanner() {
     return getAppBanner({iosMeta, androidManifest}).then(banner => {
-      expect(banner.parentElement).to.not.be.null;
-      expect(banner.style.display).to.be.equal('');
-      const bannerTop = banner.querySelector(
-          'i-amphtml-app-banner-top-padding');
-      expect(bannerTop).to.exist;
-      const dismissBtn = banner.querySelector(
-          '.amp-app-banner-dismiss-button');
-      expect(dismissBtn).to.exist;
+      return banner.implementation_.isDismissed().then(() => {
+        expect(banner.parentElement).to.not.be.null;
+        expect(banner.style.display).to.be.equal('');
+        const bannerTop = banner.querySelector(
+            'i-amphtml-app-banner-top-padding');
+        expect(bannerTop).to.exist;
+        const dismissBtn = banner.querySelector(
+            '.amp-app-banner-dismiss-button');
+        expect(dismissBtn).to.exist;
+      });
     });
   }
 
@@ -302,6 +280,27 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
     isEdge = false;
     isEmbedded = false;
     hasNavigateToCapability = true;
+
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
+    const viewer = Services.viewerForDoc(ampdoc);
+    sandbox.stub(viewer, 'isEmbedded', () => isEmbedded);
+    sandbox.stub(viewer, 'hasCapability', () => hasNavigateToCapability);
+    platform = Services.platformFor(win);
+    sandbox.stub(platform, 'isIos', () => isIos);
+    sandbox.stub(platform, 'isAndroid', () => isAndroid);
+    sandbox.stub(platform, 'isChrome', () => isChrome);
+    sandbox.stub(platform, 'isSafari', () => isSafari);
+    sandbox.stub(platform, 'isFirefox', () => isFirefox);
+    sandbox.stub(platform, 'isEdge', () => isEdge);
+
+    vsync = Services.vsyncFor(win);
+    sandbox.stub(vsync, 'runPromise', (task, state) => {
+      runTask(task, state);
+      return Promise.resolve();
+    });
+    sandbox.stub(vsync, 'run', runTask);
   });
 
   describe('Choosing platform', () => {
@@ -502,45 +501,36 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
 
   describe('Abstract App Banner', () => {
     it('should setup click listener', () => {
-      return createIframePromise(true).then(iframe => {
-        const doc = iframe.doc;
-        const element = doc.createElement('div');
-        doc.body.appendChild(element);
-        const openButton = doc.createElement('button');
-        element.appendChild(openButton);
-        openButton.setAttribute('open-button', '');
-        openButton.addEventListener = sandbox.spy();
-        const banner = new AbstractAppBanner(element);
-        banner.setupOpenButton_(openButton, 'open-button', 'install-link');
-        expect(openButton.addEventListener).to.have.been.calledWith('click');
-      });
+      const element = doc.createElement('div');
+      doc.body.appendChild(element);
+      const openButton = doc.createElement('button');
+      element.appendChild(openButton);
+      openButton.setAttribute('open-button', '');
+      openButton.addEventListener = sandbox.spy();
+      const banner = new AbstractAppBanner(element);
+      banner.setupOpenButton_(openButton, 'open-button', 'install-link');
+      expect(openButton.addEventListener).to.have.been.calledWith('click');
     });
 
     it('should create dismiss button and setup click listener', () => {
-      return createIframePromise(true).then(iframe => {
-        const win = iframe.win;
-        const doc = iframe.doc;
-        vsync = Services.vsyncFor(win);
-        sandbox.stub(vsync, 'run', runTask);
-        const element = doc.createElement('div');
-        element.id = 'banner1';
-        element.getAmpDoc = () => iframe.ampdoc;
-        doc.body.appendChild(element);
-        const banner = new AbstractAppBanner(element);
-        banner.addDismissButton_();
+      const element = doc.createElement('div');
+      element.id = 'banner1';
+      element.getAmpDoc = () => ampdoc;
+      doc.body.appendChild(element);
+      const banner = new AbstractAppBanner(element);
+      banner.addDismissButton_();
 
-        const bannerTop = element.querySelector(
-            'i-amphtml-app-banner-top-padding');
-        expect(bannerTop).to.exist;
-        const dismissBtn = element.querySelector(
-            '.amp-app-banner-dismiss-button');
-        expect(dismissBtn).to.not.be.null;
-        expect(dismissBtn.parentElement).to.be.equal(element);
-        dismissBtn.dispatchEvent(new Event('click'));
+      const bannerTop = element.querySelector(
+          'i-amphtml-app-banner-top-padding');
+      expect(bannerTop).to.exist;
+      const dismissBtn = element.querySelector(
+          '.amp-app-banner-dismiss-button');
+      expect(dismissBtn).to.not.be.null;
+      expect(dismissBtn.parentElement).to.be.equal(element);
+      dismissBtn.dispatchEvent(new Event('click'));
+      return banner.isDismissed().then(value => {
         expect(element.parentElement).to.be.null;
-        return banner.isDismissed().then(value => {
-          expect(value).to.be.true;
-        });
+        expect(value).to.be.true;
       });
     });
   });

@@ -147,5 +147,8 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   }
 }
 
-AMP.registerElement(
-    'amp-ad-network-fake-impl', AmpAdNetworkFakeImpl);
+
+AMP.extension('amp-ad-network-fake-impl', '0.1', AMP => {
+  AMP.registerElement(
+      'amp-ad-network-fake-impl', AmpAdNetworkFakeImpl);
+});

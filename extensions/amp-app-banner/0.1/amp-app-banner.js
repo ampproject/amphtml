@@ -189,8 +189,8 @@ export class AmpIosAppBanner extends AbstractAppBanner {
   constructor(element) {
     super(element);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
+    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = null;
 
     /** @private {?Element} */
     this.metaTag_ = null;
@@ -210,6 +210,8 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
   /** @override */
   buildCallback() {
+    this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
+
     // We want to fallback to browser builtin mechanism when possible.
     const platform = Services.platformFor(this.win);
     this.canShowBuiltinBanner_ = !this.viewer_.isEmbedded()
@@ -482,4 +484,6 @@ function updateViewportPadding(state) {
 }
 
 
-AMP.registerElement('amp-app-banner', AmpAppBanner, CSS);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAppBanner, CSS);
+});

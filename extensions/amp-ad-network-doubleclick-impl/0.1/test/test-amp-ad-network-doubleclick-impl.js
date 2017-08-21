@@ -64,7 +64,9 @@ import '../../../amp-ad/0.1/amp-ad';
  * inherit that CSS from the parent page anymore.
  */
 const realWinConfig = {
-  amp: true,
+  amp: {
+    extensions: ['amp-ad-network-doubleclick-impl'],
+  },
   ampAdCss: true,
   allowExternalResources: true,
 };
@@ -302,10 +304,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
             };
           });
 
-      sandbox.stub(impl, 'getAmpDoc', () => {
-        doc.win = env.win;
-        return doc;
-      });
       // Reproduced from noopMethods in ads/google/a4a/test/test-utils.js,
       // to fix failures when this is run after 'gulp build', without a 'dist'.
       sandbox.stub(impl, 'getPageLayoutBox', () => {
@@ -665,10 +663,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
         // Boilerplate stubbing
       sandbox.stub(impl, 'shouldInitializePromiseChain_', () => true);
-      sandbox.stub(impl, 'getAmpDoc', () => {
-        doc.win = window;
-        return doc;
-      });
       sandbox.stub(impl, 'getPageLayoutBox', () => {
         return {
           top: 0,
