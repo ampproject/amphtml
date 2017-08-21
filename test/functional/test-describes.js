@@ -31,13 +31,13 @@ describe('fetch-mock', () => {
   }
 
   describes.realWin('on realWin', {
-    mockFetches: true,
+    mockFetch: true,
   }, env => {
     runTests(env);
   });
 
   describes.fakeWin('on fakeWin', {
-    mockFetches: true,
+    mockFetch: true,
   }, env => {
     runTests(env);
   });
