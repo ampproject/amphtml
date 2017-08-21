@@ -39,11 +39,6 @@ function buildCodeownersFile(dirs) {
       if (typeof item === 'string') {
         // Allow leading `@` to be optional
         codeowners += item.indexOf('@') !== 0 ? `@${item}` : item;
-        let nextItem = arr[i + 1];
-        // Look ahead if we need to add a comma
-        if (nextItem && typeof nextItem  === 'string') {
-          codeowners += ', ';
-        }
       } else {
         codeowners += '\n';
         // The entry is going to be an object where the key is
