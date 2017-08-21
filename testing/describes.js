@@ -513,7 +513,7 @@ class FakeWinFixture {
   /** @override */
   teardown(env) {
     if (!!this.spec.mockFetches) {
-      fetchMock.restore();
+      fetchMock./*OK*/restore();
     }
   }
 }
@@ -608,7 +608,7 @@ class RealWinFixture {
       env.iframe.parentNode.removeChild(env.iframe);
     }
     if (!!this.spec.mockFetches) {
-      fetchMock.restore();
+      fetchMock./*OK*/restore();
     }
   }
 }
