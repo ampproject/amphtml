@@ -26,7 +26,7 @@ extensions/amp-apester-media/ @mrsufgi
 extensions/amp-app-banner/ @aghassemi
 extensions/amp-audio/ @aghassemi
 extensions/amp-auto-ads/ @tlong2
-extensions/amp-bind/ @choumx @kmh287
+extensions/amp-bind/ @choumx
 extensions/amp-brid-player/ @aghassemi @DarXector
 extensions/amp-brightcove/ @aghassemi @mister-ben
 extensions/amp-call-tracking/ @alanorozco
