@@ -15,6 +15,7 @@
  */
 
 // This must load before all other tests.
+import 'babel-polyfill';
 import '../src/polyfills';
 import {Services} from '../src/services';
 import {removeElement} from '../src/dom';
