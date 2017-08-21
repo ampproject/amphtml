@@ -38,7 +38,9 @@ def Die(msg):
 
 
 def GetNodeJsCmd():
-  """Ensure Node.js is installed and return the proper command to run."""
+  """Ensure Node.js is installed and return the proper command to run.
+  this is a test to trigger validator reqs
+  """
   logging.info('entering ...')
 
   for cmd in ['node', 'nodejs']:
