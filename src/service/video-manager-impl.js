@@ -861,23 +861,43 @@ class VideoEntry {
     });
 
     // Listen to pause, play and user interaction events.
-    const unlistenInteraction = listen(mask, 'click', onInteraction.bind(this));
+    const unlisteners = [];
+    unlisteners.push(listen(mask, 'click', onInteraction.bind(this)));
+    unlisteners.push(listen(animation, 'click', onInteraction.bind(this)));
 
-    const unlistenPause = listen(this.video.element, VideoEvents.PAUSE,
-        toggleAnimation.bind(this, /*playing*/ false));
+    unlisteners.push(listen(this.video.element, VideoEvents.PAUSE,
+        toggleAnimation.bind(this, /*playing*/ false)));
 
-    const unlistenPlaying = listen(this.video.element, VideoEvents.PLAYING,
-        toggleAnimation.bind(this, /*playing*/ true));
+    unlisteners.push(listen(this.video.element, VideoEvents.PLAYING,
+        toggleAnimation.bind(this, /*playing*/ true)));
+
+    unlisteners.push(listen(this.video.element, VideoEvents.AD_START,
+        adStart.bind(this)));
+
+    unlisteners.push(listen(this.video.element, VideoEvents.AD_END,
+        adEnd.bind(this)));
 
     function onInteraction() {
       this.userInteractedWithAutoPlay_ = true;
       this.video.showControls();
       this.video.unmute();
-      unlistenInteraction();
-      unlistenPause();
-      unlistenPlaying();
+      unlisteners.forEach(unlistener => {
+        unlistener();
+      });
       removeElement(animation);
       removeElement(mask);
+    }
+
+    function adStart() {
+      setStyles(mask, {
+        'display': 'none',
+      });
+    }
+
+    function adEnd() {
+      setStyles(mask, {
+        'display': 'block',
+      });
     }
   }
 
