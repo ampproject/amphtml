@@ -16,6 +16,7 @@
 
 import {validateData, loadScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
+import {getMultiSizeDimensions} from '../ads/google/utils';
 import {rethrowAsync} from '../src/log';
 
 /**
@@ -72,38 +73,4 @@ export function yieldbot(global, data) {
       doubleclick(global, data);
     });
   });
-}
-
-/**
- * Parse a string of comma separated <code>WxH</code> values.
- * @param {string} multiSizeDataStr The amp-ad data attribute containing the multi-size dimensions.
- * @return {?Array<!Array<number>>} An array of dimensions.
- * @see https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md#multi-size-ad
- * @example data-multi-size="300x220,300x210,300x200"
- * @private
- */
-function getMultiSizeDimensions(multiSizeDataStr) {
-  const dimensions = [];
-
-  if (multiSizeDataStr) {
-    const arrayOfSizeStrs = multiSizeDataStr.split(',');
-
-    for (let idx = 0; idx < arrayOfSizeStrs.length; idx++) {
-      const sizeStr = arrayOfSizeStrs[idx];
-      const size = sizeStr.split('x');
-
-      if (size.length != 2) {
-        continue;
-      }
-      const width = Number(size[0]);
-      const height = Number(size[1]);
-
-      if (isNaN(width) || isNaN(height)) {
-        continue;
-      }
-
-      dimensions.push([width, height]);
-    }
-  }
-  return dimensions;
 }
