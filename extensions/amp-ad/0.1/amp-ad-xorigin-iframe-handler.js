@@ -81,6 +81,9 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?SubscriptionApi} */
     this.inaboxPositionApi_ = null;
 
+    /** @private {?SubscriptionApi} */
+    this.inaboxRequestPositionApi_ = null;
+
     /** @private {?../../../src/service/position-observer-impl.AmpDocPositionObserver} */
     this.positionObserver_ = null;
 
@@ -92,6 +95,12 @@ export class AmpAdXOriginIframeHandler {
 
     /** @private @const {!../../../src/service/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
+
+    /** @private {?Promise<!../../../src/layout-rect.LayoutRectDef>} */
+    this.iframePositionPromise_ = null;
+
+    /** @private {boolean} */
+    this.positionRequest_ = false;
   }
 
 
@@ -122,6 +131,19 @@ export class AmpAdXOriginIframeHandler {
       this.inaboxPositionApi_ = new SubscriptionApi(
           this.iframe, MessageType.SEND_POSITIONS, true, () => {
             this.initPositionApi_();
+          });
+
+      this.inaboxRequestPositionApi_ = new SubscriptionApi(
+          this.iframe, MessageType.REQUEST_POSITION, true, () => {
+            if (this.positionRequest_) {
+              // Already request iframe position;
+              return;
+            }
+            this.positionRequest_ = true;
+            this.getIframePositionPromise_().then(position => {
+              this.inaboxRequestPositionApi_.send(
+                  MessageType.POSITION_RESPONSE, position);
+            });
           });
     }
 
@@ -445,14 +467,19 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   getIframePositionPromise_() {
-    return this.viewport_.getElementRectAsync(
-        dev().assertElement(this.iframe)).then(position => {
-          const viewport = this.viewport_.getRect();
-          return dict({
-            'targetRect': position,
-            'viewportRect': viewport,
+    if (!this.iframePositionPromise_) {
+      this.iframePositionPromise_ = this.viewport_.getElementRectAsync(
+          dev().assertElement(this.iframe)).then(position => {
+            this.iframePositionPromise_ = null;
+            this.positionRequest_ = false;
+            const viewport = this.viewport_.getRect();
+            return dict({
+              'targetRect': position,
+              'viewportRect': viewport,
+            });
           });
-        });
+    }
+    return this.iframePositionPromise_;
   }
 
   /** @private */

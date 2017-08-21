@@ -291,4 +291,27 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     expect(el.style['margin-top']).to.be.empty;
   });
 
+  it('should request the position async from host', () => {
+    const el = document.createElement('div');
+    el.getBoundingClientRect = () => {return layoutRectLtwh(10, 20, 10, 10);};
+    const el2 = document.createElement('div');
+    el2.getBoundingClientRect = () => {return layoutRectLtwh(30, 40, 15, 15);};
+    const requestSpy = stubIframeClientMakeRequest(
+        'request-position',
+        'position-response',
+        (req, res, cb) => cb({
+          targetRect: layoutRectLtwh(10, 20, 100, 100),
+          viewportRect: layoutRectLtwh(1, 1, 1, 1),
+        }));
+    let rect2 = null;
+    binding.getElementRectAsync(el2).then(rect => {
+      rect2 = rect;
+    });
+    return binding.getElementRectAsync(el).then(rect => {
+      expect(rect).to.jsonEqual(layoutRectLtwh(20, 40, 10, 10));
+      expect(rect2).to.jsonEqual(layoutRectLtwh(40, 60, 15, 15));
+      expect(requestSpy).to.be.calledOnce;
+    });
+  });
+
 });

@@ -405,9 +405,10 @@ export class Viewport {
    * @return {!Promise<?../layout-rect.LayoutRectDef>}}
    */
   getElementRectAsync(el) {
-    return this.vsync_.measurePromise(() => {
-      return this.getElementRect_(el);
-    });
+    return this.binding_.getElementRectAsync(el) ||
+        this.vsync_.measurePromise(() => {
+          return this.getElementRect_(el);
+        });
   }
 
   /**
@@ -1086,6 +1087,14 @@ export class ViewportBindingDef {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
+
+
+  /**
+   * Returns the promise to get element rect to viewport.
+   * @param {!Element} unusedEl
+   * @return {?Promise<!../layout-rect.LayoutRectDef>}
+   */
+  getElementRectAsync(unusedEl) {}
 }
 
 
@@ -1268,6 +1277,9 @@ export class ViewportBindingNatural_ {
   setScrollTop(scrollTop) {
     this.getScrollingElement_()./*OK*/scrollTop = scrollTop;
   }
+
+  /** @override */
+  getElementRectAsync() {}
 
   /**
    * @return {!Element}
@@ -1586,6 +1598,9 @@ export class ViewportBindingNaturalIosEmbed_ {
     this.setScrollPos_(scrollTop || 1);
   }
 
+  /** @override */
+  getElementRectAsync() {}
+
   /**
    * @param {!Event} event
    * @private
@@ -1863,6 +1878,9 @@ export class ViewportBindingIosEmbedWrapper_ {
     // `onScrolled_` for more details.
     this.wrapper_./*OK*/scrollTop = scrollTop || 1;
   }
+
+  /** @override */
+  getElementRectAsync() {}
 
   /**
    * @param {!Event=} opt_event
