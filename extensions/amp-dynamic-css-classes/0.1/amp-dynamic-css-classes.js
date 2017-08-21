@@ -151,19 +151,12 @@ function addRuntimeClasses(ampdoc) {
 }
 
 
-/**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @visibleForTesting
- */
-export function installDynamicClassesForTesting(ampdoc) {
-  addRuntimeClasses(ampdoc);
-}
-
-
 // Register doc-service factory.
-AMP.registerServiceForDoc(
-    'amp-dynamic-css-classes',
-    function(ampdoc) {
-      addRuntimeClasses(ampdoc);
-      return {};
-    });
+AMP.extension('amp-dynamic-css-classes', '0.1', AMP => {
+  AMP.registerServiceForDoc(
+      'amp-dynamic-css-classes',
+      function(ampdoc) {
+        addRuntimeClasses(ampdoc);
+        return {};
+      });
+});
