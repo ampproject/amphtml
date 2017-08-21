@@ -37,7 +37,10 @@ export function yieldbot(global, data) {
         let dimensions;
 
         if (multiSizeDataStr) {
-          dimensions = getMultiSizeDimensions(multiSizeDataStr);
+          dimensions = getMultiSizeDimensions(multiSizeDataStr,
+              primaryWidth,
+              primaryHeight,
+              false);
           dimensions.unshift([primaryWidth, primaryHeight]);
         } else {
           dimensions = [[primaryWidth, primaryHeight]];
