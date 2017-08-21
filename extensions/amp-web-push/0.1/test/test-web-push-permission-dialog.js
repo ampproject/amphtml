@@ -17,8 +17,6 @@
 import {WindowMessenger} from '../window-messenger';
 import {AmpWebPushPermissionDialog} from '../amp-web-push-permission-dialog';
 import {WebPushService} from '../web-push-service';
-import {TAG} from '../vars';
-import {toggleExperiment} from '../../../../src/experiments';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
 import {parseUrl} from '../../../../src/url';
 import * as sinon from 'sinon';
@@ -69,13 +67,11 @@ describes.realWin('web-push-permission-dialog', {
 
   beforeEach(() => {
     setDefaultConfigParams_();
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
     sandbox = sinon.sandbox.create();
   });
 
   afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
     sandbox.restore();
   });
 

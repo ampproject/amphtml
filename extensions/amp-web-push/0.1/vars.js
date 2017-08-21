@@ -14,7 +14,6 @@
  * the License.
  */
 
-export const EXPERIMENT = 'amp-web-push';
 export const TAG = 'amp-web-push';
 export const CONFIG_TAG = TAG;
 export const SERVICE_TAG = TAG + '-service';

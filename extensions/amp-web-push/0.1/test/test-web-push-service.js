@@ -18,8 +18,7 @@ import {WindowMessenger} from '../window-messenger';
 import {AmpWebPushHelperFrame} from '../amp-web-push-helper-frame';
 import {WebPushService} from '../web-push-service';
 import {WebPushWidgetVisibilities} from '../amp-web-push-widget';
-import {TAG, NotificationPermission} from '../vars';
-import {toggleExperiment} from '../../../../src/experiments';
+import {NotificationPermission} from '../vars';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
 import * as sinon from 'sinon';
 
@@ -32,12 +31,7 @@ describes.realWin('web-push-service environment support', {
   let webPush;
 
   beforeEach(() => {
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
-  });
-
-  afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
   });
 
   it('should report supported environment', () => {
@@ -124,13 +118,11 @@ describes.realWin('web-push-service helper frame messaging', {
 
   beforeEach(() => {
     setDefaultConfigParams_();
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
     sandbox = sinon.sandbox.create();
   });
 
   afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
     sandbox.restore();
   });
 
@@ -199,13 +191,11 @@ describes.realWin('web-push-service widget visibilities', {
 
   beforeEach(() => {
     setDefaultConfigParams_();
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
     sandbox = sinon.sandbox.create();
   });
 
   afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
     sandbox.restore();
   });
 
@@ -409,13 +399,11 @@ describes.realWin('web-push-service subscribing', {
 
   beforeEach(() => {
     setDefaultConfigParams_();
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
     sandbox = sinon.sandbox.create();
   });
 
   afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
     sandbox.restore();
   });
 
@@ -562,13 +550,11 @@ describes.realWin('web-push-service unsubscribing', {
 
   beforeEach(() => {
     setDefaultConfigParams_();
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
     sandbox = sinon.sandbox.create();
   });
 
   afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
     sandbox.restore();
   });
 
