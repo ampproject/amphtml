@@ -505,14 +505,14 @@ class FakeWinFixture {
   setup(env) {
     env.win = new FakeWindow(this.spec.win || {});
 
-    if (!!this.spec.mockFetches) {
+    if (this.spec.mockFetches !== false) {
       attachFetchMock(env);
     }
   }
 
   /** @override */
   teardown(env) {
-    if (!!this.spec.mockFetches) {
+    if (this.spec.mockFetches !== false) {
       fetchMock./*OK*/restore();
     }
   }
@@ -590,7 +590,7 @@ class RealWinFixture {
         interceptEventListeners(win.document.body);
         env.interceptEventListeners = interceptEventListeners;
 
-        if (!!spec.mockFetches) {
+        if (spec.mockFetches !== false) {
           attachFetchMock(env);
         }
 
@@ -607,7 +607,7 @@ class RealWinFixture {
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
     }
-    if (!!this.spec.mockFetches) {
+    if (this.spec.mockFetches !== false) {
       fetchMock./*OK*/restore();
     }
   }
