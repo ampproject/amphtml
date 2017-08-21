@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-import {
-    createIframePromise,
-    doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-3q-player';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {adopt} from '../../../../src/runtime';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
-import * as sinon from 'sinon';
 
 
 describes.realWin('amp-3q-player', {

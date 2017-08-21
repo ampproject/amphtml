@@ -21,10 +21,9 @@ import {
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import * as sinon from 'sinon';
 import {gmosspIsA4AEnabled} from '../gmossp-a4a-config';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {createIframePromise} from '../../../../testing/iframe';
+
 
 describes.realWin('gmossp-a4a-config', {amp: false}, env => {
   let doc;

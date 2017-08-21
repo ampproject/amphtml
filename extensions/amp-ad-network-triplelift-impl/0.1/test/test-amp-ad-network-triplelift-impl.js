@@ -21,10 +21,8 @@ import {
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import * as sinon from 'sinon';
 import {tripleliftIsA4AEnabled} from '../triplelift-a4a-config';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {createIframePromise} from '../../../../testing/iframe';
 
 
 describes.realWin('triplelift-a4a-config', {amp: false}, env => {

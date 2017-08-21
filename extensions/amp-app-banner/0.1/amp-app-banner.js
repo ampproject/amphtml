@@ -189,7 +189,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
   constructor(element) {
     super(element);
 
-    /** @private @const {?../../../src/service/viewer-impl.Viewer} */
+    /** @private {?../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = null;
 
     /** @private {?Element} */

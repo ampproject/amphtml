@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {createIframePromise} from '../../../../testing/iframe';
-import {Services} from '../../../../src/services';
+
 import {
     AmpAppBanner,
     AbstractAppBanner,
     AmpIosAppBanner,
     AmpAndroidAppBanner,
 } from '../amp-app-banner';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {Services} from '../../../../src/services';
 
 
 describes.realWin('amp-app-banner', {
@@ -502,45 +501,36 @@ describes.realWin('amp-app-banner', {
 
   describe('Abstract App Banner', () => {
     it('should setup click listener', () => {
-      return createIframePromise(true).then(iframe => {
-        const doc = iframe.doc;
-        const element = doc.createElement('div');
-        doc.body.appendChild(element);
-        const openButton = doc.createElement('button');
-        element.appendChild(openButton);
-        openButton.setAttribute('open-button', '');
-        openButton.addEventListener = sandbox.spy();
-        const banner = new AbstractAppBanner(element);
-        banner.setupOpenButton_(openButton, 'open-button', 'install-link');
-        expect(openButton.addEventListener).to.have.been.calledWith('click');
-      });
+      const element = doc.createElement('div');
+      doc.body.appendChild(element);
+      const openButton = doc.createElement('button');
+      element.appendChild(openButton);
+      openButton.setAttribute('open-button', '');
+      openButton.addEventListener = sandbox.spy();
+      const banner = new AbstractAppBanner(element);
+      banner.setupOpenButton_(openButton, 'open-button', 'install-link');
+      expect(openButton.addEventListener).to.have.been.calledWith('click');
     });
 
     it('should create dismiss button and setup click listener', () => {
-      return createIframePromise(true).then(iframe => {
-        const win = iframe.win;
-        const doc = iframe.doc;
-        vsync = Services.vsyncFor(win);
-        sandbox.stub(vsync, 'run', runTask);
-        const element = doc.createElement('div');
-        element.id = 'banner1';
-        element.getAmpDoc = () => iframe.ampdoc;
-        doc.body.appendChild(element);
-        const banner = new AbstractAppBanner(element);
-        banner.addDismissButton_();
+      const element = doc.createElement('div');
+      element.id = 'banner1';
+      element.getAmpDoc = () => ampdoc;
+      doc.body.appendChild(element);
+      const banner = new AbstractAppBanner(element);
+      banner.addDismissButton_();
 
-        const bannerTop = element.querySelector(
-            'i-amphtml-app-banner-top-padding');
-        expect(bannerTop).to.exist;
-        const dismissBtn = element.querySelector(
-            '.amp-app-banner-dismiss-button');
-        expect(dismissBtn).to.not.be.null;
-        expect(dismissBtn.parentElement).to.be.equal(element);
-        dismissBtn.dispatchEvent(new Event('click'));
+      const bannerTop = element.querySelector(
+          'i-amphtml-app-banner-top-padding');
+      expect(bannerTop).to.exist;
+      const dismissBtn = element.querySelector(
+          '.amp-app-banner-dismiss-button');
+      expect(dismissBtn).to.not.be.null;
+      expect(dismissBtn.parentElement).to.be.equal(element);
+      dismissBtn.dispatchEvent(new Event('click'));
+      return banner.isDismissed().then(value => {
         expect(element.parentElement).to.be.null;
-        return banner.isDismissed().then(value => {
-          expect(value).to.be.true;
-        });
+        expect(value).to.be.true;
       });
     });
   });

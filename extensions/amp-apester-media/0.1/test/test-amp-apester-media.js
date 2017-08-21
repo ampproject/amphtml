@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 import '../amp-apester-media';
-import {adopt} from '../../../../src/runtime';
 import {Services} from '../../../../src/services';
-import * as sinon from 'sinon';
 
 
 describes.realWin('amp-apester-media', {

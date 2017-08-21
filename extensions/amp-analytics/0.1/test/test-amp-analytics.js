@@ -22,26 +22,19 @@ import {
 } from '../events';
 import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
-import {
-  installVariableService,
-  variableServiceFor,
-} from '../variables';
+import {variableServiceFor} from '../variables';
 import {
   installUserNotificationManagerForTesting,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
-import {adopt} from '../../../../src/runtime';
-import {createIframePromise} from '../../../../testing/iframe';
 import {
   getService,
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
-import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {map} from '../../../../src/utils/object';
 import {cidServiceForDocForTesting} from
     '../../../../src/service/cid-impl';
 import {Services} from '../../../../src/services';
-import * as sinon from 'sinon';
 import * as log from '../../../../src/log';
 
 /* global require: false */
@@ -104,7 +97,6 @@ describes.realWin('amp-analytics', {
     cidServiceForDocForTesting(ampdoc);
     viewer = win.services.viewer.obj;
     ins = instrumentationServiceForDocForTesting(ampdoc);
-    // installVariableService(win);
     installUserNotificationManagerForTesting(ampdoc);
     return Services.userNotificationManagerForDoc(ampdoc).then(manager => {
       uidService = manager;
