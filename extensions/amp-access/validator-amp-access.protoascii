@@ -45,6 +45,11 @@ tags: {  # amp-access (json)
     mandatory: true
     value_casei: "application/json"
   }
+  attrs: {
+    name: "test"
+    mandatory: false
+    value_casei: "application/json"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "<!--"
