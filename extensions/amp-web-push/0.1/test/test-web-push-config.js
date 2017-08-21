@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {WebPushService} from '../web-push-service';
 import {TAG, CONFIG_TAG} from '../vars';
-import {toggleExperiment} from '../../../../src/experiments';
 import {WebPushConfigAttributes, WebPushConfig} from '../amp-web-push-config';
 import {
   getElementClassForTesting,
@@ -43,7 +41,6 @@ describes.realWin('web-push-config', {
   beforeEach(() => {
     win = env.win;
     webPushConfig = setDefaultWebPushConfig();
-    toggleExperiment(env.win, TAG, true);
   });
 
   function createConfigElementWithAttributes(attributes) {
@@ -68,20 +65,6 @@ describes.realWin('web-push-config', {
     const elements = win.document.querySelectorAll(CONFIG_TAG);
     elements.forEach(element => element.remove());
   }
-
-  afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
-  });
-
-  it('should fail if experiment is not enabled', () => {
-    toggleExperiment(env.win, TAG, false);
-    // Experiment check is bypassed on test mode -- make sure it isn't.
-    window.AMP_MODE = {test: false};
-    expect(() => {
-      new WebPushService(env.ampdoc).ensureAmpExperimentEnabled_();
-    }).to.throw(`Experiment "${TAG}" is disabled. Enable it on ` +
-      'https://cdn.ampproject.org/experiments.html.');
-  });
 
   it('should fail if element does not have correct ID', () => {
     return env.ampdoc.whenReady().then(() => {
