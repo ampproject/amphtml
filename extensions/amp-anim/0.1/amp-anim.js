@@ -19,6 +19,9 @@ import {srcsetFromElement} from '../../../src/srcset';
 import {dev, user} from '../../../src/log';
 import * as st from '../../../src/style';
 
+const TAG = 'amp-anim';
+
+
 export class AmpAnim extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -131,6 +134,9 @@ export class AmpAnim extends AMP.BaseElement {
           throw error;
         });
   }
-};
+}
 
-AMP.registerElement('amp-anim', AmpAnim);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAnim);
+});
