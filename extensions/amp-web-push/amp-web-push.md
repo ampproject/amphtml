@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Experimental (<a href="https://cdn.ampproject.org/experiments.html">turn on amp-web-push</a>)</td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
