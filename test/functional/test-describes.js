@@ -16,9 +16,8 @@
 
 // Test `fetch-mock` integration in describes.
 describe('fetch-mock', () => {
-  describes.realWin('on realWin', {
-    mockFetches: true,
-  }, env => {
+  /** @param {!Object} env */
+  function runTests(env) {
     it('should mock fetches', () => {
       const mock = env.expectFetch('fake.com', {payload: 'foo'});
 
@@ -29,20 +28,17 @@ describe('fetch-mock', () => {
         expect(mock.called('fake.com')).to.be.true;
       });
     });
+  }
+
+  describes.realWin('on realWin', {
+    mockFetches: true,
+  }, env => {
+    runTests(env);
   });
 
   describes.fakeWin('on fakeWin', {
     mockFetches: true,
   }, env => {
-    it('should mock fetches', () => {
-      env.expectFetch('fake.com', {payload: 'foo'});
-
-      return env.win.fetch('fake.com').then(response => {
-        return response.json();
-      }).then(data => {
-        expect(data.payload).to.equal('foo');
-        expect(mock.called('fake.com')).to.be.true;
-      });
-    });
+    runTests(env);
   });
 });
