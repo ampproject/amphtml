@@ -26,7 +26,7 @@ import {camelCaseToDash} from '../../src/string';
 export function adsense(global, data) {
   // TODO: check mandatory fields
   validateData(data, [],
-      ['adClient', 'adSlot', 'adHost', 'adTest', 'tagOrigin', 'experimentId',
+      ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
         'ampSlotIndex', 'adChannel']);
 
   if (global.context.clientId) {
