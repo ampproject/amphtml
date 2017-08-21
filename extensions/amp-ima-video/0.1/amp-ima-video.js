@@ -344,6 +344,9 @@ class AmpImaVideo extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-ima-video', AmpImaVideo);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpImaVideo);
+});

@@ -479,6 +479,7 @@ export function doNotLoadExternalResourcesInTest(win) {
     if (tagName == 'iframe' || tagName == 'img') {
       // Make get/set write to a fake property instead of
       // triggering invocation.
+      element.fakeSrc = '';
       Object.defineProperty(element, 'src', {
         set: function(val) {
           this.fakeSrc = val;

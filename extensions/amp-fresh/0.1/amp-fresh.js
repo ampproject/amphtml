@@ -24,9 +24,9 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 
-
 /** @const */
 const TAG = 'amp-fresh';
+
 
 export class AmpFresh extends AMP.BaseElement {
 
@@ -91,4 +91,7 @@ export class AmpFresh extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-fresh', AmpFresh, CSS);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpFresh, CSS);
+});
