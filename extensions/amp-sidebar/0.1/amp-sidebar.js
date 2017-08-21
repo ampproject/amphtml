@@ -20,7 +20,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {Toolbar} from './toolbar';
 import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 import {debounce} from '../../../src/utils/rate-limit';
@@ -118,7 +118,7 @@ export class AmpSidebar extends AMP.BaseElement {
           this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
             ampdoc));
         } catch (e) {
-          user().error(TAG, 'Failed to instantiate toolbar', e);
+          this.user().error(TAG, 'Failed to instantiate toolbar', e);
         }
       });
     }
