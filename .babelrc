@@ -8,7 +8,6 @@
       "modules": "commonjs"
     }]
   ],
-  "plugins": [
-    "transform-remove-strict-mode"
-  ]
+  sourceType: 'module',
+  ignore: ['sha384-generated.js']
 }

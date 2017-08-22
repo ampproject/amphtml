@@ -153,7 +153,7 @@ describe('cid', () => {
   });
 
   describe('with real crypto', () => {
-    it('should hash domain name and scope', () => {
+    it.only('should hash domain name and scope', () => {
       // domain name: 'http://www.origin.com'
       // scope: 'custom-cid-scope'
       return compare(
