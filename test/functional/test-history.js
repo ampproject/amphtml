@@ -33,7 +33,6 @@ describes.fakeWin('History', {
     location: '#first',
   },
 }, env => {
-
   let sandbox;
   let clock;
   let bindingMock;
@@ -100,6 +99,36 @@ describes.fakeWin('History', {
         clock.tick(1);
         expect(onPop).to.be.calledOnce;
       });
+    });
+  });
+
+  it('should only pop up to maxStackSize_() states', () => {
+    const spy = sandbox.spy();
+    sandbox.stub(history, 'maxStackSize_').returns(2);
+
+    const push = bindingMock.expects('push').thrice();
+    push.onFirstCall().returns(Promise.resolve(10));
+    push.onSecondCall().returns(Promise.resolve(11));
+    push.onThirdCall().returns(Promise.resolve(12));
+
+    const pop = bindingMock.expects('pop').thrice();
+    pop.onFirstCall().returns(Promise.resolve(12));
+    pop.onSecondCall().returns(Promise.resolve(11));
+    pop.onThirdCall().returns(Promise.resolve(10));
+
+    return Promise.all([
+      history.push(() => spy('a')),
+      history.push(() => spy('b')),
+      history.push(() => spy('c')),
+    ]).then(() => Promise.all([
+      history.pop(),
+      history.pop(),
+      history.pop(),
+    ])).then(() => {
+      clock.tick(1);
+      expect(spy.callCount).to.equal(2);
+      expect(spy).to.be.calledWith('c');
+      expect(spy).to.be.calledWith('b');
     });
   });
 

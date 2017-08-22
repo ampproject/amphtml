@@ -20,14 +20,14 @@ import {
   getService,
 } from '../service';
 import {getMode} from '../mode';
-import {dev} from '../log';
+import {dev, user} from '../log';
 import {dict, map} from '../utils/object';
 import {Services} from '../services';
 
-/** @private @const */
+/** @private @const {string} */
 const TAG_ = 'History';
 
-/** @private @const */
+/** @private @const {string} */
 const HISTORY_PROP_ = 'AMP.History';
 
 /** @typedef {number} */
@@ -179,10 +179,16 @@ export class History {
       return;
     }
 
+    const maxStackSize = this.maxStackSize_();
     const toPop = [];
     for (let i = this.stackOnPop_.length - 1; i > this.stackIndex_; i--) {
       if (this.stackOnPop_[i]) {
-        toPop.push(this.stackOnPop_[i]);
+        if (toPop.length < maxStackSize) {
+          toPop.push(this.stackOnPop_[i]);
+        } else {
+          user().warn(TAG_, 'Maximum history stack size reached. ' +
+              'Dropping state with id: ' + i);
+        }
         this.stackOnPop_[i] = undefined;
       }
     }
@@ -251,6 +257,14 @@ export class History {
       this.queue_.splice(0, 1);
       this.deque_();
     });
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  maxStackSize_() {
+    return 10;
   }
 }
 
