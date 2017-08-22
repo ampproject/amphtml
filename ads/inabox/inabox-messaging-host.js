@@ -15,9 +15,7 @@
  */
 
 import {FrameOverlayManager} from './frame-overlay-manager';
-import {
-  PositionObserver,
-} from './position-observer';
+import {PositionObserver} from './position-observer';
 import {
   serializeMessage,
   deserializeMessage,
