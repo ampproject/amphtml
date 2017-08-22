@@ -32,8 +32,8 @@ function prependDashAndToLowerCase(match) {
 }
 
 /**
- * @param {string} name Attribute name with dashes
- * @return {string} Dashes removed and character after to upper case.
+ * @param {string} name Attribute name containing dashes.
+ * @return {string} Dashes removed and successive character sent to upper case.
  * visibleForTesting
  */
 export function dashToCamelCase(name) {
