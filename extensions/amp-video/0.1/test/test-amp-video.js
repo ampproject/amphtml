@@ -407,7 +407,10 @@ describe(TAG, () => {
             const video = v.querySelector('video');
             video.currentTime = video.duration - 0.1;
             impl.play();
-            return listenOncePromise(v, VideoEvents.ENDED);
+            // Make sure pause and end are triggered when video ends.
+            const pEnded = listenOncePromise(v, VideoEvents.ENDED);
+            const pPause = listenOncePromise(v, VideoEvents.PAUSE);
+            return Promise.all([pEnded, pPause]);
           });
     });
   });
