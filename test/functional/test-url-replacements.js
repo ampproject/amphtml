@@ -203,6 +203,51 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace EXTERNAL_REFERRER', () => {
+    return getReplacements().then(replacements => {
+      stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
+          .returns(Promise.resolve('https://example.org/page.html'));
+      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+    }).then(res => {
+      expect(res).to.equal('?ref=https%3A%2F%2Fexample.org%2Fpage.html');
+    });
+  });
+
+  it('should replace EXTERNAL_REFERRER to empty string ' +
+      'if referrer is of same domain', () => {
+    return getReplacements().then(replacements => {
+      stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
+          .returns(Promise.resolve('http://localhost/page.html'));
+      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+    }).then(res => {
+      expect(res).to.equal('?ref=http%3A%2F%2Flocalhost%2Fpage.html');
+    });
+  });
+
+  it('should replace EXTERNAL_REFERRER to empty string ' +
+      'if referrer is CDN proxy of same domain', () => {
+    return getReplacements().then(replacements => {
+      stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
+          .returns(Promise.resolve(
+              'https://localhost.cdn.ampproject.org/v/localhost/page.html'));
+      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+    }).then(res => {
+      expect(res).to.equal('?ref=');
+    });
+  });
+
+  it('should replace EXTERNAL_REFERRER to empty string ' +
+      'if referrer is CDN proxy of same domain (before CURLS)', () => {
+    return getReplacements().then(replacements => {
+      stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
+          .returns(Promise.resolve(
+              'https://cdn.ampproject.org/v/localhost/page.html'));
+      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+    }).then(res => {
+      expect(res).to.equal('?ref=');
+    });
+  });
+
   it('should replace TITLE', () => {
     return expandAsync('?title=TITLE').then(res => {
       expect(res).to.equal('?title=Pixel%20Test');

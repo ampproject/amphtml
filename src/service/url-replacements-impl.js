@@ -152,7 +152,7 @@ export class GlobalVariableSource extends VariableSource {
     }));
 
     // Like DOCUMENT_REFERRER, but returns null if the referrer is same domain
-    // as the current page. CDN proxy is considered same domain.
+    // as the current page. Corresponding CDN proxy is considered same domain.
     this.setAsync('EXTERNAL_REFERRER', /** @type {AsyncResolverDef} */(() => {
       return Services.viewerForDoc(this.ampdoc).getReferrerUrl()
           .then(referrer => {
