@@ -101,7 +101,6 @@ describes.realWin('test-scrollable-carousel', {
       const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
 
       // click on the next button
-      console.log('QQQ: goCallback(1, false)');
       impl.goCallback(1, /*animate*/ false);
 
       // scroll to the correct position
