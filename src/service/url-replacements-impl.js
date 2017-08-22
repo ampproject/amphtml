@@ -158,7 +158,7 @@ export class GlobalVariableSource extends VariableSource {
       return Services.viewerForDoc(this.ampdoc).getReferrerUrl()
           .then(referrer => {
             if (!referrer) {
-              return referrer;
+              return null;
             }
             const referrerHostname = parseUrl(getSourceUrl(referrer)).hostname;
             const currentHostname =
