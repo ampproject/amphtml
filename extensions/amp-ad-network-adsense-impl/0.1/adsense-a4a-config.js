@@ -34,21 +34,33 @@ import {
 } from '../../../src/experiments';
 import {dev} from '../../../src/log';
 
-/** @const {!string}  @private */
+/** @const {!string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 
-/** @type {string} */
-const TAG = 'amp-ad-network-adsense-impl';
+/**
+ * Unconditioned, client-side diverted experiment across all AdSense traffic.
+ * @const {!string} @visibleForTesting
+ */
+export const FF_DR_EXP_NAME = 'expAdSenseFFDR';
 
-/** @const @enum{string} */
+/** @const @enum{string} @visibleForTesting */
+export const INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP = {
+  CONTROL: '21060901',
+  EXPERIMENT: '21060902',
+};
+
+/** @const @enum{string} @visibleForTesting */
 export const ADSENSE_EXPERIMENT_FEATURE = {
   HOLDBACK_EXTERNAL_CONTROL: '21060732',
   HOLDBACK_EXTERNAL: '21060733',
-  DELAYED_REQUEST_CONTROL: '21060734',
-  DELAYED_REQUEST: '21060735',
+  DELAYED_REQUEST_EXTERNAL_CONTROL: '21060734',
+  DELAYED_REQUEST_EXTERNAL: '21060735',
   HOLDBACK_INTERNAL_CONTROL: '2092615',
   HOLDBACK_INTERNAL: '2092616',
 };
+
+/** @type {string} */
+const TAG = 'amp-ad-network-adsense-impl';
 
 /** @const @type {!Object<string,?string>} */
 export const URL_EXPERIMENT_MAPPING = {
@@ -58,8 +70,8 @@ export const URL_EXPERIMENT_MAPPING = {
   '1': ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL_CONTROL,
   '2': ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
   // Delay Request
-  '3': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
-  '4': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST,
+  '3': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL_CONTROL,
+  '4': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL,
 };
 
 /**
@@ -68,6 +80,19 @@ export const URL_EXPERIMENT_MAPPING = {
  * @returns {boolean}
  */
 export function adsenseIsA4AEnabled(win, element) {
+  // Select Fast fetch, delayed request across all traffic as its unconditioned.
+  // Note that this will "pollute" the SERP triggered control/experiments and
+  // will have no effect on delayed fetch.
+  const ffDrExperimentInfoMap =
+      /** @type {!Object<string, !ExperimentInfo>} */ ({});
+  ffDrExperimentInfoMap[FF_DR_EXP_NAME] = {
+    isTrafficEligible: () => true,
+    branches: [
+      INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.CONTROL,
+      INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.EXPERIMENT,
+    ],
+  };
+  randomlySelectUnsetExperiments(win, ffDrExperimentInfoMap);
   if (!isGoogleAdsA4AValidEnvironment(win) ||
       !element.getAttribute('data-ad-client')) {
     return false;
@@ -85,8 +110,10 @@ export function adsenseIsA4AEnabled(win, element) {
         /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[ADSENSE_A4A_EXPERIMENT_NAME] = {
       isTrafficEligible: () => true,
-      branches: [ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
-        ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
+      branches: [
+        ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
+        ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
+      ],
     };
     // Note: Because the same experimentName is being used everywhere here,
     // randomlySelectUnsetExperiments won't add new IDs if
@@ -96,6 +123,7 @@ export function adsenseIsA4AEnabled(win, element) {
     experimentId = getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME);
     dev().info(
         TAG, `random experiment selection ${urlExperimentId}: ${experimentId}`);
+
   }
   if (experimentId) {
     addExperimentIdToElement(experimentId, element);
@@ -107,9 +135,12 @@ export function adsenseIsA4AEnabled(win, element) {
 
 /**
  * @param {!Window} win
- * @param {!ADSENSE_EXPERIMENT_FEATURE} feature
- * @return {boolean} whether feature is enabled
+ * @return {boolean} whether fast fetch delayed request experiment is enabled.
  */
-export function experimentFeatureEnabled(win, feature) {
-  return getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) == feature;
+export function fastFetchDelayedRequestEnabled(win) {
+  return !!(
+      getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) ==
+        ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL ||
+      getExperimentBranch(win, FF_DR_EXP_NAME) ==
+        INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.EXPERIMENT);
 }

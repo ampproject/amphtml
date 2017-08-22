@@ -461,7 +461,7 @@ export function randomlySelectUnsetExperiments(win, experiments) {
  *     null if experimentName has been tested but no branch was enabled).
  */
 export function getExperimentBranch(win, experimentName) {
-  return win.experimentBranches[experimentName];
+  return win.experimentBranches ? win.experimentBranches[experimentName] : null;
 }
 
 /**
