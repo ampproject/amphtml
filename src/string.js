@@ -47,7 +47,7 @@ export function dashToCamelCase(name) {
  * @return {string} The string in dash-case.
  */
 export function camelCaseToDash(string) {
-  return string.replace(/(?!^)([A-Z])/g, prependDashAndToLowerCase);
+  return string.replace(/(?!^)[A-Z]/g, prependDashAndToLowerCase);
 }
 
 /**
