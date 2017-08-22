@@ -85,6 +85,12 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @private  {?Element} */
     this.topBar_ = null;
+
+    /** @private  {?Element} */
+    this.topFill_ = null;
+
+    /** @private  {?Element} */
+    this.topGradient_ = null;
   }
 
   /** @override */
@@ -274,7 +280,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
       this.descriptionBox_.classList.remove('standard');
       this.descriptionBox_.classList.add('overflow');
-      this.topBar_.classList.add('overflow');
+      this.topBar_.classList.add('fullscreen');
       this.vsync_.run({
         measure: measureBeforeExpandingDescTextArea,
         mutate: mutateExpandingDescTextArea,
@@ -282,7 +288,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     } else if (this.descriptionBox_.classList.contains('overflow')) {
       this.vsync_.mutate(() => {
         this.descriptionBox_.classList.remove('overflow');
-        this.topBar_.classList.remove('overflow');
+        this.topBar_.classList.remove('fullscreen');
         this.descriptionBox_.classList.add('standard');
         this.descriptionTextArea_.classList.add('non-expanded');
         setStyle(this.descriptionTextArea_, 'top', '');
@@ -326,6 +332,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     dev().assert(this.container_);
     this.topBar_ = this.win.document.createElement('div');
     this.topBar_.classList.add('i-amphtml-lbv-top-bar');
+
+    this.topFill_ = this.win.document.createElement('div');
+    this.topFill_.classList.add('i-amphtml-lbv-top-bar-top-fill');
+    this.topBar_.appendChild(this.topFill_);
+
+    this.topGradient_ = this.win.document.createElement('div');
+    this.topGradient_.classList.add('i-amphtml-lbv-top-gradient');
+    this.topBar_.appendChild(this.topGradient_);
 
     const close = this.close_.bind(this);
     const openGallery = this.openGallery_.bind(this);
@@ -460,6 +474,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       this.buildGallery_();
     }
     this.container_.setAttribute('gallery-view', '');
+    this.topBar_.classList.add('fullscreen');
   }
 
   /**
@@ -468,6 +483,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   closeGallery_() {
     this.container_.removeAttribute('gallery-view');
+    if (this.descriptionBox_.classList.contains('standard')) {
+      this.topBar_.classList.remove('fullscreen');
+    }
   }
 
   /**
