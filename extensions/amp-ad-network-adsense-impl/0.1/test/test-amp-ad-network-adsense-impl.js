@@ -57,6 +57,15 @@ function createAdsenseImplElement(attributes, doc, opt_tag) {
   return addAttributesToElement(element, attributes);
 }
 
+function createResponsiveAdsenseImplElement(doc) {
+  return createAdsenseImplElement({
+    'data-ad-client': 'ca-adsense',
+    'width': '100',
+    'height': '100',
+    // 'data-auto-format': 'rspv',
+  }, doc);
+}
+
 describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
   let impl;
   let element;
@@ -100,6 +109,10 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
 
   describe('#isValidElement', () => {
     it('should be valid', () => {
+      expect(impl.isValidElement()).to.be.true;
+    });
+    it('should be valid (responsive)', () => {
+      element.setAttribute('data-auto-format', 'rspv');
       expect(impl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
@@ -445,6 +458,13 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
           /(\?|&)dtd=\d+(&|$)/,
         ].forEach(regexp => expect(url).to.match(regexp));
       });
+      it('sets rafmt for responsive', () => {
+        element.setAttribute('data-ad-slot', 'some_slot');
+        element.setAttribute('data-auto-format', 'rspv');
+        return impl.getAdUrl().then(url => {
+          expect(url).to.match(/(\?|&)ramft=13(&|$)/);
+        });
+      });
     });
 
     // Not using arrow function here because otherwise the way closure behaves
@@ -543,6 +563,53 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
           expect(impl.element.getAttribute('data-amp-slot-index'))
               .to.equal('1');
         });
+  });
+
+  describe('#buildCallback', () => {
+    let iframe;
+    let impl;
+    let loadExtensionSpy;
+
+    function thing(config) {
+      config.type = 'adsense';
+      element = createElementWithAttributes(env.win.document, 'amp-ad', config);
+      // To trigger CSS styling.
+      element.setAttribute('data-a4a-upgrade-type',
+          'amp-ad-network-adsense-impl');
+      iframe = env.win.document.createElement('iframe');
+      element.appendChild(iframe);
+      document.body.appendChild(element);
+      impl = new AmpAdNetworkAdsenseImpl(element);
+      impl.getResource().measure();
+    }
+
+    beforeEach(() => {
+      resetSharedState();
+    });
+
+    it('should do nothing for non-responsive', () => {
+      thing({
+        width: '320',
+        height: '150',
+      });
+      expect(impl.buildCallback()).to.be.undefined;
+    });
+
+    it('should do something for responsive', () => {
+      thing({
+        width: '1',
+        height: '1',
+        'data-auto-format': 'rspv',
+      });
+      const callback = impl.buildCallback();
+      expect(callback).to.not.be.undefined;
+
+      impl.iframe = iframe;
+      return callback.then((result) => {
+        expect(element.offsetHeight).to.equal(300);
+        expect(element.offsetWidth).to.equal(400);
+      });
+    });
   });
 
   describe('#delayAdRequestEnabled', () => {
