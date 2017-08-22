@@ -22,9 +22,6 @@ import {isProxyOrigin} from '../url';
 import {WindowInterface} from '../window-interface';
 
 const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
-const API_KEYS = {
-  'googleanalytics': 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
-};
 
 const TAG = 'GoogleCidApi';
 const AMP_TOKEN = 'AMP_TOKEN';
@@ -64,12 +61,12 @@ export class GoogleCidApi {
   }
 
   /**
-   * @param {string} apiClient
+   * @param {string} apiKey
    * @param {string} scope
    * @return {!Promise<?string>}
    */
-  getScopedCid(apiClient, scope) {
-    const url = this.getUrl_(apiClient);
+  getScopedCid(apiKey, scope) {
+    const url = this.getUrl_(apiKey);
     if (!url) {
       return Promise.resolve(/** @type {?string} */(null));
     }
@@ -153,15 +150,11 @@ export class GoogleCidApi {
   }
 
   /**
-   * @param {string} apiClient
+   * @param {string} apiKey
    * @return {?string}
    */
-  getUrl_(apiClient) {
-    const key = API_KEYS[apiClient];
-    if (!key) {
-      return null;
-    }
-    return GOOGLE_API_URL + key;
+  getUrl_(apiKey) {
+    return GOOGLE_API_URL + apiKey;
   }
 
   /**

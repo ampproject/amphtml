@@ -59,12 +59,20 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
 
   describe('getScopedCid', () => {
     function verifyClientIdApiInUse(used) {
-      viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
-        'scope': 'AMP_ECID_GOOGLE',
-        'clientIdApi': used,
-      })).returns(Promise.resolve('client-id-from-viewer'));
-      return expect(api.getScopedCid('AMP_ECID_GOOGLE'))
-          .to.eventually.equal('client-id-from-viewer');
+      viewerMock.sendMessageAwaitResponse
+          .returns(Promise.resolve('client-id-from-viewer'));
+      return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
+        expect(cid).to.equal('client-id-from-viewer');
+        const payload = {
+          'scope': 'AMP_ECID_GOOGLE',
+          'clientIdApi': used,
+        };
+        if (used) {
+          payload['apiKey'] = 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM';
+        }
+        expect(viewerMock.sendMessageAwaitResponse)
+            .to.be.calledWith('cid', dict(payload));
+      });
     }
 
     it('should use client ID API from api if everything great', () => {
@@ -97,10 +105,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     it('should return undefined if Viewer returns undefined', () => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
-      viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
-        'scope': 'AMP_ECID_GOOGLE',
-        'clientIdApi': true,
-      })).returns(Promise.resolve());
+      viewerMock.sendMessageAwaitResponse.returns(Promise.resolve());
       return expect(api.getScopedCid('AMP_ECID_GOOGLE'))
           .to.eventually.be.undefined;
     });
@@ -108,12 +113,48 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     it('should reject if Viewer rejects', () => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
-      viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
-        'scope': 'AMP_ECID_GOOGLE',
-        'clientIdApi': true,
-      })).returns(Promise.reject('Client API error'));
+      viewerMock.sendMessageAwaitResponse
+          .returns(Promise.reject('Client API error'));
       return expect(api.getScopedCid('AMP_ECID_GOOGLE'))
           .to.eventually.be.rejectedWith(/Client API error/);
+    });
+  });
+
+  describe('isScopeOptedIn', () => {
+    it('should read predefined and custom API key correctly', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" ' +
+          'content="googleanalytics,' +
+          'foo=lE.HUEiz-IsNtlbNo_l2K18dT680nsaM80nsaMn,' +
+          'bar=saM80nsaMnlE.HUEiz_IsNtlbNo-l2K18dT680n,' +
+          'invalid=invalid-api-key">';
+      expect(api.isScopeOptedIn('AMP_ECID_GOOGLE'))
+          .to.equal('AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM');
+      expect(api.isScopeOptedIn('foo'))
+          .to.equal('lE.HUEiz-IsNtlbNo_l2K18dT680nsaM80nsaMn');
+      expect(api.isScopeOptedIn('bar'))
+          .to.equal('saM80nsaMnlE.HUEiz_IsNtlbNo-l2K18dT680n');
+      expect(api.isScopeOptedIn('invalid')).to.be.undefined;
+      expect(api.isScopeOptedIn('non-existing')).to.be.undefined;
+    });
+
+    it('should work if meta only contains predefined clients', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" content="googleanalytics">';
+      expect(api.isScopeOptedIn('AMP_ECID_GOOGLE'))
+          .to.equal('AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM');
+    });
+
+    it('should work if meta only contains custom scopes', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" ' +
+          'content="' +
+          'foo=lE.HUEiz_IsNtlbNo-l2K18dT680nsaM80nsaMn,' +
+          'bar=saM80nsaMnlE.HUEiz_IsNtlbNo-l2K18dT680n">';
+      expect(api.isScopeOptedIn('foo'))
+          .to.equal('lE.HUEiz_IsNtlbNo-l2K18dT680nsaM80nsaMn');
+      expect(api.isScopeOptedIn('bar'))
+          .to.equal('saM80nsaMnlE.HUEiz_IsNtlbNo-l2K18dT680n');
     });
   });
 });

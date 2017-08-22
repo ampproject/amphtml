@@ -128,7 +128,7 @@ describe('cid', () => {
     });
     sandbox.stub(viewer, 'isTrustedViewer',
         () => Promise.resolve(trustedViewer));
-    sandbox.stub(ViewerCidApi, 'scopeOptedInForCidApi', () => null);
+    sandbox.stub(ViewerCidApi, 'isScopeOptedIn', () => null);
     viewerSendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse',
         (eventType, opt_data) => {
           if (eventType != 'cid') {
@@ -778,7 +778,7 @@ describes.realWin('cid', {amp: true}, env => {
 
     beforeEach(() => {
       sandbox.stub(url, 'isProxyOrigin').returns(false);
-      sandbox.stub(ViewerCidApi, 'scopeOptedInForCidApi')
+      sandbox.stub(ViewerCidApi, 'isScopeOptedIn')
           .returns('googleanalytics');
       setCookie(win, '_ga', '', 0);
     });
