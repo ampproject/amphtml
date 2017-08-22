@@ -104,9 +104,9 @@ export class AbstractAmpContext {
     this.client_ = new IframeMessagingClient(win);
     this.client_.setHostWindow(this.getHostWindow_());
     this.client_.setSentinel(dev().assertString(this.sentinel));
+    this.errorReport();
 
     this.listenForPageVisibility_();
-    this.errorReport();
   }
 
   /**
@@ -319,12 +319,13 @@ export class AbstractAmpContext {
    */
   errorReport() {
     this.win_.addEventListener('error', event => {
-      if (!!event.error) {
-        this.client_.sendMessage(MessageType.USER_ERROR, dict({
-          'error': event.error,
-          'message': event.error.message,
-        }));
-      }
+      console.log(event);
+      //if (!!event.error) {
+        // this.client_.sendMessage(MessageType.USER_ERROR, dict({
+        //   'error': event.error,
+        //   'message': event.error.message,
+        // }));
+      //}
     });
   }
 }

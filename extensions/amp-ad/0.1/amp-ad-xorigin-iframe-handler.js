@@ -25,8 +25,8 @@ import {
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {Services} from '../../../src/services';
-import {dev, isUserErrorMessage} from '../../../src/log';
-import {reportErrorToAnalytics} from '../../../src/error';
+import {dev} from '../../../src/log';
+//import {reportErrorToAnalytics} from '../../../src/error';
 import {dict} from '../../../src/utils/object';
 import {setStyle} from '../../../src/style';
 import {getData, loadPromise} from '../../../src/event-helper';
@@ -196,10 +196,10 @@ export class AmpAdXOriginIframeHandler {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }));
 
-    this.unlisteners_.push(listenFor(this.iframe, 'user-error',
-        data => {
-          this.userErrorForAnalytics(data['error'], data['message']);
-        }, true, true));
+    // this.unlisteners_.push(listenFor(this.iframe, 'user-error',
+    //     data => {
+    //       this.userErrorForAnalytics(data['error'], data['message']);
+    //     }, true, true));
 
     // Iframe.onload normally called by the Ad after full load.
     const iframeLoadPromise = loadPromise(this.iframe).then(() => {
@@ -506,11 +506,11 @@ export class AmpAdXOriginIframeHandler {
    * @param {!Error} error
    * @param {string} message
    */
-  userErrorForAnalytics(error, message) {
-    if (isUserErrorMessage(message)) {
-      reportErrorToAnalytics(error, this.baseInstance_.win);
-    }
-  }
+  // userErrorForAnalytics(error, message) {
+  //   if (isUserErrorMessage(message)) {
+  //     reportErrorToAnalytics(error, this.baseInstance_.win);
+  //   }
+  // }
 }
 
 // Make the class available to other late loaded amp-ad implementations
