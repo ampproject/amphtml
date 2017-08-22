@@ -117,15 +117,15 @@ There are two types of filters: location-based and time-based. Other filters (su
 
 ### clickLocation filter
 
-The `clickLocation` filter type specifies the minimum distance a click must be from the edges of the creative or viewport (whichever is smaller).  The `clickLocation` filter requires the following properties:
+The `clickLocation` filter type specifies the minimum distance a click must be from the edges of the creative or the edges of a specific element in the creative. The clickLocation filter may have the following properties:
 
 | Property     | Value | Meaning |
 | ------------ | ----- | ------- |
-| `top`        | `number` | Distance in px from the top edge. |
-| `right`      | `number` | Distance in px from the right edge. |
-| `bottom`     | `number` | Distance in px from the bottom edge. |
-| `left`       | `number` | Distance in px from the left edge. |
-| `relativeTo` | `string` | Element selector to select the element to which the border protection is applied. |
+| `top`        | `number` | Distance in px from the top edge. Default: 0 |
+| `right`      | `number` | Distance in px from the right edge. Default: 0  |
+| `bottom`     | `number` | Distance in px from the bottom edge. Default: 0  |
+| `left`       | `number` | Distance in px from the left edge. Default: 0 |
+| `relativeTo` | `string` | Selects the element to use for edge boundaries. The full creative `body` is used if this is not specified. The selected element does not need to be the element that triggers the exit. The selected element must be in a fixed position for the life of the creative (no resizing, repositioning, etc.). Selector must use CSS selector syntax. |
 
 ### clickDelay filter
 
@@ -165,12 +165,12 @@ The `clickDelay` filter type specifies the time to wait before responding to cli
       "left": 100
     },
     "border-with-relative-to-element": {
-      type": "clickLocation",
+      "type": "clickLocation",
       "top": 10,
       "right": 10,
       "bottom": 10,
       "left": 10,
-      "relativeTo": "#adContent"
+      "relativeTo": "#headline"
     }
   }
 }
