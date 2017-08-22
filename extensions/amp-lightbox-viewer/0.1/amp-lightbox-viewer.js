@@ -85,6 +85,12 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @private  {?Element} */
     this.topBar_ = null;
+
+    /** @private  {?Element} */
+    this.topFill_ = null;
+
+    /** @private  {?Element} */
+    this.topGradient_ = null;
   }
 
   /** @override */
