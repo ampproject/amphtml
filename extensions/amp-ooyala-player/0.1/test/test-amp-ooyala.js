@@ -14,46 +14,50 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-ooyala-player';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-ooyala-player', function() {
+describes.realWin('amp-ooyala-player', {
+  amp: {
+    extensions: ['amp-ooyala-player'],
+  },
+}, function(env) {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getOoyalaElement(embedCode, playerId, pCode, opt_version,
-    opt_config, opt_placeholder) {
-    return createIframePromise(true).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const player = iframe.doc.createElement('amp-ooyala-player');
-      if (embedCode) {
-        player.setAttribute('data-embedcode', embedCode);
-      }
-      if (playerId) {
-        player.setAttribute('data-playerid', playerId);
-      }
-      if (pCode) {
-        player.setAttribute('data-pcode', pCode);
-      }
+      opt_config, opt_placeholder) {
+    const player = doc.createElement('amp-ooyala-player');
+    if (embedCode) {
+      player.setAttribute('data-embedcode', embedCode);
+    }
+    if (playerId) {
+      player.setAttribute('data-playerid', playerId);
+    }
+    if (pCode) {
+      player.setAttribute('data-pcode', pCode);
+    }
 
-      if (opt_version) {
-        player.setAttribute('data-playerversion', opt_version);
-      }
+    if (opt_version) {
+      player.setAttribute('data-playerversion', opt_version);
+    }
 
-      if (opt_config) {
-        player.setAttribute('data-config', opt_config);
-      }
+    if (opt_config) {
+      player.setAttribute('data-config', opt_config);
+    }
 
-      if (opt_placeholder) {
-        player.setAttribute('data-placeholder', opt_placeholder);
-      }
+    if (opt_placeholder) {
+      player.setAttribute('data-placeholder', opt_placeholder);
+    }
 
-      return iframe.addElement(player);
-    });
+    doc.body.appendChild(player);
+    return player.build()
+        .then(() => player.layoutCallback())
+        .then(() => player);
   };
 
   it('renders a V3 player', () => {

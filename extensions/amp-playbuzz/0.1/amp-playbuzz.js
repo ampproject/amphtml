@@ -304,6 +304,9 @@ class AmpPlaybuzz extends AMP.BaseElement {
     }
     return true;  // Call layoutCallback again.
   }
-};
+}
 
-AMP.registerElement('amp-playbuzz', AmpPlaybuzz, CSS);
+
+AMP.extension('amp-playbuzz', '0.1', AMP => {
+  AMP.registerElement('amp-playbuzz', AmpPlaybuzz, CSS);
+});

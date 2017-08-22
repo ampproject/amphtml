@@ -552,5 +552,8 @@ export function installLightboxManager(win) {
   }
 }
 
-installLightboxManager(AMP.win);
-AMP.registerElement(TAG, AmpLightboxViewer, CSS);
+
+AMP.extension(TAG, '0.1', AMP => {
+  installLightboxManager(AMP.win);
+  AMP.registerElement(TAG, AmpLightboxViewer, CSS);
+});

@@ -26,11 +26,13 @@
 
 import {WebPushService} from './web-push-service';
 import {WebPushConfig} from './amp-web-push-config';
-import {CONFIG_TAG, WIDGET_TAG, SERVICE_TAG} from './vars';
+import {CONFIG_TAG, WIDGET_TAG, SERVICE_TAG, TAG} from './vars';
 import {WebPushWidget} from './amp-web-push-widget';
 import {CSS} from '../../../build/amp-web-push-0.1.css';
 
 
-AMP.registerServiceForDoc(SERVICE_TAG, WebPushService);
-AMP.registerElement(CONFIG_TAG, WebPushConfig);
-AMP.registerElement(WIDGET_TAG, WebPushWidget, CSS);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerServiceForDoc(SERVICE_TAG, WebPushService);
+  AMP.registerElement(CONFIG_TAG, WebPushConfig);
+  AMP.registerElement(WIDGET_TAG, WebPushWidget, CSS);
+});

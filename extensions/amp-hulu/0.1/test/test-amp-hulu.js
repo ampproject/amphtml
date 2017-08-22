@@ -14,29 +14,31 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-hulu';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-hulu', () => {
+describes.realWin('amp-hulu', {
+  amp: {
+    extensions: ['amp-hulu'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getHulu(eid, opt_responsive) {
-    return createIframePromise(/*opt_runtimeOff*/ true).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const hulu = iframe.doc.createElement('amp-hulu');
-      hulu.setAttribute('data-eid', eid);
-      hulu.setAttribute('width', '111');
-      hulu.setAttribute('height', '222');
-      if (opt_responsive) {
-        hulu.setAttribute('layout', 'responsive');
-      }
-      return iframe.addElement(hulu);
-    });
+    const hulu = doc.createElement('amp-hulu');
+    hulu.setAttribute('data-eid', eid);
+    hulu.setAttribute('width', '111');
+    hulu.setAttribute('height', '222');
+    if (opt_responsive) {
+      hulu.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(hulu);
+    return hulu.build().then(() => hulu.layoutCallback()).then(() => hulu);
   }
 
   it('renders', () => {

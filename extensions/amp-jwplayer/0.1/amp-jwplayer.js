@@ -113,7 +113,9 @@ class AmpJWPlayer extends AMP.BaseElement {
     placeholder.setAttribute('referrerpolicy', 'origin');
     return placeholder;
   }
+}
 
-};
 
-AMP.registerElement('amp-jwplayer', AmpJWPlayer);
+AMP.extension('amp-jwplayer', '0.1', AMP => {
+  AMP.registerElement('amp-jwplayer', AmpJWPlayer);
+});

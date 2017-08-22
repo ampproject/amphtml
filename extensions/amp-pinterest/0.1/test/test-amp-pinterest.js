@@ -15,9 +15,7 @@
  */
 
 import '../amp-pinterest';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
 describes.realWin('amp-pinterest', {
   amp: {
@@ -59,5 +57,4 @@ describes.realWin('amp-pinterest', {
         'scription=Next%20stop%3A%20Pinterest');
     });
   });
-
 });

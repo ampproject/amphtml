@@ -14,46 +14,40 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpFresh} from '../amp-fresh';
 import {
   ampFreshManagerForDoc,
   installAmpFreshManagerForDoc,
 } from '../amp-fresh-manager';
-import {resetServiceForTesting} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 
-describe('amp-fresh', () => {
 
-  let sandbox;
+describes.realWin('amp-fresh', {
+  amp: {
+    extension: ['amp-fresh'],
+  },
+}, env => {
+  let win, doc;
   let fresh;
   let elem;
   let manager;
 
   beforeEach(() => {
-    toggleExperiment(window, 'amp-fresh', true);
-    elem = document.createElement('div');
+    win = env.win;
+    doc = win.document;
+    toggleExperiment(win, 'amp-fresh', true);
+    elem = doc.createElement('div');
     elem.setAttribute('id', 'amp-fresh-1');
-    document.body.appendChild(elem);
-    const span = document.createElement('span');
+    doc.body.appendChild(elem);
+    const span = doc.createElement('span');
     span.textContent = 'hello';
     elem.appendChild(span);
-    installAmpFreshManagerForDoc(window.document);
-    manager = ampFreshManagerForDoc(window.document);
+    installAmpFreshManagerForDoc(doc);
+    manager = ampFreshManagerForDoc(doc);
     fresh = new AmpFresh(elem);
-    sandbox = sinon.sandbox.create();
     fresh.mutateElement = function(cb) {
       cb();
     };
-  });
-
-  afterEach(() => {
-    toggleExperiment(window, 'amp-fresh', false);
-    resetServiceForTesting(window, 'ampFreshManager');
-    sandbox.restore();
-    if (elem.parentNode) {
-      elem.parentNode.removeChild(elem);
-    }
   });
 
   it('should register to manager', () => {
@@ -66,15 +60,15 @@ describe('amp-fresh', () => {
   it('should replace its subtree', () => {
     fresh.buildCallback();
     expect(fresh.element.innerHTML).to.equal('<span>hello</span>');
-    const doc = {
+    const otherDoc = {
       getElementById(id) {
-        const el = document.createElement('amp-fresh');
+        const el = doc.createElement('amp-fresh');
         el.innerHTML = '<span>hello</span><div>world</div>!';
         el.setAttribute('id', id);
         return el;
       },
     };
-    manager.update_(doc);
+    manager.update_(otherDoc);
     expect(fresh.element.innerHTML).to.equal(
         '<span>hello</span><div>world</div>!');
   });

@@ -73,4 +73,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-timeago', AmpTimeAgo);
+
+AMP.extension('amp-timeago', '0.1', AMP => {
+  AMP.registerElement('amp-timeago', AmpTimeAgo);
+});

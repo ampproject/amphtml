@@ -14,34 +14,35 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-reddit';
-import {adopt} from '../../../../src/runtime';
 import {reddit} from '../../../../3p/reddit';
 
-adopt(window);
 
-describe('amp-reddit', () => {
+describes.realWin('amp-reddit', {
+  amp: {
+    extensions: ['amp-reddit'],
+    canonicalUrl: 'https://foo.bar/baz',
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
+
   function getReddit(src, type) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const link = document.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      link.setAttribute('href', 'https://foo.bar/baz');
-      iframe.doc.head.appendChild(link);
+    const ampReddit = doc.createElement('amp-reddit');
+    ampReddit.setAttribute('height', 400);
+    ampReddit.setAttribute('width', 400);
+    ampReddit.setAttribute('data-src', src);
+    ampReddit.setAttribute('data-embedtype', type);
+    ampReddit.setAttribute('layout', 'responsive');
 
-      const ampReddit = iframe.doc.createElement('amp-reddit');
-      ampReddit.setAttribute('height', 400);
-      ampReddit.setAttribute('width', 400);
-      ampReddit.setAttribute('data-src', src);
-      ampReddit.setAttribute('data-embedtype', type);
-      ampReddit.setAttribute('layout', 'responsive');
-
-      return iframe.addElement(ampReddit);
-    });
+    doc.body.appendChild(ampReddit);
+    return ampReddit.build()
+        .then(() => ampReddit.layoutCallback())
+        .then(() => ampReddit);
   }
 
   it('renders post iframe', () => {
@@ -56,21 +57,19 @@ describe('amp-reddit', () => {
   });
 
   it('adds post embed', () => {
-    return createIframePromise().then(iframe => {
-      const div = document.createElement('div');
-      div.setAttribute('id', 'c');
-      iframe.doc.body.appendChild(div);
+    const div = document.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
 
-      reddit(iframe.win, {
-        src: 'https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed',
-        embedtype: 'post',
-        width: 400,
-        height: 400,
-      });
-
-      const embedlyEmbed = iframe.doc.body.querySelector('.embedly-card');
-      expect(embedlyEmbed).not.to.be.undefined;
+    reddit(win, {
+      src: 'https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed',
+      embedtype: 'post',
+      width: 400,
+      height: 400,
     });
+
+    const embedlyEmbed = doc.body.querySelector('.embedly-card');
+    expect(embedlyEmbed).not.to.be.undefined;
   });
 
   it('renders comment iframe', () => {
@@ -85,21 +84,19 @@ describe('amp-reddit', () => {
   });
 
   it('adds comment embed', () => {
-    return createIframePromise().then(iframe => {
-      const div = document.createElement('div');
-      div.setAttribute('id', 'c');
-      iframe.doc.body.appendChild(div);
+    const div = document.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
 
-      reddit(iframe.win, {
-        src: 'https://www.reddit.com/r/sports/comments/54loj1/50_cents_awful_1st_pitch_given_a_historical/d8306kw',
-        embedtype: 'comment',
-        width: 400,
-        height: 400,
-      });
-
-      const redditEmbed = iframe.doc.body.querySelector('.reddit-embed');
-      expect(redditEmbed).not.to.be.undefined;
+    reddit(win, {
+      src: 'https://www.reddit.com/r/sports/comments/54loj1/50_cents_awful_1st_pitch_given_a_historical/d8306kw',
+      embedtype: 'comment',
+      width: 400,
+      height: 400,
     });
+
+    const redditEmbed = doc.body.querySelector('.reddit-embed');
+    expect(redditEmbed).not.to.be.undefined;
   });
 
   it('requires data-src', () => {
@@ -112,5 +109,4 @@ describe('amp-reddit', () => {
         .should.eventually.be.rejectedWith(
         /The data-embedtype attribute is required for/);
   });
-
 });

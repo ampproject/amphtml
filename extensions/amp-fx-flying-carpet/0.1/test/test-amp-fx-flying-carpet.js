@@ -14,58 +14,55 @@
  * limitations under the License.
  */
 
-import {adopt} from '../../../../src/runtime';
-import {createIframePromise} from '../../../../testing/iframe';
-import {installImg} from '../../../../builtins/amp-img';
+import {AmpFlyingCarpet} from '../amp-fx-flying-carpet';
+import {Resource} from '../../../../src/service/resource';
 import {Services} from '../../../../src/services';
-import * as sinon from 'sinon';
-import '../amp-fx-flying-carpet';
 
-adopt(window);
 
-describe('amp-fx-flying-carpet', () => {
-  let iframe;
-
-  let sandbox;
+describes.realWin('amp-fx-flying-carpet', {
+  amp: {
+    extensions: ['amp-fx-flying-carpet'],
+  },
+}, env => {
+  let win, doc;
+  let viewport;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-  afterEach(() => {
-    sandbox.restore();
+    win = env.win;
+    doc = win.document;
+    viewport = Services.viewportForDoc(env.ampdoc);
   });
 
   function getAmpFlyingCarpet(opt_childrenCallback, opt_top) {
-    let viewport;
     const top = opt_top || '200vh';
-    let flyingCarpet;
-    return createIframePromise().then(i => {
-      iframe = i;
 
-      const bodyResizer = iframe.doc.createElement('div');
-      bodyResizer.style.height = '400vh';
-      bodyResizer.style.width = '1px';
-      iframe.doc.body.appendChild(bodyResizer);
+    const bodyResizer = doc.createElement('div');
+    bodyResizer.style.height = '400vh';
+    bodyResizer.style.width = '1px';
+    doc.body.appendChild(bodyResizer);
 
-      iframe.doc.body.style.position = 'relative';
-      viewport = Services.viewportForDoc(iframe.win.document);
-      viewport.resize_();
+    doc.body.style.position = 'relative';
+    viewport.resize_();
 
-      const parent = iframe.doc.querySelector('#parent');
-      parent.style.position = 'absolute';
-      parent.style.top = top;
+    const parent = doc.querySelector('#parent');
+    parent.style.position = 'absolute';
+    parent.style.top = top;
 
-      flyingCarpet = iframe.doc.createElement('amp-fx-flying-carpet');
-      flyingCarpet.setAttribute('height', '10px');
-      if (opt_childrenCallback) {
-        const children = opt_childrenCallback(iframe, flyingCarpet);
-        children.forEach(child => {
-          flyingCarpet.appendChild(child);
-        });
-      }
+    const flyingCarpet = doc.createElement('amp-fx-flying-carpet');
+    flyingCarpet.setAttribute('height', '10px');
+    if (opt_childrenCallback) {
+      const children = opt_childrenCallback(flyingCarpet);
+      children.forEach(child => {
+        flyingCarpet.appendChild(child);
+      });
+    }
 
-      return iframe.addElement(flyingCarpet);
-    }).then(flyingCarpet => {
+    parent.appendChild(flyingCarpet);
+    return flyingCarpet.build().then(() => {
+      const resource = Resource.forElement(flyingCarpet);
+      resource.measure();
+      return flyingCarpet.layoutCallback();
+    }).then(() => {
       viewport.setScrollTop(parseInt(top, 10));
       return flyingCarpet;
     }, error => {
@@ -75,9 +72,8 @@ describe('amp-fx-flying-carpet', () => {
 
   it('should move children into wrapping divs', () => {
     let img;
-    return getAmpFlyingCarpet(iframe => {
-      installImg(iframe.win);
-      img = iframe.doc.createElement('amp-img');
+    return getAmpFlyingCarpet(() => {
+      img = doc.createElement('amp-img');
       img.setAttribute('src', '/examples/img/sample.jpg');
       img.setAttribute('width', 300);
       img.setAttribute('height', 200);
@@ -97,8 +93,8 @@ describe('amp-fx-flying-carpet', () => {
 
   it('should move text into wrapping divs', () => {
     let text;
-    return getAmpFlyingCarpet(iframe => {
-      text = iframe.doc.createTextNode('test');
+    return getAmpFlyingCarpet(() => {
+      text = doc.createTextNode('test');
       return [text];
     }).then(flyingCarpet => {
       const clip = flyingCarpet.firstChild;
@@ -114,31 +110,19 @@ describe('amp-fx-flying-carpet', () => {
   });
 
   it('should listen to build callback of children', () => {
+    const scheduleLayoutStub = sandbox.stub(
+        AmpFlyingCarpet.prototype, 'scheduleLayout');
     let img;
-    let layoutSpy;
-    let childLayoutSpy;
-    return getAmpFlyingCarpet((iframe, flyingCarpet) => {
-      // To make sure the flyingCarpet has already tried laying out children
-      layoutSpy = sandbox.spy(flyingCarpet.implementation_, 'layoutCallback');
-
+    return getAmpFlyingCarpet(() => {
       // Add the image
-      img = iframe.doc.createElement('amp-img');
+      img = doc.createElement('amp-img');
       img.setAttribute('src', '/examples/img/sample.jpg');
       img.setAttribute('width', 300);
       img.setAttribute('height', 200);
       return [img];
-    }).then(flyingCarpet => {
-      expect(layoutSpy).to.have.been.called;
-
-      // Now, allow the image to build.
-      installImg(flyingCarpet.ownerDocument.defaultView);
-
-      childLayoutSpy = sandbox.spy(img.implementation_, 'layoutCallback');
-      return new Promise(resolve => {
-        setTimeout(resolve, 32);
-      });
     }).then(() => {
-      expect(childLayoutSpy).to.have.been.called;
+      expect(scheduleLayoutStub).to.have.been.called;
+      expect(scheduleLayoutStub).to.have.been.calledWith([img]);
     });
   });
 
@@ -202,16 +186,15 @@ describe('amp-fx-flying-carpet', () => {
 
   it('should attempt to collapse when its children collapse', () => {
     let img;
-    return getAmpFlyingCarpet(iframe => {
-      installImg(iframe.win);
+    return getAmpFlyingCarpet(() => {
       // Usually, the children appear on a new line with indentation
-      const pretext = iframe.doc.createTextNode('\n  ');
-      img = iframe.doc.createElement('amp-img');
+      const pretext = doc.createTextNode('\n  ');
+      img = doc.createElement('amp-img');
       img.setAttribute('src', '/examples/img/sample.jpg');
       img.setAttribute('width', 300);
       img.setAttribute('height', 200);
       // Usually, the closing node appears on a new line
-      const posttext = iframe.doc.createTextNode('\n');
+      const posttext = doc.createTextNode('\n');
       return [pretext, img, posttext];
     }).then(flyingCarpet => {
       const attemptCollapse = sandbox.stub(flyingCarpet.implementation_,

@@ -14,57 +14,45 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpFresh} from '../amp-fresh';
 import {
   ampFreshManagerForDoc,
   installAmpFreshManagerForDoc,
 } from '../amp-fresh-manager';
-import {installXhrService} from '../../../../src/service/xhr-impl';
-import {resetServiceForTesting} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 import {AmpDoc} from '../../../../src/service/ampdoc-impl';
 
-describe('amp-fresh-manager', () => {
-  let sandbox;
+
+describes.realWin('amp-fresh-manager', {amp: true}, env => {
+  let win, doc;
   let requests;
   let container;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
     const mockXhr = sandbox.useFakeXMLHttpRequest().xhr;
     requests = [];
-    toggleExperiment(window, 'amp-fresh', true);
-    installXhrService(window);
-    installAmpFreshManagerForDoc(window.document);
+    toggleExperiment(win, 'amp-fresh', true);
+    installAmpFreshManagerForDoc(doc);
     mockXhr.onCreate = function(xhr) {
       requests.push(xhr);
     };
-    container = document.createElement('div');
-    document.body.appendChild(container);
-  });
-
-  afterEach(() => {
-    toggleExperiment(window, 'amp-fresh', false);
-    resetServiceForTesting(window, 'ampFreshManager');
-    resetServiceForTesting(window, 'xhr');
-    sandbox.restore();
-    if (container.parentNode) {
-      container.parentNode.removeChild(container);
-    }
+    container = doc.createElement('div');
+    doc.body.appendChild(container);
   });
 
   it('should fetch document on instantiation', () => {
     expect(requests).to.have.lengthOf(0);
     // Force instantiation
-    ampFreshManagerForDoc(window.document);
+    ampFreshManagerForDoc(doc);
     expect(requests).to.have.lengthOf(1);
   });
 
   it('only update when doc is ready', () => {
     sandbox.stub(AmpDoc.prototype, 'whenReady')
         .returns(Promise.resolve());
-    const service = ampFreshManagerForDoc(window.document);
+    const service = ampFreshManagerForDoc(doc);
     const updateSpy = sandbox.spy(service, 'update_');
     expect(updateSpy).to.have.not.been.called;
     requests[0].respond(200, {
@@ -77,23 +65,23 @@ describe('amp-fresh-manager', () => {
 
   it('adds amp-fresh=1 query param to request', () => {
     // Force instantiation
-    ampFreshManagerForDoc(window.document);
+    ampFreshManagerForDoc(doc);
     expect(requests[0].url).to.match(/amp-fresh=1/);
   });
 
   it('calls setFreshReady on all registered amp-fresh elements ' +
      'on failure', () => {
-    const elem = document.createElement('div');
+    const elem = doc.createElement('div');
     elem.setAttribute('id', 'amp-fresh-1');
     container.appendChild(elem);
-    const elem2 = document.createElement('div');
+    const elem2 = doc.createElement('div');
     elem2.setAttribute('id', 'amp-fresh-2');
     container.appendChild(elem2);
     const fresh = new AmpFresh(elem);
     const fresh2 = new AmpFresh(elem2);
     const setFreshReadySpy = sandbox.spy(fresh, 'setFreshReady');
     const setFreshReadySpy2 = sandbox.spy(fresh2, 'setFreshReady');
-    const service = ampFreshManagerForDoc(window.document);
+    const service = ampFreshManagerForDoc(doc);
     requests[0].respond(404, {
       'Content-Type': 'text/xml',
     }, '<html></html>');
@@ -108,10 +96,10 @@ describe('amp-fresh-manager', () => {
   });
 
   it('throws on duplicate ids', () => {
-    const elem = document.createElement('div');
+    const elem = doc.createElement('div');
     elem.setAttribute('id', 'amp-fresh-1');
     container.appendChild(elem);
-    const elem2 = document.createElement('div');
+    const elem2 = doc.createElement('div');
     elem2.setAttribute('id', 'amp-fresh-1');
     container.appendChild(elem2);
     const fresh = new AmpFresh(elem);

@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../src/services';
 import {
   AmpIframe,
   isAdLike,
   setTrackingIframeTimeoutForTesting,
 } from '../amp-iframe';
-import {adopt} from '../../../../src/runtime';
-import {
-  poll,
-} from '../../../../testing/iframe';
 import {CommonSignals} from '../../../../src/common-signals';
+import {Services} from '../../../../src/services';
+import {poll} from '../../../../testing/iframe';
 import {
   createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
-import * as sinon from 'sinon';
-adopt(window);
+
+
 describes.realWin('amp-iframe', {
   allowExternalResources: true,
   amp: {
@@ -45,7 +42,6 @@ describes.realWin('amp-iframe', {
     let timer;
     let ranJs;
     let content;
-    let sandbox;
     let win;
     let doc;
 
@@ -59,7 +55,6 @@ describes.realWin('amp-iframe', {
       timer = Services.timerFor(win);
       ranJs = 0;
       content = '';
-      sandbox = sinon.sandbox.create();
       timer = Services.timerFor(env.win);
       win.addEventListener('message', message => {
         if (!message.data) {
@@ -74,10 +69,6 @@ describes.realWin('amp-iframe', {
         }
       });
       setTrackingIframeTimeoutForTesting(20);
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     function waitForJsInIframe() {

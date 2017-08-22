@@ -995,4 +995,6 @@ export class AmpFormService {
 }
 
 
-AMP.registerServiceForDoc(TAG, AmpFormService);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerServiceForDoc(TAG, AmpFormService);
+});

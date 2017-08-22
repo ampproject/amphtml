@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import '../amp-video';
-import * as sinon from 'sinon';
 
-const TAG = 'amp-video';
 
-describe(TAG, () => {
-
-  let sandbox;
-  const timer = Services.timerFor(window);
+describes.realWin('amp-video', {
+  amp: {
+    extensions: ['amp-video'],
+  },
+}, env => {
+  let win, doc;
+  let timer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    win = env.win;
+    doc = win.document;
+    timer = Services.timerFor(win);
   });
 
   function getFooVideoSrc(mediatype) {
@@ -41,26 +39,29 @@ describe(TAG, () => {
   }
 
   function getVideo(attributes, children, opt_beforeLayoutCallback) {
-    return createIframePromise(
-        true, opt_beforeLayoutCallback).then(iframe => {
-          const v = iframe.doc.createElement(TAG);
-          for (const key in attributes) {
-            v.setAttribute(key, attributes[key]);
-          }
-          if (children != null) {
-            for (const key in children) {
-              v.appendChild(children[key]);
-            }
-          }
-          return iframe.addElement(v).catch(e => {
-            // Ignore failed to load errors since sources are fake.
-            if (e.toString().indexOf('Failed to load') > -1) {
-              return v;
-            } else {
-              throw e;
-            }
-          });
-        });
+    const v = doc.createElement('amp-video');
+    for (const key in attributes) {
+      v.setAttribute(key, attributes[key]);
+    }
+    if (children != null) {
+      for (const key in children) {
+        v.appendChild(children[key]);
+      }
+    }
+    doc.body.appendChild(v);
+    return v.build().then(() => {
+      if (opt_beforeLayoutCallback) {
+        opt_beforeLayoutCallback(v);
+      }
+      return v.layoutCallback().then(() => v);
+    }).catch(e => {
+      // Ignore failed to load errors since sources are fake.
+      if (e.toString().indexOf('Failed to load') > -1) {
+        return v;
+      } else {
+        throw e;
+      }
+    });
   }
 
   it('should load a video', () => {
@@ -111,7 +112,7 @@ describe(TAG, () => {
     const mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
     for (let i = 0; i < mediatypes.length; i++) {
       const mediatype = mediatypes[i];
-      const source = document.createElement('source');
+      const source = doc.createElement('source');
       source.setAttribute('src', getFooVideoSrc(mediatype));
       source.setAttribute('type', mediatype);
       sources.push(source);
@@ -148,7 +149,7 @@ describe(TAG, () => {
     const mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
     for (let i = 0; i < mediatypes.length; i++) {
       const mediatype = mediatypes[i];
-      const source = document.createElement('source');
+      const source = doc.createElement('source');
       source.setAttribute('src', 'http:' + getFooVideoSrc(mediatype));
       source.setAttribute('type', mediatype);
       sources.push(source);
@@ -231,7 +232,7 @@ describe(TAG, () => {
     const mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
     for (let i = 0; i < mediatypes.length; i++) {
       const mediatype = mediatypes[i];
-      const source = document.createElement('source');
+      const source = doc.createElement('source');
       source.setAttribute('src', getFooVideoSrc(mediatype));
       source.setAttribute('type', mediatype);
       sources.push(source);

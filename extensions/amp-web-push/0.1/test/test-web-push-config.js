@@ -15,14 +15,14 @@
  */
 
 import {TAG, CONFIG_TAG} from '../vars';
-import {WebPushConfigAttributes, WebPushConfig} from '../amp-web-push-config';
-import {
-  getElementClassForTesting,
-  registerElement,
-} from '../../../../src/custom-element';
+import {WebPushConfigAttributes} from '../amp-web-push-config';
+import '../amp-web-push';
+
 
 describes.realWin('web-push-config', {
-  amp: true,
+  amp: {
+    extensions: ['amp-web-push'],
+  },
 }, env => {
   let win;
   let webPushConfig = {};
@@ -44,11 +44,6 @@ describes.realWin('web-push-config', {
   });
 
   function createConfigElementWithAttributes(attributes) {
-    if (!getElementClassForTesting(win, CONFIG_TAG)) {
-      // Our tests may call this function multiple times, but an element class
-      // can only be registered once
-      registerElement(env.win, CONFIG_TAG, WebPushConfig);
-    }
     const element = env.win.document.createElement(CONFIG_TAG);
     element.setAttribute(WebPushConfigAttributes.HELPER_FRAME_URL,
         attributes[WebPushConfigAttributes.HELPER_FRAME_URL]);

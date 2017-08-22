@@ -16,61 +16,53 @@
 
 import '../amp-font';
 import {FontLoader} from '../fontloader';
-import {adopt} from '../../../../src/runtime';
-import {createIframePromise} from '../../../../testing/iframe';
-import * as sinon from 'sinon';
 
-adopt(window);
 
-describe('amp-font', function() {
-
-  let sandbox;
+describes.realWin('amp-font', {
+  amp: {
+    extensions: ['amp-font'],
+  },
+}, function(env) {
+  let win, doc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
-  function getAmpFontIframe() {
-    return createIframePromise().then(iframe => {
-      iframe.doc.body.classList.add('comic-amp-font-loading');
-      const font = iframe.doc.createElement('amp-font');
-      font.setAttribute('layout', 'nodisplay');
-      font.setAttribute('font-family', 'Comic AMP');
-      font.setAttribute('timeout', '1000');
-      font.setAttribute('while-loading-class', '');
-      font.setAttribute('on-error-add-class', 'comic-amp-font-missing');
-      font.setAttribute('on-load-add-class', 'comic-amp-font-loaded');
-      font.setAttribute('on-error-remove-class', 'comic-amp-font-loading');
-      font.setAttribute('on-load-remove-class', 'comic-amp-font-loading');
-      return iframe.addElement(font).then(unusedF => {
-        return Promise.resolve(iframe);
-      });
-    });
+  function getAmpFont() {
+    doc.body.classList.add('comic-amp-font-loading');
+    const font = doc.createElement('amp-font');
+    font.setAttribute('layout', 'nodisplay');
+    font.setAttribute('font-family', 'Comic AMP');
+    font.setAttribute('timeout', '1000');
+    font.setAttribute('while-loading-class', '');
+    font.setAttribute('on-error-add-class', 'comic-amp-font-missing');
+    font.setAttribute('on-load-add-class', 'comic-amp-font-loaded');
+    font.setAttribute('on-error-remove-class', 'comic-amp-font-loading');
+    font.setAttribute('on-load-remove-class', 'comic-amp-font-loading');
+    doc.body.appendChild(font);
+    return font.build().then(() => font.layoutCallback()).then(() => font);
   }
 
   it('should timeout while loading custom font', function() {
     sandbox.stub(FontLoader.prototype, 'load')
         .returns(Promise.reject('mock rejection'));
-    return getAmpFontIframe().then(iframe => {
-      expect(iframe.doc.documentElement)
+    return getAmpFont().then(() => {
+      expect(doc.documentElement)
           .to.have.class('comic-amp-font-missing');
-      expect(iframe.doc.body)
+      expect(doc.body)
           .to.not.have.class('comic-amp-font-loading');
     });
   });
 
   it('should load custom font', function() {
     sandbox.stub(FontLoader.prototype, 'load').returns(Promise.resolve());
-    return getAmpFontIframe().then(iframe => {
-      expect(iframe.doc.documentElement)
+    return getAmpFont().then(() => {
+      expect(doc.documentElement)
           .to.have.class('comic-amp-font-loaded');
-      expect(iframe.doc.body)
+      expect(doc.body)
           .to.not.have.class('comic-amp-font-loading');
     });
   });
-
 });

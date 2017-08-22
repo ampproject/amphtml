@@ -14,29 +14,33 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-izlesene';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-izlesene', () => {
+describes.realWin('amp-izlesene', {
+  amp: {
+    extensions: ['amp-izlesene'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getIzlesene(videoId, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const izlesene = iframe.doc.createElement('amp-izlesene');
-      izlesene.setAttribute('data-videoid', videoId);
-      izlesene.setAttribute('width', '111');
-      izlesene.setAttribute('height', '222');
-      if (opt_responsive) {
-        izlesene.setAttribute('layout', 'responsive');
-      }
-      return iframe.addElement(izlesene);
-    });
+    const izlesene = doc.createElement('amp-izlesene');
+    izlesene.setAttribute('data-videoid', videoId);
+    izlesene.setAttribute('width', '111');
+    izlesene.setAttribute('height', '222');
+    if (opt_responsive) {
+      izlesene.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(izlesene);
+    return izlesene.build().then(() => {
+      return izlesene.layoutCallback();
+    }).then(() => izlesene);
   }
 
   it('renders', () => {

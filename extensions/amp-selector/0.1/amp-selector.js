@@ -22,6 +22,8 @@ import {closestBySelector, tryFocus, isRTL} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 
+const TAG = 'amp-selector';
+
 /**
  * Set of namespaces that can be set for lifecycle reporters.
  *
@@ -452,4 +454,7 @@ export class AmpSelector extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-selector', AmpSelector, CSS);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpSelector, CSS);
+});

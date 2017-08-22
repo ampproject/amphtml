@@ -14,29 +14,31 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-springboard-player';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-springboard-player', () => {
+describes.realWin('amp-springboard-player', {
+  amp: {
+    extensions: ['amp-springboard-player'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getSpringboardPlayer(attributes) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const sp = iframe.doc.createElement('amp-springboard-player');
-      for (const key in attributes) {
-        sp.setAttribute(key, attributes[key]);
-      }
-      sp.setAttribute('width', '480');
-      sp.setAttribute('height', '270');
-      sp.setAttribute('layout', 'responsive');
-      return iframe.addElement(sp);
-    });
+    const sp = doc.createElement('amp-springboard-player');
+    for (const key in attributes) {
+      sp.setAttribute(key, attributes[key]);
+    }
+    sp.setAttribute('width', '480');
+    sp.setAttribute('height', '270');
+    sp.setAttribute('layout', 'responsive');
+    doc.body.appendChild(sp);
+    return sp.build().then(() => sp.layoutCallback()).then(() => sp);
   }
 
   it('renders', () => {

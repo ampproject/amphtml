@@ -70,4 +70,7 @@ class AmpVine extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-vine', AmpVine);
+
+AMP.extension('amp-vine', '0.1', AMP => {
+  AMP.registerElement('amp-vine', AmpVine);
+});

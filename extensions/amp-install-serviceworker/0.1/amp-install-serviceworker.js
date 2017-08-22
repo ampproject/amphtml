@@ -299,5 +299,6 @@ function install(win, src) {
 }
 
 
-AMP.registerElement('amp-install-serviceworker',
-    AmpInstallServiceWorker);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpInstallServiceWorker);
+});

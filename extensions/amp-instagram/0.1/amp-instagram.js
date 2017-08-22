@@ -234,6 +234,9 @@ class AmpInstagram extends AMP.BaseElement {
     }
     return true;  // Call layoutCallback again.
   }
-};
+}
 
-AMP.registerElement('amp-instagram', AmpInstagram, CSS);
+
+AMP.extension('amp-instagram', '0.1', AMP => {
+  AMP.registerElement('amp-instagram', AmpInstagram, CSS);
+});

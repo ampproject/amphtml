@@ -499,6 +499,9 @@ class AmpYoutube extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-youtube', AmpYoutube);
+
+AMP.extension('amp-youtube', '0.1', AMP => {
+  AMP.registerElement('amp-youtube', AmpYoutube);
+});
