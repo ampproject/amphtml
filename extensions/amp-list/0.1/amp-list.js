@@ -219,4 +219,7 @@ export class AmpList extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-list', AmpList);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpList);
+});

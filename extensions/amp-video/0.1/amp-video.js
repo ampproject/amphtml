@@ -378,4 +378,7 @@ class AmpVideo extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement(TAG, AmpVideo);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpVideo);
+});

@@ -13,24 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
+
 import '../amp-imgur';
 
-describes.realWin('amp-imgur', {}, () => {
+
+describes.realWin('amp-imgur', {
+  amp: {
+    extensions: ['amp-imgur'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getIns(imgurId) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const ins = iframe.doc.createElement('amp-imgur');
-      ins.setAttribute('data-imgur-id', imgurId);
-      ins.setAttribute('width', '1');
-      ins.setAttribute('height', '1');
-      ins.setAttribute('layout', 'responsive');
-      return iframe.addElement(ins);
-    });
+    const ins = doc.createElement('amp-imgur');
+    ins.setAttribute('data-imgur-id', imgurId);
+    ins.setAttribute('width', '1');
+    ins.setAttribute('height', '1');
+    ins.setAttribute('layout', 'responsive');
+    doc.body.appendChild(ins);
+    return ins.build().then(() => ins.layoutCallback()).then(() => ins);
   }
 
   function testIframe(iframe) {

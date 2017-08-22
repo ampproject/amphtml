@@ -81,6 +81,9 @@ class AmpHulu extends AMP.BaseElement {
     dev().assert(this.eid_);
     return `https://player.hulu.com/site/dash/mobile_embed.html?amp=1&eid=${encodeURIComponent(this.eid_ || '')}`;
   }
-};
+}
 
-AMP.registerElement('amp-hulu', AmpHulu);
+
+AMP.extension('amp-hulu', '0.1', AMP => {
+  AMP.registerElement('amp-hulu', AmpHulu);
+});

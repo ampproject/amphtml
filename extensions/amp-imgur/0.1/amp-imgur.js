@@ -115,7 +115,9 @@ export class AmpImgur extends AMP.BaseElement {
     }
     return true;  // Call layoutCallback again.
   }
-
 }
 
-AMP.registerElement('amp-imgur', AmpImgur);
+
+AMP.extension('amp-imgur', '0.1', AMP => {
+  AMP.registerElement('amp-imgur', AmpImgur);
+});

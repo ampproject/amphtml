@@ -54,7 +54,6 @@ const VIEWER_TAG = 'amp-lightbox-viewer';
  * @return {!Promise}
  */
 export function autoDiscoverLightboxables(ampdoc) {
-
   // Extra safety check, manager should not call this if experiments are off
   dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer'));
   dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer-auto'));
@@ -89,7 +88,6 @@ function meetsHeuristics(element) {
 
   // TODO(aghassemi): This will become complicated soon, create a pluggable
   // system for this.
-
   if (element.getLayoutBox) {
     const layoutBox = element.getLayoutBox();
     if (layoutBox.left < 0 ||

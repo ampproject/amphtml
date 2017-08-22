@@ -286,6 +286,9 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-ooyala-player', AmpOoyalaPlayer);
+
+AMP.extension('amp-ooyala-player', '0.1', AMP => {
+  AMP.registerElement('amp-ooyala-player', AmpOoyalaPlayer);
+});

@@ -14,60 +14,56 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-instagram';
-import {adopt} from '../../../../src/runtime';
-import * as sinon from 'sinon';
 
-adopt(window);
 
-describe('amp-instagram', () => {
-
-  let sandbox;
+describes.realWin('amp-instagram', {
+  amp: {
+    extensions: ['amp-instagram'],
+  },
+}, env => {
+  let win, doc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    win = env.win;
+    doc = win.document;
   });
 
   function getIns(shortcode, opt_responsive,
       opt_beforeLayoutCallback, opt_captioned) {
-    return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const ins = iframe.doc.createElement('amp-instagram');
-      ins.setAttribute('data-shortcode', shortcode);
-      ins.setAttribute('width', '111');
-      ins.setAttribute('height', '222');
-      ins.setAttribute('alt', 'Testing');
-      if (opt_responsive) {
-        ins.setAttribute('layout', 'responsive');
-      }
-      if (opt_captioned) {
-        ins.setAttribute('data-captioned', '');
-      }
-      ins.implementation_.getVsync = () => {
-        return {
-          mutate(cb) { cb(); },
-          measure(cb) { cb(); },
-          runPromise(task, state = {}) {
-            if (task.measure) {
-              task.measure(state);
-            }
-            if (task.mutate) {
-              task.mutate(state);
-            }
-            return Promise.resolve();
-          },
-        };
+    const ins = doc.createElement('amp-instagram');
+    ins.setAttribute('data-shortcode', shortcode);
+    ins.setAttribute('width', '111');
+    ins.setAttribute('height', '222');
+    ins.setAttribute('alt', 'Testing');
+    if (opt_responsive) {
+      ins.setAttribute('layout', 'responsive');
+    }
+    if (opt_captioned) {
+      ins.setAttribute('data-captioned', '');
+    }
+    ins.implementation_.getVsync = () => {
+      return {
+        mutate(cb) { cb(); },
+        measure(cb) { cb(); },
+        runPromise(task, state = {}) {
+          if (task.measure) {
+            task.measure(state);
+          }
+          if (task.mutate) {
+            task.mutate(state);
+          }
+          return Promise.resolve();
+        },
       };
-      return iframe.addElement(ins);
-    });
+    };
+    doc.body.appendChild(ins);
+    return ins.build().then(() => {
+      if (opt_beforeLayoutCallback) {
+        opt_beforeLayoutCallback(ins);
+      }
+      return ins.layoutCallback();
+    }).then(() => ins);
   }
 
   function testImage(image) {

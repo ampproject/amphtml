@@ -41,6 +41,7 @@ import * as dom from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 
+const TAG = 'amp-image-lightbox';
 
 /** @private @const {!Object<string, boolean>} */
 const SUPPORTED_ELEMENTS_ = {
@@ -1098,4 +1099,7 @@ class AmpImageLightbox extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-image-lightbox', AmpImageLightbox, CSS);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpImageLightbox, CSS);
+});

@@ -13,56 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-    createIframePromise,
-    doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
+
 import '../amp-nexxtv-player';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {adopt} from '../../../../src/runtime';
-import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
-import * as sinon from 'sinon';
 
-adopt(window);
 
-describe('amp-nexxtv-player', () => {
-
-  let sandbox;
-  const timer = Services.timerFor(window);
+describes.realWin('amp-nexxtv-player', {
+  amp: {
+    extensions: ['amp-nexxtv-player'],
+  },
+}, env => {
+  let win, doc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    win = env.win;
+    doc = win.document;
   });
 
   function getNexxtv(mediaid, client) {
-    return createIframePromise(true).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const nexxtv = iframe.doc.createElement('amp-nexxtv-player');
+    const nexxtv = doc.createElement('amp-nexxtv-player');
 
-      if (mediaid) {
-        nexxtv.setAttribute('data-mediaid', mediaid);
-      }
-      if (client) {
-        nexxtv.setAttribute('data-client', client);
-      }
+    if (mediaid) {
+      nexxtv.setAttribute('data-mediaid', mediaid);
+    }
+    if (client) {
+      nexxtv.setAttribute('data-client', client);
+    }
 
-      // see yt test implementation
-      timer.promise(50).then(() => {
-        const nexxTimerIframe = nexxtv.querySelector('iframe');
-
-        nexxtv.implementation_.handleNexxMessages_({
-          origin: 'https://embed.nexx.cloud',
-          source: nexxTimerIframe.contentWindow,
-          data: JSON.stringify({cmd: 'onload'}),
-        });
+    // see yt test implementation
+    doc.body.appendChild(nexxtv);
+    return nexxtv.build().then(() => {
+      return nexxtv.layoutCallback();
+    }).then(() => {
+      const nexxTimerIframe = nexxtv.querySelector('iframe');
+      nexxtv.implementation_.handleNexxMessages_({
+        origin: 'https://embed.nexx.cloud',
+        source: nexxTimerIframe.contentWindow,
+        data: JSON.stringify({cmd: 'onload'}),
       });
-
-      return iframe.addElement(nexxtv);
+      return nexxtv;
     });
   }
 

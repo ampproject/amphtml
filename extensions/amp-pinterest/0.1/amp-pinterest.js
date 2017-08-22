@@ -87,7 +87,9 @@ class AmpPinterest extends AMP.BaseElement {
     }
     return Promise.reject(user().createError('Invalid selector: ' + selector));
   }
+}
 
-};
 
-AMP.registerElement('amp-pinterest', AmpPinterest, CSS);
+AMP.extension('amp-pinterest', '0.1', AMP => {
+  AMP.registerElement('amp-pinterest', AmpPinterest, CSS);
+});

@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-twitter';
-import {adopt} from '../../../../src/runtime';
 import {twitter} from '../../../../3p/twitter';
 
-adopt(window);
 
-describe('amp-twitter', () => {
+describes.realWin('amp-twitter', {
+  amp: {
+    extensions: ['amp-twitter'],
+    canonicalUrl: 'https://foo.bar/baz',
+  },
+}, env => {
   const tweetId = '585110598171631616';
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getAmpTwitter(tweetid) {
-    return createIframePromise(/*opt_runtimeOff*/ true).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const link = document.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      link.setAttribute('href', 'https://foo.bar/baz');
-      iframe.doc.head.appendChild(link);
-
-      const ampTwitter = iframe.doc.createElement('amp-twitter');
-      ampTwitter.setAttribute('data-tweetid', tweetid);
-      ampTwitter.setAttribute('width', '111');
-      ampTwitter.setAttribute('height', '222');
-      return iframe.addElement(ampTwitter);
-    });
+    const ampTwitter = doc.createElement('amp-twitter');
+    ampTwitter.setAttribute('data-tweetid', tweetid);
+    ampTwitter.setAttribute('width', '111');
+    ampTwitter.setAttribute('height', '222');
+    doc.body.appendChild(ampTwitter);
+    return ampTwitter.build()
+        .then(() => ampTwitter.layoutCallback())
+        .then(() => ampTwitter);
   }
 
   it('renders iframe in amp-twitter', () => {
@@ -54,19 +54,17 @@ describe('amp-twitter', () => {
   });
 
   it('adds tweet element correctly', () => {
-    return createIframePromise().then(iframe => {
-      const div = document.createElement('div');
-      div.setAttribute('id', 'c');
-      iframe.doc.body.appendChild(div);
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
 
-      twitter(iframe.win, {
-        tweetid: tweetId,
-        width: 111,
-        height: 222,
-      });
-      const tweet = iframe.doc.body.querySelector('#tweet');
-      expect(tweet).not.to.be.undefined;
+    twitter(win, {
+      tweetid: tweetId,
+      width: 111,
+      height: 222,
     });
+    const tweet = doc.body.querySelector('#tweet');
+    expect(tweet).not.to.be.undefined;
   });
 
   it('removes iframe after unlayoutCallback', () => {

@@ -616,4 +616,7 @@ export function setTrackingIframeTimeoutForTesting(ms) {
   trackingIframeTimeout = ms;
 }
 
-AMP.registerElement('amp-iframe', AmpIframe);
+
+AMP.extension(TAG_, '0.1', AMP => {
+  AMP.registerElement(TAG_, AmpIframe);
+});

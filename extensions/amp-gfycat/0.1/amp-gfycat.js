@@ -79,4 +79,7 @@ class AmpGfycat extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-gfycat', AmpGfycat);
+
+AMP.extension('amp-gfycat', '0.1', AMP => {
+  AMP.registerElement('amp-gfycat', AmpGfycat);
+});
