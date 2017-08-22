@@ -24,6 +24,7 @@ var host = argv.host || 'localhost';
 var port = argv.port || process.env.PORT || 8000;
 var useHttps = argv.https != undefined;
 var quiet = argv.quiet != undefined;
+var enableRestart = argv.enable_restart;
 
 /**
  * Starts a simple http server at the repository root
@@ -57,12 +58,18 @@ function serve() {
     },
   })
   .once('exit', function () {
+    if (enableRestart) {
+      return;
+    }
     process.nextTick(function() {
       process.exit();
     });
   })
   .once('quit', function () {
     util.log(util.colors.green('Shutting down server'));
+    if (enableRestart) {
+      process.exit();
+    }
   });
   if (!quiet) {
     util.log(util.colors.yellow('Run `gulp build` then go to '
