@@ -100,6 +100,8 @@ class TestConfig {
     this.configTasks = [];
 
     this.platform = Services.platformFor(window);
+
+    this.skipIe();  // By default, IE is skipped. Individual tests may opt in.
   }
 
   skipChrome() {
@@ -126,6 +128,10 @@ class TestConfig {
 
   skipIos() {
     return this.skip(this.platform.isIos.bind(this.platform));
+  }
+
+  skipIe() {
+    return this.skip(this.platform.isIe.bind(this.platform));
   }
 
   /**
@@ -158,6 +164,10 @@ class TestConfig {
 
   ifIos() {
     return this.if(this.platform.isIos.bind(this.platform));
+  }
+
+  ifIe() {
+    return this.if(this.platform.isIe.bind(this.platform));
   }
 
   /**
