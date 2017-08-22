@@ -21,10 +21,7 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {
-  experimentFeatureEnabled,
-  ADSENSE_EXPERIMENT_FEATURE,
-} from './adsense-a4a-config';
+import {fastFetchDelayedRequestEnabled} from './adsense-a4a-config';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -138,8 +135,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return experimentFeatureEnabled(
-        this.win, ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST);
+    return fastFetchDelayedRequestEnabled(this.win);
   }
 
   /** @override */
