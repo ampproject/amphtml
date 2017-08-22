@@ -97,4 +97,6 @@ export class AmpCallTracking extends AMP.BaseElement {
 }
 
 
-AMP.registerElement('amp-call-tracking', AmpCallTracking);
+AMP.extension('amp-call-tracking', '0.1', AMP => {
+  AMP.registerElement('amp-call-tracking', AmpCallTracking);
+});

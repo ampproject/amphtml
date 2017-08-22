@@ -421,6 +421,9 @@ class AmpDailymotion extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-dailymotion', AmpDailymotion);
+
+AMP.extension('amp-dailymotion', '0.1', AMP => {
+  AMP.registerElement('amp-dailymotion', AmpDailymotion);
+});

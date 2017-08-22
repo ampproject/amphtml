@@ -150,7 +150,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   commitSwitch_(pos) {
-    dev().fine(TAG, 'commitSwitch_');
     this.updateInViewport_(pos, this.oldPos_);
     this.doLayout_(pos);
     this.preloadNext_(pos, Math.sign(pos - this.oldPos_));

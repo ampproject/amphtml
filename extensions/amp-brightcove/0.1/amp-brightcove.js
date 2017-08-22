@@ -151,6 +151,9 @@ class AmpBrightcove extends AMP.BaseElement {
     }
     return true;
   }
-};
+}
 
-AMP.registerElement('amp-brightcove', AmpBrightcove);
+
+AMP.extension('amp-brightcove', '0.1', AMP => {
+  AMP.registerElement('amp-brightcove', AmpBrightcove);
+});
