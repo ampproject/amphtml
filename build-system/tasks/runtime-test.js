@@ -257,6 +257,8 @@ gulp.task('test', 'Runs tests',
 
   if (argv.coverage) {
     util.log(util.colors.blue('Including code coverage tests'));
+    c.browserify.transform.push(
+        ['browserify-istanbul', { instrumenterConfig: { embedSource: true }}]);
     c.reporters = c.reporters.concat(['progress', 'coverage']);
     if (c.preprocessors['src/**/*.js']) {
       c.preprocessors['src/**/*.js'].push('coverage');
