@@ -148,6 +148,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Counter](#counter) | `COUNTER` | `${counter}` |
 | [Document Charset](#document-charset) | `DOCUMENT_CHARSET` | `${documentCharset}` |
 | [Document Referrer](#document-referrer) | `DOCUMENT_REFERRER` | `${documentReferrer}` |
+| [External Referrer](#external-referrer) | `EXTERNAL_REFERRER` | `${externalReferrer}` |
 | [Source URL](#source-url)           | `SOURCE_URL`      | `${sourceUrl}` |
 | [Source Host](#source-host)         | `SOURCE_HOST`     | `${sourceHost}` |
 | [Source Hostname](#source-hostname) | `SOURCE_HOSTNAME` | `${sourceHostname}` |
@@ -544,6 +545,19 @@ Provides the absolute Y coordinate of the top edge of the element specified by `
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${elementY}`
+
+#### External Referrer
+
+Provides the referrer where the user came from. Similar to [Document Referrer](#document_referrer), but the value is empty if user is navigated from same domain or the corresponding CDN proxy domain.
+Analytics vendor might prefer this value to Document Referrer for better session stitching, depending on the server side implementation. 
+
+* **platform variable**: `EXTERNAL_REFERRER`
+  *  Example: <br>
+  ```html
+  <amp-pixel src="https://foo.com/pixel?referrer=EXTERNAL_REFERRER"></amp-pixel>
+  ```
+* **amp-analytics variable**: `${externalReferrer}`
+  * Example value: `https://www.google.com`
 
 #### Extra URL Parameters
 

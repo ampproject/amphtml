@@ -24,4 +24,8 @@ export class WindowInterface {
   static getDocumentReferrer(win) {
     return win.document.referrer;
   }
+
+  static getHostname(win) {
+    return win.location.hostname;
+  }
 }

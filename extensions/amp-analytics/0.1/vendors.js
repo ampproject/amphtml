@@ -47,6 +47,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'documentReferrer': 'DOCUMENT_REFERRER',
       'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
       'domInteractiveTime': 'DOM_INTERACTIVE_TIME',
+      'externalReferrer': 'EXTERNAL_REFERRER',
       'navRedirectCount': 'NAV_REDIRECT_COUNT',
       'navTiming': 'NAV_TIMING',
       'navType': 'NAV_TYPE',
@@ -659,7 +660,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'cid=${clientId}&' +
           'tid=${account}&' +
           'dl=${documentLocation}&' +
-          'dr=${documentReferrer}&' +
+          'dr=${externalReferrer}&' +
           'sd=${screenColorDepth}&' +
           'ul=${browserLanguage}&' +
           'de=${documentCharset}',
@@ -751,7 +752,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'cid=${clientId}&' +
       'tid=${account}&' +
       'dl=${documentLocation}&' +
-      'dr=${documentReferrer}&' +
+      'dr=${externalReferrer}&' +
       'sd=${screenColorDepth}&' +
       'ul=${browserLanguage}&' +
       'de=${documentCharset}',
