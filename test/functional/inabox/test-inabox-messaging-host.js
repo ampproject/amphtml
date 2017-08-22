@@ -96,7 +96,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
     });
   });
 
-  describe('request-position', () => {
+  describe('get-position', () => {
     let postMessageSpy;
 
     beforeEach(() => {
@@ -117,7 +117,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         origin: 'www.example.com',
         data: 'amp-' + JSON.stringify({
           sentinel: '0-123',
-          type: 'request-position',
+          type: 'get-position',
         }),
       });
       const message = postMessageSpy.getCall(0).args[0];
@@ -151,7 +151,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         origin: 'www.example.com',
         data: 'amp-' + JSON.stringify({
           sentinel: '0-123',
-          type: 'request-position',
+          type: 'get-position',
         }),
       });
       host.processMessage({
@@ -159,7 +159,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         origin: 'www.example2.com',
         data: 'amp-' + JSON.stringify({
           sentinel: '0-321',
-          type: 'request-position',
+          type: 'get-position',
         }),
       });
       host.processMessage({
@@ -167,7 +167,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         origin: 'www.example.com',
         data: 'amp-' + JSON.stringify({
           sentinel: '0-123',
-          type: 'request-position',
+          type: 'get-position',
         }),
       });
       clock.tick(5);

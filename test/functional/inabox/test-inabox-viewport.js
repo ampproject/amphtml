@@ -297,7 +297,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     const el2 = document.createElement('div');
     el2.getBoundingClientRect = () => {return layoutRectLtwh(30, 40, 15, 15);};
     const requestSpy = stubIframeClientMakeRequest(
-        'request-position',
+        'get-position',
         'position-response',
         (req, res, cb) => cb({
           targetRect: layoutRectLtwh(10, 20, 100, 100),
