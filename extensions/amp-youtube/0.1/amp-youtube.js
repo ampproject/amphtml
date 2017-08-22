@@ -307,9 +307,12 @@ class AmpYoutube extends AMP.BaseElement {
     if (data['event'] == 'infoDelivery' &&
         data['info'] && data['info']['playerState'] !== undefined) {
       this.playerState_ = data['info']['playerState'];
-      if (this.playerState_ == PlayerStates.PAUSED ||
-          this.playerState_ == PlayerStates.ENDED) {
+      if (this.playerState_ == PlayerStates.PAUSED) {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+      } else if (this.playerState_ == PlayerStates.ENDED) {
+        // YT does not fire pause and ended together.
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        this.element.dispatchCustomEvent(VideoEvents.ENDED);
       } else if (this.playerState_ == PlayerStates.PLAYING) {
         this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       }

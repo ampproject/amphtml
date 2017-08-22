@@ -27,6 +27,7 @@ import {
   runVideoPlayerIntegrationTests,
 } from './test-video-players-helper';
 import * as sinon from 'sinon';
+import {toArray} from '../../src/types';
 
 describe.configure().ifNewChrome().run('Fake Video Player' +
     'Integration Tests', () => {
@@ -51,6 +52,13 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
     let klass;
     let video;
     let impl;
+
+    it('should receive i-amphtml-video-interface class when registered', () => {
+      const expectedClass = 'i-amphtml-video-interface';
+      expect(toArray(video.classList)).to.not.contain(expectedClass);
+      videoManager.register(impl);
+      expect(toArray(video.classList)).to.contain(expectedClass);
+    });
 
     it('should register common actions', () => {
       const spy = sandbox.spy(impl, 'registerAction');
