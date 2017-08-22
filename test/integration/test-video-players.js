@@ -59,8 +59,7 @@ describe.skip('amp-dailymotion', () => {
   });
 });
 
-//TODO(aghassemi, #11032): unskip
-describe.skip('amp-3q-player', () => {
+describe.configure().skipIos().run('amp-3q-player', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-3q-player');
     video.setAttribute('data-id', 'c8dbe7f4-7f7f-11e6-a407-0cc47a188158');
