@@ -167,6 +167,11 @@ class TestConfig {
   }
 
   ifIe() {
+    // Necessary because we skip IE by default.
+    const ieSkipped = this.skipMatchers.indexOf(this.skipIe);
+    if (ieSkipped !== -1) {
+      this.skipMatchers.splice(ieSkipped, 1);
+    }
     return this.if(this.platform.isIe.bind(this.platform));
   }
 
