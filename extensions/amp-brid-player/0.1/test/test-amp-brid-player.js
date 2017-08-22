@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-brid-player';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
-import * as sinon from 'sinon';
 
 
 describes.realWin('amp-brid-player', {

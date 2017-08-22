@@ -17,7 +17,6 @@
 import '../amp-call-tracking';
 import {clearResponseCacheForTesting} from '../amp-call-tracking';
 import {Services} from '../../../../src/services';
-import * as sinon from 'sinon';
 
 
 describes.realWin('amp-call-tracking', {
