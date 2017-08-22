@@ -74,8 +74,7 @@ export class PositionObserver {
   }
 
   update_() {
-    this.viewportRect_ =
-        this.getViewportRect(this.win_, this.scrollingElement_);
+    this.viewportRect_ = this.getViewportRect();
   }
 
   /**
