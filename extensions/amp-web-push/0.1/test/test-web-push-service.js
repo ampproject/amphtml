@@ -20,10 +20,10 @@ import {WebPushService} from '../web-push-service';
 import {WebPushWidgetVisibilities} from '../amp-web-push-widget';
 import {NotificationPermission} from '../vars';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
-import * as sinon from 'sinon';
 
 const FAKE_IFRAME_URL =
   '//ads.localhost:9876/test/fixtures/served/iframe-stub.html#';
+
 
 describes.realWin('web-push-service environment support', {
   amp: true,
@@ -69,13 +69,13 @@ describes.realWin('web-push-service environment support', {
   });
 });
 
+
 describes.realWin('web-push-service helper frame messaging', {
   amp: true,
 }, env => {
   let webPush;
   const webPushConfig = {};
   let iframeWindow = null;
-  let sandbox = null;
 
   function setDefaultConfigParams_() {
     webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] =
@@ -119,11 +119,6 @@ describes.realWin('web-push-service helper frame messaging', {
   beforeEach(() => {
     setDefaultConfigParams_();
     webPush = new WebPushService(env.ampdoc);
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should create helper iframe on document', () => {
@@ -142,13 +137,13 @@ describes.realWin('web-push-service helper frame messaging', {
   });
 });
 
+
 describes.realWin('web-push-service widget visibilities', {
   amp: true,
 }, env => {
   let webPush;
   const webPushConfig = {};
   let iframeWindow = null;
-  let sandbox = null;
 
   function setDefaultConfigParams_() {
     webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] =
@@ -192,11 +187,6 @@ describes.realWin('web-push-service widget visibilities', {
   beforeEach(() => {
     setDefaultConfigParams_();
     webPush = new WebPushService(env.ampdoc);
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should show blocked widget if permission query returns blocked', () => {
@@ -356,7 +346,6 @@ describes.realWin('web-push-service subscribing', {
   let webPush;
   const webPushConfig = {};
   let iframeWindow = null;
-  let sandbox = null;
 
   function setDefaultConfigParams_() {
     webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] =
@@ -400,11 +389,6 @@ describes.realWin('web-push-service subscribing', {
   beforeEach(() => {
     setDefaultConfigParams_();
     webPush = new WebPushService(env.ampdoc);
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should register service worker', () => {
@@ -507,7 +491,6 @@ describes.realWin('web-push-service unsubscribing', {
   let webPush;
   const webPushConfig = {};
   let iframeWindow = null;
-  let sandbox = null;
 
   function setDefaultConfigParams_() {
     webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] =
@@ -551,11 +534,6 @@ describes.realWin('web-push-service unsubscribing', {
   beforeEach(() => {
     setDefaultConfigParams_();
     webPush = new WebPushService(env.ampdoc);
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should forward amp-web-push-unsubscribe message to SW', done => {

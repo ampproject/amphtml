@@ -149,7 +149,9 @@ class AmpSocialShare extends AMP.BaseElement {
       openWindowDialog(this.win, href, target, windowFeatures);
     }
   }
+}
 
-};
 
-AMP.registerElement('amp-social-share', AmpSocialShare, CSS);
+AMP.extension('amp-social-share', '0.1', AMP => {
+  AMP.registerElement('amp-social-share', AmpSocialShare, CSS);
+});

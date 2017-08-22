@@ -19,10 +19,10 @@ import {AmpWebPushPermissionDialog} from '../amp-web-push-permission-dialog';
 import {WebPushService} from '../web-push-service';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
 import {parseUrl} from '../../../../src/url';
-import * as sinon from 'sinon';
 
 const FAKE_IFRAME_URL =
   '//ads.localhost:9876/test/fixtures/served/iframe-stub.html#';
+
 
 describes.realWin('web-push-permission-dialog', {
   amp: true,
@@ -30,7 +30,6 @@ describes.realWin('web-push-permission-dialog', {
   let webPush;
   const webPushConfig = {};
   let iframeWindow = null;
-  let sandbox = null;
 
   function setDefaultConfigParams_() {
     webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] =
@@ -68,11 +67,6 @@ describes.realWin('web-push-permission-dialog', {
   beforeEach(() => {
     setDefaultConfigParams_();
     webPush = new WebPushService(env.ampdoc);
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should detect opened as popup', () => {
