@@ -130,7 +130,7 @@ export class InaboxMessagingHost {
    */
   handlePositionRequest_(iframe, request, source, origin) {
     // Inabox should only send one request in single animationFrame
-    const viewportRect = this.positionObserver_.getViewportRect(this.win_);
+    const viewportRect = this.positionObserver_.getViewportRect();
     const targetRect =
         layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect());
     source./*OK*/postMessage(
