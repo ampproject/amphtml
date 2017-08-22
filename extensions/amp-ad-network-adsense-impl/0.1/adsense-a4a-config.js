@@ -34,7 +34,7 @@ import {
 } from '../../../src/experiments';
 import {dev} from '../../../src/log';
 
-/** @const {!string}  @private */
+/** @const {!string} */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 
 /** @type {string} */
@@ -44,10 +44,12 @@ const TAG = 'amp-ad-network-adsense-impl';
 export const ADSENSE_EXPERIMENT_FEATURE = {
   HOLDBACK_EXTERNAL_CONTROL: '21060732',
   HOLDBACK_EXTERNAL: '21060733',
-  DELAYED_REQUEST_CONTROL: '21060734',
-  DELAYED_REQUEST: '21060735',
+  DELAYED_REQUEST_EXTERNAL_CONTROL: '21060734',
+  DELAYED_REQUEST_EXTERNAL: '21060735',
   HOLDBACK_INTERNAL_CONTROL: '2092615',
   HOLDBACK_INTERNAL: '2092616',
+  DELAYED_REQUEST_INTERNAL_CONTROL: '21060901',
+  DELAYED_REQUEST_INTERNAL: '21060902',
 };
 
 /** @const @type {!Object<string,?string>} */
@@ -58,8 +60,8 @@ export const URL_EXPERIMENT_MAPPING = {
   '1': ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL_CONTROL,
   '2': ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
   // Delay Request
-  '3': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
-  '4': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST,
+  '3': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL_CONTROL,
+  '4': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL,
 };
 
 /**
@@ -80,13 +82,18 @@ export function adsenseIsA4AEnabled(win, element) {
     dev().info(
         TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
   } else {
-    // Not set via url so randomly set.
+    // Not set via url so randomly set.  Delayed request experiment run in
+    // same layer as client-side holdback to ensure mutual exclusion.
     const experimentInfoMap =
         /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[ADSENSE_A4A_EXPERIMENT_NAME] = {
       isTrafficEligible: () => true,
-      branches: [ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
-        ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
+      branches: [
+        ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
+        ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
+        ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_INTERNAL_CONTROL,
+        ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_INTERNAL,
+      ],
     };
     // Note: Because the same experimentName is being used everywhere here,
     // randomlySelectUnsetExperiments won't add new IDs if
@@ -96,6 +103,7 @@ export function adsenseIsA4AEnabled(win, element) {
     experimentId = getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME);
     dev().info(
         TAG, `random experiment selection ${urlExperimentId}: ${experimentId}`);
+
   }
   if (experimentId) {
     addExperimentIdToElement(experimentId, element);

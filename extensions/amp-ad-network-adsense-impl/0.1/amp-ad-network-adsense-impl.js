@@ -139,7 +139,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   delayAdRequestEnabled() {
     return experimentFeatureEnabled(
-        this.win, ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST);
+        this.win, ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL) ||
+        experimentFeatureEnabled(
+            this.win, ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_INTERNAL);
   }
 
   /** @override */

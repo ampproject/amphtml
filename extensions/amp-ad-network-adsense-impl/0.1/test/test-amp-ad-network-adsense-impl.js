@@ -563,13 +563,19 @@ describes.realWin('amp-ad-network-adsense-impl', {
         }));
     });
 
-    it('should return true if in experiment', () => {
-      forceExperimentBranch(impl.win, ADSENSE_A4A_EXPERIMENT_NAME,
-          ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST);
-      expect(impl.delayAdRequestEnabled()).to.be.true;
+    Object.entries({
+      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL_CONTROL]: false,
+      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL]: true,
+      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_INTERNAL_CONTROL]: false,
+      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_INTERNAL]: true,
+    }).forEach(item => {
+      it(`should return ${item[1]} if in ${item[0]} experiment`, () => {
+        forceExperimentBranch(impl.win, ADSENSE_A4A_EXPERIMENT_NAME, item[0]);
+        expect(impl.delayAdRequestEnabled()).to.equal(item[1]);
+      });
     });
 
-    it('should return false if not in experiment', () => {
+    it('should return false if not in any experiments', () => {
       expect(impl.delayAdRequestEnabled()).to.be.false;
     });
   });
