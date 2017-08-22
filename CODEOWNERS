@@ -24,7 +24,7 @@ extensions/amp-analytics/ @avimehta @dvoytenko @lannka
 extensions/amp-animation/ @aghassemi @alanorozco @dvoytenko
 extensions/amp-apester-media/ @mrsufgi
 extensions/amp-app-banner/ @aghassemi
-extensions/amp-audio/ @aghassemi
+extensions/amp-audio/ @aghassemi @wassgha
 extensions/amp-auto-ads/ @tlong2
 extensions/amp-bind/ @choumx
 extensions/amp-brid-player/ @aghassemi @DarXector
@@ -32,7 +32,7 @@ extensions/amp-brightcove/ @aghassemi @mister-ben
 extensions/amp-call-tracking/ @alanorozco
 extensions/amp-carousel/ @camelburrito @dvoytenko
 extensions/amp-crypto-polyfill/ @lannka
-extensions/amp-dailymotion/ @zeno @erwinmombay @aghassemi
+extensions/amp-dailymotion/ @zeno @erwinmombay @aghassemi @wassgha
 extensions/amp-experiment/ @lannka
 extensions/amp-facebook/ @aghassemi
 extensions/amp-facebook-comments/ @ymschaap
@@ -69,12 +69,12 @@ extensions/amp-selector/ @camelburrito
 extensions/amp-share-tracking/ @muxin
 extensions/amp-sidebar/ @camelburrito
 extensions/amp-social-share/ @aghassemi @ithinkihaveacat @RyanCopley
-extensions/amp-soundcloud/ @asap
+extensions/amp-soundcloud/ @asap @wassgha
 extensions/amp-springboard-player/ @aghassemi @Em-PredragMilosevic
 extensions/amp-sticky-ad/ @zhouyx
-extensions/amp-video/ @aghassemi
+extensions/amp-video/ @aghassemi @wassgha
 extensions/amp-viewer-integration/ @chenshay
 extensions/amp-vimeo/ @aghassemi
 extensions/amp-vine/ @aghassemi @niallkennedy
 extensions/amp-viz-vega/ @aghassemi
-extensions/amp-youtube/ @aghassemi
+extensions/amp-youtube/ @aghassemi @wassgha
