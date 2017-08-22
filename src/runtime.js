@@ -83,7 +83,6 @@ import {
   toggleExperiment,
 } from './experiments';
 import {parseUrl} from './url';
-import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {setStyle} from './style';
 import {waitForBody} from './dom';
