@@ -162,8 +162,7 @@ export class GlobalVariableSource extends VariableSource {
             }
             const referrerHostname = parseUrl(getSourceUrl(referrer)).hostname;
             const currentHostname =
-                parseUrl(WindowInterface.getLocationHref(this.ampdoc.win))
-                    .hostname;
+                WindowInterface.getHostname(this.ampdoc.win);
             return referrerHostname === currentHostname ? null : referrer;
           });
     }));

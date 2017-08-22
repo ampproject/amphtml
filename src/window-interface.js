@@ -25,7 +25,7 @@ export class WindowInterface {
     return win.document.referrer;
   }
 
-  static getLocationHref(win) {
-    return win.location.href;
+  static getHostname(win) {
+    return win.location.hostname;
   }
 }

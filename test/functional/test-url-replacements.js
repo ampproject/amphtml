@@ -208,7 +208,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace EXTERNAL_REFERRER', () => {
     const windowInterface = mockWindowInterface(sandbox);
-    windowInterface.getLocationHref.returns('http://different.org/');
+    windowInterface.getHostname.returns('different.org');
     return getReplacements().then(replacements => {
       stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
           .returns(Promise.resolve('http://example.org/page.html'));
@@ -221,7 +221,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace EXTERNAL_REFERRER to empty string ' +
       'if referrer is of same domain', () => {
     const windowInterface = mockWindowInterface(sandbox);
-    windowInterface.getLocationHref.returns('http://example.org/');
+    windowInterface.getHostname.returns('example.org');
     return getReplacements().then(replacements => {
       stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
           .returns(Promise.resolve('http://example.org/page.html'));
@@ -234,7 +234,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace EXTERNAL_REFERRER to empty string ' +
       'if referrer is CDN proxy of same domain', () => {
     const windowInterface = mockWindowInterface(sandbox);
-    windowInterface.getLocationHref.returns('http://example.org/');
+    windowInterface.getHostname.returns('example.org');
     return getReplacements().then(replacements => {
       stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
           .returns(Promise.resolve(
@@ -248,7 +248,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace EXTERNAL_REFERRER to empty string ' +
       'if referrer is CDN proxy of same domain (before CURLS)', () => {
     const windowInterface = mockWindowInterface(sandbox);
-    windowInterface.getLocationHref.returns('http://example.org/');
+    windowInterface.getHostname.returns('example.org');
     return getReplacements().then(replacements => {
       stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
           .returns(Promise.resolve(
