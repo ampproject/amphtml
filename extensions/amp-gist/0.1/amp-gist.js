@@ -79,7 +79,4 @@ export class AmpGist extends AMP.BaseElement {
   }
 }
 
-
-AMP.extension('amp-gist', '0.1', AMP => {
-  AMP.registerElement('amp-gist', AmpGist);
-});
+AMP.registerElement('amp-gist', AmpGist);
