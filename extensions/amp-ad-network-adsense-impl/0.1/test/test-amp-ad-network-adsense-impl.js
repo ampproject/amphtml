@@ -57,15 +57,6 @@ function createAdsenseImplElement(attributes, doc, opt_tag) {
   return addAttributesToElement(element, attributes);
 }
 
-function createResponsiveAdsenseImplElement(doc) {
-  return createAdsenseImplElement({
-    'data-ad-client': 'ca-adsense',
-    'width': '100',
-    'height': '100',
-    // 'data-auto-format': 'rspv',
-  }, doc);
-}
-
 describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
   let impl;
   let element;
@@ -568,7 +559,6 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
   describe('#buildCallback', () => {
     let iframe;
     let impl;
-    let loadExtensionSpy;
 
     function thing(config) {
       config.type = 'adsense';
@@ -580,7 +570,6 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
       element.appendChild(iframe);
       document.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
-      impl.getResource().measure();
     }
 
     beforeEach(() => {
@@ -605,6 +594,7 @@ describes.realWin('amp-ad-network-adsense-impl', {amp: true}, env => {
       expect(callback).to.not.be.undefined;
 
       impl.iframe = iframe;
+      // The returned promise fails for some reason.
       return callback.then((result) => {
         expect(element.offsetHeight).to.equal(300);
         expect(element.offsetWidth).to.equal(400);
