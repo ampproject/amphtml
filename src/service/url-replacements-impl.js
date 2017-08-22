@@ -38,6 +38,7 @@ import {
   getTimingDataAsync,
 } from './variable-source';
 import {isProtocolValid} from '../url';
+import {WindowInterface} from '../window-interface';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -161,7 +162,8 @@ export class GlobalVariableSource extends VariableSource {
             }
             const referrerHostname = parseUrl(getSourceUrl(referrer)).hostname;
             const currentHostname =
-                parseUrl(this.ampdoc.win.location.href).hostname;
+                parseUrl(WindowInterface.getLocationHref(this.ampdoc.win))
+                    .hostname;
             return referrerHostname === currentHostname ? null : referrer;
           });
     }));
