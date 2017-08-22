@@ -165,8 +165,8 @@ describes.realWin('amp-ad-exit', {
     addAdDiv();
     // TEST_3P_VENDOR must be in ANALYTICS_CONFIG *before* makeElementWithConfig
     ANALYTICS_CONFIG[TEST_3P_VENDOR] = ANALYTICS_CONFIG[TEST_3P_VENDOR] || {
-        iframe: '/nowhere.html',
-      };
+      iframe: '/nowhere.html',
+    };
     return makeElementWithConfig(EXIT_CONFIG).then(el => {
       element = el;
     });
@@ -544,20 +544,30 @@ describes.realWin('amp-ad-exit', {
     });
     expect(open).to.have.been.calledTwice;
     expect(open).to.have.been.calledWith(
-      EXIT_CONFIG.targets.borderProtection.finalUrl, '_blank');
+        EXIT_CONFIG.targets.borderProtection.finalUrl, '_blank');
+  });
+
+  it('should replace custom URL variables with 3P Analytics defaults', () => {
+    const open = sandbox.stub(win, 'open', () => {
+      return {name: 'fakeWin'};
+    });
+
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'variableFrom3pAnalytics'},
+      event: makeClickEvent(1001, 101, 102),
+      satisfiesTrust: () => true,
+    });
+
+    expect(open).to.have.been.calledWith(
+        'http://localhost:8000/vars?foo=foo-default', '_blank');
   });
 
   it('should replace custom URL variables with 3P Analytics signals', () => {
-    ResponseMap.add(env.ampdoc, '3p-vendor', env.win.document.baseURI, {
-      'unused': 'unused',
-      'collected-data': 'abc123',
+    const open = sandbox.stub(win, 'open', () => {
+      return {name: 'fakeWin'};
     });
 
-    IframeTransportResponseMap.add(env.ampdoc, '3p-vendor',
-
-    addToResponseMap(env.ampdoc, '3p-vendor',
-
-        env.win.document.baseURI, {
     addToResponseMap(env.ampdoc, TEST_3P_VENDOR, env.win.document.baseURI, {
       'unused': 'unused',
       'collected-data': 'abc123',
@@ -572,6 +582,15 @@ describes.realWin('amp-ad-exit', {
 
     expect(open).to.have.been.calledWith(
         'http://localhost:8000/vars?foo=abc123', '_blank');
+  });
+
+  it('should reject unrecognized 3P Analytics vendors', () => {
+    const unkVendor = JSON.parse(JSON.stringify(EXIT_CONFIG));
+    unkVendor.targets.variableFrom3pAnalytics.vars._foo.vendorAnalyticsSource =
+        'nonexistent_vendor';
+
+    expect(makeElementWithConfig(unkVendor))
+        .to.eventually.be.rejectedWith(/Unknown vendor/);
   });
 });
 
