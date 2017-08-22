@@ -48,7 +48,9 @@ function getConfig() {
   if (argv.edge) {
     return Object.assign({}, karmaDefault, {browsers: ['Edge']});
   }
-
+  if (argv.ie) {
+    return Object.assign({}, karmaDefault, {browsers: ['IE']});
+  }
   if (argv.saucelabs) {
     if (!process.env.SAUCE_USERNAME) {
       throw new Error('Missing SAUCE_USERNAME Env variable');
@@ -118,6 +120,7 @@ function printArgvMessages() {
   const argvMessages = {
     safari: 'Running tests on Safari.',
     firefox: 'Running tests on Firefox.',
+    ie: 'Running tests on IE.',
     edge: 'Running tests on Edge.',
     saucelabs: 'Running tests on Sauce Labs.',
     nobuild: 'Skipping build.',
@@ -319,9 +322,10 @@ gulp.task('test', 'Runs tests',
     'testnames': '  Lists the name of each test being run',
     'watch': '  Watches for changes in files, runs corresponding test(s)',
     'saucelabs': '  Runs test on saucelabs (requires setup)',
-    'safari': '  Runs tests in Safari',
-    'firefox': '  Runs tests in Firefox',
-    'edge': '  Runs tests in Edge',
+    'safari': '  Runs tests on Safari',
+    'firefox': '  Runs tests on Firefox',
+    'edge': '  Runs tests on Edge',
+    'ie': '  Runs tests on IE',
     'unit': '  Run only unit tests.',
     'integration': '  Run only integration tests.',
     'compiled': '  Changes integration tests to use production JS ' +
