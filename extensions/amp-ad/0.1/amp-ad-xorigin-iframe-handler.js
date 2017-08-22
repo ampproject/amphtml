@@ -134,7 +134,7 @@ export class AmpAdXOriginIframeHandler {
           });
 
       this.inaboxRequestPositionApi_ = new SubscriptionApi(
-          this.iframe, MessageType.REQUEST_POSITION, true, () => {
+          this.iframe, MessageType.GET_POSITION, true, () => {
             if (this.positionRequest_) {
               // Already request iframe position;
               return;

@@ -17,7 +17,6 @@
 import {FrameOverlayManager} from './frame-overlay-manager';
 import {
   PositionObserver,
-  getViewportRect,
 } from './position-observer';
 import {
   serializeMessage,
@@ -73,12 +72,11 @@ export class InaboxMessagingHost {
     this.iframes_ = iframes;
     this.iframeMap_ = Object.create(null);
     this.registeredIframeSentinels_ = Object.create(null);
-    this.positionRequestIframeSentinels_ = Object.create(null);
     this.positionObserver_ = new PositionObserver(win);
     this.msgObservable_ = new NamedObservable();
     this.frameOverlayManager_ = new FrameOverlayManager(win);
     this.msgObservable_.listen(
-        MessageType.REQUEST_POSITION, this.handlePositionRequest_);
+        MessageType.GET_POSITION, this.handlePositionRequest_);
 
     this.msgObservable_.listen(
         MessageType.SEND_POSITIONS, this.handleSendPositions_);
@@ -133,23 +131,16 @@ export class InaboxMessagingHost {
    * @return {boolean}
    */
   handlePositionRequest_(iframe, request, source, origin) {
-    if (this.positionRequestIframeSentinels_[request.sentinel]) {
-      // Only handle on position request in one animation frame
-      return false;
-    }
-    this.positionRequestIframeSentinels_[request.sentinel] = true;
-    this.win_.requestAnimationFrame(() => {
-      const viewportRect = getViewportRect(this.win_);
-      const targetRect =
-          layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect());
-      source./*OK*/postMessage(
-          serializeMessage(MessageType.POSITION_RESPONSE, request.sentinel,
-              dict({
-                'viewportRect': viewportRect,
-                'targetRect': targetRect,
-              })), origin);
-      this.positionRequestIframeSentinels_[request.sentinel] = false;
-    });
+    // Inabox should only send one request in single animationFrame
+    const viewportRect = this.positionObserver_.getViewportRect(this.win_);
+    const targetRect =
+        layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect());
+    source./*OK*/postMessage(
+        serializeMessage(MessageType.POSITION_RESPONSE, request.sentinel,
+            dict({
+              'viewportRect': viewportRect,
+              'targetRect': targetRect,
+            })), origin);
     return true;
   }
 

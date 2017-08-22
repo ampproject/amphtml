@@ -394,7 +394,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         return layoutRectLtwh(1, 1, 1, 1);
       });
       iframe.postMessageToParent({
-        type: 'request-position',
+        type: 'get-position',
         sentinel: 'amp3ptest' + testIndex,
       });
       return iframe.expectMessageFromParent('position-response').then(data => {
