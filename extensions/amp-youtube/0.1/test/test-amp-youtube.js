@@ -276,24 +276,23 @@ describe('amp-youtube', function() {
             return p;
           })
           .then(() => {
-        // Make sure pause is triggered when video stops
-            const p = listenOncePromise(yt, VideoEvents.PAUSE);
-            sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
-            sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 0});
-            return p;
-          })
-          .then(() => {
             const p = listenOncePromise(yt, VideoEvents.UNMUTED);
             sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
             return p;
           }).then(() => {
-        // Should not send the unmute event twice if already sent once.
+            // Should not send the unmute event twice if already sent once.
             const p = listenOncePromise(yt, VideoEvents.UNMUTED).then(() => {
               assert.fail('Should not have dispatch unmute message twice');
             });
             sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
             const successTimeout = timer.promise(10);
             return Promise.race([p, successTimeout]);
+          }).then(() => {
+            // Make sure pause and end are triggered when video ends.
+            const pEnded = listenOncePromise(yt, VideoEvents.ENDED);
+            const pPause = listenOncePromise(yt, VideoEvents.PAUSE);
+            sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 0});
+            return Promise.all([pEnded, pPause]);
           });
     });
   });
