@@ -14,60 +14,50 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-brid-player';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {adopt} from '../../../../src/runtime';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
-import * as sinon from 'sinon';
 
-adopt(window);
 
-describe('amp-brid-player', () => {
-
-  let sandbox;
-  const timer = Services.timerFor(window);
+describes.realWin('amp-brid-player', {
+  amp: {
+    extensions: ['amp-brid-player'],
+  },
+}, env => {
+  let win, doc;
+  let timer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    win = env.win;
+    doc = win.document;
+    timer = Services.timerFor(win);
   });
 
   function getBridPlayer(attributes, opt_responsive) {
-    return createIframePromise(true).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const bc = iframe.doc.createElement('amp-brid-player');
+    const bc = doc.createElement('amp-brid-player');
 
-      for (const key in attributes) {
-        bc.setAttribute(key, attributes[key]);
-      }
-      bc.setAttribute('width', '640');
-      bc.setAttribute('height', '360');
-      if (opt_responsive) {
-        bc.setAttribute('layout', 'responsive');
-      }
+    for (const key in attributes) {
+      bc.setAttribute(key, attributes[key]);
+    }
+    bc.setAttribute('width', '640');
+    bc.setAttribute('height', '360');
+    if (opt_responsive) {
+      bc.setAttribute('layout', 'responsive');
+    }
 
-      // see yt test implementation
-      timer.promise(50).then(() => {
-        const bridTimerIframe = bc.querySelector('iframe');
+    // see yt test implementation
+    timer.promise(50).then(() => {
+      const bridTimerIframe = bc.querySelector('iframe');
 
-        bc.implementation_.handleBridMessages_({
-          origin: 'https://services.brid.tv',
-          source: bridTimerIframe.contentWindow,
-          data: 'Brid|0|trigger|ready',
-        });
+      bc.implementation_.handleBridMessages_({
+        origin: 'https://services.brid.tv',
+        source: bridTimerIframe.contentWindow,
+        data: 'Brid|0|trigger|ready',
       });
-
-
-      return iframe.addElement(bc);
     });
+    doc.body.appendChild(bc);
+    return bc.build().then(() => bc.layoutCallback()).then(() => bc);
   }
 
   it('renders', () => {

@@ -14,78 +14,45 @@
  * limitations under the License.
  */
 
+import '../amp-dynamic-css-classes';
 import {Services} from '../../../../src/services';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {
-  installDocumentStateService,
-} from '../../../../src/service/document-state';
-import {installPlatformService} from '../../../../src/service/platform-impl';
-import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {vsyncForTesting} from '../../../../src/service/vsync-impl';
-import {installDynamicClassesForTesting} from '../amp-dynamic-css-classes';
 
 const tcoReferrer = 'http://t.co/xyzabc123';
 const PinterestUA = 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G920F' +
   ' Build/LMY47X; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0' +
   ' Chrome/47.0.2526.100 Mobile Safari/537.36 [Pinterest/Android]';
 
-describe('dynamic classes are inserted at runtime', () => {
+
+describes.fakeWin('dynamic classes are inserted at runtime', {
+  amp: true,  // Extension will be installed manually in tests.
+  location: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
+}, env => {
+  let win, doc, ampdoc;
   let body;
-  let mockWin;
   let viewer;
 
   beforeEach(() => {
-    const classList = [];
-    classList.add = classList.push;
-    classList.contains = function(c) {
-      return this.includes(c);
-    };
-    body = {
-      nodeType: /* ELEMENT */ 1,
-      tagName: 'BODY',
-      classList,
-    };
-    mockWin = {
-      document: {
-        nodeType: /* DOCUMENT */ 9,
-        referrer: 'http://localhost/',
-        body,
-      },
-      navigator: {
-        userAgent: '',
-      },
-      setTimeout: window.setTimeout,
-      clearTimeout: window.clearTimeout,
-      location: {
-        href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
-      },
-    };
-    mockWin.document.defaultView = mockWin;
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
+    body = doc.body;
   });
 
   function setup(embeded, userAgent, referrer) {
-    installDocService(mockWin, /* isSingleDoc */ true);
-    installDocumentStateService(mockWin);
-    const ampdocService = Services.ampdocServiceFor(mockWin);
-    const ampdoc = ampdocService.getAmpDoc();
-    installPlatformService(mockWin);
-
-    const vsync = vsyncForTesting(mockWin);
+    const vsync = vsyncForTesting(win);
     vsync.schedule_ = () => {
       vsync.runScheduledTasks_();
     };
-
-    installViewerServiceForDoc(ampdoc);
     viewer = Services.viewerForDoc(ampdoc);
     viewer.isEmbedded = () => !!embeded;
-
     if (userAgent !== undefined) {
-      mockWin.navigator.userAgent = userAgent;
+      win.navigator.userAgent = userAgent;
     }
     if (referrer !== undefined) {
-      viewer.getUnconfirmedReferrerUrl = () => referrer;
+      sandbox.stub(viewer, 'getUnconfirmedReferrerUrl', () => referrer);
     }
-    installDynamicClassesForTesting(ampdoc);
+    env.installExtension('amp-dynamic-css-classes');
   }
 
   describe('when embedded', () => {

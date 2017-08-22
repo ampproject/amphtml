@@ -14,33 +14,37 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-dailymotion';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-dailymotion', () => {
+describes.realWin('amp-dailymotion', {
+  amp: {
+    extensions: ['amp-dailymotion'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getDailymotion(videoId, optResponsive, optCustomSettings) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const dailymotion = iframe.doc.createElement('amp-dailymotion');
-      dailymotion.setAttribute('data-videoid', videoId);
-      dailymotion.setAttribute('width', '111');
-      dailymotion.setAttribute('height', '222');
-      if (optResponsive) {
-        dailymotion.setAttribute('layout', 'responsive');
-      }
-      if (optCustomSettings) {
-        dailymotion.setAttribute('data-start', 123);
-        dailymotion.setAttribute('data-param-origin', 'example&.org');
-      }
-      return iframe.addElement(dailymotion);
-    });
+    const dailymotion = doc.createElement('amp-dailymotion');
+    dailymotion.setAttribute('data-videoid', videoId);
+    dailymotion.setAttribute('width', '111');
+    dailymotion.setAttribute('height', '222');
+    if (optResponsive) {
+      dailymotion.setAttribute('layout', 'responsive');
+    }
+    if (optCustomSettings) {
+      dailymotion.setAttribute('data-start', 123);
+      dailymotion.setAttribute('data-param-origin', 'example&.org');
+    }
+    doc.body.appendChild(dailymotion);
+    return dailymotion.build().then(() => {
+      return dailymotion.layoutCallback();
+    }).then(() => dailymotion);
   }
 
   it('renders', () => {

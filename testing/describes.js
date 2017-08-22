@@ -694,6 +694,21 @@ class AmpFixture {
     }
 
     /**
+     * Installs the specified extension.
+     * @param {string} extensionId
+     * @param {string=} opt_version
+     */
+    env.installExtension = function(extensionId, opt_version) {
+      const version = opt_version || '0.1';
+      const installer = extensionsBuffer[`${extensionId}:${version}`];
+      if (!installer) {
+        throw new Error(`extension not found: ${extensionId}:${version}.` +
+            ' Make sure the module is imported');
+      }
+      registerExtension(env.extensions, extensionId, installer, win.AMP);
+    };
+
+    /**
      * Creates a custom element without registration.
      * @param {string=} opt_name
      * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass
