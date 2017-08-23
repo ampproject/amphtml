@@ -641,6 +641,20 @@ describes.sandboxed('DOM', {}, env => {
     });
   });
 
+  describe('getDataParamsFromLinkUrl', () => {
+    it('should return key-value for link of https://example.com/index.html?query#hash', () => {
+      const element = document.createElement('a');
+      element.setAttribute('href', 'https://example.com/index.html?query#hash');
+      const params = dom.getDataParamsFromLinkUrl(element);
+      expect(params.clickHostname).to.be.equal('example.com');
+      expect(params.clickProtocol).to.be.equal('https');
+      expect(params.clickPathname).to.be.equal('/index.html');
+      expect(params.clickQuery).to.be.equal('query');
+      expect(params.clickHash).to.be.equal('hash');
+      expect(params.clickUrl).to.be.equal('https://example.com/index.html?query#hash');
+    });
+  });
+
   describe('hasNextNodeInDocumentOrder', () => {
     it('should return true when the element has a nextSibling', () => {
       const element = document.createElement('div');

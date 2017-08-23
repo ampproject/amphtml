@@ -530,6 +530,39 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
 }
 
 /**
+ * Returns link element url components as url parameters key-value pairs.
+ * e.g. <a href="https://example.com/index.html?query#hash"
+ * -> {
+ *   CLICK_HOSTNAME: example.com,
+ *   CLICK_PROTOCOL: https,
+ *   CLICK_PATHNAME: /index.html,
+ *   CLICK_QUERY: query,
+ *   CLICK_HASH: hash,
+ *   CLICK_URL: https://example.com/index.html?query#hash
+ * }
+ * @param {!Element} element
+ * @param {function(strig):string=} opt_computeParamNameFunc to compute the parameters
+ *    name, get passed the camel-case parameter name.
+ * @return {!JsonObject}
+ */
+export function getDataParamsFromLinkUrl(element, opt_computeParamNameFunc) {
+  if (element.tagName.toUpperCase() != 'A') {
+    return {};
+  }
+  const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
+  const params = dict();
+  params[computeParamNameFunc('clickHostname')] = element.hostname;
+  params[computeParamNameFunc('clickProtocol')] = element.protocol.replace(/:$/, '');
+  params[computeParamNameFunc('clickPathname')] = element.pathname;
+  params[computeParamNameFunc('clickQuery')] = element.search.slice(1);
+  params[computeParamNameFunc('clickHash')] = element.hash.slice(1);
+  params[computeParamNameFunc('clickUrl')]
+    = element.protocol + '//' + element.hostname + element.pathname
+      + element.search + element.hash;
+  return params;
+}
+
+/**
  * Whether the element have a next node in the document order.
  * This means either:
  *  a. The element itself has a nextSibling.
