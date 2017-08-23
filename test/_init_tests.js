@@ -101,6 +101,7 @@ class TestConfig {
 
     this.platform = Services.platformFor(window);
 
+    this.isIe = this.platform.isIe.bind(this.platform);
     this.skipIe();  // By default, IE is skipped. Individual tests may opt in.
   }
 
@@ -131,7 +132,7 @@ class TestConfig {
   }
 
   skipIe() {
-    return this.skip(this.platform.isIe.bind(this.platform));
+    return this.skip(this.isIe);
   }
 
   /**
@@ -168,11 +169,11 @@ class TestConfig {
 
   ifIe() {
     // Necessary because we skip IE by default.
-    const ieSkipped = this.skipMatchers.indexOf(this.skipIe);
+    const ieSkipped = this.skipMatchers.indexOf(this.isIe);
     if (ieSkipped !== -1) {
-      this.skipMatchers.splice(ieSkipped, 1);
+      this.skipMatchers.splice(this.isIe, 1);
     }
-    return this.if(this.platform.isIe.bind(this.platform));
+    return this.if(this.isIe);
   }
 
   /**
