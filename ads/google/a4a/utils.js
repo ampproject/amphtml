@@ -198,7 +198,7 @@ export function googlePageParameters(win, doc, startTime, output = 'html') {
           'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
           'd_imp': '1',
-          'c': getCorrelator(win, clientId),
+          'c': getCorrelator(win, clientId, doc),
           'dt': startTime,
           output,
           'biw': viewportRect.width,
