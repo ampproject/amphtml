@@ -75,6 +75,12 @@ export class FormValidator {
 
     /** @protected @const {!Document} */
     this.doc = /** @type {!Document} */ (form.ownerDocument);
+
+    /**
+     * Tribool indicating last known validity of form.
+     * @private {boolean|null}
+     */
+    this.formValidity_ = null;
   }
 
   /**
@@ -91,6 +97,22 @@ export class FormValidator {
    * @param {!Event} unusedEvent
    */
   onInput(unusedEvent) {}
+
+  /**
+   * Fires a valid/invalid event from the form if its validity state
+   * has changed since the last invocation of this function.
+   * @visibleForTesting
+   */
+  fireValidityEventIfNecessary() {
+    const previousValidity = this.formValidity_;
+    this.formValidity_ = this.form.checkValidity();
+    if (previousValidity !== this.formValidity_) {
+      const win = this.form.ownerDocument.defaultView;
+      const type = this.formValidity_ ? 'valid' : 'invalid';
+      const event = createCustomEvent(win, type, null, {bubbles: true});
+      this.form.dispatchEvent(event);
+    }
+  }
 }
 
 
@@ -100,8 +122,8 @@ export class DefaultValidator extends FormValidator {
   /** @override */
   report() {
     this.form.reportValidity();
+    this.fireValidityEventIfNecessary();
   }
-
 }
 
 
@@ -125,6 +147,8 @@ export class PolyfillDefaultValidator extends FormValidator {
         break;
       }
     }
+
+    this.fireValidityEventIfNecessary();
   }
 
   /** @override */
@@ -164,12 +188,6 @@ export class AbstractCustomValidator extends FormValidator {
 
     /** @private @const {!Object<string, ?Element>} */
     this.inputVisibleValidationDict_ = {};
-
-    /**
-     * Tribool indicating validity of form after previous check.
-     * @private {boolean|null}
-     */
-    this.formValidity_ = null;
   }
 
   /**
@@ -282,21 +300,6 @@ export class AbstractCustomValidator extends FormValidator {
   onInput(event) {
     this.onInteraction(event);
   }
-
-  /**
-   * Fires a valid/invalid event from the form if its validity state
-   * has changed since the last validity check.
-   */
-  fireValidityEventIfNecessary_() {
-    const previousValidity = this.formValidity_;
-    this.formValidity_ = this.form.checkValidity();
-    if (previousValidity !== this.formValidity_) {
-      const win = this.form.ownerDocument.defaultView;
-      const type = this.formValidity_ ? 'valid' : 'invalid';
-      const event = createCustomEvent(win, type, null, {bubbles: true});
-      this.form.dispatchEvent(event);
-    }
-  }
 }
 
 
@@ -315,7 +318,7 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
       }
     }
 
-    this.fireValidityEventIfNecessary_();
+    this.fireValidityEventIfNecessary();
   }
 
   /** @override */
@@ -344,7 +347,7 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
       firstInvalidInput./*REVIEW*/focus();
     }
 
-    this.fireValidityEventIfNecessary_();
+    this.fireValidityEventIfNecessary();
   }
 
   /** @override */
@@ -364,8 +367,7 @@ export class AsYouGoValidator extends AbstractCustomValidator {
   /** @override */
   onInteraction(event) {
     super.onInteraction(event);
-
-    this.fireValidityEventIfNecessary_();
+    this.fireValidityEventIfNecessary();
   }
 }
 
@@ -380,8 +382,7 @@ export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
   /** @override */
   onInteraction(event) {
     super.onInteraction(event);
-
-    this.fireValidityEventIfNecessary_();
+    this.fireValidityEventIfNecessary();
   }
 }
 
