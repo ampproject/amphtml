@@ -51,6 +51,8 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   SRA: '117152667',
   HOLDBACK_INTERNAL_CONTROL: '2092613',
   HOLDBACK_INTERNAL: '2092614',
+  CANONICAL_CONTROL: '21060932',
+  CANONICAL_EXPERIMENT: '21060933'
 };
 
 /** @const @type {!Object<string,?string>} */
@@ -107,7 +109,10 @@ export function doubleclickIsA4AEnabled(win, element) {
     experimentInfoMap[DOUBLECLICK_A4A_EXPERIMENT_NAME] = {
       isTrafficEligible: () => true,
       branches: [DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
-        DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
+                 DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
+                 DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
+                 DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT
+                ],
     };
     // Note: Because the same experimentName is being used everywhere here,
     // randomlySelectUnsetExperiments won't add new IDs if
@@ -123,9 +128,11 @@ export function doubleclickIsA4AEnabled(win, element) {
     forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
   }
   return ![DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
-    DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
-    DOUBLECLICK_EXPERIMENT_FEATURE.SFG_CONTROL_ID,
-    DOUBLECLICK_EXPERIMENT_FEATURE.SFG_EXP_ID].includes(experimentId);
+           DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
+           DOUBLECLICK_EXPERIMENT_FEATURE.SFG_CONTROL_ID,
+           DOUBLECLICK_EXPERIMENT_FEATURE.SFG_EXP_ID,
+           DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT
+          ].includes(experimentId);
 }
 
 /**

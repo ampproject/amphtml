@@ -86,13 +86,7 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
  *   pathway.
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
-  const supportsNativeCrypto = win.crypto &&
-      (win.crypto.subtle || win.crypto.webkitSubtle);
-  const googleCdnProxyRegex =
-      /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/;
-  return supportsNativeCrypto &&
-      (googleCdnProxyRegex.test(win.location.origin) || getMode(win).localDev ||
-       getMode(win).test);
+  return win.crypto && (win.crypto.subtle || win.crypto.webkitSubtle);
 }
 
 /**
