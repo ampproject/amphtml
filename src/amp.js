@@ -118,7 +118,3 @@ if (self.console) {
 }
 self.document.documentElement.setAttribute('amp-version',
     '$internalRuntimeVersion$');
-
-function *hello() {
-
-}

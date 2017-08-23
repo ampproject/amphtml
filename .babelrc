@@ -9,5 +9,5 @@
     }]
   ],
   sourceType: 'module',
-  ignore: ['sha384-generated.js']
+  ignore: ['sha384-generated.js', 'bind-expr-impl.js']
 }
