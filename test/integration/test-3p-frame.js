@@ -415,7 +415,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     expect(newName).not.to.equal(name);
   });
 
-  describe('serializeMessage', () => {
+  describe.configure().run('serializeMessage', () => {
     it('should work without payload', () => {
       const message = serializeMessage('msgtype', 'msgsentinel');
       expect(message.indexOf('amp-')).to.equal(0);
@@ -456,7 +456,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     });
   });
 
-  describe('deserializeMessage', () => {
+  describe.configure().run('deserializeMessage', () => {
     it('should deserialize valid message', () => {
       const message = deserializeMessage(
           'amp-{"type":"msgtype","sentinel":"msgsentinel","x":1,"y":"abc"}');

@@ -131,7 +131,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
         });
       });
 
-      describe('with Bind in parent window', () => {
+      describe.configure().run('with Bind in parent window', () => {
         let parentBind;
         let parentContainer;
 
