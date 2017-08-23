@@ -25,7 +25,6 @@ import {parseIfNeeded} from '../src/iframe-helper';
 import {
   installAmpdocServices,
   installRuntimeServices,
-  registerForUnitTest,
 } from '../src/runtime';
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
@@ -233,7 +232,6 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       installRuntimeServices(iframe.contentWindow);
       installCustomElements(iframe.contentWindow);
       installAmpdocServices(ampdoc);
-      registerForUnitTest(iframe.contentWindow);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
       installStyles(iframe.contentWindow.document, cssText, () => {
@@ -285,7 +283,6 @@ export function createServedIframe(src) {
       win.AMP_TEST_IFRAME = true;
       win.AMP_TEST = true;
       installRuntimeServices(win);
-      registerForUnitTest(win);
       resolve({
         win: win,
         doc: win.document,
