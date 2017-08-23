@@ -392,7 +392,7 @@ export class ActionService {
 
       // Wait for the previous action, if applicable.
       currentPromise = (currentPromise)
-          ? currentPromise.then(() => invoke())
+          ? currentPromise.then(invoke())
           : invoke();
     });
   }
