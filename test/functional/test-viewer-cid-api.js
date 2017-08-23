@@ -120,7 +120,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     });
   });
 
-  describe.only('isScopeOptedIn', () => {
+  describe('isScopeOptedIn', () => {
     it('should read predefined clients and custom API keys correctly', () => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" ' +

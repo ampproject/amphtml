@@ -25,6 +25,7 @@ const CID_API_SCOPE_WHITELIST = {
 const API_KEYS = {
   'googleanalytics': 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
 };
+const TAG = 'ViewerCidApi';
 
 /**
  * Exposes CID API if provided by the Viewer.
@@ -106,7 +107,7 @@ export class ViewerCidApi {
           if (scope) {
             apiKeyMap[scope] = API_KEYS[clientName];
           } else {
-            user().error(
+            user().error(TAG,
                 `Unsupported client for Google CID API: ${clientName}`);
           }
         }
