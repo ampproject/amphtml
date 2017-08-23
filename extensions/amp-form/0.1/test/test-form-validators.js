@@ -183,7 +183,7 @@ describes.realWin('form-validators', {amp: true}, env => {
 
       validator.report();
       expect(form.dispatchEvent).calledOnce;
-    })
+    });
   });
 
   describe('PolyfillDefaultValidator', () => {
@@ -483,7 +483,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       form = getForm(doc, true);
       validations = doc.querySelectorAll('[visible-when-invalid]');
       validator = new InteractAndSubmitValidator(form);
-    })
+    });
 
     it('should report validation for input on interaction', () => {
       form.elements[0].validationMessage = 'Name is required';
