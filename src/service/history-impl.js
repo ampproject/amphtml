@@ -56,9 +56,6 @@ export class History {
     /** @private {!Array<!Function|undefined>} */
     this.stackOnPop_ = [];
 
-    /** @private {number} */
-    this.stackSize_ = 0;
-
     /**
      * @private {!Array<!{
      *   callback: function():!Promise,
@@ -84,11 +81,7 @@ export class History {
    */
   push(opt_onPop) {
     return this.enque_(() => {
-      if (this.stackSize_ >= this.maxStackSize_()) {
-        throw new Error('Maximum history size reached.');
-      }
       return this.binding_.push().then(stackIndex => {
-        this.stackSize_++;
         this.onStackIndexUpdated_(stackIndex);
         if (opt_onPop) {
           this.stackOnPop_[stackIndex] = opt_onPop;
@@ -108,7 +101,6 @@ export class History {
   pop(stateId) {
     return this.enque_(() => {
       return this.binding_.pop(stateId).then(stackIndex => {
-        this.stackSize_--;
         this.onStackIndexUpdated_(stackIndex);
       });
     }, 'pop');
@@ -129,7 +121,6 @@ export class History {
       // Pop the current state. The binding will ignore the request if
       // it cannot satisfy it.
       return this.binding_.pop(this.stackIndex_).then(stackIndex => {
-        this.stackSize_--;
         this.onStackIndexUpdated_(stackIndex);
       });
     }, 'goBack');
@@ -260,14 +251,6 @@ export class History {
       this.queue_.splice(0, 1);
       this.deque_();
     });
-  }
-
-  /**
-   * @return {number}
-   * @private
-   */
-  maxStackSize_() {
-    return 10;
   }
 }
 

@@ -102,17 +102,6 @@ describes.fakeWin('History', {
     });
   });
 
-  it('should only allow pushing up to maxStackSize_() states', () => {
-    sandbox.stub(history, 'maxStackSize_').returns(2);
-    const push = bindingMock.expects('push').returns(Promise.resolve()).twice();
-    return Promise.all([
-      history.push(),
-      history.push(),
-    ]).then(() => {
-      expect(history.push()).to.be.rejected;
-    });
-  });
-
   it('should return and call callback when history popped', () => {
     const onPop = sandbox.spy();
     bindingMock.expects('push').withExactArgs()
