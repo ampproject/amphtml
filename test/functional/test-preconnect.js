@@ -20,7 +20,7 @@ import {preconnectForElement, setPreconnectFeaturesForTesting} from
 import * as sinon from 'sinon';
 import * as lolex from 'lolex';
 
-describe('preconnect', () => {
+describe.only('preconnect', () => {
 
   let sandbox;
   let iframeClock;
