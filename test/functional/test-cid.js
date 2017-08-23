@@ -128,7 +128,6 @@ describe('cid', () => {
     });
     sandbox.stub(viewer, 'isTrustedViewer',
         () => Promise.resolve(trustedViewer));
-    sandbox.stub(ViewerCidApi, 'isScopeOptedIn', () => null);
     viewerSendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse',
         (eventType, opt_data) => {
           if (eventType != 'cid') {
@@ -144,6 +143,7 @@ describe('cid', () => {
         });
 
     cid = cidServiceForDocForTesting(ampdoc);
+    sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn', () => null);
     installCryptoService(fakeWin);
     crypto = Services.cryptoFor(fakeWin);
   });
@@ -778,8 +778,7 @@ describes.realWin('cid', {amp: true}, env => {
 
     beforeEach(() => {
       sandbox.stub(url, 'isProxyOrigin').returns(false);
-      sandbox.stub(ViewerCidApi, 'isScopeOptedIn')
-          .returns('googleanalytics');
+      sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn').returns('api-key');
       setCookie(win, '_ga', '', 0);
     });
 
@@ -796,7 +795,7 @@ describes.realWin('cid', {amp: true}, env => {
         createCookieIfNotPresent: true,
       }, hasConsent).then(scopedCid => {
         expect(getScopedCidStub)
-            .to.be.calledWith('googleanalytics', 'AMP_ECID_GOOGLE');
+            .to.be.calledWith('api-key', 'AMP_ECID_GOOGLE');
         expect(scopedCid).to.equal('cid-from-api');
         expect(getCookie(win, '_ga')).to.equal('cid-from-api');
       });
