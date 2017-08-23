@@ -43,6 +43,25 @@ describes.realWin('iframe-messaging-client', {}, env => {
       postAmpMessage(
           {type: 'response-type', sentinel: 'sentinel-123'}, hostWindow);
       expect(callbackSpy).to.be.calledOnce;
+      postAmpMessage(
+          {type: 'response-type', sentinel: 'sentinel-123'}, hostWindow);
+      expect(callbackSpy).to.be.calledTwice;
+    });
+  });
+
+  describe('makeRequestOnce', () => {
+    it('should unlisten after message received', () => {
+      const callbackSpy = sandbox.spy();
+      client.makeRequestOnce('request-type', 'response-type', callbackSpy);
+      expect(postMessageStub).to.be.calledWith(serializeMessage(
+          'request-type', 'sentinel-123', {}, '$internalRuntimeVersion$'));
+
+      postAmpMessage(
+          {type: 'response-type', sentinel: 'sentinel-123'}, hostWindow);
+      expect(callbackSpy).to.be.calledOnce;
+      postAmpMessage(
+          {type: 'response-type', sentinel: 'sentinel-123'}, hostWindow);
+      expect(callbackSpy).to.be.calledOnce;
     });
   });
 

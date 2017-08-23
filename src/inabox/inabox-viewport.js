@@ -255,7 +255,7 @@ export class ViewportBindingInabox {
   getElementRectAsync(el) {
     if (!this.requestPositionPromise_) {
       this.requestPositionPromise_ = new Promise(resolve => {
-        this.iframeClient_.makeRequest(
+        this.iframeClient_.makeRequestOnce(
             MessageType.GET_POSITION, MessageType.POSITION_RESPONSE,
             data => {
               this.requestPositionPromise_ = null;
