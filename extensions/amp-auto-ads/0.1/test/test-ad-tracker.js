@@ -16,19 +16,18 @@
 
 
 import {AdTracker, getExistingAds} from '../ad-tracker';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {Services} from '../../../../src/services';
-import * as sinon from 'sinon';
+import {layoutRectLtwh} from '../../../../src/layout-rect';
 
-describe('ad-tracker', () => {
-  let doc;
+
+describes.realWin('ad-tracker', {amp: true}, env => {
+  let win, doc;
   let resources;
-  let sandbox;
   let container;
 
   beforeEach(() => {
-    doc = window.document;
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
 
     resources = Services.resourcesForDoc(doc);
     sandbox.stub(resources, 'getElementLayoutBox', element => {
@@ -37,11 +36,6 @@ describe('ad-tracker', () => {
 
     container = doc.createElement('div');
     doc.body.appendChild(container);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-    doc.body.removeChild(container);
   });
 
   function addAd(layoutBox) {
@@ -229,13 +223,16 @@ describe('ad-tracker', () => {
   });
 });
 
-describes.realWin('getExistingAds', {}, env => {
+
+describes.realWin('getExistingAds', {amp: true}, env => {
   let win;
   let doc;
+  let ampdoc;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    ampdoc = env.ampdoc;
   });
 
   it('should find all the amp-ads in the DOM', () => {
@@ -249,7 +246,7 @@ describes.realWin('getExistingAds', {}, env => {
     doc.body.appendChild(ad4);
     ad4.appendChild(doc.createElement('amp-ad'));
 
-    const ads = getExistingAds(win);
+    const ads = getExistingAds(ampdoc);
     expect(ads).to.have.lengthOf(3);
     expect(ads[0]).to.equal(ad1);
     expect(ads[1]).to.equal(ad2);

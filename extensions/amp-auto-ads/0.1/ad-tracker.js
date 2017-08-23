@@ -157,11 +157,11 @@ export class AdTracker {
 }
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Array<!Element>}
  */
-export function getExistingAds(win) {
-  return [].slice.call(win.document.getElementsByTagName('AMP-AD'))
+export function getExistingAds(ampdoc) {
+  return [].slice.call(ampdoc.getRootNode().getElementsByTagName('AMP-AD'))
       .filter(ad => {
         // Filters out AMP-STICKY-AD.
         if (ad.parentElement && ad.parentElement.tagName == 'AMP-STICKY-AD') {
