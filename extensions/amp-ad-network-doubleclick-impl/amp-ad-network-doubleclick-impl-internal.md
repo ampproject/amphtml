@@ -121,3 +121,7 @@ If `refresh_interval` is set to false, then this slot will not be refresh-enable
 #### SRA Compatibility
 
 Refresh is currently not supported for SRA enabled slots. If a slot is enabled for both, refresh will be disabled, and an error will be logged to the user's console.
+
+#### AMP Ad Container Compatibility
+
+The only AMP ad containers in which refresh is currently supported are amp-sticky-ad and amp-carousel container types.
