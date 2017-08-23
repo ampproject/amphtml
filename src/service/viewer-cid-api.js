@@ -61,14 +61,14 @@ export class ViewerCidApi {
    */
   getScopedCid(scope) {
     const apiKey = this.isScopeOptedIn(scope);
-    const payload = {
+    const payload = dict({
       'scope': scope,
       'clientIdApi': !!apiKey,
-    };
+    });
     if (!!apiKey) {
       payload['apiKey'] = apiKey;
     }
-    return this.viewer_.sendMessageAwaitResponse('cid', dict(payload));
+    return this.viewer_.sendMessageAwaitResponse('cid', payload);
   }
 
   /**
@@ -76,7 +76,7 @@ export class ViewerCidApi {
    * Returns the API key that should be used, or null if page hasn't opted in.
    *
    * @param {string} scope
-   * @return {string=}
+   * @return {string|undefined}
    */
   isScopeOptedIn(scope) {
     if (!this.apiKeyMap_) {

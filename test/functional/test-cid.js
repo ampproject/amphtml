@@ -21,7 +21,6 @@ import {
   optOutOfCid,
   isOptedOutOfCid,
 } from '../../src/service/cid-impl';
-import {ViewerCidApi} from '../../src/service/viewer-cid-api';
 import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentStateService} from '../../src/service/document-state';

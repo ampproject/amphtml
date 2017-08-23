@@ -63,15 +63,15 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
           .returns(Promise.resolve('client-id-from-viewer'));
       return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
         expect(cid).to.equal('client-id-from-viewer');
-        const payload = {
+        const payload = dict({
           'scope': 'AMP_ECID_GOOGLE',
           'clientIdApi': used,
-        };
+        });
         if (used) {
           payload['apiKey'] = 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM';
         }
         expect(viewerMock.sendMessageAwaitResponse)
-            .to.be.calledWith('cid', dict(payload));
+            .to.be.calledWith('cid', payload);
       });
     }
 
@@ -121,7 +121,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
   });
 
   describe('isScopeOptedIn', () => {
-    it('should read predefined and custom API key correctly', () => {
+    it('should read predefined clients and custom API keys correctly', () => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" ' +
           'content="googleanalytics,' +

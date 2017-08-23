@@ -66,11 +66,6 @@ export class GoogleCidApi {
    * @return {!Promise<?string>}
    */
   getScopedCid(apiKey, scope) {
-    const url = this.getUrl_(apiKey);
-    if (!url) {
-      return Promise.resolve(/** @type {?string} */(null));
-    }
-
     if (this.cidPromise_[scope]) {
       return this.cidPromise_[scope];
     }
@@ -97,6 +92,7 @@ export class GoogleCidApi {
       if (!token || this.isStatusToken_(token)) {
         this.persistToken_(TokenStatus.RETRIEVING, TIMEOUT);
       }
+      const url = GOOGLE_API_URL + apiKey;
       return this.fetchCid_(dev().assertString(url), scope, token)
           .then(this.handleResponse_.bind(this))
           .catch(e => {
@@ -147,14 +143,6 @@ export class GoogleCidApi {
       this.persistToken_(TokenStatus.NOT_FOUND, HOUR);
       return null;
     }
-  }
-
-  /**
-   * @param {string} apiKey
-   * @return {?string}
-   */
-  getUrl_(apiKey) {
-    return GOOGLE_API_URL + apiKey;
   }
 
   /**
