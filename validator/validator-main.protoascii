@@ -3304,8 +3304,6 @@ attr_lists: {
 }
 tags: {  # <amp-img>
   tag_name: "AMP-IMG"
-  # <amp-img> is whitelisted for <amp-sidebar>, otherwise:
-  # disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
@@ -3328,7 +3326,6 @@ tags: {  # <amp-img>
 }
 tags: {  # <amp-pixel>
   tag_name: "AMP-PIXEL"
-  disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
     name: "referrerpolicy"
     value: "no-referrer"
