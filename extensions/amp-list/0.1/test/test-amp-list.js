@@ -17,10 +17,14 @@
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Services} from '../../../../src/services';
-import * as sinon from 'sinon';
 
-describe('amp-list component', () => {
-  let sandbox;
+
+describes.realWin('amp-list component', {
+  amp: {
+    extensions: ['amp-list'],
+  },
+}, env => {
+  let win, doc, ampdoc;
   let templatesMock;
   let element;
   let list;
@@ -28,14 +32,14 @@ describe('amp-list component', () => {
   let bindStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
 
-    const templates = Services.templatesFor(window);
+    const templates = Services.templatesFor(win);
     templatesMock = sandbox.mock(templates);
 
-    const ampdoc = Services.ampdocServiceFor(window).getAmpDoc();
-
-    element = document.createElement('div');
+    element = doc.createElement('div');
     element.setAttribute('src', 'https://data.com/list.json');
     element.getAmpDoc = () => ampdoc;
     element.getFallback = () => null;
@@ -48,14 +52,12 @@ describe('amp-list component', () => {
     listMock = sandbox.mock(list);
 
     element.style.height = '10px';
-    document.body.appendChild(element);
+    doc.body.appendChild(element);
   });
 
   afterEach(() => {
-    document.body.removeChild(element);
     templatesMock.verify();
     listMock.verify();
-    sandbox.restore();
   });
 
   it('should load and render', () => {
@@ -63,7 +65,7 @@ describe('amp-list component', () => {
       {title: 'Title1'},
     ];
     const newHeight = 127;
-    const itemElement = document.createElement('div');
+    const itemElement = doc.createElement('div');
     itemElement.style.height = newHeight + 'px';
     const fetchPromise = Promise.resolve(items);
     const renderPromise = Promise.resolve([itemElement]);
@@ -91,7 +93,7 @@ describe('amp-list component', () => {
 
   it('should dispatch "amp:template-rendered" event after render', () => {
     const items = [{title: 'Title1'}];
-    const itemElement = document.createElement('div');
+    const itemElement = doc.createElement('div');
     const fetchPromise = Promise.resolve(items);
     const renderPromise = Promise.resolve([itemElement]);
     listMock.expects('fetch_').withExactArgs('items')
@@ -115,7 +117,7 @@ describe('amp-list component', () => {
     bindStub.returns(Promise.resolve(fakeBind));
 
     const items = [{title: 'Title1'}];
-    const itemElement = document.createElement('div');
+    const itemElement = doc.createElement('div');
     const fetchPromise = Promise.resolve(items);
     const rendered = [itemElement];
     const renderPromise = Promise.resolve(rendered);
@@ -138,9 +140,9 @@ describe('amp-list component', () => {
     const newItems = [
       {title: 'Title2'}, {title: 'Title3'},
     ];
-    const itemElement = document.createElement('div');
-    const itemElement2 = document.createElement('div');
-    const itemElement3 = document.createElement('div');
+    const itemElement = doc.createElement('div');
+    const itemElement2 = doc.createElement('div');
+    const itemElement3 = doc.createElement('div');
     const fetchPromise = Promise.resolve(initialItems);
     const renderPromise = Promise.resolve([itemElement]);
     listMock.expects('fetch_').withExactArgs('items')
@@ -182,7 +184,7 @@ describe('amp-list component', () => {
       {title: 'Title1'},
     ];
     element.setAttribute('items', 'different');
-    const itemElement = document.createElement('div');
+    const itemElement = doc.createElement('div');
     listMock.expects('fetch_')
         .returns(Promise.resolve(different)).once();
     templatesMock.expects('findAndRenderTemplateArray')
@@ -197,7 +199,7 @@ describe('amp-list component', () => {
     const items = [
       {title: 'Title1'},
     ];
-    const itemElement = document.createElement('div');
+    const itemElement = doc.createElement('div');
     const fetchPromise = Promise.resolve(items);
     const renderPromise = Promise.resolve([itemElement]);
     listMock.expects('fetch_').withExactArgs('items')
@@ -218,7 +220,7 @@ describe('amp-list component', () => {
       {title: 'Title1'},
     ];
     element.setAttribute('role', 'list1');
-    const itemElement = document.createElement('div');
+    const itemElement = doc.createElement('div');
     itemElement.setAttribute('role', 'listitem1');
     const fetchPromise = Promise.resolve(items);
     const renderPromise = Promise.resolve([itemElement]);

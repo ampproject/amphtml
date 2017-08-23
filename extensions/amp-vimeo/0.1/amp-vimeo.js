@@ -74,6 +74,9 @@ class AmpVimeo extends AMP.BaseElement {
       })), '*');
     }
   }
-};
+}
 
-AMP.registerElement('amp-vimeo', AmpVimeo);
+
+AMP.extension('amp-vimeo', '0.1', AMP => {
+  AMP.registerElement('amp-vimeo', AmpVimeo);
+});

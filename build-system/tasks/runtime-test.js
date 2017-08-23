@@ -219,9 +219,8 @@ gulp.task('test', 'Runs tests',
     if (argv.randomize) {
       testFiles = shuffleArray(testFiles);
     }
-    // we need to replace the test init with something that won't match
-    // any file. _init_tests gets added twice due to the regex matching.
-    testFiles[testFiles.indexOf('test/_init_tests.js')] = '_WONTMATCH.qqq';
+
+    testFiles.splice(testFiles.indexOf('test/_init_tests.js'),1);
     c.files = config.commonTestPaths.concat(testFiles);
 
     util.log(util.colors.blue(JSON.stringify(c.files)));
@@ -254,6 +253,35 @@ gulp.task('test', 'Runs tests',
     c.client.mocha = {
       'grep': argv.grep,
     };
+  }
+
+  if (argv.coverage) {
+    util.log(util.colors.blue('Including code coverage tests'));
+    c.browserify.transform.push(
+        ['browserify-istanbul', { instrumenterConfig: { embedSource: true }}]);
+    c.reporters = c.reporters.concat(['progress', 'coverage']);
+    if (c.preprocessors['src/**/*.js']) {
+      c.preprocessors['src/**/*.js'].push('coverage');
+    }
+    c.preprocessors['extensions/**/*.js'] &&
+        c.preprocessors['extensions/**/*.js'].push('coverage');
+    c.coverageReporter = {
+      dir: 'test/coverage',
+      reporters: [
+        { type: 'html', subdir: 'report-html' },
+        { type: 'lcov', subdir: 'report-lcov' },
+        { type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt' },
+        { type: 'text', subdir: '.', file: 'text.txt' },
+        { type: 'text-summary', subdir: '.', file: 'text-summary.txt' },
+      ],
+      instrumenterOptions: {
+        istanbul: {
+          noCompact: true,
+        }
+      }
+    };
+    // TODO(jonkeller): Add c.coverageReporter.check as shown in
+    // https://github.com/karma-runner/karma-coverage/blob/master/docs/configuration.md
   }
 
   // Run fake-server to test XHR responses.

@@ -20,8 +20,13 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
-import {parseUrl, removeFragment, parseQueryString,
-  addParamsToUrl} from '../url';
+import {
+  parseUrl,
+  removeFragment,
+  parseQueryString,
+  addParamsToUrl,
+  getSourceUrl,
+} from '../url';
 import {getTrackImpressionPromise} from '../impression.js';
 import {
   VariableSource,
@@ -33,6 +38,7 @@ import {
   getTimingDataAsync,
 } from './variable-source';
 import {isProtocolValid} from '../url';
+import {WindowInterface} from '../window-interface';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -144,6 +150,21 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the referrer URL.
     this.setAsync('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
       return Services.viewerForDoc(this.ampdoc).getReferrerUrl();
+    }));
+
+    // Like DOCUMENT_REFERRER, but returns null if the referrer is of
+    // same domain or the corresponding CDN proxy.
+    this.setAsync('EXTERNAL_REFERRER', /** @type {AsyncResolverDef} */(() => {
+      return Services.viewerForDoc(this.ampdoc).getReferrerUrl()
+          .then(referrer => {
+            if (!referrer) {
+              return null;
+            }
+            const referrerHostname = parseUrl(getSourceUrl(referrer)).hostname;
+            const currentHostname =
+                WindowInterface.getHostname(this.ampdoc.win);
+            return referrerHostname === currentHostname ? null : referrer;
+          });
     }));
 
     // Returns the title of this AMP document.
@@ -303,6 +324,11 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
     this.set('TIMESTAMP', () => {
       return Date.now();
+    });
+
+    //Returns the human readable timestamp in format of 2011-01-01T11:11:11.612Z.
+    this.set('TIMESTAMP_ISO', () => {
+      return new Date().toISOString();
     });
 
     // Returns the user's time-zone offset from UTC, in minutes.
@@ -989,6 +1015,7 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
       });
 }
 
+
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Window} embedWin
@@ -998,7 +1025,6 @@ export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
   installServiceInEmbedScope(embedWin, 'url-replace',
       new UrlReplacements(ampdoc, varSource));
 }
-
 
 /**
  * @typedef {{

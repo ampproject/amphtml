@@ -346,6 +346,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-brid-player', AmpBridPlayer);
+
+AMP.extension('amp-brid-player', '0.1', AMP => {
+  AMP.registerElement('amp-brid-player', AmpBridPlayer);
+});
