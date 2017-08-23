@@ -29,3 +29,4 @@ Our governance model is as follows:
 * Yuxi Chen (@muxin)
 * Johannes Henkel (@powdercloud). Specialty: Validator
 * Yuxuan Zhou (@zhouyx)
+* Wassim Gharbi (@wassgha)
