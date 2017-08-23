@@ -97,7 +97,6 @@ import {
   adoptShadowMode,
   installAmpdocServices,
   installRuntimeServices,
-  registerElementForTesting,
 } from '../src/runtime';
 import {createElementWithAttributes} from '../src/dom';
 import {addParamsToUrl} from '../src/url';
@@ -687,8 +686,6 @@ class AmpFixture {
         const installer = extensionsBuffer[`${extensionId}:${version}`];
         if (installer) {
           registerExtension(env.extensions, extensionId, installer, win.AMP);
-        } else {
-          registerElementForTesting(win, extensionId);
         }
       });
     }

@@ -83,7 +83,6 @@ import {
   toggleExperiment,
 } from './experiments';
 import {parseUrl} from './url';
-import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {setStyle} from './style';
 import {waitForBody} from './dom';
@@ -96,8 +95,6 @@ setReportError(reportErrorForWin.bind(null, self));
 /** @const @private {string} */
 const TAG = 'runtime';
 
-/** @type {!Object} */
-const elementsForTesting = {};
 
 /**
  * Install runtime-level services.
@@ -487,13 +484,6 @@ function prepareAndRegisterElementShadowMode(global, extensions,
  */
 function registerElementClass(global, name, implementationClass, opt_css) {
   registerExtendedElement(global, name, implementationClass);
-  if (getMode().test) {
-    elementsForTesting[name] = {
-      name,
-      implementationClass,
-      css: opt_css,
-    };
-  }
   // Register this extension to resolve its Service Promise.
   registerServiceBuilder(global, name, emptyService);
 }
@@ -979,44 +969,6 @@ function emptyService() {
   return {};
 }
 
-
-/**
- * Registers all extended elements as normal elements in the given
- * window.
- * Make sure to call `adopt(window)` in your unit test as well and
- * then call this on the generated iframe.
- * @param {!Window} win
- */
-export function registerForUnitTest(win) {
-  for (const key in elementsForTesting) {
-    let element = null;
-    element = elementsForTesting[key];
-    if (element.css) {
-      installStyles(win.document, element.css, () => {
-        registerElement(win, element.name, element.implementationClass);
-      }, false, element.name);
-    } else {
-      registerElement(win, element.name, element.implementationClass);
-    }
-  }
-}
-
-
-/**
- * Registers a specific element for testing.
- * @param {!Window} win
- * @param {string} elementName
- * @visibleForTesting
- */
-export function registerElementForTesting(win, elementName) {
-  const element = elementsForTesting[elementName];
-  if (!element) {
-    throw new Error('test element not found: ' + elementName +
-      '\nKnown elements ' + Object.keys(elementsForTesting).sort());
-  }
-  win.AMP.registerElement(element.name, element.implementationClass,
-      element.css);
-}
 
 /**
  * For a given extension, checks that its version is the same
