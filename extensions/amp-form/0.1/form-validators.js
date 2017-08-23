@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
 import {ValidationBubble} from './validation-bubble';
+import {createCustomEvent} from '../../../src/event-helper';
+import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
 
 
@@ -163,6 +164,12 @@ export class AbstractCustomValidator extends FormValidator {
 
     /** @private @const {!Object<string, ?Element>} */
     this.inputVisibleValidationDict_ = {};
+
+    /**
+     * Tribool indicating validity of form after previous check.
+     * @private {boolean|null}
+     */
+    this.formValidity_ = null;
   }
 
   /**
@@ -275,6 +282,21 @@ export class AbstractCustomValidator extends FormValidator {
   onInput(event) {
     this.onInteraction(event);
   }
+
+  /**
+   * Fires a valid/invalid event from the form if its validity state
+   * has changed since the last validity check.
+   */
+  fireValidityEventIfNecessary_() {
+    const previousValidity = this.formValidity_;
+    this.formValidity_ = this.form.checkValidity();
+    if (previousValidity !== this.formValidity_) {
+      const win = this.form.ownerDocument.defaultView;
+      const type = this.formValidity_ ? 'valid' : 'invalid';
+      const event = createCustomEvent(win, type, null, {bubbles: true});
+      this.form.dispatchEvent(event);
+    }
+  }
 }
 
 
@@ -292,13 +314,14 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
         break;
       }
     }
+
+    this.fireValidityEventIfNecessary_();
   }
 
   /** @override */
   shouldValidateOnInteraction(input) {
     return !!this.getVisibleValidationFor(input);
   }
-
 }
 
 
@@ -320,6 +343,8 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
     if (firstInvalidInput) {
       firstInvalidInput./*REVIEW*/focus();
     }
+
+    this.fireValidityEventIfNecessary_();
   }
 
   /** @override */
@@ -335,6 +360,13 @@ export class AsYouGoValidator extends AbstractCustomValidator {
   shouldValidateOnInteraction(unusedInput) {
     return true;
   }
+
+  /** @override */
+  onInteraction(event) {
+    super.onInteraction(event);
+
+    this.fireValidityEventIfNecessary_();
+  }
 }
 
 
@@ -343,6 +375,13 @@ export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
   /** @override */
   shouldValidateOnInteraction(unusedInput) {
     return true;
+  }
+
+  /** @override */
+  onInteraction(event) {
+    super.onInteraction(event);
+
+    this.fireValidityEventIfNecessary_();
   }
 }
 
