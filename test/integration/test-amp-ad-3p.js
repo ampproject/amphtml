@@ -154,7 +154,7 @@ function createFixture() {
   return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
 }
 
-describe.configure().enableIe().retryOnSaucelabs().run('amp-ad 3P', () => {
+describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
   let fixture;
 
   beforeEach(() => {
@@ -169,7 +169,7 @@ describe.configure().enableIe().retryOnSaucelabs().run('amp-ad 3P', () => {
   });
 });
 
-describe.configure().enableIe().retryOnSaucelabs().run('amp-ad 3P ' +
+describe.configure().retryOnSaucelabs().run('amp-ad 3P ' +
     '(with AmpContext experiment)', () => {
   let fixture;
 
