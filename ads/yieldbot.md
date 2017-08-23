@@ -31,7 +31,7 @@ limitations under the License.
 
 ### With Doubleclick `amp-ad` data attributes
 
-To specify Doubleclick `amp-ad` data attributes, see [Doubleclick](./google/doubleclick.md) for details. Use the
+To specify Doubleclick `amp-ad` data attributes, `multi-size` for example, see [Doubleclick](./google/doubleclick.md) for details. Use the
 Doubleclick attributes as you would with an `<amp-ad type="doubleclick"/>` element.
 
 ```html
@@ -40,6 +40,7 @@ Doubleclick attributes as you would with an `<amp-ad type="doubleclick"/>` eleme
           data-psn="1234"
           data-yb-slot="medrec"
           data-slot="/2476204/medium-rectangle"
+          data-multi-size="300x220,300x200"
           json='{"targeting":{"category":["food","lifestyle"]},"categoryExclusions":["health"]}'>
 </amp-ad>
 ```
@@ -63,8 +64,8 @@ For integration testing, the Yieldbot Platform can be set to always return a bid
 The Yieldbot `amp-ad` type can be tested with the following file:
 - [test/manual/amp-ad.yieldbot.amp.html](../test/manual/amp-ad.yieldbot.amp.html)
 
-When Yieldbot testing mode is enabled, a cookie (`ybotc__`) on the domain `i.yldbt.com` tells the Yieldbot ad server to always return a bid and when creative is requested, return a static integration testing creative.
+When Yieldbot testing mode is enabled, a cookie (`__ybot_test`) on the domain `.yldbt.com` tells the Yieldbot ad server to always return a bid and when creative is requested, return a static integration testing creative.
 
 - No ad serving metrics are impacted when integration testing mode is enabled.
-- The `ybotc__` cookie expires in 24 hours.
+- The `__ybot_test` cookie expires in 24 hours.
  - It is good practice to click "Stop testing" when testing is complete, to return to normal ad delivery.
