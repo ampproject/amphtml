@@ -120,21 +120,19 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     });
   });
 
-  describe('isScopeOptedIn', () => {
+  describe.only('isScopeOptedIn', () => {
     it('should read predefined clients and custom API keys correctly', () => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" ' +
-          'content="googleanalytics,' +
-          'foo=lE.HUEiz-IsNtlbNo_l2K18dT680nsaM80nsaMn,' +
-          'bar=saM80nsaMnlE.HUEiz_IsNtlbNo-l2K18dT680n,' +
-          'invalid=invalid-api-key">';
+          'content="googleanalytics, ' +
+          'foo = foo-api-key,' +
+          'bar=bar-api-key ,' +
+          'hello=hello-api-key">';
       expect(api.isScopeOptedIn('AMP_ECID_GOOGLE'))
           .to.equal('AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM');
-      expect(api.isScopeOptedIn('foo'))
-          .to.equal('lE.HUEiz-IsNtlbNo_l2K18dT680nsaM80nsaMn');
-      expect(api.isScopeOptedIn('bar'))
-          .to.equal('saM80nsaMnlE.HUEiz_IsNtlbNo-l2K18dT680n');
-      expect(api.isScopeOptedIn('invalid')).to.be.undefined;
+      expect(api.isScopeOptedIn('foo')).to.equal('foo-api-key');
+      expect(api.isScopeOptedIn('bar')).to.equal('bar-api-key');
+      expect(api.isScopeOptedIn('hello')).to.equal('hello-api-key');
       expect(api.isScopeOptedIn('non-existing')).to.be.undefined;
     });
 
@@ -149,12 +147,10 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" ' +
           'content="' +
-          'foo=lE.HUEiz_IsNtlbNo-l2K18dT680nsaM80nsaMn,' +
-          'bar=saM80nsaMnlE.HUEiz_IsNtlbNo-l2K18dT680n">';
-      expect(api.isScopeOptedIn('foo'))
-          .to.equal('lE.HUEiz_IsNtlbNo-l2K18dT680nsaM80nsaMn');
-      expect(api.isScopeOptedIn('bar'))
-          .to.equal('saM80nsaMnlE.HUEiz_IsNtlbNo-l2K18dT680n');
+          'foo=foo-api-key,' +
+          'bar=bar-api-key">';
+      expect(api.isScopeOptedIn('foo')).to.equal('foo-api-key');
+      expect(api.isScopeOptedIn('bar')).to.equal('bar-api-key');
     });
   });
 });

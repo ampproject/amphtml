@@ -16,6 +16,7 @@
 
 import {Services} from '../services';
 import {dict} from '../utils/object';
+import {user} from '../log';
 
 const GOOGLE_CLIENT_ID_API_META_NAME = 'amp-google-client-id-api';
 const CID_API_SCOPE_WHITELIST = {
@@ -24,7 +25,6 @@ const CID_API_SCOPE_WHITELIST = {
 const API_KEYS = {
   'googleanalytics': 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
 };
-const API_KEY_VALIDATOR = /^[a-zA-Z0-9\-_.]{39,42}$/;
 
 /**
  * Exposes CID API if provided by the Viewer.
@@ -65,7 +65,7 @@ export class ViewerCidApi {
       'scope': scope,
       'clientIdApi': !!apiKey,
     });
-    if (!!apiKey) {
+    if (apiKey) {
       payload['apiKey'] = apiKey;
     }
     return this.viewer_.sendMessageAwaitResponse('cid', payload);
@@ -95,18 +95,19 @@ export class ViewerCidApi {
     if (optInMeta && optInMeta.hasAttribute('content')) {
       const list = optInMeta.getAttribute('content').split(',');
       list.forEach(item => {
+        item = item.trim();
         if (item.indexOf('=') > 0) {
           const pair = item.split('=');
-          const scope = pair[0];
-          const apiKey = pair[1];
-          if (API_KEY_VALIDATOR.test(apiKey)) {
-            apiKeyMap[scope] = apiKey;
-          }
+          const scope = pair[0].trim();
+          apiKeyMap[scope] = pair[1].trim();
         } else {
           const clientName = item;
           const scope = CID_API_SCOPE_WHITELIST[clientName];
           if (scope) {
             apiKeyMap[scope] = API_KEYS[clientName];
+          } else {
+            user().error(
+                `Unsupported client for Google CID API: ${clientName}`);
           }
         }
       });
