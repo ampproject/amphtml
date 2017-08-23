@@ -48,7 +48,6 @@ export const MessageType = {
   SEND_POSITIONS: 'send-positions',
   POSITION: 'position',
   GET_POSITION: 'get-position',
-  POSITION_RESPONSE: 'position-response',
 
   // For amp-analytics' iframe-transport
   SEND_IFRAME_TRANSPORT_EVENTS: 'send-iframe-transport-events',

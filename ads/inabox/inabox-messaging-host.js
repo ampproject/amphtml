@@ -134,7 +134,7 @@ export class InaboxMessagingHost {
     const targetRect =
         layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect());
     source./*OK*/postMessage(
-        serializeMessage(MessageType.POSITION_RESPONSE, request.sentinel,
+        serializeMessage(MessageType.POSITION, request.sentinel,
             dict({
               'viewportRect': viewportRect,
               'targetRect': targetRect,

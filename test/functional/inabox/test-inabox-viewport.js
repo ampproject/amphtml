@@ -39,10 +39,11 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   let measureSpy;
 
   function stubIframeClientMakeRequest(
-      requestType, responseType, callback, opt_sync) {
+      requestType, responseType, callback, opt_sync, opt_once) {
+    const methodName = opt_once ? 'makeRequestOnce' : 'makeRequest';
 
     return sandbox./*OK*/stub(
-        binding.iframeClient_, 'makeRequest', (req, res, cb) => {
+        binding.iframeClient_, methodName, (req, res, cb) => {
           expect(req).to.equal(requestType);
           expect(res).to.equal(responseType);
 
@@ -298,11 +299,11 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     el2.getBoundingClientRect = () => {return layoutRectLtwh(30, 40, 15, 15);};
     const requestSpy = stubIframeClientMakeRequest(
         'get-position',
-        'position-response',
+        'position',
         (req, res, cb) => cb({
           targetRect: layoutRectLtwh(10, 20, 100, 100),
           viewportRect: layoutRectLtwh(1, 1, 1, 1),
-        }));
+        }), undefined, true);
     let rect2 = null;
     binding.getElementRectAsync(el2).then(rect => {
       rect2 = rect;

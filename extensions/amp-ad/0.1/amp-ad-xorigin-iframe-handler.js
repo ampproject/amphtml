@@ -45,7 +45,7 @@ import {throttle} from '../../../src/utils/rate-limit';
 
 const VISIBILITY_TIMEOUT = 10000;
 
-const MIN_INABOX_POSITION_EVENT_INTERVAL = 500;
+const MIN_INABOX_POSITION_EVENT_INTERVAL = 100;
 
 
 export class AmpAdXOriginIframeHandler {
@@ -96,9 +96,6 @@ export class AmpAdXOriginIframeHandler {
     /** @private @const {!../../../src/service/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
 
-    /** @private {?Promise<!../../../src/layout-rect.LayoutRectDef>} */
-    this.iframePositionPromise_ = null;
-
     /** @private {boolean} */
     this.positionRequest_ = false;
   }
@@ -141,8 +138,9 @@ export class AmpAdXOriginIframeHandler {
             }
             this.positionRequest_ = true;
             this.getIframePositionPromise_().then(position => {
+              this.positionRequest_ = false;
               this.inaboxRequestPositionApi_.send(
-                  MessageType.POSITION_RESPONSE, position);
+                  MessageType.POSITION, position);
             });
           });
     }
@@ -467,19 +465,14 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   getIframePositionPromise_() {
-    if (!this.iframePositionPromise_) {
-      this.iframePositionPromise_ = this.viewport_.getElementRectAsync(
-          dev().assertElement(this.iframe)).then(position => {
-            this.iframePositionPromise_ = null;
-            this.positionRequest_ = false;
-            const viewport = this.viewport_.getRect();
-            return dict({
-              'targetRect': position,
-              'viewportRect': viewport,
-            });
+    return this.viewport_.getElementRectAsync(
+        dev().assertElement(this.iframe)).then(position => {
+          const viewport = this.viewport_.getRect();
+          return dict({
+            'targetRect': position,
+            'viewportRect': viewport,
           });
-    }
-    return this.iframePositionPromise_;
+        });
   }
 
   /** @private */

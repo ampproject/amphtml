@@ -29,9 +29,13 @@ import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
 import {px, setImportantStyles, resetStyles} from '../../src/style';
+import {throttle} from '../../src/utils/rate-limit';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
+
+/** @const {number} */
+const MIN_EVENT_INTERVAL = 100;
 
 /** @visibleForTesting */
 export function prepareBodyForOverlay(win, bodyElement) {
@@ -133,6 +137,11 @@ export class ViewportBindingInabox {
     /** @private {!../service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
+    /** @private {function()} */
+    this.fireScrollThrottle_ = throttle(this.win, () => {
+      this.scrollObservable_.fire();
+    }, MIN_EVENT_INTERVAL);
+
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
@@ -163,7 +172,7 @@ export class ViewportBindingInabox {
             this.resizeObservable_.fire();
           }
           if (isMoved(this.viewportRect_, oldViewportRect)) {
-            this.scrollObservable_.fire();
+            this.fireScrollThrottle_();
           }
         });
   }
@@ -256,7 +265,7 @@ export class ViewportBindingInabox {
     if (!this.requestPositionPromise_) {
       this.requestPositionPromise_ = new Promise(resolve => {
         this.iframeClient_.makeRequestOnce(
-            MessageType.GET_POSITION, MessageType.POSITION_RESPONSE,
+            MessageType.GET_POSITION, MessageType.POSITION,
             data => {
               this.requestPositionPromise_ = null;
               resolve(data.targetRect);

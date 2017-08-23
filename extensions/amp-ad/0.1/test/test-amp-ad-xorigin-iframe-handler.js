@@ -397,11 +397,11 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         type: 'get-position',
         sentinel: 'amp3ptest' + testIndex,
       });
-      return iframe.expectMessageFromParent('position-response').then(data => {
+      return iframe.expectMessageFromParent('position').then(data => {
         expect(data).to.jsonEqual({
           targetRect: layoutRectLtwh(1, 1, 1, 1),
           viewportRect: layoutRectLtwh(1, 1, 1, 1),
-          type: 'position-response',
+          type: 'position',
           sentinel: 'amp3ptest' + testIndex,
         });
       });
