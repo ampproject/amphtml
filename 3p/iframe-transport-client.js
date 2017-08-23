@@ -83,6 +83,17 @@ export class IframeTransportClient {
   }
 
   /**
+   * Sends a message back to the creative
+   * @param {string} transportId An ID uniquely identifying which creative
+   * shall receive the event
+   * @param {!Object<string,string>} response
+   */
+  sendMessageToCreative(transportId, response) {
+    this.client_.sendMessage(MessageType.IFRAME_TRANSPORT_RESPONSE,
+        /** @type {JsonObject} */({transportId, message: response}));
+  }
+
+  /**
    * Gets the IframeMessagingClient
    * @returns {!IframeMessagingClient}
    * @VisibleForTesting

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import {MessageType} from '../../../src/3p-frame-messaging';
 import {createElementWithAttributes} from '../../../src/dom';
+import {listenFor} from '../../../src/iframe-helper';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {
@@ -40,8 +42,10 @@ export class IframeTransport {
    * @param {!Window} win
    * @param {!string} type The value of the amp-analytics tag's type attribute
    * @param {!JsonObject} config
+   * @param {function(!JsonObject)=} opt_processResponse An optional
+   * function to receive any response messages back from the cross-domain iframe
    */
-  constructor(win, type, config) {
+  constructor(win, type, config, opt_processResponse) {
     /** @private @const {!Window} win */
     this.win_ = win;
 
@@ -54,7 +58,7 @@ export class IframeTransport {
     dev().assert(config && config['iframe'],
         'Must supply iframe URL to constructor!');
     this.frameUrl_ = config['iframe'];
-    this.processCrossDomainIframe();
+    this.processCrossDomainIframe(opt_processResponse);
   }
 
   /**
@@ -67,14 +71,16 @@ export class IframeTransport {
   /**
    * If iframe is specified in config/transport, check whether third-party
    * iframe already exists, and if not, create it.
+   * @param {function(!JsonObject)=} opt_processResponse An optional
+   * function to receive any response messages back from the cross-domain iframe
    */
-  processCrossDomainIframe() {
+  processCrossDomainIframe(opt_processResponse) {
     let frameData;
     if (IframeTransport.hasCrossDomainIframe(this.type_)) {
       frameData = IframeTransport.getFrameData(this.type_);
       ++(frameData.usageCount);
     } else {
-      frameData = this.createCrossDomainIframe();
+      frameData = this.createCrossDomainIframe(opt_processResponse);
       this.win_.document.body.appendChild(frameData.frame);
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
@@ -82,10 +88,12 @@ export class IframeTransport {
 
   /**
    * Create a cross-domain iframe for third-party vendor anaytlics
+   * @param {function(!JsonObject)=} opt_processResponse An optional
+   * function to receive any response messages back from the cross-domain iframe
    * @return {!FrameData}
    * @VisibleForTesting
    */
-  createCrossDomainIframe() {
+  createCrossDomainIframe(opt_processResponse) {
     // Explanation of IDs:
     // Each instance of IframeTransport (owned by a specific amp-analytics
     // tag, in turn owned by a specific creative) has an ID in this._id.
@@ -126,6 +134,15 @@ export class IframeTransport {
           /** @type {!HTMLIFrameElement} */
           (frame)),
     });
+    if (opt_processResponse) {
+      frameData.responseMessageUnlisten = listenFor(frameData.frame,
+          MessageType.IFRAME_TRANSPORT_RESPONSE, response => {
+            dev().assert(response && response['message'],
+                'Received empty response from 3p analytics frame');
+            opt_processResponse(response['message']);
+          },
+          true);
+    }
     IframeTransport.crossDomainIframes_[this.type_] = frameData;
     return frameData;
   }

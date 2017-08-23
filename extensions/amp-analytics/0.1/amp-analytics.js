@@ -226,7 +226,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
       this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
         this.element.getAttribute('type'),
-        this.config_['transport']);
+        this.config_['transport'], response => {
+          //TODO(jonkeller)
+        });
     }
 
     const promises = [];
