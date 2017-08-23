@@ -731,10 +731,10 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'optout': '_gaUserPrefs.ioo',
   },
 
-    // USE WITH CAUTION (unless told by Google Analytics representatives)
-    // googleanalytics-alpha configuration is not planned to be supported
-    // long-term. Avoid use of this value for amp-analytics config attribute
-    // unless you plan to migrate before deprecation' #5761
+  // USE WITH CAUTION (unless told by Google Analytics representatives)
+  // googleanalytics-alpha configuration is not planned to be supported
+  // long-term. Avoid use of this value for amp-analytics config attribute
+  // unless you plan to migrate before deprecation' #5761
   'googleanalytics-alpha': {
     'vars': {
       'eventValue': '0',
