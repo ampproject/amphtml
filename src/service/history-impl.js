@@ -56,6 +56,9 @@ export class History {
     /** @private {!Array<!Function|undefined>} */
     this.stackOnPop_ = [];
 
+    /** @private {number} */
+    this.stackSize_ = 0;
+
     /**
      * @private {!Array<!{
      *   callback: function():!Promise,
@@ -81,7 +84,11 @@ export class History {
    */
   push(opt_onPop) {
     return this.enque_(() => {
+      if (this.stackSize_ >= this.maxStackSize_()) {
+        throw new Error('Maximum history size reached.');
+      }
       return this.binding_.push().then(stackIndex => {
+        this.stackSize_++;
         this.onStackIndexUpdated_(stackIndex);
         if (opt_onPop) {
           this.stackOnPop_[stackIndex] = opt_onPop;
@@ -101,6 +108,7 @@ export class History {
   pop(stateId) {
     return this.enque_(() => {
       return this.binding_.pop(stateId).then(stackIndex => {
+        this.stackSize_--;
         this.onStackIndexUpdated_(stackIndex);
       });
     }, 'pop');
@@ -121,6 +129,7 @@ export class History {
       // Pop the current state. The binding will ignore the request if
       // it cannot satisfy it.
       return this.binding_.pop(this.stackIndex_).then(stackIndex => {
+        this.stackSize_--;
         this.onStackIndexUpdated_(stackIndex);
       });
     }, 'goBack');
@@ -179,16 +188,10 @@ export class History {
       return;
     }
 
-    const maxStackSize = this.maxStackSize_();
     const toPop = [];
     for (let i = this.stackOnPop_.length - 1; i > this.stackIndex_; i--) {
       if (this.stackOnPop_[i]) {
-        if (toPop.length < maxStackSize) {
-          toPop.push(this.stackOnPop_[i]);
-        } else {
-          user().warn(TAG_, 'Maximum history stack size reached. ' +
-              'Dropping state with id: ' + i);
-        }
+        toPop.push(this.stackOnPop_[i]);
         this.stackOnPop_[i] = undefined;
       }
     }
