@@ -223,7 +223,8 @@ describe.skip('integration amp-carousel', () => {
     });
   });
 
-  describe.configure().run('when amp-carousel has explicit `controls` attribute', () => {
+  describe.configure().run('when amp-carousel has explicit' +
+      ' `controls` attribute', () => {
 
     it('should have visible buttons even when `amp-mode-mouse` ' +
        'is not on body', () => {
