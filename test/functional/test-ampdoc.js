@@ -201,6 +201,7 @@ describe('AmpDocSingle', () => {
 
   it('should return document as root', () => {
     expect(ampdoc.getRootNode()).to.equal(window.document);
+    expect(ampdoc.getHeadNode()).to.equal(window.document.head);
     expect(ampdoc.isSingleDoc()).to.be.true;
   });
 
@@ -305,6 +306,7 @@ describe('AmpDocShadow', () => {
       return;
     }
     expect(ampdoc.getRootNode()).to.equal(shadowRoot);
+    expect(ampdoc.getHeadNode()).to.equal(shadowRoot);
   });
 
   it('should find element by id', () => {
