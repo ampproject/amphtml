@@ -1,0 +1,170 @@
+<!doctype html>
+<html ⚡>
+<head>
+    <meta charset="utf-8">
+    <title>IMA examples</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+    <script async custom-element="amp-ima-video" src="https://cdn.ampproject.org/v0/amp-ima-video-0.1.js"></script>
+    <style amp-custom>
+    .spacer {
+        height: 100vh;
+     }
+    </style>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <style>
+    .player-wrapper {
+        width: 640px;
+        height: 360px;
+        max-width: 90%;
+    }
+    </style>
+</head>
+<body>
+    <h2>Pre-roll</h2>
+    <div class="player-wrapper">
+        <amp-ima-video id="preroll"
+            width="640" height="360" layout="responsive"
+            data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=&debug_experiment_id=1269069638"
+            data-poster="/examples/img/ima-poster.png">
+            <source src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4" type="video/mp4">
+        </amp-ima-video>
+    </div>
+    <h3>Actions</h3>
+    <button on="tap:preroll.play">Play</button>
+    <button on="tap:preroll.pause">Pause</button>
+    <button on="tap:preroll.mute">Mute</button>
+    <button on="tap:preroll.unmute">Unmute</button>
+    <button on="tap:preroll.fullscreen">Fullscreen</button>
+
+    <h2>Skippable Pre-roll</h2>
+    <div class="player-wrapper">
+        <amp-ima-video id="prerollskip"
+            width="640" height="360" layout="responsive"
+            data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator=&debug_experiment_id=1269069638"
+            data-poster="/examples/img/ima-poster.png">
+            <source src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4" type="video/mp4">
+        </amp-ima-video>
+    </div>
+    <h3>Actions</h3>
+    <button on="tap:prerollskip.play">Play</button>
+    <button on="tap:prerollskip.pause">Pause</button>
+    <button on="tap:prerollskip.mute">Mute</button>
+    <button on="tap:prerollskip.unmute">Unmute</button>
+    <button on="tap:prerollskip.fullscreen">Fullscreen</button>
+
+    <h2>Single redirect error</h2>
+    <div class="player-wrapper">
+        <amp-ima-video id="error"
+            width="640" height="360" layout="responsive"
+            data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dredirecterror&nofb=1&correlator=&debug_experiment_id=1269069638"
+            data-poster="/examples/img/ima-poster.png">
+            <source src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4" type="video/mp4">
+        </amp-ima-video>
+    </div>
+    <h3>Actions</h3>
+    <button on="tap:error.play">Play</button>
+    <button on="tap:error.pause">Pause</button>
+    <button on="tap:error.mute">Mute</button>
+    <button on="tap:error.unmute">Unmute</button>
+    <button on="tap:error.fullscreen">Fullscreen</button>
+
+    <h2>VMAP pre, mid post - single ads</h2>
+    <div class="player-wrapper">
+        <amp-ima-video id="adrulessingle"
+            width="640" height="360" layout="responsive"
+            data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator=&debug_experiment_id=1269069638"
+            data-poster="/examples/img/ima-poster.png">
+            <source src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4" type="video/mp4">
+        </amp-ima-video>
+    </div>
+    <h3>Actions</h3>
+    <button on="tap:adrulessingle.play">Play</button>
+    <button on="tap:adrulessingle.pause">Pause</button>
+    <button on="tap:adrulessingle.mute">Mute</button>
+    <button on="tap:adrulessingle.unmute">Unmute</button>
+    <button on="tap:adrulessingle.fullscreen">Fullscreen</button>
+
+    <h2>VMAP pre, mid pod, post + bumpers</h2>
+    <div class="player-wrapper">
+        <amp-ima-video id="adrulespodsbumpers"
+            width="640" height="360" layout="responsive"
+            data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostpodbumper&cmsid=496&vid=short_onecue&correlator=&debug_experiment_id=1269069638"
+            data-poster="/examples/img/ima-poster.png">
+            <source src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4" type="video/mp4">
+        </amp-ima-video>
+    </div>
+    <h3>Actions</h3>
+    <button on="tap:adrulespodsbumpers.play">Play</button>
+    <button on="tap:adrulespodsbumpers.pause">Pause</button>
+    <button on="tap:adrulespodsbumpers.mute">Mute</button>
+    <button on="tap:adrulespodsbumpers.unmute">Unmute</button>
+    <button on="tap:adrulespodsbumpers.fullscreen">Fullscreen</button>
+
+    <h2>VMAP Post</h2>
+    <div class="player-wrapper">
+        <amp-ima-video id="postroll"
+            width="640" height="360" layout="responsive"
+            data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpostonly&cmsid=496&vid=short_onecue&correlator=&debug_experiment_id=1269069638"
+            data-poster="/examples/img/ima-poster.png">
+            <source src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4" type="video/mp4">
+        </amp-ima-video>
+    </div>
+    <h3>Actions</h3>
+    <button on="tap:postroll.play">Play</button>
+    <button on="tap:postroll.pause">Pause</button>
+    <button on="tap:postroll.mute">Mute</button>
+    <button on="tap:postroll.unmute">Unmute</button>
+    <button on="tap:postroll.fullscreen">Fullscreen</button>
+
+    <h2>VPAID JS</h2>
+    <div class="player-wrapper">
+        <amp-ima-video id="vpaidjs"
+            width="640" height="360" layout="responsive"
+            data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinearvpaid2js&correlator=&debug_experiment_id=1269069638"
+            data-poster="/examples/img/ima-poster.png">
+            <source src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4" type="video/mp4">
+        </amp-ima-video>
+    </div>
+    <h3>Actions</h3>
+    <button on="tap:vpaidjs.play">Play</button>
+    <button on="tap:vpaidjs.pause">Pause</button>
+    <button on="tap:vpaidjs.mute">Mute</button>
+    <button on="tap:vpaidjs.unmute">Unmute</button>
+    <button on="tap:vpaidjs.fullscreen">Fullscreen</button>
+
+    <h2>AdSense</h2>
+    <div class="player-wrapper">
+        <amp-ima-video id="adsense"
+            width="640" height="360" layout="responsive"
+            data-tag="https://afimplex.appspot.com/nonskippable"
+            data-poster="/examples/img/ima-poster.png">
+            <source src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4" type="video/mp4">
+        </amp-ima-video>
+    </div>
+    <h3>Actions</h3>
+    <button on="tap:adsense.play">Play</button>
+    <button on="tap:adsense.pause">Pause</button>
+    <button on="tap:adsense.mute">Mute</button>
+    <button on="tap:adsense.unmute">Unmute</button>
+    <button on="tap:adsense.fullscreen">Fullscreen</button>
+
+    <h2>AdSense Skippable</h2>
+    <div class="player-wrapper">
+        <amp-ima-video id="adsenseskippable"
+            width="640" height="360" layout="responsive"
+            data-tag="https://afimplex.appspot.com/skippable_ad_green"
+            data-poster="/examples/img/ima-poster.png">
+            <source src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4" type="video/mp4">
+        </amp-ima-video>
+    </div>
+    <h3>Actions</h3>
+    <button on="tap:adsenseskippable.play">Play</button>
+    <button on="tap:adsenseskippable.pause">Pause</button>
+    <button on="tap:adsenseskippable.mute">Mute</button>
+    <button on="tap:adsenseskippable.unmute">Unmute</button>
+    <button on="tap:adsenseskippable.fullscreen">Fullscreen</button>
+</body>
+</html>

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {isDocumentReady} from './document-ready';
+import {onDocumentReady} from './document-ready';
+import {urls} from './config';
 
 /**
  * While browsers put a timeout on font downloads (3s by default,
@@ -37,6 +38,13 @@ import {isDocumentReady} from './document-ready';
  * @param {!Window} win
  */
 export function fontStylesheetTimeout(win) {
+  onDocumentReady(win.document, () => maybeTimeoutStyleSheets(win));
+}
+
+/**
+ * @param {!Window} win
+ */
+function maybeTimeoutStyleSheets(win) {
   let timeSinceResponseStart = 0;
   // If available, we start counting from the time the HTTP response
   // for the page started. The preload scanner should then quickly
@@ -49,20 +57,33 @@ export function fontStylesheetTimeout(win) {
 
   // Avoid timer dependency since this runs very early in execution.
   win.setTimeout(() => {
-    // We waited for the timeout period. There is no way to check whether
-    // the stylesheet actually loaded. For that reason we check whether
-    // the document is ready instead. The link tags block the readiness
-    // and they are the only external resource that does, so if the doc
-    // isn't ready yet it is probably the stylesheet's fault.
-    if (isDocumentReady(win.document)) {
+    const styleSheets = win.document.styleSheets;
+    if (!styleSheets) {
       return;
     }
-    // Alright we timed out.
-    // Find all stylesheets.
+    // Find all stylesheets that aren't loaded from the AMP CDN (those are
+    // critical if they are present).
     const styleLinkElements = win.document.querySelectorAll(
-        'link[rel~="stylesheet"]');
+        'link[rel~="stylesheet"]:not([href^="' + urls.cdn + '"])');
+    // Compare external sheets against elements of document.styleSheets.
+    // They do not appear in this list until they have been loaded.
+    const timedoutStyleSheets = [];
     for (let i = 0; i < styleLinkElements.length; i++) {
-      const existingLink = styleLinkElements[i];
+      const link = styleLinkElements[i];
+      let found = false;
+      for (let n = 0; n < styleSheets.length; n++) {
+        if (styleSheets[n].ownerNode == link) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        timedoutStyleSheets.push(link);
+      }
+    }
+
+    for (let i = 0; i < timedoutStyleSheets.length; i++) {
+      const existingLink = timedoutStyleSheets[i];
       const newLink = existingLink.cloneNode(/* not deep */ false);
       // To avoid blocking the render, we assign a non-matching media
       // attribute first…

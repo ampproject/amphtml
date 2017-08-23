@@ -34,15 +34,15 @@ function buildCodeownersFile(dirs) {
   const dirpaths = Object.keys(dirs);
   let codeowners = '';
   dirpaths.forEach(function(dirpath) {
-    codeowners += `${dirpath === '*' ? dirpath : `${dirpath}/*`} `;
+    codeowners += `${dirpath === '*' ? dirpath : `${dirpath}/`} `;
     dirs[dirpath].forEach(function(item, i, arr) {
       if (typeof item === 'string') {
         // Allow leading `@` to be optional
         codeowners += item.indexOf('@') !== 0 ? `@${item}` : item;
         let nextItem = arr[i + 1];
-        // Look ahead if we need to add a comma
+        // Look ahead if we need to add a space
         if (nextItem && typeof nextItem  === 'string') {
-          codeowners += ', ';
+          codeowners += ' ';
         }
       } else {
         codeowners += '\n';
@@ -64,7 +64,7 @@ function buildCodeownersFile(dirs) {
         let username = subItemUsername.indexOf('@') !== 0 ?
             `@${subItemUsername}` : subItemUsername;
         item[subItemUsername].forEach(function(pattern) {
-          codeowners += `${subItemUsername === '*' ? dirpath :
+          codeowners += `${dirpath === '*' ? pattern :
               `${dirpath}/${pattern}`} ${username}`;
         });
       }

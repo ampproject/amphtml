@@ -86,7 +86,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
         return install(this.win, src);
       });
     } else {
-      user().error(TAG,
+      this.user().error(TAG,
           'Did not install ServiceWorker because it does not ' +
           'match the current origin: ' + src);
     }
@@ -299,5 +299,6 @@ function install(win, src) {
 }
 
 
-AMP.registerElement('amp-install-serviceworker',
-    AmpInstallServiceWorker);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpInstallServiceWorker);
+});
