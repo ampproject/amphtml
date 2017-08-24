@@ -71,7 +71,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    win.AMP_MODE = {test: true};
     sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
         () => {
           return ['google'];
@@ -132,9 +131,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
       element = createAdsenseImplElement({'data-ad-client': 'ca-adsense'},
           doc, 'amp-embed');
       impl = new AmpAdNetworkAdsenseImpl(element);
-      // Force test mode to ensure isGoogleAdsA4AValidEnvironment returns
-      // true.
-      impl.win.AMP_MODE = {test: true};
       expect(impl.isValidElement()).to.be.true;
     });
   });
