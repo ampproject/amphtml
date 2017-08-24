@@ -16,7 +16,9 @@
 
 import {user} from '../../../src/log';
 import {FilterType} from './filters/filter';
-import {ANALYTICS_CONFIG} from '../../amp-analytics/0.1/vendors';
+import {
+  IframeTransportResponses,
+} from '../../amp-analytics/0.1/iframe-transport-responses';
 
 /**
  * @typedef {{
@@ -147,7 +149,9 @@ function assertTarget(name, target, config) {
           variable, pattern);
       const vendor = target.vars[variable]['vendorAnalyticsSource'];
       if (vendor) {
-        user().assert(ANALYTICS_CONFIG[vendor], 'Unknown vendor: ' + vendor);
+        user().assert(IframeTransportResponses &&
+            IframeTransportResponses.isValidVendor(vendor),
+            'Unknown vendor: ' + vendor);
         user().assert(
             target.vars[variable]['vendorAnalyticsResponseKey'],
             'Variable \'%s\': If vendorAnalyticsSource is defined then ' +

@@ -22,6 +22,7 @@ import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {IframeTransport} from './iframe-transport';
+import {IframeTransportResponses} from './iframe-transport-responses';
 import {Services} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
@@ -230,7 +231,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           // Add this response to the response map, for use by amp-ad-exit
           const frameType = this.element.getAttribute('type');
           const creativeUrl = /** @type {string} */ (this.win.document.baseURI);
-          const map = this.getAmpDoc().getIframeTransportResponses();
+          const map = IframeTransportResponses.getResponses();
           map[frameType] = map[frameType] || {};
           map[frameType][creativeUrl] = response;
         });
@@ -835,7 +836,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     return new ExpansionOptions(vars, opt_iterations, opt_noEncode);
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   // Register doc-service factory.

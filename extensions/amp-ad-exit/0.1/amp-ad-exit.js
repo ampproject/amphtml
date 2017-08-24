@@ -21,6 +21,9 @@ import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
+import {
+  IframeTransportResponses,
+} from '../../amp-analytics/0.1/iframe-transport-responses';
 
 const TAG = 'amp-ad-exit';
 
@@ -101,7 +104,8 @@ export class AmpAdExit extends AMP.BaseElement {
     };
     if (target.vars) {
       const uri = /** @type {string} */ (this.win.document.baseURI);
-      const all3pResponses = this.getAmpDoc().getIframeTransportResponses();
+      const all3pResponses = IframeTransportResponses.getResponses();
+
       for (const customVarName in target.vars) {
         if (customVarName[0] == '_') {
           const customVar =
@@ -255,7 +259,6 @@ export class AmpAdExit extends AMP.BaseElement {
     }
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAdExit);
