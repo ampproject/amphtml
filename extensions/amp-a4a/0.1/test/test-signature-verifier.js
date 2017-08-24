@@ -292,7 +292,8 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
                         verifier.verifyCreativeAndSignature(
                             'service-1', 'key-1', signature2, creative2, noop))
                         .to.eventually.equal(
-                        VerificationStatus.ERROR_KEY_NOT_FOUND);
+                            // eslint-disable-next-line indent
+                            VerificationStatus.ERROR_KEY_NOT_FOUND);
                   });
             })));
 
