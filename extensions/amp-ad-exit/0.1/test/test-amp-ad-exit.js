@@ -18,6 +18,9 @@ import '../amp-ad-exit';
 import * as sinon from 'sinon';
 import {ANALYTICS_CONFIG} from '../../../amp-analytics/0.1/vendors';
 import {toggleExperiment} from '../../../../src/experiments';
+import {
+  getService,
+} from '../../../../src/service';
 
 const TEST_3P_VENDOR = '3p-vendor';
 
@@ -101,21 +104,6 @@ const EXIT_CONFIG = {
   },
 };
 
-/**
- * Add a response
- * @param {!../../../../service/ampdoc-impl.AmpDoc} ampDoc
- * @param {!string} vendor The identifier for the third-party frame that
- * responded
- * @param {!string} creativeUrl The URL of the creative being responded to
- * @param {!Object<string,string>} response The response object sent from
- * the third-party vendor's iframe
- */
-function addToResponseMap(ampDoc, vendor, creativeUrl, response) {
-  const map = ampDoc.getIframeTransportResponses();
-  map[vendor] = map[vendor] || {};
-  map[vendor][creativeUrl] = response;
-}
-
 describes.realWin('amp-ad-exit', {
   amp: {
     ampdoc: 'single',
@@ -158,6 +146,22 @@ describes.realWin('amp-ad-exit', {
     win.document.body.appendChild(adDiv);
   }
 
+  /**
+   * Add a response
+   * @param {!../../../../service/ampdoc-impl.AmpDoc} ampDoc
+   * @param {!string} vendor The identifier for the third-party frame that
+   * responded
+   * @param {!string} creativeUrl The URL of the creative being responded to
+   * @param {!Object<string,string>} response The response object sent from
+   * the third-party vendor's iframe
+   */
+  function addToResponseMap(ampDoc, vendor, creativeUrl, response) {
+    const responseService = getService(ampDoc.win, 'iframe-transport-responses');
+    const map = responseService.getResponses();
+    map[vendor] = map[vendor] || {};
+    map[vendor][creativeUrl] = response;
+  }
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create({useFakeTimers: true});
     win = env.win;
@@ -165,7 +169,9 @@ describes.realWin('amp-ad-exit', {
     addAdDiv();
     // TEST_3P_VENDOR must be in ANALYTICS_CONFIG *before* makeElementWithConfig
     ANALYTICS_CONFIG[TEST_3P_VENDOR] = ANALYTICS_CONFIG[TEST_3P_VENDOR] || {
-      iframe: '/nowhere.html',
+      transport: {
+        iframe: '/nowhere.html',
+      },
     };
     return makeElementWithConfig(EXIT_CONFIG).then(el => {
       element = el;
