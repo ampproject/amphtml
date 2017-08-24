@@ -71,7 +71,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
     return fixture.awaitEvent(BindEvents.RESCAN_TEMPLATE, ++numTemplated);
   }
 
-  describe.configure().run('with [text] and [class]', () => {
+  describe('with [text] and [class]', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-basic.html');
     });
@@ -137,7 +137,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
     });
   });
 
-  describe.configure().run('with <input>', () => {
+  describe('with <input>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-basic.html');
     });
@@ -241,7 +241,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
     });
   });
 
-  describe.configure().run('with <amp-img>', () => {
+  describe('with <amp-img>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-basic.html');
     });
@@ -307,7 +307,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
     });
   });
 
-  describe.configure().run('with <amp-live-list>', () => {
+  describe('with <amp-live-list>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-live-list.html');
     });
@@ -361,7 +361,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
     });
   });
 
-  describe.configure().run('with <amp-selector>', () => {
+  describe('with <amp-selector>', () => {
     beforeEach(() => {
       // One <amp-selector> and three <amp-img> elements.
       return setupWithFixture('test/fixtures/bind-selector.html', 4);
@@ -406,7 +406,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
     });
   });
 
-  describe.configure().run('with <amp-video>', () => {
+  describe('with <amp-video>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-video.html');
     });
@@ -476,7 +476,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
     });
   });
 
-  describe.configure().run('with <amp-youtube>', () => {
+  describe('with <amp-youtube>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-youtube.html');
     });
@@ -492,7 +492,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
     });
   });
 
-  describe.configure().run('with <amp-brightcove>', () => {
+  describe('with <amp-brightcove>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-brightcove.html');
     });
@@ -509,7 +509,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
     });
   });
 
-  describe.configure().run('with <amp-iframe>', () => {
+  describe('with <amp-iframe>', () => {
     beforeEach(() => {
       // <amp-iframe> and its placeholder <amp-img>.
       return setupWithFixture('test/fixtures/bind-iframe.html', 2);
@@ -530,7 +530,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
     });
   });
 
-  describe.configure().run('with <amp-list>', () => {
+  describe('with <amp-list>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-list.html', 1);
     });
@@ -555,7 +555,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
     });
   });
 
-  describe.configure().run('with <amp-state>', () => {
+  describe('with <amp-state>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-basic.html');
     });
