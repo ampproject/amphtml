@@ -1178,8 +1178,7 @@ let DescendantConstraints;
  * @typedef {{ tagName: string,
  *             hasDescendantConstraintLists: boolean,
  *             childTagMatcher: ?ChildTagMatcher,
- *             referencePointMatcher: ?ReferencePointMatcher,
- *             dataAmpReportTestValue: ?string }}
+ *             referencePointMatcher: ?ReferencePointMatcher }}
  */
 let TagStackEntry;
 
@@ -1232,23 +1231,11 @@ class TagStack {
    * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
    */
   enterTag(tagName, context, result, encounteredAttrs) {
-    let maybeDataAmpReportTestValue = null;
-    if (!amp.validator.LIGHT) {
-      for (let i = 0; i < encounteredAttrs.length; i += 2) {
-        const attrName = encounteredAttrs[i];
-        const attrValue = encounteredAttrs[i + 1];
-        if (attrName === 'data-amp-report-test') {
-          maybeDataAmpReportTestValue = attrValue;
-          break;
-        }
-      }
-    }
     this.stack_.push({
       tagName: tagName,
       hasDescendantConstraintLists: false,
       childTagMatcher: null,
       referencePointMatcher: null,
-      dataAmpReportTestValue: maybeDataAmpReportTestValue
     });
   }
 
@@ -1356,17 +1343,6 @@ class TagStack {
   getCurrent() {
     goog.asserts.assert(this.stack_.length > 0, 'Empty tag stack.');
     return this.stack_[this.stack_.length - 1].tagName;
-  };
-
-  /**
-   * The value of the data-amp-report-test attribute for the current tag,
-   * which may be null.
-   * @return {?string}
-   */
-  getReportTestValue() {
-    if (this.stack_.length > 0)
-      return this.stack_[this.stack_.length - 1].dataAmpReportTestValue;
-    return null;
   };
 
   /**
@@ -2108,9 +2084,6 @@ class Context {
     error.line = lineCol.getLine();
     error.col = lineCol.getCol();
     error.specUrl = (specUrl === null ? '' : specUrl);
-    const reportTestValue = this.tagStack_.getReportTestValue();
-    if (reportTestValue !== null)
-      error.dataAmpReportTestValue = reportTestValue;
 
     this.addBuiltError(error, validationResult);
   }
