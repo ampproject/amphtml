@@ -3174,18 +3174,27 @@ function validateNoSiblingsAllowedTags(
   const tagStack = context.getTagStack();
 
   if (spec.siblingsDisallowed && context.numOfSiblings() > 0) {
-    context.addError(
+    if (amp.validator.LIGHT) {
+      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      return;
+    } else {
+      context.addError(
         amp.validator.ValidationError.Severity.ERROR,
         amp.validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS,
         context.getDocLocator(),
         /* params */
         [spec.tagName.toLowerCase(), tagStack.getParent().toLowerCase()],
         getTagSpecUrl(spec), validationResult);
+    }
   }
 
   if (tagStack.parentHasChildWithNoSiblingRule() &&
       context.numOfSiblings() > 0) {
-    context.addError(
+    if (amp.validator.LIGHT) {
+      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      return;
+    } else {
+      context.addError(
         amp.validator.ValidationError.Severity.ERROR,
         amp.validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS,
         tagStack.parentOnlyChildErrorLineCol(),
@@ -3195,6 +3204,7 @@ function validateNoSiblingsAllowedTags(
           tagStack.getParent().toLowerCase()
         ],
         getTagSpecUrl(spec), validationResult);
+    }
   }
 
   if (spec.siblingsDisallowed) {
