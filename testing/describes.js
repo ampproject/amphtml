@@ -797,9 +797,6 @@ class AmpFixture {
  */
 function configureAmpTestMode(win) {
   win.AMP_TEST = true;
-  win.AMP_CONFIG = {
-    canary: 'testSentinel',
-  };
 }
 
 
