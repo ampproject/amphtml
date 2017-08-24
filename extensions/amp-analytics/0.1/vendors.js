@@ -372,8 +372,15 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'requests': {
       'host': 'https://sb.scorecardresearch.com',
       'base': '${host}/b?',
-      'pageview': '${base}c1=2&c2=${c2}&rn=${random}&c8=${title}' +
-        '&c7=${canonicalUrl}&c9=${documentReferrer}&cs_c7amp=${ampdocUrl}',
+      'pageview': '${base}c1=2' +
+        '&c2=${c2}' +
+        '&cs_pv=${pageViewId}' +
+        '&c12=${clientId(comScore)}' +
+        '&rn=${random}' +
+        '&c8=${title}' +
+        '&c7=${canonicalUrl}' +
+        '&c9=${documentReferrer}' +
+        '&cs_c7amp=${ampdocUrl}',
     },
     'triggers': {
       'defaultPageview': {
