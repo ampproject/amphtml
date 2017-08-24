@@ -170,16 +170,6 @@ ValidatorTestCase.prototype.run = function() {
   assert.fail('', '', message, '');
 };
 
-describe('ValidatorTestdata', () => {
-  it('reports data-amp-report-test values', () => {
-    const result = amp.validator.validateString(
-        '<!doctype lemur data-amp-report-test="foo">');
-    assertStrictEqual(
-        result.status, amp.validator.ValidationResult.Status.FAIL);
-    assertStrictEqual('foo', result.errors[0].dataAmpReportTestValue);
-  });
-});
-
 /**
  * A strict comparison between two values.
  * Note: Unfortunately assert.strictEqual has some drawbacks, including that

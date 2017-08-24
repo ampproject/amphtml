@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 238
+min_validator_revision_required: 246
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 466
+spec_file_revision: 473
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
@@ -3771,6 +3771,7 @@ error_specificity { code: DEPRECATED_TAG specificity: 102 }
 error_specificity { code: DISALLOWED_MANUFACTURED_BODY specificity: 104 }
 error_specificity { code: DOCUMENT_TOO_COMPLEX specificity: 105 }
 error_specificity { code: INCORRECT_MIN_NUM_CHILD_TAGS specificity: 106 }
+error_specificity { code: TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS specificity: 107 }
 # Error formats
 error_formats {
   code: UNKNOWN_CODE
@@ -3994,6 +3995,11 @@ error_formats {
 error_formats {
   code: INCORRECT_MIN_NUM_CHILD_TAGS
   format: "Tag '%1' must have a minimum of %2 child tags - saw %3 child tags."
+}
+error_formats {
+  code: TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS
+  format: "Tag '%1' is not allowed to have any sibling tags ('%2' should only"
+  " have 1 child)."
 }
 error_formats {
   code: DISALLOWED_CHILD_TAG_NAME
