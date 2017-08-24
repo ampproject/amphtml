@@ -302,6 +302,7 @@ function createElementRules_() {
       'checked': null,
       'disabled': null,
       'height': null,
+      'hidden': null,
       'inputmode': null,
       'max': null,
       'maxlength': null,
