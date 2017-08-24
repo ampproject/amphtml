@@ -17,6 +17,7 @@
 import {
   setReportValiditySupportedForTesting,
   getFormValidator,
+  FormValidator,
   DefaultValidator,
   PolyfillDefaultValidator,
   AsYouGoValidator,
@@ -123,22 +124,78 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
   });
 
-  describe('DefaultValidator', () => {
-    it('should reports form validity', () => {
+  describe('FormValidator', () => {
+    let form, validator;
+
+    beforeEach(() => {
       const doc = env.win.document;
-      const form = getForm(doc);
-      const validator = new DefaultValidator(form);
+      form = getForm(doc);
+      validator = new FormValidator(form);
+    });
+
+    it('fireValidityEventIfNecessary()', () => {
+      sandbox.stub(form, 'checkValidity').returns(false);
+      sandbox.stub(form, 'dispatchEvent');
+
+      validator.fireValidityEventIfNecessary();
+      expect(form.dispatchEvent).calledOnce;
+      expect(form.dispatchEvent).calledWithMatch({type: 'invalid'});
+
+      // Should not fire if validity hasn't changed.
+      validator.fireValidityEventIfNecessary();
+      expect(form.dispatchEvent).calledOnce;
+
+      form.checkValidity.returns(true);
+
+      // Should fire now that validity has changed.
+      validator.fireValidityEventIfNecessary();
+      expect(form.dispatchEvent).calledTwice;
+      expect(form.dispatchEvent).calledWithMatch({type: 'valid'});
+
+      validator.fireValidityEventIfNecessary();
+      expect(form.dispatchEvent).calledTwice;
+    });
+  });
+
+  describe('DefaultValidator', () => {
+    let form, validator;
+
+    beforeEach(() => {
+      const doc = env.win.document;
+      form = getForm(doc);
+      validator = new DefaultValidator(form);
+    });
+
+    it('should reports form validity', () => {
       sandbox.stub(form, 'reportValidity');
       validator.report();
       expect(form.reportValidity).to.have.been.called;
     });
+
+    it('should fire events on report()', () => {
+      sandbox.stub(form, 'dispatchEvent');
+
+      validator.onBlur({target: form.elements[0]});
+      expect(form.dispatchEvent).notCalled;
+
+      validator.onInput({target: form.elements[0]});
+      expect(form.dispatchEvent).notCalled;
+
+      validator.report();
+      expect(form.dispatchEvent).calledOnce;
+    });
   });
 
   describe('PolyfillDefaultValidator', () => {
+    let doc, form, validator;
+
+    beforeEach(() => {
+      doc = env.win.document;
+      form = getForm(doc);
+      validator = new PolyfillDefaultValidator(form);
+    });
+
     it('should reports form validity', () => {
-      const doc = env.win.document;
-      const form = getForm(doc);
-      const validator = new PolyfillDefaultValidator(form);
       expect(validator.validationBubble_).to.be.instanceOf(ValidationBubble);
       sandbox.stub(validator.validationBubble_, 'show');
       validator.report();
@@ -149,18 +206,12 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
 
     it('should hide validation bubble onblur', () => {
-      const doc = env.win.document;
-      const form = getForm(doc);
-      const validator = new PolyfillDefaultValidator(form);
       sandbox.stub(validator.validationBubble_, 'hide');
       validator.onBlur();
       expect(validator.validationBubble_.hide).to.be.calledOnce;
     });
 
     it('should re-validate on input if is is actively reported', () => {
-      const doc = env.win.document;
-      const form = getForm(doc);
-      const validator = new PolyfillDefaultValidator(form);
       sandbox.stub(validator.validationBubble_, 'show');
       sandbox.stub(validator.validationBubble_, 'hide');
       validator.onInput({target: form.elements[0]});
@@ -182,14 +233,32 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(form.elements[0].hasAttribute('aria-invalid')).to.be.false;
       expect(validator.validationBubble_.hide).to.be.calledOnce;
     });
+
+    it('should fire events on report()', () => {
+      sandbox.stub(form, 'dispatchEvent');
+
+      validator.onBlur({target: form.elements[0]});
+      expect(form.dispatchEvent).notCalled;
+
+      validator.onInput({target: form.elements[0]});
+      expect(form.dispatchEvent).notCalled;
+
+      validator.report();
+      expect(form.dispatchEvent).calledOnce;
+    });
   });
 
   describe('ShowFirstOnSubmitValidator', () => {
+    let doc, form, validations, validator;
+
+    beforeEach(() => {
+      doc = env.win.document;
+      form = getForm(doc, true);
+      validations = doc.querySelectorAll('[visible-when-invalid]');
+      validator = new ShowFirstOnSubmitValidator(form);
+    });
+
     it('should show first validation message', () => {
-      const doc = env.win.document;
-      const form = getForm(doc, true);
-      const validations = doc.querySelectorAll('[visible-when-invalid]');
-      const validator = new ShowFirstOnSubmitValidator(form);
       validator.report();
       expect(doc.activeElement).to.equal(form.elements[0]);
       expect(validations[0].className).to.contain('visible');
@@ -198,10 +267,6 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
 
     it('should not report on interaction for non-active inputs', () => {
-      const doc = env.win.document;
-      const form = getForm(doc, true);
-      const validations = doc.querySelectorAll('[visible-when-invalid]');
-      const validator = new ShowFirstOnSubmitValidator(form);
       validator.onBlur({target: form.elements[0]});
       expect(doc.activeElement).to.not.equal(form.elements[0]);
       expect(validations[0].className).to.not.contain('visible');
@@ -215,10 +280,6 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
 
     it('should not report on interaction for non-active inputs', () => {
-      const doc = env.win.document;
-      const form = getForm(doc, true);
-      const validations = doc.querySelectorAll('[visible-when-invalid]');
-      const validator = new ShowFirstOnSubmitValidator(form);
       form.elements[0].validationMessage = 'Name is required';
       validator.report();
       expect(doc.activeElement).to.equal(form.elements[0]);
@@ -251,14 +312,32 @@ describes.realWin('form-validators', {amp: true}, env => {
           'Email format is wrong');
       expect(validations[2].textContent).to.equal(emailTypeValidationMsg);
     });
+
+    it('should fire events on report()', () => {
+      sandbox.stub(form, 'dispatchEvent');
+
+      validator.onBlur({target: form.elements[0]});
+      expect(form.dispatchEvent).notCalled;
+
+      validator.onInput({target: form.elements[0]});
+      expect(form.dispatchEvent).notCalled;
+
+      validator.report();
+      expect(form.dispatchEvent).calledOnce;
+    });
   });
 
   describe('ShowAllOnSubmitValidator', () => {
+    let doc, form, validations, validator;
+
+    beforeEach(() => {
+      doc = env.win.document;
+      form = getForm(doc, true);
+      validations = doc.querySelectorAll('[visible-when-invalid]');
+      validator = new ShowAllOnSubmitValidator(form);
+    });
+
     it('should show validation messages for all inputs', () => {
-      const doc = env.win.document;
-      const form = getForm(doc, true);
-      const validations = doc.querySelectorAll('[visible-when-invalid]');
-      const validator = new ShowAllOnSubmitValidator(form);
       validator.report();
       expect(doc.activeElement).to.equal(form.elements[0]);
       expect(validations[0].className).to.contain('visible');
@@ -267,10 +346,6 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
 
     it('should not report on interaction for non-active inputs', () => {
-      const doc = env.win.document;
-      const form = getForm(doc, true);
-      const validations = doc.querySelectorAll('[visible-when-invalid]');
-      const validator = new ShowAllOnSubmitValidator(form);
       validator.onBlur({target: form.elements[0]});
       expect(doc.activeElement).to.not.equal(form.elements[0]);
       expect(validations[0].className).to.not.contain('visible');
@@ -284,10 +359,6 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
 
     it('should re-validate and report on interaction for active inputs', () => {
-      const doc = env.win.document;
-      const form = getForm(doc, true);
-      const validations = doc.querySelectorAll('[visible-when-invalid]');
-      const validator = new ShowAllOnSubmitValidator(form);
       form.elements[0].validationMessage = 'Name is required';
       form.elements[1].validationMessage = 'Email is required';
       validator.report();
@@ -327,14 +398,32 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
     });
+
+    it('should fire events on report()', () => {
+      sandbox.stub(form, 'dispatchEvent');
+
+      validator.onBlur({target: form.elements[0]});
+      expect(form.dispatchEvent).notCalled;
+
+      validator.onInput({target: form.elements[0]});
+      expect(form.dispatchEvent).notCalled;
+
+      validator.report();
+      expect(form.dispatchEvent).calledOnce;
+    });
   });
 
   describe('AsYouGoValidator', () => {
+    let doc, form, validations, validator;
+
+    beforeEach(() => {
+      doc = env.win.document;
+      form = getForm(doc, true);
+      validations = doc.querySelectorAll('[visible-when-invalid]');
+      validator = new AsYouGoValidator(form);
+    });
+
     it('should report validation for input on interaction', () => {
-      const doc = env.win.document;
-      const form = getForm(doc, true);
-      const validations = doc.querySelectorAll('[visible-when-invalid]');
-      const validator = new AsYouGoValidator(form);
       form.elements[0].validationMessage = 'Name is required';
       form.elements[1].validationMessage = 'Email is required';
 
@@ -372,67 +461,94 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[2].className).to.not.contain('visible');
     });
 
-    describe('InteractAndSubmitValidator', () => {
-      it('should report validation for input on interaction', () => {
-        const doc = env.win.document;
-        const form = getForm(doc, true);
-        const validations = doc.querySelectorAll('[visible-when-invalid]');
-        const validator = new AsYouGoValidator(form);
-        form.elements[0].validationMessage = 'Name is required';
-        form.elements[1].validationMessage = 'Email is required';
+    it('should fire events on onBlur() and onInput()', () => {
+      sandbox.stub(validator, 'fireValidityEventIfNecessary');
 
-        validator.onBlur({target: form.elements[0]});
-        expect(validations[0].className).to.contain('visible');
-        expect(validations[1].className).to.not.contain('visible');
-        expect(validations[2].className).to.not.contain('visible');
+      validator.report();
+      expect(validator.fireValidityEventIfNecessary).notCalled;
 
-        form.elements[0].value = 'John Miller';
-        validator.onInput({target: form.elements[0]});
-        expect(validations[0].className).to.not.contain('visible');
-        expect(validations[1].className).to.not.contain('visible');
-        expect(validations[2].className).to.not.contain('visible');
+      validator.onBlur({target: form.elements[0]});
+      expect(validator.fireValidityEventIfNecessary).calledOnce;
 
-        validator.onInput({target: form.elements[1]});
-        expect(validations[0].className).to.not.contain('visible');
-        expect(validations[1].className).to.contain('visible');
-        expect(validations[2].className).to.not.contain('visible');
-        expect(validations[1].textContent).to.equal('Email is required');
-
-        form.elements[1].value = 'invalidemail';
-        form.elements[1].validationMessage = 'Email format is wrong';
-        validator.onInput({target: form.elements[1]});
-        expect(validations[0].className).to.not.contain('visible');
-        expect(validations[1].className).to.not.contain('visible');
-        expect(validations[2].className).to.contain('visible');
-        expect(validations[2].textContent).to.not.equal(
-            'Email format is wrong');
-        expect(validations[2].textContent).to.equal(emailTypeValidationMsg);
-
-        form.elements[1].value = 'valid@email.com';
-        validator.onBlur({target: form.elements[1]});
-        expect(validations[0].className).to.not.contain('visible');
-        expect(validations[1].className).to.not.contain('visible');
-        expect(validations[2].className).to.not.contain('visible');
-      });
-
-      it('should report on interaction for non-active inputs on submit', () => {
-        const doc = env.win.document;
-        const form = getForm(doc, true);
-        const validations = doc.querySelectorAll('[visible-when-invalid]');
-        const validator = new ShowAllOnSubmitValidator(form);
-        validator.report();
-
-        expect(doc.activeElement).to.equal(form.elements[0]);
-        expect(validations[0].className).to.contain('visible');
-        expect(validations[1].className).to.contain('visible');
-        expect(validations[2].className).to.not.contain('visible');
-
-        expect(doc.activeElement).to.equal(form.elements[0]);
-        expect(validations[0].className).to.contain('visible');
-        expect(validations[1].className).to.contain('visible');
-        expect(validations[2].className).to.not.contain('visible');
-      });
+      validator.onInput({target: form.elements[0]});
+      expect(validator.fireValidityEventIfNecessary).calledTwice;
     });
   });
 
+  describe('InteractAndSubmitValidator', () => {
+    let doc, form, validations, validator;
+
+    beforeEach(() => {
+      doc = env.win.document;
+      form = getForm(doc, true);
+      validations = doc.querySelectorAll('[visible-when-invalid]');
+      validator = new InteractAndSubmitValidator(form);
+    });
+
+    it('should report validation for input on interaction', () => {
+      form.elements[0].validationMessage = 'Name is required';
+      form.elements[1].validationMessage = 'Email is required';
+
+      validator.onBlur({target: form.elements[0]});
+      expect(validations[0].className).to.contain('visible');
+      expect(validations[1].className).to.not.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+
+      form.elements[0].value = 'John Miller';
+      validator.onInput({target: form.elements[0]});
+      expect(validations[0].className).to.not.contain('visible');
+      expect(validations[1].className).to.not.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+
+      validator.onInput({target: form.elements[1]});
+      expect(validations[0].className).to.not.contain('visible');
+      expect(validations[1].className).to.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+      expect(validations[1].textContent).to.equal('Email is required');
+
+      form.elements[1].value = 'invalidemail';
+      form.elements[1].validationMessage = 'Email format is wrong';
+      validator.onInput({target: form.elements[1]});
+      expect(validations[0].className).to.not.contain('visible');
+      expect(validations[1].className).to.not.contain('visible');
+      expect(validations[2].className).to.contain('visible');
+      expect(validations[2].textContent).to.not.equal(
+          'Email format is wrong');
+      expect(validations[2].textContent).to.equal(emailTypeValidationMsg);
+
+      form.elements[1].value = 'valid@email.com';
+      validator.onBlur({target: form.elements[1]});
+      expect(validations[0].className).to.not.contain('visible');
+      expect(validations[1].className).to.not.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+    });
+
+    it('should report on interaction for non-active inputs on submit', () => {
+      validator.report();
+
+      expect(doc.activeElement).to.equal(form.elements[0]);
+      expect(validations[0].className).to.contain('visible');
+      expect(validations[1].className).to.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+
+      expect(doc.activeElement).to.equal(form.elements[0]);
+      expect(validations[0].className).to.contain('visible');
+      expect(validations[1].className).to.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+    });
+
+    it('should fire events on report(), onBlur() and onInput()', () => {
+      sandbox.stub(validator, 'fireValidityEventIfNecessary');
+
+      validator.onBlur({target: form.elements[0]});
+      expect(validator.fireValidityEventIfNecessary).calledOnce;
+
+      validator.onInput({target: form.elements[0]});
+      expect(validator.fireValidityEventIfNecessary).calledTwice;
+
+      validator.report();
+      expect(validator.fireValidityEventIfNecessary).calledThrice;
+    });
+
+  });
 });
