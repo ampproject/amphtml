@@ -21,7 +21,6 @@ import {Services} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
 import {dev, user} from '../log';
 import {dict} from '../utils/object';
-import {findIndex} from '../utils/array';
 import {isProtocolValid} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
 import {tryFocus} from '../dom';
@@ -104,55 +103,40 @@ export class StandardActions {
    * @throws {Error} If action is not recognized.
    */
   handleAmpTarget(invocation, opt_actionIndex, opt_actionInfos) {
-    switch (invocation.method) {
+    const method = invocation.method;
+    switch (method) {
       case 'pushState':
-        this.handleAmpPushState_(invocation);
-        return;
       case 'setState':
         const actions = /** @type {!Array} */ (dev().assert(opt_actionInfos));
         const index = dev().assertNumber(opt_actionIndex);
-        // Only allow one AMP.setState action per event.
+        // Allow one amp-bind state action per event.
         for (let i = 0; i < index; i++) {
           const action = actions[i];
-          if (action.target == 'AMP' && action.method == 'setState') {
+          if (action.target == 'AMP' && action.method.indexOf('State') >= 0) {
             user().error('AMP-BIND', 'One state action allowed per event.');
             return null;
           }
         }
-        return this.handleAmpSetState_(invocation);
+        return this.handleAmpBindAction_(invocation, method == 'pushState');
+
       case 'navigateTo':
         return this.handleAmpNavigateTo_(invocation);
+
       case 'goBack':
         return this.handleAmpGoBack_(invocation);
+
       case 'print':
         return this.handleAmpPrint_(invocation);
     }
-    throw user().createError('Unknown AMP action ', invocation.method);
+    throw user().createError('Unknown AMP action ', method);
   }
 
   /**
    * @param {!./action-impl.ActionInvocation} invocation
-   * @return {?Promise}
+   * @param {boolean} isPushState
    * @private
    */
-  handleAmpSetState_(invocation) {
-    this.handleAmpBindAction_(invocation);
-  }
-
-  /**
-   * @param {!./action-impl.ActionInvocation} invocation
-   * @private
-   */
-  handleAmpPushState_(invocation) {
-    this.handleAmpBindAction_(invocation, /* opt_pushState */ true);
-  }
-
-  /**
-   * @param {!./action-impl.ActionInvocation} invocation
-   * @param {boolean=} opt_pushState
-   * @private
-   */
-  handleAmpBindAction_(invocation, opt_pushState) {
+  handleAmpBindAction_(invocation, isPushState) {
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return null;
     }
@@ -166,7 +150,7 @@ export class StandardActions {
         if (event && event.detail) {
           scope['event'] = event.detail;
         }
-        if (opt_pushState) {
+        if (isPushState) {
           bind.pushStateWithExpression(objectString, scope);
         } else {
           bind.setStateWithExpression(objectString, scope);

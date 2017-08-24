@@ -264,21 +264,17 @@ describes.sandboxed('StandardActions', {}, () => {
         },
       };
 
-      const args = {};
-      args[OBJECT_STRING_ARGS_KEY] = '{foo: 123}';
+      const args = {
+        [OBJECT_STRING_ARGS_KEY]: '{foo: 123}',
+      };
+      const target = ampdoc;
+      const satisfiesTrust = () => true;
+      const setState = {method: 'setState', args, target, satisfiesTrust};
+      const pushState = {method: 'pushState', args, target, satisfiesTrust};
 
-      standardActions.handleAmpTarget({
-        method: 'setState',
-        args,
-        target: ampdoc,
-        satisfiesTrust: () => true,
-      });
-      standardActions.handleAmpTarget({
-        method: 'pushState',
-        args,
-        target: ampdoc,
-        satisfiesTrust: () => true,
-      });
+      standardActions.handleAmpTarget(setState, 0, []);
+      standardActions.handleAmpTarget(pushState, 0, []);
+
       return Services.bindForDocOrNull(ampdoc).then(() => {
         expect(setStateSpy).to.be.calledOnce;
         expect(setStateSpy).to.be.calledWith('{foo: 123}');
