@@ -490,7 +490,6 @@ export class AmpAdXOriginIframeHandler {
     this.isInaboxPositionApiInit_ = true;
     // Send window scroll/resize event to viewport.
     this.unlisteners_.push(this.viewport_.onScroll(throttle(this.win_, () => {
-      console.log('viewport scroll!');
       this.getIframePositionPromise_().then(position => {
         this.inaboxPositionApi_.send(MessageType.POSITION, position);
       });

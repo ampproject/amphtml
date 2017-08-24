@@ -129,7 +129,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
     });
   });
 
-  describe('send-positions', () => {
+  describe('send-positions position observer callback', () => {
 
     let callback;
     let target;
@@ -141,6 +141,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
           target = tgt;
           callback = cb;
         },
+        getViewportRect() {},
       };
 
       iframe1.contentWindow.postMessage = postMessageSpy = sandbox.stub();
@@ -158,8 +159,9 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
       expect(target).to.equal(iframe1);
       callback({x: 1});
-      const message = postMessageSpy.getCall(0).args[0];
-      const targetOrigin = postMessageSpy.getCall(0).args[1];
+      expect(postMessageSpy).to.be.calledTwice;
+      const message = postMessageSpy.getCall(1).args[0];
+      const targetOrigin = postMessageSpy.getCall(1).args[1];
       expect(deserializeMessage(message)).to.deep.equal({
         type: 'position',
         sentinel: '0-123',
@@ -187,6 +189,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         }),
       });
 
+      postMessageSpy.reset();
       callback({x: 1});
       expect(postMessageSpy).to.be.calledOnce;
     });
