@@ -161,7 +161,8 @@ export class DoubleclickA4aEligibility {
    * @param {!Array} validBranches
    * @param {!string} experimentName}
    */
-  addAndForceExperiment(win, element, experimentId, validBranches, experimentName) {
+  addAndForceExperiment(win, element, experimentId, validBranches,
+                        experimentName) {
     if (experimentId) {
       addExperimentIdToElement(experimentId, element);
       forceExperimentBranch(win, experimentName, experimentId);
@@ -169,7 +170,8 @@ export class DoubleclickA4aEligibility {
     return experimentId ? !!validBranches.includes(experimentId) : true;
   }
 
-  selectExperiment(win, element, selectionBranches, validBranches, experimentName) {
+  selectExperiment(win, element, selectionBranches, validBranches,
+                   experimentName) {
     const experimentInfoMap =
         /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[experimentName] = {
