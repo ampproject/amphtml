@@ -40,7 +40,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
   function stubIframeClientMakeRequest(
       requestType, responseType, callback, opt_sync, opt_once) {
-    const methodName = opt_once ? 'makeRequestOnce' : 'makeRequest';
+    const methodName = opt_once ? 'requestOnce' : 'makeRequest';
 
     return sandbox./*OK*/stub(
         binding.iframeClient_, methodName, (req, res, cb) => {

@@ -70,7 +70,7 @@ export class IframeMessagingClient {
    * @param {function(Object)} callback The callback function to call
    *   when a message with type responseType is received.
    */
-  makeRequestOnce(requestType, responseType, callback) {
+  requestOnce(requestType, responseType, callback) {
     const unlisten = this.registerCallback(responseType, event => {
       unlisten();
       callback(event);
