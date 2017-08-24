@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 import '../amp-compare-slider';
 
 describes.realWin('amp-compare-slider', {
@@ -30,5 +31,6 @@ describes.realWin('amp-compare-slider', {
     element = win.document.createElement('amp-compare-slider');
     win.document.body.appendChild(element);
   });
+
 
 });

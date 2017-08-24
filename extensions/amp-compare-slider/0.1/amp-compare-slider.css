@@ -1,0 +1,76 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+amp-compare-slider {
+  position: initial !important;
+  max-width: 100%;
+}
+
+.topElementContainer {
+  z-index: 3;
+  width: 50%;
+}
+
+.topElementContainer,
+.bottomElementContainer {
+  height: 100%;
+  position: absolute;
+  left: 0px;
+  overflow: hidden;
+}
+
+.topElement {
+  width: 400px;
+}
+
+.topElement,
+.bottomElement{
+  height: 100%;
+}
+
+.bottomElement,
+.bottomElementContainer {
+  width: 100%;
+}
+
+.draggable {
+  width: 4px;
+  height: 100%;
+  position: absolute;
+  cursor: ew-resize;
+  background-color: black;
+  bottom: 0; 
+  top: 0;
+  right: 0;
+}
+
+.dragHint {
+  height: 25px;
+  background: black url("data:image/svg+xml;charset=utf-8,<svg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='32px' height='32px' viewBox='0 0 32 32' enable-background='new 0 0 32 32' xml:space='preserve'> <polygon fill='#FFFFFF' points='13,21 8,16 13,11'/> <polygon fill='#FFFFFF' points='19,11 24,16 19,21 '/></svg>") no-repeat center center;
+  width: 70px;
+  position: absolute;
+  right: 43%;
+  bottom: 50%;
+  margin: auto;
+  text-align: center;
+  display: inline-block;
+  z-index: 4;
+  border: 1px solid white;
+}
+
+i-amphtml-sizer {
+  padding: 0px !important;
+}
