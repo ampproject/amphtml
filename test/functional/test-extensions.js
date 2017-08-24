@@ -16,12 +16,11 @@
 
 import {AmpDocShadow} from '../../src/service/ampdoc-impl';
 import {BaseElement} from '../../src/base-element';
-import {ElementStub, setLoadingCheckForTests} from '../../src/element-stub';
+import {ElementStub} from '../../src/element-stub';
 import {
   Extensions,
   addDocFactoryToExtension,
   addElementToExtension,
-  addShadowRootFactoryToExtension,
   installExtensionsInShadowDoc,
   installExtensionsService,
   registerExtension,
@@ -213,7 +212,7 @@ describes.sandboxed('Extensions', {}, () => {
     it('should add shadow-root factory in registration', () => {
       const factory = function() {};
       registerExtension(extensions, 'amp-ext', () => {
-        addShadowRootFactoryToExtension(extensions, factory);
+        addShadowRootFactoryToExtension(extensions, factory);//QQQ:removed
       }, {});
 
       const holder = extensions.getExtensionHolder_('amp-ext');
@@ -224,7 +223,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should add shadow-root factory out of registration', () => {
       const factory = function() {};
-      addShadowRootFactoryToExtension(extensions, factory);
+      addShadowRootFactoryToExtension(extensions, factory);//QQQ:removed
 
       const holder = extensions.getExtensionHolder_('_UNKNOWN_');
       expect(holder.shadowRootFactories).to.exist;
@@ -239,9 +238,9 @@ describes.sandboxed('Extensions', {}, () => {
       };
       const factory3 = sandbox.spy();
       registerExtension(extensions, 'amp-ext', () => {
-        addShadowRootFactoryToExtension(extensions, factory1);
-        addShadowRootFactoryToExtension(extensions, factory2);
-        addShadowRootFactoryToExtension(extensions, factory3);
+        addShadowRootFactoryToExtension(extensions, factory1);//QQQ:removed
+        addShadowRootFactoryToExtension(extensions, factory2);//QQQ:removed
+        addShadowRootFactoryToExtension(extensions, factory3);//QQQ:removed
       }, {});
 
       // Install into shadow doc.
@@ -265,9 +264,9 @@ describes.sandboxed('Extensions', {}, () => {
       };
       const factory3 = sandbox.spy();
       registerExtension(extensions, 'amp-ext', () => {
-        addShadowRootFactoryToExtension(extensions, factory1);
-        addShadowRootFactoryToExtension(extensions, factory2);
-        addShadowRootFactoryToExtension(extensions, factory3);
+        addShadowRootFactoryToExtension(extensions, factory1);//QQQ:removed
+        addShadowRootFactoryToExtension(extensions, factory2);//QQQ:removed
+        addShadowRootFactoryToExtension(extensions, factory3);//QQQ:removed
       }, {});
 
       // Install into shadow doc.
@@ -294,7 +293,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
   });
 
-  describes.realWin('loadExtension', {
+  describes.realWin('preloadExtension', {
     amp: true,
     fakeRegisterElement: true,
   }, env => {
@@ -310,7 +309,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(0);
       expect(extensions.extensions_['amp-test']).to.be.undefined;
-      extensions.loadExtension('amp-test');
+      extensions.preloadExtension('amp-test');
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(1);
       expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
@@ -323,12 +322,12 @@ describes.sandboxed('Extensions', {}, () => {
           '[custom-element="amp-test"]')).to.have.length(0);
       expect(extensions.extensions_['amp-test']).to.be.undefined;
 
-      extensions.loadExtension('amp-test');
+      extensions.preloadExtension('amp-test');
       expect(doc.head.querySelectorAll('[custom-element="amp-test"]'))
           .to.have.length(1);
       expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
 
-      extensions.loadExtension('amp-test');
+      extensions.preloadExtension('amp-test');
       expect(doc.head.querySelectorAll('[custom-element="amp-test"]'))
           .to.have.length(1);
     });
@@ -343,7 +342,7 @@ describes.sandboxed('Extensions', {}, () => {
           '[custom-element="amp-test"]')).to.have.length(1);
       expect(extensions.extensions_['amp-test']).to.be.undefined;
 
-      extensions.loadExtension('amp-test');
+      extensions.preloadExtension('amp-test');
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(1);
       expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
@@ -354,7 +353,7 @@ describes.sandboxed('Extensions', {}, () => {
     it('should give script correct attributes', () => {
       expect(doc.head.querySelectorAll('[custom-element="amp-test"]'))
           .to.have.length(0);
-      extensions.loadExtension('amp-test');
+      extensions.preloadExtension('amp-test');
       expect(doc.head.querySelectorAll('[custom-element="amp-test"]'))
           .to.have.length(1);
 
@@ -368,7 +367,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(doc.head.querySelectorAll('[custom-element="amp-embed"]'))
           .to.have.length(0);
 
-      extensions.loadExtension('amp-embed');
+      extensions.preloadExtension('amp-embed');
       expect(doc.head.querySelectorAll('[custom-element="amp-ad"]'))
           .to.have.length(1);
       expect(extensions.extensions_['amp-ad'].scriptPresent).to.be.true;
@@ -466,8 +465,8 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install extensions', () => {
-      setLoadingCheckForTests('amp-test');
-      const stub = sandbox.stub(extensions, 'loadExtension', extensionId => {
+      setLoadingCheckForTests('amp-test');//QQQQ:has been removed
+      const stub = sandbox.stub(extensions, 'preloadExtension', extensionId => {
         return Promise.resolve().then(() => {
           registerExtension(extensions, extensionId, AMP => {
             AMP.registerElement(extensionId, AmpTest);
@@ -509,7 +508,7 @@ describes.sandboxed('Extensions', {}, () => {
       registerServiceBuilder(parentWin, 'fake-service-bar',
           () => fakeServiceBar, /* opt_instantiate */ true);
 
-      sandbox.stub(extensions, 'loadExtension', extensionId => {
+      sandbox.stub(extensions, 'preloadExtension', extensionId => {
         return Promise.resolve().then(() => {
           registerExtension(extensions, extensionId, AMP => {
             AMP.registerElement(extensionId, AmpTest);
@@ -532,7 +531,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should call pre-install callback before other installs', () => {
-      const stub = sandbox.stub(extensions, 'loadExtension', extensionId => {
+      const stub = sandbox.stub(extensions, 'preloadExtension', extensionId => {
         registerExtension(extensions, extensionId, AMP => {
           AMP.registerElement(extensionId, AmpTest);
         }, parentWin.AMP);

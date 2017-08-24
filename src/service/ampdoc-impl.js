@@ -34,8 +34,8 @@ const AMPDOC_PROP = '__AMPDOC';
  * @param {string} extensionId
  * @restricted
  */
-export function addDeclaredExtension(ampdoc, extensionId) {
-  ampdoc.addDeclaredExtension_(extensionId);
+export function declareExtension(ampdoc, extensionId) {
+  ampdoc.declareExtension_(extensionId);
 }
 
 
@@ -240,7 +240,7 @@ export class AmpDoc {
    * @private
    * @restricted
    */
-  addDeclaredExtension_(extensionId) {
+  declareExtension_(extensionId) {
     if (this.declaredExtensions_.indexOf(extensionId) == -1) {
       this.declaredExtensions_.push(extensionId);
     }

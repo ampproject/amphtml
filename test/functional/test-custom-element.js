@@ -15,9 +15,10 @@
  */
 
 import * as lolex from 'lolex';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
-import {ElementStub, setLoadingCheckForTests} from '../../src/element-stub';
+import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
@@ -31,7 +32,7 @@ import {
   registerElement,
   resetScheduledElementForTesting,
   stubElementIfNotKnown,
-  stubElements,
+  stubElementsForDoc,
   upgradeOrRegisterElement,
 } from '../../src/custom-element';
 
@@ -43,7 +44,7 @@ describes.realWin('CustomElement register', {amp: 1}, env => {
 
   beforeEach(() => {
     win = env.win;
-    setLoadingCheckForTests('amp-element1');
+    setLoadingCheckForTests('amp-element1');//QQQ: has been removed
     installResourcesServiceForDoc(window.document);
   });
 
@@ -1929,6 +1930,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     let win;
     let elem1;
     let setIntervalCallback;
+    let ampdoc;
 
     beforeEach(() => {
       elements = [];
@@ -1974,6 +1976,8 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       };
       doc.defaultView = win;
 
+      ampdoc = new AmpDocSingle(win);
+
       installDocumentStateService(win);
     });
 
@@ -1983,7 +1987,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     });
 
     it('should be stub elements when body available', () => {
-      stubElements(win);
+      stubElementsForDoc(ampdoc);
 
       expect(win.ampExtendedElements).to.exist;
       expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
@@ -1996,7 +2000,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     it('should repeat stubbing when body is not available', () => {
       doc.body = null;  // Body not available
 
-      stubElements(win);
+      stubElementsForDoc(ampdoc);
 
       expect(win.ampExtendedElements).to.exist;
       expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);

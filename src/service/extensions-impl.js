@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {addDeclaredExtension} from './ampdoc-impl';
+import {declareExtension} from './ampdoc-impl';
 import {
   adoptServiceForEmbed,
   adoptServiceForEmbedIfEmbeddable,
@@ -422,7 +422,7 @@ export class Extensions {
   installExtensionInDoc_(ampdoc, extensionId) {
     const holder = this.getExtensionHolder_(extensionId);
     return this.waitFor_(holder).then(() => {
-      addDeclaredExtension(ampdoc, extensionId);
+      declareExtension(ampdoc, extensionId);
       holder.docFactories.forEach(factory => {
         try {
           factory(ampdoc);

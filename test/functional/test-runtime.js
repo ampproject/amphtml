@@ -408,7 +408,7 @@ describes.fakeWin('runtime', {
       progress += 'not expected 2';
     }, 'version123'));
     // Add legacy element (5) and eagarly ask for its load as ElementStub does.
-    Services.extensionsFor(win).loadExtension('amp-test-element5', false);
+    Services.extensionsFor(win).preloadExtension('amp-test-element5', false);
     win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '5';
@@ -957,7 +957,7 @@ describes.realWin('runtime multidoc', {
     });
 
     it('should ignore runtime extension', () => {
-      extensionsMock.expects('loadExtension').never();
+      extensionsMock.expects('preloadExtension').never();
 
       const scriptEl = win.document.createElement('script');
       scriptEl.setAttribute('src', 'https://cdn.ampproject.org/v0.js');
@@ -966,7 +966,7 @@ describes.realWin('runtime multidoc', {
     });
 
     it('should ignore unknown script', () => {
-      extensionsMock.expects('loadExtension').never();
+      extensionsMock.expects('preloadExtension').never();
 
       const scriptEl = win.document.createElement('script');
       scriptEl.setAttribute('data-id', 'unknown1');
@@ -980,7 +980,7 @@ describes.realWin('runtime multidoc', {
     });
 
     it('should import extension element', () => {
-      extensionsMock.expects('loadExtension')
+      extensionsMock.expects('preloadExtension')
           .withExactArgs('amp-ext1')
           .returns(Promise.resolve({
             elements: {
@@ -999,7 +999,7 @@ describes.realWin('runtime multidoc', {
     });
 
     it('should import extension template', () => {
-      extensionsMock.expects('loadExtension')
+      extensionsMock.expects('preloadExtension')
           .withExactArgs('amp-ext1')
           .returns(Promise.resolve({elements: {}}))
           .once();
@@ -1281,7 +1281,7 @@ describes.realWin('runtime multidoc', {
     it('should ignore runtime extension', () => {
       shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
       writer = shadowDoc.writer;
-      extensionsMock.expects('loadExtension').never();
+      extensionsMock.expects('preloadExtension').never();
       writer.write(
           '<script src="https://cdn.ampproject.org/v0.js"></script>');
       writer.write('<body>');
@@ -1291,7 +1291,7 @@ describes.realWin('runtime multidoc', {
     it('should ignore unknown script', () => {
       shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
       writer = shadowDoc.writer;
-      extensionsMock.expects('loadExtension').never();
+      extensionsMock.expects('preloadExtension').never();
       writer.write(
           '<script data-id="unknown1"' +
           ' src="https://cdn.ampproject.org/other.js"></script>');
@@ -1307,7 +1307,7 @@ describes.realWin('runtime multidoc', {
     it('should import extension element', () => {
       shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
       writer = shadowDoc.writer;
-      extensionsMock.expects('loadExtension')
+      extensionsMock.expects('preloadExtension')
           .withExactArgs('amp-ext1')
           .returns(Promise.resolve({
             elements: {
@@ -1327,7 +1327,7 @@ describes.realWin('runtime multidoc', {
     it('should import extension template', () => {
       shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
       writer = shadowDoc.writer;
-      extensionsMock.expects('loadExtension')
+      extensionsMock.expects('preloadExtension')
           .withExactArgs('amp-ext1')
           .returns(Promise.resolve({elements: {}}))
           .once();

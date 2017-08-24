@@ -22,7 +22,7 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
 import {ElementStub, stubbedElements} from './element-stub';
 import {Services} from './services';
 import {Signals} from './utils/signals';
-import {addDeclaredExtension} from './service/ampdoc-impl';
+import {declareExtension} from './service/ampdoc-impl';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
 import {
@@ -164,7 +164,7 @@ export function stubElementsForDoc(ampdoc) {
   const list = ampdoc.getHeadNode().querySelectorAll('script[custom-element]');
   for (let i = 0; i < list.length; i++) {
     const name = list[i].getAttribute('custom-element');
-    addDeclaredExtension(ampdoc, name);
+    declareExtension(ampdoc, name);
     stubElementIfNotKnown(ampdoc.win, name);
   }
 }
