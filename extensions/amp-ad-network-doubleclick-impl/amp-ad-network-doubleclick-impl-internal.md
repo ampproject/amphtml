@@ -125,3 +125,16 @@ Refresh is currently not supported for SRA enabled slots. If a slot is enabled f
 #### AMP Ad Container Compatibility
 
 The only AMP ad containers in which refresh is currently supported are amp-sticky-ad and amp-carousel container types.
+
+
+### SRA: Single Request Architecture (alpha)
+Enabling SRA allows a publisher to make a single request for all ad slots on the AMP page which gives a publisher the ability to do roadblocking and competitive exclusions. This very similar to the behavior achieved on non-AMP pages when using [this](https://developers.google.com/doubleclick-gpt/reference#googletag.PubAdsService_enableSingleRequest) method in GPT.
+
+In order to use this feature, add the following meta tag to the head of the AMP page:
+`<meta name=”amp-ad-doubleclick-sra”/>`
+
+Note that SRA is not available in the following cases:
+1. If the AMP page is not served from a valid AMP cache 
+2. If publishers use [`remote.html`](https://github.com/ampproject/amphtml/blob/master/ads/README.md#1st-party-cookies)
+3. The ad refresh feature is incompatible with SRA
+4. Publishers don't use the amp-ad attribute [`useSameDomainRenderingUntilDeprecated`](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md#temporary-use-of-usesamedomainrenderinguntildeprecated)
