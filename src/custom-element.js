@@ -1908,7 +1908,7 @@ export function markElementScheduledForTesting(win, elementName) {
  * @param {string} elementName Name of an extended custom element.
  * @visibleForTesting
  */
-export function resetScheduledElementForTesting(win, elementName) {
+export function resetScheduledElementForTesting(win, elementName) {//QQQ: still needed?
   if (win.ampExtendedElements) {
     delete win.ampExtendedElements[elementName];
   }
@@ -1929,7 +1929,7 @@ export function getElementClassForTesting(win, elementName) {
 /** @param {!Element} element */
 function assertNotTemplate(element) {
   dev().assert(!element.isInTemplate_, 'Must never be called in template');
-};
+}
 
 /**
  * @param {!Element} element
