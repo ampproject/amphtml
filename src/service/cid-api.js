@@ -22,9 +22,6 @@ import {isProxyOrigin} from '../url';
 import {WindowInterface} from '../window-interface';
 
 const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
-const API_KEYS = {
-  'googleanalytics': 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
-};
 
 const TAG = 'GoogleCidApi';
 const AMP_TOKEN = 'AMP_TOKEN';
@@ -64,16 +61,11 @@ export class GoogleCidApi {
   }
 
   /**
-   * @param {string} apiClient
+   * @param {string} apiKey
    * @param {string} scope
    * @return {!Promise<?string>}
    */
-  getScopedCid(apiClient, scope) {
-    const url = this.getUrl_(apiClient);
-    if (!url) {
-      return Promise.resolve(/** @type {?string} */(null));
-    }
-
+  getScopedCid(apiKey, scope) {
     if (this.cidPromise_[scope]) {
       return this.cidPromise_[scope];
     }
@@ -100,6 +92,7 @@ export class GoogleCidApi {
       if (!token || this.isStatusToken_(token)) {
         this.persistToken_(TokenStatus.RETRIEVING, TIMEOUT);
       }
+      const url = GOOGLE_API_URL + apiKey;
       return this.fetchCid_(dev().assertString(url), scope, token)
           .then(this.handleResponse_.bind(this))
           .catch(e => {
@@ -150,18 +143,6 @@ export class GoogleCidApi {
       this.persistToken_(TokenStatus.NOT_FOUND, HOUR);
       return null;
     }
-  }
-
-  /**
-   * @param {string} apiClient
-   * @return {?string}
-   */
-  getUrl_(apiClient) {
-    const key = API_KEYS[apiClient];
-    if (!key) {
-      return null;
-    }
-    return GOOGLE_API_URL + key;
   }
 
   /**
