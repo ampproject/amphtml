@@ -177,28 +177,29 @@ export function groupAmpAdsByType(win, type, groupFn) {
 
 /**
  * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} doc
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {number} startTime
  * @param {string=} output default is 'html'
  * @return {!Promise<!Object<string,null|number|string>>}
  */
-export function googlePageParameters(win, doc, startTime, output = 'html') {
-  const referrerPromise = Services.viewerForDoc(doc).getReferrerUrl();
-  return getOrCreateAdCid(doc, 'AMP_ECID_GOOGLE', '_ga')
+export function googlePageParameters(
+    win, nodeOrDoc, startTime, output = 'html') {
+  const referrerPromise = Services.viewerForDoc(nodeOrDoc).getReferrerUrl();
+  return getOrCreateAdCid(nodeOrDoc, 'AMP_ECID_GOOGLE', '_ga')
       .then(clientId => referrerPromise.then(referrer => {
-        const documentInfo = Services.documentInfoForDoc(doc);
+        const documentInfo = Services.documentInfoForDoc(nodeOrDoc);
         // Read by GPT for GA/GPT integration.
         win.gaGlobal = win.gaGlobal ||
         {cid: clientId, hid: documentInfo.pageViewId};
         const screen = win.screen;
-        const viewport = Services.viewportForDoc(doc);
+        const viewport = Services.viewportForDoc(nodeOrDoc);
         const viewportRect = viewport.getRect();
         const viewportSize = viewport.getSize();
         return {
           'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
           'd_imp': '1',
-          'c': getCorrelator(win, clientId),
+          'c': getCorrelator(win, clientId, nodeOrDoc),
           'dt': startTime,
           output,
           'biw': viewportRect.width,
