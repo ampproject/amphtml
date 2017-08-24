@@ -305,12 +305,12 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
           viewportRect: layoutRectLtwh(1, 1, 1, 1),
         }), undefined, true);
     let rect2 = null;
-    binding.getElementRectAsync(el2).then(rect => {
+    binding.getLayoutRectAsync(el2).then(rect => {
       rect2 = rect;
     });
-    return binding.getElementRectAsync(el).then(rect => {
-      expect(rect).to.jsonEqual(layoutRectLtwh(20, 40, 10, 10));
-      expect(rect2).to.jsonEqual(layoutRectLtwh(40, 60, 15, 15));
+    return binding.getLayoutRectAsync(el).then(rect => {
+      expect(rect).to.jsonEqual(layoutRectLtwh(21, 41, 10, 10));
+      expect(rect2).to.jsonEqual(layoutRectLtwh(41, 61, 15, 15));
       expect(requestSpy).to.be.calledOnce;
     });
   });

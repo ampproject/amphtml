@@ -456,7 +456,7 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   getIframePositionPromise_() {
-    return this.viewport_.getElementRectAsync(
+    return this.viewport_.getBoundingRectAsync(
         dev().assertElement(this.iframe)).then(position => {
           const viewport = this.viewport_.getRect();
           return dict({

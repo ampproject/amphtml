@@ -261,14 +261,18 @@ export class ViewportBindingInabox {
   }
 
   /** @override */
-  getElementRectAsync(el) {
+  getLayoutRectAsync(el) {
     if (!this.requestPositionPromise_) {
       this.requestPositionPromise_ = new Promise(resolve => {
         this.iframeClient_.requestOnce(
             MessageType.SEND_POSITIONS, MessageType.POSITION,
             data => {
               this.requestPositionPromise_ = null;
-              resolve(data.targetRect);
+              const parentLayoutRect = moveLayoutRect(
+                  data.targetRect,
+                  data.viewportRect.left,
+                  data.viewportRect.top);
+              resolve(parentLayoutRect);
             }
         );
       });
@@ -278,15 +282,12 @@ export class ViewportBindingInabox {
       return el./*OK*/getBoundingClientRect();
     });
 
-    const promise =
-        Promise.all([elPosPromise, this.requestPositionPromise_]).then(
-            values => {
-              const box = values[0];
-              const iframeBox = values[1];
-              return moveLayoutRect(box, iframeBox.left, iframeBox.top);
-            });
-
-    return Services.timerFor(this.win).timeoutPromise(150, promise);
+    return Promise.all([elPosPromise, this.requestPositionPromise_]).then(
+        values => {
+          const box = values[0];
+          const iframeBox = values[1];
+          return moveLayoutRect(box, iframeBox.left, iframeBox.top);
+        });
   }
 
   /**
