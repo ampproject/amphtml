@@ -285,10 +285,10 @@ class PreconnectService {
       const url = origin +
           '/amp_preconnect_polyfill_404_or_other_error_expected.' +
           '_Do_not_worry_about_it?' + cacheBust;
-      // We use an XHR without withCredentials(true), so we do not send cookies
-      // to the host and the host cannot set cookies.
       const xhr = new XMLHttpRequest();
       xhr.open('HEAD', url, true);
+      // We only support credentialed preconnect for now.
+      xhr.withCredentials = true;
 
       xhr.send();
     });
