@@ -44,7 +44,7 @@ limitations under the License.
 
 - `data-sid`
 
-## optional demography parameters
+### Optional demography parameters
 
 - `data-demo-Gender`
 - `data-demo-Country`
