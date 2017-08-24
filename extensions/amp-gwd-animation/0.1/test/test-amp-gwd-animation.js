@@ -18,9 +18,9 @@ import {Services} from '../../../../src/services';
 import {adopt} from '../../../../src/runtime';
 import {getServiceForDoc} from '../../../../src/service';
 import {
-  EXPERIMENT as AmpGwdAnimationExperimentName,
+  EXPERIMENT,
   GWD_PAGEDECK_ID,
-  TAG as AmpGwdAnimationTagName,
+  TAG,
   AmpGwdAnimation,
   insertEventActionBinding,
 } from '../amp-gwd-animation';
@@ -43,7 +43,7 @@ describes.sandboxed('AMP GWD runtime', {}, () => {
    */
   function createGwdAnimationElement(ampdoc, attrs) {
     const element =
-        ampdoc.getBody().ownerDocument.createElement(AmpGwdAnimationTagName);
+        ampdoc.getBody().ownerDocument.createElement(TAG);
     for (const attr in attrs) {
       element.setAttribute(attr, attrs[attr]);
     }
@@ -87,7 +87,7 @@ describes.sandboxed('AMP GWD runtime', {}, () => {
 
       beforeEach(() => {
         // TODO(sklobovskaya): Remove experiment guard.
-        toggleExperiment(env.win, AmpGwdAnimationExperimentName, true);
+        toggleExperiment(env.win, EXPERIMENT, true);
 
         ampdoc = env.ampdoc;
         ampdoc.getBody().innerHTML =
