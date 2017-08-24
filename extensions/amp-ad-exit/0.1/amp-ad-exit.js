@@ -18,6 +18,9 @@ import {makeClickDelaySpec} from './filters/click-delay';
 import {assertConfig, TransportMode} from './config';
 import {createFilter} from './filters/factory';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
+import {
+  getService,
+} from '../../../src/service';
 import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
@@ -101,7 +104,10 @@ export class AmpAdExit extends AMP.BaseElement {
     };
     if (target.vars) {
       const uri = /** @type {string} */ (this.win.document.baseURI);
-      const all3pResponses = this.getAmpDoc().getIframeTransportResponses();
+      const responseService =
+          getService(this.getAmpDoc().win, 'iframe-transport-responses');
+      const all3pResponses = responseService.getResponses();
+
       for (const customVarName in target.vars) {
         if (customVarName[0] == '_') {
           const customVar =
@@ -255,7 +261,6 @@ export class AmpAdExit extends AMP.BaseElement {
     }
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAdExit);
