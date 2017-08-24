@@ -1908,7 +1908,7 @@ export function markElementScheduledForTesting(win, elementName) {
  * @param {string} elementName Name of an extended custom element.
  * @visibleForTesting
  */
-export function resetScheduledElementForTesting(win, elementName) {//QQQ: still needed?
+export function resetScheduledElementForTesting(win, elementName) {
   if (win.ampExtendedElements) {
     delete win.ampExtendedElements[elementName];
   }
