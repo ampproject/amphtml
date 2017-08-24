@@ -177,10 +177,9 @@ export class Cid {
     /** @const {!Location} */
     const url = parseUrl(this.ampdoc.win.location.href);
     if (!isProxyOrigin(url)) {
-      const apiClient =
-          ViewerCidApi.scopeOptedInForCidApi(this.ampdoc.win, scope);
-      if (apiClient) {
-        return this.cidApi_.getScopedCid(apiClient, scope).then(scopedCid => {
+      const apiKey = this.viewerCidApi_.isScopeOptedIn(scope);
+      if (apiKey) {
+        return this.cidApi_.getScopedCid(apiKey, scope).then(scopedCid => {
           if (scopedCid == TokenStatus.OPT_OUT) {
             return null;
           }
