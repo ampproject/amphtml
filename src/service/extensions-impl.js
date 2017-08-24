@@ -359,6 +359,7 @@ export class Extensions {
    * Adds `name` to the list of services registered by the current extension.
    * @param {string} name
    * @param {function(new:Object, !./ampdoc-impl.AmpDoc)} implementationClass
+   * @private
    */
   addService_(name, implementationClass) {
     const holder = this.getCurrentExtensionHolder_();

@@ -470,6 +470,7 @@ describes.fakeWin('runtime', {
       adopt(win);
       ext.installExtensionsService(win);
       extensions = Services.extensionsFor(win);
+      const extel = {}; // QQQ
       registerStub = sandbox.stub(extel, 'registerExtendedElement');
     });
 
@@ -626,6 +627,7 @@ describes.fakeWin('runtime', {
       adoptShadowMode(win);
       ext.installExtensionsService(win);
       extensions = Services.extensionsFor(win);
+      const extel = {}; // QQQ
       registerStub = sandbox.stub(extel, 'registerExtendedElement');
     });
 
