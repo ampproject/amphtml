@@ -24,10 +24,10 @@ import {dev} from '../log';
 import {dict, map} from '../utils/object';
 import {Services} from '../services';
 
-/** @private @const */
+/** @private @const {string} */
 const TAG_ = 'History';
 
-/** @private @const */
+/** @private @const {string} */
 const HISTORY_PROP_ = 'AMP.History';
 
 /** @typedef {number} */
