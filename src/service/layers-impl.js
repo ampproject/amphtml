@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {layoutRectLtwh} from '../layout-rect';
+import {dev} from '../log';
+import {filterSplice} from '../utils/array';
+import {Services} from '../services';
+
 const LAYOUT_PROP = '__AMP_LAYOUT';
 const LAYOUT_LAYER_PROP = '__AMP_LAYER';
 
@@ -67,10 +72,12 @@ function PositionLt(left, top) {
 
 export class LayoutLayers {
   constructor(ampdoc) {
-    this.win = ampdoc.win;
+    const {win} = ampdoc;
+
+    this.win = win;
 
     /** @const {!Document} */
-    this.document_ = this.win.document;
+    this.document_ = win.document;
 
     /** @const {!Array<!LayoutLayer>} */
     this.layers_ = [];
@@ -79,7 +86,7 @@ export class LayoutLayers {
 
     this.document_.addEventListener('scroll', event => {
       this.scrolled_(event.target || this.getScrollingElement_());
-    }, { capture: true, passive: true });
+    }, {capture: true, passive: true});
     win.addEventListener('resize', () => this.onResize_());
   }
 
@@ -105,25 +112,19 @@ export class LayoutLayers {
    * @return {!LayoutRectDef}
    */
   calcIntersectionWithParent(element, parent, opt_expand) {
-    const { left, top } = LayoutElement.getScrolledPosition(element, parent);
+    const {left, top} = LayoutElement.getScrolledPosition(element, parent);
     const size = LayoutElement.getSize(element);
     const parentSize = LayoutElement.getSize(parent);
     if (opt_expand) {
-      parentSize.width *= 1 + (opt_expand.dw || 0) * 2,
-      parentSize.height *= 1 + (opt_expand.dh || 0) * 2,
+      parentSize.width *= 1 + (opt_expand.dw || 0) * 2;
+      parentSize.height *= 1 + (opt_expand.dh || 0) * 2;
     }
 
     return layoutRectLtwh(
-      left,
-      top,
-      Math.max(
-        Math.min(left + size.width, parentSize.width) - left,
-        0
-      ),
-      Math.max(
-        Math.min(top + size.height, parentSize.height) - top,
-        0
-      )
+        left,
+        top,
+        Math.max(Math.min(left + size.width, parentSize.width) - left, 0),
+        Math.max(Math.min(top + size.height, parentSize.height) - top, 0)
     );
   }
 
@@ -149,9 +150,10 @@ export class LayoutLayers {
    * @param {!AmpElement} element An AMP Element
    * @param {!SizeDef} size
    * @param {boolean=} force Whether to skip approval/denial logic
+   * TODO
    */
-  changeSize(element, size, force = false) {
-  }
+  // changeSize(element, size, force = false) {
+  // }
 
   /**
    * Eagerly creates a LayoutLayer for the element.
@@ -187,14 +189,22 @@ export class LayoutLayers {
   }
 
   getScrollingElement_() {
+    if (this.scrollingElement_) {
+      return this.scrollingElement_;
+    }
+
     const doc = this.document_;
-    if (doc./*OK*/scrollingElement) {
-      return doc./*OK*/scrollingElement;
+    let s = doc./*OK*/scrollingElement;
+
+    if (!s) {
+      if (doc.body && Services.platformFor(this.win).isWebKit()) {
+        s = doc.body;
+      } else {
+        s = doc.documentElement;
+      }
     }
-    if (doc.body && platformFor(this.win).isWebKit()) {
-      return doc.body;
-    }
-    return doc.documentElement;
+
+    return this.scrollingElement_ = s;
   }
 }
 
@@ -510,8 +520,8 @@ class LayoutElement {
     const box = this.element_.getBoundingClientRect();
     this.size_ = SizeWh(box.width, box.height);
     this.position_ = PositionLt(
-      box.left - relative.left,
-      box.top - relative.top
+        box.left - relative.left,
+        box.top - relative.top
     );
   }
 }

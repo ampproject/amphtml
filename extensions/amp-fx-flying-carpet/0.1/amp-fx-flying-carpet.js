@@ -16,10 +16,8 @@
 
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {Layout} from '../../../src/layout';
-import {user, dev} from '../../../src/log';
+import {user} from '../../../src/log';
 import {setStyle} from '../../../src/style';
-import {listen} from '../../../src/event-helper';
-import {AmpEvents} from '../../../src/amp-events';
 
 const TAG = 'amp-fx-flying-carpet';
 

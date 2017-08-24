@@ -21,7 +21,7 @@ import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 import {isArray, toWin} from './types';
 import {Services} from './services';
-import {user} from './log';
+import {user, dev} from './log';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting

@@ -334,7 +334,7 @@ function createBaseCustomElementClass(win) {
     getLayers() {
       return /** @type {!./service/layers-impl.LayoutLayers} */ (
         dev().assert(this.layers_,
-          'no layers yet, since element is not attached'));
+            'no layers yet, since element is not attached'));
     }
 
     /**
