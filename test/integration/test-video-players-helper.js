@@ -324,7 +324,7 @@ export function runVideoPlayerIntegrationTests(
   describe.configure().ifNewChrome().run('Video Docking', function() {
     this.timeout(TIMEOUT);
 
-    describe.configure().run('General Behavior', () => {
+    describe('General Behavior', () => {
       it.skip('should have class when attribute is set (autoplay)', function() {
         return getVideoPlayer(
             {
@@ -401,7 +401,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    describe.configure().run('with-autoplay', () => {
+    describe('with-autoplay', () => {
       it('should minimize when out of viewport', function() {
         let viewport;
         let video;
@@ -502,7 +502,7 @@ export function runVideoPlayerIntegrationTests(
   describe.configure().ifNewChrome().run('Autoplay', function() {
     this.timeout(TIMEOUT);
 
-    describe.configure().run('play/pause', () => {
+    describe('play/pause', () => {
       it('should play when in view port initially', () => {
         return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
           return listenOncePromise(r.video, VideoEvents.PLAYING);
@@ -541,7 +541,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    describe.configure().run('Animated Icon', () => {
+    describe('Animated Icon', () => {
       // TODO(amphtml): Unskip when #9379 is fixed.
       it.skip('should create an animated icon overlay', () => {
         let video;

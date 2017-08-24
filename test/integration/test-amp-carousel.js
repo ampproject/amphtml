@@ -44,7 +44,7 @@ describe.skip('integration amp-carousel', () => {
     });
   });
 
-  describe.configure().run('when amp-mode-mouse class is on body', () => {
+  describe('when amp-mode-mouse class is on body', () => {
 
     beforeEach(() => {
       fixture.doc.body.classList.add('amp-mode-mouse');
@@ -194,7 +194,7 @@ describe.skip('integration amp-carousel', () => {
     });
   });
 
-  describe.configure().run('when amp-mode-mouse class is not on body', () => {
+  describe('when amp-mode-mouse class is not on body', () => {
 
     it('should not have the buttons visible', () => {
       return fixture.awaitEvent(AmpEvents.LOAD_START, 1).then(() => {
@@ -223,8 +223,7 @@ describe.skip('integration amp-carousel', () => {
     });
   });
 
-  describe.configure().run('when amp-carousel has explicit' +
-      ' `controls` attribute', () => {
+  describe('when amp-carousel has explicit `controls` attribute', () => {
 
     it('should have visible buttons even when `amp-mode-mouse` ' +
        'is not on body', () => {
