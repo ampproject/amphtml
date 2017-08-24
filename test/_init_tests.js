@@ -102,14 +102,23 @@ class TestConfig {
     this.platform = Services.platformFor(window);
 
     /**
+     * Predicate functions that determine whether to run tests on a platform.
+     */
+    this.runOnChrome = this.platform.isChrome.bind(this.platform);
+    this.runOnEdge = this.platform.isEdge.bind(this.platform);
+    this.runOnFirefox = this.platform.isFirefox.bind(this.platform);
+    this.runOnSafari = this.platform.isSafari.bind(this.platform);
+    this.runOnIos = this.platform.isIos.bind(this.platform);
+    this.runOnIe = this.platform.isIe.bind(this.platform);
+
+    /**
      * By default, IE is skipped. Individual tests may opt in.
      */
-    this.runOnIe = this.platform.isIe.bind(this.platform);
     this.skip(this.runOnIe);
   }
 
   skipChrome() {
-    return this.skip(this.platform.isChrome.bind(this.platform));
+    return this.skip(this.runOnChrome);
   }
 
   skipOldChrome() {
@@ -119,19 +128,19 @@ class TestConfig {
   }
 
   skipEdge() {
-    return this.skip(this.platform.isEdge.bind(this.platform));
+    return this.skip(this.runOnEdge);
   }
 
   skipFirefox() {
-    return this.skip(this.platform.isFirefox.bind(this.platform));
+    return this.skip(this.runOnFirefox);
   }
 
   skipSafari() {
-    return this.skip(this.platform.isSafari.bind(this.platform));
+    return this.skip(this.runOnSafari);
   }
 
   skipIos() {
-    return this.skip(this.platform.isIos.bind(this.platform));
+    return this.skip(this.runOnIos);
   }
 
   enableIe() {
@@ -152,23 +161,23 @@ class TestConfig {
   }
 
   ifChrome() {
-    return this.if(this.platform.isChrome.bind(this.platform));
+    return this.if(this.runOnChrome);
   }
 
   ifEdge() {
-    return this.if(this.platform.isEdge.bind(this.platform));
+    return this.if(this.runOnEdge);
   }
 
   ifFirefox() {
-    return this.if(this.platform.isFirefox.bind(this.platform));
+    return this.if(this.runOnFirefox);
   }
 
   ifSafari() {
-    return this.if(this.platform.isSafari.bind(this.platform));
+    return this.if(this.runOnSafari);
   }
 
   ifIos() {
-    return this.if(this.platform.isIos.bind(this.platform));
+    return this.if(this.runOnIos);
   }
 
   ifIe() {
