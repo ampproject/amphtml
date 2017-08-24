@@ -19,6 +19,7 @@ import {waitForChild} from '../../../../src/dom';
 import {Services} from '../../../../src/services';
 import {AnchorAdStrategy} from '../anchor-ad-strategy';
 
+
 describes.realWin('anchor-ad-strategy', {
   amp: {
     runtimeOn: true,
@@ -26,12 +27,10 @@ describes.realWin('anchor-ad-strategy', {
     extensions: ['amp-ad'],
   },
 }, env => {
-  let sandbox;
   let configObj;
   let attributes;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
     const viewportMock =
         sandbox.mock(Services.viewportForDoc(env.win.document));
     viewportMock.expects('getWidth').returns(360).atLeast(1);
@@ -51,7 +50,7 @@ describes.realWin('anchor-ad-strategy', {
       configObj['optInStatus'].push(2);
 
       const anchorAdStrategy = new AnchorAdStrategy(
-          env.win, attributes, configObj);
+          env.ampdoc, attributes, configObj);
 
       const strategyPromise = anchorAdStrategy.run().then(placed => {
         expect(placed).to.equal(true);
@@ -77,7 +76,7 @@ describes.realWin('anchor-ad-strategy', {
 
     it('should not insert sticky ad if not opted in', () => {
       const anchorAdStrategy = new AnchorAdStrategy(
-          env.win, attributes, configObj);
+          env.ampdoc, attributes, configObj);
 
       const strategyPromise = anchorAdStrategy.run().then(placed => {
         expect(placed).to.equal(false);
@@ -101,7 +100,7 @@ describes.realWin('anchor-ad-strategy', {
       env.win.document.body.appendChild(existingStickyAd);
 
       const anchorAdStrategy = new AnchorAdStrategy(
-          env.win, attributes, configObj);
+          env.ampdoc, attributes, configObj);
 
       const strategyPromise = anchorAdStrategy.run().then(placed => {
         expect(placed).to.equal(false);

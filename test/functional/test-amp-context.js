@@ -64,7 +64,6 @@ describe('3p ampcontext.js', () => {
   it('should add metadata to window.context using name as per 3P.', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
-    expect(context).to.be.ok;
     expect(context.location).to.deep.equal({
       'hash': '',
       'host': 'foo.com',
@@ -86,7 +85,6 @@ describe('3p ampcontext.js', () => {
   it('should add metadata to window.context using name as per A4A.', () => {
     win.name = generateSerializedAttributesA4A();
     const context = new AmpContext(win);
-    expect(context).to.be.ok;
     expect(context.location).to.deep.equal({
       'hash': '',
       'host': 'foo.com',
@@ -108,7 +106,6 @@ describe('3p ampcontext.js', () => {
   it('should add metadata to window.context using window var.', () => {
     win.AMP_CONTEXT_DATA = generateAttributes();
     const context = new AmpContext(win);
-    expect(context).to.be.ok;
     expect(context.location).to.deep.equal({
       'hash': '',
       'host': 'foo.com',
@@ -131,34 +128,17 @@ describe('3p ampcontext.js', () => {
     const sentinel = '1-456';
     win.AMP_CONTEXT_DATA = sentinel;
     const context = new AmpContext(win);
-    expect(context).to.be.ok;
     expect(context.sentinel).to.equal(sentinel);
   });
 
   it('should throw error if sentinel invalid', () => {
     win.name = generateSerializedAttributes('foobar');
-    const AmpContextSpy = sandbox.spy(AmpContext);
-    try {
-      new AmpContextSpy(win);
-    } catch (err) {
-      // do nothing with it
-    }
-    expect(AmpContextSpy.threw()).to.be.true;
-    expect(AmpContextSpy.exceptions.length).to.equal(1);
-    expect(AmpContextSpy.exceptions[0].message).to.equal(
-        'Incorrect sentinel format');
+    expect(() => new AmpContext(win)).to.throw('Incorrect sentinel format');
   });
 
   it('should throw error if metadata missing', () => {
     win.name = generateIncorrectAttributes();
-    const AmpContextSpy = sandbox.spy(AmpContext);
-    try {
-      new AmpContextSpy(win);
-    } catch (err) {
-      // do nothing with it
-    }
-    expect(AmpContextSpy.threw()).to.be.true;
-    expect(AmpContextSpy.exceptions.length).to.equal(1);
+    expect(() => new AmpContext(win)).to.throw(/Cannot read property/);
   });
 
   it('should be able to send an intersection observer request', () => {
@@ -173,16 +153,17 @@ describe('3p ampcontext.js', () => {
 
     // window.context should have sent postMessage asking for intersection
     // observer
-    expect(windowPostMessageSpy.calledOnce).to.be.true;
-    expect(windowPostMessageSpy.calledWith({
-      sentinel: '1-291921',
-      type: MessageType.SEND_INTERSECTIONS,
-    }, '*'));
+    expect(windowPostMessageSpy).to.be.calledOnce;
+    expect(windowPostMessageSpy).to.be.calledWith(
+        'amp-$internalRuntimeVersion$' +
+        '{"type":"send-intersections","sentinel":"1-291921"}',
+        '*');
 
     // send an intersection message down
     const messagePayload = {
       sentinel: '1-291921',
       type: MessageType.INTERSECTION,
+      changes: 'changes',
     };
     const messageData = 'amp-' + JSON.stringify(messagePayload);
     const message = {
@@ -196,8 +177,8 @@ describe('3p ampcontext.js', () => {
     // TODO(alanorozco): Called twice for backwards compatibility with
     // window.context. This behavior is deprecated and this test should be
     // changed when removed.
-    expect(callbackSpy.calledTwice).to.be.true;
-    expect(callbackSpy.calledWith(messagePayload));
+    expect(callbackSpy).to.be.calledTwice;
+    expect(callbackSpy).to.be.calledWith('changes');
 
     // Stop listening for intersection observer messages
     stopObserving();
@@ -208,7 +189,7 @@ describe('3p ampcontext.js', () => {
     // TODO(alanorozco): Called twice for backwards compatibility with
     // window.context. This behavior is deprecated and this test should be
     // changed when removed.
-    expect(callbackSpy.calledTwice).to.be.true;
+    expect(callbackSpy).to.be.calledTwice;
   });
 
   it('should send a pM and set callback when onPageVisibilityChange()', () => {
@@ -219,16 +200,16 @@ describe('3p ampcontext.js', () => {
 
     // window.context should have sent postMessage asking for visibility
     // observer
-    expect(windowPostMessageSpy.calledOnce).to.be.true;
-    expect(windowPostMessageSpy.calledWith({
-      sentinel: '1-291921',
-      type: MessageType.SEND_EMBED_STATE,
-    }, '*'));
+    expect(windowPostMessageSpy).to.be.calledOnce;
+    expect(windowPostMessageSpy).to.be.calledWith(
+        'amp-$internalRuntimeVersion$' +
+        '{"type":"send-embed-state","sentinel":"1-291921"}', '*');
 
     // send a page visibility message down
     const messagePayload = {
       sentinel: '1-291921',
       type: MessageType.EMBED_STATE,
+      pageHidden: true,
     };
     const messageData = 'amp-' + JSON.stringify(messagePayload);
     const message = {
@@ -239,8 +220,8 @@ describe('3p ampcontext.js', () => {
 
     // window.context should have received visibility observer postMessage
     // back, and should have called the callback function
-    expect(callbackSpy.calledOnce).to.be.true;
-    expect(callbackSpy.calledWith(messagePayload));
+    expect(callbackSpy).to.be.calledOnce;
+    expect(callbackSpy).to.be.calledWith({hidden: true});
 
     // Stop listening for page visibility observer messages
     stopObserving();
@@ -249,7 +230,7 @@ describe('3p ampcontext.js', () => {
     windowMessageHandler(message);
 
     // callback should not have been called a second time
-    expect(callbackSpy.calledOnce).to.be.true;
+    expect(callbackSpy).to.be.calledOnce;
   });
 
   it('should call resize success callback on resize success', () => {
@@ -270,18 +251,18 @@ describe('3p ampcontext.js', () => {
     context.requestResize(height, width);
 
     // window.context should have sent postMessage requesting resize
-    expect(windowPostMessageSpy.calledOnce).to.be.true;
-    expect(windowPostMessageSpy.calledWith({
-      sentinel: '1-291921',
-      type: MessageType.SEND_EMBED_STATE,
-      width,
-      height,
-    }, '*'));
+    expect(windowPostMessageSpy).to.be.calledOnce;
+    expect(windowPostMessageSpy).to.be.calledWith(
+        'amp-$internalRuntimeVersion$' +
+        '{"width":100,"height":200,"type":"embed-size","sentinel":"1-291921"}',
+        '*');
 
     // send a resize success message down
     const messagePayload = {
       sentinel: '1-291921',
       type: MessageType.EMBED_SIZE_CHANGED,
+      requestedHeight: 300,
+      requestedWidth: 200,
     };
     const messageData = 'amp-' + JSON.stringify(messagePayload);
     const message = {
@@ -292,10 +273,10 @@ describe('3p ampcontext.js', () => {
 
     // window.context should have received resize success message, and then
     // called the success callback
-    expect(successCallbackSpy.calledOnce).to.be.true;
-    expect(successCallbackSpy.calledWith(messagePayload));
+    expect(successCallbackSpy).to.be.calledOnce;
+    expect(successCallbackSpy).to.be.calledWith(300, 200);
 
-    expect(deniedCallbackSpy.called).to.be.false;
+    expect(deniedCallbackSpy).to.not.be.called;
   });
 
   it('should call resize denied callback on resize denied', () => {
@@ -316,18 +297,18 @@ describe('3p ampcontext.js', () => {
     context.requestResize(height, width);
 
     // window.context should have sent resize request postMessage
-    expect(windowPostMessageSpy.calledOnce).to.be.true;
-    expect(windowPostMessageSpy.calledWith({
-      sentinel: '1-291921',
-      type: MessageType.SEND_EMBED_STATE,
-      width,
-      height,
-    }, '*'));
+    expect(windowPostMessageSpy).to.be.calledOnce;
+    expect(windowPostMessageSpy).to.be.calledWith(
+        'amp-$internalRuntimeVersion$' +
+        '{"width":100,"height":200,"type":"embed-size","sentinel":"1-291921"}',
+        '*');
 
     // send a resize denied message down
     const messagePayload = {
       sentinel: '1-291921',
       type: MessageType.EMBED_SIZE_DENIED,
+      requestedHeight: 300,
+      requestedWidth: 200,
     };
     const messageData = 'amp-' + JSON.stringify(messagePayload);
     const message = {
@@ -337,10 +318,10 @@ describe('3p ampcontext.js', () => {
     windowMessageHandler(message);
 
     // resize denied callback should have been called
-    expect(deniedCallbackSpy.calledOnce).to.be.true;
-    expect(deniedCallbackSpy.calledWith(messagePayload));
+    expect(deniedCallbackSpy).to.be.calledOnce;
+    expect(deniedCallbackSpy).to.be.calledWith(300, 200);
 
-    expect(successCallbackSpy.called).to.be.false;
+    expect(successCallbackSpy).to.not.be.called;
   });
 });
 
