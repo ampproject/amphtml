@@ -25,7 +25,7 @@ import {startupChunk} from '../chunk';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
 import {installPerformanceService} from '../service/performance-impl';
-import {installStyles, makeBodyVisible} from '../style-installer';
+import {installStylesForDoc, makeBodyVisible} from '../style-installer';
 import {installErrorReporting} from '../error';
 import {installDocService} from '../service/ampdoc-impl';
 import {installCacheServiceWorker} from '../service-worker/install';
@@ -78,7 +78,7 @@ startupChunk(self.document, function initial() {
   const fullCss = cssText
       + 'html.i-amphtml-inabox{width:100%!important;height:100%!important}'
       + 'html.i-amphtml-inabox>body{position:initial!important}';
-  installStyles(self.document, fullCss, () => {
+  installStylesForDoc(ampdoc, fullCss, () => {
     startupChunk(self.document, function services() {
       // Core services.
       installRuntimeServices(self);

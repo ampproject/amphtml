@@ -18,7 +18,7 @@ import {Services} from './services';
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
 import {dev} from './log';
 import {closestNode, escapeCssSelectorIdent} from './dom';
-import {insertStyleElement} from './style-installer';
+import {installCssTransformer} from './style-installer';
 import {
   isShadowDomSupported,
   getShadowDomSupportedVersion,
@@ -120,6 +120,11 @@ function createShadowRootPolyfill(hostElement) {
     },
   });
 
+  // CSS isolation.
+  installCssTransformer(shadowRoot, css => {
+    return transformShadowCss(shadowRoot, css);
+  });
+
   return shadowRoot;
 }
 
@@ -158,35 +163,6 @@ export function getShadowRootNode(node) {
 
 
 /**
- * Creates a shadow root for an shadow embed.
- * @param {!Element} hostElement
- * @param {!Array<string>} extensionIds
- * @return {!ShadowRoot}
- */
-export function createShadowEmbedRoot(hostElement, extensionIds) {
-  const shadowRoot = createShadowRoot(hostElement);
-  shadowRoot.AMP = {};
-
-  const win = hostElement.ownerDocument.defaultView;
-  /** @const {!./service/extensions-impl.Extensions} */
-  const extensions = Services.extensionsFor(win);
-  const ampdocService = Services.ampdocServiceFor(win);
-  const ampdoc = ampdocService.getAmpDoc(hostElement);
-
-  // Instal runtime CSS.
-  copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot);
-
-  // Install extensions.
-  extensionIds.forEach(extensionId => extensions.loadExtension(extensionId));
-
-  // Apply extensions factories, such as CSS.
-  extensions.installFactoriesInShadowRoot(shadowRoot, extensionIds);
-
-  return shadowRoot;
-}
-
-
-/**
  * Imports a body into a shadow root with the workaround for a polyfill case.
  * @param {!ShadowRoot} shadowRoot
  * @param {!Element} body
@@ -215,46 +191,6 @@ export function importShadowBody(shadowRoot, body, deep) {
   shadowRoot.appendChild(resultBody);
   Object.defineProperty(shadowRoot, 'body', {value: resultBody});
   return resultBody;
-}
-
-
-/**
- * Adds the given css text to the given shadow root.
- *
- * The style tags will be at the beginning of the shadow root before all author
- * styles. One element can be the main runtime CSS. This is guaranteed
- * to always be the first stylesheet in the doc.
- *
- * @param {!ShadowRoot} shadowRoot
- * @param {string} cssText
- * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
- *     as the first element in head and all style elements will be positioned
- *     after.
- * @param {string=} opt_ext
- * @return {!Element}
- */
-export function installStylesForShadowRoot(shadowRoot, cssText,
-    opt_isRuntimeCss, opt_ext) {
-  return insertStyleElement(
-      dev().assert(shadowRoot.ownerDocument),
-      shadowRoot,
-      transformShadowCss(shadowRoot, cssText),
-      opt_isRuntimeCss || false,
-      opt_ext || null);
-}
-
-
-/*
- * Copies runtime styles from the ampdoc context into a shadow root.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!ShadowRoot} shadowRoot
- */
-export function copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot) {
-  const style = dev().assert(
-      ampdoc.getRootNode().querySelector('style[amp-runtime]'),
-      'Runtime style is not found in the ampdoc: %s', ampdoc.getRootNode());
-  const cssText = style.textContent;
-  installStylesForShadowRoot(shadowRoot, cssText, /* opt_isRuntimeCss */ true);
 }
 
 
