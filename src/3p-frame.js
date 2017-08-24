@@ -202,6 +202,7 @@ export function setDefaultBootstrapBaseUrlForTesting(url) {
 
 export function resetBootstrapBaseUrlForTesting(win) {
   win.bootstrapBaseUrl = undefined;
+  win.defaultBootstrapBaseUrl = undefined;
 }
 
 /**
@@ -211,18 +212,22 @@ export function resetBootstrapBaseUrlForTesting(win) {
  * @return {string}
  */
 export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
+  if (parentWindow.defaultBootstrapBaseUrl) {
+    return parentWindow.defaultBootstrapBaseUrl;
+  }
   const srcFileBasename = opt_srcFileBasename || 'frame';
   if (getMode().localDev || getMode().test) {
     if (overrideBootstrapBaseUrl) {
-      return overrideBootstrapBaseUrl;
+      return parentWindow.defaultBootstrapBaseUrl = overrideBootstrapBaseUrl;
     }
-    return getAdsLocalhost(parentWindow)
+    return parentWindow.defaultBootstrapBaseUrl = getAdsLocalhost(parentWindow)
         + '/dist.3p/'
         + (getMode().minified ? `$internalRuntimeVersion$/${srcFileBasename}`
             : `current/${srcFileBasename}.max`)
         + '.html';
   }
-  return 'https://' + getSubDomain(parentWindow) +
+  return parentWindow.defaultBootstrapBaseUrl = 'https://' +
+      getSubDomain(parentWindow) +
       `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
       `${srcFileBasename}.html`;
 }
