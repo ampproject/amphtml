@@ -156,7 +156,8 @@ describes.realWin('amp-ad-exit', {
    * the third-party vendor's iframe
    */
   function addToResponseMap(ampDoc, vendor, creativeUrl, response) {
-    const responseService = getService(ampDoc.win, 'iframe-transport-responses');
+    const responseService =
+        getService(ampDoc.win, 'iframe-transport-responses');
     const map = responseService.getResponses();
     map[vendor] = map[vendor] || {};
     map[vendor][creativeUrl] = response;
