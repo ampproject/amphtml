@@ -37,7 +37,7 @@ import {
 } from '../polyfills/domtokenlist-toggle';
 import {installImg} from '../../builtins/amp-img';
 import {installPixel} from '../../builtins/amp-pixel';
-import {installStyles} from '../style-installer';
+import {installStylesLegacy} from '../style-installer';
 import {calculateExtensionScriptUrl} from './extension-location';
 
 const TAG = 'extensions';
@@ -420,7 +420,7 @@ export class Extensions {
     installPolyfillsInChildWindow(childWin);
 
     // Install runtime styles.
-    installStyles(childWin.document, cssText, () => {},
+    installStylesLegacy(childWin.document, cssText, /* callback */ null,
         /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
 
     // Run pre-install callback.
@@ -455,7 +455,7 @@ export class Extensions {
         const elementDef = extension.elements[extensionId];
         if (elementDef && elementDef.css) {
           return new Promise(resolve => {
-            installStyles(
+            installStylesLegacy(
                 childWin.document,
                 /** @type {string} */ (elementDef.css),
                 /* completeCallback */ resolve,

@@ -224,6 +224,13 @@ export class AmpDoc {
   }
 
   /**
+   * Returns the head node. It's either an element or a shadow root.
+   * @return {!Element|!ShadowRoot}
+   * @abstract
+   */
+  getHeadNode() {}
+
+  /**
    * Returns `true` if the ampdoc's body is available.
    *
    * @return {boolean}
@@ -340,6 +347,11 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
+  getHeadNode() {
+    return dev().assertElement(this.win.document.head);
+  }
+
+  /** @override */
   isBodyAvailable() {
     return !!this.win.document.body;
   }
@@ -420,6 +432,11 @@ export class AmpDocShadow extends AmpDoc {
   /** @override */
   getUrl() {
     return this.url_;
+  }
+
+  /** @override */
+  getHeadNode() {
+    return this.shadowRoot_;
   }
 
   /** @override */
