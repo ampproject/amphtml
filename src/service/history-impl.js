@@ -20,7 +20,7 @@ import {
   getService,
 } from '../service';
 import {getMode} from '../mode';
-import {dev, user} from '../log';
+import {dev} from '../log';
 import {dict, map} from '../utils/object';
 import {Services} from '../services';
 
