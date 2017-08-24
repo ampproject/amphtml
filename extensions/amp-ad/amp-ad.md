@@ -91,7 +91,7 @@ If provided, requires confirming the [amp-user-notification](https://www.ampproj
 
 ##### data-loading-strategy (optional)
 
-Instructs the ad to start loading when it is within the given number of viewports away (specified as a float value in the range of [0, 3]) from the current viewport. Use a smaller value to gain higher degree of viewability, with the risk of generating fewer views. If the attribute is not used, the default value is 3. If the attribute is used but the value is left blank, then a float value is assigned by the system, which optimizes for viewability without drastically impacting the views.
+Instructs the ad to start loading when the ad is within the given number of viewports away from the current viewport. You must specify a float value in the range of [0, 3]. By default, the value is 3. Use a smaller value to gain a higher degree of viewability (i.e., increase the chance that an ad, once loaded, will be seen) but with the risk of generating fewer impressions (i.e., fewer ads loaded). If the attribute is used but the value is left blank, then a float value is assigned by the system, which optimizes for viewability without drastically impacting the impressions.
 
 ##### common attributes
 
