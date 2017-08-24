@@ -104,7 +104,8 @@ class TestConfig {
     /**
      * By default, IE is skipped. Individual tests may opt in.
      */
-    this.skip(this.platform.isIe.bind(this.platform));
+    this.runOnIe = this.platform.isIe.bind(this.platform);
+    this.skip(this.runOnIe);
   }
 
   skipChrome() {
@@ -134,8 +135,7 @@ class TestConfig {
   }
 
   enableIe() {
-    this.skipMatchers.splice(
-        this.skipMatchers.indexOf(this.platform.isIe.bind(this.platform)), 1);
+    this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
     return this;
   }
 
@@ -173,7 +173,7 @@ class TestConfig {
 
   ifIe() {
     // It's necessary to first enable IE because we skip it by default.
-    return this.enableIe().if(this.platform.isIe.bind(this.platform));
+    return this.enableIe().if(this.runOnIe);
   }
 
   /**
