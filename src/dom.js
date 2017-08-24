@@ -533,12 +533,12 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
  * Returns link element url components as url parameters key-value pairs.
  * e.g. <a href="https://example.com/index.html?query#hash"
  * -> {
- *   CLICK_HOSTNAME: example.com,
- *   CLICK_PROTOCOL: https,
- *   CLICK_PATHNAME: /index.html,
- *   CLICK_QUERY: query,
- *   CLICK_HASH: hash,
- *   CLICK_URL: https://example.com/index.html?query#hash
+ *   clickHostname: example.com,
+ *   clickProtocol: https,
+ *   clickProtocol: /index.html,
+ *   clickQuery: query,
+ *   clickHash: hash,
+ *   clickUrl: https://example.com/index.html?query#hash
  * }
  * @param {!Element} element
  * @param {function(strig):string=} opt_computeParamNameFunc to compute the parameters
