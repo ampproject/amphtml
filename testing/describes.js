@@ -641,6 +641,9 @@ class AmpFixture {
     const win = env.win;
     let completePromise;
 
+    // Configure mode.
+    configureAmpTestMode(win);
+
     // AMP requires canonical URL.
     const link = win.document.createElement('link');
     link.setAttribute('rel', 'canonical');
@@ -745,6 +748,7 @@ class AmpFixture {
             env.embed = embed;
             env.parentWin = env.win;
             env.win = embed.win;
+            configureAmpTestMode(embed.win);
           });
       completePromise = completePromise ?
           completePromise.then(() => promise) : promise;
@@ -785,6 +789,14 @@ class AmpFixture {
       });
     }
   }
+}
+
+
+/**
+ * @param {!Window} win
+ */
+function configureAmpTestMode(win) {
+  win.AMP_TEST = true;
 }
 
 
