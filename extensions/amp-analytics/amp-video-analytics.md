@@ -135,7 +135,7 @@ All video analytics triggers expose the following variables. These variables are
 
 ## Video analytics variables
 
-Video analytics contributes the following URL substitutions to [amp-var-substitutions.md](/spec/amp-var-substitutions.md).
+Video analytics contributes the following URL substitutions to [amp-var-substitutions.md](../../spec/amp-var-substitutions.md).
 
 ### VIDEO_STATE
 
