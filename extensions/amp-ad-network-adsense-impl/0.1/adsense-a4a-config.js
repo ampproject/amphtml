@@ -93,6 +93,11 @@ export function adsenseIsA4AEnabled(win, element) {
     ],
   };
   randomlySelectUnsetExperiments(win, ffDrExperimentInfoMap);
+  addExperimentIdToElement(experimentId, element);
+  let delayedFetchExperimentId = getExperimentBranch(win, FF_DR_EXP_NAME);
+  if (delayedFetchExperimentId) {
+    addExperimentIdToElement(delayedFetchExperimentId, element);
+  }
   if (!isGoogleAdsA4AValidEnvironment(win) ||
       !element.getAttribute('data-ad-client')) {
     return false;
