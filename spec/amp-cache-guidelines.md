@@ -22,7 +22,7 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
 4. It serves each site from a subdomain of the cache domain.
 
-    1. Similar to the [Google AMP Cache URL format](https://developers.google.com/amp/cache/overview#amp-cache-url-format).
+    1. See for example: the [Google AMP Cache URL format](https://developers.google.com/amp/cache/overview#amp-cache-url-format).
 
 5. Pledges to maintain URL space forever (even beyond the lifetime of the cache itself): 
 
