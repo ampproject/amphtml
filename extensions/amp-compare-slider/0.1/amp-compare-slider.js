@@ -39,4 +39,7 @@ export class AmpCompareSlider extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-compare-slider', AmpCompareSlider);
+
+AMP.extension('amp-compare-slider', '0.1', AMP => {
+  AMP.registerElement('amp-compare-slider', AmpCompareSlider);
+});
