@@ -48,6 +48,12 @@ var commonTestPaths = [
     nocache: false,
     watched: true,
   },
+  {
+    pattern: 'test/coverage/**/*',
+    included: false,
+    nocache: false,
+    watched: false,
+  },
 ];
 
 var testPaths = commonTestPaths.concat([
@@ -89,6 +95,7 @@ module.exports = {
     '!extensions/amp-access/0.1/access-expr-impl.js',
     '!extensions/amp-animation/0.1/css-expr-impl.js',
     '!extensions/amp-bind/0.1/bind-expr-impl.js',
+    '!test/coverage/**/*.*',
   ],
   jsonGlobs: [
     '**/*.json',
@@ -117,6 +124,7 @@ module.exports = {
     // of the AMP runtime, so shouldn't be checked.
     '!extensions/amp-a4a/*/test/testdata/*.js',
     '!examples/*.js',
+    '!test/coverage/**/*.*',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
 };
