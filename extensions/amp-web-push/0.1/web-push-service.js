@@ -19,8 +19,7 @@ import {user} from '../../../src/log';
 import {CSS} from '../../../build/amp-web-push-0.1.css';
 import {IFrameHost} from './iframehost';
 import {WindowMessenger} from './window-messenger';
-import {installStyles} from '../../../src/style-installer';
-import {installStylesForShadowRoot} from '../../../src/shadow-embed';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {openWindowDialog} from '../../../src/dom';
 import {
   TAG,
@@ -111,13 +110,7 @@ export class WebPushService {
     this.ampdoc = ampdoc;
 
     // Install styles.
-    if (ampdoc.isSingleDoc()) {
-      const root = /** @type {!Document} */ (ampdoc.getRootNode());
-      installStyles(root, CSS, () => { }, false, TAG);
-    } else {
-      const root = /** @type {!ShadowRoot} */ (ampdoc.getRootNode());
-      installStylesForShadowRoot(root, CSS, false, TAG);
-    }
+    installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
     /** @private {!Object} */
     this.config_ = {

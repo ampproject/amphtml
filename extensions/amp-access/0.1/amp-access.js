@@ -27,8 +27,7 @@ import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
 import {evaluateAccessExpr} from './access-expr';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {installStyles} from '../../../src/style-installer';
-import {installStylesForShadowRoot} from '../../../src/shadow-embed';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
@@ -72,13 +71,7 @@ export class AccessService {
     this.ampdoc = ampdoc;
 
     // Install styles.
-    if (ampdoc.isSingleDoc()) {
-      const root = /** @type {!Document} */ (ampdoc.getRootNode());
-      installStyles(root, CSS, () => {}, false, TAG);
-    } else {
-      const root = /** @type {!ShadowRoot} */ (ampdoc.getRootNode());
-      installStylesForShadowRoot(root, CSS, false, TAG);
-    }
+    installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
     const accessElement = ampdoc.getElementById('amp-access');
 

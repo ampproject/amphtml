@@ -21,7 +21,6 @@ import {
   createShadowDomWriter,
   createShadowRoot,
   importShadowBody,
-  installStylesForShadowRoot,
 } from './shadow-embed';
 import {VisibilityState} from './visibility-state';
 import {
@@ -67,7 +66,7 @@ import {
 } from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStorageServiceForDoc} from './service/storage-impl';
-import {installStyles} from './style-installer';
+import {installStylesForDoc} from './style-installer';
 import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsServiceForDoc} from
@@ -444,7 +443,9 @@ function prepareAndRegisterElement(global, extensions,
     name, implementationClass, opt_css) {
   addElementToExtension(extensions, name, implementationClass, opt_css);
   if (opt_css) {
-    installStyles(global.document, opt_css, () => {
+    const ampdocService = Services.ampdocServiceFor(global);
+    const ampdoc = ampdocService.getAmpDoc();
+    installStylesForDoc(ampdoc, opt_css, () => {
       registerElementClass(global, name, implementationClass, opt_css);
     }, false, name);
   } else {
@@ -467,7 +468,10 @@ function prepareAndRegisterElementShadowMode(global, extensions,
   registerElementClass(global, name, implementationClass, opt_css);
   if (opt_css) {
     addShadowRootFactoryToExtension(extensions, shadowRoot => {
-      installStylesForShadowRoot(shadowRoot, dev().assertString(opt_css),
+      const ampdocService = Services.ampdocServiceFor(global);
+      const ampdoc = ampdocService.getAmpDoc(shadowRoot);
+      installStylesForDoc(ampdoc, dev().assertString(opt_css),
+          /* callback */ null,
           /* isRuntimeCss */ false, name);
     });
   }
@@ -595,7 +599,7 @@ class MultidocManager {
     dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
 
     // Install runtime CSS.
-    installStylesForShadowRoot(shadowRoot, cssText,
+    installStylesForDoc(ampdoc, cssText, /* callback */ null,
         /* opt_isRuntimeCss */ true);
 
     // Instal doc services.
@@ -692,7 +696,7 @@ class MultidocManager {
         hostElement, url, opt_initParams,
         (amp, shadowRoot, ampdoc) => {
           // Install extensions.
-          const extensionIds = this.mergeShadowHead_(shadowRoot, doc);
+          const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
           installExtensionsInShadowDoc(this.extensions_, ampdoc, extensionIds);
 
           // Append body.
@@ -736,7 +740,7 @@ class MultidocManager {
           amp.writer = writer;
           writer.onBody(doc => {
             // Install extensions.
-            const extensionIds = this.mergeShadowHead_(shadowRoot, doc);
+            const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
             // Apply all doc extensions.
             installExtensionsInShadowDoc(
                 this.extensions_, ampdoc, extensionIds);
@@ -775,12 +779,13 @@ class MultidocManager {
 
   /**
    * Processes the contents of the shadow document's head.
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!ShadowRoot} shadowRoot
    * @param {!Document} doc
    * @return {!Array<string>}
    * @private
    */
-  mergeShadowHead_(shadowRoot, doc) {
+  mergeShadowHead_(ampdoc, shadowRoot, doc) {
     const extensionIds = [];
     if (doc.head) {
       const parentLinks = {};
@@ -840,7 +845,8 @@ class MultidocManager {
               // Ignore.
               dev().fine(TAG, '- ignore boilerplate style: ', n);
             } else {
-              installStylesForShadowRoot(shadowRoot, n.textContent,
+              installStylesForDoc(ampdoc, n.textContent,
+                  /* callback */ null,
                   /* isRuntimeCss */ false, 'amp-custom');
               dev().fine(TAG, '- import style: ', n);
             }
