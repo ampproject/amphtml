@@ -28,22 +28,14 @@ tags: {  # amp-video
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-video>
-  tag_name: "AMP-VIDEO"
-  disallowed_ancestor: "AMP-SIDEBAR"
-  # Typically we'd require the extension j/s, but for historical reasons
-  # many pages don't have it, so it ends up late loaded and we warn, instead
-  # of making this a validation error.
-  also_requires_tag_warning: "amp-video extension .js script"
+
+attr_lists: { # <amp-video> attributes that are common to both AMP & A4A.
+  name: "amp-video-common"
   attrs: { name: "album" }
   attrs: { name: "alt" }
   attrs: { name: "artist" }
   attrs: { name: "artwork" }
   attrs: { name: "attribution" }
-  attrs: {
-    name: "autoplay"
-    value: ""
-  }
   attrs: {
     name: "controls"
     value: ""
@@ -83,7 +75,41 @@ tags: {  # <amp-video>
   attrs: { name: "[poster]" }
   attrs: { name: "[preload]" }
   attrs: { name: "[src]" }
+}
+
+tags: {  # <amp-video> for AMP
+  html_format: AMP
+  tag_name: "AMP-VIDEO"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  # Typically we'd require the extension j/s, but for historical reasons
+  # many pages don't have it, so it ends up late loaded and we warn, instead
+  # of making this a validation error.
+  also_requires_tag_warning: "amp-video extension .js script"
   attr_lists: "extended-amp-global"
+  attr_lists: "amp-video-common"
+  attr_lists: "implements-video-interface-amp"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {  # <amp-video> for A4A
+  html_format: AMP4ADS
+  tag_name: "AMP-VIDEO"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  # Typically we'd require the extension j/s, but for historical reasons
+  # many pages don't have it, so it ends up late loaded and we warn, instead
+  # of making this a validation error.
+  also_requires_tag_warning: "amp-video extension .js script"
+  attr_lists: "extended-amp-global"
+  attr_lists: "amp-video-common"
+  attr_lists: "implements-video-interface-amp4ads"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
   amp_layout: {
     supported_layouts: FILL

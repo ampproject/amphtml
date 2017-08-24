@@ -55,7 +55,7 @@ Examples:
 
 ## Attributes
 
-##### autoplay
+##### autoplay (optional)
 
 If this attribute is present, and the browser supports autoplay:
 
@@ -63,7 +63,12 @@ If this attribute is present, and the browser supports autoplay:
 * when the video is scrolled out of view, the video is paused
 * when the video is scrolled into view, the video resumes playback
 * when the user taps the video, the video is unmuted
-* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused. 
+* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
+
+##### fullscreen-on-landscape (optional)
+
+If this attribute is present, the video will automatically go to fullscreen when the
+device is rotated to landscape (Currently not supported on Safari iOS).
 
 ##### data-partner
 

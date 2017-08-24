@@ -3385,6 +3385,30 @@ attr_lists: {
   }
 }
 
+# Video Interface attributes for AMP. These attributes can be attached to any
+# element that implements the video interface
+attr_lists: {
+  name: "implements-video-interface-amp"
+  attrs: {
+    name: "autoplay"
+    value: ""
+  }
+  attrs: {
+    name: "fullscreen-on-landscape"
+    value: ""
+  }
+}
+
+# Video Interface attributes for A4A. These attributes can be attached to any
+# element that implements the video interface
+attr_lists: {
+  name: "implements-video-interface-amp4ads"
+  attrs: {
+    name: "autoplay"
+    value: ""
+  }
+}
+
 # Global attributes: These can be used in all tags.
 attr_lists: {
   name: "$GLOBAL_ATTRS"
@@ -4152,4 +4176,3 @@ error_formats {
   format: "CSS syntax error in tag '%1' - the property '%2' is disallowed "
           "unless the enclosing rule is prefixed with the '%3' qualification."
 }
-

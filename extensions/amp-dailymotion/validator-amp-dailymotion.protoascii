@@ -25,12 +25,8 @@ tags: {  # amp-dailymotion
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-dailymotion>
-  html_format: AMP
-  tag_name: "AMP-DAILYMOTION"
-  disallowed_ancestor: "AMP-SIDEBAR"
-  requires_extension: "amp-dailymotion"
-  attrs: { name: "autoplay" }
+attr_lists: { # <amp-dailymotion> attributes that are common to both AMP & A4A.
+  name: "amp-dailymotion-common"
   attrs: {
     name: "data-endscreen-enable"
     value_regex: "true|false"
@@ -64,7 +60,33 @@ tags: {  # <amp-dailymotion>
     mandatory: true
     value_regex_casei: "[a-z0-9]+"
   }
+}
+tags: {  # <amp-dailymotion> for AMP
+  html_format: AMP
+  tag_name: "AMP-DAILYMOTION"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  requires_extension: "amp-dailymotion"
   attr_lists: "extended-amp-global"
+  attr_lists: "amp-dailymotion-common"
+  attr_lists: "implements-video-interface-amp"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-dailymotion"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {  # <amp-dailymotion> for A4A
+  html_format: AMP4ADS
+  tag_name: "AMP-DAILYMOTION"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  requires_extension: "amp-dailymotion"
+  attr_lists: "extended-amp-global"
+  attr_lists: "amp-dailymotion-common"
+  attr_lists: "implements-video-interface-amp4ads"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-dailymotion"
   amp_layout: {
     supported_layouts: FILL
