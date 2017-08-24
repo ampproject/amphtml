@@ -552,7 +552,8 @@ export function getDataParamsFromLinkUrl(element, opt_computeParamNameFunc) {
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const params = dict();
   params[computeParamNameFunc('clickHostname')] = element.hostname;
-  params[computeParamNameFunc('clickProtocol')] = element.protocol.replace(/:$/, '');
+  params[computeParamNameFunc('clickProtocol')]
+    = element.protocol.replace(/:$/, '');
   params[computeParamNameFunc('clickPathname')] = element.pathname;
   params[computeParamNameFunc('clickQuery')] = element.search.slice(1);
   params[computeParamNameFunc('clickHash')] = element.hash.slice(1);
