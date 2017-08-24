@@ -23,7 +23,10 @@ import {
 } from '../../../src/video-interface';
 import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {getDataParamsFromAttributes, getDataParamsFromLinkUrl} from '../../../src/dom';
+import {
+  getDataParamsFromAttributes,
+  getDataParamsFromLinkUrl,
+} from '../../../src/dom';
 import {startsWith} from '../../../src/string';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
