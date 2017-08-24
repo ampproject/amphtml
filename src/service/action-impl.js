@@ -184,6 +184,8 @@ export class ActionService {
     this.addEvent('submit');
     this.addEvent('change');
     this.addEvent('input-debounced');
+    this.addEvent('valid');
+    this.addEvent('invalid');
   }
 
   /** @override */
@@ -242,6 +244,11 @@ export class ActionService {
         const deferredEvent = new DeferredEvent(event);
         this.addInputDetails_(deferredEvent);
         debouncedInput(deferredEvent);
+      });
+    } else if (name == 'valid' || name == 'invalid') {
+      this.root_.addEventListener(name, event => {
+        const element = dev().assertElement(event.target);
+        this.trigger(element, name, event, ActionTrust.HIGH);
       });
     }
   }

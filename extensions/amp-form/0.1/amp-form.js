@@ -555,14 +555,14 @@ export class AmpForm {
       // Validity checking should always occur, novalidate only circumvent
       // reporting and blocking submission on non-valid forms.
       const isValid = checkUserValidityOnSubmission(this.form_);
-      if (this.shouldValidate_ && !isValid) {
+      if (this.shouldValidate_) {
         this.vsync_.run({
           measure: undefined,
           mutate: reportValidity,
         }, {
           validator: this.validator_,
         });
-        return false;
+        return isValid;
       }
     }
     return true;
