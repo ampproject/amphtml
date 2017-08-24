@@ -1177,6 +1177,9 @@ let DescendantConstraints;
 /**
  * @typedef {{ tagName: string,
  *             hasDescendantConstraintLists: boolean,
+ *             numOfChildren: number,
+ *             onlyChildTagName: string,
+ *             onlyChildErrorLineCol: LineCol,
  *             childTagMatcher: ?ChildTagMatcher,
  *             referencePointMatcher: ?ReferencePointMatcher }}
  */
@@ -1221,6 +1224,22 @@ class TagStack {
   }
 
   /**
+   * @param {string} tagName
+   * @return {TagStackEntry} a new TagStackEntry.
+   */
+  createNewTagStackEntry(tagName) {
+    return {
+      tagName: tagName,
+      hasDescendantConstraintLists: false,
+      numOfChildren: 0,
+      onlyChildTagName: '',
+      onlyChildErrorLineCol: null,
+      childTagMatcher: null,
+      referencePointMatcher: null
+    };
+  }
+
+  /**
    * Enter a tag, opening a scope for child tags. Reason |context| and
    * |result| are provided is that entering a tag can close the previous
    * tag, which can trigger validation (e.g., the previous tag may be
@@ -1231,12 +1250,8 @@ class TagStack {
    * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
    */
   enterTag(tagName, context, result, encounteredAttrs) {
-    this.stack_.push({
-      tagName: tagName,
-      hasDescendantConstraintLists: false,
-      childTagMatcher: null,
-      referencePointMatcher: null,
-    });
+    this.stack_.push(this.createNewTagStackEntry(tagName));
+    this.increaseChildCounterForParent();
   }
 
   /**
@@ -1346,14 +1361,86 @@ class TagStack {
   };
 
   /**
+   * The parent of the current stack entry.
+   * @return {?TagStackEntry}
+   */
+  getParentStackEntry() {
+    if (this.stack_.length >= 2) {
+      return this.stack_[this.stack_.length - 2];
+    }
+    return null;
+  }
+
+  /**
    * The name of the parent of the current tag.
    * @return {string}
    */
   getParent() {
-    if (this.stack_.length >= 2) {
-      return this.stack_[this.stack_.length - 2].tagName;
+    const parent = this.getParentStackEntry();
+    return (parent === null) ? '$ROOT' : parent.tagName;
+  }
+
+  /**
+   * The number of siblings that have been discovered up to now by traversing
+   * the stack.
+   * @return {number}
+   */
+  numOfSiblings() {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) return parent.numOfChildren - 1;
+    return 0;
+  }
+
+  /**
+   * Increases the Parent tag's child count.
+   */
+  increaseChildCounterForParent() {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) ++parent.numOfChildren;
+  }
+
+  /**
+   * Tells the parent of the current stack entry that it can only have 1 child
+   * and that child must be me (the current stack entry).
+   * @param {string} tagName The current stack entry's tag name.
+   * @param {amp.htmlparser.DocLocator} docLocator The line and col of where the
+   *  current stack entry appears.
+   */
+  tellParentNoSiblingsAllowed(tagName, docLocator) {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) {
+      parent.onlyChildTagName = tagName;
+      parent.onlyChildErrorLineCol =
+          new LineCol(docLocator.getLine(), docLocator.getCol());
     }
-    return '$ROOT';
+  }
+
+  /**
+   * @return {LineCol} The LineCol of the tag that set the 'no siblings allowed'
+   * rule.
+   */
+  parentOnlyChildErrorLineCol() {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) return parent.onlyChildErrorLineCol;
+    return null;
+  }
+
+  /**
+   * @return {string} The name of the tag that set the 'no siblings allowed'
+   * rule.
+   */
+  parentOnlyChildTagName() {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) return parent.onlyChildTagName;
+    return '';
+  }
+
+  /**
+   * @return {boolean} true if this tag's parent has a child with 'no siblings
+   * allowed' rule. Else false.
+   */
+  parentHasChildWithNoSiblingRule() {
+    return this.parentOnlyChildTagName().length > 0;
   }
 
   /**
@@ -1788,7 +1875,7 @@ class ExtensionsContext {
     // AMP-AD is grandfathered in to not require the respective extension
     // javascript file for historical reasons. We still need to mark that
     // the extension is used if we see the tags.
-    this.extensionsLoaded_["amp-ad"] = true;
+    this.extensionsLoaded_['amp-ad'] = true;
 
     /**
      * @type {!Array<string>}
@@ -2252,6 +2339,26 @@ class Context {
    */
   allowedDescendantsList() {
     return this.tagStack_.allowedDescendantsList();
+  }
+
+  /**
+   * The number of siblings that have been discovered up to now by traversing
+   * the stack.
+   * @return {number}
+   */
+  numOfSiblings() {
+    return this.tagStack_.numOfSiblings();
+  }
+
+  /**
+   * Tells the parent of the current stack entry that it can only have 1 child
+   * and that child must be me (the current stack entry).
+   * @param {string} tagName The current stack entry's tag name.
+   * @param {amp.htmlparser.DocLocator} docLocator The line and col of where the
+   *  current stack entry appears.
+   */
+  tellParentNoSiblingsAllowed(tagName, docLocator) {
+    this.tagStack_.tellParentNoSiblingsAllowed(tagName, docLocator);
   }
 }
 
@@ -3052,6 +3159,46 @@ function validateDescendantTags(
         return;
       }
     }
+  }
+}
+
+/**
+ * Validates if the 'no siblings allowed' rule if it exists.
+ * @param {!ParsedTagSpec} parsedTagSpec
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} validationResult
+ */
+function validateNoSiblingsAllowedTags(
+    parsedTagSpec, context, validationResult) {
+  const spec = parsedTagSpec.getSpec();
+  const tagStack = context.getTagStack();
+
+  if (spec.siblingsDisallowed && context.numOfSiblings() > 0) {
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS,
+        context.getDocLocator(),
+        /* params */
+        [spec.tagName.toLowerCase(), tagStack.getParent().toLowerCase()],
+        getTagSpecUrl(spec), validationResult);
+  }
+
+  if (tagStack.parentHasChildWithNoSiblingRule() &&
+      context.numOfSiblings() > 0) {
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS,
+        tagStack.parentOnlyChildErrorLineCol(),
+        /* params */
+        [
+          tagStack.parentOnlyChildTagName().toLowerCase(),
+          tagStack.getParent().toLowerCase()
+        ],
+        getTagSpecUrl(spec), validationResult);
+  }
+
+  if (spec.siblingsDisallowed) {
+    context.tellParentNoSiblingsAllowed(spec.tagName, context.getDocLocator());
   }
 }
 
@@ -3919,6 +4066,7 @@ function validateTagAgainstSpec(
   validateParentTag(parsedSpec, context, resultForAttempt);
   validateAncestorTags(parsedSpec, context, resultForAttempt);
   validateDescendantTags(parsedSpec, context, resultForAttempt, parsedRules);
+  validateNoSiblingsAllowedTags(parsedSpec, context, resultForAttempt);
 
   // Set Descendent Constraint rules.
   const descendantTagLists = parsedRules.getDescendantTagLists();
@@ -5291,7 +5439,9 @@ amp.validator.categorizeError = function(error) {
       error.code ===
           amp.validator.ValidationError.Code.DUPLICATE_REFERENCE_POINT ||
       error.code ===
-          amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT) {
+          amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT ||
+      error.code ===
+          amp.validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS) {
     return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
   }
   // E.g. "The tag 'picture' is disallowed."
