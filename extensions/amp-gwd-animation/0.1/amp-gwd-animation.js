@@ -22,10 +22,14 @@ import {
   GWD_TIMELINE_EVENT,
   installGwdRuntimeServiceForDoc,
 } from './amp-gwd-animation-impl';
+import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 
 /** @const {string} The custom element tag name for this extension. */
 export const TAG = 'amp-gwd-animation';
+
+/** @const {string} Experiment flag name. TODO(sklobovskaya): Remove. */
+export const EXPERIMENT = TAG;
 
 /** @const {string} */
 export const GWD_PAGEDECK_ID = 'pagedeck';
@@ -97,6 +101,11 @@ export class GwdAnimation extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // TODO(sklobovskaya): Remove experiment guard.
+    user().assert(
+        isExperimentOn(this.getWin(), EXPERIMENT),
+        `Experiment ${EXPERIMENT} is disabled.`);
+
     // Ensure GWD animation runtime service factory is registered for this
     // ampdoc. In the event multiple copies of this extension exist in the doc,
     // the runtime service will only be started once.

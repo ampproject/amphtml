@@ -18,6 +18,7 @@ import {Services} from '../../../../src/services';
 import {adopt} from '../../../../src/runtime';
 import {getServiceForDoc} from '../../../../src/service';
 import {
+  EXPERIMENT as AmpGwdAnimationExperimentName,
   GWD_PAGEDECK_ID,
   TAG as AmpGwdAnimationTagName,
   AmpGwdAnimation,
@@ -30,6 +31,7 @@ import {
   AmpGwdRuntimeService,
   PlaybackCssClass,
 } from '../amp-gwd-animation-impl';
+import {toggleExperiment} from '../../../../src/experiments';
 
 adopt(window);
 
@@ -84,6 +86,9 @@ describes.sandboxed('AMP GWD runtime', {}, () => {
       let page1Elem;
 
       beforeEach(() => {
+        // TODO(sklobovskaya): Remove experiment guard.
+        toggleExperiment(env.win, AmpGwdAnimationExperimentName, true);
+
         ampdoc = env.ampdoc;
         ampdoc.getBody().innerHTML =
             `<amp-carousel id="pagedeck"

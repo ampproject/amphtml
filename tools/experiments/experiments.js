@@ -112,6 +112,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
+    id: 'amp-gwd-animation',
+    name: 'AMP GWD Animation',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXYYY',
+  },
+  {
     id: 'no-auth-in-prerender',
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
