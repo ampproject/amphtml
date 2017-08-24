@@ -121,16 +121,16 @@ All video analytics triggers expose the following variables. These variables are
 
 | Var | Type | Description |
 |--|--|--|
-| ${autoplay} | Boolean | Whether video began as an autoplay video. |
-| ${currentTime} | Number | Current playback time in seconds at the time of trigger |
-| ${duration} | Number | Total duration of the video in seconds |
-| ${height} | Number | Height of video in px |
-| ${id} | String | Id of the video element |
-| ${playedTotal} | Number | Total amount of time user has watch the video |
-| ${state} | String | One of “playing_auto”, “playing_manual”, “paused” |
-| ${width} | Number | Width of video in px |
-| ${playedRangesJson} | String | JSON representation of segments of time the user has watch the video. e.g. [[1, 10], [5, 20]] |
-| ${playedTotal} | Number | Total playing time for the session in seconds. |
+| ${autoplay} | Boolean | Indicates whether the video began as an autoplay video. |
+| ${currentTime} | Number | Specifies the current playback time (in seconds) at the time of trigger. |
+| ${duration} | Number | Specifies the total duration of the video (in seconds). |
+| ${height} | Number | Specifies the height of video (in px). |
+| ${id} | String | Specifies the ID of the video element. |
+| ${playedTotal} | Number | Specifies the total amount of time the user has watched the video. |
+| ${state} | String | Indicates the state, which can be one “playing_auto”, “playing_manual”, or “paused”. |
+| ${width} | Number | Specifies the width of video (in px). |
+| ${playedRangesJson} | String | Representssegments of time the user has watch the video (in JSON format). For example, [[1, 10], [5, 20]] |
+| ${playedTotal} | Number | Specifies the total playing time for the session (in seconds). |
 
 
 ## Video analytics variables
