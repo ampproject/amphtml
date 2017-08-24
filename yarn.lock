@@ -3278,7 +3278,7 @@ fd-slicer@~1.0.1:
   dependencies:
     pend "~1.2.0"
 
-fetch-mock@^5.12.2:
+fetch-mock@5.12.2:
   version "5.12.2"
   resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-5.12.2.tgz#07fde6b71f718328b4ce9b81c82a7c11c05d9748"
   dependencies:
@@ -4333,17 +4333,13 @@ iconv-lite@0.4.13, iconv-lite@^0.4.13:
   version "0.4.13"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.13.tgz#1f88aba4ab0b1508e8312acc39345f36e992e2f2"
 
-iconv-lite@0.4.15, iconv-lite@^0.4.5:
+iconv-lite@0.4.15, iconv-lite@^0.4.5, iconv-lite@~0.4.13:
   version "0.4.15"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.15.tgz#fe265a218ac6a57cfe854927e9d04c19825eddeb"
 
 iconv-lite@0.4.4:
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.4.tgz#e95f2e41db0735fc21652f7827a5ee32e63c83a8"
-
-iconv-lite@~0.4.13:
-  version "0.4.18"
-  resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.18.tgz#23d8656b16aae6742ac29732ea8f0336a4789cf2"
 
 ieee754@^1.1.4:
   version "1.1.8"
@@ -4982,6 +4978,12 @@ karma-html2js-preprocessor@0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/karma-html2js-preprocessor/-/karma-html2js-preprocessor-0.1.0.tgz#2f7cf881f54a5d0b72154cc6ee1241c44292c7fe"
 
+karma-ie-launcher@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/karma-ie-launcher/-/karma-ie-launcher-1.0.0.tgz#497986842c490190346cd89f5494ca9830c6d59c"
+  dependencies:
+    lodash "^4.6.1"
+
 karma-mocha-reporter@^2.2.3:
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/karma-mocha-reporter/-/karma-mocha-reporter-2.2.3.tgz#04fdda45a1d9697a73871c7472223c581701ab20"
@@ -5503,7 +5505,7 @@ lodash@4.16.2:
   version "4.16.2"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.16.2.tgz#3e626db827048a699281a8a125226326cfc0e652"
 
-lodash@^4.0.0, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.17.4, lodash@^4.2.0, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.8.0:
+lodash@^4.0.0, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.17.4, lodash@^4.2.0, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@^4.8.0:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 

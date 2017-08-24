@@ -19,7 +19,7 @@ import {
   withdrawRequest,
 } from '../../testing/test-helper';
 
-describe('amp-pixel', function() {
+describe.configure().run('amp-pixel', function() {
   this.timeout(15000);
 
   describes.integration('amp-pixel integration test', {
