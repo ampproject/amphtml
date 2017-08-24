@@ -547,7 +547,7 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
  */
 export function getDataParamsFromLinkUrl(element, opt_computeParamNameFunc) {
   if (element.tagName.toUpperCase() != 'A') {
-    return {};
+    return dict();
   }
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const params = dict();
