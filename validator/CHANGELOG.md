@@ -30,6 +30,17 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 7:00 PM, August 23, 2017 UTC
+
+Validator Version 245
+Spec Version 466
+
+Includes:
+ - Whitelist `use.typekit.net` font provider #10888 & #10889
+ - `<amp-web-push>` element #10468
+ - `<form custom-validation-reporting="interact-and-submit">` attribute #10782
+ - `<amp-sidebar>` changes #10749
+
 ### 11:00 PM, August 14, 2017 UTC
 
 Validator Version 244
