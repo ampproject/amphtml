@@ -378,33 +378,5 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         });
       });
     });
-
-    it('should be able to reply to request-position API', () => {
-      toggleExperiment(window, 'inabox-position-api', true);
-      const iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
-      const iframe = createIframeWithMessageStub(window);
-      iframe.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-      iframe.name = 'test_nomaster';
-      iframeHandler.init(iframe);
-      sandbox.stub/*OK*/(
-          iframeHandler.viewport_, 'getElementRectAsync', () => {
-            return Promise.resolve(layoutRectLtwh(1, 1, 1, 1));
-          });
-      sandbox.stub/*OK*/(iframeHandler.viewport_, 'getRect', () => {
-        return layoutRectLtwh(1, 1, 1, 1);
-      });
-      iframe.postMessageToParent({
-        type: 'get-position',
-        sentinel: 'amp3ptest' + testIndex,
-      });
-      return iframe.expectMessageFromParent('position').then(data => {
-        expect(data).to.jsonEqual({
-          targetRect: layoutRectLtwh(1, 1, 1, 1),
-          viewportRect: layoutRectLtwh(1, 1, 1, 1),
-          type: 'position',
-          sentinel: 'amp3ptest' + testIndex,
-        });
-      });
-    });
   });
 });

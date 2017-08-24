@@ -52,7 +52,7 @@ class NamedObservable {
    * @param {string} key
    * @param {*} thisArg
    * @param {!Array} args
-   * @retun {boolean} True when a callback was found and successfully executed.
+   * @return {boolean} True when a callback was found and successfully executed.
    */
   fire(key, thisArg, args) {
     if (key in this.map_) {
@@ -73,8 +73,6 @@ export class InaboxMessagingHost {
     this.positionObserver_ = new PositionObserver(win);
     this.msgObservable_ = new NamedObservable();
     this.frameOverlayManager_ = new FrameOverlayManager(win);
-    this.msgObservable_.listen(
-        MessageType.GET_POSITION, this.handlePositionRequest_);
 
     this.msgObservable_.listen(
         MessageType.SEND_POSITIONS, this.handleSendPositions_);
@@ -121,15 +119,13 @@ export class InaboxMessagingHost {
   }
 
   /**
-   *
    * @param {!HTMLIFrameElement} iframe
    * @param {!Object} request
    * @param {!Window} source
    * @param {string} origin
    * @return {boolean}
    */
-  handlePositionRequest_(iframe, request, source, origin) {
-    // Inabox should only send one request in single animationFrame
+  handleSendPositions_(iframe, request, source, origin) {
     const viewportRect = this.positionObserver_.getViewportRect();
     const targetRect =
         layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect());
@@ -139,21 +135,12 @@ export class InaboxMessagingHost {
               'viewportRect': viewportRect,
               'targetRect': targetRect,
             })), origin);
-    return true;
-  }
 
-  /**
-   * @param {!HTMLIFrameElement} iframe
-   * @param {!Object} request
-   * @param {!Window} source
-   * @param {string} origin
-   * @return {boolean}
-   */
-  handleSendPositions_(iframe, request, source, origin) {
     // To prevent double tracking for the same requester.
     if (this.registeredIframeSentinels_[request.sentinel]) {
-      return false;
+      return true;
     }
+
     this.registeredIframeSentinels_[request.sentinel] = true;
     this.positionObserver_.observe(iframe, data => {
       dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);

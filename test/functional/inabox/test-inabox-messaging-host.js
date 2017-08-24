@@ -95,7 +95,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
     });
   });
 
-  describe('get-position', () => {
+  describe('send-positions', () => {
     let postMessageSpy;
 
     beforeEach(() => {
@@ -106,6 +106,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
       sandbox.stub(host.positionObserver_, 'getViewportRect', () => {
         return layoutRectLtwh(10, 10, 100, 100);
       });
+      sandbox.stub(host.positionObserver_, 'observe', () => {});
       iframe1.getBoundingClientRect =
           () => {return layoutRectLtwh(5, 5, 20, 20);};
       host.processMessage({
@@ -113,7 +114,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         origin: 'www.example.com',
         data: 'amp-' + JSON.stringify({
           sentinel: '0-123',
-          type: 'get-position',
+          type: 'send-positions',
         }),
       });
       const message = postMessageSpy.getCall(0).args[0];

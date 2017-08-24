@@ -81,6 +81,9 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?SubscriptionApi} */
     this.inaboxPositionApi_ = null;
 
+    /** @private {boolean} */
+    this.isInaboxPositionApiInit_ = false;
+
     /** @private {?SubscriptionApi} */
     this.inaboxRequestPositionApi_ = null;
 
@@ -97,7 +100,7 @@ export class AmpAdXOriginIframeHandler {
     this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
 
     /** @private {boolean} */
-    this.positionRequest_ = false;
+    this.sendPositionPending_ = false;
   }
 
 
@@ -127,23 +130,11 @@ export class AmpAdXOriginIframeHandler {
     if (isExperimentOn(this.win_, 'inabox-position-api')) {
       this.inaboxPositionApi_ = new SubscriptionApi(
           this.iframe, MessageType.SEND_POSITIONS, true, () => {
-            this.initPositionApi_();
+            // TODO(@zhouyx): Make sendPosition_ only send to message origin iframe
+            this.sendPosition_();
+            this.registerPosition_();
           });
-
-      this.inaboxRequestPositionApi_ = new SubscriptionApi(
-          this.iframe, MessageType.GET_POSITION, true, () => {
-            if (this.positionRequest_) {
-              // Already request iframe position;
-              return;
-            }
-            this.positionRequest_ = true;
-            this.getIframePositionPromise_().then(position => {
-              this.positionRequest_ = false;
-              this.inaboxRequestPositionApi_.send(
-                  MessageType.POSITION, position);
-            });
-          });
-    }
+    };
 
     // High-fidelity positions for scrollbound animations.
     // Protected by 'amp-animation' experiment for now.
@@ -476,12 +467,30 @@ export class AmpAdXOriginIframeHandler {
   }
 
   /** @private */
-  initPositionApi_() {
+  sendPosition_() {
+    if (this.sendPositionPending_) {
+      // Only send once in single animation frame.
+      return;
+    }
+
+    this.sendPositionPending_ = true;
     this.getIframePositionPromise_().then(position => {
+      this.sendPositionPending_ = false;
       this.inaboxPositionApi_.send(MessageType.POSITION, position);
     });
+  }
+
+  /** @private */
+  registerPosition_() {
+    if (this.isInaboxPositionApiInit_) {
+      // only register to viewport scroll/resize once
+      return;
+    }
+
+    this.isInaboxPositionApiInit_ = true;
     // Send window scroll/resize event to viewport.
     this.unlisteners_.push(this.viewport_.onScroll(throttle(this.win_, () => {
+      console.log('viewport scroll!');
       this.getIframePositionPromise_().then(position => {
         this.inaboxPositionApi_.send(MessageType.POSITION, position);
       });

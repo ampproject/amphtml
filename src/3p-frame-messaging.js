@@ -47,7 +47,6 @@ export const MessageType = {
   // For amp-inabox
   SEND_POSITIONS: 'send-positions',
   POSITION: 'position',
-  GET_POSITION: 'get-position',
 
   // For amp-analytics' iframe-transport
   SEND_IFRAME_TRANSPORT_EVENTS: 'send-iframe-transport-events',
