@@ -96,8 +96,8 @@ export class ISignatureVerifier {
  *
  * Unlike an AMP service, a signature verifier is **stateful**. It maintains a
  * cache of all public keys that it has previously downloaded and imported, and
- * also keeps track of which keys and signing services have already had failed
- * download or import attempts and should not be attempted again.
+ * also keeps track of which keys and signing services have already had
+ * unsuccessful download or import attempts and should not be attempted again.
  *
  * This entire class is currently dead code in production, but will soon be
  * introduced as an experiment.

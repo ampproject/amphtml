@@ -114,7 +114,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
 
     /**
      * @param {!Array<!Keypair>} keys
-     * @param {!Promise<!JsonObject>}
+     * @return {!Promise<!JsonObject>}
      */
     const jwkSet = keys =>
         Promise.all(keys.map(key => key.jwk()))
@@ -282,7 +282,8 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature1, creative1, noop)
+                      // eslint-disable-next-line indent
+                      'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(
                         VerificationStatus.ERROR_KEY_NOT_FOUND);
