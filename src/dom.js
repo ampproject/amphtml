@@ -541,7 +541,7 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
  *   clickUrl: https://example.com/index.html?query#hash
  * }
  * @param {!Element} element
- * @param {function(strig):string=} opt_computeParamNameFunc to compute the parameters
+ * @param {function(string):string=} opt_computeParamNameFunc to compute the parameters
  *    name, get passed the camel-case parameter name.
  * @return {!JsonObject}
  */
