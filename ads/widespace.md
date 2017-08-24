@@ -34,8 +34,7 @@ limitations under the License.
     data-demo-Country="SE"
     data-demo-Region="W1U 8EW"
     data-demo-City="Stockholm"
-    data-demo-Yob="1981"
-    >
+    data-demo-Yob="1981">
 </amp-ad>
 ```
 
