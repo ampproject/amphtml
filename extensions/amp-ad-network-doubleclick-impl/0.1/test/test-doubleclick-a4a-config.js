@@ -59,6 +59,8 @@ describe('doubleclick-a4a-config', () => {
 
   describe('#doubleclickIsA4AEnabled', () => {
     it('should enable a4a when native crypto is supported', () => {
+      forceExperimentBranch(mockWin, DFP_CANONICAL_FF_EXPERIMENT_NAME,
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT);
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;

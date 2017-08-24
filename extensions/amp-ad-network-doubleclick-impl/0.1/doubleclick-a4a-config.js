@@ -83,40 +83,55 @@ export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
 /** @const {string} */
 export const BETA_EXPERIMENT_ID = '2077831';
 
-let singleton;
-
+/** @visibleForTesting */
 export class DoubleclickA4aEligibility {
   constructor() {
-    if (!singleton) {
-      singleton = this;
-    }
-
     return singleton;
   }
 
+  /**
+   * Returns whether win supports native crypto. Is just a wrapper around
+   * supportsNativeCrypto, but this way we can mock out for testing.
+   * @param {!Window} win
+   * @return {boolean}
+   */
   supportsCrypto(win) {
     return supportsNativeCrypto(win);
   }
 
+  /**
+   * Returns whether we are running on the AMP CDN.
+   * @param {!Window} win
+   * @return {boolean}
+   */
   isCdnProxy(win) {
     const googleCdnProxyRegex =
       /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/;
     return !!googleCdnProxyRegex.test(win.location.origin);
   }
 
+  /** Whether Fast Fetch is enabled
+   * @param {!Window} win
+   * @param {!Element} element
+   * @return {boolean}
+   */
   isA4aEnabled(win, element) {
-    element = element;
+    let experimentId;
     if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
         element.hasAttribute('useSameDomainRenderingUntilDeprecated') ||
         !this.supportsCrypto(win)) {
       return false;
     }
     if (!this.isCdnProxy(win)) {
-      return this.selectExperiment(win, element, [
+      experimentId = this.selectExperiment(win, element, [
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
-      ], [DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT],
-          DFP_CANONICAL_FF_EXPERIMENT_NAME);
+      ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
+      if (experimentId) {
+        addExperimentIdToElement(experimentId, element);
+      }
+      return experimentId ==
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT;
     }
     if (element.hasAttribute(BETA_ATTRIBUTE)) {
       addExperimentIdToElement(BETA_EXPERIMENT_ID, element);
@@ -124,54 +139,35 @@ export class DoubleclickA4aEligibility {
       return true;
     }
     // See if in holdback control/experiment.
-    let experimentId;
     const urlExperimentId = extractUrlExperimentId(win, element);
     if (urlExperimentId != undefined) {
       experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
       dev().info(
           TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
-      return this.addAndForceExperiment(win, element, experimentId, [
-        DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL_CONTROL,
-        DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
-        DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
-        DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
-        MANUAL_EXPERIMENT_ID,
-        DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
-        DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
-      ], DOUBLECLICK_A4A_EXPERIMENT_NAME);
     } else {
-      return this.selectExperiment(win, element, [
+      experimentId = this.selectExperiment(win, element, [
         DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
-        DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL], [
-          DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL_CONTROL,
-          DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
-          DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
-          DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
-          MANUAL_EXPERIMENT_ID,
-          DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
-          DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
-        ], DOUBLECLICK_A4A_EXPERIMENT_NAME);
+        DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
+          DOUBLECLICK_A4A_EXPERIMENT_NAME);
     }
+    if (experimentId) {
+      addExperimentIdToElement(experimentId, element);
+      forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
+    }
+    return ![DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.SFG_CONTROL_ID,
+      DOUBLECLICK_EXPERIMENT_FEATURE.SFG_EXP_ID].includes(experimentId);
   }
 
   /**
    * @param {!Window} win
    * @param {!Element} element
-   * @param {?string} experimentId
-   * @param {!Array} validBranches
+   * @param {!Array} selectionBranches
    * @param {!string} experimentName}
+   * @return {?string} Experiment branch ID.
    */
-  addAndForceExperiment(win, element, experimentId, validBranches,
-                        experimentName) {
-    if (experimentId) {
-      addExperimentIdToElement(experimentId, element);
-      forceExperimentBranch(win, experimentName, experimentId);
-    }
-    return experimentId ? !!validBranches.includes(experimentId) : true;
-  }
-
-  selectExperiment(win, element, selectionBranches, validBranches,
-                   experimentName) {
+  selectExperiment(win, element, selectionBranches, experimentName) {
     const experimentInfoMap =
         /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[experimentName] = {
@@ -179,11 +175,11 @@ export class DoubleclickA4aEligibility {
       branches: selectionBranches,
     };
     randomlySelectUnsetExperiments(win, experimentInfoMap);
-    const experimentId = getExperimentBranch(win, experimentName);
-    return this.addAndForceExperiment(
-        win, element, experimentId, validBranches, experimentName);
+    return getExperimentBranch(win, experimentName);
   }
 }
+
+const singleton = new DoubleclickA4aEligibility();
 
 /**
  * @param {!Window} win
@@ -191,8 +187,7 @@ export class DoubleclickA4aEligibility {
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element) {
-  const eligibilityChecker = new DoubleclickA4aEligibility();
-  return eligibilityChecker.isA4aEnabled(win, element);
+  return singleton.isA4aEnabled(win, element);
 }
 
 /**
