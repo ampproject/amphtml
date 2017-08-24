@@ -254,27 +254,37 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(goBackStub).to.be.calledOnce;
     });
 
-    it('should implement setState', () => {
-      const spy = sandbox.spy();
+    it('should implement setState() and pushState()', () => {
+      const setStateSpy = sandbox.spy();
+      const pushStateSpy = sandbox.spy();
       window.services.bind = {
         obj: {
-          setStateWithExpression: spy,
+          setStateWithExpression: setStateSpy,
+          pushStateWithExpression: pushStateSpy,
         },
       };
 
       const args = {};
       args[OBJECT_STRING_ARGS_KEY] = '{foo: 123}';
 
-      const invocation = {
+      standardActions.handleAmpTarget({
         method: 'setState',
         args,
         target: ampdoc,
         satisfiesTrust: () => true,
-      };
-      standardActions.handleAmpTarget(invocation);
+      });
+      standardActions.handleAmpTarget({
+        method: 'pushState',
+        args,
+        target: ampdoc,
+        satisfiesTrust: () => true,
+      });
       return Services.bindForDocOrNull(ampdoc).then(() => {
-        expect(spy).to.be.calledOnce;
-        expect(spy).to.be.calledWith('{foo: 123}');
+        expect(setStateSpy).to.be.calledOnce;
+        expect(setStateSpy).to.be.calledWith('{foo: 123}');
+
+        expect(pushStateSpy).to.be.calledOnce;
+        expect(pushStateSpy).to.be.calledWith('{foo: 123}');
       });
     });
 

@@ -33,7 +33,6 @@ describes.fakeWin('History', {
     location: '#first',
   },
 }, env => {
-
   let sandbox;
   let clock;
   let bindingMock;
