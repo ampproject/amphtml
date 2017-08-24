@@ -129,12 +129,10 @@ export class InaboxMessagingHost {
     const viewportRect = this.positionObserver_.getViewportRect();
     const targetRect =
         layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect());
-    source./*OK*/postMessage(
-        serializeMessage(MessageType.POSITION, request.sentinel,
-            dict({
-              'viewportRect': viewportRect,
-              'targetRect': targetRect,
-            })), origin);
+    this.sendPosition_(request, source, origin, dict({
+      'viewportRect': viewportRect,
+      'targetRect': targetRect,
+    }));
 
     // To prevent double tracking for the same requester.
     if (this.registeredIframeSentinels_[request.sentinel]) {
@@ -143,12 +141,23 @@ export class InaboxMessagingHost {
 
     this.registeredIframeSentinels_[request.sentinel] = true;
     this.positionObserver_.observe(iframe, data => {
-      dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
-      source./*OK*/postMessage(
-          serializeMessage(MessageType.POSITION, request.sentinel, data),
-          origin);
+      this.sendPosition_(request, source, origin, data);
     });
     return true;
+  }
+
+  /**
+   *
+   * @param {!Object} request
+   * @param {!Window} source
+   * @param {string} origin
+   * @param {Object} data
+   */
+  sendPosition_(request, source, origin, data) {
+    dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
+    source./*OK*/postMessage(
+        serializeMessage(MessageType.POSITION, request.sentinel, data),
+        origin);
   }
 
   /**

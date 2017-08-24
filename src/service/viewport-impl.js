@@ -365,6 +365,8 @@ export class Viewport {
 
   /**
    * Returns the rect of the element within the document.
+   * Note that this function should be called in vsync measure. Please consider
+   * using `getLayoutRectAsync` instead.
    * @param {!Element} el
    * @return {!../layout-rect.LayoutRectDef}}
    */
@@ -388,7 +390,7 @@ export class Viewport {
   }
 
   /**
-   * Returns the rect of the element within the document async
+   * Returns a promise that resolves with latest rect of the element within the document.
    * @param {!Element} el
    * @return {!Promise<!../layout-rect.LayoutRectDef>}
    */
@@ -416,7 +418,7 @@ export class Viewport {
   }
 
   /**
-   * Returns a promise with rect of the element within the viewport async.
+   * Returns a promise that resolve with latest rect of the element within the viewport.
    * @param {!Element} el
    * @return {!Promise<?../layout-rect.LayoutRectDef>}}
    */
