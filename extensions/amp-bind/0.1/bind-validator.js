@@ -34,10 +34,11 @@ let PropertyRulesDef;
  * @private {Object<string, ?PropertyRulesDef>}
  */
 const GLOBAL_PROPERTY_RULES = {
-  'text': null,
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
+  'hidden': null,
+  'text': null,
 };
 
 /**
@@ -302,7 +303,6 @@ function createElementRules_() {
       'checked': null,
       'disabled': null,
       'height': null,
-      'hidden': null,
       'inputmode': null,
       'max': null,
       'maxlength': null,
