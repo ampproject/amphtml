@@ -568,7 +568,7 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Rendering fails => return false
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
-    this.adPromise_ = this.keysetPromise_
+    this.adPromise_ = Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
         .then(() => {
           checkStillCurrent();
           // See if experiment that delays request until slot is within
@@ -672,10 +672,12 @@ export class AmpA4A extends AMP.BaseElement {
             this.creativeBody_ = bytes;
           }
           this.protectedEmitLifecycleEvent_('adResponseValidateStart');
-          return signatureVerifierFor(this.win)
-              .verify(bytes, headers, (eventName, extraVariables) => {
-                this.protectedEmitLifecycleEvent_(eventName, extraVariables);
-              })
+          return this.keysetPromise_
+              .then(() => signatureVerifierFor(this.win)
+                  .verify(bytes, headers, (eventName, extraVariables) => {
+                    this.protectedEmitLifecycleEvent_(
+                        eventName, extraVariables);
+                  }))
               .then(status => {
                 if (getMode().localDev &&
                     this.element.getAttribute('type') == 'fake') {

@@ -208,7 +208,8 @@ export class SignatureVerifier {
     const match = signatureFormat.exec(headerValue);
     if (!match) {
       // TODO(@taymonbeal, #9274): replace this with real error reporting
-      user().error('AMP-A4A', `Invalid signature header: ${headerValue}`);
+      user().error(
+          'AMP-A4A', `Invalid signature header: ${headerValue.split(':')[0]}`);
       return Promise.resolve(VerificationStatus.ERROR_SIGNATURE_MISMATCH);
     }
     return this.verifyCreativeAndSignature(
@@ -246,6 +247,9 @@ export class SignatureVerifier {
       return Promise.resolve(VerificationStatus.UNVERIFIED);
     }
     const signer = this.signers_[signingServiceName];
+    dev().assert(
+        signer, 'Keyset for service %s not loaded before verification',
+        signingServiceName);
     return signer.promise.then(success => {
       if (!success) {
         // The public keyset couldn't be fetched and imported. Probably a
@@ -292,6 +296,7 @@ export class SignatureVerifier {
                   });
                   return VerificationStatus.OK;
                 } else {
+                  // TODO(@taymonbeal, #11090): add CSI ping here
                   return VerificationStatus.ERROR_SIGNATURE_MISMATCH;
                 }
               },
@@ -328,16 +333,20 @@ export class SignatureVerifier {
    * @private
    */
   fetchAndAddKeys_(keys, signingServiceName, keypairId) {
-    // TODO(@erwinmombay, #11081): eslint-disable-line needed due to linter bug
     let url = this.signingServerURLs_[signingServiceName];
     if (keypairId != null) {
       url += '?kid=' + encodeURIComponent(keypairId);
     }
+    // TODO(@taymonbeal, #11088): consider a timeout on this fetch
     return Services.xhrFor(this.win_)
-        .fetchJson(
-            url, // eslint-disable-line indent
-            {mode: 'cors', method: 'GET', ampCors: false, credentials: 'omit'})
-        .then(
+        .fetchJson(url, {
+          mode: 'cors',
+          method: 'GET',
+          // This should be cached across publisher domains, so don't append
+          // __amp_source_origin to the URL.
+          ampCors: false,
+          credentials: 'omit',
+        }).then(
             response => { // eslint-disable-line indent
               // These are assertions on signing service behavior required by
               // the spec. However, nothing terrible happens if they aren't met
