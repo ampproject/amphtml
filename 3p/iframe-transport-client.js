@@ -89,7 +89,7 @@ export class IframeTransportClient {
    * @param {!Object<string,string>} response
    */
   sendMessageToCreative(transportId, response) {
-    this.client_.sendMessage(MessageType.IFRAME_TRANSPORT_RESPONSE,
+    this.client_./*OK*/sendMessage(MessageType.IFRAME_TRANSPORT_RESPONSE,
         /** @type {JsonObject} */({transportId, message: response}));
   }
 

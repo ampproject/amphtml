@@ -26,6 +26,9 @@ import {setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 
+/** @private @const {string} */
+const TAG_ = 'amp-analytics.IframeTransport';
+
 /** @typedef {{
  *    frame: Element,
  *    sentinel: !string,
@@ -80,20 +83,21 @@ export class IframeTransport {
       frameData = IframeTransport.getFrameData(this.type_);
       ++(frameData.usageCount);
     } else {
-      frameData = this.createCrossDomainIframe(opt_processResponse);
+      frameData = this.createCrossDomainIframe();
       this.win_.document.body.appendChild(frameData.frame);
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
+    if (opt_processResponse) {
+      IframeTransport.responseProcessors_[this.id_] = opt_processResponse;
+    }
   }
 
   /**
-   * Create a cross-domain iframe for third-party vendor anaytlics
-   * @param {function(!JsonObject)=} opt_processResponse An optional
-   * function to receive any response messages back from the cross-domain iframe
+   * Create a cross-domain iframe for third-party vendor analytics
    * @return {!FrameData}
    * @VisibleForTesting
    */
-  createCrossDomainIframe(opt_processResponse) {
+  createCrossDomainIframe() {
     // Explanation of IDs:
     // Each instance of IframeTransport (owned by a specific amp-analytics
     // tag, in turn owned by a specific creative) has an ID in this._id.
@@ -134,15 +138,20 @@ export class IframeTransport {
           /** @type {!HTMLIFrameElement} */
           (frame)),
     });
-    if (opt_processResponse) {
-      frameData.responseMessageUnlisten = listenFor(frameData.frame,
-          MessageType.IFRAME_TRANSPORT_RESPONSE, response => {
-            dev().assert(response && response['message'],
-                'Received empty response from 3p analytics frame');
-            opt_processResponse(response['message']);
-          },
-          true);
-    }
+    frameData.responseMessageUnlisten = listenFor(frameData.frame,
+        MessageType.IFRAME_TRANSPORT_RESPONSE, response => {
+          dev().assert(response && response['message'],
+              'Received empty response from 3p analytics frame');
+          const responseProcessor = IframeTransport.responseProcessors_[
+              response['transportId']];
+          if (!responseProcessor) {
+            dev().warn(TAG_,'Received a response, but no response processor' +
+              ' was configured');
+            return;
+          }
+          responseProcessor(/** @type {!JsonObject} */ (response['message']));
+        },
+        true);
     IframeTransport.crossDomainIframes_[this.type_] = frameData;
     return frameData;
   }
@@ -165,6 +174,7 @@ export class IframeTransport {
       return;
     }
     ampDoc.body.removeChild(frameData.frame);
+    frameData.responseMessageUnlisten();
     delete IframeTransport.crossDomainIframes_[type];
   }
 
@@ -246,3 +256,6 @@ IframeTransport.crossDomainIframes_ = {};
 
 /** @private {number} */
 IframeTransport.nextId_ = 0;
+
+/** @private {Object<string, function(!JsonObject)>} */
+IframeTransport.responseProcessors_ = {};

@@ -227,7 +227,12 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport'], response => {
-          //TODO(jonkeller)
+          // Add this response to the response map, for use by amp-ad-exit
+          const frameType = this.element.getAttribute('type');
+          const creativeUrl = /** @type {string} */ (this.win.document.baseURI);
+          const map = this.getAmpDoc().getIframeTransportResponses();
+          map[frameType] = map[frameType] || {};
+          map[frameType][creativeUrl] = response;
         });
     }
 

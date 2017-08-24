@@ -16,6 +16,7 @@
 
 import {user} from '../../../src/log';
 import {FilterType} from './filters/filter';
+import {ANALYTICS_CONFIG} from '../../amp-analytics/0.1/vendors';
 
 /**
  * @typedef {{
@@ -37,7 +38,16 @@ export let AmpAdExitConfig;
 export let NavigationTargetConfig;
 
 /**
- * @typedef {!Object<string, {defaultValue: (string|number|boolean)}>}
+ * @typedef {{
+ *   defaultValue: (string|number|boolean),
+ *   vendorAnalyticsSource: (string|undefined),
+ *   vendorAnalyticsResponseKey: (string|undefined)
+ * }}
+ */
+export let Variable;
+
+/**
+ * @typedef {!Object<string, !Variable>}
  */
 export let Variables;
 
@@ -135,6 +145,14 @@ function assertTarget(name, target, config) {
       user().assert(
           pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
           variable, pattern);
+      const vendor = target.vars[variable]['vendorAnalyticsSource'];
+      if (vendor) {
+        user().assert(ANALYTICS_CONFIG[vendor], 'Unknown vendor: ' + vendor);
+        user().assert(
+            target.vars[variable]['vendorAnalyticsResponseKey'],
+            'Variable \'%s\': If vendorAnalyticsSource is defined then ' +
+            'vendorAnalyticsResponseKey must also be defined', variable);
+      }
     }
   }
 }
