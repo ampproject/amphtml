@@ -123,8 +123,8 @@ describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
       });
     });
 
-    describe.configure().run('from in the PRERENDER state', () => {
-      describe.configure().run('for prerenderable element', () => {
+    describe('from in the PRERENDER state', () => {
+      describe('for prerenderable element', () => {
         beforeEach(() => {
           prerenderAllowed.returns(true);
           setupSpys();
@@ -186,7 +186,7 @@ describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
         });
       });
 
-      describe.configure().run('for non-prerenderable element', () => {
+      describe('for non-prerenderable element', () => {
         beforeEach(() => {
           setupSpys();
         });
@@ -248,7 +248,7 @@ describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
       });
     });
 
-    describe.configure().run('from in the VISIBLE state', () => {
+    describe('from in the VISIBLE state', () => {
       beforeEach(() => {
         viewer.receiveMessage('visibilitychange',
             {state: VisibilityState.VISIBLE});
@@ -298,7 +298,7 @@ describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
       });
     });
 
-    describe.configure().run('from in the HIDDEN state', () => {
+    describe('from in the HIDDEN state', () => {
       beforeEach(() => {
         viewer.receiveMessage('visibilitychange',
             {state: VisibilityState.VISIBLE});
@@ -352,7 +352,7 @@ describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
       });
     });
 
-    describe.configure().run('from in the INACTIVE state', () => {
+    describe('from in the INACTIVE state', () => {
       beforeEach(() => {
         viewer.receiveMessage('visibilitychange',
             {state: VisibilityState.VISIBLE});
@@ -408,7 +408,7 @@ describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
       });
     });
 
-    describe.configure().run('from in the PAUSED state', () => {
+    describe('from in the PAUSED state', () => {
       beforeEach(() => {
         viewer.receiveMessage('visibilitychange',
             {state: VisibilityState.VISIBLE});
