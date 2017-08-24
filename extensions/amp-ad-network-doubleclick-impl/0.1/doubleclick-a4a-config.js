@@ -25,7 +25,7 @@ import {
   extractUrlExperimentId,
   addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
+import {supportsNativeCrypto} from '../../../ads/google/a4a/utils';
 import {
   /* eslint no-unused-vars: 0 */ ExperimentInfo,
   getExperimentBranch,
@@ -36,6 +36,9 @@ import {dev} from '../../../src/log';
 
 /** @const {string} */
 export const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
+
+/** @const {string} */
+export const DFP_CANONICAL_FF_EXPERIMENT_NAME = 'expDfpCanonicalFf';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -48,11 +51,12 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   DELAYED_REQUEST: '21060729',
   SFG_CONTROL_ID: '21060730',
   SFG_EXP_ID: '21060731',
+  SRA_CONTROL: '117152666',
   SRA: '117152667',
   HOLDBACK_INTERNAL_CONTROL: '2092613',
   HOLDBACK_INTERNAL: '2092614',
   CANONICAL_CONTROL: '21060932',
-  CANONICAL_EXPERIMENT: '21060933'
+  CANONICAL_EXPERIMENT: '21060933',
 };
 
 /** @const @type {!Object<string,?string>} */
@@ -69,7 +73,7 @@ export const URL_EXPERIMENT_MAPPING = {
   '5': DOUBLECLICK_EXPERIMENT_FEATURE.SFG_CONTROL_ID,
   '6': DOUBLECLICK_EXPERIMENT_FEATURE.SFG_EXP_ID,
   // SRA
-  '7': '117152666',
+  '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
   '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
 };
 
@@ -79,60 +83,114 @@ export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
 /** @const {string} */
 export const BETA_EXPERIMENT_ID = '2077831';
 
+let singleton;
+
+export class DoubleclickA4aEligibility {
+  constructor() {
+    if (!singleton) {
+      singleton = this;
+    }
+
+    return singleton;
+  }
+
+  supportsCrypto(win) {
+    return supportsNativeCrypto(win);
+  }
+
+  isCdnProxy(win) {
+    const googleCdnProxyRegex =
+      /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/;
+    return !!googleCdnProxyRegex.test(win.location.origin);
+  }
+
+  isA4aEnabled(win, element) {
+    element = element;
+    if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
+        element.hasAttribute('useSameDomainRenderingUntilDeprecated') ||
+        !this.supportsCrypto(win)) {
+      return false;
+    }
+    if (!this.isCdnProxy(win)) {
+      return this.selectExperiment(win, element, [
+        DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
+        DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
+      ], [DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT],
+          DFP_CANONICAL_FF_EXPERIMENT_NAME);
+    }
+    if (element.hasAttribute(BETA_ATTRIBUTE)) {
+      addExperimentIdToElement(BETA_EXPERIMENT_ID, element);
+      dev().info(TAG, `beta forced a4a selection ${element}`);
+      return true;
+    }
+    // See if in holdback control/experiment.
+    let experimentId;
+    const urlExperimentId = extractUrlExperimentId(win, element);
+    if (urlExperimentId != undefined) {
+      experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
+      dev().info(
+          TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+      return this.addAndForceExperiment(win, element, experimentId, [
+        DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL_CONTROL,
+        DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
+        DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
+        DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
+        MANUAL_EXPERIMENT_ID,
+        DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
+        DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
+      ], DOUBLECLICK_A4A_EXPERIMENT_NAME);
+    } else {
+      return this.selectExperiment(win, element, [
+        DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
+        DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL], [
+          DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL_CONTROL,
+          DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
+          DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
+          DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
+          MANUAL_EXPERIMENT_ID,
+          DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
+          DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
+        ], DOUBLECLICK_A4A_EXPERIMENT_NAME);
+    }
+  }
+
+  /**
+   * @param {!Window} win
+   * @param {!Element} element
+   * @param {?string} experimentId
+   * @param {!Array} validBranches
+   * @param {!string} experimentName}
+   */
+  addAndForceExperiment(win, element, experimentId, validBranches, experimentName) {
+    if (experimentId) {
+      addExperimentIdToElement(experimentId, element);
+      forceExperimentBranch(win, experimentName, experimentId);
+    }
+    return experimentId ? !!validBranches.includes(experimentId) : true;
+  }
+
+  selectExperiment(win, element, selectionBranches, validBranches, experimentName) {
+    const experimentInfoMap =
+        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+    experimentInfoMap[experimentName] = {
+      isTrafficEligible: () => true,
+      branches: selectionBranches,
+    };
+    randomlySelectUnsetExperiments(win, experimentInfoMap);
+    const experimentId = getExperimentBranch(win, experimentName);
+    return this.addAndForceExperiment(
+        win, element, experimentId, validBranches, experimentName);
+  }
+}
+
 /**
  * @param {!Window} win
  * @param {!Element} element
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element) {
-  if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
-      element.hasAttribute('useSameDomainRenderingUntilDeprecated') ||
-      !isGoogleAdsA4AValidEnvironment(win)) {
-    return false;
-  }
-  if (element.hasAttribute(BETA_ATTRIBUTE)) {
-    addExperimentIdToElement(BETA_EXPERIMENT_ID, element);
-    dev().info(TAG, `beta forced a4a selection ${element}`);
-    return true;
-  }
-  // See if in holdback control/experiment.
-  let experimentId;
-  const urlExperimentId = extractUrlExperimentId(win, element);
-  if (urlExperimentId != undefined) {
-    experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-    dev().info(
-        TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
-  } else {
-    // Not set via url so randomly set.
-    const experimentInfoMap =
-        /** @type {!Object<string, !ExperimentInfo>} */ ({});
-    experimentInfoMap[DOUBLECLICK_A4A_EXPERIMENT_NAME] = {
-      isTrafficEligible: () => true,
-      branches: [DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
-                 DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
-                 DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
-                 DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT
-                ],
-    };
-    // Note: Because the same experimentName is being used everywhere here,
-    // randomlySelectUnsetExperiments won't add new IDs if
-    // maybeSetExperimentFromUrl has already set something for this
-    // experimentName.
-    randomlySelectUnsetExperiments(win, experimentInfoMap);
-    experimentId = getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME);
-    dev().info(
-        TAG, `random experiment selection ${urlExperimentId}: ${experimentId}`);
-  }
-  if (experimentId) {
-    addExperimentIdToElement(experimentId, element);
-    forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
-  }
-  return ![DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
-           DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
-           DOUBLECLICK_EXPERIMENT_FEATURE.SFG_CONTROL_ID,
-           DOUBLECLICK_EXPERIMENT_FEATURE.SFG_EXP_ID,
-           DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT
-          ].includes(experimentId);
+  const eligibilityChecker = new DoubleclickA4aEligibility();
+  return eligibilityChecker.isA4aEnabled(win, element);
 }
 
 /**
