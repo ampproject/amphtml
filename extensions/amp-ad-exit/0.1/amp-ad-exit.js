@@ -18,12 +18,12 @@ import {makeClickDelaySpec} from './filters/click-delay';
 import {assertConfig, TransportMode} from './config';
 import {createFilter} from './filters/factory';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
+import {
+  getService,
+} from '../../../src/service';
 import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
-import {
-  IframeTransportResponses,
-} from '../../amp-analytics/0.1/iframe-transport-responses';
 
 const TAG = 'amp-ad-exit';
 
@@ -104,7 +104,9 @@ export class AmpAdExit extends AMP.BaseElement {
     };
     if (target.vars) {
       const uri = /** @type {string} */ (this.win.document.baseURI);
-      const all3pResponses = IframeTransportResponses.getResponses();
+      const responseService =
+        getService(this.getAmpDoc().win, 'iframe-transport-responses');
+      const all3pResponses = responseService.getResponses();
 
       for (const customVarName in target.vars) {
         if (customVarName[0] == '_') {
