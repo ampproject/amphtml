@@ -39,7 +39,7 @@ describe.configure().retryOnSaucelabs().run('Old Opacity Boilerplate', () => {
 });
 
 
-describe('New Visibility Boilerplate', () => {
+describe.configure().run('New Visibility Boilerplate', () => {
 
   let fixture;
   beforeEach(() => {
