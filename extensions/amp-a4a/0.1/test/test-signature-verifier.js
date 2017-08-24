@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// TODO(@erwinmombay, #11081): eslint-disable-next-line needed due to linter bug
+// TODO(@jridgewell, #11081): fix linter to allow fixing weird indentation
 
 import * as sinon from 'sinon';
 
@@ -53,8 +53,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
     verifier.loadKeyset('service-1');
     return verifier
         .verifyCreativeAndSignature(
-            // eslint-disable-next-line indent
-            'service-1', 'key-1', creative1, new Uint8Array(256), noop)
+        'service-1', 'key-1', creative1, new Uint8Array(256), noop)
         .then(status => {
           expect(status).to.equal(VerificationStatus.UNVERIFIED);
           expect(env.fetchMock.called()).to.be.false;
@@ -155,8 +154,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
           const lifecycleSpy = env.sandbox.spy();
           return verifier
               .verifyCreativeAndSignature(
-                  // eslint-disable-next-line indent
-                  'service-1', 'key-1', signature, creative1, lifecycleSpy)
+              'service-1', 'key-1', signature, creative1, lifecycleSpy)
               .then(status => {
                 expect(status).to.equal(VerificationStatus.OK);
                 expect(lifecycleSpy).to.be.calledOnce;
@@ -177,8 +175,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                      // eslint-disable-next-line indent
-                      'service-1', 'key-1', signature1, creative1, noop)
+                  'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.OK);
                     verifier.loadKeyset('service-1');
@@ -197,8 +194,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                      // eslint-disable-next-line indent
-                      'service-1', 'key-1', signature1, creative1, noop)
+                  'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.OK);
                     env.fetchMock.getOnce(
@@ -221,8 +217,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
             verifier.loadKeyset('service-1');
             return verifier
                 .verifyCreativeAndSignature(
-                    // eslint-disable-next-line indent
-                    'service-1', 'key-1', signature1, creative1, noop)
+                'service-1', 'key-1', signature1, creative1, noop)
                 .then(status => {
                   expect(status).to.equal(VerificationStatus.OK);
                   env.fetchMock.getOnce(
@@ -282,8 +277,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                      // eslint-disable-next-line indent
-                      'service-1', 'key-1', signature1, creative1, noop)
+                  'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(
                         VerificationStatus.ERROR_KEY_NOT_FOUND);
@@ -292,8 +286,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
                         verifier.verifyCreativeAndSignature(
                             'service-1', 'key-1', signature2, creative2, noop))
                         .to.eventually.equal(
-                            // eslint-disable-next-line indent
-                            VerificationStatus.ERROR_KEY_NOT_FOUND);
+                        VerificationStatus.ERROR_KEY_NOT_FOUND);
                   });
             })));
 
@@ -343,8 +336,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                      // eslint-disable-next-line indent
-                      'service-1', 'key-1', signature1, creative1, noop)
+                  'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.UNVERIFIED);
                     verifier.loadKeyset('service-1');
@@ -365,8 +357,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                      // eslint-disable-next-line indent
-                      'service-1', 'key-1', signature1, creative1, noop)
+                  'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.UNVERIFIED);
                     verifier.loadKeyset('service-1');
@@ -387,8 +378,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                      // eslint-disable-next-line indent
-                      'service-1', 'key-1', signature1, creative1, noop)
+                  'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.UNVERIFIED);
                     verifier.loadKeyset('service-1');
@@ -425,8 +415,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                      // eslint-disable-next-line indent
-                      'service-1', 'key-1', signature1, creative1, noop)
+                  'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.UNVERIFIED);
                     verifier.loadKeyset('service-1');
