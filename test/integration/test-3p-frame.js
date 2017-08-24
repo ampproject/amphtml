@@ -18,6 +18,7 @@ import {
   addDataAndJsonAttributes_,
   getIframe,
   getBootstrapBaseUrl,
+  getDefaultBootstrapBaseUrl,
   getSubDomain,
   preloadBootstrap,
   resetCountForTesting,
@@ -268,6 +269,17 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     window.AMP_MODE = {};
     expect(getBootstrapBaseUrl(window)).to.match(
         /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/);
+  });
+
+  it('should return a stable URL in getBootstrapBaseUrl', () => {
+    window.AMP_MODE = {};
+    expect(getBootstrapBaseUrl(window)).to.equal(getBootstrapBaseUrl(window));
+  });
+
+  it('should return a stable URL in getDefaultBootstrapBaseUrl', () => {
+    window.AMP_MODE = {};
+    expect(getDefaultBootstrapBaseUrl(window)).to.equal(
+        getDefaultBootstrapBaseUrl(window));
   });
 
   it('should pick the right bootstrap url (custom)', () => {
