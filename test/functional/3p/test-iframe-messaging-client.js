@@ -49,10 +49,10 @@ describes.realWin('iframe-messaging-client', {}, env => {
     });
   });
 
-  describe('makeRequestOnce', () => {
+  describe('requestOnce', () => {
     it('should unlisten after message received', () => {
       const callbackSpy = sandbox.spy();
-      client.makeRequestOnce('request-type', 'response-type', callbackSpy);
+      client.requestOnce('request-type', 'response-type', callbackSpy);
       expect(postMessageStub).to.be.calledWith(serializeMessage(
           'request-type', 'sentinel-123', {}, '$internalRuntimeVersion$'));
 
