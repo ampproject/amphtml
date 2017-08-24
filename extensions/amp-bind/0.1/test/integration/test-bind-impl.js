@@ -99,7 +99,7 @@ function waitForEvent(env, name) {
   });
 }
 
-describe.configure().ifIe().ifNewChrome().run('Bind', function() {
+describe.configure().ifNewChrome().run('Bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
@@ -131,7 +131,7 @@ describe.configure().ifIe().ifNewChrome().run('Bind', function() {
         });
       });
 
-      describe.configure().run('with Bind in parent window', () => {
+      describe('with Bind in parent window', () => {
         let parentBind;
         let parentContainer;
 
