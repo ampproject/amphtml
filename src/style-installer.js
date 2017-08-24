@@ -143,13 +143,8 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
 
   // Check if it has already been created or discovered.
   if (key) {
-    if (styleMap[key]) {
-      return styleMap[key];
-    }
-    // Check if the style has already been added by the server layout.
-    const existing = cssRoot./*OK*/querySelector(`style[${key}]`);
+    const existing = getExistingStyleElement(cssRoot, styleMap, key);
     if (existing) {
-      styleMap[key] = existing;
       return existing;
     }
   }
@@ -165,7 +160,8 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
     style.setAttribute('amp-runtime', '');
   } else if (isExtCss) {
     style.setAttribute('amp-extension', ext || '');
-    afterElement = dev().assertElement(styleMap['amp-runtime']);
+    afterElement = dev().assertElement(getExistingStyleElement(
+        cssRoot, styleMap, 'amp-runtime'));
   } else {
     if (ext) {
       style.setAttribute(ext, '');
@@ -177,6 +173,28 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
     styleMap[key] = style;
   }
   return style;
+}
+
+
+/**
+ * @param {!Element|!ShadowRoot} cssRoot
+ * @param {!Object<string, !Element>} styleMap
+ * @param {string} key
+ * @return {?Element}
+ */
+function getExistingStyleElement(cssRoot, styleMap, key) {
+  // Already cached.
+  if (styleMap[key]) {
+    return styleMap[key];
+  }
+  // Check if the style has already been added by the server layout.
+  const existing = cssRoot./*OK*/querySelector(`style[${key}]`);
+  if (existing) {
+    styleMap[key] = existing;
+    return existing;
+  }
+  // Nothing found.
+  return null;
 }
 
 

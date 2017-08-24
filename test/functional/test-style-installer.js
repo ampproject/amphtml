@@ -259,6 +259,22 @@ describe('Styles', () => {
         });
       });
 
+      it('should re-create extension style w/o cache', () => {
+        const runtimeStyle = doc.createElement('style');
+        runtimeStyle.setAttribute('amp-runtime', '');
+        head.appendChild(runtimeStyle);
+        // Additional element to test the correct insertion order.
+        head.appendChild(doc.createElement('link'));
+        const promise = installStylesAsPromise('other{}', false, 'amp-ext1');
+        return promise.then(styleEl => {
+          expect(styleEl.getAttribute('amp-extension')).to.equal('amp-ext1');
+          expect(styleEl.textContent).to.match(/other\s*\{/);
+          expect(head.querySelectorAll('style[amp-extension=amp-ext1]'))
+              .to.have.length(1);
+          expect(styleEl.previousElementSibling).to.equal(runtimeStyle);
+        });
+      });
+
       it('should use the cached extension style', () => {
         const cachedExtStyle = doc.createElement('style');
         cachedExtStyle.textContent = 'ext1{}';
