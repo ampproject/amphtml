@@ -56,11 +56,19 @@ var commonTestPaths = [
   },
 ];
 
-var testPaths = commonTestPaths.concat([
+var basicTestPaths = [
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
-]);
+];
+
+var testPaths = commonTestPaths.concat(basicTestPaths);
+
+var a4aTestPaths = [
+  'extensions/amp-a4a/**/test/**/*.js',
+  'extensions/amp-ad-network-*/**/test/**/*.js',
+  'ads/google/a4a/test/*.js'
+];
 
 var unitTestPaths = commonTestPaths.concat([
   'test/functional/**/*.js',
@@ -77,7 +85,9 @@ var integrationTestPaths = commonTestPaths.concat([
 /** @const  */
 module.exports = {
   commonTestPaths: commonTestPaths,
+  basicTestPaths: basicTestPaths,
   testPaths: testPaths,
+  a4aTestPaths: a4aTestPaths,
   unitTestPaths: unitTestPaths,
   integrationTestPaths: integrationTestPaths,
   lintGlobs: [

@@ -27,6 +27,7 @@ var util = require('gulp-util');
 var webserver = require('gulp-webserver');
 var app = require('../test-server').app;
 var karmaDefault = require('./karma.conf');
+var shuffleSeed = require('shuffle-seed');
 
 
 const green = util.colors.green;
@@ -134,7 +135,8 @@ function printArgvMessages() {
     unit: 'Running only the unit tests. Requires ' +
         cyan('gulp css') +  ' to have been run first.',
     randomize: 'Randomizing the order in which tests are run.',
-    testlist: 'Running the tests listed in ' + cyan(argv.testlist),
+    a4a: 'Running only A4A tests.',
+    seed: 'Randomizing test order with seed ' + cyan(argv.seed) + '.',
     compiled:  'Running tests against minified code.',
     grep: 'Only running tests that match the pattern "' +
         cyan(argv.grep) + '".'
@@ -198,42 +200,28 @@ gulp.task('test', 'Runs tests',
   } else if (argv.unit) {
     c.files = config.unitTestPaths;
   } else if (argv.randomize || argv.glob || argv.a4a) {
-    var testPaths;
-    if (argv.a4a) {
-      testPaths = [
-        'extensions/amp-a4a/**/test/**/*.js',
-        'extensions/amp-ad-network-*/**/test/**/*.js',
-        'ads/google/a4a/test/*.js'
-      ];
-    } else {
-      testPaths = [
-        'test/**/*.js',
-        'ads/**/test/test-*.js',
-        'extensions/**/test/**/*.js',
-      ];
-    }
+    const testPaths = argv.a4a ? config.a4aTestPaths : config.basicTestPaths;
 
     var testFiles = [];
-
     for (var index in testPaths) {
       testFiles = testFiles.concat(glob.sync(testPaths[index]));
     }
 
-    if (argv.randomize) {
-      testFiles = shuffleArray(testFiles);
+    if (argv.randomize || argv.a4a) {
+      const seed = argv.seed || Math.random();
+      util.log(
+          util.colors.yellow('Randomizing:'),
+          util.colors.cyan('Seeding with value', seed));
+      util.log(
+          util.colors.yellow('To rerun same ordering, append'),
+          util.colors.cyan(`--seed=${seed}`),
+          util.colors.yellow('to your invocation of'),
+          util.colors.cyan('gulp test'));
+      testFiles = shuffleSeed.shuffle(testFiles, seed);
     }
 
-    testFiles.splice(testFiles.indexOf('test/_init_tests.js'),1);
+    testFiles.splice(testFiles.indexOf('test/_init_tests.js'), 1);
     c.files = config.commonTestPaths.concat(testFiles);
-
-    util.log(util.colors.blue(JSON.stringify(c.files)));
-    util.log(yellow("Save the above files in a .json file to reuse"));
-
-  } else if (argv.testlist) {
-    var file = read.file(argv.testlist);
-    util.log(file);
-    c.files = file;
-
   } else {
     c.files = config.testPaths;
   }
@@ -334,20 +322,11 @@ gulp.task('test', 'Runs tests',
     'grep': '  Runs tests that match the pattern',
     'files': '  Runs tests for specific files',
     'randomize': '  Runs entire test suite in random order',
-    'testlist': '  Runs tests specified in JSON by supplied file',
+    'seed': '  Seeds the test order randomization. Use with --randomize ' +
+        'or --a4a',
     'glob': '  Explicitly expands test paths using glob before passing ' +
         'to Karma',
     'nohelp': '  Silence help messages that are printed prior to test run',
+    'a4a': '  Runs all A4A tests',
   }
 });
-
-
-function shuffleArray(array) {
-    for (var i = array.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-    }
-    return array;
-}
