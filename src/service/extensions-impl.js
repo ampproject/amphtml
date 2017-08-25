@@ -26,7 +26,6 @@ import {
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
-  upgradeElementInChildWindow,
   upgradeOrRegisterElement,
 } from '../custom-element';
 import {cssText} from '../../build/css';
@@ -122,8 +121,8 @@ export function registerExtension(extensions, extensionId, factory, arg) {
  * @return {!Promise}
  * @restricted
  */
-export function installExtensionsInShadowDoc(extensions, ampdoc, extensionIds) {
-  return extensions.installExtensionsInShadowDoc_(ampdoc, extensionIds);
+export function installExtensionsInDoc(extensions, ampdoc, extensionIds) {
+  return extensions.installExtensionsInDoc_(ampdoc, extensionIds);
 }
 
 
@@ -336,7 +335,7 @@ export class Extensions {
     if (css) {
       installStylesForDoc(ampdoc, css, () => {
         this.registerElementInWindow_(ampdoc.win, name, implementationClass);
-      }, /* isRuntime */ false, name);
+      }, /* isRuntimeCss */ false, name);
     } else {
       this.registerElementInWindow_(ampdoc.win, name, implementationClass);
     }
@@ -386,9 +385,10 @@ export class Extensions {
 
     // If a single-doc mode, run factory right away if it's included by
     // the doc.
-    if (this.ampdocService_.isSingleDoc()) {
+    if (this.currentExtensionId_ && this.ampdocService_.isSingleDoc()) {
       const ampdoc = this.ampdocService_.getAmpDoc();
       const extensionId = dev().assertString(this.currentExtensionId_);
+      //QQQ: consider: "otherwise known" extensions, e.g. not registered via preloadExtension?
       if (ampdoc.declaresExtension(extensionId)) {
         factory(ampdoc);
       }
@@ -404,7 +404,7 @@ export class Extensions {
    * @private
    * @restricted
    */
-  installExtensionsInShadowDoc_(ampdoc, extensionIds) {
+  installExtensionsInDoc_(ampdoc, extensionIds) {
     const promises = [];
     extensionIds.forEach(extensionId => {
       promises.push(this.installExtensionInDoc_(ampdoc, extensionId));
@@ -472,7 +472,6 @@ export class Extensions {
     extensionIds.forEach(extensionId => {
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
-      stubElementIfNotKnown(topWin, extensionId);
       if (!LEGACY_ELEMENTS.includes(extensionId)) {
         stubElementIfNotKnown(childWin, extensionId);
       }
@@ -484,25 +483,37 @@ export class Extensions {
           adoptServiceForEmbedIfEmbeddable(childWin, service);
         });
 
-        // Adopt the custom element.
-        const elementDef = extension.elements[extensionId];
-        if (elementDef && elementDef.css) {
-          return new Promise(resolve => {
-            installStylesLegacy(
-                childWin.document,
-                /** @type {string} */ (elementDef.css),
-                /* completeCallback */ resolve,
-                /* isRuntime */ false,
-                extensionId);
-          }).then(() => extension); // Forward `extension` to chained Promise.
+        // Adopt the custom elements.
+        let elementPromises = null;
+        for (const elementName in extension.elements) {
+          const elementDef = extension.elements[elementName];
+          const elementPromise = new Promise(resolve => {
+            if (elementDef.css) {
+              installStylesLegacy(
+                  childWin.document,
+                  elementDef.css,
+                  /* completeCallback */ resolve,
+                  /* isRuntime */ false,
+                  extensionId);
+            } else {
+              resolve();
+            }
+          }).then(() => {
+            upgradeOrRegisterElement(
+                childWin,
+                elementName,
+                elementDef.implementationClass);
+          });
+          if (elementPromises) {
+            elementPromises.push(elementPromise);
+          } else {
+            elementPromises = [elementPromise];
+          }
+        }
+        if (elementPromises) {
+          return Promise.all(elementPromises).then(() => extension);
         }
         return extension;
-      }).then(extension => {
-        // Notice that stubbing happens much sooner above
-        // (see stubElementIfNotKnown).
-        Object.keys(extension.elements).forEach(element => {
-          upgradeElementInChildWindow(topWin, childWin, element);
-        });
       });
       promises.push(promise);
     });

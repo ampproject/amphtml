@@ -196,23 +196,6 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
 
 
 /**
- * Upgrade element in the child window.
- * @param {!Window} parentWin
- * @param {!Window} childWin
- * @param {string} name
- */
-export function upgradeElementInChildWindow(parentWin, childWin, name) {
-  const toClass = getExtendedElements(parentWin)[name];
-  // Some extensions unofficially register unstubbed elements, e.g. amp-bind.
-  // Can be changed to assert() once official support (#9143) is implemented.
-  if (!toClass) {
-    dev().warn(TAG_, '%s is not stubbed yet', name);
-  }
-  dev().assert(toClass != ElementStub, '%s is not upgraded yet', name);
-  upgradeOrRegisterElement(childWin, name, toClass);
-}
-
-/**
  * Applies layout to the element. Visible for testing only.
  *
  * \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  / _____|
@@ -691,7 +674,7 @@ function createBaseCustomElementClass(win) {
      * @final @private @this {!Element}
      */
     completeUpgrade_(newImpl, upgradeStartTime) {
-      this.upgradeDelayMs_ = Date.now() - upgradeStartTime;
+      this.upgradeDelayMs_ = win.Date.now() - upgradeStartTime;
       this.upgradeState_ = UpgradeState.UPGRADED;
       this.implementation_ = newImpl;
       this.classList.remove('amp-unresolved');
@@ -1081,7 +1064,7 @@ function createBaseCustomElementClass(win) {
       // non-stub class. We may allow nested upgrades later, but they will
       // certainly be bad for performance.
       this.upgradeState_ = UpgradeState.UPGRADE_IN_PROGRESS;
-      const startTime = Date.now();
+      const startTime = win.Date.now();
       const res = impl.upgradeCallback();
       if (!res) {
         // Nothing returned: the current object is the upgraded version.

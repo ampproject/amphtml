@@ -27,7 +27,7 @@ import {
   addElementToExtension,
   addServiceToExtension,
   installBuiltinElements,
-  installExtensionsInShadowDoc,
+  installExtensionsInDoc,
   installExtensionsService,
   registerExtension,
   stubLegacyElements,
@@ -574,7 +574,7 @@ class MultidocManager {
         (amp, shadowRoot, ampdoc) => {
           // Install extensions.
           const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
-          installExtensionsInShadowDoc(this.extensions_, ampdoc, extensionIds);
+          installExtensionsInDoc(this.extensions_, ampdoc, extensionIds);
 
           // Append body.
           if (doc.body) {
@@ -619,8 +619,7 @@ class MultidocManager {
             // Install extensions.
             const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
             // Apply all doc extensions.
-            installExtensionsInShadowDoc(
-                this.extensions_, ampdoc, extensionIds);
+            installExtensionsInDoc(this.extensions_, ampdoc, extensionIds);
 
             // Append shallow body.
             const body = importShadowBody(

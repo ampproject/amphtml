@@ -36,15 +36,17 @@ import {
   upgradeOrRegisterElement,
 } from '../../src/custom-element';
 
-describes.realWin('CustomElement register', {amp: 1}, env => {
+
+describes.realWin('CustomElement register', {amp: true}, env => {
 
   class ConcreteElement extends BaseElement {}
 
-  let win;
+  let win, ampdoc;
 
   beforeEach(() => {
     win = env.win;
-    setLoadingCheckForTests('amp-element1');//QQQ: has been removed
+    ampdoc = env.ampdoc;
+    ampdoc.declareExtension_('amp-element1');
     installResourcesServiceForDoc(window.document);
   });
 
@@ -73,7 +75,7 @@ describes.realWin('CustomElement register', {amp: 1}, env => {
 
 
 describes.realWin('CustomElement', {amp: true}, env => {
-  let win, doc;
+  let win, doc, ampdoc;
   let resources;
   let resourcesMock;
   let clock;
@@ -150,6 +152,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    ampdoc = env.ampdoc;
     clock = lolex.install(win);
     resources = Services.resourcesForDoc(doc);
     resources.isBuildOn_ = true;
@@ -163,6 +166,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     StubElementClass = doc.registerElement('amp-stub', {
       prototype: createAmpElementProto(win, 'amp-stub', ElementStub),
     });
+    ampdoc.declareExtension_('amp-stub');
 
     testElementCreatedCallback = sandbox.spy();
     testElementPreconnectCallback = sandbox.spy();
@@ -415,20 +419,21 @@ describes.realWin('CustomElement', {amp: true}, env => {
     expect(element.isUpgraded()).to.equal(false);
     const oldImpl = element.implementation_;
     const newImpl = new TestElement(element);
-    const promise = Services.timerFor(window).promise(10).then(() => newImpl);
+    const promise = Services.timerFor(win).promise(10).then(() => newImpl);
     oldImpl.upgradeCallback = () => promise;
 
     container.appendChild(element);
     expect(element.implementation_).to.equal(oldImpl);
     expect(element.isUpgraded()).to.equal(false);
     expect(element.upgradeState_).to.equal(/* UPGRADE_IN_PROGRESS */ 4);
+    clock.tick(10);
     return promise.then(() => {
       // Skip a microtask.
     }).then(() => {
       expect(element.implementation_).to.equal(newImpl);
       expect(element.isUpgraded()).to.equal(true);
       expect(element.upgradeState_).to.equal(/* UPGRADED */ 2);
-      expect(element.upgradeDelayMs_ >= 10).to.be.true;
+      expect(element.upgradeDelayMs_).to.be.equal(10);
     });
   });
 
@@ -1329,6 +1334,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     StubElementClass = doc.registerElement('amp-stub2', {
       prototype: createAmpElementProto(win, 'amp-stub2', ElementStub),
     });
+    env.ampdoc.declareExtension_('amp-stub2');
     element = new StubElementClass();
   });
 
@@ -1929,7 +1935,6 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     let doc;
     let win;
     let elem1;
-    let setIntervalCallback;
     let ampdoc;
 
     beforeEach(() => {
@@ -1941,6 +1946,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
           ownerDocument: doc,
         },
         head: {
+          nodeType: /* ELEMENT */ 1,
           querySelectorAll: selector => {
             if (selector == 'script[custom-element]') {
               return elements;
@@ -1967,11 +1973,6 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
           create: proto => Object.create(proto),
         },
         HTMLElement,
-        setInterval: callback => {
-          setIntervalCallback = callback;
-        },
-        clearInterval: () => {
-        },
         ampExtendedElements: {},
       };
       doc.defaultView = win;
@@ -1994,7 +1995,6 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       expect(win.ampExtendedElements['amp-test2']).to.be.undefined;
       expect(doc.registerElement).to.be.calledOnce;
       expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
-      expect(setIntervalCallback).to.be.undefined;
     });
 
     it('should repeat stubbing when body is not available', () => {
@@ -2007,7 +2007,6 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       expect(win.ampExtendedElements['amp-test2']).to.be.undefined;
       expect(doc.registerElement).to.be.calledOnce;
       expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
-      expect(setIntervalCallback).to.exist;
 
       // Add more elements
       const elem2 = {
@@ -2019,9 +2018,10 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
         ownerDocument: doc,
       };
       elements.push(elem2);
-      doc.body = {};
-      setIntervalCallback();
 
+      // Body available. Stub again.
+      doc.body = {};
+      stubElementsForDoc(ampdoc);
       expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
       expect(win.ampExtendedElements['amp-test2']).to.equal(ElementStub);
       expect(doc.registerElement).to.have.callCount(2);

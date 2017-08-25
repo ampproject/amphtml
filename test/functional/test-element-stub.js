@@ -16,6 +16,7 @@
 
 import {createElementWithAttributes} from '../../src/dom';
 
+//QQQQ:merge with test-custom-element
 describes.realWin('test-element-stub', {amp: true}, env => {
 
   let doc;
