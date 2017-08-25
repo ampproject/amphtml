@@ -264,27 +264,58 @@ describes.sandboxed('StandardActions', {}, () => {
         },
       };
 
-      const args = {};
-      args[OBJECT_STRING_ARGS_KEY] = '{foo: 123}';
+      const args = {
+        [OBJECT_STRING_ARGS_KEY]: '{foo: 123}',
+      };
+      const target = ampdoc;
+      const satisfiesTrust = () => true;
+      const setState = {method: 'setState', args, target, satisfiesTrust};
+      const pushState = {method: 'pushState', args, target, satisfiesTrust};
 
-      standardActions.handleAmpTarget({
-        method: 'setState',
-        args,
-        target: ampdoc,
-        satisfiesTrust: () => true,
-      });
-      standardActions.handleAmpTarget({
-        method: 'pushState',
-        args,
-        target: ampdoc,
-        satisfiesTrust: () => true,
-      });
+      standardActions.handleAmpTarget(setState, 0, []);
+      standardActions.handleAmpTarget(pushState, 0, []);
+
       return Services.bindForDocOrNull(ampdoc).then(() => {
         expect(setStateSpy).to.be.calledOnce;
         expect(setStateSpy).to.be.calledWith('{foo: 123}');
 
         expect(pushStateSpy).to.be.calledOnce;
         expect(pushStateSpy).to.be.calledWith('{foo: 123}');
+      });
+    });
+
+    it('should not allow chained setState', () => {
+      const spy = sandbox.spy();
+      window.services.bind = {
+        obj: {
+          setStateWithExpression: spy,
+        },
+      };
+
+      const firstSetState = {
+        method: 'setState',
+        args: {[OBJECT_STRING_ARGS_KEY]: '{foo: 123}'},
+        target: ampdoc,
+        satisfiesTrust: () => true,
+      };
+      const secondSetState = {
+        method: 'setState',
+        args: {[OBJECT_STRING_ARGS_KEY]: '{bar: 456}'},
+        target: ampdoc,
+        satisfiesTrust: () => true,
+      };
+      const actionInfos = [
+        {target: 'AMP', method: 'setState'},
+        {target: 'AMP', method: 'setState'},
+      ];
+      standardActions.handleAmpTarget(firstSetState, 0, actionInfos);
+      standardActions.handleAmpTarget(secondSetState, 1, actionInfos);
+
+      return Services.bindForDocOrNull(ampdoc).then(() => {
+        // Only first setState call should be allowed.
+        expect(spy).to.be.calledOnce;
+        expect(spy).to.be.calledWith('{foo: 123}');
+        expect(spy).to.not.be.calledWith('{bar: 456}');
       });
     });
 
