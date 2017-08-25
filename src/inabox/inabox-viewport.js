@@ -20,9 +20,6 @@ import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {registerServiceBuilderForDoc} from '../service';
 import {
-  nativeIntersectionObserverSupported,
-} from '../../src/intersection-observer-polyfill';
-import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../layout-rect';
