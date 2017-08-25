@@ -101,14 +101,14 @@ function createImplTag(config, element, impl, env) {
 
 
 describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
-  let doc;
+  let win, doc, ampdoc;
   let element;
   let impl;
 
   beforeEach(() => {
-    doc = env.win.document;
-    // Necessary to disable isProxyOrigin check
-    env.win.AMP_MODE.test = true;
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
   });
 
 
@@ -160,8 +160,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         'layout': 'fixed',
       });
       impl = new AmpAdNetworkDoubleclickImpl(element);
+      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
       impl.size_ = size;
-      installExtensionsService(impl.win);
       const extensions = Services.extensionsFor(impl.win);
       preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
     });
@@ -208,12 +208,13 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         'type': 'doubleclick',
       });
       impl = new AmpAdNetworkDoubleclickImpl(element);
-        // Next two lines are to ensure that internal parts not relevant for this
-        // test are properly set.
+      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
+      sandbox.stub(env.ampdocService, 'getAmpDoc', () => ampdoc);
+      // Next two lines are to ensure that internal parts not relevant for this
+      // test are properly set.
       impl.size_ = {width: 200, height: 50};
       impl.iframe = impl.win.document.createElement('iframe');
-      installExtensionsService(impl.win);
-        // Temporary fix for local test failure.
+      // Temporary fix for local test failure.
       sandbox.stub(impl,
           'getIntersectionElementLayoutBox', () => {
             return {

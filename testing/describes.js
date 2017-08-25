@@ -707,6 +707,9 @@ class AmpFixture {
         throw new Error(`extension not found: ${extensionId}:${version}.` +
             ' Make sure the module is imported');
       }
+      if (env.ampdoc) {
+        env.ampdoc.declareExtension_(extensionId);
+      }
       registerExtension(env.extensions, extensionId, installer, win.AMP);
     };
 
@@ -762,7 +765,10 @@ class AmpFixture {
           hostElement, importDoc, win.location.href);
       const ampdoc = ret.ampdoc;
       env.ampdoc = ampdoc;
-      const promise = ampdoc.whenReady();
+      const promise = Promise.all([
+        env.extensions.installExtensionsInDoc_(ampdoc, extensionIds),
+        ampdoc.whenReady(),
+      ]);
       completePromise = completePromise ?
           completePromise.then(() => promise) : promise;
     }

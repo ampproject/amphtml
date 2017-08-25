@@ -64,13 +64,14 @@ describes.realWin('amp-ad-network-adsense-impl', {
     extensions: ['amp-ad', 'amp-ad-network-adsense-impl'],
   },
 }, env => {
-  let win, doc;
+  let win, doc, ampdoc;
   let impl;
   let element;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    ampdoc = env.ampdoc;
     sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
         () => {
           return ['google'];
@@ -146,7 +147,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'layout': 'fixed',
       });
       impl = new AmpAdNetworkAdsenseImpl(element);
-      installExtensionsService(impl.win);
+      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
       const extensions = Services.extensionsFor(impl.win);
       preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
     });
@@ -162,6 +163,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       });
       expect(preloadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
     });
+
     it('with analytics', () => {
       const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
       impl.extractSize({
@@ -200,7 +202,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'type': 'adsense',
       });
       impl = new AmpAdNetworkAdsenseImpl(element);
-      installExtensionsService(impl.win);
+      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
+      sandbox.stub(env.ampdocService, 'getAmpDoc', () => ampdoc);
     });
 
     it('injects amp analytics', () => {
