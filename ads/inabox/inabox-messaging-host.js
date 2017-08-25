@@ -24,7 +24,7 @@ import {
 import {dev} from '../../src/log';
 import {getData} from '../../src/event-helper';
 import {dict} from '../../src/utils/object';
-
+import {layoutRectFromDomRect} from '../../src/layout-rect';
 /** @const */
 const TAG = 'InaboxMessagingHost';
 
@@ -52,7 +52,7 @@ class NamedObservable {
    * @param {string} key
    * @param {*} thisArg
    * @param {!Array} args
-   * @retun {boolean} True when a callback was found and successfully executed.
+   * @return {boolean} True when a callback was found and successfully executed.
    */
   fire(key, thisArg, args) {
     if (key in this.map_) {
@@ -126,18 +126,38 @@ export class InaboxMessagingHost {
    * @return {boolean}
    */
   handleSendPositions_(iframe, request, source, origin) {
+    const viewportRect = this.positionObserver_.getViewportRect();
+    const targetRect =
+        layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect());
+    this.sendPosition_(request, source, origin, dict({
+      'viewportRect': viewportRect,
+      'targetRect': targetRect,
+    }));
+
     // To prevent double tracking for the same requester.
     if (this.registeredIframeSentinels_[request.sentinel]) {
-      return false;
+      return true;
     }
+
     this.registeredIframeSentinels_[request.sentinel] = true;
     this.positionObserver_.observe(iframe, data => {
-      dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
-      source./*OK*/postMessage(
-          serializeMessage(MessageType.POSITION, request.sentinel, data),
-          origin);
+      this.sendPosition_(request, source, origin, data);
     });
     return true;
+  }
+
+  /**
+   *
+   * @param {!Object} request
+   * @param {!Window} source
+   * @param {string} origin
+   * @param {JsonObject} data
+   */
+  sendPosition_(request, source, origin, data) {
+    dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
+    source./*OK*/postMessage(
+        serializeMessage(MessageType.POSITION, request.sentinel, data),
+        origin);
   }
 
   /**
