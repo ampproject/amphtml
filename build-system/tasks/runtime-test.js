@@ -135,7 +135,7 @@ function printArgvMessages() {
     unit: 'Running only the unit tests. Requires ' +
         cyan('gulp css') +  ' to have been run first.',
     randomize: 'Randomizing the order in which tests are run.',
-    a4a: 'Runing only A4A tests.',
+    a4a: 'Running only A4A tests.',
     seed: 'Randomizing test order with seed ' + cyan(argv.seed) + '.',
     compiled:  'Running tests against minified code.',
     grep: 'Only running tests that match the pattern "' +
