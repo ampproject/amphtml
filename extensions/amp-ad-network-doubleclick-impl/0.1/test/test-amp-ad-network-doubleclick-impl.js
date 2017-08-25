@@ -23,9 +23,6 @@ import {
   AMP_SIGNATURE_HEADER,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/legacy-signature-verifier';
-import {
-  installExtensionsService,
-} from '../../../../src/service/extensions-impl';
 import {Services} from '../../../../src/services';
 import {
   AmpAdNetworkDoubleclickImpl,

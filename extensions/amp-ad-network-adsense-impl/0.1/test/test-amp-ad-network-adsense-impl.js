@@ -25,9 +25,6 @@ import {
   ADSENSE_EXPERIMENT_FEATURE,
   INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP,
 } from '../adsense-a4a-config';
-import {
-  installExtensionsService,
-} from '../../../../src/service/extensions-impl';
 import {Services} from '../../../../src/services';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
