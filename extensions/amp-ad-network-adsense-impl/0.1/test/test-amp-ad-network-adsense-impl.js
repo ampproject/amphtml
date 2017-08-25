@@ -564,34 +564,29 @@ describes.realWin('amp-ad-network-adsense-impl', {
   });
 
   describe('#buildCallback', () => {
+
+    const VIEWPORT_WIDTH = 375;
+    const VIEWPORT_HEIGHT = 667;
+
     let iframe;
-    let impl;
 
     function constructImpl(config) {
+      iframe = env.win.document.createElement('iframe');
+
       config.type = 'adsense';
       element = createElementWithAttributes(env.win.document, 'amp-ad', config);
-      // To trigger CSS styling.
-      element.setAttribute('data-a4a-upgrade-type',
-          'amp-ad-network-adsense-impl');
-      iframe = env.win.document.createElement('iframe');
       element.appendChild(iframe);
       document.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
       impl.element.style.display = 'block';
       impl.element.style.position = 'relative';
       impl.element.style.top = '101vh';
+
+      // Fix the viewport to a consistent size to that the test doesn't depend
+      // on the actual browser window opened.
+      impl.getViewport().getSize =
+          () => ({width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT});
     }
-
-    beforeEach(() => {
-      resetSharedState();
-
-      // The test makes the page taller than the viewport, causing a scrollbar
-      // to appear a various moments that disrupts the expected size. Hiding
-      // the overflow prevents the scrollbar from appearing without changing
-      // any other rendering behaviour.
-      document.body.style.overflow = 'hidden';
-    });
-
 
     it('should do nothing for non-responsive', () => {
       constructImpl({
@@ -601,29 +596,31 @@ describes.realWin('amp-ad-network-adsense-impl', {
       expect(impl.buildCallback()).to.be.undefined;
     });
 
-    it.only('should schedule a resize for responsive', () => {
+    it('should schedule a resize for responsive', () => {
       constructImpl({
         width: '100vw',
         height: '100',
         'data-auto-format': 'rspv',
       });
+
       const callback = impl.buildCallback();
       expect(callback).to.not.be.undefined;
 
-
-      // impl.iframe = iframe;
       // The returned promise fails for some reason.
       return callback.then(() => {
         expect(element.offsetHeight).to.equal(300);
-        expect(element.offsetWidth).to.equal(document.body.clientWidth);
+        expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
       });
     });
   });
 
   describe('#onLayoutMeasure', () => {
+
+    const VIEWPORT_WIDTH = 375;
+    const VIEWPORT_HEIGHT = 667;
+
     let container;
     let iframe;
-    let impl;
 
     function buildImpl(config) {
       // Create an element with horizontal margins for the ad to break out of.
@@ -633,12 +630,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
       config.type = 'adsense';
       config['data-ad-client'] = 'ca-pub-1234';
-      config['data-adtest'] = 'on';
 
       element = createElementWithAttributes(env.win.document, 'amp-ad', config);
-      // To trigger CSS styling.
-      element.setAttribute('data-a4a-upgrade-type',
-          'amp-ad-network-adsense-impl');
       iframe = env.win.document.createElement('iframe');
       element.appendChild(iframe);
       container.appendChild(element);
@@ -649,23 +642,15 @@ describes.realWin('amp-ad-network-adsense-impl', {
       impl.element.style.top = '101vh';
 
       // Stub out mutations to occur immediately.
-      impl.getVsync().mutate = function(callback) {
-        callback();
-      };
+      impl.getVsync().mutate = callback => callback();
+
+      // Fix the viewport to a consistent size to that the test doesn't depend
+      // on the actual browser window opened.
+      impl.getViewport().getSize =
+          () => ({width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT});
 
       return impl.buildCallback();
     }
-
-    beforeEach(() => {
-      resetSharedState();
-
-      // The test makes the page taller than the viewport, causing a scrollbar
-      // to appear a various moments that disrupts the expected size. Hiding
-      // the overflow prevents the scrollbar from appearing without changing
-      // any other rendering behaviour.
-      document.body.style.overflow = 'hidden';
-    });
-
 
     it('should leave margins untouched for non-responsive', () => {
       container = env.win.document.createElement('div');
@@ -678,14 +663,14 @@ describes.realWin('amp-ad-network-adsense-impl', {
       impl.onLayoutMeasure();
 
       // Default margins unchanged.
-      expect(element.marginLeft).to.be.equal(0);
-      expect(element.marginRight).to.be.equal(0);
+      expect(element.marginLeft).to.be.undefined;
+      expect(element.marginRight).to.be.undefined;
     });
 
     it.only('should change left margin for responsive', () => {
       container = env.win.document.createElement('div');
       return buildImpl({
-        width: '320',
+        width: '100vw',
         height: '150',
         'data-auto-format': 'rspv',
       }).then(() => {
@@ -700,7 +685,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       container.style.direction = 'rtl';
 
       return buildImpl({
-        width: '320',
+        width: '100vw',
         height: '150',
         'data-auto-format': 'rspv',
       }).then(() => {
@@ -711,7 +696,28 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
   });
 
+  describe('#getResponsiveHeightForContext_', () => {
+    it('should request 100px height for very small viewports', () => {
+      expect(
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+              {width: 100, height: 667}))
+          .to.be.equal(100);
+    });
 
+    it('should request 6:5 aspect ratio for normal viewport (iPhone 5)', () => {
+      expect(
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+              {width: 320, height: 568}))
+          .to.be.equal(267);
+    });
+
+    it('should request 300px height for wide viewports', () => {
+      expect(
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+              {width: 500, height: 667}))
+          .to.be.equal(300);
+    });
+  });
 
   describe('#delayAdRequestEnabled', () => {
     let impl;
