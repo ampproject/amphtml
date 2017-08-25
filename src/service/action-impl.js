@@ -16,18 +16,18 @@
 
 import {ActionTrust} from '../action-trust';
 import {KeyCodes} from '../utils/key-codes';
+import {Services} from '../services';
 import {debounce} from '../utils/rate-limit';
-import {isEnabled} from '../dom';
 import {dev, user} from '../log';
+import {isArray, isFiniteNumber} from '../types';
+import {isEnabled} from '../dom';
+import {getMode} from '../mode';
+import {getValueForExpr} from '../json';
+import {map} from '../utils/object';
 import {
   registerServiceBuilderForDoc,
   installServiceInEmbedScope,
 } from '../service';
-import {getMode} from '../mode';
-import {getValueForExpr} from '../json';
-import {isArray, isFiniteNumber} from '../types';
-import {map} from '../utils/object';
-import {Services} from '../services';
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.
@@ -85,7 +85,21 @@ let ActionInfoArgsDef;
  *   str: string
  * }}
  */
-let ActionInfoDef;
+export let ActionInfoDef;
+
+/**
+ * Function called when an action is invoked.
+ *
+ * Optionally, takes this action's position within all actions triggered by
+ * the same event, as well as said action array, as params.
+ *
+ * If the action is chainable, returns a Promise which resolves when the
+ * action is complete. Otherwise, returns null.
+ *
+ * @typedef {function(
+ *     !ActionInvocation, number=, !Array<!ActionInfoDef>=):?Promise}
+ */
+let ActionHandlerDef;
 
 /**
  * @typedef {Event|DeferredEvent}
@@ -165,12 +179,12 @@ export class ActionService {
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
 
-    /** @const @private {!Object<string, function(!ActionInvocation)>} */
+    /** @const @private {!Object<string, ActionHandlerDef>} */
     this.globalTargets_ = map();
 
     /**
      * @const @private {!Object<string, {
-      *   handler: function(!ActionInvocation),
+      *   handler: ActionHandlerDef,
       *   minTrust: ActionTrust,
       * }>}
       */
@@ -254,44 +268,9 @@ export class ActionService {
   }
 
   /**
-   * Given a browser 'change' or 'input' event, add `details` property
-   * containing the relevant information for the change that generated it.
-   * @param {!ActionEventDef} event
-   */
-  addInputDetails_(event) {
-    const detail = /** @type {!JsonObject} */ (map());
-    const target = event.target;
-    const tagName = target.tagName;
-
-    // Expose `value` property on HTMLInputElement and HTMLSelectElement.
-    if (tagName == 'INPUT' || tagName == 'SELECT') {
-      const type = target.getAttribute('type');
-
-      // TODO(blueyedgeek, #10729): Provide valueAsNumber instead of casting.
-      detail['value'] = (type == 'range') ? Number(target.value) : target.value;
-
-      // Expose HTMLInputElement properties based on type.
-      if (tagName == 'INPUT') {
-        if (type == 'checkbox' || type == 'radio') {
-          detail['checked'] = target.checked;
-        } else if (type == 'range') {
-          // TODO(choumx): Perhaps we shouldn't cast since min/max is also
-          // available on input[type="date|time|number"].
-          detail['min'] = Number(target.min);
-          detail['max'] = Number(target.max);
-        }
-      }
-    }
-
-    if (Object.keys(detail).length > 0) {
-      event.detail = detail;
-    }
-  }
-
-  /**
    * Registers the action target that will receive all designated actions.
    * @param {string} name
-   * @param {function(!ActionInvocation)} handler
+   * @param {ActionHandlerDef} handler
    */
   addGlobalTarget(name, handler) {
     this.globalTargets_[name] = handler;
@@ -300,7 +279,7 @@ export class ActionService {
   /**
    * Registers the action handler for a common method.
    * @param {string} name
-   * @param {function(!ActionInvocation)} handler
+   * @param {ActionHandlerDef} handler
    * @param {ActionTrust} minTrust
    */
   addGlobalMethodHandler(name, handler, minTrust = ActionTrust.HIGH) {
@@ -328,13 +307,15 @@ export class ActionService {
    * @param {ActionTrust} trust
    */
   execute(target, method, args, source, event, trust) {
-    this.invoke_(target, method, args, source, event, trust, null);
+    const invocation =
+        new ActionInvocation(target, method, args, source, event, trust);
+    this.invoke_(invocation, /* actionInfo */ null);
   }
 
   /**
    * Installs action handler for the specified element.
    * @param {!Element} target
-   * @param {function(!ActionInvocation)} handler
+   * @param {ActionHandlerDef} handler
    * @param {ActionTrust} minTrust
    */
   installActionHandler(target, handler, minTrust = ActionTrust.HIGH) {
@@ -388,33 +369,39 @@ export class ActionService {
       return;
     }
 
-    for (let i = 0; i < action.actionInfos.length; i++) {
-      const actionInfo = action.actionInfos[i];
+    // Invoke actions serially, where each action waits for its predecessor
+    // to complete. `currentPromise` is the i'th promise in the chain.
+    let currentPromise = null;
 
-      // Replace any expressions in args with data in `event`.
+    action.actionInfos.forEach((actionInfo, i) => {
+      // Replace any variables in args with data in `event`.
       const args = dereferenceExprsInArgs(actionInfo.args, event);
 
-      // Global target, e.g. `AMP`.
-      const globalTarget = this.globalTargets_[actionInfo.target];
-      if (globalTarget) {
-        const invocation = new ActionInvocation(
-            this.root_,
-            actionInfo.method,
-            args,
-            action.node,
-            event,
-            trust);
-        globalTarget(invocation);
-      } else {
+      const invoke = () => {
+        // Global target, e.g. `AMP`.
+        const globalTarget = this.globalTargets_[actionInfo.target];
+        if (globalTarget) {
+          const invocation = new ActionInvocation(this.root_, actionInfo.method,
+              args, action.node, event, trust);
+          return globalTarget(invocation, i, action.actionInfos);
+        }
+
+        // Element target via `id` attribute.
         const target = this.root_.getElementById(actionInfo.target);
         if (target) {
-          this.invoke_(target, actionInfo.method, args,
-              action.node, event, trust, actionInfo);
+          const invocation = new ActionInvocation(target, actionInfo.method,
+              args, action.node, event, trust);
+          return this.invoke_(invocation, actionInfo);
         } else {
           this.actionInfoError_('target not found', actionInfo, target);
         }
-      }
-    }
+      };
+
+      // Wait for the previous action, if applicable.
+      currentPromise = (currentPromise)
+          ? currentPromise.then(invoke)
+          : invoke();
+    });
   }
 
   /**
@@ -432,24 +419,19 @@ export class ActionService {
   }
 
   /**
-   * @param {!Element} target
-   * @param {string} method
-   * @param {?JsonObject} args
-   * @param {?Element} source
-   * @param {?ActionEventDef} event
-   * @param {ActionTrust} trust
-   * @param {?ActionInfoDef} actionInfo
+   * @param {!ActionInvocation} invocation
+   * @param {?ActionInfoDef} actionInfo TODO(choumx): Remove this param.
+   * @return {?Promise}
    * @private visible for testing
    */
-  invoke_(target, method, args, source, event, trust, actionInfo) {
-    const invocation = new ActionInvocation(target, method, args,
-        source, event, trust);
+  invoke_(invocation, actionInfo) {
+    const target = dev().assertElement(invocation.target);
+    const method = invocation.method;
 
     // Try a global method handler first.
-    const globalMethod = this.globalMethodHandlers_[invocation.method];
+    const globalMethod = this.globalMethodHandlers_[method];
     if (globalMethod && invocation.satisfiesTrust(globalMethod.minTrust)) {
-      globalMethod.handler(invocation);
-      return;
+      return globalMethod.handler(invocation);
     }
 
     const lowerTagName = target.tagName.toLowerCase();
@@ -463,7 +445,7 @@ export class ActionService {
             'Did you forget to include it via <script custom-element>?',
             actionInfo, target);
       }
-      return;
+      return null;
     }
 
     // Special elements with AMP ID or known supported actions.
@@ -471,7 +453,7 @@ export class ActionService {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = target.getAttribute('id') || '';
     if ((targetId && targetId.substring(0, 4) == 'amp-') ||
-        (supportedActions && supportedActions.indexOf(method) != -1)) {
+        (supportedActions && supportedActions.indexOf(method) > -1)) {
       const holder = target[ACTION_HANDLER_];
       if (holder) {
         const {handler, minTrust} = holder;
@@ -482,13 +464,14 @@ export class ActionService {
         target[ACTION_QUEUE_] = target[ACTION_QUEUE_] || [];
         target[ACTION_QUEUE_].push(invocation);
       }
-      return;
+      return null;
     }
 
     // Unsupported target.
-    this.actionInfoError_(
-        'Target element does not support provided action',
+    this.actionInfoError_('Target element does not support provided action',
         actionInfo, target);
+
+    return null;
   }
 
   /**
@@ -537,6 +520,43 @@ export class ActionService {
     }
     return actionMap;
   }
+
+  /**
+   * Given a browser 'change' or 'input' event, add `details` property
+   * containing the relevant information for the change that generated it.
+   * @param {!ActionEventDef} event
+   * @private
+   */
+  addInputDetails_(event) {
+    const detail = /** @type {!JsonObject} */ (map());
+    const target = event.target;
+    const tagName = target.tagName;
+
+    // Expose `value` property on HTMLInputElement and HTMLSelectElement.
+    if (tagName == 'INPUT' || tagName == 'SELECT') {
+      const type = target.getAttribute('type');
+
+      // TODO(blueyedgeek, #10729): Provide valueAsNumber instead of casting.
+      detail['value'] = (type == 'range') ? Number(target.value) : target.value;
+
+      // Expose HTMLInputElement properties based on type.
+      if (tagName == 'INPUT') {
+        if (type == 'checkbox' || type == 'radio') {
+          detail['checked'] = target.checked;
+        } else if (type == 'range') {
+          // TODO(choumx): Perhaps we shouldn't cast since min/max is also
+          // available on input[type="date|time|number"].
+          detail['min'] = Number(target.min);
+          detail['max'] = Number(target.max);
+        }
+      }
+    }
+
+    if (Object.keys(detail).length > 0) {
+      event.detail = detail;
+    }
+  }
+
 }
 
 
