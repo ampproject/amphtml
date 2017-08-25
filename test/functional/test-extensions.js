@@ -185,7 +185,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(win.customElements.elements['amp-test']).to.not.exist;
 
       // Resolve the promise.
-      registerExtension(extensions, 'amp-test', AMP => {
+      registerExtension(extensions, 'amp-test', () => {
         addElementToExtension(extensions, 'amp-test', AmpTest);
         addElementToExtension(extensions, 'amp-test-sub', AmpTestSub);
       }, {});
@@ -208,7 +208,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(win.services['amp-test']).to.not.exist;
 
       // Resolve the promise.
-      registerExtension(extensions, 'amp-test', AMP => {
+      registerExtension(extensions, 'amp-test', () => {
         addElementToExtension(extensions, 'amp-test', AmpTest);
         addElementToExtension(extensions, 'amp-test-sub', AmpTestSub);
       }, {});
@@ -226,7 +226,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(win.customElements.elements['amp-test']).to.not.exist;
 
       // Resolve the promise.
-      registerExtension(extensions, 'amp-test', AMP => {
+      registerExtension(extensions, 'amp-test', () => {
         addElementToExtension(extensions, 'amp-test', AmpTest);
         addElementToExtension(extensions, 'amp-test-sub', AmpTestSub);
       }, {});
@@ -321,7 +321,7 @@ describes.sandboxed('Extensions', {}, () => {
       const factory2 = sandbox.spy();
 
       // Resolve the promise.
-      registerExtension(extensions, 'amp-test', AMP => {
+      registerExtension(extensions, 'amp-test', () => {
         addServiceToExtension(extensions, 'service1', factory1);
         addServiceToExtension(extensions, 'service2', factory2);
       }, {});
@@ -350,7 +350,7 @@ describes.sandboxed('Extensions', {}, () => {
       };
 
       // Resolve the promise.
-      registerExtension(extensions, 'amp-test', AMP => {
+      registerExtension(extensions, 'amp-test', () => {
         addServiceToExtension(extensions, 'service1', factory1);
         addServiceToExtension(extensions, 'service2', factory2);
       }, {});

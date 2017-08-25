@@ -687,6 +687,9 @@ class AmpFixture {
         const version = tuple[1] || '0.1';
         const installer = extensionsBuffer[`${extensionId}:${version}`];
         if (installer) {
+          if (env.ampdoc) {
+            env.ampdoc.declareExtension_(extensionId);
+          }
           registerExtension(env.extensions, extensionId, installer, win.AMP);
         }
       });

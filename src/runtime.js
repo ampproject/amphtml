@@ -141,12 +141,13 @@ export function installBuiltins(global) {
  * Multi frame support is currently incomplete.
  * @param {!Window} global Global scope to adopt.
  * @param {function(!Window, !./service/extensions-impl.Extensions):!Promise} callback
+ * @return {!Promise}
  */
 function adoptShared(global, callback) {
 
   // Tests can adopt the same window twice. sigh.
   if (global.AMP_TAG) {
-    return;
+    return Promise.resolve();
   }
   global.AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
@@ -329,6 +330,8 @@ function adoptShared(global, callback) {
   if (Services.platformFor(global).isIos()) {
     setStyle(global.document.documentElement, 'cursor', 'pointer');
   }
+
+  return iniPromise;
 }
 
 
@@ -336,9 +339,10 @@ function adoptShared(global, callback) {
  * Applies the runtime to a given global scope for a single-doc mode.
  * Multi frame support is currently incomplete.
  * @param {!Window} global Global scope to adopt.
+ * @return {!Promise}
  */
 export function adopt(global) {
-  adoptShared(global, (global, extensions) => {
+  return adoptShared(global, (global, extensions) => {
     const ampdocService = Services.ampdocServiceFor(global);
     const ampdoc = ampdocService.getAmpDoc();
 
@@ -369,9 +373,10 @@ export function adopt(global) {
 /**
  * Applies the runtime to a given global scope for shadow mode.
  * @param {!Window} global Global scope to adopt.
+ * @return {!Promise}
  */
 export function adoptShadowMode(global) {
-  adoptShared(global, (global, extensions) => {
+  return adoptShared(global, (global, extensions) => {
 
     const manager = new MultidocManager(
         global,
