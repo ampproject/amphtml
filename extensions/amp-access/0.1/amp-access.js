@@ -766,6 +766,7 @@ export class AccessService {
 
   /**
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @return {?Promise}
    * @private
    */
   handleAction_(invocation) {
@@ -780,6 +781,7 @@ export class AccessService {
       }
       this.loginWithType_(invocation.method.substring('login-'.length));
     }
+    return null;
   }
 
   /**
