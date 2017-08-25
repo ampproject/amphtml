@@ -147,7 +147,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @return {boolean}
    * @private
    */
-  _isResponsive() {
+  isResponsive_() {
     return this.autoFormat_ == 'rspv';
   }
 
@@ -183,7 +183,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
     this.size_ = isExperimentOn(this.win, 'as-use-attr-for-format')
-    && !this._isResponsive()
+    && !this.isResponsive_()
     && !isNaN(width) && width > 0
     && !isNaN(height) && height > 0
         ? {width, height}
@@ -222,7 +222,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'brdim': additionalDimensions(this.win, viewportSize),
       'ifi': this.win['ampAdGoogleIfiCounter']++,
       'rc': this.fromResumeCallback ? 1 : null,
-      'rafmt': this._isResponsive() ? 13 : null,
+      'rafmt': this.isResponsive_() ? 13 : null,
     };
 
     const experimentIds = [];
@@ -348,12 +348,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.autoFormat_ =
         this.element.getAttribute('data-auto-format') || '';
 
-    if (this._isResponsive()) {
+    if (this.isResponsive_()) {
       // Attempt to resize to the correct height. The width should already be
       // 100vw, but is fixed here so that future resizes of the viewport don't
       // affect it.
       const viewportSize = this.getViewport().getSize();
-      console.log(`rspv h=${AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(viewportSize)} w=${viewportSize.width}`);
       return this.attemptChangeSize(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
               viewportSize),
@@ -365,7 +364,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   onLayoutMeasure() {
     super.onLayoutMeasure();
 
-    if (this._isResponsive() && !this.responsiveAligned_) {
+    if (this.isResponsive_() && !this.responsiveAligned_) {
       this.responsiveAligned_ = true;
 
       const layoutBox = this.getLayoutBox();

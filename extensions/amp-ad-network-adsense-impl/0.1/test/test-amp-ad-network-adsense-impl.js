@@ -567,7 +567,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     let iframe;
     let impl;
 
-    function thing(config) {
+    function constructImpl(config) {
       config.type = 'adsense';
       element = createElementWithAttributes(env.win.document, 'amp-ad', config);
       // To trigger CSS styling.
@@ -577,37 +577,141 @@ describes.realWin('amp-ad-network-adsense-impl', {
       element.appendChild(iframe);
       document.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
+      impl.element.style.display = 'block';
+      impl.element.style.position = 'relative';
+      impl.element.style.top = '101vh';
     }
 
     beforeEach(() => {
       resetSharedState();
+
+      // The test makes the page taller than the viewport, causing a scrollbar
+      // to appear a various moments that disrupts the expected size. Hiding
+      // the overflow prevents the scrollbar from appearing without changing
+      // any other rendering behaviour.
+      document.body.style.overflow = 'hidden';
     });
 
+
     it('should do nothing for non-responsive', () => {
-      thing({
+      constructImpl({
         width: '320',
         height: '150',
       });
       expect(impl.buildCallback()).to.be.undefined;
     });
 
-    it('should do something for responsive', () => {
-      thing({
-        width: '1',
-        height: '1',
+    it.only('should schedule a resize for responsive', () => {
+      constructImpl({
+        width: '100vw',
+        height: '100',
         'data-auto-format': 'rspv',
       });
       const callback = impl.buildCallback();
       expect(callback).to.not.be.undefined;
 
-      impl.iframe = iframe;
+
+      // impl.iframe = iframe;
       // The returned promise fails for some reason.
-      return callback.then((result) => {
+      return callback.then(() => {
         expect(element.offsetHeight).to.equal(300);
-        expect(element.offsetWidth).to.equal(400);
+        expect(element.offsetWidth).to.equal(document.body.clientWidth);
       });
     });
   });
+
+  describe('#onLayoutMeasure', () => {
+    let container;
+    let iframe;
+    let impl;
+
+    function buildImpl(config) {
+      // Create an element with horizontal margins for the ad to break out of.
+      container.style.marginLeft = '19px';
+      container.style.marginRight = '25px';
+      document.body.appendChild(container);
+
+      config.type = 'adsense';
+      config['data-ad-client'] = 'ca-pub-1234';
+      config['data-adtest'] = 'on';
+
+      element = createElementWithAttributes(env.win.document, 'amp-ad', config);
+      // To trigger CSS styling.
+      element.setAttribute('data-a4a-upgrade-type',
+          'amp-ad-network-adsense-impl');
+      iframe = env.win.document.createElement('iframe');
+      element.appendChild(iframe);
+      container.appendChild(element);
+
+      impl = new AmpAdNetworkAdsenseImpl(element);
+      impl.element.style.display = 'block';
+      impl.element.style.position = 'relative';
+      impl.element.style.top = '101vh';
+
+      // Stub out mutations to occur immediately.
+      impl.getVsync().mutate = function(callback) {
+        callback();
+      };
+
+      return impl.buildCallback();
+    }
+
+    beforeEach(() => {
+      resetSharedState();
+
+      // The test makes the page taller than the viewport, causing a scrollbar
+      // to appear a various moments that disrupts the expected size. Hiding
+      // the overflow prevents the scrollbar from appearing without changing
+      // any other rendering behaviour.
+      document.body.style.overflow = 'hidden';
+    });
+
+
+    it('should leave margins untouched for non-responsive', () => {
+      container = env.win.document.createElement('div');
+      const buildResult = buildImpl({
+        width: '320',
+        height: '150',
+      });
+      expect(buildResult).to.be.undefined;
+
+      impl.onLayoutMeasure();
+
+      // Default margins unchanged.
+      expect(element.marginLeft).to.be.equal(0);
+      expect(element.marginRight).to.be.equal(0);
+    });
+
+    it.only('should change left margin for responsive', () => {
+      container = env.win.document.createElement('div');
+      return buildImpl({
+        width: '320',
+        height: '150',
+        'data-auto-format': 'rspv',
+      }).then(() => {
+        impl.onLayoutMeasure();
+        expect(element.style.marginLeft).to.be.equal('-19px');
+        expect(element.style.marginRight).to.be.equal('');
+      });
+    });
+
+    it.only('should change right margin for responsive in RTL', () => {
+      container = env.win.document.createElement('div');
+      container.style.direction = 'rtl';
+
+      return buildImpl({
+        width: '320',
+        height: '150',
+        'data-auto-format': 'rspv',
+      }).then(() => {
+        impl.onLayoutMeasure();
+        expect(element.style.marginLeft).to.be.equal('');
+        expect(element.style.marginRight).to.be.equal('-25px');
+      });
+    });
+  });
+
+
 
   describe('#delayAdRequestEnabled', () => {
     let impl;
