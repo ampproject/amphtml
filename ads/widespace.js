@@ -23,7 +23,12 @@ import {writeScript, validateData} from '../3p/3p';
 export function widespace(global, data) {
 
   const WS_AMP_CODE_VER = '1.0.1';
-  const demographParams = ['demoGender', 'demoCountry', 'demoRegion', 'demoCity', 'demoPostal', 'demoYob'];
+  const demographParams = ['demoGender',
+                           'demoCountry',
+                           'demoRegion',
+                           'demoCity',
+                           'demoPostal',
+                           'demoYob'];
 
   validateData(data, ['sid'], demographParams);
 
