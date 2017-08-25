@@ -356,7 +356,7 @@ message ExtensionSpec {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 30
+// NEXT AVAILABLE TAG: 31
 message TagSpec {
   // The HtmlFormat field tells the validator which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is relevant for.)
@@ -456,6 +456,9 @@ message TagSpec {
   // of this tag in the document.
   optional ChildTagSpec child_tags = 19;
 
+  // If set to true, this tag cannot have any siblings.
+  optional bool siblings_disallowed = 30;
+
   // The reference_points defined by this TagSpec instance determine how
   // specific child tags are identified. Please see the comment for the
   // ReferencePoint message.
@@ -554,7 +557,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 87
+  // NEXT AVAILABLE TAG: 88
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -612,6 +615,7 @@ message ValidationError {
     CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT = 66;
     MANDATORY_REFERENCE_POINT_MISSING = 67;
     DUPLICATE_REFERENCE_POINT = 68;
+    TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS = 87;
     TAG_REFERENCE_POINT_CONFLICT = 69;
     CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR = 70;
     BASE_TAG_MUST_PRECEED_ALL_URLS = 78;
