@@ -16,36 +16,7 @@ limitations under the License.
 
 # OpenX
 
-## Examples
-
-- All OpenX <amp-ad> tags require the width, height, and type="openx" parameters.
-- Secure tags (HTTPS) are required for AMP.
-
-### OpenX Ad Server
-
-Display an OpenX Ad Unit.
-
-__Required:__
-
-- `data-auid` - The ad unit ID to display
-- `data-host` - SSL-enabled OpenX delivery domain
-
-__Optional:__
-
-- `json` - Additional json options.
-
-  - `customVars` - please refer to the [documentation](https://docs.openx.com/Content/developers/ad_request_api/custom_variables_in_ad_calls.html).
-
-```
-<amp-ad width="728" height="90"
-      type="openx"
-      data-host="domain.openx.net"
-      data-auid="12345"
-      json='{"dfp":{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1},"openx":{"customVars":{"marco":"polo","fates":["clothos","lachesis","atropos"]}}}'>
-</amp-ad>
-```
-
-### OpenX Bidder
+## OpenX Bidder
 
 OpenX header bidding. Parameters noted in the Doubleclick amp-ad [documentation](doubleclick.md) can be
 forwarded to Doubleclick by the following rules:
@@ -57,7 +28,7 @@ __Required:__
 
 - `data-host` - SSL-enabled OpenX delivery domain
 - `data-nc` - Network code '-' sitename
-- `data-auid` - Open X Ad unit id to display
+- `data-auid` - Open X ad unit id to display
 - `data-dfp-slot` - The Doubleclick slot
 
 __Optional:__
