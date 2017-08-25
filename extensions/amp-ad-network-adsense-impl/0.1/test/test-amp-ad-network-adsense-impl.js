@@ -652,6 +652,15 @@ describes.realWin('amp-ad-network-adsense-impl', {
       return impl.buildCallback();
     }
 
+    beforeEach(() => {
+      document.body.style.marginLeft = '5px';
+      document.body.style.marginRight = '9px';
+    });
+
+    // afterEach(() => {
+    //   document.body.removeChild(container);
+    // });
+
     it('should leave margins untouched for non-responsive', () => {
       container = env.win.document.createElement('div');
       const buildResult = buildImpl({
@@ -667,7 +676,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       expect(element.marginRight).to.be.undefined;
     });
 
-    it.only('should change left margin for responsive', () => {
+    it('should change left margin for responsive', () => {
       container = env.win.document.createElement('div');
       return buildImpl({
         width: '100vw',
@@ -675,12 +684,13 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'data-auto-format': 'rspv',
       }).then(() => {
         impl.onLayoutMeasure();
-        expect(element.style.marginLeft).to.be.equal('-19px');
+        // Left margin is 19px from container and 5px from body.
+        expect(element.style.marginLeft).to.be.equal('-24px');
         expect(element.style.marginRight).to.be.equal('');
       });
     });
 
-    it.only('should change right margin for responsive in RTL', () => {
+    it('should change right margin for responsive in RTL', () => {
       container = env.win.document.createElement('div');
       container.style.direction = 'rtl';
 
@@ -691,12 +701,13 @@ describes.realWin('amp-ad-network-adsense-impl', {
       }).then(() => {
         impl.onLayoutMeasure();
         expect(element.style.marginLeft).to.be.equal('');
-        expect(element.style.marginRight).to.be.equal('-25px');
+        // Right margin is 25px from container and 9px from body.
+        expect(element.style.marginRight).to.be.equal('-34px');
       });
     });
   });
 
-  describe('#getResponsiveHeightForContext_', () => {
+  describe('#getResponsiveHeightForContext', () => {
     it('should request 100px height for very small viewports', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
@@ -705,6 +716,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
 
     it('should request 6:5 aspect ratio for normal viewport (iPhone 5)', () => {
+      console.log('okay!');
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
               {width: 320, height: 568}))

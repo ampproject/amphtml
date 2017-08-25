@@ -378,8 +378,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           computedStyle(this.win, this.element)['direction'];
       this.getVsync().mutate(() => {
         if (parentDirection == 'rtl') {
+          console.log('rtl');
           setStyle(this.element, 'marginRight', layoutBox.left, 'px');
         } else {
+          console.log('ltr');
           setStyle(this.element, 'marginLeft', -1 * layoutBox.left, 'px');
         }
       });
