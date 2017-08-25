@@ -153,6 +153,7 @@ export class ViewportBindingInabox {
 
   /** @private */
   listenForPosition_() {
+
     this.iframeClient_.makeRequest(
         MessageType.SEND_POSITIONS, MessageType.POSITION,
         data => {
@@ -160,7 +161,8 @@ export class ViewportBindingInabox {
           const oldViewportRect = this.viewportRect_;
           this.viewportRect_ = data.viewportRect;
 
-          this.updateBoxRect_(data.target);
+          this.updateBoxRect_(data.targetRect);
+
           if (isResized(this.viewportRect_, oldViewportRect)) {
             this.resizeObservable_.fire();
           }
@@ -214,10 +216,6 @@ export class ViewportBindingInabox {
    */
   updateBoxRect_(positionRect) {
     if (!positionRect) {
-      // inabox iframe gets out of viewport
-      const boxWidth = this.win./*OK*/innerWidth;
-      const boxHeight = this.win./*OK*/innerHeight;
-      this.boxRect_ = layoutRectLtwh(0, boxHeight + 1, boxWidth, boxHeight);
       return;
     }
 

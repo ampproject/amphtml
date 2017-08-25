@@ -69,8 +69,6 @@ export class AmpAdXOriginIframeHandler {
     this.embedStateApi_ = null;
 
     /** @private {?SubscriptionApi} */
-    this.positionObserverHighFidelityApi_ = null;
-    /** @private {?SubscriptionApi} */
     this.inaboxPositionApi_ = null;
 
     /** @private {boolean} */
@@ -78,10 +76,6 @@ export class AmpAdXOriginIframeHandler {
 
     /** @private {?SubscriptionApi} */
     this.inaboxRequestPositionApi_ = null;
-
-
-    /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
-    this.positionObserver_ = null;
 
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
@@ -335,18 +329,9 @@ export class AmpAdXOriginIframeHandler {
       this.embedStateApi_.destroy();
       this.embedStateApi_ = null;
     }
-    if (this.positionObserver_) {
-      if (this.iframe) {
-        this.positionObserver_.unobserve(this.iframe);
-      }
-    }
     if (this.inaboxPositionApi_) {
       this.inaboxPositionApi_.destroy();
       this.inaboxPositionApi_ = null;
-    }
-    if (this.positionObserverHighFidelityApi_) {
-      this.positionObserverHighFidelityApi_.destroy();
-      this.positionObserverHighFidelityApi_ = null;
     }
     if (this.intersectionObserver_) {
       this.intersectionObserver_.destroy();

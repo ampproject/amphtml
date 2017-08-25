@@ -395,15 +395,11 @@ export class Viewport {
    * @return {!Promise<!../layout-rect.LayoutRectDef>}
    */
   getLayoutRectAsync(el) {
-    // const scrollLeft = this.getScrollLeft();
-    // const scrollTop = this.getScrollTop();
-
     // Go up the window hierarchy through friendly iframes.
     const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
     if (frameElement) {
       const bPromise = this.binding_.getLayoutRectAsync(el, 0, 0);
-      const cPromise = this.binding_.getLayoutRectAsync(
-          frameElement);
+      const cPromise = this.binding_.getLayoutRectAsync(frameElement);
       return Promise.all([bPromise, cPromise]).then(values => {
         const b = values[0];
         const c = values[1];
@@ -414,6 +410,7 @@ export class Viewport {
       });
     }
 
+    // Use the most updated scrollTop and scrollLeft.
     return this.binding_.getLayoutRectAsync(el);
   }
 
@@ -439,10 +436,6 @@ export class Viewport {
         const boxRect = values[1];
         return moveLayoutRect(boxRect, -viewportRect.left, -viewportRect.top);
       });
-
-    // return this.getLayoutRectAsync(el).then(rect => {
-    //   return moveLayoutRect(rect, -viewportRect.left, -viewportRect.top);
-    // });
   }
 
   /**

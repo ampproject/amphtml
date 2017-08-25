@@ -34,11 +34,9 @@ import {
 } from '../../../src/layout';
 import {
   installPositionObserverServiceForDoc,
-  //PositionInViewportEntryDef,
 } from '../../../src/service/position-observer/position-observer-impl';
 import {
   PositionObserverFidelity,
-  //PositionInViewportEntryDef,
 } from '../../../src/service/position-observer/position-observer-fidelity';
 
 const TAG = 'amp-position-observer';
