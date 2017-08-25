@@ -27,7 +27,7 @@ var util = require('gulp-util');
 var webserver = require('gulp-webserver');
 var app = require('../test-server').app;
 var karmaDefault = require('./karma.conf');
-var seedrandom = require('seedrandom');
+var shuffleSeed = require('shuffle-seed');
 
 
 const green = util.colors.green;
@@ -135,7 +135,9 @@ function printArgvMessages() {
     unit: 'Running only the unit tests. Requires ' +
         cyan('gulp css') +  ' to have been run first.',
     randomize: 'Randomizing the order in which tests are run.',
-    testlist: 'Running the tests listed in ' + cyan(argv.testlist),
+    a4a: 'Runs all A4A tests',
+    seed: 'Seeds the test order randomization. Use with --randomize ' +
+        'or --a4a',
     compiled:  'Running tests against minified code.',
     grep: 'Only running tests that match the pattern "' +
         cyan(argv.grep) + '".'
@@ -201,17 +203,9 @@ gulp.task('test', 'Runs tests',
   } else if (argv.randomize || argv.glob || argv.a4a) {
     var testPaths;
     if (argv.a4a) {
-      testPaths = [
-        'extensions/amp-a4a/**/test/**/*.js',
-        'extensions/amp-ad-network-*/**/test/**/*.js',
-        'ads/google/a4a/test/*.js'
-      ];
+      testPaths = config.a4aTestPaths;
     } else {
-      testPaths = [
-        'test/**/*.js',
-        'ads/**/test/test-*.js',
-        'extensions/**/test/**/*.js',
-      ];
+      testPaths = config.basicTestPaths;
     }
 
     var testFiles = [];
@@ -221,7 +215,13 @@ gulp.task('test', 'Runs tests',
     }
 
     if (argv.randomize || argv.a4a) {
-      testFiles = shuffleArray(testFiles, argv.seed);
+      const seed = argv.seed || Math.random();
+      util.log(
+          util.colors.red('Randomizing:'),
+          yellow('Seeding with value', seed));
+      util.log(util.colors.red('Randomizing:'),
+               yellow(`To rerun same ordering, append --seed=${seed}`));
+      testFiles = shuffleSeed.shuffle(testFiles, seed);
     }
 
     testFiles.splice(testFiles.indexOf('test/_init_tests.js'),1);
@@ -334,21 +334,3 @@ gulp.task('test', 'Runs tests',
     'a4a': '  Runs all A4A tests',
   }
 });
-
-
-function shuffleArray(array, seed) {
-  seed = seed || Math.random();
-  util.log(
-      util.colors.red('Randomizing:'),
-      yellow('Seeding with value', seed));
-  util.log(util.colors.red('Randomizing:'),
-           yellow(`To rerun same ordering, append --seed=${seed}`));
-  const rng = seedrandom(seed);
-  for (var i = array.length - 1; i > 0; i--) {
-    var j = Math.floor(rng() * (i + 1));
-    var temp = array[i];
-    array[i] = array[j];
-    array[j] = temp;
-  }
-  return array;
-}
