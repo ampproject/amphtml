@@ -359,7 +359,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       iframe.name = 'test_nomaster';
       iframeHandler.init(iframe);
       sandbox.stub/*OK*/(
-          iframeHandler.viewport_, 'getElementRectAsync', () => {
+          iframeHandler.viewport_, 'getBoundingRectAsync', () => {
             return Promise.resolve(layoutRectLtwh(1, 1, 1, 1));
           });
       sandbox.stub/*OK*/(iframeHandler.viewport_, 'getRect', () => {

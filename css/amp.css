@@ -604,14 +604,13 @@ i-amphtml-video-mask, i-amp-video-mask {
 }
 .amp-video-eq {
   align-items: flex-end;
-  border: transparent solid 7px;
-  bottom: 0;
+  bottom: 7px;
   display: flex;
   height: 12px;
   opacity: 0.8;
   overflow: hidden;
   position: absolute;
-  right: 0;
+  right: 7px;
   width: 20px;
   z-index: 1;
 }
