@@ -22,10 +22,6 @@ limitations under the License.
     <td>Allows users to subscribe to <a href="https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/">web push notifications</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-web-push" src="https://cdn.ampproject.org/v0/amp-web-push-0.1.js">&lt;/script></code></td>
   </tr>
@@ -41,7 +37,11 @@ limitations under the License.
 
 ## Behavior
 
-Developers compose widgets that appear based on a user's subscription state. Widgets are composed of AMP elements and can be as simple as a button or a text link, for example:
+Developers compose widgets that appear based on a user's subscription state. Widgets are composed of AMP elements and can be as simple as a button or a text link. 
+
+*Example*
+
+Clicking the subscription widget pops up a page prompting the user for notification permissions and signals the service worker (configured below) to subscribe the user to push in the background. Clicking the unsubscription widget signals the worker to unsubscribe the user from push in the background.
 
 ```html
 <!-- A subscription widget -->
@@ -55,22 +55,17 @@ Developers compose widgets that appear based on a user's subscription state. Wid
 </amp-web-push-widget>
 ```
 
-Clicking the subscription widget pops up a page prompting the user for notification permissions and signals the service worker (configured below) to subscribe the user to push in the background. Clicking the unsubscription widget signals the worker to unsubscribe the user from push in the background.
-
 ## Attributes
 
-**visibility** (required)
+##### visibility (required)
 
-Describes when this widget is shown, one of `unsubscribed`, `subscribed`, or `blocked`.
+Describes when the widget is shown. The value can be one of `unsubscribed`, `subscribed`, or `blocked`.
 
 Widgets are initially hidden while the user's subscription state is computed.
 
-## Validation
-See [amp-web-push rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-web-push/validator-amp-web-push.protoascii) in the AMP validator specification.
+## Configuration
 
-# Configuration
-
-amp-web-push requires extra integration on your site. You will need to upload two HTML files (provided) on your site as well as an amp-web-push compatible service worker JavaScript file. These three files form the configuration described below.
+The `amp-web-push` component requires extra integration on your site. You will need to upload two HTML files (provided) on your site as well as an amp-web-push compatible service worker JavaScript file. These three files form the configuration described below.
 
 ```html
 <amp-web-push
@@ -122,7 +117,7 @@ All properties are <strong>required</strong>, and all URLs must begin with the s
         The absolute URL, starting with <code>https://</code>, to the JavaScript service worker file uploaded to your site. Use a service worker compatible with amp-web-push.
       </p>
       <p>
-         If possible, make the service worker available at the root of your site (e.g. your-site.com/service-worker.js) instead of a subfolder. amp-web-push is restricted to working at the same folder level (subfolders included) the service worker is uploaded to unless the service worker is served with an HTTP response header of 'Service-Worker-Allowed: /'.
+         If possible, make the service worker available at the root of your site (e.g. your-site.com/service-worker.js) instead of a subfolder. amp-web-push is restricted to working at the same folder level (subfolders included) the service worker is uploaded to unless the service worker is served with an HTTP response header of <code>Service-Worker-Allowed: /</code>.
       </p>
       <p>
         This service worker runs in the background and subscribes and unsubscribes the user from notifications.
@@ -134,3 +129,5 @@ All properties are <strong>required</strong>, and all URLs must begin with the s
   </tr>
 </table>
 
+## Validation
+See [amp-web-push rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-web-push/validator-amp-web-push.protoascii) in the AMP validator specification.
