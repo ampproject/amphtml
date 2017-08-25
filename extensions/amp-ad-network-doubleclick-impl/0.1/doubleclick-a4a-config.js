@@ -83,14 +83,12 @@ export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
 /** @const {string} */
 export const BETA_EXPERIMENT_ID = '2077831';
 
-/** @visibleForTesting */
 /**
  * Class for checking whether a page/element is eligible for Fast Fetch.
  * Singleton class.
+ * @visibleForTesting
  */
 export class DoubleclickA4aEligibility {
-  constructor() {}
-
   /**
    * Returns whether win supports native crypto. Is just a wrapper around
    * supportsNativeCrypto, but this way we can mock out for testing.
@@ -108,8 +106,8 @@ export class DoubleclickA4aEligibility {
    */
   isCdnProxy(win) {
     const googleCdnProxyRegex =
-      /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/;
-    return !!googleCdnProxyRegex.test(win.location.origin);
+        /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+    return googleCdnProxyRegex.test(win.location.origin);
   }
 
   /** Whether Fast Fetch is enabled
@@ -126,17 +124,17 @@ export class DoubleclickA4aEligibility {
     }
     let experimentName = DFP_CANONICAL_FF_EXPERIMENT_NAME;
     if (!this.isCdnProxy(win)) {
-      experimentId = this.selectExperiment(win, element, [
+      experimentId = this.maybeSelectExperiment(win, element, [
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
       ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
     } else {
-      experimentName = DOUBLECLICK_A4A_EXPERIMENT_NAME;
       if (element.hasAttribute(BETA_ATTRIBUTE)) {
         addExperimentIdToElement(BETA_EXPERIMENT_ID, element);
         dev().info(TAG, `beta forced a4a selection ${element}`);
         return true;
       }
+      experimentName = DOUBLECLICK_A4A_EXPERIMENT_NAME;
       // See if in holdback control/experiment.
       const urlExperimentId = extractUrlExperimentId(win, element);
       if (urlExperimentId != undefined) {
@@ -145,7 +143,7 @@ export class DoubleclickA4aEligibility {
             TAG,
             `url experiment selection ${urlExperimentId}: ${experimentId}.`);
       } else {
-        experimentId = this.selectExperiment(win, element, [
+        experimentId = this.maybeSelectExperiment(win, element, [
           DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
           DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
             DOUBLECLICK_A4A_EXPERIMENT_NAME);
@@ -168,9 +166,10 @@ export class DoubleclickA4aEligibility {
    * @param {!Element} element
    * @param {!Array} selectionBranches
    * @param {!string} experimentName}
-   * @return {?string} Experiment branch ID.
+   * @return {?string} Experiment branch ID or null if not selected.
+   * @private
    */
-  selectExperiment(win, element, selectionBranches, experimentName) {
+  maybeSelectExperiment(win, element, selectionBranches, experimentName) {
     const experimentInfoMap =
         /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[experimentName] = {
