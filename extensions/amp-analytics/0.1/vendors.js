@@ -698,7 +698,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'clt=${contentLoadTime}&' +
           'dit=${domInteractiveTime}' +
           '${baseSuffix}',
-      'user-error': '${host}/collect?${basePrefix}&' +
+      'error': '${host}/collect?${basePrefix}&' +
           't=exception&' +
           'exd=${errorMessage}' +
           '${baseSuffix}',
@@ -794,7 +794,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'clt=${contentLoadTime}&' +
           'dit=${domInteractiveTime}' +
           '${baseSuffix}',
-      'user-error': '${host}/collect?${basePrefix}&' +
+      'error': '${host}/collect?${basePrefix}&' +
           't=exception&' +
           'exd=${errorMessage}' +
           '${baseSuffix}',
