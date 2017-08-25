@@ -23,7 +23,7 @@ import {writeScript, validateData} from '../3p/3p';
 export function widespace(global, data) {
 
   const WS_AMP_CODE_VER = '1.0.1';
-  // Optinal demography parameters.
+  // Optional demography parameters.
   let demo = [];
 
   demo = ['Gender', 'Country', 'Region', 'City', 'Postal', 'Yob'].map((d) => {
