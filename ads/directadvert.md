@@ -19,16 +19,22 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="320" height="250"
+<amp-ad width="auto" height="750"
     type="directadvert"
-    data-block-id="1953045">
+    layout="fixed-height"
+    data-token="D3UMgQWBqleq1tPW"
+    data-url="http://bigpicture.ru"
+    data-anchorid="i0xMMY1MoliiZWVl"
+>
 </amp-ad>
-
 ```
 
 ## Configuration
 
-For more information, please [see FAQ](https://www.directadvert.ru/text/help).
+For semantics of configuration, please see ad network documentation. Currently supported all anchor based widgets.
 
 Supported parameters:
-- data-block-id
+
+- data-token
+- data-url
+- data-anchorid
