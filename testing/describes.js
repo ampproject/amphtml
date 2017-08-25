@@ -89,6 +89,7 @@ import {
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
+import {stubService} from './test-helper';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {Services} from '../src/services';
@@ -285,8 +286,10 @@ export const repeated = (function() {
 
 
 /**
- * Mocks Window.fetch in the given environment and exposes fetch-mock's mock()
- * function as `env.expectFetch(matcher, response)`.
+ * Mocks Window.fetch in the given environment and exposes `env.fetchMock`. For
+ * convenience, also exposes fetch-mock's mock() function as
+ * `env.expectFetch(matcher, response)`.
+ *
  * @param {!Object} env
  * @see http://www.wheresrhys.co.uk/fetch-mock/quickstart
  */
@@ -294,6 +297,7 @@ function attachFetchMock(env) {
   fetchMock.constructor.global = env.win;
   fetchMock._mock();
 
+  env.fetchMock = fetchMock;
   env.expectFetch = fetchMock.mock.bind(fetchMock);
 }
 
@@ -692,6 +696,17 @@ class AmpFixture {
         }
       });
     }
+
+    /**
+     * Stubs a method of a service object using Sinon.
+     *
+     * @param {string} serviceId
+     * @param {string} method
+     * @return {!sinon.stub}
+     */
+    env.stubService = (serviceId, method) => {
+      return stubService(env.sandbox, env.win, serviceId, method);
+    };
 
     /**
      * Installs the specified extension.

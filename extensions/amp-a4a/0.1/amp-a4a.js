@@ -193,6 +193,9 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(AMP.AmpAdUIHandler);
     dev().assert(AMP.AmpAdXOriginIframeHandler);
 
+    /** @private {?Promise<undefined>} */
+    this.keysetPromise_ = null;
+
     /** @private {?Promise<?CreativeMetaDataDef>} */
     this.adPromise_ = null;
 
@@ -349,11 +352,14 @@ export class AmpA4A extends AMP.BaseElement {
     });
 
     this.uiHandler = new AMP.AmpAdUIHandler(this);
+
     const verifier = signatureVerifierFor(this.win);
-    const visible = Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible();
-    this.getSigningServiceNames().forEach(signingServiceName => {
-      verifier.loadKeyset(signingServiceName, visible);
-    });
+    this.keysetPromise_ =
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
+          this.getSigningServiceNames().forEach(signingServiceName => {
+            verifier.loadKeyset(signingServiceName);
+          });
+        });
   }
 
   /** @override */
@@ -666,10 +672,12 @@ export class AmpA4A extends AMP.BaseElement {
             this.creativeBody_ = bytes;
           }
           this.protectedEmitLifecycleEvent_('adResponseValidateStart');
-          return signatureVerifierFor(this.win)
-              .verify(bytes, headers, (eventName, extraVariables) => {
-                this.protectedEmitLifecycleEvent_(eventName, extraVariables);
-              })
+          return this.keysetPromise_
+              .then(() => signatureVerifierFor(this.win)
+                  .verify(bytes, headers, (eventName, extraVariables) => {
+                    this.protectedEmitLifecycleEvent_(
+                        eventName, extraVariables);
+                  }))
               .then(status => {
                 if (getMode().localDev &&
                     this.element.getAttribute('type') == 'fake') {
