@@ -27,6 +27,7 @@ var util = require('gulp-util');
 var webserver = require('gulp-webserver');
 var app = require('../test-server').app;
 var karmaDefault = require('./karma.conf');
+var seedrandom = require('seedrandom');
 
 
 const green = util.colors.green;
@@ -219,21 +220,12 @@ gulp.task('test', 'Runs tests',
       testFiles = testFiles.concat(glob.sync(testPaths[index]));
     }
 
-    if (argv.randomize) {
-      testFiles = shuffleArray(testFiles);
+    if (argv.randomize || argv.a4a) {
+      testFiles = shuffleArray(testFiles, argv.seed);
     }
 
     testFiles.splice(testFiles.indexOf('test/_init_tests.js'),1);
     c.files = config.commonTestPaths.concat(testFiles);
-
-    util.log(util.colors.blue(JSON.stringify(c.files)));
-    util.log(yellow("Save the above files in a .json file to reuse"));
-
-  } else if (argv.testlist) {
-    var file = read.file(argv.testlist);
-    util.log(file);
-    c.files = file;
-
   } else {
     c.files = config.testPaths;
   }
@@ -334,20 +326,29 @@ gulp.task('test', 'Runs tests',
     'grep': '  Runs tests that match the pattern',
     'files': '  Runs tests for specific files',
     'randomize': '  Runs entire test suite in random order',
-    'testlist': '  Runs tests specified in JSON by supplied file',
+    'seed': '  Seeds the test order randomization. Use with --randomize ' +
+        'or --a4a',
     'glob': '  Explicitly expands test paths using glob before passing ' +
         'to Karma',
     'nohelp': '  Silence help messages that are printed prior to test run',
+    'a4a': '  Runs all A4A tests',
   }
 });
 
 
-function shuffleArray(array) {
-    for (var i = array.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-    }
-    return array;
+function shuffleArray(array, seed) {
+  seed = seed || Math.random();
+  util.log(
+      util.colors.red('Randomizing:'),
+      yellow('Seeding with value', seed));
+  util.log(util.colors.red('Randomizing:'),
+           yellow(`To rerun same ordering, append --seed=${seed}`));
+  const rng = seedrandom(seed);
+  for (var i = array.length - 1; i > 0; i--) {
+    var j = Math.floor(rng() * (i + 1));
+    var temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+  return array;
 }
