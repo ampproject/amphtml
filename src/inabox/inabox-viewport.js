@@ -29,9 +29,13 @@ import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
 import {px, setImportantStyles, resetStyles} from '../../src/style';
+import {throttle} from '../../src/utils/rate-limit';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
+
+/** @const {number} */
+const MIN_EVENT_INTERVAL = 100;
 
 /** @visibleForTesting */
 export function prepareBodyForOverlay(win, bodyElement) {
@@ -127,6 +131,17 @@ export class ViewportBindingInabox {
     /** @private @const {!../../3p/iframe-messaging-client.IframeMessagingClient} */
     this.iframeClient_ = iframeMessagingClientFor(win);
 
+    /** @private {?Promise<!../layout-rect.LayoutRectDef>} */
+    this.requestPositionPromise_ = null;
+
+    /** @private {!../service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.win);
+
+    /** @private {function()} */
+    this.fireScrollThrottle_ = throttle(this.win, () => {
+      this.scrollObservable_.fire();
+    }, MIN_EVENT_INTERVAL);
+
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
@@ -157,7 +172,7 @@ export class ViewportBindingInabox {
             this.resizeObservable_.fire();
           }
           if (isMoved(this.viewportRect_, oldViewportRect)) {
-            this.scrollObservable_.fire();
+            this.fireScrollThrottle_();
           }
         });
   }
@@ -243,6 +258,36 @@ export class ViewportBindingInabox {
       return this.tryToEnterOverlayMode_();
     }
     return this.leaveOverlayMode_();
+  }
+
+  /** @override */
+  getLayoutRectAsync(el) {
+    if (!this.requestPositionPromise_) {
+      this.requestPositionPromise_ = new Promise(resolve => {
+        this.iframeClient_.requestOnce(
+            MessageType.SEND_POSITIONS, MessageType.POSITION,
+            data => {
+              this.requestPositionPromise_ = null;
+              const parentLayoutRect = moveLayoutRect(
+                  data.targetRect,
+                  data.viewportRect.left,
+                  data.viewportRect.top);
+              resolve(parentLayoutRect);
+            }
+        );
+      });
+    }
+
+    const elPosPromise = this.vsync_.measurePromise(() => {
+      return el./*OK*/getBoundingClientRect();
+    });
+
+    return Promise.all([elPosPromise, this.requestPositionPromise_]).then(
+        values => {
+          const box = values[0];
+          const iframeBox = values[1];
+          return moveLayoutRect(box, iframeBox.left, iframeBox.top);
+        });
   }
 
   /**
