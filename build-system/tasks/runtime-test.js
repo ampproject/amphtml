@@ -135,9 +135,8 @@ function printArgvMessages() {
     unit: 'Running only the unit tests. Requires ' +
         cyan('gulp css') +  ' to have been run first.',
     randomize: 'Randomizing the order in which tests are run.',
-    a4a: 'Runs all A4A tests',
-    seed: 'Seeds the test order randomization. Use with --randomize ' +
-        'or --a4a',
+    a4a: 'Runing only A4A tests.',
+    seed: 'Randomizing test order with seed ' + cyan(argv.seed) + '.',
     compiled:  'Running tests against minified code.',
     grep: 'Only running tests that match the pattern "' +
         cyan(argv.grep) + '".'
@@ -204,7 +203,6 @@ gulp.task('test', 'Runs tests',
     const testPaths = argv.a4a ? config.a4aTestPaths : config.basicTestPaths;
 
     var testFiles = [];
-
     for (var index in testPaths) {
       testFiles = testFiles.concat(glob.sync(testPaths[index]));
     }
@@ -214,10 +212,11 @@ gulp.task('test', 'Runs tests',
       util.log(
           util.colors.yellow('Randomizing:'),
           util.colors.cyan('Seeding with value', seed));
-      util.log(util.colors.yellow('To rerun same ordering, append'),
-               util.colors.cyan(`--seed=${seed}`),
-               util.colors.yellow('to your invocation of'),
-               util.colors.cyan('gulp test'));
+      util.log(
+          util.colors.yellow('To rerun same ordering, append'),
+          util.colors.cyan(`--seed=${seed}`),
+          util.colors.yellow('to your invocation of'),
+          util.colors.cyan('gulp test'));
       testFiles = shuffleSeed.shuffle(testFiles, seed);
     }
 
