@@ -128,10 +128,8 @@ export class LegacySignatureVerifier {
    * operations.
    *
    * @param {string} signingServiceName
-   * @param {!Promise<undefined>} waitFor a promise that must resolve before the
-   *     keys are fetched
    */
-  loadKeyset(signingServiceName, waitFor) {
+  loadKeyset(signingServiceName) {
     dev().assert(getMode().localDev || !endsWith(signingServiceName, '-dev'));
     if (!this.isAvailable_()) {
       return;
@@ -142,8 +140,7 @@ export class LegacySignatureVerifier {
         return;
       }
       this.signingServiceNames_[signingServiceName] = true;
-      // Delay request until document is not in a prerender state.
-      this.keys_.push(waitFor.then(() =>
+      this.keys_.push(
           Services.xhrFor(this.win_).fetchJson(url, {
             mode: 'cors',
             method: 'GET',
@@ -152,33 +149,37 @@ export class LegacySignatureVerifier {
             // across pages.
             ampCors: false,
             credentials: 'omit',
-          })).then(res => res.json())
-          .then(jwkSetObj => {
-            if (jwkSetObj && isArray(jwkSetObj['keys']) &&
-                jwkSetObj['keys'].every(isObject)) {
-              return jwkSetObj['keys'];
-            } else {
-              user().error(
-                  TAG,
-                  `Invalid response from signing server ${signingServiceName}`);
-              return [];
-            }
-          }).then(jwks => ({
-            signingServiceName,
-            keys: jwks.map(jwk => this.importPublicKey_(signingServiceName, jwk)
-                .catch(err => {
+          }).then(res => res.json())
+              .then(jwkSetObj => {
+                if (jwkSetObj && isArray(jwkSetObj['keys']) &&
+                    jwkSetObj['keys'].every(isObject)) {
+                  return jwkSetObj['keys'];
+                } else {
                   user().error(
-                      TAG, `error importing keys for: ${signingServiceName}`,
-                      err);
-                  return null;
-                })),
-          })).catch(err => {
-            user().error(TAG, err);
-            // TODO(a4a-team): This is a failure in the initial attempt to get
-            // the keys, probably b/c of a network condition.  We should
-            // re-trigger key fetching later.
-            return {signingServiceName, keys: []};
-          }));
+                      TAG,
+                      `Invalid response from signing server ${
+                        signingServiceName
+                      }`);
+                  return [];
+                }
+              }).then(jwks => ({
+                signingServiceName,
+                keys: jwks.map(jwk =>
+                    this.importPublicKey_(signingServiceName, jwk)
+                        .catch(err => {
+                          user().error(
+                              TAG,
+                              `error importing keys for: ${signingServiceName}`,
+                              err);
+                          return null;
+                        })),
+              })).catch(err => {
+                user().error(TAG, err);
+                // TODO(a4a-team): This is a failure in the initial attempt to
+                // get the keys, probably b/c of a network condition.  We should
+                // re-trigger key fetching later.
+                return {signingServiceName, keys: []};
+              }));
     } else {
       // The given signingServiceName does not have a corresponding URL in
       // _a4a-config.js.

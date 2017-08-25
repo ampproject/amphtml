@@ -19,6 +19,7 @@ import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
 } from '../../../amp-a4a/0.1/amp-a4a';
+import {VerificationStatus} from '../../../amp-a4a/0.1/signature-verifier';
 import {
   AMP_SIGNATURE_HEADER,
   signatureVerifierFor,
@@ -383,6 +384,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       element.setAttribute('height', 'auto');
       new AmpAd(element).upgradeCallback();
       expect(impl.element.getAttribute('height')).to.equal('auto');
+      impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.getAdUrl().then(url =>
           // With exp dc-use-attr-for-format off, we can't test for specific
@@ -394,6 +396,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           element.setAttribute('width', 'auto');
           new AmpAd(element).upgradeCallback();
           expect(impl.element.getAttribute('width')).to.equal('auto');
+          impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
              // Ensure that "auto" doesn't appear anywhere here:
@@ -452,6 +455,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           element.setAttribute('data-override-width', '123');
           element.setAttribute('data-override-height', '456');
           new AmpAd(element).upgradeCallback();
+          impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
              expect(url).to.contain('sz=123x456&'));
@@ -463,6 +467,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           element.setAttribute('data-multi-size', '1x2,3x4');
           element.setAttribute('data-multi-size-validation', 'false');
           new AmpAd(element).upgradeCallback();
+          impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
              expect(url).to.contain('sz=123x456%7C1x2%7C3x4&'));
@@ -474,6 +479,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           element.setAttribute('data-multi-size', '1x2,3x4');
           element.setAttribute('data-multi-size-validation', 'false');
           new AmpAd(element).upgradeCallback();
+          impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
              // Ensure that "auto" doesn't appear anywhere here:
@@ -623,7 +629,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     function stubForAmpCreative() {
       sandbox.stub(
           signatureVerifierFor(impl.win), 'verify',
-          () => Promise.resolve(null));
+          () => Promise.resolve(VerificationStatus.OK));
     }
 
     function mockSendXhrRequest() {
@@ -661,7 +667,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl = new AmpAdNetworkDoubleclickImpl(element);
       impl.initialSize_ = {width: 200, height: 50};
 
-        // Boilerplate stubbing
+      // Boilerplate stubbing
       sandbox.stub(impl, 'shouldInitializePromiseChain_', () => true);
       sandbox.stub(impl, 'getPageLayoutBox', () => {
         return {
@@ -686,11 +692,19 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         };
       });
       sandbox.stub(impl, 'updatePriority', () => {});
+
+      env.expectFetch(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
+          {'keys': []});
+      env.expectFetch(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
+          {'keys': []});
     });
 
     it('amp creative - should force iframe to match size of creative', () => {
       stubForAmpCreative();
       sandbox.stub(impl, 'sendXhrRequest', mockSendXhrRequest);
+      impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
         const iframe = impl.iframe;
@@ -702,6 +716,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should force iframe to match size of creative', () => {
       sandbox.stub(impl, 'sendXhrRequest', mockSendXhrRequest);
+      impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
         const iframe = impl.iframe;
@@ -718,6 +733,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
       // This would normally be set in AmpA4a#buildCallback.
       impl.creativeSize_ = {width: 200, height: 50};
+      impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
         const iframe = impl.iframe;
@@ -733,6 +749,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
       // This would normally be set in AmpA4a#buildCallback.
       impl.creativeSize_ = {width: 200, height: 50};
+      impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
         const iframe = impl.iframe;
@@ -746,6 +763,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       stubForAmpCreative();
       sandbox.stub(impl, 'sendXhrRequest', mockSendXhrRequest);
       impl.element.setAttribute('data-multi-size', '201x50');
+      impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
         expect(impl.adUrl_).to.be.ok;

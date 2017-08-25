@@ -65,6 +65,9 @@ export class FakeWindow {
     /** @const */
     this.Math = window.Math;
 
+    /** @const */
+    this.crypto = window.crypto || window.msCrypto;
+
     // Parent Window points to itself if spec.parent was not passed.
     /** @const @type {!Window} */
     this.parent = spec.parent ? new FakeWindow(spec.parent) : this;
