@@ -653,13 +653,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
     }
 
     beforeEach(() => {
+      // Set body margin to arbitrary test values.
       document.body.style.marginLeft = '5px';
       document.body.style.marginRight = '9px';
     });
-
-    // afterEach(() => {
-    //   document.body.removeChild(container);
-    // });
 
     it('should leave margins untouched for non-responsive', () => {
       container = env.win.document.createElement('div');
@@ -700,9 +697,9 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'data-auto-format': 'rspv',
       }).then(() => {
         impl.onLayoutMeasure();
-        expect(element.style.marginLeft).to.be.equal('');
         // Right margin is 25px from container and 9px from body.
         expect(element.style.marginRight).to.be.equal('-34px');
+        expect(element.style.marginLeft).to.be.equal('');
       });
     });
   });
@@ -716,7 +713,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
 
     it('should request 6:5 aspect ratio for normal viewport (iPhone 5)', () => {
-      console.log('okay!');
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
               {width: 320, height: 568}))

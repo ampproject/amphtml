@@ -369,19 +369,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
       const layoutBox = this.getLayoutBox();
 
-      // Nudge into the correct horizontal position. NB: this must succeed in
-      // order to align the element correctly, so we use changeSize rather than
-      // attemptChangeSize here. But it doesn't actually change the size (it
-      // just changes the horizontal margins).
+      // Nudge into the correct horizontal position by changing side margin.
       // TODO(charliereams): Is this the right way to get direction?
       const parentDirection =
           computedStyle(this.win, this.element)['direction'];
       this.getVsync().mutate(() => {
         if (parentDirection == 'rtl') {
-          console.log('rtl');
           setStyle(this.element, 'marginRight', layoutBox.left, 'px');
         } else {
-          console.log('ltr');
           setStyle(this.element, 'marginLeft', -1 * layoutBox.left, 'px');
         }
       });
