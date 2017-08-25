@@ -153,22 +153,14 @@ export class ViewportBindingInabox {
 
   /** @private */
   listenForPosition_() {
-
-    if (nativeIntersectionObserverSupported(this.win)) {
-      // Using native IntersectionObserver, no position data needed
-      // from host doc.
-      return;
-    }
-
     this.iframeClient_.makeRequest(
         MessageType.SEND_POSITIONS, MessageType.POSITION,
         data => {
           dev().fine(TAG, 'Position changed: ', data);
           const oldViewportRect = this.viewportRect_;
-          this.viewportRect_ = data.viewport;
+          this.viewportRect_ = data.viewportRect;
 
           this.updateBoxRect_(data.target);
-
           if (isResized(this.viewportRect_, oldViewportRect)) {
             this.resizeObservable_.fire();
           }

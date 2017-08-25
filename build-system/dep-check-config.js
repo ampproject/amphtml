@@ -185,11 +185,6 @@ exports.rules = [
           'src/service/parallax-impl.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
           'src/service/extension-location.js',
-      // TODO(@zhouyx, #9213) Remove this item.
-      'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
-          'src/service/position-observer/position-observer-impl.js',
-       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js->' +
-          'src/service/position-observer/position-observer-fidelity.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
     ],

@@ -58,10 +58,7 @@ export class PositionObserverEntry {
         Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0;
 
     /** @type {?PositionInViewportEntryDef} */
-    this.position = null;
-
-    /** @type {?../../layout-rect.LayoutRectDef} */
-    this.inIframePositionRect = null;
+    this.prevPosition_ = null;
   }
 
   /**
@@ -69,10 +66,8 @@ export class PositionObserverEntry {
    * @param {!PositionInViewportEntryDef} position
    */
   trigger(position) {
-    if (!position.positionRect) {
-      return;
-    }
-    const prePos = this.position;
+
+    const prePos = this.prevPosition_ ;
     if (prePos
         && layoutRectEquals(prePos.positionRect, position.positionRect)
         && layoutRectEquals(prePos.viewportRect, position.viewportRect)) {
@@ -89,17 +84,17 @@ export class PositionObserverEntry {
         /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect),
         position.viewportRect)) {
       // Update position
-      this.position = position;
+      this.prevPosition_ = position;
       // Only call handler if entry element overlap with viewport.
       try {
         this.handler_(position);
       } catch (err) {
         // TODO(@zhouyx, #9208) Throw error.
       }
-    } else if (this.position) {
+    } else if (this.prevPosition_) {
       // Need to notify that element gets outside viewport
       // NOTE: This is required for inabox position observer.
-      this.position = null;
+      this.prevPosition_ = null;
       position.positionRect = null;
       try {
         this.handler_(position);

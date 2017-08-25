@@ -32,17 +32,8 @@ import {setStyle} from '../../../src/style';
 import {getData, loadPromise} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
 import {removeElement} from '../../../src/dom';
-import {getServiceForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {MessageType} from '../../../src/3p-frame-messaging';
-import {
-  installPositionObserverServiceForDoc,
-} from '../../../src/service/position-observer/position-observer-impl';
-import {
-  PositionObserverFidelity,
-  SEND_POSITIONS_HIGH_FIDELITY,
-  POSITION_HIGH_FIDELITY,
-} from '../../../src/service/position-observer/position-observer-fidelity';
 import {throttle} from '../../../src/utils/rate-limit';
 
 const VISIBILITY_TIMEOUT = 10000;
@@ -137,35 +128,6 @@ export class AmpAdXOriginIframeHandler {
             this.registerPosition_();
           });
     };
-
-    // High-fidelity positions for scrollbound animations.
-    // Protected by 'amp-animation' experiment for now.
-    if (isExperimentOn(this.baseInstance_.win, 'amp-animation')) {
-      let posObInstalled = false;
-
-      // to be removed
-      this.positionObserverHighFidelityApi_ = new SubscriptionApi(
-        this.iframe, MessageType.SEND_POSITIONS_HIGH_FIDELITY, true, () => {
-          const ampdoc = this.baseInstance_.getAmpDoc();
-          // TODO (#9232) May crash PWA
-          if (!posObInstalled) {
-            installPositionObserverServiceForDoc(ampdoc);
-            posObInstalled = true;
-          }
-          this.positionObserver_ = getServiceForDoc(ampdoc,
-              'position-observer');
-
-          this.positionObserver_.observe(
-              dev().assertElement(this.iframe),
-              PositionObserverFidelity.HIGH, pos => {
-                // Valid cast because it is an external object.
-                const posCast = /** @type {!JsonObject} */ (pos);
-                this.positionObserverHighFidelityApi_.send(
-                    MessageType.POSITION_HIGH_FIDELITY,
-                    posCast);
-              });
-        });
-    }
 
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.

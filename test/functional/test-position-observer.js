@@ -20,12 +20,10 @@ import {
 import {
   PositionObserverFidelity,
 } from '../../src/service/position-observer/position-observer-fidelity';
-import {
-  PosObAmpdocHostInterface,
-} from '../../src/service/position-observer/position-observer-host-interface';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {Services} from '../../src/services';
 import {setStyles} from '../../src/style';
+import {macroTask} from '../../testing/yield';
 import * as lolex from 'lolex';
 
 describes.realWin('PositionObserver', {amp: 1}, env => {
@@ -38,19 +36,15 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
 
   describe('PositionObserver for AMP doc', () => {
     let posOb;
-    let host;
     let elem;
     let elem1;
     let clock;
     beforeEach(() => {
-      host = new PosObAmpdocHostInterface(ampdoc);
-      const vsync = Services.vsyncFor(ampdoc.win);
       clock = lolex.install(win);
-      sandbox.stub(vsync, 'measure', callback => {
+      posOb = new PositionObserver(ampdoc);
+      sandbox.stub(posOb.vsync_, 'measure', callback => {
         win.setTimeout(callback, 1);
       });
-      posOb = new PositionObserver(
-          win, Services.vsyncFor(ampdoc.win), host);
       elem = win.document.createElement('div');
       win.document.body.appendChild(elem);
       setStyles(elem, {
@@ -101,25 +95,36 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
     });
 
     describe('update position info at correct time', () => {
-      it('should update new position with scroll event', () => {
+      let top;
+      beforeEach(() => {
+        top = 0;
+        sandbox.stub(posOb.viewport_, 'getBoundingRectAsync', () => {
+          return Promise.resolve(layoutRectLtwh(0, top, 0, 0));
+        });
+      });
+      it('should update new position with scroll event', function* () {
         const spy = sandbox.spy();
         posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
         clock.tick(2);
-        spy.reset();
-        const scrollEvent = new Event('scroll');
-        win.dispatchEvent(scrollEvent);
-        elem.style.top = '1px';
-        clock.tick(1);
+        yield macroTask();
         expect(spy).to.be.calledOnce;
-        elem.style.top = '2px';
+        spy.reset();
+        top++;
+        win.dispatchEvent(new Event('scroll'));
+        yield macroTask();
+        expect(spy).to.be.calledOnce;
+        spy.reset();
+        top++;
         clock.tick(1);
-        expect(spy).to.be.calledTwice;
+        yield macroTask();
+        expect(spy).to.be.calledOnce;
         // stop fire scroll update after 500ms timeout
         // Make the number larger to avoid window scroll event
         clock.tick(5001);
         spy.reset();
-        elem.style.top = '3px';
+        top++;
         clock.tick(1);
+        yield macroTask();
         expect(spy).to.not.be.called;
       });
 
@@ -141,51 +146,51 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         expect(spy1).to.be.calledOnce;
       });
 
-      it('should not update if element position does not change', () => {
+      it('should not update if element position does not change', function* () {
         const spy = sandbox.spy();
         posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
-        const spy1 = sandbox.spy();
-        posOb.observe(elem1, PositionObserverFidelity.HIGH, spy1);
-        clock.tick(1);
-        const scrollEvent = new Event('scroll');
-        win.dispatchEvent(scrollEvent);
-        elem.style.top = '1px';
-        clock.tick(1);
-        expect(spy).to.be.calledTwice;
-        expect(spy1).to.be.calledOnce;
+        yield macroTask();
+        expect(spy).to.be.calledOnce;
+        win.dispatchEvent(new Event('scroll'));
+        yield macroTask();
+        expect(spy).to.be.calledOnce;
       });
     });
 
     describe('should provide correct position data', () => {
-      it('overlap with viewport', () => {
-        setStyles(elem, {
-          'position': 'absolute',
-          'top': '1px',
-          'left': '2px',
-          'width': '20px',
-          'height': '10px',
+      let top;
+      beforeEach(() => {
+        top = 0;
+        sandbox.stub(posOb.viewport_, 'getBoundingRectAsync', () => {
+          return Promise.resolve(layoutRectLtwh(2, top, 20, 10));
         });
+      });
+
+      it('overlap with viewport', function* () {
         const viewport = Services.viewportForDoc(ampdoc);
         const sizes = viewport.getSize();
         const spy = sandbox.spy();
+        top = 1;
         posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
-        clock.tick(1);
+        yield macroTask();
         expect(spy).to.be.calledWith({
           positionRect: layoutRectLtwh(2, 1, 20, 10),
           relativePos: 'inside',
           viewportRect: layoutRectLtwh(0, 0, sizes.width, sizes.height),
         });
         spy.reset();
-        elem.style.top = '-5px';
+        top = -5;
         posOb.updateAllEntries();
+        yield macroTask();
         expect(spy).to.be.calledWith({
           positionRect: layoutRectLtwh(2, -5, 20, 10),
           relativePos: 'top',
           viewportRect: layoutRectLtwh(0, 0, sizes.width, sizes.height),
         });
         spy.reset();
-        elem.style.top = `${sizes.height - 5}px`;
+        top = sizes.height - 5;
         posOb.updateAllEntries();
+        yield macroTask();
         expect(spy).to.be.calledWith({
           positionRect: layoutRectLtwh(2, sizes.height - 5, 20, 10),
           relativePos: 'bottom',
@@ -193,7 +198,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         });
       });
 
-      it('out of viewport', () => {
+      it('out of viewport', function* () {
         setStyles(elem, {
           'position': 'absolute',
           'top': '1px',
@@ -205,29 +210,33 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         const sizes = viewport.getSize();
         const spy = sandbox.spy();
         posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
-        clock.tick(1);
+        yield macroTask();
         spy.reset();
-        elem.style.top = '-11px';
+        top = -11;
         posOb.updateAllEntries();
+        yield macroTask();
         expect(spy).to.be.calledWith({
           positionRect: null,
           relativePos: 'top',
           viewportRect: layoutRectLtwh(0, 0, sizes.width, sizes.height),
         });
         spy.reset();
-        elem.style.top = `${sizes.height + 1}px`;
+        elem.style.top = sizes.height + 1;
         posOb.updateAllEntries();
+        yield macroTask();
         expect(spy).to.not.be.called;
-        elem.style.top = '0px';
+        top = 0;
         posOb.updateAllEntries();
+        yield macroTask();
         expect(spy).to.be.calledWith({
           positionRect: layoutRectLtwh(2, 0, 20, 10),
           relativePos: 'inside',
           viewportRect: layoutRectLtwh(0, 0, sizes.width, sizes.height),
         });
         spy.reset();
-        elem.style.top = `${sizes.height + 5}px`;
+        top = sizes.height + 5;
         posOb.updateAllEntries();
+        yield macroTask();
         expect(spy).to.be.calledWith({
           positionRect: null,
           relativePos: 'bottom',
