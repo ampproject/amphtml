@@ -76,6 +76,7 @@ let ExtensionDef;
  *
  * @typedef {{
  *   extension: !ExtensionDef,
+ *   auto: boolean,
  *   docFactories: !Array<function(!./ampdoc-impl.AmpDoc)>,
  *   promise: (!Promise<!ExtensionDef>|undefined),
  *   resolve: (function(!ExtensionDef)|undefined),
@@ -202,7 +203,7 @@ export class Extensions {
    * @restricted
    */
   registerExtension_(extensionId, factory, arg) {
-    const holder = this.getExtensionHolder_(extensionId);
+    const holder = this.getExtensionHolder_(extensionId, /* auto */ true);
     try {
       this.currentExtensionId_ = extensionId;
       factory(arg);
@@ -235,7 +236,8 @@ export class Extensions {
    * @return {!Promise<!ExtensionDef>}
    */
   waitForExtension(extensionId) {
-    return this.waitFor_(this.getExtensionHolder_(extensionId));
+    return this.waitFor_(this.getExtensionHolder_(
+        extensionId, /* auto */ false));
   }
 
   /**
@@ -248,7 +250,7 @@ export class Extensions {
     if (extensionId == 'amp-embed') {
       extensionId = 'amp-ad';
     }
-    const holder = this.getExtensionHolder_(extensionId);
+    const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
     this.insertExtensionScriptIfNeeded_(extensionId, holder);
     return this.waitFor_(holder);
   }
@@ -388,9 +390,9 @@ export class Extensions {
     if (this.currentExtensionId_ && this.ampdocService_.isSingleDoc()) {
       const ampdoc = this.ampdocService_.getAmpDoc();
       const extensionId = dev().assertString(this.currentExtensionId_);
-      //QQQ: consider: "otherwise known" extensions, e.g. not registered via preloadExtension?
-      if (ampdoc.declaresExtension(extensionId)) {
+      if (ampdoc.declaresExtension(extensionId) || holder.auto) {
         factory(ampdoc);
+        //QQQ: test "otherwise known" extensions, e.g. not registered via preloadExtension?
       }
     }
   }
@@ -420,7 +422,7 @@ export class Extensions {
    * @private
    */
   installExtensionInDoc_(ampdoc, extensionId) {
-    const holder = this.getExtensionHolder_(extensionId);
+    const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
     return this.waitFor_(holder).then(() => {
       declareExtension(ampdoc, extensionId);
       holder.docFactories.forEach(factory => {
@@ -523,10 +525,11 @@ export class Extensions {
   /**
    * Creates or returns an existing extension holder.
    * @param {string} extensionId
+   * @param {boolean} auto
    * @return {!ExtensionHolderDef}
    * @private
    */
-  getExtensionHolder_(extensionId) {
+  getExtensionHolder_(extensionId, auto) {
     let holder = this.extensions_[extensionId];
     if (!holder) {
       const extension = /** @type {ExtensionDef} */ ({
@@ -535,6 +538,7 @@ export class Extensions {
       });
       holder = /** @type {ExtensionHolderDef} */ ({
         extension,
+        auto,
         docFactories: [],
         promise: undefined,
         resolve: undefined,
@@ -559,7 +563,8 @@ export class Extensions {
       dev().error(TAG, 'unknown extension for ', opt_forName);
     }
     return this.getExtensionHolder_(
-        this.currentExtensionId_ || UNKNOWN_EXTENSION);
+        this.currentExtensionId_ || UNKNOWN_EXTENSION,
+        /* auto */ true);
   }
 
   /**

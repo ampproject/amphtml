@@ -345,6 +345,7 @@ export function adopt(global) {
   return adoptShared(global, (global, extensions) => {
     const ampdocService = Services.ampdocServiceFor(global);
     const ampdoc = ampdocService.getAmpDoc();
+    global.AMP.ampdoc = ampdoc;
 
     const viewer = Services.viewerForDoc(global.document);
     global.AMP.viewer = viewer;
