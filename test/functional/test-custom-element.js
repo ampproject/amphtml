@@ -20,8 +20,8 @@ import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
+import {createElementWithAttributes} from '../../src/dom';
 import {installDocumentStateService} from '../../src/service/document-state';
-import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
 import {poll} from '../../testing/iframe';
 import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
@@ -41,14 +41,27 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
   class ConcreteElement extends BaseElement {}
 
-  let win, ampdoc;
+  let win, doc, ampdoc, extensions;
 
   beforeEach(() => {
     win = env.win;
+    doc = win.document;
     ampdoc = env.ampdoc;
+    extensions = env.extensions;
     ampdoc.declareExtension_('amp-element1');
-    installResourcesServiceForDoc(window.document);
   });
+
+  function insertElement(name) {
+    const testElement = createElementWithAttributes(doc, name, {
+      width: '300',
+      height: '250',
+      type: '_ping_',
+      'data-aax_size': '300*250',
+      'data-aax_pubname': 'abc123',
+      'data-aax_src': '302',
+    });
+    doc.body.appendChild(testElement);
+  }
 
   it('should go through stub/upgrade cycle', () => {
     registerElement(win, 'amp-element1', ElementStub);
@@ -56,8 +69,8 @@ describes.realWin('CustomElement register', {amp: true}, env => {
         .to.equal(ElementStub);
 
     // Pre-download elements are created as ElementStub.
-    const element1 = win.document.createElement('amp-element1');
-    win.document.body.appendChild(element1);
+    const element1 = doc.createElement('amp-element1');
+    doc.body.appendChild(element1);
     expect(element1.implementation_).to.be.instanceOf(ElementStub);
 
     // Post-download, elements are upgraded.
@@ -67,9 +80,84 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     expect(element1.implementation_).to.be.instanceOf(ConcreteElement);
 
     // Elements created post-download and immediately upgraded.
-    const element2 = win.document.createElement('amp-element1');
-    win.document.body.appendChild(element1);
+    const element2 = doc.createElement('amp-element1');
+    doc.body.appendChild(element1);
     expect(element2.implementation_).to.be.instanceOf(ConcreteElement);
+  });
+
+  it('should mark stubbed element as declared', () => {
+    expect(ampdoc.declaresExtension('amp-element2')).to.be.false;
+
+    const head = document.createElement('fake-head');
+    const script = document.createElement('script');
+    script.setAttribute('custom-element', 'amp-element2');
+    head.appendChild(script);
+    sandbox.stub(ampdoc, 'getHeadNode', () => head);
+
+    stubElementsForDoc(ampdoc);
+    expect(ampdoc.declaresExtension('amp-element2')).to.be.true;
+    expect(win.ampExtendedElements['amp-element2']).to.equal(ElementStub);
+  });
+
+  it('should install pre-stubbed element extension', () => {
+    const stub = sandbox.stub(extensions, 'installExtensionForDoc');
+
+    stubElementIfNotKnown(win, 'amp-element2');
+    expect(win.ampExtendedElements['amp-element2']).to.equal(ElementStub);
+    expect(ampdoc.declaresExtension('amp-element2')).to.be.false;
+    expect(stub).to.not.be.called;
+
+    const element = doc.createElement('amp-element2');
+    doc.body.appendChild(element);
+    expect(stub).to.be.calledOnce;
+    expect(stub).to.be.calledWithExactly(ampdoc, 'amp-element2');
+  });
+
+  it('should not install declared pre-stubbed element extension', () => {
+    ampdoc.declareExtension_('amp-element2');
+    const stub = sandbox.stub(extensions, 'installExtensionForDoc');
+
+    stubElementIfNotKnown(win, 'amp-element2');
+    expect(win.ampExtendedElements['amp-element2']).to.equal(ElementStub);
+    expect(ampdoc.declaresExtension('amp-element2')).to.be.true;
+    expect(stub).to.not.be.called;
+
+    const element = doc.createElement('amp-element2');
+    doc.body.appendChild(element);
+    expect(stub).to.not.be.called;
+  });
+
+  it('should not install declared pre-installed element', () => {
+    const stub = sandbox.stub(extensions, 'installExtensionForDoc');
+
+    registerElement(win, 'amp-element1', ConcreteElement);
+    expect(win.ampExtendedElements['amp-element1']).to.equal(ConcreteElement);
+    expect(ampdoc.declaresExtension('amp-element1')).to.be.true;
+    expect(stub).to.not.be.called;
+
+    const element = doc.createElement('amp-element1');
+    doc.body.appendChild(element);
+    expect(stub).to.not.be.called;
+  });
+
+  it('insert script for amp-ad when script is not included', () => {
+    insertElement('amp-ad');
+    expect(doc.head.querySelectorAll('[custom-element="amp-ad"]'))
+        .to.have.length(1);
+  });
+
+  it('insert script for amp-embed when script is not included', () => {
+    insertElement('amp-embed');
+    expect(doc.head.querySelectorAll('[custom-element="amp-embed"]'))
+        .to.have.length(0);
+    expect(doc.head.querySelectorAll('[custom-element="amp-ad"]'))
+        .to.have.length(1);
+  });
+
+  it('insert script for amp-video when script is not included', () => {
+    insertElement('amp-video');
+    expect(doc.head.querySelectorAll('[custom-element="amp-video"]'))
+        .to.have.length(1);
   });
 });
 

@@ -392,7 +392,6 @@ export class Extensions {
       const extensionId = dev().assertString(this.currentExtensionId_);
       if (ampdoc.declaresExtension(extensionId) || holder.auto) {
         factory(ampdoc);
-        //QQQ: test "otherwise known" extensions, e.g. not registered via preloadExtension?
       }
     }
   }

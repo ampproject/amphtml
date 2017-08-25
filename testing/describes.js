@@ -782,7 +782,6 @@ class AmpFixture {
     if (env.embed) {
       env.embed.destroy();
     }
-    // resetLoadingCheckForTests();  QQQ: is this still needed?
     if (win.customElements && win.customElements.elements) {
       for (const k in win.customElements.elements) {
         resetScheduledElementForTesting(win, k);
