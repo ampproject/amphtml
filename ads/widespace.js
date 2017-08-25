@@ -23,14 +23,14 @@ import {writeScript, validateData} from '../3p/3p';
 export function widespace(global, data) {
 
   const WS_AMP_CODE_VER = '1.0.1';
-  const demographParams = ['demoGender',
-                           'demoCountry',
-                           'demoRegion',
-                           'demoCity',
-                           'demoPostal',
-                           'demoYob'];
+  // Optinal demography parameters.
+  let demo = [];
 
-  validateData(data, ['sid'], demographParams);
+  demo = ['Gender', 'Country', 'Region', 'City', 'Postal', 'Yob'].map((d) => {
+    return 'demo' + d;
+  });
+
+  validateData(data, ['sid'], demo);
 
   const url = 'https://engine.widespace.com/map/engine/dynamic?isamp=1'
       + '&ampver=' + WS_AMP_CODE_VER
