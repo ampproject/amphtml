@@ -84,10 +84,12 @@ export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
 export const BETA_EXPERIMENT_ID = '2077831';
 
 /** @visibleForTesting */
+/**
+ * Class for checking whether a page/element is eligible for Fast Fetch.
+ * Singleton class.
+ */
 export class DoubleclickA4aEligibility {
-  constructor() {
-    return singleton;
-  }
+  constructor() {}
 
   /**
    * Returns whether win supports native crypto. Is just a wrapper around
@@ -122,33 +124,32 @@ export class DoubleclickA4aEligibility {
         !this.supportsCrypto(win)) {
       return false;
     }
+    let experimentName = DFP_CANONICAL_FF_EXPERIMENT_NAME;
     if (!this.isCdnProxy(win)) {
       experimentId = this.selectExperiment(win, element, [
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
       ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
-      if (experimentId) {
-        addExperimentIdToElement(experimentId, element);
-      }
-      return experimentId ==
-          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT;
-    }
-    if (element.hasAttribute(BETA_ATTRIBUTE)) {
-      addExperimentIdToElement(BETA_EXPERIMENT_ID, element);
-      dev().info(TAG, `beta forced a4a selection ${element}`);
-      return true;
-    }
-    // See if in holdback control/experiment.
-    const urlExperimentId = extractUrlExperimentId(win, element);
-    if (urlExperimentId != undefined) {
-      experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-      dev().info(
-          TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
     } else {
-      experimentId = this.selectExperiment(win, element, [
-        DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
-        DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
-          DOUBLECLICK_A4A_EXPERIMENT_NAME);
+      experimentName = DOUBLECLICK_A4A_EXPERIMENT_NAME;
+      if (element.hasAttribute(BETA_ATTRIBUTE)) {
+        addExperimentIdToElement(BETA_EXPERIMENT_ID, element);
+        dev().info(TAG, `beta forced a4a selection ${element}`);
+        return true;
+      }
+      // See if in holdback control/experiment.
+      const urlExperimentId = extractUrlExperimentId(win, element);
+      if (urlExperimentId != undefined) {
+        experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
+        dev().info(
+            TAG,
+            `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+      } else {
+        experimentId = this.selectExperiment(win, element, [
+          DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
+          DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
+            DOUBLECLICK_A4A_EXPERIMENT_NAME);
+      }
     }
     if (experimentId) {
       addExperimentIdToElement(experimentId, element);
@@ -157,7 +158,9 @@ export class DoubleclickA4aEligibility {
     return ![DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
       DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
       DOUBLECLICK_EXPERIMENT_FEATURE.SFG_CONTROL_ID,
-      DOUBLECLICK_EXPERIMENT_FEATURE.SFG_EXP_ID].includes(experimentId);
+      DOUBLECLICK_EXPERIMENT_FEATURE.SFG_EXP_ID,
+      DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
+    ].includes(experimentId);
   }
 
   /**
@@ -179,6 +182,7 @@ export class DoubleclickA4aEligibility {
   }
 }
 
+/** @const {!DoubleclickA4aEligibility} */
 const singleton = new DoubleclickA4aEligibility();
 
 /**

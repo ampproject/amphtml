@@ -67,8 +67,8 @@ describe('doubleclick-a4a-config', () => {
     });
 
     it('should not enable a4a when native crypto is not supported', () => {
-      const instance = new DoubleclickA4aEligibility();
-      sandbox.stub(instance, 'supportsCrypto', () => false);
+      sandbox.stub(DoubleclickA4aEligibility.prototype,
+          'supportsCrypto', () => false);
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
@@ -77,8 +77,8 @@ describe('doubleclick-a4a-config', () => {
     it('should select into canonical AMP experiment when not on CDN', () => {
       forceExperimentBranch(mockWin, DFP_CANONICAL_FF_EXPERIMENT_NAME,
           DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT);
-      const instance = new DoubleclickA4aEligibility();
-      sandbox.stub(instance, 'isCdnProxy', () => false);
+      sandbox.stub(DoubleclickA4aEligibility.prototype,
+          'isCdnProxy', () => false);
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
