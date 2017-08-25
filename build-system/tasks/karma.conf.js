@@ -211,6 +211,7 @@ module.exports = {
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',
+    'karma-ie-launcher',
     'karma-mocha',
     'karma-mocha-reporter',
     'karma-safari-launcher',

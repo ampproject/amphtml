@@ -1641,6 +1641,9 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     child.style.height = '300px';
     child.textContent = 'test';
     win.document.body.appendChild(child);
+    installDocService(win, /* isSingleDoc */ true);
+    installDocumentStateService(win);
+    installVsyncService(win);
     binding = new ViewportBindingIosEmbedWrapper_(win);
     binding.connect();
   });
