@@ -201,12 +201,7 @@ gulp.task('test', 'Runs tests',
   } else if (argv.unit) {
     c.files = config.unitTestPaths;
   } else if (argv.randomize || argv.glob || argv.a4a) {
-    var testPaths;
-    if (argv.a4a) {
-      testPaths = config.a4aTestPaths;
-    } else {
-      testPaths = config.basicTestPaths;
-    }
+    const testPaths = argv.a4a ? config.a4aTestPaths : config.basicTestPaths;
 
     var testFiles = [];
 
@@ -217,14 +212,16 @@ gulp.task('test', 'Runs tests',
     if (argv.randomize || argv.a4a) {
       const seed = argv.seed || Math.random();
       util.log(
-          util.colors.red('Randomizing:'),
-          yellow('Seeding with value', seed));
-      util.log(util.colors.red('Randomizing:'),
-               yellow(`To rerun same ordering, append --seed=${seed}`));
+          util.colors.yellow('Randomizing:'),
+          util.colors.cyan('Seeding with value', seed));
+      util.log(util.colors.yellow('To rerun same ordering, append'),
+               util.colors.cyan(`--seed=${seed}`),
+               util.colors.yellow('to your invocation of'),
+               util.colors.cyan('gulp test'));
       testFiles = shuffleSeed.shuffle(testFiles, seed);
     }
 
-    testFiles.splice(testFiles.indexOf('test/_init_tests.js'),1);
+    testFiles.splice(testFiles.indexOf('test/_init_tests.js'), 1);
     c.files = config.commonTestPaths.concat(testFiles);
   } else {
     c.files = config.testPaths;
