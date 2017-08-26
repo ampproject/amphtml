@@ -23,8 +23,10 @@ import {
   PositionObserverFidelity,
   LOW_FIDELITY_FRAME_COUNT,
 } from './position-observer-fidelity';
+import {dev} from '../../log';
 
 /**
+ * TODO (@zhouyx): rename relativePos to relativePositions
  * The positionObserver returned position value which includes the position rect
  * relative to viewport. And viewport rect which always has top 0, left 0, and
  * viewport width and height.
@@ -67,40 +69,32 @@ export class PositionObserverEntry {
    */
   trigger(position) {
 
-    const prePos = this.prevPosition_ ;
-    if (prePos
-        && layoutRectEquals(prePos.positionRect, position.positionRect)
-        && layoutRectEquals(prePos.viewportRect, position.viewportRect)) {
+    const prevPos = this.prevPosition_ ;
+    if (prevPos
+        && layoutRectEquals(prevPos.positionRect, position.positionRect)
+        && layoutRectEquals(prevPos.viewportRect, position.viewportRect)) {
       // position didn't change, do nothing.
       return;
     }
 
+    dev().assert(position.positionRect);
+    const positionRect =
+        /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
     // Add the relative position of the element to its viewport
-    position.relativePos = layoutRectsRelativePos(
-        /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect),
-        position.viewportRect
-    );
-    if (layoutRectsOverlap(
-        /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect),
-        position.viewportRect)) {
+    position.relativePos = layoutRectsRelativePos(positionRect,
+        position.viewportRect);
+
+    if (layoutRectsOverlap(positionRect, position.viewportRect)) {
       // Update position
       this.prevPosition_ = position;
       // Only call handler if entry element overlap with viewport.
-      try {
-        this.handler_(position);
-      } catch (err) {
-        // TODO(@zhouyx, #9208) Throw error.
-      }
+      this.handler_(position);
     } else if (this.prevPosition_) {
       // Need to notify that element gets outside viewport
       // NOTE: This is required for inabox position observer.
       this.prevPosition_ = null;
       position.positionRect = null;
-      try {
-        this.handler_(position);
-      } catch (err) {
-        // TODO(@zhouyx, #9208) Throw error.
-      }
+      this.handler_(position);
     }
   }
 }

@@ -24,6 +24,7 @@ import {
   PositionObserverFidelity,
   LOW_FIDELITY_FRAME_COUNT,
 } from './position-observer-fidelity';
+
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';
 
@@ -57,6 +58,9 @@ export class PositionObserver {
     /** @private {boolean} */
     this.measure_ = false;
 
+    /** @private {boolean} */
+    this.callbackStarted_ = false;
+
     /** @private {function()} */
     this.boundStopScroll_ = debounce(this.win_, () => {
       this.inScroll_ = false;
@@ -73,9 +77,11 @@ export class PositionObserver {
 
     this.entries_.push(entry);
 
-    if (this.entries_.length == 1) {
+    if (!this.callbackStarted_) {
       this.startCallback_();
     }
+
+    this.callbackStarted_ = true;
 
     this.updateSingleEntry_(entry);
   }
@@ -89,6 +95,7 @@ export class PositionObserver {
         this.entries_.splice(i, 1);
         if (this.entries_.length == 0) {
           this.stopCallback_();
+          this.callbackStarted_ = false;
         }
         return;
       }
