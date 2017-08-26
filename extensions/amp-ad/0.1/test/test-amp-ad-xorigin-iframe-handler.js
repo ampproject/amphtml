@@ -378,8 +378,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           iframeHandler.viewport_, 'getClientRectAsync', () => {
             return Promise.resolve(layoutRectLtwh(1, 1, 1, 1));
           });
-      sandbox.stub/*OK*/(iframeHandler.viewport_, 'getRect', () => {
-        return layoutRectLtwh(1, 1, 1, 1);
+      sandbox.stub/*OK*/(iframeHandler.viewport_, 'getRectAsync', () => {
+        return Promise.resolve(layoutRectLtwh(1, 1, 1, 1));
       });
       iframe.postMessageToParent({
         type: 'send-positions',
