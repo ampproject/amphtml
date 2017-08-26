@@ -267,9 +267,7 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  directadvert: {
-    renderStartImplemented: true,
-  },
+  directadvert: {},
 
   distroscale: {
     preconnect: [

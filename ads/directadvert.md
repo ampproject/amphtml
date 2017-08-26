@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="320" height="250"
+<amp-ad width="300" height="250"
     type="directadvert"
     data-block-id="1953045">
 </amp-ad>
@@ -30,5 +30,5 @@ limitations under the License.
 
 For more information, please [see FAQ](https://www.directadvert.ru/text/help).
 
-Supported parameters:
+Required parameters:
 - data-block-id

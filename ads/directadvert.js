@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,10 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function directadvert(global, data) {
-    validateData(data, ['blockId']);
+  validateData(data, ['blockId']);
 
-    const anchorEl = global.document.createElement('div');
-    anchorEl.id = `DIV_DA_${data['blockId']}`;
-    global.document.getElementById('c').appendChild(anchorEl);
+  const url = 'https://code.directadvert.ru/data/' +
+      encodeURIComponent(data['blockId']) + '.js?async=1&div=c';
 
-    writeScript(global, `https://code.directadvert.ru/data/${data['blockId']}.js?async=1&div=DIV_DA_${data['blockId']}`);
+  writeScript(global, url);
 }
