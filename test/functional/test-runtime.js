@@ -22,6 +22,7 @@ import {
   adoptShadowMode,
   installAmpdocServices,
 } from '../../src/runtime';
+import {createShadowRoot} from '../../src/shadow-embed';
 import {deactivateChunking} from '../../src/chunk';
 import {
   getServiceForDoc,
@@ -38,7 +39,6 @@ import {toggleExperiment} from '../../src/experiments';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
-import * as shadowembed from '../../src/shadow-embed';
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
@@ -491,7 +491,7 @@ describes.fakeWin('runtime', {
 
     it('should register element without CSS', () => {
       const servicePromise = getServicePromise(win, 'amp-ext');
-      const installStylesStub = sandbox.stub(styles, 'installStyles');
+      const installStylesStub = sandbox.stub(styles, 'installStylesForDoc');
 
       win.AMP.push({
         n: 'amp-ext',
@@ -523,7 +523,7 @@ describes.fakeWin('runtime', {
     it('should register element with CSS', () => {
       const servicePromise = getServicePromise(win, 'amp-ext');
       let installStylesCallback;
-      const installStylesStub = sandbox.stub(styles, 'installStyles',
+      const installStylesStub = sandbox.stub(styles, 'installStylesForDoc',
           (doc, cssText, cb) => {
             installStylesCallback = cb;
           });
@@ -543,9 +543,11 @@ describes.fakeWin('runtime', {
           .to.equal(win.AMP.BaseElement);
       expect(ext.elements['amp-ext'].css).to.equal('a{}');
 
+      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+
       expect(installStylesStub).to.be.calledOnce;
       expect(installStylesStub).to.be.calledWithExactly(
-          win.document,
+          ampdoc,
           'a{}',
           installStylesCallback,
           /* isRuntimeCss */ false,
@@ -645,8 +647,7 @@ describes.fakeWin('runtime', {
 
     it('should register element without CSS', () => {
       const servicePromise = getServicePromise(win, 'amp-ext');
-      const installStylesStub = sandbox.stub(shadowembed,
-          'installStylesForShadowRoot');
+      const installStylesStub = sandbox.stub(styles, 'installStylesForDoc');
 
       win.AMP.push({
         n: 'amp-ext',
@@ -680,8 +681,11 @@ describes.fakeWin('runtime', {
 
     it('should register element with CSS', () => {
       const servicePromise = getServicePromise(win, 'amp-ext');
-      const installStylesStub = sandbox.stub(shadowembed,
-          'installStylesForShadowRoot');
+      let installStylesCallback;
+      const installStylesStub = sandbox.stub(styles, 'installStylesForDoc',
+          (doc, cssText, cb) => {
+            installStylesCallback = cb;
+          });
 
       win.AMP.push({
         n: 'amp-ext',
@@ -709,11 +713,17 @@ describes.fakeWin('runtime', {
 
       // Execute factory to install style.
       const shadowRoot = document.createDocumentFragment();
+      const ampdoc = new AmpDocShadow(win, 'https://acme.org/', shadowRoot);
+      ampdocServiceMock.expects('getAmpDoc')
+          .withExactArgs(shadowRoot)
+          .returns(ampdoc)
+          .once();
       extHolder.shadowRootFactories[0](shadowRoot);
       expect(installStylesStub).to.be.calledOnce;
       expect(installStylesStub).to.be.calledWithExactly(
-          shadowRoot,
+          ampdoc,
           'a{}',
+          installStylesCallback,
           /* isRuntimeCss */ false,
           /* ext */ 'amp-ext');
 
@@ -785,7 +795,7 @@ describes.realWin('runtime multidoc', {
       hostElement = win.document.createElement('div');
       importDoc = win.document.implementation.createHTMLDocument('');
       importDoc.body.appendChild(win.document.createElement('child'));
-      const shadowRoot = shadowembed.createShadowRoot(hostElement);
+      const shadowRoot = createShadowRoot(hostElement);
       ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
 
       ampdocServiceMock.expects('installShadowDoc_')
@@ -1077,7 +1087,7 @@ describes.realWin('runtime multidoc', {
     beforeEach(() => {
       deactivateChunking();
       hostElement = win.document.createElement('div');
-      const shadowRoot = shadowembed.createShadowRoot(hostElement);
+      const shadowRoot = createShadowRoot(hostElement);
       ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
 
       ampdocServiceMock.expects('installShadowDoc_')
@@ -1424,7 +1434,7 @@ describes.realWin('runtime multidoc', {
       const hostElement = win.document.createElement('div');
       win.document.body.appendChild(hostElement);
       const importDoc = win.document.implementation.createHTMLDocument('');
-      const shadowRoot = shadowembed.createShadowRoot(hostElement);
+      const shadowRoot = createShadowRoot(hostElement);
       const ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
 
       ampdocServiceMock.expects('installShadowDoc_')

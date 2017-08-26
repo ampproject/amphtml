@@ -16,6 +16,7 @@
 
 import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 import * as sinon from 'sinon';
 
 describes.realWin('inabox-host:messaging', {}, env => {
@@ -95,6 +96,40 @@ describes.realWin('inabox-host:messaging', {}, env => {
   });
 
   describe('send-positions', () => {
+    let postMessageSpy;
+
+    beforeEach(() => {
+      iframe1.contentWindow.postMessage = postMessageSpy = sandbox.stub();
+    });
+
+    it('should send position back', () => {
+      sandbox.stub(host.positionObserver_, 'getViewportRect', () => {
+        return layoutRectLtwh(10, 10, 100, 100);
+      });
+      sandbox.stub(host.positionObserver_, 'observe', () => {});
+      iframe1.getBoundingClientRect =
+          () => {return layoutRectLtwh(5, 5, 20, 20);};
+      host.processMessage({
+        source: iframe1.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'send-positions',
+        }),
+      });
+      const message = postMessageSpy.getCall(0).args[0];
+      const targetOrigin = postMessageSpy.getCall(0).args[1];
+      expect(deserializeMessage(message)).to.deep.equal({
+        type: 'position',
+        sentinel: '0-123',
+        viewportRect: layoutRectLtwh(10, 10, 100, 100),
+        targetRect: layoutRectLtwh(5, 5, 20, 20),
+      });
+      expect(targetOrigin).to.equal('www.example.com');
+    });
+  });
+
+  describe('send-positions position observer callback', () => {
 
     let callback;
     let target;
@@ -106,6 +141,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
           target = tgt;
           callback = cb;
         },
+        getViewportRect() {},
       };
 
       iframe1.contentWindow.postMessage = postMessageSpy = sandbox.stub();
@@ -123,8 +159,9 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
       expect(target).to.equal(iframe1);
       callback({x: 1});
-      const message = postMessageSpy.getCall(0).args[0];
-      const targetOrigin = postMessageSpy.getCall(0).args[1];
+      expect(postMessageSpy).to.be.calledTwice;
+      const message = postMessageSpy.getCall(1).args[0];
+      const targetOrigin = postMessageSpy.getCall(1).args[1];
       expect(deserializeMessage(message)).to.deep.equal({
         type: 'position',
         sentinel: '0-123',
@@ -152,6 +189,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         }),
       });
 
+      postMessageSpy.reset();
       callback({x: 1});
       expect(postMessageSpy).to.be.calledOnce;
     });

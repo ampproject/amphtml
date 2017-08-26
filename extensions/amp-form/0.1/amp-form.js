@@ -19,7 +19,6 @@ import {FormEvents} from './form-events';
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
-import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {iterateCursor} from '../../../src/dom';
 import {formOrNullForElement, setFormForElement} from '../../../src/form';
 import {
@@ -38,7 +37,7 @@ import {
   childElementByAttr,
   ancestorElementsByTag,
 } from '../../../src/dom';
-import {installStyles} from '../../../src/style-installer';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {
   getFormValidator,
@@ -556,14 +555,14 @@ export class AmpForm {
       // Validity checking should always occur, novalidate only circumvent
       // reporting and blocking submission on non-valid forms.
       const isValid = checkUserValidityOnSubmission(this.form_);
-      if (this.shouldValidate_ && !isValid) {
+      if (this.shouldValidate_) {
         this.vsync_.run({
           measure: undefined,
           mutate: reportValidity,
         }, {
           validator: this.validator_,
         });
-        return false;
+        return isValid;
       }
     }
     return true;
@@ -937,14 +936,7 @@ export class AmpFormService {
    */
   installStyles_(ampdoc) {
     return new Promise(resolve => {
-      if (ampdoc.isSingleDoc()) {
-        const root = /** @type {!Document} */ (ampdoc.getRootNode());
-        installStyles(root, CSS, resolve);
-      } else {
-        const root = /** @type {!ShadowRoot} */ (ampdoc.getRootNode());
-        installStylesForShadowRoot(root, CSS);
-        resolve();
-      }
+      installStylesForDoc(ampdoc, CSS, resolve, false, TAG);
     });
   }
 
