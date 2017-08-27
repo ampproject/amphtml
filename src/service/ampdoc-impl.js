@@ -15,7 +15,7 @@
  */
 
 import {Signals} from '../utils/signals';
-import {dev} from '../log';
+import {dev, user} from '../log';
 import {
   getParentWindowFrameElement,
   registerServiceBuilder,
@@ -306,6 +306,10 @@ export class AmpDoc {
    */
   contains(node) {
     return this.getRootNode().contains(node);
+  }
+
+  user() {
+    return user(this);
   }
 }
 
