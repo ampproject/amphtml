@@ -57,6 +57,12 @@ amp-ad[type="adsense"] > iframe {
   transform: translate(-50%, -50%);
 }
 
+[dir=rtl] amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
+[dir=rtl] amp-ad[type="adsense"] > iframe {
+  left: 0 !important;
+  right: 50% !important;
+  transform: translate(50%, -50%);
+}
 
 amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
 amp-ad[data-a4a-upgrade-type="amp-ad-network-adsense-impl"] > iframe {
