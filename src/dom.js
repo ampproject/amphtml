@@ -535,7 +535,7 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
  * -> {
  *   clickHostname: example.com,
  *   clickProtocol: https,
- *   clickProtocol: /index.html,
+ *   clickPathname: /index.html,
  *   clickQuery: query,
  *   clickHash: hash,
  *   clickUrl: https://example.com/index.html?query#hash
