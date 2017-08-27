@@ -219,7 +219,7 @@ The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that
 
 The `triggers` configuration object describes when an analytics request should be sent. The `triggers` attribute contains a key-value pair of trigger-name and  trigger-configuration. A trigger-name can be any string comprised of alphanumeric characters (a-zA-Z0-9). Triggers from a  configuration with lower precedence are overridden by triggers with the same names from a configuration with higher precedence.
 
-  - `on` (required) The event to listener for. Valid values are `render-start`, `ini-load`, `visible`, `click`, `scroll`, `timer`, and `hidden`.
+  - `on` (required) The event to listener for. Valid values are `render-start`, `ini-load`, `visible`, `click`, `scroll`, `timer`, `hidden`, and `user-error`.
   - `request` (required) Name of the request to send (as specified in the `requests` section).
   - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify vars unique to this trigger.
   - `selector` and `selectionMethod` can be specified for some triggers, such as `click` and `visible`. See [Element selector](#element-selector) for details.
@@ -351,6 +351,21 @@ Notice that selector can be used to only specify a single element, not a collect
 
 The element visibility trigger waits for the signal specified by the `waitFor` property in `visibilitySpec` before tracking element visibility. If `waitFor` is not specified, it waits for element's [`ini-load`](#initial-load-trigger) signal. See `waitFor` docs for more details.
 
+
+##### Error trigger
+
+The user error event (`"on": "user-error"`) is triggered when there are errors that belong to publishers. This includes, but not limited to, mis-config of an AMP component, mis-configured ads, or failed assertions,
+
+```javascript
+"triggers": {
+  "userError": {
+    "on": "user-error",
+     "request": "error"
+  }
+}
+```
+
+There is no use of selector or spec with this trigger.
 
 <strong><a id="visibility-spec"></a>Visibility Spec</strong>
 

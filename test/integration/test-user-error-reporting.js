@@ -34,12 +34,12 @@ describe.configure().run('user-error', function() {
     <amp-analytics><script type="application/json">
           {
               "requests": {
-                  "user-error": "${depositRequestUrl(randomId)}"
+                  "error": "${depositRequestUrl(randomId)}"
               },
               "triggers": {
-                  "user-error": {
+                  "userError": {
                       "on": "user-error",
-                      "request": "user-error"
+                      "request": "error"
                   }
               }
           }
@@ -68,12 +68,12 @@ describe.configure().run('user-error', function() {
     <amp-analytics><script type="application/json">
           {
               "requests": {
-                  "user-error": "${depositRequestUrl(randomId)}"
+                  "error": "${depositRequestUrl(randomId)}"
               },
               "triggers": {
-                  "user-error": {
+                  "userError": {
                       "on": "user-error",
-                      "request": "user-error"
+                      "request": "error"
                   }
               }
           }
