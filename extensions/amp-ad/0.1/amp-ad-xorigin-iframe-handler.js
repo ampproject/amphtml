@@ -207,10 +207,10 @@ export class AmpAdXOriginIframeHandler {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }));
 
-    // this.unlisteners_.push(listenFor(this.iframe, 'user-error',
-    //     data => {
-    //       this.userErrorForAnalytics(data['error'], data['message']);
-    //     }, true, true));
+    this.unlisteners_.push(listenFor(this.iframe, 'user-error',
+        data => {
+          this.userErrorForAnalytics(data['error'], data['message']);
+        }, true, true));
 
     // Iframe.onload normally called by the Ad after full load.
     const iframeLoadPromise = loadPromise(this.iframe).then(() => {
