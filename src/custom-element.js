@@ -39,6 +39,11 @@ import {reportError} from './error';
 import {setStyle} from './style';
 import * as dom from './dom';
 import {toWin} from './types';
+import {setStyle} from './style';
+import {LayoutDelayMeter} from './layout-delay-meter';
+import {ResourceState} from './service/resource';
+import {AmpEvents} from './amp-events';
+import {LayoutElement} from './service/layers-impl';
 
 const TAG = 'CustomElement';
 
@@ -715,6 +720,7 @@ function createBaseCustomElementClass(win) {
         this.layers_ = Services.layersForDoc(this.ampdoc_);
       }
       this.getResources().add(this);
+      new LayoutElement(this);
 
       if (this.everAttached) {
         const reconstruct = this.reconstructWhenReparented();

@@ -55,6 +55,7 @@ import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {installHistoryServiceForDoc} from './service/history-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
+import {installLayersServiceForDoc} from './service/layers-impl';
 import {
   installShadowDoc,
   shadowDocHasBody,
@@ -118,6 +119,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installViewportServiceForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);
+  installLayersServiceForDoc(ampdoc);
   installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);

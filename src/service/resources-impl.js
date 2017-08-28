@@ -1585,6 +1585,7 @@ export class Resources {
    * @private
    */
   calcTaskScore_(task) {
+    // TODO
     const viewport = this.viewport_.getRect();
     const box = task.resource.getLayoutBox();
     let posPriority = Math.floor((box.top - viewport.top) / viewport.height);
