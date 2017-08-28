@@ -207,7 +207,7 @@ export class AmpAdXOriginIframeHandler {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }));
 
-    this.unlisteners_.push(listenFor(this.iframe, 'user-error',
+    this.unlisteners_.push(listenFor(this.iframe, MessageType.USER_ERROR,
         data => {
           this.userErrorForAnalytics(data['error'], data['message']);
         }, true, true));
