@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 import './polyfills';
-import {AmpContext} from './ampcontext.js';
+import {AmpContext} from './ampcontext';
+import {AmpDoc} from '../src/service/ampdoc-decl';
 import {initLogConstructor, setReportError} from '../src/log';
 
 

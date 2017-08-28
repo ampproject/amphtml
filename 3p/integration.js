@@ -189,6 +189,7 @@ import {yieldone} from '../ads/yieldone';
 import {zedo} from '../ads/zedo';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
+import '../src/service/ampdoc-decl';
 
 
 /**

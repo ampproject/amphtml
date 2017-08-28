@@ -15,6 +15,7 @@
  */
 import './polyfills';
 import {IframeTransportClient} from './iframe-transport-client.js';
+import {AmpDoc} from '../src/service/ampdoc-decl';
 import {initLogConstructor, setReportError} from '../src/log';
 
 initLogConstructor();
