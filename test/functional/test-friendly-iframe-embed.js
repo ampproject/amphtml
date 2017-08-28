@@ -63,7 +63,7 @@ describe('friendly-iframe-embed', () => {
   it('should follow main install steps', () => {
 
     // Resources are not involved.
-    extensionsMock.expects('loadExtension').never();
+    extensionsMock.expects('preloadExtension').never();
     resourcesMock.expects('add').never();
 
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
@@ -131,7 +131,7 @@ describe('friendly-iframe-embed', () => {
   it('should install extensions', () => {
 
     // Extensions preloading have been requested.
-    extensionsMock.expects('loadExtension')
+    extensionsMock.expects('preloadExtension')
         .withExactArgs('amp-test')
         .returns(Promise.resolve())
         .once();
@@ -172,7 +172,7 @@ describe('friendly-iframe-embed', () => {
   });
 
   it('should uninstall all resources', () => {
-    extensionsMock.expects('loadExtension').atLeast(1);
+    extensionsMock.expects('preloadExtension').atLeast(1);
     extensionsMock.expects('installExtensionsInChildWindow').atLeast(1);
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
@@ -503,7 +503,7 @@ describe('friendly-iframe-embed', () => {
         services: {
           'extensions': {obj: {
             installExtensionsInChildWindow: () => {},
-            loadExtension: () => {},
+            preloadExtension: () => {},
           }},
         },
         setInterval() {

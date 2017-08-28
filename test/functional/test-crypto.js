@@ -19,15 +19,20 @@ import {Platform} from '../../src/service/platform-impl';
 import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
+import {installDocService} from '../../src/service/ampdoc-impl';
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
 
-describes.realWin('crypto-impl', {}, env => {
 
+describes.realWin('crypto-impl', {}, env => {
   let win;
   let crypto;
+
+  beforeEach(() => {
+    win = env.win;
+  });
 
   function uint8Array(array) {
     const uint8Array = new Uint8Array(array.length);
@@ -93,9 +98,13 @@ describes.realWin('crypto-impl', {}, env => {
   }
 
   function createCrypto(win) {
+    if (win && !win.document) {
+      win.document = env.win.document;
+    }
+    installDocService(win, /* isSingleDoc */ true);
     installExtensionsService(win);
     const extensions = Services.extensionsFor(win);
-    sandbox.stub(extensions, 'loadExtension', extensionId => {
+    sandbox.stub(extensions, 'preloadExtension', extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(win);
       return Promise.resolve();
@@ -108,10 +117,6 @@ describes.realWin('crypto-impl', {}, env => {
     const platform = new Platform(window);
     return platform.isChrome() && platform.getMajorVersion() >= 37;
   }
-
-  beforeEach(() => {
-    win = env.win;
-  });
 
   testSuite('with native crypto API');
   testSuite('with crypto lib', {});

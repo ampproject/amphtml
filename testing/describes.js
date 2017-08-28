@@ -110,7 +110,6 @@ import {
   installExtensionsService,
   registerExtension,
 } from '../src/service/extensions-impl';
-import {resetLoadingCheckForTests} from '../src/element-stub';
 import {resetScheduledElementForTesting} from '../src/custom-element';
 import {setStyles} from '../src/style';
 import * as sinon from 'sinon';
@@ -692,6 +691,9 @@ class AmpFixture {
         const version = tuple[1] || '0.1';
         const installer = extensionsBuffer[`${extensionId}:${version}`];
         if (installer) {
+          if (env.ampdoc) {
+            env.ampdoc.declareExtension_(extensionId);
+          }
           registerExtension(env.extensions, extensionId, installer, win.AMP);
         }
       });
@@ -719,6 +721,9 @@ class AmpFixture {
       if (!installer) {
         throw new Error(`extension not found: ${extensionId}:${version}.` +
             ' Make sure the module is imported');
+      }
+      if (env.ampdoc) {
+        env.ampdoc.declareExtension_(extensionId);
       }
       registerExtension(env.extensions, extensionId, installer, win.AMP);
     };
@@ -775,7 +780,10 @@ class AmpFixture {
           hostElement, importDoc, win.location.href);
       const ampdoc = ret.ampdoc;
       env.ampdoc = ampdoc;
-      const promise = ampdoc.whenReady();
+      const promise = Promise.all([
+        env.extensions.installExtensionsInDoc_(ampdoc, extensionIds),
+        ampdoc.whenReady(),
+      ]);
       completePromise = completePromise ?
           completePromise.then(() => promise) : promise;
     }
@@ -789,7 +797,6 @@ class AmpFixture {
     if (env.embed) {
       env.embed.destroy();
     }
-    resetLoadingCheckForTests();
     if (win.customElements && win.customElements.elements) {
       for (const k in win.customElements.elements) {
         resetScheduledElementForTesting(win, k);

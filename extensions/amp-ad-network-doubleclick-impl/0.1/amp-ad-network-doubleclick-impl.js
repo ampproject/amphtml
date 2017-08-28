@@ -487,7 +487,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
-      this.extensions_./*OK*/loadExtension('amp-analytics');
+      this.extensions_./*OK*/installExtensionForDoc(
+          this.getAmpDoc(), 'amp-analytics');
     }
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.

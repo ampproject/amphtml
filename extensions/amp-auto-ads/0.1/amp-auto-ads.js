@@ -48,7 +48,8 @@ export class AmpAutoAds extends AMP.BaseElement {
     }
 
     const ampdoc = this.getAmpDoc();
-    Services.extensionsFor(this.win)./*OK*/loadElementClass(AD_TAG);
+    Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+        ampdoc, AD_TAG);
 
     const configPromise = this.getConfig_(adNetwork.getConfigUrl());
     Promise.all([configPromise, ampdoc.whenReady()]).then(values => {
