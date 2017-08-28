@@ -33,7 +33,12 @@ import {setStyle} from '../style';
 import {isIframed} from '../dom';
 import {getMode} from '../mode';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
-import {}
+import {
+  ViewportBindingIosEmbedWrapper_,
+} from './viewport-binding-ios-embed-wrapper';
+import {
+  ViewportBindingNaturalIosEmbed_,
+} from './viewport-binding-natrual-ios-embed';
 
 const TAG_ = 'Viewport';
 
