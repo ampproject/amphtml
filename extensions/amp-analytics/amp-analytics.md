@@ -219,7 +219,7 @@ The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that
 
 The `triggers` configuration object describes when an analytics request should be sent. The `triggers` attribute contains a key-value pair of trigger-name and  trigger-configuration. A trigger-name can be any string comprised of alphanumeric characters (a-zA-Z0-9). Triggers from a  configuration with lower precedence are overridden by triggers with the same names from a configuration with higher precedence.
 
-  - `on` (required) The event to listener for. Valid values are `render-start`, `ini-load`, `click`, `scroll`, `timer`, `visible`, `hidden`, [`amp-access-*`](../amp-access/amp-access-analytics.md), and [`video-*`](./amp-video-analytics.md)
+  - `on` (required) The event to listener for. Valid values are `render-start`, `ini-load`, `click`, `scroll`, `timer`, `visible`, `hidden`, [`access-*`](../amp-access/amp-access-analytics.md), and [`video-*`](./amp-video-analytics.md)
   - `request` (required) Name of the request to send (as specified in the `requests` section).
   - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify vars unique to this trigger.
   - `selector` and `selectionMethod` can be specified for some triggers, such as `click` and `visible`. See [Element selector](#element-selector) for details.
@@ -477,7 +477,7 @@ The above configuration translates to:
 
 ##### Access triggers
 
-AMP Access system issues numerous events for different states in the access flow. For details on access triggers (`"on": "amp-access-*"`), see [AMP Access and Analytics](../amp-access/amp-access-analytics.md).
+AMP Access system issues numerous events for different states in the access flow. For details on access triggers (`"on": "access-*"`), see [AMP Access and Analytics](../amp-access/amp-access-analytics.md).
 
 
 #### Video analytics triggers
