@@ -734,7 +734,7 @@ export class AmpA4A extends AMP.BaseElement {
           // is just to prefetch.
           const extensions = Services.extensionsFor(this.win);
           creativeMetaDataDef.customElementExtensions.forEach(
-              extensionId => extensions.loadExtension(extensionId));
+              extensionId => extensions.preloadExtension(extensionId));
           return creativeMetaDataDef;
         })
         .catch(error => {

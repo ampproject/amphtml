@@ -30,7 +30,6 @@ import {
 import {bodyAlwaysVisible} from './style-installer';
 import {deactivateChunking} from './chunk';
 import {doNotTrackImpression} from './impression';
-import {stubElements} from './custom-element';
 
 
 // PWA shell manages its own visibility and shadow ampdocs their own.
@@ -55,7 +54,6 @@ installBuiltins(self);
 
 // Final configuration and stubbing.
 adoptShadowMode(self);
-stubElements(self);
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
