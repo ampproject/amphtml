@@ -69,7 +69,7 @@ export const LogLevel = {
 };
 
 /**
- * Sets reportError function. Called from error.js to break cyclic
+ * Sets report3pError function. Called from error.js to break cyclic
  * dependency.
  * @param {function(*, !Element=)|undefined} fn
  */
@@ -234,7 +234,7 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.name = tag || error.name;
-      // reportError is installed globally per window in the entry point.
+      // report3pError is installed globally per window in the entry point.
       self.reportError(error);
     }
   }
@@ -249,7 +249,7 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.expected = true;
-      // reportError is installed globally per window in the entry point.
+      // report3pError is installed globally per window in the entry point.
       self.reportError(error);
     }
   }
@@ -300,6 +300,7 @@ export class Log {
   assert(shouldBeTrueish, opt_message, var_args) {
     let firstElement;
     if (!shouldBeTrueish) {
+      console.log('!shouldBeTrueish');
       const message = opt_message || 'Assertion failed';
       const splitMessage = message.split('%s');
       const first = splitMessage.shift();
@@ -321,7 +322,8 @@ export class Log {
       e.associatedElement = firstElement;
       e.messageArray = messageArray;
       this.prepareError_(e);
-      // reportError is installed globally per window in the entry point.
+      // report3pError is installed globally per window in the entry point.
+      console.log('assert reportError');
       self.reportError(e);
       throw e;
     }
@@ -503,7 +505,9 @@ function createErrorVargs(var_args) {
 export function rethrowAsync(var_args) {
   const error = createErrorVargs.apply(null, arguments);
   setTimeout(() => {
-    // reportError is installed globally per window in the entry point.
+    console.log('rethrow async');
+    // report3pError is installed globally per window in the entry point.
+    console.log('rethrow err: ' + error);
     self.reportError(error);
     throw error;
   });

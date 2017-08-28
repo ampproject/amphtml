@@ -117,6 +117,7 @@ export function reportErrorForWin(win, error, opt_associatedElement) {
  * @return {!Error}
  */
 export function reportError(error, opt_associatedElement) {
+  console.log('reportError() name: ' + error.name + ' msg: ' + error.message);
   try {
     // Convert error to the expected type.
     let isValidError;

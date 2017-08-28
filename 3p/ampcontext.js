@@ -104,9 +104,10 @@ export class AbstractAmpContext {
     this.client_ = new IframeMessagingClient(win);
     this.client_.setHostWindow(this.getHostWindow_());
     this.client_.setSentinel(dev().assertString(this.sentinel));
-    this.reportError();
 
     this.listenForPageVisibility_();
+    console.log('in constructor');
+    this.report3pError();
   }
 
   /**
@@ -317,11 +318,9 @@ export class AbstractAmpContext {
   /**
    * Send 3p error to parent iframe
    */
-  reportError() {
-    console.log('report error');
+  report3pError() {
     this.win_.addEventListener('error', event => {
-      if (!!event.error) {
-        console.log('error: ' + event.error);
+      if (event.error) {
         this.client_.sendMessage(MessageType.USER_ERROR, dict({
           'error': event.error,
         }));

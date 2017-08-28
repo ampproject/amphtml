@@ -66,29 +66,28 @@ describe('3p ampcontext.js', () => {
     const context = new AmpContext(win);
     expect(context).to.be.ok;
     const addEventListenerSpy = sandbox.spy(win, 'addEventListener');
-    context.reportError();
+    context.report3pError();
 
     expect(addEventListenerSpy).to.have.been.called;
     expect(addEventListenerSpy)
         .to.have.been.calledWith('error');
   });
 
-  it('should send error and message when reportError()', () => {
+  it('should send error and message when report3pError()', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
     expect(context).to.be.ok;
 
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.reset();
-    context.reportError();
+    context.report3pError();
 
     // window.context should have sent postMessage sending 3p errors
-    expect(windowPostMessageSpy.calledWith({
+    expect(windowPostMessageSpy).to.be.calledWith({
       sentinel: '1-291921',
       type: MessageType.USER_ERROR,
       error: sinon.match.any,
-      message: sinon.match.any,
-    }, '*'));
+    }, '*');
   });
 
 
