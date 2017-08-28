@@ -241,7 +241,7 @@ export class AmpDoc {
    * @restricted
    */
   declareExtension_(extensionId) {
-    if (this.declaredExtensions_.indexOf(extensionId) == -1) {
+    if (!this.declaresExtension(extensionId)) {
       this.declaredExtensions_.push(extensionId);
     }
   }
