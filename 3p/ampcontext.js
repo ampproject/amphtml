@@ -324,7 +324,6 @@ export class AbstractAmpContext {
         console.log('error: ' + event.error);
         this.client_.sendMessage(MessageType.USER_ERROR, dict({
           'error': event.error,
-          'message': event.error.message,
         }));
       }
     });

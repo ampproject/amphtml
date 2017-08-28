@@ -25,7 +25,7 @@ import {
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {Services} from '../../../src/services';
-import {dev, isUserErrorMessage} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {reportErrorToAnalytics} from '../../../src/error';
 import {dict} from '../../../src/utils/object';
 import {setStyle} from '../../../src/style';
@@ -209,7 +209,7 @@ export class AmpAdXOriginIframeHandler {
 
     this.unlisteners_.push(listenFor(this.iframe, MessageType.USER_ERROR,
         data => {
-          this.userErrorForAnalytics_(data['error'], data['message']);
+          this.userErrorForAnalytics_(data['error']);
         }, true, true));
 
     // Iframe.onload normally called by the Ad after full load.
@@ -532,13 +532,10 @@ export class AmpAdXOriginIframeHandler {
 
   /**
    * @param {!Error} error
-   * @param {string} message
    * @private
    */
-  userErrorForAnalytics_(error, message) {
-    if (isUserErrorMessage(message)) {
-      reportErrorToAnalytics(error, this.baseInstance_.win);
-    }
+  userErrorForAnalytics_(error) {
+    reportErrorToAnalytics(error, this.baseInstance_.win);
   }
 }
 

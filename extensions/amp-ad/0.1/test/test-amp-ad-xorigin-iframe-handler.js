@@ -226,12 +226,11 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           type: 'user-error',
           sentinel: 'amp3ptest' + testIndex,
           error: err,
-          message: err.message,
         });
         return initPromise.then(() => {
           expect(userErrorReportSpy).to.be.called;
           expect(userErrorReportSpy).to.be.calledWith(
-              {message: 'error test'}, err.message);
+              {message: 'error test'});
         });
       });
     });
