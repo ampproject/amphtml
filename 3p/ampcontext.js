@@ -319,13 +319,12 @@ export class AbstractAmpContext {
    */
   errorReport() {
     this.win_.addEventListener('error', event => {
-      console.log(event);
-      //if (!!event.error) {
-        // this.client_.sendMessage(MessageType.USER_ERROR, dict({
-        //   'error': event.error,
-        //   'message': event.error.message,
-        // }));
-      //}
+      if (!!event.error) {
+        this.client_.sendMessage(MessageType.USER_ERROR, dict({
+          'error': event.error,
+          'message': event.error.message,
+        }));
+      }
     });
   }
 }

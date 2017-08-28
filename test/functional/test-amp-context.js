@@ -32,9 +32,9 @@ describe('3p ampcontext.js', () => {
     windowPostMessageSpy = sandbox.spy();
     win = {
       addEventListener: (eventType, handlerFn) => {
-        //console.log('event type: ' + eventType);
-        // expect(windowMessageHandler).to.not.be.ok;
-        windowMessageHandler = handlerFn;
+        if (eventType == 'message') {
+          windowMessageHandler = handlerFn;
+        }
       },
       parent: {
         postMessage: windowPostMessageSpy,
@@ -61,35 +61,35 @@ describe('3p ampcontext.js', () => {
     windowMessageHandler = undefined;
   });
 
-  // it('should call addEventListener with correct eventType', () => {
-  //   win.name = generateSerializedAttributes();
-  //   const context = new AmpContext(win);
-  //   expect(context).to.be.ok;
-  //   const addEventListenerSpy = sandbox.spy(win, 'addEventListener');
-  //   context.errorReport();
-  //
-  //   expect(addEventListenerSpy).to.have.been.called;
-  //   expect(addEventListenerSpy)
-  //       .to.have.been.calledWith('error');
-  // });
-  //
-  // it('should send error and message when errorReport()', () => {
-  //   win.name = generateSerializedAttributes();
-  //   const context = new AmpContext(win);
-  //   expect(context).to.be.ok;
-  //
-  //   // Resetting since a message is sent on construction.
-  //   windowPostMessageSpy.reset();
-  //   context.errorReport();
-  //
-  //   // window.context should have sent postMessage sending 3p errors
-  //   expect(windowPostMessageSpy.calledWith({
-  //     sentinel: '1-291921',
-  //     type: MessageType.USER_ERROR,
-  //     error: sinon.match.any,
-  //     message: sinon.match.any,
-  //   }, '*'));
-  // });
+  it('should call addEventListener with correct eventType', () => {
+    win.name = generateSerializedAttributes();
+    const context = new AmpContext(win);
+    expect(context).to.be.ok;
+    const addEventListenerSpy = sandbox.spy(win, 'addEventListener');
+    context.errorReport();
+
+    expect(addEventListenerSpy).to.have.been.called;
+    expect(addEventListenerSpy)
+        .to.have.been.calledWith('error');
+  });
+
+  it('should send error and message when errorReport()', () => {
+    win.name = generateSerializedAttributes();
+    const context = new AmpContext(win);
+    expect(context).to.be.ok;
+
+    // Resetting since a message is sent on construction.
+    windowPostMessageSpy.reset();
+    context.errorReport();
+
+    // window.context should have sent postMessage sending 3p errors
+    expect(windowPostMessageSpy.calledWith({
+      sentinel: '1-291921',
+      type: MessageType.USER_ERROR,
+      error: sinon.match.any,
+      message: sinon.match.any,
+    }, '*'));
+  });
 
 
   it('should add metadata to window.context using name as per 3P.', () => {
