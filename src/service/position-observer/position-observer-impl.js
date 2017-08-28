@@ -79,9 +79,8 @@ export class PositionObserver {
 
     if (!this.callbackStarted_) {
       this.startCallback_();
+      this.callbackStarted_ = true;
     }
-
-    this.callbackStarted_ = true;
 
     this.updateSingleEntry_(entry);
   }
@@ -136,10 +135,7 @@ export class PositionObserver {
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
       if (entry.element == element) {
-        entry.fidelity = fidelity;
-        if (fidelity == PositionObserverFidelity.HIGH) {
-          entry.turn = 0;
-        }
+        entry.updateFidelity(fidelity);
         return;
       }
     }

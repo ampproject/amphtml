@@ -161,6 +161,9 @@ export class Viewport {
     /** @private @const (function()) */
     this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
 
+    /** @private {?Promise<!../layout-rect.LayoutRectDef>} */
+    this.rectPromise_ = null;
+
     this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
     this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
     this.binding_.updatePaddingTop(this.paddingTop_);
@@ -415,12 +418,16 @@ export class Viewport {
   }
 
   getRectAsync() {
-    return this.vsync_.measurePromise(() => {
-      const scrollTop = this.binding_.getScrollTop();
-      const scrollLeft = this.binding_.getScrollLeft();
-      const size = this.binding_.getSize();
-      return layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
-    });
+    if (!this.rectPromise_) {
+      this.rectPromise_ = this.vsync_.measurePromise(() => {
+        this.rectPromise_ = null;
+        const scrollTop = this.binding_.getScrollTop();
+        const scrollLeft = this.binding_.getScrollLeft();
+        const size = this.binding_.getSize();
+        return layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
+      });
+    }
+    return this.rectPromise_;
   }
 
   /**

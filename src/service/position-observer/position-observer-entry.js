@@ -97,4 +97,15 @@ export class PositionObserverEntry {
       this.handler_(position);
     }
   }
+
+  /**
+   *
+   * @param {PositionObserverFidelity} fidelity
+   */
+  updateFidelity(fidelity) {
+    this.fidelity = fidelity;
+    if (fidelity == PositionObserverFidelity.HIGH) {
+      this.turn = 0;
+    }
+  }
 }
