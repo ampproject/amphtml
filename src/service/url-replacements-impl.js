@@ -67,12 +67,12 @@ export class GlobalVariableSource extends VariableSource {
   constructor(ampdoc) {
     super();
 
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!./ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /**
      * @private
-     * @const {function(!./ampdoc-impl.AmpDoc):
+     * @const {function(!./ampdoc-decl.AmpDoc):
      *     !Promise<?../../extensions/amp-access/0.1/amp-access.AccessService>}
      */
     this.getAccessService_ = Services.accessServiceForDocOrNull;
@@ -596,9 +596,9 @@ export class GlobalVariableSource extends VariableSource {
  * @package For export
  */
 export class UrlReplacements {
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  /** @param {!./ampdoc-decl.AmpDoc} ampdoc */
   constructor(ampdoc, variableSource) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!./ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @type {VariableSource} */
@@ -1004,7 +1004,7 @@ export function extractClientIdFromGaCookie(gaCookie) {
 }
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  */
 export function installUrlReplacementsServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
@@ -1017,7 +1017,7 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
 
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  * @param {!Window} embedWin
  * @param {*} varSource
  */

@@ -20,7 +20,7 @@ import {Services} from '../../../src/services';
 
 /**
  * Strips everything but the domain from referrer string.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @returns {string}
  */
 function referrerDomain(ampdoc) {
@@ -63,7 +63,7 @@ export function referrers_(referrer) {
 
 /**
  * Normalizes certain referrers across devices.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @returns {!Array<string>}
  */
 function normalizedReferrers(ampdoc) {
@@ -86,7 +86,7 @@ function normalizedReferrers(ampdoc) {
 
 /**
  * Adds CSS classes onto the HTML element.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @param {!Array<string>} classes
  */
 function addDynamicCssClasses(ampdoc, classes) {
@@ -114,7 +114,7 @@ function addCssClassesToBody(body, classes) {
 /**
  * Adds dynamic css classes based on the referrer, with a separate class for
  * each level of subdomain specificity.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  */
 function addReferrerClasses(ampdoc) {
   const referrers = normalizedReferrers(ampdoc);
@@ -130,7 +130,7 @@ function addReferrerClasses(ampdoc) {
 
 /**
  * Adds a dynamic css class `amp-viewer` if this document is inside a viewer.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  */
 function addViewerClass(ampdoc) {
   const viewer = Services.viewerForDoc(ampdoc);
@@ -143,7 +143,7 @@ function addViewerClass(ampdoc) {
 
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  */
 function addRuntimeClasses(ampdoc) {
   addReferrerClasses(ampdoc);

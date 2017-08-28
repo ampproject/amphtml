@@ -24,7 +24,7 @@ const nameValidator = /^[\w-]+$/;
 /**
  * Allocates the current page view to an experiment variant based on the given
  * experiment config.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @param {string} experimentName
  * @param {!JsonObject} config
  * @return {!Promise<?string>}
@@ -112,7 +112,7 @@ function validateConfig(config) {
  * Returns a float number (bucket ticket) in the range of [0, 100). The number
  * is hashed from the CID of the given scope (opt_cidScope). If the
  * scope is not provided, a random number is used.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @param {string} group
  * @param {string=} opt_cidScope
  * @return {!Promise<!number>} a float number in the range of [0, 100)

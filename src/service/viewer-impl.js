@@ -80,11 +80,11 @@ const TRUSTED_VIEWER_HOSTS = [
 export class Viewer {
 
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    * @param {!Object<string, string>=} opt_initParams
    */
   constructor(ampdoc, opt_initParams) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!./ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @const {!Window} */
@@ -989,7 +989,7 @@ export function setViewerVisibilityState(viewer, state) {
 
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installViewerServiceForDoc(ampdoc, opt_initParams) {

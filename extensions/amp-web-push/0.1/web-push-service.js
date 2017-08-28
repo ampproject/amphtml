@@ -103,7 +103,7 @@ export class WebPushService {
   }
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     /** @const */

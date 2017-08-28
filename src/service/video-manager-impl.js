@@ -130,11 +130,11 @@ export const DockStates = {
 export class VideoManager {
 
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
 
-    /** @const {!./ampdoc-impl.AmpDoc}  */
+    /** @const {!./ampdoc-decl.AmpDoc}  */
     this.ampdoc = ampdoc;
 
     /** @private {!../service/viewport-impl.Viewport} */
@@ -453,7 +453,7 @@ class VideoEntry {
     /** @private @const {!VideoManager} */
     this.manager_ = manager;
 
-    /** @private @const {!./ampdoc-impl.AmpDoc}  */
+    /** @private @const {!./ampdoc-decl.AmpDoc}  */
     this.ampdoc_ = manager.ampdoc;
 
     /** @private {!../service/viewport-impl.Viewport} */
@@ -1933,7 +1933,7 @@ export function clearSupportsAutoplayCacheForTesting() {
 }
 
 /**
- * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!./ampdoc-decl.AmpDoc} nodeOrDoc
  */
 export function installVideoManagerForDoc(nodeOrDoc) {
   registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', VideoManager);

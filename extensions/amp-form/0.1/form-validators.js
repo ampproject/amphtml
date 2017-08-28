@@ -70,7 +70,7 @@ export class FormValidator {
     /** @protected @const {!HTMLFormElement} */
     this.form = form;
 
-    /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @protected @const {!../../../src/service/ampdoc-decl.AmpDoc} */
     this.ampdoc = getAmpdoc(form);
 
     /** @protected @const {!Document} */

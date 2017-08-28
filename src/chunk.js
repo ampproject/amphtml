@@ -37,7 +37,7 @@ let deactivated = /nochunking=1/.test(self.location.hash);
 const resolved = Promise.resolve();
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrAmpDoc
  * @return {!Chunks}
  * @private
  */
@@ -53,7 +53,7 @@ function getChunkServiceForDoc_(nodeOrAmpDoc) {
  * time to do other things) and may even be further delayed until
  * there is time.
  *
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrAmpDoc
  * @param {function(?IdleDeadline)} fn
  */
 export function startupChunk(nodeOrAmpDoc, fn) {
@@ -75,7 +75,7 @@ export function startupChunk(nodeOrAmpDoc, fn) {
  * object to the function, which can be used to perform a variable amount
  * of work depending on the remaining amount of idle time.
  *
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrAmpDoc
  * @param {function(?IdleDeadline)} fn
  * @param {ChunkPriority} priority
  */
@@ -89,7 +89,7 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
 }
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrAmpDoc
  * @return {!Chunks}
  */
 export function chunkInstanceForTesting(nodeOrAmpDoc) {
@@ -114,7 +114,7 @@ export function activateChunkingForTesting() {
  * Runs all currently scheduled chunks.
  * Independent of errors it will unwind the queue. Will afterwards
  * throw the first encountered error.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrAmpDoc
  */
 export function runChunksForTesting(nodeOrAmpDoc) {
   const service = chunkInstanceForTesting(nodeOrAmpDoc);
@@ -302,7 +302,7 @@ class StartupTask extends Task {
  */
 class Chunks {
   /**
-   * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
+   * @param {!./service/ampdoc-decl.AmpDoc} ampDoc
    */
   constructor(ampDoc) {
     /** @private @const */

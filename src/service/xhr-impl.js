@@ -90,7 +90,7 @@ export class Xhr {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private {?./ampdoc-impl.AmpDoc} */
+    /** @private {?./ampdoc-decl.AmpDoc} */
     this.ampdocSingle_ = null;
     if (!getMode().test) {
       const ampdocService = Services.ampdocServiceFor(win);

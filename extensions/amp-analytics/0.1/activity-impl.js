@@ -120,7 +120,7 @@ const ACTIVE_EVENT_TYPES = [
 ];
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampDoc
  */
 export function installActivityServiceForTesting(ampDoc) {
   registerServiceBuilderForDoc(ampDoc, 'activity', Activity);
@@ -145,10 +145,10 @@ export class Activity {
    *  - At any point after instantiation, `getTotalEngagedTime` can be used
    *    to get the engage time up to the time the function is called. If
    *    `whenFirstVisible` has not yet resolved, engaged time is 0.
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+    /** @const {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc */
     this.ampdoc = ampdoc;
 
     /** @private @const {function()} */

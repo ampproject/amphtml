@@ -37,11 +37,11 @@ let HistoryIdDef;
 export class History {
 
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    * @param {!HistoryBindingInterface} binding
    */
   constructor(ampdoc, binding) {
-    /** @private @const {!./ampdoc-impl.AmpDoc} */
+    /** @private @const {!./ampdoc-decl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @private @const {!../service/timer-impl.Timer} */
@@ -825,7 +825,7 @@ export class HistoryBindingVirtual_ {
 
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  * @return {!History}
  * @private
  */
@@ -849,7 +849,7 @@ function createHistory(ampdoc) {
 
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  */
 export function installHistoryServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'history', createHistory);

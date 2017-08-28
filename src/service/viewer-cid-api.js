@@ -34,7 +34,7 @@ export class ViewerCidApi {
 
   constructor(ampdoc) {
 
-    /** @private {!./ampdoc-impl.AmpDoc} */
+    /** @private {!./ampdoc-decl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @private {!./viewer-impl.Viewer} */

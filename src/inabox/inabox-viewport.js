@@ -384,7 +384,7 @@ export class ViewportBindingInabox {
 }
 
 /**
- * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../service/ampdoc-decl.AmpDoc} ampdoc
  */
 export function installInaboxViewportService(ampdoc) {
   const binding = new ViewportBindingInabox(ampdoc.win);

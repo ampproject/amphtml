@@ -130,7 +130,7 @@ export class AmpViewerIntegration {
 
   /**
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    * @param {string} origin
    * @param {!Messaging} messaging
    * @return {!Promise<undefined>}

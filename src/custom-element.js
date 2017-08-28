@@ -496,7 +496,7 @@ function createBaseCustomElementClass(win) {
 
       /**
        * Ampdoc can only be looked up when an element is attached.
-       * @private {?./service/ampdoc-impl.AmpDoc}
+       * @private {?./service/ampdoc-decl.AmpDoc}
        */
       this.ampdoc_ = null;
 
@@ -625,12 +625,12 @@ function createBaseCustomElementClass(win) {
     /**
      * Returns the associated ampdoc. Only available after attachment. It throws
      * exception before the element is attached.
-     * @return {!./service/ampdoc-impl.AmpDoc}
+     * @return {!./service/ampdoc-decl.AmpDoc}
      * @final @this {!Element}
      * @package
      */
     getAmpDoc() {
-      return /** @type {!./service/ampdoc-impl.AmpDoc} */ (
+      return /** @type {!./service/ampdoc-decl.AmpDoc} */ (
         dev().assert(this.ampdoc_,
             'no ampdoc yet, since element is not attached'));
     }

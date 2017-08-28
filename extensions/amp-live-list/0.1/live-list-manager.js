@@ -36,7 +36,7 @@ const SERVICE_ID = 'liveListManager';
 export class LiveListManager {
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     /** @const */
@@ -234,7 +234,7 @@ export class LiveListManager {
 }
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  */
 function installLiveListManager(ampdoc) {
   registerServiceBuilderForDoc(
@@ -245,7 +245,7 @@ function installLiveListManager(ampdoc) {
 }
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @return {!LiveListManager}
  */
 export function liveListManagerForDoc(ampdoc) {

@@ -76,10 +76,10 @@ let ChangeSizeRequestDef;
 
 export class Resources {
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!./ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @const {!Window} */
@@ -2119,7 +2119,7 @@ function elements_(elements) {
 export let SizeDef;
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  */
 export function installResourcesServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'resources', Resources);

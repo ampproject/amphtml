@@ -377,7 +377,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 export class UserNotificationManager {
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     /** @const */
@@ -478,7 +478,7 @@ export class UserNotificationManager {
 
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @visibleForTesting
  */
 export function installUserNotificationManagerForTesting(ampdoc) {

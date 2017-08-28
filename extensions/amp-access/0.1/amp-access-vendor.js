@@ -31,7 +31,7 @@ const TAG = 'amp-access-vendor';
 export class AccessVendorAdapter {
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
    */
   constructor(ampdoc, configJson) {

@@ -49,10 +49,10 @@ const PERMITTED_POSITIONS = ['top','bottom','center'];
  */
 export class StandardActions {
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!./ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @const @private {!./action-impl.ActionService} */
@@ -326,7 +326,7 @@ export class StandardActions {
 
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  */
 export function installStandardActionsForDoc(ampdoc) {
   registerServiceBuilderForDoc(

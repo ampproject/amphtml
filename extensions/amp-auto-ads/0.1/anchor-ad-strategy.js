@@ -25,13 +25,13 @@ const OPT_IN_STATUS_ANCHOR_ADS = 2;
 
 export class AnchorAdStrategy {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    * @param {!JsonObject<string, string>} baseAttributes Any attributes that
    *     should be added to any inserted ads.
    * @param {!JSONType} configObj
    */
   constructor(ampdoc, baseAttributes, configObj) {
-    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @const {!../../../src/service/ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @const @private {!JsonObject<string, string>} */

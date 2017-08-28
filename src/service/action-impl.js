@@ -155,11 +155,11 @@ export class ActionInvocation {
 export class ActionService {
 
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    * @param {(!Document|!ShadowRoot)=} opt_root
    */
   constructor(ampdoc, opt_root) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!./ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @const {!Document|!ShadowRoot} */
@@ -1017,7 +1017,7 @@ function isNum(c) {
 
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  */
 export function installActionServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(

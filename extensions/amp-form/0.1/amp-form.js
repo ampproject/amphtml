@@ -901,7 +901,7 @@ function isDisabled_(element) {
  */
 export class AmpFormService {
   /**
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param  {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     /** @const @private {!Promise} */
@@ -930,7 +930,7 @@ export class AmpFormService {
 
   /**
    * Install the amp-form CSS
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param  {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    * @return {!Promise}
    * @private
    */
@@ -942,7 +942,7 @@ export class AmpFormService {
 
   /**
    * Install the event handlers
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param  {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    * @return {!Promise}
    * @private
    */

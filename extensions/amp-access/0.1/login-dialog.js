@@ -30,7 +30,7 @@ const TAG = 'amp-access-login';
 const RETURN_URL_REGEX = new RegExp('RETURN_URL');
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @param {string|!Promise<string>} urlOrPromise
  * @return {!WebLoginDialog|!ViewerLoginDialog}
  */
@@ -48,7 +48,7 @@ export function createLoginDialog(ampdoc, urlOrPromise) {
  * Opens the login dialog for the specified URL. If the login dialog succeeds,
  * the returned promised is resolved with the dialog's response. Otherwise, the
  * returned promise is rejected.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @param {string|!Promise<string>} urlOrPromise
  * @return {!Promise<string>}
  */
@@ -58,7 +58,7 @@ export function openLoginDialog(ampdoc, urlOrPromise) {
 
 /**
  * Gets the final login URL with all the performed replacements.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @param {string|!Promise<string>} urlOrPromise
  * @return {!Promise<string>}
  */

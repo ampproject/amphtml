@@ -73,12 +73,12 @@ export let ViewportResizedEventDef;
 export class Viewport {
 
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    * @param {!ViewportBindingDef} binding
    * @param {!./viewer-impl.Viewer} viewer
    */
   constructor(ampdoc, binding, viewer) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!./ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /**
@@ -1130,11 +1130,11 @@ export class ViewportBindingDef {
 export class ViewportBindingNatural_ {
 
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    * @param {!./viewer-impl.Viewer} viewer
    */
   constructor(ampdoc, viewer) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!./ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @const {!Window} */
@@ -1344,13 +1344,13 @@ export class ViewportBindingNatural_ {
 export class ViewportBindingNaturalIosEmbed_ {
   /**
    * @param {!Window} win
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(win, ampdoc) {
     /** @const {!Window} */
     this.win = win;
 
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!./ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private {?Element} */
@@ -2033,7 +2033,7 @@ export function updateViewportMetaString(currentValue, updateParams) {
 
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  * @return {!Viewport}
  * @private
  */
@@ -2107,7 +2107,7 @@ function getViewportType(win, viewer) {
 }
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  */
 export function installViewportServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc,

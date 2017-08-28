@@ -71,7 +71,7 @@ const WHITELISTED_VARIABLES = [
 /** Provides A4A specific variable substitution. */
 export class A4AVariableSource extends VariableSource {
   /**
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param  {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    * @param  {!Window} embedWin
    */
   constructor(ampdoc, embedWin) {

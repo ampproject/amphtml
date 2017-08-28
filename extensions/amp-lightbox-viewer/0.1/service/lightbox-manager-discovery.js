@@ -50,7 +50,7 @@ const VIEWER_TAG = 'amp-lightbox-viewer';
  * becoming lightboxable and adds `lightbox` attribute to them.
  * It may also install a tap handler on elements that meet our heuristics
  * to automatically open in lightbox on tap.
- * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @return {!Promise}
  */
 export function autoDiscoverLightboxables(ampdoc) {
@@ -122,7 +122,7 @@ function meetsHeuristicsForTap(element) {
 /**
  * Tries to find an existing amp-lightbox-viewer, if there is none, it adds a
  * default one.
- * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @return {!Promise<string>} Returns the id of the amp-lightbox-viewer.
  */
 function maybeInstallLightboxViewer(ampdoc) {

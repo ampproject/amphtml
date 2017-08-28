@@ -157,7 +157,7 @@ export class AdTracker {
 }
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @return {!Array<!Element>}
  */
 export function getExistingAds(ampdoc) {

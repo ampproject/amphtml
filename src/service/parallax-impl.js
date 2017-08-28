@@ -31,7 +31,7 @@ const EXPERIMENT = ATTR;
  */
 export class ParallaxService {
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     /** @private @const {!Observable} */
@@ -204,7 +204,7 @@ export class ParallaxElement {
 }
 
 /**
- * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!./ampdoc-decl.AmpDoc} nodeOrDoc
  */
 export function installParallaxForDoc(nodeOrDoc) {
   const enabled = isExperimentOn(AMP.win, EXPERIMENT);

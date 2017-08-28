@@ -25,7 +25,7 @@ const TAG = 'amp-access-other';
 export class AccessOtherAdapter {
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
    * @param {!./amp-access.AccessTypeAdapterContextDef} context
    */

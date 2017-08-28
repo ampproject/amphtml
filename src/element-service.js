@@ -86,7 +86,7 @@ function isElementScheduled(win, elementName) {
  * Users should typically wrap this as a special purpose function (e.g.
  * Services.viewportForDoc(...)) for type safety and because the factory should not be
  * passed around.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
@@ -103,7 +103,7 @@ export function getElementServiceForDoc(nodeOrDoc, id, extension, opt_element) {
 /**
  * Same as getElementService but produces null if the given element is not
  * actually available on the current page.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
@@ -142,7 +142,7 @@ export function getElementServiceIfAvailableForDoc(
  * Returns a promise for service for the given id in the embed scope of
  * a given node, if it exists. Otherwise, falls back to ampdoc scope IFF
  * the given node is in the top-level window.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @param {string} extension Name of the custom element that provides
  *     the implementation of this service.

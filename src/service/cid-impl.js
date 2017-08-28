@@ -75,7 +75,7 @@ let GetCidDef;
 
 
 export class Cid {
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  /** @param {!./ampdoc-decl.AmpDoc} ampdoc */
   constructor(ampdoc) {
     /** @const */
     this.ampdoc = ampdoc;
@@ -228,7 +228,7 @@ export function optOutOfCid(ampdoc) {
 /**
  * Whether user has opted out of Cid issuance for all scopes.
  *
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  * @return {!Promise<boolean>}
  * @visibleForTesting
  */
@@ -364,7 +364,7 @@ function getBaseCid(cid, persistenceConsent) {
 /**
  * Stores a new cidString in localStorage. Adds the current time to the
  * stored value.
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  * @param {!Promise} persistenceConsent
  * @param {string} cidString Actual cid string to store.
  */
@@ -392,7 +392,7 @@ function store(ampdoc, persistenceConsent, cidString) {
 
 /**
  * Get/set the Base CID from/to the viewer.
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  * @param {string=} opt_data Stringified JSON object {cid, time}.
  * @return {!Promise<string|undefined>}
  */
@@ -435,7 +435,7 @@ function createCidData(cidString) {
  * Gets the persisted CID data as a promise. It tries to read from
  * localStorage first then from viewer if it is in embedded mode.
  * Returns null if none was found.
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  * @return {!Promise<?BaseCidInfoDef>}
  */
 function read(ampdoc) {
@@ -526,14 +526,14 @@ function getNewCidForCookie(win) {
 }
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  */
 export function installCidService(ampdoc) {
   return registerServiceBuilderForDoc(ampdoc, 'cid', Cid);
 }
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  * @return {!Cid}
  * @private visible for testing
  */

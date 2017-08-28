@@ -35,7 +35,7 @@ const TAG = 'clickhandler';
 /**
  * Install click handler service for ampdoc. Immediately instantiates the
  * the click handler service.
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  */
 export function installGlobalClickListenerForDoc(ampdoc) {
   registerServiceBuilderForDoc(
@@ -54,11 +54,11 @@ export function installGlobalClickListenerForDoc(ampdoc) {
  */
 export class ClickHandler {
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
   constructor(ampdoc, opt_rootNode) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!./ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private @const {!Document|!ShadowRoot} */

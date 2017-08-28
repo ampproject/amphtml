@@ -23,13 +23,13 @@ import {loadPromise} from '../../../src/event-helper';
  */
 export class IFrameHost {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc The AMP document
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc The AMP document
    * to add the <iframe> to.
    * @param {string} url The <iframe> src URL.
    */
   constructor(ampdoc, url) {
     /**
-     * @type {!../../../src/service/ampdoc-impl.AmpDoc}
+     * @type {!../../../src/service/ampdoc-decl.AmpDoc}
      * @private
      */
     this.ampdoc_ = ampdoc;

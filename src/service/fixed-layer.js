@@ -43,14 +43,14 @@ const DECLARED_STICKY_PROP = '__AMP_DECLSTICKY';
  */
 export class FixedLayer {
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    * @param {!./vsync-impl.Vsync} vsync
    * @param {number} borderTop
    * @param {number} paddingTop
    * @param {boolean} transfer
    */
   constructor(ampdoc, vsync, borderTop, paddingTop, transfer) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!./ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private @const */

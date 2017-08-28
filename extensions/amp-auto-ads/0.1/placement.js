@@ -84,7 +84,7 @@ INJECTORS[Position.LAST_CHILD] = (anchorElement, elementToInject) => {
 
 export class Placement {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    * @param {!../../../src/service/resources-impl.Resources} resources
    * @param {!Element} anchorElement
    * @param {!Position} position
@@ -94,7 +94,7 @@ export class Placement {
    */
   constructor(ampdoc, resources, anchorElement, position, injector, attributes,
       opt_margins) {
-    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @const {!../../../src/service/ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
@@ -212,7 +212,7 @@ export class Placement {
 
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @param {!JsonObject} configObj
  * @return {!Array<!Placement>}
  */
@@ -233,7 +233,7 @@ export function getPlacementsFromConfigObj(ampdoc, configObj) {
 /**
  * Validates that the placementObj represents a valid placement and if so
  * constructs and returns an instance of the Placement class for it.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
  * @param {!JsonObject} placementObj
  * @param {!Array<!Placement>} placements
  */

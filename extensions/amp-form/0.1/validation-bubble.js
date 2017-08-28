@@ -25,7 +25,7 @@ export class ValidationBubble {
 
   /**
    * Creates a bubble component to display messages in.
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    * @param {string} id
    */
   constructor(ampdoc, id) {

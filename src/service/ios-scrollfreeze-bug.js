@@ -29,7 +29,7 @@ import {setStyle} from '../style';
  *
  * See #3481 for more details.
  *
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  * @param {!../service/platform-impl.Platform=} opt_platform
  * @param {!./viewer-impl.Viewer=} opt_viewer
  * @param {!./vsync-impl.Vsync=} opt_vsync

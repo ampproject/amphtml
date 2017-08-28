@@ -25,7 +25,7 @@ import {
 } from './url';
 
 /**
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-decl.AmpDoc} ampdoc
  */
 export function installGlobalSubmitListenerForDoc(ampdoc) {
   ampdoc.getRootNode().addEventListener('submit', onDocumentFormSubmit_, true);

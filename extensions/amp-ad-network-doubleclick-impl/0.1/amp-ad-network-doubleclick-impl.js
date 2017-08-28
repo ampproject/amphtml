@@ -1010,7 +1010,7 @@ export function getNetworkId(element) {
 
 /**
  * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} doc
+ * @param {!Node|!../../../src/service/ampdoc-decl.AmpDoc} doc
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
  * @return {!Promise<string>} SRA request URL
  */
@@ -1050,7 +1050,7 @@ export function constructSRABlockParameters(instances) {
 
 /**
  * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} doc
+ * @param {!Node|!../../../src/service/ampdoc-decl.AmpDoc} doc
  * @param {number} startTime
  * @param {boolean=} isSra
  * @return {!Promise<!Object<string,string|number|boolean>>}

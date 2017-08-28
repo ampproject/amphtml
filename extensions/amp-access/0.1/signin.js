@@ -58,7 +58,7 @@ const TAG = 'amp-access-signin';
 export class SignInProtocol {
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
    * @param {string} pubOrigin
    * @param {!JsonObject} configJson

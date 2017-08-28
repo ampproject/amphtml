@@ -26,7 +26,7 @@ const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 /**
  * Registers a handler that performs URL replacement on the href
  * of an ad click.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-decl.AmpDoc} ampdoc
  * @param {!Window} win
  */
 export function installAnchorClickInterceptor(ampdoc, win) {
@@ -38,7 +38,7 @@ export function installAnchorClickInterceptor(ampdoc, win) {
  * Handle click on links and replace variables in the click URL.
  * The function changes the actual href value and stores the
  * template in the ORIGINAL_HREF_ATTRIBUTE attribute
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-decl.AmpDoc} ampdoc
  * @param {!Event} e
  */
 function maybeExpandUrlParams(ampdoc, e) {

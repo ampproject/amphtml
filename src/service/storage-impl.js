@@ -41,12 +41,12 @@ const MAX_VALUES_PER_ORIGIN = 8;
 export class Storage {
 
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    * @param {!../service/viewer-impl.Viewer} viewer
    * @param {!StorageBindingDef} binding
    */
   constructor(ampdoc, viewer, binding) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!./ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private @const {!../service/viewer-impl.Viewer} */
@@ -381,7 +381,7 @@ export class ViewerStorageBinding {
 
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  */
 export function installStorageServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(

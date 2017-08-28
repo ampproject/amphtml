@@ -45,7 +45,7 @@ const TAG = 'amp-analytics';
  */
 export class AnalyticsRoot {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    * @param {?AnalyticsRoot} parent
    */
   constructor(ampdoc, parent) {
@@ -326,7 +326,7 @@ export class AnalyticsRoot {
  */
 export class AmpdocAnalyticsRoot extends AnalyticsRoot {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     super(ampdoc, /* parent */ null);
@@ -389,7 +389,7 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
  */
 export class EmbedAnalyticsRoot extends AnalyticsRoot {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    * @param {!../../../src/friendly-iframe-embed.FriendlyIframeEmbed} embed
    * @param {?AnalyticsRoot} parent
    */

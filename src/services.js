@@ -32,7 +32,7 @@ import {
 export class Services {
   /**
    * Returns a promise for the Access service.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!Promise<!../extensions/amp-access/0.1/amp-access.AccessService>}
    */
   static accessServiceForDoc(nodeOrDoc) {
@@ -44,7 +44,7 @@ export class Services {
   /**
    * Returns a promise for the Access service or a promise for null if the service
    * is not available on the current page.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!Promise<?../extensions/amp-access/0.1/amp-access.AccessService>}
    */
   static accessServiceForDocOrNull(nodeOrDoc) {
@@ -54,7 +54,7 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!./service/action-impl.ActionService}
    */
   static actionServiceForDoc(nodeOrDoc) {
@@ -64,7 +64,7 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!Promise<!Activity>}
    */
   static activityForDoc(nodeOrDoc) {
@@ -85,7 +85,7 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @param {boolean=} loadAnalytics
    * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
    */
@@ -102,7 +102,7 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
    */
   static analyticsForDocOrNull(nodeOrDoc) {
@@ -122,7 +122,7 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>}
    */
   static bindForDocOrNull(nodeOrDoc) {
@@ -132,7 +132,7 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!Promise<!./service/cid-impl.Cid>}
    */
   static cidForDoc(nodeOrDoc) {
@@ -150,7 +150,7 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!./service/document-info-impl.DocumentInfoDef} Info about the doc
    */
   static documentInfoForDoc(nodeOrDoc) {
@@ -177,7 +177,7 @@ export class Services {
 
   /**
    * Returns service implemented in service/history-impl.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!./service/history-impl.History}
    */
   static historyForDoc(nodeOrDoc) {
@@ -194,7 +194,7 @@ export class Services {
   };
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!./service/parallax-impl.ParallaxService}
    */
   static parallaxForDoc(nodeOrDoc) {
@@ -230,7 +230,7 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!./service/resources-impl.Resources}
    */
   static resourcesForDoc(nodeOrDoc) {
@@ -250,7 +250,7 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!Promise<!./service/storage-impl.Storage>}
    */
   static storageForDoc(nodeOrDoc) {
@@ -277,7 +277,7 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!./service/url-replacements-impl.UrlReplacements}
    */
   static urlReplacementsForDoc(nodeOrDoc) {
@@ -287,7 +287,7 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>}
    */
   static userNotificationManagerForDoc(nodeOrDoc) {
@@ -308,7 +308,7 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!./service/video-manager-impl.VideoManager}
    */
   static videoManagerForDoc(nodeOrDoc) {
@@ -317,7 +317,7 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!./service/viewer-impl.Viewer}
    */
   static viewerForDoc(nodeOrDoc) {
@@ -329,7 +329,7 @@ export class Services {
    * Returns promise for the viewer. This is an unusual case and necessary only
    * for services that need reference to the viewer before it has been
    * initialized. Most of the code, however, just should use `viewerForDoc`.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!Promise<!./service/viewer-impl.Viewer>}
    */
   static viewerPromiseForDoc(nodeOrDoc) {
@@ -347,7 +347,7 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
    * @return {!./service/viewport-impl.Viewport}
    */
   static viewportForDoc(nodeOrDoc) {

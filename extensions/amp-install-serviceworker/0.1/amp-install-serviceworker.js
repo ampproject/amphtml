@@ -220,7 +220,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 class UrlRewriter_ {
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    * @param {!RegExp} urlMatchExpr
    * @param {string} shellUrl
    */

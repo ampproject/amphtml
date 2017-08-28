@@ -90,11 +90,11 @@ const BIND_ONLY_ATTRIBUTES = map({
 export class Bind {
   /**
    * If `opt_win` is provided, scans its document for bindings instead.
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    * @param {!Window=} opt_win
    */
   constructor(ampdoc, opt_win) {
-    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @const {!../../../src/service/ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @const @private {!Window} */

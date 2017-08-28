@@ -113,7 +113,7 @@ export function installRuntimeServices(global) {
 
 /**
  * Install ampdoc-level services.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-decl.AmpDoc} ampdoc
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installAmpdocServices(ampdoc, opt_initParams) {
@@ -154,8 +154,8 @@ export function installBuiltins(global) {
  *         !Window,
  *         !./service/extensions-impl.Extensions,
  *         string,
- *         (function(new:Object, !./service/ampdoc-impl.AmpDoc)|undefined),
- *         (function(!./service/ampdoc-impl.AmpDoc):!Object|undefined)),
+ *         (function(new:Object, !./service/ampdoc-decl.AmpDoc)|undefined),
+ *         (function(!./service/ampdoc-decl.AmpDoc):!Object|undefined)),
  *   }} opts
  * @param {function(!Window, !./service/extensions-impl.Extensions)} callback
  */
@@ -224,8 +224,8 @@ function adoptShared(global, opts, callback) {
   /**
    * Registers an ampdoc service.
    * @param {string} name
-   * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)|undefined} opt_ctor
-   * @param {function(!./service/ampdoc-impl.AmpDoc):!Object|undefined} opt_factory
+   * @param {function(new:Object, !./service/ampdoc-decl.AmpDoc)|undefined} opt_ctor
+   * @param {function(!./service/ampdoc-decl.AmpDoc):!Object|undefined} opt_factory
    */
   global.AMP.registerServiceForDoc = opts.registerServiceForDoc.bind(null,
       global, extensions);
@@ -498,7 +498,7 @@ function registerElementClass(global, name, implementationClass, opt_css) {
  * @param {!Window} global
  * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
+ * @param {function(new:Object, !./service/ampdoc-decl.AmpDoc)} ctor
  */
 function prepareAndRegisterServiceForDoc(global, extensions, name, ctor) {
   const ampdocService = Services.ampdocServiceFor(global);
@@ -514,7 +514,7 @@ function prepareAndRegisterServiceForDoc(global, extensions, name, ctor) {
  * @param {!Window} global
  * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
+ * @param {function(new:Object, !./service/ampdoc-decl.AmpDoc)} ctor
  */
 function prepareAndRegisterServiceForDocShadowMode(global, extensions,
     name, ctor) {
@@ -529,9 +529,9 @@ function prepareAndRegisterServiceForDocShadowMode(global, extensions,
 /**
  * Registration steps for an ampdoc service in both single- and shadow-doc
  * modes.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-decl.AmpDoc} ampdoc
  * @param {string} name
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
+ * @param {function(new:Object, !./service/ampdoc-decl.AmpDoc)} ctor
  */
 function registerServiceForDoc(ampdoc, name, ctor) {
   // TODO(kmh287): Investigate removing the opt_instantiate arg after
@@ -779,7 +779,7 @@ class MultidocManager {
 
   /**
    * Processes the contents of the shadow document's head.
-   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./service/ampdoc-decl.AmpDoc} ampdoc
    * @param {!ShadowRoot} shadowRoot
    * @param {!Document} doc
    * @return {!Array<string>}
@@ -926,7 +926,7 @@ class MultidocManager {
     this.removeShadowRoot_(shadowRoot);
     const amp = shadowRoot.AMP;
     delete shadowRoot.AMP;
-    const ampdoc = /** @type {!./service/ampdoc-impl.AmpDoc} */ (amp.ampdoc);
+    const ampdoc = /** @type {!./service/ampdoc-decl.AmpDoc} */ (amp.ampdoc);
     setViewerVisibilityState(
         Services.viewerForDoc(ampdoc), VisibilityState.INACTIVE);
     disposeServicesForDoc(ampdoc);

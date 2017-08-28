@@ -43,7 +43,7 @@ export let DocumentInfoDef;
 
 
 /**
- * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!./ampdoc-decl.AmpDoc} nodeOrDoc
  */
 export function installDocumentInfoServiceForDoc(nodeOrDoc) {
   return registerServiceBuilderForDoc(nodeOrDoc, 'documentInfo', DocInfo);
@@ -52,7 +52,7 @@ export function installDocumentInfoServiceForDoc(nodeOrDoc) {
 
 export class DocInfo {
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     /** @private @const  */

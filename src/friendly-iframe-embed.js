@@ -584,7 +584,7 @@ export class FriendlyIframeEmbed {
 /**
  * Returns the promise that will be resolved when all content elements
  * have been loaded in the initially visible set.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} context
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} context
  * @param {!Window} hostWin
  * @param {!./layout-rect.LayoutRectDef} rect
  * @return {!Promise}

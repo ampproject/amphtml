@@ -559,7 +559,7 @@ export function resetLogConstructorForTesting() {
  *  2. Development mode is enabled via `#development=1` or logging is explicitly
  *     enabled via `#log=D` where D >= 1.
  *
- * @param {!Element=} opt_element
+ * @param {(!Element|!./service/ampdoc-decl.AmpDoc)=} opt_element
  * @return {!Log}
  */
 export function user(opt_element) {
@@ -625,7 +625,7 @@ export function dev() {
 
 /**
  * @param {!Window} win
- * @param {!Element=} opt_element
+ * @param {(!Element|!./service/ampdoc-decl.AmpDoc)=} opt_element
  * @returns {boolean} isEmbed
  */
 export function isFromEmbed(win, opt_element) {

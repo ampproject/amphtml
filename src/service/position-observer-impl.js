@@ -62,9 +62,9 @@ const LOW_FIDELITY_FRAME_COUNT = 4;
 
 class AbstractPositionObserver {
 
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  /** @param {!./ampdoc-decl.AmpDoc} ampdoc */
   constructor(ampdoc) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!./ampdoc-decl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @private {!Array<!Object>} */
@@ -195,7 +195,7 @@ class AbstractPositionObserver {
 /** The implementation of the positionObserver for an ampdoc */
 export class AmpDocPositionObserver extends AbstractPositionObserver {
 
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  /** @param {!./ampdoc-decl.AmpDoc} ampdoc */
   constructor(ampdoc) {
 
     super(ampdoc);
@@ -321,7 +321,7 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
 
 /** The implementation of the positionObserver for inabox */
 export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  /** @param {!./ampdoc-decl.AmpDoc} ampdoc */
   constructor(ampdoc) {
     super(ampdoc);
 
@@ -444,7 +444,7 @@ export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
 }
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  */
 export function installPositionObserverServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'position-observer', () => {

@@ -34,11 +34,11 @@ const TAG = 'amp-fresh';
 export class AmpFreshManager {
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
 
-    /** @const @type {!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @const @type {!../../../src/service/ampdoc-decl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     if (!isExperimentOn(this.ampdoc.win, TAG)) {
@@ -119,14 +119,14 @@ export class AmpFreshManager {
 }
 
 /**
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!../../../src/service/ampdoc-decl.AmpDoc} nodeOrDoc
  */
 export function installAmpFreshManagerForDoc(nodeOrDoc) {
   registerServiceBuilderForDoc(nodeOrDoc, 'ampFreshManager', AmpFreshManager);
 }
 
 /**
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!../../../src/service/ampdoc-decl.AmpDoc} nodeOrDoc
  * @return {!AmpFreshManager}
  */
 export function ampFreshManagerForDoc(nodeOrDoc) {

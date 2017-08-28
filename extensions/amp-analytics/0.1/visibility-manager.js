@@ -55,7 +55,7 @@ function getElementId(element) {
 export class VisibilityManager {
   /**
    * @param {?VisibilityManager} parent
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(parent, ampdoc) {
     /** @const @protected */
@@ -345,7 +345,7 @@ export class VisibilityManager {
  */
 export class VisibilityManagerForDoc extends VisibilityManager {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     super(/* parent */ null, ampdoc);

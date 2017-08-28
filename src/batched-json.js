@@ -23,7 +23,7 @@ import {getValueForExpr} from './json';
  * Sets the fetch credentials option from the element's `credentials` attribute,
  * if it exists.
  *
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-decl.AmpDoc} ampdoc
  * @param {!Element} element
  * @param {string=} opt_expr Dot-syntax reference to subdata of JSON result
  *     to return. If not specified, entire JSON result is returned.

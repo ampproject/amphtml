@@ -32,14 +32,14 @@ import {Services} from '../../../../src/services';
 export class LightboxManager {
 
   /**
-   * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
 
     // Extra safety check, we don't install this service if experiment is off
     dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer'));
 
-    /** @const @private {!../../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @const @private {!../../../../src/service/ampdoc-decl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /**

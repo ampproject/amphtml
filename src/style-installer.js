@@ -33,7 +33,7 @@ const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
  * styles. One element can be the main runtime CSS. This is guaranteed
  * to always be the first stylesheet in the doc.
  *
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc The ampdoc that should get the new styles.
+ * @param {!./service/ampdoc-decl.AmpDoc} ampdoc The ampdoc that should get the new styles.
  * @param {string} cssText
  * @param {?function(!Element)|undefined} cb Called when the new styles are available.
  *     Not using a promise, because this is synchronous when possible.

@@ -67,7 +67,7 @@ try {
   throw e;
 }
 startupChunk(self.document, function initial() {
-  /** @const {!../service/ampdoc-impl.AmpDoc} */
+  /** @const {!../service/ampdoc-decl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
   installPerformanceService(self);
   /** @const {!../service/performance-impl.Performance} */

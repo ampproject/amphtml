@@ -177,7 +177,7 @@ export function groupAmpAdsByType(win, type, groupFn) {
 
 /**
  * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!../../../src/service/ampdoc-decl.AmpDoc} nodeOrDoc
  * @param {number} startTime
  * @param {string=} output default is 'html'
  * @return {!Promise<!Object<string,null|number|string>>}
@@ -348,7 +348,7 @@ function elapsedTimeWithCeiling(time, start) {
 /**
  * @param {!Window} win
  * @param {string=} opt_cid
- * @param {(!Node|!../../../src/service/ampdoc-impl.AmpDoc)=} opt_nodeOrDoc
+ * @param {(!Node|!../../../src/service/ampdoc-decl.AmpDoc)=} opt_nodeOrDoc
  * @return {number} The correlator.
  */
 export function getCorrelator(win, opt_cid, opt_nodeOrDoc) {

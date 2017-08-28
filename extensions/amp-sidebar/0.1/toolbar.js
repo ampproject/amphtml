@@ -21,7 +21,7 @@ export class Toolbar {
   /**
   * @param {!Element} element
   * @param {!../../../src/service/vsync-impl.Vsync} vsync
-  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+  * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
   */
   constructor(element, vsync, ampdoc) {
     /** @private {!Element} */
@@ -33,7 +33,7 @@ export class Toolbar {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
-    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @const @private {!../../../src/service/ampdoc-decl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @private {!string} */

@@ -64,7 +64,7 @@ const TEMPLATE_PROP = '__AMP_ACCESS__TEMPLATE';
  */
 export class AccessService {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     /** @const */

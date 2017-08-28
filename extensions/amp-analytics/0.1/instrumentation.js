@@ -134,7 +134,7 @@ const ALLOWED_IN_EMBED = [
  */
 export class InstrumentationService {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-decl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     /** @const */
@@ -523,7 +523,7 @@ export class AnalyticsGroup {
  * it in multi-doc scope. Otherwise an element life-cycle could resolve way before we
  * have the service available.
  *
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!../../../src/service/ampdoc-decl.AmpDoc} nodeOrDoc
  * @return {!Promise<InstrumentationService>}
  */
 export function instrumentationServicePromiseForDoc(nodeOrDoc) {
@@ -532,7 +532,7 @@ export function instrumentationServicePromiseForDoc(nodeOrDoc) {
 }
 
 /*
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!../../../src/service/ampdoc-decl.AmpDoc} nodeOrDoc
  * @return {!InstrumentationService}
  */
 export function instrumentationServiceForDocForTesting(nodeOrDoc) {

@@ -72,7 +72,7 @@ let ExtensionDef;
  *
  * @typedef {{
  *   extension: !ExtensionDef,
- *   docFactories: !Array<function(!./ampdoc-impl.AmpDoc)>,
+ *   docFactories: !Array<function(!./ampdoc-decl.AmpDoc)>,
  *   shadowRootFactories: !Array<function(!ShadowRoot)>,
  *   promise: (!Promise<!ExtensionDef>|undefined),
  *   resolve: (function(!ExtensionDef)|undefined),
@@ -113,7 +113,7 @@ export function registerExtension(extensions, extensionId, factory, arg) {
 /**
  * Apply all registered factories to the specified ampdoc.
  * @param {!Extensions} extensions
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./ampdoc-decl.AmpDoc} ampdoc
  * @param {!Array<string>} extensionIds
  * @return {!Promise}
  * @restricted
@@ -156,7 +156,7 @@ export function addServiceToExtension(extensions, name) {
  * restricted method and it's allowed to be called only during the overall
  * extension registration.
  * @param {!Extensions} extensions
- * @param {function(!./ampdoc-impl.AmpDoc)} factory
+ * @param {function(!./ampdoc-decl.AmpDoc)} factory
  * @param {string=} opt_forName
  * @restricted
  */
@@ -320,7 +320,7 @@ export class Extensions {
 
   /**
    * Registers an ampdoc factory.
-   * @param {function(!./ampdoc-impl.AmpDoc)} factory
+   * @param {function(!./ampdoc-decl.AmpDoc)} factory
    * @param {string=} opt_forName
    * @private
    * @restricted
@@ -345,7 +345,7 @@ export class Extensions {
   /**
    * Installs all ampdoc factories previously registered with
    * `addDocFactory_`.
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./ampdoc-decl.AmpDoc} ampdoc
    * @param {!Array<string>} extensionIds
    * @return {!Promise}
    * @private

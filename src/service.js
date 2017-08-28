@@ -36,9 +36,9 @@ import {dev} from './log';
  *   obj: (?Object),
  *   promise: (?Promise),
  *   resolve: (?function(!Object)),
- *   context: (?Window|?./service/ampdoc-impl.AmpDoc),
+ *   context: (?Window|?./service/ampdoc-decl.AmpDoc),
  *   ctor: (?function(new:Object, !Window)|
- *          ?function(new:Object, !./service/ampdoc-impl.AmpDoc)),
+ *          ?function(new:Object, !./service/ampdoc-decl.AmpDoc)),
  * }}
  */
 let ServiceHolderDef;
@@ -98,7 +98,7 @@ export function getExistingServiceInEmbedScope(win, id, opt_fallbackToTopWin) {
 /**
  * Returns a service with the given id. Assumes that it has been constructed
  * already.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
  * @param {string} id
  * @param {boolean=} opt_fallbackToTopWin
  * @return {Object} The service.
@@ -177,9 +177,9 @@ export function registerServiceBuilder(win,
 /**
  * Returns a service and registers it given a class to be used as
  * implementation.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} constructor
+ * @param {function(new:Object, !./service/ampdoc-decl.AmpDoc)} constructor
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
 export function registerServiceBuilderForDoc(nodeOrDoc,
@@ -257,7 +257,7 @@ export function getServicePromiseOrNull(win, id) {
 /**
  * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
  * Expects service `id` to be registered.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @return {T}
  * @template T
@@ -273,7 +273,7 @@ export function getServiceForDoc(nodeOrDoc, id) {
  * Returns a promise for a service for the given id and ampdoc. Also expects
  * a service that has the actual implementation. The promise resolves when
  * the implementation loaded.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @return {!Promise<!Object>}
  */
@@ -286,7 +286,7 @@ export function getServicePromiseForDoc(nodeOrDoc, id) {
 /**
  * Like getServicePromiseForDoc but returns null if the service was never
  * registered for this ampdoc.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @return {?Promise<!Object>}
  */
@@ -347,8 +347,8 @@ export function getParentWindowFrameElement(node, topWin) {
 
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!./service/ampdoc-impl.AmpDoc}
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
+ * @return {!./service/ampdoc-decl.AmpDoc}
  */
 export function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
@@ -356,13 +356,13 @@ export function getAmpdoc(nodeOrDoc) {
         nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
     return getAmpdocService(win).getAmpDoc(/** @type {!Node} */ (nodeOrDoc));
   }
-  return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
+  return /** @type {!./service/ampdoc-decl.AmpDoc} */ (nodeOrDoc);
 }
 
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!./service/ampdoc-impl.AmpDoc|!Window}
+ * @param {!Node|!./service/ampdoc-decl.AmpDoc} nodeOrDoc
+ * @return {!./service/ampdoc-decl.AmpDoc|!Window}
  */
 function getAmpdocServiceHolder(nodeOrDoc) {
   const ampdoc = getAmpdoc(nodeOrDoc);
@@ -413,10 +413,10 @@ function getServiceInternal(holder, id) {
 
 /**
  * @param {!Object} holder Object holding the service instance.
- * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
+ * @param {!Window|!./service/ampdoc-decl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
  * @param {?function(new:Object, !Window)|
- *         ?function(new:Object, !./service/ampdoc-impl.AmpDoc)}
+ *         ?function(new:Object, !./service/ampdoc-decl.AmpDoc)}
  *     ctor Constructor function to new the service. Called with context.
  */
 function registerServiceInternal(holder, context, id, ctor) {
@@ -541,7 +541,7 @@ export function assertDisposable(service) {
 /**
  * Disposes all disposable (implements `Disposable` interface) services in
  * ampdoc scope.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-decl.AmpDoc} ampdoc
  */
 export function disposeServicesForDoc(ampdoc) {
   disposeServicesInternal(ampdoc);
