@@ -816,7 +816,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
-  browsers = [];
+  var browsers = [];
   if (process.env.TRAVIS) {
     browsers.push('last 2 versions', 'safari >= 9');
   } else {

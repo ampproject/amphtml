@@ -191,7 +191,10 @@ function getGraph(entryModule) {
       .pipe(source(entryModule))
       // Unfortunately we need to write the files out.
       .pipe(gulp.dest('./.amp-build'))
-      .on('end', resolve.bind(null, module));
+      .on('end', resolve.bind(null, module))
+      .on('error', function(err) {
+        console.log(err);
+      });
   return promise;
 }
 

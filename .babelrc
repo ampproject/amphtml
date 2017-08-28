@@ -5,9 +5,10 @@
       "targets": {
         "browsers": ["Last 2 versions"]
       },
-      "modules": "commonjs"
+      "modules": "commonjs",
+      sourceType: 'module'
     }]
   ],
-  sourceType: 'module',
-  ignore: ['sha384-generated.js', 'bind-expr-impl.js']
+  sourceType: "module",
+  ignore: ["sha384-generated.js", "bind-expr-impl.js"]
 }
