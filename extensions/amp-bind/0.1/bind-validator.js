@@ -34,10 +34,11 @@ let PropertyRulesDef;
  * @private {Object<string, ?PropertyRulesDef>}
  */
 const GLOBAL_PROPERTY_RULES = {
-  'text': null,
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
+  'hidden': null,
+  'text': null,
 };
 
 /**
