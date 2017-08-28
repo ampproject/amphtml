@@ -117,7 +117,7 @@ For some common tracking use cases (e.g., page views, page clicks, scrolling, et
 
 ## Specifying configuration data
 
-In the `<amp-analytics>` element, you specify a JSON configuration object that contains the details for what to measure and where to send the analytics data. 
+In the `<amp-analytics>` element, you specify a JSON configuration object that contains the details for what to measure and where to send the analytics data.
 
 The configuration object for `<amp-analytics>` uses the following format:
 
@@ -159,7 +159,7 @@ be merged together such that:
 2.  Inline configuration takes precedence over vendor configuration.
 
 
-#### Loading remote configuration 
+#### Loading remote configuration
 
 To load a remote configuration, in the `<amp-analytics>` element, specify the `config` attribute and the URL for the configuration data. The URL specified should use the HTTPS scheme. The URL may include [AMP URL vars](../../spec/amp-var-substitutions.md). To access cookies, see the [`data-credentials`](#data-credentials) attribute. The response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
 
@@ -219,15 +219,16 @@ The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that
 
 The `triggers` configuration object describes when an analytics request should be sent. The `triggers` attribute contains a key-value pair of trigger-name and  trigger-configuration. A trigger-name can be any string comprised of alphanumeric characters (a-zA-Z0-9). Triggers from a  configuration with lower precedence are overridden by triggers with the same names from a configuration with higher precedence.
 
-  - `on` (required) The event to listener for. Valid values are `render-start`, `ini-load`, `visible`, `click`, `scroll`, `timer`, and `hidden`.
+  - `on` (required) The event to listener for. Valid values are `render-start`, `ini-load`, `click`, `scroll`, `timer`, `visible`, `hidden`, [`access-*`](../amp-access/amp-access-analytics.md), and [`video-*`](./amp-video-analytics.md)
   - `request` (required) Name of the request to send (as specified in the `requests` section).
   - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify vars unique to this trigger.
   - `selector` and `selectionMethod` can be specified for some triggers, such as `click` and `visible`. See [Element selector](#element-selector) for details.
-  - `scrollSpec` (required when `on` is set to `scroll`) This configuration is used on conjunction with the `scroll` trigger. Please see below for details.
-  - `timerSpec` (required when `on` is set to `timer`) This configuration is used on conjunction with the `timer` trigger. Please see below for details.
+  - `scrollSpec` (required when `on` is set to `scroll`) This configuration is used in conjunction with the `scroll` trigger. Please see below for details.
+  - `timerSpec` (required when `on` is set to `timer`) This configuration is used in conjunction with the `timer` trigger. Please see below for details.
   - `sampleSpec` This object is used to define how the requests can be sampled before they are sent. This setting allows sampling based on random input or other platform supported vars. The object contains configuration to specify an input that is used to generate a hash and a threshold that the hash must meet.
     - `sampleOn` This string template is expanded by filling in the platform variables and then hashed to generate a number for the purposes of the sampling logic described under threshold below.
     - `threshold` This configuration is used to filter out requests that do not meet particular criteria: For a request to go through to the analytics vendor, the following logic should be true `HASH(sampleOn) < threshold`.
+  - `videoSpec` (used when `on` is set to `video-*`) This configuration is used in conjunction with the [`video-*`](./amp-video-analytics.md) triggers.
 
 As an example, the following configuration can be used to sample 50% of the requests based on random input or at 1% based on client id.
 
@@ -476,7 +477,12 @@ The above configuration translates to:
 
 ##### Access triggers
 
-AMP Access system issues numerous events for different states in the access flow. For details on access triggers (`"on": "amp-access-*"`), see [AMP Access and Analytics](../amp-access/amp-access-analytics.md).
+AMP Access system issues numerous events for different states in the access flow. For details on access triggers (`"on": "access-*"`), see [AMP Access and Analytics](../amp-access/amp-access-analytics.md).
+
+
+#### Video analytics triggers
+
+Video analytics provides several triggers (`"on": "video-*"`) that publishers can use to track different events occurring during a video's lifecycle. More details are available in [AMP Video Analytics](./amp-video-analytics.md).
 
 
 #### Transport
