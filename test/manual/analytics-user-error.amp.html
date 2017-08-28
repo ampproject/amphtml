@@ -1,0 +1,102 @@
+<!doctype html>
+<html ⚡>
+<head>
+    <meta charset="utf-8">
+    <title>User Error</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+    <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+    <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+    <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+    <script async custom-element="amp-jwplayer" src="https://cdn.ampproject.org/v0/amp-jwplayer-0.1.js"></script>
+    <style amp-custom>
+        body {
+            font-family: 'Georgia', Serif;
+        }
+        h1 {
+            padding: 10px;
+        }
+        p {
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+<h1>Lorem ipsum</h1>
+<amp-img
+        src="img/sea@1x.jpg"
+        srcset="img/sea@1x.jpg 1x, img/sea@2x.jpg 2x"
+        alt="Fusce pretium tempor justo, vitae consequat dolor maximus eget."
+        placeholder
+        width="360" height="216" layout="responsive"
+        role='img'>
+</amp-img>
+
+<amp-anim
+        src=""
+        width="400" height="225" layout="responsive"
+        role='img'>
+    <amp-img placeholder
+             src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h225-no-k"
+             width="400" height="225" layout="responsive"></amp-img>
+</amp-anim>
+<p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
+    luctus nunc ut elit cursus, et imperdiet diam vehicula.
+    Duis et nisi sed urna blandit bibendum et sit amet erat.
+</p>
+
+<amp-pixel src="https://foo.com/tracker/foo"
+           layout="nodisplay"
+           referrerpolicy="referrer-fail"></amp-pixel>
+
+<h2 id="amp-iframe">IFrame</h2>
+<amp-iframe width=10 height=10
+            layout="responsive"
+            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=Alameda,%20CA">
+</amp-iframe>
+
+<amp-list layout="responsive" src= [src]="src" width="600" height="600">
+    <template type="amp-mustache">
+    </template>
+</amp-list>
+
+<amp-youtube width="480" height="270"
+             data-param-autoplay
+             data-videoid="dQw4w9WgXcQ">
+</amp-youtube>
+
+<amp-youtube
+        data-id="mGENRKrdoGY"
+        layout="responsive"
+        data-param-controls=1
+        width="480" height="270">
+</amp-youtube>
+
+<amp-jwplayer
+        data-playlist-id="482jsTAr"
+        data-player-id="uoIbMPm3"
+        width="480" height="270">
+</amp-jwplayer>
+
+<amp-analytics type="googleanalytics">
+    <script type="application/json">
+        {
+            "vars": {
+                "account":"UA-104520313-1"
+            },
+            "triggers": {
+                "useError": {
+                    "on": "user-error",
+                    "request": "error"
+                }
+            }
+        }
+    </script>
+</amp-analytics>
+
+</body>
+</html>
