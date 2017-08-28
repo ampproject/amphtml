@@ -22,6 +22,7 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
 import {ElementStub, stubbedElements} from './element-stub';
 import {Services} from './services';
 import {Signals} from './utils/signals';
+import {declareExtension} from './service/ampdoc-impl';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
 import {
@@ -111,6 +112,10 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     registerElement(win, name, /** @type {!Function} */ (toClass));
     return;
   }
+  if (knownElements[name] == toClass) {
+    // Already registered this instance.
+    return;
+  }
   user().assert(knownElements[name] == ElementStub,
       '%s is already registered. The script tag for ' +
       '%s is likely included twice in the page.', name, name);
@@ -150,23 +155,17 @@ function tryUpgradeElementNoInline(element, toClass) {
 }
 
 /**
- * Stub extended elements missing an implementation.
- * @param {!Window} win
+ * Stub extended elements missing an implementation. It can be called multiple
+ * times and on partial document in order to start stubbing as early as
+ * possible.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function stubElements(win) {
-  const knownElements = getExtendedElements(win);
-  const list = win.document.head.querySelectorAll('script[custom-element]');
+export function stubElementsForDoc(ampdoc) {
+  const list = ampdoc.getHeadNode().querySelectorAll('script[custom-element]');
   for (let i = 0; i < list.length; i++) {
     const name = list[i].getAttribute('custom-element');
-    if (knownElements[name]) {
-      continue;
-    }
-    registerElement(win, name, ElementStub);
-  }
-  // Repeat stubbing when HEAD is complete.
-  if (!win.document.body) {
-    const docState = Services.documentStateFor(win);
-    docState.onBodyAvailable(() => stubElements(win));
+    declareExtension(ampdoc, name);
+    stubElementIfNotKnown(ampdoc.win, name);
   }
 }
 
@@ -183,15 +182,6 @@ export function stubElementIfNotKnown(win, name) {
 }
 
 /**
- * Stub element in the child window.
- * @param {!Window} childWin
- * @param {string} name
- */
-export function stubElementInChildWindow(childWin, name) {
-  registerElement(childWin, name, ElementStub);
-}
-
-/**
  * Copies the specified element to child window (friendly iframe). This way
  * all implementations of the AMP elements are shared between all friendly
  * frames.
@@ -204,23 +194,6 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
   registerElement(childWin, name, toClass || ElementStub);
 }
 
-
-/**
- * Upgrade element in the child window.
- * @param {!Window} parentWin
- * @param {!Window} childWin
- * @param {string} name
- */
-export function upgradeElementInChildWindow(parentWin, childWin, name) {
-  const toClass = getExtendedElements(parentWin)[name];
-  // Some extensions unofficially register unstubbed elements, e.g. amp-bind.
-  // Can be changed to assert() once official support (#9143) is implemented.
-  if (!toClass) {
-    dev().warn(TAG_, '%s is not stubbed yet', name);
-  }
-  dev().assert(toClass != ElementStub, '%s is not upgraded yet', name);
-  upgradeOrRegisterElement(childWin, name, toClass);
-}
 
 /**
  * Applies layout to the element. Visible for testing only.
@@ -701,7 +674,7 @@ function createBaseCustomElementClass(win) {
      * @final @private @this {!Element}
      */
     completeUpgrade_(newImpl, upgradeStartTime) {
-      this.upgradeDelayMs_ = Date.now() - upgradeStartTime;
+      this.upgradeDelayMs_ = win.Date.now() - upgradeStartTime;
       this.upgradeState_ = UpgradeState.UPGRADED;
       this.implementation_ = newImpl;
       this.classList.remove('amp-unresolved');
@@ -1005,9 +978,17 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
-        const ampdocService = Services.ampdocServiceFor(
-            this.ownerDocument.defaultView);
-        this.ampdoc_ = ampdocService.getAmpDoc(this);
+        const win = this.ownerDocument.defaultView;
+        const ampdocService = Services.ampdocServiceFor(win);
+        const ampdoc = ampdocService.getAmpDoc(this);
+        this.ampdoc_ = ampdoc;
+        // Load the pre-stubbed extension if needed.
+        const extensionId = this.tagName.toLowerCase();
+        if (isStub(this.implementation_) &&
+            !ampdoc.declaresExtension(extensionId)) {
+          Services.extensionsFor(win).installExtensionForDoc(
+              ampdoc, extensionId);
+        }
       }
       if (!this.resources_) {
         // Resources can now be initialized since the ampdoc is now available.
@@ -1083,7 +1064,7 @@ function createBaseCustomElementClass(win) {
       // non-stub class. We may allow nested upgrades later, but they will
       // certainly be bad for performance.
       this.upgradeState_ = UpgradeState.UPGRADE_IN_PROGRESS;
-      const startTime = Date.now();
+      const startTime = win.Date.now();
       const res = impl.upgradeCallback();
       if (!res) {
         // Nothing returned: the current object is the upgraded version.
@@ -1931,7 +1912,7 @@ export function getElementClassForTesting(win, elementName) {
 /** @param {!Element} element */
 function assertNotTemplate(element) {
   dev().assert(!element.isInTemplate_, 'Must never be called in template');
-};
+}
 
 /**
  * @param {!Element} element

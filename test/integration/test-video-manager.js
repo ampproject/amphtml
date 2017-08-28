@@ -35,8 +35,13 @@ describe.configure().ifNewChrome().run('Fake Video Player' +
   // of functional testing. Same tests run on real video players such as
   // `amp-video` and `amp-youtube` as part of integration testing.
   runVideoPlayerIntegrationTests(fixture => {
-    fixture.win.AMP.registerElement('amp-test-fake-videoplayer',
-        createFakeVideoPlayerClass(fixture.win));
+    fixture.win.AMP.push({
+      n: 'amp-test-fake-videoplayer',
+      f: function(AMP) {
+        AMP.registerElement('amp-test-fake-videoplayer',
+            createFakeVideoPlayerClass(fixture.win));
+      },
+    });
     return fixture.doc.createElement('amp-test-fake-videoplayer');
   });
 });

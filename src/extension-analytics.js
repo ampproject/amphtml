@@ -56,7 +56,8 @@ export function insertAnalyticsElement(
     // Get Extensions service and force load analytics extension.
     const extensions =
         Services.extensionsFor(parentElement.ownerDocument.defaultView);
-    extensions./*OK*/loadExtension('amp-analytics');
+    const ampdoc = Services.ampdoc(parentElement);
+    extensions./*OK*/installExtensionForDoc(ampdoc, 'amp-analytics');
   } else {
     Services.analyticsForDocOrNull(parentElement).then(analytics => {
       dev().assert(analytics);

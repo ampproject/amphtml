@@ -29,6 +29,17 @@ const AMPDOC_PROP = '__AMPDOC';
 
 
 /**
+ * Adds a declared extension to an ampdoc.
+ * @param {!AmpDoc} ampdoc
+ * @param {string} extensionId
+ * @restricted
+ */
+export function declareExtension(ampdoc, extensionId) {
+  ampdoc.declareExtension_(extensionId);
+}
+
+
+/**
  * Creates and installs the ampdoc for the shadow root.
  * @param {!AmpDocService} ampdocService
  * @param {string} url
@@ -187,6 +198,9 @@ export class AmpDoc {
 
     /** @private @const */
     this.signals_ = new Signals();
+
+    /** @private @const {!Array<string>} */
+    this.declaredExtensions_ = [];
   }
 
   /**
@@ -210,6 +224,26 @@ export class AmpDoc {
   /** @return {!Signals} */
   signals() {
     return this.signals_;
+  }
+
+  /**
+   * Returns whether the specified extension has been declared on this ampdoc.
+   * @param {string} extensionId
+   * @return {boolean}
+   */
+  declaresExtension(extensionId) {
+    return this.declaredExtensions_.indexOf(extensionId) != -1;
+  }
+
+  /**
+   * @param {string} extensionId
+   * @private
+   * @restricted
+   */
+  declareExtension_(extensionId) {
+    if (!this.declaresExtension(extensionId)) {
+      this.declaredExtensions_.push(extensionId);
+    }
   }
 
   /**

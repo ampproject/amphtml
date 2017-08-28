@@ -18,6 +18,7 @@ import {
   AmpDocService,
   AmpDocSingle,
   AmpDocShadow,
+  declareExtension,
   installShadowDoc,
   shadowDocHasBody,
   shadowDocReady,
@@ -267,6 +268,30 @@ describe('AmpDocSingle', () => {
       expect(ampdoc.getBody()).to.equal(doc.body);
       expect(ampdoc.isReady()).to.be.true;
     });
+  });
+
+  it('should declare extension', () => {
+    expect(ampdoc.declaresExtension('ext1')).to.be.false;
+    expect(ampdoc.declaresExtension('ext2')).to.be.false;
+    declareExtension(ampdoc, 'ext1');
+    expect(ampdoc.declaresExtension('ext1')).to.be.true;
+    expect(ampdoc.declaresExtension('ext2')).to.be.false;
+
+    declareExtension(ampdoc, 'ext2');
+    expect(ampdoc.declaresExtension('ext1')).to.be.true;
+    expect(ampdoc.declaresExtension('ext2')).to.be.true;
+  });
+
+  it('should ignore duplicate extensions', () => {
+    expect(ampdoc.declaresExtension('ext1')).to.be.false;
+    declareExtension(ampdoc, 'ext1');
+    expect(ampdoc.declaresExtension('ext1')).to.be.true;
+    expect(ampdoc.declaredExtensions_).to.have.length(1);
+
+    // Repeat.
+    declareExtension(ampdoc, 'ext1');
+    expect(ampdoc.declaredExtensions_).to.have.length(1);
+    expect(ampdoc.declaresExtension('ext1')).to.be.true;
   });
 });
 

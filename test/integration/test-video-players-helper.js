@@ -54,7 +54,7 @@ export function runVideoPlayerIntegrationTests(
     return button;
   }
 
-  describe.configure().ifNewChrome() .run('Video Interface', function() {
+  describe.configure().ifNewChrome().run('Video Interface', function() {
     this.timeout(TIMEOUT);
 
     it('should override the video interface methods', function() {
