@@ -221,7 +221,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         const err = new Error();
         err.message = 'error test';
         const userErrorReportSpy =
-                sandbox.spy/*OK*/(iframeHandler, 'userErrorForAnalytics');
+                sandbox.spy/*OK*/(iframeHandler, 'userErrorForAnalytics_');
         iframe.postMessageToParent({
           type: 'user-error',
           sentinel: 'amp3ptest' + testIndex,

@@ -97,6 +97,7 @@ let detectedJsEngine;
  * @param {!Element=} opt_associatedElement
  */
 export function reportErrorForWin(win, error, opt_associatedElement) {
+  console.log('name: ' + error.name + ' msg: ' + error.message);
   reportError(error, opt_associatedElement);
   if (error && !!win && isUserErrorMessage(error.message)
       && !isUserErrorEmbed(error.message)) {

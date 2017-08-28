@@ -318,8 +318,10 @@ export class AbstractAmpContext {
    * Send 3p error to parent iframe
    */
   reportError() {
+    console.log('report error');
     this.win_.addEventListener('error', event => {
       if (!!event.error) {
+        console.log('error: ' + event.error);
         this.client_.sendMessage(MessageType.USER_ERROR, dict({
           'error': event.error,
           'message': event.error.message,
