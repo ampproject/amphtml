@@ -339,16 +339,16 @@ class AmpGwdRuntimeService {
     receiver.classList.remove(PlaybackCssClass.PAUSE);
 
     // If another goto animation is currently active on this element, stop it.
-    const currentlabel =
+    const currentLabel =
         receiver.getAttribute(CURRENT_LABEL_ANIMATION_ATTR);
-    if (currentlabel) {
-      receiver.classList.remove(currentlabel);
+    if (currentLabel) {
+      receiver.classList.remove(currentLabel);
       receiver.removeAttribute(CURRENT_LABEL_ANIMATION_ATTR);
     }
 
     // A forced reflow is needed if removing and readding the same class so
     // the animation is restarted.
-    if (currentlabel == label) {
+    if (currentLabel == label) {
       reflow(receiver);
     }
 

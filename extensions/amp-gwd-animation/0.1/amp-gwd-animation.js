@@ -103,7 +103,7 @@ export class GwdAnimation extends AMP.BaseElement {
   buildCallback() {
     // TODO(sklobovskaya): Remove experiment guard.
     user().assert(
-        isExperimentOn(this.getWin(), EXPERIMENT),
+        isExperimentOn(this.getAmpDoc().win, EXPERIMENT),
         `Experiment ${EXPERIMENT} is disabled.`);
 
     // Ensure GWD animation runtime service factory is registered for this
@@ -184,7 +184,8 @@ export class GwdAnimation extends AMP.BaseElement {
 
 /**
  * Modifies the given element's on attribute to include the given event and
- * action handler definition.
+ * action handler definition. (This is currently the only mechanism by which
+ * an AMP event handler can be programmatically added.)
  * @param {!Element} element
  * @param {string} event
  * @param {string} actionStr e.g., `someDiv.hide`
