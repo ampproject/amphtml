@@ -18,7 +18,7 @@ var isDryrun = argv.dryrun;
 var verbose = (argv.verbose || argv.v);
 
 const issuesopt = {
-  url: 'https://api.github.com/repos/adelinamart/amphtml/issues',
+  url: 'https://api.github.com/repos/ampproject/amphtml/issues',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
     'Accept': 'application/vnd.github.v3+json'
@@ -26,7 +26,7 @@ const issuesopt = {
 };
 
 const optionsMilestone = {
-  url: 'https://api.github.com/repos/adelinamart/amphtml/milestones',
+  url: 'https://api.github.com/repos/ampproject/amphtml/milestones',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
     'Accept': 'application/vnd.github.v3+json'
@@ -63,9 +63,9 @@ function getGitMetadata() {
 return getIssues()
 .then(function() {
 	util.log(util.colors.blue('automation applied'));
-	if (isDryrun){
-	return;
-	}
+	if (isDryrun) {
+    return;
+  }
 })
 .catch(errHandler);	
 }
@@ -116,8 +116,8 @@ function getIssues(){
         // Milestone task: move issue from closed milestone
         if (milestone) {
           if (milestoneTitle.startsWith('Sprint') && milestoneState == 'closed') {
-            // 4 is the number for Milestone 'Backlog Bugs' TODO
-            updates.push(applyMilestone(issue, 1));
+            // 4 is the number for Milestone 'Backlog Bugs' 
+            updates.push(applyMilestone(issue, 4));
           }
         }
         //if issueType is not null, add correct milestones
@@ -147,7 +147,7 @@ function getIssues(){
         } else {
           if (milestone == null){
             // 20 is the number for Milestone 'Pending Triage' TODO
-            updates.push(applyMilestone(issue, 3));     
+            updates.push(applyMilestone(issue, 20));     
           } else {
             if (milestoneTitle == 'Prioritized FRs' || milestoneTitle == 'New FRs') {
               updates.push(applyLabel(issue, 'Type: Feature Request'));
@@ -226,7 +226,7 @@ function applyLabel(issue, label) {
  */
 function githubRequest(path, opt_method, opt_data, typeRequest) {
   var options = {
-    url: 'https://api.github.com/repos/adelinamart/amphtml' + path,
+    url: 'https://api.github.com/repos/ampproject/amphtml/' + path,
     body: {},
     headers: {
       'User-Agent': 'amp-changelog-gulp-task',
