@@ -174,10 +174,26 @@ function getGraph(entryModule) {
   module.name = entryModule;
   module.deps = [];
 
+  var browsers = [];
+  if (process.env.TRAVIS) {
+    browsers.push('last 2 versions', 'safari >= 9');
+  } else {
+    browsers.push('Last 4 Chrome versions');
+  }
+  console.log(entryModule);
+
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
   var bundler = browserify(entryModule, {debug: true, deps: true})
-      .transform(babel, {});
+      .transform(babel.configure({
+        presets: [
+          ["env", {
+            targets: {
+              browsers: browsers,
+            },
+          }]
+        ],
+      }));
 
   bundler.pipeline.get('deps').push(through.obj(function(row, enc, next) {
     module.deps.push({
