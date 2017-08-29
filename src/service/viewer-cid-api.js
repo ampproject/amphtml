@@ -52,7 +52,19 @@ export class ViewerCidApi {
     if (!this.viewer_.hasCapability('cid')) {
       return Promise.resolve(false);
     }
-    return this.viewer_.isTrustedViewer();
+    return this.viewer_.isTrustedViewer().then(trusted => {
+      if (!trusted) {
+        return false;
+      }
+      return this.viewer_.getViewerOrigin().then(origin => {
+        if (origin == 'https://www.google.com') {
+          return true;
+        }
+        // Until the API supports calling to Google ccTLDs we cannot
+        // support Safari.
+        return !Services.platformFor(this.ampdoc_.win).isSafari();
+      });
+    });
   }
 
   /**
