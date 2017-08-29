@@ -1797,6 +1797,7 @@ attr_lists: {
   attrs: { name: "text-decoration" }
   attrs: { name: "text-rendering" }
   attrs: { name: "unicode-bidi" }
+  attrs: { name: "vector-effect" }
   attrs: { name: "visibility" }
   attrs: { name: "word-spacing" }
   attrs: { name: "writing-mode" }
