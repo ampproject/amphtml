@@ -104,7 +104,7 @@ export class GlobalVariableSource extends VariableSource {
   /** @override */
   initialize() {
 
-    /** @const {!./viewport-impl.Viewport} */
+    /** @const {!./viewport/viewport-impl.Viewport} */
     const viewport = Services.viewportForDoc(this.ampdoc);
 
     // Returns a random value for cache busters.

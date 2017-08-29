@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {Observable} from '../observable';
+import {Observable} from '../../observable';
 import {checkAndFix as checkAndFixIosScrollfreezeBug} from
-    './ios-scrollfreeze-bug';
-import {layoutRectLtwh} from '../layout-rect';
-import {dev} from '../log';
-import {onDocumentReady, whenDocumentReady} from '../document-ready';
-import {Services} from '../services';
-import {setStyle, setStyles, computedStyle} from '../style';
+    './../ios-scrollfreeze-bug';
+import {layoutRectLtwh} from '../../layout-rect';
+import {dev} from '../../log';
+import {onDocumentReady, whenDocumentReady} from '../../document-ready';
+import {Services} from '../../services';
+import {setStyle, setStyles, computedStyle} from '../../style';
+import {ViewportBindingDef} from './viewport-binding-def';
+
 
 const TAG_ = 'Viewport';
 
@@ -40,13 +42,13 @@ const TAG_ = 'Viewport';
 export class ViewportBindingNaturalIosEmbed_ {
   /**
    * @param {!Window} win
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(win, ampdoc) {
     /** @const {!Window} */
     this.win = win;
 
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!../ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private {?Element} */
@@ -58,7 +60,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {?Element} */
     this.endPosEl_ = null;
 
-    /** @private {!../service/vsync-impl.Vsync} */
+    /** @private {!../../service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private {!{x: number, y: number}} */

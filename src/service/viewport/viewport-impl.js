@@ -14,31 +14,33 @@
  * limitations under the License.
  */
 
-import {Animation} from '../animation';
-import {FixedLayer} from './fixed-layer';
-import {Observable} from '../observable';
-import {VisibilityState} from '../visibility-state';
+import {Animation} from '../../animation';
+import {FixedLayer} from './../fixed-layer';
+import {Observable} from '../../observable';
+import {VisibilityState} from '../../visibility-state';
 import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
-} from '../service';
-import {layoutRectLtwh, moveLayoutRect} from '../layout-rect';
-import {dev} from '../log';
-import {dict} from '../utils/object';
-import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
-import {isExperimentOn} from '../experiments';
-import {numeric} from '../transition';
-import {Services} from '../services';
-import {setStyle} from '../style';
-import {isIframed} from '../dom';
-import {getMode} from '../mode';
+} from '../../service';
+import {layoutRectLtwh, moveLayoutRect} from '../../layout-rect';
+import {dev} from '../../log';
+import {dict} from '../../utils/object';
+import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
+import {isExperimentOn} from '../../experiments';
+import {numeric} from '../../transition';
+import {Services} from '../../services';
+import {setStyle} from '../../style';
+import {isIframed} from '../../dom';
+import {getMode} from '../../mode';
+import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {
   ViewportBindingIosEmbedWrapper_,
 } from './viewport-binding-ios-embed-wrapper';
 import {
   ViewportBindingNaturalIosEmbed_,
-} from './viewport-binding-natrual-ios-embed';
+} from './viewport-binding-natural-ios-embed';
+
 
 const TAG_ = 'Viewport';
 
@@ -72,17 +74,17 @@ export let ViewportResizedEventDef;
  * This object represents the viewport. It tracks scroll position, resize
  * and other events and notifies interesting parties when viewport has changed
  * and how.
- * @implements {../service.Disposable}
+ * @implements {../../service.Disposable}
  */
 export class Viewport {
 
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../ampdoc-impl.AmpDoc} ampdoc
    * @param {!ViewportBindingDef} binding
-   * @param {!./viewer-impl.Viewer} viewer
+   * @param {!../viewer-impl.Viewer} viewer
    */
   constructor(ampdoc, binding, viewer) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!../ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /**
@@ -94,12 +96,12 @@ export class Viewport {
     /** @const {!ViewportBindingDef} */
     this.binding_ = binding;
 
-    /** @const {!./viewer-impl.Viewer} */
+    /** @const {!../viewer-impl.Viewer} */
     this.viewer_ = viewer;
 
     /**
      * Used to cache the rect of the viewport.
-     * @private {?../layout-rect.LayoutRectDef}
+     * @private {?../../layout-rect.LayoutRectDef}
      */
     this.rect_ = null;
 
@@ -126,10 +128,10 @@ export class Viewport {
     /** @private {number} */
     this.lastPaddingTop_ = 0;
 
-    /** @private {!./timer-impl.Timer} */
+    /** @private {!../timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.ampdoc.win);
 
-    /** @private {!./vsync-impl.Vsync} */
+    /** @private {!../vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.ampdoc.win);
 
     /** @private {boolean} */
@@ -354,7 +356,7 @@ export class Viewport {
 
   /**
    * Returns the rect of the viewport which includes scroll positions and size.
-   * @return {!../layout-rect.LayoutRectDef}}
+   * @return {!../../layout-rect.LayoutRectDef}}
    */
   getRect() {
     if (this.rect_ == null) {
@@ -372,7 +374,7 @@ export class Viewport {
    * Note that this function should be called in vsync measure. Please consider
    * using `getLayoutRectAsync` instead.
    * @param {!Element} el
-   * @return {!../layout-rect.LayoutRectDef}}
+   * @return {!../../layout-rect.LayoutRectDef}}
    */
   getLayoutRect(el) {
     const scrollLeft = this.getScrollLeft();
@@ -396,7 +398,7 @@ export class Viewport {
   /**
    * Returns a promise that resolves with latest rect of the element within the document.
    * @param {!Element} el
-   * @return {!Promise<!../layout-rect.LayoutRectDef>}
+   * @return {!Promise<!../../layout-rect.LayoutRectDef>}
    */
   getLayoutRectAsync(el) {
     const scrollLeft = this.getScrollLeft();
@@ -424,7 +426,7 @@ export class Viewport {
   /**
    * Returns a promise that resolve with latest rect of the element within the viewport.
    * @param {!Element} el
-   * @return {!Promise<?../layout-rect.LayoutRectDef>}}
+   * @return {!Promise<?../../layout-rect.LayoutRectDef>}}
    */
   getBoundingRectAsync(el) {
     const viewportRect = this.getRect();
@@ -614,7 +616,7 @@ export class Viewport {
   /**
    * Get FriendlyIframeEmbed if available.
    * @param {!Element} element Element supposedly inside the FIE.
-   * @return {?../friendly-iframe-embed.FriendlyIframeEmbed}
+   * @return {?../../friendly-iframe-embed.FriendlyIframeEmbed}
    * @private
    */
   getFriendlyIframeEmbed_(element) {
@@ -1059,7 +1061,7 @@ export function updateViewportMetaString(currentValue, updateParams) {
 
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../ampdoc-impl.AmpDoc} ampdoc
  * @return {!Viewport}
  * @private
  */
@@ -1105,7 +1107,7 @@ const ViewportType = {
 
 /**
  * @param {!Window} win
- * @param {!./viewer-impl.Viewer} viewer
+ * @param {!../viewer-impl.Viewer} viewer
  * @return {string}
  */
 function getViewportType(win, viewer) {
@@ -1133,7 +1135,7 @@ function getViewportType(win, viewer) {
 }
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../ampdoc-impl.AmpDoc} ampdoc
  */
 export function installViewportServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc,

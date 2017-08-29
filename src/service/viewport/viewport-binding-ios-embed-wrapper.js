@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {Observable} from '../observable';
-import {layoutRectLtwh} from '../layout-rect';
-import {dev} from '../log';
-import {whenDocumentReady} from '../document-ready';
-import {Services} from '../services';
-import {px, setStyle} from '../style';
-import {waitForBody} from '../dom';
+import {Observable} from '../../observable';
+import {layoutRectLtwh} from '../../layout-rect';
+import {dev} from '../../log';
+import {whenDocumentReady} from '../../document-ready';
+import {Services} from '../../services';
+import {px, setStyle} from '../../style';
+import {waitForBody} from '../../dom';
+import {ViewportBindingDef} from './viewport-binding-def';
 
 const TAG_ = 'Viewport';
 
@@ -50,7 +51,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.wrapper_.id = 'i-amphtml-wrapper';
     this.wrapper_.className = topClasses;
 
-    /** @private {!../service/vsync-impl.Vsync} */
+    /** @private {!../../service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private @const {!Observable} */

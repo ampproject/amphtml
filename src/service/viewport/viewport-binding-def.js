@@ -148,7 +148,7 @@ export class ViewportBindingDef {
    *     pass in, if they cached these values and would like to avoid
    *     remeasure. Requires appropriate updating the values on scroll.
    * @param {number=} unusedScrollTop Same comment as above.
-   * @return {!../layout-rect.LayoutRectDef}
+   * @return {!../../layout-rect.LayoutRectDef}
    */
   getLayoutRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
 
@@ -157,7 +157,7 @@ export class ViewportBindingDef {
    * @param {!Element} unusedEl
    * @param {number=} unusedScrollLeft
    * @param {number=} unusedScrollTop
-   * @return {!Promise<!../layout-rect.LayoutRectDef>}
+   * @return {!Promise<!../../layout-rect.LayoutRectDef>}
    */
   getLayoutRectAsync(unusedEl, unusedScrollLeft, unusedScrollTop) {}
 }

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {Observable} from '../observable';
-import {layoutRectLtwh} from '../layout-rect';
-import {dev} from '../log';
-import {Services} from '../services';
-import {px, setStyle} from '../style';
+import {Observable} from '../../observable';
+import {layoutRectLtwh} from '../../layout-rect';
+import {dev} from '../../log';
+import {Services} from '../../services';
+import {px, setStyle} from '../../style';
+import {ViewportBindingDef} from './viewport-binding-def';
+
 
 const TAG_ = 'Viewport';
 
@@ -35,23 +37,23 @@ const TAG_ = 'Viewport';
 export class ViewportBindingNatural_ {
 
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {!./viewer-impl.Viewer} viewer
+   * @param {!../ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../viewer-impl.Viewer} viewer
    */
   constructor(ampdoc, viewer) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!../ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @const {!Window} */
     this.win = ampdoc.win;
 
-    /** @const {!../service/platform-impl.Platform} */
+    /** @const {!../../service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
 
-    /** @private {!../service/vsync-impl.Vsync} */
+    /** @private {!../../service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
-    /** @private @const {!./viewer-impl.Viewer} */
+    /** @private @const {!../viewer-impl.Viewer} */
     this.viewer_ = viewer;
 
     /** @private @const {!Observable} */

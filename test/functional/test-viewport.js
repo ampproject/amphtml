@@ -26,7 +26,7 @@ import {
   parseViewportMeta,
   stringifyViewportMeta,
   updateViewportMetaString,
-} from '../../src/service/viewport-impl';
+} from '../../src/service/viewport/viewport-impl';
 import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
 import {installDocumentStateService} from '../../src/service/document-state';
