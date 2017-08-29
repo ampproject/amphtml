@@ -104,8 +104,7 @@ export class Platform {
    * @return {boolean}
    */
   isWebKit() {
-    return /WebKit/i.test(this.navigator_.userAgent) && !this.isEdge()
-        && !(this.isOpera() && this.isAndroid());
+    return /WebKit/i.test(this.navigator_.userAgent) && !this.isEdge();
   }
 
   /**

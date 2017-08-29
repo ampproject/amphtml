@@ -226,6 +226,7 @@ describe('Platform', () => {
     isOpera = true;
     majorVersion = 42;
     isAndroid = true;
+    isWebKit = true;
     userAgent = 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MTC19T)' +
         ' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.91 Mobile' +
         ' Safari/537.36 OPR/42.7.2246.114996';
