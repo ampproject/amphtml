@@ -32,7 +32,7 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
     fetchMock.getOnce(
         'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
         () => keysetBody, {name: 'keyset'});
-    keysetBody = `{"keys":[${validCSSAmp.publicKey}]}`;
+    keysetBody = validCSSAmp.publicKeyset;
     verifier = new LegacySignatureVerifier(env.win);
     result = verifier.keys_;
   });
@@ -71,9 +71,9 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
 
   it('should fetch multiple keys', () => {
     // For our purposes, re-using the same key is fine.
-    keysetBody =
-        `{"keys":[${validCSSAmp.publicKey},${
-            validCSSAmp.publicKey},${validCSSAmp.publicKey}]}`;
+    const publicKey =
+        JSON.stringify(JSON.parse(validCSSAmp.publicKeyset)['keys'][0]);
+    keysetBody = `{"keys":[${publicKey},${publicKey},${publicKey}]}`;
     expect(result).to.be.empty;
     verifier.loadKeyset('google');
     expect(result).to.be.instanceof(Array);
