@@ -181,6 +181,7 @@ class AmpGwdRuntimeService {
     // TODO(sklobovskaya): Decide if it's worth just storing the index.
     const currentPageEl = this.ampdoc_.getRootNode().querySelector(
         `.${GWD_PAGE_WRAPPER_CLASS}.${PlaybackCssClass.PLAY}`);
+
     if (currentPageEl) {
       currentPageEl.classList.remove(PlaybackCssClass.PLAY);
     }
@@ -189,6 +190,7 @@ class AmpGwdRuntimeService {
     const gwdPages = this.ampdoc_.getRootNode().querySelectorAll(
         `.${GWD_PAGE_WRAPPER_CLASS}`);
     const newPageEl = gwdPages[index];
+
     if (newPageEl) {
       newPageEl.classList.add(PlaybackCssClass.PLAY);
     }
@@ -200,6 +202,7 @@ class AmpGwdRuntimeService {
    */
   play(id) {
     const receiver = this.getReceiver(id);
+
     if (!receiver) {
       return;
     }
@@ -213,6 +216,7 @@ class AmpGwdRuntimeService {
    */
   pause(id) {
     const receiver = this.getReceiver(id);
+
     if (!receiver) {
       return;
     }
@@ -226,6 +230,7 @@ class AmpGwdRuntimeService {
    */
   togglePlay(id) {
     const receiver = this.getReceiver(id);
+
     if (!receiver) {
       return;
     }
@@ -240,6 +245,7 @@ class AmpGwdRuntimeService {
    */
   gotoAndPlay(id, label) {
     const receiver = this.getReceiver(id);
+
     if (!receiver) {
       return;
     }
@@ -255,6 +261,7 @@ class AmpGwdRuntimeService {
    */
   gotoAndPause(id, label) {
     const receiver = this.getReceiver(id);
+
     if (!receiver) {
       return;
     }
@@ -264,6 +271,7 @@ class AmpGwdRuntimeService {
 
     // Trigger a pause.
     const timeToWaitBeforePause = 40;
+
     this.ampdoc_.win.setTimeout(() => {
       this.pause(id);
     }, timeToWaitBeforePause);
@@ -289,6 +297,7 @@ class AmpGwdRuntimeService {
     }
 
     const receiver = this.getReceiver(id);
+
     if (!receiver) {
       return;
     }
@@ -296,6 +305,7 @@ class AmpGwdRuntimeService {
     // Invoke gotoAndPlay up to the requested number of times.
     const counterName = `${eventName}_${label}`;
     const currentCount = getOrInitCounter(receiver, counterName);
+
     if (currentCount < count) {
       this.playLabelAnimation_(receiver, label);
       setCounter(receiver, counterName, currentCount + 1);
@@ -329,7 +339,7 @@ class AmpGwdRuntimeService {
 
   /**
    * Switches the given element's animation to the given label animation.
-   * This is a core gotoAndPlay routine that is used in all the goto* actions.
+   * This is a core gotoAndPlay routine that is used in all goto* actions.
    * @param {!Element} receiver
    * @param {string} label
    * @private
@@ -341,6 +351,7 @@ class AmpGwdRuntimeService {
     // If another goto animation is currently active on this element, stop it.
     const currentLabel =
         receiver.getAttribute(CURRENT_LABEL_ANIMATION_ATTR);
+
     if (currentLabel) {
       receiver.classList.remove(currentLabel);
       receiver.removeAttribute(CURRENT_LABEL_ANIMATION_ATTR);
@@ -368,6 +379,7 @@ class AmpGwdRuntimeService {
    */
   onAnimationEndEvent_(event) {
     const userEventName = event.target.getAttribute(EVENT_NAME_ATTR);
+
     if (!userEventName) {
       // No GWD event name could be extracted, usually just because the event is
       // from some other animation. Just ignore it.
@@ -378,6 +390,7 @@ class AmpGwdRuntimeService {
         this.ampdoc_.win,
         `${GWD_TIMELINE_EVENT}`,
         {eventName: userEventName, sourceEvent: event});
+
     this.ampdoc_.win.dispatchEvent(timelineEvent);
   }
 

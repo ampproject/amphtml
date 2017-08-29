@@ -54,7 +54,7 @@ const ACTION_IMPL_ARGS = {
 };
 
 /**
- * Given an action name, extracts its required argumnents from an invocation
+ * Given an action name, extracts its required arguments from an invocation
  * payload, which may contain the data needed by this action in its `args` or
  * `events` child objects. The arguments required by each action are specified
  * in ACTION_IMPL_ARGS as path strings.
@@ -127,11 +127,15 @@ export class GwdAnimation extends AMP.BaseElement {
     // switched from the old page to the new.
     const gwdPageDeck = this.getAmpDoc().getRootNode().querySelector(
         `amp-carousel#${GWD_PAGEDECK_ID}`);
+
     if (gwdPageDeck) {
       user().assert(this.element.id,
           'The `amp-gwd-animation` element must have an id.');
-      insertEventActionBinding(gwdPageDeck, 'slideChange',
-          `${this.element.id}.setCurrentPage(index=event.index)`);
+
+      const setCurrentPageActionDef =
+          `${this.element.id}.setCurrentPage(index=event.index)`;
+      insertEventActionBinding(
+          gwdPageDeck, 'slideChange', setCurrentPageActionDef);
     }
 
     // Register handlers for supported actions.
@@ -145,7 +149,7 @@ export class GwdAnimation extends AMP.BaseElement {
    * GWD runtime method with arguments extracted from the invocation object
    * (@see getActionImplArgs).
    * @param {string} actionName Name of the action to invoke (currently
-   *     identical to the corresponding service method)
+   *     identical to the corresponding service method).
    * @return {!function(!../../../src/service/action-impl.ActionInvocation)}
    * @private
    */
@@ -154,6 +158,7 @@ export class GwdAnimation extends AMP.BaseElement {
       const service = user().assert(
           getServiceForDoc(this.getAmpDoc(), GWD_SERVICE_NAME),
           `Cannot execute action because the GWD service is not registered.`);
+
       const actionArgs = getActionImplArgs(actionName, invocation);
       service[actionName].apply(service, actionArgs);
     };
@@ -183,7 +188,7 @@ export class GwdAnimation extends AMP.BaseElement {
 }
 
 /**
- * Modifies the given element's on attribute to include the given event and
+ * Modifies the given element's `on` attribute to include the given event and
  * action handler definition. (This is currently the only mechanism by which
  * an AMP event handler can be programmatically added.)
  * @param {!Element} element
@@ -194,14 +199,15 @@ export class GwdAnimation extends AMP.BaseElement {
 export const insertEventActionBinding = function(element, event, actionStr) {
   const currentOnAttrVal = element.getAttribute('on') || '';
   const eventPrefix = `${event}:`;
-
+  const eventDefIndex = currentOnAttrVal.indexOf(eventPrefix);
   let newOnAttrVal;
 
-  const eventDefIndex = currentOnAttrVal.indexOf(eventPrefix);
   if (eventDefIndex != -1) {
     // Some actions already defined for this event. Splice in the new action.
     const actionsDefIndex = eventDefIndex + eventPrefix.length;
-    newOnAttrVal = currentOnAttrVal.substr(0, actionsDefIndex) +
+
+    newOnAttrVal =
+        currentOnAttrVal.substr(0, actionsDefIndex) +
         actionStr + ',' +
         currentOnAttrVal.substr(actionsDefIndex);
   } else {
