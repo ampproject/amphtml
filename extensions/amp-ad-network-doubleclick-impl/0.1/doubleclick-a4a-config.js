@@ -124,7 +124,7 @@ export class DoubleclickA4aEligibility {
     }
     let experimentName = DFP_CANONICAL_FF_EXPERIMENT_NAME;
     if (!this.isCdnProxy(win)) {
-      experimentId = this.maybeSelectExperiment(win, element, [
+      experimentId = this.maybeSelectExperiment_(win, element, [
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
       ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
@@ -143,7 +143,7 @@ export class DoubleclickA4aEligibility {
             TAG,
             `url experiment selection ${urlExperimentId}: ${experimentId}.`);
       } else {
-        experimentId = this.maybeSelectExperiment(win, element, [
+        experimentId = this.maybeSelectExperiment_(win, element, [
           DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
           DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
             DOUBLECLICK_A4A_EXPERIMENT_NAME);
@@ -164,12 +164,12 @@ export class DoubleclickA4aEligibility {
   /**
    * @param {!Window} win
    * @param {!Element} element
-   * @param {!Array} selectionBranches
+   * @param {!Array<string>} selectionBranches
    * @param {!string} experimentName}
    * @return {?string} Experiment branch ID or null if not selected.
    * @private
    */
-  maybeSelectExperiment(win, element, selectionBranches, experimentName) {
+  maybeSelectExperiment_(win, element, selectionBranches, experimentName) {
     const experimentInfoMap =
         /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[experimentName] = {
