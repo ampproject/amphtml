@@ -67,15 +67,16 @@ const getActionImplArgs = function(actionName, invocation) {
       ACTION_IMPL_ARGS[actionName],
       `The action ${actionName} is not a supported action.`);
 
-  return argDefs.map((argDef) => {
+  return argDefs.map(argDef => {
     // Walk the invocation object to get the requested property by
     // its path, e.g., 'args.id' == invocation.args.id
     let obj = invocation;
-    for (const prop of argDef.split('.')) {
+    const props = argDef.split('.');
+    for (let i = 0; i < props.length; i++) {
       if (!obj) {
         return undefined;
       }
-      obj = obj[prop];
+      obj = obj[props[i]];
     }
 
     return obj;
@@ -154,10 +155,10 @@ export class GwdAnimation extends AMP.BaseElement {
    * @private
    */
   createAction_(actionName) {
-    return (invocation) => {
+    return invocation => {
       const service = user().assert(
           getServiceForDoc(this.getAmpDoc(), GWD_SERVICE_NAME),
-          `Cannot execute action because the GWD service is not registered.`);
+          'Cannot execute action because the GWD service is not registered.');
 
       const actionArgs = getActionImplArgs(actionName, invocation);
       service[actionName].apply(service, actionArgs);

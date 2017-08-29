@@ -53,7 +53,7 @@ export const GWD_PAGE_WRAPPER_CLASS = 'gwd-page-wrapper';
  * listeners are added.
  * @const {!Array<string>}
  */
-const ANIMATIONEND_EVENTS = ['animationend', 'webkitAnimationEnd'];
+const VENDOR_ANIMATIONEND_EVENTS = ['animationend', 'webkitAnimationEnd'];
 
 /**
  * GWD playback control CSS classes.
@@ -84,7 +84,7 @@ const LOG_ID = 'GWD';
 const getOrInitCounter = function(receiver, counterName) {
   initCounterIfNotExists(receiver, counterName);
   return receiver.gwdGotoCounters[counterName];
-}
+};
 
 /**
  * @param {!Element} receiver
@@ -95,7 +95,7 @@ const getOrInitCounter = function(receiver, counterName) {
 const setCounter = function(receiver, counterName, val) {
   initCounterIfNotExists(receiver, counterName);
   receiver.gwdGotoCounters[counterName] = val;
-}
+};
 
 /**
  * Initializes the counters map if it is not yet initialized, and initializes
@@ -112,7 +112,7 @@ const initCounterIfNotExists = function(receiver, counterName) {
   if (!receiver.gwdGotoCounters.hasOwnProperty(counterName)) {
     receiver.gwdGotoCounters[counterName] = 0;
   }
-}
+};
 
 /**
  * AMP GWD animation runtime service.
@@ -398,9 +398,9 @@ class AmpGwdRuntimeService {
    * @private
    */
   listenForAnimationEnd_() {
-    for (const animationendEvent of ANIMATIONEND_EVENTS) {
+    for (let i = 0; i < VENDOR_ANIMATIONEND_EVENTS.length; i++) {
       this.ampdoc_.getBody().addEventListener(
-          animationendEvent, this.boundOnAnimationEndEvent_, true);
+          VENDOR_ANIMATIONEND_EVENTS[i], this.boundOnAnimationEndEvent_, true);
     }
   }
 
@@ -408,9 +408,9 @@ class AmpGwdRuntimeService {
    * @private
    */
   unlistenForAnimationEnd_() {
-    for (const animationendEvent of ANIMATIONEND_EVENTS) {
+    for (let i = 0; i < VENDOR_ANIMATIONEND_EVENTS.length; i++) {
       this.ampdoc_.getBody().removeEventListener(
-          animationendEvent, this.boundOnAnimationEndEvent_, true);
+          VENDOR_ANIMATIONEND_EVENTS[i], this.boundOnAnimationEndEvent_, true);
     }
   }
 
@@ -440,7 +440,7 @@ export const installGwdRuntimeServiceForDoc = function(ampdoc) {
   registerServiceBuilderForDoc(
       ampdoc,
       GWD_SERVICE_NAME,
-      (ampdoc) => {
+      ampdoc => {
         return new AmpGwdRuntimeService(ampdoc);
       },
       true /* instantiate */);

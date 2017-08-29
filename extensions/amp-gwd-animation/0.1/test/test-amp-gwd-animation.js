@@ -21,14 +21,12 @@ import {
   EXPERIMENT,
   GWD_PAGEDECK_ID,
   TAG,
-  AmpGwdAnimation,
   insertEventActionBinding,
 } from '../amp-gwd-animation';
 import {
   ANIMATIONS_DISABLED_CLASS,
   CURRENT_LABEL_ANIMATION_ATTR,
   GWD_PAGE_WRAPPER_CLASS,
-  AmpGwdRuntimeService,
   PlaybackCssClass,
 } from '../amp-gwd-animation-impl';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -79,7 +77,7 @@ describes.sandboxed('AMP GWD runtime', {}, () => {
         ampdoc: variant.ampdoc,
         extensions: ['amp-gwd-animation'],
       },
-    }, (env) => {
+    }, env => {
       let ampdoc;
       let element;
       let impl;
@@ -103,10 +101,10 @@ describes.sandboxed('AMP GWD runtime', {}, () => {
               <div id="page2" class="${GWD_PAGE_WRAPPER_CLASS}"></div>
             </amp-carousel>`;
         element = createGwdAnimationElement(ampdoc, {
-              'id': 'gwdAnim',
-              'timeline-event-prefix': 'foo123',
-              'layout': 'nodisplay',
-            });
+          'id': 'gwdAnim',
+          'timeline-event-prefix': 'foo123',
+          'layout': 'nodisplay',
+        });
         impl = element.implementation_;
         page1Elem = ampdoc.getRootNode().getElementById('page1');
       });
@@ -246,7 +244,7 @@ describes.sandboxed('AMP GWD runtime', {}, () => {
         invokeWithSomeArgsUndefined(impl, invocation);
       });
 
-      it('should execute gotoAndPause', (done) => {
+      it('should execute gotoAndPause', done => {
         // Test handling missing arguments.
         const invocation = {
           method: 'gotoAndPause',
@@ -322,7 +320,7 @@ describes.sandboxed('AMP GWD runtime', {}, () => {
 
           expect(triggeredAmpEventNames)
               .to.deep.equal(['foo123event-1', 'foo123event-2']);
-          expect(triggeredEvents.map((event) => event.eventName))
+          expect(triggeredEvents.map(event => event.eventName))
               .to.deep.equal(['event-1', 'event-2']);
         });
 
