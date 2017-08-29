@@ -272,7 +272,12 @@ export class GlobalVariableSource extends VariableSource {
         // TODO: replace with "filter" when it's in place. #2198
         const cookieName = opt_cookieName || scope;
         if (cid && cookieName == '_ga') {
-          cid = extractClientIdFromGaCookie(cid);
+          if (typeof cid === 'string') {
+            cid = extractClientIdFromGaCookie(cid);
+          } else {
+            // Do not log the CID directly, that's PII.
+            dev().error('non-string cid, what is it?', Object.keys(cid));
+          }
         }
 
         clientIds[scope] = cid;
