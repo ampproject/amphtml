@@ -16,7 +16,7 @@
 
 import {Observable} from '../../observable';
 import {checkAndFix as checkAndFixIosScrollfreezeBug} from
-    './../ios-scrollfreeze-bug';
+    './ios-scrollfreeze-bug';
 import {layoutRectLtwh} from '../../layout-rect';
 import {dev} from '../../log';
 import {onDocumentReady, whenDocumentReady} from '../../document-ready';
