@@ -43,7 +43,7 @@
      try {
        return localListener(event);
      } catch (e) {
-       // report3pError is installed globally per window in the entry point.
+       // reportError is installed globally per window in the entry point.
        self.reportError(e);
        throw e;
      }

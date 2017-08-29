@@ -102,7 +102,7 @@ describe.configure().run('reportErrorToServer', () => {
     resetExperimentTogglesForTesting(window);
   });
 
-  it('report3pError with error object', function SHOULD_BE_IN_STACK() {
+  it('reportError with error object', function SHOULD_BE_IN_STACK() {
     const e = new Error('XYZ');
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
@@ -127,7 +127,7 @@ describe.configure().run('reportErrorToServer', () => {
     expect(query.args).to.be.undefined;
   });
 
-  it('report3pError with error and ignore stack', () => {
+  it('reportError with error and ignore stack', () => {
     const e = new Error('XYZ');
     e.ignoreStack = true;
     const url = parseUrl(
@@ -145,7 +145,7 @@ describe.configure().run('reportErrorToServer', () => {
     expect(e.message).to.contain('_reported_');
   });
 
-  it('report3pError with error object w/args', () => {
+  it('reportError with error object w/args', () => {
     const e = new Error('XYZ');
     e.args = {x: 1};
     const url = parseUrl(
@@ -156,7 +156,7 @@ describe.configure().run('reportErrorToServer', () => {
     expect(query.args).to.equal(JSON.stringify({x: 1}));
   });
 
-  it('report3pError with a string instead of error', () => {
+  it('reportError with a string instead of error', () => {
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined,
             'string error',
@@ -165,7 +165,7 @@ describe.configure().run('reportErrorToServer', () => {
     expect(query.m).to.equal('string error');
   });
 
-  it('report3pError with no error', () => {
+  it('reportError with no error', () => {
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined,
             undefined,
@@ -174,7 +174,7 @@ describe.configure().run('reportErrorToServer', () => {
     expect(query.m).to.equal('Unknown error');
   });
 
-  it('report3pError with associatedElement', () => {
+  it('reportError with associatedElement', () => {
     const e = new Error('XYZ');
     const el = document.createElement('foo-bar');
     e.associatedElement = el;
@@ -190,7 +190,7 @@ describe.configure().run('reportErrorToServer', () => {
     expect(query.noAmp).to.equal('0');
   });
 
-  it('report3pError mark asserts', () => {
+  it('reportError mark asserts', () => {
     let e = '';
     try {
       user().assert(false, 'XYZ');
@@ -206,7 +206,7 @@ describe.configure().run('reportErrorToServer', () => {
     expect(query.v).to.equal('$internalRuntimeVersion$');
   });
 
-  it('report3pError mark asserts without error object', () => {
+  it('reportError mark asserts without error object', () => {
     let e = '';
     try {
       user().assert(false, 'XYZ');
@@ -222,7 +222,7 @@ describe.configure().run('reportErrorToServer', () => {
     expect(query.v).to.equal('$internalRuntimeVersion$');
   });
 
-  it('report3pError marks 3p', () => {
+  it('reportError marks 3p', () => {
     window.context = {
       location: {},
     };
@@ -236,7 +236,7 @@ describe.configure().run('reportErrorToServer', () => {
     expect(query['3p']).to.equal('1');
   });
 
-  it('report3pError marks canary and viewerState', () => {
+  it('reportError marks canary and viewerState', () => {
     window.viewerState = 'some-state';
     window.AMP_CONFIG = {
       canary: true,
@@ -252,7 +252,7 @@ describe.configure().run('reportErrorToServer', () => {
     expect(query['vs']).to.equal('some-state');
   });
 
-  it('report3pError without error object', () => {
+  it('reportError without error object', () => {
     const url = parseUrl(
         getErrorReportUrl('foo bar', 'foo.js', '11', '22', undefined));
     const query = parseQueryString(url.search);
@@ -325,7 +325,7 @@ describe.configure().run('reportErrorToServer', () => {
     expect(isCancellation({})).to.be.false;
   });
 
-  it('report3pError with error object', () => {
+  it('reportError with error object', () => {
     const e = cancellation();
     const url =
         getErrorReportUrl(undefined, undefined, undefined, undefined, e);
@@ -451,7 +451,7 @@ describe.configure().run('reportErrorToServer', () => {
 });
 
 
-describes.sandboxed('report3pError', {}, () => {
+describes.sandboxed('reportError', {}, () => {
   let clock;
 
   beforeEach(() => {

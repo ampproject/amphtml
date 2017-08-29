@@ -69,7 +69,7 @@ export const LogLevel = {
 };
 
 /**
- * Sets report3pError function. Called from error.js to break cyclic
+ * Sets reportError function. Called from error.js to break cyclic
  * dependency.
  * @param {function(*, !Element=)|undefined} fn
  */
@@ -234,7 +234,7 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.name = tag || error.name;
-      // report3pError is installed globally per window in the entry point.
+      // reportError is installed globally per window in the entry point.
       self.reportError(error);
     }
   }
@@ -249,7 +249,7 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.expected = true;
-      // report3pError is installed globally per window in the entry point.
+      // reportError is installed globally per window in the entry point.
       self.reportError(error);
     }
   }
@@ -321,7 +321,7 @@ export class Log {
       e.associatedElement = firstElement;
       e.messageArray = messageArray;
       this.prepareError_(e);
-      // report3pError is installed globally per window in the entry point.
+      // reportError is installed globally per window in the entry point.
       self.reportError(e);
       throw e;
     }
@@ -503,7 +503,7 @@ function createErrorVargs(var_args) {
 export function rethrowAsync(var_args) {
   const error = createErrorVargs.apply(null, arguments);
   setTimeout(() => {
-    // report3pError is installed globally per window in the entry point.
+    // reportError is installed globally per window in the entry point.
     self.reportError(error);
     throw error;
   });
