@@ -2000,22 +2000,8 @@ describe('amp-a4a', () => {
       sandbox.restore();
     });
 
-    it('should emit upgradeDelay lifecycle ping with legacy verifier', () => {
+    it('should emit upgradeDelay lifecycle ping', () => {
       return createIframePromise().then(fixture => {
-        forceExperimentBranch(
-            fixture.win, VERIFIER_EXP_NAME, LEGACY_VERIFIER_EID);
-        const a4a = new MockA4AImpl(createA4aElement(fixture.doc));
-        const emitLifecycleEventSpy = sandbox.spy(a4a, 'emitLifecycleEvent');
-        a4a.buildCallback();
-        expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
-          'forced_delta': 12345,
-        })).to.be.calledOnce;
-      });
-    });
-
-    it('should emit upgradeDelay lifecycle ping with new verifier', () => {
-      return createIframePromise().then(fixture => {
-        forceExperimentBranch(fixture.win, VERIFIER_EXP_NAME, NEW_VERIFIER_EID);
         const a4a = new MockA4AImpl(createA4aElement(fixture.doc));
         const emitLifecycleEventSpy = sandbox.spy(a4a, 'emitLifecycleEvent');
         a4a.buildCallback();
