@@ -275,6 +275,7 @@ export class GlobalVariableSource extends VariableSource {
           if (typeof cid === 'string') {
             cid = extractClientIdFromGaCookie(cid);
           } else {
+            // TODO(@jridgewell, #11120): remove once #11120 is figured out.
             // Do not log the CID directly, that's PII.
             dev().error(TAG, 'non-string cid, what is it?', Object.keys(cid));
           }
