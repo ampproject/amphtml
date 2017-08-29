@@ -21,10 +21,7 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {
-  experimentFeatureEnabled,
-  ADSENSE_EXPERIMENT_FEATURE,
-} from './adsense-a4a-config';
+import {fastFetchDelayedRequestEnabled} from './adsense-a4a-config';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -138,8 +135,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return experimentFeatureEnabled(
-        this.win, ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST);
+    return fastFetchDelayedRequestEnabled(this.win);
   }
 
   /** @override */
@@ -225,7 +221,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
-      this.extensions_./*OK*/loadExtension('amp-analytics');
+      this.extensions_./*OK*/installExtensionForDoc(
+          this.getAmpDoc(), 'amp-analytics');
     }
     return this.size_;
   }
@@ -324,4 +321,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 }
 
-AMP.registerElement('amp-ad-network-adsense-impl', AmpAdNetworkAdsenseImpl);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAdNetworkAdsenseImpl);
+});

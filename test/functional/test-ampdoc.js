@@ -18,6 +18,7 @@ import {
   AmpDocService,
   AmpDocSingle,
   AmpDocShadow,
+  declareExtension,
   installShadowDoc,
   shadowDocHasBody,
   shadowDocReady,
@@ -201,6 +202,7 @@ describe('AmpDocSingle', () => {
 
   it('should return document as root', () => {
     expect(ampdoc.getRootNode()).to.equal(window.document);
+    expect(ampdoc.getHeadNode()).to.equal(window.document.head);
     expect(ampdoc.isSingleDoc()).to.be.true;
   });
 
@@ -267,6 +269,30 @@ describe('AmpDocSingle', () => {
       expect(ampdoc.isReady()).to.be.true;
     });
   });
+
+  it('should declare extension', () => {
+    expect(ampdoc.declaresExtension('ext1')).to.be.false;
+    expect(ampdoc.declaresExtension('ext2')).to.be.false;
+    declareExtension(ampdoc, 'ext1');
+    expect(ampdoc.declaresExtension('ext1')).to.be.true;
+    expect(ampdoc.declaresExtension('ext2')).to.be.false;
+
+    declareExtension(ampdoc, 'ext2');
+    expect(ampdoc.declaresExtension('ext1')).to.be.true;
+    expect(ampdoc.declaresExtension('ext2')).to.be.true;
+  });
+
+  it('should ignore duplicate extensions', () => {
+    expect(ampdoc.declaresExtension('ext1')).to.be.false;
+    declareExtension(ampdoc, 'ext1');
+    expect(ampdoc.declaresExtension('ext1')).to.be.true;
+    expect(ampdoc.declaredExtensions_).to.have.length(1);
+
+    // Repeat.
+    declareExtension(ampdoc, 'ext1');
+    expect(ampdoc.declaredExtensions_).to.have.length(1);
+    expect(ampdoc.declaresExtension('ext1')).to.be.true;
+  });
 });
 
 
@@ -305,6 +331,7 @@ describe('AmpDocShadow', () => {
       return;
     }
     expect(ampdoc.getRootNode()).to.equal(shadowRoot);
+    expect(ampdoc.getHeadNode()).to.equal(shadowRoot);
   });
 
   it('should find element by id', () => {

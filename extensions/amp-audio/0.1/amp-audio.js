@@ -26,6 +26,9 @@ import {
   setMediaSession,
 } from '../../../src/mediasession-helper';
 
+const TAG = 'amp-audio';
+
+
 /**
  * Visible for testing only.
  */
@@ -63,7 +66,7 @@ export class AmpAudio extends AMP.BaseElement {
     }
     this.propagateAttributes(
         ['src', 'autoplay', 'muted', 'loop', 'aria-label',
-          'aria-describedby', 'aria-labelledby'],
+          'aria-describedby', 'aria-labelledby', 'controlsList'],
         audio);
 
     this.applyFillContent(audio);
@@ -126,4 +129,7 @@ export class AmpAudio extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-audio', AmpAudio);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAudio);
+});

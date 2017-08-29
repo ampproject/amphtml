@@ -25,13 +25,12 @@ import {parseIfNeeded} from '../src/iframe-helper';
 import {
   installAmpdocServices,
   installRuntimeServices,
-  registerForUnitTest,
 } from '../src/runtime';
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
-import {installStyles} from '../src/style-installer';
+import {installStylesLegacy} from '../src/style-installer';
 
 let iframeCount = 0;
 
@@ -233,10 +232,9 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       installRuntimeServices(iframe.contentWindow);
       installCustomElements(iframe.contentWindow);
       installAmpdocServices(ampdoc);
-      registerForUnitTest(iframe.contentWindow);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
-      installStyles(iframe.contentWindow.document, cssText, () => {
+      installStylesLegacy(iframe.contentWindow.document, cssText, () => {
         resolve({
           win: iframe.contentWindow,
           doc: iframe.contentWindow.document,
@@ -285,7 +283,6 @@ export function createServedIframe(src) {
       win.AMP_TEST_IFRAME = true;
       win.AMP_TEST = true;
       installRuntimeServices(win);
-      registerForUnitTest(win);
       resolve({
         win: win,
         doc: win.document,
@@ -479,6 +476,7 @@ export function doNotLoadExternalResourcesInTest(win) {
     if (tagName == 'iframe' || tagName == 'img') {
       // Make get/set write to a fake property instead of
       // triggering invocation.
+      element.fakeSrc = '';
       Object.defineProperty(element, 'src', {
         set: function(val) {
           this.fakeSrc = val;

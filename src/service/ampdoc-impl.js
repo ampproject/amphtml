@@ -29,6 +29,17 @@ const AMPDOC_PROP = '__AMPDOC';
 
 
 /**
+ * Adds a declared extension to an ampdoc.
+ * @param {!AmpDoc} ampdoc
+ * @param {string} extensionId
+ * @restricted
+ */
+export function declareExtension(ampdoc, extensionId) {
+  ampdoc.declareExtension_(extensionId);
+}
+
+
+/**
  * Creates and installs the ampdoc for the shadow root.
  * @param {!AmpDocService} ampdocService
  * @param {string} url
@@ -187,6 +198,9 @@ export class AmpDoc {
 
     /** @private @const */
     this.signals_ = new Signals();
+
+    /** @private @const {!Array<string>} */
+    this.declaredExtensions_ = [];
   }
 
   /**
@@ -213,6 +227,26 @@ export class AmpDoc {
   }
 
   /**
+   * Returns whether the specified extension has been declared on this ampdoc.
+   * @param {string} extensionId
+   * @return {boolean}
+   */
+  declaresExtension(extensionId) {
+    return this.declaredExtensions_.indexOf(extensionId) != -1;
+  }
+
+  /**
+   * @param {string} extensionId
+   * @private
+   * @restricted
+   */
+  declareExtension_(extensionId) {
+    if (!this.declaresExtension(extensionId)) {
+      this.declaredExtensions_.push(extensionId);
+    }
+  }
+
+  /**
    * Returns the root node for this ampdoc. It will either be a `Document` for
    * the single-doc runtime mode, or a `ShadowRoot` for shadow-doc mode. This
    * node can be used, among other things, to add ampdoc-wide event listeners.
@@ -222,6 +256,13 @@ export class AmpDoc {
   getRootNode() {
     return /** @type {?} */ (dev().assert(null, 'not implemented'));
   }
+
+  /**
+   * Returns the head node. It's either an element or a shadow root.
+   * @return {!Element|!ShadowRoot}
+   * @abstract
+   */
+  getHeadNode() {}
 
   /**
    * Returns `true` if the ampdoc's body is available.
@@ -340,6 +381,11 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
+  getHeadNode() {
+    return dev().assertElement(this.win.document.head);
+  }
+
+  /** @override */
   isBodyAvailable() {
     return !!this.win.document.body;
   }
@@ -420,6 +466,11 @@ export class AmpDocShadow extends AmpDoc {
   /** @override */
   getUrl() {
     return this.url_;
+  }
+
+  /** @override */
+  getHeadNode() {
+    return this.shadowRoot_;
   }
 
   /** @override */

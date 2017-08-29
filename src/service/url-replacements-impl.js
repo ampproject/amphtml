@@ -20,8 +20,13 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
-import {parseUrl, removeFragment, parseQueryString,
-  addParamsToUrl} from '../url';
+import {
+  parseUrl,
+  removeFragment,
+  parseQueryString,
+  addParamsToUrl,
+  getSourceUrl,
+} from '../url';
 import {getTrackImpressionPromise} from '../impression.js';
 import {
   VariableSource,
@@ -33,6 +38,7 @@ import {
   getTimingDataAsync,
 } from './variable-source';
 import {isProtocolValid} from '../url';
+import {WindowInterface} from '../window-interface';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -144,6 +150,21 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the referrer URL.
     this.setAsync('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
       return Services.viewerForDoc(this.ampdoc).getReferrerUrl();
+    }));
+
+    // Like DOCUMENT_REFERRER, but returns null if the referrer is of
+    // same domain or the corresponding CDN proxy.
+    this.setAsync('EXTERNAL_REFERRER', /** @type {AsyncResolverDef} */(() => {
+      return Services.viewerForDoc(this.ampdoc).getReferrerUrl()
+          .then(referrer => {
+            if (!referrer) {
+              return null;
+            }
+            const referrerHostname = parseUrl(getSourceUrl(referrer)).hostname;
+            const currentHostname =
+                WindowInterface.getHostname(this.ampdoc.win);
+            return referrerHostname === currentHostname ? null : referrer;
+          });
     }));
 
     // Returns the title of this AMP document.

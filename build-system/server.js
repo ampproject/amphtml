@@ -46,7 +46,6 @@ process.on('uncaughtException', function(err) {
 // Exit in the event of a crash in the parent gulp process.
 setInterval(function() {
   if (!isRunning(gulpProcess)) {
-    util.log(util.colors.red('Gulp process terminated, shutting down server'));
     process.exit(1);
   }
 }, 1000);

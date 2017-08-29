@@ -18,6 +18,7 @@ import {
   addDataAndJsonAttributes_,
   getIframe,
   getBootstrapBaseUrl,
+  getDefaultBootstrapBaseUrl,
   getSubDomain,
   preloadBootstrap,
   resetCountForTesting,
@@ -36,7 +37,7 @@ import {validateData} from '../../3p/3p';
 import {DomFingerprint} from '../../src/utils/dom-fingerprint';
 import * as sinon from 'sinon';
 
-describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
+describe.configure().ifNewChrome().run('3p-frame', () => {
 
   let clock;
   let sandbox;
@@ -137,7 +138,7 @@ describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
   });
 
   // TODO(bradfrizzell) break this out into a test-iframe-attributes
-  it.configure().skipSauceLabs().run('should create an iframe', () => {
+  it.skip('should create an iframe', () => {
     window.AMP_MODE = {
       localDev: true,
       development: false,
@@ -268,6 +269,17 @@ describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
     window.AMP_MODE = {};
     expect(getBootstrapBaseUrl(window)).to.match(
         /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/);
+  });
+
+  it('should return a stable URL in getBootstrapBaseUrl', () => {
+    window.AMP_MODE = {};
+    expect(getBootstrapBaseUrl(window)).to.equal(getBootstrapBaseUrl(window));
+  });
+
+  it('should return a stable URL in getDefaultBootstrapBaseUrl', () => {
+    window.AMP_MODE = {};
+    expect(getDefaultBootstrapBaseUrl(window)).to.equal(
+        getDefaultBootstrapBaseUrl(window));
   });
 
   it('should pick the right bootstrap url (custom)', () => {

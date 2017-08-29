@@ -702,7 +702,7 @@ var forbiddenTermsSrcInclusive = {
     'obscure bugs if you attempt to match a descendant of a descendant (ie ' +
     '"div div"). Instead, use the scopedQuerySelector helper in dom.js',
   },
-  'loadExtension': {
+  'preloadExtension': {
     message: bannedTermsHelpString,
     whitelist: [
       'src/element-stub.js',

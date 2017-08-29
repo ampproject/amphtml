@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-import {upgradeOrRegisterElement} from './custom-element';
+import '../amp-compare-slider';
 
+describes.realWin('amp-compare-slider', {
+  amp: {
+    extensions: ['amp-compare-slider'],
+  },
+}, env => {
 
-/**
- * Registers an extended element. This function should typically be called
- * through the registerElement method on the AMP runtime.
- * @param {!Window} win
- * @param {string} name
- * @param {!Function} implementationClass
- * @package
- */
-export function registerExtendedElement(win, name, implementationClass) {
-  upgradeOrRegisterElement(win, name, implementationClass);
-}
+  let win;
+  let element;
+
+  beforeEach(() => {
+    win = env.win;
+    element = win.document.createElement('amp-compare-slider');
+    win.document.body.appendChild(element);
+  });
+
+});

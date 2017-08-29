@@ -24,7 +24,7 @@ import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../service';
-import {layoutRectLtwh} from '../layout-rect';
+import {layoutRectLtwh, moveLayoutRect} from '../layout-rect';
 import {dev} from '../log';
 import {dict} from '../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
@@ -365,6 +365,8 @@ export class Viewport {
 
   /**
    * Returns the rect of the element within the document.
+   * Note that this function should be called in vsync measure. Please consider
+   * using `getLayoutRectAsync` instead.
    * @param {!Element} el
    * @return {!../layout-rect.LayoutRectDef}}
    */
@@ -385,6 +387,46 @@ export class Viewport {
     }
 
     return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
+  }
+
+  /**
+   * Returns a promise that resolves with latest rect of the element within the document.
+   * @param {!Element} el
+   * @return {!Promise<!../layout-rect.LayoutRectDef>}
+   */
+  getLayoutRectAsync(el) {
+    const scrollLeft = this.getScrollLeft();
+    const scrollTop = this.getScrollTop();
+
+    // Go up the window hierarchy through friendly iframes.
+    const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
+    if (frameElement) {
+      const bPromise = this.binding_.getLayoutRectAsync(el, 0, 0);
+      const cPromise = this.binding_.getLayoutRectAsync(
+          frameElement, scrollLeft, scrollTop);
+      return Promise.all([bPromise, cPromise]).then(values => {
+        const b = values[0];
+        const c = values[1];
+        return layoutRectLtwh(Math.round(b.left + c.left),
+            Math.round(b.top + c.top),
+            Math.round(b.width),
+            Math.round(b.height));
+      });
+    }
+
+    return this.binding_.getLayoutRectAsync(el, scrollLeft, scrollTop);
+  }
+
+  /**
+   * Returns a promise that resolve with latest rect of the element within the viewport.
+   * @param {!Element} el
+   * @return {!Promise<?../layout-rect.LayoutRectDef>}}
+   */
+  getBoundingRectAsync(el) {
+    const viewportRect = this.getRect();
+    return this.getLayoutRectAsync(el).then(rect => {
+      return moveLayoutRect(rect, -viewportRect.left, -viewportRect.top);
+    });
   }
 
   /**
@@ -1063,6 +1105,15 @@ export class ViewportBindingDef {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
+
+  /**
+   * Returns a the rect of the element within the document asynchronously
+   * @param {!Element} unusedEl
+   * @param {number=} unusedScrollLeft
+   * @param {number=} unusedScrollTop
+   * @return {!Promise<!../layout-rect.LayoutRectDef>}
+   */
+  getLayoutRectAsync(unusedEl, unusedScrollLeft, unusedScrollTop) {}
 }
 
 
@@ -1092,6 +1143,9 @@ export class ViewportBindingNatural_ {
     /** @const {!../service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
 
+    /** @private {!../service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.win);
+
     /** @private @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewer;
 
@@ -1102,7 +1156,9 @@ export class ViewportBindingNatural_ {
     this.resizeObservable_ = new Observable();
 
     /** @const {function()} */
-    this.boundScrollEventListener_ = () => this.scrollObservable_.fire();
+    this.boundScrollEventListener_ = () => {
+      this.scrollObservable_.fire();
+    };
 
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
@@ -1240,6 +1296,13 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
+  getLayoutRectAsync(el, opt_scrollLeft, opt_scrollTop) {
+    return this.vsync_.measurePromise(() => {
+      return this.getLayoutRect(el, opt_scrollLeft, opt_scrollTop);
+    });
+  }
+
+  /** @override */
   setScrollTop(scrollTop) {
     this.getScrollingElement_()./*OK*/scrollTop = scrollTop;
   }
@@ -1298,6 +1361,9 @@ export class ViewportBindingNaturalIosEmbed_ {
 
     /** @private {?Element} */
     this.endPosEl_ = null;
+
+    /** @private {!../service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private {!{x: number, y: number}} */
     this.pos_ = {x: 0, y: 0};
@@ -1557,6 +1623,13 @@ export class ViewportBindingNaturalIosEmbed_ {
   }
 
   /** @override */
+  getLayoutRectAsync(el, opt_scrollLeft, opt_scrollTop) {
+    return this.vsync_.measurePromise(() => {
+      return this.getLayoutRect(el, opt_scrollLeft, opt_scrollTop);
+    });
+  }
+
+  /** @override */
   setScrollTop(scrollTop) {
     this.setScrollPos_(scrollTop || 1);
   }
@@ -1654,6 +1727,9 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.wrapper_ = this.win.document.createElement('html');
     this.wrapper_.id = 'i-amphtml-wrapper';
     this.wrapper_.className = topClasses;
+
+    /** @private {!../service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -1830,6 +1906,13 @@ export class ViewportBindingIosEmbedWrapper_ {
         Math.round(b.top + scrollTop),
         Math.round(b.width),
         Math.round(b.height));
+  }
+
+  /** @override */
+  getLayoutRectAsync(el, opt_scrollLeft, opt_scrollTop) {
+    return this.vsync_.measurePromise(() => {
+      return this.getLayoutRect(el, opt_scrollLeft, opt_scrollTop);
+    });
   }
 
   /** @override */

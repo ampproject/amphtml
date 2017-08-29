@@ -49,6 +49,11 @@ import {createElementWithAttributes} from '../../../../src/dom';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
+// Need the following side-effect import because in actual production code,
+// Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
+// always available for them. However, when we test an impl in isolation,
+// AmpAd is not loaded already, so we need to load it separately.
+import '../../../amp-ad/0.1/amp-ad';
 
 describe('amp-a4a', () => {
   let sandbox;
@@ -58,6 +63,7 @@ describe('amp-a4a', () => {
   let adResponse;
   let onCreativeRenderSpy;
   let keysetBody;
+  let getResourceStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -69,6 +75,10 @@ describe('amp-a4a', () => {
     getSigningServiceNamesMock.returns(['google']);
     viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     viewerWhenVisibleMock.returns(Promise.resolve());
+    getResourceStub = sandbox.stub(AmpA4A.prototype, 'getResource');
+    getResourceStub.returns({
+      getUpgradeDelayMs: () => 12345,
+    });
     adResponse = {
       headers: {'AMP-Access-Control-Allow-Source-Origin': 'about:srcdoc'},
       body: validCSSAmp.reserialized,
@@ -242,12 +252,16 @@ describe('amp-a4a', () => {
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
       a4a.buildCallback();
+      const lifecycleEventStub =
+          sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
         expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+        expect(lifecycleEventStub).to.be.calledWith('renderSafeFrameStart',
+            {'isAmpCreative': false, 'releaseType': 'pr'});
       });
     });
 
@@ -435,6 +449,7 @@ describe('amp-a4a', () => {
   describe('cross-domain rendering', () => {
     let a4aElement;
     let a4a;
+    let lifecycleEventStub;
     beforeEach(() => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
@@ -451,6 +466,7 @@ describe('amp-a4a', () => {
         a4a.createdCallback();
         a4a.firstAttachedCallback();
         a4a.buildCallback();
+        lifecycleEventStub = sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
         expect(onCreativeRenderSpy).to.not.be.called;
       });
     });
@@ -473,6 +489,8 @@ describe('amp-a4a', () => {
           expect(devErrLogSpy.getCall(0).args[1]).to.have.string(
               'random illegal value');
           expect(fetchMock.called('ad')).to.be.true;
+          expect(lifecycleEventStub).to.be.calledWith('renderCrossDomainStart',
+              {'isAmpCreative': false, 'releaseType': 'pr'});
         });
       });
     });
@@ -734,7 +752,7 @@ describe('amp-a4a', () => {
           expect(renderNonAmpCreativeSpy.calledOnce,
               'renderNonAmpCreative_ called exactly once').to.be.true;
           a4a.unlayoutCallback();
-          sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+          getResourceStub.returns(
             {'hasBeenMeasured': () => true, 'isMeasureRequested': () => false});
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
           a4a.resumeCallback();
@@ -794,8 +812,7 @@ describe('amp-a4a', () => {
               'renderNonAmpCreative_ called exactly once').to.be.true;
           a4a.unlayoutCallback();
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
-          sandbox.stub(AmpA4A.prototype, 'getResource').returns(
-            {'hasBeenMeasured': () => false});
+          getResourceStub.returns({'hasBeenMeasured': () => false});
           a4a.resumeCallback();
           expect(onLayoutMeasureSpy).to.not.be.called;
           expect(a4a.fromResumeCallback).to.be.true;
@@ -814,9 +831,11 @@ describe('amp-a4a', () => {
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
         const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
-        const loadExtensionSpy =
-            sandbox.spy(Extensions.prototype, 'loadExtension');
+        const preloadExtensionSpy =
+            sandbox.spy(Extensions.prototype, 'preloadExtension');
         a4a.buildCallback();
+        const lifecycleEventStub =
+            sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(promiseResult => {
@@ -826,7 +845,7 @@ describe('amp-a4a', () => {
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
           expect(fetchMock.called('ad')).to.be.true;
-          expect(loadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
+          expect(preloadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
           return a4a.layoutCallback().then(() => {
             expect(renderAmpCreativeSpy.calledOnce,
                 'renderAmpCreative_ called exactly once').to.be.true;
@@ -858,6 +877,11 @@ describe('amp-a4a', () => {
             expect(onCreativeRenderSpy).to.be.calledOnce;
             expect(updatePriorityStub).to.be.calledOnce;
             expect(updatePriorityStub.args[0][0]).to.equal(0);
+            expect(lifecycleEventStub).to.be.calledWith(
+                'adResponseValidateEnd', {
+                  'signatureValidationResult': 0,
+                  'releaseType': 'pr',
+                });
           });
         });
       });
@@ -890,6 +914,7 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc, rect);
         const a4a = new MockA4AImpl(a4aElement);
         // test 0 height
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.not.be.ok;
         // test 0 width
@@ -1242,13 +1267,15 @@ describe('amp-a4a', () => {
         });
       });
       it('should not delay request when in viewport', () => {
-        sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+        getResourceStub.returns(
             {
+              getUpgradeDelayMs: () => 1,
               renderOutsideViewport: () => true,
               whenWithinRenderOutsideViewport: () => {
                 throw new Error('failure!');
               },
             });
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_);
         return a4a.adPromise_.then(() => {
@@ -1257,13 +1284,15 @@ describe('amp-a4a', () => {
       });
       it('should delay request until within renderOutsideViewport',() => {
         let whenWithinRenderOutsideViewportResolve;
-        sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+        getResourceStub.returns(
             {
+              getUpgradeDelayMs: () => 1,
               renderOutsideViewport: () => false,
               whenWithinRenderOutsideViewport: () => new Promise(resolve => {
                 whenWithinRenderOutsideViewportResolve = resolve;
               }),
             });
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_);
         // Delay to all getAdUrl to potentially execute.
@@ -1917,6 +1946,29 @@ describe('amp-a4a', () => {
           expect(a4a.isRefreshing).to.be.true;
           expect(a4a.isRelayoutNeededFlag).to.be.true;
         });
+      });
+    });
+  });
+
+  describe('buildCallback', () => {
+    let sandbox;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('should emit upgradeDelay lifecycle ping', () => {
+      return createIframePromise().then(fixture => {
+        const a4a = new MockA4AImpl(createA4aElement(fixture.doc));
+        const emitLifecycleEventSpy = sandbox.spy(a4a, 'emitLifecycleEvent');
+        a4a.buildCallback();
+        expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
+          'forced_delta': 12345,
+        })).to.be.calledOnce;
       });
     });
   });

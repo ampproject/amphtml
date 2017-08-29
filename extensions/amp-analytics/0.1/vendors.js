@@ -47,6 +47,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'documentReferrer': 'DOCUMENT_REFERRER',
       'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
       'domInteractiveTime': 'DOM_INTERACTIVE_TIME',
+      'externalReferrer': 'EXTERNAL_REFERRER',
       'navRedirectCount': 'NAV_REDIRECT_COUNT',
       'navTiming': 'NAV_TIMING',
       'navType': 'NAV_TYPE',
@@ -371,8 +372,15 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'requests': {
       'host': 'https://sb.scorecardresearch.com',
       'base': '${host}/b?',
-      'pageview': '${base}c1=2&c2=${c2}&rn=${random}&c8=${title}' +
-        '&c7=${canonicalUrl}&c9=${documentReferrer}&cs_c7amp=${ampdocUrl}',
+      'pageview': '${base}c1=2' +
+        '&c2=${c2}' +
+        '&cs_pv=${pageViewId}' +
+        '&c12=${clientId(comScore)}' +
+        '&rn=${random}' +
+        '&c8=${title}' +
+        '&c7=${canonicalUrl}' +
+        '&c9=${documentReferrer}' +
+        '&cs_c7amp=${ampdocUrl}',
     },
     'triggers': {
       'defaultPageview': {
@@ -659,7 +667,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'cid=${clientId}&' +
           'tid=${account}&' +
           'dl=${documentLocation}&' +
-          'dr=${documentReferrer}&' +
+          'dr=${externalReferrer}&' +
           'sd=${screenColorDepth}&' +
           'ul=${browserLanguage}&' +
           'de=${documentCharset}',
@@ -696,6 +704,10 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'pdt=${pageDownloadTime}&' +
           'clt=${contentLoadTime}&' +
           'dit=${domInteractiveTime}' +
+          '${baseSuffix}',
+      'error': '${host}/collect?${basePrefix}&' +
+          't=exception&' +
+          'exd=${errorMessage}' +
           '${baseSuffix}',
     },
     'triggers': {
@@ -741,54 +753,58 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'requests': {
       'host': 'https://www.google-analytics.com',
       'basePrefix': 'v=1&' +
-      '_v=a1&' +
-      'ds=${dataSource}&' +
-      '${anonymizeIP}&' +
-      '_s=${requestCount}&' +
-      'dt=${title}&' +
-      'sr=${screenWidth}x${screenHeight}&' +
-      '_utmht=${timestamp}&' +
-      'cid=${clientId}&' +
-      'tid=${account}&' +
-      'dl=${documentLocation}&' +
-      'dr=${documentReferrer}&' +
-      'sd=${screenColorDepth}&' +
-      'ul=${browserLanguage}&' +
-      'de=${documentCharset}',
+          '_v=a1&' +
+          'ds=${dataSource}&' +
+          '${anonymizeIP}&' +
+          '_s=${requestCount}&' +
+          'dt=${title}&' +
+          'sr=${screenWidth}x${screenHeight}&' +
+          '_utmht=${timestamp}&' +
+          'cid=${clientId}&' +
+          'tid=${account}&' +
+          'dl=${documentLocation}&' +
+          'dr=${externalReferrer}&' +
+          'sd=${screenColorDepth}&' +
+          'ul=${browserLanguage}&' +
+          'de=${documentCharset}',
       'baseSuffix': '&a=${pageViewId}&' +
-      'z=${random}',
+          'z=${random}',
       'pageview': '${host}/r/collect?${basePrefix}&' +
-      't=pageview&' +
-      'jid=${random}&' +
-      '_r=1' +
-      '${baseSuffix}',
+          't=pageview&' +
+          'jid=${random}&' +
+          '_r=1' +
+          '${baseSuffix}',
       'event': '${host}/collect?${basePrefix}&' +
-      't=event&' +
-      'jid=&' +
-      'ec=${eventCategory}&' +
-      'ea=${eventAction}&' +
-      'el=${eventLabel}&' +
-      'ev=${eventValue}' +
-      '${baseSuffix}',
+          't=event&' +
+          'jid=&' +
+          'ec=${eventCategory}&' +
+          'ea=${eventAction}&' +
+          'el=${eventLabel}&' +
+          'ev=${eventValue}' +
+          '${baseSuffix}',
       'social': '${host}/collect?${basePrefix}&' +
-      't=social&' +
-      'jid=&' +
-      'sa=${socialAction}&' +
-      'sn=${socialNetwork}&' +
-      'st=${socialTarget}' +
-      '${baseSuffix}',
+          't=social&' +
+          'jid=&' +
+          'sa=${socialAction}&' +
+          'sn=${socialNetwork}&' +
+          'st=${socialTarget}' +
+          '${baseSuffix}',
       'timing': '${host}/collect?${basePrefix}&' +
-      't=${timingRequestType}&' +
-      'jid=&' +
-      'plt=${pageLoadTime}&' +
-      'dns=${domainLookupTime}&' +
-      'tcp=${tcpConnectTime}&' +
-      'rrt=${redirectTime}&' +
-      'srt=${serverResponseTime}&' +
-      'pdt=${pageDownloadTime}&' +
-      'clt=${contentLoadTime}&' +
-      'dit=${domInteractiveTime}' +
-      '${baseSuffix}',
+          't=${timingRequestType}&' +
+          'jid=&' +
+          'plt=${pageLoadTime}&' +
+          'dns=${domainLookupTime}&' +
+          'tcp=${tcpConnectTime}&' +
+          'rrt=${redirectTime}&' +
+          'srt=${serverResponseTime}&' +
+          'pdt=${pageDownloadTime}&' +
+          'clt=${contentLoadTime}&' +
+          'dit=${domInteractiveTime}' +
+          '${baseSuffix}',
+      'error': '${host}/collect?${basePrefix}&' +
+          't=exception&' +
+          'exd=${errorMessage}' +
+          '${baseSuffix}',
     },
     'triggers': {
       'performanceTiming': {

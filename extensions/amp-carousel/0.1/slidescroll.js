@@ -20,7 +20,7 @@ import {BaseSlides} from './base-slides';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {isConnectedNode} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
@@ -516,7 +516,7 @@ export class AmpSlideScroll extends BaseSlides {
         this.showSlide_(index);
       }
     } else {
-      user().error(TAG, 'Invalid [slide] value: %s', value);
+      this.user().error(TAG, 'Invalid [slide] value: %s', value);
     }
   }
 

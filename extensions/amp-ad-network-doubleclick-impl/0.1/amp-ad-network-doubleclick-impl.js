@@ -487,7 +487,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
-      this.extensions_./*OK*/loadExtension('amp-analytics');
+      this.extensions_./*OK*/installExtensionForDoc(
+          this.getAmpDoc(), 'amp-analytics');
     }
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
@@ -721,7 +722,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   credentials: 'include',
                   headers,
                 }).catch(err => {
-                  user().error(TAG, err.message);
+                  this.user().error(TAG, err.message);
                 });
               }
               // Non-200 status codes are forbidden for RTC.
@@ -801,7 +802,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {!Promise<?Object>}
    */
   shouldSendRequestWithoutRtc(errMessage) {
-    user().error(TAG, errMessage);
+    this.user().error(TAG, errMessage);
     let rtcTotalTime;
     // Have to use match instead of == because AMP
     // custom messages automatically append three
@@ -952,7 +953,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
                 const canceled = isCancellation(error);
                 if (!canceled) {
-                  user().error(TAG, 'SRA request failure', error);
+                  this.user().error(TAG, 'SRA request failure', error);
                 }
                 // Collapse all slots on failure so long as they are not
                 // cancellation.
@@ -979,8 +980,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 }
 
-AMP.registerElement(
-    'amp-ad-network-doubleclick-impl', AmpAdNetworkDoubleclickImpl);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAdNetworkDoubleclickImpl);
+});
 
 
 /** @visibileForTesting */
