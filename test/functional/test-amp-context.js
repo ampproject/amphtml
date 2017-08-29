@@ -24,6 +24,7 @@ const NOOP = () => {};
 describe('3p ampcontext.js', () => {
   let windowPostMessageSpy;
   let windowMessageHandler;
+  let windowErrorHandler;
   let win;
   let sandbox;
 
@@ -34,6 +35,9 @@ describe('3p ampcontext.js', () => {
       addEventListener: (eventType, handlerFn) => {
         if (eventType == 'message') {
           windowMessageHandler = handlerFn;
+        }
+        else if (eventType == 'error') {
+          windowErrorHandler = handlerFn;
         }
       },
       parent: {
@@ -81,15 +85,43 @@ describe('3p ampcontext.js', () => {
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.reset();
     context.report3pError();
-    expect(windowPostMessageSpy).to.be.called;
-    // window.context should have sent postMessage sending 3p errors
-    expect(windowPostMessageSpy).to.be.calledWith({
+
+    const e = new Error();
+    e.message = 'error';
+
+    const messagePayload = {
       sentinel: '1-291921',
       type: MessageType.USER_ERROR,
-      error: sinon.match.any,
-    }, '*');
-  });
+    };
 
+    try {
+      throw e;
+    }
+    catch (err) {
+      const messageData = 'amp-' + JSON.stringify(messagePayload);
+      const message = {
+        source: context.client_.hostWindow_,
+        data: messageData,
+        error: err,
+      };
+      windowErrorHandler(message);
+
+      // window.context should have sent postMessage sending 3p errors
+      expect(windowPostMessageSpy).to.be.called;
+      expect(windowPostMessageSpy).to.be.calledWith(
+          'amp-$internalRuntimeVersion$' +
+          '{"error":{"message":"error"},' +
+          '"type":"user-error","sentinel":"1-291921"}',
+          '*');
+    }
+
+    // const e = new ErrorEvent('error', {
+    //   error: new Error('e'),
+    // });
+    // e.initEvent('error', true, true);
+    // context.win_.dispatchEvent(e);
+    // // window.context should have sent postMessage sending 3p errors
+  });
 
   it('should add metadata to window.context using name as per 3P.', () => {
     win.name = generateSerializedAttributes();

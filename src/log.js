@@ -322,7 +322,6 @@ export class Log {
       e.messageArray = messageArray;
       this.prepareError_(e);
       // report3pError is installed globally per window in the entry point.
-      console.log('assert:reportError');
       self.reportError(e);
       throw e;
     }
@@ -505,7 +504,6 @@ export function rethrowAsync(var_args) {
   const error = createErrorVargs.apply(null, arguments);
   setTimeout(() => {
     // report3pError is installed globally per window in the entry point.
-    console.log('rethrow err: ' + error);
     self.reportError(error);
     throw error;
   });
