@@ -97,7 +97,7 @@ let detectedJsEngine;
  * @param {!Element=} opt_associatedElement
  */
 export function reportErrorForWin(win, error, opt_associatedElement) {
-  console.log('name: ' + error.name + ' msg: ' + error.message);
+  console.log('forWin - name: ' + error.name + ' msg: ' + error.message);
   reportError(error, opt_associatedElement);
   if (error && !!win && isUserErrorMessage(error.message)
       && !isUserErrorEmbed(error.message)) {
@@ -117,7 +117,6 @@ export function reportErrorForWin(win, error, opt_associatedElement) {
  * @return {!Error}
  */
 export function reportError(error, opt_associatedElement) {
-  console.log('reportError() name: ' + error.name + ' msg: ' + error.message);
   try {
     // Convert error to the expected type.
     let isValidError;

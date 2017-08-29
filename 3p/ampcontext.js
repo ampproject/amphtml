@@ -106,7 +106,6 @@ export class AbstractAmpContext {
     this.client_.setSentinel(dev().assertString(this.sentinel));
 
     this.listenForPageVisibility_();
-    console.log('in constructor');
     this.report3pError();
   }
 

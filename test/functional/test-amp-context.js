@@ -81,7 +81,7 @@ describe('3p ampcontext.js', () => {
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.reset();
     context.report3pError();
-
+    expect(windowPostMessageSpy).to.be.called;
     // window.context should have sent postMessage sending 3p errors
     expect(windowPostMessageSpy).to.be.calledWith({
       sentinel: '1-291921',
