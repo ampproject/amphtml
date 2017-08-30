@@ -36,7 +36,7 @@ export const urls = {
   thirdPartyFrameRegex: thirdPartyFrameRegex || /^d-\d+\.ampproject\.net$/,
   cdn: env['cdnUrl'] || 'https://cdn.ampproject.org',
   cdnProxyRegex: cdnProxyRegex ||
-      /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/,
+      /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/,
   localhostRegex: /^https?:\/\/localhost(:\d+)?$/,
   errorReporting: env['errorReportingUrl'] ||
       'https://amp-error-reporting.appspot.com/r',

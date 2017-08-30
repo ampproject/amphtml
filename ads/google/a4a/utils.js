@@ -87,7 +87,7 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
   const googleCdnProxyRegex =
-        /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+        /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/;
   return supportsNativeCrypto(win) && (
       !!googleCdnProxyRegex.test(win.location.origin) ||
         getMode(win).localDev || getMode(win).test);
