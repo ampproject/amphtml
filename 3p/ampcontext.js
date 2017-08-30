@@ -319,7 +319,7 @@ export class AbstractAmpContext {
    * @private
    */
   report3pError_() {
-    this.win_.onerror = function(message) {
+    this.win_.onerror = message => {
       if (message) {
         this.client_.sendMessage(MessageType.USER_ERROR, dict({
           'message': message,
