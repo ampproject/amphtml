@@ -83,7 +83,7 @@ describe('3p ampcontext.js', () => {
     };
     windowMessageHandler(message);
 
-    win.onerror = function(message, source, lineno, colno, error) {
+    window.onerror = function(message, source, lineno, colno, error) {
       expect(error).to.equal(e);
       expect(message).to.equal('message');
       context.report3pError_();
