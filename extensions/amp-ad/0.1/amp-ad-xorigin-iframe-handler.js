@@ -535,10 +535,11 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   userErrorForAnalytics_(message) {
-    const e = new Error();
-    e.message = message;
-    e.name = '3pError';
-    reportErrorToAnalytics(e, this.baseInstance_.win);
+    if (typeof message == 'string') {
+      const e = new Error(message);
+      e.name = '3pError';
+      reportErrorToAnalytics(e, this.baseInstance_.win);
+    }
   }
 }
 
