@@ -358,10 +358,10 @@ export class Services {
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-impl.Viewport}
    */
   static viewportForDoc(nodeOrDoc) {
-    return /** @type {!./service/viewport-impl.Viewport} */ (
+    return /** @type {!./service/viewport/viewport-impl.Viewport} */ (
         getServiceForDoc(nodeOrDoc, 'viewport'));
   }
 

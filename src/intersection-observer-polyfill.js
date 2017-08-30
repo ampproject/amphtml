@@ -103,7 +103,7 @@ export class IntersectionObserverApi {
     /** @private {?function()} */
     this.unlistenOnDestroy_ = null;
 
-    /** @private @const {!./service/viewport-impl.Viewport} */
+    /** @private @const {!./service/viewport/viewport-impl.Viewport} */
     this.viewport_ = baseElement.getViewport();
 
     /** @private {?SubscriptionApi} */

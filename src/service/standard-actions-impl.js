@@ -64,7 +64,7 @@ export class StandardActions {
     /** @const @private {!./url-replacements-impl.UrlReplacements} */
     this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
 
-    /** @const @private {!./viewport-impl.Viewport} */
+    /** @const @private {!./viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     this.installActions_(this.actions_);

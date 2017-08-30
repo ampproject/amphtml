@@ -149,14 +149,14 @@ export class InstrumentationService {
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
-    /** @const {!../../../src/service/viewport-impl.Viewport} */
+    /** @const {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private {boolean} */
     this.scrollHandlerRegistered_ = false;
 
     /** @private {!Observable<
-        !../../../src/service/viewport-impl.ViewportChangedEventDef>} */
+        !../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
     this.scrollObservable_ = new Observable();
   }
 
@@ -286,7 +286,7 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!../../../src/service/viewport-impl.ViewportChangedEventDef} e
+   * @param {!../../../src/service/viewport/viewport-impl.ViewportChangedEventDef} e
    * @private
    */
   onScroll_(e) {

@@ -96,7 +96,7 @@ export class AmpAdXOriginIframeHandler {
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.baseInstance_.getAmpDoc());
 
-    /** @private @const {!../../../src/service/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
 
     /** @private {boolean} */

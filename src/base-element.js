@@ -731,7 +731,7 @@ export class BaseElement {
 
   /**
    * Returns the viewport within which the element operates.
-   * @return {!./service/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-impl.Viewport}
    */
   getViewport() {
     return Services.viewportForDoc(this.getAmpDoc());

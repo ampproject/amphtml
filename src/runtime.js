@@ -69,7 +69,7 @@ import {installUrlReplacementsServiceForDoc} from
     './service/url-replacements-impl';
 import {installViewerServiceForDoc, setViewerVisibilityState} from
     './service/viewer-impl';
-import {installViewportServiceForDoc} from './service/viewport-impl';
+import {installViewportServiceForDoc} from './service/viewport/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {installBatchedXhrService} from './service/batched-xhr-impl';

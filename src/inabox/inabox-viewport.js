@@ -16,7 +16,8 @@
 
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {Services} from '../services';
-import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
+import {Viewport} from '../service/viewport/viewport-impl';
+import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {registerServiceBuilderForDoc} from '../service';
 import {
   nativeIntersectionObserverSupported,
