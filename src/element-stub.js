@@ -16,25 +16,14 @@
 
 import {BaseElement} from './base-element';
 import {dev} from './log';
-import {Services} from './services';
 
 /** @type {!Array} */
 export const stubbedElements = [];
-
-/** @type {!Object<string, boolean>} */
-const loadingChecked = {};
 
 
 export class ElementStub extends BaseElement {
   constructor(element) {
     super(element);
-    // Fetch amp-ad script if it is not present.
-    const name = element.tagName.toLowerCase();
-    if (!loadingChecked[name]) {
-      loadingChecked[name] = true;
-      Services.extensionsFor(this.win).loadExtension(
-          name, /* stubElement */ false);
-    }
     stubbedElements.push(this);
   }
 
@@ -55,27 +44,4 @@ export class ElementStub extends BaseElement {
     // No real state so no reason to reconstruct.
     return false;
   }
-}
-
-
-/**
- * @visibleForTesting
- */
-export function resetLoadingCheckForTests() {
-  const keys = Object.keys(loadingChecked);
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    if (loadingChecked.hasOwnProperty(key)) {
-      delete loadingChecked[key];
-    }
-  }
-}
-
-
-/**
- * @param {string} name
- * @visibleForTesting
- */
-export function setLoadingCheckForTests(name) {
-  loadingChecked[name] = true;
 }

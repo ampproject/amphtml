@@ -24,9 +24,6 @@ import {
   AMP_SIGNATURE_HEADER,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/legacy-signature-verifier';
-import {
-  installExtensionsService,
-} from '../../../../src/service/extensions-impl';
 import {Services} from '../../../../src/services';
 import {
   AmpAdNetworkDoubleclickImpl,
@@ -102,14 +99,14 @@ function createImplTag(config, element, impl, env) {
 
 
 describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
-  let doc;
+  let win, doc, ampdoc;
   let element;
   let impl;
 
   beforeEach(() => {
-    doc = env.win.document;
-    // Necessary to disable isProxyOrigin check
-    env.win.AMP_MODE.test = true;
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
   });
 
 
@@ -150,7 +147,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
 
   describe('#extractSize', () => {
-    let loadExtensionSpy;
+    let preloadExtensionSpy;
     const size = {width: 200, height: 50};
 
     beforeEach(() => {
@@ -161,10 +158,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         'layout': 'fixed',
       });
       impl = new AmpAdNetworkDoubleclickImpl(element);
+      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
       impl.size_ = size;
-      installExtensionsService(impl.win);
       const extensions = Services.extensionsFor(impl.win);
-      loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
+      preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
     });
 
     it('should not load amp-analytics without an analytics header', () => {
@@ -176,7 +173,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           return false;
         },
       })).to.deep.equal(size);
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+      expect(preloadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
     });
 
     it('should load amp-analytics with an analytics header', () => {
@@ -194,7 +191,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           return !!this.get(name);
         },
       })).to.deep.equal(size);
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+      expect(preloadExtensionSpy.withArgs('amp-analytics')).to.be.called;
       // exact value of ampAnalyticsConfig covered in
       // ads/google/test/test-utils.js
     });
@@ -209,12 +206,13 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         'type': 'doubleclick',
       });
       impl = new AmpAdNetworkDoubleclickImpl(element);
-        // Next two lines are to ensure that internal parts not relevant for this
-        // test are properly set.
+      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
+      sandbox.stub(env.ampdocService, 'getAmpDoc', () => ampdoc);
+      // Next two lines are to ensure that internal parts not relevant for this
+      // test are properly set.
       impl.size_ = {width: 200, height: 50};
       impl.iframe = impl.win.document.createElement('iframe');
-      installExtensionsService(impl.win);
-        // Temporary fix for local test failure.
+      // Temporary fix for local test failure.
       sandbox.stub(impl,
           'getIntersectionElementLayoutBox', () => {
             return {
