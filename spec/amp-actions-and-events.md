@@ -112,10 +112,10 @@ For example, the following is possible in AMP.
     </td>
     <td><code>input</code>, <code>select</code></td>
     <td>
-      <code>event.min</code><br>
-      <code>event.max</code><br>
-      <code>event.value</code><br>
-      <code>event.valueAsNumber</code><br>
+      <pre>event.min
+event.max
+event.value
+event.valueAsNumber</pre>
     </td>
   </tr>
   <tr>
@@ -143,7 +143,8 @@ For example, the following is possible in AMP.
   <tr>
     <td><code>slideChange</code></td>
     <td>Fired when the user manually changes the carousel's current slide. Does not fire on autoplay or the <code>goToSlide</code> action.</td>
-    <td><code>// Slide number.<br>event.index</code></td>
+    <td><pre>// Slide number.
+event.index</pre></td>
   </tr>
 </table>
 
@@ -157,7 +158,8 @@ For example, the following is possible in AMP.
   <tr>
     <td><code>select</code></td>
     <td>Fired when the user manually selects an option.</td>
-    <td><code>// The `option` attribute value of the selected element.<br>event.targetOption</code></td>
+    <td><pre>// The `option` attribute value of the selected element.
+event.targetOption</pre></td>
   </tr>
 </table>
 
@@ -176,12 +178,14 @@ For example, the following is possible in AMP.
   <tr>
     <td><code>submit-success</code></td>
     <td>Fired when the form submission response is success.</td>
-    <td><code>// Response JSON.<br>event.response</code></td>
+    <td><pre>// Response JSON.
+event.response</pre></td>
   </tr>
   <tr>
     <td><code>submit-error</code></td>
     <td>Fired when the form submission response is an error.</td>
-    <td><code>// Response JSON.<br>event.response</code></td>
+    <td><pre>// Response JSON.
+event.response</pre></td>
   </tr>
 </table>
 
