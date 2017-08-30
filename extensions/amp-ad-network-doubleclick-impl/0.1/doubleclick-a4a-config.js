@@ -106,7 +106,7 @@ export class DoubleclickA4aEligibility {
    */
   isCdnProxy(win) {
     const googleCdnProxyRegex =
-        /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+        /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/;
     return googleCdnProxyRegex.test(win.location.origin);
   }
 
