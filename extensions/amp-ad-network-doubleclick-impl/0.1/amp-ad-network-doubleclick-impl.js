@@ -841,19 +841,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibileForTesting
    */
   fireDelayedImpressions(impressions, scrubReferer) {
-    if (!impressions) return;
+    if (!impressions) {
+      return;
+    }
     impressions.split(',').forEach(url => {
       try {
         dev().assert(isSecureUrl(url));
         // Create amp-pixel and append to document to send impression.
         this.win.document.body.appendChild(
-          createElementWithAttributes(
-            this.win.document,
-            'amp-pixel',
-            dict({
-              src: url,
-              referrerpolicy: scrubReferer ? 'no-referrer' : ''
-            })));
+            createElementWithAttributes(
+                this.win.document,
+                'amp-pixel',
+                dict({
+                  'src': url,
+                  'referrerpolicy': scrubReferer ? 'no-referrer' : '',
+                })));
       } catch (unusedError) {}
     });
   }

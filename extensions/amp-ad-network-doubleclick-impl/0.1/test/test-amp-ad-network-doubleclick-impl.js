@@ -199,7 +199,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     it('should load delayed impression amp-pixels', () => {
       const fireDelayedImpressionsSpy =
           sandbox.spy(impl, 'fireDelayedImpressions');
-      const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
       expect(impl.extractSize({
         get(name) {
           switch (name) {
