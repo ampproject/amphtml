@@ -26,8 +26,8 @@ import {setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 
-/** @private @const {string} */
-const TAG_ = 'amp-analytics.IframeTransport';
+/** @const {string} */
+export const AMP_ANALYTICS_3P_RESPONSES = 'amp-analytics-3p-responses';
 
 /** @typedef {{
  *    frame: Element,
@@ -45,10 +45,11 @@ export class IframeTransport {
    * @param {!Window} win
    * @param {!string} type The value of the amp-analytics tag's type attribute
    * @param {!JsonObject} config
-   * @param {function(!JsonObject)=} opt_processResponse An optional
-   * function to receive any response messages back from the cross-domain iframe
+   * @param {string} creativeId A string which identifies the
+   * creative which contains this amp-analytics tag. In practice, this is
+   * the value of the data-amp-3p-sentinel attribute of the iframe.
    */
-  constructor(win, type, config, opt_processResponse) {
+  constructor(win, type, config, creativeId) {
     /** @private @const {!Window} win */
     this.win_ = win;
 
@@ -56,12 +57,15 @@ export class IframeTransport {
     this.type_ = type;
 
     /** @private @const {string} */
+    this.creativeId_ = creativeId;
+
+    /** @private @const {string} */
     this.id_ = IframeTransport.createUniqueId_();
 
     dev().assert(config && config['iframe'],
         'Must supply iframe URL to constructor!');
     this.frameUrl_ = config['iframe'];
-    this.processCrossDomainIframe(opt_processResponse);
+    this.processCrossDomainIframe();
   }
 
   /**
@@ -74,10 +78,8 @@ export class IframeTransport {
   /**
    * If iframe is specified in config/transport, check whether third-party
    * iframe already exists, and if not, create it.
-   * @param {function(!JsonObject)=} opt_processResponse An optional
-   * function to receive any response messages back from the cross-domain iframe
    */
-  processCrossDomainIframe(opt_processResponse) {
+  processCrossDomainIframe() {
     let frameData;
     if (IframeTransport.hasCrossDomainIframe(this.type_)) {
       frameData = IframeTransport.getFrameData(this.type_);
@@ -87,9 +89,6 @@ export class IframeTransport {
       this.win_.document.body.appendChild(frameData.frame);
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
-    if (opt_processResponse) {
-      IframeTransport.responseProcessors_[this.id_] = opt_processResponse;
-    }
   }
 
   /**
@@ -142,14 +141,13 @@ export class IframeTransport {
         MessageType.IFRAME_TRANSPORT_RESPONSE, response => {
           dev().assert(response && response['message'],
               'Received empty response from 3p analytics frame');
-          const responseProcessor = IframeTransport.responseProcessors_[
-              response['transportId']];
-          if (!responseProcessor) {
-            dev().warn(TAG_,'Received a response, but no response processor' +
-              ' was configured');
-            return;
-          }
-          responseProcessor(/** @type {!JsonObject} */ (response['message']));
+          // Add this response to the response map, for use by amp-ad-exit
+          this.win_[AMP_ANALYTICS_3P_RESPONSES] =
+              this.win_[AMP_ANALYTICS_3P_RESPONSES] || {};
+          this.win_[AMP_ANALYTICS_3P_RESPONSES][this.type_] =
+              this.win_[AMP_ANALYTICS_3P_RESPONSES][this.type_] || {};
+          this.win_[AMP_ANALYTICS_3P_RESPONSES][this.type_][this.creativeId_] =
+              response['message'];
         },
         true);
     IframeTransport.crossDomainIframes_[this.type_] = frameData;
@@ -256,6 +254,3 @@ IframeTransport.crossDomainIframes_ = {};
 
 /** @private {number} */
 IframeTransport.nextId_ = 0;
-
-/** @private {Object<string, function(!JsonObject)>} */
-IframeTransport.responseProcessors_ = {};

@@ -17,10 +17,10 @@
 import '../amp-ad-exit';
 import * as sinon from 'sinon';
 import {ANALYTICS_CONFIG} from '../../../amp-analytics/0.1/vendors';
-import {toggleExperiment} from '../../../../src/experiments';
 import {
-  getService,
-} from '../../../../src/service';
+  AMP_ANALYTICS_3P_RESPONSES,
+} from '../../../amp-analytics/0.1/iframe-transport';
+import {toggleExperiment} from '../../../../src/experiments';
 
 const TEST_3P_VENDOR = '3p-vendor';
 
@@ -148,19 +148,19 @@ describes.realWin('amp-ad-exit', {
 
   /**
    * Add a response
-   * @param {!../../../../service/ampdoc-impl.AmpDoc} ampDoc
+   * @param {!Window} win
    * @param {!string} vendor The identifier for the third-party frame that
    * responded
    * @param {!string} creativeUrl The URL of the creative being responded to
    * @param {!Object<string,string>} response The response object sent from
    * the third-party vendor's iframe
    */
-  function addToResponseMap(ampDoc, vendor, creativeUrl, response) {
-    const responseService =
-        getService(ampDoc.win, 'iframe-transport-responses');
-    const map = responseService.getResponses();
-    map[vendor] = map[vendor] || {};
-    map[vendor][creativeUrl] = response;
+  function addToResponseMap(win, vendor, creativeUrl, response) {
+    win[AMP_ANALYTICS_3P_RESPONSES] =
+        win[AMP_ANALYTICS_3P_RESPONSES] || {};
+    win[AMP_ANALYTICS_3P_RESPONSES][vendor] =
+        win[AMP_ANALYTICS_3P_RESPONSES][vendor] || {};
+    win[AMP_ANALYTICS_3P_RESPONSES][vendor][creativeUrl] = response;
   }
 
   beforeEach(() => {
@@ -575,7 +575,10 @@ describes.realWin('amp-ad-exit', {
       return {name: 'fakeWin'};
     });
 
-    addToResponseMap(env.ampdoc, TEST_3P_VENDOR, env.win.document.baseURI, {
+    const creativeId = (env.win.frameElement &&
+        env.win.frameElement.getAttribute('data-amp-3p-sentinel')) ||
+        /** @type {string} */ (env.win.document.baseURI); // Fallback
+    addToResponseMap(env.ampdoc.win, TEST_3P_VENDOR, creativeId, {
       'unused': 'unused',
       'collected-data': 'abc123',
     });

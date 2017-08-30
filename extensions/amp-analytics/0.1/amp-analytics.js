@@ -22,9 +22,6 @@ import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {IframeTransport} from './iframe-transport';
-import {
-  getService,
-} from '../../../src/service';
 import {Services} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
@@ -227,18 +224,13 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.instrumentation_.createAnalyticsGroup(this.element);
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      const creativeId = (this.win.frameElement &&
+        this.win.frameElement.getAttribute('data-amp-3p-sentinel')) ||
+        /** @type {string} */ (this.win.document.baseURI); // Fallback
       this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
         this.element.getAttribute('type'),
-        this.config_['transport'], response => {
-          // Add this response to the response map, for use by amp-ad-exit
-          const frameType = this.element.getAttribute('type');
-          const creativeUrl = /** @type {string} */ (this.win.document.baseURI);
-          const responseService =
-              getService(this.getAmpDoc().win, 'iframe-transport-responses');
-          const map = responseService.getResponses();
-          map[frameType] = map[frameType] || {};
-          map[frameType][creativeUrl] = response;
-        });
+        this.config_['transport'],
+        creativeId);
     }
 
     const promises = [];
