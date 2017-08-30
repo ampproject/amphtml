@@ -356,6 +356,8 @@ The element visibility trigger waits for the signal specified by the `waitFor` p
 
 The user error event (`"on": "user-error"`) is triggered when an error occurs that is attributable to the author of the page or to software that is used in publishing the page. This includes, but not limited to, misconfiguration of an AMP component, misconfigured ads, or failed assertions. User errors are also reported in the developer console.
 
+Currently, the trigger is not stable with excluding errors generated from A4A iframe embed, therefore, unwanted errors maybe reported.
+
 ```javascript
 "triggers": {
   "userError": {
