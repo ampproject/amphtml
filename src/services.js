@@ -186,16 +186,6 @@ export class Services {
   }
 
   /**
-   * Returns service implemented in service/iframe-transport-responses-impl.js.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return
-   *     {!./service/iframe-transport-responses-impl.IframeTransportResponses}
-   */
-  static iframeTransportResponsesForDoc(nodeOrDoc) {
-    return getServiceForDoc(nodeOrDoc, 'iframe-transport-responses');
-  }
-
-  /**
    * @param {!Window} win
    * @return {!./input.Input}
    */

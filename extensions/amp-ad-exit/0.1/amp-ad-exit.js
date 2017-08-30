@@ -18,12 +18,12 @@ import {makeClickDelaySpec} from './filters/click-delay';
 import {assertConfig, TransportMode} from './config';
 import {createFilter} from './filters/factory';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
-import {
-  getService,
-} from '../../../src/service';
 import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
+import {
+  AMP_ANALYTICS_3P_RESPONSES,
+} from '../../amp-analytics/0.1/iframe-transport';
 
 const TAG = 'amp-ad-exit';
 
@@ -60,6 +60,11 @@ export class AmpAdExit extends AMP.BaseElement {
     };
 
     this.userFilters_ = {};
+
+    /** @private @const {string} */
+    this.creativeId_ = (this.win.frameElement &&
+        this.win.frameElement.getAttribute('data-amp-3p-sentinel')) ||
+        /** @type {string} */ (this.win.document.baseURI); // Fallback
 
     this.registerAction('exit', this.exit.bind(this));
   }
@@ -103,10 +108,8 @@ export class AmpAdExit extends AMP.BaseElement {
       'CLICK_Y': true,
     };
     if (target.vars) {
-      const uri = /** @type {string} */ (this.win.document.baseURI);
-      const responseService =
-          getService(this.getAmpDoc().win, 'iframe-transport-responses');
-      const all3pResponses = responseService.getResponses();
+      const all3pResponses = this.getAmpDoc().win[AMP_ANALYTICS_3P_RESPONSES] ||
+          {};
 
       for (const customVarName in target.vars) {
         if (customVarName[0] == '_') {
@@ -126,8 +129,7 @@ export class AmpAdExit extends AMP.BaseElement {
                  ...
                }
                The cross-domain iframe of vendorXYZ has sent the
-               following response for the creative at the URI held in "uri"
-               above:
+               following response for the creative:
                  { priority: medium, category: W }
                This is just example data. The keys/values in that object can
                be any strings.
@@ -149,7 +151,8 @@ export class AmpAdExit extends AMP.BaseElement {
                      custom variable. If so, return the value in the
                      response object that is associated with that key.
                   */
-                  const relevant3pResponses = all3pResponses[vendor][uri];
+                  const relevant3pResponses =
+                      all3pResponses[vendor][this.creativeId_];
                   if (relevant3pResponses) {
                     return relevant3pResponses[
                         /** @type {string} */
@@ -225,7 +228,6 @@ export class AmpAdExit extends AMP.BaseElement {
         'be inside a <script> tag with type="application/json"');
     try {
       const config = assertConfig(parseJson(child.textContent));
-      // const userFilters = {};
       for (const name in config.filters) {
         this.userFilters_[name] =
             createFilter(name, config.filters[name], this);

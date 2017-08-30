@@ -15,8 +15,8 @@
  */
 
 import {user} from '../../../src/log';
-import {FilterType} from './filters/filter';
 import {ANALYTICS_CONFIG} from '../../amp-analytics/0.1/vendors';
+import {FilterType} from './filters/filter';
 
 /**
  * @typedef {{
