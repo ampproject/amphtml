@@ -106,7 +106,7 @@ export class AbstractAmpContext {
     this.client_.setSentinel(dev().assertString(this.sentinel));
 
     this.listenForPageVisibility_();
-    this.report3pError();
+    this.report3pError_();
   }
 
   /**
@@ -316,8 +316,9 @@ export class AbstractAmpContext {
 
   /**
    * Send 3p error to parent iframe
+   * @private
    */
-  report3pError() {
+  report3pError_() {
     this.win_.onerror = function(message) {
       if (message) {
         this.client_.sendMessage(MessageType.USER_ERROR, dict({

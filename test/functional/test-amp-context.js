@@ -59,7 +59,7 @@ describe('3p ampcontext.js', () => {
     windowMessageHandler = undefined;
   });
 
-  it('should send message when report3pError()', () => {
+  it('should send message when report3pError_()', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
     expect(context).to.be.ok;
@@ -86,7 +86,7 @@ describe('3p ampcontext.js', () => {
     window.onerror = function(message, source, lineno, colno, error) {
       expect(error).to.equal(e);
       expect(message).to.equal('message');
-      context.report3pError();
+      context.report3pError_();
       expect(windowPostMessageSpy).to.be.called;
       expect(windowPostMessageSpy).to.be.calledWith(
           'amp-$internalRuntimeVersion$' +
