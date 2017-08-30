@@ -78,7 +78,7 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 /**
  * Check whether Google Ads supports the A4A rendering pathway is valid for the
  * environment by ensuring native crypto support and page originated in the
- * the {@code cdn.ampproject.org} CDN <em>or</em> we must be running in local
+ * {@code cdn.ampproject.org} CDN <em>or</em> we must be running in local
  * dev mode.
  *
  * @param {!Window} win  Host window for the ad.
@@ -86,13 +86,20 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
  *   pathway.
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
-  const supportsNativeCrypto = win.crypto &&
-      (win.crypto.subtle || win.crypto.webkitSubtle);
   const googleCdnProxyRegex =
-      /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/;
-  return supportsNativeCrypto &&
-      (googleCdnProxyRegex.test(win.location.origin) || getMode(win).localDev ||
-       getMode(win).test);
+        /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+  return supportsNativeCrypto(win) && (
+      !!googleCdnProxyRegex.test(win.location.origin) ||
+        getMode(win).localDev || getMode(win).test);
+}
+
+/**
+ * Checks whether native crypto is supported for win.
+ * @param {!Window} win  Host window for the ad.
+ * @returns {boolean} Whether native crypto is supported.
+ */
+export function supportsNativeCrypto(win) {
+  return win.crypto && (win.crypto.subtle || win.crypto.webkitSubtle);
 }
 
 /**
