@@ -72,7 +72,7 @@ describe('3p ampcontext.js', () => {
 
     const messagePayload = {
       sentinel: '1-291921',
-      type: MessageType.USER_ERROR,
+      type: MessageType.USER_ERROR_IN_IRAME,
     };
 
     const messageData = 'amp-' + JSON.stringify(messagePayload);

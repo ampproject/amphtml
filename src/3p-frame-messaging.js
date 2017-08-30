@@ -53,7 +53,7 @@ export const MessageType = {
   IFRAME_TRANSPORT_EVENTS: 'iframe-transport-events',
 
   // For user-error
-  USER_ERROR: 'user-error',
+  USER_ERROR_IN_IRAME: 'user-error',
 };
 
 /**
