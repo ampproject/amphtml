@@ -1090,8 +1090,9 @@ describes.fakeWin('Core events', {amp: true}, env => {
         element,
         'change',
         sinon.match(e => {
-          const detail = e.detail;
-          return detail.min == 0 && detail.max == 10 && detail.value == 5;
+          const {min, max, value, valueAsNumber} = e.detail;
+          return min === '0' && max === '10' && value === '5'
+              && valueAsNumber === 5;
         }));
   });
 

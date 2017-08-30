@@ -536,18 +536,18 @@ export class ActionService {
     if (tagName == 'INPUT' || tagName == 'SELECT') {
       const type = target.getAttribute('type');
 
-      // TODO(blueyedgeek, #10729): Provide valueAsNumber instead of casting.
-      detail['value'] = (type == 'range') ? Number(target.value) : target.value;
+      detail['value'] = target.value;
+      detail['valueAsNumber'] = (target.valueAsNumber !== undefined)
+          ? target.valueAsNumber
+          : Number(target.value);
 
       // Expose HTMLInputElement properties based on type.
       if (tagName == 'INPUT') {
         if (type == 'checkbox' || type == 'radio') {
           detail['checked'] = target.checked;
         } else if (type == 'range') {
-          // TODO(choumx): Perhaps we shouldn't cast since min/max is also
-          // available on input[type="date|time|number"].
-          detail['min'] = Number(target.min);
-          detail['max'] = Number(target.max);
+          detail['min'] = target.min;
+          detail['max'] = target.max;
         }
       }
     }
@@ -556,7 +556,6 @@ export class ActionService {
       event.detail = detail;
     }
   }
-
 }
 
 
