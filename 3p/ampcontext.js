@@ -318,12 +318,13 @@ export class AbstractAmpContext {
    * Send 3p error to parent iframe
    */
   report3pError() {
-    this.win_.onerror = function(msg) {
-      if (msg) {
+    this.win_.onerror = function(message) {
+      if (message) {
         this.client_.sendMessage(MessageType.USER_ERROR, dict({
-          'message': msg,
+          'message': message,
         }));
       }
+      return false;
     };
   }
 }

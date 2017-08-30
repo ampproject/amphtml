@@ -24,7 +24,6 @@ const NOOP = () => {};
 describe('3p ampcontext.js', () => {
   let windowPostMessageSpy;
   let windowMessageHandler;
-  let windowErrorHandler;
   let win;
   let sandbox;
 
@@ -33,12 +32,7 @@ describe('3p ampcontext.js', () => {
     windowPostMessageSpy = sandbox.spy();
     win = {
       addEventListener: (eventType, handlerFn) => {
-        if (eventType == 'message') {
-          windowMessageHandler = handlerFn;
-        }
-        else if (eventType == 'error') {
-          windowErrorHandler = handlerFn;
-        }
+        windowMessageHandler = handlerFn;
       },
       parent: {
         postMessage: windowPostMessageSpy,
@@ -65,62 +59,41 @@ describe('3p ampcontext.js', () => {
     windowMessageHandler = undefined;
   });
 
-  it('should call addEventListener with correct eventType', () => {
-    win.name = generateSerializedAttributes();
-    const context = new AmpContext(win);
-    expect(context).to.be.ok;
-    const addEventListenerSpy = sandbox.spy(win, 'addEventListener');
-    context.report3pError();
-
-    expect(addEventListenerSpy).to.have.been.called;
-    expect(addEventListenerSpy)
-        .to.have.been.calledWith('error');
-  });
-
-  it('should send error and message when report3pError()', () => {
+  it('should send message when report3pError()', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
     expect(context).to.be.ok;
 
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.reset();
-    context.report3pError();
 
     const e = new Error();
-    e.message = 'error';
+    e.message = 'message';
 
     const messagePayload = {
       sentinel: '1-291921',
       type: MessageType.USER_ERROR,
     };
 
-    try {
-      throw e;
-    }
-    catch (err) {
-      const messageData = 'amp-' + JSON.stringify(messagePayload);
-      const message = {
-        source: context.client_.hostWindow_,
-        data: messageData,
-        error: err,
-      };
-      windowErrorHandler(message);
+    const messageData = 'amp-' + JSON.stringify(messagePayload);
+    const message = {
+      source: context.client_.hostWindow_,
+      data: messageData,
+      message: e.message,
+    };
+    windowMessageHandler(message);
 
-      // window.context should have sent postMessage sending 3p errors
+    window.onerror = function(message, source, lineno, colno, error) {
+      expect(error).to.equal(e);
+      expect(message).to.equal('message');
+      context.report3pError();
       expect(windowPostMessageSpy).to.be.called;
       expect(windowPostMessageSpy).to.be.calledWith(
           'amp-$internalRuntimeVersion$' +
-          '{"error":{"message":"error"},' +
-          '"type":"user-error","sentinel":"1-291921"}',
+              '{"error":{"message":"error"},' +
+              '"type":"user-error","sentinel":"1-291921"}',
           '*');
-    }
-
-    // const e = new ErrorEvent('error', {
-    //   error: new Error('e'),
-    // });
-    // e.initEvent('error', true, true);
-    // context.win_.dispatchEvent(e);
-    // // window.context should have sent postMessage sending 3p errors
+    };
   });
 
   it('should add metadata to window.context using name as per 3P.', () => {
