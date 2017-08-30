@@ -537,18 +537,18 @@ export class ActionService {
       const type = target.getAttribute('type');
 
       detail['value'] = target.value;
+
       detail['valueAsNumber'] = (target.valueAsNumber !== undefined)
           ? target.valueAsNumber
           : Number(target.value);
 
-      // Expose HTMLInputElement properties based on type.
-      if (tagName == 'INPUT') {
-        if (type == 'checkbox' || type == 'radio') {
-          detail['checked'] = target.checked;
-        } else if (type == 'range') {
-          detail['min'] = target.min;
-          detail['max'] = target.max;
-        }
+      if (type == 'checkbox' || type == 'radio') {
+        detail['checked'] = target.checked;
+      }
+
+      if (target.min !== undefined || target.max !== undefined) {
+        detail['min'] = target.min;
+        detail['max'] = target.max;
       }
     }
 
