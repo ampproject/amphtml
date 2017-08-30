@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {childElementByTag} from '../dom';
+import {childElementByTag, scopedQuerySelector} from '../dom';
 import {getService, registerServiceBuilder} from '../service';
 import {dev, user} from '../log';
 import {toWin} from '../types';
@@ -170,10 +170,13 @@ export class Templates {
    * attribute, the value indicates the ID of the template element.
    * @param {!Element} parent
    * @param {!JsonObject} data
+   * @param {string=} opt_queryString
    * @return {!Promise<!Element>}
    */
-  findAndRenderTemplate(parent, data) {
-    return this.renderTemplate(this.findTemplate_(parent), data);
+  findAndRenderTemplate(parent, data, opt_queryString) {
+    return this.renderTemplate(
+        this.findTemplate_(parent, opt_queryString),
+        data);
   }
 
   /**
@@ -184,30 +187,35 @@ export class Templates {
    * the array of the rendered elements.
    * @param {!Element} parent
    * @param {!Array<!JsonObject>} array
+   * @param {string=} opt_queryString
    * @return {!Promise<!Array<!Element>>}
    */
-  findAndRenderTemplateArray(parent, array) {
-    return this.renderTemplateArray(this.findTemplate_(parent), array);
+  findAndRenderTemplateArray(parent, array, opt_queryString) {
+    return this.renderTemplateArray(
+        this.findTemplate_(parent, opt_queryString),
+        array);
   }
 
   /**
    * Detect if a template is present inside the parent.
    * @param {!Element} parent
+   * @param {string=} opt_queryString
    * @return {boolean}
    */
-  hasTemplate(parent) {
-    return !!this.maybeFindTemplate_(parent);
+  hasTemplate(parent, opt_queryString) {
+    return !!this.maybeFindTemplate_(parent, opt_queryString);
   }
 
   /**
    * Find a specified template inside the parent. Fail if the template is
    * not present.
    * @param {!Element} parent
+   * @param {string=} opt_queryString
    * @return {!Element}
    * @private
    */
-  findTemplate_(parent) {
-    const templateElement = this.maybeFindTemplate_(parent);
+  findTemplate_(parent, opt_queryString) {
+    const templateElement = this.maybeFindTemplate_(parent, opt_queryString);
     user().assert(templateElement, 'Template not found for %s', parent);
     user().assert(templateElement.tagName == 'TEMPLATE',
         'Template element must be a "template" tag %s', templateElement);
@@ -220,13 +228,16 @@ export class Templates {
    * child "template" element. When specified via "template" attribute,
    * the value indicates the ID of the template element.
    * @param {!Element} parent
+   * @param {string=} opt_queryString
    * @return {?Element}
    * @private
    */
-  maybeFindTemplate_(parent) {
+  maybeFindTemplate_(parent, opt_queryString) {
     const templateId = parent.getAttribute('template');
     if (templateId) {
       return parent.ownerDocument.getElementById(templateId);
+    } else if (opt_queryString) {
+      return scopedQuerySelector(parent, opt_queryString);
     } else {
       return childElementByTag(parent, 'template');
     }

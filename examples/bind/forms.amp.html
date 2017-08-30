@@ -13,6 +13,26 @@
 </head>
 <body>
 
+  <amp-list class="items m1"
+  width="auto"
+  height="100"
+  layout="fixed-height"
+  src="/link/to/myap.json"
+  [src]="recipes.recentRecipesSrc">
+    <template type="amp-mustache">
+      <a class="text-decoration-none p1"
+        href="">
+        <amp-img width="100"
+          height="100"
+          layout="responsive"
+          alt="{{name}}"
+          src="{{thumbnail_url}}"></amp-img>
+        <p class="name">{{name}}</p>
+        <p class="slug">{{slug}}</p>
+      </a>
+    </template>
+  </amp-list>
+
   <p>Submit the form and then press a button to change the text in the below template</p>
   <button on="tap:AMP.setState({selected: 1})">1</button>
   <button on="tap:AMP.setState({selected: 2})">2</button>
@@ -20,6 +40,7 @@
   <button on="tap:AMP.setState({selected: 4})">4</button>
 
   <p [text]="'$' + selectedRange">$0</p>
+  <p [text]="recipes.recentRecipesSrc + 'wow'">Cool</p>
   <p>Color Selection: <span [text]="colorSelection || 'red'">red</span>
 
   <h4>Enter your name and email.</h4>
@@ -64,6 +85,10 @@
               Success! Thanks {{name}} for entering your email: {{email}}
 
               <p>You have selected: <span [text]="selected ? selected : 'No selection'">No selection</span></p>
+              <button [disabled]="listSrcButtonDisabled"
+                class="ampstart-btn caps m1 mb3"
+                id="listSrcButton"
+                on="tap:AMP.setState({listSrcButtonDisabled: true, recipes: {recentRecipesSrc: '{{name}}'}})">Show more</button>
           </template>
       </div>
       <div submit-error>

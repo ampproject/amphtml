@@ -59,6 +59,8 @@ const DEFAULT_THROTTLE_INTERVAL = 100; // ms
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
+  'amp-date': ['setDate', 'clear'],
+  'amp-date-range': ['setDates', 'clear'],
 };
 
 /**
@@ -452,16 +454,18 @@ export class ActionService {
 
     const lowerTagName = target.tagName.toLowerCase();
     // AMP elements.
-    if (lowerTagName.substring(0, 4) == 'amp-') {
+    if (lowerTagName.substring(0, 4) == 'amp-' &&
+        !ELEMENTS_ACTIONS_MAP_[lowerTagName]) {
       if (target.enqueAction) {
         target.enqueAction(invocation);
+        return null;
       } else {
         this.actionInfoError_('Unrecognized AMP element "' +
             lowerTagName + '". ' +
             'Did you forget to include it via <script custom-element>?',
             actionInfo, target);
       }
-      return null;
+      // return null;
     }
 
     // Special elements with AMP ID or known supported actions.
@@ -481,6 +485,20 @@ export class ActionService {
         target[ACTION_QUEUE_].push(invocation);
       }
       return null;
+    }
+
+    // AMP elements.
+    if (lowerTagName.substring(0, 4) == 'amp-' &&
+        !ELEMENTS_ACTIONS_MAP_[lowerTagName]) {
+      if (target.enqueAction) {
+        target.enqueAction(invocation);
+      } else {
+        this.actionInfoError_('Unrecognized AMP element "' +
+            lowerTagName + '". ' +
+            'Did you forget to include it via <script custom-element>?',
+            actionInfo, target);
+      }
+      return;
     }
 
     // Unsupported target.
