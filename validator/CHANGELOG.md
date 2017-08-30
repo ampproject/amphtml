@@ -30,6 +30,17 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 11:00 PM, August 30, 2017 UTC
+
+Validator Version 246
+Spec Version 473
+
+Includes:
+ - `<amp-position-observer>` #10818
+ - amp-audio/video changes #10757, #10930, #10936
+ - Sibling tag rules
+ - #10965 and #10976
+
 ### 7:00 PM, August 23, 2017 UTC
 
 Validator Version 245
