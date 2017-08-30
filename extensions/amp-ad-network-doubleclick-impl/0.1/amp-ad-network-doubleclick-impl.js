@@ -837,7 +837,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * @param {string} impressions
-   * @param {boolean} scrubReferer
+   * @param {boolean=} scrubReferer
    * @visibileForTesting
    */
   fireDelayedImpressions(impressions, scrubReferer) {
