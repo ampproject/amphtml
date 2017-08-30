@@ -499,12 +499,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
-  'example-3p-vendor': {
-    'transport': {
-      'iframe': '/examples/analytics-iframe-transport-remote-frame.html',
-    },
-  },
-
   'facebookpixel': {
     'vars': {
       'pixelId': 'PIXEL-ID',
