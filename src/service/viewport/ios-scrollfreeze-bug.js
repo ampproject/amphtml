@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {setStyle} from '../style';
+import {Services} from '../../services';
+import {setStyle} from '../../style';
 
 
 /**
@@ -29,21 +29,21 @@ import {setStyle} from '../style';
  *
  * See #3481 for more details.
  *
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @param {!../service/platform-impl.Platform=} opt_platform
- * @param {!./viewer-impl.Viewer=} opt_viewer
- * @param {!./vsync-impl.Vsync=} opt_vsync
+ * @param {!../ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../platform-impl.Platform=} opt_platform
+ * @param {!../viewer-impl.Viewer=} opt_viewer
+ * @param {!../vsync-impl.Vsync=} opt_vsync
  * @return {?Promise}
  * @package
  */
 export function checkAndFix(ampdoc, opt_platform, opt_viewer, opt_vsync) {
   /** @const {!Window} */
   const win = ampdoc.win;
-  /** @const {!./platform-impl.Platform} */
+  /** @const {!../platform-impl.Platform} */
   const platform = opt_platform || Services.platformFor(win);
-  /** @const {!./viewer-impl.Viewer} */
+  /** @const {!../viewer-impl.Viewer} */
   const viewer = opt_viewer || Services.viewerForDoc(ampdoc);
-  /** @const {!./vsync-impl.Vsync} */
+  /** @const {!../vsync-impl.Vsync} */
   const vsync = opt_vsync || Services.vsyncFor(win);
   if (!platform.isIos() || !platform.isSafari() ||
           platform.getMajorVersion() > 8 ||
