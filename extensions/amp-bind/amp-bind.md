@@ -272,6 +272,11 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
     <td>Expression result must be a space-delimited string.</td>
   </tr>
   <tr>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class">The <code>hidden</code> attribute</a></td>
+    <td><code>[hidden]</code></td>
+    <td>Should be a boolean expression.</td>
+  </tr>
+  <tr>
     <td>Size of <a href="https://www.ampproject.org/docs/reference/components">AMP elements</a></td>
     <td><code>[width]</code><br><code>[height]</code></td>
     <td>Changes the width and/or height of the AMP element.</td>
