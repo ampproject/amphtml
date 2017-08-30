@@ -73,7 +73,7 @@ class AbstractPositionObserver {
     /** @private {!./vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(ampdoc.win);
 
-    /** @private {!./viewport-impl.Viewport} */
+    /** @private {!./viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
   }

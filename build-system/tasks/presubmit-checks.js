@@ -240,7 +240,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
-      'src/service/viewport-impl.js',
+      'src/service/viewport/viewport-impl.js',
     ],
   },
   'installVsyncService': {
@@ -248,7 +248,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/runtime.js',
       'src/service/resources-impl.js',
-      'src/service/viewport-impl.js',
+      'src/service/viewport/viewport-impl.js',
       'src/service/vsync-impl.js',
     ],
   },
@@ -307,7 +307,7 @@ var forbiddenTerms = {
     whitelist: [
       // viewer-impl.sendMessage
       'src/service/viewer-impl.js',
-      'src/service/viewport-impl.js',
+      'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
