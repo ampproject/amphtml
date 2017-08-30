@@ -83,6 +83,10 @@ app.use('/pwa', (req, res) => {
     // pwa.js
     contentType = 'application/javascript';
     file = '/examples/pwa/pwa-sw.js';
+  } else if (req.url == '/ampdoc-shell') {
+    // pwa-ampdoc-shell.html
+    contentType = 'text/html';
+    file = '/examples/pwa/pwa-ampdoc-shell.html';
   } else {
     // Redirect to the underlying resource.
     // TODO(dvoytenko): would be nicer to do forward instead of redirect.

@@ -196,6 +196,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/amp.js',
+      'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/performance-impl.js',
     ],
