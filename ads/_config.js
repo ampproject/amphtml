@@ -267,6 +267,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  directadvert: {
+    renderStartImplemented: true,
+  },
+
   distroscale: {
     preconnect: [
       'https://c.jsrdn.com',

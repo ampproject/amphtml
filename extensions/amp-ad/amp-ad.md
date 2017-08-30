@@ -227,6 +227,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [CSA](../../ads/google/csa.md)
 - [CxenseDisplay](../../ads/eas.md)
 - [Dianomi](../../ads/dianomi.md)
+- [Directadvert](../../ads/directadvert.md)
 - [DistroScale](../../ads/distroscale.md)
 - [Dot and Media](../../ads/dotandads.md)
 - [Doubleclick](../../ads/google/doubleclick.md)
