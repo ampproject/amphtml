@@ -20,20 +20,28 @@
  */
 
 import './polyfills';
-
-import {installDocService} from './service/ampdoc-impl';
+import {Services} from './services';
+import {
+  installDocService,
+  installShadowDocForShell,
+} from './service/ampdoc-impl';
 import {
   adoptShadowMode,
   installBuiltins,
   installRuntimeServices,
+  installAmpdocServices,
 } from './runtime';
-import {bodyAlwaysVisible} from './style-installer';
+import {
+  installStylesForDoc,
+  makeBodyVisible,
+  bodyAlwaysVisible,
+} from './style-installer';
 import {deactivateChunking} from './chunk';
 import {doNotTrackImpression} from './impression';
-
-
-// PWA shell manages its own visibility and shadow ampdocs their own.
-bodyAlwaysVisible(self);
+import {cssText} from '../build/css';
+import {isExperimentOn} from './experiments';
+import {installPerformanceService} from './service/performance-impl';
+import {stubElementsForDoc} from './custom-element';
 
 // This feature doesn't make sense in shadow mode as it only applies to
 // background rendered iframes;
@@ -49,11 +57,36 @@ installRuntimeServices(self);
 // has to be unblocked.
 doNotTrackImpression();
 
-// Builtins.
-installBuiltins(self);
+if (isExperimentOn(self, 'ampdoc-shell')) {
+  //Shadow mode with an Ampdoc for the shell
+  installPerformanceService(self);
+  const ampdocService = Services.ampdocServiceFor(self);
+  const ampdocShell = installShadowDocForShell(ampdocService);
+  installStylesForDoc(ampdocShell, cssText, () => {
+    installAmpdocServices(ampdocShell);
 
-// Final configuration and stubbing.
-adoptShadowMode(self);
+    // Builtins.
+    installBuiltins(self);
+
+    // Final configuration and stubbing.
+    adoptShadowMode(self);
+
+    // Pre-stub already known elements.
+    stubElementsForDoc(ampdocShell);
+
+    makeBodyVisible(self.document, /* waitForServices */ true);
+    Services.resourcesForDoc(ampdocShell).ampInitComplete();
+  }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+} else {
+  // PWA shell manages its own visibility and shadow ampdocs their own.
+  bodyAlwaysVisible(self);
+
+  // Builtins.
+  installBuiltins(self);
+
+  // Final configuration and stubbing.
+  adoptShadowMode(self);
+}
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
