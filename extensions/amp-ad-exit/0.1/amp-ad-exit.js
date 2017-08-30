@@ -61,11 +61,6 @@ export class AmpAdExit extends AMP.BaseElement {
 
     this.userFilters_ = {};
 
-    /** @private @const {string} */
-    this.creativeId_ = (this.win.frameElement &&
-        this.win.frameElement.getAttribute('data-amp-3p-sentinel')) ||
-        /** @type {string} */ (this.win.document.baseURI); // Fallback
-
     this.registerAction('exit', this.exit.bind(this));
   }
 
@@ -151,8 +146,7 @@ export class AmpAdExit extends AMP.BaseElement {
                      custom variable. If so, return the value in the
                      response object that is associated with that key.
                   */
-                  const relevant3pResponses =
-                      all3pResponses[vendor][this.creativeId_];
+                  const relevant3pResponses = all3pResponses[vendor];
                   if (relevant3pResponses) {
                     return relevant3pResponses[
                         /** @type {string} */
