@@ -83,17 +83,22 @@ describe('3p ampcontext.js', () => {
     };
     windowMessageHandler(message);
 
-    win.onerror = function(message, source, lineno, colno, error) {
-      expect(error).to.equal(e);
-      expect(message).to.equal('message');
-      context.report3pError_();
-      expect(windowPostMessageSpy).to.be.called;
-      expect(windowPostMessageSpy).to.be.calledWith(
-          'amp-$internalRuntimeVersion$' +
-              '{"error":{"message":"error"},' +
-              '"type":"user-error","sentinel":"1-291921"}',
-          '*');
-    };
+    try {
+      throw e;
+    } catch (err) {
+      win.onerror = function(message, source, lineno, colno, error) {
+        expect(error).to.equal(err);
+        expect(err).to.equal(e);
+        expect(message).to.equal('message');
+        context.report3pError_();
+        expect(windowPostMessageSpy).to.be.called;
+        expect(windowPostMessageSpy).to.be.calledWith(
+            'amp-$internalRuntimeVersion$' +
+                '{"error":{"message":"error"},' +
+                '"type":"user-error","sentinel":"1-291921"}',
+            '*');
+      };
+    }
   });
 
   it('should add metadata to window.context using name as per 3P.', () => {
