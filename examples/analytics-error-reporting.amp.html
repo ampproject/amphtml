@@ -93,19 +93,11 @@
         data-blade-error="0">
 </amp-ad>
 
-<h2>Adverticum fake 3p error</h2>
-<amp-ad width="285" height="350"
-        type="adverticum"
-        data-goa3zone="4316734"
-        data-costumeTargetString="bWFsYWM="
-        data-adverticum-error="0">
-</amp-ad>
-
 <amp-analytics>
     <script type="application/json">
         {
             "requests": {
-                "error": "http://localhost:8000/error=${errorMessage}"
+                "error": "http://localhost:8000/error=${errorName}-${errorMessage}"
             },
             "triggers": {
                 "userError": {

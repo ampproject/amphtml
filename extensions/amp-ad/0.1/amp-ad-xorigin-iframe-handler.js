@@ -209,7 +209,7 @@ export class AmpAdXOriginIframeHandler {
 
     this.unlisteners_.push(listenFor(this.iframe, MessageType.USER_ERROR,
         data => {
-          this.userErrorForAnalytics_(data['error']);
+          this.userErrorForAnalytics_(data['message']);
         }, true, true));
 
     // Iframe.onload normally called by the Ad after full load.
@@ -531,11 +531,14 @@ export class AmpAdXOriginIframeHandler {
   }
 
   /**
-   * @param {!Error} error
+   * @param {!string} message
    * @private
    */
-  userErrorForAnalytics_(error) {
-    reportErrorToAnalytics(error, this.baseInstance_.win);
+  userErrorForAnalytics_(message) {
+    const e = new Error();
+    e.message = message;
+    e.name = '3pError';
+    reportErrorToAnalytics(e, this.baseInstance_.win);
   }
 }
 
