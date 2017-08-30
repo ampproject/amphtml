@@ -45,19 +45,13 @@ export class IframeTransport {
    * @param {!Window} win
    * @param {!string} type The value of the amp-analytics tag's type attribute
    * @param {!JsonObject} config
-   * @param {string} creativeId A string which identifies the
-   * creative which contains this amp-analytics tag. In practice, this is
-   * the value of the data-amp-3p-sentinel attribute of the iframe.
    */
-  constructor(win, type, config, creativeId) {
+  constructor(win, type, config) {
     /** @private @const {!Window} win */
     this.win_ = win;
 
     /** @private @const {string} */
     this.type_ = type;
-
-    /** @private @const {string} */
-    this.creativeId_ = creativeId;
 
     /** @private @const {string} */
     this.id_ = IframeTransport.createUniqueId_();
@@ -145,8 +139,6 @@ export class IframeTransport {
           this.win_[AMP_ANALYTICS_3P_RESPONSES] =
               this.win_[AMP_ANALYTICS_3P_RESPONSES] || {};
           this.win_[AMP_ANALYTICS_3P_RESPONSES][this.type_] =
-              this.win_[AMP_ANALYTICS_3P_RESPONSES][this.type_] || {};
-          this.win_[AMP_ANALYTICS_3P_RESPONSES][this.type_][this.creativeId_] =
               response['message'];
         },
         true);
