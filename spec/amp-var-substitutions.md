@@ -554,7 +554,7 @@ Provides the message of the error that triggered an user error event. This varia
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${errorMessage}`
-  * Example: `"error": "http://localhost:8000/message=${errorMessage}"`
+  * Example value: `Invalid multi-size data format`
 
 #### Error Name
 
@@ -562,7 +562,7 @@ Provides the name of the error that triggered an user error event. This variable
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${errorName}`
-  * Example : `"error": "http://localhost:8000/name=${errorName}"`
+  * Example value: `AMP-AD`
 
 #### External Referrer
 
