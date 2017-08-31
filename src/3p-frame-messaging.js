@@ -51,6 +51,9 @@ export const MessageType = {
   // For amp-analytics' iframe-transport
   SEND_IFRAME_TRANSPORT_EVENTS: 'send-iframe-transport-events',
   IFRAME_TRANSPORT_EVENTS: 'iframe-transport-events',
+
+  // For user-error-in-iframe
+  USER_ERROR_IN_IFRAME: 'user-error-in-iframe',
 };
 
 /**
