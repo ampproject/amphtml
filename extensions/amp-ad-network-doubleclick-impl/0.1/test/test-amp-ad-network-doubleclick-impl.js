@@ -195,6 +195,30 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       // exact value of ampAnalyticsConfig covered in
       // ads/google/test/test-utils.js
     });
+
+    it('should load delayed impression amp-pixels', () => {
+      const fireDelayedImpressionsSpy =
+          sandbox.spy(impl, 'fireDelayedImpressions');
+      expect(impl.extractSize({
+        get(name) {
+          switch (name) {
+            case 'X-AmpImps':
+              return 'https://a.com?a=b,https://b.com?c=d';
+            case 'X-AmpRSImps':
+              return 'https://c.com?e=f,https://d.com?g=h';
+            default:
+              return undefined;
+          }
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      })).to.deep.equal(size);
+      expect(fireDelayedImpressionsSpy.withArgs(
+          'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
+      expect(fireDelayedImpressionsSpy.withArgs(
+          'https://c.com?e=f,https://d.com?g=h', true)).to.be.calledOnce;
+    });
   });
 
   describe('#onCreativeRender', () => {
@@ -988,6 +1012,55 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           expect(impl.element.getAttribute('width')).to.be.null;
           expect(impl.element.getAttribute('height')).to.equal('150');
           verifyCss(impl.iframe, size);
+        });
+      });
+
+      describe('#fireDelayedImpressions', () => {
+        beforeEach(() => {
+          element = createElementWithAttributes(doc, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+          });
+          impl = new AmpAdNetworkDoubleclickImpl(element);
+        });
+
+        it('should handle null impressions', () => {
+          impl.fireDelayedImpressions(null);
+          expect(env.win.document.querySelectorAll('amp-pixel').length)
+              .to.equal(0);
+        });
+
+        it('should not include non-https', () => {
+          impl.fireDelayedImpressions('http://f.com?a=b,https://b.net?c=d');
+          expect(env.win.document.querySelectorAll('amp-pixel').length)
+              .to.equal(1);
+          expect(env.win.document.querySelector(
+              'amp-pixel[src="https://b.net?c=d"][referrerpolicy=""]'))
+              .to.be.ok;
+        });
+
+        it('should append amp-pixel w/o scrubReferer', () => {
+          impl.fireDelayedImpressions('https://f.com?a=b,https://b.net?c=d');
+          expect(env.win.document.querySelector(
+              'amp-pixel[src="https://f.com?a=b"][referrerpolicy=""]'))
+              .to.be.ok;
+          expect(env.win.document.querySelector(
+              'amp-pixel[src="https://b.net?c=d"][referrerpolicy=""]'))
+              .to.be.ok;
+        });
+
+        it('should append amp-pixel wwith scrubReferer', () => {
+          impl.fireDelayedImpressions(
+              'https://f.com?a=b,https://b.net?c=d', true);
+          expect(env.win.document.querySelector(
+              'amp-pixel[src="https://f.com?a=b"]' +
+              '[referrerpolicy="no-referrer"]'))
+              .to.be.ok;
+          expect(env.win.document.querySelector(
+              'amp-pixel[src="https://b.net?c=d"]' +
+              '[referrerpolicy="no-referrer"]'))
+              .to.be.ok;
         });
       });
     });
