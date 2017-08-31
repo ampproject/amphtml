@@ -122,12 +122,15 @@ export class DoubleclickA4aEligibility {
         !this.supportsCrypto(win)) {
       return false;
     }
+    const urlExperimentId = extractUrlExperimentId(win, element);
     let experimentName = DFP_CANONICAL_FF_EXPERIMENT_NAME;
     if (!this.isCdnProxy(win)) {
-      experimentId = this.maybeSelectExperiment_(win, element, [
-        DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
-        DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
-      ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
+      // Ensure that forcing FF via url is applied.
+      experimentId = urlExperimentId == -1 ? MANUAL_EXPERIMENT_ID :
+          this.maybeSelectExperiment_(win, element, [
+            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
+            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
+          ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
     } else {
       if (element.hasAttribute(BETA_ATTRIBUTE)) {
         addExperimentIdToElement(BETA_EXPERIMENT_ID, element);
@@ -136,7 +139,6 @@ export class DoubleclickA4aEligibility {
       }
       experimentName = DOUBLECLICK_A4A_EXPERIMENT_NAME;
       // See if in holdback control/experiment.
-      const urlExperimentId = extractUrlExperimentId(win, element);
       if (urlExperimentId != undefined) {
         experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
         dev().info(

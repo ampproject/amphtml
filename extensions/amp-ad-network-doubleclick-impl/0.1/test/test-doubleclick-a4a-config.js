@@ -26,6 +26,7 @@ import {
 } from '../doubleclick-a4a-config';
 import {
   isInExperiment,
+  MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {forceExperimentBranch} from '../../../../src/experiments';
@@ -84,6 +85,18 @@ describe('doubleclick-a4a-config', () => {
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
           DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT);
+    });
+
+    it('should honor url forced FF on non-CDN', () => {
+      mockWin.location = parseUrl(
+          'https://foo.com/some/path/to/content.html?exp=a4a:-1');
+      sandbox.stub(DoubleclickA4aEligibility.prototype,
+          'isCdnProxy', () => false);
+      const elem = testFixture.doc.createElement('div');
+      testFixture.doc.body.appendChild(elem);
+      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
+          MANUAL_EXPERIMENT_ID);
     });
 
     it('should not enable if data-use-same-domain-rendering-until-deprecated',
