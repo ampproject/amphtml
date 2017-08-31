@@ -707,7 +707,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           '${baseSuffix}',
       'error': '${host}/collect?${basePrefix}&' +
           't=exception&' +
-          'exd=${errorMessage}' +
+          'exd=name=${errorName},msg=${errorMessage}' +
           '${baseSuffix}',
     },
     'triggers': {
@@ -803,7 +803,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           '${baseSuffix}',
       'error': '${host}/collect?${basePrefix}&' +
           't=exception&' +
-          'exd=${errorMessage}' +
+          'exd=name=${errorName},msg=${errorMessage}' +
           '${baseSuffix}',
     },
     'triggers': {
