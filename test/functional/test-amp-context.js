@@ -16,7 +16,7 @@
 import {
   AmpContext,
 } from '../../3p/ampcontext';
-import {MessageType} from '../../src/3p-frame-messaging';
+import {MessageType, deserializeMessage} from '../../src/3p-frame-messaging';
 import * as sinon from 'sinon';
 
 const NOOP = () => {};
@@ -67,29 +67,24 @@ describe('3p ampcontext.js', () => {
 
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.reset();
-    // const e = new Error();
-    // e.message = 'message';
-    //
-    // const messagePayload = {
-    //   sentinel: '1-291921',
-    //   type: MessageType.USER_ERROR_IN_IRAME,
-    // };
-    //
-    // const messageData = 'amp-' + JSON.stringify(messagePayload);
-    // const message = {
-    //   source: context.client_.hostWindow_,
-    //   data: messageData,
-    //   message: e.message,
-    // };
-    // windowMessageHandler(message);
-
     win.onerror('message');
     expect(windowPostMessageSpy).to.be.called;
-    expect(windowPostMessageSpy).to.be.calledWith(
-        'amp-$internalRuntimeVersion$' +
+
+    const expected = 'amp-$internalRuntimeVersion$' +
         '{"message":"message",' +
-        '"type":"user-error-in-iframe","sentinel":"1-291921"}',
-        '*');
+        '"type":"user-error-in-iframe","sentinel":"1-291921"}';
+
+    const jsonMessage = deserializeMessage(expected, '*');
+    expect(windowPostMessageSpy).to.be.calledWith(
+        expected, '*'
+    );
+    expect(jsonMessage).to.be.jsonEqual(
+        {
+          'message': 'message',
+          'sentinel': '1-291921',
+          'type': 'user-error-in-iframe',
+        }
+      );
   });
 
   it('should add metadata to window.context using name as per 3P.', () => {
