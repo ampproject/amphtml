@@ -548,19 +548,21 @@ Provides the absolute Y coordinate of the top edge of the element specified by `
 * **platform variable**: N/A
 * **amp-analytics variable**: `${elementY}`
 
-#### Error Name
-
-Provides the name of the error that triggered an user error event. This variable is only available in a `trigger` of type `user-error`
-
-* **platform variable**: N/A
-* **amp-analytics variable**: `${errorName}`
-
 #### Error Message
 
 Provides the message of the error that triggered an user error event. This variable is only available in a `trigger` of type `user-error`
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${errorMessage}`
+  * Example: `"error": "http://localhost:8000/message=${errorMessage}"`
+
+#### Error Name
+
+Provides the name of the error that triggered an user error event. This variable is only available in a `trigger` of type `user-error`
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${errorName}`
+  * Example : `"error": "http://localhost:8000/name=${errorName}"`
 
 #### External Referrer
 
