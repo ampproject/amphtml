@@ -396,4 +396,3 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
   });
 });
-
