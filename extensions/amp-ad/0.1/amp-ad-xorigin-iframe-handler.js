@@ -26,6 +26,7 @@ import {
 } from '../../../src/iframe-helper';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {reportErrorToAnalytics} from '../../../src/error';
 import {dict} from '../../../src/utils/object';
 import {setStyle} from '../../../src/style';
 import {getData, loadPromise} from '../../../src/event-helper';
@@ -205,6 +206,11 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }));
+
+    this.unlisteners_.push(listenFor(this.iframe,
+        MessageType.USER_ERROR_IN_IFRAME, data => {
+          this.userErrorForAnalytics_(data['message']);
+        }, true, true /* opt_includingNestedWindows */));
 
     // Iframe.onload normally called by the Ad after full load.
     const iframeLoadPromise = loadPromise(this.iframe).then(() => {
@@ -521,6 +527,18 @@ export class AmpAdXOriginIframeHandler {
     // have changed. Send an intersection record if needed.
     if (this.intersectionObserver_) {
       this.intersectionObserver_.fire();
+    }
+  }
+
+  /**
+   * @param {string} message
+   * @private
+   */
+  userErrorForAnalytics_(message) {
+    if (typeof message == 'string') {
+      const e = new Error(message);
+      e.name = '3pError';
+      reportErrorToAnalytics(e, this.baseInstance_.win);
     }
   }
 }

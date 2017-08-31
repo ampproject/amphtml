@@ -16,7 +16,7 @@
 import {
   AmpContext,
 } from '../../3p/ampcontext';
-import {MessageType} from '../../src/3p-frame-messaging';
+import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
 import * as sinon from 'sinon';
 
 const NOOP = () => {};
@@ -33,7 +33,6 @@ describe('3p ampcontext.js', () => {
     win = {
       addEventListener: (eventType, handlerFn) => {
         expect(eventType).to.equal('message');
-        expect(windowMessageHandler).to.not.be.ok;
         windowMessageHandler = handlerFn;
       },
       parent: {
@@ -59,6 +58,23 @@ describe('3p ampcontext.js', () => {
     sandbox.restore();
     win = undefined;
     windowMessageHandler = undefined;
+  });
+
+  it('should send error message with report3pError_', () => {
+    win.name = generateSerializedAttributes();
+    const context = new AmpContext(win);
+    expect(context).to.be.ok;
+
+    // Resetting since a message is sent on construction.
+    windowPostMessageSpy.reset();
+    win.onerror('message');
+    expect(windowPostMessageSpy).to.be.called;
+    expect(windowPostMessageSpy).to.be.calledWith(serializeMessage(
+        'user-error-in-iframe',
+        '1-291921',
+        {'message': 'message'},
+        '$internalRuntimeVersion$'
+      ));
   });
 
   it('should add metadata to window.context using name as per 3P.', () => {
