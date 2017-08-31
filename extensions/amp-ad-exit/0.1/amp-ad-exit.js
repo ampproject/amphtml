@@ -139,8 +139,7 @@ export class AmpAdExit extends AMP.BaseElement {
                     /** @type {string} */ (customVar.vendorAnalyticsSource);
                 if (all3pResponses[vendor]) {
                   /* The vendor (in the example above, "vendorXYZ") has
-                     responded to some creative(s). Need to check if it has
-                     responded for *this* creative, and whether that
+                     responded to this creative. Need to check whether that
                      response contains a property that matches the
                      vendorAnalyticsResponseKey (ex: "priority") for this
                      custom variable. If so, return the value in the
