@@ -208,7 +208,7 @@ export class AmpAdXOriginIframeHandler {
     }));
 
     this.unlisteners_.push(listenFor(this.iframe,
-        MessageType.USER_ERROR_IN_IRAME, data => {
+        MessageType.USER_ERROR_IN_IFRAME, data => {
           this.userErrorForAnalytics_(data['message']);
         }, true, true /* opt_includingNestedWindows */));
 
