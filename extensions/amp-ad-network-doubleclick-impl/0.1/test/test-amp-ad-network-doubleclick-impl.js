@@ -37,6 +37,7 @@ import {
 } from '../doubleclick-a4a-config';
 import {
   isInExperiment,
+  addExperimentIdToElement,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {
   QQID_HEADER,
@@ -344,6 +345,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('returns the right URL', () => {
       new AmpAd(element).upgradeCallback();
+      addExperimentIdToElement('12345678', element);
       return impl.getAdUrl().then(url => {
         [
           /^https:\/\/securepubads\.g\.doubleclick\.net\/gampad\/ads/,
@@ -377,11 +379,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           /(\?|&)isw=[0-9]+(&|$)/,
           /(\?|&)ish=[0-9]+(&|$)/,
           /(\?|&)pfx=(1|0)(&|$)/,
-          /(\?|&)eid=([^&]+%2c)*108809080(%2c[^&]+)*(&|$)/,
+          /(\?|&)eid=([^&]+%2c)*12345678(%2c[^&]+)*(&|$)/,
           /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%-]+(&|$)/,
           /(\?|&)top=localhost(&|$)/,
           /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F[a-zA-Z0-9.:%-]+(&|$)/,
           /(\?|&)dtd=[0-9]+(&|$)/,
+          /(\?|&)vis=[0-5]+(&|$)/,
         ].forEach(regexp => expect(url).to.match(regexp));
       });
     });
