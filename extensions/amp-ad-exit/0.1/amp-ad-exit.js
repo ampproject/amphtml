@@ -21,9 +21,6 @@ import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
-import {
-  AMP_ANALYTICS_3P_RESPONSES,
-} from '../../amp-analytics/0.1/iframe-transport';
 
 const TAG = 'amp-ad-exit';
 
@@ -60,6 +57,11 @@ export class AmpAdExit extends AMP.BaseElement {
     };
 
     this.userFilters_ = {};
+
+    /** @private @const {string} */
+    this.creativeId_ = (this.win.frameElement &&
+      this.win.frameElement.getAttribute('data-amp-3p-sentinel')) ||
+      /** @type {string} */ (this.win.document.baseURI); // Fallback
 
     this.registerAction('exit', this.exit.bind(this));
   }
@@ -103,8 +105,8 @@ export class AmpAdExit extends AMP.BaseElement {
       'CLICK_Y': true,
     };
     if (target.vars) {
-      const all3pResponses = this.getAmpDoc().win[AMP_ANALYTICS_3P_RESPONSES] ||
-          {};
+      const all3pResponses =
+          this.getAmpDoc().win['amp-analytics-3p-responses'] || {};
 
       for (const customVarName in target.vars) {
         if (customVarName[0] == '_') {
@@ -136,7 +138,7 @@ export class AmpAdExit extends AMP.BaseElement {
                   customVar.hasOwnProperty('vendorAnalyticsResponseKey')) {
                 // It's a 3p analytics variable
                 const vendor =
-                    /** @type {string} */ (customVar.vendorAnalyticsSource);
+                    /** @type {string} */ (customVar['vendorAnalyticsSource']);
                 if (all3pResponses[vendor]) {
                   /* The vendor (in the example above, "vendorXYZ") has
                      responded to this creative. Need to check whether that
@@ -145,11 +147,12 @@ export class AmpAdExit extends AMP.BaseElement {
                      custom variable. If so, return the value in the
                      response object that is associated with that key.
                   */
-                  const relevant3pResponses = all3pResponses[vendor];
+                  const relevant3pResponses =
+                      all3pResponses[vendor][this.creativeId_];
                   if (relevant3pResponses) {
                     return relevant3pResponses[
                         /** @type {string} */
-                        (customVar.vendorAnalyticsResponseKey)];
+                        (customVar['vendorAnalyticsResponseKey'])];
                   }
                 }
               }

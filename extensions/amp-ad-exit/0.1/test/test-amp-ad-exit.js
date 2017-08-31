@@ -151,13 +151,17 @@ describes.realWin('amp-ad-exit', {
    * @param {!Window} win
    * @param {!string} vendor The identifier for the third-party frame that
    * responded
+   * @param {!string} creativeId A string identifying the creative being
+   * responded to
    * @param {!Object<string,string>} response The response object sent from
    * the third-party vendor's iframe
    */
-  function addToResponseMap(win, vendor, response) {
+  function addToResponseMap(win, vendor, creativeId, response) {
     win[AMP_ANALYTICS_3P_RESPONSES] =
         win[AMP_ANALYTICS_3P_RESPONSES] || {};
-    win[AMP_ANALYTICS_3P_RESPONSES][vendor] = response;
+    win[AMP_ANALYTICS_3P_RESPONSES][vendor] =
+        win[AMP_ANALYTICS_3P_RESPONSES][vendor] || {};
+    win[AMP_ANALYTICS_3P_RESPONSES][vendor][creativeId] = response;
   }
 
   beforeEach(() => {
@@ -572,7 +576,10 @@ describes.realWin('amp-ad-exit', {
       return {name: 'fakeWin'};
     });
 
-    addToResponseMap(env.ampdoc.win, TEST_3P_VENDOR, {
+    const creativeId = (env.win.frameElement &&
+        env.win.frameElement.getAttribute('data-amp-3p-sentinel')) ||
+        /** @type {string} */ (env.win.document.baseURI); // Fallback
+    addToResponseMap(env.ampdoc.win, TEST_3P_VENDOR, creativeId, {
       'unused': 'unused',
       'collected-data': 'abc123',
     });

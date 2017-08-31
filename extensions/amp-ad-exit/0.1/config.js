@@ -146,7 +146,7 @@ function assertTarget(name, target, config) {
           pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
           variable, pattern);
       const vendor = target.vars[variable]['vendorAnalyticsSource'];
-      if (vendor !== undefined) {
+      if (vendor) {
         assertVendor(vendor);
         user().assert(
             target.vars[variable]['vendorAnalyticsResponseKey'],
