@@ -371,10 +371,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       const layoutBox = this.getLayoutBox();
 
       // Nudge into the correct horizontal position by changing side margin.
-      // TODO(charliereams): Is this the right way to get direction?
-      const parentDirection =
-          computedStyle(this.win, this.element)['direction'];
       this.getVsync().mutate(() => {
+        // TODO(charliereams): Is this the right way to get direction?
+        const parentDirection =
+            computedStyle(this.win, this.element)['direction'];
         if (parentDirection == 'rtl') {
           setStyle(this.element, 'marginRight', layoutBox.left, 'px');
         } else {
