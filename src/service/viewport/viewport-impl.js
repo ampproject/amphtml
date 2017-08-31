@@ -22,7 +22,12 @@ import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../../service';
-import {layoutRectLtwh, moveLayoutRect} from '../../layout-rect';
+import {
+  layoutRectLtwh,
+  moveLayoutRect,
+  rectIntersection,
+  layoutRectFromDomRect,
+} from '../../layout-rect';
 import {dev} from '../../log';
 import {dict} from '../../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
@@ -374,7 +379,7 @@ export class Viewport {
    * Note that this function should be called in vsync measure. Please consider
    * using `getLayoutRectAsync` instead.
    * @param {!Element} el
-   * @return {!../../layout-rect.LayoutRectDef}}
+   * @return {!../../layout-rect.LayoutRectDef}
    */
   getLayoutRect(el) {
     const scrollLeft = this.getScrollLeft();
@@ -396,42 +401,50 @@ export class Viewport {
   }
 
   /**
-   * Returns a promise that resolves with latest rect of the element within the document.
+   * Returns the client rect of the element
+   * TODO(@zhouyx): Consider combine with #getClientRectInViewportAsync()
    * @param {!Element} el
    * @return {!Promise<!../../layout-rect.LayoutRectDef>}
    */
-  getLayoutRectAsync(el) {
-    const scrollLeft = this.getScrollLeft();
-    const scrollTop = this.getScrollTop();
+  getClientRectAsync(el) {
+    const local = this.vsync_.measurePromise(() => {
+      return el./*OK*/getBoundingClientRect();
+    });
+    const global = this.binding_.getGlobalClientRect();
 
-    // Go up the window hierarchy through friendly iframes.
-    const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
-    if (frameElement) {
-      const bPromise = this.binding_.getLayoutRectAsync(el, 0, 0);
-      const cPromise = this.binding_.getLayoutRectAsync(
-          frameElement, scrollLeft, scrollTop);
-      return Promise.all([bPromise, cPromise]).then(values => {
-        const b = values[0];
-        const c = values[1];
-        return layoutRectLtwh(Math.round(b.left + c.left),
-            Math.round(b.top + c.top),
-            Math.round(b.width),
-            Math.round(b.height));
-      });
-    }
-
-    return this.binding_.getLayoutRectAsync(el, scrollLeft, scrollTop);
+    return Promise.all([local, global]).then(values => {
+      const l = values[0];
+      const g = values[1];
+      if (!g) {
+        return l;
+      }
+      return moveLayoutRect(l, g.left, g.top);
+    });
   }
 
   /**
-   * Returns a promise that resolve with latest rect of the element within the viewport.
+   * Returns the client rect of the element if it intersects with viewport
    * @param {!Element} el
    * @return {!Promise<?../../layout-rect.LayoutRectDef>}}
    */
-  getBoundingRectAsync(el) {
-    const viewportRect = this.getRect();
-    return this.getLayoutRectAsync(el).then(rect => {
-      return moveLayoutRect(rect, -viewportRect.left, -viewportRect.top);
+  getClientRectInViewportAsync(el) {
+    const local = this.vsync_.measurePromise(() => {
+      return el./*OK*/getBoundingClientRect();
+    });
+    const global = this.binding_.getGlobalClientRect();
+
+    return Promise.all([local, global]).then(values => {
+      const l = values[0];
+      const g = values[1];
+      const size = this.getSize();
+      const viewport = layoutRectLtwh(0, 0, size.width, size.height);
+      if (!rectIntersection(l, g, viewport)) {
+        return null;
+      }
+      if (g) {
+        return moveLayoutRect(l, g.left, g.top);
+      }
+      return l;
     });
   }
 
