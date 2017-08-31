@@ -50,6 +50,17 @@ export const ValidAdContainerTypes = {
   'AMP-STICKY-AD': 'sa',
 };
 
+/**
+ * See `VisibilityState` enum.
+ * @const {!Object<string, string>}
+ */
+const visibilityStateCodes = {
+  'visible': '1',
+  'hidden': '2',
+  'prerender': '3',
+  'unloaded': '5',
+};
+
 /** @const {string} */
 export const QQID_HEADER = 'X-QQID';
 
@@ -78,7 +89,7 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 /**
  * Check whether Google Ads supports the A4A rendering pathway is valid for the
  * environment by ensuring native crypto support and page originated in the
- * the {@code cdn.ampproject.org} CDN <em>or</em> we must be running in local
+ * {@code cdn.ampproject.org} CDN <em>or</em> we must be running in local
  * dev mode.
  *
  * @param {!Window} win  Host window for the ad.
@@ -86,13 +97,20 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
  *   pathway.
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
-  const supportsNativeCrypto = win.crypto &&
-      (win.crypto.subtle || win.crypto.webkitSubtle);
   const googleCdnProxyRegex =
-      /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/;
-  return supportsNativeCrypto &&
-      (googleCdnProxyRegex.test(win.location.origin) || getMode(win).localDev ||
-       getMode(win).test);
+        /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+  return supportsNativeCrypto(win) && (
+      !!googleCdnProxyRegex.test(win.location.origin) ||
+        getMode(win).localDev || getMode(win).test);
+}
+
+/**
+ * Checks whether native crypto is supported for win.
+ * @param {!Window} win  Host window for the ad.
+ * @returns {boolean} Whether native crypto is supported.
+ */
+export function supportsNativeCrypto(win) {
+  return win.crypto && (win.crypto.subtle || win.crypto.webkitSubtle);
 }
 
 /**
@@ -195,6 +213,8 @@ export function googlePageParameters(
         const viewport = Services.viewportForDoc(nodeOrDoc);
         const viewportRect = viewport.getRect();
         const viewportSize = viewport.getSize();
+        const visibilityState = Services.viewerForDoc(nodeOrDoc)
+            .getVisibilityState();
         return {
           'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
@@ -214,6 +234,7 @@ export function googlePageParameters(
           'isw': win != win.top ? viewportSize.width : null,
           'ish': win != win.top ? viewportSize.height : null,
           'art': isCanary(win) ? '2' : null,
+          'vis': visibilityStateCodes[visibilityState] || '0',
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?

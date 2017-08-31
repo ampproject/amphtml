@@ -65,6 +65,26 @@ requirement: {
   value: 'String.fromCodePoint'
 }
 
+# Object
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Object.values is not allowed'
+  value: 'Object.values'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Object.entries is not allowed'
+  value: 'Object.entries'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Object.getOwnPropertyDescriptors is not allowed'
+  value: 'Object.getOwnPropertyDescriptors'
+}
+
 # Array
 
 requirement: {

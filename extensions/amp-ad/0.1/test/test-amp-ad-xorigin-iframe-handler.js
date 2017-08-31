@@ -216,6 +216,22 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           expect(signals.get('ini-load')).to.be.ok;
         });
       });
+
+      it('should be able to use user-error API', () => {
+        const err = new Error();
+        err.message = 'error test';
+        const userErrorReportSpy =
+                sandbox.spy/*OK*/(iframeHandler, 'userErrorForAnalytics_');
+        iframe.postMessageToParent({
+          type: 'user-error-in-iframe',
+          sentinel: 'amp3ptest' + testIndex,
+          message: err.message,
+        });
+        return initPromise.then(() => {
+          expect(userErrorReportSpy).to.be.called;
+          expect(userErrorReportSpy).to.be.calledWith('error test');
+        });
+      });
     });
 
     it('should trigger render-start on message "bootstrap-loaded" if' +

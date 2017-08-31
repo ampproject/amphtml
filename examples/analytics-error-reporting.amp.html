@@ -2,7 +2,7 @@
 <html ⚡>
 <head>
     <meta charset="utf-8">
-    <title>Lorem Ipsum</title>
+    <title>Errors for User Error Report</title>
     <link rel="canonical" href="amps.html" >
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -10,6 +10,7 @@
     <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
     <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
     <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
     <style amp-custom>
         body {
             font-family: 'Georgia', Serif;
@@ -23,7 +24,8 @@
     </style>
 </head>
 <body>
-<h1>Lorem Ipsum</h1>
+<h1>These create 1P error</h1>
+<h2>amp-img fake 1p error</h2>
 <amp-img
         src="img/sea@1x.jpg"
         srcset="img/sea@1x.jpg 1x, img/sea@2x.jpg 2x"
@@ -33,6 +35,7 @@
         role='img'>
 </amp-img>
 
+<h2>amp-anim fake 1p error</h2>
 <amp-anim
         src=""
         width="400" height="225" layout="responsive"
@@ -48,36 +51,58 @@
     Duis et nisi sed urna blandit bibendum et sit amet erat.
 </p>
 
+<h2>amp-pixel fake 1p error</h2>
 <amp-pixel src="https://foo.com/tracker/foo"
            layout="nodisplay"
            referrerpolicy="referrer-fail"></amp-pixel>
 
-<h2 id="amp-iframe">IFrame</h2>
+<h2 id="amp-iframe">IFrame fake 1p error</h2>
 <amp-iframe width=10 height=10
             layout="responsive"
             src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=Alameda,%20CA">
 </amp-iframe>
 
+<h2>amp-list fake 1p error</h2>
 <amp-list layout="responsive" src= [src]="src" width="600" height="600">
     <template type="amp-mustache">
     </template>
 </amp-list>
 
+<h2>amp-youtube fake 1p error</h2>
 <amp-youtube width="480" height="270"
              data-param-autoplay
              data-videoid="dQw4w9WgXcQ">
 </amp-youtube>
 
-<amp-analytics type="googleanalytics">
+<h1>These create 3P error</h1>
+<h2>A9 fake 3p error</h2>
+<amp-ad width="300" height="250"
+        type="a9"
+        data-aax_size="300x250"
+        data-aax_pubname="test123"
+        data-aax_src="302"
+        data-a9-error="0">
+</amp-ad>
+
+<h2>Adblade fake 3p error</h2>
+<amp-ad width="300" height="250"
+        type="adblade"
+        data-width="300"
+        data-height="250"
+        data-cid="19626-3798936394"
+        data-blade-error="0">
+</amp-ad>
+
+<amp-analytics>
     <script type="application/json">
         {
             "requests": {
-                "user-error": "http://localhost:8000/dsdsdsd"
+                "error": "http://localhost:8000/error=${errorName}-${errorMessage}"
             },
             "triggers": {
-                "user-error": {
+                "userError": {
                     "on": "user-error",
-                    "request": "user-error"
+                    "request": "error"
                 }
             }
         }

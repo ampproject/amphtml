@@ -255,11 +255,11 @@ describe('Resource', () => {
     });
   });
 
-  it('should noop request measure when not built', () => {
+  it('should request measure even when not built', () => {
     expect(resource.isMeasureRequested()).to.be.false;
     elementMock.expects('getBoundingClientRect').never();
     resource.requestMeasure();
-    expect(resource.isMeasureRequested()).to.be.false;
+    expect(resource.isMeasureRequested()).to.be.true;
   });
 
   it('should request measure when built', () => {
@@ -579,11 +579,12 @@ describe('Resource', () => {
   });
 
   it('should change size and update state', () => {
+    expect(resource.isMeasureRequested()).to.be.false;
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     elementMock.expects('changeSize').withExactArgs(111, 222,
         {top: 1, right: 2, bottom: 3, left: 4}).once();
     resource.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
-    expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    expect(resource.isMeasureRequested()).to.be.true;
   });
 
   it('should change size but not state', () => {
