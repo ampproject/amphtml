@@ -470,7 +470,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                 this.getBlockParameters_(),
                 /* RTC Parameters */ values[1],
-                /* pageLevelParameters */ values[0]), ['108809080']);
+                /* pageLevelParameters */ values[0]));
       });
   }
 
