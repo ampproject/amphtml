@@ -36,7 +36,7 @@ import {
   RANDOM_NUMBER_GENERATORS,
   getExperimentBranch,
   randomlySelectUnsetExperiments,
-  getRuntimeType,
+  getBinaryType,
 } from '../../src/experiments';
 import {createElementWithAttributes} from '../../src/dom';
 import {user} from '../../src/log';
@@ -578,19 +578,19 @@ describe('isCanary', () => {
   });
 });
 
-describe('getRuntimeType', () => {
+describe('getBinaryType', () => {
   it('should return correct type', () => {
     const win = {
       AMP_CONFIG: {
         type: 'production',
       },
     };
-    expect(getRuntimeType(win)).to.equal('production');
+    expect(getBinaryType(win)).to.equal('production');
     win.AMP_CONFIG.type = 'canary';
-    expect(getRuntimeType(win)).to.equal('canary');
+    expect(getBinaryType(win)).to.equal('canary');
   });
   it('should return "unknown"', () => {
-    expect(getRuntimeType({})).to.equal('unknown');
+    expect(getBinaryType({})).to.equal('unknown');
   });
 });
 

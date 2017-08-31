@@ -67,11 +67,11 @@ export function isCanary(win) {
 }
 
 /**
- * Returns runtime type, e.g., canary, control, or production.
+ * Returns binary type, e.g., canary, control, or production.
  * @param {!Window} win
  * @return {string}
  */
-export function getRuntimeType(win) {
+export function getBinaryType(win) {
   return (win.AMP_CONFIG && win.AMP_CONFIG.type) || 'unknown';
 }
 
