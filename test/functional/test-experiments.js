@@ -36,6 +36,7 @@ import {
   RANDOM_NUMBER_GENERATORS,
   getExperimentBranch,
   randomlySelectUnsetExperiments,
+  getRuntimeType,
 } from '../../src/experiments';
 import {createElementWithAttributes} from '../../src/dom';
 import {user} from '../../src/log';
@@ -574,6 +575,22 @@ describe('isCanary', () => {
     expect(isCanary(win)).to.be.false;
     win.AMP_CONFIG.canary = 1;
     expect(isCanary(win)).to.be.true;
+  });
+});
+
+describe('getRuntimeType', () => {
+  it('should return correct type', () => {
+    const win = {
+      AMP_CONFIG: {
+        type: 'production',
+      },
+    };
+    expect(getRuntimeType(win)).to.equal('production');
+    win.AMP_CONFIG.type = 'canary';
+    expect(getRuntimeType(win)).to.equal('canary');
+  });
+  it('should return "unknown"', () => {
+    expect(getRuntimeType({})).to.equal('unknown');
   });
 });
 
