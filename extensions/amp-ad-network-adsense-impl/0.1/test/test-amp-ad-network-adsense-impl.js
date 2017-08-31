@@ -651,18 +651,14 @@ describes.realWin('amp-ad-network-adsense-impl', {
       impl.element.style.top = '150vh';
 
       // Stub out mutations to occur immediately.
-      impl.getVsync().mutate = callback => {
-        callback();
-      };
+      impl.getVsync().mutate = callback => callback();
 
       // Fix the viewport to a consistent size to that the test doesn't depend
       // on the actual browser window opened.
       impl.getViewport().getSize =
           () => ({width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT});
 
-      var c = impl.buildCallback();
-      impl.iframe = iframe;
-      return c;
+      return impl.buildCallback();
     }
 
     beforeEach(() => {
