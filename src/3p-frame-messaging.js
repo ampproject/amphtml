@@ -52,8 +52,8 @@ export const MessageType = {
   SEND_IFRAME_TRANSPORT_EVENTS: 'send-iframe-transport-events',
   IFRAME_TRANSPORT_EVENTS: 'iframe-transport-events',
 
-  // For user-error
-  USER_ERROR_IN_IRAME: 'user-error',
+  // For user-error-in-iframe
+  USER_ERROR_IN_IRAME: 'user-error-in-iframe',
 };
 
 /**

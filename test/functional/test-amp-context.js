@@ -59,7 +59,7 @@ describe('3p ampcontext.js', () => {
     windowMessageHandler = undefined;
   });
 
-  it.only('should send message when report3pError_()', () => {
+  it('should send message when report3pError_()', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
     expect(context).to.be.ok;
@@ -67,27 +67,28 @@ describe('3p ampcontext.js', () => {
 
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.reset();
-    const e = new Error();
-    e.message = 'message';
-
-    const messagePayload = {
-      sentinel: '1-291921',
-      type: MessageType.USER_ERROR_IN_IRAME,
-    };
-
-    const messageData = 'amp-' + JSON.stringify(messagePayload);
-    const message = {
-      source: context.client_.hostWindow_,
-      data: messageData,
-      message: e.message,
-    };
-    windowMessageHandler(message);
+    // const e = new Error();
+    // e.message = 'message';
+    //
+    // const messagePayload = {
+    //   sentinel: '1-291921',
+    //   type: MessageType.USER_ERROR_IN_IRAME,
+    // };
+    //
+    // const messageData = 'amp-' + JSON.stringify(messagePayload);
+    // const message = {
+    //   source: context.client_.hostWindow_,
+    //   data: messageData,
+    //   message: e.message,
+    // };
+    // windowMessageHandler(message);
 
     win.onerror('message');
     expect(windowPostMessageSpy).to.be.called;
     expect(windowPostMessageSpy).to.be.calledWith(
         'amp-$internalRuntimeVersion$' +
-        '{"message":"message","type":"user-error","sentinel":"1-291921"}',
+        '{"message":"message",' +
+        '"type":"user-error-in-iframe","sentinel":"1-291921"}',
         '*');
   });
 
