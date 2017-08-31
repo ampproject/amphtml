@@ -60,7 +60,7 @@ import {
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {stringHash32} from '../../../src/string';
-import {removeElement} from '../../../src/dom';
+import {removeElement, createElementWithAttributes} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -70,7 +70,7 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
-import {deepMerge} from '../../../src/utils/object';
+import {deepMerge, dict} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
 import {isSecureUrl, parseUrl} from '../../../src/url';
 import {VisibilityState} from '../../../src/visibility-state';
@@ -490,6 +490,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
+    this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
+    this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);
@@ -831,6 +833,34 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // Null response indicates single slot should execute using non-SRA method.
     return this.sraResponsePromise_.then(
         response => response || super.sendXhrRequest(adUrl));
+  }
+
+  /**
+   * @param {string} impressions
+   * @param {boolean=} scrubReferer
+   * @visibileForTesting
+   */
+  fireDelayedImpressions(impressions, scrubReferer) {
+    if (!impressions) {
+      return;
+    }
+    impressions.split(',').forEach(url => {
+      try {
+        if (!isSecureUrl(url)) {
+          dev().warn(TAG, `insecure impression url: ${url}`);
+          return;
+        }
+        // Create amp-pixel and append to document to send impression.
+        this.win.document.body.appendChild(
+            createElementWithAttributes(
+                this.win.document,
+                'amp-pixel',
+                dict({
+                  'src': url,
+                  'referrerpolicy': scrubReferer ? 'no-referrer' : '',
+                })));
+      } catch (unusedError) {}
+    });
   }
 
   /**
