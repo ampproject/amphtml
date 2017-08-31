@@ -235,6 +235,8 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Random](#random) | `RANDOM` | `${random}` |
 | [Request Count](#request-count) | N/A | `${requestCount}` |
 | [Timestamp](#timestamp) | `TIMESTAMP` | `${timestamp}` |
+| [Error Name](#error-name) | N/A | `${errorName}` |
+| [Error Message](#error-message) | N/A | `${errorMessage}` |
 
 ### Variable Descriptions
 
@@ -545,6 +547,22 @@ Provides the absolute Y coordinate of the top edge of the element specified by `
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${elementY}`
+
+#### Error Message
+
+Provides the message of the error that triggered an user error event. This variable is only available in a `trigger` of type `user-error`
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${errorMessage}`
+  * Example value: `Invalid multi-size data format`
+
+#### Error Name
+
+Provides the name of the error that triggered an user error event. This variable is only available in a `trigger` of type `user-error`
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${errorName}`
+  * Example value: `AMP-AD`
 
 #### External Referrer
 
