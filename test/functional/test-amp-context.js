@@ -32,6 +32,7 @@ describe('3p ampcontext.js', () => {
     windowPostMessageSpy = sandbox.spy();
     win = {
       addEventListener: (eventType, handlerFn) => {
+        expect(eventType).to.equal('message');
         windowMessageHandler = handlerFn;
       },
       parent: {
@@ -59,11 +60,10 @@ describe('3p ampcontext.js', () => {
     windowMessageHandler = undefined;
   });
 
-  it('should send message when report3pError_()', () => {
+  it('should send error message with report3pError_', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
     expect(context).to.be.ok;
-    context.report3pError_();
 
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.reset();
