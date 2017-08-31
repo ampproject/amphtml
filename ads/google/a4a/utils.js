@@ -24,6 +24,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {parseUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
+import {VisibilityState} from '../../../src/visibility-state';
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {
   isExperimentOn,
@@ -55,10 +56,10 @@ export const ValidAdContainerTypes = {
  * @const {!Object<string, string>}
  */
 const visibilityStateCodes = {
-  'visible': '1',
-  'hidden': '2',
-  'prerender': '3',
-  'unloaded': '5',
+  [VisibilityState.VISIBLE]: '1',
+  [VisibilityState.HIDDEN]: '2',
+  [VisibilityState.PRERENDER]: '3',
+  [VisibilityState.UNLOADED]: '5',
 };
 
 /** @const {string} */
