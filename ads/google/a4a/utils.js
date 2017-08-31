@@ -59,7 +59,6 @@ const visibilityStateCodes = {
   [VisibilityState.VISIBLE]: '1',
   [VisibilityState.HIDDEN]: '2',
   [VisibilityState.PRERENDER]: '3',
-  [VisibilityState.UNLOADED]: '5',
 };
 
 /** @const {string} */
