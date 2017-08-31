@@ -59,14 +59,14 @@ describe('3p ampcontext.js', () => {
     windowMessageHandler = undefined;
   });
 
-  it('should send message when report3pError_()', () => {
+  it.only('should send message when report3pError_()', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
     expect(context).to.be.ok;
+    context.report3pError_();
 
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.reset();
-
     const e = new Error();
     e.message = 'message';
 
@@ -83,22 +83,12 @@ describe('3p ampcontext.js', () => {
     };
     windowMessageHandler(message);
 
-    try {
-      throw e;
-    } catch (err) {
-      win.onerror = function(message, source, lineno, colno, error) {
-        expect(error).to.equal(err);
-        expect(err).to.equal(e);
-        expect(message).to.equal('message');
-        context.report3pError_();
-        expect(windowPostMessageSpy).to.be.called;
-        expect(windowPostMessageSpy).to.be.calledWith(
-            'amp-$internalRuntimeVersion$' +
-                '{"error":{"message":"error"},' +
-                '"type":"user-error","sentinel":"1-291921"}',
-            '*');
-      };
-    }
+    win.onerror('message');
+    expect(windowPostMessageSpy).to.be.called;
+    expect(windowPostMessageSpy).to.be.calledWith(
+        'amp-$internalRuntimeVersion$' +
+        '{"message":"message","type":"user-error","sentinel":"1-291921"}',
+        '*');
   });
 
   it('should add metadata to window.context using name as per 3P.', () => {
