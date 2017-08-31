@@ -385,8 +385,11 @@ actions that apply to the whole document.
     <td>Navigates back in history.</td>
   </tr>
   <tr>
-    <td><code>setState</code></td>
-    <td>Updates <code>amp-bind</code>'s state. See <a href="../extensions/amp-bind/amp-bind.md#ampsetstate">details</a>.</td>
+    <td><code>setState({foo: 'bar'})</code></td>
+    <td>
+      <p>Requires <a href="../extensions/amp-bind/amp-bind.md">amp-bind</a>. Merges an object literal into the bindable state. See <a href="../extensions/amp-bind/amp-bind.md#ampsetstate">more details</a>.</p>
+      <p>When used with <a href="#multiple-actions-for-one-event">multiple actions</a>, subsequent actions will wait for <code>setState()</code> to complete before invocation. Only a single <code>setState()</code> is allowed per event.</p>
+    </td>
   </tr>
   <tr>
     <td><code>print</code></td>
