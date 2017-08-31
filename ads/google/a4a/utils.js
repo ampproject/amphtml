@@ -50,6 +50,17 @@ export const ValidAdContainerTypes = {
   'AMP-STICKY-AD': 'sa',
 };
 
+/**
+ * See `VisibilityState` enum.
+ * @const {!Object<string, string>}
+ */
+const visibilityStateCodes = {
+  'visible': '1',
+  'hidden': '2',
+  'prerender': '3',
+  'unloaded': '5',
+};
+
 /** @const {string} */
 export const QQID_HEADER = 'X-QQID';
 
@@ -202,6 +213,8 @@ export function googlePageParameters(
         const viewport = Services.viewportForDoc(nodeOrDoc);
         const viewportRect = viewport.getRect();
         const viewportSize = viewport.getSize();
+        const visibilityState = Services.viewerForDoc(nodeOrDoc)
+            .getVisibilityState();
         return {
           'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
@@ -221,6 +234,7 @@ export function googlePageParameters(
           'isw': win != win.top ? viewportSize.width : null,
           'ish': win != win.top ? viewportSize.height : null,
           'art': isCanary(win) ? '2' : null,
+          'vis': visibilityStateCodes[visibilityState] || '0',
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?
