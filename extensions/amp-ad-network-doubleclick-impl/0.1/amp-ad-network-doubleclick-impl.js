@@ -846,7 +846,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     impressions.split(',').forEach(url => {
       try {
-        dev().assert(isSecureUrl(url));
+        if (!isSecureUrl(url)) {
+          dev().warn(TAG, `insecure impression url: ${url}`);
+          return;
+        }
         // Create amp-pixel and append to document to send impression.
         this.win.document.body.appendChild(
             createElementWithAttributes(
