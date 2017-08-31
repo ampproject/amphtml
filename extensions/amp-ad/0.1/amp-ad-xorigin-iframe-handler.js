@@ -531,7 +531,7 @@ export class AmpAdXOriginIframeHandler {
   }
 
   /**
-   * @param {!string} message
+   * @param {string} message
    * @private
    */
   userErrorForAnalytics_(message) {
