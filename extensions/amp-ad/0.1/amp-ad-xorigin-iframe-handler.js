@@ -210,7 +210,7 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_.push(listenFor(this.iframe,
         MessageType.USER_ERROR_IN_IRAME, data => {
           this.userErrorForAnalytics_(data['message']);
-        }, true, true));
+        }, true, true /* opt_includingNestedWindows */));
 
     // Iframe.onload normally called by the Ad after full load.
     const iframeLoadPromise = loadPromise(this.iframe).then(() => {

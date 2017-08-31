@@ -16,7 +16,7 @@
 import {
   AmpContext,
 } from '../../3p/ampcontext';
-import {MessageType, deserializeMessage} from '../../src/3p-frame-messaging';
+import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
 import * as sinon from 'sinon';
 
 const NOOP = () => {};
@@ -69,22 +69,12 @@ describe('3p ampcontext.js', () => {
     windowPostMessageSpy.reset();
     win.onerror('message');
     expect(windowPostMessageSpy).to.be.called;
-
-    const expected = 'amp-$internalRuntimeVersion$' +
-        '{"message":"message",' +
-        '"type":"user-error-in-iframe","sentinel":"1-291921"}';
-
-    const jsonMessage = deserializeMessage(expected, '*');
-    expect(windowPostMessageSpy).to.be.calledWith(
-        expected, '*'
-    );
-    expect(jsonMessage).to.be.jsonEqual(
-        {
-          'message': 'message',
-          'sentinel': '1-291921',
-          'type': 'user-error-in-iframe',
-        }
-      );
+    expect(windowPostMessageSpy).to.be.calledWith(serializeMessage(
+        'user-error-in-iframe',
+        '1-291921',
+        {'message': 'message'},
+        '$internalRuntimeVersion$'
+      ));
   });
 
   it('should add metadata to window.context using name as per 3P.', () => {
