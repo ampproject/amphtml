@@ -74,6 +74,18 @@ function isValidRegex(regex) {
 }
 
 /**
+ * Returns true if the regex has a group but is missing the corresponding
+ * Unicode group. For now this tests only for word character group (\\w) which
+ * must be followed by the Unicode equivalent group (\\p{L}\\p{N}_).
+ * @param {null|string} regex
+ * @return {boolean}
+ */
+function isMissingUnicodeGroup(regex) {
+  var wordGroupRegex = new RegExp("\\\\w(?!\\\\p{L}\\\\p{N}_)");
+  return wordGroupRegex.test(regex);
+}
+
+/**
  * Returns all html files underneath the testdata roots. This looks
  * both for feature_tests/*.html and for tests in extension directories.
  * E.g.: extensions/amp-accordion/0.1/test/*.html,
@@ -401,17 +413,29 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
       const regex = rules.internedStrings[-1 - attrSpec.valueRegex];
       expect(isValidRegex(regex)).toBe(true);
     });
+    it('value_regex must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegex];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
+    });
   }
   if (attrSpec.valueRegexCasei !== null) {
     it('value_regex_casei valid', () => {
       const regex = rules.internedStrings[-1 - attrSpec.valueRegexCasei];
       expect(isValidRegex(regex)).toBe(true);
     });
+    it('value_regex_casei must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegexCasei];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
+    });
   }
   if (attrSpec.blacklistedValueRegex !== null) {
     it('blacklisted_value_regex valid', () => {
       const regex = rules.internedStrings[-1 - attrSpec.blacklistedValueRegex];
       expect(isValidRegex(regex)).toBe(true);
+    });
+    it('blacklisted_value_regex must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.blacklistedValueRegex];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
     });
   }
   // value_url must have at least one allowed protocol.
@@ -664,15 +688,18 @@ describe('ValidatorRulesMakeSense', () => {
         });
       }
       // blacklisted_cdata_regex
-      it('blacklisted_cdata_regex valid and error_message defined', () => {
-        for (const blacklistedCdataRegex of
-                 tagSpec.cdata.blacklistedCdataRegex) {
+      for (const blacklistedCdataRegex of tagSpec.cdata.blacklistedCdataRegex) {
+        it('blacklisted_cdata_regex valid and error_message defined', () => {
           usefulCdataSpec = true;
           expect(blacklistedCdataRegex.regex).toBeDefined();
           expect(isValidRegex(blacklistedCdataRegex.regex)).toBe(true);
           expect(blacklistedCdataRegex.errorMessage).toBeDefined();
-        }
-      });
+        });
+        it('blacklisted_cdata_regex must have unicode named groups', () => {
+          const regex = rules.internedStrings[-1 - blacklistedCdataRegex.regex];
+          expect(isMissingUnicodeGroup(regex)).toBe(false);
+        });
+      }
 
       // css_spec
       if (tagSpec.cdata.cssSpec !== null) {
@@ -726,6 +753,10 @@ describe('ValidatorRulesMakeSense', () => {
       }
       it('a cdata spec must be defined', () => {
         expect(usefulCdataSpec).toBe(true);
+      });
+      it('cdata_regex must have unicode named groups', () => {
+        const regex = rules.internedStrings[-1 - tagSpec.cdata.cdataRegex];
+        expect(isMissingUnicodeGroup(regex)).toBe(false);
       });
 
       // reference_points

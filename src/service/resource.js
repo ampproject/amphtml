@@ -351,10 +351,8 @@ export class Resource {
   changeSize(newHeight, newWidth, opt_newMargins) {
     this.element./*OK*/changeSize(newHeight, newWidth, opt_newMargins);
 
-    // Schedule for re-layout.
-    if (this.state_ != ResourceState.NOT_BUILT) {
-      this.state_ = ResourceState.NOT_LAID_OUT;
-    }
+    // Schedule for re-measure and possible re-layout.
+    this.requestMeasure();
   }
 
   /**
@@ -520,10 +518,6 @@ export class Resource {
    * Requests the element to be remeasured on the next pass.
    */
   requestMeasure() {
-    if (this.state_ == ResourceState.NOT_BUILT) {
-      // Can't measure unbuilt element.
-      return;
-    }
     this.isMeasureRequested_ = true;
   }
 

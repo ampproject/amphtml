@@ -113,7 +113,7 @@ describe('cid', () => {
     installExtensionsService(fakeWin);
     const extensions = Services.extensionsFor(fakeWin);
     // stub extensions service to provide crypto-polyfill
-    sandbox.stub(extensions, 'loadExtension', extensionId => {
+    sandbox.stub(extensions, 'preloadExtension', extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(fakeWin);
       return Promise.resolve();

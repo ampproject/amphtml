@@ -134,7 +134,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   // Pre-load extensions.
   if (spec.extensionIds) {
     spec.extensionIds.forEach(
-        extensionId => extensions.loadExtension(extensionId));
+        extensionId => extensions.preloadExtension(extensionId));
   }
 
   const html = mergeHtml(spec);

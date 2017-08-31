@@ -52,8 +52,8 @@ export class AnchorAdStrategy {
       user().warn(TAG, 'exists <amp-sticky-ad>');
       return Promise.resolve(false);
     }
-    Services.extensionsFor(this.ampdoc.win)./*OK*/loadElementClass(
-        STICKY_AD_TAG);
+    Services.extensionsFor(this.ampdoc.win)./*OK*/installExtensionForDoc(
+        this.ampdoc, STICKY_AD_TAG);
     this.placeStickyAd_();
     return Promise.resolve(true);
   }
