@@ -653,7 +653,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE,,_ga)',
       'dataSource': 'AMP',
       'anonymizeIP': 'aip',
-      'errorParam': '${errorName}:${errorMessage}',
+      'errorParam': '${errorName}-${errorMessage}',
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
@@ -750,7 +750,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE,,_ga)',
       'dataSource': 'AMP',
       'anonymizeIP': 'aip',
-      'errorParam': '${errorName}:${errorMessage}',
+      'errorParam': '${errorName}-${errorMessage}',
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
