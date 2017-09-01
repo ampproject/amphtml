@@ -149,10 +149,11 @@ export class AmpAdExit extends AMP.BaseElement {
                   */
                   const relevant3pResponses =
                       all3pResponses[vendor][this.creativeId_];
-                  if (relevant3pResponses) {
-                    return relevant3pResponses[
-                        /** @type {string} */
-                        (customVar['vendorAnalyticsResponseKey'])];
+                  const responseKey = /** @type {string} */
+                      (customVar['vendorAnalyticsResponseKey']);
+                  if (relevant3pResponses &&
+                      relevant3pResponses.hasOwnProperty(responseKey)) {
+                    return relevant3pResponses[responseKey];
                   }
                 }
               }
