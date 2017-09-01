@@ -262,7 +262,7 @@ export class ViewportBindingInabox {
   }
 
   /** @override */
-  getRootClientRectAsyn() {
+  getRootClientRectAsync() {
     if (!this.requestPositionPromise_) {
       this.requestPositionPromise_ = new Promise(resolve => {
         this.iframeClient_.requestOnce(

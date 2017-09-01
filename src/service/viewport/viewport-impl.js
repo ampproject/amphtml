@@ -400,50 +400,30 @@ export class Viewport {
   }
 
   /**
-   * Returns the client rect of the element
-   * TODO(@zhouyx): Consider combine with #getClientRectInViewportAsync()
+   * Returns the clientRect of the element.
+   * If root is viewport: return the element clientRect
+   * If root is an iframe: return the element clientRect if element intersects with root
+   * TODO(@zhouyx): We should consider return null if root doesn't intersect with viewportRect as well.
    * @param {!Element} el
-   * @return {!Promise<!../../layout-rect.LayoutRectDef>}
+   * @return {!Promise<?../../layout-rect.LayoutRectDef>}
    */
   getClientRectAsync(el) {
     const local = this.vsync_.measurePromise(() => {
       return el./*OK*/getBoundingClientRect();
     });
-    const global = this.binding_.getRootClientRectAsyn();
+    const root = this.binding_.getRootClientRectAsync();
 
-    return Promise.all([local, global]).then(values => {
+    return Promise.all([local, root]).then(values => {
       const l = values[0];
-      const g = values[1];
-      if (!g) {
+      const r = values[1];
+      if (!r) {
         return l;
       }
-      return moveLayoutRect(l, g.left, g.top);
-    });
-  }
-
-  /**
-   * Returns the client rect of the element if it intersects with viewport
-   * @param {!Element} el
-   * @return {!Promise<?../../layout-rect.LayoutRectDef>}}
-   */
-  getClientRectInViewportAsync(el) {
-    const local = this.vsync_.measurePromise(() => {
-      return el./*OK*/getBoundingClientRect();
-    });
-    const global = this.binding_.getRootClientRectAsyn();
-
-    return Promise.all([local, global]).then(values => {
-      const l = values[0];
-      const g = values[1];
-      const size = this.getSize();
-      const viewport = layoutRectLtwh(0, 0, size.width, size.height);
-      if (!rectIntersection(l, g, viewport)) {
+      const clientRect = moveLayoutRect(l, r.left, r.top);
+      if (!rectIntersection(clientRect, r)) {
         return null;
       }
-      if (g) {
-        return moveLayoutRect(l, g.left, g.top);
-      }
-      return l;
+      return clientRect;
     });
   }
 

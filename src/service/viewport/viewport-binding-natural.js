@@ -203,7 +203,7 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  getRootClientRectAsyn() {
+  getRootClientRectAsync() {
     return Promise.resolve(null);
   }
 

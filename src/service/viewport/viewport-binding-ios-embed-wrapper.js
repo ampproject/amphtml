@@ -232,7 +232,7 @@ export class ViewportBindingIosEmbedWrapper_ {
   }
 
   /** @override */
-  getRootClientRectAsyn() {
+  getRootClientRectAsync() {
     return Promise.resolve(null);
   }
 
