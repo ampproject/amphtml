@@ -224,9 +224,12 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.instrumentation_.createAnalyticsGroup(this.element);
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      const creativeId = (this.win.frameElement &&
+          this.win.frameElement.getAttribute('data-amp-3p-sentinel')) ||
+          /** @type {string} */ (this.win.document.baseURI); // Fallback
       this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
         this.element.getAttribute('type'),
-        this.config_['transport']);
+        this.config_['transport'], creativeId);
     }
 
     const promises = [];
