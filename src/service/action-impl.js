@@ -537,10 +537,8 @@ export class ActionService {
       const type = target.getAttribute('type');
 
       detail['value'] = target.value;
-
-      detail['valueAsNumber'] = (target.valueAsNumber !== undefined)
-          ? target.valueAsNumber
-          : Number(target.value);
+      // Natively supported on some browsers but convert anyways for consistency.
+      detail['valueAsNumber'] = Number(target.value);
 
       if (type == 'checkbox' || type == 'radio') {
         detail['checked'] = target.checked;
