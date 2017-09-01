@@ -432,6 +432,8 @@ describe('isProxyOrigin', () => {
   testProxyOrigin(
     'https://cdn.ampproject.org.badguys.com/', false);
   testProxyOrigin(
+    'https://cdn.ampproject.orgbadguys.com/', false);
+  testProxyOrigin(
     'https://cdn.ampproject.org:1234', false);
   testProxyOrigin(
       'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0', true);
