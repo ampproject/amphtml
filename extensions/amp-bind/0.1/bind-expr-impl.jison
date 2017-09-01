@@ -289,40 +289,44 @@ object_literal:
       %}
   | '{' object '}'
       %{
-        $$ = new AstNode(AstNodeType.OBJECT_LITERAL, [$2]);
+        $$ = new AstNode(AstNodeType.OBJECT_LITERAL, [$object]);
       %}
   | '{' object ',' '}'
       %{
-        $$ = new AstNode(AstNodeType.OBJECT_LITERAL, [$2]);
+        $$ = new AstNode(AstNodeType.OBJECT_LITERAL, [$object]);
       %}
   ;
 
 object:
     key_value
       %{
-        $$ = new AstNode(AstNodeType.OBJECT, [$1]);
+        $$ = new AstNode(AstNodeType.OBJECT, [$key_value]);
       %}
   | object ',' key_value
       %{
-        $$ = $1;
-        $$.args.push($3);
+        $$ = $object;
+        $$.args.push($key_value);
       %}
   ;
 
 key_value:
   key ':' expr
       %{
-        $$ = new AstNode(AstNodeType.KEY_VALUE, [$1, $3]);
+        $$ = new AstNode(AstNodeType.KEY_VALUE, [$key, $expr]);
       %}
   ;
 
 key:
     NAME
       %{
-        $$ = new AstNode(AstNodeType.LITERAL, null, $1);
+        $$ = new AstNode(AstNodeType.LITERAL, null, $NAME);
       %}
   | primitive
       %{
-        $$ = $1;
+        $$ = $primitive;
+      %}
+  | '[' expr ']' /* Computed property name. */
+      %{
+        $$ = $expr;
       %}
   ;
