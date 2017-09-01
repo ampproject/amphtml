@@ -26,7 +26,6 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
   rectIntersection,
-  layoutRectFromDomRect,
 } from '../../layout-rect';
 import {dev} from '../../log';
 import {dict} from '../../utils/object';
@@ -410,7 +409,7 @@ export class Viewport {
     const local = this.vsync_.measurePromise(() => {
       return el./*OK*/getBoundingClientRect();
     });
-    const global = this.binding_.getGlobalClientRect();
+    const global = this.binding_.getRootClientRectAsyn();
 
     return Promise.all([local, global]).then(values => {
       const l = values[0];
@@ -431,7 +430,7 @@ export class Viewport {
     const local = this.vsync_.measurePromise(() => {
       return el./*OK*/getBoundingClientRect();
     });
-    const global = this.binding_.getGlobalClientRect();
+    const global = this.binding_.getRootClientRectAsyn();
 
     return Promise.all([local, global]).then(values => {
       const l = values[0];

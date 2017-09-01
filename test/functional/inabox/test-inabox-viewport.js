@@ -300,7 +300,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
           targetRect: layoutRectLtwh(10, 20, 100, 100),
           viewportRect: layoutRectLtwh(1, 1, 1, 1),
         }), undefined, true);
-    return binding.getGlobalClientRect().then(rect => {
+    return binding.getRootClientRectAsyn().then(rect => {
       expect(rect).to.jsonEqual(layoutRectLtwh(10, 20, 100, 100));
       expect(requestSpy).to.be.calledOnce;
     });

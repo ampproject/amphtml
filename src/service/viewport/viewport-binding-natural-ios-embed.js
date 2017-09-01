@@ -321,7 +321,7 @@ export class ViewportBindingNaturalIosEmbed_ {
   }
 
   /** @override */
-  getGlobalClientRect() {
+  getRootClientRectAsyn() {
     return Promise.resolve(null);
   }
 

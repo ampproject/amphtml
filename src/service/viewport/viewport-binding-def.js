@@ -156,5 +156,5 @@ export class ViewportBindingDef {
    * Returns the client rect of the current window.
    * @return {Promise<null>|Promise<!../../layout-rect.LayoutRectDef>}
    */
-  getGlobalClientRect() {}
+  getRootClientRectAsyn() {}
 }
