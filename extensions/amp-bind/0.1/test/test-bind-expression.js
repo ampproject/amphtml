@@ -265,7 +265,7 @@ describe('BindExpression', () => {
     expect(evaluate('foo[0]')).to.be.null;
   });
 
-  it('should support select Math functions', () => {
+  it('should support Math functions', () => {
     expect(evaluate('abs(-1)')).to.equal(1);
     expect(evaluate('ceil(0.1)')).to.equal(1);
     expect(evaluate('floor(1.9)')).to.equal(1);
@@ -301,17 +301,39 @@ describe('BindExpression', () => {
         .to.equal('http%3A%2F%2Fwww.google.com%2Ffoo%3Ffoo%3Dbar');
   });
 
-  it('should support BindArrays functions', () => {
-    const arr = [1, 2, 3];
+  it('should support copyAndSplice()', () => {
+    const a = [1, 2, 3];
     expect(() => evaluate('copyAndSplice()')).to.throw(/not an array/);
     expect(() => evaluate('copyAndSplice(x)', {x: 8472}))
         .to.throw(/not an array/);
-    expect(evaluate('copyAndSplice(arr)', {arr})).to.not.equal(arr);
-    expect(evaluate('copyAndSplice(arr)', {arr})).to.deep.equal(arr);
-    expect(evaluate('copyAndSplice(arr, 1)', {arr})).to.deep.equal([1]);
-    expect(evaluate('copyAndSplice(arr, 1, 1)', {arr})).to.deep.equal([1, 3]);
-    expect(evaluate('copyAndSplice(arr, 1, 1, 47)', {arr})).to
-        .deep.equal([1, 47, 3]);
+    expect(evaluate('copyAndSplice(a)', {a})).to.not.equal(a);
+    expect(evaluate('copyAndSplice(a)', {a})).to.deep.equal(a);
+    expect(evaluate('copyAndSplice(a, 1)', {a})).to.deep.equal([1]);
+    expect(evaluate('copyAndSplice(a, 1, 1)', {a})).to.deep.equal([1, 3]);
+    expect(evaluate('copyAndSplice(a, 1, 1, 47)', {a}))
+        .to.deep.equal([1, 47, 3]);
+  });
+
+  it('should support Array.prototype.map()', () => {
+    const a = [1, 2, 3];
+    expect(evaluate('a.map(() => 5)', {a})).to.deep.equal([5, 5, 5]);
+    expect(evaluate('a.map(x => x + 1)', {a})).to.deep.equal([2, 3, 4]);
+    expect(evaluate('a.map((x, i) => i * 2)', {a})).to.deep.equal([0, 2, 4]);
+
+    const b = [{foo: 'x'}, {foo: 'y'}, {foo: 'z'}];
+    expect(evaluate('b.map(x => x.foo)', {b})).to.deep.equal(['x', 'y', 'z']);
+
+    // Single parameters in parentheses are ambiguous to the parser.
+    expect(() => evaluate('a.map((x) => x * x)', {a})).to.throw();
+  });
+
+  it('should support Array.prototype.reduce()', () => {
+    const a = [1, 2, 3];
+    expect(evaluate('a.reduce((x, y) => x + y)', {a})).to.equal(6);
+
+    // Only support arrow functions as the only parameter in applicable
+    // function invocations (don't support optional `thisArg`, etc.).
+    expect(() => evaluate('a.reduce((x, y)) => x + y, 0)', {a})).to.throw();
   });
 
   it('should NOT allow access to prototype properties', () => {
