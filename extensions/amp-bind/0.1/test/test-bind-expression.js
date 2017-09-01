@@ -247,6 +247,11 @@ describe('BindExpression', () => {
     expect(() => evaluate('{1+1: "b"}')).to.throw();
   });
 
+  it('should support computed property names', () => {
+    expect(evaluate('{["a" + "b" + "c"]: 123}')).to.deep.equal({abc: 123});
+    expect(evaluate('{[foo]: 123}', {foo: 'abc'})).to.deep.equal({abc: 123});
+  });
+
   it('should support trailing commas in object literals', () => {
     expect(evaluate('{a: "b",}')).to.deep.equal({a: 'b'});
     expect(evaluate('{a: "b", c: "d",}')).to.deep.equal({a: 'b', c: 'd'});
