@@ -58,11 +58,6 @@ export class AmpAdExit extends AMP.BaseElement {
 
     this.userFilters_ = {};
 
-    /** @private @const {string} */
-    this.creativeId_ = (this.win.frameElement &&
-      this.win.frameElement.getAttribute('data-amp-3p-sentinel')) ||
-      /** @type {string} */ (this.win.document.baseURI); // Fallback
-
     this.registerAction('exit', this.exit.bind(this));
   }
 
@@ -105,6 +100,8 @@ export class AmpAdExit extends AMP.BaseElement {
       'CLICK_Y': true,
     };
     if (target.vars) {
+      // The resource IDs of the amp-analytics tag(s) in this creative
+      const sourceResourceIds = this.win['amp-analytics-resourceids'];
       const all3pResponses =
           this.getAmpDoc().win['amp-analytics-3p-responses'] || {};
 
@@ -141,20 +138,22 @@ export class AmpAdExit extends AMP.BaseElement {
                     /** @type {string} */ (customVar['vendorAnalyticsSource']);
                 if (all3pResponses[vendor]) {
                   /* The vendor (in the example above, "vendorXYZ") has
-                     responded to this creative. Need to check whether that
-                     response contains a property that matches the
-                     vendorAnalyticsResponseKey (ex: "priority") for this
-                     custom variable. If so, return the value in the
+                     responded to an amp-analytics tag in this creative. Need to
+                     check whether that response contains a property that
+                     matches the vendorAnalyticsResponseKey (ex: "priority")
+                     for this custom variable. If so, return the value in the
                      response object that is associated with that key.
                   */
-                  const relevant3pResponses =
-                      all3pResponses[vendor][this.creativeId_];
-                  const responseKey = /** @type {string} */
+                  sourceResourceIds.forEach(resourceId => {
+                    const vendorResponsesToResource =
+                        all3pResponses[vendor][resourceId];
+                    const responseKey = /** @type {string} */
                       (customVar['vendorAnalyticsResponseKey']);
-                  if (relevant3pResponses &&
-                      relevant3pResponses.hasOwnProperty(responseKey)) {
-                    return relevant3pResponses[responseKey];
-                  }
+                    if (vendorResponsesToResource &&
+                        vendorResponsesToResource.hasOwnProperty(responseKey)) {
+                      return vendorResponsesToResource[responseKey];
+                    }
+                  });
                 }
               }
               // Either it's not a 3p analytics variable, or it is one but
