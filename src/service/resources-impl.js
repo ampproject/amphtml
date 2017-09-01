@@ -1384,6 +1384,8 @@ export class Resources {
                 relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop) {
           const wasDisplayed = r.isDisplayed();
           r.measure();
+          // TODO: Optimize this.
+          Services.layersForDoc(this.ampdoc).remeasure(r.element);
           if (wasDisplayed && !r.isDisplayed()) {
             if (!toUnload) {
               toUnload = [];

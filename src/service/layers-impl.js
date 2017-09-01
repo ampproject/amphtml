@@ -75,7 +75,8 @@ export class LayoutLayers {
   constructor(ampdoc) {
     const {win} = ampdoc;
 
-    this.win = win;
+    this.ampdoc_ = ampdoc;
+    this.win_ = win;
 
     /** @const {!Document} */
     this.document_ = win.document;
@@ -135,6 +136,12 @@ export class LayoutLayers {
     );
   }
 
+  getScrolledBox(element) {
+    const { left, top } = LayoutElement.getScrolledPosition(element);
+    const { width, height } = LayoutElement.getSize(element);
+    return layoutRectLtwh(left, top, width, height);
+  }
+
   /**
    * Remeasures the element, and any other elements who's cached rects may have
    * been altered by this element's mutation.
@@ -167,9 +174,19 @@ export class LayoutLayers {
    * @param {!Element} element
    */
   declareLayer(element) {
+    this.declareLayer_(element);
+  }
+
+  /**
+   * Eagerly creates a LayoutLayer for the element.
+   * @param {!Element} element
+   * @return {!LayoutLayer}
+   */
+  declareLayer_(element) {
     dev().assert(!LayoutLayer.forOptional(element));
     const layer = new LayoutLayer(element);
     this.layers_.push(layer);
+    return layer;
   }
 
   onResize_() {
@@ -187,12 +204,15 @@ export class LayoutLayers {
   }
 
   scrolled_(element) {
-    const layer = LayoutLayer.forOptional(element);
+    let layer = LayoutLayer.forOptional(element);
     if (layer) {
       layer.updateScrollPosition();
     } else {
-      this.declareLayer(element);
+      layer = this.declareLayer_(element);
     }
+
+    // This will eventually tell Resources that these elements have scrolled.
+    // Services.resourcesForDoc(this.ampdoc_).scrollTick(layer.getElements());
   }
 
   getScrollingElement_() {
@@ -204,7 +224,7 @@ export class LayoutLayers {
     let s = doc./*OK*/scrollingElement;
 
     if (!s) {
-      if (doc.body && Services.platformFor(this.win).isWebKit()) {
+      if (doc.body && Services.platformFor(this.win_).isWebKit()) {
         s = doc.body;
       } else {
         s = doc.documentElement;
@@ -342,11 +362,11 @@ export class LayoutLayer {
     // Basically, are we removing this layer.
     const contained = layer === this.getParentLayer();
 
-    filterSplice(this.layouts_, element => {
+    filterSplice(this.layouts_, layout => {
       // TODO
-      if (contained || layer.contains(element.element_)) {
-        element.parentLayer_ = layer;
-        layer.layouts_.push(element);
+      if (contained || layer.contains(layout.element_)) {
+        layout.parentLayer_ = layer;
+        layer.layouts_.push(layout);
         return false;
       }
 
@@ -386,6 +406,26 @@ export class LayoutLayer {
 
   getScrolledPosition() {
     return LayoutElement.getScrolledPosition(this.root_);
+  }
+
+  /**
+   * TODO we can make this smarter by passing in a viewport.
+   * If this layer is not in viewport, skip it.
+   * If child layer is not in viewport, skip it.
+   */
+  getElements(opt_collected) {
+    const collected = opt_collected || [];
+    const layouts = this.layouts_;
+    for (let i = 0; i < layouts.length; i++) {
+      collected.push(layouts[i].element_);
+    }
+
+    const layers = this.layers_;
+    for (let i = 0; i < layouts.length; i++) {
+      layouts[i].getElements(collected);
+    }
+
+    return collected;
   }
 }
 
@@ -477,9 +517,9 @@ export class LayoutElement {
       return layout.getOffsets();
     }
 
-    const parent = LayoutLayer.getParentLayer(element);
-    const relative = parent ? parent.getScrolledPosition() : PositionLt(0, 0);
     const box = element.getBoundingClientRect();
+    const parent = LayoutLayer.getParentLayer(element);
+    const relative = parent ? parent.getScrolledPosition() : box;
     return PositionLt(
         box.left - relative.left,
         box.top - relative.top
@@ -523,20 +563,19 @@ export class LayoutElement {
     let x = position.left;
     let y = position.top;
 
-    let first = true;
+    let last;
     const stopAt = opt_parent ? LayoutLayer.getParentLayer(opt_parent) : null;
     for (let p = this.getParentLayer(); p !== stopAt; p = p.getParentLayer()) {
 
-      x += p.getScrollLeft();
-      y += p.getScrollTop();
+      x -= p.getScrollLeft();
+      y -= p.getScrollTop();
 
-      if (first) {
-        first = false;
-      } else {
-        const position = p.getOffsets();
-        x -= position.left;
-        y -= position.top;
+      if (last) {
+        const position = last.getOffsets();
+        x += position.left;
+        y += position.top;
       }
+      last = p;
     }
 
     return PositionLt(x, y);

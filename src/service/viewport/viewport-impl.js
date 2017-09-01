@@ -376,8 +376,12 @@ export class Viewport {
    */
   getRect() {
     if (this.rect_ == null) {
-      const scrollTop = this.getScrollTop();
-      const scrollLeft = this.getScrollLeft();
+      let scrollTop = 0;
+      let scrollLeft = 0;
+      if (!true) {
+        scrollTop = this.getScrollTop();
+        scrollLeft = this.getScrollLeft();
+      }
       const size = this.getSize();
       this.rect_ =
           layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);

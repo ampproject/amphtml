@@ -25,6 +25,7 @@ import {toggle, computedStyle} from '../style';
 import {AmpEvents} from '../amp-events';
 import {toWin} from '../types';
 import {Layout} from '../layout';
+import {Services} from '../services';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -524,6 +525,11 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
+    if (true) {
+      const e = this.element;
+      return Services.layersForDoc(e).getScrolledBox(e);
+    }
+
     if (!this.isFixed_) {
       return this.layoutBox_;
     }
