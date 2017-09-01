@@ -127,8 +127,8 @@ export class DoubleclickA4aEligibility {
     let experimentName = DFP_CANONICAL_FF_EXPERIMENT_NAME;
     if (!this.isCdnProxy(win)) {
       // Ensure that forcing FF via url is applied if test/localDev.
-      experimentId = urlExperimentId == -1 &&
-          (getMode(win).localDev ||	getMode(win).test) ?
+      experimentId = (urlExperimentId == -1 &&
+          (getMode(win).localDev ||	getMode(win).test)) ?
           MANUAL_EXPERIMENT_ID :
           this.maybeSelectExperiment(win, element, [
             DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
