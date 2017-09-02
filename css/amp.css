@@ -195,10 +195,15 @@ i-amphtml-sizer {
 
 .i-amphtml-fill-content {
   display: block;
-  width: 1px;          /* These lines are a work around to this issue in iOS: */
-  min-width: 100%;     /* https://bugs.webkit.org/show_bug.cgi?id=155198      */
-  height: 1px;
+  /* These lines are a work around to this issue in iOS:     */
+  /* https://bugs.webkit.org/show_bug.cgi?id=155198          */
+  /* And: https://github.com/ampproject/amphtml/issues/11133 */
+  height: 0;
+  max-height: 100%;
+  max-width: 100%;
   min-height: 100%;
+  min-width: 100%;
+  width: 0;
   margin: auto;
 }
 
