@@ -70,7 +70,7 @@ describes.realWin('font-stylesheet-timeout', {
   it('should time out if style sheets do not load', () => {
     const link = addLink(undefined, '/does-not-exist.css');
     fontStylesheetTimeout(win);
-    clock.tick(999);
+    clock.tick(499);
     expect(win.document.querySelectorAll(
         'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(0);
     clock.tick(1);
@@ -92,11 +92,11 @@ describes.realWin('font-stylesheet-timeout', {
   });
 
   it('should time out from response start', () => {
-    responseStart = 500;
-    clock.tick(1000);
+    responseStart = 200;
+    clock.tick(500);
     const link = addLink(undefined, '/does-not-exist.css');
     fontStylesheetTimeout(win);
-    clock.tick(499);
+    clock.tick(199);
     expect(win.document.querySelectorAll(
         'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(0);
     clock.tick(1);
