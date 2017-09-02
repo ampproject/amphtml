@@ -99,9 +99,9 @@ export class AmpAdExit extends AMP.BaseElement {
       'CLICK_X': true,
       'CLICK_Y': true,
     };
+    // The resource IDs of the amp-analytics tag(s) in this creative
+    const sourceCreativeIds = this.win['amp-analytics-creative-ids'];
     if (target.vars) {
-      // The resource IDs of the amp-analytics tag(s) in this creative
-      const sourceResourceIds = this.win['amp-analytics-resourceids'];
       const all3pResponses =
           this.getAmpDoc().win['amp-analytics-3p-responses'] || {};
 
@@ -132,11 +132,12 @@ export class AmpAdExit extends AMP.BaseElement {
              */
             substitutionFunctions[customVarName] = () => {
               if (customVar.hasOwnProperty('vendorAnalyticsSource') &&
-                  customVar.hasOwnProperty('vendorAnalyticsResponseKey')) {
+                  customVar.hasOwnProperty('vendorAnalyticsResponseKey') &&
+                  sourceCreativeIds) {
                 // It's a 3p analytics variable
                 const vendor =
                     /** @type {string} */ (customVar['vendorAnalyticsSource']);
-                if (all3pResponses[vendor]) {
+                if (all3pResponses && all3pResponses[vendor]) {
                   /* The vendor (in the example above, "vendorXYZ") has
                      responded to an amp-analytics tag in this creative. Need to
                      check whether that response contains a property that
@@ -144,16 +145,17 @@ export class AmpAdExit extends AMP.BaseElement {
                      for this custom variable. If so, return the value in the
                      response object that is associated with that key.
                   */
-                  sourceResourceIds.forEach(resourceId => {
+                  for (let i = 0; i < sourceCreativeIds.length; ++i) {
+                    const creativeId = sourceCreativeIds[i];
                     const vendorResponsesToResource =
-                        all3pResponses[vendor][resourceId];
+                        all3pResponses[vendor][creativeId];
                     const responseKey = /** @type {string} */
                       (customVar['vendorAnalyticsResponseKey']);
                     if (vendorResponsesToResource &&
                         vendorResponsesToResource.hasOwnProperty(responseKey)) {
                       return vendorResponsesToResource[responseKey];
                     }
-                  });
+                  }
                 }
               }
               // Either it's not a 3p analytics variable, or it is one but

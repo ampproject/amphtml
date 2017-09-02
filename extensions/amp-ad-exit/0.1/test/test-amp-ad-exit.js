@@ -572,13 +572,13 @@ describes.realWin('amp-ad-exit', {
   });
 
   it('should replace custom URL variables with 3P Analytics signals', () => {
+    debugger;
     const open = sandbox.stub(win, 'open', () => {
       return {name: 'fakeWin'};
     });
 
-    const creativeId = (env.win.frameElement &&
-        env.win.frameElement.getAttribute('data-amp-3p-sentinel')) ||
-        /** @type {string} */ (env.win.document.baseURI); // Fallback
+    const creativeId = win.document.baseURI + '-' + element.getResourceId();
+    env.win['amp-analytics-creative-ids'] = [creativeId];
     addToResponseMap(env.ampdoc.win, TEST_3P_VENDOR, creativeId, {
       'unused': 'unused',
       'collected-data': 'abc123',
