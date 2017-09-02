@@ -153,11 +153,8 @@ export class ViewportBindingDef {
   getLayoutRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
 
   /**
-   * Returns a the rect of the element within the document asynchronously
-   * @param {!Element} unusedEl
-   * @param {number=} unusedScrollLeft
-   * @param {number=} unusedScrollTop
-   * @return {!Promise<!../../layout-rect.LayoutRectDef>}
+   * Returns the client rect of the current window.
+   * @return {Promise<null>|Promise<!../../layout-rect.LayoutRectDef>}
    */
-  getLayoutRectAsync(unusedEl, unusedScrollLeft, unusedScrollTop) {}
+  getRootClientRectAsync() {}
 }
