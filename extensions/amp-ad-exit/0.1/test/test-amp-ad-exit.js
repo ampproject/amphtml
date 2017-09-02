@@ -572,7 +572,6 @@ describes.realWin('amp-ad-exit', {
   });
 
   it('should replace custom URL variables with 3P Analytics signals', () => {
-    debugger;
     const open = sandbox.stub(win, 'open', () => {
       return {name: 'fakeWin'};
     });
