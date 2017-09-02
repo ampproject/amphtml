@@ -462,8 +462,10 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   getIframePositionPromise_() {
-    return this.viewport_.getBoundingRectAsync(
+    return this.viewport_.getClientRectAsync(
         dev().assertElement(this.iframe)).then(position => {
+          dev().assert(position,
+              'element clientRect should intersects with root clientRect');
           const viewport = this.viewport_.getRect();
           return dict({
             'targetRect': position,

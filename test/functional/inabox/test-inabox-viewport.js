@@ -293,10 +293,6 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should request the position async from host', () => {
-    const el = document.createElement('div');
-    el.getBoundingClientRect = () => {return layoutRectLtwh(10, 20, 10, 10);};
-    const el2 = document.createElement('div');
-    el2.getBoundingClientRect = () => {return layoutRectLtwh(30, 40, 15, 15);};
     const requestSpy = stubIframeClientMakeRequest(
         'send-positions',
         'position',
@@ -304,15 +300,9 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
           targetRect: layoutRectLtwh(10, 20, 100, 100),
           viewportRect: layoutRectLtwh(1, 1, 1, 1),
         }), undefined, true);
-    let rect2 = null;
-    binding.getLayoutRectAsync(el2).then(rect => {
-      rect2 = rect;
-    });
-    return binding.getLayoutRectAsync(el).then(rect => {
-      expect(rect).to.jsonEqual(layoutRectLtwh(21, 41, 10, 10));
-      expect(rect2).to.jsonEqual(layoutRectLtwh(41, 61, 15, 15));
+    return binding.getRootClientRectAsync().then(rect => {
+      expect(rect).to.jsonEqual(layoutRectLtwh(10, 20, 100, 100));
       expect(requestSpy).to.be.calledOnce;
     });
   });
-
 });
