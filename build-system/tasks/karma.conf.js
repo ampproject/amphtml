@@ -40,7 +40,9 @@ module.exports = {
   browserify: {
     watch: true,
     debug: true,
-    transform: ['babelify'],
+    transform: [
+      ['babelify'],
+    ],
     bundleDelay: 900,
   },
 
@@ -204,10 +206,12 @@ module.exports = {
     'karma-chai',
     'karma-chai-as-promised',
     'karma-chrome-launcher',
+    'karma-coverage',
     'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',
+    'karma-ie-launcher',
     'karma-mocha',
     'karma-mocha-reporter',
     'karma-safari-launcher',

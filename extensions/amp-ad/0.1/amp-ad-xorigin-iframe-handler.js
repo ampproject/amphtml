@@ -26,6 +26,7 @@ import {
 } from '../../../src/iframe-helper';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {reportErrorToAnalytics} from '../../../src/error';
 import {dict} from '../../../src/utils/object';
 import {setStyle} from '../../../src/style';
 import {getData, loadPromise} from '../../../src/event-helper';
@@ -33,16 +34,19 @@ import {getHtml} from '../../../src/get-html';
 import {removeElement} from '../../../src/dom';
 import {getServiceForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
+import {MessageType} from '../../../src/3p-frame-messaging';
 import {
   installPositionObserverServiceForDoc,
   PositionObserverFidelity,
   SEND_POSITIONS_HIGH_FIDELITY,
   POSITION_HIGH_FIDELITY,
 } from '../../../src/service/position-observer-impl';
-
+import {throttle} from '../../../src/utils/rate-limit';
 
 
 const VISIBILITY_TIMEOUT = 10000;
+
+const MIN_INABOX_POSITION_EVENT_INTERVAL = 100;
 
 
 export class AmpAdXOriginIframeHandler {
@@ -51,6 +55,8 @@ export class AmpAdXOriginIframeHandler {
    * @param {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A} baseInstance
    */
   constructor(baseInstance) {
+    /** @private {!Window} */
+    this.win_ = baseInstance.win;
 
     /** @private */
     this.baseInstance_ = baseInstance;
@@ -73,6 +79,15 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?SubscriptionApi} */
     this.positionObserverHighFidelityApi_ = null;
 
+    /** @private {?SubscriptionApi} */
+    this.inaboxPositionApi_ = null;
+
+    /** @private {boolean} */
+    this.isInaboxPositionApiInit_ = false;
+
+    /** @private {?SubscriptionApi} */
+    this.inaboxRequestPositionApi_ = null;
+
     /** @private {?../../../src/service/position-observer-impl.AmpDocPositionObserver} */
     this.positionObserver_ = null;
 
@@ -81,7 +96,14 @@ export class AmpAdXOriginIframeHandler {
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.baseInstance_.getAmpDoc());
+
+    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
+
+    /** @private {boolean} */
+    this.sendPositionPending_ = false;
   }
+
 
   /**
    * Sets up listeners and iframe state for iframe containing ad creative.
@@ -105,10 +127,22 @@ export class AmpAdXOriginIframeHandler {
         this.iframe, 'send-embed-state', true,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
 
+    // To provide position to inabox.
+    if (isExperimentOn(this.win_, 'inabox-position-api')) {
+      this.inaboxPositionApi_ = new SubscriptionApi(
+          this.iframe, MessageType.SEND_POSITIONS, true, () => {
+            // TODO(@zhouyx): Make sendPosition_ only send to message origin iframe
+            this.sendPosition_();
+            this.registerPosition_();
+          });
+    };
+
     // High-fidelity positions for scrollbound animations.
     // Protected by 'amp-animation' experiment for now.
     if (isExperimentOn(this.baseInstance_.win, 'amp-animation')) {
       let posObInstalled = false;
+
+      // to be removed
       this.positionObserverHighFidelityApi_ = new SubscriptionApi(
         this.iframe, SEND_POSITIONS_HIGH_FIDELITY, true, () => {
           const ampdoc = this.baseInstance_.getAmpDoc();
@@ -119,6 +153,7 @@ export class AmpAdXOriginIframeHandler {
           }
           this.positionObserver_ = getServiceForDoc(ampdoc,
               'position-observer');
+
           this.positionObserver_.observe(
               dev().assertElement(this.iframe),
               PositionObserverFidelity.HIGH, pos => {
@@ -171,6 +206,11 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }));
+
+    this.unlisteners_.push(listenFor(this.iframe,
+        MessageType.USER_ERROR_IN_IFRAME, data => {
+          this.userErrorForAnalytics_(data['message']);
+        }, true, true /* opt_includingNestedWindows */));
 
     // Iframe.onload normally called by the Ad after full load.
     const iframeLoadPromise = loadPromise(this.iframe).then(() => {
@@ -337,6 +377,10 @@ export class AmpAdXOriginIframeHandler {
         this.positionObserver_.unobserve(this.iframe);
       }
     }
+    if (this.inaboxPositionApi_) {
+      this.inaboxPositionApi_.destroy();
+      this.inaboxPositionApi_ = null;
+    }
     if (this.positionObserverHighFidelityApi_) {
       this.positionObserverHighFidelityApi_.destroy();
       this.positionObserverHighFidelityApi_ = null;
@@ -414,6 +458,58 @@ export class AmpAdXOriginIframeHandler {
   }
 
   /**
+   * Retrieve iframe position entry in next animation frame.
+   * @private
+   */
+  getIframePositionPromise_() {
+    return this.viewport_.getClientRectAsync(
+        dev().assertElement(this.iframe)).then(position => {
+          dev().assert(position,
+              'element clientRect should intersects with root clientRect');
+          const viewport = this.viewport_.getRect();
+          return dict({
+            'targetRect': position,
+            'viewportRect': viewport,
+          });
+        });
+  }
+
+  /** @private */
+  sendPosition_() {
+    if (this.sendPositionPending_) {
+      // Only send once in single animation frame.
+      return;
+    }
+
+    this.sendPositionPending_ = true;
+    this.getIframePositionPromise_().then(position => {
+      this.sendPositionPending_ = false;
+      this.inaboxPositionApi_.send(MessageType.POSITION, position);
+    });
+  }
+
+  /** @private */
+  registerPosition_() {
+    if (this.isInaboxPositionApiInit_) {
+      // only register to viewport scroll/resize once
+      return;
+    }
+
+    this.isInaboxPositionApiInit_ = true;
+    // Send window scroll/resize event to viewport.
+    this.unlisteners_.push(this.viewport_.onScroll(throttle(this.win_, () => {
+      this.getIframePositionPromise_().then(position => {
+        this.inaboxPositionApi_.send(MessageType.POSITION, position);
+      });
+    }, MIN_INABOX_POSITION_EVENT_INTERVAL)));
+    this.unlisteners_.push(this.viewport_.onResize(() => {
+      this.getIframePositionPromise_().then(position => {
+        this.inaboxPositionApi_.send(MessageType.POSITION, position);
+      });
+    }));
+  }
+
+  /**
    * See BaseElement method.
    * @param {boolean} inViewport
    */
@@ -433,6 +529,18 @@ export class AmpAdXOriginIframeHandler {
     // have changed. Send an intersection record if needed.
     if (this.intersectionObserver_) {
       this.intersectionObserver_.fire();
+    }
+  }
+
+  /**
+   * @param {string} message
+   * @private
+   */
+  userErrorForAnalytics_(message) {
+    if (typeof message == 'string') {
+      const e = new Error(message);
+      e.name = '3pError';
+      reportErrorToAnalytics(e, this.baseInstance_.win);
     }
   }
 }

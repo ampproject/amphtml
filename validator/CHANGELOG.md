@@ -30,7 +30,45 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
-### 12:01PM, July 21, 2017 UTC
+### 11:00 PM, August 30, 2017 UTC
+
+Validator Version 246
+Spec Version 473
+
+Includes:
+ - `<amp-position-observer>` #10818
+ - amp-audio/video changes #10757, #10930, #10936
+ - Sibling tag rules
+ - #10965 and #10976
+
+### 7:00 PM, August 23, 2017 UTC
+
+Validator Version 245
+Spec Version 466
+
+Includes:
+ - Whitelist `use.typekit.net` font provider #10888 & #10889
+ - `<amp-web-push>` element #10468
+ - `<form custom-validation-reporting="interact-and-submit">` attribute #10782
+ - `<amp-sidebar>` changes #10749
+
+### 11:00 PM, August 14, 2017 UTC
+
+Validator Version 244
+Spec Version 458
+
+Includes:
+ - `<amp-video crossorigin>` attribute #10635
+
+### 9:00 PM, July 27, 2017 UTC
+
+Validator Version 244
+Spec Version 456
+
+Includes:
+ - `amp-google-client-id-api` meta tag
+
+### 12:01 PM, July 21, 2017 UTC
 
 Validator Version 244
 Spec Version 455
@@ -49,7 +87,7 @@ Includes:
  - Allow `<amp-animation>` in AMP4ADS documents #10093
  - amp-bind extension rules to no longer require `<amp-state>` #10159
  
-### 9:00PM, June 26, 2017 UTC
+### 9:00 PM, June 26, 2017 UTC
 
 Validator Version 239
 Spec Version 443

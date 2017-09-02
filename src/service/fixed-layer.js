@@ -275,9 +275,11 @@ export class FixedLayer {
         // large value (to catch cases where sticky-tops are in a long way
         // down inside a scroller).
         for (let i = 0; i < elements.length; i++) {
-          const element = elements[i].element;
-          setStyle(element, 'top', '');
-          setStyle(element, 'bottom', '-9999vh');
+          setStyles(elements[i].element, {
+            top: '',
+            bottom: '-9999vh',
+            transition: 'none',
+          });
         }
         // 2. Capture the `style.top` with this new `style.bottom` value. If
         // this element has a non-auto top, this value will remain constant
@@ -367,12 +369,21 @@ export class FixedLayer {
             transferLayer.className = this.ampdoc.getBody().className;
           }
         }
-        this.elements_.forEach((fe, i) => {
+        const elements = this.elements_;
+        for (let i = 0; i < elements.length; i++) {
+          const fe = elements[i];
           const feState = state[fe.id];
+
+          // Note: This MUST be done after measurements are taken.
+          // Transitions will mess up everything and, depending on when paints
+          // happen, mutates of transition and bottom at the same time may be
+          // make the transition active.
+          setStyle(fe.element, 'transition', '');
+
           if (feState) {
             this.mutateElement_(fe, i, feState);
           }
-        });
+        }
       },
     }, {}).catch(error => {
       // Fail silently.

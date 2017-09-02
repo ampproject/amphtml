@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 238
+min_validator_revision_required: 246
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 453
+spec_file_revision: 475
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
@@ -234,7 +234,9 @@ tags: {
                  "https://fast\\.fonts\\.net/.*|"
                  "https://maxcdn\\.bootstrapcdn\\.com/font-awesome/"
                  "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
-                 "https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css"
+                 "https://cloud\\.typography\\.com/"
+                 "[0-9]*/[0-9]*/css/fonts\\.css|"
+                 "https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css"
   }
   attrs: {
     name: "rel"
@@ -451,6 +453,23 @@ tags: {
     name: "name"
     mandatory: true
     value_casei: "amp-link-variable-allowed-origin"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+}
+# AMP metadata, name=amp-google-client-id-api
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-google-clientid-id-api"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-google-client-id-api"
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
@@ -1778,6 +1797,7 @@ attr_lists: {
   attrs: { name: "text-decoration" }
   attrs: { name: "text-rendering" }
   attrs: { name: "unicode-bidi" }
+  attrs: { name: "vector-effect" }
   attrs: { name: "visibility" }
   attrs: { name: "word-spacing" }
   attrs: { name: "writing-mode" }
@@ -2561,7 +2581,7 @@ tags {  # <form method=GET ...>
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "(show-first-on-submit|show-all-on-submit|as-you-go)"
+    value_regex: "(show-first-on-submit|show-all-on-submit|as-you-go|interact-and-submit)"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3145,6 +3165,25 @@ tags: {
     }
   }
 }
+# AMP IMA VIDEO
+tags: {
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-ima-video > script[type=application/json]"
+  mandatory_parent: "AMP-IMA-VIDEO"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
 # Specific script tags for custom elements and runtime imports.
 # 4.11.2 The noscript element
 tags: {
@@ -3614,6 +3653,7 @@ attr_lists: {
   }
   # <amp-bind>
   attrs: { name: "[class]" }
+  attrs: { name: "[hidden]" }
   attrs: { name: "[text]" }
 }
 
@@ -3731,8 +3771,9 @@ error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 100 }
 error_specificity { code: DEPRECATED_ATTR specificity: 101 }
 error_specificity { code: DEPRECATED_TAG specificity: 102 }
 error_specificity { code: DISALLOWED_MANUFACTURED_BODY specificity: 104 }
-
-
+error_specificity { code: DOCUMENT_TOO_COMPLEX specificity: 105 }
+error_specificity { code: INCORRECT_MIN_NUM_CHILD_TAGS specificity: 106 }
+error_specificity { code: TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS specificity: 107 }
 # Error formats
 error_formats {
   code: UNKNOWN_CODE
@@ -3954,6 +3995,15 @@ error_formats {
   format: "Tag '%1' must have %2 child tags - saw %3 child tags."
 }
 error_formats {
+  code: INCORRECT_MIN_NUM_CHILD_TAGS
+  format: "Tag '%1' must have a minimum of %2 child tags - saw %3 child tags."
+}
+error_formats {
+  code: TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS
+  format: "Tag '%1' is not allowed to have any sibling tags ('%2' should only"
+  " have 1 child)."
+}
+error_formats {
   code: DISALLOWED_CHILD_TAG_NAME
   format: "Tag '%1' is disallowed as child of tag '%2'. "
           "Child tag must be one of %3."
@@ -4000,6 +4050,10 @@ error_formats {
 error_formats {
   code: MISSING_REQUIRED_EXTENSION
   format: "The tag '%1' requires including the '%2' extension JavaScript."
+}
+error_formats {
+  code: DOCUMENT_TOO_COMPLEX
+  format: "The document is too complex."
 }
 
 # CSS Errors. All of these use %1 for the tag name (in practice 'style'
@@ -4106,4 +4160,3 @@ error_formats {
   format: "CSS syntax error in tag '%1' - the property '%2' is disallowed "
           "unless the enclosing rule is prefixed with the '%3' qualification."
 }
-

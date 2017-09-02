@@ -213,12 +213,6 @@ const EXPERIMENTS = [
     name: 'Display jank meter',
   },
   {
-    id: 'sticky-ad-early-load',
-    name: 'Load sticky-ad early after user first scroll' +
-        'Only apply to 1.0 version',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7479',
-  },
-  {
     id: 'amp-fx-parallax',
     name: 'Amp extension for a parallax effect',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
@@ -241,22 +235,6 @@ const EXPERIMENTS = [
     name: 'Use slot width/height attribute for AdSense size format',
   },
   {
-    id: 'ad-loader-v1',
-    name: 'New ad loader version 1',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
-  },
-  {
-    id: 'ad-loader-v2',
-    name: 'New ad loader version 2',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
-  },
-  {
-    id: 'amp-form-verifiers',
-    name: 'Asynchronous form verifiers',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9174',
-    spec: 'https://github.com/ampproject/amphtml/issues/8736',
-  },
-  {
     id: 'input-debounced',
     name: 'A debounced input event for AMP actions',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9413',
@@ -274,13 +252,6 @@ const EXPERIMENTS = [
       'amp-sidebar/1.0/amp-sidebar-1.0.md',
   },
   {
-    id: 'amp-ad-refresh',
-    name: 'Enable AMP ad refresh',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-ad-network-doubleclick-impl/' +
-        'amp-ad-network-doubleclick-impl-internal.md',
-  },
-  {
     id: 'user-error-reporting',
     name: 'Report error to publishers',
     spec: 'https://github.com/ampproject/amphtml/issues/6415',
@@ -289,6 +260,18 @@ const EXPERIMENTS = [
     id: 'disable-rtc',
     name: 'Disable AMP RTC',
     spec: 'https://github.com/ampproject/amphtml/issues/8551',
+  },
+  {
+    id: 'amp-position-observer',
+    name: 'Amp extension for monitoring position of an element within viewport',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/10875',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+      'amp-position-observer/amp-position-observer.md',
+  },
+  {
+    id: 'inabox-position-api',
+    name: 'Position API for foreign iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/10995',
   },
 ];
 

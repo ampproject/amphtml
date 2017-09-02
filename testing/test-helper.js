@@ -23,6 +23,7 @@ import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../src/service';
+import {WindowInterface} from '../src/window-interface';
 
 export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.
@@ -56,6 +57,16 @@ export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
   const mock = {};
   methods.forEach(method => {
     mock[method] = sandbox.stub(impl, method);
+  });
+  return mock;
+}
+
+export function mockWindowInterface(sandbox) {
+  const methods = Object.getOwnPropertyNames(WindowInterface)
+      .filter(p => typeof WindowInterface[p] === 'function');
+  const mock = {};
+  methods.forEach(method => {
+    mock[method] = sandbox.stub(WindowInterface, method);
   });
   return mock;
 }

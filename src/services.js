@@ -23,7 +23,6 @@ import {
   getAmpdoc,
 } from './service';
 import {
-  getElementService,
   getElementServiceForDoc,
   getElementServiceIfAvailable,
   getElementServiceIfAvailableForDoc,
@@ -86,6 +85,15 @@ export class Services {
   }
 
   /**
+   * Returns the AmpDoc for the specified context node.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!./service/ampdoc-impl.AmpDoc}
+   */
+  static ampdoc(nodeOrDoc) {
+    return getAmpdoc(nodeOrDoc);
+  }
+
+  /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @param {boolean=} loadAnalytics
    * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
@@ -94,7 +102,8 @@ export class Services {
     if (loadAnalytics) {
       // Get Extensions service and force load analytics extension.
       const ampdoc = getAmpdoc(nodeOrDoc);
-      Services.extensionsFor(ampdoc.win)./*OK*/loadExtension('amp-analytics');
+      Services.extensionsFor(ampdoc.win)./*OK*/installExtensionForDoc(
+          ampdoc, 'amp-analytics');
     }
     return (/** @type {!Promise<
               !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
@@ -288,12 +297,12 @@ export class Services {
   }
 
   /**
-   * @param {!Window} window
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>}
    */
-  static userNotificationManagerFor(window) {
+  static userNotificationManagerForDoc(nodeOrDoc) {
     return (/** @type {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>} */
-        (getElementService(window, 'userNotificationManager',
+        (getElementServiceForDoc(nodeOrDoc, 'userNotificationManager',
             'amp-user-notification')));
   }
 
@@ -349,10 +358,10 @@ export class Services {
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-impl.Viewport}
    */
   static viewportForDoc(nodeOrDoc) {
-    return /** @type {!./service/viewport-impl.Viewport} */ (
+    return /** @type {!./service/viewport/viewport-impl.Viewport} */ (
         getServiceForDoc(nodeOrDoc, 'viewport'));
   }
 

@@ -20,7 +20,7 @@ import {BaseSlides} from './base-slides';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {isConnectedNode} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
@@ -210,7 +210,7 @@ export class AmpSlideScroll extends BaseSlides {
       if (args) {
         this.showSlideWhenReady(args['index']);
       }
-    }, ActionTrust.MEDIUM); // TODO(choumx, #9699): LOW.
+    }, ActionTrust.HIGH);
   }
 
   /** @override */
@@ -281,6 +281,12 @@ export class AmpSlideScroll extends BaseSlides {
   layoutCallback() {
     if (this.slideIndex_ === null) {
       this.showSlide_(this.initialSlideIndex_);
+    } else {
+      // When display is toggled on a partcular media or element resizes,
+      // it will need to be re-laid-out. This is only needed when the slide
+      // does not change (example when browser window size changes,
+      // or orientation changes)
+      this.scheduleLayout(this.slides_[dev().assertNumber(this.slideIndex_)]);
     }
     return Promise.resolve();
   }
@@ -510,7 +516,7 @@ export class AmpSlideScroll extends BaseSlides {
         this.showSlide_(index);
       }
     } else {
-      user().error(TAG, 'Invalid [slide] value: %s', value);
+      this.user().error(TAG, 'Invalid [slide] value: %s', value);
     }
   }
 
@@ -595,7 +601,7 @@ export class AmpSlideScroll extends BaseSlides {
       const name = 'slideChange';
       const event =
           createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
-      this.action_.trigger(this.element, name, event, ActionTrust.MEDIUM);
+      this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
 
       this.element.dispatchCustomEvent(name, {index: newIndex});
     }

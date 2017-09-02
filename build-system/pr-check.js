@@ -43,7 +43,7 @@ const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
 function startTimer(functionName) {
   const startTime = Date.now();
   console.log(
-      '\n' + fileLogPrefix, 'Running', util.colors.cyan(functionName), '...');
+      '\n' + fileLogPrefix, 'Running', util.colors.cyan(functionName) + '...');
   return startTime;
 }
 
@@ -117,7 +117,7 @@ function isValidatorWebuiFile(filePath) {
  * @return {boolean}
  */
 function isBuildSystemFile(filePath) {
-  return filePath.startsWith('build-system') &&
+  return (filePath.startsWith('build-system') &&
       // Exclude textproto from build-system since we want it to trigger
       // tests and type check.
       path.extname(filePath) != '.textproto' &&
@@ -126,7 +126,9 @@ function isBuildSystemFile(filePath) {
       !isFlagConfig(filePath) &&
       // Exclude visual diff files from build-system since we want it to trigger
       // visual diff tests.
-      !isVisualDiffFile(filePath);
+      !isVisualDiffFile(filePath))
+      // OWNERS.yaml files should trigger build system to run tests
+      || isOwnersFile(filePath);
 }
 
 /**
@@ -158,6 +160,15 @@ function isValidatorFile(filePath) {
 }
 
 /**
+ * Determines if the given path has a OWNERS.yaml basename.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isOwnersFile(filePath) {
+  return path.basename(filePath) === 'OWNERS.yaml';
+}
+
+/**
  * Determines if the given file is a markdown file containing documentation.
  * @param {string} filePath
  * @return {boolean}
@@ -184,7 +195,7 @@ function isVisualDiffFile(filePath) {
  * @return {boolean}
  */
 function isIntegrationTest(filePath) {
-  return filePath.startsWith('test/integration/');
+  return filePath.includes('test/integration/');
 }
 
 /**
@@ -255,6 +266,9 @@ const command = {
     timedExecOrDie(`${gulp} json-syntax`);
     timedExecOrDie(`${gulp} lint`);
   },
+  buildCss: function() {
+    timedExecOrDie(`${gulp} css`);
+  },
   buildRuntime: function() {
     timedExecOrDie(`${gulp} build`);
   },
@@ -267,17 +281,20 @@ const command = {
   },
   runUnitTests: function() {
     // Unit tests with Travis' default chromium
-    timedExecOrDie(`${gulp} test --nobuild`);
+    timedExecOrDie(`${gulp} test --unit --nobuild`);
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
     // timedExecOrDie(
     //     `${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
   },
-  runIntegrationTests: function() {
+  runIntegrationTests: function(compiled) {
     // Integration tests with all saucelabs browsers
-    timedExecOrDie(
-        `${gulp} test --nobuild --saucelabs --integration --compiled`);
+    let cmd = `${gulp} test --nobuild --saucelabs --integration`;
+    if (compiled) {
+      cmd += ' --compiled';
+    }
+    timedExecOrDie(cmd);
   },
   runVisualDiffTests: function(opt_mode) {
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
@@ -293,16 +310,16 @@ const command = {
     timedExecOrDie(`${gulp} presubmit`);
   },
   buildValidatorWebUI: function() {
-    timedExecOrDie('cd validator/webui && python build.py');
+    timedExecOrDie(`${gulp} validator-webui`);
   },
   buildValidator: function() {
-    timedExecOrDie('cd validator && python build.py');
+    timedExecOrDie(`${gulp} validator`);
   },
 };
 
 function runAllCommands() {
   // Run different sets of independent tasks in parallel to reduce build time.
-  if (process.env.BUILD_SHARD == "pre_build_checks_and_unit_tests") {
+  if (process.env.BUILD_SHARD == "unit_tests") {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
@@ -318,7 +335,7 @@ function runAllCommands() {
     command.cleanBuild();
     command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
-    command.runIntegrationTests();
+    command.runIntegrationTests(/* compiled */ true);
   }
 }
 
@@ -359,12 +376,20 @@ function main(argv) {
     process.exit(1);
   }
 
-  //if (files.includes('package.json') ?
-        //!files.includes('yarn.lock') : files.includes('yarn.lock')) {
-    //console.error('pr-check.js - any update to package.json or yarn.lock ' +
-        //'must include the other file. Please update through yarn.');
-    //process.exit(1);
-  //}
+  // Make sure changes to package.json also update yarn.lock.
+  if (files.indexOf('package.json') != -1 && files.indexOf('yarn.lock') == -1) {
+    console.error(fileLogPrefix, util.colors.red('ERROR:'),
+        'Updates to', util.colors.cyan('package.json'),
+        'must be accompanied by a corresponding update to',
+        util.colors.cyan('yarn.lock'));
+    console.error(fileLogPrefix, util.colors.yellow('NOTE:'),
+        'To update', util.colors.cyan('yarn.lock'), 'after changing',
+        util.colors.cyan('package.json') + ',', 'run',
+        '"' + util.colors.cyan('yarn install') + '"',
+        'and include the change to', util.colors.cyan('yarn.lock'),
+        'in your PR.');
+    process.exit(1);
+  }
 
   const sortedBuildTargets = [];
   for (const t of buildTargets) {
@@ -377,7 +402,7 @@ function main(argv) {
       util.colors.cyan(sortedBuildTargets.join(', ')));
 
   // Run different sets of independent tasks in parallel to reduce build time.
-  if (process.env.BUILD_SHARD == "pre_build_checks_and_unit_tests") {
+  if (process.env.BUILD_SHARD == "unit_tests") {
     if (buildTargets.has('BUILD_SYSTEM')) {
       command.testBuildSystem();
     }
@@ -385,21 +410,31 @@ function main(argv) {
       command.testDocumentLinks(files);
     }
     if (buildTargets.has('RUNTIME') ||
-        buildTargets.has('INTEGRATION_TEST') ||
-        buildTargets.has('VISUAL_DIFF')) {
+        buildTargets.has('INTEGRATION_TEST')) {
       command.cleanBuild();
-      command.buildRuntime();
-      command.runVisualDiffTests();
-      // Ideally, we'd run presubmit tests after `gulp dist`, as some checks run
-      // through the dist/ folder. However, to speed up the Travis queue, we no
-      // longer do a dist build for PRs, so this call won't cover dist/.
-      // TODO(rsimha-amp): Move this once integration tests are enabled.
-      command.runPresubmitTests();
+      command.buildCss();
       command.runJsonAndLintChecks();
       command.runDepAndTypeChecks();
       // Run unit tests only if the PR contains runtime changes.
       if (buildTargets.has('RUNTIME')) {
         command.runUnitTests();
+      }
+    }
+  }
+
+  if (process.env.BUILD_SHARD == "integration_tests") {
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('VISUAL_DIFF')) {
+      command.cleanBuild();
+      command.buildRuntime();
+      command.runVisualDiffTests();
+      // Run presubmit and integration tests only if the PR contains runtime
+      // changes or modifies an integration test.
+      if (buildTargets.has('INTEGRATION_TEST') ||
+          buildTargets.has('RUNTIME')) {
+        command.runPresubmitTests();
+        command.runIntegrationTests(/* compiled */ false);
       }
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
@@ -410,26 +445,6 @@ function main(argv) {
     }
     if (buildTargets.has('VALIDATOR')) {
       command.buildValidator();
-    }
-  }
-
-  if (process.env.BUILD_SHARD == "integration_tests") {
-    // Run the integration_tests shard for a PR only if it is modifying an
-    // integration test. Otherwise, the shard can be skipped.
-    if (buildTargets.has('INTEGRATION_TEST')) {
-      console.log(fileLogPrefix,
-          'Running the',
-          util.colors.cyan('integration_tests'),
-          'build shard since this PR touches',
-          util.colors.cyan('test/integration'));
-      command.cleanBuild();
-      command.buildRuntimeMinified();
-      command.runIntegrationTests();
-    } else {
-      console.log(fileLogPrefix,
-          'Skipping the',
-          util.colors.cyan('integration_tests'),
-          'build shard for this PR');
     }
   }
 

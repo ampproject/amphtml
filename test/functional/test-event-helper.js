@@ -22,13 +22,18 @@ import {
   listenOncePromise,
   loadPromise,
 } from '../../src/event-helper';
+import {
+  detectEvtListenerOptsSupport,
+  resetEvtListenerOptsSupportForTesting,
+} from '../../src/event-helper-listen';
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
 
 describe('EventHelper', () => {
 
   function getEvent(name, target) {
-    const event = new Event(name, {bubbles: true, cancelable: true});
+    const event = document.createEvent('Event');
+    event.initEvent(name, true, true);
     event.testTarget = target;
     return event;
   }
@@ -37,6 +42,8 @@ describe('EventHelper', () => {
   let element;
   let loadObservable;
   let errorObservable;
+  let addEventListenerStub;
+  let removeEventListenerStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -242,6 +249,57 @@ describe('EventHelper', () => {
     };
     createCustomEvent(win, 'foo', {bar: 123});
     expect(initCustomEventSpy).to.be.calledOnce;
+  });
+
+  it('should detect when addEventListener options are supported', () => {
+    const eventListenerStubAcceptOpts = (type, listener, options) => {
+      const getCapture = options.capture;
+      if (getCapture) {
+        // Added to bypass linter (never used warning)
+      }
+    };
+    // Simulate an addEventListener that accepts options
+    addEventListenerStub =
+      sandbox.stub(self, 'addEventListener', eventListenerStubAcceptOpts);
+    // Simulate a removeEventListener that accepts options
+    removeEventListenerStub =
+      sandbox.stub(self, 'removeEventListener', eventListenerStubAcceptOpts);
+    resetEvtListenerOptsSupportForTesting();
+    expect(detectEvtListenerOptsSupport()).to.be.true;
+    expect(addEventListenerStub.called).to.be.true;
+    expect(removeEventListenerStub.called).to.be.true;
+    resetEvtListenerOptsSupportForTesting();
+  });
+
+  it('should cache the result of the test and only do it once', () => {
+    resetEvtListenerOptsSupportForTesting();
+    expect(detectEvtListenerOptsSupport()).to.be.true;
+    expect(addEventListenerStub.called).to.be.true;
+    expect(removeEventListenerStub.called).to.be.true;
+    expect(detectEvtListenerOptsSupport()).to.be.true;
+    expect(addEventListenerStub.calledOnce).to.be.true;
+    expect(removeEventListenerStub.calledOnce).to.be.true;
+  });
+
+  it('should detect when addEventListener options are not supported', () => {
+    const eventListenerStubRejectOpts = (type, listener, capture) => {
+      const getCapture = capture;
+      if (getCapture) {
+        // Added to bypass linter (never used warning)
+      }
+    };
+    // Simulate an addEventListener that does not accept options
+    addEventListenerStub =
+      sandbox.stub(self, 'addEventListener', eventListenerStubRejectOpts);
+    // Simulate a removeEventListener that does not accept options
+    removeEventListenerStub =
+      sandbox.stub(self, 'removeEventListener', eventListenerStubRejectOpts);
+    resetEvtListenerOptsSupportForTesting();
+    expect(detectEvtListenerOptsSupport()).to.be.false;
+    expect(addEventListenerStub.called).to.be.true;
+    expect(removeEventListenerStub.called).to.be.true;
+    expect(detectEvtListenerOptsSupport()).to.be.false;
+    expect(removeEventListenerStub.calledOnce).to.be.true;
   });
 
 });

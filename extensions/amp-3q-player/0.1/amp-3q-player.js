@@ -17,7 +17,12 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {tryParseJson} from '../../../src/json';
 import {user, dev} from '../../../src/log';
-import {removeElement} from '../../../src/dom';
+import {
+  removeElement,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -25,6 +30,9 @@ import {isObject} from '../../../src/types';
 import {listen, getData} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
+
+const TAG = 'amp-3q-player';
+
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -215,6 +223,44 @@ class Amp3QPlayer extends AMP.BaseElement {
     this.sdnPostMessage_('hideControlbar');
   }
 
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
   /** @override */
   getCurrentTime() {
     // Not supported.
@@ -232,6 +278,9 @@ class Amp3QPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-3q-player', Amp3QPlayer);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, Amp3QPlayer);
+});

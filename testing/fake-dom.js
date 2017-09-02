@@ -64,8 +64,9 @@ export class FakeWindow {
     this.DOMTokenList = window.DOMTokenList;
     /** @const */
     this.Math = window.Math;
+
     /** @const */
-    this.Event = window.Event;
+    this.crypto = window.crypto || window.msCrypto;
 
     // Parent Window points to itself if spec.parent was not passed.
     /** @const @type {!Window} */
@@ -171,10 +172,10 @@ export class FakeWindow {
 
     // Navigator.
     /** @const {!Navigator} */
-    this.navigator = freeze({
+    this.navigator = {
       userAgent: spec.navigator && spec.navigator.userAgent ||
           window.navigator.userAgent,
-    });
+    };
 
     // Storage.
     /** @const {!FakeStorage|undefined} */

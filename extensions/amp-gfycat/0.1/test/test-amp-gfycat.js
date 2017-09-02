@@ -15,36 +15,38 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-gfycat';
-import {adopt} from '../../../../src/runtime';
-import {listenOncePromise} from '../../../../src/event-helper';
-import {VideoEvents} from '../../../../src/video-interface';
 
-adopt(window);
+describes.realWin('amp-gfycat', {
+  amp: {
+    extensions: ['amp-gfycat'],
+  },
+}, env => {
+  let win, doc;
 
-describe('amp-gfycat', () => {
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
+
   function getGfycat(gfyId, opt_params) {
-    return createIframePromise(true).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const gfycat = iframe.doc.createElement('amp-gfycat');
-      gfycat.setAttribute('data-gfyid', gfyId);
-      gfycat.setAttribute('width', 640);
-      gfycat.setAttribute('height', 640);
-      if (opt_params && opt_params.responsive) {
-        gfycat.setAttribute('layout', 'responsive');
-      }
-      if (opt_params && opt_params.autoplay) {
-        gfycat.setAttribute('autoplay', '');
-      }
-      if (opt_params && opt_params.noautoplay) {
-        gfycat.setAttribute('noautoplay', '');
-      }
-      return iframe.addElement(gfycat);
-    });
+    const gfycat = doc.createElement('amp-gfycat');
+    gfycat.setAttribute('data-gfyid', gfyId);
+    gfycat.setAttribute('width', 640);
+    gfycat.setAttribute('height', 640);
+    if (opt_params && opt_params.responsive) {
+      gfycat.setAttribute('layout', 'responsive');
+    }
+    if (opt_params && opt_params.noautoplay) {
+      gfycat.setAttribute('noautoplay', '');
+    }
+    if (opt_params && opt_params.autoplay) {
+      gfycat.setAttribute('autoplay', '');
+    }
+    doc.body.appendChild(gfycat);
+    return gfycat.build().then(() => {
+      return gfycat.layoutCallback();
+    }).then(() => gfycat);
   }
 
   it('renders', () => {

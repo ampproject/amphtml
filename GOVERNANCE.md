@@ -28,4 +28,5 @@ Our governance model is as follows:
 * Hongfei Ding (@lannka)
 * Yuxi Chen (@muxin)
 * Johannes Henkel (@powdercloud). Specialty: Validator
+* Wassim Gharbi (@wassgha)
 * Yuxuan Zhou (@zhouyx)

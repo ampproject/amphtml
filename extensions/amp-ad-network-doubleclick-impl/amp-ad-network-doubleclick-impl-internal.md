@@ -72,7 +72,7 @@ Below the term `primary size` refers to the width and height pair specified by t
 - `data-multi-size` A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. Each individual size must be a number (the width) followed by a lowercase 'x' followed by a number (the height). Each dimension specified this way must not be larger than its counterpart in the primary size. Further, each dimension must be no less than 2/3rds of the corresponding primary dimension, unless `data-mutli-size-validation` is set to false.
 - `data-multi-size-validation` If set to false, this will allow secondary sizes (those specified in the `data-multi-size` attribute) to be less than 2/3rds of the corresponding primary size. By default this is assumed to be true.
 
-### AMP Ad Refresh
+### AMP Ad Refresh (alpha)
 
 AMP Ad Refresh permits amp-ad tags using Fast Fetch to undergo periodic refresh events. Each such event re-issues a new ad request and attempts to display the returned creative.
 
@@ -121,3 +121,20 @@ If `refresh_interval` is set to false, then this slot will not be refresh-enable
 #### SRA Compatibility
 
 Refresh is currently not supported for SRA enabled slots. If a slot is enabled for both, refresh will be disabled, and an error will be logged to the user's console.
+
+#### AMP Ad Container Compatibility
+
+The only AMP ad containers in which refresh is currently supported are amp-sticky-ad and amp-carousel container types.
+
+
+### SRA: Single Request Architecture (alpha)
+Enabling SRA allows a publisher to make a single request for all ad slots on the AMP page which gives a publisher the ability to do roadblocking and competitive exclusions. This very similar to the behavior achieved on non-AMP pages when using [this](https://developers.google.com/doubleclick-gpt/reference#googletag.PubAdsService_enableSingleRequest) method in GPT.
+
+In order to use this feature, add the following meta tag to the head of the AMP page:
+`<meta name=”amp-ad-doubleclick-sra”/>`
+
+Note that SRA is not available in the following cases:
+1. If the AMP page is not served from a valid AMP cache 
+2. If publishers use [`remote.html`](https://github.com/ampproject/amphtml/blob/master/ads/README.md#1st-party-cookies)
+3. The ad refresh feature is incompatible with SRA
+4. Publishers don't use the amp-ad attribute [`useSameDomainRenderingUntilDeprecated`](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md#temporary-use-of-usesamedomainrenderinguntildeprecated)

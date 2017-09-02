@@ -48,6 +48,7 @@ import {
   QQID_HEADER,
   getEnclosingContainerTypes,
   ValidAdContainerTypes,
+  maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -59,7 +60,7 @@ import {
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {stringHash32} from '../../../src/string';
-import {removeElement} from '../../../src/dom';
+import {removeElement, createElementWithAttributes} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -69,14 +70,23 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
-import {deepMerge} from '../../../src/utils/object';
+import {deepMerge, dict} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
 import {isSecureUrl, parseUrl} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
+import {VisibilityState} from '../../../src/visibility-state';
+import {
+  isExperimentOn,
+  /* eslint no-unused-vars: 0 */ ExperimentInfo,
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {
   RefreshManager,
   DATA_ATTR_NAME,
 } from '../../amp-a4a/0.1/refresh-manager';
+import {
+  addExperimentIdToElement,
+} from '../../../ads/google/a4a/traffic-experiments';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -89,7 +99,7 @@ const DOUBLECLICK_BASE_URL =
 /** @const {number} */
 const RTC_TIMEOUT = 1000;
 
-/** @private {?Promise<!Object<string,string>>} */
+/** @private {?Promise<?Object>} */
 let rtcPromise = null;
 
 /** @private {?JsonObject|undefined} */
@@ -106,6 +116,15 @@ const PAGE_LEVEL_PARAMS_ = {
   'gdfp_req': '1',
   'sfv': DEFAULT_SAFEFRAME_VERSION,
   'u_sd': window.devicePixelRatio,
+};
+
+/** @visibleForTesting @const {string} */
+export const CORRELATOR_CLEAR_EXP_NAME = 'dbclk-correlator-clear';
+
+/** @visibleForTesting @enum {string} */
+export const CORRELATOR_CLEAR_EXP_BRANCHES = {
+  CONTROL: '22302764',
+  EXPERIMENT: '22302765',
 };
 
 /**
@@ -285,6 +304,56 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.win, DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST);
   }
 
+  /** @override */
+  buildCallback() {
+    super.buildCallback();
+    if (this.win['dbclk_a4a_viz_change']) {
+      // Only create one per page but ensure all slots get experiment
+      // selection.
+      const expId = getExperimentBranch(this.win, CORRELATOR_CLEAR_EXP_NAME);
+      if (expId) {
+        // If experiment was already selected, add to element to ensure it is
+        // included in request.
+        addExperimentIdToElement(expId, this.element);
+      }
+      return;
+    }
+    this.win['dbclk_a4a_viz_change'] = true;
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    viewer.onVisibilityChanged(() => {
+      if (viewer.getVisibilityState() != VisibilityState.PAUSED ||
+          this.useSra || !this.win.ampAdPageCorrelator) {
+        // Do not allow experiment selection if SRA or correlator was not set.
+        return;
+      }
+      // Select into correlator clear experiment of pause visibility change.
+      // Should execute prior to resumeCallback.
+      // TODO(keithwrightbos,glevitzy) - determine behavior for correlator
+      // interaction with refresh.
+      const experimentInfoMap =
+          /** @type {!Object<string, !ExperimentInfo>} */ ({});
+      experimentInfoMap[CORRELATOR_CLEAR_EXP_NAME] = {
+        isTrafficEligible: () => true,
+        branches: ['22302764','22302765'],
+      };
+      randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+      const expId = getExperimentBranch(this.win, CORRELATOR_CLEAR_EXP_NAME);
+      if (expId) {
+        // Adding to experiment id will cause it to be included in subsequent ad
+        // requests.
+        addExperimentIdToElement(expId, this.element);
+        if (expId === CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT) {
+          // TODO(keithwrightbos) - do not clear if at least one slot on the page
+          // is an AMP creative that survived unlayoutCallback in order to
+          // ensure competitive exclusion/roadblocking.  Note this only applies
+          // to non-backfill inventory.
+          dev().info(TAG, 'resetting page correlator');
+          this.win.ampAdPageCorrelator = null;
+        }
+      }
+    });
+  }
+
   /**
    * @return {!{
    *  resolver: ?function(?../../../src/service/xhr-impl.FetchResponse),
@@ -329,8 +398,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           multiSizeDataStr,
           this.initialSize_.width,
           this.initialSize_.height,
-          multiSizeValidation == 'true',
-          /* Use strict mode only in non-refresh case */ !this.isRefreshing);
+          multiSizeValidation == 'true');
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
           .join('|');
@@ -402,8 +470,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                 this.getBlockParameters_(),
                 /* RTC Parameters */ values[1],
-                /* pageLevelParameters */ values[0]), ['108809080']);
+                /* pageLevelParameters */ values[0]));
       });
+  }
+
+  /** @override */
+  onNetworkFailure(error, adUrl) {
+    dev().info(TAG, 'network error, attempt adding of error parameter', error);
+    return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
   }
 
   /** @override */
@@ -413,8 +487,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
-      this.extensions_./*OK*/loadExtension('amp-analytics');
+      this.extensions_./*OK*/installExtensionForDoc(
+          this.getAmpDoc(), 'amp-analytics');
     }
+    this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
+    this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);
@@ -596,15 +673,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * model.
    * The targeting info from the RTC updates the targeting info on
    * this object within mergeRtc.
-   * @return {?Promise<?Object>} An object of parameters to add to
+   * @param {Document=} opt_doc Optional document for testing.
+   * @return {!Promise<?Object>} An object of parameters to add to
    *   the ad request url.
    * @private
    */
-  executeRtc_() {
+  executeRtc_(opt_doc) {
+    const doc = opt_doc || this.element.ownerDocument;
     if (rtcPromise) {
       return this.mergeRtc();
     }
-    const ampRtcPageElement = document.getElementById('amp-rtc');
+    const ampRtcPageElement = doc.getElementById('amp-rtc');
     if (!ampRtcPageElement) {
       return Promise.resolve();
     }
@@ -645,7 +724,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   credentials: 'include',
                   headers,
                 }).catch(err => {
-                  user().error(TAG, err.message);
+                  this.user().error(TAG, err.message);
                 });
               }
               // Non-200 status codes are forbidden for RTC.
@@ -672,7 +751,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Merges the RTC response into the jsonTargeting of this.
    * If it can't merge, or there is no response, potentially
    * rejects.
-   * @return {Promise<?Object>} Resolves if ad request is
+   * @return {!Promise<?Object>} Resolves if ad request is
    *     to be sent, with object of params to add to request,
    *     otherwise rejects with a reject message if we have one.
    */
@@ -722,10 +801,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * the ad request on RTC failure. If yes, we return a resolve,
    * if not, we return a reject.
    * @param {string} errMessage
-   * @return {Promise<?number|?string>}
+   * @return {!Promise<?Object>}
    */
   shouldSendRequestWithoutRtc(errMessage) {
-    user().error(TAG, errMessage);
+    this.user().error(TAG, errMessage);
     let rtcTotalTime;
     // Have to use match instead of == because AMP
     // custom messages automatically append three
@@ -754,6 +833,34 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // Null response indicates single slot should execute using non-SRA method.
     return this.sraResponsePromise_.then(
         response => response || super.sendXhrRequest(adUrl));
+  }
+
+  /**
+   * @param {string} impressions
+   * @param {boolean=} scrubReferer
+   * @visibileForTesting
+   */
+  fireDelayedImpressions(impressions, scrubReferer) {
+    if (!impressions) {
+      return;
+    }
+    impressions.split(',').forEach(url => {
+      try {
+        if (!isSecureUrl(url)) {
+          dev().warn(TAG, `insecure impression url: ${url}`);
+          return;
+        }
+        // Create amp-pixel and append to document to send impression.
+        this.win.document.body.appendChild(
+            createElementWithAttributes(
+                this.win.document,
+                'amp-pixel',
+                dict({
+                  'src': url,
+                  'referrerpolicy': scrubReferer ? 'no-referrer' : '',
+                })));
+      } catch (unusedError) {}
+    });
   }
 
   /**
@@ -876,7 +983,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
                 const canceled = isCancellation(error);
                 if (!canceled) {
-                  user().error(TAG, 'SRA request failure', error);
+                  this.user().error(TAG, 'SRA request failure', error);
                 }
                 // Collapse all slots on failure so long as they are not
                 // cancellation.
@@ -903,8 +1010,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 }
 
-AMP.registerElement(
-    'amp-ad-network-doubleclick-impl', AmpAdNetworkDoubleclickImpl);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAdNetworkDoubleclickImpl);
+});
 
 
 /** @visibileForTesting */
