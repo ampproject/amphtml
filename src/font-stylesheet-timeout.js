@@ -53,7 +53,7 @@ function maybeTimeoutStyleSheets(win) {
   if (perf && perf.timing && perf.timing.responseStart) {
     timeSinceResponseStart = Date.now() - perf.timing.responseStart;
   }
-  const timeout = Math.max(1, 1000 - timeSinceResponseStart);
+  const timeout = Math.max(1, 500 - timeSinceResponseStart);
 
   // Avoid timer dependency since this runs very early in execution.
   win.setTimeout(() => {
