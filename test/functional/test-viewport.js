@@ -846,15 +846,10 @@ describes.fakeWin('Viewport', {}, env => {
     bindingMock.expects('getRootClientRectAsync')
         .returns(Promise.resolve(layoutRectLtwh(5, 5, 5, 5))).twice();
     const el = document.createElement('div');
-    const el1 = document.createElement('div');
     el.getBoundingClientRect = () => {return layoutRectLtwh(1, 2, 3, 4);};
-    el1.getBoundingClientRect = () => {return layoutRectLtwh(5, 6, 3, 4);};
     sandbox.stub(viewport.vsync_, 'measurePromise', cb => cb());
     return viewport.getClientRectAsync(el).then(res => {
       expect(res).to.deep.equal(layoutRectLtwh(6, 7, 3, 4));
-      return viewport.getClientRectAsync(el1).then(res => {
-        expect(res).to.be.null;
-      });
     });
   });
 

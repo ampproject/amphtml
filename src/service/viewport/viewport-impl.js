@@ -25,7 +25,6 @@ import {
 import {
   layoutRectLtwh,
   moveLayoutRect,
-  rectIntersection,
 } from '../../layout-rect';
 import {dev} from '../../log';
 import {dict} from '../../utils/object';
@@ -401,11 +400,10 @@ export class Viewport {
 
   /**
    * Returns the clientRect of the element.
-   * If root is viewport: return the element clientRect
-   * If root is an iframe: return the element clientRect if element intersects with root
-   * TODO(@zhouyx): We should consider return null if root doesn't intersect with viewportRect as well.
+   * Note: This method does not taking intersection into account.
+   * TODO(@zhouyx): We may need to return info on the intersectionRect.
    * @param {!Element} el
-   * @return {!Promise<?../../layout-rect.LayoutRectDef>}
+   * @return {!Promise<!../../layout-rect.LayoutRectDef>}
    */
   getClientRectAsync(el) {
     const local = this.vsync_.measurePromise(() => {
@@ -419,11 +417,7 @@ export class Viewport {
       if (!r) {
         return l;
       }
-      const clientRect = moveLayoutRect(l, r.left, r.top);
-      if (!rectIntersection(clientRect, r)) {
-        return null;
-      }
-      return clientRect;
+      return moveLayoutRect(l, r.left, r.top);
     });
   }
 
