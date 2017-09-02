@@ -42,6 +42,7 @@ import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
+import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
 
@@ -826,6 +827,30 @@ describes.fakeWin('Viewport', {}, env => {
     bindingMock.expects('getLayoutRect').withArgs(element, 222, 111)
         .returns('sentinel').once();
     expect(viewport.getLayoutRect(element)).to.equal('sentinel');
+  });
+
+  it('should calculate client rect w/o global client rect', () => {
+    const bindingMock = sandbox.mock(binding);
+    bindingMock.expects('getRootClientRectAsync')
+        .returns(Promise.resolve(null));
+    const el = document.createElement('div');
+    el.getBoundingClientRect = () => {return layoutRectLtwh(1, 2, 3, 4);};
+    sandbox.stub(viewport.vsync_, 'measurePromise', cb => cb());
+    return viewport.getClientRectAsync(el).then(res => {
+      expect(res).to.deep.equal(layoutRectLtwh(1, 2, 3, 4));
+    });
+  });
+
+  it('should calculate client rect w/ global client rect when ', () => {
+    const bindingMock = sandbox.mock(binding);
+    bindingMock.expects('getRootClientRectAsync')
+        .returns(Promise.resolve(layoutRectLtwh(5, 5, 5, 5))).twice();
+    const el = document.createElement('div');
+    el.getBoundingClientRect = () => {return layoutRectLtwh(1, 2, 3, 4);};
+    sandbox.stub(viewport.vsync_, 'measurePromise', cb => cb());
+    return viewport.getClientRectAsync(el).then(res => {
+      expect(res).to.deep.equal(layoutRectLtwh(6, 7, 3, 4));
+    });
   });
 
   it('should deletegate scrollWidth', () => {
