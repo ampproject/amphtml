@@ -99,11 +99,11 @@ export class AmpAdExit extends AMP.BaseElement {
       'CLICK_X': true,
       'CLICK_Y': true,
     };
-    // The resource IDs of the amp-analytics tag(s) in this creative
-    const sourceCreativeIds = this.win['amp-analytics-creative-ids'];
     if (target.vars) {
       const all3pResponses =
           this.getAmpDoc().win['amp-analytics-3p-responses'] || {};
+      // The resource IDs of the amp-analytics tag(s) in this creative
+      const sourceCreativeIds = this.win['amp-analytics-creative-ids'];
 
       for (const customVarName in target.vars) {
         if (customVarName[0] == '_') {
