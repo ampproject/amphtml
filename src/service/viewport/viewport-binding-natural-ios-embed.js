@@ -321,11 +321,10 @@ export class ViewportBindingNaturalIosEmbed_ {
   }
 
   /** @override */
-  getLayoutRectAsync(el, opt_scrollLeft, opt_scrollTop) {
-    return this.vsync_.measurePromise(() => {
-      return this.getLayoutRect(el, opt_scrollLeft, opt_scrollTop);
-    });
+  getRootClientRectAsync() {
+    return Promise.resolve(null);
   }
+
 
   /** @override */
   setScrollTop(scrollTop) {
