@@ -46,7 +46,7 @@ export class PositionObserver {
     /** @private {!../vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
 
-    /** @private {!../viewport-impl.Viewport} */
+    /** @private {!../viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private {Array<function()>} */
@@ -176,7 +176,7 @@ export class PositionObserver {
     const viewportSize = this.viewport_.getSize();
     const viewportBox =
         layoutRectLtwh(0, 0, viewportSize.width, viewportSize.height);
-    this.viewport_.getBoundingRectAsync(entry.element).then(elementBox => {
+    this.viewport_.getClientRectAsync(entry.element).then(elementBox => {
       entry.trigger(
       /** @type {./position-observer-entry.PositionInViewportEntryDef}*/ ({
         positionRect: elementBox,

@@ -98,7 +98,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
       let top;
       beforeEach(() => {
         top = 0;
-        sandbox.stub(posOb.viewport_, 'getBoundingRectAsync', () => {
+        sandbox.stub(posOb.viewport_, 'getClientRectAsync', () => {
           return Promise.resolve(layoutRectLtwh(0, top, 0, 0));
         });
       });
@@ -161,7 +161,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
       let top;
       beforeEach(() => {
         top = 0;
-        sandbox.stub(posOb.viewport_, 'getBoundingRectAsync', () => {
+        sandbox.stub(posOb.viewport_, 'getClientRectAsync', () => {
           return Promise.resolve(layoutRectLtwh(2, top, 20, 10));
         });
       });
