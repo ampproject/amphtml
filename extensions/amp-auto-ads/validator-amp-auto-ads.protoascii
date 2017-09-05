@@ -26,8 +26,7 @@ tags: {  # amp-auto-ads
 tags: {  # <amp-auto-ads>
   html_format: AMP
   tag_name: "AMP-AUTO-ADS"
-  disallowed_ancestor: "AMP-AUTO-ADS"
-  disallowed_ancestor: "AMP-SIDEBAR"
+  mandatory_parent: "BODY"
   requires_extension: "amp-auto-ads"
   attrs: {
     name: "type"
