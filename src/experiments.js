@@ -72,8 +72,8 @@ export function isCanary(win) {
  * @return {string}
  */
 export function getBinaryType(win) {
-  return win.AMP_CONFIG && win.AMP_CONFIG.type
-      ? win.AMP_CONFIG.type : 'unknown';
+  return win.AMP_CONFIG && win.AMP_CONFIG.type ?
+      win.AMP_CONFIG.type : 'unknown';
 }
 
 
