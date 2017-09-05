@@ -120,7 +120,7 @@ export function isAmpMessage(message) {
       message.indexOf('{') != -1);
 }
 
-/** @typedef {{transportId: string, message: string}} */
+/** @typedef {{creativeId: string, message: string}} */
 export let IframeTransportEvent;
 // An event, and the transport ID of the amp-analytics tags that
 // generated it. For instance if the creative with transport

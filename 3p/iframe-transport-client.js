@@ -61,7 +61,7 @@ export class IframeTransportClient {
           events.forEach(event => {
             try {
               this.listener_ &&
-                  this.listener_(event.message, event.transportId);
+                  this.listener_(event.message, event.creativeId);
             } catch (e) {
               user().error(TAG_,
                   'Exception in callback passed to onAnalyticsEvent: ' +
@@ -84,13 +84,13 @@ export class IframeTransportClient {
 
   /**
    * Sends a message back to the creative
-   * @param {string} transportId An ID uniquely identifying which creative
+   * @param {string} creativeId An ID uniquely identifying which creative
    * shall receive the event
    * @param {!Object<string,string>} response
    */
-  sendMessageToCreative(transportId, response) {
+  sendMessageToCreative(creativeId, response) {
     this.client_./*OK*/sendMessage(MessageType.IFRAME_TRANSPORT_RESPONSE,
-        /** @type {JsonObject} */({transportId, message: response}));
+        /** @type {JsonObject} */({creativeId, message: response}));
   }
 
   /**

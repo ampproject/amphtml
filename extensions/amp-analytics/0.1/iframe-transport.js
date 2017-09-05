@@ -29,6 +29,9 @@ import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 /** @const {string} */
 export const AMP_ANALYTICS_3P_RESPONSES = 'amp-analytics-3p-responses';
 
+/** @const {string} */
+const AMP_ANALYTICS_CREATIVE_IDS = 'amp-analytics-creative-ids';
+
 /** @typedef {{
  *    frame: Element,
  *    sentinel: !string,
@@ -43,30 +46,34 @@ export let FrameData;
 export class IframeTransport {
   /**
    * @param {!Window} ampWin The window object of the AMP document
+   * @param {!Window} win The window object of the innermost document
+   * containing the amp-analytics tag (e.g. a creative iframe)
    * @param {!string} type The value of the amp-analytics tag's type attribute
    * @param {!JsonObject} config
-   * @param {string} creativeId A string which identifies the
-   * creative which contains this amp-analytics tag. In practice, this is
-   * the value of the data-amp-3p-sentinel attribute of the iframe.
+   * @param {string} resourceId The result of calling
+   * element.getResourceId() on the containing AmpAnalytics instance
    */
-  constructor(ampWin, type, config, creativeId) {
+  constructor(ampWin, win, type, config, resourceId) {
     /** @private @const {!Window} win */
     this.ampWin_ = ampWin;
+
+    /** @private @const {!Window} win */
+    this.win_ = win;
 
     /** @private @const {string} */
     this.type_ = type;
 
     /** @private @const {string} */
-    this.creativeId_ = creativeId;
+    this.resourceId_ = resourceId;
 
-    /** @private @const {string} */
-    this.id_ = IframeTransport.createUniqueId_();
+    if (!this.win_[AMP_ANALYTICS_CREATIVE_IDS]) {
+      this.win_[AMP_ANALYTICS_CREATIVE_IDS] = [];
+    }
+    this.win_[AMP_ANALYTICS_CREATIVE_IDS].push(this.getId());
 
     dev().assert(config && config['iframe'],
         'Must supply iframe URL to constructor!');
     this.frameUrl_ = config['iframe'];
-
-    IframeTransport.transportIdToCreativeId_[this.id_] = this.creativeId_;
 
     this.processCrossDomainIframe();
   }
@@ -77,7 +84,6 @@ export class IframeTransport {
   detach() {
     IframeTransport.markCrossDomainIframeAsDone(this.ampWin_.document,
         this.type_);
-    delete IframeTransport.transportIdToCreativeId_[this.id_];
   }
 
   /**
@@ -104,16 +110,17 @@ export class IframeTransport {
   createCrossDomainIframe() {
     // Explanation of IDs:
     // Each instance of IframeTransport (owned by a specific amp-analytics
-    // tag, in turn owned by a specific creative) has an ID in this._id.
+    // tag, in turn owned by a specific creative) has an ID (this.getId()).
     // Each cross-domain iframe also has an ID, stored here in sentinel.
-    // These two types of IDs are drawn from the same pool of numbers, and
-    // are thus mutually unique.
+    // These two types of IDs have different formats and are thus mutually
+    // unique.
     // There is a many-to-one relationship, in that several creatives may
-    // utilize the same analytics vendor, so perhaps creatives #1 & #2 might
-    // both use xframe #3.
+    // utilize the same analytics vendor, so perhaps two creatives might
+    // both use the same xframe.
     // Of course, a given creative may use multiple analytics vendors, but
     // in that case it would use multiple amp-analytics tags, so the
-    // iframeTransport.id_ -> sentinel relationship is *not* many-to-many.
+    // iframeTransport.getId() -> sentinel relationship is *not*
+    // many-to-many.
     const sentinel = IframeTransport.createUniqueId_();
     const useLocal = getMode().localDev || getMode().test;
     const useRtvVersion = !useLocal;
@@ -146,11 +153,18 @@ export class IframeTransport {
         MessageType.IFRAME_TRANSPORT_RESPONSE, response => {
           dev().assert(response && response['message'],
               'Received empty response from 3p analytics frame');
-          // Add this response to the response map, for use by amp-ad-exit
-          const creativeId =
-              IframeTransport.transportIdToCreativeId_[response['transportId']];
-          dev().assert(creativeId, 'Unrecognized transportId: ' +
-              response['transportId']);
+          /*
+           * Beware: Note that due to bug #2942, only the IframeTransport
+           * instance that creates the cross-domain iframe can call
+           * listenFor on it!
+           * So, this response is bound for the IframeTransport instance
+           * whose getId() == response['creativeId'], which is not
+           * necessarily the instance that we are currently running in.
+           * Add this response to the response map on the AMP window, for use by
+           * amp-ad-exit which is / may be in the same window as the recipient.
+           */
+          const creativeId = response['creativeId'];
+          dev().assert(creativeId, 'Unrecognized creativeId: ' + creativeId);
           this.ampWin_[AMP_ANALYTICS_3P_RESPONSES] =
               this.ampWin_[AMP_ANALYTICS_3P_RESPONSES] || {};
           this.ampWin_[AMP_ANALYTICS_3P_RESPONSES][this.type_] =
@@ -214,12 +228,13 @@ export class IframeTransport {
   sendRequest(event) {
     const frameData = IframeTransport.getFrameData(this.type_);
     dev().assert(frameData, 'Trying to send message to non-existent frame');
-    dev().assert(frameData.queue, 'Event queue is missing for ' + this.id_);
+    dev().assert(frameData.queue,
+        'Event queue is missing for ' + this.getId());
     frameData.queue.enqueue(
         /**
          * @type {!../../../src/3p-frame-messaging.IframeTransportEvent}
          */
-        ({transportId: this.id_, message: event}));
+        ({creativeId: this.getId(), message: event}));
   }
 
   /**
@@ -239,7 +254,6 @@ export class IframeTransport {
    */
   static resetCrossDomainIframes() {
     IframeTransport.crossDomainIframes_ = {};
-    IframeTransport.transportIdToCreativeId_ = {};
   }
 
   /**
@@ -247,7 +261,7 @@ export class IframeTransport {
    * @VisibleForTesting
    */
   getId() {
-    return this.id_;
+    return this.win_.document.baseURI + '-' + this.resourceId_;
   }
 
   /**
@@ -264,6 +278,3 @@ IframeTransport.crossDomainIframes_ = {};
 
 /** @private {number} */
 IframeTransport.nextId_ = 0;
-
-/** @private {Object<string,string>} */
-IframeTransport.transportIdToCreativeId_ = {};
