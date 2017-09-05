@@ -10,7 +10,8 @@ var gulp = require('gulp-help')(require('gulp'));
 var request = BBPromise.promisify(require('request'));
 var util = require('gulp-util');
 
-var GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
+// Set token TODO
+var GITHUB_ACCESS_TOKEN = '9673cdabb822de5439e606e5f410ff3d2344d8a0';
 var exec = BBPromise.promisify(child_process.exec);
 var gitExec = BBPromise.promisify(git.exec);
 
@@ -18,7 +19,8 @@ var isDryrun = argv.dryrun;
 var verbose = (argv.verbose || argv.v);
 
 const issuesopt = {
-  url: 'https://api.github.com/repos/ampproject/amphtml/issues',
+  //Url to repository TODO 
+  url: 'https://api.github.com/repos/adelinamart/amphtml/issues',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
     'Accept': 'application/vnd.github.v3+json'
@@ -26,7 +28,8 @@ const issuesopt = {
 };
 
 const optionsMilestone = {
-  url: 'https://api.github.com/repos/ampproject/amphtml/milestones',
+  //Url to repository TODO
+  url: 'https://api.github.com/repos/adelinamart/amphtml/milestones',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
     'Accept': 'application/vnd.github.v3+json'
@@ -37,9 +40,6 @@ if (GITHUB_ACCESS_TOKEN) {
   issuesopt.qs = {
     access_token: GITHUB_ACCESS_TOKEN
   }
-}
-
-if (GITHUB_ACCESS_TOKEN) {
   optionsMilestone.qs = {
     access_token: GITHUB_ACCESS_TOKEN
   }
@@ -63,11 +63,7 @@ function getGitMetadata() {
 return getIssues()
 .then(function() {
 	util.log(util.colors.blue('automation applied'));
-	if (isDryrun) {
-    return;
-  }
 })
-.catch(errHandler);	
 }
 /**
  * Function goes through all the gitHub issues,
@@ -92,6 +88,8 @@ function getIssues(){
       var milestoneTitle; 
       var milestoneState;
       var hasPriority = false;
+      //by default we will assign 'Pending Triage' milestone, number 20 TODO
+      var issueNewMilestone = 3; 
 
       // Get the title and state of the milestone 
       if (milestone) {
@@ -116,29 +114,33 @@ function getIssues(){
         // Milestone task: move issue from closed milestone
         if (milestone) {
           if (milestoneTitle.startsWith('Sprint') && milestoneState == 'closed') {
-            // 4 is the number for Milestone 'Backlog Bugs' 
-            updates.push(applyMilestone(issue, 4));
+            // 4 is the number for Milestone 'Backlog Bugs' TODO
+            issueNewMilestone = 1; 
+            updates.push(applyMilestone(issue, issueNewMilestone));
           }
         }
         //if issueType is not null, add correct milestones
         if (issueType != null) {
           if (milestoneTitle == 'Pending Triage' || milestone == null) {
             if (issueType == 'Type: Feature Request') {
-              // 23 is the number for Milestone 'New FRs' 
-              updates.push(applyMilestone(issue, 23)); 
+              // 23 is the number for Milestone 'New FRs' TODO
+              issueNewMilestone = 4;
+              updates.push(applyMilestone(issue, issueNewMilestone)); 
             } else {
               if (issueType == 'Related to: Documentation' || 
                 issueType == 'Type: Design Review' || issueType == 'Type: Weekly Status') {
-                // 12 is the number for Milestone 'Docs Updates'  
-                updates.push(applyMilestone(issue, 12));
+                // 12 is the number for Milestone 'Docs Updates' TODO 
+                issueNewMilestone = 5;
+                updates.push(applyMilestone(issue, issueNewMilestone));
               } else {
                 if (issueType == 'Type: Bug' || issueType == 'Related to: Flaky Tests') {
-                  // 4 is the number for Milestone 'Backlog Bugs' 
-                  updates.push(applyMilestone(issue, 4));
+                  // 4 is the number for Milestone 'Backlog Bugs' TODO
+                  issueNewMilestone = 1;
+                  updates.push(applyMilestone(issue, issueNewMilestone));
                 } else {
                   if (milestone == null) {
-                    // 20 is the number for Milestone 'Pending Triage' 
-                    updates.push(applyMilestone(issue, 20));
+                    // 20 is the number for Milestone 'Pending Triage' TODO
+                    updates.push(applyMilestone(issue, issueNewMilestone));
                   }
                 }
               }
@@ -147,7 +149,7 @@ function getIssues(){
         } else {
           if (milestone == null){
             // 20 is the number for Milestone 'Pending Triage' TODO
-            updates.push(applyMilestone(issue, 20));     
+            updates.push(applyMilestone(issue, issueNewMilestone));     
           } else {
             if (milestoneTitle == 'Prioritized FRs' || milestoneTitle == 'New FRs') {
               updates.push(applyLabel(issue, 'Type: Feature Request'));
@@ -221,12 +223,13 @@ function applyLabel(issue, label) {
  * @param {string} path
  * @param {string=} opt_method
  * @param {*} opt_data
- * param {string} typeRequest
+ * @param {string} typeRequest
  * @return {!Promise<*>}
  */
 function githubRequest(path, opt_method, opt_data, typeRequest) {
   var options = {
-    url: 'https://api.github.com/repos/ampproject/amphtml/' + path,
+    // Url to repository TODO
+    url: 'https://api.github.com/repos/adelinamart/amphtml' + path,
     body: {},
     headers: {
       'User-Agent': 'amp-changelog-gulp-task',
@@ -241,11 +244,12 @@ function githubRequest(path, opt_method, opt_data, typeRequest) {
   }
   if (opt_data) {
     options.json = true;
-    if (typeRequest == 'milestone')
+    if (typeRequest == 'milestone') {
       options.body['milestone'] = opt_data;
+    }
     else options.body = opt_data;
   }
-  return request(options);
+  return request(options)
 }
 
 gulp.task('issues:one', 'Get issues data', processissues, {
