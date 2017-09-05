@@ -66,6 +66,16 @@ export function isCanary(win) {
   return !!(win.AMP_CONFIG && win.AMP_CONFIG.canary);
 }
 
+/**
+ * Returns binary type, e.g., canary, control, or production.
+ * @param {!Window} win
+ * @return {string}
+ */
+export function getBinaryType(win) {
+  return win.AMP_CONFIG && win.AMP_CONFIG.type ?
+      win.AMP_CONFIG.type : 'unknown';
+}
+
 
 /**
  * Enable experiments detailed in an origin trials token iff the token is
