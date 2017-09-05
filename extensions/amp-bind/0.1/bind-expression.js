@@ -388,20 +388,20 @@ export class BindExpression {
 
       case AstNodeType.ARROW_FUNCTION:
         const functionScope = map(scope);
-        return (...params) => {
+        return (...values) => {
           // Support parameters in arrow functions by forwarding their values
           // into the function's scope. For example, in this function call:
           //
           //     const f = (x, y) => x + y;
           //     f(2, 7);
           //
-          // `names` == ['x', 'y'] and `params` == [2, 7], so we include
+          // `names` == ['x', 'y'] and `values` == [2, 7], so we include
           // {x: 2, y: 7} in the scope when evaluating `x + y`.
 
-          const names = args[0];
+          const names = this.eval_(args[0], scope);
           if (names) {
             names.forEach((name, i) => {
-              functionScope[name] = params[i];
+              functionScope[name] = values[i];
             });
           }
           return this.eval_(args[1], functionScope);

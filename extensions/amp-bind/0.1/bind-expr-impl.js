@@ -223,7 +223,8 @@ case 29:
 break;
 case 30:
 
-        this.$ = new AstNode(AstNodeType.ARROW_FUNCTION, [[$$[$0-2]], $$[$0]]);
+        const param = new AstNode(AstNodeType.LITERAL, null, [$$[$0-2]]);
+        this.$ = new AstNode(AstNodeType.ARROW_FUNCTION, [param, $$[$0]]);
       
 break;
 case 31:
@@ -233,13 +234,13 @@ case 31:
 break;
 case 32:
 
-        this.$ = [$$[$0-2], $$[$0]];
+        this.$ = new AstNode(AstNodeType.LITERAL, null, [$$[$0-2], $$[$0]]);
       
 break;
 case 33:
 
         this.$ = $$[$0-2];
-        this.$.push($$[$0]);
+        this.$.value.push($$[$0]);
       
 break;
 case 34:

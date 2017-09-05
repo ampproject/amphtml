@@ -188,7 +188,8 @@ arrow_function:
       %}
   | NAME '=>' expr
       %{
-        $$ = new AstNode(AstNodeType.ARROW_FUNCTION, [[$NAME], $expr]);
+        const param = new AstNode(AstNodeType.LITERAL, null, [$NAME]);
+        $$ = new AstNode(AstNodeType.ARROW_FUNCTION, [param, $expr]);
       %}
   | '(' params ')' '=>' expr
       %{
@@ -205,12 +206,12 @@ arrow_function:
 params:
     NAME ',' NAME
       %{
-        $$ = [$1, $3];
+        $$ = new AstNode(AstNodeType.LITERAL, null, [$1, $3]);
       %}
   | params ',' NAME
       %{
         $$ = $params;
-        $$.push($NAME);
+        $$.value.push($NAME);
       %}
   ;
 
