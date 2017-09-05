@@ -293,7 +293,7 @@ describe('preconnect', () => {
         expect(as == '' || as == 'fetch').to.be.ok;
         preloads[0].as = 'not-valid';
         if (preloads[0].as != 'not-valid') {
-          expect(as).to.equal('fetch');
+          expect(as == '' || as == 'fetch').to.be.ok;
         }
       });
     });
