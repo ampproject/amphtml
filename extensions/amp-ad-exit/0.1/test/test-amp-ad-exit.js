@@ -53,6 +53,7 @@ const EXIT_CONFIG = {
       'finalUrl': 'http://localhost:8000/vars?foo=_foo',
       'trackingUrls': [
         'http://localhost:8000/tracking?bar=_bar',
+        'http://localhost:8000/tracking?numVar=_numVar&boolVar=_boolVar',
       ],
       vars: {
         _foo: {
@@ -60,6 +61,12 @@ const EXIT_CONFIG = {
         },
         _bar: {
           defaultValue: 'bar-default',
+        },
+        _numVar: {
+          defaultValue: 3,
+        },
+        _boolVar: {
+          defaultValue: true,
         },
       },
     },
@@ -384,7 +391,8 @@ describes.realWin('amp-ad-exit', {
 
     element.implementation_.executeAction({
       method: 'exit',
-      args: {target: 'customVars', _foo: 'foo', _bar: 'bar'},
+      args: {target: 'customVars', _foo: 'foo', _bar: 'bar', _numVar: 0,
+        _boolVar: false},
       event: makeClickEvent(1001, 101, 102),
       satisfiesTrust: () => true,
     });
@@ -394,6 +402,9 @@ describes.realWin('amp-ad-exit', {
     expect(sendBeacon)
         .to.have.been.calledWith(
         'http://localhost:8000/tracking?bar=bar', '');
+    expect(sendBeacon)
+        .to.have.been.calledWith(
+        'http://localhost:8000/tracking?numVar=0&boolVar=false', '');
   });
 
   it('border protection', () => {
