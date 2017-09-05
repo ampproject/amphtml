@@ -49,6 +49,9 @@ tags: {  # amp-sidebar > nav
   attrs: {
     name: "toolbar"
     mandatory: true
+    # This tagspec sometimes produces errors for non-sidebar NAVs. This
+    # dispatch key helps with this somewhat.
+    dispatch_key: NAME_DISPATCH
   }
   attrs: {
     name: "toolbar-target"

@@ -1,6 +1,5 @@
 FAIL
 feature_tests/multiple_body_tags_3.html:32:53 Tag or text which is only allowed inside the body section found outside of the body section. [DISALLOWED_HTML]
-feature_tests/multiple_body_tags_3.html:33:2 The attribute 'amp-boilerplate' may not appear in tag 'style amp-custom'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
 feature_tests/multiple_body_tags_3.html:33:2 The parent tag of tag 'style amp-custom' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
 feature_tests/multiple_body_tags_3.html:33:641 The tag 'noscript > style[amp-boilerplate]' may only appear as a descendant of tag 'head'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DISALLOWED_HTML]
 feature_tests/multiple_body_tags_3.html:34:2 The parent tag of tag 'amphtml engine v0.js script' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
