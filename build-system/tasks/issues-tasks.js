@@ -11,7 +11,7 @@ var request = BBPromise.promisify(require('request'));
 var util = require('gulp-util');
 
 // Set token TODO
-var GITHUB_ACCESS_TOKEN = '9673cdabb822de5439e606e5f410ff3d2344d8a0';
+var GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 var exec = BBPromise.promisify(child_process.exec);
 var gitExec = BBPromise.promisify(git.exec);
 
@@ -19,8 +19,8 @@ var isDryrun = argv.dryrun;
 var verbose = (argv.verbose || argv.v);
 
 const issuesopt = {
-  //Url to repository TODO 
-  url: 'https://api.github.com/repos/adelinamart/amphtml/issues',
+  // Url to repository TODO 
+  url: 'https://api.github.com/repos/ampproject/amphtml/issues',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
     'Accept': 'application/vnd.github.v3+json'
@@ -28,8 +28,8 @@ const issuesopt = {
 };
 
 const optionsMilestone = {
-  //Url to repository TODO
-  url: 'https://api.github.com/repos/adelinamart/amphtml/milestones',
+  // Url to repository TODO
+  url: 'https://api.github.com/repos/ampproject/amphtml/milestones',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
     'Accept': 'application/vnd.github.v3+json'
@@ -88,8 +88,8 @@ function getIssues(){
       var milestoneTitle; 
       var milestoneState;
       var hasPriority = false;
-      //by default we will assign 'Pending Triage' milestone, number 20 TODO
-      var issueNewMilestone = 3; 
+      // By default we will assign 'Pending Triage' milestone, number 20 TODO
+      var issueNewMilestone = 20; 
 
       // Get the title and state of the milestone 
       if (milestone) {
@@ -115,7 +115,7 @@ function getIssues(){
         if (milestone) {
           if (milestoneTitle.startsWith('Sprint') && milestoneState == 'closed') {
             // 4 is the number for Milestone 'Backlog Bugs' TODO
-            issueNewMilestone = 1; 
+            issueNewMilestone = 4; 
             updates.push(applyMilestone(issue, issueNewMilestone));
           }
         }
@@ -124,18 +124,18 @@ function getIssues(){
           if (milestoneTitle == 'Pending Triage' || milestone == null) {
             if (issueType == 'Type: Feature Request') {
               // 23 is the number for Milestone 'New FRs' TODO
-              issueNewMilestone = 4;
+              issueNewMilestone = 23;
               updates.push(applyMilestone(issue, issueNewMilestone)); 
             } else {
               if (issueType == 'Related to: Documentation' || 
                 issueType == 'Type: Design Review' || issueType == 'Type: Weekly Status') {
                 // 12 is the number for Milestone 'Docs Updates' TODO 
-                issueNewMilestone = 5;
+                issueNewMilestone = 12;
                 updates.push(applyMilestone(issue, issueNewMilestone));
               } else {
                 if (issueType == 'Type: Bug' || issueType == 'Related to: Flaky Tests') {
                   // 4 is the number for Milestone 'Backlog Bugs' TODO
-                  issueNewMilestone = 1;
+                  issueNewMilestone = 4;
                   updates.push(applyMilestone(issue, issueNewMilestone));
                 } else {
                   if (milestone == null) {
@@ -229,7 +229,7 @@ function applyLabel(issue, label) {
 function githubRequest(path, opt_method, opt_data, typeRequest) {
   var options = {
     // Url to repository TODO
-    url: 'https://api.github.com/repos/adelinamart/amphtml' + path,
+    url: 'https://api.github.com/repos/ampproject/amphtml' + path,
     body: {},
     headers: {
       'User-Agent': 'amp-changelog-gulp-task',
