@@ -343,10 +343,10 @@ describe('BindExpression', () => {
     });
 
     it('encodeURI and encodeURIComponent', () => {
-      expect(evaluate('encodeURI("http://www.google.com/s p a c e.html")'))
-          .to.equal('http://www.google.com/s%20p%20a%20c%20e.html');
-      expect(evaluate('encodeURIComponent("http://www.google.com/foo?foo=bar")'))
-          .to.equal('http%3A%2F%2Fwww.google.com%2Ffoo%3Ffoo%3Dbar');
+      expect(evaluate('encodeURI("http://google.com/s p a c e.html")'))
+          .to.equal('http://google.com/s%20p%20a%20c%20e.html');
+      expect(evaluate('encodeURIComponent("http://google.com/foo?foo=bar")'))
+          .to.equal('http%3A%2F%2Fgoogle.com%2Ffoo%3Ffoo%3Dbar');
     });
 
     it('copyAndSplice()', () => {
@@ -370,9 +370,10 @@ describe('BindExpression', () => {
     });
 
     it('disallow: function declarations', () => {
-      expect(() => { evaluate('function() {}'); }).to.throw();
+      expect(() => { evaluate('(function() {})'); }).to.throw();
       expect(() => { evaluate('function foo() {}'); }).to.throw();
       expect(() => { evaluate('new Function()'); }).to.throw();
+      expect(() => { evaluate('Function()'); }).to.throw();
       expect(() => { evaluate('() => {}'); }).to.throw();
       expect(() => { evaluate('class Foo {}'); }).to.throw();
     });
@@ -383,12 +384,14 @@ describe('BindExpression', () => {
           bar: () => { 'bar'; },
         },
         baz: () => { 'baz'; },
+        qux: window.Function,
       };
       // baz() throws a parse error because functions must have a caller.
       expect(() => { evaluate('baz()', scope); }).to.throw();
-      expect(() => {
-        evaluate('foo.bar()', scope);
-      }).to.throw(Error, unsupportedFunctionError);
+      expect(() => { evaluate('foo.bar()', scope); })
+          .to.throw(Error, unsupportedFunctionError);
+      expect(() => { evaluate('foo.qux("a", "return a")', scope) })
+          .to.throw(unsupportedFunctionError);
     });
 
     it('disallow: invocation of prototype functions', () => {
