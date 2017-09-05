@@ -18,6 +18,7 @@ import {
   fontStylesheetTimeout,
 } from '../../src/font-stylesheet-timeout';
 
+import {toggleExperiment} from '../../src/experiments';
 
 describes.realWin('font-stylesheet-timeout', {
   amp: true,
@@ -129,5 +130,65 @@ describes.realWin('font-stylesheet-timeout', {
         'link[rel="stylesheet"]')[1].href).to.equal(link1.href);
     expect(win.document.querySelectorAll(
         'link[rel="stylesheet"]')[2]).to.equal(cdnLink);
+  });
+
+  describe('font-display: swap', () => {
+    let fonts;
+    beforeEach(() => {
+      fonts = [
+        {
+          status: 'loaded',
+          display: 'auto',
+        },
+        {
+          status: 'loading',
+          display: 'auto',
+        },
+        {
+          status: 'loading',
+          display: 'auto',
+        },
+        {
+          status: 'loading',
+          display: 'optional',
+        },
+        null,
+      ];
+      let index = 0;
+      Object.defineProperty(win.document, 'fonts', {
+        get: () => {
+          return {
+            values: () => {
+              return {next: () => {
+                return {value: fonts[index++]};
+              }};
+            },
+          };
+        },
+      });
+      toggleExperiment(win, 'font-display-swap', true);
+    });
+
+    it('should not do anything with experiment off', () => {
+      toggleExperiment(win, 'font-display-swap', false);
+      fontStylesheetTimeout(win);
+      expect(fonts[1].display).to.equal('auto');
+    });
+
+    it('should not change loaded fonts', () => {
+      fontStylesheetTimeout(win);
+      expect(fonts[0].display).to.equal('auto');
+    });
+
+    it('should change loading fonts to swap', () => {
+      fontStylesheetTimeout(win);
+      expect(fonts[1].display).to.equal('swap');
+      expect(fonts[2].display).to.equal('swap');
+    });
+
+    it('should not override non-default values', () => {
+      fontStylesheetTimeout(win);
+      expect(fonts[3].display).to.equal('optional');
+    });
   });
 });
