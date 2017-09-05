@@ -90,7 +90,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * @return {function(string): string}
    */
   getUrlVariableRewriter_(args, event, target) {
-    const vars = {
+    const substitutionFunctions = {
       'CLICK_X': () => event.clientX,
       'CLICK_Y': () => event.clientY,
     };
@@ -100,17 +100,76 @@ export class AmpAdExit extends AMP.BaseElement {
       'CLICK_Y': true,
     };
     if (target.vars) {
-      for (const customVar in target.vars) {
-        if (customVar[0] == '_') {
-          vars[customVar] = () =>
-              args[customVar] || target.vars[customVar].defaultValue;
-          whitelist[customVar] = true;
+      const all3pResponses =
+          this.getAmpDoc().win['amp-analytics-3p-responses'] || {};
+      // The resource IDs of the amp-analytics tag(s) in this creative
+      const sourceCreativeIds = this.win['amp-analytics-creative-ids'];
+
+      for (const customVarName in target.vars) {
+        if (customVarName[0] == '_') {
+          const customVar =
+              /** @type {./config.Variable} */ (target.vars[customVarName]);
+          if (customVar) {
+            /*
+              Example:
+              The amp-ad-exit target has a variable representing the
+               priority of something, which is defined as follows:
+               "vars": {
+                 "_pty": {
+                   "defaultValue": "unknown",
+                   "vendorAnalyticsSource": "vendorXYZ",
+                   "vendorAnalyticsResponseKey": "priority"
+                 },
+                 ...
+               }
+               The cross-domain iframe of vendorXYZ has sent the
+               following response for the creative:
+                 { priority: medium, category: W }
+               This is just example data. The keys/values in that object can
+               be any strings.
+               The code below will create substitutionFunctions['_pty'],
+               which in this example will return "medium".
+             */
+            substitutionFunctions[customVarName] = () => {
+              if (customVar.hasOwnProperty('vendorAnalyticsSource') &&
+                  customVar.hasOwnProperty('vendorAnalyticsResponseKey') &&
+                  sourceCreativeIds) {
+                // It's a 3p analytics variable
+                const vendor =
+                    /** @type {string} */ (customVar['vendorAnalyticsSource']);
+                if (all3pResponses && all3pResponses[vendor]) {
+                  /* The vendor (in the example above, "vendorXYZ") has
+                     responded to an amp-analytics tag in this creative. Need to
+                     check whether that response contains a property that
+                     matches the vendorAnalyticsResponseKey (ex: "priority")
+                     for this custom variable. If so, return the value in the
+                     response object that is associated with that key.
+                  */
+                  for (let i = 0; i < sourceCreativeIds.length; ++i) {
+                    const creativeId = sourceCreativeIds[i];
+                    const vendorResponsesToResource =
+                        all3pResponses[vendor][creativeId];
+                    const responseKey = /** @type {string} */
+                      (customVar['vendorAnalyticsResponseKey']);
+                    if (vendorResponsesToResource &&
+                        vendorResponsesToResource.hasOwnProperty(responseKey)) {
+                      return vendorResponsesToResource[responseKey];
+                    }
+                  }
+                }
+              }
+              // Either it's not a 3p analytics variable, or it is one but
+              // no matching response has been received yet.
+              return args[customVarName] || customVar.defaultValue;
+            };
+            whitelist[customVarName] = true;
+          }
         }
       }
     }
     const replacements = Services.urlReplacementsForDoc(this.getAmpDoc());
     return url => replacements.expandUrlSync(
-        url, vars, undefined /* opt_collectVars */, whitelist);
+        url, substitutionFunctions, undefined /* opt_collectVars */, whitelist);
   }
 
   /**
@@ -167,7 +226,6 @@ export class AmpAdExit extends AMP.BaseElement {
         'be inside a <script> tag with type="application/json"');
     try {
       const config = assertConfig(parseJson(child.textContent));
-      // const userFilters = {};
       for (const name in config.filters) {
         this.userFilters_[name] =
             createFilter(name, config.filters[name], this);
@@ -203,7 +261,6 @@ export class AmpAdExit extends AMP.BaseElement {
     }
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAdExit);

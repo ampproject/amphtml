@@ -24,6 +24,9 @@ import {setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 
+/** @const {string} */
+export const AMP_ANALYTICS_3P_RESPONSES = 'amp-analytics-3p-responses';
+
 /** @typedef {{
  *    frame: Element,
  *    sentinel: !string,
