@@ -429,6 +429,20 @@ describe('BindExpression', () => {
     expect(() => { evaluate('class Foo {}'); }).to.throw();
   });
 
+  it('should NOT allow arrow functions (other than as a parameter)', () => {
+    expect(() => { evaluate('() => 123'); }).to.throw();
+    expect(() => { evaluate('x => 123'); }).to.throw();
+    expect(() => { evaluate('(x, y) => 123'); }).to.throw();
+
+    expect(() => { evaluate('(() => 123).constructor()'); }).to.throw();
+    expect(() => { evaluate('(x => 123).constructor()'); }).to.throw();
+    expect(() => { evaluate('((x, y) => 123).constructor()'); }).to.throw();
+
+    expect(() => { evaluate('(() => 123).name'); }).to.throw();
+    expect(() => { evaluate('(x => 123).name'); }).to.throw();
+    expect(() => { evaluate('((x, y) => 123).name'); }).to.throw();
+  });
+
   it('should NOT allow invocation of custom functions in scope', () => {
     const scope = {
       foo: {
