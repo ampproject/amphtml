@@ -239,9 +239,9 @@ encodeURIComponent('hello world')</pre></td>
   </tr>
   <tr>
     <td><a href="#custom-built-in-functions">Custom built-ins</a><sup>2</sup></td>
-    <td><code>copyAndSplice</code></td>
+    <td><code>splice</code></td>
     <td><pre>// Returns [1, 47 ,3].
-copyAndSplice([1, 2, 3], 1, 1, 47)</pre></td>
+splice([1, 2, 3], 1, 1, 47)</pre></td>
   </tr>
 </table>
 
@@ -531,7 +531,7 @@ To send credentials, pass the value of `include`. If this value is set, the resp
     <th>Details</th>
   </tr>
   <tr>
-    <td><code>copyAndSplice</code></td>
+    <td><code>splice</code></td>
     <td>Similar to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice">Array#splice()</a> except a copy of the spliced array is returned.
     <br><br>Arguments:
     <ul>
@@ -542,10 +542,10 @@ To send credentials, pass the value of `include`. If this value is set, the resp
     </ul>
     <br><br>Examples:
     <pre>// Deleting an element. Returns [1, 3]
-copyAndSplice([1, 2, 3], 1, 1)
+splice([1, 2, 3], 1, 1)
 
 // Replacing an item. Returns ['Pizza', 'Cake', 'Ice Cream']
-copyAndSplice(['Pizza', 'Cake', 'Soda'], 2, 1, 'Ice Cream')</pre>
+splice(['Pizza', 'Cake', 'Soda'], 2, 1, 'Ice Cream')</pre>
    </td>
   </tr>
 </table>

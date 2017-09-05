@@ -60,9 +60,9 @@ function generateFunctionWhitelist() {
    * @return {!Array}
    */
   /*eslint "no-unused-vars": 0*/
-  function copyAndSplice(array, start, deleteCount, items) {
+  function splice(array, start, deleteCount, items) {
     if (!isArray(array)) {
-      throw new Error(`copyAndSplice: ${array} is not an array.`);
+      throw new Error(`splice: ${array} is not an array.`);
     }
     const copy = Array.prototype.slice.call(array);
     const args = Array.prototype.slice.call(arguments, 1);
@@ -129,7 +129,8 @@ function generateFunctionWhitelist() {
 
   // Custom functions (non-js-built-ins) must be added manually as their names
   // will be minified at compile time.
-  out[BUILT_IN_FUNCTIONS]['copyAndSplice'] = copyAndSplice;
+  out[BUILT_IN_FUNCTIONS]['copyAndSplice'] = splice; // Legacy name.
+  out[BUILT_IN_FUNCTIONS]['splice'] = splice; // Legacy name.
 
   return out;
 }

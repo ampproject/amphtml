@@ -349,17 +349,15 @@ describe('BindExpression', () => {
           .to.equal('http%3A%2F%2Fgoogle.com%2Ffoo%3Ffoo%3Dbar');
     });
 
-    it('copyAndSplice()', () => {
+    it('splice()', () => {
       const a = [1, 2, 3];
-      expect(() => evaluate('copyAndSplice()')).to.throw(/not an array/);
-      expect(() => evaluate('copyAndSplice(x)', {x: 8472}))
-          .to.throw(/not an array/);
-      expect(evaluate('copyAndSplice(a)', {a})).to.not.equal(a);
-      expect(evaluate('copyAndSplice(a)', {a})).to.deep.equal(a);
-      expect(evaluate('copyAndSplice(a, 1)', {a})).to.deep.equal([1]);
-      expect(evaluate('copyAndSplice(a, 1, 1)', {a})).to.deep.equal([1, 3]);
-      expect(evaluate('copyAndSplice(a, 1, 1, 47)', {a}))
-          .to.deep.equal([1, 47, 3]);
+      expect(() => evaluate('splice()')).to.throw(/not an array/);
+      expect(() => evaluate('splice(x)', {x: 8472})).to.throw(/not an array/);
+      expect(evaluate('splice(a)', {a})).to.not.equal(a);
+      expect(evaluate('splice(a)', {a})).to.deep.equal(a);
+      expect(evaluate('splice(a, 1)', {a})).to.deep.equal([1]);
+      expect(evaluate('splice(a, 1, 1)', {a})).to.deep.equal([1, 3]);
+      expect(evaluate('splice(a, 1, 1, 47)', {a})).to.deep.equal([1, 47, 3]);
     });
 
     it('return null when caller is null', () => {
