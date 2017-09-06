@@ -172,11 +172,13 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   disableScroll() {
+    // TODO(@jridgewell): Recursively disable scroll
     this.wrapper_.classList.add('i-amphtml-scroll-disabled');
   }
 
   /** @override */
   resetScroll() {
+    // TODO(@jridgewell): Recursively disable scroll
     this.wrapper_.classList.remove('i-amphtml-scroll-disabled');
   }
 
@@ -230,13 +232,17 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
+    const b = el./*OK*/getBoundingClientRect();
+    if (true) {
+      return layoutRectLtwh(b.left, b.top, b.width, b.height);
+    }
+
     const scrollTop = opt_scrollTop != undefined
       ? opt_scrollTop
       : this.getScrollTop();
     const scrollLeft = opt_scrollLeft != undefined
       ? opt_scrollLeft
       : this.getScrollLeft();
-    const b = el./*OK*/getBoundingClientRect();
     return layoutRectLtwh(Math.round(b.left + scrollLeft),
         Math.round(b.top + scrollTop),
         Math.round(b.width),

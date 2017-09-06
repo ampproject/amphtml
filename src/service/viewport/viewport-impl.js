@@ -423,6 +423,12 @@ export class Viewport {
    * @return {!Promise<!../../layout-rect.LayoutRectDef>}
    */
   getClientRectAsync(el) {
+    if (true) {
+      return this.vsync_.measurePromise(() => {
+        return this.getLayoutRect(el);
+      });
+    }
+
     const local = this.vsync_.measurePromise(() => {
       return el./*OK*/getBoundingClientRect();
     });
@@ -462,7 +468,12 @@ export class Viewport {
    */
   scrollIntoView(element) {
     const elementTop = this.binding_.getLayoutRect(element).top;
-    const newScrollTop = Math.max(0, elementTop - this.paddingTop_);
+    let newScrollTop;
+    if (true) {
+      newScrollTop = elementTop + this.getScrollTop();
+    } else {
+      newScrollTop = Math.max(0, elementTop - this.paddingTop_);
+    }
     this.binding_.setScrollTop(newScrollTop);
   }
 
@@ -494,9 +505,17 @@ export class Viewport {
         offset = 0;
         break;
     }
-    const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
-    const newScrollTop = Math.max(0, calculatedScrollTop);
-    const curScrollTop = this.getScrollTop();
+    let newScrollTop;
+    let curScrollTop;
+
+    if (true) {
+      const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
+      newScrollTop = Math.max(0, calculatedScrollTop);
+      curScrollTop = this.getScrollTop();
+    } else {
+      newScrollTop = elementRect.top + offset;
+      curScrollTop = 0;
+    }
     if (newScrollTop == curScrollTop) {
       return Promise.resolve();
     }

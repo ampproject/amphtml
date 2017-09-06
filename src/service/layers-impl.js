@@ -90,12 +90,12 @@ export class LayoutLayers {
       const {target} = event;
       const scrolled = target.nodeType == Node.ELEMENT_NODE
           ? target
-          : this.getScrollingElement_();
+          : this.getScrollingElement();
       this.scrolled_(scrolled);
     }, /* TODO */{capture: true, passive: true});
     win.addEventListener('resize', () => this.onResize_());
 
-    this.declareLayer(this.getScrollingElement_());
+    this.declareLayer(this.getScrollingElement());
   }
 
   /**
@@ -106,7 +106,7 @@ export class LayoutLayers {
    */
   calcIntersectionWithViewport(element) {
     return this.calcIntersectionWithParent(element,
-        this.getScrollingElement_());
+        this.getScrollingElement());
   }
 
   /**
@@ -190,7 +190,7 @@ export class LayoutLayers {
   }
 
   onResize_() {
-    const scroll = LayoutLayer.for(this.getScrollingElement_());
+    const scroll = LayoutLayer.for(this.getScrollingElement());
 
     const layers = this.layers_;
     for (let i = 0; i < layers; i++) {
@@ -215,7 +215,7 @@ export class LayoutLayers {
     // Services.resourcesForDoc(this.ampdoc_).scrollTick(layer.getElements());
   }
 
-  getScrollingElement_() {
+  getScrollingElement() {
     if (this.scrollingElement_) {
       return this.scrollingElement_;
     }

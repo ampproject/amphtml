@@ -1024,6 +1024,7 @@ export class Resources {
   }
 
   doPass() {
+    // TODO(@jridgewell): Oh man, total rewrite needed.
     if (!this.isRuntimeOn_) {
       dev().fine(TAG_, 'runtime is off');
       return;

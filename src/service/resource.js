@@ -398,6 +398,7 @@ export class Resource {
    * transitioned to the "ready for layout" state.
    */
   measure() {
+    // TODO
     // Check if the element is ready to be measured.
     // Placeholders are special. They are technically "owned" by parent AMP
     // elements, sized by parents, but laid out independently. This means
@@ -646,6 +647,7 @@ export class Resource {
     let distance;
     if (viewportBox.right < layoutBox.left ||
         viewportBox.left > layoutBox.right) {
+      // TODO
       // If outside of viewport's x-axis, element is not in viewport.
       return false;
     }

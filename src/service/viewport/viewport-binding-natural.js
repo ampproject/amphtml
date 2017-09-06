@@ -131,12 +131,14 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   disableScroll() {
+    // TODO(@jridgewell): Recursively disable scroll
     this.win.document.documentElement.classList.add(
         'i-amphtml-scroll-disabled');
   }
 
   /** @override */
   resetScroll() {
+    // TODO(@jridgewell): Recursively disable scroll
     this.win.document.documentElement.classList.remove(
         'i-amphtml-scroll-disabled');
   }
@@ -201,13 +203,17 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
+    const b = el./*OK*/getBoundingClientRect();
+    if (true) {
+      return layoutRectLtwh(b.left, b.top, b.width, b.height);
+    }
+
     const scrollTop = opt_scrollTop != undefined
       ? opt_scrollTop
       : this.getScrollTop();
     const scrollLeft = opt_scrollLeft != undefined
       ? opt_scrollLeft
       : this.getScrollLeft();
-    const b = el./*OK*/getBoundingClientRect();
     return layoutRectLtwh(Math.round(b.left + scrollLeft),
         Math.round(b.top + scrollTop),
         Math.round(b.width),
@@ -229,19 +235,6 @@ export class ViewportBindingNatural_ {
    * @private
    */
   getScrollingElement_() {
-    const doc = this.win.document;
-    if (doc./*OK*/scrollingElement) {
-      return doc./*OK*/scrollingElement;
-    }
-    if (doc.body
-        // Due to https://bugs.webkit.org/show_bug.cgi?id=106133, WebKit
-        // browsers have to use `body` and NOT `documentElement` for
-        // scrolling purposes. This has mostly being resolved via
-        // `scrollingElement` property, but this branch is still necessary
-        // for backward compatibility purposes.
-        && this.platform_.isWebKit()) {
-      return doc.body;
-    }
-    return doc.documentElement;
+    return Services.layersForDoc(this.ampdoc).getScrollingElement();
   }
 }

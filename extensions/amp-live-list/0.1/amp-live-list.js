@@ -850,6 +850,12 @@ export class AmpLiveList extends AMP.BaseElement {
    * @return {boolean}
    */
   isElementBelowViewport_(element) {
+    if (true) {
+      // Well, if the scroller is above the viewport, but the element is way
+      // down in the box, is it above or below?
+      return this.viewport_.getLayoutRect(element).top > 0;
+    }
+
     return this.viewport_.getLayoutRect(element).top >
         this.viewport_.getScrollTop() + this.viewport_.getSize().height;
   }
