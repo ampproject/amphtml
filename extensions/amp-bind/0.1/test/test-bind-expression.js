@@ -390,7 +390,7 @@ describe('BindExpression', () => {
       expect(() => { evaluate('baz()', scope); }).to.throw();
       expect(() => { evaluate('foo.bar()', scope); })
           .to.throw(Error, unsupportedFunctionError);
-      expect(() => { evaluate('foo.qux("a", "return a")', scope) })
+      expect(() => { evaluate('foo.qux("a", "return a")', scope); })
           .to.throw(unsupportedFunctionError);
     });
 
@@ -569,12 +569,12 @@ describe('BindExpression', () => {
     });
 
     it('disallow: exceeding maximum AST size', () => {
-      expect(new BindExpression('1 + 1', /* opt_maxAstSize */ 3)).to.not.be.null;
+      expect(new BindExpression('1 + 1', /* maxAstSize */ 3)).to.not.be.null;
 
       // The expression '1 + 1' should have an AST size of 3 -- one for each
       // literal, and a PLUS expression wrapping them.
       expect(() => {
-        new BindExpression('1 + 1', /* opt_maxAstSize */ 2);
+        new BindExpression('1 + 1', /* maxAstSize */ 2);
       }).to.throw(expressionSizeExceededError);
     });
   });
