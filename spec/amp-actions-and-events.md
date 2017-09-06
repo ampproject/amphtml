@@ -187,6 +187,16 @@ event.response</pre></td>
     <td><pre>// Response JSON.
 event.response</pre></td>
   </tr>
+  <tr>
+    <td><code>valid</code></td>
+    <td>Fired when the form is valid.</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><code>invalid</code></td>
+    <td>Fired when the form is invalid.</td>
+    <td></td>
+  </tr>
 </table>
 
 
