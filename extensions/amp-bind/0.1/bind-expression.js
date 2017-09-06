@@ -94,7 +94,7 @@ function generateFunctionWhitelist() {
    */
   function values(object) {
     const v = [];
-    for (var key in object) {
+    for (const key in object) {
       if (hasOwn(object, key) && isEnumerable.call(object, key)) {
         v.push(object[key]);
       }
@@ -174,8 +174,8 @@ function generateFunctionWhitelist() {
   out[BUILT_IN_FUNCTIONS]['copyAndSplice'] = splice; // Legacy name.
   out[BUILT_IN_FUNCTIONS]['sort'] = sort;
   out[BUILT_IN_FUNCTIONS]['splice'] = splice;
-  out[BUILT_IN_FUNCTIONS]['values'] = (typeof Object.values === 'function')
-      ? Object.values : values;
+  out[BUILT_IN_FUNCTIONS]['values'] =
+      (typeof Object.values == 'function') ? Object.values : values;
 
   return out;
 }
