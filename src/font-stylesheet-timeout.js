@@ -16,6 +16,7 @@
 
 import {onDocumentReady} from './document-ready';
 import {urls} from './config';
+import {isExperimentOn} from './experiments';
 
 /**
  * While browsers put a timeout on font downloads (3s by default,
@@ -38,13 +39,14 @@ import {urls} from './config';
  * @param {!Window} win
  */
 export function fontStylesheetTimeout(win) {
-  onDocumentReady(win.document, () => maybeTimeoutStyleSheets(win));
+  onDocumentReady(win.document, () => maybeTimeoutFonts(win));
 }
 
 /**
  * @param {!Window} win
  */
-function maybeTimeoutStyleSheets(win) {
+function maybeTimeoutFonts(win) {
+  timeoutFontFaces(win);
   let timeSinceResponseStart = 0;
   // If available, we start counting from the time the HTTP response
   // for the page started. The preload scanner should then quickly
@@ -57,6 +59,8 @@ function maybeTimeoutStyleSheets(win) {
 
   // Avoid timer dependency since this runs very early in execution.
   win.setTimeout(() => {
+    // Try again, more fonts might have loaded.
+    timeoutFontFaces(win);
     const styleSheets = win.document.styleSheets;
     if (!styleSheets) {
       return;
@@ -93,6 +97,7 @@ function maybeTimeoutStyleSheets(win) {
       // loaded.
       newLink.onload = () => {
         newLink.media = media;
+        timeoutFontFaces(win);
       };
       newLink.setAttribute('i-amphtml-timeout', timeout);
       const parent = existingLink.parentElement;
@@ -105,4 +110,46 @@ function maybeTimeoutStyleSheets(win) {
       parent.removeChild(existingLink);
     }
   }, timeout);
+}
+
+/**
+ * Sets font faces that haven't been loaded by the time this was called to
+ * `font-display: swap` in supported browsers.
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display
+ * for details on behavior.
+ * Swap effectively leads to immediate display of the fallback font with
+ * the custom font being displayed when possible.
+ * While this is not the most desirable setting, it is compatible with the
+ * default (which does that but only waiting for 3 seconds).
+ * Ideally websites would opt into `font-display: optional` which provides
+ * nicer UX for non-icon fonts.
+ * If fonts set a non default display mode, this does nothing.
+ * @param {!Window} win
+ */
+function timeoutFontFaces(win) {
+  if (!isExperimentOn(win, 'font-display-swap')) {
+    return;
+  }
+  const doc = win.document;
+  // TODO(@cramforce) Switch to .values when FontFaceSet extern supports it.
+  if (!doc.fonts && !doc.fonts['values']) {
+    return;
+  }
+  const it = doc.fonts['values']();
+  let entry;
+  while ((entry = it.next())) {
+    const fontFace = entry.value;
+    if (!fontFace) {
+      return;
+    }
+    if (fontFace.status != 'loading') {
+      continue;
+    }
+    // Not supported or non-default value.
+    // If the publisher specified a non-default, we respect that, of course.
+    if (!('display' in fontFace) || fontFace.display != 'auto') {
+      continue;
+    }
+    fontFace.display = 'swap';
+  }
 }
