@@ -298,7 +298,7 @@ export class BindExpression {
         }
 
         if (validFunction) {
-          if (Array.isArray(params) && !this.containsObject_(params)) {
+          if (Array.isArray(params)) {
             return validFunction.apply(caller, params);
           } else if (typeof params == 'function') {
             // Special case: `params` may be an arrow function, which are only
@@ -468,20 +468,5 @@ export class BindExpression {
     const stringified = JSON.stringify(/** @type {!JsonObject} */ (member));
     user().warn(TAG, `Cannot read property ${stringified} of ` +
         `${stringified}; returning null.`);
-  }
-
-  /**
-   * Returns true if input array contains a plain object.
-   * @param {!Array} array
-   * @return {boolean}
-   * @private
-   */
-  containsObject_(array) {
-    for (let i = 0; i < array.length; i++) {
-      if (isObject(array[i])) {
-        return true;
-      }
-    }
-    return false;
   }
 }

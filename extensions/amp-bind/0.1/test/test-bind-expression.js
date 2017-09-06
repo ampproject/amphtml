@@ -17,7 +17,6 @@
 import {BindExpression} from '../bind-expression';
 
 describe('BindExpression', () => {
-  const argumentTypeError = 'Unexpected argument type';
   const unsupportedFunctionError = 'not a supported function';
   const expressionSizeExceededError = 'exceeds max';
 
@@ -200,6 +199,15 @@ describe('BindExpression', () => {
     });
   });
 
+  describe('numbers', () => {
+    it('prototype functions', () => {
+      expect(evaluate('3.14.toExponential()')).to.equal('3.14e+0');
+      expect(evaluate('3.14.toFixed()')).to.equal('3');
+      expect(evaluate('3.14.toPrecision(2)')).to.equal('3.1');
+      expect(evaluate('3.14.toString()')).to.equal('3.14');
+    });
+  });
+
   describe('variables', () => {
     it('basic support', () => {
       expect(evaluate('foo', {foo: 'bar'})).to.equal('bar');
@@ -279,7 +287,7 @@ describe('BindExpression', () => {
   });
 
   describe('objects', () => {
-    it('should support object literals', () => {
+    it('literals', () => {
       expect(evaluate('{}')).to.deep.equal({});
       expect(evaluate('{}["a"]')).to.be.null;
       expect(evaluate('{}[{}]')).to.be.null;
@@ -293,22 +301,27 @@ describe('BindExpression', () => {
       expect(() => evaluate('{1+1: "b"}')).to.throw();
     });
 
-    it('should support computed property names', () => {
+    it('computed property names', () => {
       expect(evaluate('{["a" + "b" + "c"]: 123}')).to.deep.equal({abc: 123});
       expect(evaluate('{[foo]: 123}', {foo: 'abc'})).to.deep.equal({abc: 123});
     });
 
-    it('should support trailing commas in object literals', () => {
+    it('trailing commas in object literals', () => {
       expect(evaluate('{a: "b",}')).to.deep.equal({a: 'b'});
       expect(evaluate('{a: "b", c: "d",}')).to.deep.equal({a: 'b', c: 'd'});
     });
 
-    it('should evaluate undefined vars and properties to null', () => {
+    it('undefined vars and properties should be null', () => {
       expect(evaluate('foo')).to.be.null;
       expect(evaluate('foo.bar')).to.be.null;
       expect(evaluate('foo["bar"]')).to.be.null;
       expect(evaluate('foo[bar]')).to.be.null;
       expect(evaluate('foo[0]')).to.be.null;
+    });
+
+    it('static functions', () => {
+      expect(evaluate('keys({a: 1, b: 2})')).to.deep.equal(['a', 'b']);
+      expect(evaluate('values({a: 1, b: 2})')).to.deep.equal([1, 2]);
     });
   });
 
@@ -358,6 +371,14 @@ describe('BindExpression', () => {
       expect(evaluate('splice(a, 1)', {a})).to.deep.equal([1]);
       expect(evaluate('splice(a, 1, 1)', {a})).to.deep.equal([1, 3]);
       expect(evaluate('splice(a, 1, 1, 47)', {a})).to.deep.equal([1, 47, 3]);
+    });
+
+    it('sort()', () => {
+      const a = [2, 3, 1];
+      expect(() => evaluate('sort()')).to.throw(/not an array/);
+      expect(() => evaluate('sort("abc")')).to.throw(/not an array/);
+      expect(evaluate('sort(a)', {a})).to.not.equal(a);
+      expect(evaluate('sort(a)', {a})).to.deep.equal([1, 2, 3]);
     });
 
     it('return null when caller is null', () => {
@@ -417,13 +438,9 @@ describe('BindExpression', () => {
       }).to.throw(Error, unsupportedFunctionError);
     });
 
-    it('disallow: whitelisted functions with invalid argument types', () => {
-      expect(() => {
-        evaluate('[1, 2, 3].indexOf({})');
-      }).to.throw(Error, argumentTypeError);
-      expect(() => {
-        evaluate('"abc".substr({})');
-      }).to.throw(Error, argumentTypeError);
+    it('gracefully handle invalid argument types', () => {
+      expect(evaluate('[1, 2, 3].indexOf({})')).to.equal(-1);
+      expect(() => { evaluate('"abc".substr({})'); }).to.throw(TypeError);
     });
   });
 
@@ -578,6 +595,11 @@ describe('BindExpression', () => {
   });
 
   describe('arrow functions', () => {
+    it('known issue: single parameters with parentheses are ambiguous', () => {
+      // Single parameters in parentheses are ambiguous to the parser.
+      expect(() => evaluate('[1, 2, 3].map((x) => x * x)')).to.throw();
+    });
+
     it('Array#map()', () => {
       const a = [1, 2, 3];
       expect(evaluate('a.map(() => 5)', {a})).to.deep.equal([5, 5, 5]);
@@ -586,9 +608,6 @@ describe('BindExpression', () => {
 
       const b = [{foo: 'x'}, {foo: 'y'}, {foo: 'z'}];
       expect(evaluate('b.map(x => x.foo)', {b})).to.deep.equal(['x', 'y', 'z']);
-
-      // Single parameters in parentheses are ambiguous to the parser.
-      expect(() => evaluate('a.map((x) => x * x)', {a})).to.throw();
     });
 
     it('Array#reduce()', () => {
@@ -598,6 +617,17 @@ describe('BindExpression', () => {
       // Only support arrow functions as the only parameter in applicable
       // function invocations (don't support optional `thisArg`, etc.).
       expect(() => evaluate('a.reduce((x, y)) => x + y, 0)', {a})).to.throw();
+    });
+
+    it('Array#filter', () => {
+      const a = [1, 2, 3];
+      expect(evaluate('a.filter(x => x > 1)', {a})).to.deep.equal([2, 3]);
+    });
+
+    it('Array#some', () => {
+      const a = [1, 2, 3];
+      expect(evaluate('a.some(x => x == 0)', {a})).to.be.false;
+      expect(evaluate('a.some(x => x == 1)', {a})).to.be.true;
     });
 
     it('disallow: usage other than as function parameter', () => {
