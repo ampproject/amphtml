@@ -36,7 +36,7 @@ const TAG = 'amp-lightbox-viewer';
  *
  * @enum {number}
  */
-const LIGHTBOX_CONTROLS_MODES = {
+const LightboxControlsModes = {
   SHOW_CONTROLS: 1,
   HIDE_CONTROLS: 0,
 };
@@ -103,8 +103,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private  {?Element} */
     this.topGradient_ = null;
 
-    /** @private {!LIGHTBOX_CONTROLS_MODES} */
-    this.controlsMode_ = LIGHTBOX_CONTROLS_MODES.SHOW_CONTROLS;
+    /** @private {!LightboxControlsModes} */
+    this.controlsMode_ = LightboxControlsModes.SHOW_CONTROLS;
   }
 
   /** @override */
@@ -415,14 +415,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   toggleControls_() {
-    if (this.controlsMode_ == LIGHTBOX_CONTROLS_MODES.HIDE_CONTROLS) {
+    if (this.controlsMode_ == LightboxControlsModes.HIDE_CONTROLS) {
       this.toggleDescriptionBox_(/* opt_display */true);
       this.toggleTopBar_(/* opt_display */true);
-      this.controlsMode_ = LIGHTBOX_CONTROLS_MODES.SHOW_CONTROLS;
+      this.controlsMode_ = LightboxControlsModes.SHOW_CONTROLS;
     } else {
       this.toggleDescriptionBox_(/* opt_display */false);
       this.toggleTopBar_(/* opt_display */false);
-      this.controlsMode_ = LIGHTBOX_CONTROLS_MODES.HIDE_CONTROLS;
+      this.controlsMode_ = LightboxControlsModes.HIDE_CONTROLS;
     }
   }
 
