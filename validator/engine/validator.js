@@ -3477,7 +3477,7 @@ function validateLayout(parsedTagSpec, context, attrsByKey, result) {
 }
 
 /**
- * Helper method for ValidateAttributes, for when an attribute is
+ * Helper method for validateAttributes, for when an attribute is
  * encountered which is not specified by the validator.protoascii
  * specification.
  * @param {!ParsedTagSpec} parsedTagSpec
@@ -4070,11 +4070,16 @@ function validateTagAgainstSpec(
   let resultForAttempt = new amp.validator.ValidationResult();
   resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
   const parsedSpec = parsedRules.getByTagSpecId(tagSpecId);
-  validateAttributes(
-      parsedRules.getParsedAttrSpecs(), parsedSpec, context, parsedSpec,
-      encounteredAttrs, resultForAttempt);
   validateParentTag(parsedSpec, context, resultForAttempt);
   validateAncestorTags(parsedSpec, context, resultForAttempt);
+  // Only validate attributes if we haven't yet found any errors. The
+  // Parent/Ancestor errors are informative without adding additional errors
+  // about attributes.
+  if (resultForAttempt.status != amp.validator.ValidationResult.Status.FAIL) {
+    validateAttributes(
+        parsedRules.getParsedAttrSpecs(), parsedSpec, context, parsedSpec,
+        encounteredAttrs, resultForAttempt);
+  }
   validateDescendantTags(parsedSpec, context, resultForAttempt, parsedRules);
   validateNoSiblingsAllowedTags(parsedSpec, context, resultForAttempt);
 
