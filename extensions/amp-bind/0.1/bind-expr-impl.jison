@@ -1,10 +1,3 @@
-/** shared vars and functions */
-
-%{
-%}
-
-/* lexical grammar */
-
 %lex
 
 %%
@@ -16,6 +9,7 @@
 [a-zA-Z_][a-zA-Z0-9_]*    return 'NAME'
 \'[^\']*\'                return 'STRING'
 \"[^\"]*\"                return 'STRING'
+'=>'                      return '=>'
 "+"                       return '+'
 "-"                       return '-'
 "*"                       return '*'
@@ -45,8 +39,6 @@
 
 /lex
 
-/* token type names (no precedence) */
-
 %token NAME
 %token STRING
 %token NUMBER
@@ -55,10 +47,12 @@
 %token EOF
 
 /*
- * operator precedence
+ * Operator precedence.
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
  */
 
+%nonassoc '=>'
+%left ','
 %right '?' ':'
 %left '||'
 %left '&&'
@@ -67,12 +61,13 @@
 %left '+' '-'
 %left '*' '/' '%'
 %right '!' UMINUS UPLUS
-%left '(' ')'
 %left '.' '[' ']'
+%left '(' ')'
+
 
 %%
 
-/* language grammar */
+/* BNF grammar. */
 
 result:
     expr EOF
@@ -168,15 +163,55 @@ operation:
       %}
   ;
 
+/*
+ * Constrain the use of arrow functions to function invocations.
+ */
 invocation:
-    expr '.' NAME args
-      %{
-        $$ = new AstNode(AstNodeType.INVOCATION, [$1, $4], $3);
-      %}
-  |
     NAME args
       %{
-        $$ = new AstNode(AstNodeType.INVOCATION, [undefined, $2], $1)
+        $$ = new AstNode(AstNodeType.INVOCATION, [undefined, $args], $NAME);
+      %}
+  | expr '.' NAME args
+      %{
+        $$ = new AstNode(AstNodeType.INVOCATION, [$expr, $args], $NAME);
+      %}
+  | expr '.' NAME '(' arrow_function ')'
+      %{
+        $$ = new AstNode(AstNodeType.INVOCATION, [$expr, $arrow_function], $NAME);
+      %}
+  ;
+
+arrow_function:
+    '(' ')' '=>' expr
+      %{
+        $$ = new AstNode(AstNodeType.ARROW_FUNCTION, [undefined, $expr]);
+      %}
+  | NAME '=>' expr
+      %{
+        const param = new AstNode(AstNodeType.LITERAL, null, [$NAME]);
+        $$ = new AstNode(AstNodeType.ARROW_FUNCTION, [param, $expr]);
+      %}
+  | '(' params ')' '=>' expr
+      %{
+        $$ = new AstNode(AstNodeType.ARROW_FUNCTION, [$params, $expr]);
+      %}
+  ;
+
+/*
+ * Must be multiple parameters, unfortunately. A single parameter like '(x)'
+ * causes a reduce/reduce conflict with a parenthetical expr with one variable.
+ * This can be solved but requires a custom lexer, e.g.
+ * http://coffeescript.org/v1/annotated-source/lexer.html#section-32
+ */
+params:
+    NAME ',' NAME
+      %{
+        $$ = new AstNode(AstNodeType.LITERAL, null, [$1, $3]);
+      %}
+  | params ',' NAME
+      %{
+        $$ = $params;
+        $$.value.push($NAME);
       %}
   ;
 
