@@ -27,7 +27,7 @@ export function adsense(global, data) {
   // TODO: check mandatory fields
   validateData(data, [],
       ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
-        'ampSlotIndex', 'adChannel', 'loadingStrategy']);
+        'ampSlotIndex', 'adChannel']);
 
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.
