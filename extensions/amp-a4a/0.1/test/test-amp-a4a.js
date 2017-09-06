@@ -831,8 +831,8 @@ describe('amp-a4a', () => {
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
         const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
-        const loadExtensionSpy =
-            sandbox.spy(Extensions.prototype, 'loadExtension');
+        const preloadExtensionSpy =
+            sandbox.spy(Extensions.prototype, 'preloadExtension');
         a4a.buildCallback();
         const lifecycleEventStub =
             sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
@@ -845,7 +845,7 @@ describe('amp-a4a', () => {
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
           expect(fetchMock.called('ad')).to.be.true;
-          expect(loadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
+          expect(preloadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
           return a4a.layoutCallback().then(() => {
             expect(renderAmpCreativeSpy.calledOnce,
                 'renderAmpCreative_ called exactly once').to.be.true;
@@ -914,6 +914,7 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc, rect);
         const a4a = new MockA4AImpl(a4aElement);
         // test 0 height
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.not.be.ok;
         // test 0 width
@@ -1268,11 +1269,13 @@ describe('amp-a4a', () => {
       it('should not delay request when in viewport', () => {
         getResourceStub.returns(
             {
+              getUpgradeDelayMs: () => 1,
               renderOutsideViewport: () => true,
               whenWithinRenderOutsideViewport: () => {
                 throw new Error('failure!');
               },
             });
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_);
         return a4a.adPromise_.then(() => {
@@ -1283,11 +1286,13 @@ describe('amp-a4a', () => {
         let whenWithinRenderOutsideViewportResolve;
         getResourceStub.returns(
             {
+              getUpgradeDelayMs: () => 1,
               renderOutsideViewport: () => false,
               whenWithinRenderOutsideViewport: () => new Promise(resolve => {
                 whenWithinRenderOutsideViewportResolve = resolve;
               }),
             });
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_);
         // Delay to all getAdUrl to potentially execute.

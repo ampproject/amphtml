@@ -79,10 +79,10 @@ tags: {  # <amp-video>
   attrs: { name: "[attribution]" }
   attrs: { name: "[controls]" }
   attrs: { name: "[loop]" }
-  attrs: { name: "[title]" }
   attrs: { name: "[poster]" }
   attrs: { name: "[preload]" }
   attrs: { name: "[src]" }
+  attrs: { name: "[title]" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
   amp_layout: {

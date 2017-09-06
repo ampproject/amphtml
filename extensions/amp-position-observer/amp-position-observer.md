@@ -20,8 +20,8 @@ limitations under the License.
   <tr>
     <td width="40%"><strong>Description</strong></td>
     <td>Monitors position of an element within the viewport as user scrolls
-        and dispatches `enter`, `exit` and `scroll` events that can be used with
-        other components such as `<amp-animation>`
+    and dispatches <code>enter</code>, <code>exit</code> and <code>scroll</code> events that can be used with
+    other components such as <code>&lt;amp-animation></code>
     </td>
   </tr>
   <tr>

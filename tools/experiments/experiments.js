@@ -180,6 +180,11 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
   {
+    id: 'font-display-swap',
+    name: 'Use font-display: swap as the default for fonts.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
+  },
+  {
     id: 'amp-animation',
     name: 'High-performing keyframe animations in AMP.',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +

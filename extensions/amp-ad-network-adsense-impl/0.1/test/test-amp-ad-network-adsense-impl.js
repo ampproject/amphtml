@@ -25,9 +25,6 @@ import {
   ADSENSE_EXPERIMENT_FEATURE,
   INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP,
 } from '../adsense-a4a-config';
-import {
-  installExtensionsService,
-} from '../../../../src/service/extensions-impl';
 import {Services} from '../../../../src/services';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
@@ -64,14 +61,14 @@ describes.realWin('amp-ad-network-adsense-impl', {
     extensions: ['amp-ad', 'amp-ad-network-adsense-impl'],
   },
 }, env => {
-  let win, doc;
+  let win, doc, ampdoc;
   let impl;
   let element;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    win.AMP_MODE = {test: true};
+    ampdoc = env.ampdoc;
     sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
         () => {
           return ['google'];
@@ -132,15 +129,12 @@ describes.realWin('amp-ad-network-adsense-impl', {
       element = createAdsenseImplElement({'data-ad-client': 'ca-adsense'},
           doc, 'amp-embed');
       impl = new AmpAdNetworkAdsenseImpl(element);
-      // Force test mode to ensure isGoogleAdsA4AValidEnvironment returns
-      // true.
-      impl.win.AMP_MODE = {test: true};
       expect(impl.isValidElement()).to.be.true;
     });
   });
 
   describe('#extractSize', () => {
-    let loadExtensionSpy;
+    let preloadExtensionSpy;
 
     beforeEach(() => {
       element = createElementWithAttributes(doc, 'amp-ad', {
@@ -150,9 +144,9 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'layout': 'fixed',
       });
       impl = new AmpAdNetworkAdsenseImpl(element);
-      installExtensionsService(impl.win);
+      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
       const extensions = Services.extensionsFor(impl.win);
-      loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
+      preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
     });
 
     it('without analytics', () => {
@@ -164,8 +158,9 @@ describes.realWin('amp-ad-network-adsense-impl', {
           return false;
         },
       });
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+      expect(preloadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
     });
+
     it('with analytics', () => {
       const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
       impl.extractSize({
@@ -181,7 +176,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
           return !!this.get(name);
         },
       });
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+      expect(preloadExtensionSpy.withArgs('amp-analytics')).to.be.called;
       // exact value of ampAnalyticsConfig_ covered in
       // ads/google/test/test-utils.js
     });
@@ -204,7 +199,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'type': 'adsense',
       });
       impl = new AmpAdNetworkAdsenseImpl(element);
-      installExtensionsService(impl.win);
+      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
+      sandbox.stub(env.ampdocService, 'getAmpDoc', () => ampdoc);
     });
 
     it('injects amp analytics', () => {
@@ -565,24 +561,24 @@ describes.realWin('amp-ad-network-adsense-impl', {
         }));
     });
 
-    Object.entries({
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL_CONTROL]: {
+    [
+      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL_CONTROL, {
         layer: ADSENSE_A4A_EXPERIMENT_NAME,
         result: false,
-      },
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL]: {
+      }],
+      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL, {
         layer: ADSENSE_A4A_EXPERIMENT_NAME,
         result: true,
-      },
-      [INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.CONTROL]: {
+      }],
+      [INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.CONTROL, {
         layer: FF_DR_EXP_NAME,
         result: false,
-      },
-      [INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.EXPERIMENT]: {
+      }],
+      [INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.EXPERIMENT, {
         layer: FF_DR_EXP_NAME,
         result: true,
-      },
-    }).forEach(item => {
+      }],
+    ].forEach(item => {
       it(`should return ${item[1].result} if in ${item[0]} experiment`, () => {
         forceExperimentBranch(impl.win, item[1].layer, item[0]);
         expect(impl.delayAdRequestEnabled()).to.equal(item[1].result);

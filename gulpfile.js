@@ -325,7 +325,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           watch: watch,
           preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
           minify: shouldMinify,
-          wrapper: '<%= contents %>'
         })
       );
     }

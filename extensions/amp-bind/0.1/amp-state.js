@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {map} from '../../../src/utils/object';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -148,7 +149,7 @@ export class AmpState extends AMP.BaseElement {
       return;
     }
     const id = user().assert(this.element.id, '<amp-state> must have an id.');
-    const state = Object.create(null);
+    const state = /** @type {!JsonObject} */ (map());
     state[id] = json;
     Services.bindForDocOrNull(this.element).then(bind => {
       dev().assert(bind, 'Bind service can not be found.');

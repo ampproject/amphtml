@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-import {upgradeOrRegisterElement} from './custom-element';
-
+import {loadScript, validateData} from '../3p/3p';
 
 /**
- * Registers an extended element. This function should typically be called
- * through the registerElement method on the AMP runtime.
- * @param {!Window} win
- * @param {string} name
- * @param {!Function} implementationClass
- * @package
+ * @param {!Window} global
+ * @param {!Object} data
  */
-export function registerExtendedElement(win, name, implementationClass) {
-  upgradeOrRegisterElement(win, name, implementationClass);
+export function directadvert(global, data) {
+  validateData(data, ['blockId']);
+
+  const url = 'https://code.directadvert.ru/data/' +
+      encodeURIComponent(data['blockId']) + '.js?async=1&div=c';
+
+  loadScript(global, url, () => {
+    global.context.renderStart();
+  }, () => {
+    global.context.noContentAvailable();
+  });
+
 }

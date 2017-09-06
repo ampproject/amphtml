@@ -583,6 +583,10 @@ export class AmpAnalytics extends AMP.BaseElement {
         .then(request => {
           const whiteList =
               this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
+          // Since client id expansion is often async, preconnect
+          // to destination before expanding.
+          this.preconnect.url(request,
+              /* We are about to make a real request. */ true);
           // For consistency with amp-pixel we also expand any url
           // replacements.
           return Services.urlReplacementsForDoc(this.element).expandAsync(

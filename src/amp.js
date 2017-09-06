@@ -24,11 +24,11 @@ import {startupChunk} from './chunk';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
-import {installStyles, makeBodyVisible} from './style-installer';
+import {installStylesForDoc, makeBodyVisible} from './style-installer';
 import {installErrorReporting} from './error';
 import {installDocService} from './service/ampdoc-impl';
 import {installCacheServiceWorker} from './service-worker/install';
-import {stubElements} from './custom-element';
+import {stubElementsForDoc} from './custom-element';
 import {
   installAmpdocServices,
   installBuiltins,
@@ -71,7 +71,7 @@ startupChunk(self.document, function initial() {
   const perf = Services.performanceFor(self);
   fontStylesheetTimeout(self);
   perf.tick('is');
-  installStyles(self.document, cssText, () => {
+  installStylesForDoc(ampdoc, cssText, () => {
     startupChunk(self.document, function services() {
       // Core services.
       installRuntimeServices(self);
@@ -88,7 +88,8 @@ startupChunk(self.document, function initial() {
       adopt(self);
     });
     startupChunk(self.document, function stub() {
-      stubElements(self);
+      // Pre-stub already known elements.
+      stubElementsForDoc(ampdoc);
     });
     startupChunk(self.document, function final() {
       installPullToRefreshBlocker(self);

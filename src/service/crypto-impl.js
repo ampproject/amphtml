@@ -118,7 +118,7 @@ export class Crypto {
       return this.polyfillPromise_;
     }
     return this.polyfillPromise_ = Services.extensionsFor(this.win_)
-        .loadExtension('amp-crypto-polyfill')
+        .preloadExtension('amp-crypto-polyfill')
         .then(() => getService(this.win_, 'crypto-polyfill'));
   }
 

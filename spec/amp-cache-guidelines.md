@@ -20,15 +20,19 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
 3. It participates in the AMP JS library release cycle and makes every effort to serve the latest version. It does not allow sites to perform version locking.
 
-4. Pledges to maintain URL space forever (even beyond the lifetime of the cache itself): 
+4. It serves each site from a subdomain of the cache domain.
+
+    1. See for example: the [Google AMP Cache URL format](https://developers.google.com/amp/cache/overview#amp-cache-url-format).
+
+5. Pledges to maintain URL space forever (even beyond the lifetime of the cache itself): 
 
     1. This can be achieved by donating the URL space to a trustworthy third party entity such as [archive.org](http://archive.org).
 
     2. This means that, should a cache decide to no longer operate, URLs should redirect to the origin URL or be served by another cache.
 
-5. Uses HTTPS serving only.
+6. Uses HTTPS serving only.
 
-6. Serves a strong [Content Security Policy](https://w3c.github.io/webappsec-csp/) ([CSP](https://developer.chrome.com/extensions/contentSecurityPolicy)) - a CSP defines a mechanism by which web developers can control the resources which a particular page can fetch or execute, as well as a number of security-relevant policy decisions.
+7. Serves a strong [Content Security Policy](https://w3c.github.io/webappsec-csp/) ([CSP](https://developer.chrome.com/extensions/contentSecurityPolicy)) - a CSP defines a mechanism by which web developers can control the resources which a particular page can fetch or execute, as well as a number of security-relevant policy decisions.
 
     1. Implements separately documented security rewrites on served content.
 
@@ -36,27 +40,27 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
     3. Caches must update their CSP in a timely fashion (within 7 days) at the request of the AMP Project.
 
-7. Supports a public Update ping mechanism which provides a mechanism for document publishers to notify the AMP cache about new, updated or deleted documents: 
+8. Supports a public Update ping mechanism which provides a mechanism for document publishers to notify the AMP cache about new, updated or deleted documents: 
 
     1. Equivalent to the [Google AMP Cache Update ping API](https://developers.google.com/amp/cache/update-ping#update-ping-format)
 
-8. Supports a public AMP Cache URL API:
+9. Supports a public AMP Cache URL API:
 
     1. Equivalent to the [Google AMP Cache URL API](https://developers.google.com/amp/cache/overview#amp-cache-url-format)
 
-9. Provides a faithful visual and UX reproduction of source document. E.g. changes in image resolution or compression rate may be acceptable if they provide strong benefits in terms of bandwidth usage and load time.
+10. Provides a faithful visual and UX reproduction of source document. E.g. changes in image resolution or compression rate may be acceptable if they provide strong benefits in terms of bandwidth usage and load time.
 
-10. No obstruction of the contents, branding or attribution of the original AMP document. 
+11. No obstruction of the contents, branding or attribution of the original AMP document. 
 
-11. No changes to ads, monetization, access (paywall monetization and similar), analytics, or similar.
+12. No changes to ads, monetization, access (paywall monetization and similar), analytics, or similar.
 
-12. Respects all resource deletions within a reasonable timeframe.
+13. Respects all resource deletions within a reasonable timeframe.
 
-13. Uses a stale-while-revalidate caching model and reasonable min cache time (such as in the order of single digit minutes) is allowed. For example, as per [Google AMP Cache updates](https://developers.google.com/amp/cache/overview#google-amp-cache-updates), "[the cache] uses the origin's caching headers, such as Max-Age, as hints in deciding whether a particular document or resource is stale. When a user makes a request for something that is stale, that request causes a new copy to be fetched, so that the next user gets fresh content":
+14. Uses a stale-while-revalidate caching model and reasonable min cache time (such as in the order of single digit minutes) is allowed. For example, as per [Google AMP Cache updates](https://developers.google.com/amp/cache/overview#google-amp-cache-updates), "[the cache] uses the origin's caching headers, such as Max-Age, as hints in deciding whether a particular document or resource is stale. When a user makes a request for something that is stale, that request causes a new copy to be fetched, so that the next user gets fresh content":
 
     1. The cache is allowed to serve stale content independent of HTTP caching headers. It must make reasonable efforts to keep the cache contents fresh and must revalidate content after serving stale responses.
 
-14. Follows [AMP cache modifications best practices](../spec/amp-cache-modifications.md).
+15. Follows [AMP cache modifications best practices](../spec/amp-cache-modifications.md).
 
 ## Guidelines: Crawling 
 

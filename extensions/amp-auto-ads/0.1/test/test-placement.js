@@ -18,37 +18,37 @@ import {AdTracker} from '../ad-tracker';
 import {Services} from '../../../../src/services';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 
+
 describes.realWin('placement', {
   amp: {
     runtimeOn: true,
     ampdoc: 'single',
-    extensions: ['amp-ad'],
   },
 }, env => {
-
-  let sandbox;
+  let win, doc, ampdoc;
   let container;
 
   beforeEach(() => {
-    sandbox = env.sandbox.create();
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
+    env.iframe.style.height = '1000px';
 
-    env.win.frameElement.style.height = '1000px';
-
-    const belowFoldSpacer = document.createElement('div');
+    const belowFoldSpacer = doc.createElement('div');
     belowFoldSpacer.style.height = '1000px';
-    env.win.document.body.appendChild(belowFoldSpacer);
+    doc.body.appendChild(belowFoldSpacer);
 
-    container = env.win.document.createElement('div');
-    env.win.document.body.appendChild(container);
+    container = doc.createElement('div');
+    doc.body.appendChild(container);
   });
 
   describe('getAdElement', () => {
     it('should get ad Element when ad placed', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -77,11 +77,11 @@ describes.realWin('placement', {
     });
 
     it('should throw an error if ad not placed', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -100,14 +100,14 @@ describes.realWin('placement', {
 
   describe('getEstimatedPosition', () => {
     it('should estimate the position when before anchor', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.style.position = 'absolute';
       anchor.style.top = '15px';
       anchor.style.height = '100px';
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -126,14 +126,14 @@ describes.realWin('placement', {
     });
 
     it('should estimate the position when first child of anchor', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.style.position = 'absolute';
       anchor.style.top = '15px';
       anchor.style.height = '100px';
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -152,14 +152,14 @@ describes.realWin('placement', {
     });
 
     it('should estimate the position when last child of anchor', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.style.position = 'absolute';
       anchor.style.top = '15px';
       anchor.style.height = '100px';
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -178,14 +178,14 @@ describes.realWin('placement', {
     });
 
     it('should estimate the position when after anchor', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.style.position = 'absolute';
       anchor.style.top = '15px';
       anchor.style.height = '100px';
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -206,11 +206,11 @@ describes.realWin('placement', {
 
   describe('placeAd', () => {
     it('should place an ad with the correct base attributes', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -249,11 +249,11 @@ describes.realWin('placement', {
     });
 
     it('should place an ad with the correct placement attributes', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -299,11 +299,11 @@ describes.realWin('placement', {
     });
 
     it('should place an ad with i-amphtml-layout-awaiting-size class', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -338,11 +338,11 @@ describes.realWin('placement', {
     });
 
     it('should place an ad with the correct margins', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -383,11 +383,11 @@ describes.realWin('placement', {
     });
 
     it('should place an ad with top margin only', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -427,11 +427,11 @@ describes.realWin('placement', {
     });
 
     it('should place an ad with bottom margin only', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -471,11 +471,11 @@ describes.realWin('placement', {
     });
 
     it('should place an ad with no margins', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -513,7 +513,7 @@ describes.realWin('placement', {
     });
 
     it('should report placement placed when resize allowed', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
@@ -522,7 +522,7 @@ describes.realWin('placement', {
         return Promise.resolve();
       });
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -553,7 +553,7 @@ describes.realWin('placement', {
     });
 
     it('should report resize failed when resize not allowed', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
@@ -562,7 +562,7 @@ describes.realWin('placement', {
         return Promise.reject(new Error('Resize failed'));
       });
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -593,14 +593,14 @@ describes.realWin('placement', {
     });
 
     it('should report too near existing ad', () => {
-      const fakeAd = document.createElement('div');
+      const fakeAd = doc.createElement('div');
       container.appendChild(fakeAd);
 
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -633,11 +633,11 @@ describes.realWin('placement', {
 
   describe('Ad positioning', () => {
     it('should place the ad before the anchor', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -668,11 +668,11 @@ describes.realWin('placement', {
     });
 
     it('should place the ad after the anchor', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -703,12 +703,12 @@ describes.realWin('placement', {
     });
 
     it('should place the ad as the first child of the anchor', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
-      anchor.appendChild(document.createElement('div'));
+      anchor.appendChild(doc.createElement('div'));
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -739,12 +739,12 @@ describes.realWin('placement', {
     });
 
     it('should place the ad as the last child of the anchor', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
-      anchor.appendChild(document.createElement('div'));
+      anchor.appendChild(doc.createElement('div'));
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -775,15 +775,15 @@ describes.realWin('placement', {
     });
 
     it('should place the ad inside the 2nd anchor with class name', () => {
-      const anchor1 = document.createElement('div');
+      const anchor1 = doc.createElement('div');
       anchor1.className = 'aClass';
       container.appendChild(anchor1);
 
-      const anchor2 = document.createElement('div');
+      const anchor2 = doc.createElement('div');
       anchor2.className = 'aClass';
       container.appendChild(anchor2);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -818,11 +818,11 @@ describes.realWin('placement', {
 
   describe('getPlacementsFromConfigObj', () => {
     it('should get a placement from the config object', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -837,12 +837,12 @@ describes.realWin('placement', {
     });
 
     it('should return empty array when no placements array', () => {
-      const placements = getPlacementsFromConfigObj(env.win, {});
+      const placements = getPlacementsFromConfigObj(ampdoc, {});
       expect(placements).to.be.empty;
     });
 
     it('should not return a placement with no anchor property', () => {
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             pos: 1,
@@ -854,11 +854,11 @@ describes.realWin('placement', {
     });
 
     it('should not return a placement with no selector in the anchor', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {},
@@ -871,11 +871,11 @@ describes.realWin('placement', {
     });
 
     it('should not return a placement with an invalid position', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -891,11 +891,11 @@ describes.realWin('placement', {
 
     it('should not return placement if its anchor doesn\'t exist on the page',
         () => {
-          const anchor = document.createElement('div');
+          const anchor = doc.createElement('div');
           anchor.id = 'wrongId';
           container.appendChild(anchor);
 
-          const placements = getPlacementsFromConfigObj(env.win, {
+          const placements = getPlacementsFromConfigObj(ampdoc, {
             placements: [
               {
                 anchor: {
@@ -910,15 +910,15 @@ describes.realWin('placement', {
         });
 
     it('should get a placement for the 2nd anchor with class name', () => {
-      const anchor1 = document.createElement('div');
+      const anchor1 = doc.createElement('div');
       anchor1.className = 'aClass';
       container.appendChild(anchor1);
 
-      const anchor2 = document.createElement('div');
+      const anchor2 = doc.createElement('div');
       anchor2.className = 'aClass';
       container.appendChild(anchor2);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -936,15 +936,15 @@ describes.realWin('placement', {
     });
 
     it('should get a placement for all the anchors with class name', () => {
-      const anchor1 = document.createElement('div');
+      const anchor1 = doc.createElement('div');
       anchor1.className = 'aClass';
       container.appendChild(anchor1);
 
-      const anchor2 = document.createElement('div');
+      const anchor2 = doc.createElement('div');
       anchor2.className = 'aClass';
       container.appendChild(anchor2);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -964,15 +964,15 @@ describes.realWin('placement', {
 
     it('should get a placement for the 2nd anchor with class name when ' +
         'index and all both specified.', () => {
-      const anchor1 = document.createElement('div');
+      const anchor1 = doc.createElement('div');
       anchor1.className = 'aClass';
       container.appendChild(anchor1);
 
-      const anchor2 = document.createElement('div');
+      const anchor2 = doc.createElement('div');
       anchor2.className = 'aClass';
       container.appendChild(anchor2);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -992,17 +992,17 @@ describes.realWin('placement', {
 
     it('should only get placement for element with sufficient textContent',
         () => {
-          const nonAnchor = document.createElement('div');
+          const nonAnchor = doc.createElement('div');
           nonAnchor.className = 'class1';
           container.appendChild(nonAnchor);
-          nonAnchor.appendChild(document.createTextNode('abc'));
+          nonAnchor.appendChild(doc.createTextNode('abc'));
 
-          const anchor = document.createElement('div');
+          const anchor = doc.createElement('div');
           anchor.className = 'class1';
           container.appendChild(anchor);
-          anchor.appendChild(document.createTextNode('abcd'));
+          anchor.appendChild(doc.createTextNode('abcd'));
 
-          const placements = getPlacementsFromConfigObj(env.win, {
+          const placements = getPlacementsFromConfigObj(ampdoc, {
             placements: [
               {
                 anchor: {
@@ -1019,11 +1019,11 @@ describes.realWin('placement', {
         });
 
     it('should not return a placement that\'s inside an amp-sidebar', () => {
-      const anchor = document.createElement('amp-sidebar');
+      const anchor = doc.createElement('amp-sidebar');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -1038,12 +1038,12 @@ describes.realWin('placement', {
     });
 
     it('should not return a placement that\'s inside an amp-app-banner', () => {
-      const anchor = document.createElement('amp-app-banner');
+      const anchor = doc.createElement('amp-app-banner');
       anchor.setAttribute('layout', 'nodisplay');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -1058,11 +1058,11 @@ describes.realWin('placement', {
     });
 
     it('should get a placement when outside amp-sidebar', () => {
-      const anchor = document.createElement('amp-sidebar');
+      const anchor = doc.createElement('amp-sidebar');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -1078,14 +1078,14 @@ describes.realWin('placement', {
 
     it('should not return a placement that is a child of a blacklisted ' +
         'ancestor.', () => {
-      const parent = document.createElement('amp-sidebar');
+      const parent = doc.createElement('amp-sidebar');
       container.appendChild(parent);
 
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       parent.appendChild(anchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -1101,14 +1101,14 @@ describes.realWin('placement', {
 
     it('should get a placement when anchor parent of blacklisted ancestor.',
         () => {
-          const anchor = document.createElement('div');
+          const anchor = doc.createElement('div');
           anchor.id = 'anId';
           container.appendChild(anchor);
 
-          const child = document.createElement('amp-sidebar');
+          const child = doc.createElement('amp-sidebar');
           anchor.appendChild(child);
 
-          const placements = getPlacementsFromConfigObj(env.win, {
+          const placements = getPlacementsFromConfigObj(ampdoc, {
             placements: [
               {
                 anchor: {
@@ -1125,31 +1125,31 @@ describes.realWin('placement', {
 
   describe('getPlacementsFromConfigObj, sub-anchors', () => {
     it('should get placements using the sub anchor', () => {
-      const nonAnchor = document.createElement('div');
+      const nonAnchor = doc.createElement('div');
       nonAnchor.id = 'anId';
       container.appendChild(nonAnchor);
 
-      const nonSubAnchor1 = document.createElement('div');
+      const nonSubAnchor1 = doc.createElement('div');
       nonSubAnchor1.className = 'sub-class';
       nonAnchor.appendChild(nonSubAnchor1);
 
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const subAnchor1 = document.createElement('div');
+      const subAnchor1 = doc.createElement('div');
       subAnchor1.className = 'sub-class';
       anchor.appendChild(subAnchor1);
 
-      const nonSubAnchor2 = document.createElement('div');
+      const nonSubAnchor2 = doc.createElement('div');
       nonSubAnchor2.className = 'non-sub-class';
       anchor.appendChild(nonSubAnchor2);
 
-      const subAnchor2 = document.createElement('div');
+      const subAnchor2 = doc.createElement('div');
       subAnchor2.className = 'sub-class';
       anchor.appendChild(subAnchor2);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -1171,19 +1171,19 @@ describes.realWin('placement', {
     });
 
     it('should get placement only for anchor indexed in sub-anchor', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const subAnchor1 = document.createElement('div');
+      const subAnchor1 = doc.createElement('div');
       subAnchor1.className = 'sub-class';
       anchor.appendChild(subAnchor1);
 
-      const subAnchor2 = document.createElement('div');
+      const subAnchor2 = doc.createElement('div');
       subAnchor2.className = 'sub-class';
       anchor.appendChild(subAnchor2);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -1203,35 +1203,35 @@ describes.realWin('placement', {
     });
 
     it('should get placements using recursive sub anchors', () => {
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const subAnchor1 = document.createElement('div');
+      const subAnchor1 = doc.createElement('div');
       subAnchor1.className = 'sub-class1';
       anchor.appendChild(subAnchor1);
 
-      const subSubAnchor1 = document.createElement('div');
+      const subSubAnchor1 = doc.createElement('div');
       subSubAnchor1.className = 'sub-class2';
       subAnchor1.appendChild(subSubAnchor1);
 
-      const nonSubSubAnchor = document.createElement('div');
+      const nonSubSubAnchor = doc.createElement('div');
       nonSubSubAnchor.className = 'sub-class3';
       subAnchor1.appendChild(nonSubSubAnchor);
 
-      const subAnchor2 = document.createElement('div');
+      const subAnchor2 = doc.createElement('div');
       subAnchor2.className = 'sub-class1';
       anchor.appendChild(subAnchor2);
 
-      const subSubAnchor2 = document.createElement('div');
+      const subSubAnchor2 = doc.createElement('div');
       subSubAnchor2.className = 'sub-class2';
       subAnchor2.appendChild(subSubAnchor2);
 
-      const nonSubAnchor = document.createElement('div');
+      const nonSubAnchor = doc.createElement('div');
       nonSubAnchor.className = 'sub-class1';
       anchor.appendChild(nonSubAnchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -1256,23 +1256,23 @@ describes.realWin('placement', {
     });
 
     it('should not return placement when no element matches sub anchor', () => {
-      const nonAnchor = document.createElement('div');
+      const nonAnchor = doc.createElement('div');
       nonAnchor.id = 'anId';
       container.appendChild(nonAnchor);
 
-      const nonSubAnchor1 = document.createElement('div');
+      const nonSubAnchor1 = doc.createElement('div');
       nonSubAnchor1.className = 'sub-class';
       nonAnchor.appendChild(nonSubAnchor1);
 
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const nonSubAnchor2 = document.createElement('div');
+      const nonSubAnchor2 = doc.createElement('div');
       nonSubAnchor2.className = 'non-sub-class';
       anchor.appendChild(nonSubAnchor2);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -1292,19 +1292,19 @@ describes.realWin('placement', {
 
     it('sub anchor query selector matching should be scoped to within parent ' +
         'anchor element', () => {
-      const wrapper = document.createElement('div');
+      const wrapper = doc.createElement('div');
       wrapper.className = 'class1';
       container.appendChild(wrapper);
 
-      const anchor = document.createElement('div');
+      const anchor = doc.createElement('div');
       anchor.className = 'class2';
       wrapper.appendChild(anchor);
 
-      const subAnchor = document.createElement('div');
+      const subAnchor = doc.createElement('div');
       subAnchor.className = 'class3';
       anchor.appendChild(subAnchor);
 
-      const placements = getPlacementsFromConfigObj(env.win, {
+      const placements = getPlacementsFromConfigObj(ampdoc, {
         placements: [
           {
             anchor: {
@@ -1324,26 +1324,26 @@ describes.realWin('placement', {
 
     it('should only get placements for elements with sufficient textContent',
         () => {
-          const anchor = document.createElement('div');
+          const anchor = doc.createElement('div');
           anchor.id = 'anId';
           container.appendChild(anchor);
 
-          const subAnchor1 = document.createElement('div');
+          const subAnchor1 = doc.createElement('div');
           subAnchor1.className = 'sub-class';
           anchor.appendChild(subAnchor1);
-          subAnchor1.appendChild(document.createTextNode('abc'));
+          subAnchor1.appendChild(doc.createTextNode('abc'));
 
-          const subAnchor2 = document.createElement('div');
+          const subAnchor2 = doc.createElement('div');
           subAnchor2.className = 'sub-class';
           anchor.appendChild(subAnchor2);
-          subAnchor2.appendChild(document.createTextNode('abcd'));
+          subAnchor2.appendChild(doc.createTextNode('abcd'));
 
-          const subAnchor3 = document.createElement('div');
+          const subAnchor3 = doc.createElement('div');
           subAnchor3.className = 'sub-class';
           anchor.appendChild(subAnchor3);
-          subAnchor3.appendChild(document.createTextNode('abcd'));
+          subAnchor3.appendChild(doc.createTextNode('abcd'));
 
-          const placements = getPlacementsFromConfigObj(env.win, {
+          const placements = getPlacementsFromConfigObj(ampdoc, {
             placements: [
               {
                 anchor: {
@@ -1366,21 +1366,21 @@ describes.realWin('placement', {
 
     it('should only get placement for element with sufficient textContent',
         () => {
-          const anchor = document.createElement('div');
+          const anchor = doc.createElement('div');
           anchor.id = 'anId';
           container.appendChild(anchor);
 
-          const subAnchor1 = document.createElement('div');
+          const subAnchor1 = doc.createElement('div');
           subAnchor1.className = 'sub-class';
           anchor.appendChild(subAnchor1);
-          subAnchor1.appendChild(document.createTextNode('abc'));
+          subAnchor1.appendChild(doc.createTextNode('abc'));
 
-          const subAnchor2 = document.createElement('div');
+          const subAnchor2 = doc.createElement('div');
           subAnchor2.className = 'sub-class';
           anchor.appendChild(subAnchor2);
-          subAnchor2.appendChild(document.createTextNode('abcd'));
+          subAnchor2.appendChild(doc.createTextNode('abcd'));
 
-          const placements = getPlacementsFromConfigObj(env.win, {
+          const placements = getPlacementsFromConfigObj(ampdoc, {
             placements: [
               {
                 anchor: {

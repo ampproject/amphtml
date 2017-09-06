@@ -147,7 +147,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   buildCarousel_() {
     if (!this.carousel_) {
       dev().assert(this.container_);
-      Services.extensionsFor(this.win).loadExtension('amp-carousel');
+      Services.extensionsFor(this.win).installExtensionForDoc(
+          this.getAmpDoc(), 'amp-carousel');
       this.carousel_ = this.win.document.createElement('amp-carousel');
       this.carousel_.setAttribute('type', 'slides');
       this.carousel_.setAttribute('layout', 'fill');

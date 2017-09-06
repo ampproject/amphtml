@@ -57,6 +57,8 @@ export const ADSENSE_EXPERIMENT_FEATURE = {
   DELAYED_REQUEST_EXTERNAL: '21060735',
   HOLDBACK_INTERNAL_CONTROL: '2092615',
   HOLDBACK_INTERNAL: '2092616',
+  CACHE_EXTENSION_INJECTION_CONTROL: '21060953',
+  CACHE_EXTENSION_INJECTION_EXP: '21060954',
 };
 
 /** @type {string} */
@@ -72,6 +74,9 @@ export const URL_EXPERIMENT_MAPPING = {
   // Delay Request
   '3': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL_CONTROL,
   '4': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL,
+  // AMP Cache extension injection
+  '5': ADSENSE_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_CONTROL,
+  '6': ADSENSE_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_EXP,
 };
 
 /**
@@ -93,6 +98,10 @@ export function adsenseIsA4AEnabled(win, element) {
     ],
   };
   randomlySelectUnsetExperiments(win, ffDrExperimentInfoMap);
+  const delayedFetchExperimentId = getExperimentBranch(win, FF_DR_EXP_NAME);
+  if (delayedFetchExperimentId) {
+    addExperimentIdToElement(delayedFetchExperimentId, element);
+  }
   if (!isGoogleAdsA4AValidEnvironment(win) ||
       !element.getAttribute('data-ad-client')) {
     return false;

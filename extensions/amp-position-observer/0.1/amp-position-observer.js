@@ -394,4 +394,6 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement(TAG, AmpVisibilityObserver);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpVisibilityObserver);
+});

@@ -15,6 +15,13 @@
  */
 
 /**
+ * @fileoverview
+ * @deprecated Do not use this in new code. Use env.fetchMock instead. Its API
+ *     is a superset of this one. TODO(@taymonbeal, #11066): Migrate all
+ *     existing users and then delete this file.
+ */
+
+/**
  * @typedef {(?string|{
  *     body: ?string,
  *     status: (number|undefined),
