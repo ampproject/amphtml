@@ -30,6 +30,14 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 9:00 PM, September 6, 2017 UTC
+
+Validator Version 248
+Spec Version 474
+
+Includes:
+ - #11087
+ 
 ### 11:00 PM, August 30, 2017 UTC
 
 Validator Version 246
