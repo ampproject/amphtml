@@ -299,7 +299,12 @@ export class BindExpression {
 
         if (validFunction) {
           if (Array.isArray(params)) {
-            return validFunction.apply(caller, params);
+            // Don't allow objects as parameters except for Object functions.
+            const invalidArgumentType = this.containsObject_(params)
+                && !this.isObjectMethod_(method);
+            if (!invalidArgumentType) {
+              return validFunction.apply(caller, params);
+            }
           } else if (typeof params == 'function') {
             // Special case: `params` may be an arrow function, which are only
             // supported as the sole argument to functions like Array#find.
@@ -468,5 +473,29 @@ export class BindExpression {
     const stringified = JSON.stringify(/** @type {!JsonObject} */ (member));
     user().warn(TAG, `Cannot read property ${stringified} of ` +
         `${stringified}; returning null.`);
+  }
+
+  /**
+   * Returns true iff method is
+   * @param {string} method
+   * @return {boolean}
+   */
+  isObjectMethod_(method) {
+    return method == 'keys' || method == 'values';
+  }
+
+  /**
+   * Returns true if input array contains a plain object.
+   * @param {!Array} array
+   * @return {boolean}
+   * @private
+   */
+  containsObject_(array) {
+    for (let i = 0; i < array.length; i++) {
+      if (isObject(array[i])) {
+        return true;
+      }
+    }
+    return false;
   }
 }

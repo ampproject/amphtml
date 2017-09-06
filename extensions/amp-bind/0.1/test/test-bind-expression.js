@@ -17,6 +17,7 @@
 import {BindExpression} from '../bind-expression';
 
 describe('BindExpression', () => {
+  const argumentTypeError = 'Unexpected argument type';
   const unsupportedFunctionError = 'not a supported function';
   const expressionSizeExceededError = 'exceeds max';
 
@@ -438,9 +439,13 @@ describe('BindExpression', () => {
       }).to.throw(Error, unsupportedFunctionError);
     });
 
-    it('gracefully handle invalid argument types', () => {
-      expect(evaluate('[1, 2, 3].indexOf({})')).to.equal(-1);
-      expect(() => { evaluate('"abc".substr({})'); }).to.throw(TypeError);
+    it('disallow: whitelisted functions with invalid argument types', () => {
+      expect(() => {
+        evaluate('[1, 2, 3].indexOf({})');
+      }).to.throw(Error, argumentTypeError);
+      expect(() => {
+        evaluate('"abc".substr({})');
+      }).to.throw(Error, argumentTypeError);
     });
   });
 
