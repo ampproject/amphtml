@@ -22,7 +22,12 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
-import {removeElement} from '../../../src/dom';
+import {
+  removeElement,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
 
@@ -45,12 +50,6 @@ class AmpGfycat extends AMP.BaseElement {
 
     /** @private {?string} */
     this.videoIframeSrc_ = null;
-
-    /** @private {?Promise} */
-    this.playerReadyPromise_ = null;
-
-    /** @private {?Function} */
-    this.playerReadyResolver_ = null;
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
@@ -78,9 +77,10 @@ class AmpGfycat extends AMP.BaseElement {
   buildCallback() {
     this.videoid_ = this.getVideoId_();
 
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    // Enable autoplay by default
+    if (!this.element.hasAttribute('noautoplay')) {
+      this.element.setAttribute('autoplay', '');
+    }
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
@@ -90,7 +90,7 @@ class AmpGfycat extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('amp-img');
     dev().assert(this.videoid_);
-    const videoid = this.videoid_ || '';
+    const videoid = this.videoid_;
 
     placeholder.setAttribute('src',
         'https://thumbs.gfycat.com/' +
@@ -120,7 +120,7 @@ class AmpGfycat extends AMP.BaseElement {
       return this.videoIframeSrc_;
     }
 
-    const videoid = this.videoid_ || '';
+    const videoid = this.videoid_;
     let src = 'https://gfycat.com/ifr/' + encodeURIComponent(videoid);
 
     const params = getDataParamsFromAttributes(this.element);
@@ -150,11 +150,9 @@ class AmpGfycat extends AMP.BaseElement {
     );
 
     this.element.appendChild(iframe);
-    const loaded = this.loadPromise(this.iframe_).then(() => {
+    return this.loadPromise(this.iframe_).then(() => {
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
     });
-    this.playerReadyResolver_(loaded);
-    return loaded;
   }
 
   /** @override */
@@ -166,10 +164,6 @@ class AmpGfycat extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
     return true;  // Call layoutCallback again.
   }
 
@@ -180,12 +174,10 @@ class AmpGfycat extends AMP.BaseElement {
    * @private
    * */
   sendCommand_(command, opt_arg) {
-    this.playerReadyPromise_.then(() => {
-      if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = command;
-        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
-      }
-    });
+    if (this.iframe_ && this.iframe_.contentWindow) {
+      const message = command;
+      this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+    }
   }
 
   /** @private */
@@ -198,9 +190,7 @@ class AmpGfycat extends AMP.BaseElement {
       return;
     }
 
-    if (eventData == 'ready') {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-    } else if (eventData == 'paused') {
+    if (eventData == 'paused') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
     } else if (eventData == 'playing') {
       this.element.dispatchCustomEvent(VideoEvents.PLAYING);
@@ -223,7 +213,7 @@ class AmpGfycat extends AMP.BaseElement {
 
   /** @override */
   isInteractive() {
-    return true;
+    return false;
   }
 
   /** @override */
@@ -255,6 +245,44 @@ class AmpGfycat extends AMP.BaseElement {
   /** @override */
   hideControls() {
     // Not supported.
+  }
+
+    /**
+   * @override
+   */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
   }
 
     /** @override */

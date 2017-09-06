@@ -83,29 +83,14 @@ Example: Finding the actual width and height
 </iframe>
 ```
 
-##### autoplay
+##### noautoplay
 
-By default, a video autoplays. Adding `autoplay` attribute provides
-additional functionality:
+By default, a video autoplays.
 * when the video is scrolled out of view, the video is paused
 * when the video is scrolled into view, the video resumes playback
 * if the user has interacted with the video (e.g., pauses/resumes), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused. 
 
-Example:
-
-```html
-  <amp-gfycat
-          data-gfyid="TautWhoppingCougar"
-          width="640"
-          height="360"
-          autoplay>
-  </amp-gfycat>
-```
-
-
-##### noautoplay
-
-By default, a video autoplays. You can turn off autoplay by setting the  `noautoplay` attribute.
+You can turn off autoplay by setting the  `noautoplay` attribute.
 
 Example: Turning off autoplay
 
