@@ -42,9 +42,6 @@ describes.realWin('amp-gfycat', {
     if (opt_params && opt_params.noautoplay) {
       gfycat.setAttribute('noautoplay', '');
     }
-    if (opt_params && opt_params.autoplay) {
-      gfycat.setAttribute('autoplay', '');
-    }
     doc.body.appendChild(gfycat);
     return gfycat.build().then(() => {
       return gfycat.layoutCallback();
