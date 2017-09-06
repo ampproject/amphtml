@@ -39,9 +39,6 @@ const DEFAULT_MAX_AST_SIZE = 50;
 /** @const @private {string} */
 const BUILT_IN_FUNCTIONS = 'built-in-functions';
 
-/** @const {!Function} */
-const isEnumerable = Object.prototype.propertyIsEnumerable;
-
 /**
  * Map of object type to function name to whitelisted function.
  * @private {!Object<string, !Object<string, Function>>}
@@ -95,7 +92,7 @@ function generateFunctionWhitelist() {
   function values(object) {
     const v = [];
     for (const key in object) {
-      if (hasOwn(object, key) && isEnumerable.call(object, key)) {
+      if (hasOwn(object, key)) {
         v.push(object[key]);
       }
     }
