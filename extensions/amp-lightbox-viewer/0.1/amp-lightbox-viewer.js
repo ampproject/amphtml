@@ -31,6 +31,17 @@ import {numeric} from '../../../src/transition';
 const TAG = 'amp-lightbox-viewer';
 
 /**
+ * Set of namespaces that indicate the lightbox controls mode.
+ * Lightbox controls include top bar, description box
+ *
+ * @enum {number}
+ */
+const LIGHTBOX_CONTROLS_MODES = {
+  SHOW_CONTROLS: 1,
+  HIDE_CONTROLS: 0,
+};
+
+/**
  * TODO(aghassemi): Make lightbox-manager into a doc-level service.
  * @private  {!./service/lightbox-manager-impl.LightboxManager}
  * */
@@ -91,6 +102,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @private  {?Element} */
     this.topGradient_ = null;
+
+    /** @private {!LIGHTBOX_CONTROLS_MODES} */
+    this.controlsMode_ = LIGHTBOX_CONTROLS_MODES.SHOW_CONTROLS;
   }
 
   /** @override */
@@ -116,6 +130,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.buildCarousel_();
     this.buildDescriptionBox_();
     this.buildTopBar_();
+
+    this.setupContainerListener_();
 
     this.element.appendChild(this.container_);
   }
@@ -205,8 +221,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.descriptionTextArea_.classList.add('non-expanded');
     this.descriptionBox_.appendChild(this.descriptionTextArea_);
 
-    const toggleDescription = this.toggleDescriptionBox_.bind(this);
-    listen(dev().assertElement(this.container_), 'click', toggleDescription);
     this.descriptionBox_.addEventListener('click', event => {
       this.toggleDescriptionOverflow_();
       event.stopPropagation();
@@ -229,12 +243,23 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
   /**
    * Toggle description box if it has text content
+   * @param {boolean=} opt_display
    * @private
    */
-  toggleDescriptionBox_() {
+  toggleDescriptionBox_(opt_display) {
     this.updateDescriptionBox_();
+    dev().assert(this.descriptionBox_);
+    if (opt_display == undefined) {
+      opt_display = this.descriptionBox_.classList.contains('hide');
+    }
     if (this.descriptionBox_.textContent) {
-      this.descriptionBox_.classList.toggle('hide');
+      if (opt_display) {
+        this.descriptionBox_.classList.remove('hide');
+      } else {
+        this.descriptionBox_.classList.add('hide');
+      }
+    } else {
+      this.descriptionBox_.classList.add('hide');
     }
   }
 
@@ -319,10 +344,19 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
   /**
    * Toggle lightbox top bar
+   * @param {boolean=} opt_display
    * @private
    */
-  toggleTopBar_() {
-    this.topBar_.classList.toggle('hide');
+  toggleTopBar_(opt_display) {
+    dev().assert(this.topBar_);
+    if (opt_display == undefined) {
+      opt_display = this.topBar_.classList.contains('hide');
+    }
+    if (opt_display) {
+      this.topBar_.classList.remove('hide');
+    } else {
+      this.topBar_.classList.add('hide');
+    }
   }
 
   /**
@@ -351,8 +385,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.buildButton_('Gallery', 'amp-lbv-button-gallery', openGallery);
     this.buildButton_('Content', 'amp-lbv-button-slide', closeGallery);
 
-    const toggleTopBar = this.toggleTopBar_.bind(this);
-    listen(dev().assertElement(this.container_), 'click', toggleTopBar);
     this.container_.appendChild(this.topBar_);
   }
 
@@ -376,6 +408,32 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     });
 
     this.topBar_.appendChild(button);
+  }
+
+  /**
+   * Toggle lightbox controls including topbar and description.
+   * @private
+   */
+  toggleControls_() {
+    if (this.controlsMode_ == LIGHTBOX_CONTROLS_MODES.HIDE_CONTROLS) {
+      this.toggleDescriptionBox_(/* opt_display */true);
+      this.toggleTopBar_(/* opt_display */true);
+      this.controlsMode_ = LIGHTBOX_CONTROLS_MODES.SHOW_CONTROLS;
+    } else {
+      this.toggleDescriptionBox_(/* opt_display */false);
+      this.toggleTopBar_(/* opt_display */false);
+      this.controlsMode_ = LIGHTBOX_CONTROLS_MODES.HIDE_CONTROLS;
+    }
+  }
+
+  /**
+   * Set up container listener.
+   * @private
+   */
+  setupContainerListener_() {
+    dev().assert(this.container_);
+    const toggleControls = this.toggleControls_.bind(this);
+    listen(dev().assertElement(this.container_), 'click', toggleControls);
   }
 
   /**
