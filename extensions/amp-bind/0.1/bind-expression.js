@@ -16,7 +16,7 @@
 
 import {AstNodeType} from './bind-expr-defines';
 import {getMode} from '../../../src/mode';
-import {dict, map} from '../../../src/utils/object';
+import {dict, hasOwn, map} from '../../../src/utils/object';
 import {isArray, isObject} from '../../../src/types';
 import {parser} from './bind-expr-impl';
 import {user} from '../../../src/log';
@@ -39,6 +39,9 @@ const DEFAULT_MAX_AST_SIZE = 50;
 /** @const @private {string} */
 const BUILT_IN_FUNCTIONS = 'built-in-functions';
 
+/** @const {!Function} */
+const isEnumerable = Object.prototype.propertyIsEnumerable;
+
 /**
  * Map of object type to function name to whitelisted function.
  * @private {!Object<string, !Object<string, Function>>}
@@ -51,8 +54,7 @@ let FUNCTION_WHITELIST;
  */
 function generateFunctionWhitelist() {
   /**
-   * Similar to Array.prototype.splice, except it's a static function
-   * and returns a new array instead of splicing in-place.
+   * Static, not-in-place variant of Array#splice.
    * @param {!Array} array
    * @param {number=} start
    * @param {number=} deleteCount
@@ -70,17 +72,56 @@ function generateFunctionWhitelist() {
     return copy;
   }
 
+  /**
+   * Static, not-in-place variant of Array#sort.
+   * @param {!Array} array
+   * @return {!Array}
+   */
+  function sort(array) {
+    if (!isArray(array)) {
+      throw new Error(`sort: ${array} is not an array.`);
+    }
+    const copy = Array.prototype.slice.call(array);
+    Array.prototype.sort.call(copy);
+    return copy;
+  }
+
+  /**
+   * Polyfills Object.values for IE.
+   * @param {!Object} object
+   * @return {!Array}
+   * @see https://github.com/es-shims/Object.values
+   */
+  function values(object) {
+    const v = [];
+    for (var key in object) {
+      if (hasOwn(object, key) && isEnumerable.call(object, key)) {
+        v.push(object[key]);
+      }
+    }
+    return v;
+  }
+
   // Prototype functions.
   const whitelist = dict({
     '[object Array]': [
       Array.prototype.concat,
+      Array.prototype.filter,
+      // TODO(choumx): Need polyfill for Array#find and Array#findIndex.
       Array.prototype.indexOf,
       Array.prototype.join,
       Array.prototype.lastIndexOf,
       Array.prototype.map,
       Array.prototype.reduce,
       Array.prototype.slice,
+      Array.prototype.some,
       Array.prototype.includes,
+    ],
+    '[object Number]': [
+      Number.prototype.toExponential,
+      Number.prototype.toFixed,
+      Number.prototype.toPrecision,
+      Number.prototype.toString,
     ],
     '[object String]': [
       String.prototype.charAt,
@@ -99,6 +140,8 @@ function generateFunctionWhitelist() {
 
   // Un-namespaced static functions.
   whitelist[BUILT_IN_FUNCTIONS] = [
+    encodeURI,
+    encodeURIComponent,
     Math.abs,
     Math.ceil,
     Math.floor,
@@ -107,8 +150,7 @@ function generateFunctionWhitelist() {
     Math.random,
     Math.round,
     Math.sign,
-    encodeURI,
-    encodeURIComponent,
+    Object.keys, // Object.values is polyfilled below.
   ];
 
   // Creates a map of function name to the function itself.
@@ -130,7 +172,10 @@ function generateFunctionWhitelist() {
   // Custom functions (non-js-built-ins) must be added manually as their names
   // will be minified at compile time.
   out[BUILT_IN_FUNCTIONS]['copyAndSplice'] = splice; // Legacy name.
-  out[BUILT_IN_FUNCTIONS]['splice'] = splice; // Legacy name.
+  out[BUILT_IN_FUNCTIONS]['sort'] = sort;
+  out[BUILT_IN_FUNCTIONS]['splice'] = splice;
+  out[BUILT_IN_FUNCTIONS]['values'] = (typeof Object.values === 'function')
+      ? Object.values : values;
 
   return out;
 }

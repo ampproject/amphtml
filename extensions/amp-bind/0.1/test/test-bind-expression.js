@@ -577,7 +577,6 @@ describe('BindExpression', () => {
     });
   });
 
-
   describe('arrow functions', () => {
     it('Array#map()', () => {
       const a = [1, 2, 3];
