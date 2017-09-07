@@ -39,6 +39,7 @@ WEBSERVER_TIMEOUT_SECS = 15
 CONFIGS = ['prod', 'canary']
 AMP_RUNTIME_FILE = 'dist/amp.js'
 BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status'
+BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5
 BUILD_PROCESSING_TIMEOUT_SECS = 60
 PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds'
 
@@ -113,23 +114,28 @@ end
 # Args:
 # - buildId: ID of the ongoing Percy build.
 # Returns:
-# - True if build is complete.
+# - The eventual status of the Percy build.
 def waitForBuildCompletion(buildId)
+  puts green('Waiting for Percy build ') + cyan("#{buildId}") +
+      green(' to be processed...')
   tries = 0
-  until ['finished', 'failed'].include?(getBuildStatus(buildId)['state'])
-    sleep(5)
+  until ['finished', 'failed'].include?(
+      (status = getBuildStatus(buildId))['state'])
+    sleep(BUILD_PROCESSING_POLLING_INTERVAL_SECS)
     tries += 1
-    break if tries > (BUILD_PROCESSING_TIMEOUT_SECS / 5)
+    break if tries > (
+        BUILD_PROCESSING_TIMEOUT_SECS / BUILD_PROCESSING_POLLING_INTERVAL_SECS)
   end
+  status
 end
 
 
 # Verifies that a Percy build succeeded and didn't contain any visual diffs.
 #
 # Args:
+# - status: The eventual status of the Percy build.
 # - buildId: ID of the Percy build.
-def verifyBuildStatus(buildId)
-  status = getBuildStatus(buildId)
+def verifyBuildStatus(status, buildId)
   if status['state'] == 'failed'
     raise "Percy build failed: #{status['failure_reason']}"
   end
@@ -208,7 +214,7 @@ def runVisualTests(visualTestsConfig)
   result = Percy::Capybara.finalize_build
   if (result['success'])
     puts green('Percy build ') + cyan("#{buildId}") +
-        green(' is now being processed...')
+        green(' is now being processed in the background.')
     buildId
   else
     puts red('Percy build ') + cyan("#{buildId}") + red(' failed!')
@@ -325,6 +331,12 @@ end
 
 # Launches a webserver, loads test pages, and generates Percy snapshots.
 def main()
+  if ARGV.include? '--verify'
+    buildId = File.open('PERCY_BUILD_ID', "r").read
+    status = waitForBuildCompletion(buildId)
+    verifyBuildStatus(status, buildId)
+    exit
+  end
   if ARGV.include? '--skip'
     createEmptyBuild()
     exit
@@ -344,8 +356,7 @@ def main()
     visualTestsConfigJson = loadVisualTestsConfigJson()
     visualTestsConfig = JSON.parse(visualTestsConfigJson)
     buildId = runVisualTests(visualTestsConfig)
-    waitForBuildCompletion(buildId)
-    verifyBuildStatus(buildId)
+    File.write('PERCY_BUILD_ID', buildId)
   ensure
     closeWebServer(pid)
   end
