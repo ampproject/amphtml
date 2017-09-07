@@ -20,12 +20,17 @@ import {
   layoutRectsRelativePos,
   layoutRectLtwh,
 } from '../../layout-rect';
-import {
-  PositionObserverFidelity,
-  LOW_FIDELITY_FRAME_COUNT,
-} from './position-observer-fidelity';
 import {Services} from '../../services';
 import {dev} from '../../log';
+
+/** @enum {number} */
+export const PositionObserverFidelity = {
+  HIGH: 1,
+  LOW: 0,
+};
+
+/** @const @private */
+const LOW_FIDELITY_FRAME_COUNT = 4;
 
 /**
  * TODO (@zhouyx): rename relativePos to relativePositions
@@ -107,8 +112,15 @@ export class PositionObserverEntry {
   /**
    * To update the position of entry element when it is ready.
    * Called when updateAllEntries, or when first observe an element.
+   * @param {boolean=} opt_force
    */
-  update() {
+  update(opt_force) {
+    if (!opt_force && this.turn != 0) {
+      this.turn--;
+      return;
+    }
+    this.turn = (this.fidelity == PositionObserverFidelity.LOW) ?
+            LOW_FIDELITY_FRAME_COUNT : 0;
     const viewportSize = this.viewport_.getSize();
     const viewportBox =
         layoutRectLtwh(0, 0, viewportSize.width, viewportSize.height);

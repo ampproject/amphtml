@@ -18,11 +18,10 @@ import {registerServiceBuilderForDoc} from '../../service';
 import {Services} from '../../services';
 import {dev} from '../../log';
 import {debounce} from '../../utils/rate-limit';
-import {PositionObserverEntry} from './position-observer-entry';
 import {
-  PositionObserverFidelity,
-  LOW_FIDELITY_FRAME_COUNT,
-} from './position-observer-fidelity';
+  PositionObserverEntry,
+  /* eslint no-unused-vars: 0 */ PositionObserverFidelity,
+} from './position-observer-entry';
 
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';
@@ -37,7 +36,7 @@ export class PositionObserver {
    */
   constructor(ampdoc) {
     /** @private {!../ampdoc-impl.AmpDoc} */
-    this.ampdoc = ampdoc;
+    this.ampdoc_ = ampdoc;
 
     /** @private {!Window} */
     this.win_ = ampdoc.win;
@@ -71,12 +70,12 @@ export class PositionObserver {
 
   /**
    * @param {!Element} element
-   * @param {PositionObserverFidelity} fidelity
+   * @param {!PositionObserverFidelity} fidelity
    * @param {function(?./position-observer-entry.PositionInViewportEntryDef)} handler
    */
   observe(element, fidelity, handler) {
     const entry =
-        new PositionObserverEntry(this.ampdoc, element, fidelity, handler);
+        new PositionObserverEntry(this.ampdoc_, element, fidelity, handler);
 
     this.entries_.push(entry);
 
@@ -153,19 +152,7 @@ export class PositionObserver {
   updateAllEntries(opt_force) {
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
-
-      if (opt_force) {
-        entry.update();
-        continue;
-      }
-
-      if (entry.turn == 0) {
-        entry.update();
-        entry.turn = (entry.fidelity == PositionObserverFidelity.LOW) ?
-            LOW_FIDELITY_FRAME_COUNT : 0;
-      } else {
-        entry.turn--;
-      }
+      entry.update(opt_force);
     }
   }
 
