@@ -42,6 +42,8 @@ BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status'
 BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5
 BUILD_PROCESSING_TIMEOUT_SECS = 60
 PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds'
+OUT = ENV['TRAVIS'] ? "/dev/null" : :out
+
 
 # Colorize logs.
 def red(text); "\e[31m#{text}\e[0m"; end
@@ -56,7 +58,7 @@ def green(text); "\e[32m#{text}\e[0m"; end
 def launchWebServer()
   webserverCmd =
       "gulp serve --host #{HOST} --port #{PORT} #{ENV['WEBSERVER_QUIET']}"
-  spawn(webserverCmd)
+  spawn(webserverCmd, :out=>OUT)
 end
 
 
@@ -235,7 +237,8 @@ def generateSnapshots(page, webpages)
   end
   for config in CONFIGS
     puts green('Switching to the ') + cyan("#{config}") + green(' AMP config')
-    system("gulp prepend-global --target #{AMP_RUNTIME_FILE} --#{config}")
+    configCmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --#{config}"
+    system(configCmd, :out=>OUT)
     puts green('Generating snapshots using the ') + cyan("#{config}") +
         green(' AMP config')
     webpages.each do |webpage|
@@ -250,7 +253,8 @@ def generateSnapshots(page, webpages)
       Percy::Capybara.snapshot(page, name: name)
     end
     puts green('Switching back to the default AMP config')
-    system("gulp prepend-global --target #{AMP_RUNTIME_FILE} --remove")
+    removeCmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --remove"
+    system(removeCmd, :out=>OUT)
   end
 end
 
