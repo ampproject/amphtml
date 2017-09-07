@@ -304,7 +304,7 @@ const command = {
     } else if (opt_mode === 'master') {
       cmd += ' --master';
     }
-    timedExec(cmd);
+    timedExecOrDie(cmd);
   },
   runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);
