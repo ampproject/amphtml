@@ -253,11 +253,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       opt_display = this.descriptionBox_.classList.contains('hide');
     }
     if (this.descriptionBox_.textContent) {
-      if (opt_display) {
-        this.descriptionBox_.classList.remove('hide');
-      } else {
-        this.descriptionBox_.classList.add('hide');
-      }
+      this.descriptionBox_.classList.toggle('hide', opt_display);
     } else {
       this.descriptionBox_.classList.add('hide');
     }
@@ -352,11 +348,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     if (opt_display == undefined) {
       opt_display = this.topBar_.classList.contains('hide');
     }
-    if (opt_display) {
-      this.topBar_.classList.remove('hide');
-    } else {
-      this.topBar_.classList.add('hide');
-    }
+    this.topBar_.classList.toggle('hide', opt_display);
   }
 
   /**
