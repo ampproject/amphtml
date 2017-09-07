@@ -63,10 +63,11 @@ const BUILTINS = dict({
     },
   },
   'email': {
-    'shareEndpoint': 'mailto:',
+    'shareEndpoint': 'mailto: ${recipient}',
     'defaultParams': {
       'subject': 'TITLE',
       'body': 'CANONICAL_URL',
+      'recipient': '',
     },
   },
   'tumblr': {
