@@ -145,6 +145,14 @@ export class WebPushService {
    * @returns {!Promise}
    */
   start(configJson) {
+    dev().fine(TAG, 'amp-web-push extension starting up.');
+
+    // Exit early if web push isn't supported
+    if (!this.environmentSupportsWebPush()) {
+      dev().fine(TAG, 'Web push is not supported.');
+      return Promise.reject('Web push is not supported');
+    }
+
     this.initializeConfig(configJson);
 
     // Add the IFrame
@@ -172,14 +180,6 @@ export class WebPushService {
    * @param {!AmpWebPushConfig} configJson
    */
   initializeConfig(configJson) {
-    dev().fine(TAG, 'amp-web-push extension starting up.');
-
-    // Exit early if web push isn't supported
-    if (!this.environmentSupportsWebPush()) {
-      dev().fine(TAG, 'Web push is not supported.');
-      return;
-    }
-
     // Read amp-web-push configuration
     this.config_ = configJson;
     if (!this.config_) {
@@ -187,6 +187,8 @@ export class WebPushService {
       return;
     }
   }
+
+  /**
 
   /**
    * Installs the helper IFrame onto the AMP page and returns a Promise for when

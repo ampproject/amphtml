@@ -67,6 +67,19 @@ describes.realWin('web-push-service environment support', {
     });
     expect(webPush.environmentSupportsWebPush()).to.eq(false);
   });
+
+  it('an unsupported environment should prevent initializing', () => {
+    // Cause push to not be supported on this environment
+    Object.defineProperty(env.win, 'PushManager', {
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value: undefined,
+    });
+    // Should not error out
+    return webPush.start().should.eventually.be
+        .rejectedWith(/Web push is not supported/);
+  });
 });
 
 
