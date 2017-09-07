@@ -1,6 +1,7 @@
 language: node_js
 sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
 dist: trusty
+group: deprecated-2017Q3  # See https://blog.travis-ci.com/2017-08-29-trusty-image-updates
 node_js:
   - "4"
 python:
