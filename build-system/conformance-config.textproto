@@ -71,6 +71,7 @@ requirement: {
   type: BANNED_NAME
   error_message: 'Object.values is not allowed'
   value: 'Object.values'
+  whitelist: 'extensions/amp-bind/0.1/bind-expression.js' # Polyfills IE case.
 }
 
 requirement: {

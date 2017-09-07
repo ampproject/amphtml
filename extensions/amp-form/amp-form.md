@@ -122,6 +122,8 @@ For details on valid inputs and fields, see [amp-form rules](https://github.com/
 * **submit**: Emitted whenever the form is submitted and before the submission is complete.
 * **submit-success**: Emitted whenever the form submission is done and the response is a success.
 * **submit-error**: Emitted whenever the form submission is done and the response is an error.
+* **valid**: Emitted whenever the form's validation state changes to "valid" (in accordance with its [reporting strategy](#reporting-strategies)).
+* **invalid**: Emitted whenever the form's validation state to "invalid" (in accordance with its [reporting strategy](#reporting-strategies)).
 
 These events can be used through the [`on` attribute](../../spec/amp-html-format.md#on).
 For example, the following listens to both `submit-success` and `submit-error` and shows different lightboxes depending on the event.
@@ -134,7 +136,7 @@ For example, the following listens to both `submit-success` and `submit-error` a
 See the [full example here](../../examples/forms.amp.html).
 
 #### Input Events
-AMP exposes `change` events on inputs. This allows you to use the [`on` attribute](../../spec/amp-html-format.md#on) to execute an action on any element when an input value changes.
+AMP exposes `change` and `input-debounced` events on child `<input>` elements. This allows you to use the [`on` attribute](../../spec/amp-html-format.md#on) to execute an action on any element when an input value changes.
 
 For example, a common use case is to submit a form on input change (selecting a radio button to answer a poll, choosing a language from a `select` input to translate a page, etc.).
 
