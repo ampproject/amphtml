@@ -24,7 +24,7 @@
 require 'capybara/poltergeist'
 require 'json'
 require 'net/http'
-require 'percy/capybara'
+require 'percy/capybara/anywhere'
 require 'phantomjs'
 
 

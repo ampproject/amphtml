@@ -329,8 +329,8 @@ function runAllCommands() {
     command.runVisualDiffTests(/* opt_mode */ 'master');
     command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
-    command.verifyVisualDiffTests();
     command.runUnitTests();
+    command.verifyVisualDiffTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
     command.buildValidator();
