@@ -187,10 +187,10 @@ Expressions are similar to JavaScript with some important differences.
 
 - Expressions may only access the containing document's [state](#state).
 - Expressions **do not** have access to globals like `window` or `document`.
-- Only [white-listed functions](#white-listed-functions) are allowed.
-- Custom functions, classes and some control flow statements (e.g. `for`) are disallowed.
+- Only [white-listed functions](#white-listed-functions) and operators may be used.
+- Custom functions, classes and loops are generally disallowed. Arrow functions are allowed as parameters, e.g. `Array.prototype.map`.
 - Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
-- A single expression is currently capped at 50 operands for performance reasons. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
+- A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
 
 The full expression grammar and implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).
 
@@ -214,38 +214,123 @@ null || 'default' // 'default'
     <th>Example</th>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods"><code>Array</code></a></td>
-    <td class="col-thirty"><code>concat</code><br><code>includes</code><br><code>indexOf</code><br><code>join</code><br><code>lastIndexOf</code><br><code>slice</code></td>
-    <td><pre>// Returns true.
-[1, 2, 3].includes(1)</pre></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods"><code>Array</code><sup>2</sup></a></td>
+    <td class="col-thirty">
+      <code>concat</code><br>
+      <code>filter</code><br>
+      <code>includes</code><br>
+      <code>indexOf</code><br>
+      <code>join</code><br>
+      <code>lastIndexOf</code><br>
+      <code>map</code><br>
+      <code>reduce</code><br>
+      <code>slice</code><br>
+      <code>some</code><br>
+    </td>
+    <td>
+      <pre>// Returns true.
+[1, 2, 3].includes(1)</pre>
+      <pre>// Returns [2, 3].
+[1, 2, 3].filter(x => x >= 2)</pre>
+      <pre>// Returns [1, 3, 5].
+[1, 2, 3].map((x, i) => x + i)</pre>
+      <pre>// Returns 6.
+[1, 2, 3].reduce((x, y) => x + y)</pre>
+    </td>
+  </tr>
+  <tr>
+   <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number#Methods"><code>Number</code></a></td>
+    <td>
+      <code>toExponential</code><br>
+      <code>toFixed</code><br>
+      <code>toPrecision</code><br>
+      <code>toString</code>
+    <td>
+      <pre>// Returns 3.
+(3.14).toFixed()</pre>
+      <pre>// Returns '3.14'.
+(3.14).toString()</pre>
+    </td>
   </tr>
   <tr>
    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String#Methods"><code>String</code></a></td>
-    <td><code>charAt</code><br><code>charCodeAt</code><br><code>concat</code><br><code>indexOf</code><br><code>lastIndexOf</code><br><code>slice</code><br><code>split</code><br><code>substr</code><br><code>substring</code><br><code>toLowerCase</code><br><code>toUpperCase</code></td>
-    <td><pre>// Returns 'abcdef'.
-'abc'.concat('def')</pre></td>
+    <td>
+      <code>charAt</code><br>
+      <code>charCodeAt</code><br>
+      <code>concat</code><br>
+      <code>indexOf</code><br>
+      <code>lastIndexOf</code><br>
+      <code>slice</code><br>
+      <code>split</code><br>
+      <code>substr</code><br>
+      <code>substring</code><br>
+      <code>toLowerCase</code><br>
+      <code>toUpperCase</code></td>
+    <td>
+      <pre>// Returns 'abcdef'.
+'abc'.concat('def')</pre>
+    </td>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math"><code>Math</code></a><sup>2</sup></td>
-    <td><code>abs</code><br><code>ceil</code><br><code>floor</code><br><code>max</code><br><code>min</code><br><code>random</code><br><code>round</code><br><code>sign</code></td>
-    <td><pre>// Returns 1.
-abs(-1)</td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math"><code>Math</code></a><sup>3</sup></td>
+    <td>
+      <code>abs</code><br>
+      <code>ceil</code><br>
+      <code>floor</code><br>
+      <code>max</code><br>
+      <code>min</code><br>
+      <code>random</code><br>
+      <code>round</code><br>
+      <code>sign</code></td>
+    <td>
+      <pre>// Returns 1.
+abs(-1)</pre>
+    </td>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects"><code>Global</code></a><sup>2</sup></td>
-    <td><code>encodeURI</code><br><code>encodeURIComponent</code></td>
-    <td><pre>// Returns 'hello%20world'
-encodeURIComponent('hello world')</pre></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object"><code>Object</code></a><sup>3</sup></td>
+    <td>
+      <code>keys</code><br>
+      <code>values</code>
+    <td>
+      <pre>// Returns ['a', 'b'].
+keys({a: 1, b: 2})</pre>
+      <pre>// Returns [1, 2].
+values({a: 1, b: 2}</pre>
+    </td>
   </tr>
   <tr>
-    <td><a href="#custom-built-in-functions">Custom built-ins</a><sup>2</sup></td>
-    <td><code>copyAndSplice</code></td>
-    <td><pre>// Returns [1, 47 ,3].
-copyAndSplice([1, 2, 3], 1, 1, 47)</pre></td>
+    <td>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects"><code>Global</code></a><sup>3</sup>
+    </td>
+    <td>
+      <code>encodeURI</code><br>
+      <code>encodeURIComponent</code>
+    </td>
+    <td>
+      <pre>// Returns 'Hello%20world'.
+encodeURIComponent('Hello world')</pre>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="#custom-built-in-functions">Custom built-ins</a><sup>3</sup>
+    </td>
+    <td>
+      <code>splice</code><br>
+      <code>sort</code>
+    </td>
+    <td>
+      <pre>// Returns a new array [1, 47 ,3]. Does not splice in-place.
+splice([1, 2, 3], 1, 1, 47)</pre>
+      <pre>// Returns a new array: [1, 2, 3]. Does not sort in-place.
+sort([2, 1, 3])</pre>
+    </td>
   </tr>
 </table>
 
-<sup>2</sup>Functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
+<sup>2</sup>Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` instead of `(x) => x + 1`.<br>
+<sup>3</sup>Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
 
 ### Bindings
 
@@ -519,36 +604,6 @@ Defines a `credentials` option as specified by the [Fetch API](https://fetch.spe
 * Default: `omit`
 
 To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
-
-
-### Non-standard built-in functions
-
-`amp-bind` supports the following non-standard functions:
-
-<table>
-  <tr>
-    <th>Name</th>
-    <th>Details</th>
-  </tr>
-  <tr>
-    <td><code>copyAndSplice</code></td>
-    <td>Similar to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice">Array#splice()</a> except a copy of the spliced array is returned.
-    <br><br>Arguments:
-    <ul>
-      <li><code>array</code>: An array.</li>
-      <li><code>start</code>: Index at which to start changing the array.</li>
-      <li><code>deleteCount</code>: The number of items to delete, starting at index <code>start</code>.</li>
-      <li><code>items...</code>: Items to add to the array, beginning at index <code>start</code></li>
-    </ul>
-    <br><br>Examples:
-    <pre>// Deleting an element. Returns [1, 3]
-copyAndSplice([1, 2, 3], 1, 1)
-
-// Replacing an item. Returns ['Pizza', 'Cake', 'Ice Cream']
-copyAndSplice(['Pizza', 'Cake', 'Soda'], 2, 1, 'Ice Cream')</pre>
-   </td>
-  </tr>
-</table>
 
 ### Deep-merge with `AMP.setState()`
 
