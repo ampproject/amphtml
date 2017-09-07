@@ -304,7 +304,10 @@ const command = {
     } else if (opt_mode === 'master') {
       cmd += ' --master';
     }
-    timedExec(cmd);
+    timedExecOrDie(cmd);
+  },
+  verifyVisualDiffTests: function() {
+    timedExecOrDie('ruby build-system/tasks/visual-diff.rb --verify');
   },
   runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);
@@ -326,6 +329,7 @@ function runAllCommands() {
     command.runVisualDiffTests(/* opt_mode */ 'master');
     command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
+    command.verifyVisualDiffTests();
     command.runUnitTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
@@ -436,6 +440,7 @@ function main(argv) {
         command.runPresubmitTests();
         command.runIntegrationTests(/* compiled */ false);
       }
+      command.verifyVisualDiffTests();
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
       command.runVisualDiffTests(/* opt_mode */ 'skip');
