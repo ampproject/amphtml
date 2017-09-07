@@ -25,7 +25,7 @@ var gulp = require('gulp-help')(require('gulp'));
 var request = BBPromise.promisify(require('request'));
 var util = require('gulp-util');
 
-// Set token TODO
+// Set token 
 var GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 var exec = BBPromise.promisify(child_process.exec);
 var gitExec = BBPromise.promisify(git.exec);
@@ -34,7 +34,7 @@ var isDryrun = argv.dryrun;
 var verbose = (argv.verbose || argv.v);
 
 const issuesopt = {
-  // Url to repository TODO 
+  // Url to repository 
   url: 'https://api.github.com/repos/ampproject/amphtml/issues',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
@@ -43,7 +43,7 @@ const issuesopt = {
 };
 
 const optionsMilestone = {
-  // Url to repository TODO
+  // Url to repository 
   url: 'https://api.github.com/repos/ampproject/amphtml/milestones',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
@@ -70,15 +70,13 @@ function processissues() {
         'need `public_repo` scope.'));
     return;
   }
-
   return getGitMetadata();
 }
 
 function getGitMetadata() {
-return getIssues()
-.then(function() {
-	util.log(util.colors.blue('automation applied'));
-})
+  return getIssues().then(function() {
+    util.log(util.colors.blue('automation applied'));
+  })
 }
 /**
  * Function goes through all the gitHub issues,
@@ -103,7 +101,7 @@ function getIssues(){
       var milestoneTitle; 
       var milestoneState;
       var hasPriority = false;
-      // By default we will assign 'Pending Triage' milestone, number 20 TODO
+      // By default we will assign 'Pending Triage' milestone, number 20 
       var issueNewMilestone = 20; 
 
       // Get the title and state of the milestone 
@@ -115,12 +113,14 @@ function getIssues(){
       labels.forEach(function(label) {
         if (label) {
           // Check if the issues has type
-          if (label.name.startsWith('Type') || label.name.startsWith('Related'))
+          if (label.name.startsWith('Type') || label.name.startsWith('Related')) {
             issueType = label.name;
+          }
           // Check if the issues has Priority
           if (label.name.startsWith('P0') || label.name.startsWith('P1') || 
-            label.name.startsWith('P2') || label.name.startsWith('P3'))
-            hasPriority = true;
+            label.name.startsWith('P2') || label.name.startsWith('P3')) { 
+            hasPriority = true; 
+          }
         }
       });
       promise = promise.then(function() {
@@ -129,7 +129,7 @@ function getIssues(){
         // Milestone task: move issue from closed milestone
         if (milestone) {
           if (milestoneTitle.startsWith('Sprint') && milestoneState == 'closed') {
-            // 4 is the number for Milestone 'Backlog Bugs' TODO
+            // 4 is the number for Milestone 'Backlog Bugs' 
             issueNewMilestone = 4; 
             updates.push(applyMilestone(issue, issueNewMilestone));
           }
@@ -138,23 +138,23 @@ function getIssues(){
         if (issueType != null) {
           if (milestoneTitle == 'Pending Triage' || milestone == null) {
             if (issueType == 'Type: Feature Request') {
-              // 23 is the number for Milestone 'New FRs' TODO
+              // 23 is the number for Milestone 'New FRs' 
               issueNewMilestone = 23;
               updates.push(applyMilestone(issue, issueNewMilestone)); 
             } else {
               if (issueType == 'Related to: Documentation' || 
                 issueType == 'Type: Design Review' || issueType == 'Type: Weekly Status') {
-                // 12 is the number for Milestone 'Docs Updates' TODO 
+                // 12 is the number for Milestone 'Docs Updates' 
                 issueNewMilestone = 12;
                 updates.push(applyMilestone(issue, issueNewMilestone));
               } else {
                 if (issueType == 'Type: Bug' || issueType == 'Related to: Flaky Tests') {
-                  // 4 is the number for Milestone 'Backlog Bugs' TODO
+                  // 4 is the number for Milestone 'Backlog Bugs' 
                   issueNewMilestone = 4;
                   updates.push(applyMilestone(issue, issueNewMilestone));
                 } else {
                   if (milestone == null) {
-                    // 20 is the number for Milestone 'Pending Triage' TODO
+                    // 20 is the number for Milestone 'Pending Triage' 
                     updates.push(applyMilestone(issue, issueNewMilestone));
                   }
                 }
@@ -162,8 +162,8 @@ function getIssues(){
             }
           }
         } else {
-          if (milestone == null){
-            // 20 is the number for Milestone 'Pending Triage' TODO
+          if (milestone == null) {
+            // 20 is the number for Milestone 'Pending Triage' 
             updates.push(applyMilestone(issue, issueNewMilestone));     
           } else {
             if (milestoneTitle == 'Prioritized FRs' || milestoneTitle == 'New FRs') {
@@ -178,8 +178,9 @@ function getIssues(){
         // Apply default priority if no priority
         if (hasPriority == false && milestoneTitle != 'New FRs' && 
           milestoneTitle != '3P Implementation' && milestoneTitle != 'Pending Triage' 
-          && milestone != null) 
-          updates.push(applyLabel(issue, 'P2: Soon'));  
+          && milestone != null) { 
+          updates.push(applyLabel(issue, 'P2: Soon')); 
+        }
         return Promise.all(updates);
       });
     });
@@ -243,7 +244,7 @@ function applyLabel(issue, label) {
  */
 function githubRequest(path, opt_method, opt_data, typeRequest) {
   var options = {
-    // Url to repository TODO
+    // Url to repository 
     url: 'https://api.github.com/repos/ampproject/amphtml' + path,
     body: {},
     headers: {
