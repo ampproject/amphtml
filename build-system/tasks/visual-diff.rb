@@ -144,12 +144,15 @@ def verifyBuildStatus(buildId)
     else
       # For master and PR branches, just print a warning, since the diff may be
       # intentional.
-      puts red('Percy build with ID ') + cyan("#{buildId}") +
+      puts red('Percy build ') + cyan("#{buildId}") +
           red(' contains visual diffs.')
       puts red('If this is an intentional visual change,') +
           red(' you must approve the snapshots at ') +
           cyan("#{PERCY_BUILD_URL}/#{buildId}")
     end
+  else
+    puts green('Percy build ') + cyan("#{buildId}") +
+        green(' contained no visual diffs.')
   end
 end
 
@@ -196,7 +199,7 @@ def runVisualTests(visualTestsConfig)
   page = Capybara::Session.new(:poltergeist)
   build = Percy::Capybara.initialize_build
   buildId = build['data']['id']
-  puts green('Starting Percy build with id ') + cyan("#{buildId}")
+  puts green('Starting Percy build ') + cyan("#{buildId}")
   page.driver.options[:phantomjs] = Phantomjs.path
   page.driver.options[:js_errors] = true
   page.driver.options[:phantomjs_options] =
@@ -204,11 +207,11 @@ def runVisualTests(visualTestsConfig)
   generateSnapshots(page, visualTestsConfig['webpages'])
   result = Percy::Capybara.finalize_build
   if (result['success'])
-    puts green('Percy build with ID ') + cyan("#{buildId}") +
+    puts green('Percy build ') + cyan("#{buildId}") +
         green(' is now being processed...')
     buildId
   else
-    puts red('Percy build with ID ') + cyan("#{buildId}") + red(' failed!')
+    puts red('Percy build ') + cyan("#{buildId}") + red(' failed!')
     raise 'Build failure'
   end
 end
