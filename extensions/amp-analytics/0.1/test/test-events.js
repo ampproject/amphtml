@@ -536,7 +536,7 @@ describes.realWin('Events', {amp: 1}, env => {
   });
 
 
-  describe.only('TimerEventTracker', () => {
+  describe('TimerEventTracker', () => {
     let clock;
     let tracker;
 
