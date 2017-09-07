@@ -17,7 +17,6 @@
 import {registerServiceBuilderForDoc} from '../../service';
 import {Services} from '../../services';
 import {dev} from '../../log';
-import {layoutRectLtwh} from '../../layout-rect';
 import {debounce} from '../../utils/rate-limit';
 import {PositionObserverEntry} from './position-observer-entry';
 import {
@@ -37,6 +36,9 @@ export class PositionObserver {
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    /** @private {!../ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
     /** @private {!Window} */
     this.win_ = ampdoc.win;
 
@@ -73,16 +75,16 @@ export class PositionObserver {
    * @param {function(?./position-observer-entry.PositionInViewportEntryDef)} handler
    */
   observe(element, fidelity, handler) {
-    const entry = new PositionObserverEntry(element, fidelity, handler);
+    const entry =
+        new PositionObserverEntry(this.ampdoc, element, fidelity, handler);
 
     this.entries_.push(entry);
 
     if (!this.callbackStarted_) {
       this.startCallback_();
-      this.callbackStarted_ = true;
     }
 
-    this.updateSingleEntry_(entry);
+    entry.update();
   }
 
   /**
@@ -94,7 +96,6 @@ export class PositionObserver {
         this.entries_.splice(i, 1);
         if (this.entries_.length == 0) {
           this.stopCallback_();
-          this.callbackStarted_ = false;
         }
         return;
       }
@@ -107,6 +108,7 @@ export class PositionObserver {
    * @private
    */
   startCallback_() {
+    this.callbackStarted_ = true;
     // listen to viewport scroll event to help pass determine if need to
     this.unlisteners_.push(this.viewport_.onScroll(() => {
       this.onScrollHandler_();
@@ -121,6 +123,7 @@ export class PositionObserver {
    * @private
    */
   stopCallback_() {
+    this.callbackStarted_ = false;
     while (this.unlisteners_.length) {
       const unlisten = this.unlisteners_.pop();
       unlisten();
@@ -152,38 +155,18 @@ export class PositionObserver {
       const entry = this.entries_[i];
 
       if (opt_force) {
-        this.updateSingleEntry_(entry);
+        entry.update();
         continue;
       }
 
       if (entry.turn == 0) {
-        this.updateSingleEntry_(entry);
+        entry.update();
         entry.turn = (entry.fidelity == PositionObserverFidelity.LOW) ?
             LOW_FIDELITY_FRAME_COUNT : 0;
       } else {
         entry.turn--;
       }
     }
-  }
-
-  /**
-   * To update the position of single element when it is ready.
-   * Called when updateAllEntries, or when first observe an element.
-   * @param {!./position-observer-entry.PositionObserverEntry} entry
-   * @private
-   */
-  updateSingleEntry_(entry) {
-    const viewportSize = this.viewport_.getSize();
-    const viewportBox =
-        layoutRectLtwh(0, 0, viewportSize.width, viewportSize.height);
-    this.viewport_.getClientRectAsync(entry.element).then(elementBox => {
-      entry.trigger(
-      /** @type {./position-observer-entry.PositionInViewportEntryDef}*/ ({
-        positionRect: elementBox,
-        viewportRect: viewportBox,
-        relativePos: '',
-      }));
-    });
   }
 
   /**

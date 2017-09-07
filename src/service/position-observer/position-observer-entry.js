@@ -18,11 +18,13 @@ import {
   layoutRectEquals,
   layoutRectsOverlap,
   layoutRectsRelativePos,
+  layoutRectLtwh,
 } from '../../layout-rect';
 import {
   PositionObserverFidelity,
   LOW_FIDELITY_FRAME_COUNT,
 } from './position-observer-fidelity';
+import {Services} from '../../services';
 import {dev} from '../../log';
 
 /**
@@ -40,12 +42,12 @@ export let PositionInViewportEntryDef;
 
 export class PositionObserverEntry {
   /**
-   *
+   * @param {!../ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
    * @param {!PositionObserverFidelity} fidelity
    * @param {!function(?PositionInViewportEntryDef)} handler
    */
-  constructor(element, fidelity, handler) {
+  constructor(ampdoc, element, fidelity, handler) {
     /** @const {!Element} */
     this.element = element;
 
@@ -61,14 +63,17 @@ export class PositionObserverEntry {
 
     /** @type {?PositionInViewportEntryDef} */
     this.prevPosition_ = null;
+
+    /** @private {!../viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(ampdoc);
   }
 
   /**
-   * Call to update entry position
+   * Call to trigger an entry handler
    * @param {!PositionInViewportEntryDef} position
+   * @private
    */
-  trigger(position) {
-
+  trigger_(position) {
     const prevPos = this.prevPosition_ ;
     if (prevPos
         && layoutRectEquals(prevPos.positionRect, position.positionRect)
@@ -77,7 +82,8 @@ export class PositionObserverEntry {
       return;
     }
 
-    dev().assert(position.positionRect);
+    dev().assert(position.positionRect,
+        'PositionObserver should always trigger entry with clientRect');
     const positionRect =
         /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
     // Add the relative position of the element to its viewport
@@ -96,6 +102,24 @@ export class PositionObserverEntry {
       position.positionRect = null;
       this.handler_(position);
     }
+  }
+
+  /**
+   * To update the position of entry element when it is ready.
+   * Called when updateAllEntries, or when first observe an element.
+   */
+  update() {
+    const viewportSize = this.viewport_.getSize();
+    const viewportBox =
+        layoutRectLtwh(0, 0, viewportSize.width, viewportSize.height);
+    this.viewport_.getClientRectAsync(this.element).then(elementBox => {
+      this.trigger_(
+      /** @type {./position-observer-entry.PositionInViewportEntryDef}*/ ({
+        positionRect: elementBox,
+        viewportRect: viewportBox,
+        relativePos: '',
+      }));
+    });
   }
 
   /**
