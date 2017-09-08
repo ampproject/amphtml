@@ -155,13 +155,13 @@ export class AmpList extends AMP.BaseElement {
           items = [items];
         }
       }
+      user().assert(isArray(items),
+          'Response must contain an array at "%s". %s',
+          itemsExpr, this.element);
       const maxLen = parseInt(this.element.getAttribute('max-items'), 10);
       if (maxLen < items.length) {
         items = items.slice(0, maxLen);
       }
-      user().assert(isArray(items),
-          'Response must contain an array at "%s". %s',
-          itemsExpr, this.element);
       return this.renderItems_(items);
     }, error => {
       throw user().createError('Error fetching amp-list', error);
