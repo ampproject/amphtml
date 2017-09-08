@@ -42,6 +42,7 @@ import {installPixel} from '../../builtins/amp-pixel';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
 import {calculateExtensionScriptUrl} from './extension-location';
 import {map} from '../utils/object';
+import {toWin} from '../types';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
@@ -448,7 +449,7 @@ export class Extensions {
   installExtensionsInChildWindow(childWin, extensionIds,
       opt_preinstallCallback) {
     const topWin = this.win;
-    const parentWin = childWin.frameElement.ownerDocument.defaultView;
+    const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);
 
     // Install necessary polyfills.

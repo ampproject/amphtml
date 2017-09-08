@@ -31,7 +31,7 @@ import {
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {Services} from '../../../src/services';
-import {toArray} from '../../../src/types';
+import {toArray, toWin} from '../../../src/types';
 import {
   removeElement,
   childElementByAttr,
@@ -106,7 +106,7 @@ export class AmpForm {
     this.id_ = id;
 
     /** @const @private {!Window} */
-    this.win_ = element.ownerDocument.defaultView;
+    this.win_ = toWin(element.ownerDocument.defaultView);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);

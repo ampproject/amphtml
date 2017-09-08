@@ -117,7 +117,8 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
   const propertyName = getVendorJsPropertyName(element.style, property,
       opt_bypassCache);
   if (propertyName) {
-    element.style[propertyName] = opt_units ? value + opt_units : value;
+    element.style[propertyName] =
+        /** @type {string} */ (opt_units ? value + opt_units : value);
   }
 }
 

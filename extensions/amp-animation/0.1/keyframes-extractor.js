@@ -15,6 +15,7 @@
  */
 
 import {endsWith} from '../../../src/string';
+import {toWin} from '../../../src/types';
 
 
 /**
@@ -28,7 +29,7 @@ export function extractKeyframes(rootNode, name) {
   if (!styleSheets) {
     return null;
   }
-  const win = (rootNode.ownerDocument || rootNode).defaultView;
+  const win = toWin((rootNode.ownerDocument || rootNode).defaultView);
   // Go from the last to first since the last rule wins in CSS.
   for (let i = styleSheets.length - 1; i >= 0; i--) {
     const keyframes = scanStyle(

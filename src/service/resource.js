@@ -23,6 +23,7 @@ import {dev} from '../log';
 import {startsWith} from '../string';
 import {toggle, computedStyle} from '../style';
 import {AmpEvents} from '../amp-events';
+import {toWin} from '../types';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -134,7 +135,7 @@ export class Resource {
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
     /** @const {!Window} */
-    this.hostWin = element.ownerDocument.defaultView;
+    this.hostWin = toWin(element.ownerDocument.defaultView);
 
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = resources;

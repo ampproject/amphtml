@@ -229,8 +229,8 @@ function maybeTransform(cssRoot, cssText) {
  *     be blocked on key services being loaded.
  */
 export function makeBodyVisible(doc, opt_waitForServices) {
-  /** @const {!Window} */
-  const win = doc.defaultView;
+  dev().assert(doc.defaultView, 'Passed in document must have a defaultView');
+  const win = /** @type {!Window} */ (doc.defaultView);
   if (win[bodyVisibleSentinel]) {
     return;
   }

@@ -25,6 +25,7 @@ import {
 } from './service';
 import {user} from './log';
 import * as dom from './dom';
+import {toWin} from './types';
 
 /**
  * Returns a promise for a service for the given id and window. Also expects
@@ -156,8 +157,8 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
   }
   // Return embed-scope element service promise if scheduled.
   if (nodeOrDoc.nodeType) {
-    const win = /** @type {!Document} */ (
-        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
+    const win = toWin(/** @type {!Document} */ (
+        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
     const topWin = getTopWindow(win);
     // In embeds, doc-scope services are window-scope. But make sure to
     // only do this for embeds (not the top window), otherwise we'd grab

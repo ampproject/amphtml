@@ -25,7 +25,7 @@ import {
   ShadowDomVersion,
 } from './web-components';
 import {setStyle} from './style';
-import {toArray} from './types';
+import {toArray, toWin} from './types';
 
 /**
  * Used for non-composed root-node search. See `getRootNode`.
@@ -79,7 +79,7 @@ export function createShadowRoot(hostElement) {
 function createShadowRootPolyfill(hostElement) {
   const doc = hostElement.ownerDocument;
   /** @const {!Window} */
-  const win = doc.defaultView;
+  const win = toWin(doc.defaultView);
 
   // Host CSS polyfill.
   hostElement.classList.add('i-amphtml-shadow-host-polyfill');

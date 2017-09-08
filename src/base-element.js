@@ -19,7 +19,7 @@ import {Layout} from './layout';
 import {getData} from './event-helper';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
-import {isArray} from './types';
+import {isArray, toWin} from './types';
 import {Services} from './services';
 import {user} from './log';
 
@@ -140,7 +140,7 @@ export class BaseElement {
     this.inViewport_ = false;
 
     /** @public @const {!Window} */
-    this.win = element.ownerDocument.defaultView;
+    this.win = toWin(element.ownerDocument.defaultView);
 
     /**
      * Maps action name to struct containing the action handler and minimum
