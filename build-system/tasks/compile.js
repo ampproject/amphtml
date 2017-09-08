@@ -17,7 +17,7 @@
 
 var fs = require('fs-extra');
 var argv = require('minimist')(process.argv.slice(2));
-var closureCompiler = require('gulp-closure-compiler');
+var closureCompiler = require('google-closure-compiler').gulp();
 var gulp = require('gulp');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
