@@ -376,7 +376,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         if (parentDirection == 'rtl') {
           setStyle(this.element, 'marginRight', layoutBox.left, 'px');
         } else {
-          setStyle(this.element, 'marginLeft', -1 * layoutBox.left, 'px');
+          setStyle(this.element, 'marginLeft', -layoutBox.left, 'px');
         }
       });
     }
