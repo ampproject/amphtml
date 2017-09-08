@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-import {VerificationStatus} from './signature-verifier';
+import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {signingServerURLs} from '../../../ads/_a4a-config';
+import {
+  forceExperimentBranch,
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {Services} from '../../../src/services';
@@ -58,6 +63,15 @@ const TAG = 'amp-a4a';
 /** @const {string} @visibleForTesting */
 export const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 
+/** @const {string} */
+export const VERIFIER_EXP_NAME = 'a4a-new-signature-verifier';
+
+/** @const {string} @visibleForTesting */
+export const LEGACY_VERIFIER_EID = '21060935';
+
+/** @const {string} @visibleForTesting */
+export const NEW_VERIFIER_EID = '21060936';
+
 /**
  * Returns the signature verifier for the given window. Lazily creates it if it
  * doesn't already exist.
@@ -66,13 +80,34 @@ export const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
  * multiple Fast Fetch ad slots on a page (even ones from different ad networks)
  * to share the same cached public keys.
  *
+ * Experiment diversion between the new verifier and the legacy verifier occurs
+ * here.
+ *
  * @param {!Window} win
  * @return {!./signature-verifier.ISignatureVerifier}
  */
 export function signatureVerifierFor(win) {
   const propertyName = 'AMP_FAST_FETCH_SIGNATURE_VERIFIER_';
-  return win[propertyName] ||
-      (win[propertyName] = new LegacySignatureVerifier(win));
+  if (!win[propertyName]) {
+    if (/a4a-new-verifier/.test(win.location.hash)) {
+      forceExperimentBranch(win, VERIFIER_EXP_NAME, NEW_VERIFIER_EID);
+    } else if (/a4a-legacy-verifier/.test(win.location.hash)) {
+      forceExperimentBranch(win, VERIFIER_EXP_NAME, LEGACY_VERIFIER_EID);
+    } else {
+      randomlySelectUnsetExperiments(win, {
+        [VERIFIER_EXP_NAME]: {
+          isTrafficEligible: () => true,
+          branches: [LEGACY_VERIFIER_EID, NEW_VERIFIER_EID],
+        },
+      });
+    }
+    if (getExperimentBranch(win, VERIFIER_EXP_NAME) == NEW_VERIFIER_EID) {
+      win[propertyName] = new SignatureVerifier(win, signingServerURLs);
+    } else {
+      win[propertyName] = new LegacySignatureVerifier(win);
+    }
+  }
+  return win[propertyName];
 }
 
 /**
