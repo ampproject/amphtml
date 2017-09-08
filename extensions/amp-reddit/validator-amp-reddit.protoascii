@@ -29,7 +29,6 @@ tags: {  # <amp-reddit>
   html_format: AMP
   tag_name: "AMP-REDDIT"
   requires_extension: "amp-reddit"
-  disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
     name: "data-embedlive"
     value_regex_casei: "(false|true)"

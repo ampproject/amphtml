@@ -53,7 +53,6 @@ tags: {  # <amp-state>
   tag_name: "AMP-STATE"
   spec_name: "amp-state"
   requires_extension: "amp-bind"
-  disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
     name: "credentials"
     trigger: {

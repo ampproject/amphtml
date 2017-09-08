@@ -29,7 +29,6 @@ tags: {  # amp-o2-player
 tags: {  # <amp-o2-player>
   html_format: AMP
   tag_name: "AMP-O2-PLAYER"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-o2-player"
   attrs: {
     name: "data-bcid"

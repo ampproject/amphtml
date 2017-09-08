@@ -48,7 +48,6 @@ tags: {  # amp-analytics (json)
 }
 tags: {  # <amp-analytics>
   tag_name: "AMP-ANALYTICS"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-analytics"
   attrs: { name: "type" }
   attrs: {

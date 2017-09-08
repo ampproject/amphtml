@@ -29,7 +29,6 @@ tags: {  # amp-vine
 tags: {  # <amp-vine>
   html_format: AMP
   tag_name: "AMP-VINE"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-vine"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {

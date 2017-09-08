@@ -30,7 +30,6 @@ tags: {  # <amp-sidebar>
   html_format: AMP
   tag_name: "AMP-SIDEBAR"
   mandatory_parent: "BODY"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-sidebar"
   attrs: {
     name: "side"
