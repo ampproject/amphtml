@@ -27,6 +27,9 @@ import {
 } from '../amp-a4a';
 import {
   AMP_SIGNATURE_HEADER,
+  LEGACY_VERIFIER_EID,
+  NEW_VERIFIER_EID,
+  VERIFIER_EXP_NAME,
   signatureVerifierFor,
 } from '../legacy-signature-verifier';
 import {VerificationStatus} from '../signature-verifier';
@@ -36,6 +39,7 @@ import {Signals} from '../../../../src/utils/signals';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {cancellation} from '../../../../src/error';
+import {forceExperimentBranch} from '../../../../src/experiments';
 import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
@@ -62,7 +66,6 @@ describe('amp-a4a', () => {
   let viewerWhenVisibleMock;
   let adResponse;
   let onCreativeRenderSpy;
-  let keysetBody;
   let getResourceStub;
 
   beforeEach(() => {
@@ -80,11 +83,13 @@ describe('amp-a4a', () => {
       getUpgradeDelayMs: () => 12345,
     });
     adResponse = {
-      headers: {'AMP-Access-Control-Allow-Source-Origin': 'about:srcdoc'},
+      headers: {
+        'AMP-Access-Control-Allow-Source-Origin': 'about:srcdoc',
+        'AMP-Fast-Fetch-Signature': validCSSAmp.signatureHeader,
+      },
       body: validCSSAmp.reserialized,
     };
     adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
-    keysetBody = `{"keys":[${validCSSAmp.publicKey}]}`;
   });
 
   afterEach(() => {
@@ -100,8 +105,11 @@ describe('amp-a4a', () => {
     expect(fetchMock).to.be.null;
     fetchMock = new FetchMock(fixture.win);
     fetchMock.getOnce(
-        'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-        () => keysetBody, {name: 'keyset'});
+        'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+          body: validCSSAmp.publicKeyset,
+          status: 200,
+          headers: {'Content-Type': 'application/jwk-set+json'},
+        });
     installDocService(fixture.win, /* isSingleDoc */ true);
     const doc = fixture.doc;
     // TODO(a4a-cam@): This is necessary in the short term, until A4A is
@@ -242,12 +250,12 @@ describe('amp-a4a', () => {
           {name: 'ad'});
       a4aElement = createA4aElement(fixture.doc);
       a4a = new MockA4AImpl(a4aElement);
-      a4a.buildCallback();
       return fixture;
     }));
 
     it('for SafeFrame rendering case', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
@@ -270,6 +278,7 @@ describe('amp-a4a', () => {
       sandbox.stub(platform, 'isIos').returns(true);
       a4a = new MockA4AImpl(a4aElement);
       // Make sure there's no signature, so that we go down the 3p iframe path.
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
       // Ensure no rendering type header (ios on safari will default to
       // safeframe).
@@ -290,6 +299,7 @@ describe('amp-a4a', () => {
 
     it('for cached content iframe rendering case', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
       a4a.buildCallback();
       a4a.onLayoutMeasure();
@@ -301,8 +311,26 @@ describe('amp-a4a', () => {
       });
     });
 
-    it('for A4A friendly iframe rendering case', () => {
+    it('for A4A friendly iframe rendering case with legacy verifier', () => {
       expect(a4a.friendlyIframeEmbed_).to.not.exist;
+      forceExperimentBranch(
+          fixture.win, VERIFIER_EXP_NAME, LEGACY_VERIFIER_EID);
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        const child = a4aElement.querySelector('iframe[srcdoc]');
+        expect(child).to.be.ok;
+        expect(child).to.be.visible;
+        const a4aBody = child.contentDocument.body;
+        expect(a4aBody).to.be.ok;
+        expect(a4aBody).to.be.visible;
+        expect(a4a.friendlyIframeEmbed_).to.exist;
+      });
+    });
+
+    it('for A4A friendly iframe rendering case with new verifier', () => {
+      expect(a4a.friendlyIframeEmbed_).to.not.exist;
+      forceExperimentBranch(fixture.win, VERIFIER_EXP_NAME, NEW_VERIFIER_EID);
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -344,6 +372,7 @@ describe('amp-a4a', () => {
 
     it('should reset state to null on non-FIE unlayoutCallback', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
       a4a.buildCallback();
       a4a.onLayoutMeasure();
@@ -452,6 +481,7 @@ describe('amp-a4a', () => {
     let lifecycleEventStub;
     beforeEach(() => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
@@ -532,6 +562,7 @@ describe('amp-a4a', () => {
             it(`should not attach a NameFrame when header is ${headerVal}`,
                 () => {
                   // Make sure there's no signature, so that we go down the 3p iframe path.
+                  delete adResponse.headers['AMP-Fast-Fetch-Signature'];
                   delete adResponse.headers[AMP_SIGNATURE_HEADER];
                   // If rendering type is anything but nameframe, we SHOULD NOT
                   // attach a NameFrame.
@@ -699,6 +730,7 @@ describe('amp-a4a', () => {
 
   it('should set height/width on iframe matching header value', () => {
     // Make sure there's no signature, so that we go down the 3p iframe path.
+    delete adResponse.headers['AMP-Fast-Fetch-Signature'];
     delete adResponse.headers[AMP_SIGNATURE_HEADER];
     adResponse.headers['X-CreativeSize'] = '320x50';
     return createIframePromise().then(fixture => {
@@ -731,6 +763,7 @@ describe('amp-a4a', () => {
   describe('#onLayoutMeasure', () => {
     it('resumeCallback calls onLayoutMeasure', () => {
       // Force non-FIE
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -790,6 +823,7 @@ describe('amp-a4a', () => {
     });
     it('resumeCallback w/ measure required no onLayoutMeasure', () => {
       // Force non-FIE
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -940,6 +974,7 @@ describe('amp-a4a', () => {
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
         if (!isValidCreative) {
+          delete adResponse.headers['AMP-Fast-Fetch-Signature'];
           delete adResponse.headers[AMP_SIGNATURE_HEADER];
         }
         if (opt_failAmpRender) {
@@ -1225,6 +1260,7 @@ describe('amp-a4a', () => {
       it('should process safeframe version header properly', () => {
         adResponse.headers[SAFEFRAME_VERSION_HEADER] = '1-2-3';
         adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
+        delete adResponse.headers['AMP-Fast-Fetch-Signature'];
         delete adResponse.headers[AMP_SIGNATURE_HEADER];
         return createIframePromise().then(fixture => {
           setupForAdTesting(fixture);
@@ -1308,6 +1344,7 @@ describe('amp-a4a', () => {
     it('should ignore invalid safeframe version header', () => {
       adResponse.headers[SAFEFRAME_VERSION_HEADER] = 'some-bad-item';
       adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -1687,6 +1724,8 @@ describe('amp-a4a', () => {
       let a4a;
       beforeEach(() => {
         return createIframePromise().then(fixture => {
+          forceExperimentBranch(
+              fixture.win, VERIFIER_EXP_NAME, LEGACY_VERIFIER_EID);
           setupForAdTesting(fixture);
           const a4aElement = createA4aElement(fixture.doc);
           a4a = new MockA4AImpl(a4aElement);
