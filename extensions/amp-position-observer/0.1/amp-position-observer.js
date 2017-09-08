@@ -37,7 +37,7 @@ import {
 } from '../../../src/service/position-observer/position-observer-impl';
 import {
   PositionObserverFidelity,
-} from '../../../src/service/position-observer/position-observer-fidelity';
+} from '../../../src/service/position-observer/position-observer-entry';
 
 const TAG = 'amp-position-observer';
 

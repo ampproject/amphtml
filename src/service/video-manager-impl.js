@@ -38,7 +38,7 @@ import {
 } from './position-observer/position-observer-impl';
 import {
   PositionObserverFidelity,
-} from './position-observer/position-observer-fidelity';
+} from './position-observer/position-observer-entry';
 import {map} from '../utils/object';
 import {layoutRectLtwh, RelativePositions} from '../layout-rect';
 import {

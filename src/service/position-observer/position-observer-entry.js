@@ -115,12 +115,17 @@ export class PositionObserverEntry {
    * @param {boolean=} opt_force
    */
   update(opt_force) {
-    if (!opt_force && this.turn != 0) {
-      this.turn--;
-      return;
+    if (!opt_force) {
+      if (this.turn != 0) {
+        this.turn--;
+        return;
+      }
+
+      if (this.fidelity == PositionObserverFidelity.LOW) {
+        this.turn = LOW_FIDELITY_FRAME_COUNT;
+      }
     }
-    this.turn = (this.fidelity == PositionObserverFidelity.LOW) ?
-            LOW_FIDELITY_FRAME_COUNT : 0;
+
     const viewportSize = this.viewport_.getSize();
     const viewportBox =
         layoutRectLtwh(0, 0, viewportSize.width, viewportSize.height);

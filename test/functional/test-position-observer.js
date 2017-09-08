@@ -19,7 +19,7 @@ import {
 } from '../../src/service/position-observer/position-observer-impl';
 import {
   PositionObserverFidelity,
-} from '../../src/service/position-observer/position-observer-fidelity';
+} from '../../src/service/position-observer/position-observer-entry';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {Services} from '../../src/services';
 import {setStyles} from '../../src/style';
