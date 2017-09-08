@@ -39,3 +39,4 @@ require('./serve');
 require('./size');
 require('./todos');
 require('./validator');
+require('./visual-diff');
