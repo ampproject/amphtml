@@ -38,6 +38,7 @@ import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {setStyle} from './style';
 import * as dom from './dom';
+import {toWin} from './types';
 
 const TAG = 'CustomElement';
 
@@ -103,6 +104,7 @@ export function createCustomElementClass(win, name) {
   class CustomAmpElement extends baseCustomElement {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
+     * @suppress {checkTypes}
      */
     constructor(self) {
       return super(self);
@@ -453,7 +455,7 @@ function createBaseCustomElementClass(win) {
         if (this.actionQueue_) {
           // Only schedule when the queue is not empty, which should be
           // the case 99% of the time.
-          Services.timerFor(this.ownerDocument.defaultView)
+          Services.timerFor(toWin(this.ownerDocument.defaultView))
               .delay(this.dequeueActions_.bind(this), 1);
         }
         if (!this.getPlaceholder()) {
@@ -483,7 +485,7 @@ function createBaseCustomElementClass(win) {
         // If we do early preconnects we delay them a bit. This is kind of
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
-        Services.timerFor(this.ownerDocument.defaultView).delay(() => {
+        Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
           this.implementation_.preconnectCallback(onLayout);
         }, 1);
       }
@@ -581,7 +583,7 @@ function createBaseCustomElementClass(win) {
       }
       if (this.sizeList_) {
         setStyle(this, 'width', this.sizeList_.select(
-            this.ownerDocument.defaultView));
+            toWin(this.ownerDocument.defaultView)));
       }
       // Heights.
       if (this.heightsList_ === undefined &&
@@ -594,7 +596,7 @@ function createBaseCustomElementClass(win) {
         const sizer = this.getSizer_();
         if (sizer) {
           setStyle(sizer, 'paddingTop',
-              this.heightsList_.select(this.ownerDocument.defaultView));
+              this.heightsList_.select(toWin(this.ownerDocument.defaultView)));
         }
       }
     }
@@ -670,7 +672,7 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
-        const win = this.ownerDocument.defaultView;
+        const win = toWin(this.ownerDocument.defaultView);
         const ampdocService = Services.ampdocServiceFor(win);
         const ampdoc = ampdocService.getAmpDoc(this);
         this.ampdoc_ = ampdoc;
@@ -1005,7 +1007,7 @@ function createBaseCustomElementClass(win) {
         } else {
           // Set a minimum delay in case the element loads very fast or if it
           // leaves the viewport.
-          Services.timerFor(this.ownerDocument.defaultView).delay(() => {
+          Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
             // TODO(dvoytenko, #9177): cleanup `this.ownerDocument.defaultView`
             // once investigation is complete. It appears that we get a lot of
             // errors here once the iframe is destroyed due to timer.
@@ -1461,7 +1463,7 @@ function createBaseCustomElementClass(win) {
     getLayoutDelayMeter_() {
       if (!this.layoutDelayMeter_) {
         this.layoutDelayMeter_ = new LayoutDelayMeter(
-            this.ownerDocument.defaultView, this.getPriority());
+            toWin(this.ownerDocument.defaultView), this.getPriority());
       }
       return this.layoutDelayMeter_;
     }
@@ -1537,9 +1539,8 @@ function assertNotTemplate(element) {
 function getVsync(element) {
   // TODO(dvoytenko, #9177): consider removing this and always resolving via
   // `createCustomElementClass(win)` object.
-  return Services.vsyncFor(element.ownerDocument.defaultView);
+  return Services.vsyncFor(toWin(element.ownerDocument.defaultView));
 }
-
 
 /**
  * Whether the implementation is a stub.

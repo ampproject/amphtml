@@ -17,6 +17,7 @@
 import {dev} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 import {startsWith} from '../../../src/string';
+import {toWin} from '../../../src/types';
 
 
 /**
@@ -49,7 +50,7 @@ export function setBlacklistedPropertiesForTesting(properties) {
  * @return {!Object}
  */
 export function installFormProxy(form) {
-  const constr = getFormProxyConstr(form.ownerDocument.defaultView);
+  const constr = getFormProxyConstr(toWin(form.ownerDocument.defaultView));
   const proxy = new constr(form);
   if (!('action' in proxy)) {
     setupLegacyProxy(form, proxy);
