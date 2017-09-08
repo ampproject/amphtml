@@ -130,21 +130,6 @@ export class PositionObserver {
   }
 
   /**
-   * @param {!Element} element
-   * @param {PositionObserverFidelity} fidelity
-   */
-  changeFidelity(element, fidelity) {
-    for (let i = 0; i < this.entries_.length; i++) {
-      const entry = this.entries_[i];
-      if (entry.element == element) {
-        entry.updateFidelity(fidelity);
-        return;
-      }
-    }
-    dev().error(TAG, 'cannot change fidelity on unobserved element');
-  }
-
-  /**
    * This should always be called in vsync.
    * @param {boolean=} opt_force
    * @visibleForTesting

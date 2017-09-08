@@ -72,16 +72,6 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         expect(spy).to.be.calledOnce;
       });
 
-      it('should change fidelity', () => {
-        posOb.observe(elem, PositionObserverFidelity.LOW, () => {});
-        expect(posOb.entries_[0].fidelity).to.equal(
-            PositionObserverFidelity.LOW);
-        posOb.changeFidelity(elem, PositionObserverFidelity.HIGH);
-        expect(posOb.entries_[0].fidelity).to.equal(
-            PositionObserverFidelity.HIGH);
-        expect(posOb.entries_[0].turn).to.equal(0);
-      });
-
       it('should unobserve and stop', () => {
         const spy = sandbox.spy(posOb, 'stopCallback_');
         posOb.observe(elem, PositionObserverFidelity.LOW, () => {});
