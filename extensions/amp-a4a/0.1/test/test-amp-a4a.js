@@ -249,6 +249,7 @@ describe('amp-a4a', () => {
           TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
           {name: 'ad'});
       a4aElement = createA4aElement(fixture.doc);
+      window.AMP_CONFIG = {type: 'production'};
       a4a = new MockA4AImpl(a4aElement);
       return fixture;
     }));
@@ -492,6 +493,7 @@ describe('amp-a4a', () => {
             {name: 'ad'});
         const doc = fixture.doc;
         a4aElement = createA4aElement(doc);
+        window.AMP_CONFIG = {type: 'production'};
         a4a = new MockA4AImpl(a4aElement);
         a4a.createdCallback();
         a4a.firstAttachedCallback();
@@ -861,6 +863,7 @@ describe('amp-a4a', () => {
             {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
+        window.AMP_CONFIG = {type: 'production'};
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');

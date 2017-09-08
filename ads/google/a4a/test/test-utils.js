@@ -276,7 +276,7 @@ describe('Google A4A utils', () => {
         impl.win.AMP_CONFIG.type = 'canary';
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.match(/art=2/);
+            expect(url1).to.match(/[&?]art=2/);
           });
         });
       });
@@ -297,7 +297,7 @@ describe('Google A4A utils', () => {
         impl.win.AMP_CONFIG.type = 'control';
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.match(/art=1/);
+            expect(url1).to.match(/[&?]art=1/);
           });
         });
       });
@@ -316,7 +316,7 @@ describe('Google A4A utils', () => {
         noopMethods(impl, doc, sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.not.match(/art/);
+            expect(url1).to.not.match(/[&?]art=/);
           });
         });
       });
