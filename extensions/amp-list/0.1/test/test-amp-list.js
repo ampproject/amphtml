@@ -92,7 +92,7 @@ describes.realWin('amp-list component', {
   });
 
   it('should load and render non-array if single-result is set', () => {
-    const items =  {title: 'Title1'};
+    const items = {title: 'Title1'};
     const newHeight = 127;
     const itemElement = doc.createElement('div');
     itemElement.style.height = newHeight + 'px';
