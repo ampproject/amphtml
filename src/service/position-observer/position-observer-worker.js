@@ -45,7 +45,7 @@ const LOW_FIDELITY_FRAME_COUNT = 4;
  */
 export let PositionInViewportEntryDef;
 
-export class PositionObserverEntry {
+export class PositionObserverWorker {
   /**
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
@@ -131,7 +131,7 @@ export class PositionObserverEntry {
         layoutRectLtwh(0, 0, viewportSize.width, viewportSize.height);
     this.viewport_.getClientRectAsync(this.element).then(elementBox => {
       this.trigger_(
-      /** @type {./position-observer-entry.PositionInViewportEntryDef}*/ ({
+      /** @type {./position-observer-worker.PositionInViewportEntryDef}*/ ({
         positionRect: elementBox,
         viewportRect: viewportBox,
         relativePos: '',

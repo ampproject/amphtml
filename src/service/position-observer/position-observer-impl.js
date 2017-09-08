@@ -19,9 +19,9 @@ import {Services} from '../../services';
 import {dev} from '../../log';
 import {debounce} from '../../utils/rate-limit';
 import {
-  PositionObserverEntry,
+  PositionObserverWorker,
   /* eslint no-unused-vars: 0 */ PositionObserverFidelity,
-} from './position-observer-entry';
+} from './position-observer-worker';
 
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';
@@ -41,8 +41,8 @@ export class PositionObserver {
     /** @private {!Window} */
     this.win_ = ampdoc.win;
 
-    /** @private {!Array<!PositionObserverEntry>} */
-    this.entries_ = [];
+    /** @private {!Array<!PositionObserverWorker>} */
+    this.workers_ = [];
 
     /** @private {!../vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -71,29 +71,29 @@ export class PositionObserver {
   /**
    * @param {!Element} element
    * @param {!PositionObserverFidelity} fidelity
-   * @param {function(?./position-observer-entry.PositionInViewportEntryDef)} handler
+   * @param {function(?./position-observer-worker.PositionInViewportEntryDef)} handler
    */
   observe(element, fidelity, handler) {
-    const entry =
-        new PositionObserverEntry(this.ampdoc_, element, fidelity, handler);
+    const worker =
+        new PositionObserverWorker(this.ampdoc_, element, fidelity, handler);
 
-    this.entries_.push(entry);
+    this.workers_.push(worker);
 
     if (!this.callbackStarted_) {
       this.startCallback_();
     }
 
-    entry.update();
+    worker.update();
   }
 
   /**
    * @param {!Element} element
    */
   unobserve(element) {
-    for (let i = 0; i < this.entries_.length; i++) {
-      if (this.entries_[i].element == element) {
-        this.entries_.splice(i, 1);
-        if (this.entries_.length == 0) {
+    for (let i = 0; i < this.workers_.length; i++) {
+      if (this.workers_[i].element == element) {
+        this.workers_.splice(i, 1);
+        if (this.workers_.length == 0) {
           this.stopCallback_();
         }
         return;
@@ -135,9 +135,9 @@ export class PositionObserver {
    * @visibleForTesting
   */
   updateAllEntries(opt_force) {
-    for (let i = 0; i < this.entries_.length; i++) {
-      const entry = this.entries_[i];
-      entry.update(opt_force);
+    for (let i = 0; i < this.workers_.length; i++) {
+      const worker = this.workers_[i];
+      worker.update(opt_force);
     }
   }
 

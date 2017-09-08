@@ -37,7 +37,7 @@ import {
 } from '../../../src/service/position-observer/position-observer-impl';
 import {
   PositionObserverFidelity,
-} from '../../../src/service/position-observer/position-observer-entry';
+} from '../../../src/service/position-observer/position-observer-worker';
 
 const TAG = 'amp-position-observer';
 
@@ -152,7 +152,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   /**
    * Called by position observer.
    * It calculates visibility and progress, and triggers the appropriate events.
-   * @param {!../../../src/service/position-observer/position-observer-entry.PositionInViewportEntryDef} entry PositionObserver entry
+   * @param {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef} entry PositionObserver entry
    * @private
    */
   positionChanged_(entry) {

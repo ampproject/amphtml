@@ -19,7 +19,7 @@ import {
 } from '../../src/service/position-observer/position-observer-impl';
 import {
   PositionObserverFidelity,
-} from '../../src/service/position-observer/position-observer-entry';
+} from '../../src/service/position-observer/position-observer-worker';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {Services} from '../../src/services';
 import {setStyles} from '../../src/style';
@@ -68,7 +68,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         const spy = sandbox.spy(posOb, 'startCallback_');
         posOb.observe(elem, PositionObserverFidelity.LOW, () => {});
         posOb.observe(elem1, PositionObserverFidelity.LOW, () => {});
-        expect(posOb.entries_).to.have.length(2);
+        expect(posOb.workers_).to.have.length(2);
         expect(spy).to.be.calledOnce;
       });
 
@@ -77,7 +77,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         posOb.observe(elem, PositionObserverFidelity.LOW, () => {});
         posOb.observe(elem1, PositionObserverFidelity.LOW, () => {});
         posOb.unobserve(elem);
-        expect(posOb.entries_).to.have.length(1);
+        expect(posOb.workers_).to.have.length(1);
         expect(spy).to.not.be.called;
         posOb.unobserve(elem1);
         expect(spy).to.be.calledOnce;
@@ -116,24 +116,6 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         clock.tick(1);
         yield macroTask();
         expect(spy).to.not.be.called;
-      });
-
-      it.skip('should update new position with resize event', () => {
-        const spy = sandbox.spy();
-        posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
-        const spy1 = sandbox.spy();
-        posOb.observe(elem1, PositionObserverFidelity.HIGH, spy1);
-        clock.tick(1);
-        spy.reset();
-        spy1.reset();
-        //expect(spy).to.be.calledOnce;
-        elem.style.top = '1px';
-        elem1.style.top = '1px';
-        const resizeEvent = new Event('resize');
-        ampdoc.win.dispatchEvent(resizeEvent);
-        clock.tick(1);
-        expect(spy).to.be.calledOnce;
-        expect(spy1).to.be.calledOnce;
       });
 
       it('should not update if element position does not change', function* () {

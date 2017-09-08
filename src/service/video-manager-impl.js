@@ -38,7 +38,7 @@ import {
 } from './position-observer/position-observer-impl';
 import {
   PositionObserverFidelity,
-} from './position-observer/position-observer-entry';
+} from './position-observer/position-observer-worker';
 import {map} from '../utils/object';
 import {layoutRectLtwh, RelativePositions} from '../layout-rect';
 import {
@@ -536,7 +536,7 @@ class VideoEntry {
     /** @private {number} */
     this.dockVisibleHeight_ = 0;
 
-    /** @private {?./position-observer/position-observer-entry.PositionInViewportEntryDef} */
+    /** @private {?./position-observer/position-observer-worker.PositionInViewportEntryDef} */
     this.dockLastPosition_ = null;
 
     /** @private {boolean} */
@@ -1066,7 +1066,7 @@ class VideoEntry {
   /**
    * Called when the video's position in the viewport changed (at most once per
    * animation frame)
-   * @param {./position-observer/position-observer-entry.PositionInViewportEntryDef} newPos
+   * @param {./position-observer/position-observer-worker.PositionInViewportEntryDef} newPos
    */
   onDockableVideoPositionChanged(newPos) {
     this.vsync_.run({
@@ -1130,7 +1130,7 @@ class VideoEntry {
    * Updates the minimization position of the video (in viewport, above or
    * below viewport), also the height of the part of the video that is
    * currently in the viewport (between 0 and the initial video height).
-   * @param {./position-observer/position-observer-entry.PositionInViewportEntryDef} newPos
+   * @param {./position-observer/position-observer-worker.PositionInViewportEntryDef} newPos
    * @private
    */
   updateDockableVideoPosition_(newPos) {
