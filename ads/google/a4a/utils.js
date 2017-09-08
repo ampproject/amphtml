@@ -215,7 +215,7 @@ export function googlePageParameters(
         const viewportSize = viewport.getSize();
         const visibilityState = Services.viewerForDoc(nodeOrDoc)
             .getVisibilityState();
-        const art = getBinaryNumericalCode(getBinaryType(win));
+        const art = getBinaryTypeNumericalCode(getBinaryType(win));
         return {
           'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
