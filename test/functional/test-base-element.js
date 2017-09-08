@@ -16,35 +16,30 @@
 
 import {BaseElement} from '../../src/base-element';
 import {Resource} from '../../src/service/resource';
-import {createAmpElementProto} from '../../src/custom-element';
+import {createAmpElementProtoForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
 import {Services} from '../../src/services';
-import * as sinon from 'sinon';
 
 
-describe('BaseElement', () => {
-
-  let sandbox;
+describes.realWin('BaseElement', {amp: true}, env => {
+  let win, doc;
   let customElement;
   let element;
 
-  document.registerElement('amp-test-element', {
-    prototype: createAmpElementProto(window, 'amp-test-element', BaseElement),
-  });
-
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    customElement = document.createElement('amp-test-element');
+    win = env.win;
+    doc = win.document;
+    doc.registerElement('amp-test-element', {
+      prototype: createAmpElementProtoForTesting(win,
+          'amp-test-element', BaseElement),
+    });
+    customElement = doc.createElement('amp-test-element');
     element = new BaseElement(customElement);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('should delegate update priority to resources', () => {
-    const resources = window.services.resources.obj;
+    const resources = win.services.resources.obj;
     customElement.getResources = () => resources;
     const updatePriorityStub = sandbox.stub(resources, 'updatePriority');
     element.updatePriority(1);
@@ -52,7 +47,7 @@ describe('BaseElement', () => {
   });
 
   it('propagateAttributes - niente', () => {
-    const target = document.createElement('div');
+    const target = doc.createElement('div');
     expect(target.hasAttributes()).to.be.false;
 
     element.propagateAttributes(['data-test1'], target);
@@ -63,7 +58,7 @@ describe('BaseElement', () => {
   });
 
   it('propagateAttributes', () => {
-    const target = document.createElement('div');
+    const target = doc.createElement('div');
     expect(target.hasAttributes()).to.be.false;
 
     customElement.setAttribute('data-test1', 'abc');
@@ -149,7 +144,7 @@ describe('BaseElement', () => {
   });
 
   it('should return correct layoutBox', () => {
-    const resources = window.services.resources.obj;
+    const resources = win.services.resources.obj;
     customElement.getResources = () => resources;
     const resource = new Resource(1, customElement, resources);
     sandbox.stub(resources, 'getResourceForElement')
@@ -175,12 +170,12 @@ describe('BaseElement', () => {
 
     beforeEach(() => {
       const timer = Services.timerFor(element.win);
-      target = document.createElement('div');
+      target = doc.createElement('div');
 
-      event1 = document.createEvent('Event');
+      event1 = doc.createEvent('Event');
       event1.initEvent('event1', false, true);
 
-      event2 = document.createEvent('Event');
+      event2 = doc.createEvent('Event');
       event2.initEvent('event2', false, true);
 
       event1Promise = listenOncePromise(element.element, 'event1');

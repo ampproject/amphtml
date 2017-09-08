@@ -103,14 +103,16 @@ import {createElementWithAttributes} from '../src/dom';
 import {addParamsToUrl} from '../src/url';
 import {cssText} from '../build/css';
 import {CSS} from '../build/amp-ad-0.1.css.js';
-import {createAmpElementProto} from '../src/custom-element';
+import {createAmpElementProtoForTesting} from '../src/custom-element';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {
   installBuiltinElements,
   installExtensionsService,
   registerExtension,
 } from '../src/service/extensions-impl';
-import {resetScheduledElementForTesting} from '../src/custom-element';
+import {
+  resetScheduledElementForTesting,
+} from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
 import * as sinon from 'sinon';
 
@@ -862,7 +864,7 @@ function installAmpAdStylesPromise(win) {
 function createAmpElement(win, opt_name, opt_implementationClass) {
   // Create prototype and constructor.
   const name = opt_name || 'amp-element';
-  const proto = createAmpElementProto(win, name);
+  const proto = createAmpElementProtoForTesting(win, name);
   const ctor = function() {
     const el = win.document.createElement(name);
     el.__proto__ = proto;

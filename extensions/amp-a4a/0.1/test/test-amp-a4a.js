@@ -44,7 +44,9 @@ import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
-import {resetScheduledElementForTesting} from '../../../../src/custom-element';
+import {
+  resetScheduledElementForTesting,
+} from '../../../../src/service/custom-element-registry';
 import {Services} from '../../../../src/services';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';

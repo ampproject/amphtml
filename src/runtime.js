@@ -79,7 +79,7 @@ import {
 } from './experiments';
 import {parseUrl} from './url';
 import {setStyle} from './style';
-import {stubElementsForDoc} from './custom-element';
+import {stubElementsForDoc} from './service/custom-element-registry';
 import {waitForBodyPromise} from './dom';
 import * as config from './config';
 

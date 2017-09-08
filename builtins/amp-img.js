@@ -16,7 +16,7 @@
 
 import {BaseElement} from '../src/base-element';
 import {isLayoutSizeDefined} from '../src/layout';
-import {registerElement} from '../src/custom-element';
+import {registerElement} from '../src/service/custom-element-registry';
 import {srcsetFromElement} from '../src/srcset';
 
 /**

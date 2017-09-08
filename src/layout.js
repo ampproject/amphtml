@@ -21,8 +21,9 @@
 
 import {dev, user} from './log';
 import {isFiniteNumber} from './types';
-import {setStyles} from './style';
+import {setStyle, setStyles} from './style';
 import {startsWith} from './string';
+
 
 /**
  * @enum {string}
@@ -278,4 +279,173 @@ export function isLoadingAllowed(element) {
     return true;
   }
   return LOADING_ELEMENTS_[tagName] || false;
+}
+
+
+/**
+ * Applies layout to the element. Visible for testing only.
+ *
+ * \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  / _____|
+ *  \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
+ *   \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
+ *    \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
+ *     \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
+ *
+ * The equivalent of this method is used for server-side rendering (SSR) and
+ * any changes made to it must be made in coordination with caches that
+ * implement SSR. For more information on SSR see bit.ly/amp-ssr.
+ *
+ * @param {!Element} element
+ * @return {!Layout}
+ */
+export function applyStaticLayout(element) {
+  // Check if the layout has already been done by server-side rendering. The
+  // document may be visible to the user if the boilerplate was removed so
+  // please take care in making changes here.
+  const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
+  if (completedLayoutAttr) {
+    const layout = /** @type {!Layout} */ (dev().assert(
+        parseLayout(completedLayoutAttr)));
+    if (layout == Layout.RESPONSIVE && element.firstElementChild) {
+      // Find sizer, but assume that it might not have been parsed yet.
+      element.sizerElement =
+          element.querySelector('i-amphtml-sizer') || undefined;
+    } else if (layout == Layout.NODISPLAY) {
+      applyNoDisplayLayout(element);
+    }
+    return layout;
+  }
+
+  // If the layout was already done by server-side rendering (SSR), then the code
+  // below will not run. Any changes below will necessitate a change to SSR and must
+  // be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
+
+  // Parse layout from the element.
+  const layoutAttr = element.getAttribute('layout');
+  const widthAttr = element.getAttribute('width');
+  const heightAttr = element.getAttribute('height');
+  const sizesAttr = element.getAttribute('sizes');
+  const heightsAttr = element.getAttribute('heights');
+
+  // Input layout attributes.
+  const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
+  user().assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
+  const inputWidth = (widthAttr && widthAttr != 'auto') ?
+      parseLength(widthAttr) : widthAttr;
+  user().assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
+  const inputHeight = heightAttr ? parseLength(heightAttr) : null;
+  user().assert(inputHeight !== undefined, 'Invalid height value: %s',
+      heightAttr);
+
+  // Effective layout attributes. These are effectively constants.
+  let width;
+  let height;
+  let layout;
+
+  // Calculate effective width and height.
+  if ((!inputLayout || inputLayout == Layout.FIXED ||
+      inputLayout == Layout.FIXED_HEIGHT) &&
+      (!inputWidth || !inputHeight) && hasNaturalDimensions(element.tagName)) {
+    // Default width and height: handle elements that do not specify a
+    // width/height and are defined to have natural browser dimensions.
+    const dimensions = getNaturalDimensions(element);
+    width = (inputWidth || inputLayout == Layout.FIXED_HEIGHT) ? inputWidth :
+        dimensions.width;
+    height = inputHeight || dimensions.height;
+  } else {
+    width = inputWidth;
+    height = inputHeight;
+  }
+
+  // Calculate effective layout.
+  if (inputLayout) {
+    layout = inputLayout;
+  } else if (!width && !height) {
+    layout = Layout.CONTAINER;
+  } else if (height && (!width || width == 'auto')) {
+    layout = Layout.FIXED_HEIGHT;
+  } else if (height && width && (sizesAttr || heightsAttr)) {
+    layout = Layout.RESPONSIVE;
+  } else {
+    layout = Layout.FIXED;
+  }
+
+  // Verify layout attributes.
+  if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
+      layout == Layout.RESPONSIVE) {
+    user().assert(height, 'Expected height to be available: %s', heightAttr);
+  }
+  if (layout == Layout.FIXED_HEIGHT) {
+    user().assert(!width || width == 'auto',
+        'Expected width to be either absent or equal "auto" ' +
+        'for fixed-height layout: %s', widthAttr);
+  }
+  if (layout == Layout.FIXED || layout == Layout.RESPONSIVE) {
+    user().assert(width && width != 'auto',
+        'Expected width to be available and not equal to "auto": %s',
+        widthAttr);
+  }
+  if (layout == Layout.RESPONSIVE) {
+    user().assert(getLengthUnits(width) == getLengthUnits(height),
+        'Length units should be the same for width and height: %s, %s',
+        widthAttr, heightAttr);
+  } else {
+    user().assert(heightsAttr === null,
+        'Unexpected "heights" attribute for none-responsive layout');
+  }
+
+  // Apply UI.
+  element.classList.add(getLayoutClass(layout));
+  if (isLayoutSizeDefined(layout)) {
+    element.classList.add('i-amphtml-layout-size-defined');
+  }
+  if (layout == Layout.NODISPLAY) {
+    // CSS defines layout=nodisplay automatically with `display:none`. Thus
+    // no additional styling is needed.
+    applyNoDisplayLayout(element);
+  } else if (layout == Layout.FIXED) {
+    setStyles(element, {
+      width: dev().assertString(width),
+      height: dev().assertString(height),
+    });
+  } else if (layout == Layout.FIXED_HEIGHT) {
+    setStyle(element, 'height', dev().assertString(height));
+  } else if (layout == Layout.RESPONSIVE) {
+    const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
+    setStyles(sizer, {
+      display: 'block',
+      paddingTop:
+        ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%',
+    });
+    element.insertBefore(sizer, element.firstChild);
+    element.sizerElement = sizer;
+  } else if (layout == Layout.FILL) {
+    // Do nothing.
+  } else if (layout == Layout.CONTAINER) {
+    // Do nothing. Elements themselves will check whether the supplied
+    // layout value is acceptable. In particular container is only OK
+    // sometimes.
+  } else if (layout == Layout.FLEX_ITEM) {
+    // Set height and width to a flex item if they exist.
+    // The size set to a flex item could be overridden by `display: flex` later.
+    if (width) {
+      setStyle(element, 'width', width);
+    }
+    if (height) {
+      setStyle(element, 'height', height);
+    }
+  }
+  return layout;
+}
+
+
+/**
+ * @param {!Element} element
+ */
+function applyNoDisplayLayout(element) {
+  // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been deployed
+  // everywhere, switch all relevant elements to this API. In the meantime,
+  // simply unblock display toggling via `style="display: ..."`.
+  setStyle(element, 'display', 'none');
+  element.classList.add('i-amphtml-display');
 }

@@ -17,7 +17,7 @@
 import {BaseElement} from '../src/base-element';
 import {dev, user} from '../src/log';
 import {dict} from '../src/utils/object';
-import {registerElement} from '../src/custom-element';
+import {registerElement} from '../src/service/custom-element-registry';
 import {Services} from '../src/services';
 import {createElementWithAttributes} from '../src/dom';
 

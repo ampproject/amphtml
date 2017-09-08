@@ -41,7 +41,7 @@ import {doNotTrackImpression} from './impression';
 import {cssText} from '../build/css';
 import {isExperimentOn} from './experiments';
 import {installPerformanceService} from './service/performance-impl';
-import {stubElementsForDoc} from './custom-element';
+import {stubElementsForDoc} from './service/custom-element-registry';
 
 // This feature doesn't make sense in shadow mode as it only applies to
 // background rendered iframes;
