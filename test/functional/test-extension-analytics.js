@@ -24,7 +24,7 @@ import {
     useAnalyticsInSandbox,
     CustomEventReporterBuilder,
 } from '../../src/extension-analytics';
-import {createAmpElementProto} from '../../src/custom-element';
+import {registerElement} from '../../src/service/custom-element-registry';
 import {Services} from '../../src/services';
 import {BaseElement} from '../../src/base-element';
 import {macroTask} from '../../testing/yield';
@@ -172,7 +172,8 @@ describes.realWin('extension-analytics', {
       triggerEventForTarget(nodeOrDoc, eventType, opt_vars) {
         triggerEventSpy(nodeOrDoc, eventType, opt_vars);
       }
-        }
+    }
+
     beforeEach(() => {
       ampdoc = env.ampdoc;
       sandbox = sinon.sandbox.create();
@@ -183,9 +184,7 @@ describes.realWin('extension-analytics', {
             // Force instantiation
       getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
 
-      env.win.document.registerElement('amp-test', {
-        prototype: createAmpElementProto(env.win, 'amp-test', BaseElement),
-      });
+      registerElement(env.win, 'amp-test', BaseElement);
       parentEle = env.win.document.createElement('amp-test');
       parentEle.setAttribute('layout', 'nodisplay');
       env.win.document.body.appendChild(parentEle);
@@ -264,10 +263,8 @@ describes.realWin('extension-analytics', {
           buildCallback() {
             useAnalyticsInSandbox(this.element, promise);
           }
-                }
-        env.win.document.registerElement('amp-test', {
-          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
-        });
+        }
+        registerElement(env.win, 'amp-test', TestElement);
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
@@ -322,10 +319,8 @@ describes.realWin('extension-analytics', {
             useAnalyticsInSandbox(this.element, promise);
             return super.layoutCallback();
           }
-                }
-        env.win.document.registerElement('amp-test', {
-          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
-        });
+        }
+        registerElement(env.win, 'amp-test', TestElement);
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
@@ -356,10 +351,8 @@ describes.realWin('extension-analytics', {
           unlayoutCallback() {
             return true;
           }
-                }
-        env.win.document.registerElement('amp-test', {
-          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
-        });
+        }
+        registerElement(env.win, 'amp-test', TestElement);
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
@@ -405,10 +398,8 @@ describes.realWin('extension-analytics', {
           unlayoutCallback() {
             return true;
           }
-                }
-        env.win.document.registerElement('amp-test', {
-          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
-        });
+        }
+        registerElement(env.win, 'amp-test', TestElement);
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
