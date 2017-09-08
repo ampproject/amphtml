@@ -59,6 +59,7 @@ function createAdsenseImplElement(attributes, doc, opt_tag) {
 describes.realWin('amp-ad-network-adsense-impl', {
   amp: {
     extensions: ['amp-ad', 'amp-ad-network-adsense-impl'],
+    // runtimeOn: true,
   },
 }, env => {
   let win, doc, ampdoc, viewer;
@@ -525,8 +526,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
     // Not using arrow function here because otherwise the way closure behaves
     // prevents me from calling this.timeout(5000).
     it('with multiple slots', function() {
-      // When ran locally, this test tends to exceed 2000ms timeout.
-      this.timeout(5000);
+      // When run locally, this test tends to exceed 2000ms timeout.
+      this.timeout(10000);
       // Reset counter for purpose of this test.
       delete win['ampAdGoogleIfiCounter'];
       const elem1 = createAdsenseImplElement({
