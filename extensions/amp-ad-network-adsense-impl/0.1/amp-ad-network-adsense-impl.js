@@ -48,8 +48,10 @@ import {stringHash32} from '../../../src/string';
 import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {clamp} from '../../../src/utils/math';
 import {
   computedStyle,
+  setStyle,
   setStyles,
 } from '../../../src/style';
 import {AdsenseSharedState} from './adsense-shared-state';
@@ -116,6 +118,28 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {?string} */
     this.qqid_ = null;
+
+    /**
+     * For full-width responsive ads: whether the element has already been
+     * aligned to the edges of the viewport.
+     * @private {boolean}
+     */
+    this.responsiveAligned_ = false;
+
+    /**
+     * The contents of the data-auto-format attribute, or empty string if the
+     * attribute was not set.
+     * @private {?string}
+     */
+    this.autoFormat_ = null;
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isResponsive_() {
+    return this.autoFormat_ == 'rspv';
   }
 
   /** @override */
@@ -157,9 +181,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
     this.size_ = isExperimentOn(this.win, 'as-use-attr-for-format')
-        && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
-        ? {width, height}
-        : this.getIntersectionElementLayoutBox();
+        && !this.isResponsive_()
+        && !isNaN(width) && width > 0
+        && !isNaN(height) && height > 0
+            ? {width, height}
+            : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
     const slotId = this.element.getAttribute('data-amp-slot-index');
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
@@ -193,6 +219,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'brdim': additionalDimensions(this.win, viewportSize),
       'ifi': this.win['ampAdGoogleIfiCounter']++,
       'rc': this.fromResumeCallback ? 1 : null,
+      'rafmt': this.isResponsive_() ? 13 : null,
     };
 
     const experimentIds = [];
@@ -313,8 +340,65 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
+  buildCallback() {
+    super.buildCallback();
+
+    this.autoFormat_ =
+        this.element.getAttribute('data-auto-format') || '';
+
+    if (this.isResponsive_()) {
+      // Attempt to resize to the correct height. The width should already be
+      // 100vw, but is fixed here so that future resizes of the viewport don't
+      // affect it.
+      const viewportSize = this.getViewport().getSize();
+      return this.attemptChangeSize(
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+              viewportSize),
+          viewportSize.width);
+    }
+  }
+
+  /** @override */
+  onLayoutMeasure() {
+    super.onLayoutMeasure();
+
+    if (this.isResponsive_() && !this.responsiveAligned_) {
+      this.responsiveAligned_ = true;
+
+      const layoutBox = this.getLayoutBox();
+
+      // Nudge into the correct horizontal position by changing side margin.
+      this.getVsync().mutate(() => {
+        // TODO(charliereams): Is this the right way to get direction?
+        const parentDirection =
+            computedStyle(this.win, this.element)['direction'];
+        if (parentDirection == 'rtl') {
+          setStyle(this.element, 'marginRight', layoutBox.left, 'px');
+        } else {
+          setStyle(this.element, 'marginLeft', -layoutBox.left, 'px');
+        }
+      });
+    }
+  }
+
+  /** @override */
   getPreconnectUrls() {
     return ['https://googleads.g.doubleclick.net'];
+  }
+
+  /**
+   * Calculates the appropriate height for a full-width responsive ad of the
+   * given width.
+   * @param {!{width: number, height: number}} viewportSize
+   * @return {number}
+   * @private
+   */
+  static getResponsiveHeightForContext_(viewportSize) {
+    const minHeight = 100;
+    const maxHeight = Math.min(300, viewportSize.height);
+    // We aim for a 6:5 aspect ratio.
+    const idealHeight = Math.round(viewportSize.width / 1.2);
+    return clamp(idealHeight, minHeight, maxHeight);
   }
 }
 
