@@ -298,7 +298,7 @@ const command = {
   },
   runVisualDiffTests: function(opt_mode) {
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    let cmd = 'ruby build-system/tasks/visual-diff.rb';
+    let cmd = `${gulp} visual-diff`;
     if (opt_mode === 'skip') {
       cmd += ' --skip';
     } else if (opt_mode === 'master') {
@@ -307,7 +307,7 @@ const command = {
     timedExecOrDie(cmd);
   },
   verifyVisualDiffTests: function() {
-    timedExecOrDie('ruby build-system/tasks/visual-diff.rb --verify');
+    timedExecOrDie(`${gulp} visual-diff --verify`);
   },
   runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);

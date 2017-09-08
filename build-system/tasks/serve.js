@@ -55,6 +55,7 @@ function serve() {
       'SERVE_PROCESS_ID': process.pid,
       'SERVE_QUIET': quiet
     },
+    stdout: !quiet,
   })
   .once('quit', function () {
     util.log(util.colors.green('Shutting down server'));
