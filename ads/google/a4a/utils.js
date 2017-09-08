@@ -593,12 +593,12 @@ export function maybeAppendErrorParameter(adUrl, parameterValue) {
 /**
  * Returns a numerical code representing the binary type.
  * @param {string} type
- * @return {?string}
+ * @return {?number}
  */
 function getBinaryTypeNumericalCode(type) {
   return {
-    'production': '0',
-    'control': '1',
-    'canary': '2',
+    'production': 0,
+    'control': 1,
+    'canary': 2,
   }[type] || null;
 }
