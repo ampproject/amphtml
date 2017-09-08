@@ -19,19 +19,16 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=300 height=220
+<amp-ad width=300 height=1
       type="teads"
       data-pid="42266"
       layout="responsive">
-      <div fallback>Teads fallback - Discover <a href="http://teads.tv/en/platform/">inRead by Teads</a>!</div>
 </amp-ad>
 ```
 
 ## Configuration
 
 For semantics of configuration, please contact [Teads](http://teads.tv/fr/contact/).
-
-Teads amp-ad component is designed to work with layout="responsive", so please be careful to keep width and height at a 4/3 ratio.
 
 Supported parameters:
 

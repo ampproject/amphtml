@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
+// Imported just for the side effect of getting the `types` it exports into
+// the type system during compile time.
+import './time';
+
 
 /**
  * A CurveDef is a function that returns a normtime value (0 to 1) for another
  * normtime value.
- * @typedef {function(normtime):normtime}
+ * @typedef {function(./time.normtimeDef): ./time.normtimeDef}
  */
-class CurveDef {};
+export let CurveDef;
 
 
 /**
@@ -135,8 +139,9 @@ class Bezier {
     // Try gradient descent to solve for t. If it works, it is very fast.
     let tMin = 0;
     let tMax = 1;
+    let value = 0;
     for (let i = 0; i < 8; i++) {
-      const value = this.getPointX(t);
+      value = this.getPointX(t);
       const derivative = (this.getPointX(t + epsilon) - value) / epsilon;
       if (Math.abs(value - xVal) < epsilon) {
         return t;
@@ -246,7 +251,7 @@ export const Curves = {
    * @param {number} n
    * @return {number}
    */
-  LINEAR: function(n) {return n;},
+  LINEAR(n) {return n;},
 
   /**
    * ease
@@ -254,7 +259,7 @@ export const Curves = {
   EASE: bezierCurve(0.25, 0.1, 0.25, 1.0),
 
   /**
-   * ease-out: slow out, fast in
+   * ease-in: slow out, fast in
    */
   EASE_IN: bezierCurve(0.42, 0.0, 1.0, 1.0),
 
@@ -292,6 +297,22 @@ export function getCurve(curve) {
     return null;
   }
   if (typeof curve == 'string') {
+    // If the curve is a custom cubic-bezier curve
+    if (curve.indexOf('cubic-bezier') != -1) {
+      const match = curve.match(/cubic-bezier\((.+)\)/);
+      if (match) {
+        const values = match[1].split(',').map(parseFloat);
+        if (values.length == 4) {
+          for (let i = 0; i < 4; i++) {
+            if (isNaN(values[i])) {
+              return null;
+            }
+          }
+          return bezierCurve(values[0], values[1], values[2], values[3]);
+        }
+      }
+      return null;
+    }
     return NAME_MAP[curve];
   }
   return curve;

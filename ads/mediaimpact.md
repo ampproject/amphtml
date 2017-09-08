@@ -41,3 +41,8 @@ Supported parameters:
 
 for further information regarding this implementation please contact adtechnology@axelspringer.de 
 or visit http://www.mediaimpact.de/ 
+
+## Optional features
+
+- loading placeholder for ads, see [official AMP readme]('../extensions/amp-ad/amp-ad.md#placeholder')
+- noad fallback for ads, see [official AMP readme]('../extensions/amp-ad/amp-ad.md#no-ad-available')

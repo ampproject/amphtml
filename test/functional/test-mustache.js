@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* global require: false */
 const mustache = require('../../third_party/mustache/mustache');
 
 describe('Mustache', () => {
@@ -44,7 +45,7 @@ describe('Mustache', () => {
   it('should only expand own properties', () => {
     const parent = {value: 'bc'};
     const child = Object.create(parent);
-    const container = {parent: parent, child: child};
+    const container = {parent, child};
     expect(mustache.render('a{{value}}', parent)).to.equal('abc');
     expect(mustache.render('a{{value}}', child)).to.equal('a');
     expect(mustache.render('a{{parent.value}}', container)).to.equal('abc');

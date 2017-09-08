@@ -13,31 +13,79 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp-help')(require('gulp'));
-var gls = require('gulp-live-server');
-var path = require('path');
 var util = require('gulp-util');
+var nodemon = require('nodemon');
 
+var host = argv.host || 'localhost';
 var port = argv.port || process.env.PORT || 8000;
+var useHttps = argv.https != undefined;
+var quiet = argv.quiet != undefined;
 
 /**
  * Starts a simple http server at the repository root
  */
 function serve() {
-  var serverScript = path.join(__dirname, '../server.js')
-  var server = gls.new([serverScript, (argv.path || '/'), port]);
-  server.start();
-  util.log(util.colors.yellow(
-    'Run `gulp build` then go to http://localhost:' + port + '/examples.build/article.amp.max.html'
-  ));
+  // Get the serve mode
+  if (argv.compiled) {
+    process.env.SERVE_MODE = 'compiled';
+    util.log(util.colors.green('Serving minified js'));
+  } else if (argv.cdn) {
+    process.env.SERVE_MODE = 'cdn';
+    util.log(util.colors.green('Serving current prod js'));
+  } else {
+    process.env.SERVE_MODE = 'default';
+    util.log(util.colors.green('Serving unminified js'));
+  }
+
+  nodemon({
+    script: require.resolve('../server.js'),
+    watch: [
+      require.resolve('../app.js'),
+      require.resolve('../server.js')
+    ],
+    env: {
+      'NODE_ENV': 'development',
+      'SERVE_PORT': port,
+      'SERVE_HOST': host,
+      'SERVE_USEHTTPS': useHttps,
+      'SERVE_PROCESS_ID': process.pid,
+      'SERVE_QUIET': quiet
+    },
+    stdout: !quiet,
+  })
+  .once('quit', function () {
+    util.log(util.colors.green('Shutting down server'));
+  });
+  if (!quiet) {
+    util.log(util.colors.yellow('Run `gulp build` then go to '
+        + getHost() + '/examples/article.amp.html'
+    ));
+  }
 }
 
-gulp.task('serve', 'Serves content in root dir over http://localhost:' +
-  port + '/', serve, {
-    options: {
-      'port': '  Specifies alternative port to use instead of default (8000)'
+process.on('SIGINT', function() {
+  process.exit();
+});
+
+gulp.task(
+    'serve',
+    'Serves content in root dir over ' + getHost() + '/',
+    serve,
+    {
+      options: {
+        'host': '  Hostname or IP address to bind to (default: localhost)',
+        'port': '  Specifies alternative port (default: 8000)',
+        'https': '  Use HTTPS server (default: false)',
+        'quiet': '  Do not log HTTP requests (default: false)'
+      }
     }
-  }
 );
+
+function getHost() {
+  return (useHttps ? 'https' : 'http') + '://' + host + ':' + port;
+}
+

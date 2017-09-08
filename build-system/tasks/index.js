@@ -13,16 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
+require('./ava');
 require('./babel-helpers');
 require('./changelog');
+require('./check-links');
 require('./clean');
 require('./compile');
 require('./compile-access-expr');
+require('./compile-bind-expr');
+require('./compile-css-expr');
+require('./csvify-size');
+require('./dep-check');
+require('./get-zindex');
+require('./gen-codeowners');
+require('./extension-generator');
+require('./json-check');
 require('./lint');
-require('./make-golden');
+require('./prepend-global');
 require('./presubmit-checks');
+require('./release-tagging');
+require('./runtime-test');
 require('./serve');
 require('./size');
-require('./test');
+require('./todos');
 require('./validator');
+require('./visual-diff');

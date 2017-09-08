@@ -1,0 +1,10 @@
+{
+  "prefer_related_applications": true,
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "com.medium.reader",
+      "url": "android-app://com.medium.reader/https/medium.com/p/cb7f223fad86"
+    }
+  ]
+}

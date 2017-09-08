@@ -22,18 +22,20 @@ limitations under the License.
     <td>Allows for a “lightbox” or similar experience where upon user interaction, a component expands to fill the viewport until it is closed again by the user.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>nodisplay</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-lightbox">amp-lightbox.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-lightbox/">Annotated code example for amp-lightbox</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## Behavior
 
@@ -41,7 +43,7 @@ The `amp-lightbox` component defines the child elements that will be displayed i
 
 ### Closing the lightbox
 Pressing the escape key on the keyboard will close the lightbox.
-Alternatively setting the `on` attribute on one or more elements within the lightbox and setting it's method to `close` will close the lightbox when the element is tapped or clicked.
+Alternatively setting the `on` attribute on one or more elements within the lightbox and setting its method to `close` will close the lightbox when the element is tapped or clicked.
 
 Example:
 ```html
@@ -58,26 +60,49 @@ Example:
 
 The `amp-lightbox` component can be styled with standard CSS.
 
-## Validation errors
-
-The following lists validation errors specific to the `amp-lightbox` tag
-(see also `amp-lightbox` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+## Actions
+The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md):
 
 <table>
   <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Action</th>
     <th>Description</th>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-lightbox</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+    <td>open (default)</td>
+    <td>Opens the lightbox</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if implied layout is any other value.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if specified layout is any other value.</td>
+    <td>close</td>
+    <td>Closes the lightbox</td>
   </tr>
 </table>
+
+### Examples
+
+```html
+<button on="tap:tweets-lb">See Quote</button>
+<amp-lightbox id="tweets-lb" layout="nodisplay">
+    <blockquote>"Don't talk to me about JavaScript fatigue" - Horse JS</blockquote>
+    <button on="tap:tweets-lb.close">Nice!</button>
+</amp-lightbox>
+```
+
+## Attributes
+
+##### id (required)
+
+A unique identifer for the lightbox.
+
+##### layout
+
+Must be set to `nodisplay`.
+
+##### scrollable
+
+When `scrollable` attribute is present, the content of the lightbox can scroll
+when overflowing the height of the lightbox.
+
+## Validation
+
+See [amp-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/validator-amp-lightbox.protoascii) in the AMP validator specification.

@@ -50,7 +50,7 @@ limitations under the License.
 
 Supported parameters:
 
-- url: requried: OAS cname. must start with HTTPS.
-- sitepage: required: Sitepage configured for this ad spot
-- position: required: Position for the this ad spot
-- query: Optional: Query paramater to be sent with request. Keywords and keynames, taxonomy etc. 
+- adhost: required: OAS cname. Must start with HTTPS.
+- sitepage: required: Sitepage configured for this ad spot.
+- pos: required: Position for the this ad spot.
+- query: optional: Query parameter to be sent with request. Keywords and keynames, taxonomy etc. 

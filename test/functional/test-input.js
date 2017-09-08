@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {installTimerService} from '../../src/service/timer-impl.js';
 import {Input} from '../../src/input';
 import * as sinon from 'sinon';
 
@@ -48,16 +49,15 @@ describe('Input', () => {
       document: documentApi,
       navigator: {},
       ontouchstart: '',
+      setTimeout: window.setTimeout,
     };
+    installTimerService(windowApi);
 
     input = new Input(windowApi);
   });
 
   afterEach(() => {
-    input = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should initialize in touch mode', () => {

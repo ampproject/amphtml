@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
+var argv = require('minimist')(process.argv.slice(2));
 var crypto = require('crypto');
 
 // Used to e.g. references the ads binary from the runtime to get
 // version lock.
-exports.VERSION = String(new Date().getTime());
+exports.VERSION = argv.version ?
+    String(argv.version) : String(Date.now());
 
 // A token that changes its value each time we release AMP. This is intended
 // to verify that two iframes of AMP have the same version of AMP. It is

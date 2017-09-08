@@ -55,6 +55,10 @@
     }
   };
 
+  babelHelpers.interopRequireDefault = function (obj) {
+    return obj && obj.__esModule ? obj : { default: obj };
+  };
+
   babelHelpers.get = function get(object, property, receiver) {
     if (object === null) object = Function.prototype;
     var desc = Object.getOwnPropertyDescriptor(object, property);
@@ -84,5 +88,10 @@
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
+  };
+
+  babelHelpers.defineProperty = function(obj, key, value) {
+      obj[key] = value;
+      return obj;
   };
 })(typeof global === "undefined" ? self : global);

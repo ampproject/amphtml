@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 
 var argv = require('minimist')(process.argv.slice(2));
 var config = require('../config');
 var eslint = require('gulp-eslint');
-var exec = require('child_process').exec;
 var gulp = require('gulp-help')(require('gulp'));
 var gulpIf = require('gulp-if');
 var lazypipe = require('lazypipe');
@@ -29,14 +29,8 @@ var isWatching = (argv.watch || argv.w) || false;
 
 var options = {
   fix: false,
+  rulePaths: ['build-system/eslint-rules/'],
   plugins: ['eslint-plugin-google-camelcase'],
-  "ecmaFeatures": {
-    "modules": true,
-    "arrowFunctions": true,
-    "blockBindings": true,
-    "forOf": false,
-    "destructuring": false
-  },
 };
 
 var watcher = lazypipe().pipe(watch, config.lintGlobs);
@@ -73,13 +67,13 @@ function lint() {
       util.log(util.colors.red(msg));
     }))
     .pipe(gulpIf(isFixed, gulp.dest('.')))
+    .pipe(eslint.failAfterError())
     .on('end', function() {
       if (errorsFound && !options.fix) {
         util.log(util.colors.blue('Run `gulp lint --fix` to automatically ' +
             'fix some of these lint warnings/errors. This is a destructive ' +
             'operation (operates on the file system) so please make sure ' +
             'you commit before running.'));
-        process.exit(1);
       }
     });
 }

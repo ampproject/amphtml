@@ -1,0 +1,2 @@
+FAIL
+amp-carousel/0.1/test/validator-amp-carousel.html:32:2 The attribute 'delay' in tag 'amp-carousel' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [AMP_TAG_PROBLEM]

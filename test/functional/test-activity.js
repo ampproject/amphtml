@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-import {installActivityService} from '../../src/service/activity-impl';
-import {activityFor} from '../../src/activity';
-import {installViewerService} from '../../src/service/viewer-impl';
-import {viewerFor} from '../../src/viewer';
-import {installViewportService} from '../../src/service/viewport-impl';
-import {viewportFor} from '../../src/viewport';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {
+  installActivityServiceForTesting,
+} from '../../extensions/amp-analytics/0.1/activity-impl';
+import {Services} from '../../src/services';
+import {installDocumentStateService} from '../../src/service/document-state';
+import {installPlatformService} from '../../src/service/platform-impl';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
+import {installTimerService} from '../../src/service/timer-impl';
+import {
+  installViewportServiceForDoc,
+} from '../../src/service/viewport/viewport-impl';
+import {markElementScheduledForTesting} from '../../src/custom-element';
+import {installVsyncService} from '../../src/service/vsync-impl';
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
 
@@ -29,6 +37,7 @@ describe('Activity getTotalEngagedTime', () => {
   let clock;
   let fakeDoc;
   let fakeWin;
+  let ampdoc;
   let viewer;
   let viewport;
   let activity;
@@ -49,7 +58,8 @@ describe('Activity getTotalEngagedTime', () => {
     scrollObservable = new Observable();
 
     fakeDoc = {
-      addEventListener: function(eventName, callback) {
+      nodeType: /* DOCUMENT */ 9,
+      addEventListener(eventName, callback) {
         if (eventName === 'mousedown') {
           mousedownObservable.add(callback);
         }
@@ -59,23 +69,43 @@ describe('Activity getTotalEngagedTime', () => {
           // required to instantiate Viewport service
           paddingTop: 0,
         },
+        classList: {
+          add: () => {},
+        },
+      },
+      body: {
+        nodeType: 1,
+        style: {},
       },
     };
 
     fakeWin = {
+      services: {},
       document: fakeDoc,
-      ampExtendedElements: {
-        'amp-analytics': true,
-      },
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
       },
+      navigator: window.navigator,
+      setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
       // required to instantiate Viewport service
       addEventListener: () => {},
+      removeEventListener: () => {},
     };
+    fakeDoc.defaultView = fakeWin;
 
-    installViewerService(fakeWin);
-    viewer = viewerFor(fakeWin);
+    ampdoc = new AmpDocSingle(fakeWin);
+    fakeWin.services['ampdoc'] = {obj: {
+      getAmpDoc: () => ampdoc,
+      isSingleDoc: () => true,
+    }};
+
+    installDocumentStateService(fakeWin);
+    installTimerService(fakeWin);
+    installVsyncService(fakeWin);
+    installPlatformService(fakeWin);
+    installViewerServiceForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
 
     const whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolve = resolve;
@@ -85,34 +115,26 @@ describe('Activity getTotalEngagedTime', () => {
       visibilityObservable.add(handler);
     });
 
-    installViewportService(fakeWin);
-    viewport = viewportFor(fakeWin);
+    installViewportServiceForDoc(ampdoc);
+    viewport = Services.viewportForDoc(ampdoc);
 
     sandbox.stub(viewport, 'onScroll', handler => {
       scrollObservable.add(handler);
     });
 
-    installActivityService(fakeWin);
+    markElementScheduledForTesting(fakeWin, 'amp-analytics');
+    installActivityServiceForTesting(ampdoc);
 
-    return activityFor(fakeWin).then(a => {
+    return Services.activityForDoc(ampdoc).then(a => {
       activity = a;
     });
   });
 
   afterEach(() => {
-    fakeDoc = null;
-    fakeWin = null;
-    viewer = null;
-    viewport = null;
-    activity = null;
-    whenFirstVisibleResolve = null;
-    visibilityObservable = null;
-    mousedownObservable = null;
-    scrollObservable = null;
     sandbox.restore();
   });
 
-  it('should use the stubed viewer in tests', () => {
+  it('should use the stubbed viewer in tests', () => {
     return expect(activity.viewer_).to.equal(viewer);
   });
 
@@ -202,16 +224,11 @@ describe('Activity getTotalEngagedTime', () => {
         activity.boundHandleActivity_);
     whenFirstVisibleResolve();
     return viewer.whenFirstVisible().then(() => {
-      expect(addEventListenerSpy).to.have.been.calledWith('mousedown',
-          activity.boundHandleActivity_);
-      expect(addEventListenerSpy).to.have.been.calledWith('mouseup',
-          activity.boundHandleActivity_);
-      expect(addEventListenerSpy).to.have.been.calledWith('mousemove',
-          activity.boundHandleActivity_);
-      expect(addEventListenerSpy).to.have.been.calledWith('keydown',
-          activity.boundHandleActivity_);
-      expect(addEventListenerSpy).to.have.been.calledWith('keyup',
-          activity.boundHandleActivity_);
+      expect(addEventListenerSpy.getCall(0).args[0]).to.equal('mousedown');
+      expect(addEventListenerSpy.getCall(1).args[0]).to.equal('mouseup');
+      expect(addEventListenerSpy.getCall(2).args[0]).to.equal('mousemove');
+      expect(addEventListenerSpy.getCall(3).args[0]).to.equal('keydown');
+      expect(addEventListenerSpy.getCall(4).args[0]).to.equal('keyup');
     });
   });
 });

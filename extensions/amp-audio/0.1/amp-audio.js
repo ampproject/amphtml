@@ -16,12 +16,34 @@
 
 import {Layout} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
-import {loadPromise} from '../../../src/event-helper';
+import {dev} from '../../../src/log';
+import {listen} from '../../../src/event-helper';
+import {
+  EMPTY_METADATA,
+  parseSchemaImage,
+  parseOgImage,
+  parseFavicon,
+  setMediaSession,
+} from '../../../src/mediasession-helper';
+
+const TAG = 'amp-audio';
+
 
 /**
  * Visible for testing only.
  */
 export class AmpAudio extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.audio_ = null;
+
+    /** @private {!../../../src/mediasession-helper.MetadataDef} */
+    this.metadata_ = EMPTY_METADATA;
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -31,7 +53,7 @@ export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const audio = document.createElement('audio');
+    const audio = this.element.ownerDocument.createElement('audio');
     if (!audio.play) {
       this.toggleFallback(true);
       return Promise.resolve();
@@ -43,31 +65,71 @@ export class AmpAudio extends AMP.BaseElement {
       assertHttpsUrl(this.element.getAttribute('src'), this.element);
     }
     this.propagateAttributes(
-        ['src', 'autoplay', 'muted', 'loop'],
+        ['src', 'autoplay', 'muted', 'loop', 'aria-label',
+          'aria-describedby', 'aria-labelledby', 'controlsList'],
         audio);
 
     this.applyFillContent(audio);
     this.getRealChildNodes().forEach(child => {
       if (child.getAttribute && child.getAttribute('src')) {
-        assertHttpsUrl(child.getAttribute('src'), child);
+        assertHttpsUrl(child.getAttribute('src'),
+            dev().assertElement(child));
       }
       audio.appendChild(child);
     });
     this.element.appendChild(audio);
-    /** @private {?HTMLAudioElement} */
     this.audio_ = audio;
-    return loadPromise(audio);
+
+    // Gather metadata
+    const doc = this.getAmpDoc().win.document;
+    const artist = this.element.getAttribute('artist');
+    const title = this.element.getAttribute('title')
+                  || this.element.getAttribute('aria-label')
+                  || doc.title;
+    const album = this.element.getAttribute('album');
+    const artwork = this.element.getAttribute('artwork')
+                   || parseSchemaImage(doc)
+                   || parseOgImage(doc)
+                   || parseFavicon(doc);
+    this.metadata_ = {
+      'title': title || '',
+      'artist': artist || '',
+      'album': album || '',
+      'artwork': [
+        {'src': artwork || ''},
+      ],
+    };
+
+    listen(this.audio_, 'playing', () => this.audioPlaying_());
+    return this.loadPromise(audio);
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     if (this.audio_) {
       this.audio_.pause();
     }
-    // No need to do layout later - user action will be expect to resume
-    // the playback.
-    return false;
+  }
+
+  audioPlaying_() {
+    const playHandler = () => {
+      this.audio_.play();
+    };
+    const pauseHandler = () => {
+      this.audio_.pause();
+    };
+
+    // Update the media session
+    setMediaSession(
+        this.getAmpDoc().win,
+        this.metadata_,
+        playHandler,
+        pauseHandler
+    );
   }
 }
 
-AMP.registerElement('amp-audio', AmpAudio);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAudio);
+});

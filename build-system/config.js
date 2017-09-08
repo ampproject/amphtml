@@ -13,134 +13,128 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-var path = require('path');
-
-var karmaConf = path.resolve('karma.conf.js');
+'use strict';
 
 var commonTestPaths = [
   'test/_init_tests.js',
-  'test/fixtures/**/*.html',
+  'test/fixtures/*.html',
+  {
+    pattern: 'test/fixtures/served/*.html',
+    included: false,
+    nocache: false,
+    watched: true,
+  },
   {
     pattern: 'dist/**/*.js',
     included: false,
-    nocache: true,
+    nocache: false,
+    watched: true,
   },
   {
     pattern: 'dist.tools/**/*.js',
     included: false,
-    nocache: true,
+    nocache: false,
+    watched: true,
   },
   {
     pattern: 'examples/**/*',
     included: false,
-    nocache: true,
+    nocache: false,
+    watched: true,
   },
   {
     pattern: 'dist.3p/**/*',
     included: false,
-    nocache: true,
+    nocache: false,
+    watched: true,
   },
-]
+  {
+    pattern: 'test/coverage/**/*',
+    included: false,
+    nocache: false,
+    watched: false,
+  },
+];
 
-var testPaths = commonTestPaths.concat([
+var basicTestPaths = [
   'test/**/*.js',
+  'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
+];
+
+var testPaths = commonTestPaths.concat(basicTestPaths);
+
+var a4aTestPaths = [
+  'extensions/amp-a4a/**/test/**/*.js',
+  'extensions/amp-ad-network-*/**/test/**/*.js',
+  'ads/google/a4a/test/*.js'
+];
+
+var unitTestPaths = commonTestPaths.concat([
+  'test/functional/**/*.js',
+  'ads/**/test/test-*.js',
+  'extensions/**/test/*.js',
 ]);
 
 var integrationTestPaths = commonTestPaths.concat([
   'test/integration/**/*.js',
+  'test/functional/test-error.js',
   'extensions/**/test/integration/**/*.js',
 ]);
 
-var karma = {
-  default: {
-    configFile: karmaConf,
-    singleRun: true,
-    client: {
-      captureConsole: false,
-    }
-  },
-  firefox: {
-    configFile: karmaConf,
-    singleRun: true,
-    browsers: ['Firefox'],
-    client: {
-      mocha: {
-        timeout: 10000
-      },
-      captureConsole: false
-    }
-  },
-  safari: {
-    configFile: karmaConf,
-    singleRun: true,
-    browsers: ['Safari'],
-    client: {
-      mocha: {
-        timeout: 10000
-      },
-      captureConsole: false
-    }
-  },
-  saucelabs: {
-    configFile: karmaConf,
-    reporters: ['dots', 'saucelabs'],
-    browsers: [
-      'SL_Chrome_android',
-      'SL_Chrome_latest',
-      'SL_Chrome_37',
-      'SL_Firefox_latest',
-      'SL_Safari_8',
-      'SL_Safari_9',
-      'SL_Edge_latest',
-      // TODO(#895) Enable these.
-      //'SL_iOS_9_1',
-      //'SL_IE_11',
-    ],
-    singleRun: true,
-    client: {
-      mocha: {
-        timeout: 10000
-      },
-      captureConsole: false,
-    },
-    captureTimeout: 120000,
-    browserDisconnectTimeout: 120000,
-    browserNoActivityTimeout: 120000,
-  }
-};
-
 /** @const  */
 module.exports = {
+  commonTestPaths: commonTestPaths,
+  basicTestPaths: basicTestPaths,
   testPaths: testPaths,
+  a4aTestPaths: a4aTestPaths,
+  unitTestPaths: unitTestPaths,
   integrationTestPaths: integrationTestPaths,
-  karma: karma,
   lintGlobs: [
     '**/*.js',
+    '!**/*.extern.js',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
         'third_party,build-system}/**/*.*',
-    '!{testing,examples,examples.build}/**/*.*',
+    '!{testing,examples}/**/*.*',
     // TODO: temporary, remove when validator is up to date
     '!validator/**/*.*',
+    '!eslint-rules/**/*.*',
     '!gulpfile.js',
     '!karma.conf.js',
     '!**/local-amp-chrome-extension/background.js',
     '!extensions/amp-access/0.1/access-expr-impl.js',
+    '!extensions/amp-animation/0.1/css-expr-impl.js',
+    '!extensions/amp-bind/0.1/bind-expr-impl.js',
+    '!test/coverage/**/*.*',
+  ],
+  jsonGlobs: [
+    '**/*.json',
+    '!{node_modules,build,dist,dist.3p,dist.tools,' +
+        'third_party,build-system}/**/*.*',
   ],
   presubmitGlobs: [
     '**/*.{css,js,go}',
     // This does match dist.3p/current, so we run presubmit checks on the
     // built 3p binary. This is done, so we make sure our special 3p checks
     // run against the entire transitive closure of deps.
-    '!{node_modules,build,examples.build,dist,dist.tools,' +
+    '!{node_modules,build,dist,dist.tools,' +
         'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
+    '!dist.3p/current/**/ampcontext-lib.js',
+    '!dist.3p/current/**/iframe-transport-client-lib.js',
+    '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
+    '!validator/nodejs/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
     '!build/polyfills.js',
     '!build/polyfills/*.js',
     '!gulpfile.js',
     '!third_party/**/*.*',
+    '!validator/chromeextension/*.*',
+    // Files in this testdata dir are machine-generated and are not part
+    // of the AMP runtime, so shouldn't be checked.
+    '!extensions/amp-a4a/*/test/testdata/*.js',
+    '!examples/*.js',
+    '!test/coverage/**/*.*',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
 };

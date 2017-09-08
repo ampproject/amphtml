@@ -1,0 +1,26 @@
+version: 1
+runtime: go
+api_version: go1
+
+handlers:
+- url: /fetch
+  script: _go_app
+  secure: always
+
+- url: /$
+  static_files: index.html
+  upload: index.html
+  secure: always
+
+- url: /amp_favicon.png$
+  static_files: amp_favicon.png
+  upload: amp_favicon\.png$
+  secure: always
+
+- url: /logo-blue.svg$
+  static_files: logo-blue.svg
+  upload: logo-blue\.svg$
+  secure: always
+
+skip_files:
+  serve-standalone.go

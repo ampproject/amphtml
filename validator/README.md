@@ -19,75 +19,49 @@ limitations under the License.
 A validator for the
 [AMP HTML format](https://github.com/ampproject/amphtml/blob/master/README.md).
 
-This is a very first release, rough on the edges. Fasten your seatbelts.
+If you just want to validate a page, please see
+[our documentation over at ampproject.org](https://www.ampproject.org/docs/guides/validate.html).
 
-Prerequisite: Linux Ubuntu 14 or similar, or Mac OS X 10.11.x or later
+## Chrome Extension
+Please see [chromeextension/README.md](https://github.com/ampproject/amphtml/blob/master/validator/chromeextension/README.md).
 
-###Mac OS X
+## Command Line Tool and Node.js API
 
-See [Building a command-line AMP Validator: Mac OS X](https://github.com/ampproject/amphtml/blob/master/validator/docs/building_a_command_line_amp_validator_for_mac_os_x.md).
+Please see [nodejs/README.md](https://github.com/ampproject/amphtml/blob/master/validator/nodejs/README.md).
 
-###Linux
+## Web UI
+
+Please see [webui/README.md](https://github.com/ampproject/amphtml/blob/master/validator/webui/README.md).
+
+## Building a Custom Validator
+
+This is only useful for development - e.g. when making changes to
+`engine/validator.js` or when authoring an AMP extension, and it's rough around
+the edges. Below are instructions for Linux Ubuntu 14.
 
 Install these packages using apt-get:
+
 * npm
-* nodejs
 * openjdk-7-jre
 * protobuf-compiler
 * python-protobuf
 * python2.7
 
-Then, run `build.py`. It creates `dist/validate`, a script which
-can print AMP HTML validation errors to the console.
+In addition, install Node.js v4.4.2. E.g.,
+  [by downloading](https://nodejs.org/en/download/) or
+  [by using a package manager](https://nodejs.org/en/download/package-manager/) or
+  [by using NVM](https://github.com/creationix/nvm).
+
+Then, run `build.py`. This creates `dist/validator_minified.js`, which is
+equivalent to the validator deployed at cdn.ampproject.org. You may now
+use the `--validator_js` command line flag to
+[amphtml-validator](https://www.ampproject.org/docs/guides/validate.html#command-line-tool) to use this validator.
 
 ```
-$ dist/validate
-usage: validate <file.html>
-$ dist/validate testdata/minimum_valid_amp.html
-PASS
-$ touch empty.html
-$ dist/validate empty.html
-FAIL
-empty.html:1:0 The mandatory tag 'html doctype' is missing or
-incorrect. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'html ⚡ for top-level html' is
-missing or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#ampd)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'head' is missing or incorrect.
-(see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'link rel=canonical' is missing
-or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'meta charset=utf-8' is missing
-or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'meta name=viewport' is missing
-or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'body' is missing or incorrect.
-(see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'amphtml engine v0.js script' is
-missing or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'noscript enclosure for
-boilerplate' is missing or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'boilerplate (js enabled)' is
-missing or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'boilerplate (noscript)' is
-missing or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+$ amphtml-validator --validator_js dist/validator_minified.js testdata/feature_tests/several_errors.html
+testdata/feature_tests/several_errors.html:23:2 The attribute 'charset' may not appear in tag 'meta name= and content='.
+testdata/feature_tests/several_errors.html:26:2 The tag 'script' is disallowed except in specific forms.
+testdata/feature_tests/several_errors.html:32:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/amp-img.html)
+testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is set to the invalid value '100%'. (see https://www.ampproject.org/docs/reference/amp-ad.html)
+...
 ```

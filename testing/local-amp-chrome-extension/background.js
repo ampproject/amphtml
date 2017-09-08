@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
+var disabled = false;
 
 // Rewrite cdn.ampproject.org
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
+    if (disabled) {
+      return {
+        redirectUrl: details.url
+      }
+    }
     // Massage to local path patterns.
     var path = details.url.substr('https://cdn.ampproject.org/'.length);
     if (/^v\d+\.js$/.test(path)) {
@@ -39,6 +45,11 @@ chrome.webRequest.onBeforeRequest.addListener(
 // Rewrite 3p.ampproject.net
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
+    if (disabled) {
+      return {
+        redirectUrl: details.url
+      }
+    }
     // Massage to local path patterns.
     var path = details.url.substr('https://3p.ampproject.net/'.length);
     path = path.replace(/^\d+/, 'dist.3p/current');
@@ -54,3 +65,23 @@ chrome.webRequest.onBeforeRequest.addListener(
     urls: ['https://3p.ampproject.net/*']
   },
   ['blocking']);
+
+  function updateBadge() {
+    if (disabled) {
+      chrome.browserAction.setBadgeText({
+        text: "OFF"
+      });
+      chrome.browserAction.setBadgeBackgroundColor({
+        color: "#7e2013"
+      });
+    } else {
+      chrome.browserAction.setBadgeText({
+        text: "ON"
+      });
+      chrome.browserAction.setBadgeBackgroundColor({
+        color: "#15a341"
+      });
+    }
+  }
+
+  updateBadge();

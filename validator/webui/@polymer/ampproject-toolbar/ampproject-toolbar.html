@@ -1,0 +1,99 @@
+<!--
+  Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!-- Toolbar displayed at the top of the page. This doesn't do much but has a
+     lot of styling, so we isolate it to keep the source for other parts of
+     the page easier to read. -->
+<link rel="import" href="../paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<dom-module id="ampproject-toolbar">
+  <style scope="ampproject-toolbar">
+    paper-toolbar {
+      --paper-toolbar-background: #fbfafb;
+      --paper-toolbar-color: #0379C4;
+      --paper-toolbar: { font-family: Roboto, verdana, arial, sans-serif; };
+      --width: 100%
+    }
+    .ampproject-left {
+      @apply(--layout-flex);
+      width: auto;
+      text-transform: none;
+      white-space: nowrap;
+      background-repeat: no-repeat;
+      background-size: 40px 40px;
+      background-position: center left;
+    }
+    .ampproject-right {
+      color: #0379C4;
+      margin: 10px 0;
+    }
+    .ampproject-link a:link,
+    .ampproject-link a:visited,
+    .ampproject-link a:hover,
+    .ampproject-link a:active {
+      color: #0379C4;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 300;
+      letter-spacing: 0.04em;
+    }
+    .flex-horizontal {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      margin-bottom: 10px;
+    }
+  </style>
+  <template>
+    <paper-toolbar>
+      <div class="ampproject-left ampproject-link">
+        <a href="https://www.ampproject.org/"
+           target="_blank"><img style="height: 60px; width: 100px"
+                                src="/logo-blue.svg"></a>
+      </div>
+      <div class="ampproject-right ampproject-link">
+        <a href="https://www.ampproject.org/docs/guides/validate.html"
+           target="_blank">HOWTO</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="https://github.com/ampproject/amphtml/blob/master/validator/README.md"
+           target="_blank">GITHUB</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="https://www.google.com/policies/privacy/"
+           target="_blank">PRIVACY</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc"
+           id="install-extension" onclick="return false;" target="_blank">CHROME EXTENSION</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="https://www.npmjs.com/package/amphtml-validator"
+           target="_blank">NPM</a>
+      </div>
+    </paper-toolbar>
+  </template>
+  <script>
+    Polymer({
+      is: 'ampproject-toolbar',
+      listeners: {
+        'install-extension.tap': 'installExtension'
+      },
+      installExtension: function(e) {
+        if (document.domain === 'validator.ampproject.org') {
+          chrome.webstore.install('https://chrome.google.com/webstore/detail/nmoffdblmcmgeicmolmhobpoocbbmknc');
+        } else {
+          window.open('https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc', '_blank');
+        }
+      }
+    });
+  </script>
+</dom-module>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateDataExists, validateExactlyOne} from '../src/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -23,14 +23,12 @@ import {loadScript, validateDataExists, validateExactlyOne} from '../src/3p';
 export function taboola(global, data) {
   // do not copy the following attributes from the 'data' object
   // to _tablloa global object
-  const blackList = ['height', 'initialWindowHeight', 'initialWindowWidth',
-    'type', 'width', 'placement', 'mode'];
+  const blackList = ['height', 'type', 'width', 'placement', 'mode'];
 
   // ensure we have vlid publisher, placement and mode
   // and exactly one page-type
-  validateDataExists(data, ['publisher', 'placement', 'mode']);
-  validateExactlyOne(data, ['article', 'video', 'photo', 'search', 'category',
-    'homepage', 'others']);
+  validateData(data, ['publisher', 'placement', 'mode',
+    ['article', 'video', 'photo', 'search', 'category', 'homepage', 'other']]);
 
   // setup default values for referrer and url
   const params = {

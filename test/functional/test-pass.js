@@ -15,7 +15,8 @@
  */
 
 import {Pass} from '../../src/pass';
-import {timer} from '../../src/timer';
+import {Services} from '../../src/services';
+import * as sinon from 'sinon';
 
 describe('Pass', () => {
 
@@ -26,20 +27,17 @@ describe('Pass', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    timerMock = sandbox.mock(timer);
+    timerMock = sandbox.mock(Services.timerFor(window));
     handlerCalled = 0;
-    pass = new Pass(() => {
+    pass = new Pass(window, () => {
       handlerCalled++;
     });
   });
 
   afterEach(() => {
-    pass = null;
     expect(handlerCalled).to.equal(0);
     timerMock.verify();
-    timerMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('handler called', () => {
@@ -96,7 +94,7 @@ describe('Pass', () => {
   });
 
   it('should have a min delay for recursive schedule', () => {
-    pass = new Pass(() => {
+    pass = new Pass(window, () => {
       expect(pass.running_).to.equal(true);
       if (handlerCalled++ == 0) {
         pass.schedule();

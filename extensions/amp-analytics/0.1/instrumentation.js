@@ -14,37 +14,41 @@
  * limitations under the License.
  */
 
+import {
+  AmpdocAnalyticsRoot,
+  EmbedAnalyticsRoot,
+} from './analytics-root';
+import {
+  AnalyticsEvent,
+  ClickEventTracker,
+  CustomEventTracker,
+  IniLoadTracker,
+  SignalTracker,
+  VideoEventTracker,
+  VisibilityTracker,
+} from './events';
 import {Observable} from '../../../src/observable';
-import {getService} from '../../../src/service';
-import {timer} from '../../../src/timer';
-import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
+import {dev, user} from '../../../src/log';
+import {
+  getFriendlyIframeEmbedOptional,
+} from '../../../src/friendly-iframe-embed';
+import {
+  getParentWindowFrameElement,
+  getServiceForDoc,
+  getServicePromiseForDoc,
+  registerServiceBuilderForDoc,
+} from '../../../src/service';
+import {isEnumValue} from '../../../src/types';
+import {startsWith} from '../../../src/string';
+import {Services} from '../../../src/services';
 
-/** @private @const {number} */
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
-
-/** @private @const {number} */
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
-
-/** @private {number} */
 const SCROLL_PRECISION_PERCENT = 5;
+const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
+const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
+const PROP = '__AMP_AN_ROOT';
 
-/**
- * This type signifies a callback that gets called when an analytics event that
- * the listener subscribed to fires.
- * @typedef {function(!AnalyticsEvent)}
- */
-let AnalyticsEventListenerDef;
-
-/**
- * @param {!Window} window Window object to listen on.
- * @param {!JSONObject} config Configuration for instrumentation.
- * @param {!AnalyticsEventListenerDef} listener Callback to call when the event
- *          fires.
- */
-export function addListener(window, config, listener) {
-  return instrumentationServiceFor(window).addListener(config, listener);
-}
 
 /**
  * Events that can result in analytics data to be sent.
@@ -56,100 +60,198 @@ export const AnalyticsEventType = {
   CLICK: 'click',
   TIMER: 'timer',
   SCROLL: 'scroll',
+  HIDDEN: 'hidden',
 };
 
+const ALLOWED_FOR_ALL = ['ampdoc', 'embed'];
+
 /**
- * Ignore Most of this class as it has not been thought through yet. It will
- * change completely.
+ * Events that can result in analytics data to be sent.
+ * @const {!Object<string, {
+ *     name: string,
+ *     allowedFor: !Array<string>,
+ *     klass: function(new:./events.EventTracker)
+ *   }>}
  */
-class AnalyticsEvent {
+const EVENT_TRACKERS = {
+  'click': {
+    name: 'click',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: ClickEventTracker,
+  },
+  'custom': {
+    name: 'custom',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: CustomEventTracker,
+  },
+  'render-start': {
+    name: 'render-start',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: SignalTracker,
+  },
+  'ini-load': {
+    name: 'ini-load',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: IniLoadTracker,
+  },
+  'visible': {
+    name: 'visible',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: VisibilityTracker,
+  },
+  'hidden': {
+    name: 'visible', // Reuse tracker with visibility
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: VisibilityTracker,
+  },
+  'video': {
+    name: 'video',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: VideoEventTracker,
+  },
+};
 
-  /**
-   * @param {!AnalyticsEventType} type The type of event.
-   */
-  constructor(type) {
-    this.type = type;
-  }
-}
+/** @const {string} */
+const TAG = 'Analytics.Instrumentation';
 
-/** @private Visible for testing. */
+
+/**
+ * Events that can result in analytics data to be sent.
+ * @const {Array<AnalyticsEventType>}
+ */
+const ALLOWED_IN_EMBED = [
+  AnalyticsEventType.VISIBLE,
+  AnalyticsEventType.CLICK,
+  AnalyticsEventType.TIMER,
+  AnalyticsEventType.HIDDEN,
+];
+
+
+/**
+ * @implements {../../../src/service.Disposable}
+ * @private
+ * @visibleForTesting
+ */
 export class InstrumentationService {
   /**
-   * @param {!Window} window
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
-    /** @const {!Window} */
-    this.win_ = window;
+  constructor(ampdoc) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
-    /** @const {string} */
-    this.TAG_ = 'Analytics.Instrumentation';
+    /** @const */
+    this.ampdocRoot_ = new AmpdocAnalyticsRoot(this.ampdoc);
 
-    /** @const {!Viewer} */
-    this.viewer_ = viewerFor(window);
+    /** @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.ampdoc.win);
 
-    /** @const {!Viewport} */
-    this.viewport_ = viewportFor(window);
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
-    /** @private {boolean} */
-    this.clickHandlerRegistered_ = false;
-
-    /** @private {!Observable<!Event>} */
-    this.clickObservable_ = new Observable();
+    /** @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private {boolean} */
     this.scrollHandlerRegistered_ = false;
 
-    /** @private {!Observable<Event>} */
+    /** @private {!Observable<
+        !../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
     this.scrollObservable_ = new Observable();
+  }
 
-    /** @private {!Object<string, !Observable<!AnalyticsEvent>>} */
-    this.customEventObservers_ = {};
-
-    /**
-     * Early events have to be buffered because there's no way to predict
-     * how fast all `amp-analytics` elements will be instrumented.
-     * @private {!Object<string, !Array<!AnalyticsEvent>>|undefined}
-     */
-    this.customEventBuffer_ = {};
-
-    // Stop buffering of custom events after 10 seconds. Assumption is that all
-    // `amp-analytics` elements will have been instrumented by this time.
-    timer.delay(() => {
-      this.customEventBuffer_ = undefined;
-    }, 10000);
+  /** @override */
+  dispose() {
+    this.ampdocRoot_.dispose();
   }
 
   /**
-   * @param {!JSONObject} config Configuration for instrumentation.
-   * @param {!AnalyticsEventListenerDef} The callback to call when the event
-   *   occurs.
+   * @param {!Node} context
+   * @return {!./analytics-root.AnalyticsRoot}
    */
-  addListener(config, listener) {
-    const eventType = config['on'];
-    if (eventType === AnalyticsEventType.VISIBLE) {
-      if (this.viewer_.isVisible()) {
-        listener(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
-      } else {
-        this.viewer_.onVisibilityChanged(() => {
-          if (this.viewer_.isVisible()) {
-            listener(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
-          }
+  getAnalyticsRoot(context) {
+    return this.findRoot_(context);
+  }
+
+  /**
+   * @param {!Element} analyticsElement
+   * @return {!AnalyticsGroup}
+   */
+  createAnalyticsGroup(analyticsElement) {
+    const root = this.findRoot_(analyticsElement);
+    return new AnalyticsGroup(root, analyticsElement, this);
+  }
+
+  /**
+   * Triggers the analytics event with the specified type.
+   *
+   * @param {!Element} target
+   * @param {string} eventType
+   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+   */
+  triggerEventForTarget(target, eventType, opt_vars) {
+    // TODO(dvoytenko): rename to `triggerEvent`.
+    const event = new AnalyticsEvent(target, eventType, opt_vars);
+    const root = this.findRoot_(target);
+    const tracker = /** @type {!CustomEventTracker} */ (
+        root.getTracker('custom', CustomEventTracker));
+    tracker.trigger(event);
+  }
+
+  /**
+   * @param {!Node} context
+   * @return {!./analytics-root.AnalyticsRoot}
+   */
+  findRoot_(context) {
+    // FIE
+    const frame = getParentWindowFrameElement(context, this.ampdoc.win);
+    if (frame) {
+      const embed = getFriendlyIframeEmbedOptional(frame);
+      if (embed) {
+        const embedNotNull = embed;
+        return this.getOrCreateRoot_(embed, () => {
+          return new EmbedAnalyticsRoot(this.ampdoc, embedNotNull,
+              this.ampdocRoot_);
         });
       }
-    } else if (eventType === AnalyticsEventType.CLICK) {
-      if (!config['selector']) {
-        console./*OK*/error(this.TAG_,
-            'Missing required selector on click trigger');
-        return;
-      }
+    }
 
-      this.ensureClickListener_();
-      this.clickObservable_.add(
-          this.createSelectiveListener_(listener, config['selector']));
-    } else if (eventType === AnalyticsEventType.SCROLL) {
+    // Ampdoc root
+    return this.ampdocRoot_;
+  }
+
+  /**
+   * @param {!Object} holder
+   * @param {function():!./analytics-root.AnalyticsRoot} factory
+   * @return {!./analytics-root.AnalyticsRoot}
+   */
+  getOrCreateRoot_(holder, factory) {
+    let root = /** @type {?./analytics-root.AnalyticsRoot} */ (holder[PROP]);
+    if (!root) {
+      root = factory();
+      holder[PROP] = root;
+    }
+    return root;
+  }
+
+  /**
+   * @param {!JsonObject} config Configuration for instrumentation.
+   * @param {function(!AnalyticsEvent)} listener The callback to call when the event
+   *  occurs.
+   * @param {!Element} analyticsElement The element associated with the
+   *  config.
+   * @private
+   */
+  addListenerDepr_(config, listener, analyticsElement) {
+    const eventType = config['on'];
+    if (!this.isTriggerAllowed_(eventType, analyticsElement)) {
+      user().error(TAG, 'Trigger type "' + eventType + '" is not ' +
+        'allowed in the embed.');
+      return;
+    }
+    if (eventType === AnalyticsEventType.SCROLL) {
       if (!config['scrollSpec']) {
-        console./*OK*/error(this.TAG_,
-            'Missing scrollSpec on scroll trigger.');
+        user().error(TAG, 'Missing scrollSpec on scroll trigger.');
         return;
       }
       this.registerScrollTrigger_(config['scrollSpec'], listener);
@@ -161,79 +263,30 @@ export class InstrumentationService {
         left: this.viewport_.getScrollLeft(),
         width: size.width,
         height: size.height,
+        relayoutAll: false,
+        velocity: 0,  // Hack for typing.
       });
     } else if (eventType === AnalyticsEventType.TIMER) {
       if (this.isTimerSpecValid_(config['timerSpec'])) {
         this.createTimerListener_(listener, config['timerSpec']);
       }
-    } else {
-      let observers = this.customEventObservers_[eventType];
-      if (!observers) {
-        observers = new Observable();
-        this.customEventObservers_[eventType] = observers;
-      }
-      observers.add(listener);
-
-      // Push recent events if any.
-      if (this.customEventBuffer_) {
-        const buffer = this.customEventBuffer_[eventType];
-        if (buffer) {
-          timer.delay(() => {
-            buffer.forEach(event => {
-              listener(event);
-            });
-          }, 1);
-        }
-      }
     }
   }
 
   /**
-   * Triggers the analytics event with the specified type.
-   * @param {string} eventType
-   */
-  triggerEvent(eventType) {
-    const event = new AnalyticsEvent(eventType);
-
-    // Enqueue.
-    if (this.customEventBuffer_) {
-      let buffer = this.customEventBuffer_[event.type];
-      if (!buffer) {
-        buffer = [];
-        this.customEventBuffer_[event.type] = buffer;
-      }
-      buffer.push(event);
-    }
-
-    // If listeners already present - trigger right away.
-    const observers = this.customEventObservers_[eventType];
-    if (observers) {
-      observers.fire(event);
-    }
-  }
-
-  /**
-   * Ensure we have a click listener registered on the document.
+   * @param {string} type
+   * @param {!Object<string, string>=} opt_vars
+   * @return {!AnalyticsEvent}
    * @private
    */
-  ensureClickListener_() {
-    if (!this.clickHandlerRegistered_) {
-      this.clickHandlerRegistered_ = true;
-      this.win_.document.documentElement.addEventListener(
-          'click', this.onClick_.bind(this));
-    }
+  createEventDepr_(type, opt_vars) {
+    // TODO(dvoytenko): Remove when Tracker migration is complete.
+    return new AnalyticsEvent(
+        this.ampdocRoot_.getRootElement(), type, opt_vars);
   }
 
   /**
-   * @param {!Event} e
-   * @private
-   */
-  onClick_(e) {
-    this.clickObservable_.fire(e);
-  }
-
-  /**
-   * @param {!ViewportChangedEventDef} e
+   * @param {!../../../src/service/viewport/viewport-impl.ViewportChangedEventDef} e
    * @private
    */
   onScroll_(e) {
@@ -241,43 +294,16 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!Function} listener
-   * @param {string} selector
-   * @private
-   */
-  createSelectiveListener_(listener, selector) {
-    return e => {
-      // First do the cheap lookups.
-      if (selector === '*' || this.matchesSelector_(e.target, selector)) {
-        listener(new AnalyticsEvent(AnalyticsEventType.CLICK));
-      } else {
-        // More expensive search.
-        let el = e.target;
-        while (el.parentElement != null && el.parentElement.tagName != 'BODY') {
-          el = el.parentElement;
-          if (this.matchesSelector_(el, selector)) {
-            listener(new AnalyticsEvent(AnalyticsEventType.CLICK));
-            // Don't fire the event multiple times even if the more than one
-            // ancestor matches the selector.
-            return;
-          }
-        }
-      }
-
-    };
-  }
-
-  /**
    * Register for a listener to be called when the boundaries specified in
    * config are reached.
-   * @param {!JSONObject} config the config that specifies the boundaries.
-   * @param {Function} listener
+   * @param {!JsonObject} config the config that specifies the boundaries.
+   * @param {function(!AnalyticsEvent)} listener
    * @private
    */
   registerScrollTrigger_(config, listener) {
     if (!Array.isArray(config['verticalBoundaries']) &&
         !Array.isArray(config['horizontalBoundaries'])) {
-      console./*OK*/error(this.TAG_, 'Boundaries are required for the scroll ' +
+      user().error(TAG, 'Boundaries are required for the scroll ' +
           'trigger to work.');
       return;
     }
@@ -289,11 +315,13 @@ export class InstrumentationService {
     }
 
     /**
-     * @param {!Object.<number, boolean>} bounds.
+     * @param {!Object<number, boolean>} bounds.
      * @param {number} scrollPos Number representing the current scroll
+     * @param {string} varName variable name to assign to the bound that
+     * triggers the event
      * position.
      */
-    const triggerScrollEvents = function(bounds, scrollPos) {
+    const triggerScrollEvents = (bounds, scrollPos, varName) => {
       if (!scrollPos) {
         return;
       }
@@ -304,7 +332,9 @@ export class InstrumentationService {
           continue;
         }
         bounds[b] = true;
-        listener(new AnalyticsEvent(AnalyticsEventType.SCROLL));
+        const vars = Object.create(null);
+        vars[varName] = b;
+        listener(this.createEventDepr_(AnalyticsEventType.SCROLL, vars));
       }
     };
 
@@ -314,9 +344,11 @@ export class InstrumentationService {
       // Calculates percentage scrolled by adding screen height/width to
       // top/left and dividing by the total scroll height/width.
       triggerScrollEvents(boundsV,
-          (e.top + e.height) * 100 / this.viewport_.getScrollHeight());
+          (e.top + e.height) * 100 / this.viewport_.getScrollHeight(),
+          VAR_V_SCROLL_BOUNDARY);
       triggerScrollEvents(boundsH,
-          (e.left + e.width) * 100 / this.viewport_.getScrollWidth());
+          (e.left + e.width) * 100 / this.viewport_.getScrollWidth(),
+          VAR_H_SCROLL_BOUNDARY);
     });
   }
 
@@ -325,8 +357,8 @@ export class InstrumentationService {
    * SCROLL_PRECISION_PERCENT and returns an object with normalized boundaries
    * as keys and false as values.
    *
-   * @param {!Array.<number>} bounds array of bounds.
-   * @return {!Object.<number,boolean>} Object with normalized bounds as keys
+   * @param {!Array<number>} bounds array of bounds.
+   * @return {!Object<number,boolean>} Object with normalized bounds as keys
    * and false as value.
    * @private
    */
@@ -339,8 +371,7 @@ export class InstrumentationService {
     for (let b = 0; b < bounds.length; b++) {
       let bound = bounds[b];
       if (typeof bound !== 'number' || !isFinite(bound)) {
-        console./*OK*/error(this.TAG_,
-            'Scroll trigger boundaries must be finite.');
+        user().error(TAG, 'Scroll trigger boundaries must be finite.');
         return result;
       }
 
@@ -352,51 +383,24 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!Element} el
-   * @param {string} selector
-   * @return {boolean} True if the given element matches the given selector.
-   * @private
-   */
-  matchesSelector_(el, selector) {
-    try {
-      const matcher = el.matches ||
-          el.webkitMatchesSelector ||
-          el.mozMatchesSelector ||
-          el.msMatchesSelector ||
-          el.oMatchesSelector;
-      if (matcher) {
-        return matcher.call(el, selector);
-      }
-      const matches = this.win_.document.querySelectorAll(selector);
-      let i = matches.length;
-      while (i-- > 0 && matches.item(i) != el) {};
-      return i > -1;
-    } catch (selectorError) {
-      console./*OK*/error(this.TAG_, 'Bad query selector.', selector,
-          selectorError);
-    }
-    return false;
-  }
-
-  /**
-   * @param {JSONObject} timerSpec
+   * @param {JsonObject} timerSpec
    * @private
    */
   isTimerSpecValid_(timerSpec) {
-    if (!timerSpec) {
-      console./*OK*/error(this.TAG_, 'Bad timer specification');
+    if (!timerSpec || typeof timerSpec != 'object') {
+      user().error(TAG, 'Bad timer specification');
       return false;
-    } else if (!timerSpec.hasOwnProperty('interval')) {
-      console./*OK*/error(this.TAG_, 'Timer interval specification required');
+    } else if (!('interval' in timerSpec)) {
+      user().error(TAG, 'Timer interval specification required');
       return false;
     } else if (typeof timerSpec['interval'] !== 'number' ||
                timerSpec['interval'] < MIN_TIMER_INTERVAL_SECONDS_) {
-      console./*OK*/error(this.TAG_, 'Bad timer interval specification');
+      user().error(TAG, 'Bad timer interval specification');
       return false;
-    } else if (timerSpec.hasOwnProperty('maxTimerLength') &&
+    } else if (('maxTimerLength' in timerSpec) &&
               (typeof timerSpec['maxTimerLength'] !== 'number' ||
                   timerSpec['maxTimerLength'] <= 0)) {
-      console./*OK*/error(this.TAG_, 'Bad maxTimerLength specification');
+      user().error(TAG, 'Bad maxTimerLength specification');
       return false;
     } else {
       return true;
@@ -404,30 +408,135 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!Function} listener
-   * @param {JSONObject} timerSpec
+   * @param {!function(!AnalyticsEvent)} listener
+   * @param {JsonObject} timerSpec
    * @private
    */
   createTimerListener_(listener, timerSpec) {
-    const intervalId = this.win_.setInterval(
-        listener.bind(null, new AnalyticsEvent(AnalyticsEventType.TIMER)),
-        timerSpec['interval'] * 1000);
-    listener(new AnalyticsEvent(AnalyticsEventType.TIMER));
+    const hasImmediate = 'immediate' in timerSpec;
+    const callImmediate = hasImmediate ? Boolean(timerSpec['immediate']) : true;
+    const intervalId = this.ampdoc.win.setInterval(
+        listener.bind(null, this.createEventDepr_(AnalyticsEventType.TIMER)),
+        timerSpec['interval'] * 1000
+    );
+
+    if (callImmediate) {
+      listener(this.createEventDepr_(AnalyticsEventType.TIMER));
+    }
 
     const maxTimerLength = timerSpec['maxTimerLength'] ||
         DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
-    this.win_.setTimeout(this.win_.clearInterval.bind(this.win_, intervalId),
+    this.ampdoc.win.setTimeout(
+        this.ampdoc.win.clearInterval.bind(this.ampdoc.win, intervalId),
         maxTimerLength * 1000);
+  }
+
+  /**
+   * Checks to confirm that a given trigger type is allowed for the element.
+   * Specifically, it confirms that if the element is in the embed, only a
+   * subset of the trigger types are allowed.
+   * @param  {!AnalyticsEventType} triggerType
+   * @param  {!Element} element
+   * @return {boolean} True if the trigger is allowed. False otherwise.
+   */
+  isTriggerAllowed_(triggerType, element) {
+    if (element.ownerDocument.defaultView != this.ampdoc.win) {
+      return ALLOWED_IN_EMBED.includes(triggerType);
+    }
+    return true;
   }
 }
 
+
 /**
- * @param {!Window} window
- * @return {!InstrumentationService}
+ * Represents the group of analytics triggers for a single config. All triggers
+ * are declared and released at the same time.
+ *
+ * @implements {../../../src/service.Disposable}
  */
-export function instrumentationServiceFor(window) {
-  return getService(window, 'amp-analytics-instrumentation', () => {
-    return new InstrumentationService(window);
-  });
+export class AnalyticsGroup {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   * @param {!Element} analyticsElement
+   * @param {!InstrumentationService} service
+   */
+  constructor(root, analyticsElement, service) {
+    // TODO(dvoytenko): remove `service` as soon as migration is complete.
+
+    /** @const */
+    this.root_ = root;
+    /** @const */
+    this.analyticsElement_ = analyticsElement;
+    /** @const */
+    this.service_ = service;
+
+    /** @private @const {!Array<!UnlistenDef>} */
+    this.listeners_ = [];
+  }
+
+  /** @override */
+  dispose() {
+    this.listeners_.forEach(listener => {
+      listener();
+    });
+  }
+
+  /**
+   * Adds a trigger with the specified config and listener. The config must
+   * contain `on` property specifying the type of the event.
+   *
+   * Triggers registered on a group are automatically released when the
+   * group is disposed.
+   *
+   * @param {!JsonObject} config
+   * @param {function(!AnalyticsEvent)} handler
+   */
+  addTrigger(config, handler) {
+    const eventType = dev().assertString(config['on']);
+    const trackerKey = startsWith(eventType, 'video-') ? 'video' : eventType;
+
+    let trackerProfile = EVENT_TRACKERS[trackerKey];
+    if (!trackerProfile && !isEnumValue(AnalyticsEventType, eventType)) {
+      trackerProfile = EVENT_TRACKERS['custom'];
+    }
+    if (trackerProfile) {
+      user().assert(
+          trackerProfile.allowedFor.indexOf(this.root_.getType()) != -1,
+          'Trigger type "%s" is not allowed in the %s',
+          eventType, this.root_.getType());
+      const tracker = this.root_.getTracker(
+          trackerProfile.name, trackerProfile.klass);
+      const unlisten = tracker.add(
+          this.analyticsElement_, eventType, config, handler);
+      this.listeners_.push(unlisten);
+    } else {
+      // TODO(dvoytenko): remove this use and `addListenerDepr_` once all
+      // triggers have been migrated..
+      this.service_.addListenerDepr_(config, handler, this.analyticsElement_);
+    }
+  }
 }
 
+
+/**
+ * It's important to resolve instrumentation asynchronously in elements that depends on
+ * it in multi-doc scope. Otherwise an element life-cycle could resolve way before we
+ * have the service available.
+ *
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!Promise<InstrumentationService>}
+ */
+export function instrumentationServicePromiseForDoc(nodeOrDoc) {
+  return /** @type {!Promise<InstrumentationService>} */ (
+      getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
+}
+
+/*
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!InstrumentationService}
+ */
+export function instrumentationServiceForDocForTesting(nodeOrDoc) {
+  registerServiceBuilderForDoc(
+      nodeOrDoc, 'amp-analytics-instrumentation', InstrumentationService);
+  return getServiceForDoc(nodeOrDoc, 'amp-analytics-instrumentation');
+}

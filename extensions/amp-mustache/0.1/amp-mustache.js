@@ -27,6 +27,7 @@ setUnescapedSanitizier(sanitizeFormattingHtml);
  * See {@link https://github.com/janl/mustache.js/}.
  *
  * @private Visible for testing.
+ * @extends {BaseTemplate$$module$src$service$template_impl}
  */
 export class AmpMustache extends AMP.BaseTemplate {
 
@@ -41,7 +42,7 @@ export class AmpMustache extends AMP.BaseTemplate {
   render(data) {
     const html = mustacheRender(this.template_, data);
     const sanitized = sanitizeHtml(html);
-    const root = this.getWin().document.createElement('div');
+    const root = this.win.document.createElement('div');
     root./*OK*/innerHTML = sanitized;
     return this.unwrap(root);
   }

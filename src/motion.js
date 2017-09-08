@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {timer} from './timer';
-import {vsyncFor} from './vsync';
+import {Services} from './services';
 
-/** @const {!Funtion} */
+/** @const {function()} */
 const NOOP_CALLBACK_ = function() {};
 
 /** @const {number} */
@@ -70,18 +69,20 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
  * zerp. For each iteration, the velocity is depreciated and the coordinates
  * are advanced from start X/Y to the destination according to velocity
  * vectors. For each such iteration the callback is called with the new x and y.
+ * @param {!Node} contextNode
  * @param {number} startX Start X coordinate.
  * @param {number} startY Start Y coordinate.
  * @param {number} veloX Starting X velocity.
  * @param {number} veloY Starting Y velocity.
  * @param {function(number, number):boolean} callback The callback for each
  *   step of the deceleration motion.
- * @param {!Vsync=} opt_vsync Mostly for testing only.
+ * @param {!./service/vsync-impl.Vsync=} opt_vsync Mostly for testing only.
  * @return {!Motion}
  */
-export function continueMotion(startX, startY, veloX, veloY, callback,
-    opt_vsync) {
-  return new Motion(startX, startY, veloX, veloY, callback, opt_vsync).start_();
+export function continueMotion(contextNode, startX, startY, veloX, veloY,
+    callback, opt_vsync) {
+  return new Motion(contextNode, startX, startY, veloX, veloY,
+      callback, opt_vsync).start_();
 }
 
 
@@ -93,19 +94,23 @@ export function continueMotion(startX, startY, veloX, veloY, callback,
  * motion.
  * @implements {IThenable}
  */
-class Motion {
+export class Motion {
   /**
+   * @param {!Node} contextNode Context node.
    * @param {number} startX Start X coordinate.
    * @param {number} startY Start Y coordinate.
    * @param {number} veloX Starting X velocity.
    * @param {number} veloY Starting Y velocity.
    * @param {function(number, number):boolean} callback The callback for each
    *   step of the deceleration motion.
-   * @param {!Vsync=} opt_vsync
+   * @param {!./service/vsync-impl.Vsync=} opt_vsync
    */
-  constructor(startX, startY, veloX, veloY, callback, opt_vsync) {
-    /** @private @const */
-    this.vsync_ = opt_vsync || vsyncFor(window);
+  constructor(contextNode, startX, startY, veloX, veloY, callback, opt_vsync) {
+    /** @private @const {!./service/vsync-impl.Vsync} */
+    this.vsync_ = opt_vsync || Services.vsyncFor(self);
+
+    /** @private @const {!Node} */
+    this.contextNode_ = contextNode;
 
     /** @private @const */
     this.callback_ = callback;
@@ -129,7 +134,7 @@ class Motion {
     this.velocityY_ = 0;
 
     /** @private {time} */
-    this.startTime_ = timer.now();
+    this.startTime_ = Date.now();
 
     /** @private {time} */
     this.lastTime_ = this.startTime_;
@@ -145,6 +150,9 @@ class Motion {
       this.resolve_ = resolve;
       this.reject_ = reject;
     });
+
+    /** @private {boolean} */
+    this.continuing_ = false;
   }
 
   /** @private */
@@ -173,9 +181,7 @@ class Motion {
   /**
    * Chains to the motion's promise that will resolve when the motion has
    * completed or will reject if motion has failed or was interrupted.
-   * @param {!Function=} opt_resolve
-   * @param {!Function=} opt_reject
-   * @return {!Promise}
+   * @override
    */
   then(opt_resolve, opt_reject) {
     if (!opt_resolve && !opt_reject) {
@@ -186,12 +192,12 @@ class Motion {
 
   /**
    * Callback for regardless whether the motion succeeds or fails.
-   * @param {!Function=} opt_callback
+   * @param {function()=} opt_callback
    * @return {!Promise}
    */
   thenAlways(opt_callback) {
     const callback = opt_callback || NOOP_CALLBACK_;
-    return this.then(callback, callback);
+    return /** @type {!Promise} */ (this.then(callback, callback));
   }
 
   /**
@@ -203,7 +209,7 @@ class Motion {
     this.velocityY_ = this.maxVelocityY_;
     const boundStep = this.stepContinue_.bind(this);
     const boundComplete = this.completeContinue_.bind(this, true);
-    return this.vsync_.runAnimMutateSeries(boundStep, 5000)
+    return this.vsync_.runAnimMutateSeries(this.contextNode_, boundStep, 5000)
         .then(boundComplete, boundComplete);
   }
 
@@ -219,7 +225,7 @@ class Motion {
       return false;
     }
 
-    this.lastTime_ = timer.now();
+    this.lastTime_ = Date.now();
     this.lastX_ += timeSincePrev * this.velocityX_;
     this.lastY_ += timeSincePrev * this.velocityY_;
     if (!this.fireMove_()) {
@@ -242,7 +248,7 @@ class Motion {
       return;
     }
     this.continuing_ = false;
-    this.lastTime_ = timer.now();
+    this.lastTime_ = Date.now();
     this.fireMove_();
     if (success) {
       this.resolve_();

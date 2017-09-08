@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+  <classpathentry including="**/*.java" kind="src" path="src"/>
+  <classpathentry including="**/*.java" kind="src" output="build/test-classes" path="test"/>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+  <classpathentry kind="lib" path="./../../third_party/closure-compiler/compiler.jar"/>
+  <classpathentry kind="lib" path="./../../third_party/closure-compiler/compiler-and-tests.jar"/>
+  <classpathentry kind="output" path="build/classes"/>
+</classpath>

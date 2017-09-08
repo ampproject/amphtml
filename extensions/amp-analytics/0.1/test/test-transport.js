@@ -21,7 +21,7 @@ import * as sinon from 'sinon';
 
 adopt(window);
 
-describe('transport', () => {
+describe('amp-analytics.transport', () => {
 
   let sandbox;
   beforeEach(() => {
@@ -98,8 +98,6 @@ describe('transport', () => {
 
   it('does not send a request when no transport methods are enabled', () => {
     setupStubs(true, true);
-    beaconRetval = false;
-    xhrRetval = false;
     sendRequest(window, 'https://example.com/test', {});
     assertCallCounts(0, 0, 0);
   });
@@ -110,9 +108,14 @@ describe('transport', () => {
     }).to.throw(/https/);
   });
 
+  it('should NOT allow __amp_source_origin', () => {
+    expect(() => {
+      sendRequest(window, 'https://twitter.com?__amp_source_origin=1');
+    }).to.throw(/Source origin is not allowed in/);
+  });
+
   describe('sendRequestUsingIframe', () => {
-    const url = 'http://iframe.localhost:9876/base/test/' +
-        'fixtures/served/iframe.html';
+    const url = 'http://iframe.localhost:9876/test/fixtures/served/iframe.html';
     it('should create and delete an iframe', () => {
       const clock = sandbox.useFakeTimers();
       const iframe = sendRequestUsingIframe(window, url);
@@ -136,7 +139,7 @@ describe('transport', () => {
 
     it('forbids same origin', () => {
       expect(() => {
-        sendRequestUsingIframe(window, 'http://localhost:9876/base/');
+        sendRequestUsingIframe(window, 'http://localhost:9876/');
       }).to.throw(
           /Origin of iframe request must not be equal to the document origin./
       );

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var del = require('del');
 var fs = require('fs');
@@ -26,8 +27,8 @@ var util = require('gulp-util');
 
 var tempFolderName = '__size-temp';
 
-var MAX_FILE_SIZE_POS = 0;
-var MIN_FILE_SIZE_POS = 1;
+var MIN_FILE_SIZE_POS = 0;
+var GZIP_POS = 1;
 var FILENAME_POS = 2;
 
 // normalized table headers
@@ -52,7 +53,7 @@ var tableOptions = {
 function findMaxIndexByFilename(rows, predicate) {
   for (var i = 0; i < rows.length; i++) {
     var curRow = rows[i];
-    var curFilename = curRow[2];
+    var curFilename = curRow[FILENAME_POS];
     if (predicate(curFilename)) {
       return i;
     }
@@ -80,7 +81,7 @@ function normalizeRow(rows, minFilename, maxFilename, mergeNames) {
     if (mergeNames) {
       rows[minIndex][FILENAME_POS] += ' / ' + rows[maxIndex][FILENAME_POS];
     }
-    rows[minIndex].unshift(rows[maxIndex][MAX_FILE_SIZE_POS]);
+    rows[minIndex].unshift(rows[maxIndex][MIN_FILE_SIZE_POS]);
     rows.splice(maxIndex, 1);
   }
 }
@@ -96,6 +97,23 @@ function normalizeRows(rows) {
 
   // normalize integration.js
   normalizeRow(rows, 'current-min/f.js', 'current/integration.js', true);
+
+  normalizeRow(rows, 'current-min/ampcontext-v0.js',
+      'current/ampcontext-lib.js', true);
+
+  // normalize alp.js
+  normalizeRow(rows, 'alp.js', 'alp.max.js', true);
+
+  // normalize amp-shadow.js
+  normalizeRow(rows, 'shadow-v0.js', 'amp-shadow.js', true);
+
+  normalizeRow(rows, 'amp4ads-v0.js', 'amp-inabox.js', true);
+
+  normalizeRow(rows, 'amp4ads-host-v0.js', 'amp-inabox-host.js', true);
+
+  // normalize sw.js
+  normalizeRow(rows, 'sw.js', 'sw.max.js', true);
+  normalizeRow(rows, 'sw-kill.js', 'sw-kill.max.js', true);
 
   // normalize extensions
   var curName = null;
@@ -201,6 +219,7 @@ function sizeTask() {
   gulp.src([
       'dist/**/*.js',
       '!dist/**/*-latest.js',
+      '!dist/**/*check-types.js',
       'dist.3p/{current,current-min}/**/*.js',
     ])
     .pipe(sizer())

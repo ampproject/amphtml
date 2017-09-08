@@ -20,8 +20,17 @@ import {
   isProxyOrigin,
   parseUrl,
   resolveRelativeUrl,
+  checkCorsUrl,
 } from './url';
 import {parseSrcset} from './srcset';
+import {user} from './log';
+import {urls} from './config';
+import {map} from './utils/object';
+import {startsWith} from './string';
+
+
+/** @private @const {string} */
+const TAG = 'sanitizer';
 
 
 /**
@@ -38,7 +47,6 @@ const BLACKLISTED_TAGS = {
   'frameset': true,
   'iframe': true,
   'img': true,
-  'input': true,
   'link': true,
   'meta': true,
   'object': true,
@@ -48,7 +56,6 @@ const BLACKLISTED_TAGS = {
   // intention to keep this block for any longer than we have to.
   'svg': true,
   'template': true,
-  'textarea': true,
   'video': true,
 };
 
@@ -59,9 +66,18 @@ const SELF_CLOSING_TAGS = {
   'col': true,
   'hr': true,
   'img': true,
+  'input': true,
   'source': true,
   'track': true,
   'wbr': true,
+  'area': true,
+  'base': true,
+  'command': true,
+  'embed': true,
+  'keygen': true,
+  'link': true,
+  'meta': true,
+  'param': true,
 };
 
 
@@ -92,8 +108,19 @@ const WHITELISTED_ATTRS = [
   'href',
   'on',
   'placeholder',
+  'option',
+  /* Attributes added for amp-bind */
+  // TODO(kmh287): Add more whitelisted attributes for bind?
+  'text',
 ];
 
+
+/** @const {!RegExp} */
+const WHITELISTED_ATTR_PREFIX_REGEX = /^data-/i;
+
+
+/** @const {!Array<string>} */
+const WHITELISTED_TARGETS = ['_top', '_blank'];
 
 /** @const {!Array<string>} */
 const BLACKLISTED_ATTR_VALUES = [
@@ -103,6 +130,32 @@ const BLACKLISTED_ATTR_VALUES = [
   /*eslint no-script-url: 0*/ '<script',
   /*eslint no-script-url: 0*/ '</script',
 ];
+
+/** @const {!Object<string, !Object<string, !RegExp>>} */
+const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = {
+  'input': {
+    'type': /(?:image|file|password|button)/i,
+  },
+};
+
+
+/** @const {!Array<string>} */
+const BLACKLISTED_FIELDS_ATTR = [
+  'form',
+  'formaction',
+  'formmethod',
+  'formtarget',
+  'formnovalidate',
+  'formenctype',
+];
+
+
+/** @const {!Object<string, !Array<string>>} */
+const BLACKLISTED_TAG_SPECIFIC_ATTRS = {
+  'input': BLACKLISTED_FIELDS_ATTR,
+  'textarea': BLACKLISTED_FIELDS_ATTR,
+  'select': BLACKLISTED_FIELDS_ATTR,
+};
 
 
 /**
@@ -134,9 +187,19 @@ export function sanitizeHtml(html) {
         }
         return;
       }
+      const bindAttribsIndices = map();
+      // Special handling for attributes for amp-bind which are formatted as
+      // [attr]. The brackets are restored at the end of this function.
+      for (let i = 0; i < attribs.length; i += 2) {
+        const attr = attribs[i];
+        if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
+          bindAttribsIndices[i] = true;
+          attribs[i] = attr.slice(1, -1);
+        }
+      }
       if (BLACKLISTED_TAGS[tagName]) {
         ignore++;
-      } else if (tagName.indexOf('amp-') != 0) {
+      } else if (!startsWith(tagName, 'amp-')) {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
@@ -146,11 +209,42 @@ export function sanitizeHtml(html) {
         } else {
           attribs = scrubbed.attribs;
           // Restore some of the attributes that AMP is directly responsible
-          // for, such as "on".
+          // for, such as "on"
           for (let i = 0; i < attribs.length; i += 2) {
-            if (WHITELISTED_ATTRS.indexOf(attribs[i]) != -1) {
+            const attrib = attribs[i];
+            if (WHITELISTED_ATTRS.includes(attrib)) {
+              attribs[i + 1] = savedAttribs[i + 1];
+            } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
               attribs[i + 1] = savedAttribs[i + 1];
             }
+          }
+        }
+        // `<A>` has special target rules:
+        // - Default target is "_top";
+        // - Allowed targets are "_blank", "_top";
+        // - All other targets are rewritted to "_top".
+        if (tagName == 'a') {
+          let index = -1;
+          let hasHref = false;
+          for (let i = 0; i < savedAttribs.length; i += 2) {
+            if (savedAttribs[i] == 'target') {
+              index = i + 1;
+            } else if (savedAttribs[i] == 'href') {
+              // Only allow valid `href` values.
+              hasHref = attribs[i + 1] != null;
+            }
+          }
+          let origTarget = index != -1 ? savedAttribs[index] : null;
+          if (origTarget != null) {
+            origTarget = origTarget.toLowerCase();
+            if (WHITELISTED_TARGETS.indexOf(origTarget) != -1) {
+              attribs[index] = origTarget;
+            } else {
+              attribs[index] = '_top';
+            }
+          } else if (hasHref) {
+            attribs.push('target');
+            attribs.push('_top');
           }
         }
       }
@@ -165,14 +259,18 @@ export function sanitizeHtml(html) {
       for (let i = 0; i < attribs.length; i += 2) {
         const attrName = attribs[i];
         const attrValue = attribs[i + 1];
-        if (!isValidAttr(attrName, attrValue)) {
+        if (!isValidAttr(tagName, attrName, attrValue)) {
           continue;
         }
         emit(' ');
-        emit(attrName);
+        if (bindAttribsIndices[i]) {
+          emit('[' + attrName + ']');
+        } else {
+          emit(attrName);
+        }
         emit('="');
         if (attrValue) {
-          emit(htmlSanitizer.escapeAttrib(resolveAttrValue(
+          emit(htmlSanitizer.escapeAttrib(rewriteAttributeValue(
               tagName, attrName, attrValue)));
         }
         emit('"');
@@ -207,12 +305,12 @@ export function sanitizeHtml(html) {
 export function sanitizeFormattingHtml(html) {
   return htmlSanitizer.sanitizeWithPolicy(html,
       function(tagName, unusedAttrs) {
-        if (WHITELISTED_FORMAT_TAGS.indexOf(tagName) == -1) {
+        if (!WHITELISTED_FORMAT_TAGS.includes(tagName)) {
           return null;
         }
         return {
-          'tagName': tagName,
-          'attribs': [],
+          tagName,
+          attribs: [],
         };
       }
   );
@@ -221,19 +319,28 @@ export function sanitizeFormattingHtml(html) {
 
 /**
  * Whether the attribute/value are valid.
+ * @param {string} tagName
  * @param {string} attrName
  * @param {string} attrValue
  * @return {boolean}
  */
-export function isValidAttr(attrName, attrValue) {
+export function isValidAttr(tagName, attrName, attrValue) {
 
   // "on*" attributes are not allowed.
-  if (attrName.indexOf('on') == 0 && attrName != 'on') {
+  if (startsWith(attrName, 'on') && attrName != 'on') {
     return false;
   }
 
   // Inline styles are not allowed.
   if (attrName == 'style') {
+    return false;
+  }
+
+  // See validator-main.protoascii
+  // https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
+  if (attrName == 'class' &&
+      attrValue &&
+      /(^|\W)i-amphtml-/i.test(attrValue)) {
     return false;
   }
 
@@ -247,20 +354,40 @@ export function isValidAttr(attrName, attrValue) {
     }
   }
 
+  // Remove blacklisted attributes from specific tags e.g. input[formaction].
+  const attrNameBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
+  if (attrNameBlacklist && attrNameBlacklist.indexOf(attrName) != -1) {
+    return false;
+  }
+
+  // Remove blacklisted values for specific attributes for specific tags
+  // e.g. input[type=image].
+  const attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+  if (attrBlacklist) {
+    const blacklistedValuesRegex = attrBlacklist[attrName];
+    if (blacklistedValuesRegex &&
+        attrValue.search(blacklistedValuesRegex) != -1) {
+      return false;
+    }
+  }
+
   return true;
 }
 
 /**
- * Resolves the attribute value. The main purpose is to rewrite URLs as
- * described in `resolveUrlAttr`.
+ * If (tagName, attrName) is a CDN-rewritable URL attribute, returns the
+ * rewritten URL value. Otherwise, returns the unchanged `attrValue`.
+ * @see resolveUrlAttr for rewriting rules.
  * @param {string} tagName
  * @param {string} attrName
  * @param {string} attrValue
  * @return {string}
  */
-function resolveAttrValue(tagName, attrName, attrValue) {
-  if (attrName == 'src' || attrName == 'href' || attrName == 'srcset') {
-    return resolveUrlAttr(tagName, attrName, attrValue, window.location);
+export function rewriteAttributeValue(tagName, attrName, attrValue) {
+  const tag = tagName.toLowerCase();
+  const attr = attrName.toLowerCase();
+  if (attr == 'src' || attr == 'href' || attr == 'srcset') {
+    return resolveUrlAttr(tag, attr, attrValue, self.location);
   }
   return attrValue;
 }
@@ -280,10 +407,11 @@ function resolveAttrValue(tagName, attrName, attrValue) {
  * @private Visible for testing.
  */
 export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
+  checkCorsUrl(attrValue);
   const isProxyHost = isProxyOrigin(windowLocation);
   const baseUrl = parseUrl(getSourceUrl(windowLocation));
 
-  if (attrName == 'href' && attrValue.indexOf('#') != 0) {
+  if (attrName == 'href' && !startsWith(attrValue, '#')) {
     return resolveRelativeUrl(attrValue, baseUrl);
   }
 
@@ -299,9 +427,9 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
     try {
       srcset = parseSrcset(attrValue);
     } catch (e) {
-      // Do not failed the whole template just because one srcset is broken.
+      // Do not fail the whole template just because one srcset is broken.
       // An AMP element will pick it up and report properly.
-      setTimeout(() => {throw e;});
+      user().error(TAG, 'Failed to parse srcset: ', e);
       return attrValue;
     }
     const sources = srcset.getSources();
@@ -332,7 +460,7 @@ function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
   }
 
   // Rewrite as a proxy URL.
-  return 'https://cdn.ampproject.org/i/' +
+  return `${urls.cdn}/i/` +
       (src.protocol == 'https:' ? 's/' : '') +
       encodeURIComponent(src.host) +
       src.pathname + (src.search || '') + (src.hash || '');

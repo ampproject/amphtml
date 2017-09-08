@@ -15,6 +15,7 @@
  */
 
 import * as st from '../../src/style';
+import * as sinon from 'sinon';
 
 describe('Style', () => {
 
@@ -26,7 +27,6 @@ describe('Style', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('toggle', () => {
@@ -74,8 +74,8 @@ describe('Style', () => {
   });
 
   it('translate', () => {
-    expect(st.translate(101, 201)).to.equal('translate(101px,201px)');
-    expect(st.translate('101vw,201em')).to.equal('translate(101vw,201em)');
+    expect(st.translate(101, 201)).to.equal('translate(101px, 201px)');
+    expect(st.translate('101vw, 201em')).to.equal('translate(101vw, 201em)');
     expect(st.translate(101)).to.equal('translate(101px)');
     expect(st.translate('101vw')).to.equal('translate(101vw)');
   });
@@ -83,6 +83,15 @@ describe('Style', () => {
   it('camelCaseToTitleCase', () => {
     const str = 'theQuickBrownFox';
     expect(st.camelCaseToTitleCase(str)).to.equal('TheQuickBrownFox');
+  });
+
+  it('removeAlphaFromColor', () => {
+    expect(st.removeAlphaFromColor('rgba(1, 1, 1, 0)')).to.equal(
+        'rgba(1, 1, 1, 1)');
+    expect(st.removeAlphaFromColor('rgb(1, 1, 1)')).to.equal(
+        'rgb(1, 1, 1)');
+    expect(st.removeAlphaFromColor('rgba(0, 0, 0,-0.5)')).to.equal(
+        'rgba(0, 0, 0, 1)');
   });
 
   describe('getVendorJsPropertyName', () => {

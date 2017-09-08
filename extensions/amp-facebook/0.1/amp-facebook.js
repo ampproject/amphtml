@@ -15,20 +15,40 @@
  */
 
 
-import {getIframe, prefetchBootstrap} from '../../../src/3p-frame';
-import {listen} from '../../../src/iframe-helper';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {listenFor} from '../../../src/iframe-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
-
+import {removeElement} from '../../../src/dom';
+import {dashToUnderline} from '../../../src/string';
 
 class AmpFacebook extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
+  }
+
   /** @override */
-  preconnectCallback(onLayout) {
-    this.preconnect.url('https://facebook.com', onLayout);
+  renderOutsideViewport() {
+    // We are conservative about loading heavy embeds.
+    // This will still start loading before they become visible, but it
+    // won't typically load a large number of embeds.
+    return 0.75;
+  }
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://facebook.com', opt_onLayout);
     // Hosts the facebook SDK.
-    this.preconnect.prefetch(
-        'https://connect.facebook.net/en_US/sdk.js', 'script');
-    prefetchBootstrap(this.getWin());
+    this.preconnect.preload(
+        'https://connect.facebook.net/' + dashToUnderline(window.navigator.language) + '/sdk.js', 'script');
+    preloadBootstrap(this.win, this.preconnect);
   }
 
   /** @override */
@@ -38,21 +58,33 @@ class AmpFacebook extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.element.ownerDocument.defaultView,
-        this.element, 'facebook');
+    const iframe = getIframe(this.win, this.element, 'facebook');
     this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
-    listen(iframe, 'embed-size', data => {
-      iframe.height = data.height;
-      iframe.width = data.width;
-      const amp = iframe.parentElement;
-      amp.setAttribute('height', data.height);
-      amp.setAttribute('width', data.width);
-      this./*OK*/changeHeight(data.height);
+    listenFor(iframe, 'embed-size', data => {
+      this./*OK*/changeHeight(data['height']);
     }, /* opt_is3P */true);
-    return loadPromise(iframe);
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
   }
-};
 
-AMP.registerElement('amp-facebook', AmpFacebook);
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
+  }
+}
+
+
+AMP.extension('amp-facebook', '0.1', AMP => {
+  AMP.registerElement('amp-facebook', AmpFacebook);
+});

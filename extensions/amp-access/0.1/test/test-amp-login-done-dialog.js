@@ -85,7 +85,6 @@ describe('LoginDoneDialog', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function succeed() {
@@ -169,11 +168,11 @@ describe('LoginDoneDialog', () => {
     it('should post message to opener', () => {
       openerMock.expects('postMessage')
           .withExactArgs(
-              sinon.match(arg => {
-                return (arg.sentinel == 'amp' && arg.type == 'result' &&
+          sinon.match(arg => {
+            return (arg.sentinel == 'amp' && arg.type == 'result' &&
                     arg.result == '#result1');
-              }),
-              '*')
+          }),
+          '*')
           .once();
       const promise = dialog.postbackOrRedirect_();
       return Promise.resolve()
@@ -196,7 +195,7 @@ describe('LoginDoneDialog', () => {
           .then(() => 'SUCCESS', error => 'ERROR ' + error)
           .then(res => {
             expect(res).to.equal('SUCCESS');
-            expect(windowApi.location.replace.callCount).to.equal(1);
+            expect(windowApi.location.replace).to.be.calledOnce;
             expect(windowApi.location.replace.firstCall.args[0]).to.equal(
                 'http://acme.com/doc1');
           });
@@ -210,7 +209,7 @@ describe('LoginDoneDialog', () => {
           .then(() => 'SUCCESS', error => 'ERROR ' + error)
           .then(res => {
             expect(res).to.equal('SUCCESS');
-            expect(windowApi.location.replace.callCount).to.equal(1);
+            expect(windowApi.location.replace).to.be.calledOnce;
             expect(windowApi.location.replace.firstCall.args[0]).to.equal(
                 'https://acme.com/doc1');
           });
@@ -223,7 +222,7 @@ describe('LoginDoneDialog', () => {
       expect(() => {
         dialog.postbackOrRedirect_();
       }).to.throw(/URL must start with/);
-      expect(windowApi.location.replace.callCount).to.equal(0);
+      expect(windowApi.location.replace).to.have.not.been.called;
     });
 
     it('should fail without opener and redirect URL', () => {
@@ -239,11 +238,11 @@ describe('LoginDoneDialog', () => {
     it('should fail with timeout', () => {
       openerMock.expects('postMessage')
           .withExactArgs(
-              sinon.match(arg => {
-                return (arg.sentinel == 'amp' && arg.type == 'result' &&
+          sinon.match(arg => {
+            return (arg.sentinel == 'amp' && arg.type == 'result' &&
                     arg.result == '#result1');
-              }),
-              '*')
+          }),
+          '*')
           .once();
       const promise = dialog.postback_();
       return Promise.resolve()
@@ -262,10 +261,10 @@ describe('LoginDoneDialog', () => {
       windowMock.expects('close').once();
       dialog.postbackError_ = sandbox.spy();
       dialog.postbackSuccess_();
-      expect(dialog.postbackError_.callCount).to.equal(0);
+      expect(dialog.postbackError_).to.have.not.been.called;
 
       clock.tick(10000);
-      expect(dialog.postbackError_.callCount).to.equal(1);
+      expect(dialog.postbackError_).to.be.calledOnce;
     });
 
     it('should configure error mode for "postback"', () => {

@@ -17,55 +17,66 @@
 @import "../../../third_party/optimized-svg-icons/amp-social-share-svgs.css";
 
 amp-social-share {
-  height: 44px;
-  width: 60px;
-}
-
-amp-social-share span {
-  display: block;
-  border-radius: 5px;
-  height: 44px;
-  width: 60px;
-}
-
-amp-social-share a {
-  display: block;
-  padding: 12px;
   background-repeat: no-repeat;
   background-position: center;
+  background-size: contain;
   text-decoration: none;
+  cursor: pointer;
+  position: relative;
 }
 
+/**
+ * Note: Attribute selectors were used initially here but we switched to using
+ * class-based selector to style each type because of a bug on iOS Safari 8.
+ * See https://github.com/ampproject/amphtml/issues/4277 for more details.
+ */
+
 /* Twitter Styling */
-amp-social-share .twitter {
+.amp-social-share-twitter {
   background-color: #55acee;
 }
 
-amp-social-share .twitter a {
-  background-image: url('https://g.twimg.com/dev/documentation/image/Twitter_logo_white_32.png');
-}
-
 /* Facebook Styling */
-amp-social-share .facebook {
+.amp-social-share-facebook {
   background-color: #3b5998;
 }
 
 /* Pinterest Styling */
-amp-social-share .pinterest {
+.amp-social-share-pinterest {
   background-color: #bd081c;
 }
 
 /* LinkedIn Styling */
-amp-social-share .linkedin {
+.amp-social-share-linkedin {
   background-color: #0077b5;
 }
 
 /* Google+ Styling */
-amp-social-share .gplus {
+.amp-social-share-gplus {
   background-color: #dc4e41;
 }
 
+/* Tumblr Styling */
+.amp-social-share-tumblr {
+  background-color: #3c5a77;
+}
+
 /* Email Styling */
-amp-social-share .email {
+.amp-social-share-email {
+  background-color: #000000;
+}
+
+/* Whatsapp Styling */
+.amp-social-share-whatsapp {
+  background-color: #25d366;
+}
+
+/* SMS Styling */
+.amp-social-share-sms {
+  background-color: #CA2B63;
+}
+
+/* "system" styling */
+.amp-social-share-system {
   background-color: #000000;
 }
