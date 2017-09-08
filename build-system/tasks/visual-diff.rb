@@ -236,11 +236,15 @@ def generateSnapshots(page, webpages)
     Percy::Capybara.snapshot(page, name: 'Blank page')
   end
   for config in CONFIGS
-    puts green('Switching to the ') + cyan("#{config}") + green(' AMP config')
+    if not ENV['TRAVIS']
+      puts green('Switching to the ') + cyan("#{config}") + green(' AMP config')
+    end
     configCmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --#{config}"
     system(configCmd, :out=>OUT)
-    puts green('Generating snapshots using the ') + cyan("#{config}") +
-        green(' AMP config')
+    if not ENV['TRAVIS']
+      puts green('Generating snapshots using the ') + cyan("#{config}") +
+          green(' AMP config')
+    end
     webpages.each do |webpage|
       url = webpage["url"]
       name = "#{webpage["name"]} (#{config})"
@@ -252,7 +256,9 @@ def generateSnapshots(page, webpages)
           page, forbidden_css, loading_incomplete_css, loading_complete_css)
       Percy::Capybara.snapshot(page, name: name)
     end
-    puts green('Switching back to the default AMP config')
+    if not ENV['TRAVIS']
+      puts green('Switching back to the default AMP config')
+    end
     removeCmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --remove"
     system(removeCmd, :out=>OUT)
   end
