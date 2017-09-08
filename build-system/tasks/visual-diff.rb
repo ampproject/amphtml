@@ -49,6 +49,28 @@ OUT = ENV['TRAVIS'] ? "/dev/null" : :out
 def red(text); "\e[31m#{text}\e[0m"; end
 def cyan(text); "\e[36m#{text}\e[0m"; end
 def green(text); "\e[32m#{text}\e[0m"; end
+def yellow(text); "\e[33m#{text}\e[0m"; end
+
+
+# Logs a message to the console.
+#
+# Args:
+# - mode: 'verbose', 'info', 'warning', or 'error'.
+# - message: Message to print on the console.
+def log(mode, message)
+  if mode == 'verbose' and not ENV['TRAVIS']
+    puts green('VERBOSE: ') + message
+  end
+  if mode == 'info'
+    puts green('INFO: ') + message
+  end
+  if mode == 'warning'
+    puts yellow('WARNING: ') + message
+  end
+  if mode == 'error'
+    puts red('ERROR: ') + message
+  end
+end
 
 
 # Launches a background AMP webserver for unminified js using gulp.
@@ -118,8 +140,8 @@ end
 # Returns:
 # - The eventual status of the Percy build.
 def waitForBuildCompletion(buildId)
-  puts green('Waiting for Percy build ') + cyan("#{buildId}") +
-      green(' to be processed...')
+  log('info',
+      'Waiting for Percy build ' + cyan("#{buildId}") + ' to be processed...')
   tries = 0
   until ['finished', 'failed'].include?(
       (status = getBuildStatus(buildId))['state'])
@@ -152,15 +174,15 @@ def verifyBuildStatus(status, buildId)
     else
       # For master and PR branches, just print a warning, since the diff may be
       # intentional.
-      puts red('Percy build ') + cyan("#{buildId}") +
-          red(' contains visual diffs.')
-      puts red('If this is an intentional visual change,') +
-          red(' you must approve the snapshots at ') +
-          cyan("#{PERCY_BUILD_URL}/#{buildId}")
+      log('warning',
+          'Percy build ' + cyan("#{buildId}") + ' contains visual diffs.')
+      log('warning',
+          'If the diffs are intentional, you must approve the snapshots at ' +
+          cyan("#{PERCY_BUILD_URL}/#{buildId}"))
     end
   else
-    puts green('Percy build ') + cyan("#{buildId}") +
-        green(' contained no visual diffs.')
+    log('info',
+        'Percy build ' + cyan("#{buildId}") + ' contained no visual diffs.')
   end
 end
 
@@ -207,7 +229,7 @@ def runVisualTests(visualTestsConfig)
   page = Capybara::Session.new(:poltergeist)
   build = Percy::Capybara.initialize_build
   buildId = build['data']['id']
-  puts green('Starting Percy build ') + cyan("#{buildId}")
+  log('info', 'Started Percy build ' + cyan("#{buildId}") + '...')
   page.driver.options[:phantomjs] = Phantomjs.path
   page.driver.options[:js_errors] = true
   page.driver.options[:phantomjs_options] =
@@ -216,11 +238,11 @@ def runVisualTests(visualTestsConfig)
   generateSnapshots(page, visualTestsConfig['webpages'])
   result = Percy::Capybara.finalize_build
   if (result['success'])
-    puts green('Percy build ') + cyan("#{buildId}") +
-        green(' is now being processed in the background.')
+    log('info',
+        'Build ' + cyan("#{buildId}") + ' is now being processed by Percy.')
     buildId
   else
-    puts red('Percy build ') + cyan("#{buildId}") + red(' failed!')
+    log('error', 'Percy build ' + cyan("#{buildId}") + ' failed!')
     raise 'Build failure'
   end
 end
@@ -237,15 +259,11 @@ def generateSnapshots(page, webpages)
     Percy::Capybara.snapshot(page, name: 'Blank page')
   end
   for config in CONFIGS
-    if not ENV['TRAVIS']
-      puts green('Switching to the ') + cyan("#{config}") + green(' AMP config')
-    end
+    log('verbose', 'Switching to the ' + cyan("#{config}") + ' AMP config')
     configCmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --#{config}"
     system(configCmd, :out=>OUT)
-    if not ENV['TRAVIS']
-      puts green('Generating snapshots using the ') + cyan("#{config}") +
-          green(' AMP config')
-    end
+    log('verbose',
+        'Generating snapshots using the ' + cyan("#{config}") + ' AMP config')
     webpages.each do |webpage|
       url = webpage["url"]
       name = "#{webpage["name"]} (#{config})"
@@ -257,9 +275,7 @@ def generateSnapshots(page, webpages)
           page, forbidden_css, loading_incomplete_css, loading_complete_css)
       Percy::Capybara.snapshot(page, name: name)
     end
-    if not ENV['TRAVIS']
-      puts green('Switching back to the default AMP config')
-    end
+    log('verbose', 'Switching back to the default AMP config')
     removeCmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --remove"
     system(removeCmd, :out=>OUT)
   end
@@ -282,23 +298,21 @@ def verifyCssElements(
   if forbidden_css
     forbidden_css.each do |css|
       if page.has_css?(css)  # No implicit wait.
-        puts red("ERROR: ") + "page has CSS element " + cyan("#{css}")
+        log('error', 'page has CSS element ' + cyan("#{css}"))
       end
     end
   end
   if loading_incomplete_css
     loading_incomplete_css.each do |css|
       if !page.has_no_css?(css)  # Implicitly waits for element to disappear.
-        puts red("ERROR: ") + "page still has CSS element "\
-            + cyan("#{css}")
+        log('error', 'page still has CSS element ' + cyan("#{css}"))
       end
     end
   end
   if loading_complete_css
     loading_complete_css.each do |css|
       if !page.has_css?(css)  # Implicitly waits for element to appear.
-        puts red("ERROR: ") + "page does not yet have CSS element "\
-            + cyan("#{css}")
+        log('error', 'page does not yet have CSS element ' + cyan("#{css}"))
       end
     end
   end
@@ -327,7 +341,8 @@ end
 # Enables us to require percy checks on GitHub, and yet, not have to do a full
 # build for every PR.
 def createEmptyBuild()
-  puts "Skipping visual diff tests and generating a blank Percy build..."
+  log('info',
+      'Skipping visual diff tests and generating a blank Percy build...')
   Percy.config.default_widths = [375]
   server = 'http://localhost'  # Not actually used.
   blank_assets_dir = File.expand_path(
@@ -353,15 +368,15 @@ def main()
     exit
   end
   unless ENV['PERCY_PROJECT'] && ENV['PERCY_TOKEN']
-    puts red("ERROR: ") + "Could not find " + cyan("PERCY_PROJECT") + " and " +
-        cyan("PERCY_TOKEN") + " environment variables."
+    log('error', 'Could not find ' + cyan('PERCY_PROJECT') + ' and ' +
+        cyan('PERCY_TOKEN') + ' environment variables.')
     raise 'Missing environment variables'
   end
   begin
     setDebuggingLevel()
     pid = launchWebServer()
     if not waitForWebServer()
-      puts red("ERROR: ") + "Failed to start webserver"
+      log('error', 'Failed to start webserver')
       raise 'Webserver launch failure'
     end
     visualTestsConfigJson = loadVisualTestsConfigJson()
