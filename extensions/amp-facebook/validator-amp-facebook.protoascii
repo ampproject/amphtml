@@ -29,7 +29,6 @@ tags: {  # amp-facebook
 tags: {  # <amp-facebook>
   html_format: AMP
   tag_name: "AMP-FACEBOOK"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-facebook"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
