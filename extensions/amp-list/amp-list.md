@@ -40,7 +40,7 @@ using a supplied template.</td>
 
 ## Usage
 
-The `amp-list` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains an array, which is rendered in the specified template.
+The `amp-list` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains data, which is rendered in the specified template.
 
 {% call callout('Important', type='caution') %}
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
@@ -167,7 +167,7 @@ Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/
 ##### src (required)
 
 The URL of the remote endpoint that returns the JSON that will be rendered
-within this `amp-list`. This must be a CORS HTTP service. The URL's protocol must be HTTPS.
+within this `amp-list`. This must be a CORS HTTP service. The URL's protocol must be HTTPS. 
 
 {% call callout('Important', type='caution') %}
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
@@ -195,7 +195,8 @@ Here's an example that specifies including credentials to display personalized c
 
 ##### items (optional)
 
-Defines the expression to locate the array to be rendered within the response. This is a dot-notated expression that navigates via fields of the JSON response.
+Defines the expression to locate the array to be rendered within the response. This is a dot-notated expression that navigates via fields of the JSON response. 
+By defaut `amp-list` expects an array, the `single-result` attribute may be used to load data from an object.
 
 - The default value is `"items"`. The expected response: `{items: [...]}`.
 - If the response itself is the desired array, use the value of `"."`. The expected response is: `[...]`.
@@ -208,6 +209,16 @@ When `items="items"` is specified (which, is the default) the response must be a
   "items": [...]
 }
 ```
+
+#### max-items (optional)
+
+An integer value spcifying the maximum length of the items array to be rendered. 
+The `items` array will be trucated to `max-items` entries if the returned value exceeds `max-items`.
+
+#### single-result (optional)
+
+Causes `amp-list` to treat the returned result as if it were a single element array. An object response will be wrapped in an array so
+`{items: {...}}` will behave as if it were `{items: [{...}]}`.  
 
 ##### common attributes
 
