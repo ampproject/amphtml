@@ -41,6 +41,8 @@ const LightboxControlsModes = {
   HIDE_CONTROLS: 0,
 };
 
+const DESC_BOX_PADDING_TOP = 50;
+
 /**
  * TODO(aghassemi): Make lightbox-manager into a doc-level service.
  * @private  {!./service/lightbox-manager-impl.LightboxManager}
@@ -96,9 +98,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @private  {?Element} */
     this.topBar_ = null;
-
-    /** @private  {?Element} */
-    this.topFill_ = null;
 
     /** @private  {?Element} */
     this.topGradient_ = null;
@@ -269,34 +268,38 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         state.prevDescTextAreaHeight =
             this.descriptionTextArea_./*OK*/scrollHeight;
         state.descBoxHeight = this.descriptionBox_./*OK*/clientHeight;
+        state.descBoxPaddingTop = DESC_BOX_PADDING_TOP;
       };
 
       const measureAfterExpandingDescTextArea = state => {
         state.descTextAreaHeight = this.descriptionTextArea_./*OK*/scrollHeight;
-        state.descBoxHeight = this.descriptionBox_./*OK*/clientHeight;
       };
 
       const mutateAnimateDesc = state => {
-        const finalDiffHeight =
+        const finalDescTextAreaTop =
             state.descBoxHeight > state.descTextAreaHeight ?
-            state.descBoxHeight - state.descTextAreaHeight : 0;
+            state.descBoxHeight - state.descBoxPaddingTop -
+            state.descTextAreaHeight : 0;
         const tempOffsetHeight =
             state.descBoxHeight > state.descTextAreaHeight ?
             state.descTextAreaHeight - state.prevDescTextAreaHeight :
-            state.descBoxHeight - state.prevDescTextAreaHeight;
-        this.animateDescOverflow_(tempOffsetHeight, finalDiffHeight);
+            state.descBoxHeight - state.descBoxPaddingTop -
+            state.prevDescTextAreaHeight;
+        this.animateDescOverflow_(tempOffsetHeight, finalDescTextAreaTop);
       };
 
       const mutateExpandingDescTextArea = state => {
         this.descriptionTextArea_.classList.remove('non-expanded');
-        const tempDiffHeight =
-            state.descBoxHeight - state.prevDescTextAreaHeight;
-        setStyle(this.descriptionTextArea_, 'top', `${tempDiffHeight}px`);
+        const tempDescTextAreaTop = state.descBoxHeight -
+            state.descBoxPaddingTop - state.prevDescTextAreaHeight;
+        setStyle(this.descriptionTextArea_, 'top', `${tempDescTextAreaTop}px`);
         this.vsync_.run({
           measure: measureAfterExpandingDescTextArea,
           mutate: mutateAnimateDesc,
         }, {
           prevDescTextAreaHeight: state.prevDescTextAreaHeight,
+          descBoxHeight: state.descBoxHeight,
+          descBoxPaddingTop: state.descBoxPaddingTop,
         });
       };
 
@@ -319,21 +322,21 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * @param {number} tempOffsetHeight
-   * @param {number} finalDiffHeight
+   * @param {number} diffTop
+   * @param {number} finalTop
    * @param {number=} duration
    * @param {string=} curve
    * @private
    */
-  animateDescOverflow_(tempOffsetHeight, finalDiffHeight,
+  animateDescOverflow_(diffTop, finalTop,
                               duration = 500, curve = 'ease-out') {
     const textArea = dev().assertElement(this.descriptionTextArea_);
-    const tr = numeric(0, tempOffsetHeight);
+    const tr = numeric(0, diffTop);
     return Animation.animate(textArea, time => {
       const p = tr(time);
       setStyle(textArea, 'transform', `translateY(-${p}px)`);
     }, duration, curve).thenAlways(() => {
-      setStyle(textArea, 'top', `${finalDiffHeight}px`);
+      setStyle(textArea, 'top', `${finalTop}px`);
       setStyle(textArea, 'transform', '');
     });
   }
@@ -360,12 +363,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.topBar_ = this.win.document.createElement('div');
     this.topBar_.classList.add('i-amphtml-lbv-top-bar');
 
-    this.topFill_ = this.win.document.createElement('div');
-    this.topFill_.classList.add('i-amphtml-lbv-top-bar-top-fill');
-    this.topBar_.appendChild(this.topFill_);
-
     this.topGradient_ = this.win.document.createElement('div');
-    this.topGradient_.classList.add('i-amphtml-lbv-top-gradient');
+    this.topGradient_.classList.add('i-amphtml-lbv-top-bar-top-gradient');
     this.topBar_.appendChild(this.topGradient_);
 
     const close = this.close_.bind(this);
