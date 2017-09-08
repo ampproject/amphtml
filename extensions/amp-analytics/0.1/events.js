@@ -26,6 +26,8 @@ import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {startsWith} from '../../../src/string';
 
+const MIN_TIMER_INTERVAL_SECONDS = 0.5;
+const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
 const TAG = 'analytics-events';
@@ -404,6 +406,84 @@ export class IniLoadTracker extends EventTracker {
       signals.whenSignal(CommonSignals.INI_LOAD),
       signals.whenSignal(CommonSignals.LOAD_END),
     ]);
+  }
+}
+
+
+/**
+ * Tracks timer events.
+ */
+export class TimerEventTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+    /** @const @private {!Array<number>} */
+    this.trackers_ = [];
+  }
+
+  /** @override */
+  dispose() {
+    const win = this.root.ampdoc.win;
+    this.trackers_.forEach(intervalId => {
+      win.clearInterval(intervalId);
+    });
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    const timerSpec = config['timerSpec'];
+    user().assert(timerSpec && typeof timerSpec == 'object',
+        'Bad timer specification');
+    user().assert('interval' in timerSpec,
+        'Timer interval specification required');
+    const interval = Number(timerSpec['interval']) || 0;
+    user().assert(interval >= MIN_TIMER_INTERVAL_SECONDS,
+        'Bad timer interval specification');
+    const maxTimerLength = 'maxTimerLength' in timerSpec ?
+        Number(timerSpec['maxTimerLength']) : DEFAULT_MAX_TIMER_LENGTH_SECONDS;
+    user().assert(maxTimerLength == null || maxTimerLength > 0,
+        'Bad maxTimerLength specification');
+    const callImmediate = 'immediate' in timerSpec ?
+        Boolean(timerSpec['immediate']) : true;
+
+    const win = this.root.ampdoc.win;
+    const intervalId = win.setInterval(() => {
+      listener(this.createEvent_(eventType));
+    }, interval * 1000);
+    this.trackers_.push(intervalId);
+    win.setTimeout(() => {
+      this.removeTracker_(intervalId);
+    }, maxTimerLength * 1000);
+    if (callImmediate) {
+      listener(this.createEvent_(eventType));
+    }
+    return () => {
+      this.removeTracker_(intervalId);
+    };
+  }
+
+  /**
+   * @param {string} eventType
+   * @return {!AnalyticsEvent}
+   * @private
+   */
+  createEvent_(eventType) {
+    return new AnalyticsEvent(this.root.getRootElement(), eventType);
+  }
+
+  /**
+   * @param {number} intervalId
+   * @private
+   */
+  removeTracker_(intervalId) {
+    const win = this.root.ampdoc.win;
+    win.clearInterval(intervalId);
+    const index = this.trackers_.indexOf(intervalId);
+    if (index != -1) {
+      this.trackers_.splice(index, 1);
+    }
   }
 }
 
