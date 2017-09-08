@@ -147,6 +147,18 @@ export class AmpList extends AMP.BaseElement {
   fetchList_() {
     const itemsExpr = this.element.getAttribute('items') || 'items';
     return this.fetch_(itemsExpr).then(items => {
+      if (this.element.hasAttribute('single-result')) {
+        user().assert(typeof items !== 'undefined' ,
+            'Response must contain an arrary or object at "%s". %s',
+            itemsExpr, this.element);
+        if (!isArray(items)) {
+          items = [items];
+        }
+      }
+      const maxLen = parseInt(this.element.getAttribute('max-length'), 10);
+      if (maxLen < items.length) {
+        items = items.slice(0, maxLen);
+      }
       user().assert(isArray(items),
           'Response must contain an array at "%s". %s',
           itemsExpr, this.element);
