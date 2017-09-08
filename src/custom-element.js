@@ -217,11 +217,12 @@ function createBaseCustomElementClass(win) {
       this.overflowElement_ = undefined;
 
       // `opt_implementationClass` is only used for tests.
-      let Ctor = dev().assert(win.ampExtendedElements &&
-          win.ampExtendedElements[this.elementName()]);
+      let Ctor = win.ampExtendedElements &&
+          win.ampExtendedElements[this.elementName()];
       if (getMode().test && this.implementationClassForTesting) {
         Ctor = this.implementationClassForTesting;
       }
+      dev().assert(Ctor);
       /** @private {!./base-element.BaseElement} */
       this.implementation_ = new Ctor(this);
 
