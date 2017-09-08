@@ -20,9 +20,6 @@ import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {registerServiceBuilderForDoc} from '../service';
 import {
-  nativeIntersectionObserverSupported,
-} from '../../src/intersection-observer-polyfill';
-import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../layout-rect';
@@ -153,12 +150,6 @@ export class ViewportBindingInabox {
 
   /** @private */
   listenForPosition_() {
-
-    if (nativeIntersectionObserverSupported(this.win)) {
-      // Using native IntersectionObserver, no position data needed
-      // from host doc.
-      return;
-    }
 
     this.iframeClient_.makeRequest(
         MessageType.SEND_POSITIONS, MessageType.POSITION,

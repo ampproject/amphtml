@@ -88,7 +88,6 @@ startupChunk(self.document, function initial() {
       // runtime tries to install the normal one.
       installViewerServiceForDoc(ampdoc);
       installInaboxViewportService(ampdoc);
-
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();

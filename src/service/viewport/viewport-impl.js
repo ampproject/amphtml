@@ -25,6 +25,7 @@ import {
 import {
   layoutRectLtwh,
   moveLayoutRect,
+  layoutRectFromDomRect,
 } from '../../layout-rect';
 import {dev} from '../../log';
 import {dict} from '../../utils/object';
@@ -409,13 +410,20 @@ export class Viewport {
     const local = this.vsync_.measurePromise(() => {
       return el./*OK*/getBoundingClientRect();
     });
-    const root = this.binding_.getRootClientRectAsync();
+
+    let root = this.binding_.getRootClientRectAsync();
+    const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
+    if (frameElement) {
+      root = this.vsync_.measurePromise(() => {
+        return frameElement./*OK*/getBoundingClientRect();
+      });
+    }
 
     return Promise.all([local, root]).then(values => {
       const l = values[0];
       const r = values[1];
       if (!r) {
-        return l;
+        return layoutRectFromDomRect(l);
       }
       return moveLayoutRect(l, r.left, r.top);
     });
