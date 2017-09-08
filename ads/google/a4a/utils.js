@@ -215,6 +215,7 @@ export function googlePageParameters(
         const viewportSize = viewport.getSize();
         const visibilityState = Services.viewerForDoc(nodeOrDoc)
             .getVisibilityState();
+        const art = getBinaryTypeNumericalCode(getBinaryType(win));
         return {
           'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
@@ -233,7 +234,7 @@ export function googlePageParameters(
           'u_his': getHistoryLength(win),
           'isw': win != win.top ? viewportSize.width : null,
           'ish': win != win.top ? viewportSize.height : null,
-          'art': getBinaryTypeNumericalCode(getBinaryType(win)),
+          'art': art == '0' ? null : art,
           'vis': visibilityStateCodes[visibilityState] || '0',
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
