@@ -42,7 +42,7 @@ BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status'
 BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5
 BUILD_PROCESSING_TIMEOUT_SECS = 60
 PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds'
-OUT = ENV['TRAVIS'] ? "/dev/null" : :out
+OUT = ENV['TRAVIS'] ? '/dev/null' : :out
 
 
 # Colorize logs.
@@ -182,7 +182,7 @@ def verifyBuildStatus(status, buildId)
     end
   else
     log('info',
-        'Percy build ' + cyan("#{buildId}") + ' contained no visual diffs.')
+        'Percy build ' + cyan("#{buildId}") + ' contains no visual diffs.')
   end
 end
 
