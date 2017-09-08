@@ -33,6 +33,11 @@ import {
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {loadPromise} from '../../../../src/event-helper';
 import * as sinon from 'sinon';
+// Need the following side-effect import because in actual production code,
+// Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
+// always available for them. However, when we test an impl in isolation,
+// AmpAd is not loaded already, so we need to load it separately.
+import '../../../amp-ad/0.1/amp-ad';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
 // (e.g., XHR requests and interfaces to ad network-specific code), but
@@ -92,8 +97,7 @@ describe('integration test: a4a', () => {
       fetchMock = new FetchMock(fixture.win);
       for (const serviceName in signingServerURLs) {
         fetchMock.getOnce(
-            signingServerURLs[serviceName],
-            `{"keys":[${validCSSAmp.publicKey}]}`);
+            signingServerURLs[serviceName], validCSSAmp.publicKeyset);
       }
       fetchMock.getOnce(
           TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
