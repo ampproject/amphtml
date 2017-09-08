@@ -212,6 +212,7 @@ def runVisualTests(visualTestsConfig)
   page.driver.options[:js_errors] = true
   page.driver.options[:phantomjs_options] =
       ["--debug=#{ENV['PHANTOMJS_DEBUG']}"]
+  page.driver.options[:phantomjs_logger] = ENV['TRAVIS'] ? '/dev/null' : STDOUT
   generateSnapshots(page, visualTestsConfig['webpages'])
   result = Percy::Capybara.finalize_build
   if (result['success'])
