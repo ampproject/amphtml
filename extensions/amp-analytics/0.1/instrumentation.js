@@ -24,6 +24,10 @@ import {
   CustomEventTracker,
   IniLoadTracker,
   SignalTracker,
+  TouchStartEventTracker,
+  TouchMoveEventTracker,
+  TouchEndEventTracker,
+  TouchCancelEventTracker,
   VideoEventTracker,
   VisibilityTracker,
 } from './events';
@@ -61,6 +65,10 @@ export const AnalyticsEventType = {
   TIMER: 'timer',
   SCROLL: 'scroll',
   HIDDEN: 'hidden',
+  TOUCHSTART: 'touchstart',
+  TOUCHMOVE: 'touchmove',
+  TOUCHEND: 'touchend',
+  TOUCHCANCEL: 'touchcancel',
 };
 
 const ALLOWED_FOR_ALL = ['ampdoc', 'embed'];
@@ -109,6 +117,26 @@ const EVENT_TRACKERS = {
     allowedFor: ALLOWED_FOR_ALL,
     klass: VideoEventTracker,
   },
+  'touchstart': {
+    name: 'touchstart',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: TouchStartEventTracker,
+  },
+  'touchmove': {
+    name: 'touchmove',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: TouchMoveEventTracker,
+  },
+  'touchend': {
+    name: 'touchend',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: TouchEndEventTracker,
+  },
+  'touchcancel': {
+    name: 'touchcancel',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: TouchCancelEventTracker,
+  },
 };
 
 /** @const {string} */
@@ -124,6 +152,11 @@ const ALLOWED_IN_EMBED = [
   AnalyticsEventType.CLICK,
   AnalyticsEventType.TIMER,
   AnalyticsEventType.HIDDEN,
+  AnalyticsEventType.SCROLL,
+  AnalyticsEventType.TOUCHSTART,
+  AnalyticsEventType.TOUCHMOVE,
+  AnalyticsEventType.TOUCHEND,
+  AnalyticsEventType.TOUCHCANCEL,
 ];
 
 

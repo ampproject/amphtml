@@ -240,10 +240,10 @@ export class ClickEventTracker extends EventTracker {
   constructor(root) {
     super(root);
 
-    /** @private {!Observable<!Event>} */
+    /** @private {?Observable<!Event>} */
     this.clickObservable_ = new Observable();
 
-    /** @private @const */
+    /** @private {?function(!Event)} */
     this.boundOnClick_ = e => {
       this.clickObservable_.fire(e);
     };
@@ -254,6 +254,8 @@ export class ClickEventTracker extends EventTracker {
   dispose() {
     this.root.getRoot().removeEventListener('click', this.boundOnClick_);
     this.clickObservable_.removeAll();
+    this.boundOnClick_ = null;
+    this.clickObservable_ = null;
   }
 
   /** @override */
@@ -407,6 +409,123 @@ export class IniLoadTracker extends EventTracker {
   }
 }
 
+/** @enum {string} */
+const TouchEventType = {
+  TOUCH_START: 'touchstart',
+  TOUCH_MOVE: 'touchmove',
+  TOUCH_END: 'touchend',
+  TOUCH_CANCEL: 'touchcancel',
+};
+
+/**
+ * Tracks touch events
+ * @abstract
+ */
+class TouchEventTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   * @param {!TouchEventType} touchEventType Which type of touch event to track
+   */
+  constructor(root, touchEventType) {
+    super(root);
+
+    /** @const @private {!TouchEventType} */
+    this.touchEventType_ = touchEventType;
+
+    /** @private {?Observable<!Event>} */
+    this.touchObservable_ = new Observable();
+
+    /** @private {?function(!Event)} */
+    this.boundOnTouch_ = e => {
+      this.touchObservable_.fire(e);
+    };
+    this.root.getRoot().addEventListener(this.touchEventType_,
+        this.boundOnTouch_);
+  }
+
+  /** @override */
+  dispose() {
+    this.root.getRoot().removeEventListener(this.touchEventType_,
+        this.boundOnTouch_);
+    this.touchObservable_.removeAll();
+    this.boundOnTouch_ = null;
+    this.touchObservable_ = null;
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    const selector = user().assert(config['selector'],
+        'Missing required selector on touch trigger');
+    const selectionMethod = config['selectionMethod'] || null;
+    return this.touchObservable_.add(this.root.createSelectiveListener(
+        this.handleTouch_.bind(this, listener),
+      (context.parentElement || context),
+        selector,
+        selectionMethod));
+  }
+
+  /**
+   * @param {function(!AnalyticsEvent)} listener
+   * @param {!Element} target
+   * @param {!Event} event
+   * @private
+   */
+  handleTouch_(listener, target, event) {
+    const params = getDataParamsFromAttributes(
+        target,
+        /* computeParamNameFunc */ undefined,
+        VARIABLE_DATA_ATTRIBUTE_KEY);
+    listener(new AnalyticsEvent(target, event.type, params));
+  }
+}
+
+/**
+ * Tracks touchstart events
+ */
+export class TouchStartEventTracker extends TouchEventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root, TouchEventType.TOUCH_START);
+  }
+}
+
+/**
+ * Tracks touchmove events
+ */
+export class TouchMoveEventTracker extends TouchEventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root, TouchEventType.TOUCH_MOVE);
+  }
+}
+
+/**
+ * Tracks touchend events
+ */
+export class TouchEndEventTracker extends TouchEventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root, TouchEventType.TOUCH_END);
+  }
+}
+
+/**
+ * Tracks touchcancel events
+ */
+export class TouchCancelEventTracker extends TouchEventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root, TouchEventType.TOUCH_CANCEL);
+  }
+}
 
 /**
  * Tracks video session events
@@ -421,7 +540,7 @@ export class VideoEventTracker extends EventTracker {
     /** @private {?Observable<!Event>} */
     this.sessionObservable_ = new Observable();
 
-    /** @private {?Function} */
+    /** @private {?function(!Event)} */
     this.boundOnSession_ = e => {
       this.sessionObservable_.fire(e);
     };
@@ -499,7 +618,6 @@ export class VideoEventTracker extends EventTracker {
     });
   }
 }
-
 
 /**
  * Tracks visibility events.

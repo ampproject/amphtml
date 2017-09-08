@@ -569,7 +569,7 @@ describe('amp-analytics.instrumentation OLD', function() {
       expect(ins.isTriggerAllowed_(AnalyticsEventType.HIDDEN, el)).to.be.true;
     });
 
-    it('allows some trigger', () => {
+    it('allows some trigger in iframe', () => {
       const iframe = document.createElement('iframe');
       document.body.appendChild(iframe);
       el = document.createElement('foo');  // dummy element as amp-analytics can't be used in iframe.
@@ -578,16 +578,16 @@ describe('amp-analytics.instrumentation OLD', function() {
       expect(ins.isTriggerAllowed_(AnalyticsEventType.CLICK, el)).to.be.true;
       expect(ins.isTriggerAllowed_(AnalyticsEventType.TIMER, el)).to.be.true;
       expect(ins.isTriggerAllowed_(AnalyticsEventType.HIDDEN, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.SCROLL, el)).to.be.true;
     });
 
 
-    it('disallows scroll trigger', () => {
+    it('disallows custom trigger in iframe', () => {
       const iframe = document.createElement('iframe');
       document.body.appendChild(iframe);
       el = document.createElement('foo');  // dummy element as amp-analytics can't be used in iframe.
       iframe.contentWindow.document.body.appendChild(el);
 
-      expect(ins.isTriggerAllowed_(AnalyticsEventType.SCROLL, el)).to.be.false;
       expect(ins.isTriggerAllowed_('custom-trigger', el)).to.be.false;
     });
   });
