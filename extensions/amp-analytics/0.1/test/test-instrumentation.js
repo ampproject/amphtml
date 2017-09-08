@@ -23,6 +23,7 @@ import {
   CustomEventTracker,
   IniLoadTracker,
   SignalTracker,
+  TimerEventTracker,
   VisibilityTracker,
 } from '../events';
 import * as sinon from 'sinon';
@@ -123,21 +124,16 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     it('should delegate to deprecated addListener', () => {
       const trackerStub = sandbox.stub(root, 'getTracker');
       const handler = function() {};
-      group.addTrigger({on: 'timer'}, handler);
       group.addTrigger({on: 'scroll'}, handler);
 
       expect(trackerStub).to.not.be.called;
       expect(group.listeners_).to.be.empty;
 
-      expect(insStub).to.have.callCount(2);
+      expect(insStub).to.have.callCount(1);
 
-      expect(insStub.args[0][0].on).to.equal('timer');
+      expect(insStub.args[0][0].on).to.equal('scroll');
       expect(insStub.args[0][1]).to.equal(handler);
       expect(insStub.args[0][2]).to.equal(analyticsElement);
-
-      expect(insStub.args[1][0].on).to.equal('scroll');
-      expect(insStub.args[1][1]).to.equal(handler);
-      expect(insStub.args[1][2]).to.equal(analyticsElement);
 
     });
 
@@ -201,6 +197,21 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       expect(stub).to.be.calledOnce;
       expect(stub).to.be.calledWith(
           analyticsElement, 'ini-load', config, handler);
+    });
+
+    it('should add "timer" trigger', () => {
+      const handler = function() {};
+      const unlisten = function() {};
+      const stub = sandbox.stub(TimerEventTracker.prototype, 'add',
+          () => unlisten);
+      const config = {on: 'timer'};
+      group.addTrigger(config, handler);
+      const tracker = root.getTrackerOptional('timer');
+      expect(tracker).to.be.instanceOf(TimerEventTracker);
+      expect(stub).to.be.calledOnce;
+      expect(stub).to.be.calledWith(analyticsElement, 'timer', config, handler);
+      expect(group.listeners_).to.have.length(1);
+      expect(group.listeners_[0]).to.equal(unlisten);
     });
 
     it('should add "visible" trigger', () => {
@@ -284,13 +295,11 @@ describe('amp-analytics.instrumentation OLD', function() {
 
   let ins;
   let fakeViewport;
-  let clock;
   let sandbox;
   let ampdoc;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     const docState = Services.documentStateFor(window);
     sandbox.stub(docState, 'isHidden', () => false);
     ampdoc = new AmpDocSingle(window);
@@ -313,128 +322,6 @@ describe('amp-analytics.instrumentation OLD', function() {
 
   afterEach(() => {
     sandbox.restore();
-  });
-
-  it('only fires when the timer interval exceeds the minimum', () => {
-    const fn1 = sandbox.stub();
-    ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 0}}, fn1);
-    expect(fn1).to.have.not.been.called;
-
-    const fn2 = sandbox.stub();
-    ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 1}}, fn2);
-    expect(fn2).to.be.calledOnce;
-  });
-
-  it('never fires when the timer spec is malformed', () => {
-    const fn1 = sandbox.stub();
-    ins.addListenerDepr_({'on': 'timer'}, fn1);
-    expect(fn1).to.have.not.been.called;
-
-    const fn2 = sandbox.stub();
-    ins.addListenerDepr_({'on': 'timer', 'timerSpec': 1}, fn2);
-    expect(fn2).to.have.not.been.called;
-
-    const fn3 = sandbox.stub();
-    ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'misc': 1}}, fn3);
-    expect(fn3).to.have.not.been.called;
-
-    const fn4 = sandbox.stub();
-    ins.addListenerDepr_(
-        {'on': 'timer', 'timerSpec': {'interval': 'two'}}, fn4);
-    expect(fn4).to.have.not.been.called;
-
-    const fn5 = sandbox.stub();
-    ins.addListenerDepr_(
-        {'on': 'timer', 'timerSpec': {'interval': null}}, fn5);
-    expect(fn5).to.have.not.been.called;
-
-    const fn6 = sandbox.stub();
-    ins.addListenerDepr_({
-      'on': 'timer',
-      'timerSpec': {'interval': 2, 'maxTimerLength': 0},
-    }, fn6);
-    expect(fn6).to.have.not.been.called;
-
-    const fn7 = sandbox.stub();
-    ins.addListenerDepr_({
-      'on': 'timer',
-      'timerSpec': {'interval': 2, 'maxTimerLength': null},
-    }, fn7);
-    expect(fn7).to.have.not.been.called;
-  });
-
-  it('fires on the appropriate interval', () => {
-    const fn1 = sandbox.stub();
-    ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 10}}, fn1);
-    expect(fn1).to.be.calledOnce;
-
-    const fn2 = sandbox.stub();
-    ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 15}}, fn2);
-    expect(fn2).to.be.calledOnce;
-
-    const fn3 = sandbox.stub();
-    ins.addListenerDepr_({
-      'on': 'timer', 'timerSpec': {'interval': 10, 'immediate': false},
-    }, fn3);
-    expect(fn3).to.have.not.been.called;
-
-    const fn4 = sandbox.stub();
-    ins.addListenerDepr_({
-      'on': 'timer', 'timerSpec': {'interval': 15, 'immediate': false},
-    }, fn4);
-    expect(fn4).to.have.not.been.called;
-
-    clock.tick(10 * 1000); // 10 seconds
-    expect(fn1).to.have.callCount(2);
-    expect(fn2).to.be.calledOnce;
-    expect(fn3).to.be.calledOnce;
-    expect(fn4).to.have.not.been.called;
-
-    clock.tick(10 * 1000); // 20 seconds
-    expect(fn1).to.have.callCount(3);
-    expect(fn2).to.have.callCount(2);
-    expect(fn3).to.have.callCount(2);
-    expect(fn4).to.be.calledOnce;
-
-    clock.tick(10 * 1000); // 30 seconds
-    expect(fn1).to.have.callCount(4);
-    expect(fn2).to.have.callCount(3);
-    expect(fn3).to.have.callCount(3);
-    expect(fn4).to.have.callCount(2);
-  });
-
-  it('stops firing after the maxTimerLength is exceeded', () => {
-    const fn1 = sandbox.stub();
-    ins.addListenerDepr_({
-      'on': 'timer', 'timerSpec': {'interval': 10, 'maxTimerLength': 15},
-    }, fn1);
-    expect(fn1).to.be.calledOnce;
-
-    const fn2 = sandbox.stub();
-    ins.addListenerDepr_({
-      'on': 'timer', 'timerSpec': {'interval': 10, 'maxTimerLength': 20},
-    }, fn2);
-    expect(fn2).to.be.calledOnce;
-
-    const fn3 = sandbox.stub();
-    ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 3600}}, fn3);
-    expect(fn3).to.be.calledOnce;
-
-    clock.tick(10 * 1000); // 10 seconds
-    expect(fn1).to.have.callCount(2);
-    expect(fn2).to.have.callCount(2);
-
-    clock.tick(10 * 1000); // 20 seconds
-    expect(fn1).to.have.callCount(2);
-    expect(fn2).to.have.callCount(3);
-
-    clock.tick(10 * 1000); // 30 seconds
-    expect(fn1).to.have.callCount(2);
-    expect(fn2).to.have.callCount(3);
-
-    // Default maxTimerLength is 2 hours
-    clock.tick(3 * 3600 * 1000); // 3 hours
-    expect(fn3).to.have.callCount(3);
   });
 
   it('fires on scroll', () => {
