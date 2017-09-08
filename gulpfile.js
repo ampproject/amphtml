@@ -216,6 +216,8 @@ declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* latestVersion */ '1.0', {hasCss: true});
 
+declareExtension('amp-shadow-doc-loader', '0.1', true);
+declareExtension('amp-fetch', '0.1', false);
 
 /**
  * Extensions to build when `--extensions=minimal_set`.
