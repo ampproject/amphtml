@@ -27,8 +27,6 @@ tags: {  # amp-fit-text
 }
 tags: {  # <amp-fit-text>
   tag_name: "AMP-FIT-TEXT"
-  # <amp-fit-text> is whitelisted for <amp-sidebar>, otherwise:
-  # disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-fit-text"
   attrs: { name: "max-font-size" }
   attrs: { name: "min-font-size" }

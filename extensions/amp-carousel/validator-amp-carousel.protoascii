@@ -27,7 +27,6 @@ tags: {  # amp-carousel
 }
 tags: {  # <amp-carousel>
   tag_name: "AMP-CAROUSEL"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-carousel"
   attrs: {
     name: "arrows"

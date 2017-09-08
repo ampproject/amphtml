@@ -29,7 +29,6 @@ tags: {  # amp-iframe
 tags: {  # <amp-iframe>
   html_format: AMP  # Iframes not allowed in ads.
   tag_name: "AMP-IFRAME"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-iframe"
   attrs: {
     name: "allowfullscreen"

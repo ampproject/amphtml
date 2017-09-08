@@ -27,7 +27,6 @@ tags: {  # amp-youtube
 }
 tags: {  # <amp-youtube>
   tag_name: "AMP-YOUTUBE"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-youtube"
   attrs: { name: "autoplay" }
   attrs: {

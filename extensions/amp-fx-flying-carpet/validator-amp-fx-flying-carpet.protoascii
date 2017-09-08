@@ -28,7 +28,6 @@ tags: {  # <script custom-element="amp-fx-flying-carpet">
 tags: {  # <amp-fx-flying-carpet>
   html_format: AMP
   tag_name: "AMP-FX-FLYING-CARPET"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-fx-flying-carpet"
   attr_lists: "extended-amp-global"
   attrs: {

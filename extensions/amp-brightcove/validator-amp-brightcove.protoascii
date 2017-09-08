@@ -29,7 +29,6 @@ tags: {  # amp-brightcove
 tags: {  # <amp-brightcove>
   html_format: AMP
   tag_name: "AMP-BRIGHTCOVE"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-brightcove"
   attrs: {
     name: "data-account"

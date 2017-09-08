@@ -29,7 +29,6 @@ tags: {  # amp-gfycat
 tags: {  # <amp-gfycat>
   html_format: AMP
   tag_name: "AMP-GFYCAT"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-gfycat"
   attrs: {
     name: "data-gfyid"

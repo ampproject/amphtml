@@ -30,7 +30,6 @@ tags: {  # amp-video
 }
 tags: {  # <amp-video>
   tag_name: "AMP-VIDEO"
-  disallowed_ancestor: "AMP-SIDEBAR"
   # Typically we'd require the extension j/s, but for historical reasons
   # many pages don't have it, so it ends up late loaded and we warn, instead
   # of making this a validation error.
