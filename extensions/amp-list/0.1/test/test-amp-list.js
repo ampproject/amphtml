@@ -121,7 +121,7 @@ describes.realWin('amp-list component', {
     });
   });
 
-  it('should trim the results to max-length items', () => {
+  it('should trim the results to max-items', () => {
     const items = [
       {title: 'Title1'},
       {title: 'Title2'},
@@ -130,7 +130,7 @@ describes.realWin('amp-list component', {
     const newHeight = 127;
     const itemElement = doc.createElement('div');
     itemElement.style.height = newHeight + 'px';
-    element.setAttribute('max-length', '2');
+    element.setAttribute('max-items', '2');
     const fetchPromise = Promise.resolve(items);
     const renderPromise = Promise.resolve([itemElement]);
     listMock.expects('fetch_').withExactArgs('items')

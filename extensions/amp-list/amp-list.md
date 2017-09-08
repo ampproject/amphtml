@@ -210,15 +210,15 @@ When `items="items"` is specified (which, is the default) the response must be a
 }
 ```
 
+#### max-items (optional)
+
+An integer value spcifying the maximum length of the items array to be rendered. 
+The `items` array will be trucated to `max-items` entries if the returned value exceeds `max-items`.
+
 #### single-result (optional)
 
 Causes `amp-list` to treat the returned result as if it were a single element array. An object response will be wrapped in an array so
 `{items: {...}}` will behave as if it were `{items: [{...}]}`.  
-
-#### max-length (optional)
-
-An integer value spcifying the maximum length of the items array to be rendered. 
-The `items` array will be trucated to `max-length` entries if the returned value exceeds max length.
 
 ##### common attributes
 

@@ -32,7 +32,7 @@ tags: {  # <amp-list>
   requires_extension: "amp-list"
   attrs: { name: "credentials" }
   attrs: { name: "items" }
-  attrs: { name: "max-length" }
+  attrs: { name: "max-items" }
   attrs: { name: "single-item" }
   attrs: {
     name: "src"

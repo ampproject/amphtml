@@ -155,7 +155,7 @@ export class AmpList extends AMP.BaseElement {
           items = [items];
         }
       }
-      const maxLen = parseInt(this.element.getAttribute('max-length'), 10);
+      const maxLen = parseInt(this.element.getAttribute('max-items'), 10);
       if (maxLen < items.length) {
         items = items.slice(0, maxLen);
       }
