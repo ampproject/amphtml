@@ -24,7 +24,7 @@ import {
     useAnalyticsInSandbox,
     CustomEventReporterBuilder,
 } from '../../src/extension-analytics';
-import {createAmpElementProto} from '../../src/custom-element';
+import {createAmpElementProtoForTesting} from '../../src/custom-element';
 import {Services} from '../../src/services';
 import {BaseElement} from '../../src/base-element';
 import {macroTask} from '../../testing/yield';
@@ -184,7 +184,8 @@ describes.realWin('extension-analytics', {
       getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
 
       env.win.document.registerElement('amp-test', {
-        prototype: createAmpElementProto(env.win, 'amp-test', BaseElement),
+        prototype: createAmpElementProtoForTesting(
+            env.win, 'amp-test', BaseElement),
       });
       parentEle = env.win.document.createElement('amp-test');
       parentEle.setAttribute('layout', 'nodisplay');
@@ -266,7 +267,8 @@ describes.realWin('extension-analytics', {
           }
                 }
         env.win.document.registerElement('amp-test', {
-          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
+          prototype: createAmpElementProtoForTesting(
+              env.win, 'amp-test', TestElement),
         });
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
@@ -324,7 +326,8 @@ describes.realWin('extension-analytics', {
           }
                 }
         env.win.document.registerElement('amp-test', {
-          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
+          prototype: createAmpElementProtoForTesting(
+              env.win, 'amp-test', TestElement),
         });
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
@@ -358,7 +361,8 @@ describes.realWin('extension-analytics', {
           }
                 }
         env.win.document.registerElement('amp-test', {
-          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
+          prototype: createAmpElementProtoForTesting(
+              env.win, 'amp-test', TestElement),
         });
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
@@ -407,7 +411,8 @@ describes.realWin('extension-analytics', {
           }
                 }
         env.win.document.registerElement('amp-test', {
-          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
+          prototype: createAmpElementProtoForTesting(
+              env.win, 'amp-test', TestElement),
         });
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
