@@ -15,7 +15,6 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {adConfig} from '../../../../ads/_config';
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
@@ -32,9 +31,9 @@ describe('Ad loader', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     a4aRegistryBackup = Object.create(null);
-    Object.keys(a4aRegistry).forEach(k => {
-      a4aRegistryBackup[k] = a4aRegistry[k];
-      delete a4aRegistry[k];
+    Object.keys(AmpAd.a4aRegistry).forEach(k => {
+      a4aRegistryBackup[k] = AmpAd.a4aRegistry[k];
+      delete AmpAd.a4aRegistry[k];
     });
     registryBackup = Object.create(null);
     Object.keys(adConfig).forEach(k => {
@@ -46,7 +45,7 @@ describe('Ad loader', () => {
 
   afterEach(() => {
     Object.keys(a4aRegistryBackup).forEach(k => {
-      a4aRegistry[k] = a4aRegistryBackup[k];
+      AmpAd.a4aRegistry[k] = a4aRegistryBackup[k];
     });
     a4aRegistryBackup = null;
     Object.keys(registryBackup).forEach(k => {
@@ -128,7 +127,7 @@ describe('Ad loader', () => {
 
       it('fails upgrade on A4A upgrade with loadElementClass error', () => {
         return iframePromise.then(fixture => {
-          a4aRegistry['zort'] = function() {
+          AmpAd.a4aRegistry['zort'] = function() {
             return true;
           };
           ampAdElement.setAttribute('type', 'zort');
@@ -152,7 +151,7 @@ describe('Ad loader', () => {
           meta.setAttribute('name', 'amp-3p-iframe-src');
           meta.setAttribute('content', 'https://example.com/remote.html');
           doc.head.appendChild(meta);
-          a4aRegistry['zort'] = () => {
+          AmpAd.a4aRegistry['zort'] = () => {
             throw new Error('predicate should not execute if remote.html!');
           };
           ampAdElement.setAttribute('type', 'zort');
@@ -166,7 +165,7 @@ describe('Ad loader', () => {
           const rtcConfig = fixture.doc.createElement('script');
           rtcConfig.setAttribute('id', 'amp-rtc');
           fixture.doc.head.appendChild(rtcConfig);
-          a4aRegistry['zort'] = function() {
+          AmpAd.a4aRegistry['zort'] = function() {
             return true;
           };
           ampAdElement.setAttribute('type', 'zort');
@@ -195,7 +194,7 @@ describe('Ad loader', () => {
           const rtcConfig = fixture.doc.createElement('script');
           rtcConfig.setAttribute('id', 'amp-rtc');
           fixture.doc.head.appendChild(rtcConfig);
-          a4aRegistry['zort'] = function() {
+          AmpAd.a4aRegistry['zort'] = function() {
             return true;
           };
           ampAdElement.setAttribute('type', 'zort');
@@ -222,7 +221,7 @@ describe('Ad loader', () => {
           meta.setAttribute('content', 'https://example.com/remote.html');
           fixture.doc.head.appendChild(meta);
           adConfig['zort'] = {remoteHTMLDisabled: true};
-          a4aRegistry['zort'] = function() {
+          AmpAd.a4aRegistry['zort'] = function() {
             return true;
           };
           ampAdElement.setAttribute('type', 'zort');
@@ -244,7 +243,7 @@ describe('Ad loader', () => {
 
       it('upgrades to registered, A4A type network-specific element', () => {
         return iframePromise.then(fixture => {
-          a4aRegistry['zort'] = function() {
+          AmpAd.a4aRegistry['zort'] = function() {
             return true;
           };
           ampAdElement.setAttribute('type', 'zort');
@@ -266,7 +265,7 @@ describe('Ad loader', () => {
 
       it('adds script to header for registered, A4A type', () => {
         return iframePromise.then(fixture => {
-          a4aRegistry['zort'] = function() {
+          AmpAd.a4aRegistry['zort'] = function() {
             return true;
           };
           ampAdElement.setAttribute('type', 'zort');

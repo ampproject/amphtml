@@ -17,7 +17,7 @@ import {CSS} from '../../../build/amp-ad-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
-import {a4aRegistry} from '../../../ads/_a4a-config';
+import {getA4ARegistery} from '../../../ads/_a4a-config';
 import {adConfig} from '../../../ads/_config';
 import {user} from '../../../src/log';
 import {Services} from '../../../src/services';
@@ -62,7 +62,7 @@ export class AmpAd extends AMP.BaseElement {
       const isCustom = type === 'custom' && isExperimentOn(this.win,
           'ad-type-custom');
       user().assert(isCustom || hasOwn(adConfig, type)
-          || hasOwn(a4aRegistry, type), `Unknown ad type "${type}"`);
+          || hasOwn(AmpAd.a4aRegistry, type), `Unknown ad type "${type}"`);
 
       // Check for the custom ad type (no ad network, self-service)
       if (isCustom) {
@@ -74,12 +74,12 @@ export class AmpAd extends AMP.BaseElement {
       this.element.setAttribute('data-amp-slot-index', slotId);
 
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
-      if (!a4aRegistry[type] ||
+      if (!AmpAd.a4aRegistry[type] ||
           (!(adConfig[type] || {}).remoteHTMLDisabled &&
           this.win.document.querySelector('meta[name=amp-3p-iframe-src]') &&
           !this.win.document.getElementById('amp-rtc')) ||
           // Note that predicate execution may have side effects.
-          !a4aRegistry[type](this.win, this.element)) {
+          !AmpAd.a4aRegistry[type](this.win, this.element)) {
         // Either this ad network doesn't support Fast Fetch, its Fast Fetch
         // implementation has explicitly opted not to handle this tag, or this
         // page uses remote.html which is inherently incompatible with Fast
@@ -102,6 +102,9 @@ export class AmpAd extends AMP.BaseElement {
     });
   }
 }
+
+// Static registery
+AmpAd.a4aRegistry = getA4ARegistery();
 
 AMP.registerElement('amp-ad', AmpAd, CSS);
 AMP.registerElement('amp-embed', AmpAd);
