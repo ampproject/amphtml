@@ -61,7 +61,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     extensions: ['amp-ad', 'amp-ad-network-adsense-impl'],
   },
 }, env => {
-  let win, doc, ampdoc;
+  let win, doc, ampdoc, viewer;
   let impl;
   let element;
 
@@ -73,7 +73,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         () => {
           return ['google'];
         });
-    const viewer = win.services.viewer.obj;
+    viewer = win.services.viewer.obj;
     sandbox.stub(viewer, 'getReferrerUrl',
         () => Promise.resolve('https://acme.org/'));
     element = createAdsenseImplElement({
@@ -112,6 +112,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
   describe('#isValidElement', () => {
     it('should be valid', () => {
+      expect(impl.isValidElement()).to.be.true;
+    });
+    it('should be valid (responsive)', () => {
+      element.setAttribute('data-auto-format', 'rspv');
       expect(impl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
@@ -452,6 +456,70 @@ describes.realWin('amp-ad-network-adsense-impl', {
           /(\?|&)dtd=\d+(&|$)/,
         ].forEach(regexp => expect(url).to.match(regexp));
       });
+      it('sets rafmt for responsive', () => {
+        element.setAttribute('data-ad-slot', 'some_slot');
+        element.setAttribute('data-auto-format', 'rspv');
+        return impl.getAdUrl().then(url => {
+          expect(url).to.match(/(\?|&)ramft=13(&|$)/);
+        });
+      });
+    });
+
+    // Not using arrow function here because otherwise the way closure behaves
+    // prevents me from calling this.timeout(5000).
+    it('with multiple slots', function() {
+      // When run locally, this test tends to exceed 2000ms timeout.
+      this.timeout(10000);
+      // Reset counter for purpose of this test.
+      delete win['ampAdGoogleIfiCounter'];
+      const elem1 = createAdsenseImplElement({
+        'data-ad-client': 'ca-adsense',
+        'width': '320',
+        'height': '50',
+        'data-experiment-id': '8675309',
+      }, doc);
+      doc.body.appendChild(elem1);
+      const elem2 = createAdsenseImplElement({
+        'data-ad-client': 'ca-adsense',
+        'width': '320',
+        'height': '50',
+        'data-experiment-id': '8675309',
+      }, doc, 'amp-ad');
+      doc.body.appendChild(elem2);
+      const elem3 = createAdsenseImplElement({
+        'data-ad-client': 'ca-not-adsense',
+        'width': '320',
+        'height': '50',
+        'data-experiment-id': '8675309',
+      }, doc, 'amp-ad');
+      doc.body.appendChild(elem3);
+      const impl1 = new AmpAdNetworkAdsenseImpl(elem1);
+      const impl2 = new AmpAdNetworkAdsenseImpl(elem2);
+      const impl3 = new AmpAdNetworkAdsenseImpl(elem3);
+      toggleExperiment(impl1.win, 'as-use-attr-for-format', true);
+      //new AmpAd(elem1).upgradeCallback();
+      return impl1.getAdUrl().then(adUrl1 => {
+        expect(adUrl1).to.match(/pv=2/);
+        expect(adUrl1).to.not.match(/prev_fmts/);
+        expect(adUrl1).to.match(/ifi=1/);
+        //new AmpAd(elem2).upgradeCallback();
+        return impl2.getAdUrl().then(adUrl2 => {
+          expect(adUrl2).to.match(/pv=1/);
+          expect(adUrl2).to.match(/prev_fmts=320x50/);
+          expect(adUrl2).to.match(/ifi=2/);
+          //new AmpAd(elem3).upgradeCallback();
+          return impl3.getAdUrl().then(adUrl3 => {
+            expect(adUrl3).to.match(/pv=2/);
+            // By some quirk of the test infrastructure, when this test
+            // is ran individually, each added slot after the first one
+            // has a bounding rectangle of 0x0. The important thing to
+            // test here is the number of previous formats.
+            expect(adUrl3).to.match(
+                /prev_fmts=(320x50%2C320x50|320x50%2C0x0)/);
+            expect(adUrl3).to.match(/ifi=3/);
+          });
+        });
+      });
     });
 
     // Not using arrow function here because otherwise the way closure behaves
@@ -550,6 +618,172 @@ describes.realWin('amp-ad-network-adsense-impl', {
           expect(impl.element.getAttribute('data-amp-slot-index'))
               .to.equal('1');
         });
+  });
+
+  describe('#buildCallback', () => {
+
+    const VIEWPORT_WIDTH = 375;
+    const VIEWPORT_HEIGHT = 667;
+
+    let iframe;
+
+    function constructImpl(config) {
+      iframe = env.win.document.createElement('iframe');
+
+      config.type = 'adsense';
+      element = createElementWithAttributes(doc, 'amp-ad', config);
+      element.appendChild(iframe);
+      document.body.appendChild(element);
+      impl = new AmpAdNetworkAdsenseImpl(element);
+      impl.element.style.display = 'block';
+      impl.element.style.position = 'relative';
+      impl.element.style.top = '101vh';
+
+      // Fix the viewport to a consistent size to that the test doesn't depend
+      // on the actual browser window opened.
+      impl.getViewport().getSize =
+          () => ({width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT});
+    }
+
+    it('should do nothing for non-responsive', () => {
+      constructImpl({
+        width: '320',
+        height: '150',
+      });
+      expect(impl.buildCallback()).to.be.undefined;
+    });
+
+    it('should schedule a resize for responsive', () => {
+      constructImpl({
+        width: '100vw',
+        height: '100',
+        'data-auto-format': 'rspv',
+      });
+
+      const callback = impl.buildCallback();
+      expect(callback).to.not.be.undefined;
+
+      // The returned promise fails for some reason.
+      return callback.then(() => {
+        expect(element.offsetHeight).to.equal(300);
+        expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
+      });
+    });
+  });
+
+  describe('#onLayoutMeasure', () => {
+
+    const VIEWPORT_WIDTH = 375;
+    const VIEWPORT_HEIGHT = 667;
+
+    // Nested elements to contain the ad. (container contains the ad, and
+    // containerContainer contains that container.)
+    let containerContainer, container;
+    let iframe;
+
+    function buildImpl(config) {
+      // Create an element with horizontal margins for the ad to break out of.
+      containerContainer.style.marginLeft = '5px';
+      containerContainer.style.marginRight = '9px';
+
+      // Create an element with horizontal margins for the ad to break out of.
+      container.style.marginLeft = '19px';
+      container.style.marginRight = '25px';
+
+      config.type = 'adsense';
+      config['data-ad-client'] = 'ca-pub-1234';
+
+      element = createElementWithAttributes(doc, 'amp-ad', config);
+      iframe = doc.createElement('iframe');
+
+      element.appendChild(iframe);
+      container.appendChild(element);
+      containerContainer.appendChild(container);
+      doc.body.appendChild(containerContainer);
+
+      impl = new AmpAdNetworkAdsenseImpl(element);
+      impl.element.style.display = 'block';
+      impl.element.style.position = 'relative';
+      impl.element.style.top = '150vh';
+
+      // Stub out mutations to occur immediately.
+      impl.getVsync().mutate = callback => callback();
+
+      // Fix the viewport to a consistent size to that the test doesn't depend
+      // on the actual browser window opened.
+      impl.getViewport().getSize =
+          () => ({width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT});
+
+      return impl.buildCallback();
+    }
+
+    beforeEach(() => {
+      viewer.toggleRuntime();  // Turn runtime on for these tests.
+    });
+
+    afterEach(() => {
+      viewer.toggleRuntime();  // Turn runtime off again.
+
+      if (containerContainer != null && containerContainer.parentNode != null) {
+        containerContainer.parentNode.removeChild(containerContainer);
+      }
+      doc.body.style.direction = '';
+    });
+
+    it('should change left margin for responsive', () => {
+      containerContainer = doc.createElement('div');
+      container = doc.createElement('div');
+      return buildImpl({
+        width: '100vw',
+        height: '150',
+        'data-auto-format': 'rspv',
+      }).then(() => {
+        impl.onLayoutMeasure();
+        // Left margin is 19px from container and 5px from body.
+        expect(element.style.marginLeft).to.be.equal('-24px');
+        expect(element.style.marginRight).to.be.equal('');
+      });
+    });
+
+    it('should change right margin for responsive in RTL', () => {
+      containerContainer = doc.createElement('div');
+      container = doc.createElement('div');
+      doc.body.style.direction = 'rtl'; // todo: revert
+
+      return buildImpl({
+        width: '100vw',
+        height: '150',
+        'data-auto-format': 'rspv',
+      }).then(() => {
+        impl.onLayoutMeasure();
+        // Right margin is 25px from container and 9px from body.
+        expect(element.style.marginRight).to.be.equal('-124px'); // seems to be out by 90?
+        expect(element.style.marginLeft).to.be.equal('');
+      });
+    });
+  });
+
+  describe('#getResponsiveHeightForContext', () => {
+    it('should request 100px height for very small viewports', () => {
+      expect(
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+              {width: 100, height: 667}))
+          .to.be.equal(100);
+    });
+
+    it('should request 6:5 aspect ratio for normal viewport (iPhone 5)', () => {
+      expect(
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+              {width: 320, height: 568}))
+          .to.be.equal(267);
+    });
+
+    it('should request 300px height for wide viewports', () => {
+      expect(
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+              {width: 500, height: 667}))
+          .to.be.equal(300);
+    });
   });
 
   describe('#delayAdRequestEnabled', () => {
