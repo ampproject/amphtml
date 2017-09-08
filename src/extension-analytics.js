@@ -55,7 +55,7 @@ export function insertAnalyticsElement(
   if (loadAnalytics) {
     // Get Extensions service and force load analytics extension.
     const extensions =
-        Services.extensionsFor(parentElement.ownerDocument.defaultView);
+        Services.extensionsFor(toWin(parentElement.ownerDocument.defaultView));
     const ampdoc = Services.ampdoc(parentElement);
     extensions./*OK*/installExtensionForDoc(ampdoc, 'amp-analytics');
   } else {

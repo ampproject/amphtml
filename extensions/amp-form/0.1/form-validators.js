@@ -18,6 +18,7 @@ import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
+import {toWin} from '../../../src/types';
 
 
 /** @type {boolean|undefined} */
@@ -107,7 +108,7 @@ export class FormValidator {
     const previousValidity = this.formValidity_;
     this.formValidity_ = this.form.checkValidity();
     if (previousValidity !== this.formValidity_) {
-      const win = this.form.ownerDocument.defaultView;
+      const win = toWin(this.form.ownerDocument.defaultView);
       const type = this.formValidity_ ? 'valid' : 'invalid';
       const event = createCustomEvent(win, type, null, {bubbles: true});
       this.form.dispatchEvent(event);
