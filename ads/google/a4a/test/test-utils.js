@@ -319,7 +319,7 @@ describe('Google A4A utils', () => {
         });
       });
     });
-    it('should not have `art` parameter when AMP_CONFIG is undefined', () => {
+    it('should not have `art` parameter when binary type is production', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
