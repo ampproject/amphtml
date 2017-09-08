@@ -19,7 +19,7 @@ import {
   IntersectionObserver,
   getIntersectionChangeEntry,
 } from '../../src/intersection-observer';
-import {createAmpElementProto} from '../../src/custom-element';
+import {createAmpElementProtoForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
@@ -325,7 +325,7 @@ describe('IntersectionObserver', () => {
   }
 
   const ElementClass = document.registerElement('amp-int', {
-    prototype: createAmpElementProto(window, 'amp-int', TestElement),
+    prototype: createAmpElementProtoForTesting(window, 'amp-int', TestElement),
   });
 
   const iframeSrc = 'http://iframe.localhost:' + location.port +

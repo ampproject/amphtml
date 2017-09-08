@@ -29,7 +29,7 @@ import {installStylesForDoc, makeBodyVisible} from '../style-installer';
 import {installErrorReporting} from '../error';
 import {installDocService} from '../service/ampdoc-impl';
 import {installCacheServiceWorker} from '../service-worker/install';
-import {stubElementsForDoc} from '../custom-element';
+import {stubElementsForDoc} from '../service/custom-element-registry';
 import {
     installAmpdocServices,
     installBuiltins,

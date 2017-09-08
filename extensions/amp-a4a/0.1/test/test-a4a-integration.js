@@ -29,7 +29,7 @@ import {signingServerURLs} from '../../../../ads/_a4a-config';
 import {
     resetScheduledElementForTesting,
     upgradeOrRegisterElement,
-} from '../../../../src/custom-element';
+} from '../../../../src/service/custom-element-registry';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {loadPromise} from '../../../../src/event-helper';
 import * as sinon from 'sinon';

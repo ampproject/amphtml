@@ -26,7 +26,9 @@ import {installTimerService} from '../../src/service/timer-impl';
 import {
   installViewportServiceForDoc,
 } from '../../src/service/viewport/viewport-impl';
-import {markElementScheduledForTesting} from '../../src/custom-element';
+import {
+  markElementScheduledForTesting,
+} from '../../src/service/custom-element-registry';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';

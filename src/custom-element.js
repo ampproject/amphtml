@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from './amp-events';
 import {CommonSignals} from './common-signals';
-import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
-    isInternalElement, isLayoutSizeDefined, isLoadingAllowed,
-    parseLayout, parseLength, getNaturalDimensions,
-    hasNaturalDimensions} from './layout';
-import {ElementStub, stubbedElements} from './element-stub';
+import {ElementStub} from './element-stub';
+import {
+  Layout,
+  applyStaticLayout,
+  isInternalElement,
+  isLayoutSizeDefined,
+  isLoadingAllowed,
+} from './layout';
+import {LayoutDelayMeter} from './layout-delay-meter';
+import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
-import {declareExtension} from './service/ampdoc-impl';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
 import {
@@ -31,13 +36,10 @@ import {
 import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
+import {setStyle} from './style';
 import * as dom from './dom';
-import {setStyle, setStyles} from './style';
-import {LayoutDelayMeter} from './layout-delay-meter';
-import {ResourceState} from './service/resource';
-import {AmpEvents} from './amp-events';
 
-const TAG_ = 'CustomElement';
+const TAG = 'CustomElement';
 
 /**
  * This is the minimum width of the element needed to trigger `loading`
@@ -46,7 +48,7 @@ const TAG_ = 'CustomElement';
  * is meaningless.
  * @private @const {number}
  */
-const MIN_WIDTH_FOR_LOADING_ = 100;
+const MIN_WIDTH_FOR_LOADING = 100;
 
 
 /**
@@ -55,7 +57,7 @@ const MIN_WIDTH_FOR_LOADING_ = 100;
  * render phase or scrolling.
  * @private @const {number}
  */
-const PREPARE_LOADING_THRESHOLD_ = 1000;
+const PREPARE_LOADING_THRESHOLD = 1000;
 
 
 /**
@@ -89,325 +91,13 @@ function isTemplateTagSupported() {
 
 
 /**
- * @param {!Window} win
- * @return {!Object<string, function(new:./base-element.BaseElement, !Element)>}
- */
-function getExtendedElements(win) {
-  if (!win.ampExtendedElements) {
-    win.ampExtendedElements = {};
-  }
-  return win.ampExtendedElements;
-}
-
-
-/**
- * Registers an element. Upgrades it if has previously been stubbed.
- * @param {!Window} win
- * @param {string} name
- * @param {function(new:./base-element.BaseElement, !Element)} toClass
- */
-export function upgradeOrRegisterElement(win, name, toClass) {
-  const knownElements = getExtendedElements(win);
-  if (!knownElements[name]) {
-    registerElement(win, name, /** @type {!Function} */ (toClass));
-    return;
-  }
-  if (knownElements[name] == toClass) {
-    // Already registered this instance.
-    return;
-  }
-  user().assert(knownElements[name] == ElementStub,
-      '%s is already registered. The script tag for ' +
-      '%s is likely included twice in the page.', name, name);
-  knownElements[name] = toClass;
-  for (let i = 0; i < stubbedElements.length; i++) {
-    const stub = stubbedElements[i];
-    // There are 3 possible states here:
-    // 1. We never made the stub because the extended impl. loaded first.
-    //    In that case the element won't be in the array.
-    // 2. We made a stub but the browser didn't attach it yet. In
-    //    that case we don't need to upgrade but simply switch to the new
-    //    implementation.
-    // 3. A stub was attached. We upgrade which means we replay the
-    //    implementation.
-    const element = stub.element;
-    if (element.tagName.toLowerCase() == name &&
-            element.ownerDocument.defaultView == win) {
-      tryUpgradeElementNoInline(element, toClass);
-      // Remove element from array.
-      stubbedElements.splice(i--, 1);
-    }
-  }
-}
-
-/**
- * This method should not be inlined to prevent TryCatch deoptimization.
- * NoInline keyword at the end of function name also prevents Closure compiler
- * from inlining the function.
- * @private
- */
-function tryUpgradeElementNoInline(element, toClass) {
-  try {
-    element.upgrade(toClass);
-  } catch (e) {
-    reportError(e, element);
-  }
-}
-
-/**
- * Stub extended elements missing an implementation. It can be called multiple
- * times and on partial document in order to start stubbing as early as
- * possible.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- */
-export function stubElementsForDoc(ampdoc) {
-  const list = ampdoc.getHeadNode().querySelectorAll('script[custom-element]');
-  for (let i = 0; i < list.length; i++) {
-    const name = list[i].getAttribute('custom-element');
-    declareExtension(ampdoc, name);
-    stubElementIfNotKnown(ampdoc.win, name);
-  }
-}
-
-/**
- * Stub element if not yet known.
- * @param {!Window} win
- * @param {string} name
- */
-export function stubElementIfNotKnown(win, name) {
-  const knownElements = getExtendedElements(win);
-  if (!knownElements[name]) {
-    registerElement(win, name, ElementStub);
-  }
-}
-
-/**
- * Copies the specified element to child window (friendly iframe). This way
- * all implementations of the AMP elements are shared between all friendly
- * frames.
- * @param {!Window} parentWin
- * @param {!Window} childWin
- * @param {string} name
- */
-export function copyElementToChildWindow(parentWin, childWin, name) {
-  const toClass = getExtendedElements(parentWin)[name];
-  registerElement(childWin, name, toClass || ElementStub);
-}
-
-
-/**
- * Applies layout to the element. Visible for testing only.
- *
- * \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  / _____|
- *  \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
- *   \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
- *    \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
- *     \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
- *
- * The equivalent of this method is used for server-side rendering (SSR) and
- * any changes made to it must be made in coordination with caches that
- * implement SSR. For more information on SSR see bit.ly/amp-ssr.
- *
- * @param {!Element} element
- * @return {!Layout}
- */
-export function applyLayout_(element) {
-  // Check if the layout has already been done by server-side rendering. The
-  // document may be visible to the user if the boilerplate was removed so
-  // please take care in making changes here.
-  const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
-  if (completedLayoutAttr) {
-    const layout = /** @type {!Layout} */ (dev().assert(
-        parseLayout(completedLayoutAttr)));
-    if (layout == Layout.RESPONSIVE && element.firstElementChild) {
-      // Find sizer, but assume that it might not have been parsed yet.
-      element.sizerElement_ =
-          element.querySelector('i-amphtml-sizer') || undefined;
-    } else if (layout == Layout.NODISPLAY) {
-      applyNoDisplayLayout_(element);
-    }
-    return layout;
-  }
-
-  // If the layout was already done by server-side rendering (SSR), then the code
-  // below will not run. Any changes below will necessitate a change to SSR and must
-  // be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
-
-  // Parse layout from the element.
-  const layoutAttr = element.getAttribute('layout');
-  const widthAttr = element.getAttribute('width');
-  const heightAttr = element.getAttribute('height');
-  const sizesAttr = element.getAttribute('sizes');
-  const heightsAttr = element.getAttribute('heights');
-
-  // Input layout attributes.
-  const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
-  user().assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
-  const inputWidth = (widthAttr && widthAttr != 'auto') ?
-      parseLength(widthAttr) : widthAttr;
-  user().assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
-  const inputHeight = heightAttr ? parseLength(heightAttr) : null;
-  user().assert(inputHeight !== undefined, 'Invalid height value: %s',
-      heightAttr);
-
-  // Effective layout attributes. These are effectively constants.
-  let width;
-  let height;
-  let layout;
-
-  // Calculate effective width and height.
-  if ((!inputLayout || inputLayout == Layout.FIXED ||
-      inputLayout == Layout.FIXED_HEIGHT) &&
-      (!inputWidth || !inputHeight) && hasNaturalDimensions(element.tagName)) {
-    // Default width and height: handle elements that do not specify a
-    // width/height and are defined to have natural browser dimensions.
-    const dimensions = getNaturalDimensions(element);
-    width = (inputWidth || inputLayout == Layout.FIXED_HEIGHT) ? inputWidth :
-        dimensions.width;
-    height = inputHeight || dimensions.height;
-  } else {
-    width = inputWidth;
-    height = inputHeight;
-  }
-
-  // Calculate effective layout.
-  if (inputLayout) {
-    layout = inputLayout;
-  } else if (!width && !height) {
-    layout = Layout.CONTAINER;
-  } else if (height && (!width || width == 'auto')) {
-    layout = Layout.FIXED_HEIGHT;
-  } else if (height && width && (sizesAttr || heightsAttr)) {
-    layout = Layout.RESPONSIVE;
-  } else {
-    layout = Layout.FIXED;
-  }
-
-  // Verify layout attributes.
-  if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
-      layout == Layout.RESPONSIVE) {
-    user().assert(height, 'Expected height to be available: %s', heightAttr);
-  }
-  if (layout == Layout.FIXED_HEIGHT) {
-    user().assert(!width || width == 'auto',
-        'Expected width to be either absent or equal "auto" ' +
-        'for fixed-height layout: %s', widthAttr);
-  }
-  if (layout == Layout.FIXED || layout == Layout.RESPONSIVE) {
-    user().assert(width && width != 'auto',
-        'Expected width to be available and not equal to "auto": %s',
-        widthAttr);
-  }
-  if (layout == Layout.RESPONSIVE) {
-    user().assert(getLengthUnits(width) == getLengthUnits(height),
-        'Length units should be the same for width and height: %s, %s',
-        widthAttr, heightAttr);
-  } else {
-    user().assert(heightsAttr === null,
-        'Unexpected "heights" attribute for none-responsive layout');
-  }
-
-  // Apply UI.
-  element.classList.add(getLayoutClass(layout));
-  if (isLayoutSizeDefined(layout)) {
-    element.classList.add('i-amphtml-layout-size-defined');
-  }
-  if (layout == Layout.NODISPLAY) {
-    // CSS defines layout=nodisplay automatically with `display:none`. Thus
-    // no additional styling is needed.
-    applyNoDisplayLayout_(element);
-  } else if (layout == Layout.FIXED) {
-    setStyles(element, {
-      width: dev().assertString(width),
-      height: dev().assertString(height),
-    });
-  } else if (layout == Layout.FIXED_HEIGHT) {
-    setStyle(element, 'height', dev().assertString(height));
-  } else if (layout == Layout.RESPONSIVE) {
-    const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
-    setStyles(sizer, {
-      display: 'block',
-      paddingTop:
-        ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%',
-    });
-    element.insertBefore(sizer, element.firstChild);
-    element.sizerElement_ = sizer;
-  } else if (layout == Layout.FILL) {
-    // Do nothing.
-  } else if (layout == Layout.CONTAINER) {
-    // Do nothing. Elements themselves will check whether the supplied
-    // layout value is acceptable. In particular container is only OK
-    // sometimes.
-  } else if (layout == Layout.FLEX_ITEM) {
-    // Set height and width to a flex item if they exist.
-    // The size set to a flex item could be overridden by `display: flex` later.
-    if (width) {
-      setStyle(element, 'width', width);
-    }
-    if (height) {
-      setStyle(element, 'height', height);
-    }
-  }
-  return layout;
-}
-
-
-/**
- * @param {!Element} element
- */
-function applyNoDisplayLayout_(element) {
-  // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been deployed
-  // everywhere, switch all relevant elements to this API. In the meantime,
-  // simply unblock display toggling via `style="display: ..."`.
-  setStyle(element, 'display', 'none');
-  element.classList.add('i-amphtml-display');
-}
-
-
-/**
- * Returns "true" for internal AMP nodes or for placeholder elements.
- * @param {!Node} node
- * @return {boolean}
- */
-function isInternalOrServiceNode(node) {
-  if (isInternalElement(node)) {
-    return true;
-  }
-  if (node.tagName && (node.hasAttribute('placeholder') ||
-      node.hasAttribute('fallback') ||
-      node.hasAttribute('overflow'))) {
-    return true;
-  }
-  return false;
-}
-
-/**
- * Creates a new custom element class prototype.
- *
- * Visible for testing only.
- *
- * @param {!Window} win The window in which to register the custom element.
- * @param {string} name The name of the custom element.
- * @param {function(new:./base-element.BaseElement, !Element)=} opt_implementationClass For
- *     testing only.
- * @return {!Object} Prototype of element.
- */
-export function createAmpElementProto(win, name, opt_implementationClass) {
-  const ElementProto = createCustomElementClass(win, name).prototype;
-  if (getMode().test && opt_implementationClass) {
-    ElementProto.implementationClassForTesting = opt_implementationClass;
-  }
-  return ElementProto;
-}
-
-/**
  * Creates a named custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
  * @param {string} name The name of the custom element.
  * @return {!Function} The custom element class.
  */
-function createCustomElementClass(win, name) {
+export function createCustomElementClass(win, name) {
   const baseCustomElement = createBaseCustomElementClass(win);
   /** @extends {HTMLElement} */
   class CustomAmpElement extends baseCustomElement {
@@ -423,6 +113,7 @@ function createCustomElementClass(win, name) {
   }
   return CustomAmpElement;
 }
+
 
 /**
  * Creates a base custom element class.
@@ -504,11 +195,11 @@ function createBaseCustomElementClass(win) {
       this.heightsList_ = undefined;
 
       /**
-       * This element can be assigned by the {@link applyLayout_} to a child
-       * element that will be used to size this element.
-       * @private {?Element|undefined}
+       * This element can be assigned by the {@link applyStaticLayout} to a
+       * child element that will be used to size this element.
+       * @package {?Element|undefined}
        */
-      this.sizerElement_ = undefined;
+      this.sizerElement = undefined;
 
       /** @private {boolean|undefined} */
       this.loadingDisabled_ = undefined;
@@ -526,11 +217,12 @@ function createBaseCustomElementClass(win) {
       this.overflowElement_ = undefined;
 
       // `opt_implementationClass` is only used for tests.
-      const knownElements = getExtendedElements(win);
-      let Ctor = knownElements[this.elementName()];
+      let Ctor = win.ampExtendedElements &&
+          win.ampExtendedElements[this.elementName()];
       if (getMode().test && this.implementationClassForTesting) {
         Ctor = this.implementationClassForTesting;
       }
+      dev().assert(Ctor);
       /** @private {!./base-element.BaseElement} */
       this.implementation_ = new Ctor(this);
 
@@ -829,7 +521,7 @@ function createBaseCustomElementClass(win) {
         if (this.isInViewport_) {
           // Already in viewport - start showing loading.
           this.toggleLoading_(true);
-        } else if (layoutBox.top < PREPARE_LOADING_THRESHOLD_ &&
+        } else if (layoutBox.top < PREPARE_LOADING_THRESHOLD &&
           layoutBox.top >= 0) {
           // Few top elements will also be pre-initialized with a loading
           // element.
@@ -849,12 +541,12 @@ function createBaseCustomElementClass(win) {
      * @private
      */
     getSizer_() {
-      if (this.sizerElement_ === undefined &&
+      if (this.sizerElement === undefined &&
           this.layout_ === Layout.RESPONSIVE) {
         // Expect sizer to exist, just not yet discovered.
-        this.sizerElement_ = this.querySelector('i-amphtml-sizer');
+        this.sizerElement = this.querySelector('i-amphtml-sizer');
       }
-      return this.sizerElement_ || null;
+      return this.sizerElement || null;
     }
 
     /**
@@ -925,7 +617,7 @@ function createBaseCustomElementClass(win) {
         // From the moment height is changed the element becomes fully
         // responsible for managing its height. Aspect ratio is no longer
         // preserved.
-        this.sizerElement_ = null;
+        this.sizerElement = null;
         setStyle(sizer, 'paddingTop', '0');
         if (this.resources_) {
           this.resources_.deferMutate(this, () => {
@@ -1011,7 +703,7 @@ function createBaseCustomElementClass(win) {
         this.everAttached = true;
 
         try {
-          this.layout_ = applyLayout_(this);
+          this.layout_ = applyStaticLayout(this);
         } catch (e) {
           reportError(e, this);
         }
@@ -1664,7 +1356,7 @@ function createBaseCustomElementClass(win) {
         this.loadingDisabled_ = this.hasAttribute('noloading');
       }
       if (this.loadingDisabled_ || !isLoadingAllowed(this) ||
-        this.layoutWidth_ < MIN_WIDTH_FOR_LOADING_ ||
+        this.layoutWidth_ < MIN_WIDTH_FOR_LOADING ||
         this.layoutCount_ > 0 ||
         isInternalOrServiceNode(this) || !isLayoutSizeDefined(this.layout_)) {
         return false;
@@ -1806,7 +1498,7 @@ function createBaseCustomElementClass(win) {
       this.getOverflowElement();
       if (!this.overflowElement_) {
         if (overflown) {
-          user().warn(TAG_,
+          user().warn(TAG,
               'Cannot resize element and overflow is not available', this);
         }
       } else {
@@ -1831,88 +1523,12 @@ function createBaseCustomElementClass(win) {
   return win.BaseCustomElementClass;
 }
 
-/**
- * Registers a new custom element with its implementation class.
- * @param {!Window} win The window in which to register the elements.
- * @param {string} name Name of the custom element
- * @param {function(new:./base-element.BaseElement, !Element)} implementationClass
- */
-export function registerElement(win, name, implementationClass) {
-  const knownElements = getExtendedElements(win);
-  knownElements[name] = implementationClass;
-  const klass = createCustomElementClass(win, name);
-
-  const supportsCustomElementsV1 = 'customElements' in win;
-  if (supportsCustomElementsV1) {
-    win['customElements'].define(name, klass);
-  } else {
-    win.document.registerElement(name, {
-      prototype: klass.prototype,
-    });
-  }
-}
-
-/**
- * Registers a new alias for an existing custom element.
- * @param {!Window} win The window in which to register the elements.
- * @param {string} aliasName Additional name for an existing custom element.
- * @param {string} sourceName Name of an existing custom element
- */
-export function registerElementAlias(win, aliasName, sourceName) {
-  const knownElements = getExtendedElements(win);
-  const implementationClass = knownElements[sourceName];
-  if (implementationClass) {
-    // Update on the knownElements to prevent register again.
-    registerElement(win, aliasName, implementationClass);
-  } else {
-    throw new Error(`Element name is unknown: ${sourceName}.` +
-                     `Alias ${aliasName} was not registered.`);
-  }
-}
-
-/**
- * In order to provide better error messages we only allow to retrieve
- * services from other elements if those elements are loaded in the page.
- * This makes it possible to mark an element as loaded in a test.
- * @param {!Window} win
- * @param {string} elementName Name of an extended custom element.
- * @visibleForTesting
- */
-export function markElementScheduledForTesting(win, elementName) {
-  const knownElements = getExtendedElements(win);
-  if (!knownElements[elementName]) {
-    knownElements[elementName] = ElementStub;
-  }
-}
-
-/**
- * Resets our scheduled elements.
- * @param {!Window} win
- * @param {string} elementName Name of an extended custom element.
- * @visibleForTesting
- */
-export function resetScheduledElementForTesting(win, elementName) {
-  if (win.ampExtendedElements) {
-    delete win.ampExtendedElements[elementName];
-  }
-}
-
-/**
- * Returns a currently registered element class.
- * @param {!Window} win
- * @param {string} elementName Name of an extended custom element.
- * @return {?function()}
- * @visibleForTesting
- */
-export function getElementClassForTesting(win, elementName) {
-  const knownElements = win.ampExtendedElements;
-  return knownElements && knownElements[elementName] || null;
-}
 
 /** @param {!Element} element */
 function assertNotTemplate(element) {
   dev().assert(!element.isInTemplate_, 'Must never be called in template');
 }
+
 
 /**
  * @param {!Element} element
@@ -1922,7 +1538,8 @@ function getVsync(element) {
   // TODO(dvoytenko, #9177): consider removing this and always resolving via
   // `createCustomElementClass(win)` object.
   return Services.vsyncFor(element.ownerDocument.defaultView);
-};
+}
+
 
 /**
  * Whether the implementation is a stub.
@@ -1931,4 +1548,41 @@ function getVsync(element) {
  */
 function isStub(impl) {
   return (impl instanceof ElementStub);
-};
+}
+
+
+/**
+ * Returns "true" for internal AMP nodes or for placeholder elements.
+ * @param {!Node} node
+ * @return {boolean}
+ */
+function isInternalOrServiceNode(node) {
+  if (isInternalElement(node)) {
+    return true;
+  }
+  if (node.tagName && (node.hasAttribute('placeholder') ||
+      node.hasAttribute('fallback') ||
+      node.hasAttribute('overflow'))) {
+    return true;
+  }
+  return false;
+}
+
+
+/**
+ * Creates a new custom element class prototype.
+ *
+ * @param {!Window} win The window in which to register the custom element.
+ * @param {string} name The name of the custom element.
+ * @param {function(new:./base-element.BaseElement, !Element)=} opt_implementationClass For
+ *     testing only.
+ * @return {!Object} Prototype of element.
+ */
+export function createAmpElementProtoForTesting(
+    win, name, opt_implementationClass) {
+  const ElementProto = createCustomElementClass(win, name).prototype;
+  if (getMode().test && opt_implementationClass) {
+    ElementProto.implementationClassForTesting = opt_implementationClass;
+  }
+  return ElementProto;
+}
