@@ -54,6 +54,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
+import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -308,11 +309,8 @@ export class AmpA4A extends AMP.BaseElement {
      * Used as a signal in some of the CSI pings.
      * @private @const {string}
      */
-    this.releaseType_ = {
-      'production': 'pr',
-      'control': 'co',
-      'canary': 'ca',
-    }[getBinaryType(this.win)] || 'un';
+    this.releaseType_ = getBinaryTypeNumericalCode(getBinaryType(this.win)) ||
+        '-1';
   }
 
   /** @override */

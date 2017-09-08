@@ -595,10 +595,10 @@ export function maybeAppendErrorParameter(adUrl, parameterValue) {
  * @param {string} type
  * @return {?number}
  */
-function getBinaryTypeNumericalCode(type) {
+export function getBinaryTypeNumericalCode(type) {
   return {
-    'production': 0,
-    'control': 1,
-    'canary': 2,
+    'production': '0',
+    'control': '1',
+    'canary': '2',
   }[type] || null;
 }
