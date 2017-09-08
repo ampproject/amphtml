@@ -213,8 +213,6 @@ end
 #
 # Args:
 # - visualTestsConfig: JSON object containing the config for the visual tests.
-# Returns:
-# - The build ID if the build was successful. Exits with an error if not.
 def runVisualTests(visualTestsConfig)
   Percy.config.default_widths = DEFAULT_WIDTHS
   Capybara.default_max_wait_time = 5
@@ -229,6 +227,7 @@ def runVisualTests(visualTestsConfig)
   page = Capybara::Session.new(:poltergeist)
   build = Percy::Capybara.initialize_build
   buildId = build['data']['id']
+  File.write('PERCY_BUILD_ID', buildId)
   log('info', 'Started Percy build ' + cyan("#{buildId}") + '...')
   page.driver.options[:phantomjs] = Phantomjs.path
   page.driver.options[:js_errors] = true
@@ -240,7 +239,6 @@ def runVisualTests(visualTestsConfig)
   if (result['success'])
     log('info',
         'Build ' + cyan("#{buildId}") + ' is now being processed by Percy.')
-    buildId
   else
     log('error', 'Percy build ' + cyan("#{buildId}") + ' failed!')
     raise 'Build failure'
@@ -271,8 +269,8 @@ def generateSnapshots(page, webpages)
       loading_incomplete_css = webpage["loading_incomplete_css"]
       loading_complete_css = webpage["loading_complete_css"]
       page.visit(url)
-      verifyCssElements(
-          page, forbidden_css, loading_incomplete_css, loading_complete_css)
+      verifyCssElements(page, url,
+          forbidden_css, loading_incomplete_css, loading_complete_css)
       Percy::Capybara.snapshot(page, name: name)
     end
     log('verbose', 'Switching back to the default AMP config')
@@ -286,6 +284,7 @@ end
 #
 # Args:
 # - page: Page object used by Percy for snapshotting.
+# - url: URL to be snapshotted.
 # - forbidden_css:
 #       Array of CSS elements that must not be found in the page.
 # - loading_incomplete_css:
@@ -293,26 +292,31 @@ end
 # - loading_complete_css:
 #       Array of CSS elements that must eventually appear on the page.
 def verifyCssElements(
-    page, forbidden_css, loading_incomplete_css, loading_complete_css)
+    page, url, forbidden_css, loading_incomplete_css, loading_complete_css)
   page.has_no_css?('.i-amphtml-loader-dot')  # Implicitly waits for page load.
   if forbidden_css
     forbidden_css.each do |css|
       if page.has_css?(css)  # No implicit wait.
-        log('error', 'page has CSS element ' + cyan("#{css}"))
+        log('error', cyan("#{url}") + ' has CSS element ' + cyan("#{css}"))
+        raise 'Invalid CSS element'
       end
     end
   end
   if loading_incomplete_css
     loading_incomplete_css.each do |css|
       if !page.has_no_css?(css)  # Implicitly waits for element to disappear.
-        log('error', 'page still has CSS element ' + cyan("#{css}"))
+        log('error',
+            cyan("#{url}") + ' still has CSS element ' + cyan("#{css}"))
+        raise 'Invalid CSS element'
       end
     end
   end
   if loading_complete_css
     loading_complete_css.each do |css|
       if !page.has_css?(css)  # Implicitly waits for element to appear.
-        log('error', 'page does not yet have CSS element ' + cyan("#{css}"))
+        log('error',
+            cyan("#{url}") + ' does not yet have CSS element ' + cyan("#{css}"))
+        raise 'Missing CSS element'
       end
     end
   end
@@ -381,8 +385,7 @@ def main()
     end
     visualTestsConfigJson = loadVisualTestsConfigJson()
     visualTestsConfig = JSON.parse(visualTestsConfigJson)
-    buildId = runVisualTests(visualTestsConfig)
-    File.write('PERCY_BUILD_ID', buildId)
+    runVisualTests(visualTestsConfig)
   ensure
     closeWebServer(pid)
   end
