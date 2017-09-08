@@ -33,6 +33,9 @@ import {
   reportError,
 } from '../src/error';
 import {resetExperimentTogglesForTesting} from '../src/experiments';
+import {
+  resetEvtListenerOptsSupportForTesting,
+} from '../src/event-helper-listen';
 import * as describes from '../testing/describes';
 import {installYieldIt} from '../testing/yield';
 import stringify from 'json-stable-stringify';
@@ -324,6 +327,7 @@ afterEach(function() {
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
   resetExperimentTogglesForTesting(window);
+  resetEvtListenerOptsSupportForTesting();
   setReportError(reportError);
 });
 

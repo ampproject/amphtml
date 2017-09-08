@@ -26,6 +26,7 @@ import {
 } from '../../../src/iframe-helper';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {reportErrorToAnalytics} from '../../../src/error';
 import {dict} from '../../../src/utils/object';
 import {setStyle} from '../../../src/style';
 import {getData, loadPromise} from '../../../src/event-helper';
@@ -96,7 +97,7 @@ export class AmpAdXOriginIframeHandler {
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.baseInstance_.getAmpDoc());
 
-    /** @private @const {!../../../src/service/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
 
     /** @private {boolean} */
@@ -205,6 +206,11 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }));
+
+    this.unlisteners_.push(listenFor(this.iframe,
+        MessageType.USER_ERROR_IN_IFRAME, data => {
+          this.userErrorForAnalytics_(data['message']);
+        }, true, true /* opt_includingNestedWindows */));
 
     // Iframe.onload normally called by the Ad after full load.
     const iframeLoadPromise = loadPromise(this.iframe).then(() => {
@@ -456,8 +462,10 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   getIframePositionPromise_() {
-    return this.viewport_.getBoundingRectAsync(
+    return this.viewport_.getClientRectAsync(
         dev().assertElement(this.iframe)).then(position => {
+          dev().assert(position,
+              'element clientRect should intersects with root clientRect');
           const viewport = this.viewport_.getRect();
           return dict({
             'targetRect': position,
@@ -521,6 +529,18 @@ export class AmpAdXOriginIframeHandler {
     // have changed. Send an intersection record if needed.
     if (this.intersectionObserver_) {
       this.intersectionObserver_.fire();
+    }
+  }
+
+  /**
+   * @param {string} message
+   * @private
+   */
+  userErrorForAnalytics_(message) {
+    if (typeof message == 'string') {
+      const e = new Error(message);
+      e.name = '3pError';
+      reportErrorToAnalytics(e, this.baseInstance_.win);
     }
   }
 }

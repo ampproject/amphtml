@@ -16,7 +16,8 @@
 
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {Services} from '../services';
-import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
+import {Viewport} from '../service/viewport/viewport-impl';
+import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {registerServiceBuilderForDoc} from '../service';
 import {
   nativeIntersectionObserverSupported,
@@ -261,34 +262,22 @@ export class ViewportBindingInabox {
   }
 
   /** @override */
-  getLayoutRectAsync(el) {
+  getRootClientRectAsync() {
     if (!this.requestPositionPromise_) {
       this.requestPositionPromise_ = new Promise(resolve => {
         this.iframeClient_.requestOnce(
             MessageType.SEND_POSITIONS, MessageType.POSITION,
             data => {
               this.requestPositionPromise_ = null;
-              const parentLayoutRect = moveLayoutRect(
-                  data.targetRect,
-                  data.viewportRect.left,
-                  data.viewportRect.top);
-              resolve(parentLayoutRect);
+              dev().assert(data.targetRect, 'Host should send targetRect');
+              resolve(data.targetRect);
             }
         );
       });
     }
-
-    const elPosPromise = this.vsync_.measurePromise(() => {
-      return el./*OK*/getBoundingClientRect();
-    });
-
-    return Promise.all([elPosPromise, this.requestPositionPromise_]).then(
-        values => {
-          const box = values[0];
-          const iframeBox = values[1];
-          return moveLayoutRect(box, iframeBox.left, iframeBox.top);
-        });
+    return this.requestPositionPromise_;
   }
+
 
   /**
    * @return {!Promise}

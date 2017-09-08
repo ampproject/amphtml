@@ -21,11 +21,13 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
 import {fastFetchDelayedRequestEnabled} from './adsense-a4a-config';
 import {
+  addExperimentIdToElement,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {isExperimentOn} from '../../../src/experiments';
+import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {
   additionalDimensions,
   googleAdUrl,
@@ -61,17 +63,6 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 
 /** @const {string} */
 const TAG = 'amp-ad-network-adsense-impl';
-
-/**
- * See `VisibilityState` enum.
- * @const {!Object<string, string>}
- */
-const visibilityStateCodes = {
-  'visible': '1',
-  'hidden': '2',
-  'prerender': '3',
-  'unloaded': '5',
-};
 
 /**
  * Shared state for AdSense ad slots. This is used primarily for ad request url
@@ -139,6 +130,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
+  buildCallback() {
+    super.buildCallback();
+    const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
+    if (verifierEid) {
+      addExperimentIdToElement(verifierEid, this.element);
+    }
+  }
+
+  /** @override */
   getAdUrl() {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after moving it someplace common.
@@ -150,8 +150,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (adClientId.substring(0, 3) != 'ca-') {
       adClientId = 'ca-' + adClientId;
     }
-    const visibilityState = Services.viewerForDoc(this.getAmpDoc())
-        .getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
     const width = Number(this.element.getAttribute('width'));
@@ -188,7 +186,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'to': this.element.getAttribute('data-tag-origin'),
       'pv': sharedStateParams.pv,
       'channel': this.element.getAttribute('data-ad-channel'),
-      'vis': visibilityStateCodes[visibilityState] || '0',
       'wgl': global['WebGLRenderingContext'] ? '1' : '0',
       'asnt': this.sentinel,
       'dff': computedStyle(this.win, this.element)['font-family'],

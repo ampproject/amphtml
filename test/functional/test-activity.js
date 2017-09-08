@@ -23,7 +23,9 @@ import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {installViewportServiceForDoc} from '../../src/service/viewport-impl';
+import {
+  installViewportServiceForDoc,
+} from '../../src/service/viewport/viewport-impl';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {Observable} from '../../src/observable';

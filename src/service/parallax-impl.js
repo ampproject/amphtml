@@ -69,7 +69,7 @@ export class ParallaxService {
    * Update each [amp-fx-parallax] element with the new scroll position.
    * Notify any listeners.
    * @param {!Array<!ParallaxElement>} elements
-   * @param {!./viewport-impl.Viewport} viewport
+   * @param {!./viewport/viewport-impl.Viewport} viewport
    * @private
    */
   parallaxMutate_(elements, viewport) {
@@ -181,7 +181,7 @@ export class ParallaxElement {
 
   /**
    * True if the element is in the viewport.
-   * @param {!./viewport-impl.Viewport} viewport
+   * @param {!./viewport/viewport-impl.Viewport} viewport
    * @return {boolean}
    */
   shouldUpdate(viewport) {

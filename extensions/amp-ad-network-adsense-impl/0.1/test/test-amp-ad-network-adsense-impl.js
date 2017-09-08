@@ -561,24 +561,24 @@ describes.realWin('amp-ad-network-adsense-impl', {
         }));
     });
 
-    Object.entries({
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL_CONTROL]: {
+    [
+      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL_CONTROL, {
         layer: ADSENSE_A4A_EXPERIMENT_NAME,
         result: false,
-      },
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL]: {
+      }],
+      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL, {
         layer: ADSENSE_A4A_EXPERIMENT_NAME,
         result: true,
-      },
-      [INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.CONTROL]: {
+      }],
+      [INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.CONTROL, {
         layer: FF_DR_EXP_NAME,
         result: false,
-      },
-      [INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.EXPERIMENT]: {
+      }],
+      [INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.EXPERIMENT, {
         layer: FF_DR_EXP_NAME,
         result: true,
-      },
-    }).forEach(item => {
+      }],
+    ].forEach(item => {
       it(`should return ${item[1].result} if in ${item[0]} experiment`, () => {
         forceExperimentBranch(impl.win, item[1].layer, item[0]);
         expect(impl.delayAdRequestEnabled()).to.equal(item[1].result);

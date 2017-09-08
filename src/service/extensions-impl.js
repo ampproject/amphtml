@@ -385,10 +385,11 @@ export class Extensions {
     const holder = this.getCurrentExtensionHolder_(opt_forName);
     holder.docFactories.push(factory);
 
-    // If a single-doc mode, run factory right away if it's included by
-    // the doc.
-    if (this.currentExtensionId_ && this.ampdocService_.isSingleDoc()) {
-      const ampdoc = this.ampdocService_.getAmpDoc();
+    // If a single-doc mode, or is shadow-doc mode and has AmpDocShell,
+    // run factory right away if it's included by the doc.
+    if (this.currentExtensionId_ && (this.ampdocService_.isSingleDoc() ||
+        this.ampdocService_.hasAmpDocShell())) {
+      const ampdoc = this.ampdocService_.getAmpDoc(this.win.document);
       const extensionId = dev().assertString(this.currentExtensionId_);
       if (ampdoc.declaresExtension(extensionId) || holder.auto) {
         factory(ampdoc);
