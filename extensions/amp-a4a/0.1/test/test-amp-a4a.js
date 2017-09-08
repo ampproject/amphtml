@@ -250,6 +250,7 @@ describe('amp-a4a', () => {
           {name: 'ad'});
       a4aElement = createA4aElement(fixture.doc);
       a4a = new MockA4AImpl(a4aElement);
+      a4a.releaseType_ = '0';
       return fixture;
     }));
 
@@ -269,7 +270,7 @@ describe('amp-a4a', () => {
         expect(child).to.be.visible;
         expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
         expect(lifecycleEventStub).to.be.calledWith('renderSafeFrameStart',
-            {'isAmpCreative': false, 'releaseType': 'pr'});
+            {'isAmpCreative': false, 'releaseType': '0'});
       });
     });
 
@@ -493,6 +494,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         a4aElement = createA4aElement(doc);
         a4a = new MockA4AImpl(a4aElement);
+        a4a.releaseType_ = '0';
         a4a.createdCallback();
         a4a.firstAttachedCallback();
         a4a.buildCallback();
@@ -520,7 +522,7 @@ describe('amp-a4a', () => {
               'random illegal value');
           expect(fetchMock.called('ad')).to.be.true;
           expect(lifecycleEventStub).to.be.calledWith('renderCrossDomainStart',
-              {'isAmpCreative': false, 'releaseType': 'pr'});
+              {'isAmpCreative': false, 'releaseType': '0'});
         });
       });
     });
@@ -862,6 +864,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.releaseType_ = '0';
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
         const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
@@ -914,7 +917,7 @@ describe('amp-a4a', () => {
             expect(lifecycleEventStub).to.be.calledWith(
                 'adResponseValidateEnd', {
                   'signatureValidationResult': 0,
-                  'releaseType': 'pr',
+                  'releaseType': '0',
                 });
           });
         });
