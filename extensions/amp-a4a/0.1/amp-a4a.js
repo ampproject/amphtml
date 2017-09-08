@@ -38,7 +38,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {utf8Decode} from '../../../src/utils/bytes';
-import {isCanary, isExperimentOn} from '../../../src/experiments';
+import {getBinaryType, isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
@@ -305,12 +305,14 @@ export class AmpA4A extends AMP.BaseElement {
     this.isRelayoutNeededFlag = false;
 
     /**
-     * Used as a signal in some of the CSI pings. Canary is shortened to 'ca'
-     * and production to 'pr'. TODO(@glevitzky, #10060) Include other release
-     * types (control) when available.
+     * Used as a signal in some of the CSI pings.
      * @private @const {string}
      */
-    this.releaseType_ = isCanary(this.win) ? 'ca' : 'pr';
+    this.releaseType_ = {
+      'production': 'pr',
+      'control': 'co',
+      'canary': 'ca',
+    }[getBinaryType(this.win)] || 'un';
   }
 
   /** @override */

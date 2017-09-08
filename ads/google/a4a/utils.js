@@ -17,7 +17,7 @@
 import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
-import {isCanary} from '../../../src/experiments';
+import {getBinaryType} from '../../../src/experiments';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -233,7 +233,7 @@ export function googlePageParameters(
           'u_his': getHistoryLength(win),
           'isw': win != win.top ? viewportSize.width : null,
           'ish': win != win.top ? viewportSize.height : null,
-          'art': isCanary(win) ? '2' : null,
+          'art': getBinaryTypeNumericalCode(getBinaryType(win)),
           'vis': visibilityStateCodes[visibilityState] || '0',
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
@@ -588,4 +588,22 @@ export function maybeAppendErrorParameter(adUrl, parameterValue) {
   const modifiedAdUrl = adUrl + `&aet=${parameterValue}`;
   dev().assert(modifiedAdUrl.length <= MAX_URL_LENGTH);
   return modifiedAdUrl;
+}
+
+/**
+ * Returns a numerical code representing the binary type.
+ * @param {string} type
+ * @return {?number}
+ */
+function getBinaryTypeNumericalCode(type) {
+  switch (type) {
+    case 'production':
+      return 0;
+    case 'control':
+      return 1;
+    case 'canary':
+      return 2;
+    default:
+      return null;
+  }
 }
