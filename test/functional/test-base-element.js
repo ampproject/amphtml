@@ -20,7 +20,6 @@ import {createAmpElementProtoForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
 import {Services} from '../../src/services';
-import * as sinon from 'sinon';
 
 
 describes.realWin('BaseElement', {amp: true}, env => {
