@@ -19,7 +19,7 @@ import {KeyCodes} from '../utils/key-codes';
 import {Services} from '../services';
 import {debounce} from '../utils/rate-limit';
 import {dev, user} from '../log';
-import {isArray, isFiniteNumber} from '../types';
+import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
@@ -338,7 +338,7 @@ export class ActionService {
 
     // Dequeue the current queue.
     if (isArray(currentQueue)) {
-      Services.timerFor(target.ownerDocument.defaultView).delay(() => {
+      Services.timerFor(toWin(target.ownerDocument.defaultView)).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
         currentQueue.forEach(invocation => {
           try {

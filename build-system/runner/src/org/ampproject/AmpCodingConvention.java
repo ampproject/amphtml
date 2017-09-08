@@ -23,6 +23,7 @@ import com.google.javascript.jscomp.CodingConvention.AssertionFunctionSpec;
 import com.google.javascript.jscomp.CodingConventions;
 import com.google.javascript.jscomp.ClosureCodingConvention;
 import com.google.javascript.jscomp.newtypes.JSType;
+import com.google.javascript.rhino.jstype.JSTypeNative;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,9 +45,9 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
 
   @Override public Collection<AssertionFunctionSpec> getAssertionFunctions() {
     return ImmutableList.of(
-        new AssertionFunctionSpec("user.assert", JSType.TRUTHY),
-        new AssertionFunctionSpec("dev.assert", JSType.TRUTHY),
-        new AssertionFunctionSpec("Log$$module$src$log.prototype.assert", JSType.TRUTHY),
+        new AssertionFunctionSpec("user.assert", JSTypeNative.TRUTHY),
+        new AssertionFunctionSpec("dev.assert", JSTypeNative.TRUTHY),
+        new AssertionFunctionSpec("Log$$module$src$log.prototype.assert", JSTypeNative.TRUTHY),
         new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertElement", "Element"),
         new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertString", "string"),
         new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertNumber", "number")

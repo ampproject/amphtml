@@ -17,6 +17,7 @@
 import {childElementByTag} from '../dom';
 import {getService, registerServiceBuilder} from '../service';
 import {dev, user} from '../log';
+import {toWin} from '../types';
 
 
 /**
@@ -49,7 +50,7 @@ export class BaseTemplate {
     this.element = element;
 
     /** @public @const {!Window} */
-    this.win = element.ownerDocument.defaultView;
+    this.win = toWin(element.ownerDocument.defaultView);
 
     this.compileCallback();
   }

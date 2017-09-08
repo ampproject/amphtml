@@ -23,6 +23,7 @@
 // Requires polyfills in immediate side effect.
 import './polyfills';
 import {dev} from './log';
+import {toWin} from './types';
 
 
 /**
@@ -108,8 +109,8 @@ export function getExistingServiceForDocInEmbedScope(
   // First, try to resolve via local (embed) window.
   if (nodeOrDoc.nodeType) {
     // If a node is passed, try to resolve via this node.
-    const win = /** @type {!Document} */ (
-        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
+    const win = toWin(/** @type {!Document} */ (
+        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
     const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
     if (local) {
       return local;
@@ -352,8 +353,8 @@ export function getParentWindowFrameElement(node, topWin) {
  */
 export function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
-    const win = /** @type {!Document} */ (
-        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
+    const win = toWin(/** @type {!Document} */ (
+        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
     return getAmpdocService(win).getAmpDoc(/** @type {!Node} */ (nodeOrDoc));
   }
   return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);

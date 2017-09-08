@@ -18,6 +18,7 @@ import {assertHttpsUrl} from '../../../src/url';
 import {openWindowDialog} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {Services} from '../../../src/services';
+import {toWin} from '../../../src/types';
 
 import {Util} from './util';
 
@@ -37,7 +38,7 @@ export class PinWidget {
     user().assert(rootElement.getAttribute('data-url'),
         'The data-url attribute is required for Pin widgets');
     this.element = rootElement;
-    this.xhr = Services.xhrFor(rootElement.ownerDocument.defaultView);
+    this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
     this.pinId = '';
     this.pinUrl = '';
     this.width = '';

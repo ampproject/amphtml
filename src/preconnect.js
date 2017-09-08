@@ -25,6 +25,7 @@ import {parseUrl} from './url';
 import {Services} from './services';
 import {dev} from './log';
 import {startsWith} from './string';
+import {toWin} from './types';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
@@ -356,7 +357,7 @@ export class Preconnect {
  * @return {!Preconnect}
  */
 export function preconnectForElement(element) {
-  const serviceHolder = element.ownerDocument.defaultView;
+  const serviceHolder = toWin(element.ownerDocument.defaultView);
   registerServiceBuilder(serviceHolder, 'preconnect', PreconnectService);
   const preconnectService = getService(serviceHolder, 'preconnect');
   return new Preconnect(preconnectService, element);

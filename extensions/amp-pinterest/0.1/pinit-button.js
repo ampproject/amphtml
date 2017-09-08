@@ -16,6 +16,7 @@
 import {openWindowDialog} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {Services} from '../../../src/services';
+import {toWin} from '../../../src/types';
 
 import {Util} from './util';
 
@@ -48,7 +49,7 @@ export class PinItButton {
     user().assert(rootElement.getAttribute('data-description'),
         'The data-description attribute is required for Pin It buttons');
     this.element = rootElement;
-    this.xhr = Services.xhrFor(rootElement.ownerDocument.defaultView);
+    this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
     this.color = rootElement.getAttribute('data-color');
     this.count = rootElement.getAttribute('data-count');
     this.lang = rootElement.getAttribute('data-lang');

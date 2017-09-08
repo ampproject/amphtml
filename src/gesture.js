@@ -17,6 +17,7 @@
 import {Observable} from './observable';
 import {Pass} from './pass';
 import {dev} from './log';
+import {toWin} from './types';
 
 const PROP_ = '__AMP_Gestures';
 
@@ -108,7 +109,7 @@ export class Gestures {
     this.wasEventing_ = false;
 
     /** @private {!Pass} */
-    this.pass_ = new Pass(element.ownerDocument.defaultView,
+    this.pass_ = new Pass(toWin(element.ownerDocument.defaultView),
         this.doPass_.bind(this));
 
     /** @private {!Observable} */

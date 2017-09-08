@@ -24,6 +24,7 @@ import {dict} from '../utils/object';
 import {isProtocolValid} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
 import {tryFocus} from '../dom';
+import {toWin} from '../types';
 
 /**
  * @param {!Element} element
@@ -286,7 +287,7 @@ export class StandardActions {
    */
   handleShow(invocation) {
     const target = dev().assertElement(invocation.target);
-    const ownerWindow = target.ownerDocument.defaultView;
+    const ownerWindow = toWin(target.ownerDocument.defaultView);
 
     if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
       user().warn(
