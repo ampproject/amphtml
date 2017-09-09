@@ -732,6 +732,9 @@ export class AmpA4A extends AMP.BaseElement {
           const extensions = Services.extensionsFor(this.win);
           creativeMetaDataDef.customElementExtensions.forEach(
               extensionId => extensions.preloadExtension(extensionId));
+          // Preload any fonts.
+          (creativeMetaDataDef.customStylesheets || []).forEach(font =>
+              this.preconnect.preload(font.href));
           return creativeMetaDataDef;
         })
         .catch(error => {
