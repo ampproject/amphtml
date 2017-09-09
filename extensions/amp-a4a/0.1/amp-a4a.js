@@ -491,9 +491,6 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   shouldInitializePromiseChain_() {
-    if (!Services.cryptoFor(this.win).isPkcsAvailable()) {
-      return false;
-    }
     const slotRect = this.getIntersectionElementLayoutBox();
     if (slotRect.height == 0 || slotRect.width == 0) {
       dev().fine(
