@@ -2,13 +2,7 @@
   "name": "amphtml-validator",
   "version": "1.0.20",
   "description": "Official validator for AMP HTML (www.ampproject.org)",
-  "keywords": [
-    "AMP",
-    "validator",
-    "validate",
-    "AMP HTML",
-    "Accelerated Mobile Pages"
-  ],
+  "keywords": ["AMP", "validator", "validate", "AMP HTML", "Accelerated Mobile Pages"],
   "engines": {
     "node": ">=0.10.25"
   },
@@ -24,7 +18,7 @@
   "dependencies": {
     "colors": "1.1.2",
     "commander": "2.9.0",
-    "promise": "7.1.1"
+    "promise" : "7.1.1"
   },
   "devDependencies": {
     "jasmine": "2.3.2"
