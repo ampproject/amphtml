@@ -242,7 +242,7 @@ export class ActionService {
     } else if (name == 'change') {
       this.root_.addEventListener(name, event => {
         const element = dev().assertElement(event.target);
-        this.addInputDetails_(event);
+        this.addTargetPropertiesAsDetail_(event);
         this.trigger(element, name, event, ActionTrust.HIGH);
       });
     } else if (name == 'input-debounced') {
@@ -256,7 +256,7 @@ export class ActionService {
         // Create a DeferredEvent to avoid races where the browser cleans up
         // the event object before the async debounced function is called.
         const deferredEvent = new DeferredEvent(event);
-        this.addInputDetails_(deferredEvent);
+        this.addTargetPropertiesAsDetail_(deferredEvent);
         debouncedInput(deferredEvent);
       });
     } else if (name == 'valid' || name == 'invalid') {
@@ -522,32 +522,32 @@ export class ActionService {
   }
 
   /**
-   * Given a browser 'change' or 'input' event, add `details` property
-   * containing the relevant information for the change that generated it.
+   * Given a browser 'change' or 'input' event, add `details` property to it
+   * containing whitelisted properties of the target element.
    * @param {!ActionEventDef} event
    * @private
    */
-  addInputDetails_(event) {
+  addTargetPropertiesAsDetail_(event) {
     const detail = /** @type {!JsonObject} */ (map());
     const target = event.target;
-    const tagName = target.tagName;
 
-    // Expose `value` property on HTMLInputElement and HTMLSelectElement.
-    if (tagName == 'INPUT' || tagName == 'SELECT') {
-      const type = target.getAttribute('type');
-
+    if (target.value !== undefined) {
       detail['value'] = target.value;
-      // Natively supported on some browsers but convert anyways for consistency.
+    }
+
+    // Check tagName instead since `valueAsNumber` isn't supported on IE.
+    if (target.tagName == 'INPUT') {
+      // Probably supported natively but convert anyways for consistency.
       detail['valueAsNumber'] = Number(target.value);
+    }
 
-      if (type == 'checkbox' || type == 'radio') {
-        detail['checked'] = target.checked;
-      }
+    if (target.checked !== undefined) {
+      detail['checked'] = target.checked;
+    }
 
-      if (target.min !== undefined || target.max !== undefined) {
-        detail['min'] = target.min;
-        detail['max'] = target.max;
-      }
+    if (target.min !== undefined || target.max !== undefined) {
+      detail['min'] = target.min;
+      detail['max'] = target.max;
     }
 
     if (Object.keys(detail).length > 0) {
