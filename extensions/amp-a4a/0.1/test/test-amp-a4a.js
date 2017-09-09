@@ -885,7 +885,7 @@ describe('amp-a4a', () => {
           expect(preloadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
           expect(doc.querySelector('link[rel=preload]' +
             '[href="https://fonts.googleapis.com/css?family=Questrial"]'))
-            .to.be.ok;
+              .to.be.ok;
           return a4a.layoutCallback().then(() => {
             expect(renderAmpCreativeSpy.calledOnce,
                 'renderAmpCreative_ called exactly once').to.be.true;
