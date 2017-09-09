@@ -419,6 +419,19 @@ describe('amp-a4a', () => {
         expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.true;
       });
     });
+
+    it('for requests from insecure HTTP pages', () => {
+      sandbox.stub(Services.cryptoFor(fixture.win), 'isPkcsAvailable')
+          .returns(false);
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        const child = a4aElement.querySelector('iframe[src]');
+        expect(child).to.be.ok;
+        expect(child).to.be.visible;
+        expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+      });
+    });
   });
   describe('layoutCallback cancels properly', () => {
     let a4aElement;
