@@ -29,7 +29,6 @@ tags: {  # amp-install-serviceworker
 tags: {  # <amp-install-serviceworker>
   html_format: AMP  # Ads cannot install serviceworkers
   tag_name: "AMP-INSTALL-SERVICEWORKER"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-install-serviceworker"
   attrs: {
     name: "src"

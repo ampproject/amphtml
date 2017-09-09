@@ -491,9 +491,6 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   shouldInitializePromiseChain_() {
-    if (!Services.cryptoFor(this.win).isPkcsAvailable()) {
-      return false;
-    }
     const slotRect = this.getIntersectionElementLayoutBox();
     if (slotRect.height == 0 || slotRect.width == 0) {
       dev().fine(
@@ -735,6 +732,9 @@ export class AmpA4A extends AMP.BaseElement {
           const extensions = Services.extensionsFor(this.win);
           creativeMetaDataDef.customElementExtensions.forEach(
               extensionId => extensions.preloadExtension(extensionId));
+          // Preload any fonts.
+          (creativeMetaDataDef.customStylesheets || []).forEach(font =>
+              this.preconnect.preload(font.href));
           return creativeMetaDataDef;
         })
         .catch(error => {

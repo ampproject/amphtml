@@ -24,6 +24,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {
   isObject,
   toArray,
+  toWin,
 } from '../../../src/types';
 import {
   getData,
@@ -136,7 +137,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.element.ownerDocument.defaultView,
+    const iframe = getIframe(toWin(this.element.ownerDocument.defaultView),
         this.element, 'ima-video');
     iframe.setAttribute('allowfullscreen', 'true');
     this.applyFillContent(iframe);

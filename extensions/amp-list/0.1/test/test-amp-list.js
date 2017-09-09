@@ -91,6 +91,70 @@ describes.realWin('amp-list component', {
     });
   });
 
+  it('should load and render non-array if single-result is set', () => {
+    const items = {title: 'Title1'};
+    const newHeight = 127;
+    const itemElement = doc.createElement('div');
+    itemElement.style.height = newHeight + 'px';
+    element.setAttribute('single-result', 'true');
+    const fetchPromise = Promise.resolve(items);
+    const renderPromise = Promise.resolve([itemElement]);
+    listMock.expects('fetch_').withExactArgs('items')
+        .returns(fetchPromise).once();
+    templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
+        element, [items])
+        .returns(renderPromise).once();
+    let measureFunc;
+    listMock.expects('getVsync').returns({
+      measure: func => {
+        measureFunc = func;
+      },
+    }).once();
+    listMock.expects('attemptChangeHeight').withExactArgs(newHeight).returns(
+        Promise.resolve());
+    return list.layoutCallback().then(() => {
+      return Promise.all([fetchPromise, renderPromise]);
+    }).then(() => {
+      expect(list.container_.contains(itemElement)).to.be.true;
+      expect(measureFunc).to.exist;
+      measureFunc();
+    });
+  });
+
+  it('should trim the results to max-items', () => {
+    const items = [
+      {title: 'Title1'},
+      {title: 'Title2'},
+      {title: 'Title3'},
+    ];
+    const newHeight = 127;
+    const itemElement = doc.createElement('div');
+    itemElement.style.height = newHeight + 'px';
+    element.setAttribute('max-items', '2');
+    const fetchPromise = Promise.resolve(items);
+    const renderPromise = Promise.resolve([itemElement]);
+    listMock.expects('fetch_').withExactArgs('items')
+        .returns(fetchPromise).once();
+    templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
+        element, items.slice(0,2))
+        .returns(renderPromise).once();
+    let measureFunc;
+    listMock.expects('getVsync').returns({
+      measure: func => {
+        measureFunc = func;
+      },
+    }).once();
+    listMock.expects('attemptChangeHeight').withExactArgs(newHeight).returns(
+        Promise.resolve());
+    return list.layoutCallback().then(() => {
+      return Promise.all([fetchPromise, renderPromise]);
+    }).then(() => {
+      expect(list.container_.contains(itemElement)).to.be.true;
+      expect(measureFunc).to.exist;
+      measureFunc();
+    });
+  });
+
   it('should dispatch "amp:template-rendered" event after render', () => {
     const items = [{title: 'Title1'}];
     const itemElement = doc.createElement('div');
@@ -171,12 +235,21 @@ describes.realWin('amp-list component', {
     });
   });
 
-  it('should fail to load b/c data is absent', () => {
+  it('should fail to load b/c data array is absent', () => {
     listMock.expects('fetch_')
         .returns(Promise.resolve({})).once();
     templatesMock.expects('findAndRenderTemplateArray').never();
     return expect(list.layoutCallback()).to.eventually.be
         .rejectedWith(/Response must contain an array/);
+  });
+
+  it('should fail to load b/c data single-result object is absent', () => {
+    element.setAttribute('single-result', 'true');
+    listMock.expects('fetch_')
+        .returns(Promise.resolve()).once();
+    templatesMock.expects('findAndRenderTemplateArray').never();
+    return expect(list.layoutCallback()).to.eventually.be
+        .rejectedWith(/Response must contain an arrary or object/);
   });
 
   it('should load and render with a different root', () => {
