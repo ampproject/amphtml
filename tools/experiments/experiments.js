@@ -108,8 +108,8 @@ const EXPERIMENTS = [
   {
     id: 'amp-gwd-animation',
     name: 'AMP GWD Animation',
-    spec: '',
-    cleanupIssue: '',
+    spec: 'https://github.com/ampproject/amphtml/issues/9949',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11238',
   },
   {
     id: 'no-auth-in-prerender',
