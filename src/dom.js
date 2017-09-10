@@ -18,6 +18,7 @@ import {dev} from './log';
 import {dict} from './utils/object';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {startsWith} from './string';
+import {parseUrl} from './url';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -546,20 +547,18 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
  * @return {!JsonObject}
  */
 export function getDataParamsFromLinkUrl(element, opt_computeParamNameFunc) {
-  if (element.tagName.toUpperCase() != 'A') {
+  if (element.tagName.toUpperCase() != 'A' || !element.href) {
     return dict();
   }
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
+  const location = parseUrl(element.href);
   const params = dict();
-  params[computeParamNameFunc('clickHostname')] = element.hostname;
-  params[computeParamNameFunc('clickProtocol')]
-    = element.protocol.replace(/:$/, '');
-  params[computeParamNameFunc('clickPathname')] = element.pathname;
-  params[computeParamNameFunc('clickQuery')] = element.search.slice(1);
-  params[computeParamNameFunc('clickHash')] = element.hash.slice(1);
-  params[computeParamNameFunc('clickUrl')]
-    = element.protocol + '//' + element.hostname + element.pathname
-      + element.search + element.hash;
+  params[computeParamNameFunc('clickHostname')] = location.hostname;
+  params[computeParamNameFunc('clickProtocol')] = location.protocol.replace(':', '');
+  params[computeParamNameFunc('clickPathname')] = location.pathname;
+  params[computeParamNameFunc('clickQuery')] = location.search;
+  params[computeParamNameFunc('clickHash')] = location.hash;
+  params[computeParamNameFunc('clickUrl')] = location.href;
   return params;
 }
 
