@@ -24,6 +24,21 @@ import {user} from '../../../src/log';
 export const ANIMATIONS_DISABLED_CLASS = 'i-amphtml-gwd-animation-disabled';
 
 /**
+ * CSS class name used to identify GWD page wrapper elements.
+ * @const {string}
+ */
+export const GWD_PAGE_WRAPPER_CLASS = 'gwd-page-wrapper';
+
+/**
+ * GWD playback control CSS classes.
+ * @enum {string}
+ */
+export const PlaybackCssClass = {
+  PAUSE: 'gwd-pause-animation',
+  PLAY: 'gwd-play-animation',
+};
+
+/**
  * The attribute used to store the name of an element's currently-active label
  * animation.
  * @const {string}
@@ -43,12 +58,6 @@ const EVENT_NAME_ATTR = 'data-event-name';
 export const GWD_TIMELINE_EVENT = 'gwd.timelineEvent';
 
 /**
- * CSS class name used to identify GWD page wrapper elements.
- * @const {string}
- */
-export const GWD_PAGE_WRAPPER_CLASS = 'gwd-page-wrapper';
-
-/**
  * Standard and vendor-prefixed versions of the `animationend` event for which
  * listeners are added.
  * @const {!Array<string>}
@@ -56,13 +65,11 @@ export const GWD_PAGE_WRAPPER_CLASS = 'gwd-page-wrapper';
 const VENDOR_ANIMATIONEND_EVENTS = ['animationend', 'webkitAnimationEnd'];
 
 /**
- * GWD playback control CSS classes.
- * @enum {string}
+ * When executing gotoAndPause, the amount of time to wait (in milliseconds)
+ * before triggering pause.
+ * @const {number}
  */
-export const PlaybackCssClass = {
-  PAUSE: 'gwd-pause-animation',
-  PLAY: 'gwd-play-animation',
-};
+export const GOTO_AND_PAUSE_DELAY = 40;
 
 /**
  * The GWD runtime service ID (arbitrary string).
@@ -71,7 +78,7 @@ export const PlaybackCssClass = {
 export const GWD_SERVICE_NAME = 'gwd';
 
 /**
- * Uppercase identifier for log statements.
+ * Uppercase identifier for log statements (arbitrary string).
  * @const {string}
  */
 const LOG_ID = 'GWD';
@@ -79,39 +86,35 @@ const LOG_ID = 'GWD';
 /**
  * @param {!Element} receiver
  * @param {string} counterName
+ * @return {number} The current GWD goto counter value for the given receiver
+ *     element and goto event counter name.
  * @private
  */
-const getOrInitCounter = function(receiver, counterName) {
-  initCounterIfNotExists(receiver, counterName);
-  return receiver.gwdGotoCounters[counterName];
+function getCounter(receiver, counterName) {
+  if (receiver.gwdGotoCounters &&
+      receiver.gwdGotoCounters.hasOwnProperty(counterName)) {
+    return receiver.gwdGotoCounters[counterName];
+  } else {
+    return 0;
+  }
 };
 
 /**
  * @param {!Element} receiver
  * @param {string} counterName
- * @param {number} val Counter value to set.
+ * @param {number} counterValue
  * @private
  */
-const setCounter = function(receiver, counterName, val) {
-  initCounterIfNotExists(receiver, counterName);
-  receiver.gwdGotoCounters[counterName] = val;
-};
-
-/**
- * Initializes the counters map if it is not yet initialized, and initializes
- * an entry for the given counter with an initial value of 0 if there is no
- * entry yet.
- * @param {!Element} receiver
- * @param {string} counterName
- * @private
- */
-const initCounterIfNotExists = function(receiver, counterName) {
+function setCounter(receiver, counterName, counterValue) {
+  // Ensure a goto counters map with an empty counter is initialized for the
+  // given element and goto event name.
   if (!receiver.gwdGotoCounters) {
     receiver.gwdGotoCounters = {};
   }
   if (!receiver.gwdGotoCounters.hasOwnProperty(counterName)) {
     receiver.gwdGotoCounters[counterName] = 0;
   }
+  receiver.gwdGotoCounters[counterName] = counterValue;
 };
 
 /**
@@ -158,21 +161,15 @@ class AmpGwdRuntimeService {
    * animations are turned off with a CSS `animation: none` override. Actions
    * like play or gotoAndPlay may be invoked while in the disabled state, though
    * they will have no immediate effect; playback changes will be reflected when
-   * animations are re-enabled and the CSS override is lifted.
+   * animations are re-enabled.
    * @param {boolean} enable True to enable, false to disable.
    */
   setEnabled(enable) {
-    if (enable) {
-      // Lift the animation CSS override.
-      this.ampdoc_.getBody().classList.remove(ANIMATIONS_DISABLED_CLASS);
-    } else {
-      // Stop all animations by overriding them with `animation: none`.
-      this.ampdoc_.getBody().classList.add(ANIMATIONS_DISABLED_CLASS);
-    }
+    this.ampdoc_.getBody().classList.toggle(ANIMATIONS_DISABLED_CLASS, !enable);
   }
 
   /**
-   * Stops animations on the previously-active page and enables them on the
+   * Stops animations on the previously-active page and starts them on the
    * newly-active page.
    * @param {number} index The index of the newly-active slide.
    */
@@ -269,30 +266,30 @@ class AmpGwdRuntimeService {
     // Switch to the label animation.
     this.playLabelAnimation_(receiver, label);
 
-    // Trigger a pause.
-    const timeToWaitBeforePause = 40;
-
+    // Pause playback. The pause must be triggered after a delay as a workaround
+    // for a Safari bug that prevents pausing animations from working.
     this.ampdoc_.win.setTimeout(() => {
       this.pause(id);
-    }, timeToWaitBeforePause);
+    }, GOTO_AND_PAUSE_DELAY);
   }
 
   /**
    * The gotoAndPlayNTimes action.
    * @param {string} id Receiver id.
    * @param {string} label The name of the label animation to go to.
-   * @param {number} count The number of times to repeat this gotoAndPlay.
-   * @param {string} eventName The timeline event name, used to record an
-   *     counter for this gotoAndPlayNTimes invocation.
+   * @param {number} maxCount The number of times this timeline event should
+   *     trigger gotoAndPlay.
+   * @param {string} eventName The source timeline event name, used to enforce
+   *     that gotoAndPlay is triggered a maximum of N times for this event.
    */
-  gotoAndPlayNTimes(id, label, count, eventName) {
-    if (count <= 0) {
-      user().warn(LOG_ID, `Invalid count parameter ${count}.`);
+  gotoAndPlayNTimes(id, label, maxCount, eventName) {
+    if (maxCount <= 0) {
+      user().error(LOG_ID, `Invalid maxCount parameter: ${maxCount}`);
       return;
     }
 
     if (!eventName) {
-      user().warn(LOG_ID, `Invalid event name ${eventName}.`);
+      user().error(LOG_ID, 'Event name required but not specified.');
       return;
     }
 
@@ -304,9 +301,9 @@ class AmpGwdRuntimeService {
 
     // Invoke gotoAndPlay up to the requested number of times.
     const counterName = `${eventName}_${label}`;
-    const currentCount = getOrInitCounter(receiver, counterName);
+    const currentCount = getCounter(receiver, counterName);
 
-    if (currentCount < count) {
+    if (currentCount < maxCount) {
       this.playLabelAnimation_(receiver, label);
       setCounter(receiver, counterName, currentCount + 1);
     }
@@ -332,14 +329,14 @@ class AmpGwdRuntimeService {
     if (receiver && receiver.classList) {
       return receiver;
     } else {
-      user().warn(LOG_ID, `Could not get receiver with id ${id}.`);
+      user().error(LOG_ID, `Could not get receiver with id ${id}.`);
       return null;
     }
   }
 
   /**
-   * Switches the given element's animation to the given label animation.
-   * This is a core gotoAndPlay routine that is used in all goto* actions.
+   * Switches an element's current animation to a label animation.
+   * This is a core gotoAndPlay routine used in all goto* actions.
    * @param {!Element} receiver
    * @param {string} label
    * @private
@@ -371,9 +368,8 @@ class AmpGwdRuntimeService {
 
   /**
    * Handles GWD event `animationend` events, which signal that a timeline event
-   * marker has been reached.
-   * If the event originated from a GWD event element, extracts its event name
-   * and dispatches a custom event.
+   * marker has been reached. If the event originated from a GWD event element,
+   * extracts its event name and dispatches a custom event.
    * @param {!Event} event An `animationend` event.
    * @private
    */
@@ -391,7 +387,7 @@ class AmpGwdRuntimeService {
         `${GWD_TIMELINE_EVENT}`,
         {eventName: userEventName, sourceEvent: event});
 
-    this.ampdoc_.win.dispatchEvent(timelineEvent);
+    this.ampdoc_.getRootNode().dispatchEvent(timelineEvent);
   }
 
   /**
@@ -426,7 +422,7 @@ class AmpGwdRuntimeService {
  * restarts.
  * @param {!Element} element
  */
-const reflow = function(element) {
+function reflow(element) {
   element./*OK*/offsetWidth = element./*OK*/offsetWidth;
 };
 
@@ -436,7 +432,7 @@ const reflow = function(element) {
  * GWD_SERVICE_NAME.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
-export const installGwdRuntimeServiceForDoc = function(ampdoc) {
+export function installGwdRuntimeServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
       ampdoc,
       GWD_SERVICE_NAME,

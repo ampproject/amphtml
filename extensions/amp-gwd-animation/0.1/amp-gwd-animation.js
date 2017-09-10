@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-trust';
-import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
-import {Services} from '../../../src/services';
-import {getServiceForDoc} from '../../../src/service';
 import {
   GWD_SERVICE_NAME,
   GWD_TIMELINE_EVENT,
   installGwdRuntimeServiceForDoc,
 } from './amp-gwd-animation-impl';
+import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
+import {ActionTrust} from '../../../src/action-trust';
 import {isExperimentOn} from '../../../src/experiments';
+import {getValueForExpr} from '../../../src/json';
 import {user} from '../../../src/log';
+import {getServiceForDoc} from '../../../src/service';
+import {Services} from '../../../src/services';
 
 /** @const {string} The custom element tag name for this extension. */
 export const TAG = 'amp-gwd-animation';
@@ -51,36 +52,6 @@ const ACTION_IMPL_ARGS = {
   'gotoAndPause': ['args.id', 'args.label'],
   'gotoAndPlayNTimes': ['args.id', 'args.label', 'args.N', 'event.eventName'],
   'setCurrentPage': ['args.index'],
-};
-
-/**
- * Given an action name, extracts its required arguments from an invocation
- * payload, which may contain the data needed by this action in its `args` or
- * `events` child objects. The arguments required by each action are specified
- * in ACTION_IMPL_ARGS as path strings.
- * @param {string} actionName
- * @param {!../../../src/service/action-impl.ActionInvocation} invocation
- * @return {!Array<string>}
- */
-const getActionImplArgs = function(actionName, invocation) {
-  const argDefs = user().assert(
-      ACTION_IMPL_ARGS[actionName],
-      `The action ${actionName} is not a supported action.`);
-
-  return argDefs.map(argDef => {
-    // Walk the invocation object to get the requested property by
-    // its path, e.g., 'args.id' == invocation.args.id
-    let obj = invocation;
-    const props = argDef.split('.');
-    for (let i = 0; i < props.length; i++) {
-      if (!obj) {
-        return undefined;
-      }
-      obj = obj[props[i]];
-    }
-
-    return obj;
-  });
 };
 
 export class GwdAnimation extends AMP.BaseElement {
@@ -120,7 +91,7 @@ export class GwdAnimation extends AMP.BaseElement {
 
     // Listen for GWD timeline events to re-broadcast them via the doc action
     // service.
-    this.getAmpDoc().win.addEventListener(
+    this.getAmpDoc().getRootNode().addEventListener(
         GWD_TIMELINE_EVENT, this.boundOnGwdTimelineEvent_, true);
 
     // If the document has a GWD page deck, automatically generate listeners
@@ -150,7 +121,7 @@ export class GwdAnimation extends AMP.BaseElement {
    * GWD runtime method with arguments extracted from the invocation object
    * (@see getActionImplArgs).
    * @param {string} actionName Name of the action to invoke (currently
-   *     identical to the corresponding service method).
+   *     identical to the corresponding service method name).
    * @return {!function(!../../../src/service/action-impl.ActionInvocation)}
    * @private
    */
@@ -160,7 +131,9 @@ export class GwdAnimation extends AMP.BaseElement {
           getServiceForDoc(this.getAmpDoc(), GWD_SERVICE_NAME),
           'Cannot execute action because the GWD service is not registered.');
 
-      const actionArgs = getActionImplArgs(actionName, invocation);
+      const argPaths = ACTION_IMPL_ARGS[actionName];
+      const actionArgs =
+        argPaths.map(argPath => getValueForExpr(invocation, argPath));
       service[actionName].apply(service, actionArgs);
     };
   }
@@ -182,7 +155,7 @@ export class GwdAnimation extends AMP.BaseElement {
 
   /** @override */
   detachedCallback() {
-    this.getAmpDoc().win.removeEventListener(
+    this.getAmpDoc().getRootNode().removeEventListener(
         GWD_TIMELINE_EVENT, this.boundOnGwdTimelineEvent_, true);
     return true;
   }
@@ -190,14 +163,16 @@ export class GwdAnimation extends AMP.BaseElement {
 
 /**
  * Modifies the given element's `on` attribute to include the given event and
- * action handler definition. (This is currently the only mechanism by which
- * an AMP event handler can be programmatically added.)
- * @param {!Element} element
- * @param {string} event
+ * action handler definition.
+ * TODO(sklobovskaya): There is currently no other mechanism by which an event
+ * handler can be programmatically added. If one becomes available, would
+ * prefer to use that instead of manipulating the action defs string.
+ * @param {!Element} element The target element.
+ * @param {string} event The event name, e.g., 'slideChange'
  * @param {string} actionStr e.g., `someDiv.hide`
  * @private Visible for testing.
  */
-export const insertEventActionBinding = function(element, event, actionStr) {
+export function insertEventActionBinding(element, event, actionStr) {
   const currentOnAttrVal = element.getAttribute('on') || '';
   const eventPrefix = `${event}:`;
   const eventDefIndex = currentOnAttrVal.indexOf(eventPrefix);
@@ -205,24 +180,25 @@ export const insertEventActionBinding = function(element, event, actionStr) {
 
   if (eventDefIndex != -1) {
     // Some actions already defined for this event. Splice in the new action.
-    const actionsDefIndex = eventDefIndex + eventPrefix.length;
+    const actionsStartIndex = eventDefIndex + eventPrefix.length;
 
     newOnAttrVal =
-        currentOnAttrVal.substr(0, actionsDefIndex) +
+        currentOnAttrVal.substr(0, actionsStartIndex) +
         actionStr + ',' +
-        currentOnAttrVal.substr(actionsDefIndex);
+        currentOnAttrVal.substr(actionsStartIndex);
   } else {
-    // No actions defined yet for this event. Append the new action.
-    newOnAttrVal =
-        currentOnAttrVal +
-        (currentOnAttrVal ? ';' : '') +
-        eventPrefix +
-        actionStr;
+    // No actions defined yet for this event. Create the event:action def and
+    // append it to the existing defs.
+    newOnAttrVal = currentOnAttrVal;
+    if (newOnAttrVal) {
+      newOnAttrVal += ';';
+    }
+    newOnAttrVal += `${eventPrefix}${actionStr}`;
   }
 
   element.setAttribute('on', newOnAttrVal);
 };
 
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, GwdAnimation, CSS);
 });

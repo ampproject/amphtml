@@ -22,6 +22,7 @@ import {
 import {
   ANIMATIONS_DISABLED_CLASS,
   CURRENT_LABEL_ANIMATION_ATTR,
+  GOTO_AND_PAUSE_DELAY,
   GWD_PAGE_WRAPPER_CLASS,
   PlaybackCssClass,
 } from '../amp-gwd-animation-impl';
@@ -278,7 +279,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
             expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE))
                 .to.be.true;
             done();
-          }, 50);
+          }, GOTO_AND_PAUSE_DELAY);
         });
       });
 
