@@ -87,7 +87,17 @@ class AmpSocialShare extends AMP.BaseElement {
 
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
     const urlReplacements = Services.urlReplacementsForDoc(this.getAmpDoc());
-    urlReplacements.expandAsync(hrefWithVars).then(href => {
+    const bindingVars = typeConfig['bindings'];
+    let bindings;
+    if (bindingVars) {
+      bindings = {};
+      bindingVars.forEach(name => {
+        const bindingName = name.toUpperCase();
+        bindings[bindingName] = this.params_[name];
+      });
+    }
+
+    urlReplacements.expandAsync(hrefWithVars, bindings).then(href => {
       this.href_ = href;
       // mailto:, whatsapp: protocols breaks when opened in _blank on iOS Safari
       const protocol = parseUrl(href).protocol;
