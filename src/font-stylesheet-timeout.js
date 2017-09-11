@@ -55,7 +55,7 @@ function maybeTimeoutFonts(win) {
   if (perf && perf.timing && perf.timing.responseStart) {
     timeSinceResponseStart = Date.now() - perf.timing.responseStart;
   }
-  const timeout = Math.max(1, 500 - timeSinceResponseStart);
+  const timeout = Math.max(1, 250 - timeSinceResponseStart);
 
   // Avoid timer dependency since this runs very early in execution.
   win.setTimeout(() => {
