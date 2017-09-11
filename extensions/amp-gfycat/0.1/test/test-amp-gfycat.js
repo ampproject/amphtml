@@ -16,7 +16,8 @@
  */
 
 import '../amp-gfycat';
-
+import {listenOncePromise} from '../../../../src/event-helper';
+import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin('amp-gfycat', {
   amp: {
@@ -76,6 +77,31 @@ describes.realWin('amp-gfycat', {
           .to.equal('https://gfycat.com/ifr/LeanMediocreBeardeddragon?autoplay=0');
     });
   });
+
+  it('should forward events from gfycat player to the amp element', () => {
+    return getGfycat('LeanMediocreBeardeddragon').then(gfycat => {
+      const iframe = gfycat.querySelector('iframe');
+      return Promise.resolve()
+          .then(() => {
+            const p = listenOncePromise(gfycat, VideoEvents.PLAYING);
+            sendFakeMessage(gfycat, iframe, 'playing');
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(gfycat, VideoEvents.PAUSE);
+            sendFakeMessage(gfycat, iframe, 'paused');
+            return p;
+          });
+    });
+  });
+
+  function sendFakeMessage(gfycat, iframe, command) {
+    gfycat.implementation_.handleGfycatMessages_({
+      origin: 'https://gfycat.com',
+      source: iframe.contentWindow,
+      data: command,
+    });
+  }
 
   it('requires data-gfyid', () => {
     return getGfycat('').should.eventually.be.rejectedWith(
