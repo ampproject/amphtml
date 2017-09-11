@@ -27,7 +27,6 @@ tags: {  # amp-font
 }
 tags: {  # <amp-font>
   tag_name: "AMP-FONT"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-font"
   attrs: {
     name: "font-family"

@@ -34,7 +34,9 @@ import {Services} from '../../src/services';
 import {getServiceForDoc} from '../../src/service';
 import {loadPromise} from '../../src/event-helper';
 import {registerServiceBuilder} from '../../src/service';
-import {resetScheduledElementForTesting} from '../../src/custom-element';
+import {
+  resetScheduledElementForTesting,
+} from '../../src/service/custom-element-registry';
 
 class AmpTest extends BaseElement {}
 class AmpTestSub extends BaseElement {}

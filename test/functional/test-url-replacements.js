@@ -21,7 +21,7 @@ import {user} from '../../src/log';
 import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
-} from '../../src/custom-element';
+} from '../../src/service/custom-element-registry';
 import {cidServiceForDocForTesting} from
     '../../src/service/cid-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
