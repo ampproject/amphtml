@@ -41,7 +41,7 @@ class AmpGfycat extends AMP.BaseElement {
     super(element);
 
     /** @private {?string}  */
-    this.videoid_ = null;
+    this.videoid_ = '';
 
     /**
      * @private {?Element}
