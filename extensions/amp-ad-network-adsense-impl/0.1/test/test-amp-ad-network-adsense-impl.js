@@ -650,8 +650,11 @@ describes.realWin('amp-ad-network-adsense-impl', {
       impl.element.style.position = 'relative';
       impl.element.style.top = '150vh';
 
-      // Stub out vsync measurements to occur immediately.
-      impl.getVsync().measure = callback => callback();
+      // Stub out vsync tasks to run immediately.
+      impl.getVsync().run = (vsyncTaskSpec, vsyncState) => {
+        vsyncTaskSpec.measure(vsyncState);
+        vsyncTaskSpec.mutate(vsyncState);
+      };
 
       // Fix the viewport to a consistent size to that the test doesn't depend
       // on the actual browser window opened.
@@ -700,8 +703,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'data-auto-format': 'rspv',
       }).then(() => {
         impl.onLayoutMeasure();
-        // Right margin is 25px from container and 9px from body.
-        expect(element.style.marginRight).to.be.equal('-124px'); // seems to be out by 90?
+        // Right margin is 9px from containerContainer and 25px from container.
+        // TODO(charliereams): In the test harness it is also offset by 15px due
+        // to strange scrollbar behaviour. Figure out how to disable this.
+        expect(element.style.marginRight).to.be.equal('-49px');
         expect(element.style.marginLeft).to.be.equal('');
       });
     });
