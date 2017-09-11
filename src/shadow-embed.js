@@ -17,7 +17,12 @@
 import {Services} from './services';
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
 import {dev} from './log';
-import {closestNode, escapeCssSelectorIdent} from './dom';
+import {
+  childElementsByTag,
+  closestNode,
+  escapeCssSelectorIdent,
+  iterateCursor,
+} from './dom';
 import {installCssTransformer} from './style-installer';
 import {
   isShadowDomSupported,
@@ -61,7 +66,19 @@ export function createShadowRoot(hostElement) {
   // Native support.
   const shadowDomSupported = getShadowDomSupportedVersion();
   if (shadowDomSupported == ShadowDomVersion.V1) {
-    return hostElement.attachShadow({mode: 'open'});
+    const shadowRoot = hostElement.attachShadow({mode: 'open'});
+    if (!shadowRoot.styleSheets) {
+      Object.defineProperty(shadowRoot, 'styleSheets', {
+        get: function() {
+          const items = [];
+          iterateCursor(childElementsByTag(shadowRoot, 'style'), child => {
+            items.push(child.sheet);
+          });
+          return items;
+        },
+      });
+    }
+    return shadowRoot;
   } else if (shadowDomSupported == ShadowDomVersion.V0) {
     return hostElement.createShadowRoot();
   }
