@@ -89,8 +89,7 @@ class AmpGfycat extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('amp-img');
-    dev().assert(this.videoid_);
-    const videoid = this.videoid_;
+    const videoid = dev().assertString(this.videoid_);
 
     placeholder.setAttribute('src',
         'https://thumbs.gfycat.com/' +
@@ -120,7 +119,7 @@ class AmpGfycat extends AMP.BaseElement {
       return this.videoIframeSrc_;
     }
 
-    const videoid = this.videoid_;
+    const videoid = dev().assertString(this.videoid_);
     let src = 'https://gfycat.com/ifr/' + encodeURIComponent(videoid);
 
     const params = getDataParamsFromAttributes(this.element);
