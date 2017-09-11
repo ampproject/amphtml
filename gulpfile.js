@@ -857,9 +857,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return toPromise(bundler.bundle()
       .on('error', function(err) {
         if (err instanceof SyntaxError) {
-          console.error($$.util.colors.red('Syntax error:', err));
+          console.error($$.util.colors.red('Syntax error:', err.message));
         } else {
-          console.error($$.util.colors.red(err));
+          console.error($$.util.colors.red(err.message));
         }
       })
       .pipe(lazybuild())
