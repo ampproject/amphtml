@@ -101,6 +101,9 @@ function normalizeRows(rows) {
   normalizeRow(rows, 'current-min/ampcontext-v0.js',
       'current/ampcontext-lib.js', true);
 
+  normalizeRow(rows, 'current-min/iframe-transport-client-v0.js',
+      'current/iframe-transport-client-lib.js', true);
+
   // normalize alp.js
   normalizeRow(rows, 'alp.js', 'alp.max.js', true);
 
@@ -110,6 +113,10 @@ function normalizeRows(rows) {
   normalizeRow(rows, 'amp4ads-v0.js', 'amp-inabox.js', true);
 
   normalizeRow(rows, 'amp4ads-host-v0.js', 'amp-inabox-host.js', true);
+
+  normalizeRow(rows, 'examiner.js', 'examiner.max.js', true);
+
+  normalizeRow(rows, 'ww.js', 'ww.max.js', true);
 
   // normalize sw.js
   normalizeRow(rows, 'sw.js', 'sw.max.js', true);
@@ -220,6 +227,7 @@ function sizeTask() {
       'dist/**/*.js',
       '!dist/**/*-latest.js',
       '!dist/**/*check-types.js',
+      '!dist/**/amp-viewer-host.max.js',
       'dist.3p/{current,current-min}/**/*.js',
     ])
     .pipe(sizer())
