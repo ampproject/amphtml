@@ -645,6 +645,14 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  smi2: {
+    preconnect: [
+      'https://smi2.ru',
+      'https://amp.smi2.ru',
+    ],
+    renderStartImplemented: true,
+  },
+
   sortable: {
     prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
     preconnect: [
