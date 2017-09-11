@@ -70,7 +70,11 @@ export function createShadowRoot(hostElement) {
     if (!shadowRoot.styleSheets) {
       Object.defineProperty(shadowRoot, 'styleSheets', {
         get: function() {
-          return new StyleSheetListImpl(shadowRoot);
+          const items = [];
+          iterateCursor(childElementsByTag(shadowRoot, 'style'), child => {
+            items.push(child.sheet);
+          });
+          return items;
         },
       });
     }
@@ -81,42 +85,6 @@ export function createShadowRoot(hostElement) {
 
   // Polyfill.
   return createShadowRootPolyfill(hostElement);
-}
-
-
-/**
- * A polyfill StyleSheetList for browsers that do not implement
- * the shadowRoot.styleSheet property.
- */
-class StyleSheetListImpl {
-  /**
-   * @param {!Document|!ShadowRoot} root
-   */
-  constructor(root) {
-    /** @private @const {!Array<CSSStyleSheet>} */
-    this.items_ = [];
-
-    iterateCursor(childElementsByTag(root, 'style'), child => {
-      this.items_.push(child.sheet);
-    });
-  }
-
-  /**
-   * Get the style sheet at the index
-   * @param {number} index
-   * @return {!CSSStyleSheet}
-   */
-  item(index) {
-    return this.items_[index];
-  }
-
-  /**
-   * Get the number of style sheets in the style sheet list
-   * @return {number}
-   */
-  get length() {
-    return this.items_.length;
-  }
 }
 
 
