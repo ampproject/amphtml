@@ -25,10 +25,6 @@ limitations under the License.
     </td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js">&lt;/script></code></td>
   </tr>
@@ -38,7 +34,10 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-position-observer.amp.html">amp-position-observer</a></td>
+    <td>
+      <a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-position-observer.amp.html">amp-position-observer</a><br>
+      <a href="https://codepen.io/collection/nMJYrv/">CodePen collection with 6 samples</a>
+    </td>
   </tr>
 </table>
 
