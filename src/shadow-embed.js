@@ -17,7 +17,12 @@
 import {Services} from './services';
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
 import {dev} from './log';
-import {closestNode, escapeCssSelectorIdent} from './dom';
+import {
+  childElementsByTag,
+  closestNode,
+  escapeCssSelectorIdent,
+  iterateCursor,
+} from './dom';
 import {installCssTransformer} from './style-installer';
 import {
   isShadowDomSupported,
@@ -61,13 +66,57 @@ export function createShadowRoot(hostElement) {
   // Native support.
   const shadowDomSupported = getShadowDomSupportedVersion();
   if (shadowDomSupported == ShadowDomVersion.V1) {
-    return hostElement.attachShadow({mode: 'open'});
+    const shadowRoot = hostElement.attachShadow({mode: 'open'});
+    if (!shadowRoot.styleSheets) {
+      Object.defineProperty(shadowRoot, 'styleSheets', {
+        get: function() {
+          return new StyleSheetListImpl(shadowRoot);
+        },
+      });
+    }
+    return shadowRoot;
   } else if (shadowDomSupported == ShadowDomVersion.V0) {
     return hostElement.createShadowRoot();
   }
 
   // Polyfill.
   return createShadowRootPolyfill(hostElement);
+}
+
+
+/**
+ * A polyfill StyleSheetList for browsers that do not implement
+ * the shadowRoot.styleSheet property.
+ */
+class StyleSheetListImpl {
+  /**
+   * @param {!Document|!ShadowRoot} root
+   */
+  constructor(root) {
+    /** @private @const {!Array<CSSStyleSheet>} */
+    this.items_ = [];
+
+    iterateCursor(childElementsByTag(root, 'style'), child => {
+      this.items_.push(child.sheet);
+    });
+  }
+
+  /**
+   * Get the style sheet at the index
+   * @param {number} index
+   * @return {!CSSStyleSheet}
+   */
+  item(index) {
+    return this.items_[index];
+  }
+
+  /**
+   * Get the number of style sheets in the style sheet list
+   * @return {number}
+   */
+  get length() {
+    return this.items_.length;
+  }
 }
 
 
