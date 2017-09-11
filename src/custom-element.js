@@ -187,6 +187,9 @@ function createBaseCustomElementClass(win) {
       /** @private {boolean} */
       this.isInViewport_ = false;
 
+      /** @private {boolean} */
+      this.paused_ = false;
+
       /** @private {string|null|undefined} */
       this.mediaQuery_ = undefined;
 
@@ -990,6 +993,15 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Whether the resource is currently visible in the viewport.
+     * @return {boolean}
+     * @final @package @this {!Element}
+     */
+    isInViewport() {
+      return this.isInViewport_;
+    }
+
+    /**
      * Instructs the resource that it entered or exited the visible viewport.
      *
      * Can only be called on a upgraded and built element.
@@ -1000,6 +1012,15 @@ function createBaseCustomElementClass(win) {
      */
     viewportCallback(inViewport) {
       assertNotTemplate(this);
+      if (inViewport == this.isInViewport_) {
+        return;
+      }
+      // TODO(dvoytenko, #9177): investigate/cleanup viewport signals for
+      // elements in dead iframes.
+      if (!this.ownerDocument ||
+          !this.ownerDocument.defaultView) {
+        return;
+      }
       this.isInViewport_ = inViewport;
       if (this.layoutCount_ == 0) {
         if (!inViewport) {
@@ -1037,6 +1058,15 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Whether the resource is currently paused.
+     * @return {boolean}
+     * @final @package @this {!Element}
+     */
+    isPaused() {
+      return this.paused_;
+    }
+
+    /**
      * Requests the resource to stop its activity when the document goes into
      * inactive state. The scope is up to the actual component. Among other
      * things the active playback of video or audio content must be stopped.
@@ -1045,10 +1075,14 @@ function createBaseCustomElementClass(win) {
      */
     pauseCallback() {
       assertNotTemplate(this);
-      if (!this.isBuilt()) {
+      if (this.paused_) {
         return;
       }
-      this.implementation_.pauseCallback();
+      this.paused_ = true;
+      this.viewportCallback(false);
+      if (this.isBuilt()) {
+        this.implementation_.pauseCallback();
+      }
     }
 
     /**
@@ -1060,10 +1094,13 @@ function createBaseCustomElementClass(win) {
      */
     resumeCallback() {
       assertNotTemplate(this);
-      if (!this.isBuilt()) {
+      if (!this.paused_) {
         return;
       }
-      this.implementation_.resumeCallback();
+      this.paused_ = false;
+      if (this.isBuilt()) {
+        this.implementation_.resumeCallback();
+      }
     }
 
     /**

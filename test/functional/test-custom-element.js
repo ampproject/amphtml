@@ -1118,18 +1118,41 @@ describes.realWin('CustomElement', {amp: true}, env => {
   });
 
   describe('pauseCallback', () => {
-    it('should pause upgraded element', () => {
+    it('should not pause unbuilt element', () => {
       const element = new ElementClass();
+      expect(element.isPaused()).to.be.false;
 
       // Non-built element doesn't receive pauseCallback.
       element.pauseCallback();
-      expect(testElementPauseCallback).to.have.not.been.called;
+      expect(element.isPaused()).to.be.true;
+      expect(testElementPauseCallback).to.not.be.called;
+    });
 
-      // Built element receives pauseCallback.
+    it('should pause upgraded element', () => {
+      const element = new ElementClass();
+      element.viewportCallback(true);
+      container.appendChild(element);
+      return element.buildingPromise_.then(() => {
+        expect(testElementViewportCallback).to.be.calledOnce;
+        expect(testElementViewportCallback).to.be.calledWith(true);
+        element.pauseCallback();
+        expect(testElementPauseCallback).to.be.calledOnce;
+        expect(testElementViewportCallback).to.be.calledTwice;
+        expect(testElementViewportCallback).to.be.calledWith(false);
+        expect(element.isPaused()).to.be.true;
+        expect(element.isInViewport()).to.be.false;
+      });
+    });
+
+    it('should only pause once', () => {
+      const element = new ElementClass();
       container.appendChild(element);
       return element.buildingPromise_.then(() => {
         element.pauseCallback();
         expect(testElementPauseCallback).to.be.calledOnce;
+        element.pauseCallback();
+        expect(testElementPauseCallback).to.be.calledOnce;
+        expect(element.isPaused()).to.be.true;
       });
     });
 
@@ -1145,6 +1168,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
   describe('resumeCallback', () => {
     it('should resume upgraded element', () => {
       const element = new ElementClass();
+      element.pauseCallback();
 
       // Non-built element doesn't receive resumeCallback.
       element.resumeCallback();
@@ -1153,8 +1177,22 @@ describes.realWin('CustomElement', {amp: true}, env => {
       // Built element receives resumeCallback.
       container.appendChild(element);
       return element.buildingPromise_.then(() => {
+        element.pauseCallback();
         element.resumeCallback();
         expect(testElementResumeCallback).to.be.calledOnce;
+      });
+    });
+
+    it('should resume upgraded element only once', () => {
+      const element = new ElementClass();
+      container.appendChild(element);
+      return element.buildingPromise_.then(() => {
+        element.pauseCallback();
+        element.resumeCallback();
+        expect(testElementResumeCallback).to.be.calledOnce;
+        element.resumeCallback();
+        expect(testElementResumeCallback).to.be.calledOnce;
+        expect(element.isPaused()).to.be.false;
       });
     });
 
@@ -1162,6 +1200,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       const element = new StubElementClass();
 
       // Unupgraded document doesn't receive resumeCallback.
+      element.pauseCallback();
       element.resumeCallback();
       expect(testElementResumeCallback).to.have.not.been.called;
     });
@@ -1175,7 +1214,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       expect(element.isBuilt()).to.equal(false);
       element.viewportCallback(true);
-      expect(element.isInViewport_).to.equal(true);
+      expect(element.isInViewport()).to.equal(true);
       expect(testElementViewportCallback).to.have.not.been.called;
     });
 
@@ -1187,7 +1226,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.isUpgraded()).to.equal(false);
       expect(element.isBuilt()).to.equal(false);
       element.viewportCallback(true);
-      expect(element.isInViewport_).to.equal(true);
+      expect(element.isInViewport()).to.equal(true);
       expect(testElementViewportCallback).to.have.not.been.called;
 
       resourcesMock.expects('upgraded').withExactArgs(element).never();
@@ -1643,9 +1682,9 @@ describes.realWin('CustomElement Loading Indicator', {amp: true}, env => {
     }).to.throw(/Must never be called in template/);
   });
 
-
   it('should turn off when exits viewport', () => {
     stubInA4A(false);
+    element.isInViewport_ = true;
     const toggle = sandbox.spy(element, 'toggleLoading_');
     element.viewportCallback(false);
     expect(toggle).to.be.calledOnce;

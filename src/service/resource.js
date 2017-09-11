@@ -174,9 +174,6 @@ export class Resource {
     /** @private {boolean} */
     this.isMeasureRequested_ = false;
 
-    /** @private {boolean} */
-    this.isInViewport_ = false;
-
     /** @private {?Promise} */
     this.renderOutsideViewportPromise_ = null;
 
@@ -202,9 +199,6 @@ export class Resource {
     this.loadPromise_ = new Promise(resolve => {
       this.loadPromiseResolve_ = resolve;
     });
-
-    /** @private {boolean} */
-    this.paused_ = false;
   }
 
   /**
@@ -806,7 +800,7 @@ export class Resource {
    * @return {boolean}
    */
   isInViewport() {
-    return this.isInViewport_;
+    return this.element.isInViewport();
   }
 
   /**
@@ -814,15 +808,6 @@ export class Resource {
    * @param {boolean} inViewport
    */
   setInViewport(inViewport) {
-    // TODO(dvoytenko, #9177): investigate/cleanup viewport signals for
-    // elements in dead iframes.
-    if (inViewport == this.isInViewport_ ||
-        !this.element.ownerDocument ||
-        !this.element.ownerDocument.defaultView) {
-      return;
-    }
-    dev().fine(TAG, 'inViewport:', this.debugid, inViewport);
-    this.isInViewport_ = inViewport;
     this.element.viewportCallback(inViewport);
   }
 
@@ -857,11 +842,6 @@ export class Resource {
    * Calls element's pauseCallback callback.
    */
   pause() {
-    if (this.state_ == ResourceState.NOT_BUILT || this.paused_) {
-      return;
-    }
-    this.paused_ = true;
-    this.setInViewport(false);
     this.element.pauseCallback();
     if (this.element.unlayoutOnPause()) {
       this.unlayout();
@@ -872,14 +852,6 @@ export class Resource {
    * Calls element's pauseCallback callback.
    */
   pauseOnRemove() {
-    if (this.state_ == ResourceState.NOT_BUILT) {
-      return;
-    }
-    this.setInViewport(false);
-    if (this.paused_) {
-      return;
-    }
-    this.paused_ = true;
     this.element.pauseCallback();
   }
 
@@ -887,10 +859,6 @@ export class Resource {
    * Calls element's resumeCallback callback.
    */
   resume() {
-    if (this.state_ == ResourceState.NOT_BUILT || !this.paused_) {
-      return;
-    }
-    this.paused_ = false;
     this.element.resumeCallback();
   }
 

@@ -17,61 +17,25 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
-import {Signals} from '../../src/utils/signals';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
 
-describe('Resource', () => {
-  let sandbox;
+describes.realWin('Resource', {amp: true}, env => {
+  let win, doc;
   let element;
   let elementMock;
-  let attributes;
   let resources;
   let resource;
   let viewportMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
 
-    attributes = {};
-    const signals = new Signals();
-    element = {
-      ownerDocument: {defaultView: window},
-      tagName: 'AMP-AD',
-      style: {},
-      hasAttribute: name => (name in attributes),
-      isBuilt: () => false,
-      isUpgraded: () => false,
-      prerenderAllowed: () => false,
-      renderOutsideViewport: () => true,
-      build: () => false,
-      getBoundingClientRect: () => null,
-      updateLayoutBox: () => {},
-      isRelayoutNeeded: () => false,
-      layoutCallback: () => {},
-      changeSize: () => {},
-      unlayoutOnPause: () => false,
-      unlayoutCallback: () => true,
-      pauseCallback: () => false,
-      resumeCallback: () => false,
-      viewportCallback: () => {},
-      disconnectedCallback: () => {},
-      togglePlaceholder: () => sandbox.spy(),
-      getPriority: () => 2,
-      dispatchCustomEvent: () => {},
-      fakeComputedStyle: {
-        marginTop: '1px',
-        marginRight: '2px',
-        marginBottom: '3px',
-        marginLeft: '4px',
-      },
-      nodeType: 1,
-      removeAttribute: () => {},
-      setAttribute: () => {},
-      signals: () => signals,
-    };
+    element = env.createAmpElement('amp-ad');
+    sandbox.stub(element, 'getPriority', () => 2);
     elementMock = sandbox.mock(element);
 
     const viewer = Services.viewerForDoc(document);
@@ -92,7 +56,6 @@ describe('Resource', () => {
   afterEach(() => {
     viewportMock.verify();
     elementMock.verify();
-    sandbox.restore();
   });
 
   it('should initialize correctly', () => {
@@ -335,9 +298,11 @@ describe('Resource', () => {
     elementMock.expects('getBoundingClientRect').returns(
         layoutRectLtwh(0, 0, 10, 10)).once();
     viewportMock.expects('getScrollTop').returns(11).atLeast(0);
-    element.offsetParent = {
-      isAlwaysFixed: () => true,
-    };
+    Object.defineProperty(element, 'offsetParent', {
+      value: {
+        isAlwaysFixed: () => true,
+      },
+    });
     resource.measure();
     expect(resource.isFixed()).to.be.true;
     // layoutBox != pageLayoutBox
@@ -350,10 +315,10 @@ describe('Resource', () => {
     elementMock.expects('getBoundingClientRect').returns(
         layoutRectLtwh(0, 0, 10, 10)).once();
     viewportMock.expects('getScrollTop').returns(11).atLeast(0);
-    const fixedParent = document.createElement('div');
+    const fixedParent = doc.createElement('div');
     fixedParent.style.position = 'fixed';
-    document.body.appendChild(fixedParent);
-    element.offsetParent = fixedParent;
+    doc.body.appendChild(fixedParent);
+    fixedParent.appendChild(element);
     viewportMock.expects('isDeclaredFixed')
         .withExactArgs(element)
         .returns(false)
@@ -373,8 +338,10 @@ describe('Resource', () => {
     let rect;
 
     beforeEach(() => {
-      attributes['placeholder'] = '';
-      element.parentElement = document.createElement('amp-iframe');
+      element.setAttribute('placeholder', '');
+      Object.defineProperty(element, 'parentElement', {
+        value: doc.createElement('amp-iframe'),
+      });
       element.parentElement.__AMP__RESOURCE = {};
       elementMock.expects('isUpgraded').returns(true).atLeast(1);
       elementMock.expects('build').returns(Promise.resolve()).once();
@@ -615,24 +582,14 @@ describe('Resource', () => {
   describe('setInViewport', () => {
     it('should call viewportCallback when not built', () => {
       resource.state_ = ResourceState.NOT_BUILT;
-      elementMock.expects('viewportCallback').withExactArgs(true).once();
       resource.setInViewport(true);
       expect(resource.isInViewport()).to.equal(true);
     });
 
     it('should call viewportCallback when built', () => {
       resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('viewportCallback').withExactArgs(true).once();
       resource.setInViewport(true);
       expect(resource.isInViewport()).to.equal(true);
-    });
-
-    it('should call viewportCallback only once', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('viewportCallback').withExactArgs(true).once();
-      resource.setInViewport(true);
-      resource.setInViewport(true);
-      resource.setInViewport(true);
     });
   });
 
@@ -747,16 +704,14 @@ describe('Resource', () => {
       expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
     });
 
-    it('should NOT call viewportCallback when resource not in viewport', () => {
+    it('should call viewportCallback when resource not in viewport', () => {
       resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      resource.isInViewport_ = false;
-      elementMock.expects('viewportCallback').never();
+      elementMock.expects('viewportCallback').withExactArgs(false).once();
       resource.unlayout();
     });
 
     it('should call viewportCallback when resource in viewport', () => {
       resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      resource.isInViewport_ = true;
       elementMock.expects('viewportCallback').withExactArgs(false).once();
       resource.unlayout();
     });
@@ -771,16 +726,9 @@ describe('Resource', () => {
   });
 
   describe('pauseCallback', () => {
-    it('should NOT call pauseCallback on unbuilt element', () => {
+    it('should call pauseCallback on unbuilt element', () => {
       resource.state_ = ResourceState.NOT_BUILT;
-      elementMock.expects('pauseCallback').never();
-      resource.pause();
-    });
-
-    it('should NOT call pauseCallback on paused element', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      resource.paused_ = true;
-      elementMock.expects('pauseCallback').never();
+      elementMock.expects('pauseCallback').once();
       resource.pause();
     });
 
@@ -820,22 +768,16 @@ describe('Resource', () => {
     });
 
     describe('when remove from DOM', () => {
-      it('should not call pauseCallback on remove for unbuilt ele', () => {
+      it('should call pauseCallback on remove for unbuilt ele', () => {
         resource.state_ = ResourceState.NOT_BUILT;
+        elementMock.expects('pauseCallback').once();
         resource.pauseOnRemove();
-        elementMock.expects('pauseCallback').never();
-        elementMock.expects('viewportCallback').never();
       });
 
       it('should call pauseCallback on remove for built ele', () => {
         resource.state_ = ResourceState.LAYOUT_COMPLETE;
-        resource.isInViewport_ = true;
-        resource.paused_ = false;
         elementMock.expects('pauseCallback').once();
-        elementMock.expects('viewportCallback').once();
         resource.pauseOnRemove();
-        expect(resource.isInViewport_).to.equal(false);
-        expect(resource.paused_).to.equal(true);
       });
 
       it('should call disconnectedCallback on remove for built ele', () => {
@@ -849,21 +791,14 @@ describe('Resource', () => {
   });
 
   describe('resumeCallback', () => {
-    it('should NOT call resumeCallback on unbuilt element', () => {
+    it('should call resumeCallback on unbuilt element', () => {
       resource.state_ = ResourceState.NOT_BUILT;
-      elementMock.expects('resumeCallback').never();
+      elementMock.expects('resumeCallback').once();
       resource.resume();
     });
 
-    it('should NOT call resumeCallback on un-paused element', () => {
+    it('should call resumeCallback on un-paused element', () => {
       resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('resumeCallback').never();
-      resource.resume();
-    });
-
-    it('should call resumeCallback on built element', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      resource.paused_ = true;
       elementMock.expects('resumeCallback').once();
       resource.resume();
     });
