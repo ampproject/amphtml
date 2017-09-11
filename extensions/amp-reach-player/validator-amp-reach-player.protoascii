@@ -29,7 +29,6 @@ tags: {  # amp-reach-player
 tags: {  # <amp-reach-player>
   html_format: AMP
   tag_name: "AMP-REACH-PLAYER"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-reach-player"
   attrs: {
     name: "data-embed-id"

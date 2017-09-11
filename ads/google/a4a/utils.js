@@ -17,7 +17,7 @@
 import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
-import {isCanary} from '../../../src/experiments';
+import {getBinaryType} from '../../../src/experiments';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -215,6 +215,7 @@ export function googlePageParameters(
         const viewportSize = viewport.getSize();
         const visibilityState = Services.viewerForDoc(nodeOrDoc)
             .getVisibilityState();
+        const art = getBinaryTypeNumericalCode(getBinaryType(win));
         return {
           'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
@@ -233,7 +234,7 @@ export function googlePageParameters(
           'u_his': getHistoryLength(win),
           'isw': win != win.top ? viewportSize.width : null,
           'ish': win != win.top ? viewportSize.height : null,
-          'art': isCanary(win) ? '2' : null,
+          'art': art == '0' ? null : art,
           'vis': visibilityStateCodes[visibilityState] || '0',
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
@@ -588,4 +589,17 @@ export function maybeAppendErrorParameter(adUrl, parameterValue) {
   const modifiedAdUrl = adUrl + `&aet=${parameterValue}`;
   dev().assert(modifiedAdUrl.length <= MAX_URL_LENGTH);
   return modifiedAdUrl;
+}
+
+/**
+ * Returns a numerical code representing the binary type.
+ * @param {string} type
+ * @return {?string}
+ */
+export function getBinaryTypeNumericalCode(type) {
+  return {
+    'production': '0',
+    'control': '1',
+    'canary': '2',
+  }[type] || null;
 }

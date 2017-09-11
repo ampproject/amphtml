@@ -31,6 +31,19 @@ import {numeric} from '../../../src/transition';
 const TAG = 'amp-lightbox-viewer';
 
 /**
+ * Set of namespaces that indicate the lightbox controls mode.
+ * Lightbox controls include top bar, description box
+ *
+ * @enum {number}
+ */
+const LightboxControlsModes = {
+  SHOW_CONTROLS: 1,
+  HIDE_CONTROLS: 0,
+};
+
+const DESC_BOX_PADDING_TOP = 50;
+
+/**
  * TODO(aghassemi): Make lightbox-manager into a doc-level service.
  * @private  {!./service/lightbox-manager-impl.LightboxManager}
  * */
@@ -87,10 +100,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.topBar_ = null;
 
     /** @private  {?Element} */
-    this.topFill_ = null;
-
-    /** @private  {?Element} */
     this.topGradient_ = null;
+
+    /** @private {!LightboxControlsModes} */
+    this.controlsMode_ = LightboxControlsModes.SHOW_CONTROLS;
   }
 
   /** @override */
@@ -116,6 +129,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.buildCarousel_();
     this.buildDescriptionBox_();
     this.buildTopBar_();
+
+    this.setupContainerListener_();
 
     this.element.appendChild(this.container_);
   }
@@ -205,8 +220,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.descriptionTextArea_.classList.add('non-expanded');
     this.descriptionBox_.appendChild(this.descriptionTextArea_);
 
-    const toggleDescription = this.toggleDescriptionBox_.bind(this);
-    listen(dev().assertElement(this.container_), 'click', toggleDescription);
     this.descriptionBox_.addEventListener('click', event => {
       this.toggleDescriptionOverflow_();
       event.stopPropagation();
@@ -229,12 +242,19 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
   /**
    * Toggle description box if it has text content
+   * @param {boolean=} opt_display
    * @private
    */
-  toggleDescriptionBox_() {
+  toggleDescriptionBox_(opt_display) {
     this.updateDescriptionBox_();
+    dev().assert(this.descriptionBox_);
+    if (opt_display == undefined) {
+      opt_display = this.descriptionBox_.classList.contains('hide');
+    }
     if (this.descriptionBox_.textContent) {
-      this.descriptionBox_.classList.toggle('hide');
+      this.descriptionBox_.classList.toggle('hide', opt_display);
+    } else {
+      this.descriptionBox_.classList.add('hide');
     }
   }
 
@@ -248,34 +268,38 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         state.prevDescTextAreaHeight =
             this.descriptionTextArea_./*OK*/scrollHeight;
         state.descBoxHeight = this.descriptionBox_./*OK*/clientHeight;
+        state.descBoxPaddingTop = DESC_BOX_PADDING_TOP;
       };
 
       const measureAfterExpandingDescTextArea = state => {
         state.descTextAreaHeight = this.descriptionTextArea_./*OK*/scrollHeight;
-        state.descBoxHeight = this.descriptionBox_./*OK*/clientHeight;
       };
 
       const mutateAnimateDesc = state => {
-        const finalDiffHeight =
+        const finalDescTextAreaTop =
             state.descBoxHeight > state.descTextAreaHeight ?
-            state.descBoxHeight - state.descTextAreaHeight : 0;
+            state.descBoxHeight - state.descBoxPaddingTop -
+            state.descTextAreaHeight : 0;
         const tempOffsetHeight =
             state.descBoxHeight > state.descTextAreaHeight ?
             state.descTextAreaHeight - state.prevDescTextAreaHeight :
-            state.descBoxHeight - state.prevDescTextAreaHeight;
-        this.animateDescOverflow_(tempOffsetHeight, finalDiffHeight);
+            state.descBoxHeight - state.descBoxPaddingTop -
+            state.prevDescTextAreaHeight;
+        this.animateDescOverflow_(tempOffsetHeight, finalDescTextAreaTop);
       };
 
       const mutateExpandingDescTextArea = state => {
         this.descriptionTextArea_.classList.remove('non-expanded');
-        const tempDiffHeight =
-            state.descBoxHeight - state.prevDescTextAreaHeight;
-        setStyle(this.descriptionTextArea_, 'top', `${tempDiffHeight}px`);
+        const tempDescTextAreaTop = state.descBoxHeight -
+            state.descBoxPaddingTop - state.prevDescTextAreaHeight;
+        setStyle(this.descriptionTextArea_, 'top', `${tempDescTextAreaTop}px`);
         this.vsync_.run({
           measure: measureAfterExpandingDescTextArea,
           mutate: mutateAnimateDesc,
         }, {
           prevDescTextAreaHeight: state.prevDescTextAreaHeight,
+          descBoxHeight: state.descBoxHeight,
+          descBoxPaddingTop: state.descBoxPaddingTop,
         });
       };
 
@@ -298,31 +322,36 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * @param {number} tempOffsetHeight
-   * @param {number} finalDiffHeight
+   * @param {number} diffTop
+   * @param {number} finalTop
    * @param {number=} duration
    * @param {string=} curve
    * @private
    */
-  animateDescOverflow_(tempOffsetHeight, finalDiffHeight,
+  animateDescOverflow_(diffTop, finalTop,
                               duration = 500, curve = 'ease-out') {
     const textArea = dev().assertElement(this.descriptionTextArea_);
-    const tr = numeric(0, tempOffsetHeight);
+    const tr = numeric(0, diffTop);
     return Animation.animate(textArea, time => {
       const p = tr(time);
       setStyle(textArea, 'transform', `translateY(-${p}px)`);
     }, duration, curve).thenAlways(() => {
-      setStyle(textArea, 'top', `${finalDiffHeight}px`);
+      setStyle(textArea, 'top', `${finalTop}px`);
       setStyle(textArea, 'transform', '');
     });
   }
 
   /**
    * Toggle lightbox top bar
+   * @param {boolean=} opt_display
    * @private
    */
-  toggleTopBar_() {
-    this.topBar_.classList.toggle('hide');
+  toggleTopBar_(opt_display) {
+    dev().assert(this.topBar_);
+    if (opt_display == undefined) {
+      opt_display = this.topBar_.classList.contains('hide');
+    }
+    this.topBar_.classList.toggle('hide', opt_display);
   }
 
   /**
@@ -334,12 +363,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.topBar_ = this.win.document.createElement('div');
     this.topBar_.classList.add('i-amphtml-lbv-top-bar');
 
-    this.topFill_ = this.win.document.createElement('div');
-    this.topFill_.classList.add('i-amphtml-lbv-top-bar-top-fill');
-    this.topBar_.appendChild(this.topFill_);
-
     this.topGradient_ = this.win.document.createElement('div');
-    this.topGradient_.classList.add('i-amphtml-lbv-top-gradient');
+    this.topGradient_.classList.add('i-amphtml-lbv-top-bar-top-gradient');
     this.topBar_.appendChild(this.topGradient_);
 
     const close = this.close_.bind(this);
@@ -351,8 +376,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.buildButton_('Gallery', 'amp-lbv-button-gallery', openGallery);
     this.buildButton_('Content', 'amp-lbv-button-slide', closeGallery);
 
-    const toggleTopBar = this.toggleTopBar_.bind(this);
-    listen(dev().assertElement(this.container_), 'click', toggleTopBar);
     this.container_.appendChild(this.topBar_);
   }
 
@@ -376,6 +399,32 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     });
 
     this.topBar_.appendChild(button);
+  }
+
+  /**
+   * Toggle lightbox controls including topbar and description.
+   * @private
+   */
+  toggleControls_() {
+    if (this.controlsMode_ == LightboxControlsModes.HIDE_CONTROLS) {
+      this.toggleDescriptionBox_(/* opt_display */true);
+      this.toggleTopBar_(/* opt_display */true);
+      this.controlsMode_ = LightboxControlsModes.SHOW_CONTROLS;
+    } else {
+      this.toggleDescriptionBox_(/* opt_display */false);
+      this.toggleTopBar_(/* opt_display */false);
+      this.controlsMode_ = LightboxControlsModes.HIDE_CONTROLS;
+    }
+  }
+
+  /**
+   * Set up container listener.
+   * @private
+   */
+  setupContainerListener_() {
+    dev().assert(this.container_);
+    const toggleControls = this.toggleControls_.bind(this);
+    listen(dev().assertElement(this.container_), 'click', toggleControls);
   }
 
   /**
