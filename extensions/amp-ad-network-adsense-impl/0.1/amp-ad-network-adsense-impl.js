@@ -156,9 +156,24 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
+
+    this.autoFormat_ =
+        this.element.getAttribute('data-auto-format') || '';
+
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
       addExperimentIdToElement(verifierEid, this.element);
+    }
+
+    if (this.isResponsive_()) {
+      // Attempt to resize to the correct height. The width should already be
+      // 100vw, but is fixed here so that future resizes of the viewport don't
+      // affect it.
+      const viewportSize = this.getViewport().getSize();
+      return this.attemptChangeSize(
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+              viewportSize),
+          viewportSize.width);
     }
   }
 
@@ -341,25 +356,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  buildCallback() {
-    super.buildCallback();
-
-    this.autoFormat_ =
-        this.element.getAttribute('data-auto-format') || '';
-
-    if (this.isResponsive_()) {
-      // Attempt to resize to the correct height. The width should already be
-      // 100vw, but is fixed here so that future resizes of the viewport don't
-      // affect it.
-      const viewportSize = this.getViewport().getSize();
-      return this.attemptChangeSize(
-          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              viewportSize),
-          viewportSize.width);
-    }
-  }
-
-  /** @override */
   onLayoutMeasure() {
     super.onLayoutMeasure();
 
@@ -369,16 +365,19 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       const layoutBox = this.getLayoutBox();
 
       // Nudge into the correct horizontal position by changing side margin.
-      this.getVsync().measure(() => {
-        // TODO(charliereams): Is this the right way to get direction?
-        const parentDirection =
+      this.getVsync().run({
+        measure: state => {
+          state.direction =
             computedStyle(this.win, this.element)['direction'];
-        if (parentDirection == 'rtl') {
-          setStyle(this.element, 'marginRight', layoutBox.left, 'px');
-        } else {
-          setStyle(this.element, 'marginLeft', -layoutBox.left, 'px');
-        }
-      });
+        },
+        mutate: state => {
+          if (state.direction == 'rtl') {
+            setStyle(this.element, 'marginRight', layoutBox.left, 'px');
+          } else {
+            setStyle(this.element, 'marginLeft', -layoutBox.left, 'px');
+          }
+        },
+      }, {direction: ''});
     }
   }
 
