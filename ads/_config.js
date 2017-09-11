@@ -641,10 +641,6 @@ export const adConfig = {
   },
 
   smi2: {
-    preconnect: [
-      'https://smi2.ru',
-      'https://amp.smi2.ru',
-    ],
     renderStartImplemented: true,
   },
 
