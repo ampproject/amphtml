@@ -3772,13 +3772,12 @@ glogg@^1.0.0:
   dependencies:
     sparkles "^1.0.0"
 
-google-closure-compiler@^20151015.0.0:
-  version "20151015.7.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20151015.7.0.tgz#a494909eb33ec5b6aed1ffb712f0557ff596ba6f"
+google-closure-compiler@20170806.0.0:
+  version "20170806.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20170806.0.0.tgz#1b04d9805a8b6e5c6f97fd9be0ab71e1a7888ee1"
   dependencies:
     chalk "^1.0.0"
-    gulp-util "^3.0.7"
-    through2 "^2.0.0"
+    vinyl "^2.0.1"
     vinyl-sourcemaps-apply "^0.2.0"
 
 got@^3.2.0:
@@ -3864,19 +3863,6 @@ gulp-ava@^0.18.0:
     gulp-util "^3.0.6"
     resolve-cwd "^2.0.0"
     through2 "^2.0.0"
-
-gulp-closure-compiler@0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/gulp-closure-compiler/-/gulp-closure-compiler-0.4.0.tgz#c4726edb1b44cb758e00d5b1522e1bdcd4e1a49a"
-  dependencies:
-    glob "^5.0.14"
-    google-closure-compiler "^20151015.0.0"
-    graceful-fs "^4.1.2"
-    gulp-util "^3.0.0"
-    mkdirp "^0.5.0"
-    temp-write "^1.0.0"
-    through "^2.3.4"
-    uuid "^2.0.1"
 
 gulp-eslint@3.0.1:
   version "3.0.1"
@@ -7569,6 +7555,10 @@ sax@^1.1.4, sax@~1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.1.tgz#7b8e656190b228e81a66aea748480d828cd2d37a"
 
+seedrandom@^2.4.2:
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/seedrandom/-/seedrandom-2.4.3.tgz#2438504dad33917314bff18ac4d794f16d6aaecc"
+
 semver-diff@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/semver-diff/-/semver-diff-2.1.0.tgz#4bbb8437c8d37e4b0cf1a68fd726ec6d645d6d36"
@@ -8195,15 +8185,6 @@ tar@~2.2.1:
     fstream "^1.0.2"
     inherits "2"
 
-temp-write@^1.0.0:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/temp-write/-/temp-write-1.1.2.tgz#75b57a3cd9f802beaae3762b11e66ab1f4afd947"
-  dependencies:
-    graceful-fs "^4.1.2"
-    mkdirp "^0.5.0"
-    os-tmpdir "^1.0.0"
-    uuid "^2.0.1"
-
 term-size@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/term-size/-/term-size-1.2.0.tgz#458b83887f288fc56d6fffbfad262e26638efa69"
@@ -8270,7 +8251,7 @@ through2@^2.0.1, through2@^2.0.3:
     readable-stream "^2.1.5"
     xtend "~4.0.1"
 
-through@2, "through@>=2.2.7 <3", through@^2.3.4, through@^2.3.6, through@^2.3.8, through@~2.3, through@~2.3.1, through@~2.3.4, through@~2.3.8:
+through@2, "through@>=2.2.7 <3", through@^2.3.6, through@^2.3.8, through@~2.3, through@~2.3.1, through@~2.3.4, through@~2.3.8:
   version "2.3.8"
   resolved "https://registry.yarnpkg.com/through/-/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
 
