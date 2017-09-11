@@ -94,7 +94,15 @@
     </script>
   </amp-animation>
   <main>
+    <h1>amp-position-observer (Experimental)</h1>
+    <h1><div>Please ensure <pre>amp-position-observer</pre> experiment flag is enabled first</h1> Running
+      <pre>AMP.toggleExperiment('amp-position-observer', true);</pre> in Developer Console will enable the experiment for your browser.
+    </div>
     <div class="spacer"></div>
+
+    <h2>Scrollbound animations with amp-position-observer and amp-animation</h2>
+    <h3>The following animation does one round (12pm-6pm) via scrolling when fully visible between the middle 80% of the viewport</h3>
+
     <div id="clock-scene-1" class="clock-scene">
       <amp-position-observer
         intersection-ratios="1"
