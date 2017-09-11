@@ -139,7 +139,7 @@ export class WebPushConfig extends AMP.BaseElement {
     this.validate();
     const config = this.parseConfig();
     const webPushService = getServiceForDoc(this.getAmpDoc(), SERVICE_TAG);
-    webPushService.start(config);
+    webPushService.start(config).catch(() => {});
 
     this.registerAction(WebPushWidgetActions.SUBSCRIBE,
         this.onSubscribe_.bind(this));

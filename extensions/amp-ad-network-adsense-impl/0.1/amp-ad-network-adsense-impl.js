@@ -21,14 +21,13 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
+import {fastFetchDelayedRequestEnabled} from './adsense-a4a-config';
 import {
-  experimentFeatureEnabled,
-  ADSENSE_EXPERIMENT_FEATURE,
-} from './adsense-a4a-config';
-import {
+  addExperimentIdToElement,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {isExperimentOn} from '../../../src/experiments';
+import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {
   additionalDimensions,
   googleAdUrl,
@@ -64,17 +63,6 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 
 /** @const {string} */
 const TAG = 'amp-ad-network-adsense-impl';
-
-/**
- * See `VisibilityState` enum.
- * @const {!Object<string, string>}
- */
-const visibilityStateCodes = {
-  'visible': '1',
-  'hidden': '2',
-  'prerender': '3',
-  'unloaded': '5',
-};
 
 /**
  * Shared state for AdSense ad slots. This is used primarily for ad request url
@@ -138,8 +126,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return experimentFeatureEnabled(
-        this.win, ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST);
+    return fastFetchDelayedRequestEnabled(this.win);
+  }
+
+  /** @override */
+  buildCallback() {
+    super.buildCallback();
+    const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
+    if (verifierEid) {
+      addExperimentIdToElement(verifierEid, this.element);
+    }
   }
 
   /** @override */
@@ -154,8 +150,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (adClientId.substring(0, 3) != 'ca-') {
       adClientId = 'ca-' + adClientId;
     }
-    const visibilityState = Services.viewerForDoc(this.getAmpDoc())
-        .getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
     const width = Number(this.element.getAttribute('width'));
@@ -192,7 +186,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'to': this.element.getAttribute('data-tag-origin'),
       'pv': sharedStateParams.pv,
       'channel': this.element.getAttribute('data-ad-channel'),
-      'vis': visibilityStateCodes[visibilityState] || '0',
       'wgl': global['WebGLRenderingContext'] ? '1' : '0',
       'asnt': this.sentinel,
       'dff': computedStyle(this.win, this.element)['font-family'],
@@ -225,7 +218,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
-      this.extensions_./*OK*/loadExtension('amp-analytics');
+      this.extensions_./*OK*/installExtensionForDoc(
+          this.getAmpDoc(), 'amp-analytics');
     }
     return this.size_;
   }
@@ -324,4 +318,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 }
 
-AMP.registerElement('amp-ad-network-adsense-impl', AmpAdNetworkAdsenseImpl);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAdNetworkAdsenseImpl);
+});

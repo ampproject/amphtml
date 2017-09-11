@@ -35,9 +35,10 @@ import {
 import {Services} from '../services';
 import {
   installPositionObserverServiceForDoc,
+} from './position-observer/position-observer-impl';
+import {
   PositionObserverFidelity,
-  PositionInViewportEntryDef,
-} from './position-observer-impl';
+} from './position-observer/position-observer-worker';
 import {map} from '../utils/object';
 import {layoutRectLtwh, RelativePositions} from '../layout-rect';
 import {
@@ -50,6 +51,9 @@ import {
 import {Animation} from '../animation';
 import * as st from '../style';
 import * as tr from '../transition';
+
+const TAG = 'video-manager';
+
 /**
  * @const {number} Percentage of the video that should be in viewport before it
  * is considered visible.
@@ -134,7 +138,7 @@ export class VideoManager {
     /** @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc = ampdoc;
 
-    /** @private {!../service/viewport-impl.Viewport} */
+    /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private {?Array<!VideoEntry>} */
@@ -146,7 +150,7 @@ export class VideoManager {
     /** @private {boolean} */
     this.resizeListenerInstalled_ = false;
 
-    /** @private {./position-observer-impl.AmpDocPositionObserver} */
+    /** @private {./position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
     /** @private {?VideoEntry} */
@@ -156,7 +160,7 @@ export class VideoManager {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const */
-    this.boundSecondsPlaying_ = () => this.secondsPlaying_();;
+    this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
@@ -199,6 +203,8 @@ export class VideoManager {
     this.maybeInstallOrientationObserver_(entry);
     this.entries_.push(entry);
     video.element.dispatchCustomEvent(VideoEvents.REGISTERED);
+    // Add a class to element to indicate it implements the video interface.
+    video.element.classList.add('i-amphtml-video-interface');
   }
 
   /**
@@ -350,8 +356,38 @@ export class VideoManager {
         return this.entries_[i];
       }
     }
-    dev().assert(false, 'video is not registered to this video manager');
+    dev().error(TAG, 'video is not registered to this video manager');
     return null;
+  }
+
+  /**
+   * Returns the entry in the video manager corresponding to the element
+   * provided
+   *
+   * @param {!AmpElement} element
+   * @return {VideoEntry} entry
+   * @private
+   */
+  getEntryForElement_(element) {
+    for (let i = 0; i < this.entries_.length; i++) {
+      const entry = this.entries_[i];
+      if (entry.video.element === element) {
+        return entry;
+      }
+    }
+    dev().error(TAG, 'video is not registered to this video manager');
+    return null;
+  }
+
+  /**
+   * Get the current analytics details for the given video.
+   * Silently fail if the video is not found in this manager.
+   * @param {!AmpElement} videoElement
+   * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>|!Promise<undefined>}
+   */
+  getVideoAnalyticsDetails(videoElement) {
+    const entry = this.getEntryForElement_(videoElement);
+    return entry ? entry.getAnalyticsDetails() : Promise.resolve();
   }
 
   /**
@@ -421,7 +457,7 @@ class VideoEntry {
     /** @private @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = manager.ampdoc;
 
-    /** @private {!../service/viewport-impl.Viewport} */
+    /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
     /** @package @const {!../video-interface.VideoInterface} */
@@ -500,7 +536,7 @@ class VideoEntry {
     /** @private {number} */
     this.dockVisibleHeight_ = 0;
 
-    /** @private {?PositionInViewportEntryDef} */
+    /** @private {?./position-observer/position-observer-worker.PositionInViewportEntryDef} */
     this.dockLastPosition_ = null;
 
     /** @private {boolean} */
@@ -828,23 +864,43 @@ class VideoEntry {
     });
 
     // Listen to pause, play and user interaction events.
-    const unlistenInteraction = listen(mask, 'click', onInteraction.bind(this));
+    const unlisteners = [];
+    unlisteners.push(listen(mask, 'click', onInteraction.bind(this)));
+    unlisteners.push(listen(animation, 'click', onInteraction.bind(this)));
 
-    const unlistenPause = listen(this.video.element, VideoEvents.PAUSE,
-        toggleAnimation.bind(this, /*playing*/ false));
+    unlisteners.push(listen(this.video.element, VideoEvents.PAUSE,
+        toggleAnimation.bind(this, /*playing*/ false)));
 
-    const unlistenPlaying = listen(this.video.element, VideoEvents.PLAYING,
-        toggleAnimation.bind(this, /*playing*/ true));
+    unlisteners.push(listen(this.video.element, VideoEvents.PLAYING,
+        toggleAnimation.bind(this, /*playing*/ true)));
+
+    unlisteners.push(listen(this.video.element, VideoEvents.AD_START,
+        adStart.bind(this)));
+
+    unlisteners.push(listen(this.video.element, VideoEvents.AD_END,
+        adEnd.bind(this)));
 
     function onInteraction() {
       this.userInteractedWithAutoPlay_ = true;
       this.video.showControls();
       this.video.unmute();
-      unlistenInteraction();
-      unlistenPause();
-      unlistenPlaying();
+      unlisteners.forEach(unlistener => {
+        unlistener();
+      });
       removeElement(animation);
       removeElement(mask);
+    }
+
+    function adStart() {
+      setStyles(mask, {
+        'display': 'none',
+      });
+    }
+
+    function adEnd() {
+      setStyles(mask, {
+        'display': 'block',
+      });
     }
   }
 
@@ -1010,7 +1066,7 @@ class VideoEntry {
   /**
    * Called when the video's position in the viewport changed (at most once per
    * animation frame)
-   * @param {PositionInViewportEntryDef} newPos
+   * @param {./position-observer/position-observer-worker.PositionInViewportEntryDef} newPos
    */
   onDockableVideoPositionChanged(newPos) {
     this.vsync_.run({
@@ -1074,7 +1130,7 @@ class VideoEntry {
    * Updates the minimization position of the video (in viewport, above or
    * below viewport), also the height of the part of the video that is
    * currently in the viewport (between 0 and the initial video height).
-   * @param {PositionInViewportEntryDef} newPos
+   * @param {./position-observer/position-observer-worker.PositionInViewportEntryDef} newPos
    * @private
    */
   updateDockableVideoPosition_(newPos) {

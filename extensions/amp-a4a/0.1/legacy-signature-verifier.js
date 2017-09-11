@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-import {VerificationStatus} from './signature-verifier';
+import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {signingServerURLs} from '../../../ads/_a4a-config';
+import {
+  forceExperimentBranch,
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {Services} from '../../../src/services';
@@ -58,6 +63,15 @@ const TAG = 'amp-a4a';
 /** @const {string} @visibleForTesting */
 export const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 
+/** @const {string} */
+export const VERIFIER_EXP_NAME = 'a4a-new-signature-verifier';
+
+/** @const {string} @visibleForTesting */
+export const LEGACY_VERIFIER_EID = '21060935';
+
+/** @const {string} @visibleForTesting */
+export const NEW_VERIFIER_EID = '21060936';
+
 /**
  * Returns the signature verifier for the given window. Lazily creates it if it
  * doesn't already exist.
@@ -66,13 +80,34 @@ export const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
  * multiple Fast Fetch ad slots on a page (even ones from different ad networks)
  * to share the same cached public keys.
  *
+ * Experiment diversion between the new verifier and the legacy verifier occurs
+ * here.
+ *
  * @param {!Window} win
  * @return {!./signature-verifier.ISignatureVerifier}
  */
 export function signatureVerifierFor(win) {
   const propertyName = 'AMP_FAST_FETCH_SIGNATURE_VERIFIER_';
-  return win[propertyName] ||
-      (win[propertyName] = new LegacySignatureVerifier(win));
+  if (!win[propertyName]) {
+    if (/a4a-new-verifier/.test(win.location.hash)) {
+      forceExperimentBranch(win, VERIFIER_EXP_NAME, NEW_VERIFIER_EID);
+    } else if (/a4a-legacy-verifier/.test(win.location.hash)) {
+      forceExperimentBranch(win, VERIFIER_EXP_NAME, LEGACY_VERIFIER_EID);
+    } else {
+      randomlySelectUnsetExperiments(win, {
+        [VERIFIER_EXP_NAME]: {
+          isTrafficEligible: () => true,
+          branches: [LEGACY_VERIFIER_EID, NEW_VERIFIER_EID],
+        },
+      });
+    }
+    if (getExperimentBranch(win, VERIFIER_EXP_NAME) == NEW_VERIFIER_EID) {
+      win[propertyName] = new SignatureVerifier(win, signingServerURLs);
+    } else {
+      win[propertyName] = new LegacySignatureVerifier(win);
+    }
+  }
+  return win[propertyName];
 }
 
 /**
@@ -102,6 +137,13 @@ export class LegacySignatureVerifier {
     this.keys_ = [];
 
     /**
+     * The set of signing services whose keys have been loaded.
+     *
+     * @private @const {!Object<string, boolean>}
+     */
+    this.signingServiceNames_ = {};
+
+    /**
      * Gets a notion of current time, in ms.  The value is not necessarily
      * absolute, so should be used only for computing deltas.  When available,
      * the performance system will be used; otherwise Date.now() will be
@@ -121,18 +163,19 @@ export class LegacySignatureVerifier {
    * operations.
    *
    * @param {string} signingServiceName
-   * @param {!Promise<undefined>} waitFor a promise that must resolve before the
-   *     keys are fetched
    */
-  loadKeyset(signingServiceName, waitFor) {
+  loadKeyset(signingServiceName) {
     dev().assert(getMode().localDev || !endsWith(signingServiceName, '-dev'));
     if (!this.isAvailable_()) {
       return;
     }
     const url = signingServerURLs[signingServiceName];
     if (url) {
-      // Delay request until document is not in a prerender state.
-      this.keys_.push(waitFor.then(() =>
+      if (this.signingServiceNames_[signingServiceName]) {
+        return;
+      }
+      this.signingServiceNames_[signingServiceName] = true;
+      this.keys_.push(
           Services.xhrFor(this.win_).fetchJson(url, {
             mode: 'cors',
             method: 'GET',
@@ -141,33 +184,37 @@ export class LegacySignatureVerifier {
             // across pages.
             ampCors: false,
             credentials: 'omit',
-          })).then(res => res.json())
-          .then(jwkSetObj => {
-            if (jwkSetObj && isArray(jwkSetObj['keys']) &&
-                jwkSetObj['keys'].every(isObject)) {
-              return jwkSetObj['keys'];
-            } else {
-              user().error(
-                  TAG,
-                  `Invalid response from signing server ${signingServiceName}`);
-              return [];
-            }
-          }).then(jwks => ({
-            signingServiceName,
-            keys: jwks.map(jwk => this.importPublicKey_(signingServiceName, jwk)
-                .catch(err => {
+          }).then(res => res.json())
+              .then(jwkSetObj => {
+                if (jwkSetObj && isArray(jwkSetObj['keys']) &&
+                    jwkSetObj['keys'].every(isObject)) {
+                  return jwkSetObj['keys'];
+                } else {
                   user().error(
-                      TAG, `error importing keys for: ${signingServiceName}`,
-                      err);
-                  return null;
-                })),
-          })).catch(err => {
-            user().error(TAG, err);
-            // TODO(a4a-team): This is a failure in the initial attempt to get
-            // the keys, probably b/c of a network condition.  We should
-            // re-trigger key fetching later.
-            return {signingServiceName, keys: []};
-          }));
+                      TAG,
+                      `Invalid response from signing server ${
+                        signingServiceName
+                      }`);
+                  return [];
+                }
+              }).then(jwks => ({
+                signingServiceName,
+                keys: jwks.map(jwk =>
+                    this.importPublicKey_(signingServiceName, jwk)
+                        .catch(err => {
+                          user().error(
+                              TAG,
+                              `error importing keys for: ${signingServiceName}`,
+                              err);
+                          return null;
+                        })),
+              })).catch(err => {
+                user().error(TAG, err);
+                // TODO(a4a-team): This is a failure in the initial attempt to
+                // get the keys, probably b/c of a network condition.  We should
+                // re-trigger key fetching later.
+                return {signingServiceName, keys: []};
+              }));
     } else {
       // The given signingServiceName does not have a corresponding URL in
       // _a4a-config.js.

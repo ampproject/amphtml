@@ -19,14 +19,11 @@ import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
 } from '../../../amp-a4a/0.1/amp-a4a';
+import {VerificationStatus} from '../../../amp-a4a/0.1/signature-verifier';
 import {
   AMP_SIGNATURE_HEADER,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/legacy-signature-verifier';
-import {createIframePromise} from '../../../../testing/iframe';
-import {
-  installExtensionsService,
-} from '../../../../src/service/extensions-impl';
 import {Services} from '../../../../src/services';
 import {
   AmpAdNetworkDoubleclickImpl,
@@ -40,6 +37,7 @@ import {
 } from '../doubleclick-a4a-config';
 import {
   isInExperiment,
+  addExperimentIdToElement,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {
   QQID_HEADER,
@@ -49,60 +47,76 @@ import {
   toggleExperiment,
   forceExperimentBranch,
 } from '../../../../src/experiments';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {VisibilityState} from '../../../../src/visibility-state';
-import * as sinon from 'sinon';
+// Need the following side-effect import because in actual production code,
+// Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
+// always available for them. However, when we test an impl in isolation,
+// AmpAd is not loaded already, so we need to load it separately.
+import '../../../amp-ad/0.1/amp-ad';
 
-function setupForAdTesting(fixture) {
-  installDocService(fixture.win, /* isSingleDoc */ true);
-  const doc = fixture.doc;
-  doc.win = fixture.win;
-  // TODO(a4a-cam@): This is necessary in the short term, until A4A is
-  // smarter about host document styling.  The issue is that it needs to
-  // inherit the AMP runtime style element in order for shadow DOM-enclosed
-  // elements to behave properly.  So we have to set up a minimal one here.
-  const ampStyle = doc.createElement('style');
-  ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
-  doc.head.appendChild(ampStyle);
+/**
+ * We're allowing external resources because otherwise using realWin causes
+ * strange behavior with iframes, as it doesn't load resources that we
+ * normally load in prod.
+ * We're turning on ampAdCss because using realWin means that we don't
+ * inherit that CSS from the parent page anymore.
+ */
+const realWinConfig = {
+  amp: {
+    extensions: ['amp-ad-network-doubleclick-impl'],
+  },
+  ampAdCss: true,
+  allowExternalResources: true,
+};
+
+const realWinConfigAmpAd = {
+  amp: {ampdoc: 'amp-ad'},
+  ampAdCss: true,
+  allowExternalResources: true,
+};
+
+/**
+ * Creates an iframe promise, and instantiates element and impl, adding the
+ * former to the document of the iframe.
+ * @param {{width, height, type}} config
+ * @return The iframe promise.
+ */
+function createImplTag(config, element, impl, env) {
+  config.type = 'doubleclick';
+  element = createElementWithAttributes(env.win.document, 'amp-ad', config);
+  // To trigger CSS styling.
+  element.setAttribute('data-a4a-upgrade-type',
+      'amp-ad-network-doubleclick-impl');
+  // Used to test styling which is targetted at first iframe child of
+  // amp-ad.
+  const iframe = env.win.document.createElement('iframe');
+  element.appendChild(iframe);
+  env.win.document.body.appendChild(element);
+  impl = new AmpAdNetworkDoubleclickImpl(element);
+  impl.iframe = iframe;
+  return [element, impl, env];
 }
 
-describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
-  let impl;
-  let element;
 
-  /**
-   * Creates an iframe promise, and instantiates element and impl, adding the
-   * former to the document of the iframe.
-   * @param {{width, height, type}} config
-   * @return The iframe promise.
-   */
-  function createImplTag(config) {
-    config.type = 'doubleclick';
-    return createIframePromise().then(fixture => {
-      setupForAdTesting(fixture);
-      element = createElementWithAttributes(fixture.doc, 'amp-ad', config);
-      // To trigger CSS styling.
-      element.setAttribute('data-a4a-upgrade-type',
-          'amp-ad-network-doubleclick-impl');
-      // Used to test styling which is targetted at first iframe child of
-      // amp-ad.
-      const iframe = fixture.doc.createElement('iframe');
-      element.appendChild(iframe);
-      document.body.appendChild(element);
-      impl = new AmpAdNetworkDoubleclickImpl(element);
-      impl.iframe = iframe;
-      return fixture;
-    });
-  }
+describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
+  let win, doc, ampdoc;
+  let element;
+  let impl;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
+  });
 
 
   describe('#isValidElement', () => {
     beforeEach(() => {
-      element = document.createElement('amp-ad');
+      element = doc.createElement('amp-ad');
       element.setAttribute('type', 'doubleclick');
       element.setAttribute('data-ad-client', 'adsense');
-      document.body.appendChild(element);
+      doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
     });
 
@@ -111,7 +125,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
     it('should NOT be valid (impl tag name)', () => {
       element =
-        document.createElement('amp-ad-network-doubleclick-impl');
+          doc.createElement('amp-ad-network-doubleclick-impl');
       element.setAttribute('type', 'doubleclick');
       element.setAttribute('data-ad-client', 'doubleclick');
       impl = new AmpAdNetworkDoubleclickImpl(element);
@@ -124,7 +138,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       expect(impl.isValidElement()).to.be.false;
     });
     it('should be valid (amp-embed)', () => {
-      element = document.createElement('amp-embed');
+      element = doc.createElement('amp-embed');
       element.setAttribute('type', 'doubleclick');
       element.setAttribute('data-ad-client', 'doubleclick');
       impl = new AmpAdNetworkDoubleclickImpl(element);
@@ -132,27 +146,23 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
   });
 
+
   describe('#extractSize', () => {
-    let loadExtensionSpy;
+    let preloadExtensionSpy;
     const size = {width: 200, height: 50};
 
     beforeEach(() => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        doc.win = window;
-        element = createElementWithAttributes(doc, 'amp-ad', {
-          'width': '200',
-          'height': '50',
-          'type': 'doubleclick',
-          'layout': 'fixed',
-        });
-        impl = new AmpAdNetworkDoubleclickImpl(element);
-        impl.size_ = size;
-        installExtensionsService(impl.win);
-        const extensions = Services.extensionsFor(impl.win);
-        loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+        'layout': 'fixed',
       });
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
+      impl.size_ = size;
+      const extensions = Services.extensionsFor(impl.win);
+      preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
     });
 
     it('should not load amp-analytics without an analytics header', () => {
@@ -164,8 +174,9 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           return false;
         },
       })).to.deep.equal(size);
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+      expect(preloadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
     });
+
     it('should load amp-analytics with an analytics header', () => {
       const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
       expect(impl.extractSize({
@@ -181,65 +192,63 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           return !!this.get(name);
         },
       })).to.deep.equal(size);
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+      expect(preloadExtensionSpy.withArgs('amp-analytics')).to.be.called;
       // exact value of ampAnalyticsConfig covered in
       // ads/google/test/test-utils.js
     });
-  });
 
-  describe('#onNetworkFailure', () => {
-
-    beforeEach(() => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        doc.win = window;
-        element = createElementWithAttributes(doc, 'amp-ad', {
-          'width': '200',
-          'height': '50',
-          'type': 'doubleclick',
-        });
-        impl = new AmpAdNetworkDoubleclickImpl(element);
-      });
-    });
-
-    it('should append error parameter', () => {
-      const TEST_URL = 'https://somenetwork.com/foo?hello=world&a=b';
-      expect(impl.onNetworkFailure(new Error('xhr failure'), TEST_URL))
-          .to.jsonEqual({adUrl: TEST_URL + '&aet=n'});
+    it('should load delayed impression amp-pixels', () => {
+      const fireDelayedImpressionsSpy =
+          sandbox.spy(impl, 'fireDelayedImpressions');
+      expect(impl.extractSize({
+        get(name) {
+          switch (name) {
+            case 'X-AmpImps':
+              return 'https://a.com?a=b,https://b.com?c=d';
+            case 'X-AmpRSImps':
+              return 'https://c.com?e=f,https://d.com?g=h';
+            default:
+              return undefined;
+          }
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      })).to.deep.equal(size);
+      expect(fireDelayedImpressionsSpy.withArgs(
+          'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
+      expect(fireDelayedImpressionsSpy.withArgs(
+          'https://c.com?e=f,https://d.com?g=h', true)).to.be.calledOnce;
     });
   });
 
   describe('#onCreativeRender', () => {
     beforeEach(() => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        doc.win = window;
-        element = createElementWithAttributes(doc, 'amp-ad', {
-          'width': '200',
-          'height': '50',
-          'type': 'doubleclick',
-        });
-        impl = new AmpAdNetworkDoubleclickImpl(element);
-        // Next two lines are to ensure that internal parts not relevant for this
-        // test are properly set.
-        impl.size_ = {width: 200, height: 50};
-        impl.iframe = impl.win.document.createElement('iframe');
-        installExtensionsService(impl.win);
-        // Temporary fix for local test failure.
-        sandbox.stub(impl,
-            'getIntersectionElementLayoutBox', () => {
-              return {
-                top: 0,
-                bottom: 0,
-                left: 0,
-                right: 0,
-                width: 320,
-                height: 50,
-              };
-            });
+      doc.win = env.win;
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
       });
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
+      sandbox.stub(env.ampdocService, 'getAmpDoc', () => ampdoc);
+      // Next two lines are to ensure that internal parts not relevant for this
+      // test are properly set.
+      impl.size_ = {width: 200, height: 50};
+      impl.iframe = impl.win.document.createElement('iframe');
+      // Temporary fix for local test failure.
+      sandbox.stub(impl,
+          'getIntersectionElementLayoutBox', () => {
+            return {
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+              width: 320,
+              height: 50,
+            };
+          });
     });
 
     it('injects amp analytics', () => {
@@ -296,76 +305,15 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
   });
 
-  describe('centering', () => {
-    const size = {width: '300px', height: '150px'};
-
-    function verifyCss(iframe, expectedSize) {
-      expect(iframe).to.be.ok;
-      const style = window.getComputedStyle(iframe);
-      expect(style.top).to.equal('50%');
-      expect(style.left).to.equal('50%');
-      expect(style.width).to.equal(expectedSize.width);
-      expect(style.height).to.equal(expectedSize.height);
-      // We don't know the exact values by which the frame will be translated,
-      // as this can vary depending on whether we use the height/width
-      // attributes, or the actual size of the frame. To make this less of a
-      // hassle, we'll just match against regexp.
-      expect(style.transform).to.match(new RegExp(
-          'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
-    }
-
-    afterEach(() => document.body.removeChild(impl.element));
-
-    it('centers iframe in slot when height && width', () => {
-      return createImplTag({
-        width: '300',
-        height: '150',
-      }).then(() => {
-        expect(impl.element.getAttribute('width')).to.equal('300');
-        expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.iframe, size);
-      });
-    });
-    it('centers iframe in slot when !height && !width', () => {
-      return createImplTag({
-        layout: 'fixed',
-      }).then(() => {
-        expect(impl.element.getAttribute('width')).to.be.null;
-        expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.iframe, size);
-      });
-    });
-    it('centers iframe in slot when !height && width', () => {
-      return createImplTag({
-        width: '300',
-        layout: 'fixed',
-      }).then(() => {
-        expect(impl.element.getAttribute('width')).to.equal('300');
-        expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.iframe, size);
-      });
-    });
-    it('centers iframe in slot when height && !width', () => {
-      return createImplTag({
-        height: '150',
-        layout: 'fixed',
-      }).then(() => {
-        expect(impl.element.getAttribute('width')).to.be.null;
-        expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.iframe, size);
-      });
-    });
-  });
-
   describe('#getAdUrl', () => {
     beforeEach(() => {
-      const sandbox = sinon.sandbox.create();
-      element = document.createElement('amp-ad');
+      const sandbox = env.sandbox;
+      element = doc.createElement('amp-ad');
       element.setAttribute('type', 'doubleclick');
       element.setAttribute('data-ad-client', 'doubleclick');
       element.setAttribute('width', '320');
       element.setAttribute('height', '50');
-      document.body.appendChild(element);
+      doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
       // Temporary fix for local test failure.
       sandbox.stub(impl,
@@ -380,10 +328,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             };
           });
 
-      sandbox.stub(impl, 'getAmpDoc', () => {
-        document.win = window;
-        return document;
-      });
       // Reproduced from noopMethods in ads/google/a4a/test/test-utils.js,
       // to fix failures when this is run after 'gulp build', without a 'dist'.
       sandbox.stub(impl, 'getPageLayoutBox', () => {
@@ -394,13 +338,14 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
 
     afterEach(() => {
-      toggleExperiment(window, 'dc-use-attr-for-format', false);
-      document.body.removeChild(element);
-      window['ampAdGoogleIfiCounter'] = 0;
+      toggleExperiment(env.win, 'dc-use-attr-for-format', false);
+      doc.body.removeChild(element);
+      env.win['ampAdGoogleIfiCounter'] = 0;
     });
 
     it('returns the right URL', () => {
       new AmpAd(element).upgradeCallback();
+      addExperimentIdToElement('12345678', element);
       return impl.getAdUrl().then(url => {
         [
           /^https:\/\/securepubads\.g\.doubleclick\.net\/gampad\/ads/,
@@ -418,7 +363,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           /(\?|&)adf=[0-9]+(&|$)/,
           /(\?|&)c=[0-9]+(&|$)/,
           /(\?|&)output=html(&|$)/,
-          /(\?|&)nhd=1(&|$)/,
+          /(\?|&)nhd=\d+(&|$)/,
           /(\?|&)biw=[0-9]+(&|$)/,
           /(\?|&)bih=[0-9]+(&|$)/,
           /(\?|&)adx=-?[0-9]+(&|$)/,
@@ -434,11 +379,12 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           /(\?|&)isw=[0-9]+(&|$)/,
           /(\?|&)ish=[0-9]+(&|$)/,
           /(\?|&)pfx=(1|0)(&|$)/,
-          /(\?|&)eid=([^&]+%2c)*108809080(%2c[^&]+)*(&|$)/,
-          /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%]+(&|$)/,
+          /(\?|&)eid=([^&]+%2c)*12345678(%2c[^&]+)*(&|$)/,
+          /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%-]+(&|$)/,
           /(\?|&)top=localhost(&|$)/,
-          /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+(&|$)/,
+          /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F[a-zA-Z0-9.:%-]+(&|$)/,
           /(\?|&)dtd=[0-9]+(&|$)/,
+          /(\?|&)vis=[0-5]+(&|$)/,
         ].forEach(regexp => expect(url).to.match(regexp));
       });
     });
@@ -463,31 +409,33 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       element.setAttribute('height', 'auto');
       new AmpAd(element).upgradeCallback();
       expect(impl.element.getAttribute('height')).to.equal('auto');
+      impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.getAdUrl().then(url =>
-        // With exp dc-use-attr-for-format off, we can't test for specific
-        // numbers, but we know that the values should be numeric.
-        expect(url).to.match(/sz=[0-9]+x[0-9]+/));
+          // With exp dc-use-attr-for-format off, we can't test for specific
+          // numbers, but we know that the values should be numeric.
+          expect(url).to.match(/sz=[0-9]+x[0-9]+/));
     });
     it('has correct format when width == "auto"',
         () => {
           element.setAttribute('width', 'auto');
           new AmpAd(element).upgradeCallback();
           expect(impl.element.getAttribute('width')).to.equal('auto');
+          impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-              // Ensure that "auto" doesn't appear anywhere here:
-              expect(url).to.match(/sz=[0-9]+x[0-9]+/));
+             // Ensure that "auto" doesn't appear anywhere here:
+             expect(url).to.match(/sz=[0-9]+x[0-9]+/));
         });
     it('should add RTC params if RTC is used', () => {
       const rtcConf = createElementWithAttributes(
-          document, 'script',
+          doc, 'script',
           {type: 'application/json', id: 'amp-rtc'});
       rtcConf.innerHTML = `{
           "endpoint": "https://example-publisher.com/rtc/",
           "sendAdRequestOnFailure": false
           }`;
-      document.head.appendChild(rtcConf);
+      doc.head.appendChild(rtcConf);
       const rtcResponse = {targeting: {age: '18-24'}};
       const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
       xhrMock.returns(
@@ -498,7 +446,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               return Promise.resolve(JSON.stringify(rtcResponse));
             },
           })
-      );
+          );
       new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(/(\?|&)artc=[0-9]+(&|$)/);
@@ -510,13 +458,13 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
     it('should add param artc=-1 if RTC request times out', () => {
       const rtcConf = createElementWithAttributes(
-          document, 'script',
+          doc, 'script',
           {type: 'application/json', id: 'amp-rtc'});
       rtcConf.innerHTML = `{
           "endpoint": "https://example-publisher.com/rtc/",
           "sendAdRequestOnFailure": false
           }`;
-      document.head.appendChild(rtcConf);
+      doc.head.appendChild(rtcConf);
       const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
       // never resolve this promise
       const xhrResponse = new Promise(() => {});
@@ -532,9 +480,10 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           element.setAttribute('data-override-width', '123');
           element.setAttribute('data-override-height', '456');
           new AmpAd(element).upgradeCallback();
+          impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-              expect(url).to.contain('sz=123x456&'));
+             expect(url).to.contain('sz=123x456&'));
         });
     it('has correct format with height/width override and multiSize',
         () => {
@@ -543,9 +492,10 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           element.setAttribute('data-multi-size', '1x2,3x4');
           element.setAttribute('data-multi-size-validation', 'false');
           new AmpAd(element).upgradeCallback();
+          impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-              expect(url).to.contain('sz=123x456%7C1x2%7C3x4&'));
+             expect(url).to.contain('sz=123x456%7C1x2%7C3x4&'));
         });
     it('has correct format with auto height/width and multiSize',
         () => {
@@ -554,16 +504,17 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           element.setAttribute('data-multi-size', '1x2,3x4');
           element.setAttribute('data-multi-size-validation', 'false');
           new AmpAd(element).upgradeCallback();
+          impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-              // Ensure that "auto" doesn't appear anywhere here:
-              expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
+             // Ensure that "auto" doesn't appear anywhere here:
+             expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
         });
     it('should have the correct ifi numbers - no refresh', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
       // Reset counter for purpose of this test.
-      delete window['ampAdGoogleIfiCounter'];
+      delete env.win['ampAdGoogleIfiCounter'];
       new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().then(url1 => {
         expect(url1).to.match(/ifi=1/);
@@ -587,6 +538,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       destroyFrameMock.returns(undefined);
       impl.mutateElement = func => func();
       impl.togglePlaceholder = sandbox.spy();
+      impl.win.document.win = impl.win;
       impl.getAmpDoc = () => impl.win.document;
       impl.getResource = () => {
         return {
@@ -610,48 +562,52 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
   describe('#unlayoutCallback', () => {
     it('should call #resetSlot, remove child iframe, but keep other children',
         () => {
-          return createImplTag({
+          const setup = createImplTag({
             width: '300',
             height: '150',
-          }).then(() => {
-            impl.buildCallback();
-            const slotIdBefore = impl.element.getAttribute(
-                'data-amp-slot-index');
+          }, element, impl, env);
+          element = setup[0];
+          impl = setup[1];
+          env = setup[2];
+          impl.buildCallback();
+          impl.win.ampAdSlotIdCounter = 1;
+          const slotIdBefore = impl.element.getAttribute(
+              'data-amp-slot-index');
 
-            impl.layoutMeasureExecuted_ = true;
-            impl.uiHandler = {applyUnlayoutUI: () => {}};
-            const placeholder = document.createElement('div');
-            placeholder.setAttribute('placeholder', '');
-            const fallback = document.createElement('div');
-            fallback.setAttribute('fallback', '');
-            impl.element.appendChild(placeholder);
-            impl.element.appendChild(fallback);
-            impl.ampAnalyticsConfig_ = {};
-            impl.ampAnalyticsElement_ =
-                document.createElement('amp-analytics');
-            impl.element.appendChild(impl.ampAnalyticsElement_);
+          impl.layoutMeasureExecuted_ = true;
+          impl.uiHandler = {applyUnlayoutUI: () => {}};
+          const placeholder = doc.createElement('div');
+          placeholder.setAttribute('placeholder', '');
+          const fallback = doc.createElement('div');
+          fallback.setAttribute('fallback', '');
+          impl.element.appendChild(placeholder);
+          impl.element.appendChild(fallback);
+          impl.ampAnalyticsConfig_ = {};
+          impl.ampAnalyticsElement_ =
+             doc.createElement('amp-analytics');
+          impl.element.appendChild(impl.ampAnalyticsElement_);
 
-            expect(impl.iframe).to.be.ok;
-            expect(impl.ampAnalyticsConfig_).to.be.ok;
-            expect(impl.element.querySelector('iframe')).to.be.ok;
-            expect(impl.element.querySelector('amp-analytics')).to.be.ok;
-            impl.unlayoutCallback();
-            expect(impl.element.querySelector('div[placeholder]')).to.be.ok;
-            expect(impl.element.querySelector('div[fallback]')).to.be.ok;
-            expect(impl.element.querySelector('iframe')).to.be.null;
-            expect(impl.element.querySelector('amp-analytics')).to.be.null;
-            expect(impl.iframe).to.be.null;
-            expect(impl.ampAnalyticsConfig_).to.be.null;
-            expect(impl.ampAnalyticsElement_).to.be.null;
-            expect(impl.element.getAttribute('data-amp-slot-index')).to
-                .equal(String(Number(slotIdBefore) + 1));
-          });
+          expect(impl.iframe).to.be.ok;
+          expect(impl.ampAnalyticsConfig_).to.be.ok;
+          expect(impl.element.querySelector('iframe')).to.be.ok;
+          expect(impl.element.querySelector('amp-analytics')).to.be.ok;
+          impl.unlayoutCallback();
+          expect(impl.element.querySelector('div[placeholder]')).to.be.ok;
+          expect(impl.element.querySelector('div[fallback]')).to.be.ok;
+          expect(impl.element.querySelector('iframe')).to.be.null;
+          expect(impl.element.querySelector('amp-analytics')).to.be.null;
+          expect(impl.iframe).to.be.null;
+          expect(impl.ampAnalyticsConfig_).to.be.null;
+          expect(impl.ampAnalyticsElement_).to.be.null;
+          expect(impl.element.getAttribute('data-amp-slot-index')).to
+              .equal(String(Number(slotIdBefore) + 1));
         });
   });
 
   describe('#getNetworkId', () => {
+    let element;
     it('should match expectations', () => {
-      element = document.createElement('amp-ad');
+      element = doc.createElement('amp-ad');
       const testValues = {
         '/1234/abc/def': '1234',
         '1234/abc/def': '1234',
@@ -668,15 +624,11 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
   });
 
   describe('#delayAdRequestEnabled', () => {
-    let impl;
     beforeEach(() => {
-      return createIframePromise().then(f => {
-        setupForAdTesting(f);
-        impl = new AmpAdNetworkDoubleclickImpl(
-          createElementWithAttributes(f.doc, 'amp-ad', {
+      impl = new AmpAdNetworkDoubleclickImpl(
+          createElementWithAttributes(doc, 'amp-ad', {
             type: 'doubleclick',
           }));
-      });
     });
 
     it('should return true if in experiment', () => {
@@ -702,7 +654,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     function stubForAmpCreative() {
       sandbox.stub(
           signatureVerifierFor(impl.win), 'verify',
-          () => Promise.resolve(null));
+          () => Promise.resolve(VerificationStatus.OK));
     }
 
     function mockSendXhrRequest() {
@@ -729,56 +681,55 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     }
 
     beforeEach(() => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        doc.win = window;
-        element = createElementWithAttributes(doc, 'amp-ad', {
-          'width': '200',
-          'height': '50',
-          'type': 'doubleclick',
-          'layout': 'fixed',
-        });
-        doc.body.appendChild(element);
-
-        impl = new AmpAdNetworkDoubleclickImpl(element);
-        impl.initialSize_ = {width: 200, height: 50};
-
-        // Boilerplate stubbing
-        sandbox.stub(impl, 'shouldInitializePromiseChain_', () => true);
-        sandbox.stub(impl, 'getAmpDoc', () => {
-          document.win = window;
-          return document;
-        });
-        sandbox.stub(impl, 'getPageLayoutBox', () => {
-          return {
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            width: 200,
-            height: 50,
-          };
-        });
-        sandbox.stub(impl, 'protectedEmitLifecycleEvent_', () => {});
-        sandbox.stub(impl, 'attemptChangeSize', (height, width) => {
-          impl.element.setAttribute('height', height);
-          impl.element.setAttribute('width', width);
-          return Promise.resolve();
-        });
-        sandbox.stub(impl, 'getAmpAdMetadata_', () => {
-          return {
-            customElementExtensions: [],
-            minifiedCreative: '<html><body>Hello, World!</body></html>',
-          };
-        });
-        sandbox.stub(impl, 'updatePriority', () => {});
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+        'layout': 'fixed',
       });
+      doc.body.appendChild(element);
+
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.initialSize_ = {width: 200, height: 50};
+
+      // Boilerplate stubbing
+      sandbox.stub(impl, 'shouldInitializePromiseChain_', () => true);
+      sandbox.stub(impl, 'getPageLayoutBox', () => {
+        return {
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          width: 200,
+          height: 50,
+        };
+      });
+      sandbox.stub(impl, 'protectedEmitLifecycleEvent_', () => {});
+      sandbox.stub(impl, 'attemptChangeSize', (height, width) => {
+        impl.element.setAttribute('height', height);
+        impl.element.setAttribute('width', width);
+        return Promise.resolve();
+      });
+      sandbox.stub(impl, 'getAmpAdMetadata_', () => {
+        return {
+          customElementExtensions: [],
+          minifiedCreative: '<html><body>Hello, World!</body></html>',
+        };
+      });
+      sandbox.stub(impl, 'updatePriority', () => {});
+
+      env.expectFetch(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
+          {'keys': []});
+      env.expectFetch(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
+          {'keys': []});
     });
 
     it('amp creative - should force iframe to match size of creative', () => {
       stubForAmpCreative();
       sandbox.stub(impl, 'sendXhrRequest', mockSendXhrRequest);
+      impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
         const iframe = impl.iframe;
@@ -790,6 +741,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
     it('should force iframe to match size of creative', () => {
       sandbox.stub(impl, 'sendXhrRequest', mockSendXhrRequest);
+      impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
         const iframe = impl.iframe;
@@ -806,6 +758,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
       // This would normally be set in AmpA4a#buildCallback.
       impl.creativeSize_ = {width: 200, height: 50};
+      impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
         const iframe = impl.iframe;
@@ -821,6 +774,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
       // This would normally be set in AmpA4a#buildCallback.
       impl.creativeSize_ = {width: 200, height: 50};
+      impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
         const iframe = impl.iframe;
@@ -834,6 +788,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       stubForAmpCreative();
       sandbox.stub(impl, 'sendXhrRequest', mockSendXhrRequest);
       impl.element.setAttribute('data-multi-size', '201x50');
+      impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
         expect(impl.adUrl_).to.be.ok;
@@ -845,31 +800,27 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
   describe('#correlator clear experiment', () => {
     let onVisibilityChangedHandler;
     let visabilityState;
-    let doc;
 
     beforeEach(() => {
       onVisibilityChangedHandler = null;
       visabilityState = VisibilityState.PAUSED;
-      return createIframePromise().then(fixture => {
-        doc = fixture.doc;
-        const viewer = {
-          isVisible: () => true,
-          onVisibilityChanged: handler => {
-            onVisibilityChangedHandler = handler;
-          },
-          getVisibilityState: () => visabilityState,
-          whenFirstVisible: () => Promise.resolve(),
-        };
-        sandbox.stub(Services, 'viewerForDoc').returns(viewer);
-        element = createElementWithAttributes(doc, 'amp-ad', {
-          type: 'doubleclick',
-          height: '250',
-          width: '320',
-        });
-        doc.body.appendChild(element);
-        impl = new AmpAdNetworkDoubleclickImpl(element);
-        impl.win.ampAdPageCorrelator = 12345;
+      const viewer = {
+        isVisible: () => true,
+        onVisibilityChanged: handler => {
+          onVisibilityChangedHandler = handler;
+        },
+        getVisibilityState: () => visabilityState,
+        whenFirstVisible: () => Promise.resolve(),
+      };
+      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        type: 'doubleclick',
+        height: '250',
+        width: '320',
       });
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.win.ampAdPageCorrelator = 12345;
     });
 
     it('clears if in experiment', () => {
@@ -968,3 +919,151 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
   });
 });
+
+
+describes.realWin('additional amp-ad-network-doubleclick-impl',
+    realWinConfigAmpAd, env => {
+      let doc;
+      let impl;
+      let element;
+
+      beforeEach(() => {
+        doc = env.win.document;
+      });
+
+      describe('#onNetworkFailure', () => {
+
+        beforeEach(() => {
+          element = createElementWithAttributes(doc, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+          });
+          impl = new AmpAdNetworkDoubleclickImpl(element);
+        });
+
+        it('should append error parameter', () => {
+          const TEST_URL = 'https://somenetwork.com/foo?hello=world&a=b';
+          expect(impl.onNetworkFailure(new Error('xhr failure'), TEST_URL))
+              .to.jsonEqual({adUrl: TEST_URL + '&aet=n'});
+        });
+      });
+
+      describe('centering', () => {
+        const size = {width: '300px', height: '150px'};
+
+        function verifyCss(iframe, expectedSize) {
+          expect(iframe).to.be.ok;
+          const style = env.win.getComputedStyle(iframe);
+          expect(style.top).to.equal('50%');
+          expect(style.left).to.equal('50%');
+          expect(style.width).to.equal(expectedSize.width);
+          expect(style.height).to.equal(expectedSize.height);
+          // We don't know the exact values by which the frame will be translated,
+          // as this can vary depending on whether we use the height/width
+          // attributes, or the actual size of the frame. To make this less of a
+          // hassle, we'll just match against regexp.
+          expect(style.transform).to.match(new RegExp(
+          'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
+        }
+
+        afterEach(() => env.win.document.body.removeChild(impl.element));
+
+        it('centers iframe in slot when height && width', () => {
+          const setup = createImplTag({
+            width: '300',
+            height: '150',
+          }, element, impl, env);
+          element = setup[0];
+          impl = setup[1];
+          env = setup[2];
+          expect(impl.element.getAttribute('width')).to.equal('300');
+          expect(impl.element.getAttribute('height')).to.equal('150');
+          verifyCss(impl.iframe, size);
+        });
+        it('centers iframe in slot when !height && !width', () => {
+          const setup = createImplTag({
+            layout: 'fixed',
+          }, element, impl, env);
+          element = setup[0];
+          impl = setup[1];
+          env = setup[2];
+          expect(impl.element.getAttribute('width')).to.be.null;
+          expect(impl.element.getAttribute('height')).to.be.null;
+          verifyCss(impl.iframe, size);
+        });
+        it('centers iframe in slot when !height && width', () => {
+          const setup = createImplTag({
+            width: '300',
+            layout: 'fixed',
+          }, element, impl, env);
+          element = setup[0];
+          impl = setup[1];
+          env = setup[2];
+          expect(impl.element.getAttribute('width')).to.equal('300');
+          expect(impl.element.getAttribute('height')).to.be.null;
+          verifyCss(impl.iframe, size);
+        });
+        it('centers iframe in slot when height && !width', () => {
+          const setup = createImplTag({
+            height: '150',
+            layout: 'fixed',
+          }, element, impl, env);
+          element = setup[0];
+          impl = setup[1];
+          env = setup[2];
+          expect(impl.element.getAttribute('width')).to.be.null;
+          expect(impl.element.getAttribute('height')).to.equal('150');
+          verifyCss(impl.iframe, size);
+        });
+      });
+
+      describe('#fireDelayedImpressions', () => {
+        beforeEach(() => {
+          element = createElementWithAttributes(doc, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+          });
+          impl = new AmpAdNetworkDoubleclickImpl(element);
+        });
+
+        it('should handle null impressions', () => {
+          impl.fireDelayedImpressions(null);
+          expect(env.win.document.querySelectorAll('amp-pixel').length)
+              .to.equal(0);
+        });
+
+        it('should not include non-https', () => {
+          impl.fireDelayedImpressions('http://f.com?a=b,https://b.net?c=d');
+          expect(env.win.document.querySelectorAll('amp-pixel').length)
+              .to.equal(1);
+          expect(env.win.document.querySelector(
+              'amp-pixel[src="https://b.net?c=d"][referrerpolicy=""]'))
+              .to.be.ok;
+        });
+
+        it('should append amp-pixel w/o scrubReferer', () => {
+          impl.fireDelayedImpressions('https://f.com?a=b,https://b.net?c=d');
+          expect(env.win.document.querySelector(
+              'amp-pixel[src="https://f.com?a=b"][referrerpolicy=""]'))
+              .to.be.ok;
+          expect(env.win.document.querySelector(
+              'amp-pixel[src="https://b.net?c=d"][referrerpolicy=""]'))
+              .to.be.ok;
+        });
+
+        it('should append amp-pixel wwith scrubReferer', () => {
+          impl.fireDelayedImpressions(
+              'https://f.com?a=b,https://b.net?c=d', true);
+          expect(env.win.document.querySelector(
+              'amp-pixel[src="https://f.com?a=b"]' +
+              '[referrerpolicy="no-referrer"]'))
+              .to.be.ok;
+          expect(env.win.document.querySelector(
+              'amp-pixel[src="https://b.net?c=d"]' +
+              '[referrerpolicy="no-referrer"]'))
+              .to.be.ok;
+        });
+      });
+    });

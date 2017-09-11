@@ -15,14 +15,11 @@
  */
 
 import {getMode} from '../../../src/mode';
-import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
-import {urls} from '../../../src/config';
 import {CSS} from '../../../build/amp-web-push-0.1.css';
 import {IFrameHost} from './iframehost';
 import {WindowMessenger} from './window-messenger';
-import {installStyles} from '../../../src/style-installer';
-import {installStylesForShadowRoot} from '../../../src/shadow-embed';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {openWindowDialog} from '../../../src/dom';
 import {
   TAG,
@@ -112,19 +109,8 @@ export class WebPushService {
     /** @const */
     this.ampdoc = ampdoc;
 
-    // Enable our AMP extension for development and test environments
-    this.enableAmpExperimentForDevelopment_();
-    // On all other environments, error if experiment is not enabled
-    this.ensureAmpExperimentEnabled_();
-
     // Install styles.
-    if (ampdoc.isSingleDoc()) {
-      const root = /** @type {!Document} */ (ampdoc.getRootNode());
-      installStyles(root, CSS, () => { }, false, TAG);
-    } else {
-      const root = /** @type {!ShadowRoot} */ (ampdoc.getRootNode());
-      installStylesForShadowRoot(root, CSS, false, TAG);
-    }
+    installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
     /** @private {!Object} */
     this.config_ = {
@@ -159,6 +145,14 @@ export class WebPushService {
    * @returns {!Promise}
    */
   start(configJson) {
+    dev().fine(TAG, 'amp-web-push extension starting up.');
+
+    // Exit early if web push isn't supported
+    if (!this.environmentSupportsWebPush()) {
+      dev().fine(TAG, 'Web push is not supported.');
+      return Promise.reject('Web push is not supported');
+    }
+
     this.initializeConfig(configJson);
 
     // Add the IFrame
@@ -186,14 +180,6 @@ export class WebPushService {
    * @param {!AmpWebPushConfig} configJson
    */
   initializeConfig(configJson) {
-    dev().fine(TAG, 'amp-web-push extension starting up.');
-
-    // Exit early if web push isn't supported
-    if (!this.environmentSupportsWebPush()) {
-      dev().fine(TAG, 'Web push is not supported.');
-      return;
-    }
-
     // Read amp-web-push configuration
     this.config_ = configJson;
     if (!this.config_) {
@@ -201,6 +187,8 @@ export class WebPushService {
       return;
     }
   }
+
+  /**
 
   /**
    * Installs the helper IFrame onto the AMP page and returns a Promise for when
@@ -248,29 +236,6 @@ export class WebPushService {
       urlWithoutFragment.replace(
           `&${WebPushService.PERMISSION_POPUP_URL_FRAGMENT}`, '');
     return urlWithoutFragment;
-  }
-
-  /**
-   * When developing locally, call this function otherwise we can't run our
-   * extension in the example sandbox. Turns off in unit test mode.
-   * @private
-   */
-  enableAmpExperimentForDevelopment_() {
-    if ((getMode().localDev && !getMode().test)) {
-      AMP.toggleExperiment(TAG, true);
-    }
-  }
-
-  /**
-   * Checks that the user enabled this AMP experiment and allows integration
-   * tests to access this class in testing mode.
-   * @private
-   */
-  ensureAmpExperimentEnabled_() {
-    // Allow integration tests to access this class in testing mode.
-    const isExperimentEnabled = isExperimentOn(this.ampdoc.win, TAG);
-    user().assert(isExperimentEnabled, `Experiment "${TAG}" is disabled. ` +
-      `Enable it on ${urls.cdn}/experiments.html.`);
   }
 
   /**

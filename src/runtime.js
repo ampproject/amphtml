@@ -21,16 +21,13 @@ import {
   createShadowDomWriter,
   createShadowRoot,
   importShadowBody,
-  installStylesForShadowRoot,
 } from './shadow-embed';
 import {VisibilityState} from './visibility-state';
 import {
-  addDocFactoryToExtension,
   addElementToExtension,
   addServiceToExtension,
-  addShadowRootFactoryToExtension,
   installBuiltinElements,
-  installExtensionsInShadowDoc,
+  installExtensionsInDoc,
   installExtensionsService,
   registerExtension,
   stubLegacyElements,
@@ -42,8 +39,6 @@ import {dev, user, initLogConstructor, setReportError} from './log';
 import {reportErrorForWin} from './error';
 import {
   disposeServicesForDoc,
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
 } from './service';
 import {childElementsByTag} from './dom';
 import {getMode} from './mode';
@@ -67,14 +62,14 @@ import {
 } from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStorageServiceForDoc} from './service/storage-impl';
-import {installStyles} from './style-installer';
+import {installStylesForDoc} from './style-installer';
 import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsServiceForDoc} from
     './service/url-replacements-impl';
 import {installViewerServiceForDoc, setViewerVisibilityState} from
     './service/viewer-impl';
-import {installViewportServiceForDoc} from './service/viewport-impl';
+import {installViewportServiceForDoc} from './service/viewport/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {installBatchedXhrService} from './service/batched-xhr-impl';
@@ -83,21 +78,17 @@ import {
   toggleExperiment,
 } from './experiments';
 import {parseUrl} from './url';
-import {registerElement} from './custom-element';
-import {registerExtendedElement} from './extended-element';
 import {setStyle} from './style';
-import {waitForBody} from './dom';
+import {stubElementsForDoc} from './service/custom-element-registry';
+import {waitForBodyPromise} from './dom';
 import * as config from './config';
 
 initLogConstructor();
 setReportError(reportErrorForWin.bind(null, self));
 
-
 /** @const @private {string} */
 const TAG = 'runtime';
 
-/** @type {!Object} */
-const elementsForTesting = {};
 
 /**
  * Install runtime-level services.
@@ -149,25 +140,14 @@ export function installBuiltins(global) {
  * Applies the runtime to a given global scope for a single-doc mode.
  * Multi frame support is currently incomplete.
  * @param {!Window} global Global scope to adopt.
- * @param {!{
- *     registerElement: function(
- *         !Window,
- *         !./service/extensions-impl.Extensions,
- *         string, !Function, string=),
- *     registerServiceForDoc: function(
- *         !Window,
- *         !./service/extensions-impl.Extensions,
- *         string,
- *         (function(new:Object, !./service/ampdoc-impl.AmpDoc)|undefined),
- *         (function(!./service/ampdoc-impl.AmpDoc):!Object|undefined)),
- *   }} opts
- * @param {function(!Window, !./service/extensions-impl.Extensions)} callback
+ * @param {function(!Window, !./service/extensions-impl.Extensions):!Promise} callback
+ * @return {!Promise}
  */
-function adoptShared(global, opts, callback) {
+function adoptShared(global, callback) {
 
   // Tests can adopt the same window twice. sigh.
   if (global.AMP_TAG) {
-    return;
+    return Promise.resolve();
   }
   global.AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
@@ -210,11 +190,10 @@ function adoptShared(global, opts, callback) {
   /**
    * Registers an extended element and installs its styles.
    * @param {string} name
-   * @param {function(new:BaseElement)} implementationClass
-   * @param {string=} opt_css
+   * @param {function(new:BaseElement, !Element)} implementationClass
+   * @param {?string|undefined} css
    */
-  global.AMP.registerElement = opts.registerElement.bind(null,
-      global, extensions);
+  global.AMP.registerElement = addElementToExtension.bind(null, extensions);
 
   /**
    * Registers an extended template.
@@ -228,11 +207,10 @@ function adoptShared(global, opts, callback) {
   /**
    * Registers an ampdoc service.
    * @param {string} name
-   * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)|undefined} opt_ctor
-   * @param {function(!./service/ampdoc-impl.AmpDoc):!Object|undefined} opt_factory
+   * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} implementationClass
    */
-  global.AMP.registerServiceForDoc = opts.registerServiceForDoc.bind(null,
-      global, extensions);
+  global.AMP.registerServiceForDoc =
+      addServiceToExtension.bind(null, extensions);
 
   // Experiments.
   /**
@@ -257,14 +235,14 @@ function adoptShared(global, opts, callback) {
   global.AMP.setTickFunction = (unusedFn, opt_flush) => {};
 
   // Run specific setup for a single-doc or shadow-doc mode.
-  callback(global, extensions);
+  const iniPromise = callback(global, extensions);
 
   /**
    * @param {function(!Object)|ExtensionPayload} fnOrStruct
    */
   function installExtension(fnOrStruct) {
     const register = () => {
-      waitForBody(global.document, () => {
+      iniPromise.then(() => {
         if (typeof fnOrStruct == 'function') {
           fnOrStruct(global.AMP);
         } else {
@@ -286,16 +264,6 @@ function adoptShared(global, opts, callback) {
     } else {
       register.displayName = fnOrStruct.n;
       startupChunk(global.document, register);
-    }
-  }
-
-  /**
-   * Certain extensions can be auto-loaded by runtime based on experiments or
-   * other configurations.
-   */
-  function installAutoLoadExtensions() {
-    if (!getMode().test && isExperimentOn(global, 'amp-lightbox-viewer-auto')) {
-      Services.extensionsFor(global).loadExtension('amp-lightbox-viewer');
     }
   }
 
@@ -357,13 +325,13 @@ function adoptShared(global, opts, callback) {
         preregisteredExtensions);
   }
 
-  installAutoLoadExtensions();
-
   // For iOS we need to set `cursor:pointer` to ensure that click events are
   // delivered.
   if (Services.platformFor(global).isIos()) {
     setStyle(global.document.documentElement, 'cursor', 'pointer');
   }
+
+  return iniPromise;
 }
 
 
@@ -371,14 +339,15 @@ function adoptShared(global, opts, callback) {
  * Applies the runtime to a given global scope for a single-doc mode.
  * Multi frame support is currently incomplete.
  * @param {!Window} global Global scope to adopt.
+ * @return {!Promise}
  */
 export function adopt(global) {
-  adoptShared(global, {
-    registerElement: prepareAndRegisterElement,
-    registerServiceForDoc: prepareAndRegisterServiceForDoc,
-  }, global => {
-    const viewer = Services.viewerForDoc(global.document);
+  return adoptShared(global, (global, extensions) => {
+    const ampdocService = Services.ampdocServiceFor(global);
+    const ampdoc = ampdocService.getAmpDoc();
+    global.AMP.ampdoc = ampdoc;
 
+    const viewer = Services.viewerForDoc(global.document);
     global.AMP.viewer = viewer;
 
     if (getMode().development) {
@@ -392,6 +361,12 @@ export function adopt(global) {
     global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
     global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
     global.AMP.viewport.getWidth = viewport.getWidth.bind(viewport);
+
+    return waitForBodyPromise(global.document).then(() => {
+      // Ensure that all declared extensions are marked and stubbed.
+      stubElementsForDoc(ampdoc);
+      installAutoLoadExtensions(extensions, ampdoc);
+    });
   });
 }
 
@@ -399,12 +374,10 @@ export function adopt(global) {
 /**
  * Applies the runtime to a given global scope for shadow mode.
  * @param {!Window} global Global scope to adopt.
+ * @return {!Promise}
  */
 export function adoptShadowMode(global) {
-  adoptShared(global, {
-    registerElement: prepareAndRegisterElementShadowMode,
-    registerServiceForDoc: prepareAndRegisterServiceForDocShadowMode,
-  }, (global, extensions) => {
+  return adoptShared(global, (global, extensions) => {
 
     const manager = new MultidocManager(
         global,
@@ -431,121 +404,23 @@ export function adoptShadowMode(global) {
      */
     global.AMP.attachShadowDocAsStream =
         manager.attachShadowDocAsStream.bind(manager);
+
+    return waitForBodyPromise(global.document);
   });
 }
 
 
 /**
- * Registers an extended element and installs its styles in a single-doc mode.
- * @param {!Window} global
+ * Certain extensions can be auto-loaded by runtime based on experiments or
+ * other configurations.
  * @param {!./service/extensions-impl.Extensions} extensions
- * @param {string} name
- * @param {function(new:BaseElement)} implementationClass
- * @param {string=} opt_css
- */
-function prepareAndRegisterElement(global, extensions,
-    name, implementationClass, opt_css) {
-  addElementToExtension(extensions, name, implementationClass, opt_css);
-  if (opt_css) {
-    installStyles(global.document, opt_css, () => {
-      registerElementClass(global, name, implementationClass, opt_css);
-    }, false, name);
-  } else {
-    registerElementClass(global, name, implementationClass, opt_css);
-  }
-}
-
-
-/**
- * Registers an extended element and installs its styles in a shodow-doc mode.
- * @param {!Window} global
- * @param {!./service/extensions-impl.Extensions} extensions
- * @param {string} name
- * @param {function(new:BaseElement)} implementationClass
- * @param {string=} opt_css
- */
-function prepareAndRegisterElementShadowMode(global, extensions,
-    name, implementationClass, opt_css) {
-  addElementToExtension(extensions, name, implementationClass, opt_css);
-  registerElementClass(global, name, implementationClass, opt_css);
-  if (opt_css) {
-    addShadowRootFactoryToExtension(extensions, shadowRoot => {
-      installStylesForShadowRoot(shadowRoot, dev().assertString(opt_css),
-          /* isRuntimeCss */ false, name);
-    });
-  }
-}
-
-
-/**
- * Registration steps for an extension element in both single- and shadow-doc
- * modes.
- * @param {!Window} global
- * @param {string} name
- * @param {function(new:BaseElement)} implementationClass
- * @param {string=} opt_css
- */
-function registerElementClass(global, name, implementationClass, opt_css) {
-  registerExtendedElement(global, name, implementationClass);
-  if (getMode().test) {
-    elementsForTesting[name] = {
-      name,
-      implementationClass,
-      css: opt_css,
-    };
-  }
-  // Register this extension to resolve its Service Promise.
-  registerServiceBuilder(global, name, emptyService);
-}
-
-
-/**
- * Registers an ampdoc service in a single-doc mode.
- * @param {!Window} global
- * @param {!./service/extensions-impl.Extensions} extensions
- * @param {string} name
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
- */
-function prepareAndRegisterServiceForDoc(global, extensions, name, ctor) {
-  const ampdocService = Services.ampdocServiceFor(global);
-  const ampdoc = ampdocService.getAmpDoc();
-  registerServiceForDoc(ampdoc, name, ctor);
-
-  addServiceToExtension(extensions, name);
-}
-
-
-/**
- * Registers an ampdoc service in a shadow-doc mode.
- * @param {!Window} global
- * @param {!./service/extensions-impl.Extensions} extensions
- * @param {string} name
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
- */
-function prepareAndRegisterServiceForDocShadowMode(global, extensions,
-    name, ctor) {
-  addDocFactoryToExtension(extensions, ampdoc => {
-    registerServiceForDoc(ampdoc, name, ctor);
-  }, name);
-
-  addServiceToExtension(extensions, name);
-}
-
-
-/**
- * Registration steps for an ampdoc service in both single- and shadow-doc
- * modes.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {string} name
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
  */
-function registerServiceForDoc(ampdoc, name, ctor) {
-  // TODO(kmh287): Investigate removing the opt_instantiate arg after
-  // all other services have been refactored.
-  registerServiceBuilderForDoc(ampdoc,
-      name,
-      ctor,
-      /* opt_instantiate */ true);
+function installAutoLoadExtensions(extensions, ampdoc) {
+  if (!getMode().test &&
+      isExperimentOn(ampdoc.win, 'amp-lightbox-viewer-auto')) {
+    extensions.installExtensionForDoc(ampdoc, 'amp-lightbox-viewer');
+  }
 }
 
 
@@ -605,11 +480,13 @@ class MultidocManager {
     dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
 
     // Install runtime CSS.
-    installStylesForShadowRoot(shadowRoot, cssText,
+    installStylesForDoc(ampdoc, cssText, /* callback */ null,
         /* opt_isRuntimeCss */ true);
-
     // Instal doc services.
     installAmpdocServices(ampdoc, initParams || Object.create(null));
+    // Install auto-load extensions.
+    installAutoLoadExtensions(this.extensions_, ampdoc);
+
     const viewer = Services.viewerForDoc(ampdoc);
 
     /**
@@ -702,8 +579,8 @@ class MultidocManager {
         hostElement, url, opt_initParams,
         (amp, shadowRoot, ampdoc) => {
           // Install extensions.
-          const extensionIds = this.mergeShadowHead_(shadowRoot, doc);
-          installExtensionsInShadowDoc(this.extensions_, ampdoc, extensionIds);
+          const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
+          installExtensionsInDoc(this.extensions_, ampdoc, extensionIds);
 
           // Append body.
           if (doc.body) {
@@ -746,10 +623,9 @@ class MultidocManager {
           amp.writer = writer;
           writer.onBody(doc => {
             // Install extensions.
-            const extensionIds = this.mergeShadowHead_(shadowRoot, doc);
+            const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
             // Apply all doc extensions.
-            installExtensionsInShadowDoc(
-                this.extensions_, ampdoc, extensionIds);
+            installExtensionsInDoc(this.extensions_, ampdoc, extensionIds);
 
             // Append shallow body.
             const body = importShadowBody(
@@ -785,12 +661,13 @@ class MultidocManager {
 
   /**
    * Processes the contents of the shadow document's head.
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!ShadowRoot} shadowRoot
    * @param {!Document} doc
    * @return {!Array<string>}
    * @private
    */
-  mergeShadowHead_(shadowRoot, doc) {
+  mergeShadowHead_(ampdoc, shadowRoot, doc) {
     const extensionIds = [];
     if (doc.head) {
       const parentLinks = {};
@@ -850,7 +727,8 @@ class MultidocManager {
               // Ignore.
               dev().fine(TAG, '- ignore boilerplate style: ', n);
             } else {
-              installStylesForShadowRoot(shadowRoot, n.textContent,
+              installStylesForDoc(ampdoc, n.textContent,
+                  /* callback */ null,
                   /* isRuntimeCss */ false, 'amp-custom');
               dev().fine(TAG, '- import style: ', n);
             }
@@ -867,7 +745,8 @@ class MultidocManager {
                 dev().fine(TAG, '- ignore runtime script: ', src);
               } else if (customElement || customTemplate) {
                 // This is an extension.
-                this.extensions_.loadExtension(customElement || customTemplate);
+                this.extensions_.installExtensionForDoc(
+                    ampdoc, customElement || customTemplate);
                 dev().fine(
                     TAG, '- load extension: ', customElement || customTemplate);
                 if (customElement) {
@@ -972,53 +851,6 @@ class MultidocManager {
 
 
 /**
- * @return {!Object}
- */
-function emptyService() {
-  // All services need to resolve to an object.
-  return {};
-}
-
-
-/**
- * Registers all extended elements as normal elements in the given
- * window.
- * Make sure to call `adopt(window)` in your unit test as well and
- * then call this on the generated iframe.
- * @param {!Window} win
- */
-export function registerForUnitTest(win) {
-  for (const key in elementsForTesting) {
-    let element = null;
-    element = elementsForTesting[key];
-    if (element.css) {
-      installStyles(win.document, element.css, () => {
-        registerElement(win, element.name, element.implementationClass);
-      }, false, element.name);
-    } else {
-      registerElement(win, element.name, element.implementationClass);
-    }
-  }
-}
-
-
-/**
- * Registers a specific element for testing.
- * @param {!Window} win
- * @param {string} elementName
- * @visibleForTesting
- */
-export function registerElementForTesting(win, elementName) {
-  const element = elementsForTesting[elementName];
-  if (!element) {
-    throw new Error('test element not found: ' + elementName +
-      '\nKnown elements ' + Object.keys(elementsForTesting).sort());
-  }
-  win.AMP.registerElement(element.name, element.implementationClass,
-      element.css);
-}
-
-/**
  * For a given extension, checks that its version is the same
  * as the version of the main AMP binary.
  * If yes, returns false and does nothing else.
@@ -1056,7 +888,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   if (!scriptInHead) {
     return false;
   }
-  // Mark the element as being replace, so that the loadExtension code
+  // Mark the element as being replaced, so that the installExtension code
   // assumes it as not-present.
   Services.extensionsFor(win).reloadExtension(fnOrStruct.n, scriptInHead);
   return true;

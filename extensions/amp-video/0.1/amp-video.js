@@ -133,12 +133,13 @@ class AmpVideo extends AMP.BaseElement {
     const artist = this.element.getAttribute('artist');
     const title = this.element.getAttribute('title');
     const album = this.element.getAttribute('album');
+    const artwork = this.element.getAttribute('artwork');
     this.metadata_ = {
       'title': title || '',
       'artist': artist || '',
       'album': album || '',
       'artwork': [
-        {'src': poster || ''},
+        {'src': artwork || poster || ''},
       ],
     };
 
@@ -163,10 +164,11 @@ class AmpVideo extends AMP.BaseElement {
     if (mutations['src']) {
       this.element.dispatchCustomEvent(VideoEvents.RELOAD);
     }
-    if (mutations['poster']) {
+    if (mutations['artwork'] || mutations['poster']) {
+      const artwork = this.element.getAttribute('artwork');
       const poster = this.element.getAttribute('poster');
       this.metadata_['artwork'] = [
-        {'src': poster || ''},
+        {'src': artwork || poster || ''},
       ];
     }
     if (mutations['album']) {
@@ -230,7 +232,8 @@ class AmpVideo extends AMP.BaseElement {
    */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
-    this.forwardEvents([VideoEvents.PLAYING, VideoEvents.PAUSE], video);
+    this.forwardEvents(
+      [VideoEvents.PLAYING, VideoEvents.PAUSE, VideoEvents.ENDED], video);
     listen(video, 'volumechange', () => {
       if (this.muted_ != this.video_.muted) {
         this.muted_ = this.video_.muted;
@@ -375,4 +378,7 @@ class AmpVideo extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement(TAG, AmpVideo);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpVideo);
+});

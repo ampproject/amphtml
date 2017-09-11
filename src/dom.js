@@ -18,6 +18,7 @@ import {dev} from './log';
 import {dict} from './utils/object';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {startsWith} from './string';
+import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -50,7 +51,7 @@ export function waitForChild(parent, checkFunc, callback) {
     return;
   }
   /** @const {!Window} */
-  const win = parent.ownerDocument.defaultView;
+  const win = toWin(parent.ownerDocument.defaultView);
   if (win.MutationObserver) {
     /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {

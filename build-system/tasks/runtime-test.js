@@ -27,6 +27,13 @@ var util = require('gulp-util');
 var webserver = require('gulp-webserver');
 var app = require('../test-server').app;
 var karmaDefault = require('./karma.conf');
+var shuffleSeed = require('shuffle-seed');
+
+
+const green = util.colors.green;
+const yellow = util.colors.yellow;
+const cyan = util.colors.cyan;
+
 
 /**
  * Read in and process the configuration settings for karma
@@ -42,7 +49,9 @@ function getConfig() {
   if (argv.edge) {
     return Object.assign({}, karmaDefault, {browsers: ['Edge']});
   }
-
+  if (argv.ie) {
+    return Object.assign({}, karmaDefault, {browsers: ['IE']});
+  }
   if (argv.saucelabs) {
     if (!process.env.SAUCE_USERNAME) {
       throw new Error('Missing SAUCE_USERNAME Env variable');
@@ -51,8 +60,7 @@ function getConfig() {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
     return Object.assign({}, karmaDefault, {
-      reporters: process.env.TRAVIS ?
-          ['super-dots', 'saucelabs', 'mocha'] : ['dots', 'saucelabs', 'mocha'],
+      reporters: ['dots', 'saucelabs', 'mocha'],
       browsers: argv.oldchrome
           ? ['SL_Chrome_45']
           : [
@@ -66,7 +74,7 @@ function getConfig() {
             //'SL_iOS_8_4', // Disabled due to flakiness and low market share
             'SL_iOS_9_1',
             'SL_iOS_10_0',
-            //'SL_IE_11',
+            'SL_IE_11',
           ],
     });
   }
@@ -105,11 +113,65 @@ function getAdTypes() {
   return adTypes;
 }
 
+
+/**
+ * Prints help messages for args if tests are being run for local development.
+ */
+function printArgvMessages() {
+  const argvMessages = {
+    safari: 'Running tests on Safari.',
+    firefox: 'Running tests on Firefox.',
+    ie: 'Running tests on IE.',
+    edge: 'Running tests on Edge.',
+    saucelabs: 'Running tests on Sauce Labs.',
+    nobuild: 'Skipping build.',
+    watch: 'Enabling watch mode. Editing and saving a file will cause the' +
+        ' tests for that file to be re-run in the same browser instance.',
+    verbose: 'Enabling verbose mode. Expect lots of output!',
+    testnames: 'Listing the names of all tests being run.',
+    files: 'Running tests in the file(s): ' + cyan(argv.files),
+    integration: 'Running only the integration tests. Requires ' +
+        cyan('gulp build') +  ' to have been run first.',
+    unit: 'Running only the unit tests. Requires ' +
+        cyan('gulp css') +  ' to have been run first.',
+    randomize: 'Randomizing the order in which tests are run.',
+    a4a: 'Running only A4A tests.',
+    seed: 'Randomizing test order with seed ' + cyan(argv.seed) + '.',
+    compiled:  'Running tests against minified code.',
+    grep: 'Only running tests that match the pattern "' +
+        cyan(argv.grep) + '".'
+  };
+  if (!process.env.TRAVIS) {
+    util.log(green('Run', cyan('gulp help'),
+        'to see a list of all test flags. (Use', cyan('--nohelp'),
+        'to silence these messages.)'));
+    if (!argv.unit && !argv.integration && !argv.files) {
+      util.log(green('Running all tests. Use',
+          cyan('--unit'), 'or', cyan('--integration'),
+          'to run just the unit tests or integration tests.'));
+    }
+    if (!argv.compiled) {
+      util.log(green('Running tests against unminified code.'));
+    }
+    Object.keys(argv).forEach(arg => {
+      const message = argvMessages[arg];
+      if (message) {
+        util.log(yellow('--' + arg + ':'), green(message));
+      }
+    });
+  }
+}
+
+
 /**
  * Run tests.
  */
 gulp.task('test', 'Runs tests',
     argv.nobuild ? [] : (argv.unit ? ['css'] : ['build']), function(done) {
+  if (!argv.nohelp) {
+    printArgvMessages();
+  }
+
   if (!argv.integration && process.env.AMPSAUCE_REPO) {
     console./*OK*/info('Deactivated for ampsauce repo')
   }
@@ -138,44 +200,28 @@ gulp.task('test', 'Runs tests',
   } else if (argv.unit) {
     c.files = config.unitTestPaths;
   } else if (argv.randomize || argv.glob || argv.a4a) {
-    /** Randomize the order of the test running */
-    var testPaths;
-    if (argv.a4a) {
-      testPaths = [
-        'extensions/amp-a4a/**/test/**/*.js',
-        'extensions/amp-ad-network-*/**/test/**/*.js',
-        'ads/google/a4a/test/*.js'
-      ];
-    } else {
-      testPaths = [
-        'test/**/*.js',
-        'ads/**/test/test-*.js',
-        'extensions/**/test/**/*.js',
-      ];
-    }
+    const testPaths = argv.a4a ? config.a4aTestPaths : config.basicTestPaths;
 
     var testFiles = [];
-
     for (var index in testPaths) {
       testFiles = testFiles.concat(glob.sync(testPaths[index]));
     }
 
-    if (argv.randomize) {
-      testFiles = shuffleArray(testFiles);
+    if (argv.randomize || argv.a4a) {
+      const seed = argv.seed || Math.random();
+      util.log(
+          util.colors.yellow('Randomizing:'),
+          util.colors.cyan('Seeding with value', seed));
+      util.log(
+          util.colors.yellow('To rerun same ordering, append'),
+          util.colors.cyan(`--seed=${seed}`),
+          util.colors.yellow('to your invocation of'),
+          util.colors.cyan('gulp test'));
+      testFiles = shuffleSeed.shuffle(testFiles, seed);
     }
-    // we need to replace the test init with something that won't match
-    // any file. _init_tests gets added twice due to the regex matching.
-    testFiles[testFiles.indexOf('test/_init_tests.js')] = '_WONTMATCH.qqq';
+
+    testFiles.splice(testFiles.indexOf('test/_init_tests.js'), 1);
     c.files = config.commonTestPaths.concat(testFiles);
-
-    util.log(util.colors.blue(JSON.stringify(c.files)));
-    util.log(util.colors.yellow("Save the above files in a .json file to reuse"));
-
-  } else if (argv.testlist) {
-    var file = read.file(argv.testlist);
-    util.log(file);
-    c.files = file;
-
   } else {
     c.files = config.testPaths;
   }
@@ -200,6 +246,35 @@ gulp.task('test', 'Runs tests',
     };
   }
 
+  if (argv.coverage) {
+    util.log(util.colors.blue('Including code coverage tests'));
+    c.browserify.transform.push(
+        ['browserify-istanbul', { instrumenterConfig: { embedSource: true }}]);
+    c.reporters = c.reporters.concat(['progress', 'coverage']);
+    if (c.preprocessors['src/**/*.js']) {
+      c.preprocessors['src/**/*.js'].push('coverage');
+    }
+    c.preprocessors['extensions/**/*.js'] &&
+        c.preprocessors['extensions/**/*.js'].push('coverage');
+    c.coverageReporter = {
+      dir: 'test/coverage',
+      reporters: [
+        { type: 'html', subdir: 'report-html' },
+        { type: 'lcov', subdir: 'report-lcov' },
+        { type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt' },
+        { type: 'text', subdir: '.', file: 'text.txt' },
+        { type: 'text-summary', subdir: '.', file: 'text-summary.txt' },
+      ],
+      instrumenterOptions: {
+        istanbul: {
+          noCompact: true,
+        }
+      }
+    };
+    // TODO(jonkeller): Add c.coverageReporter.check as shown in
+    // https://github.com/karma-runner/karma-coverage/blob/master/docs/configuration.md
+  }
+
   // Run fake-server to test XHR responses.
   var server = gulp.src(process.cwd())
       .pipe(webserver({
@@ -209,13 +284,13 @@ gulp.task('test', 'Runs tests',
         middleware: [app],
       })
       .on('kill', function () {
-        util.log(util.colors.yellow(
+        util.log(yellow(
             'Shutting down test responses server on localhost:31862'));
         process.nextTick(function() {
           process.exit();
         });
       }));
-  util.log(util.colors.yellow(
+  util.log(yellow(
       'Started test responses server on localhost:31862'));
 
   new Karma(c, function(exitCode) {
@@ -223,7 +298,7 @@ gulp.task('test', 'Runs tests',
     if (exitCode) {
       util.log(
           util.colors.red('ERROR:'),
-          util.colors.yellow('Karma test failed with exit code', exitCode));
+          yellow('Karma test failed with exit code', exitCode));
       process.exit(exitCode);
     } else {
       done();
@@ -235,9 +310,10 @@ gulp.task('test', 'Runs tests',
     'testnames': '  Lists the name of each test being run',
     'watch': '  Watches for changes in files, runs corresponding test(s)',
     'saucelabs': '  Runs test on saucelabs (requires setup)',
-    'safari': '  Runs tests in Safari',
-    'firefox': '  Runs tests in Firefox',
-    'edge': '  Runs tests in Edge',
+    'safari': '  Runs tests on Safari',
+    'firefox': '  Runs tests on Firefox',
+    'edge': '  Runs tests on Edge',
+    'ie': '  Runs tests on IE',
     'unit': '  Run only unit tests.',
     'integration': '  Run only integration tests.',
     'compiled': '  Changes integration tests to use production JS ' +
@@ -246,19 +322,11 @@ gulp.task('test', 'Runs tests',
     'grep': '  Runs tests that match the pattern',
     'files': '  Runs tests for specific files',
     'randomize': '  Runs entire test suite in random order',
-    'testlist': '  Runs tests specified in JSON by supplied file',
+    'seed': '  Seeds the test order randomization. Use with --randomize ' +
+        'or --a4a',
     'glob': '  Explicitly expands test paths using glob before passing ' +
         'to Karma',
+    'nohelp': '  Silence help messages that are printed prior to test run',
+    'a4a': '  Runs all A4A tests',
   }
 });
-
-
-function shuffleArray(array) {
-    for (var i = array.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-    }
-    return array;
-}

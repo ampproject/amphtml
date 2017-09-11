@@ -107,6 +107,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adocean: {},
+
   adreactor: {},
 
   adsense: {
@@ -262,6 +264,10 @@ export const adConfig = {
       'https://api.dable.io',
       'https://images.dable.io',
     ],
+    renderStartImplemented: true,
+  },
+
+  directadvert: {
     renderStartImplemented: true,
   },
 

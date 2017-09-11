@@ -69,8 +69,8 @@ export class AmpAd extends AMP.BaseElement {
         return new AmpAdCustom(this.element);
       }
 
-      window.ampAdSlotIdCounter = window.ampAdSlotIdCounter || 0;
-      const slotId = window.ampAdSlotIdCounter++;
+      this.win.ampAdSlotIdCounter = this.win.ampAdSlotIdCounter || 0;
+      const slotId = this.win.ampAdSlotIdCounter++;
       this.element.setAttribute('data-amp-slot-index', slotId);
 
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
@@ -95,7 +95,8 @@ export class AmpAd extends AMP.BaseElement {
           // Work around presubmit restrictions.
             const TAG = this.element.tagName;
           // Report error and fallback to 3p
-            user().error(TAG, 'Unable to load ad implementation for type ',
+            this.user().error(
+                TAG, 'Unable to load ad implementation for type ',
                 type, ', falling back to 3p, error: ', error);
             return new AmpAd3PImpl(this.element);
           });
@@ -106,5 +107,7 @@ export class AmpAd extends AMP.BaseElement {
 // Static registery
 AmpAd.a4aRegistry = getA4ARegistery();
 
-AMP.registerElement('amp-ad', AmpAd, CSS);
-AMP.registerElement('amp-embed', AmpAd);
+AMP.extension('amp-ad', '0.1', AMP => {
+  AMP.registerElement('amp-ad', AmpAd, CSS);
+  AMP.registerElement('amp-embed', AmpAd);
+});

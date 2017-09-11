@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import {upgradeOrRegisterElement} from './custom-element';
-
-
 /**
- * Registers an extended element. This function should typically be called
- * through the registerElement method on the AMP runtime.
- * @param {!Window} win
- * @param {string} name
- * @param {!Function} implementationClass
- * @package
+ * An interface to interact with browser window object.
+ * Mainly used to mock out read only APIs in test.
+ * See test-helper.js#mockWindowInterface
  */
-export function registerExtendedElement(win, name, implementationClass) {
-  upgradeOrRegisterElement(win, name, implementationClass);
+export class WindowInterface {
+
+  static getDocumentReferrer(win) {
+    return win.document.referrer;
+  }
+
+  static getHostname(win) {
+    return win.location.hostname;
+  }
 }

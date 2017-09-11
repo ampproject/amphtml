@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
 import {AmpExperiment} from '../amp-experiment';
-import * as variant from '../variant';
 import {Services} from '../../../../src/services';
-import * as sinon from 'sinon';
+import * as variant from '../variant';
 
-describe('amp-experiment', () => {
+
+describes.realWin('amp-experiment', {
+  amp: {
+    extensions: ['amp-experiment'],
+  },
+}, env => {
 
   const config = {
     'experiment-1': {
@@ -42,28 +45,21 @@ describe('amp-experiment', () => {
     },
   };
 
-  let sandbox;
-  let win;
+  let win, doc;
   let ampdoc;
   let experiment;
 
   beforeEach(() => {
-    return createIframePromise().then(iframe => {
-      sandbox = sinon.sandbox.create();
-      win = iframe.win;
-      ampdoc = iframe.ampdoc;
-      const el = win.document.createElement('amp-experiment');
-      el.ampdoc_ = ampdoc;
-      experiment = new AmpExperiment(el);
-    });
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
+    const el = doc.createElement('amp-experiment');
+    el.ampdoc_ = ampdoc;
+    experiment = new AmpExperiment(el);
   });
 
   function addConfigElement(opt_elementName, opt_type, opt_textContent) {
-    const child = win.document.createElement(opt_elementName || 'script');
+    const child = doc.createElement(opt_elementName || 'script');
     child.setAttribute('type', opt_type || 'application/json');
     child.textContent = opt_textContent || JSON.stringify(config);
     experiment.element.appendChild(child);
@@ -72,7 +68,7 @@ describe('amp-experiment', () => {
   function expectBodyHasAttributes(attributes) {
     for (const attributeName in attributes) {
       if (attributes.hasOwnProperty(attributeName)) {
-        expect(win.document.body.getAttribute(attributeName))
+        expect(doc.body.getAttribute(attributeName))
             .to.equal(attributes[attributeName]);
       }
     }
@@ -141,7 +137,7 @@ describe('amp-experiment', () => {
         'amp-x-experiment-1': 'variant-a',
         'amp-x-experiment-2': 'variant-d',
       });
-      expect(win.document.body.getAttribute('amp-x-experiment-3'))
+      expect(doc.body.getAttribute('amp-x-experiment-3'))
           .to.equal(null);
     });
   });

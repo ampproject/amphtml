@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview "Unit" test for bind-impl.js. Runs as an integration test
+ *               because it requires building web-worker binary.
+ */
+
 import * as sinon from 'sinon';
 import {AmpEvents} from '../../../../../src/amp-events';
 import {Bind} from '../../bind-impl';
@@ -99,7 +104,7 @@ function waitForEvent(env, name) {
   });
 }
 
-describe.configure().skipSauceLabs().run('Bind', function() {
+describe.configure().ifNewChrome().run('Bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
@@ -109,6 +114,7 @@ describe.configure().skipSauceLabs().run('Bind', function() {
       ampdoc: 'fie',
       runtimeOn: false,
     },
+    mockFetch: false,
   }, env => {
     let bind;
     let container;
@@ -173,6 +179,7 @@ describe.configure().skipSauceLabs().run('Bind', function() {
       ampdoc: 'shadow',
       runtimeOn: false,
     },
+    mockFetch: false,
   }, env => {
     let bind;
     let container;
@@ -199,6 +206,7 @@ describe.configure().skipSauceLabs().run('Bind', function() {
       ampdoc: 'single',
       runtimeOn: false,
     },
+    mockFetch: false,
   }, env => {
     let bind;
     let container;
@@ -360,7 +368,7 @@ describe.configure().skipSauceLabs().run('Bind', function() {
       });
     });
 
-    it('should support parsing exprs in `setStateWithExpression`', () => {
+    it('should support parsing exprs in setStateWithExpression()', () => {
       const element = createElement(env, container, '[text]="onePlusOne"');
       expect(element.textContent).to.equal('');
       const promise = onBindReadyAndSetStateWithExpression(
@@ -370,7 +378,27 @@ describe.configure().skipSauceLabs().run('Bind', function() {
       });
     });
 
-    it('should ignore <amp-state> updates if specified in `setState`', () => {
+    it('should support pushStateWithExpression()', () => {
+      const pushHistorySpy =
+          env.sandbox.spy(bind.historyForTesting(), 'push');
+
+      const element = createElement(env, container, '[text]="foo"');
+      expect(element.textContent).to.equal('');
+      const promise = bind.pushStateWithExpression('{"foo": "bar"}', {});
+      return promise.then(() => {
+        env.flushVsync();
+        expect(element.textContent).to.equal('bar');
+
+        expect(pushHistorySpy).calledOnce;
+        // Pop callback should restore `foo` to original value (null).
+        const onPopCallback = pushHistorySpy.firstCall.args[0];
+        return onPopCallback();
+      }).then(() => {
+        expect(element.textContent).to.equal('null');
+      });
+    });
+
+    it('should ignore <amp-state> updates if specified in setState()', () => {
       const element = createElement(env, container, '[src]="foo"', 'amp-state');
       expect(element.getAttribute('src')).to.be.null;
       const promise = onBindReadyAndSetState(env, bind,

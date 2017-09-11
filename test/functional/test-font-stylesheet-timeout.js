@@ -18,6 +18,7 @@ import {
   fontStylesheetTimeout,
 } from '../../src/font-stylesheet-timeout';
 
+import {toggleExperiment} from '../../src/experiments';
 
 describes.realWin('font-stylesheet-timeout', {
   amp: true,
@@ -45,15 +46,19 @@ describes.realWin('font-stylesheet-timeout', {
     });
   });
 
-  function addLink(opt_content) {
+  function addLink(opt_content, opt_href) {
     const link = document.createElement('link');
-    link.href = 'data:text/css;charset=utf-8,' + (opt_content || '');
+    link.href = opt_href || immediatelyLoadingHref(opt_content);
     link.setAttribute('rel', 'stylesHEet');
     win.document.head.appendChild(link);
     return link;
   }
 
-  it('should not time out for ready doc', () => {
+  function immediatelyLoadingHref(opt_content) {
+    return 'data:text/css;charset=utf-8,' + (opt_content || '');
+  }
+
+  it('should not time out for immediately loading style sheets', () => {
     const link = addLink();
     fontStylesheetTimeout(win);
     clock.tick(10000);
@@ -63,22 +68,10 @@ describes.realWin('font-stylesheet-timeout', {
         'link[rel="stylesheet"]')).to.equal(link);
   });
 
-  it('should not time out for complete doc', () => {
-    readyState = 'complete';
-    const link = addLink();
+  it('should time out if style sheets do not load', () => {
+    const link = addLink(undefined, '/does-not-exist.css');
     fontStylesheetTimeout(win);
-    clock.tick(10000);
-    expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"]')).to.have.length(1);
-    expect(win.document.querySelector(
-        'link[rel="stylesheet"]')).to.equal(link);
-  });
-
-  it('should time out if doc is not interactive', () => {
-    readyState = 'loading';
-    const link = addLink();
-    fontStylesheetTimeout(win);
-    clock.tick(999);
+    clock.tick(499);
     expect(win.document.querySelectorAll(
         'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(0);
     clock.tick(1);
@@ -89,6 +82,7 @@ describes.realWin('font-stylesheet-timeout', {
     expect(after).to.not.equal(link);
     expect(after.href).to.equal(link.href);
     expect(after.media).to.equal('not-matching');
+    after.href = immediatelyLoadingHref('/* make-it-load */');
     return new Promise(resolve => {
       after.addEventListener('load', () => {
         resolve();
@@ -99,12 +93,11 @@ describes.realWin('font-stylesheet-timeout', {
   });
 
   it('should time out from response start', () => {
-    responseStart = 500;
-    clock.tick(1000);
-    readyState = 'loading';
-    const link = addLink();
+    responseStart = 200;
+    clock.tick(500);
+    const link = addLink(undefined, '/does-not-exist.css');
     fontStylesheetTimeout(win);
-    clock.tick(499);
+    clock.tick(199);
     expect(win.document.querySelectorAll(
         'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(0);
     clock.tick(1);
@@ -116,12 +109,13 @@ describes.realWin('font-stylesheet-timeout', {
         'link[rel="stylesheet"]').href).to.equal(link.href);
   });
 
-  it('should time out multiple style sheets', () => {
+  it('should time out multiple style sheets and ignore CDN URLs', () => {
     responseStart = 500;
     clock.tick(10000);
-    readyState = 'loading';
-    const link0 = addLink(1);
-    const link1 = addLink(2);
+    const link0 = addLink(undefined, '/does-not-exist.css');
+    const link1 = addLink(undefined, '/does-not-exist.css');
+    const cdnLink = addLink(undefined,
+        'https://cdn.ampproject.org/does-not-exist.css');
     fontStylesheetTimeout(win);
     expect(win.document.querySelectorAll(
         'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(0);
@@ -134,5 +128,67 @@ describes.realWin('font-stylesheet-timeout', {
         'link[rel="stylesheet"]')[0].href).to.equal(link0.href);
     expect(win.document.querySelectorAll(
         'link[rel="stylesheet"]')[1].href).to.equal(link1.href);
+    expect(win.document.querySelectorAll(
+        'link[rel="stylesheet"]')[2]).to.equal(cdnLink);
+  });
+
+  describe('font-display: swap', () => {
+    let fonts;
+    beforeEach(() => {
+      fonts = [
+        {
+          status: 'loaded',
+          display: 'auto',
+        },
+        {
+          status: 'loading',
+          display: 'auto',
+        },
+        {
+          status: 'loading',
+          display: 'auto',
+        },
+        {
+          status: 'loading',
+          display: 'optional',
+        },
+        null,
+      ];
+      let index = 0;
+      Object.defineProperty(win.document, 'fonts', {
+        get: () => {
+          return {
+            values: () => {
+              return {next: () => {
+                return {value: fonts[index++]};
+              }};
+            },
+          };
+        },
+      });
+      toggleExperiment(win, 'font-display-swap', true);
+    });
+
+    it('should not do anything with experiment off', () => {
+      toggleExperiment(win, 'font-display-swap', false);
+      fontStylesheetTimeout(win);
+      expect(fonts[1].display).to.equal('auto');
+    });
+
+    it('should not change loaded fonts', () => {
+      fontStylesheetTimeout(win);
+      expect(fonts[0].display).to.equal('auto');
+    });
+
+    it('should change loading fonts to swap', () => {
+      fontStylesheetTimeout(win);
+      expect(fonts[1].display).to.equal('swap');
+      expect(fonts[2].display).to.equal('swap');
+    });
+
+    it('should not override non-default values', () => {
+      fontStylesheetTimeout(win);
+      expect(fonts[3].display).to.equal('optional');
+    });
   });
 });

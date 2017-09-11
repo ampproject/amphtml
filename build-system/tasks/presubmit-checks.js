@@ -196,6 +196,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/amp.js',
+      'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/performance-impl.js',
     ],
@@ -240,7 +241,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
-      'src/service/viewport-impl.js',
+      'src/service/viewport/viewport-impl.js',
     ],
   },
   'installVsyncService': {
@@ -248,7 +249,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/runtime.js',
       'src/service/resources-impl.js',
-      'src/service/viewport-impl.js',
+      'src/service/viewport/viewport-impl.js',
       'src/service/vsync-impl.js',
     ],
   },
@@ -270,10 +271,8 @@ var forbiddenTerms = {
   'installPositionObserverServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/service/position-observer-impl.js',
-      // TODO(@zhouyx, #9213) Remove this item.
-      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
-      'extensions/amp-animation/0.1/scrollbound-scene.js',
+      'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-position-observer/0.1/amp-position-observer.js',
       'src/service/video-manager-impl.js',
     ],
   },
@@ -307,7 +306,7 @@ var forbiddenTerms = {
     whitelist: [
       // viewer-impl.sendMessage
       'src/service/viewer-impl.js',
-      'src/service/viewport-impl.js',
+      'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
@@ -365,6 +364,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/cid-impl.js',
+      'src/service/cid-api.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -374,6 +374,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/cid-impl.js',
+      'src/service/cid-api.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -455,6 +456,7 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js',
       'src/service/viewer-impl.js',
       'src/error.js',
+      'src/window-interface.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
@@ -556,6 +558,7 @@ var forbiddenTerms = {
       'src/service-worker/core.js',
       'src/worker-error-reporting.js',
       'tools/experiments/experiments.js',
+      'build-system/amp4test.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -698,7 +701,7 @@ var forbiddenTermsSrcInclusive = {
     'obscure bugs if you attempt to match a descendant of a descendant (ie ' +
     '"div div"). Instead, use the scopedQuerySelector helper in dom.js',
   },
-  'loadExtension': {
+  'preloadExtension': {
     message: bannedTermsHelpString,
     whitelist: [
       'src/element-stub.js',
@@ -725,6 +728,8 @@ var forbiddenTermsSrcInclusive = {
       'src/service/extensions-impl.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-auto-ads/0.1/amp-auto-ads.js',
+      'extensions/amp-auto-ads/0.1/anchor-ad-strategy.js',
     ],
   },
   'reject\\(\\)': {

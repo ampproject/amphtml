@@ -39,43 +39,46 @@ import {
 '../extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config';
 import {getMode} from '../src/mode';
 import {map} from '../src/utils/object';
+/**
+ * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
+ * If an ad network, {@code ${NETWORK}}, is registered in this object, then the
+ * {@code <amp-ad type="${NETWORK}">} implementation will look up its predicate
+ * here. If there is a predicate and it and returns {@code true}, then
+ * {@code amp-ad} will attempt to render the ad via the A4A pathway (fetch
+ * ad creative via early XHR CORS request; verify that it is validated AMP;
+ * and then render directly in the host page by splicing into the host DOM).
+ * Otherwise, it will attempt to render the ad via the existing "3p iframe"
+ * pathway (delay load into a cross-domain iframe).
+ *
+ * @type {!Object<!string, !function(!Window, !Element): boolean>}
+ */
+let a4aRegistry;
 
 /**
  * Returns the a4a registry map
  */
 export function getA4ARegistery() {
-  /**
-   * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
-   * If an ad network, {@code ${NETWORK}}, is registered in this object, then the
-   * {@code <amp-ad type="${NETWORK}">} implementation will look up its predicate
-   * here. If there is a predicate and it and returns {@code true}, then
-   * {@code amp-ad} will attempt to render the ad via the A4A pathway (fetch
-   * ad creative via early XHR CORS request; verify that it is validated AMP;
-   * and then render directly in the host page by splicing into the host DOM).
-   * Otherwise, it will attempt to render the ad via the existing "3p iframe"
-   * pathway (delay load into a cross-domain iframe).
-   *
-   * @type {!Object<!string, !function(!Window, !Element): boolean>}
-   */
-  const a4aRegistry = map({
-    'adsense': adsenseIsA4AEnabled,
-    'doubleclick': doubleclickIsA4AEnabled,
-    'triplelift': tripleliftIsA4AEnabled,
-    'cloudflare': cloudflareIsA4AEnabled,
-    'gmossp': gmosspIsA4AEnabled,
-    // TODO: Add new ad network implementation "is enabled" functions here.  Note:
-    // if you add a function here that requires a new "import", above, you'll
-    // probably also need to add a whitelist exception to
-    // build-system/dep-check-config.js in the "filesMatching: 'ads/**/*.js' rule.
-  });
+  if (!a4aRegistry) {
+    a4aRegistry = map({
+      'adsense': adsenseIsA4AEnabled,
+      'doubleclick': doubleclickIsA4AEnabled,
+      'triplelift': tripleliftIsA4AEnabled,
+      'cloudflare': cloudflareIsA4AEnabled,
+      'gmossp': gmosspIsA4AEnabled,
+      // TODO: Add new ad network implementation "is enabled" functions here.  Note:
+      // if you add a function here that requires a new "import", above, you'll
+      // probably also need to add a whitelist exception to
+      // build-system/dep-check-config.js in the "filesMatching: 'ads/**/*.js' rule.
+    });
 
-  // Note: the 'fake' ad network implementation is only for local testing.
-  // Normally, ad networks should add their *IsA4AEnabled callback directly
-  // to the a4aRegistry, above.  Ad network implementations should NOT use
-  // getMode() in this file.  If they need to check getMode() state, they
-  // should do so inside their *IsA4AEnabled callback.
-  if (getMode().localDev || getMode().test) {
-    a4aRegistry['fake'] = fakeIsA4AEnabled;
+    // Note: the 'fake' ad network implementation is only for local testing.
+    // Normally, ad networks should add their *IsA4AEnabled callback directly
+    // to the a4aRegistry, above.  Ad network implementations should NOT use
+    // getMode() in this file.  If they need to check getMode() state, they
+    // should do so inside their *IsA4AEnabled callback.
+    if (getMode().localDev || getMode().test) {
+      a4aRegistry['fake'] = fakeIsA4AEnabled;
+    }
   }
 
   return a4aRegistry;

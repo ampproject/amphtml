@@ -28,6 +28,7 @@ import {dev} from '../log';
 import {getMode} from '../mode';
 import {Services} from '../services';
 import {parseUrl, parseUrlWithA} from '../url';
+import {toWin} from '../types';
 
 const TAG = 'clickhandler';
 
@@ -64,7 +65,7 @@ export class ClickHandler {
     /** @private @const {!Document|!ShadowRoot} */
     this.rootNode_ = opt_rootNode || ampdoc.getRootNode();
 
-    /** @private @const {!./viewport-impl.Viewport} */
+    /** @private @const {!./viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./viewer-impl.Viewer} */
@@ -156,7 +157,7 @@ export class ClickHandler {
    */
   handleCustomProtocolClick_(e, target, tgtLoc) {
     /** @const {!Window} */
-    const win = target.ownerDocument.defaultView;
+    const win = toWin(target.ownerDocument.defaultView);
     // On Safari iOS, custom protocol links will fail to open apps when the
     // document is iframed - in order to go around this, we set the top.location
     // to the custom protocol href.
