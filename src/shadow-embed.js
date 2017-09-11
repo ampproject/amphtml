@@ -18,7 +18,6 @@ import {Services} from './services';
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
 import {dev} from './log';
 import {
-  childElementsByTag,
   closestNode,
   escapeCssSelectorIdent,
   iterateCursor,
@@ -71,8 +70,10 @@ export function createShadowRoot(hostElement) {
       Object.defineProperty(shadowRoot, 'styleSheets', {
         get: function() {
           const items = [];
-          iterateCursor(childElementsByTag(shadowRoot, 'style'), child => {
-            items.push(child.sheet);
+          iterateCursor(shadowRoot.children, child => {
+            if (child.tagName === 'STYLE') {
+              items.push(child.sheet);
+            }
           });
           return items;
         },
