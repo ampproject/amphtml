@@ -17,47 +17,50 @@ var BBPromise = require('bluebird');
 var argv = require('minimist')(process.argv.slice(2));
 var assert = require('assert');
 var child_process = require('child_process');
-var config = require('../config');
 var extend = require('util')._extend;
-var fs = require('fs-extra');
 var git = require('gulp-git');
 var gulp = require('gulp-help')(require('gulp'));
 var request = BBPromise.promisify(require('request'));
 var util = require('gulp-util');
 
-var GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
+const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 var exec = BBPromise.promisify(child_process.exec);
 var gitExec = BBPromise.promisify(git.exec);
 
-var isDryrun = argv.dryrun;
 var verbose = (argv.verbose || argv.v);
 
-const issuesOpt = {
+const issuesOptions = {
   url: 'https://api.github.com/repos/ampproject/amphtml/issues',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
-    'Accept': 'application/vnd.github.v3+json'
+    'Accept': 'application/vnd.github.v3+json',
+  },
+  qs: {
+    access_token: GITHUB_ACCESS_TOKEN
   },
 };
 
-const optionsMilestone = {
+const milestoneOptions = {
   url: 'https://api.github.com/repos/ampproject/amphtml/milestones',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
-    'Accept': 'application/vnd.github.v3+json'
+    'Accept': 'application/vnd.github.v3+json',
+  },
+  qs: {
+    access_token: GITHUB_ACCESS_TOKEN
   },
 };
 
-if (GITHUB_ACCESS_TOKEN) {
-  issuesOpt.qs = {
-    access_token: GITHUB_ACCESS_TOKEN
-  }
-  optionsMilestone.qs = {
-    access_token: GITHUB_ACCESS_TOKEN
-  }
-}
+// 4 is the number for Milestone 'Backlog Bugs'
+const MILESTONE_BACKLOG_BUGS = 4;
+// By default we will assign 'Pending Triage' milestone, number 20
+const MILESTONE_PENDING_TRIAGE = 20;
+// 23 is the number for Milestone 'New FRs'
+const MILESTONE_NEW_FRS = 23;
+// 12 is the number for Milestone 'Docs Updates'
+const MILESTONE_DOCS_UPDATES = 12;
 
-
+// We start processing the issues by checking token first
 function processIssues() {
   if (!GITHUB_ACCESS_TOKEN) {
     util.log(util.colors.red('You have not set the ' +
@@ -68,40 +71,57 @@ function processIssues() {
         'need `public_repo` scope.'));
     return;
   }
-  return getGitMetadata();
-}
-
-function getGitMetadata() {
-  return getIssues().then(function() {
+  return updateGitHubIssues().then(function() {
     util.log(util.colors.blue('automation applied'));
   })
 }
 
+/**
+ * Fetches issues?page=${opt_page}
+ *
+ * @param {number=} opt_page
+ * @return {!Promise<!Array<}
+ */
+function getIssues(opt_page) {
+  var options = extend({}, issuesOptions);
+  options.qs = {
+    state: 'open',
+    page: opt_page,
+    per_page: 100,
+    access_token: GITHUB_ACCESS_TOKEN,
+  };
+  return request(options).then(res => {
+    const issues = JSON.parse(res.body);
+    assert(Array.isArray(issues), `issues must be an array.`);
+    return issues;
+  });
+}
 /**
  * Function goes through all the gitHub issues,
  * gets all the Labels we are interested in,
  * depending if missing milestone or label,
  * tasks applied as per design go/ampgithubautomation
  */
-function getIssues(){
+function updateGitHubIssues(){
   var promise = Promise.resolve();
-  var options = extend({}, issuesOpt);
-  options.qs = {
-    state: 'open',
-    per_page: 1000,
-    access_token: GITHUB_ACCESS_TOKEN,
-  };
-  return request(options).then(res => {
-    const issues = JSON.parse(res.body);
-    issues.forEach(function(issue) {
+  return BBPromise.all([
+    getIssues(1),
+    getIssues(2),
+    getIssues(3),
+    getIssues(4),
+    getIssues(5),
+    ])
+  .then(requests => [].concat.apply([], requests))
+  .then(issues => {
+    const allIssues = issues;
+    allIssues.forEach(function(issue) {
       var labels = issue.labels;
       var issueType;
       var milestone = issue.milestone;
       var milestoneTitle;
       var milestoneState;
       var hasPriority = false;
-      // By default we will assign 'Pending Triage' milestone, number 20
-      var issueNewMilestone = 20;
+      var issueNewMilestone = MILESTONE_PENDING_TRIAGE;
 
       // Get the title and state of the milestone
       if (milestone) {
@@ -112,7 +132,8 @@ function getIssues(){
       labels.forEach(function(label) {
         if (label) {
           // Check if the issues has type
-          if (label.name.startsWith('Type') || label.name.startsWith('Related')) {
+          if (label.name.startsWith('Type') ||
+            label.name.startsWith('Related')) {
             issueType = label.name;
           }
           // Check if the issues has Priority
@@ -129,8 +150,7 @@ function getIssues(){
         if (milestone) {
           if (milestoneTitle.startsWith('Sprint') &&
             milestoneState === 'closed') {
-            // 4 is the number for Milestone 'Backlog Bugs'
-            issueNewMilestone = 4;
+            issueNewMilestone = MILESTONE_BACKLOG_BUGS;
             updates.push(applyMilestone(issue, issueNewMilestone));
           }
         }
@@ -138,31 +158,26 @@ function getIssues(){
         if (issueType != null) {
           if (milestoneTitle === 'Pending Triage' || milestone == null) {
             if (issueType === 'Type: Feature Request') {
-              // 23 is the number for Milestone 'New FRs'
-              issueNewMilestone = 23;
+              issueNewMilestone = MILESTONE_NEW_FRS;
               updates.push(applyMilestone(issue, issueNewMilestone));
             }
             else if (issueType === 'Related to: Documentation' ||
-              issueType === 'Type: Design Review' ||
-              issueType === 'Type: Weekly Status') {
-              // 12 is the number for Milestone 'Docs Updates'
-              issueNewMilestone = 12;
+                issueType === 'Type: Design Review' ||
+                issueType === 'Type: Weekly Status') {
+              issueNewMilestone = MILESTONE_DOCS_UPDATES;
               updates.push(applyMilestone(issue, issueNewMilestone));
             }
             else if (issueType === 'Type: Bug' ||
-              issueType === 'Related to: Flaky Tests') {
-              // 4 is the number for Milestone 'Backlog Bugs'
-              issueNewMilestone = 4;
+                issueType === 'Related to: Flaky Tests') {
+              issueNewMilestone = MILESTONE_BACKLOG_BUGS;
               updates.push(applyMilestone(issue, issueNewMilestone));
             }
             else if (milestone == null) {
-              // 20 is the number for Milestone 'Pending Triage'
               updates.push(applyMilestone(issue, issueNewMilestone));
             }
           }
         }
         else if (milestone == null) {
-          // 20 is the number for Milestone 'Pending Triage'
           updates.push(applyMilestone(issue, issueNewMilestone));
         }
         else if (milestoneTitle === 'Prioritized FRs' ||
@@ -182,7 +197,6 @@ function getIssues(){
         return Promise.all(updates);
       });
     });
-    assert(Array.isArray(issues), `issues must be an array.`);
     return issues;
   });
 }
@@ -193,15 +207,15 @@ function getIssues(){
  * @return {!Promise<*>}
  */
 function applyMilestone(issue, milestoneNumber) {
-  var options = extend({}, optionsMilestone);
+  var options = extend({}, milestoneOptions);
   options.qs = {
     state: 'open',
-    per_page: 1000,
+    per_page: 100,
     access_token: GITHUB_ACCESS_TOKEN,
   };
 
   issue.milestone = milestoneNumber;
-  return githubRequest(
+  return createGithubRequest(
       '/issues/' + issue.number,
       'PATCH',
       issue.milestone, 'milestone').then(function() {
@@ -218,13 +232,13 @@ function applyMilestone(issue, milestoneNumber) {
  * @return {!Promise<*>}
  */
 function applyLabel(issue, label) {
-  var options = extend({}, optionsMilestone);
+  var options = extend({}, milestoneOptions);
   options.qs = {
     state: 'open',
-    per_page: 1000,
+    per_page: 100,
     access_token: GITHUB_ACCESS_TOKEN,
   };
-  return githubRequest(
+  return createGithubRequest(
       '/issues/' + issue.number + '/labels',
       'POST',
       [label], 'label').then(function() {
@@ -242,13 +256,13 @@ function applyLabel(issue, label) {
  * @param {string} typeRequest
  * @return {!Promise<*>}
  */
-function githubRequest(path, opt_method, opt_data, typeRequest) {
+function createGithubRequest(path, opt_method, opt_data, typeRequest) {
   var options = {
     url: 'https://api.github.com/repos/ampproject/amphtml' + path,
     body: {},
     headers: {
       'User-Agent': 'amp-changelog-gulp-task',
-      'Accept': 'application/vnd.github.v3+json'
+      'Accept': 'application/vnd.github.v3+json',
     },
     qs: {
       access_token: GITHUB_ACCESS_TOKEN
@@ -262,13 +276,15 @@ function githubRequest(path, opt_method, opt_data, typeRequest) {
     if (typeRequest === 'milestone') {
       options.body['milestone'] = opt_data;
     }
-    else options.body = opt_data;
+    else {
+      options.body = opt_data;
+    }
   }
   return request(options)
 }
 
 gulp.task('process-github-issues', 'Get issues data', processIssues, {
   options: {
-    dryrun: '  Generate process but dont push it out',
+    dryrun: '  Generate process but don\'t push it out',
   }
 });
