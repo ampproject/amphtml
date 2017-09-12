@@ -27,14 +27,9 @@ import {isExperimentOn} from './experiments';
  * even though all they do is reference fonts.
  *
  * For that reasons this function identifies (or rather infers) font
- * stylesheets that have not downloaded within 1 second of the page
+ * stylesheets that have not downloaded within timeout period of the page
  * response starting and reinserts equivalent link tags  dynamically. This
  * removes their page-render-blocking nature and lets the doc render.
- *
- * 1 second was picked, because the font-stylesheets are typically
- * tiny. If a connection wasn't able to deliver them within 1s
- * of page load start, then it is unlikely that it will be able
- * to download the font itself within 3s.
  *
  * @param {!Window} win
  */
