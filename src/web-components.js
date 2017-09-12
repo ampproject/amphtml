@@ -52,33 +52,19 @@ export function isShadowDomSupported() {
  * @return {boolean}
  */
 export function isShadowCssSupported() {
-  if (!isShadowDomSupported()) {
-    return false;
-  }
-
-  // DO NOT SUBMIT
-  //TODO: Find a better way to test CSS encapsulation
-  if (isNative(Element.prototype.attachShadow) ||
-    isNative(Element.prototype.createShadowRoot)) {
-    return true;
-  }
-
-  // DO NOT SUBMIT - this console.log should be removed after finishing testing purposes.
-  console.log(`.attachShadow() or .createShadowRoot() Do not exist, or are not native functions.
-  ShadowCSS is not supported.`);
-  return false;
+  return isShadowDomSupported() && (
+    isNative(Element.prototype.attachShadow) ||
+    isNative(Element.prototype.createShadowRoot)
+  );
 }
 
 /**
  * Returns `true` if the passed function is native to the browser, and is not polyfilled
- * @param {function|undefined} func - a function that is attatched to a JS object.
+ * @param {!function()|undefined} func A function that is attatched to a JS object.
  * @return {boolean}
  */
 function isNative(func) {
-  if (!func) {
-    return false;
-  }
-  return func.toString().indexOf('[native code]') != -1;
+  return func && func.toString().includes('[native code]');
 }
 
 /**

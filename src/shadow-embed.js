@@ -25,8 +25,8 @@ import {
 } from './dom';
 import {installCssTransformer} from './style-installer';
 import {
-  isShadowDomSupported,
   isShadowCssSupported,
+  isShadowDomSupported,
   getShadowDomSupportedVersion,
   ShadowDomVersion,
 } from './web-components';
@@ -64,25 +64,21 @@ export function createShadowRoot(hostElement) {
     return existingRoot;
   }
 
-  // Define our shadowRoot object to be returned
   let shadowRoot;
-
-  // Native support.
   const shadowDomSupported = getShadowDomSupportedVersion();
   if (shadowDomSupported == ShadowDomVersion.V1) {
     shadowRoot = hostElement.attachShadow({mode: 'open'});
   } else if (shadowDomSupported == ShadowDomVersion.V0) {
     shadowRoot = hostElement.createShadowRoot();
   } else {
-    // Polyfill.
     shadowRoot = createShadowRootPolyfill(hostElement);
   }
 
-  // Ensure that Shadow CSS is supported, and add an id if not
-  const randomId = Math.floor(Math.random() * 10000);
-  const rootId = `i-amphtml-sd-${randomId}`;
-  shadowRoot.id = rootId;
-  shadowRoot.host.classList.add(rootId);
+  if (isShadowCssSupported()) {
+    const rootId = `i-amphtml-sd-${Math.floor(Math.random() * 10000)}`;
+    shadowRoot.id = rootId;
+    shadowRoot.host.classList.add(rootId);
+  }
 
   return shadowRoot;
 }
@@ -204,8 +200,7 @@ export function importShadowBody(shadowRoot, body, deep) {
     }
   }
   setStyle(resultBody, 'position', 'relative');
-  // DO NOT SUBMIT: Find a solution, this is wrong place. Fix the problem above, the style elements need to be placed as the first child
-  //    For example: getRootNode().firstChild , should return a style element
+  shadowRoot.appendChild(resultBody);
   Object.defineProperty(shadowRoot, 'body', {value: resultBody});
   return resultBody;
 }

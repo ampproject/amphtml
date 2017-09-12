@@ -213,12 +213,16 @@ class AmpViewer {
       log('AMP LOADED:', AMP);
     });
 
-    this.shadowDomReadyPromise_ =
-    Element.prototype.attachShadow || Element.prototype.createShadowRoot ?
-    Promise.resolve() :   // Already there.
-    new Promise(resolve => {   // Wait for polyfill to arrive
-      this.win.addEventListener('WebComponentsReady', resolve);
-    });
+    const isShadowDomSupported = (
+      Element.prototype.attachShadow ||
+      Element.prototype.createShadowRoot
+    );
+
+    this.shadowDomReadyPromise_ = isShadowDomSupported ?
+        Promise.resolve() :
+        new Promise(resolve => {
+          this.win.addEventListener('WebComponentsReady', resolve);
+        });
 
     /** @private @const {string} */
     this.baseUrl_ = null;
@@ -263,14 +267,16 @@ class AmpViewer {
 
     this.container.appendChild(this.host_);
 
-    Promise.all([this.ampReadyPromise_, this.shadowDomReadyPromise_])
-        .then(response => {
-          const AMP = response[0];
-          this.amp_ = AMP.attachShadowDoc(this.host_, doc, url, {});
-          this.win.document.title = this.amp_.title || '';
-          this.amp_.onMessage(this.onMessage_.bind(this));
-          this.amp_.setVisibilityState('visible');
-        });
+    return Promise.all([
+      this.ampReadyPromise_,
+      this.shadowDomReadyPromise_,
+    ]).then(results => {
+      const AMP = results[0];
+      this.amp_ = AMP.attachShadowDoc(this.host_, doc, url, {});
+      this.win.document.title = this.amp_.title || '';
+      this.amp_.onMessage(this.onMessage_.bind(this));
+      this.amp_.setVisibilityState('visible');
+    });
   }
 
   /**
@@ -295,15 +301,17 @@ class AmpViewer {
 
     this.container.appendChild(this.host_);
 
-    return Promise.all([this.ampReadyPromise_, this.shadowDomReadyPromise_])
-        .then(response => {
-          const AMP = response[0];
-          this.amp_ = AMP.attachShadowDocAsStream(this.host_, url, {});
-          this.win.document.title = this.amp_.title || '';
-          this.amp_.onMessage(this.onMessage_.bind(this));
-          this.amp_.setVisibilityState('visible');
-          return this.amp_;
-        });
+    return Promise.all([
+      this.ampReadyPromise_,
+      this.shadowDomReadyPromise_,
+    ]).then(results => {
+      const AMP = results[0];
+      this.amp_ = AMP.attachShadowDocAsStream(this.host_, url, {});
+      this.win.document.title = this.amp_.title || '';
+      this.amp_.onMessage(this.onMessage_.bind(this));
+      this.amp_.setVisibilityState('visible');
+      return this.amp_;
+    });
   }
 
   /**
