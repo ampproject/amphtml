@@ -85,7 +85,7 @@ export function createShadowRoot(hostElement) {
     shadowRoot = createShadowRootPolyfill(hostElement);
   }
 
-  if (isShadowCssSupported()) {
+  if (!isShadowCssSupported()) {
     const rootId = `i-amphtml-sd-${Math.floor(Math.random() * 10000)}`;
     shadowRoot.id = rootId;
     shadowRoot.host.classList.add(rootId);
