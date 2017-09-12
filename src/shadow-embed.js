@@ -68,6 +68,17 @@ export function createShadowRoot(hostElement) {
   const shadowDomSupported = getShadowDomSupportedVersion();
   if (shadowDomSupported == ShadowDomVersion.V1) {
     shadowRoot = hostElement.attachShadow({mode: 'open'});
+    if (!shadowRoot.styleSheets) {
+      Object.defineProperty(shadowRoot, 'styleSheets', {
+        get: function() {
+          const items = [];
+          iterateCursor(childElementsByTag(shadowRoot, 'style'), child => {
+            items.push(child.sheet);
+          });
+          return items;
+        },
+      });
+    }
   } else if (shadowDomSupported == ShadowDomVersion.V0) {
     shadowRoot = hostElement.createShadowRoot();
   } else {
