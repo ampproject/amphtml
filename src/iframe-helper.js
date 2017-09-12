@@ -214,7 +214,9 @@ function registerGlobalListenerIfNeeded(parentWin) {
       return;
     }
 
-    let listeners = listenForEvents[data['type']];
+    // SafeFrame's postmessaging protocol specifies the message type under
+    // parameter 's'.
+    let listeners = listenForEvents[data['type'] || data['s']];
     if (!listeners) {
       return;
     }

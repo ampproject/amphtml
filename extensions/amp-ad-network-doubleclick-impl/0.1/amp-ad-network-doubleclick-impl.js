@@ -394,7 +394,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getBlockParameters_() {
     dev().assert(this.initialSize_);
     dev().assert(this.jsonTargeting_);
-    let sizeStr = `${this.initialSize_.width}x${this.initialSize_.height}`;
+    let sizeStr = this.isFluid
+        ? '320x50'
+        : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
@@ -412,7 +414,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           multiSizeDataStr,
           this.initialSize_.width,
           this.initialSize_.height,
-          multiSizeValidation == 'true');
+          multiSizeValidation == 'true',
+          this.isFluid);
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
           .join('|');
@@ -437,6 +440,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.jsonTargeting_['categoryExclusions']) || null),
       'ifi': this.ifi_,
       rc,
+      'fluid': this.isFluid ? 'height' : null,
     }, googleBlockParameters(this));
   }
 
@@ -450,7 +454,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('data-override-height')) ||
       Number(this.element.getAttribute('height'));
-    this.initialSize_ = width && height
+    this.initialSize_ = this.isFluid ? {width: 0, height: 0} : width && height
         ? {width, height}
         // width/height could be 'auto' in which case we fallback to measured.
         : this.getIntersectionElementLayoutBox();

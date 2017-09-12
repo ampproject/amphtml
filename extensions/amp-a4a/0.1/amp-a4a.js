@@ -31,7 +31,7 @@ import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
 } from '../../../src/friendly-iframe-embed';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -39,7 +39,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {getBinaryType, isExperimentOn} from '../../../src/experiments';
-import {setStyle} from '../../../src/style';
+import {setStyle, setStyles} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {handleClick} from '../../../ads/alp/handler';
@@ -55,6 +55,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {listenFor, postMessage} from '../../../src/iframe-helper';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -311,6 +312,9 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.releaseType_ = getBinaryTypeNumericalCode(getBinaryType(this.win)) ||
         '-1';
+
+    /** @protected {boolean} */
+    this.isFluid = false;
   }
 
   /** @override */
@@ -324,7 +328,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    return isLayoutSizeDefined(layout) || layout == Layout.FLUID;
   }
 
   /** @override */
@@ -334,10 +338,12 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.creativeSize_ = {
-      width: this.element.getAttribute('width'),
-      height: this.element.getAttribute('height'),
-    };
+    this.isFluid = this.element.getAttribute('height') == 'fluid';
+    this.creativeSize_ = this.isFluid
+        ? {width: 0, height: 0} : {
+          width: this.element.getAttribute('width'),
+          height: this.element.getAttribute('height'),
+        };
     this.protectedEmitLifecycleEvent_ = protectFunctionWrapper(
         this.emitLifecycleEvent, this,
         (err, varArgs) => {
@@ -492,7 +498,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   shouldInitializePromiseChain_() {
     const slotRect = this.getIntersectionElementLayoutBox();
-    if (slotRect.height == 0 || slotRect.width == 0) {
+    if (!this.isFluid && (slotRect.height == 0 || slotRect.width == 0)) {
       dev().fine(
           TAG, 'onLayoutMeasure canceled due height/width 0', this.element);
       return false;
@@ -621,7 +627,10 @@ export class AmpA4A extends AMP.BaseElement {
           }
           const safeframeVersionHeader =
             fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
-          if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
+          // For Fluid ads, we can't change the safeframe version because the ad
+          // request is made with DEFAULT_SAFEFRAME_VERSION, which is the
+          // version that it will expect the host container to have.
+          if (!this.isFluid && /^[0-9-]+$/.test(safeframeVersionHeader) &&
               safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
             this.safeframeVersion_ = safeframeVersionHeader;
             this.preconnect.preload(this.getSafeframePath_());
@@ -662,11 +671,24 @@ export class AmpA4A extends AMP.BaseElement {
           }
           const {bytes, headers} = responseParts;
           const size = this.extractSize(responseParts.headers);
+          // If a size header is returned, then we know we're not Fluid, unless
+          // the dimensions are 0x0.
+          // TODO(levitzky) Once Fluid responses no longer contain the creative
+          // size header at all, we can remove the height/width check from the
+          // condition below.
+          if (size && size.height != 0 && size.width != 0) {
+            this.isFluid = false;
+          }
           this.creativeSize_ = size || this.creativeSize_;
-          if (this.experimentalNonAmpCreativeRenderMethod_ !=
-              XORIGIN_MODE.CLIENT_CACHE &&
+          if ((this.isFluid || this.experimentalNonAmpCreativeRenderMethod_ !=
+              XORIGIN_MODE.CLIENT_CACHE) &&
               bytes) {
             this.creativeBody_ = bytes;
+          }
+          if (this.isFluid) {
+            // Since Fluid ads always render in a cross-domain frame, no need to
+            // perform signature verification.
+            return Promise.resolve(bytes);
           }
           this.protectedEmitLifecycleEvent_('adResponseValidateStart');
           return this.keysetPromise_
@@ -708,10 +730,7 @@ export class AmpA4A extends AMP.BaseElement {
           // Need to know if creative was verified as part of render outside
           // viewport but cannot wait on promise.  Sadly, need a state a
           // variable.
-          this.isVerifiedAmpCreative_ = !!creative;
-          // TODO(levitzky) If creative comes back null, we should consider re-
-          // fetching the signing server public keys and try the verification
-          // step again.
+          this.isVerifiedAmpCreative_ = !this.isFluid && !!creative;
           return creative && utf8Decode(creative);
         })
         // This block returns CreativeMetaDataDef iff the creative was verified
@@ -881,6 +900,11 @@ export class AmpA4A extends AMP.BaseElement {
         this.protectedEmitLifecycleEvent_('iframeAlreadyExists');
         return Promise.resolve();
       }
+      if (this.isFluid) {
+        return this.creativeBody_
+            ? this.renderViaNameAttrOfXOriginIframe_(this.creativeBody_)
+            : Promise.resolve(this.forceCollapse());
+      }
       if (!creativeMetaData) {
         // Non-AMP creative case, will verify ad url existence.
         return this.renderNonAmpCreative_();
@@ -963,6 +987,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
         Services.platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
+    this.isFluid = false;
   }
 
   /**
@@ -1310,13 +1335,49 @@ export class AmpA4A extends AMP.BaseElement {
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe', /** @type {!JsonObject} */ (
         Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES)));
+    if (this.isFluid) {
+      listenFor(this.iframe, 'creative_geometry_update', data => {
+        // The first creative_geometry_update message will contain bad
+        // geometric data, as it will have been computed using the initial,
+        // incorrect, iframe style. We use this first message as a
+        // triggering point to restyle the iframe, which will in turn cause
+        // safeframe to send another creative_geometry_update message, this
+        // time containing the correct information.
+        const styleString = this.iframe.getAttribute('style');
+        if (/width: 0px/.test(styleString) &&
+            /height: 0px/.test(styleString)) {
+          setStyles(this.iframe, {
+            width: '100%',
+            height: '100%',
+            position: 'relative',
+          });
+        } else {
+          const payload = JSON.parse(data['p']);
+          this.attemptChangeSize(payload.height, payload.width).catch(
+              () => this.forceCollapse());
+        }
+      }, /* opt_is3p */ true);
+    }
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
     // Iframe is appended to element as part of xorigin frame handler init.
     // Executive onCreativeRender after init to ensure it can get reference
     // to frame but prior to load to allow for earlier access.
     const frameLoadPromise =
-        this.xOriginIframeHandler_.init(this.iframe, /* opt_isA4A */ true);
+        this.xOriginIframeHandler_.init(this.iframe, /* opt_isA4A */ true)
+        .then(() => {
+          if (this.isFluid) {
+            // If this is a Fluid slot, we must send an initial message to
+            // SafeFrame.
+            postMessage(
+                /** @type {!Element} */ (this.iframe),
+                'connect-message',
+                /** @type {!JsonObject} */
+                ({message: 'connect', c: 'sfchannel1'}),
+                'https://tpc.googlesyndication.com');
+          }
+          return Promise.resolve();
+        });
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(TAG, this.element.getAttribute('type'),
           'Error executing onCreativeRender', err);
@@ -1361,7 +1422,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaNameAttrOfXOriginIframe_(creativeBody) {
-    const method = this.experimentalNonAmpCreativeRenderMethod_;
+    const method = (this.isFluid && XORIGIN_MODE.SAFEFRAME) ||
+        this.experimentalNonAmpCreativeRenderMethod_;
     dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
         method == XORIGIN_MODE.NAMEFRAME,
         'Unrecognized A4A cross-domain rendering mode: %s', method);
@@ -1394,6 +1456,45 @@ export class AmpA4A extends AMP.BaseElement {
       // TODO(bradfrizzell): change name of function and var
       let contextMetadata = getContextMetadata(
           this.win, this.element, this.sentinel);
+      if (this.isFluid) {
+        contextMetadata['uid'] = 1;
+        contextMetadata['hostPeerName'] = this.win.location.origin;
+        // The initial geometry isn't used for anything important, but it is
+        // expected, so we pass this string with all zero values.
+        contextMetadata['initialGeometry'] = JSON.stringify({
+          'windowCoords_t': 0,
+          'windowCoords_r': 0,
+          'windowCoords_b': 0,
+          'windowCoords_l': 0,
+          'frameCoords_t': 0,
+          'frameCoords_r': 0,
+          'frameCoords_b': 0,
+          'frameCoords_l': 0,
+          'styleZIndex': 'auto',
+          'allowedExpansion_t': 0,
+          'allowedExpansion_r': 0,
+          'allowedExpansion_b': 0,
+          'allowedExpansion_l': 0,
+          'xInView': 0,
+          'yInView': 0,
+        });
+        contextMetadata['permissions'] = JSON.stringify({
+          expandByOverlay: false,
+          expandByPush: false,
+          readCookie: false,
+          writeCookie: false,
+        });
+        contextMetadata['metadata'] = JSON.stringify({
+          shared: {
+            'sf_ver': this.safeframeVersion_,
+            'ck_on': 1,
+            'flash_ver': '26.0.0',
+          },
+        });
+        contextMetadata['reportCreativeGeometry'] = true;
+        contextMetadata['isDifferentSourceWindow'] = false;
+        contextMetadata['sentinel'] = this.sentinel;
+      }
       // TODO(bradfrizzell) Clean up name assigning.
       if (method == XORIGIN_MODE.NAMEFRAME) {
         contextMetadata['creative'] = creative;
