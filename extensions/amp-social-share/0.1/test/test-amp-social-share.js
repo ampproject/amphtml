@@ -176,7 +176,7 @@ describes.realWin('amp-social-share', {
       expect(el.implementation_.win.open).to.be.calledOnce;
       expect(el.implementation_.win.open).to.be.calledWith(
           'mailto:sample%40xyz.com?subject=doc%20title&' +
-            'body=https%3A%2F%2Fcanonicalexample.com%2F',
+            'body=https%3A%2F%2Fcanonicalexample.com%2F&recipient=',
           '_top', 'resizable,scrollbars,width=640,height=480'
       );
     });
