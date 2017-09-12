@@ -505,7 +505,7 @@ export const adConfig = {
 
   mywidget: {
     preconnect: 'https://likemore-fe.go.mail.ru',
-    prefetch: 'https://likemore-go.imgsmail.ru/widget.amp.js',
+    prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
     renderStartImplemented: true,
   },
 
