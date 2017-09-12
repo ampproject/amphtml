@@ -44,7 +44,10 @@ let syncScriptLoads = 0;
 /**
  * Returns the registration map
  */
-export function getRegisterations() {
+export function getRegistrations() {
+  if (!registrations) {
+    registrations = map();
+  }
   return registrations;
 }
 
@@ -53,9 +56,7 @@ export function getRegisterations() {
  * @param {ThirdPartyFunctionDef} draw Function that draws the 3p integration.
  */
 export function register(id, draw) {
-  if (!registrations) {
-    registrations = map();
-  }
+  const registrations = getRegistrations();
   dev().assert(!registrations[id], 'Double registration %s', id);
   registrations[id] = draw;
 }

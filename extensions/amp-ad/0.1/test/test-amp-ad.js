@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
+import {getA4ARegistry} from '../../../../ads/_a4a-config';
 import {adConfig} from '../../../../ads/_config';
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
@@ -24,6 +24,7 @@ import {stubService} from '../../../../testing/test-helper';
 
 describes.realWin('Ad loader', {amp: true}, env => {
   let win, doc;
+  const a4aRegistry = getA4ARegistry();
   let a4aRegistryBackup;
   let registryBackup;
   const tagNames = ['amp-ad', 'amp-embed'];
@@ -32,9 +33,9 @@ describes.realWin('Ad loader', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     a4aRegistryBackup = Object.create(null);
-    Object.keys(AmpAd.a4aRegistry).forEach(k => {
-      a4aRegistryBackup[k] = AmpAd.a4aRegistry[k];
-      delete AmpAd.a4aRegistry[k];
+    Object.keys(a4aRegistry).forEach(k => {
+      a4aRegistryBackup[k] = a4aRegistry[k];
+      delete a4aRegistry[k];
     });
     registryBackup = Object.create(null);
     Object.keys(adConfig).forEach(k => {
@@ -46,7 +47,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
 
   afterEach(() => {
     Object.keys(a4aRegistryBackup).forEach(k => {
-      AmpAd.a4aRegistry[k] = a4aRegistryBackup[k];
+      a4aRegistry[k] = a4aRegistryBackup[k];
     });
     a4aRegistryBackup = null;
     Object.keys(registryBackup).forEach(k => {
@@ -113,7 +114,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
       });
 
       it('fails upgrade on A4A upgrade with loadElementClass error', () => {
-        AmpAd.a4aRegistry['zort'] = function() {
+        a4aRegistry['zort'] = function() {
           return true;
         };
         ampAdElement.setAttribute('type', 'zort');
@@ -135,7 +136,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
         meta.setAttribute('name', 'amp-3p-iframe-src');
         meta.setAttribute('content', 'https://example.com/remote.html');
         doc.head.appendChild(meta);
-        AmpAd.a4aRegistry['zort'] = () => {
+        a4aRegistry['zort'] = () => {
           throw new Error('predicate should not execute if remote.html!');
         };
         ampAdElement.setAttribute('type', 'zort');
@@ -147,7 +148,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
         const rtcConfig = doc.createElement('script');
         rtcConfig.setAttribute('id', 'amp-rtc');
         doc.head.appendChild(rtcConfig);
-        AmpAd.a4aRegistry['zort'] = function() {
+        a4aRegistry['zort'] = function() {
           return true;
         };
         ampAdElement.setAttribute('type', 'zort');
@@ -174,7 +175,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
         const rtcConfig = doc.createElement('script');
         rtcConfig.setAttribute('id', 'amp-rtc');
         doc.head.appendChild(rtcConfig);
-        AmpAd.a4aRegistry['zort'] = function() {
+        a4aRegistry['zort'] = function() {
           return true;
         };
         ampAdElement.setAttribute('type', 'zort');
@@ -199,7 +200,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
         meta.setAttribute('content', 'https://example.com/remote.html');
         doc.head.appendChild(meta);
         adConfig['zort'] = {remoteHTMLDisabled: true};
-        AmpAd.a4aRegistry['zort'] = function() {
+        a4aRegistry['zort'] = function() {
           return true;
         };
         ampAdElement.setAttribute('type', 'zort');
@@ -219,7 +220,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
       });
 
       it('upgrades to registered, A4A type network-specific element', () => {
-        AmpAd.a4aRegistry['zort'] = function() {
+        a4aRegistry['zort'] = function() {
           return true;
         };
         ampAdElement.setAttribute('type', 'zort');
@@ -239,7 +240,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
       });
 
       it('adds script to header for registered, A4A type', () => {
-        AmpAd.a4aRegistry['zort'] = function() {
+        a4aRegistry['zort'] = function() {
           return true;
         };
         ampAdElement.setAttribute('type', 'zort');

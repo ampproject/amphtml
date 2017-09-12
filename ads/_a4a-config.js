@@ -39,6 +39,7 @@ import {
 '../extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config';
 import {getMode} from '../src/mode';
 import {map} from '../src/utils/object';
+
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
  * If an ad network, {@code ${NETWORK}}, is registered in this object, then the
@@ -57,7 +58,7 @@ let a4aRegistry;
 /**
  * Returns the a4a registry map
  */
-export function getA4ARegistery() {
+export function getA4ARegistry() {
   if (!a4aRegistry) {
     a4aRegistry = map({
       'adsense': adsenseIsA4AEnabled,
