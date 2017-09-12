@@ -166,7 +166,7 @@ class Shell {
     }
     return fetchDocument(url).then(doc => {
       log('Fetch complete: ', doc);
-      this.ampViewer_.show(doc, url);
+      return this.ampViewer_.show(doc, url);
     });
   }
 
@@ -206,10 +206,10 @@ class AmpViewer {
     this.container = container;
 
     win.AMP_SHADOW = true;
-    this.ampReadyPromise_ = new Promise(resolve => {
+    const ampReadyPromise = new Promise(resolve => {
       (window.AMP = window.AMP || []).push(resolve);
     });
-    this.ampReadyPromise_.then(AMP => {
+    ampReadyPromise.then(AMP => {
       log('AMP LOADED:', AMP);
     });
 
@@ -217,12 +217,16 @@ class AmpViewer {
       Element.prototype.attachShadow ||
       Element.prototype.createShadowRoot
     );
-
-    this.shadowDomReadyPromise_ = isShadowDomSupported ?
+    const shadowDomReadyPromise = isShadowDomSupported ?
         Promise.resolve() :
         new Promise(resolve => {
           this.win.addEventListener('WebComponentsReady', resolve);
         });
+
+    this.readyPromise_ = Promise.all([
+      ampReadyPromise,
+      shadowDomReadyPromise,
+    ]).then(results => results[0]);
 
     /** @private @const {string} */
     this.baseUrl_ = null;
@@ -267,11 +271,7 @@ class AmpViewer {
 
     this.container.appendChild(this.host_);
 
-    return Promise.all([
-      this.ampReadyPromise_,
-      this.shadowDomReadyPromise_,
-    ]).then(results => {
-      const AMP = results[0];
+    return this.readyPromise_.then(AMP => {
       this.amp_ = AMP.attachShadowDoc(this.host_, doc, url, {});
       this.win.document.title = this.amp_.title || '';
       this.amp_.onMessage(this.onMessage_.bind(this));
@@ -301,11 +301,7 @@ class AmpViewer {
 
     this.container.appendChild(this.host_);
 
-    return Promise.all([
-      this.ampReadyPromise_,
-      this.shadowDomReadyPromise_,
-    ]).then(results => {
-      const AMP = results[0];
+    return this.readyPromise_.then(AMP => {
       this.amp_ = AMP.attachShadowDocAsStream(this.host_, url, {});
       this.win.document.title = this.amp_.title || '';
       this.amp_.onMessage(this.onMessage_.bind(this));
