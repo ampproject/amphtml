@@ -70,7 +70,7 @@ export function createShadowRoot(hostElement) {
       Object.defineProperty(shadowRoot, 'styleSheets', {
         get: function() {
           const items = [];
-          iterateCursor(shadowRoot.children, child => {
+          iterateCursor(shadowRoot.childNodes, child => {
             if (child.tagName === 'STYLE') {
               items.push(child.sheet);
             }
