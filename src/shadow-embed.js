@@ -58,6 +58,8 @@ let shadowDomStreamingSupported;
  * @return {!ShadowRoot}
  */
 export function createShadowRoot(hostElement) {
+  const win = toWin(hostElement.ownerDocument.defaultView);
+
   const existingRoot = hostElement.shadowRoot || hostElement.__AMP_SHADOW_ROOT;
   if (existingRoot) {
     existingRoot./*OK*/innerHTML = '';
@@ -86,7 +88,7 @@ export function createShadowRoot(hostElement) {
   }
 
   if (!isShadowCssSupported()) {
-    const rootId = `i-amphtml-sd-${Math.floor(Math.random() * 10000)}`;
+    const rootId = `i-amphtml-sd-${win.Math.floor(win.Math.random() * 10000)}`;
     shadowRoot.id = rootId;
     shadowRoot.host.classList.add(rootId);
   }
@@ -102,7 +104,6 @@ export function createShadowRoot(hostElement) {
  */
 function createShadowRootPolyfill(hostElement) {
   const doc = hostElement.ownerDocument;
-  /** @const {!Window} */
   const win = toWin(doc.defaultView);
 
   // Host CSS polyfill.
