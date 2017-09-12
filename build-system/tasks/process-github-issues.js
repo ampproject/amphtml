@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 var BBPromise = require('bluebird');
 var argv = require('minimist')(process.argv.slice(2));
 var assert = require('assert');
@@ -37,7 +38,7 @@ const issuesOptions = {
     'Accept': 'application/vnd.github.v3+json',
   },
   qs: {
-    access_token: GITHUB_ACCESS_TOKEN
+    access_token: GITHUB_ACCESS_TOKEN,
   },
 };
 
@@ -48,7 +49,7 @@ const milestoneOptions = {
     'Accept': 'application/vnd.github.v3+json',
   },
   qs: {
-    access_token: GITHUB_ACCESS_TOKEN
+    access_token: GITHUB_ACCESS_TOKEN,
   },
 };
 
@@ -196,7 +197,8 @@ function updateGitHubIssues(){
           updates.push(applyLabel(issue, 'P2: Soon'));
         }
         if (isDryrun) {
-          util.log('Performing a dry run. These are the updates that would have been applied:');
+          util.log('Performing a dry run. ' +
+              'These are the updates that would have been applied:');
           updates.forEach(function(update) {
             util.log(util.inspect(update, { depth: null }));
           });
@@ -275,7 +277,7 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
       'Accept': 'application/vnd.github.v3+json',
     },
     qs: {
-      access_token: GITHUB_ACCESS_TOKEN
+      access_token: GITHUB_ACCESS_TOKEN,
     },
   };
   if (opt_method) {
@@ -289,12 +291,12 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
       options.body = opt_data;
     }
   }
-  return request(options)
+  return request(options);
 }
 
 gulp.task(
   'process-github-issues',
-  'Automatically updates the labels'
+  'Automatically updates the labels '
       + 'and milestones of all open issues at github.com/ampproject/amphtml.',
   processIssues,
   {
