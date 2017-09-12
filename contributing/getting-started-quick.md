@@ -27,9 +27,9 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * Install [NodeJS](https://nodejs.org/)
 
-* Install [yarn](https://yarnpkg.com/en/docs/install)
+* Install [npm](https://www.npmjs.com/get-npm)`
 
-* Install Gulp by running `yarn global add gulp`
+* Install Gulp by running `sudo npm install -g gulp`
 
 * Add this line to your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows):
 
@@ -48,7 +48,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 * Go to the branch: `git checkout <branch name>`
 
 # Build AMP & run a local server
-* Make sure you have the latest packages (after you pull): `yarn`
+* Make sure you have the latest packages (after you pull): `npm install`
 * Start the server: `gulp`
 * Access your server at [http://localhost:8000](http://localhost:8000)
 * Access your sample pages at [http://localhost:8000/examples](http://localhost:8000/examples)
