@@ -64,7 +64,7 @@ Note: With the use of **customEventReporter**, AMP assumes all custom events are
 ### useAnalyticsInSandbox API
 Third-party AMP components can contain an amp-analytics [configuration](amp-analytics.md#sending-analytics-to-a-vendor-or-in-house) to collect analytics events. Currently, only the `VISIBLE` and `HIDDEN` events are supported. To request other existing analytics [events](amp-analytics.md#triggers) (e.g., `INI-LOAD`, `CLICK`) to support analytics in third-party AMP components, please submit a [feature request in Github](https://github.com/ampproject/amphtml/issues/new).
 
-To send analytics pings, third-party AMP components must call the `useAnalyticsInSandbox()` API function and provide a promise that resolve with their analytics configuration when it is ready. The analytics configuration should be a JSON object specified in accordance with the amp-analytics [spec]((amp-analytics.md#triggers)).
+To send analytics pings, third-party AMP components must call the `useAnalyticsInSandbox()` API function and provide a promise that resolve with their analytics configuration when it is ready. The analytics configuration should be a JSON object specified in accordance with the amp-analytics [spec](amp-analytics.md#triggers).
 
 Example
 ```
