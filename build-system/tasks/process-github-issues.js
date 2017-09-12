@@ -28,6 +28,7 @@ var exec = BBPromise.promisify(child_process.exec);
 var gitExec = BBPromise.promisify(git.exec);
 
 var verbose = (argv.verbose || argv.v);
+var isDryrun = argv.dryrun;
 
 const issuesOptions = {
   url: 'https://api.github.com/repos/ampproject/amphtml/issues',
@@ -110,7 +111,7 @@ function updateGitHubIssues(){
     getIssues(3),
     getIssues(4),
     getIssues(5),
-    ])
+  ])
   .then(requests => [].concat.apply([], requests))
   .then(issues => {
     const allIssues = issues;
@@ -133,12 +134,12 @@ function updateGitHubIssues(){
         if (label) {
           // Check if the issues has type
           if (label.name.startsWith('Type') ||
-            label.name.startsWith('Related')) {
+             label.name.startsWith('Related')) {
             issueType = label.name;
           }
           // Check if the issues has Priority
           if (label.name.startsWith('P0') || label.name.startsWith('P1')
-            || label.name.startsWith('P2') || label.name.startsWith('P3')) {
+             || label.name.startsWith('P2') || label.name.startsWith('P3')) {
             hasPriority = true;
           }
         }
@@ -149,7 +150,7 @@ function updateGitHubIssues(){
         // Milestone task: move issue from closed milestone
         if (milestone) {
           if (milestoneTitle.startsWith('Sprint') &&
-            milestoneState === 'closed') {
+             milestoneState === 'closed') {
             issueNewMilestone = MILESTONE_BACKLOG_BUGS;
             updates.push(applyMilestone(issue, issueNewMilestone));
           }
@@ -194,7 +195,15 @@ function updateGitHubIssues(){
           milestoneTitle !== 'Pending Triage' && milestone != null) {
           updates.push(applyLabel(issue, 'P2: Soon'));
         }
-        return Promise.all(updates);
+        if (isDryrun) {
+          util.log('Performing a dry run. These are the updates that would have been applied:');
+          updates.forEach(function(update) {
+            util.log(util.inspect(update, { depth: null }));
+          });
+          return Promise.resolve();
+        } else {
+          return Promise.all(updates);
+        }
       });
     });
     return issues;
@@ -250,6 +259,7 @@ function applyLabel(issue, label) {
 }
 
 /**
+ * Function pushes the updates requested based on the path received
  * @param {string} path
  * @param {string=} opt_method
  * @param {*} opt_data
@@ -275,16 +285,21 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
     options.json = true;
     if (typeRequest === 'milestone') {
       options.body['milestone'] = opt_data;
-    }
-    else {
+    } else {
       options.body = opt_data;
     }
   }
   return request(options)
 }
 
-gulp.task('process-github-issues', 'Get issues data', processIssues, {
-  options: {
-    dryrun: '  Generate process but don\'t push it out',
+gulp.task(
+  'process-github-issues',
+  'Automatically updates the labels'
+      + 'and milestones of all open issues at github.com/ampproject/amphtml.',
+  processIssues,
+  {
+    options: {
+      dryrun: '  Generate process but don\'t push it out',
+    }
   }
-});
+);
