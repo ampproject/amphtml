@@ -16,7 +16,7 @@
 import {
   GWD_SERVICE_NAME,
   GWD_TIMELINE_EVENT,
-  installGwdRuntimeServiceForDoc,
+  AmpGwdRuntimeService,
 } from './amp-gwd-animation-impl';
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
 import {ActionTrust} from '../../../src/action-trust';
@@ -78,14 +78,6 @@ export class GwdAnimation extends AMP.BaseElement {
         isExperimentOn(this.getAmpDoc().win, EXPERIMENT),
         `Experiment ${EXPERIMENT} is disabled.`);
 
-    // Ensure GWD animation runtime service factory is registered for this
-    // ampdoc. In the event multiple copies of this extension exist in the doc,
-    // the runtime service will only be started once.
-    // TODO(sklobovskaya): This can be moved out elsewhere (e.g., to the
-    // extension registration callback) when the required registration APIs are
-    // ready.
-    installGwdRuntimeServiceForDoc(this.getAmpDoc());
-
     this.timelineEventPrefix_ =
         this.element.getAttribute('timeline-event-prefix') || '';
 
@@ -101,8 +93,7 @@ export class GwdAnimation extends AMP.BaseElement {
         `amp-carousel#${GWD_PAGEDECK_ID}`);
 
     if (gwdPageDeck) {
-      user().assert(this.element.id,
-          'The `amp-gwd-animation` element must have an id.');
+      user().assert(this.element.id, `The ${TAG} element must have an id.`);
 
       const setCurrentPageActionDef =
           `${this.element.id}.setCurrentPage(index=event.index)`;
@@ -200,5 +191,6 @@ export function insertEventActionBinding(element, event, actionStr) {
 };
 
 AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerServiceForDoc(GWD_SERVICE_NAME, AmpGwdRuntimeService);
   AMP.registerElement(TAG, GwdAnimation, CSS);
 });

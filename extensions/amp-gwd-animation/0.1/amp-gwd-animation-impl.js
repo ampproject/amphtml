@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import {createCustomEvent} from '../../../src/event-helper';
-import {registerServiceBuilderForDoc} from '../../../src/service';
 import {user} from '../../../src/log';
 
 /**
@@ -121,7 +120,7 @@ function setCounter(receiver, counterName, counterValue) {
  * AMP GWD animation runtime service.
  * @implements {../../../src/service.Disposable}
  */
-class AmpGwdRuntimeService {
+export class AmpGwdRuntimeService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc An AMP document
    *     with GWD content in which to install the animation runtime controller.
@@ -424,20 +423,4 @@ class AmpGwdRuntimeService {
  */
 function reflow(element) {
   element./*OK*/offsetWidth = element./*OK*/offsetWidth;
-};
-
-/**
- * Registers and immediately starts the GWD runtime service for the given
- * ampdoc. Retrieve the service instance with getServiceForDoc and
- * GWD_SERVICE_NAME.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- */
-export function installGwdRuntimeServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(
-      ampdoc,
-      GWD_SERVICE_NAME,
-      ampdoc => {
-        return new AmpGwdRuntimeService(ampdoc);
-      },
-      true /* instantiate */);
 };

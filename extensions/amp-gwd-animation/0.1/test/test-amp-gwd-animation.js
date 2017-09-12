@@ -24,11 +24,14 @@ import {
   CURRENT_LABEL_ANIMATION_ATTR,
   GOTO_AND_PAUSE_DELAY,
   GWD_PAGE_WRAPPER_CLASS,
+  GWD_SERVICE_NAME,
   PlaybackCssClass,
+  AmpGwdRuntimeService,
 } from '../amp-gwd-animation-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 import {getServiceForDoc} from '../../../../src/service';
 import {Services} from '../../../../src/services';
+import * as sinon from 'sinon';
 
 describes.sandboxed('AMP GWD Animation', {}, () => {
   /**
@@ -79,6 +82,21 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       let element;
       let impl;
       let page1Elem;
+      let sandbox;
+      let initializeSpy;
+
+      before(() => {
+        // The service's bodyAvailable callback will execute once the iframe is
+        // ready but before any beforEach hooks, so test that the service
+        // initializes by spying on the method here.
+        // TODO(sklobovskaya): initialize_() should remain private as it's not
+        // part of the service's public API, but stubbing it here is the only
+        // way to verify it is called. Revisit if another solution becomes
+        // available.
+        sandbox = sinon.sandbox.create();
+        initializeSpy =
+            sandbox.spy(AmpGwdRuntimeService.prototype, 'initialize_');
+      });
 
       beforeEach(() => {
         // TODO(sklobovskaya): Remove experiment guard.
@@ -101,7 +119,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
 
         element = createGwdAnimationElement(ampdoc, {
           'id': 'gwdAnim',
-          'timeline-event-prefix': 'foo123',
+          'timeline-event-prefix': 'tl_',
           'layout': 'nodisplay',
         });
 
@@ -118,7 +136,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       // yet invoke setEnabled. Uncomment the test case when this integration is
       // complete.
       /*
-      it('should immediately disable animations on doc body ready', () => {
+      it('should immediately disable animations', () => {
         return ampdoc.whenBodyAvailable().then(() => {
           expect(ampdoc.getBody().classList.contains(ANIMATIONS_DISABLED_CLASS))
               .to.be.true;
@@ -126,13 +144,46 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       });
       */
 
+      it('should initialize on body available', () => {
+        // Waiting for body available is only necessary here to avoid JS errors
+        // caused by beforeEach building the element after a test case
+        // environment has already been disposed.
+        return ampdoc.whenBodyAvailable().then(() => {
+          expect(initializeSpy).to.be.called;
+          sandbox.restore();
+        });
+      });
+
       it('should initially enable animations on GWD page 1', () => {
         return ampdoc.whenBodyAvailable().then(() => {
-          const page1 = ampdoc.getBody().querySelector('#page1');
+          // Execute the initialize step (normally executed on bodyAvailable).
+          const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
+          runtime.initialize_();
+
+          // Page 1 should have been enabled.
+          const page1 = ampdoc.getRootNode().getElementById('page1');
           expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
 
-          const page2 = ampdoc.getBody().querySelector('#page2');
+          // Page 2 should remain unaffected.
+          const page2 = ampdoc.getRootNode().getElementById('page2');
           expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
+        });
+      });
+
+      it('should set a page as current', () => {
+        return ampdoc.whenBodyAvailable().then(() => {
+          // Set page 1 as current.
+          const page1 = ampdoc.getRootNode().getElementById('page1');
+          page1.classList.add(PlaybackCssClass.PLAY);
+
+          // Change to page 2.
+          const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
+          runtime.setCurrentPage(1);
+
+          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
+
+          const page2 = ampdoc.getRootNode().getElementById('page2');
+          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
         });
       });
 
@@ -146,11 +197,11 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
 
       it('should disable and re-enable', () => {
         return ampdoc.whenBodyAvailable().then(() => {
-          getServiceForDoc(ampdoc, 'gwd').setEnabled(true);
+          getServiceForDoc(ampdoc, GWD_SERVICE_NAME).setEnabled(true);
           expect(ampdoc.getBody().classList.contains(ANIMATIONS_DISABLED_CLASS))
               .to.be.false;
 
-          getServiceForDoc(ampdoc, 'gwd').setEnabled(false);
+          getServiceForDoc(ampdoc, GWD_SERVICE_NAME).setEnabled(false);
           expect(ampdoc.getBody().classList.contains(ANIMATIONS_DISABLED_CLASS))
               .to.be.true;
         });
@@ -371,13 +422,13 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
               animationendEvent);
 
           expect(triggeredAmpEventNames)
-              .to.deep.equal(['foo123event-1', 'foo123event-2']);
+              .to.deep.equal(['tl_event-1', 'tl_event-2']);
           expect(triggeredEvents.map(event => event.eventName))
               .to.deep.equal(['event-1', 'event-2']);
         });
 
         it('should get the receiver element by id if it exists', () => {
-          const runtime = getServiceForDoc(ampdoc, 'gwd');
+          const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
 
           expect(runtime.getReceiver('document.body')).to.equal(
               ampdoc.getBody());
