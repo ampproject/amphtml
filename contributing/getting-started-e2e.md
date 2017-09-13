@@ -153,9 +153,9 @@ Now that you have all of the files copied locally you can actually build the cod
 
 amphtml uses Node.js, the npm package manager and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.  Installing these and getting amphtml built is straightforward:
 
-* Install [NodeJS](https://nodejs.org/) (which includes npm).
+* Install [NodeJS](https://nodejs.org/) version >= 4.7 (which includes npm)
 
-* Install [npm](https://www.npmjs.com/get-npm)
+* Install [npm](https://www.npmjs.com/get-npm) version >= 5
 
 * In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
    ```

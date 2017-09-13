@@ -25,9 +25,9 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * [Install and set up Git](https://help.github.com/articles/set-up-git/); in the "Authenticating" step of that page use SSH instead of HTTPS
 
-* Install [NodeJS](https://nodejs.org/)
+* Install [NodeJS](https://nodejs.org/) version >= 4.7
 
-* Install [npm](https://www.npmjs.com/get-npm)`
+* Install [npm](https://www.npmjs.com/get-npm)` version >= 5
 
 * Install Gulp by running `npm install -g gulp` (on some platforms this command might require elevated privileges using `sudo`)
 
