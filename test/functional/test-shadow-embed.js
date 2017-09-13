@@ -278,22 +278,22 @@ describes.sandboxed('shadow-embed', {}, () => {
     }
 
     it('should replace root selectors', () => {
-      expect(scope('html {}')).to.equal('#h amp-html {}');
-      expect(scope('body {}')).to.equal('#h amp-body {}');
+      expect(scope('html {}')).to.equal('.h amp-html {}');
+      expect(scope('body {}')).to.equal('.h amp-body {}');
       expect(scope('html {} body {}')).to.equal(
-          '#h amp-html {}#h amp-body {}');
-      expect(scope('html, body {}')).to.equal('#h amp-html, #h amp-body {}');
-      expect(scope('body.x {}')).to.equal('#h amp-body.x {}');
-      expect(scope('body::after {}')).to.equal('#h amp-body::after {}');
-      expect(scope('body[x] {}')).to.equal('#h amp-body[x] {}');
+          '.h amp-html {}.h amp-body {}');
+      expect(scope('html, body {}')).to.equal('.h amp-html, .h amp-body {}');
+      expect(scope('body.x {}')).to.equal('.h amp-body.x {}');
+      expect(scope('body::after {}')).to.equal('.h amp-body::after {}');
+      expect(scope('body[x] {}')).to.equal('.h amp-body[x] {}');
     });
 
     it('should avoid false positives for root selectors', () => {
-      expect(scope('.body {}')).to.equal('#h .body {}');
-      expect(scope('x-body {}')).to.equal('#h x-body {}');
-      expect(scope('body-x {}')).to.equal('#h body-x {}');
-      expect(scope('body_x {}')).to.equal('#h body_x {}');
-      expect(scope('body1 {}')).to.equal('#h body1 {}');
+      expect(scope('.body {}')).to.equal('.h .body {}');
+      expect(scope('x-body {}')).to.equal('.h x-body {}');
+      expect(scope('body-x {}')).to.equal('.h body-x {}');
+      expect(scope('body_x {}')).to.equal('.h body_x {}');
+      expect(scope('body1 {}')).to.equal('.h body1 {}');
     });
   });
 
