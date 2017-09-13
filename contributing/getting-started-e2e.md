@@ -160,7 +160,7 @@ amphtml uses Node.js, the npm package manager and the Gulp build system to build
    npm install -g npm@latest
    ```
 
-   On some platform the preceding command might require elevated privileges using `sudo`.
+   The preceding command might require elevated privileges using `sudo` on some platforms.
 
 * In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
    ```
@@ -183,7 +183,7 @@ amphtml uses Node.js, the npm package manager and the Gulp build system to build
    npm install -g gulp
    ```
 
-   On some platform the preceding command might require elevated privileges using `sudo`.
+   The preceding command might require elevated privileges using `sudo` on some platforms.
 
 Now whenever you're ready to build amphtml and start up your local server, simply go to your local repository directory and run:
 
@@ -277,6 +277,8 @@ If there are changes that conflict with changes on your branch (e.g. someone mod
 The common workflow for making changes to files in Git is:
 
 * edit some files using your favorite editor
+
+* if you edited `package.json` run `npm prune && npm install` to generate an updated `package-lock.json` file
 
 * tell Git that you care about these changes by _staging_ them using the `git add` command
 

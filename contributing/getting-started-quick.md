@@ -27,9 +27,9 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * Install [NodeJS](https://nodejs.org/) version >= 4.7
 
-* If the version of [npm](https://www.npmjs.com/)` that was installed with NodeJS is lower than version 5, upgrade it by running `npm install -g npm@latest` (on some platforms this command might require elevated privileges using `sudo`)
+* If the version of [npm](https://www.npmjs.com/) that was installed with NodeJS is lower than version 5, upgrade it by running `npm install -g npm@latest` (this command might require elevated privileges using `sudo` on some platforms)
 
-* Install Gulp by running `npm install -g gulp` (as before, this command might required `sudo`)
+* Install Gulp by running `npm install -g gulp` (as before, this command might require `sudo`)
 
 * Add this line to your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows):
 
@@ -62,7 +62,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 # Create commits to contain your changes
 
 * Edit files in your favorite editor
-* If you edited `package.json` run `npm prune && npm install` to generate an updated `package-lock.json` file
+* If you edited `package.json`, run `npm prune && npm install` to generate an updated `package-lock.json` file
 * Add each file you change: `git add <file>`
 * Create a commit: `git commit -m "<your commit message>"`
 * Instead of `add`ing each file individually you can use the `-a` flag on the commit instead
