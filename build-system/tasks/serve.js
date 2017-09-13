@@ -55,11 +55,7 @@ function serve() {
       'SERVE_PROCESS_ID': process.pid,
       'SERVE_QUIET': quiet
     },
-  })
-  .once('exit', function () {
-    process.nextTick(function() {
-      process.exit();
-    });
+    stdout: !quiet,
   })
   .once('quit', function () {
     util.log(util.colors.green('Shutting down server'));
@@ -70,6 +66,10 @@ function serve() {
     ));
   }
 }
+
+process.on('SIGINT', function() {
+  process.exit();
+});
 
 gulp.task(
     'serve',

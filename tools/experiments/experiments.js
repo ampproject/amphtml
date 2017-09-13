@@ -58,12 +58,6 @@ const EXPERIMENTS = [
         'README.md#amp-dev-channel',
   },
   {
-    id: 'amp-web-push',
-    name: 'Enable AMP web push',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-web-push/0.1/amp-web-push.md',
-  },
-  {
     id: 'ad-type-custom',
     name: 'Activates support for custom (self-serve) advertisements',
     spec: 'https://github.com/ampproject/amphtml/blob/master/ads/custom.md',
@@ -184,6 +178,11 @@ const EXPERIMENTS = [
     id: 'chunked-amp',
     name: 'Split AMP\'s loading phase into chunks',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
+  },
+  {
+    id: 'font-display-swap',
+    name: 'Use font-display: swap as the default for fonts.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
   },
   {
     id: 'amp-animation',

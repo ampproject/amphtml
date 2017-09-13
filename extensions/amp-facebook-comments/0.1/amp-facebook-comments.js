@@ -77,6 +77,9 @@ class AmpFacebookComments extends AMP.BaseElement {
     }
     return true;
   }
-};
+}
 
-AMP.registerElement('amp-facebook-comments', AmpFacebookComments);
+
+AMP.extension('amp-facebook-comments', '0.1', AMP => {
+  AMP.registerElement('amp-facebook-comments', AmpFacebookComments);
+});

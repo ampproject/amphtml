@@ -27,6 +27,7 @@ import {
   DEFAULT_SAFEFRAME_VERSION,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
+import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
 import {
   experimentFeatureEnabled,
   DOUBLECLICK_EXPERIMENT_FEATURE,
@@ -60,7 +61,7 @@ import {
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {stringHash32} from '../../../src/string';
-import {removeElement} from '../../../src/dom';
+import {removeElement, createElementWithAttributes} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -70,7 +71,7 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
-import {deepMerge} from '../../../src/utils/object';
+import {deepMerge, dict} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
 import {isSecureUrl, parseUrl} from '../../../src/url';
 import {VisibilityState} from '../../../src/visibility-state';
@@ -307,6 +308,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
+    const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
+    if (verifierEid) {
+      addExperimentIdToElement(verifierEid, this.element);
+    }
     if (this.win['dbclk_a4a_viz_change']) {
       // Only create one per page but ensure all slots get experiment
       // selection.
@@ -470,7 +475,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                 this.getBlockParameters_(),
                 /* RTC Parameters */ values[1],
-                /* pageLevelParameters */ values[0]), ['108809080']);
+                /* pageLevelParameters */ values[0]));
       });
   }
 
@@ -487,8 +492,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
-      this.extensions_./*OK*/loadExtension('amp-analytics');
+      this.extensions_./*OK*/installExtensionForDoc(
+          this.getAmpDoc(), 'amp-analytics');
     }
+    this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
+    this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);
@@ -833,6 +841,34 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
+   * @param {string} impressions
+   * @param {boolean=} scrubReferer
+   * @visibileForTesting
+   */
+  fireDelayedImpressions(impressions, scrubReferer) {
+    if (!impressions) {
+      return;
+    }
+    impressions.split(',').forEach(url => {
+      try {
+        if (!isSecureUrl(url)) {
+          dev().warn(TAG, `insecure impression url: ${url}`);
+          return;
+        }
+        // Create amp-pixel and append to document to send impression.
+        this.win.document.body.appendChild(
+            createElementWithAttributes(
+                this.win.document,
+                'amp-pixel',
+                dict({
+                  'src': url,
+                  'referrerpolicy': scrubReferer ? 'no-referrer' : '',
+                })));
+      } catch (unusedError) {}
+    });
+  }
+
+  /**
    * Groups slots by type and networkId from data-slot parameter.  Exposed for
    * ease of testing.
    * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
@@ -979,8 +1015,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 }
 
-AMP.registerElement(
-    'amp-ad-network-doubleclick-impl', AmpAdNetworkDoubleclickImpl);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAdNetworkDoubleclickImpl);
+});
 
 
 /** @visibileForTesting */

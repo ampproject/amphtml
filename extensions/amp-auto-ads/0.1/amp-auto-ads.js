@@ -30,12 +30,12 @@ const TAG = 'amp-auto-ads';
 /** @const */
 const AD_TAG = 'amp-ad';
 
+
 export class AmpAutoAds extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(
-        isExperimentOn(this.win, 'amp-auto-ads'), 'Experiment is off');
+    user().assert(isExperimentOn(this.win, TAG), 'Experiment is off');
 
     const type = this.element.getAttribute('type');
     user().assert(type, 'Missing type attribute');
@@ -47,24 +47,25 @@ export class AmpAutoAds extends AMP.BaseElement {
       return;
     }
 
-    Services.extensionsFor(this.win)./*OK*/loadElementClass(AD_TAG);
+    const ampdoc = this.getAmpDoc();
+    Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+        ampdoc, AD_TAG);
 
     const configPromise = this.getConfig_(adNetwork.getConfigUrl());
-    const docPromise = this.getAmpDoc().whenReady();
-    Promise.all([configPromise, docPromise]).then(values => {
+    Promise.all([configPromise, ampdoc.whenReady()]).then(values => {
       const configObj = values[0];
       if (!configObj) {
         return;
       }
 
-      const placements = getPlacementsFromConfigObj(this.win, configObj);
+      const placements = getPlacementsFromConfigObj(ampdoc, configObj);
       const attributes = /** @type {!JsonObject} */ (
           Object.assign(adNetwork.getAttributes(),
               getAttributesFromConfigObj(configObj)));
       const adTracker =
-          new AdTracker(getExistingAds(this.win), adNetwork.getAdConstraints());
+          new AdTracker(getExistingAds(ampdoc), adNetwork.getAdConstraints());
       new AdStrategy(placements, attributes, adTracker).run();
-      new AnchorAdStrategy(this.win, attributes, configObj).run();
+      new AnchorAdStrategy(ampdoc, attributes, configObj).run();
     });
   }
 
@@ -99,4 +100,7 @@ export class AmpAutoAds extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-auto-ads', AmpAutoAds);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAutoAds);
+});

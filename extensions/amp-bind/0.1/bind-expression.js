@@ -16,6 +16,7 @@
 
 import {AstNodeType} from './bind-expr-defines';
 import {getMode} from '../../../src/mode';
+import {dict, hasOwn, map} from '../../../src/utils/object';
 import {isArray, isObject} from '../../../src/types';
 import {parser} from './bind-expr-impl';
 import {user} from '../../../src/log';
@@ -50,38 +51,76 @@ let FUNCTION_WHITELIST;
  */
 function generateFunctionWhitelist() {
   /**
-   * Similar to Array.prototype.splice, except it returns a copy of the
-   * passed-in array with the desired modifications.
+   * Static, not-in-place variant of Array#splice.
    * @param {!Array} array
    * @param {number=} start
    * @param {number=} deleteCount
    * @param {...?} items
+   * @return {!Array}
    */
   /*eslint "no-unused-vars": 0*/
-  function copyAndSplice(array, start, deleteCount, items) {
+  function splice(array, start, deleteCount, items) {
     if (!isArray(array)) {
-      throw new Error(
-        `copyAndSplice: ${array} is not an array.`);
+      throw new Error(`splice: ${array} is not an array.`);
     }
     const copy = Array.prototype.slice.call(array);
-    Array.prototype.splice.apply(
-        copy,
-        Array.prototype.slice.call(arguments, 1));
+    const args = Array.prototype.slice.call(arguments, 1);
+    Array.prototype.splice.apply(copy, args);
     return copy;
   }
 
-  const whitelist = {
-    '[object Array]':
-    [
+  /**
+   * Static, not-in-place variant of Array#sort.
+   * @param {!Array} array
+   * @return {!Array}
+   */
+  function sort(array) {
+    if (!isArray(array)) {
+      throw new Error(`sort: ${array} is not an array.`);
+    }
+    const copy = Array.prototype.slice.call(array);
+    Array.prototype.sort.call(copy);
+    return copy;
+  }
+
+  /**
+   * Polyfills Object.values for IE.
+   * @param {!Object} object
+   * @return {!Array}
+   * @see https://github.com/es-shims/Object.values
+   */
+  function values(object) {
+    const v = [];
+    for (const key in object) {
+      if (hasOwn(object, key)) {
+        v.push(object[key]);
+      }
+    }
+    return v;
+  }
+
+  // Prototype functions.
+  const whitelist = dict({
+    '[object Array]': [
       Array.prototype.concat,
+      Array.prototype.filter,
+      // TODO(choumx): Need polyfill for Array#find and Array#findIndex.
       Array.prototype.indexOf,
       Array.prototype.join,
       Array.prototype.lastIndexOf,
+      Array.prototype.map,
+      Array.prototype.reduce,
       Array.prototype.slice,
+      Array.prototype.some,
       Array.prototype.includes,
     ],
-    '[object String]':
-    [
+    '[object Number]': [
+      Number.prototype.toExponential,
+      Number.prototype.toFixed,
+      Number.prototype.toPrecision,
+      Number.prototype.toString,
+    ],
+    '[object String]': [
       String.prototype.charAt,
       String.prototype.charCodeAt,
       String.prototype.concat,
@@ -94,8 +133,12 @@ function generateFunctionWhitelist() {
       String.prototype.toLowerCase,
       String.prototype.toUpperCase,
     ],
-  };
+  });
+
+  // Un-namespaced static functions.
   whitelist[BUILT_IN_FUNCTIONS] = [
+    encodeURI,
+    encodeURIComponent,
     Math.abs,
     Math.ceil,
     Math.floor,
@@ -104,14 +147,14 @@ function generateFunctionWhitelist() {
     Math.random,
     Math.round,
     Math.sign,
-    encodeURI,
-    encodeURIComponent,
+    Object.keys, // Object.values is polyfilled below.
   ];
-  // Creates a prototype-less map of function name to the function itself.
+
+  // Creates a map of function name to the function itself.
   // This makes function lookups faster (compared to Array.indexOf).
-  const out = Object.create(null);
+  const out = map();
   Object.keys(whitelist).forEach(type => {
-    out[type] = Object.create(null);
+    out[type] = map();
 
     whitelist[type].forEach((fn, i) => {
       if (fn) {
@@ -125,7 +168,12 @@ function generateFunctionWhitelist() {
 
   // Custom functions (non-js-built-ins) must be added manually as their names
   // will be minified at compile time.
-  out[BUILT_IN_FUNCTIONS]['copyAndSplice'] = copyAndSplice;
+  out[BUILT_IN_FUNCTIONS]['copyAndSplice'] = splice; // Legacy name.
+  out[BUILT_IN_FUNCTIONS]['sort'] = sort;
+  out[BUILT_IN_FUNCTIONS]['splice'] = splice;
+  out[BUILT_IN_FUNCTIONS]['values'] =
+      (typeof Object.values == 'function') ? Object.values : values;
+
   return out;
 }
 
@@ -247,11 +295,19 @@ export class BindExpression {
         }
 
         if (validFunction) {
-          if (Array.isArray(params) && !this.containsObject_(params)) {
-            return validFunction.apply(caller, params);
-          } else {
-            throw new Error(`Unexpected argument type in ${method}().`);
+          if (Array.isArray(params)) {
+            // Don't allow objects as parameters except for Object functions.
+            const invalidArgumentType = this.containsObject_(params)
+                && !this.isObjectMethod_(method);
+            if (!invalidArgumentType) {
+              return validFunction.apply(caller, params);
+            }
+          } else if (typeof params == 'function') {
+            // Special case: `params` may be an arrow function, which are only
+            // supported as the sole argument to functions like Array#find.
+            return validFunction.call(caller, params);
           }
+          throw new Error(`Unexpected argument type in ${method}().`);
         }
 
         throw new Error(unsupportedError);
@@ -305,10 +361,10 @@ export class BindExpression {
       case AstNodeType.OBJECT_LITERAL:
         return (args.length > 0)
             ? this.eval_(args[0], scope)
-            : Object.create(null);
+            : map();
 
       case AstNodeType.OBJECT:
-        const object = Object.create(null);
+        const object = map();
         args.forEach(keyValue => {
           const {k, v} = this.eval_(keyValue, scope);
           object[k] = v;
@@ -378,6 +434,27 @@ export class BindExpression {
             ? this.eval_(args[1], scope)
             : this.eval_(args[2], scope);
 
+      case AstNodeType.ARROW_FUNCTION:
+        const functionScope = map(scope);
+        return (...values) => {
+          // Support parameters in arrow functions by forwarding their values
+          // into the function's scope. For example, in this function call:
+          //
+          //     const f = (x, y) => x + y;
+          //     f(2, 7);
+          //
+          // `names` == ['x', 'y'] and `values` == [2, 7], so we include
+          // {x: 2, y: 7} in the scope when evaluating `x + y`.
+
+          const names = this.eval_(args[0], scope);
+          if (names) {
+            names.forEach((name, i) => {
+              functionScope[name] = values[i];
+            });
+          }
+          return this.eval_(args[1], functionScope);
+        };
+
       default:
         throw new Error(`Unexpected AstNodeType: ${type}.`);
     }
@@ -393,6 +470,15 @@ export class BindExpression {
     const stringified = JSON.stringify(/** @type {!JsonObject} */ (member));
     user().warn(TAG, `Cannot read property ${stringified} of ` +
         `${stringified}; returning null.`);
+  }
+
+  /**
+   * Returns true iff method is
+   * @param {string} method
+   * @return {boolean}
+   */
+  isObjectMethod_(method) {
+    return method == 'keys' || method == 'values';
   }
 
   /**

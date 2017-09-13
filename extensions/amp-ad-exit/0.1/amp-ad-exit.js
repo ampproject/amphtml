@@ -103,7 +103,8 @@ export class AmpAdExit extends AMP.BaseElement {
       for (const customVar in target.vars) {
         if (customVar[0] == '_') {
           vars[customVar] = () =>
-              args[customVar] || target.vars[customVar].defaultValue;
+              args[customVar] == undefined ?
+                target.vars[customVar].defaultValue : args[customVar];
           whitelist[customVar] = true;
         }
       }
@@ -204,4 +205,7 @@ export class AmpAdExit extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-ad-exit', AmpAdExit);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAdExit);
+});

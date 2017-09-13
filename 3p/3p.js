@@ -272,6 +272,7 @@ function validateAllowedFields(data, allowedFields) {
     consentNotificationId: true,
     ampSlotIndex: true,
     adHolderText: true,
+    loadingStrategy: true,
   };
 
   for (const field in data) {

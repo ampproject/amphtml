@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {whenDocumentReady} from '../../../../src/document-ready';
 import {isExperimentOn} from '../../../../src/experiments';
 import {autoDiscoverLightboxables} from './lightbox-manager-discovery';
 import {dev} from '../../../../src/log';
@@ -92,7 +91,7 @@ export class LightboxManager {
    * @return {!Promise}
    */
   scanLightboxables_() {
-    return whenDocumentReady(this.ampdoc_.win.document).then(() => {
+    return this.ampdoc_.whenReady().then(() => {
       const matches = this.ampdoc_.getRootNode().querySelectorAll('[lightbox]');
       this.elements_ = [];
       for (let i = 0; i < matches.length; i++) {
