@@ -653,6 +653,29 @@ describes.sandboxed('DOM', {}, env => {
       expect(params.clickHash).to.be.equal('hash');
       expect(params.clickUrl).to.be.equal('https://example.com/index.html?query#hash');
     });
+
+    it('should return key-value for link of relative path', () => {
+      const element = document.createElement('a');
+      element.setAttribute('href', './test/example.html');
+      const params = dom.getDataParamsFromLinkUrl(element);
+      expect(params.clickHostname).to.be.equal('localhost');
+      expect(params.clickProtocol).to.be.equal('http');
+      expect(params.clickPathname).to.be.equal('/test/example.html');
+      expect(params.clickQuery).to.be.equal('');
+      expect(params.clickHash).to.be.equal('');
+      expect(params.clickUrl).to.be.equal('http://localhost:9876/test/example.html');
+    });
+
+    it('should return empty object for link do not have href attrubute', () => {
+      const element = document.createElement('a');
+      const params = dom.getDataParamsFromLinkUrl(element);
+      expect(params.clickHostname).to.be.equal(undefined);
+      expect(params.clickProtocol).to.be.equal(undefined);
+      expect(params.clickPathname).to.be.equal(undefined);
+      expect(params.clickQuery).to.be.equal(undefined);
+      expect(params.clickHash).to.be.equal(undefined);
+      expect(params.clickUrl).to.be.equal(undefined);
+    });
   });
 
   describe('hasNextNodeInDocumentOrder', () => {
