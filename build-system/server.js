@@ -28,9 +28,9 @@ const webserver = require('gulp-webserver');
 
 const host = process.env.SERVE_HOST;
 const port = process.env.SERVE_PORT;
-const useHttps = process.env.SERVE_USEHTTPS == 'true' ? true : false;
+const useHttps = process.env.SERVE_USEHTTPS == 'true';
 const gulpProcess = process.env.SERVE_PROCESS_ID;
-const quiet = process.env.SERVE_QUIET == 'true' ? true : false;
+const quiet = process.env.SERVE_QUIET == 'true';
 
 // Exit if the port is in use.
 process.on('uncaughtException', function(err) {
@@ -46,7 +46,6 @@ process.on('uncaughtException', function(err) {
 // Exit in the event of a crash in the parent gulp process.
 setInterval(function() {
   if (!isRunning(gulpProcess)) {
-    util.log(util.colors.red('Gulp process terminated, shutting down server'));
     process.exit(1);
   }
 }, 1000);
@@ -58,6 +57,6 @@ gulp.src(process.cwd())
     host,
     directoryListing: true,
     https: useHttps,
-    middleware: quiet ? [app] : [morgan('dev'), app]
+    middleware: quiet ? [] : [morgan('dev'), app]
   }));
 

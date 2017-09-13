@@ -297,4 +297,7 @@ class AmpApesterMedia extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-apester-media', AmpApesterMedia, CSS);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpApesterMedia, CSS);
+});

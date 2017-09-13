@@ -38,7 +38,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {utf8Decode} from '../../../src/utils/bytes';
-import {isCanary, isExperimentOn} from '../../../src/experiments';
+import {getBinaryType, isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
@@ -54,6 +54,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
+import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -193,6 +194,9 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(AMP.AmpAdUIHandler);
     dev().assert(AMP.AmpAdXOriginIframeHandler);
 
+    /** @private {?Promise<undefined>} */
+    this.keysetPromise_ = null;
+
     /** @private {?Promise<?CreativeMetaDataDef>} */
     this.adPromise_ = null;
 
@@ -302,12 +306,11 @@ export class AmpA4A extends AMP.BaseElement {
     this.isRelayoutNeededFlag = false;
 
     /**
-     * Used as a signal in some of the CSI pings. Canary is shortened to 'ca'
-     * and production to 'pr'. TODO(@glevitzky, #10060) Include other release
-     * types (control) when available.
+     * Used as a signal in some of the CSI pings.
      * @private @const {string}
      */
-    this.releaseType_ = isCanary(this.win) ? 'ca' : 'pr';
+    this.releaseType_ = getBinaryTypeNumericalCode(getBinaryType(this.win)) ||
+        '-1';
   }
 
   /** @override */
@@ -349,11 +352,14 @@ export class AmpA4A extends AMP.BaseElement {
     });
 
     this.uiHandler = new AMP.AmpAdUIHandler(this);
+
     const verifier = signatureVerifierFor(this.win);
-    const visible = Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible();
-    this.getSigningServiceNames().forEach(signingServiceName => {
-      verifier.loadKeyset(signingServiceName, visible);
-    });
+    this.keysetPromise_ =
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
+          this.getSigningServiceNames().forEach(signingServiceName => {
+            verifier.loadKeyset(signingServiceName);
+          });
+        });
   }
 
   /** @override */
@@ -485,9 +491,6 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   shouldInitializePromiseChain_() {
-    if (!Services.cryptoFor(this.win).isPkcsAvailable()) {
-      return false;
-    }
     const slotRect = this.getIntersectionElementLayoutBox();
     if (slotRect.height == 0 || slotRect.width == 0) {
       dev().fine(
@@ -666,10 +669,12 @@ export class AmpA4A extends AMP.BaseElement {
             this.creativeBody_ = bytes;
           }
           this.protectedEmitLifecycleEvent_('adResponseValidateStart');
-          return signatureVerifierFor(this.win)
-              .verify(bytes, headers, (eventName, extraVariables) => {
-                this.protectedEmitLifecycleEvent_(eventName, extraVariables);
-              })
+          return this.keysetPromise_
+              .then(() => signatureVerifierFor(this.win)
+                  .verify(bytes, headers, (eventName, extraVariables) => {
+                    this.protectedEmitLifecycleEvent_(
+                        eventName, extraVariables);
+                  }))
               .then(status => {
                 if (getMode().localDev &&
                     this.element.getAttribute('type') == 'fake') {
@@ -726,7 +731,10 @@ export class AmpA4A extends AMP.BaseElement {
           // is just to prefetch.
           const extensions = Services.extensionsFor(this.win);
           creativeMetaDataDef.customElementExtensions.forEach(
-              extensionId => extensions.loadExtension(extensionId));
+              extensionId => extensions.preloadExtension(extensionId));
+          // Preload any fonts.
+          (creativeMetaDataDef.customStylesheets || []).forEach(font =>
+              this.preconnect.preload(font.href));
           return creativeMetaDataDef;
         })
         .catch(error => {

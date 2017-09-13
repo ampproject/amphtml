@@ -19,7 +19,7 @@ import {
     depositRequestUrl,
 } from '../../testing/test-helper';
 
-describe('user-error', function() {
+describe.configure().run('user-error', function() {
 
   let randomId;
   beforeEach(() => {
@@ -30,16 +30,16 @@ describe('user-error', function() {
     extensions: ['amp-analytics'],
     hash: 'log=0',
     experiments: ['user-error-reporting'],
-    body: () => `   
+    body: () => `
     <amp-analytics><script type="application/json">
           {
               "requests": {
-                  "user-error": "${depositRequestUrl(randomId)}"
+                  "error": "${depositRequestUrl(randomId)}"
               },
               "triggers": {
-                  "user-error": {
+                  "userError": {
                       "on": "user-error",
-                      "request": "user-error"
+                      "request": "error"
                   }
               }
           }
@@ -64,16 +64,16 @@ describe('user-error', function() {
       width="360" height="216" layout="responsive"
       role='img'>
     </amp-img>
-    
+
     <amp-analytics><script type="application/json">
           {
               "requests": {
-                  "user-error": "${depositRequestUrl(randomId)}"
+                  "error": "${depositRequestUrl(randomId)}"
               },
               "triggers": {
-                  "user-error": {
+                  "userError": {
                       "on": "user-error",
-                      "request": "user-error"
+                      "request": "error"
                   }
               }
           }

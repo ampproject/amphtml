@@ -211,4 +211,6 @@ export class AmpFont extends AMP.BaseElement {
 }
 
 
-AMP.registerElement('amp-font', AmpFont);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpFont);
+});

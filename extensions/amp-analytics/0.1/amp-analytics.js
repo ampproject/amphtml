@@ -40,12 +40,7 @@ import {
 import {ANALYTICS_CONFIG} from './vendors';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 
-// Register doc-service factory.
-AMP.registerServiceForDoc(
-    'amp-analytics-instrumentation', InstrumentationService);
-AMP.registerServiceForDoc('activity', Activity);
-
-installVariableService(AMP.win);
+const TAG = 'amp-analytics';
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
@@ -53,6 +48,7 @@ const WHITELIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.VISIBLE,
   AnalyticsEventType.HIDDEN,
 ];
+
 
 export class AmpAnalytics extends AMP.BaseElement {
 
@@ -587,6 +583,10 @@ export class AmpAnalytics extends AMP.BaseElement {
         .then(request => {
           const whiteList =
               this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
+          // Since client id expansion is often async, preconnect
+          // to destination before expanding.
+          this.preconnect.url(request,
+              /* We are about to make a real request. */ true);
           // For consistency with amp-pixel we also expand any url
           // replacements.
           return Services.urlReplacementsForDoc(this.element).expandAsync(
@@ -833,4 +833,13 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-analytics', AmpAnalytics);
+
+AMP.extension(TAG, '0.1', AMP => {
+  // Register doc-service factory.
+  AMP.registerServiceForDoc(
+      'amp-analytics-instrumentation', InstrumentationService);
+  AMP.registerServiceForDoc('activity', Activity);
+  installVariableService(AMP.win);
+  // Register the element.
+  AMP.registerElement(TAG, AmpAnalytics);
+});

@@ -67,8 +67,8 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.                     |
 | `gulp ava`<sup>[[1]](#footnote-1)</sup>                                 | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 | `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
-| `ruby build-system/tasks/visual-diff.rb`                                | Runs all visual diff tests locally. Requires `gulp build` to have been run. Also requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables. |
-| `ruby build-system/tasks/visual-diff.rb --percy_debug --phantomjs_debug --webserver_debug`  | Same as above, with additional logging. Debug flags can be used independently.  |
+| `gulp visual-diff`                                                      | Runs all visual diff tests locally. Requires `gulp build` to have been run. Also requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables. |
+| `gulp visual-diff --percy_debug --phantomjs_debug --webserver_debug`    | Same as above, with additional logging. Debug flags can be used independently.  |
 
 <a id="footnote-1">[1]</a> On Windows, this command must be run as administrator.
 
@@ -212,22 +212,22 @@ First, make sure you have [Ruby](https://www.ruby-lang.org/en/documentation/inst
 ```
 gem install percy-capybara poltergeist phantomjs
 ```
-Next, build the AMP runtime and invoke the visual diff script:
+Next, build the AMP runtime and run the gulp task that invokes the visual diff script:
 ```
 gulp build
-ruby build-system/tasks/visual-diff.rb
+gulp visual-diff
 ```
 The build will use the Percy credentials set via environment variables in the previous step, and you can see the results at `https://percy.io/<org>/<project>`.
 
 To see debugging info during Percy runs, you can run:
 ```
- ruby build-system/tasks/visual-diff.rb --percy_debug --phantomjs_debug --webserver_debug
+ gulp visual-diff --percy_debug --phantomjs_debug --webserver_debug
 ```
 The debug flags `--percy_debug`, `--phantomjs_debug`, and `--webserver_debug` can be used independently. To enable all three debug flags, you can also run:
 ```
- ruby build-system/tasks/visual-diff.rb --debug
+ gulp visual-diff --debug
 ```
-After each run, a new set of results will be available at `https://percy.io/<org>/<project>/settings`.
+After each run, a new set of results will be available at `https://percy.io/<org>/<project>`.
 
 ## Testing on devices
 
@@ -279,7 +279,7 @@ is done through
 
 ## Supported browsers
 
-In general we support the 2 latest versions of major browsers like Chrome, Firefox, Edge, Safari and Opera. We support desktop, phone, tablet and the web view version of these respective browsers.
+In general we support the 2 latest versions of major browsers like Chrome, Firefox, Edge, Safari, Opera, and UC Browser. We support desktop, phone, tablet and the web view version of these respective browsers.
 
 Beyond that the core AMP library and builtin elements should aim for very wide browser support and we accept fixes for all browsers with market share greater than 1 percent.
 

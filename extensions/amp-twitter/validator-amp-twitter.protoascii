@@ -29,7 +29,6 @@ tags: {  # amp-twitter
 tags: {  # <amp-twitter>
   html_format: AMP
   tag_name: "AMP-TWITTER"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-twitter"
   attrs: {
     name: "data-tweetid"

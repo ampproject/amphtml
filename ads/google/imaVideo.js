@@ -173,7 +173,6 @@ let imaSettings;
  */
 function getIma(global, cb) {
   loadScript(global, 'https://imasdk.googleapis.com/js/sdkloader/ima3.js', cb);
-  //loadScript(global, 'https://storage.googleapis.com/gvabox/sbusolits/h5/debug/ima3.js', cb);
 }
 
 /**
@@ -322,6 +321,8 @@ export function imaVideo(global, data) {
   setStyle(videoPlayer, 'background-color', 'black');
   videoPlayer.setAttribute('poster', data.poster);
   videoPlayer.setAttribute('playsinline', true);
+  videoPlayer.setAttribute(
+      'controlsList', 'nodownload nofullscreen noremoteplayback');
   if (data.src) {
     const sourceElement = document.createElement('source');
     sourceElement.setAttribute('src', data.src);
@@ -520,6 +521,7 @@ export function onContentEnded() {
   contentComplete = true;
   adsLoader.contentComplete();
   window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
+  window.parent./*OK*/postMessage({event: VideoEvents.ENDED}, '*');
 }
 
 /**
@@ -556,7 +558,14 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
  */
 export function onAdsLoaderError() {
   adRequestFailed = true;
-  playVideo();
+  // Send this message to trigger auto-play for failed pre-roll requests -
+  // failing to load an ad is just as good as loading one as far as starting
+  // playback is concerned because our content will be ready to play.
+  window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
+  if (playbackStarted) {
+    videoPlayer.addEventListener(interactEvent, showControls);
+    playVideo();
+  }
 }
 
 /**
@@ -569,6 +578,7 @@ export function onAdError() {
   if (adsManager) {
     adsManager.destroy();
   }
+  videoPlayer.addEventListener(interactEvent, showControls);
   playVideo();
 }
 
@@ -773,6 +783,7 @@ export function pauseVideo(event) {
   if (event && event.type == 'webkitendfullscreen') {
     // Video was paused because we exited fullscreen.
     videoPlayer.removeEventListener('webkitendfullscreen', pauseVideo);
+    fullscreen = false;
   }
 }
 
@@ -804,7 +815,7 @@ function onFullscreenClick(global) {
       fullscreenHeight = window.screen.height;
       requestFullscreen.call(global.document.documentElement);
     } else {
-      // Figure out how to make iPhone fullscren work here - I've got nothing.
+      // Use native fullscreen (iPhone)
       videoPlayer.webkitEnterFullscreen();
       // Pause the video when we leave fullscreen. iPhone does this
       // automatically, but we still use pauseVideo as an event handler to
@@ -1100,6 +1111,17 @@ const VideoEvents = {
    * @event pause
    */
   PAUSE: 'pause',
+
+  /**
+   * ended
+   *
+   * Fired when the video ends.
+   *
+   * This event should be fired in addition to `pause` when video ends.
+   *
+   * @event ended
+   */
+  ENDED: 'ended',
 
   /**
    * muted

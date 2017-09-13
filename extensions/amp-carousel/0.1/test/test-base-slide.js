@@ -31,11 +31,10 @@
  */
 
 import {BaseSlides} from '../base-slides';
-import * as sinon from 'sinon';
 
-describe('BaseSlides', () => {
 
-  let sandbox;
+describes.fakeWin('BaseSlides', {amp: true}, env => {
+  let win, doc;
   let buildSlidesSpy;
   let onViewportCallbackSpy;
   let hasPrevSpy;
@@ -52,7 +51,8 @@ describe('BaseSlides', () => {
 
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
     buildSlidesSpy = sandbox.spy();
     onViewportCallbackSpy = sandbox.spy();
     hasPrevSpy = sandbox.spy();
@@ -70,13 +70,9 @@ describe('BaseSlides', () => {
         sandbox.spy(BaseSlides.prototype, 'onViewportCallback');
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
 
   function setElement(options) {
-    const element = document.createElement('div');
+    const element = doc.createElement('div');
     if (options.loop) {
       element.setAttribute('loop', '');
     }

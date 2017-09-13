@@ -31,6 +31,7 @@ import {
   setStyle,
   setStyles,
 } from './style';
+import {toWin} from './types';
 
 
 /** @const {string} */
@@ -124,7 +125,7 @@ export function getFriendlyIframeEmbedOptional(iframe) {
 export function installFriendlyIframeEmbed(iframe, container, spec,
     opt_preinstallCallback) {
   /** @const {!Window} */
-  const win = getTopWindow(iframe.ownerDocument.defaultView);
+  const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensions = Services.extensionsFor(win);
 
@@ -134,7 +135,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   // Pre-load extensions.
   if (spec.extensionIds) {
     spec.extensionIds.forEach(
-        extensionId => extensions.loadExtension(extensionId));
+        extensionId => extensions.preloadExtension(extensionId));
   }
 
   const html = mergeHtml(spec);

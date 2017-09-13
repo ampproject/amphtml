@@ -241,6 +241,27 @@ describe('amp-img', () => {
       });
     });
 
+    it('should hide child placeholder elements if loading fails', () => {
+      sandbox.stub(impl, 'loadPromise').returns(Promise.reject());
+      const errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
+      const toggleSpy = sandbox.spy(impl, 'toggleFallback');
+      const togglePlaceholderSpy = sandbox.spy(impl, 'togglePlaceholder');
+      impl.buildCallback();
+      expect(errorSpy).to.have.not.been.called;
+      expect(toggleSpy).to.have.not.been.called;
+      expect(togglePlaceholderSpy).to.have.not.been.called;
+      expect(toggleElSpy).to.have.not.been.called;
+
+      return impl.layoutCallback().catch(() => {
+        expect(errorSpy).to.be.calledOnce;
+        expect(toggleSpy).to.be.calledOnce;
+        expect(toggleSpy.firstCall.args[0]).to.be.true;
+        expect(togglePlaceholderSpy).to.be.calledOnce;
+        expect(togglePlaceholderSpy.firstCall.args[0]).to.be.false;
+        expect(toggleElSpy.firstCall.args[0]).to.be.true;
+      });
+    });
+
     it('should fallback only once', () => {
       const loadStub = sandbox.stub(impl, 'loadPromise');
       loadStub

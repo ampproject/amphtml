@@ -22,6 +22,7 @@ import {isExperimentOn} from '../../../src/experiments';
 /** @const */
 const TAG = 'amp-google-vrview-image';
 
+
 class AmpGoogleVrviewImage extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -112,4 +113,7 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-google-vrview-image', AmpGoogleVrviewImage);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpGoogleVrviewImage);
+});

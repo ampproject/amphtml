@@ -89,6 +89,7 @@ import {
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
+import {stubService} from './test-helper';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {Services} from '../src/services';
@@ -97,21 +98,21 @@ import {
   adoptShadowMode,
   installAmpdocServices,
   installRuntimeServices,
-  registerElementForTesting,
 } from '../src/runtime';
 import {createElementWithAttributes} from '../src/dom';
 import {addParamsToUrl} from '../src/url';
 import {cssText} from '../build/css';
 import {CSS} from '../build/amp-ad-0.1.css.js';
-import {createAmpElementProto} from '../src/custom-element';
+import {createAmpElementProtoForTesting} from '../src/custom-element';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {
   installBuiltinElements,
   installExtensionsService,
   registerExtension,
 } from '../src/service/extensions-impl';
-import {resetLoadingCheckForTests} from '../src/element-stub';
-import {resetScheduledElementForTesting} from '../src/custom-element';
+import {
+  resetScheduledElementForTesting,
+} from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
 import * as sinon from 'sinon';
 
@@ -286,8 +287,10 @@ export const repeated = (function() {
 
 
 /**
- * Mocks Window.fetch in the given environment and exposes fetch-mock's mock()
- * function as `env.expectFetch(matcher, response)`.
+ * Mocks Window.fetch in the given environment and exposes `env.fetchMock`. For
+ * convenience, also exposes fetch-mock's mock() function as
+ * `env.expectFetch(matcher, response)`.
+ *
  * @param {!Object} env
  * @see http://www.wheresrhys.co.uk/fetch-mock/quickstart
  */
@@ -295,6 +298,7 @@ function attachFetchMock(env) {
   fetchMock.constructor.global = env.win;
   fetchMock._mock();
 
+  env.fetchMock = fetchMock;
   env.expectFetch = fetchMock.mock.bind(fetchMock);
 }
 
@@ -642,6 +646,9 @@ class AmpFixture {
     const win = env.win;
     let completePromise;
 
+    // Configure mode.
+    configureAmpTestMode(win);
+
     // AMP requires canonical URL.
     const link = win.document.createElement('link');
     link.setAttribute('rel', 'canonical');
@@ -686,12 +693,42 @@ class AmpFixture {
         const version = tuple[1] || '0.1';
         const installer = extensionsBuffer[`${extensionId}:${version}`];
         if (installer) {
+          if (env.ampdoc) {
+            env.ampdoc.declareExtension_(extensionId);
+          }
           registerExtension(env.extensions, extensionId, installer, win.AMP);
-        } else {
-          registerElementForTesting(win, extensionId);
         }
       });
     }
+
+    /**
+     * Stubs a method of a service object using Sinon.
+     *
+     * @param {string} serviceId
+     * @param {string} method
+     * @return {!sinon.stub}
+     */
+    env.stubService = (serviceId, method) => {
+      return stubService(env.sandbox, env.win, serviceId, method);
+    };
+
+    /**
+     * Installs the specified extension.
+     * @param {string} extensionId
+     * @param {string=} opt_version
+     */
+    env.installExtension = function(extensionId, opt_version) {
+      const version = opt_version || '0.1';
+      const installer = extensionsBuffer[`${extensionId}:${version}`];
+      if (!installer) {
+        throw new Error(`extension not found: ${extensionId}:${version}.` +
+            ' Make sure the module is imported');
+      }
+      if (env.ampdoc) {
+        env.ampdoc.declareExtension_(extensionId);
+      }
+      registerExtension(env.extensions, extensionId, installer, win.AMP);
+    };
 
     /**
      * Creates a custom element without registration.
@@ -733,6 +770,7 @@ class AmpFixture {
             env.embed = embed;
             env.parentWin = env.win;
             env.win = embed.win;
+            configureAmpTestMode(embed.win);
           });
       completePromise = completePromise ?
           completePromise.then(() => promise) : promise;
@@ -744,7 +782,10 @@ class AmpFixture {
           hostElement, importDoc, win.location.href);
       const ampdoc = ret.ampdoc;
       env.ampdoc = ampdoc;
-      const promise = ampdoc.whenReady();
+      const promise = Promise.all([
+        env.extensions.installExtensionsInDoc_(ampdoc, extensionIds),
+        ampdoc.whenReady(),
+      ]);
       completePromise = completePromise ?
           completePromise.then(() => promise) : promise;
     }
@@ -758,7 +799,6 @@ class AmpFixture {
     if (env.embed) {
       env.embed.destroy();
     }
-    resetLoadingCheckForTests();
     if (win.customElements && win.customElements.elements) {
       for (const k in win.customElements.elements) {
         resetScheduledElementForTesting(win, k);
@@ -773,6 +813,14 @@ class AmpFixture {
       });
     }
   }
+}
+
+
+/**
+ * @param {!Window} win
+ */
+function configureAmpTestMode(win) {
+  win.AMP_TEST = true;
 }
 
 
@@ -816,7 +864,7 @@ function installAmpAdStylesPromise(win) {
 function createAmpElement(win, opt_name, opt_implementationClass) {
   // Create prototype and constructor.
   const name = opt_name || 'amp-element';
-  const proto = createAmpElementProto(win, name);
+  const proto = createAmpElementProtoForTesting(win, name);
   const ctor = function() {
     const el = win.document.createElement(name);
     el.__proto__ = proto;

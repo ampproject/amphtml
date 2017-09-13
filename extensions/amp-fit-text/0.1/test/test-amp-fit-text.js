@@ -14,42 +14,41 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../src/services';
-import {createIframePromise} from '../../../../testing/iframe';
-import '../amp-fit-text';
 import {
   calculateFontSize_,
   updateOverflow_,
 } from '../amp-fit-text';
-import {adopt} from '../../../../src/runtime';
-
-adopt(window);
 
 
-describe('amp-fit-text component', () => {
+describes.realWin('amp-fit-text component', {
+  amp: {
+    extensions: ['amp-fit-text'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getFitText(text, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      const ft = iframe.doc.createElement('amp-fit-text');
-      ft.setAttribute('width', '111');
-      ft.setAttribute('height', '222');
-      ft.style.fontFamily = 'Arial';
-      ft.style.fontSize = '17px';
-      ft.style.lineHeight = '17px';
-      ft.style.overflow = 'hidden';
-      ft.style.width = '111px';
-      ft.style.height = '222px';
-      ft.style.position = 'relative';
-      if (opt_responsive) {
-        ft.setAttribute('layout', 'responsive');
-      }
-      ft.textContent = text;
-      iframe.doc.body.appendChild(ft);
-      return Services.timerFor(window).promise(16).then(() => {
-        ft.implementation_.layoutCallback();
-        return ft;
-      });
-    });
+    const ft = doc.createElement('amp-fit-text');
+    ft.setAttribute('width', '111');
+    ft.setAttribute('height', '222');
+    ft.style.fontFamily = 'Arial';
+    ft.style.fontSize = '17px';
+    ft.style.lineHeight = '17px';
+    ft.style.overflow = 'hidden';
+    ft.style.width = '111px';
+    ft.style.height = '222px';
+    ft.style.position = 'relative';
+    if (opt_responsive) {
+      ft.setAttribute('layout', 'responsive');
+    }
+    ft.textContent = text;
+    doc.body.appendChild(ft);
+    return ft.build().then(() => ft.layoutCallback()).then(() => ft);
   }
 
   it('renders', () => {
@@ -60,27 +59,24 @@ describe('amp-fit-text component', () => {
       expect(content.textContent).to.equal(text);
     });
   });
-
 });
 
 
-describe('amp-fit-text calculateFontSize', () => {
-
+describes.realWin('amp-fit-text calculateFontSize', {}, env => {
+  let win, doc;
   let element;
 
   beforeEach(() => {
-    element = document.createElement('div');
+    win = env.win;
+    doc = win.document;
+    element = doc.createElement('div');
     element.style.fontFamily = 'Arial';
     element.style.lineHeight = '1em';
     element.style.position = 'absolute';
     element.style.left = 0;
     element.style.top = 0;
     element.style.visibility = 'hidden';
-    document.body.appendChild(element);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(element);
+    doc.body.appendChild(element);
   });
 
   it('should always fit on one line w/ enough width', () => {
@@ -128,13 +124,15 @@ describe('amp-fit-text calculateFontSize', () => {
 });
 
 
-describe('amp-fit-text updateOverflow', () => {
-
+describes.realWin('amp-fit-text updateOverflow', {}, env => {
+  let win, doc;
   let content;
   let classToggles;
   let measurer;
 
   beforeEach(() => {
+    win = env.win;
+    doc = win.document;
     classToggles = {};
     content = {
       style: {},
@@ -145,16 +143,12 @@ describe('amp-fit-text updateOverflow', () => {
       },
     };
 
-    measurer = document.createElement('div');
+    measurer = doc.createElement('div');
     measurer.style.fontFamily = 'Arial';
     measurer.style.lineHeight = '1.15em';
     measurer.style.position = 'absolute';
     measurer.style.width = '300px';
-    document.body.appendChild(measurer);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(measurer);
+    doc.body.appendChild(measurer);
   });
 
   function getLineClamp() {
