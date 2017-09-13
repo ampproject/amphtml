@@ -27,10 +27,12 @@ import {dict} from './utils/object.js';
  * @param {!AmpElement} element
  * @param {!string} sentinel
  * @param {!JsonObject=} attributes
+ * @param {string=} opt_safeframeVersion If passed, will append fluid-related
+ *    attributes.
  * @return {!JsonObject}
  */
 export function getContextMetadata(
-    parentWindow, element, sentinel, attributes) {
+    parentWindow, element, sentinel, attributes, opt_safeframeVersion = '') {
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
@@ -82,6 +84,48 @@ export function getContextMetadata(
   const adSrc = element.getAttribute('src');
   if (adSrc) {
     attributes['src'] = adSrc;
+  }
+  if (opt_safeframeVersion) {
+    attributes['uid'] = 1;
+    attributes['hostPeerName'] = parentWindow.location.origin;
+    // The initial geometry isn't used for anything important, but it is
+    // expected, so we pass this string with all zero values.
+    attributes['initialGeometry'] = JSON.stringify(
+        /** @type {!JsonObject} */ ({
+          'windowCoords_t': 0,
+          'windowCoords_r': 0,
+          'windowCoords_b': 0,
+          'windowCoords_l': 0,
+          'frameCoords_t': 0,
+          'frameCoords_r': 0,
+          'frameCoords_b': 0,
+          'frameCoords_l': 0,
+          'styleZIndex': 'auto',
+          'allowedExpansion_t': 0,
+          'allowedExpansion_r': 0,
+          'allowedExpansion_b': 0,
+          'allowedExpansion_l': 0,
+          'xInView': 0,
+          'yInView': 0,
+        }));
+    attributes['permissions'] = JSON.stringify(
+        /** @type {!JsonObject} */ ({
+          expandByOverlay: false,
+          expandByPush: false,
+          readCookie: false,
+          writeCookie: false,
+        }));
+    attributes['metadata'] = JSON.stringify(
+        /** @type {!JsonObject} */ ({
+          shared: {
+            'sf_ver': opt_safeframeVersion,
+            'ck_on': 1,
+            'flash_ver': '26.0.0',
+          },
+        }));
+    attributes['reportCreativeGeometry'] = true;
+    attributes['isDifferentSourceWindow'] = false;
+    attributes['sentinel'] = sentinel;
   }
   return attributes;
 }

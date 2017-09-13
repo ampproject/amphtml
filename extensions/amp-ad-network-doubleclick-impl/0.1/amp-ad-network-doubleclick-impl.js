@@ -82,6 +82,7 @@ import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {
   getPublisherSpecifiedRefreshInterval,
   RefreshManager,
@@ -300,6 +301,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout) ||
+        this.element.getAttribute('height') == 'fluid';
+  }
+
+
+  /** @override */
   isValidElement() {
     return isGoogleAdsA4AValidEnvironment(this.win) &&
       this.isAmpAdElement() &&
@@ -316,6 +324,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
+    this.isFluid = this.element.getAttribute('height') == 'fluid';
+    this.creativeSize = this.isFluid ?
+        {width: 0, height: 0} : this.creativeSize;
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
       addExperimentIdToElement(verifierEid, this.element);
@@ -400,9 +411,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getBlockParameters_() {
     dev().assert(this.initialSize_);
     dev().assert(this.jsonTargeting_);
-    let sizeStr = this.isFluid
-        ? '320x50'
-        : `${this.initialSize_.width}x${this.initialSize_.height}`;
+    let sizeStr = this.isFluid ?
+        '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
