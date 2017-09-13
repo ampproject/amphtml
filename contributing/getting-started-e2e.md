@@ -151,16 +151,22 @@ Now run `git remote -v` again and notice that you have set up your upstream alia
 
 Now that you have all of the files copied locally you can actually build the code and run a local server to try things out.
 
-amphtml uses Node.js, the yarn package manager and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.  Installing these and getting amphtml built is straightforward:
+amphtml uses Node.js, the npm package manager and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.  Installing these and getting amphtml built is straightforward:
 
-* Install [NodeJS](https://nodejs.org/) (which includes npm).
+* Install [NodeJS](https://nodejs.org/) version >= 4.7 (which includes npm)
 
-* Install [yarn](https://yarnpkg.com/en/docs/install)
+* If the version of [npm](https://www.npmjs.com/) that was installed along with NodeJS is lower than 5 (check with `npm -v`), upgrade it by running
+   ```
+   npm install -g npm@latest
+   ```
+
+   The preceding command might require elevated privileges using `sudo` on some platforms.
 
 * In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
    ```
-   yarn
+   npm install
    ```
+
    You should see a progress indicator and some messages scrolling by.  You may see some warnings about optional dependencies that are generally safe to ignore.
 
 * For some local testing we refer to fake local URLs in order to simulate referencing third party URLs.  This requires extra setup so your browser will know that these URLs actually point to your local server.
@@ -171,11 +177,13 @@ amphtml uses Node.js, the yarn package manager and the Gulp build system to buil
 
 * The AMP Project uses Gulp as our build system.   Gulp uses a configuration file ([gulpfile.js](https://github.com/ampproject/amphtml/blob/master/gulpfile.js)) to build amphtml (including the amphtml javascript) and to start up the Node.js server with the proper settings.  You don't really have to understand exactly what it is doing at this point--you just have to install it and use it.
 
-   You can install Gulp using yarn:
+   You can install Gulp using npm:
 
    ```
-   yarn global add gulp
+   npm install -g gulp
    ```
+
+   The preceding command might require elevated privileges using `sudo` on some platforms.
 
 Now whenever you're ready to build amphtml and start up your local server, simply go to your local repository directory and run:
 
@@ -269,6 +277,8 @@ If there are changes that conflict with changes on your branch (e.g. someone mod
 The common workflow for making changes to files in Git is:
 
 * edit some files using your favorite editor
+
+* if you edited `package.json`, run `npm prune && npm install` to generate an updated `package-lock.json` file
 
 * tell Git that you care about these changes by _staging_ them using the `git add` command
 
