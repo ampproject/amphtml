@@ -131,6 +131,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 * [Performance](#performance)
 * [Device and Browser](#device-and-browser)
 * [Interaction](#interaction)
+* [Click](#click)
 * [Visibility](#visibility)
 * [Miscellaneous](#miscellaneous)
 
@@ -197,6 +198,18 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Horizontal Scroll Boundary](#horizontal-scroll-boundary) | N/A | `${horizontalScrollBoundary}` |
 | [Total Engaged Time](#total-engaged-time) | `TOTAL_ENGAGED_TIME` | `${totalEngagedTime}` |
 | [Vertical Scroll Boundary](#vertical-scroll-boundary) | N/A | `${verticalScrollBoundary}` |
+
+### Click
+
+| Variable Name  | Platform Variable  | amp-analytics Variable |
+|----------------|--------------------|------------------------|
+| [Click Hostname](#click-hostname) | N/A | clickHostname |
+| [Click Protocol](#click-protcol) | N/A | clickProtocol |
+| [Click Pathname](#click-pathname) | N/A | clickPathname |
+| [Click Query](#click-query) | N/A | clickQuery |
+| [Click Hash](#click-hash) | N/A | clickHash |
+| [Click URL](#click-url) | N/A | clickUrl |
+
 
 ### Visibility
 
@@ -994,6 +1007,48 @@ Provides the vertical scroll boundary that triggered a scroll event. This variab
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${verticalScrollBoundary}`
+
+#### Click Hostname
+
+Provides the link hostname that clicked <a> tag. This variable is only available in a `trigger` of type `click`.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${clickHostname}`
+
+#### Click Protocol
+
+Provides the link protocol that clicked <a> tag. This variable is only available in a `trigger` of type `click`.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${clickProtocol}`
+
+#### Click Pathname
+
+Provides the link pathname that clicked <a> tag. This variable is only available in a `trigger` of type `click`.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${clickPathname}`
+
+#### Click Query
+
+Provides the link query parameter that clicked <a> tag. This variable is only available in a `trigger` of type `click`.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${clickQuery}`
+
+#### Click Hash
+
+Provides the link hash parameter that clicked <a> tag. This variable is only available in a `trigger` of type `click`.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${clickHash}`
+
+#### Click URL
+
+Provides the link full URL that clicked <a> tag. This variable is only available in a `trigger` of type `click`.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${clickUrl}`
 
 #### Viewer
 
