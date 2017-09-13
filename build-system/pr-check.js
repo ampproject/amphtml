@@ -380,6 +380,7 @@ function main(argv) {
     process.exit(1);
   }
 
+  // Make sure changes to package.json also update package-lock.json.
   if (files.indexOf('package.json') != -1 && files.indexOf('package-lock.json') == -1) {
     console.error(fileLogPrefix, util.colors.red('ERROR:'),
         'Updates to', util.colors.cyan('package.json'),
