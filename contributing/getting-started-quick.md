@@ -27,9 +27,9 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * Install [NodeJS](https://nodejs.org/) version >= 4.7
 
-* Install [npm](https://www.npmjs.com/get-npm)` version >= 5
+* If the version of [npm](https://www.npmjs.com/)` that was installed with NodeJS is lower than version 5, upgrade it by running `npm install -g npm@latest` (on some platforms this command might require elevated privileges using `sudo`)
 
-* Install Gulp by running `npm install -g gulp` (on some platforms this command might require elevated privileges using `sudo`)
+* Install Gulp by running `npm install -g gulp` (as before, this command might required `sudo`)
 
 * Add this line to your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows):
 

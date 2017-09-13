@@ -155,7 +155,12 @@ amphtml uses Node.js, the npm package manager and the Gulp build system to build
 
 * Install [NodeJS](https://nodejs.org/) version >= 4.7 (which includes npm)
 
-* Install [npm](https://www.npmjs.com/get-npm) version >= 5
+* If the version of [npm](https://www.npmjs.com/) that was installed along with NodeJS is lower than 5 (check with `npm -v`), upgrade it by running
+   ```
+   npm install -g npm@latest
+   ```
+
+   On some platform the preceding command might require elevated privileges using `sudo`.
 
 * In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
    ```
