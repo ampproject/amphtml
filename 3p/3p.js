@@ -36,16 +36,27 @@ let ThirdPartyFunctionDef;
  * @const {!Object<ThirdPartyFunctionDef>}
  * @visibleForTesting
  */
-export const registrations = map();
+let registrations;
 
 /** @type {number} */
 let syncScriptLoads = 0;
+
+/**
+ * Returns the registration map
+ */
+export function getRegistrations() {
+  if (!registrations) {
+    registrations = map();
+  }
+  return registrations;
+}
 
 /**
  * @param {string} id The specific 3p integration.
  * @param {ThirdPartyFunctionDef} draw Function that draws the 3p integration.
  */
 export function register(id, draw) {
+  const registrations = getRegistrations();
   dev().assert(!registrations[id], 'Double registration %s', id);
   registrations[id] = draw;
 }
