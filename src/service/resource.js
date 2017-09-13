@@ -314,7 +314,7 @@ export class Resource {
       this.isBuilding_ = false;
       if (this.hasBeenMeasured()) {
         this.state_ = ResourceState.READY_FOR_LAYOUT;
-        this.element.updateLayoutBox(this.layoutBox_);
+        this.element.updateLayoutBox(this.getLayoutBox());
       } else {
         this.state_ = ResourceState.NOT_LAID_OUT;
       }
@@ -416,9 +416,38 @@ export class Resource {
 
     this.isMeasureRequested_ = false;
 
-    let box = this.resources_.getViewport().getLayoutRect(this.element);
-    const oldBox = this.layoutBox_;
+    const oldBox = this.getPageLayoutBox();
+    if (true) {
+      this.measureViaLayers_();
+    } else {
+      this.measureViaResources_();
+    }
+    const box = this.getPageLayoutBox();
+
+    // Note that "left" doesn't affect readiness for the layout.
+    if (this.state_ == ResourceState.NOT_LAID_OUT ||
+          oldBox.top != box.top ||
+          oldBox.width != box.width ||
+          oldBox.height != box.height) {
+
+      if (this.element.isUpgraded() &&
+              this.state_ != ResourceState.NOT_BUILT &&
+              (this.state_ == ResourceState.NOT_LAID_OUT ||
+                  this.element.isRelayoutNeeded())) {
+        this.state_ = ResourceState.READY_FOR_LAYOUT;
+      }
+    }
+
+    if (!this.hasBeenMeasured()) {
+      this.initialLayoutBox_ = box;
+    }
+
+    this.element.updateLayoutBox(box);
+  }
+
+  measureViaResources_() {
     const viewport = this.resources_.getViewport();
+    let box = this.resources_.getViewport().getLayoutRect(this.element);
     this.layoutBox_ = box;
 
     // Calculate whether the element is currently is or in `position:fixed`.
@@ -447,26 +476,11 @@ export class Resource {
       box = this.layoutBox_ = moveLayoutRect(box, -viewport.getScrollLeft(),
           -viewport.getScrollTop());
     }
+  }
 
-    // Note that "left" doesn't affect readiness for the layout.
-    if (this.state_ == ResourceState.NOT_LAID_OUT ||
-          oldBox.top != box.top ||
-          oldBox.width != box.width ||
-          oldBox.height != box.height) {
-
-      if (this.element.isUpgraded() &&
-              this.state_ != ResourceState.NOT_BUILT &&
-              (this.state_ == ResourceState.NOT_LAID_OUT ||
-                  this.element.isRelayoutNeeded())) {
-        this.state_ = ResourceState.READY_FOR_LAYOUT;
-      }
-    }
-
-    if (!this.hasBeenMeasured()) {
-      this.initialLayoutBox_ = box;
-    }
-
-    this.element.updateLayoutBox(box);
+  measureViaLayers_() {
+    const layers = Services.layersForDoc(this.element);
+    layers.remeasure(this.element);
   }
 
   /**
@@ -475,12 +489,16 @@ export class Resource {
    */
   completeCollapse() {
     toggle(this.element, false);
-    this.layoutBox_ = layoutRectLtwh(
-        this.layoutBox_.left,
-        this.layoutBox_.top,
-        0, 0);
+    if (true) {
+      this.layoutBox_ = layoutRectLtwh(0, 0, 0, 0);
+    } else {
+      this.layoutBox_ = layoutRectLtwh(
+          this.layoutBox_.left,
+          this.layoutBox_.top,
+          0, 0);
+    }
     this.isFixed_ = false;
-    this.element.updateLayoutBox(this.layoutBox_);
+    this.element.updateLayoutBox(this.getLayoutBox());
     const owner = this.getOwner();
     if (owner) {
       owner.collapsedCallback(this.element);
@@ -527,8 +545,10 @@ export class Resource {
    */
   getLayoutBox() {
     if (true) {
-      const e = this.element;
-      return Services.layersForDoc(e).getScrolledBox(e);
+      // TODO(jridgewell): transition all callers to position and/or size calls
+      // directly.
+      const {element} = this;
+      return Services.layersForDoc(element).getScrolledBox(element);
     }
 
     if (!this.isFixed_) {
@@ -545,6 +565,14 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getPageLayoutBox() {
+    if (true) {
+      const {element} = this;
+      const layers = Services.layersForDoc(element);
+      const pos = layers.getOffsetPosition(element);
+      const size = layers.getSize(element);
+      return layoutRectLtwh(pos.left, pos.top, size.width, size.height);
+    }
+
     return this.layoutBox_;
   }
 
@@ -565,8 +593,9 @@ export class Resource {
    */
   isDisplayed() {
     const isFluid = this.element.getLayout() == Layout.FLUID;
-    const hasNonZeroSize = this.layoutBox_.height > 0 &&
-        this.layoutBox_.width > 0;
+    // TODO #getSize
+    const box = this.getLayoutBox();
+    const hasNonZeroSize = box.height > 0 && box.width > 0;
     return (isFluid || hasNonZeroSize) &&
         !!this.element.ownerDocument &&
         !!this.element.ownerDocument.defaultView;
@@ -637,6 +666,7 @@ export class Resource {
     if (multiplier === true || multiplier === false) {
       return multiplier;
     }
+
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
     const viewportBox = this.resources_.getViewport().getRect();
@@ -645,12 +675,14 @@ export class Resource {
     multiplier = Math.max(multiplier, 0);
     let scrollPenalty = 1;
     let distance;
+
     if (viewportBox.right < layoutBox.left ||
         viewportBox.left > layoutBox.right) {
       // TODO
       // If outside of viewport's x-axis, element is not in viewport.
       return false;
     }
+
     if (viewportBox.bottom < layoutBox.top) {
       // Element is below viewport
       distance = layoutBox.top - viewportBox.bottom;

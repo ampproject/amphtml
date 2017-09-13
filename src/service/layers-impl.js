@@ -142,6 +142,18 @@ export class LayoutLayers {
     return layoutRectLtwh(left, top, width, height);
   }
 
+  getScrolledPosition(element, opt_parent) {
+    return LayoutElement.getScrolledPosition(element, opt_parent);
+  }
+
+  getOffsetPosition(element, opt_parent) {
+    return LayoutElement.getScrolledPosition(element, opt_parent);
+  }
+
+  getSize(element) {
+    return LayoutElement.getSize(element);
+  }
+
   /**
    * Remeasures the element, and any other elements who's cached rects may have
    * been altered by this element's mutation.
@@ -346,8 +358,8 @@ export class LayoutLayer {
     return this.root_.contains(element);
   }
 
-  getOffsets() {
-    return LayoutElement.getOffsets(this.root_);
+  getOffsetFromParent() {
+    return LayoutElement.getOffsetFromParent(this.root_);
   }
 
   getScrollTop() {
@@ -404,8 +416,12 @@ export class LayoutLayer {
     }
   }
 
-  getScrolledPosition() {
-    return LayoutElement.getScrolledPosition(this.root_);
+  getScrolledPosition(opt_parent) {
+    return LayoutElement.getScrolledPosition(this.root_, opt_parent);
+  }
+
+  getOffsetPosition(opt_parent) {
+    return LayoutElement.getOffsetPosition(this.root_, opt_parent);
   }
 
   /**
@@ -486,13 +502,48 @@ export class LayoutElement {
     }
 
     const box = element.getBoundingClientRect();
-    let {left, top} = box;
-    if (opt_parent) {
-      const parentBox = LayoutElement.getScrolledPosition(opt_parent);
-      left -= parentBox.left;
-      top -= parentBox.top;
+    if (!opt_parent) {
+      return PositionLt(box.left, box.top);
     }
-    return PositionLt(left, top);
+
+    const relative = LayoutElement.getScrolledPosition(opt_parent);
+    return PositionLt(
+      box.left - relative.left,
+      box.top - relative.top
+    );
+  }
+
+  /**
+   * Calculates the LayoutRectDef of element relative to opt_parent
+   * (or viewport), ignoring any scroll positions.
+   *
+   * @param {!Element} element
+   * @param {Element=} opt_parent
+   * @return {!LayoutRectDef}
+   */
+  static getOffsetPosition(element, opt_parent) {
+    // 4 cases:
+    //   1. AmpElement, AmpElement
+    //   2. AmpElement, Element
+    //   3. Element, AmpElement
+    //   4. Element, Element
+    const layout = LayoutElement.forOptional(element);
+    if (layout) {
+      return layout.getOffsetPosition(opt_parent);
+    }
+
+    const box = element.getBoundingClientRect();
+    const parent = LayoutLayer.getParentLayer(element);
+
+    if (!parent) {
+      return PositionLt(box.left, box.top);
+    }
+
+    const relative = parent.getOffsetPosition(opt_parent);
+    return PositionLt(
+      box.left - relative.left,
+      box.top - relative.top
+    );
   }
 
   /**
@@ -511,15 +562,19 @@ export class LayoutElement {
     return SizeWh(box.width, box.height);
   }
 
-  static getOffsets(element) {
+  static getOffsetFromParent(element) {
     const layout = LayoutElement.forOptional(element);
     if (layout) {
-      return layout.getOffsets();
+      return layout.getOffsetFromParent();
+    }
+
+    const parent = LayoutLayer.getParentLayer(element);
+    if (!parent) {
+      return PositionLt(0, 0);
     }
 
     const box = element.getBoundingClientRect();
-    const parent = LayoutLayer.getParentLayer(element);
-    const relative = parent ? parent.getScrolledPosition() : box;
+    const relative = parent.getScrolledPosition();
     return PositionLt(
         box.left - relative.left,
         box.top - relative.top
@@ -548,7 +603,7 @@ export class LayoutElement {
    * scroll position into account.
    * @return {!PositionDef}
    */
-  getOffsets() {
+  getOffsetFromParent() {
     return this.position_;
   }
 
@@ -559,7 +614,7 @@ export class LayoutElement {
    * @return {!LayoutRectDef}
    */
   getScrolledPosition(opt_parent) {
-    const position = this.getOffsets();
+    const position = this.getOffsetFromParent();
     let x = position.left;
     let y = position.top;
 
@@ -571,7 +626,32 @@ export class LayoutElement {
       y -= p.getScrollTop();
 
       if (last) {
-        const position = last.getOffsets();
+        const position = last.getOffsetFromParent();
+        x += position.left;
+        y += position.top;
+      }
+      last = p;
+    }
+
+    return PositionLt(x, y);
+  }
+
+  /**
+   * Gets the position of the element relative to the parent layer, taking
+   * scroll position of the parents into account.
+   * @param {Element=} opt_parent
+   * @return {!LayoutRectDef}
+   */
+  getOffsetPosition(opt_parent) {
+    const position = this.getOffsetFromParent();
+    let x = position.left;
+    let y = position.top;
+
+    let last;
+    const stopAt = opt_parent ? LayoutLayer.getParentLayer(opt_parent) : null;
+    for (let p = this.getParentLayer(); p !== stopAt; p = p.getParentLayer()) {
+      if (last) {
+        const position = last.getOffsetFromParent();
         x += position.left;
         y += position.top;
       }
