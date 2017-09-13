@@ -91,6 +91,11 @@ export function createShadowRoot(hostElement) {
     const rootId = `i-amphtml-sd-${win.Math.floor(win.Math.random() * 10000)}`;
     shadowRoot.id = rootId;
     shadowRoot.host.classList.add(rootId);
+
+    // CSS isolation.
+    installCssTransformer(shadowRoot, css => {
+      return transformShadowCss(shadowRoot, css);
+    });
   }
 
   return shadowRoot;
