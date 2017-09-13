@@ -15,7 +15,7 @@ before_install:
   - sh -e /etc/init.d/xvfb start
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb
-  - npm install -g npm@'^5'
+  - npm install -g npm@'^5.0.0'
 before_script:
   - pip install --user protobuf
   - gem install percy-capybara phantomjs poltergeist

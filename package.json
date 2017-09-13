@@ -6,7 +6,7 @@
   "main": "index.js",
   "engines": {
     "node": "^4.7.0",
-    "npm": "^5"
+    "npm": "^5.0.0"
   },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
