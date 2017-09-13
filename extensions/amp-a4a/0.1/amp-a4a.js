@@ -628,10 +628,7 @@ export class AmpA4A extends AMP.BaseElement {
           }
           const safeframeVersionHeader =
             fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
-          // For Fluid ads, we can't change the safeframe version because the ad
-          // request is made with DEFAULT_SAFEFRAME_VERSION, which is the
-          // version that it will expect the host container to have.
-          if (!this.isFluid && /^[0-9-]+$/.test(safeframeVersionHeader) &&
+          if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
               safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
             this.safeframeVersion_ = safeframeVersionHeader;
             this.preconnect.preload(this.getSafeframePath_());
@@ -672,14 +669,6 @@ export class AmpA4A extends AMP.BaseElement {
           }
           const {bytes, headers} = responseParts;
           const size = this.extractSize(responseParts.headers);
-          // If a size header is returned, then we know we're not Fluid, unless
-          // the dimensions are 0x0.
-          // TODO(levitzky) Once Fluid responses no longer contain the creative
-          // size header at all, we can remove the height/width check from the
-          // condition below.
-          if (size && size.height != 0 && size.width != 0) {
-            this.isFluid = false;
-          }
           this.creativeSize_ = size || this.creativeSize_;
           if ((this.isFluid || this.experimentalNonAmpCreativeRenderMethod_ !=
               XORIGIN_MODE.CLIENT_CACHE) &&
@@ -1457,6 +1446,7 @@ export class AmpA4A extends AMP.BaseElement {
       // TODO(bradfrizzell): change name of function and var
       let contextMetadata = getContextMetadata(
           this.win, this.element, this.sentinel);
+      this.sentinel = 'sentinel';
       if (this.isFluid) {
         contextMetadata['uid'] = 1;
         contextMetadata['hostPeerName'] = this.win.location.origin;
