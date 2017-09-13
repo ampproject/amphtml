@@ -291,6 +291,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {number} */
     this.ifi_ = 0;
+
+    /** @private {string} */
+    this.fluidImpressionUrl_ = null;
+
+    /** @private {boolean} */
+    this.fluidImpressionFired_ = false;
   }
 
   /** @override */
@@ -508,6 +514,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
+<<<<<<< HEAD
     this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
     this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
 
@@ -515,6 +522,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (refreshInterval && !getPublisherSpecifiedRefreshInterval(
         this.element, this.win, 'doubleclick')) {
       this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
+=======
+    if (!this.isFluid) {
+      this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
+      this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
+    } else {
+      this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
+>>>>>>> Refactors.
     }
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
@@ -683,6 +697,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if ((width != pWidth || height != pHeight)
         && (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
+    }
+  }
+
+  /** @overrde */
+  onFluidExpansion() {
+    if (!this.fluidImpressionFired_) {
+      this.fireDelayedImpressions(this.fluidImpressionUrl, false);
+      this.fluidImpressionFired_ = true;
     }
   }
 
@@ -862,9 +884,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * @param {string} impressions
    * @param {boolean=} scrubReferer
-   * @visibileForTesting
+   * @override
    */
-  fireDelayedImpressions(impressions, scrubReferer) {
+  fireDelayedImpressions(impressions, scrubReferer) { debugger;
     if (!impressions) {
       return;
     }

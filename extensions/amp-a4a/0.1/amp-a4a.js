@@ -55,7 +55,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
-import {listenFor, postMessage} from '../../../src/iframe-helper';
+import {listenFor} from '../../../src/iframe-helper';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -315,6 +315,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @protected {boolean} */
     this.isFluid = false;
+
+    /** @private {string} */
+    this.fluidImpressionUrl_;
   }
 
   /** @override */
@@ -678,6 +681,9 @@ export class AmpA4A extends AMP.BaseElement {
           // condition below.
           if (size && size.height != 0 && size.width != 0) {
             this.isFluid = false;
+          }
+          if (this.isFluid) {
+            this.fluidImpressionUrl_ = responseParts.headers.get('X-AmpImps');
           }
           this.creativeSize_ = size || this.creativeSize_;
           if ((this.isFluid || this.experimentalNonAmpCreativeRenderMethod_ !=
@@ -1353,8 +1359,9 @@ export class AmpA4A extends AMP.BaseElement {
           });
         } else {
           const payload = JSON.parse(data['p']);
-          this.attemptChangeSize(payload.height, payload.width).catch(
-              () => this.forceCollapse());
+          this.attemptChangeSize(payload.height, payload.width)
+              .then(() => this.onFluidExpansion())
+              .catch(() => this.forceCollapse());
         }
       }, /* opt_is3p */ true);
     }
@@ -1647,6 +1654,7 @@ export class AmpA4A extends AMP.BaseElement {
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
 
   /**
+<<<<<<< HEAD
    * Whether preferential render should still be utilized if web crypto is unavailable,
    * and crypto signature header is present.
    * @return {!boolean}
@@ -1654,6 +1662,11 @@ export class AmpA4A extends AMP.BaseElement {
   shouldPreferentialRenderWithoutCrypto() {
     return false;
   }
+=======
+   * Callback executed when a Fluid creative is allowed to resize.
+   */
+  onFluidExpansion() {}
+>>>>>>> Refactors.
 }
 
 /**
