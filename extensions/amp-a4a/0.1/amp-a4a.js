@@ -1369,12 +1369,11 @@ export class AmpA4A extends AMP.BaseElement {
           if (this.isFluid) {
             // If this is a Fluid slot, we must send an initial message to
             // SafeFrame.
-            postMessage(
-                /** @type {!Element} */ (this.iframe),
-                'connect-message',
-                /** @type {!JsonObject} */
-                ({message: 'connect', c: 'sfchannel1'}),
-                'https://tpc.googlesyndication.com');
+            if (this.iframe.contentWindow) {
+              this.iframe.contentWindow./*OK*/postMessage(
+                  JSON.stringify({message: 'connect', c: 'sfchannel1'}),
+                  'https://tpc.googlesyndication.com');
+            }
           }
           return Promise.resolve();
         });
@@ -1454,6 +1453,7 @@ export class AmpA4A extends AMP.BaseElement {
           return Promise.reject('Unrecognized rendering mode request');
       }
       // TODO(bradfrizzell): change name of function and var
+      this.sentinel = 'sentinel'; // TODO(levitzky) REMOVE
       let contextMetadata = getContextMetadata(
           this.win, this.element, this.sentinel);
       if (this.isFluid) {
@@ -1461,36 +1461,39 @@ export class AmpA4A extends AMP.BaseElement {
         contextMetadata['hostPeerName'] = this.win.location.origin;
         // The initial geometry isn't used for anything important, but it is
         // expected, so we pass this string with all zero values.
-        contextMetadata['initialGeometry'] = JSON.stringify({
-          'windowCoords_t': 0,
-          'windowCoords_r': 0,
-          'windowCoords_b': 0,
-          'windowCoords_l': 0,
-          'frameCoords_t': 0,
-          'frameCoords_r': 0,
-          'frameCoords_b': 0,
-          'frameCoords_l': 0,
-          'styleZIndex': 'auto',
-          'allowedExpansion_t': 0,
-          'allowedExpansion_r': 0,
-          'allowedExpansion_b': 0,
-          'allowedExpansion_l': 0,
-          'xInView': 0,
-          'yInView': 0,
-        });
-        contextMetadata['permissions'] = JSON.stringify({
-          expandByOverlay: false,
-          expandByPush: false,
-          readCookie: false,
-          writeCookie: false,
-        });
-        contextMetadata['metadata'] = JSON.stringify({
-          shared: {
-            'sf_ver': this.safeframeVersion_,
-            'ck_on': 1,
-            'flash_ver': '26.0.0',
-          },
-        });
+        contextMetadata['initialGeometry'] = JSON.stringify(
+            /** @type {!JsonObject} */ ({
+              'windowCoords_t': 0,
+              'windowCoords_r': 0,
+              'windowCoords_b': 0,
+              'windowCoords_l': 0,
+              'frameCoords_t': 0,
+              'frameCoords_r': 0,
+              'frameCoords_b': 0,
+              'frameCoords_l': 0,
+              'styleZIndex': 'auto',
+              'allowedExpansion_t': 0,
+              'allowedExpansion_r': 0,
+              'allowedExpansion_b': 0,
+              'allowedExpansion_l': 0,
+              'xInView': 0,
+              'yInView': 0,
+            }));
+        contextMetadata['permissions'] = JSON.stringify(
+            /** @type {!JsonObject} */ ({
+              expandByOverlay: false,
+              expandByPush: false,
+              readCookie: false,
+              writeCookie: false,
+            }));
+        contextMetadata['metadata'] = JSON.stringify(
+            /** @type {!JsonObject} */ ({
+              shared: {
+                'sf_ver': this.safeframeVersion_,
+                'ck_on': 1,
+                'flash_ver': '26.0.0',
+              },
+            }));
         contextMetadata['reportCreativeGeometry'] = true;
         contextMetadata['isDifferentSourceWindow'] = false;
         contextMetadata['sentinel'] = this.sentinel;
