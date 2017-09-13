@@ -177,9 +177,7 @@ function getGraph(entryModule) {
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
   var bundler = browserify(entryModule, {debug: true, deps: true})
-      .transform(babel, {
-        loose: argv.strictBabelTransform ? undefined : 'all'
-      });
+      .transform(babel.configure({}));
 
   bundler.pipeline.get('deps').push(through.obj(function(row, enc, next) {
     module.deps.push({

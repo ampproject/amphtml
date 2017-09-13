@@ -961,7 +961,7 @@ describes.fakeWin('AccessService pingback', {
     service.cid_ = Promise.resolve(cid);
 
     service.analyticsEvent_ = sandbox.spy();
-    this.docState_ = {
+    win.docState_ = {
       onReady: callback => callback(),
     };
 

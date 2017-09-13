@@ -19,7 +19,6 @@
  * code back to AMP runtime using window messaging.
  */
 
-import '../../../third_party/babel/custom-babel-helpers';
 import '../../../src/polyfills';
 import {LoginDoneDialog} from './amp-login-done-dialog';
 import {bodyAlwaysVisible} from '../../../src/style-installer';

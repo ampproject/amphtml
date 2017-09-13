@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import {urls} from '../config';
 
 /**
