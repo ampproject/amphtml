@@ -83,6 +83,7 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {listenFor} from '../../../src/iframe-helper';
 import {
   getPublisherSpecifiedRefreshInterval,
   RefreshManager,
@@ -710,14 +711,40 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
   }
 
-  /** @overrde */
-  onFluidExpansion() {
-    if (!this.fluidImpressionFired_) {
-      if (this.fluidImpressionUrl_) {
-        this.fireDelayedImpressions(this.fluidImpressionUrl_, false);
-      }
-      this.fluidImpressionFired_ = true;
+  /** @override */
+  setupListenersForFluid(iframe) {
+    if (!iframe) {
+      return;
     }
+    listenFor(iframe, 'creative_geometry_update', data => {
+      // The first creative_geometry_update message will contain bad
+      // geometric data, as it will have been computed using the initial,
+      // incorrect, iframe style. We use this first message as a
+      // triggering point to restyle the iframe, which will in turn cause
+      // safeframe to send another creative_geometry_update message, this
+      // time containing the correct information.
+      const styleString = iframe.getAttribute('style');
+      if (/width: 0px/.test(styleString) &&
+          /height: 0px/.test(styleString)) {
+        setStyles(iframe, {
+          width: '100%',
+          height: '100%',
+          position: 'relative',
+        });
+      } else {
+        const payload = JSON.parse(data['p']);
+        this.attemptChangeSize(payload.height, payload.width)
+            .then(() => {
+              if (!this.fluidImpressionFired_) {
+                if (this.fluidImpressionUrl_) {
+                  this.fireDelayedImpressions(this.fluidImpressionUrl_, false);
+                }
+                this.fluidImpressionFired_ = true;
+              }
+            })
+            .catch(() => this.forceCollapse());
+      }
+    }, /* opt_is3p */ true);
   }
 
   /**

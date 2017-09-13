@@ -55,7 +55,6 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
-import {listenFor} from '../../../src/iframe-helper';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -1323,28 +1322,7 @@ export class AmpA4A extends AMP.BaseElement {
         'iframe', /** @type {!JsonObject} */ (
         Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES)));
     if (this.isFluid) {
-      listenFor(this.iframe, 'creative_geometry_update', data => {
-        // The first creative_geometry_update message will contain bad
-        // geometric data, as it will have been computed using the initial,
-        // incorrect, iframe style. We use this first message as a
-        // triggering point to restyle the iframe, which will in turn cause
-        // safeframe to send another creative_geometry_update message, this
-        // time containing the correct information.
-        const styleString = this.iframe.getAttribute('style');
-        if (/width: 0px/.test(styleString) &&
-            /height: 0px/.test(styleString)) {
-          setStyles(this.iframe, {
-            width: '100%',
-            height: '100%',
-            position: 'relative',
-          });
-        } else {
-          const payload = JSON.parse(data['p']);
-          this.attemptChangeSize(payload.height, payload.width)
-              .then(() => this.onFluidExpansion())
-              .catch(() => this.forceCollapse());
-        }
-      }, /* opt_is3p */ true);
+      this.setupListenersForFluid(this.iframe);
     }
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
@@ -1446,7 +1424,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.win,
           this.element,
           this.sentinel,
-          /* attributes */ null,
+          /* attributes */ undefined,
           this.isFluid ? this.safeframeVersion_ : '');
       // TODO(bradfrizzell) Clean up name assigning.
       if (method == XORIGIN_MODE.NAMEFRAME) {
@@ -1598,6 +1576,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
 <<<<<<< HEAD
+<<<<<<< HEAD
    * Whether preferential render should still be utilized if web crypto is unavailable,
    * and crypto signature header is present.
    * @return {!boolean}
@@ -1610,6 +1589,13 @@ export class AmpA4A extends AMP.BaseElement {
    */
   onFluidExpansion() {}
 >>>>>>> Refactors.
+=======
+   * Sets up postmessage listener for incoming messages for fluid-enabled
+   * slots. To be overriden by implementing networks.
+   * @param {?HTMLIframeElement} iframe The source frame for the messages.
+   */
+  setupListenersForFluid(iframe) {}
+>>>>>>> Moved listener setup to doubleclick.
 }
 
 /**
