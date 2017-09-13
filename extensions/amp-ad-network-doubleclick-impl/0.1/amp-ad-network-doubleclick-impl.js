@@ -611,7 +611,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   layoutCallback() {
-    const superReturnValue = super.layoutCallback();
+    const frameLoadPromise = super.layoutCallback();
     if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
       user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
     }
@@ -624,7 +624,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               visiblePercentageMin: 50,
               continuousTimeMin: 1,
             });
-    return superReturnValue;
+    return frameLoadPromise.then(result => {
+      if (this.isFluid) {
+        // If this is a Fluid slot, we must send an initial message to
+        // safeframe.
+        if (this.iframe.contentWindow) {
+          this.iframe.contentWindow./*OK*/postMessage(
+              JSON.stringify({message: 'connect', c: 'sfchannel1'}),
+              'https://tpc.googlesyndication.com');
+        }
+      }
+      return Promise.resolve(result);
+    });
   }
 
   /** @override */

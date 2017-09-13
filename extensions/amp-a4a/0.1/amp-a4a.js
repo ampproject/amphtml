@@ -1330,19 +1330,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Executive onCreativeRender after init to ensure it can get reference
     // to frame but prior to load to allow for earlier access.
     const frameLoadPromise =
-        this.xOriginIframeHandler_.init(this.iframe, /* opt_isA4A */ true)
-        .then(() => {
-          if (this.isFluid) {
-            // If this is a Fluid slot, we must send an initial message to
-            // SafeFrame.
-            if (this.iframe.contentWindow) {
-              this.iframe.contentWindow./*OK*/postMessage(
-                  JSON.stringify({message: 'connect', c: 'sfchannel1'}),
-                  'https://tpc.googlesyndication.com');
-            }
-          }
-          return Promise.resolve();
-        });
+        this.xOriginIframeHandler_.init(this.iframe, /* opt_isA4A */ true);
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(TAG, this.element.getAttribute('type'),
           'Error executing onCreativeRender', err);
@@ -1419,7 +1407,6 @@ export class AmpA4A extends AMP.BaseElement {
           return Promise.reject('Unrecognized rendering mode request');
       }
       // TODO(bradfrizzell): change name of function and var
-      this.sentinel = 'sentinel'; // TODO(levitzky) REMOVE BEFORE SUBMITTING
       let contextMetadata = getContextMetadata(
           this.win,
           this.element,
