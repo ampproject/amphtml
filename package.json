@@ -33,7 +33,7 @@
   "devDependencies": {
     "atob": "2.0.3",
     "autoprefixer": "6.7.0",
-    "ava": "0.15.2",
+    "ava": "0.19.1",
     "babel-core": "5.8.35",
     "babel-eslint": "6.1.2",
     "babelify": "6.4.0",
