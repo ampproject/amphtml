@@ -31,7 +31,7 @@ import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
 } from '../../../src/friendly-iframe-embed';
-import {isLayoutSizeDefined, Layout} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -315,9 +315,6 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @protected {boolean} */
     this.isFluid = false;
-
-    /** @private {string} */
-    this.fluidImpressionUrl_;
   }
 
   /** @override */
@@ -331,7 +328,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout) || layout == Layout.FLUID;
+    return isLayoutSizeDefined(layout) ||
+        this.element.getAttribute('height') == 'fluid';
   }
 
   /** @override */
@@ -1460,7 +1458,7 @@ export class AmpA4A extends AMP.BaseElement {
           return Promise.reject('Unrecognized rendering mode request');
       }
       // TODO(bradfrizzell): change name of function and var
-      this.sentinel = 'sentinel'; // TODO(levitzky) REMOVE
+      this.sentinel = 'sentinel'; // TODO(levitzky) REMOVE BEFORE SUBMITTING
       let contextMetadata = getContextMetadata(
           this.win, this.element, this.sentinel);
       if (this.isFluid) {
