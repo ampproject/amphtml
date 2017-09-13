@@ -292,7 +292,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {number} */
     this.ifi_ = 0;
 
-    /** @private {string} */
+    /** @private {?string} */
     this.fluidImpressionUrl_ = null;
 
     /** @private {boolean} */
@@ -703,7 +703,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @overrde */
   onFluidExpansion() {
     if (!this.fluidImpressionFired_) {
-      this.fireDelayedImpressions(this.fluidImpressionUrl, false);
+      if (this.fluidImpressionUrl_) {
+        this.fireDelayedImpressions(this.fluidImpressionUrl_, false);
+      }
       this.fluidImpressionFired_ = true;
     }
   }

@@ -680,9 +680,6 @@ export class AmpA4A extends AMP.BaseElement {
           if (size && size.height != 0 && size.width != 0) {
             this.isFluid = false;
           }
-          if (this.isFluid) {
-            this.fluidImpressionUrl_ = responseParts.headers.get('X-AmpImps');
-          }
           this.creativeSize_ = size || this.creativeSize_;
           if ((this.isFluid || this.experimentalNonAmpCreativeRenderMethod_ !=
               XORIGIN_MODE.CLIENT_CACHE) &&
@@ -1458,7 +1455,6 @@ export class AmpA4A extends AMP.BaseElement {
           return Promise.reject('Unrecognized rendering mode request');
       }
       // TODO(bradfrizzell): change name of function and var
-      this.sentinel = 'sentinel'; // TODO(levitzky) REMOVE BEFORE SUBMITTING
       let contextMetadata = getContextMetadata(
           this.win, this.element, this.sentinel);
       if (this.isFluid) {
