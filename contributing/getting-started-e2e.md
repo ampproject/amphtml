@@ -278,7 +278,7 @@ The common workflow for making changes to files in Git is:
 
 * edit some files using your favorite editor
 
-* if you edited `package.json` run `npm prune && npm install` to generate an updated `package-lock.json` file
+* if you edited `package.json`, run `npm prune && npm install` to generate an updated `package-lock.json` file
 
 * tell Git that you care about these changes by _staging_ them using the `git add` command
 
