@@ -630,7 +630,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // safeframe.
         if (this.iframe.contentWindow) {
           this.iframe.contentWindow./*OK*/postMessage(
-              JSON.stringify({message: 'connect', c: 'sfchannel1'}),
+              JSON.stringify(/** @type {!JsonObject} */
+                ({message: 'connect', c: 'sfchannel1'})),
               'https://tpc.googlesyndication.com');
         }
       }

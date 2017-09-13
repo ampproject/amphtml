@@ -39,7 +39,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {getBinaryType, isExperimentOn} from '../../../src/experiments';
-import {setStyle, setStyles} from '../../../src/style';
+import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {handleClick} from '../../../ads/alp/handler';
@@ -1579,10 +1579,15 @@ export class AmpA4A extends AMP.BaseElement {
 =======
    * Sets up postmessage listener for incoming messages for fluid-enabled
    * slots. To be overriden by implementing networks.
-   * @param {?HTMLIframeElement} iframe The source frame for the messages.
+   * @param {?HTMLIframeElement} unusedIframe The source frame for the
+   *    messages.
    */
+<<<<<<< HEAD
   setupListenersForFluid(iframe) {}
 >>>>>>> Moved listener setup to doubleclick.
+=======
+  setupListenersForFluid(unusedIframe) {}
+>>>>>>> Lint stuff.
 }
 
 /**
