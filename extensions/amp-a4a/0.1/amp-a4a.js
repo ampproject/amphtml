@@ -1321,7 +1321,7 @@ export class AmpA4A extends AMP.BaseElement {
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe', /** @type {!JsonObject} */ (
         Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES)));
-    if (this.isFluid) {
+    if (this.isFluid && this.iframe) {
       this.setupListenersForFluid(this.iframe);
     }
     // TODO(keithwrightbos): noContentCallback?
@@ -1579,8 +1579,7 @@ export class AmpA4A extends AMP.BaseElement {
 =======
    * Sets up postmessage listener for incoming messages for fluid-enabled
    * slots. To be overriden by implementing networks.
-   * @param {?HTMLIframeElement} unusedIframe The source frame for the
-   *    messages.
+   * @param {Element} unusedIframe The source frame for the messages.
    */
 <<<<<<< HEAD
   setupListenersForFluid(iframe) {}

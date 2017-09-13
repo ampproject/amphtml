@@ -725,9 +725,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   setupListenersForFluid(iframe) {
-    if (!iframe) {
-      return;
-    }
     listenFor(iframe, 'creative_geometry_update', data => {
       // The first creative_geometry_update message will contain bad
       // geometric data, as it will have been computed using the initial,
