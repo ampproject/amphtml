@@ -34,6 +34,7 @@ import * as sinon from 'sinon';
 import * as analytics from '../../src/analytics';
 
 describes.fakeWin('installErrorReporting', {}, env => {
+  let sandbox;
   let win;
   let rejectedPromiseError;
   let rejectedPromiseEvent;
@@ -42,6 +43,7 @@ describes.fakeWin('installErrorReporting', {}, env => {
   beforeEach(() => {
     win = env.win;
     installErrorReporting(win);
+    sandbox = env.sandbox;
     rejectedPromiseEventCancelledSpy = sandbox.spy();
     rejectedPromiseError = new Error('error');
     rejectedPromiseEvent = {
@@ -544,11 +546,12 @@ describe.configure().run('detectJsEngineFromStack', () => {
 
 describes.fakeWin('user error reporting', {amp: true}, env => {
   let win;
-  sandbox = env.sandbox;
+  let sandbox;
   const error = new Error('ERROR','user error');
   let analyticsEventSpy;
 
   beforeEach(() => {
+    sandbox = env.sandbox;
     win = env.win;
     analyticsEventSpy = sandbox.spy(analytics, 'triggerAnalyticsEvent');
     toggleExperiment(win, 'user-error-reporting', true);

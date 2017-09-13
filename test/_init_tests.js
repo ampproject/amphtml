@@ -15,7 +15,7 @@
  */
 
 // This must load before all other tests.
-import '../third_party/babel/custom-babel-helpers';
+import 'babel-polyfill';
 import '../src/polyfills';
 import {Services} from '../src/services';
 import {removeElement} from '../src/dom';
@@ -39,7 +39,6 @@ import {
 import * as describes from '../testing/describes';
 import {installYieldIt} from '../testing/yield';
 import stringify from 'json-stable-stringify';
-
 
 // All exposed describes.
 global.describes = describes;
