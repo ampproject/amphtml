@@ -547,6 +547,7 @@ describe('Resources', () => {
   });
 });
 
+
 describes.fakeWin('Resources startup', {
   win: {
     readyState: 'loading',
@@ -746,9 +747,11 @@ describes.realWin('getElementLayoutBox', {}, env => {
   });
 });
 
-describe('Resources pause/resume/unlayout scheduling', () => {
 
-  let sandbox;
+describes.realWin('Resources pause/resume/unlayout scheduling', {
+  amp: true,
+}, env => {
+  let win, doc;
   let resources;
   let parent;
   let children;
@@ -756,50 +759,26 @@ describe('Resources pause/resume/unlayout scheduling', () => {
   let child1;
   let child2;
 
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+    resources = new Resources(env.ampdoc);
+    resources.isRuntimeOn_ = false;
+    const parentTuple = createElementWithResource(1);
+    parent = parentTuple[0];
+    child0 = doc.createElement('div');
+    child1 = createElementWithResource(2)[0];
+    child2 = createElementWithResource(3)[0];
+    children = [child0, child1, child2];
+    children.forEach(child => {
+      parent.appendChild(child);
+    });
+  });
+
   function createElement() {
-    const signals = new Signals();
-    return {
-      ownerDocument: {defaultView: window},
-      tagName: 'amp-test',
-      isBuilt() {
-        return true;
-      },
-      isUpgraded() {
-        return true;
-      },
-      getAttribute() {
-        return null;
-      },
-      hasAttribute() {
-        return false;
-      },
-      contains() {
-        return true;
-      },
-      classList: {
-        contains() {
-          return true;
-        },
-      },
-      getPlaceholder() {
-      },
-      pauseCallback() {
-      },
-      resumeCallback() {
-      },
-      unlayoutCallback() {
-        return false;
-      },
-      unlayoutOnPause() {
-        return false;
-      },
-      getPriority() {
-        return 0;
-      },
-      signals() {
-        return signals;
-      },
-    };
+    const element = env.createAmpElement('amp-test');
+    sandbox.stub(element, 'isBuilt', () => true);
+    return element;
   }
 
   function createElementWithResource(id) {
@@ -809,22 +788,6 @@ describe('Resources pause/resume/unlayout scheduling', () => {
     resource.element['__AMP__RESOURCE'] = resource;
     return [element, resource];
   }
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    resources = new Resources(new AmpDocSingle(window));
-    resources.isRuntimeOn_ = false;
-    const parentTuple = createElementWithResource(1);
-    parent = parentTuple[0];
-    child0 = document.createElement('div');
-    child1 = createElementWithResource(2)[0];
-    child2 = createElementWithResource(3)[0];
-    children = [child0, child1, child2];
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
 
   describe('schedulePause', () => {
     it('should not throw with a single element', () => {
@@ -898,11 +861,11 @@ describe('Resources pause/resume/unlayout scheduling', () => {
       expect(stub1.calledOnce).to.be.true;
     });
 
-    it('should not call resumeCallback on non-paused custom elements', () => {
+    it('should call resumeCallback on non-paused custom elements', () => {
       const stub2 = sandbox.stub(child2, 'resumeCallback');
 
       resources.scheduleResume(parent, children);
-      expect(stub2.calledOnce).to.be.false;
+      expect(stub2.calledOnce).to.be.true;
     });
   });
 
@@ -935,65 +898,37 @@ describe('Resources pause/resume/unlayout scheduling', () => {
   });
 });
 
-describe('Resources schedulePreload', () => {
 
-  let sandbox;
+describes.realWin('Resources schedulePreload', {amp: true}, env => {
+  let win, doc;
   let resources;
   let parent;
   let children;
   let child0;
   let child1;
   let child2;
-  let placeholder;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+    resources = new Resources(env.ampdoc);
+    resources.isRuntimeOn_ = false;
+    const parentTuple = createElementWithResource(1);
+    parent = parentTuple[0];
+    child0 = doc.createElement('div');
+    child1 = createElementWithResource(2)[0];
+    child2 = createElementWithResource(3)[0];
+    children = [child0, child1, child2];
+    children.forEach(child => {
+      parent.appendChild(child);
+    });
+  });
 
   function createElement() {
-    const signals = new Signals();
-    return {
-      ownerDocument: {defaultView: window},
-      tagName: 'amp-test',
-      isBuilt() {
-        return true;
-      },
-      isUpgraded() {
-        return true;
-      },
-      getAttribute() {
-        return null;
-      },
-      hasAttribute() {
-        return false;
-      },
-      contains() {
-        return true;
-      },
-      classList: {
-        contains() {
-          return true;
-        },
-      },
-      getPlaceholder() {
-        return placeholder;
-      },
-      renderOutsideViewport() {
-        return false;
-      },
-      layoutCallback() {
-      },
-      pauseCallback() {
-      },
-      unlayoutCallback() {
-        return false;
-      },
-      unlayoutOnPause() {
-        return false;
-      },
-      getPriority() {
-        return 0;
-      },
-      signals() {
-        return signals;
-      },
-    };
+    const element = env.createAmpElement('amp-test');
+    sandbox.stub(element, 'isBuilt', () => true);
+    sandbox.stub(element, 'isUpgraded', () => true);
+    return element;
   }
 
   function createElementWithResource(id) {
@@ -1006,23 +941,6 @@ describe('Resources schedulePreload', () => {
     resource.isInViewport = () => true;
     return [element, resource];
   }
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    resources = new Resources(new AmpDocSingle(window));
-    resources.isRuntimeOn_ = false;
-    const parentTuple = createElementWithResource(1);
-    parent = parentTuple[0];
-    placeholder = document.createElement('div');
-    child0 = document.createElement('div');
-    child1 = createElementWithResource(2)[0];
-    child2 = createElementWithResource(3)[0];
-    children = [child0, child1, child2];
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
 
   it('should not throw with a single element', () => {
     expect(() => {
@@ -1067,7 +985,7 @@ describe('Resources schedulePreload', () => {
     const stub1 = sandbox.stub(resources, 'schedule_');
 
     const insidePlaceholder1 = createElementWithResource(4)[0];
-    const placeholder1 = document.createElement('div');
+    const placeholder1 = doc.createElement('div');
     child0.getElementsByClassName = () => [insidePlaceholder1];
     child0.getPlaceholder = () => placeholder1;
 
@@ -1090,6 +1008,9 @@ describe('Resources discoverWork', () => {
       },
       isUpgraded: () => {
         return true;
+      },
+      isInViewport: () => {
+        return false;
       },
       getAttribute: () => {
         return null;
@@ -1485,8 +1406,8 @@ describe('Resources discoverWork', () => {
 
     resources.discoverWork_();
 
-    expect(resource1.isInViewport()).to.be.true;
     expect(setInViewport).to.have.been.calledBefore(schedule);
+    expect(setInViewport).to.have.been.calledWith(true);
   });
 
   it('should not grant permission to build when threshold reached', () => {

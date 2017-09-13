@@ -44,7 +44,9 @@ import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
-import {resetScheduledElementForTesting} from '../../../../src/custom-element';
+import {
+  resetScheduledElementForTesting,
+} from '../../../../src/service/custom-element-registry';
 import {Services} from '../../../../src/services';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
@@ -250,6 +252,7 @@ describe('amp-a4a', () => {
           {name: 'ad'});
       a4aElement = createA4aElement(fixture.doc);
       a4a = new MockA4AImpl(a4aElement);
+      a4a.releaseType_ = '0';
       return fixture;
     }));
 
@@ -269,7 +272,7 @@ describe('amp-a4a', () => {
         expect(child).to.be.visible;
         expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
         expect(lifecycleEventStub).to.be.calledWith('renderSafeFrameStart',
-            {'isAmpCreative': false, 'releaseType': 'pr'});
+            {'isAmpCreative': false, 'releaseType': '0'});
       });
     });
 
@@ -416,6 +419,19 @@ describe('amp-a4a', () => {
         expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.true;
       });
     });
+
+    it('for requests from insecure HTTP pages', () => {
+      sandbox.stub(Services.cryptoFor(fixture.win), 'isPkcsAvailable')
+          .returns(false);
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        const child = a4aElement.querySelector('iframe[src]');
+        expect(child).to.be.ok;
+        expect(child).to.be.visible;
+        expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+      });
+    });
   });
   describe('layoutCallback cancels properly', () => {
     let a4aElement;
@@ -493,6 +509,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         a4aElement = createA4aElement(doc);
         a4a = new MockA4AImpl(a4aElement);
+        a4a.releaseType_ = '0';
         a4a.createdCallback();
         a4a.firstAttachedCallback();
         a4a.buildCallback();
@@ -520,7 +537,7 @@ describe('amp-a4a', () => {
               'random illegal value');
           expect(fetchMock.called('ad')).to.be.true;
           expect(lifecycleEventStub).to.be.calledWith('renderCrossDomainStart',
-              {'isAmpCreative': false, 'releaseType': 'pr'});
+              {'isAmpCreative': false, 'releaseType': '0'});
         });
       });
     });
@@ -862,6 +879,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.releaseType_ = '0';
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
         const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
@@ -880,6 +898,9 @@ describe('amp-a4a', () => {
               .to.be.true;
           expect(fetchMock.called('ad')).to.be.true;
           expect(preloadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
+          expect(doc.querySelector('link[rel=preload]' +
+            '[href="https://fonts.googleapis.com/css?family=Questrial"]'))
+              .to.be.ok;
           return a4a.layoutCallback().then(() => {
             expect(renderAmpCreativeSpy.calledOnce,
                 'renderAmpCreative_ called exactly once').to.be.true;
@@ -914,7 +935,7 @@ describe('amp-a4a', () => {
             expect(lifecycleEventStub).to.be.calledWith(
                 'adResponseValidateEnd', {
                   'signatureValidationResult': 0,
-                  'releaseType': 'pr',
+                  'releaseType': '0',
                 });
           });
         });

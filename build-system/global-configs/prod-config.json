@@ -6,6 +6,7 @@
   "expAdsenseA4A": 0.01,
   "expDoubleclickA4A": 0.01,
   "expAdSenseFFDR": 0.01,
+  "expDfpCanonicalFf": 0.01,
   "dbclk_a4a_viz_change": 0.02,
   "a4aProfilingRate": 0.1,
   "ad-type-custom": 1,
@@ -21,9 +22,12 @@
   "visibility-v3": 1,
   "a4aFastFetchDoubleclickLaunched": 0,
   "a4aFastFetchAdSenseLaunched": 0,
+  "a4a-new-signature-verifier": 0.01,
   "pump-early-frame": 1,
   "a4a-measure-get-ad-urls": 0,
   "ad-loader-v2": 1,
   "3p-use-ampcontext": 0,
-  "amp-animation": 1
+  "amp-animation": 1,
+  "amp-sidebar toolbar": 1,
+  "amp-position-observer": 1
 }

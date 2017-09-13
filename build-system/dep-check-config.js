@@ -174,6 +174,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-gfycat/0.1/amp-gfycat.js->' +
+          'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->src/service/variable-source.js',
       'extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js->' +
           'src/service/video-manager-impl.js',
@@ -185,11 +187,10 @@ exports.rules = [
           'src/service/parallax-impl.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
           'src/service/extension-location.js',
-      // TODO(@zhouyx, #9213) Remove this item.
-      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js->' +
-          'src/service/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
-          'src/service/position-observer-impl.js',
+          'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
+          'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
     ],

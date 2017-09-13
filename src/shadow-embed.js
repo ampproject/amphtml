@@ -17,7 +17,11 @@
 import {Services} from './services';
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
 import {dev} from './log';
-import {closestNode, escapeCssSelectorIdent} from './dom';
+import {
+  closestNode,
+  escapeCssSelectorIdent,
+  iterateCursor,
+} from './dom';
 import {installCssTransformer} from './style-installer';
 import {
   isShadowDomSupported,
@@ -25,7 +29,7 @@ import {
   ShadowDomVersion,
 } from './web-components';
 import {setStyle} from './style';
-import {toArray} from './types';
+import {toArray, toWin} from './types';
 
 /**
  * Used for non-composed root-node search. See `getRootNode`.
@@ -61,7 +65,21 @@ export function createShadowRoot(hostElement) {
   // Native support.
   const shadowDomSupported = getShadowDomSupportedVersion();
   if (shadowDomSupported == ShadowDomVersion.V1) {
-    return hostElement.attachShadow({mode: 'open'});
+    const shadowRoot = hostElement.attachShadow({mode: 'open'});
+    if (!shadowRoot.styleSheets) {
+      Object.defineProperty(shadowRoot, 'styleSheets', {
+        get: function() {
+          const items = [];
+          iterateCursor(shadowRoot.childNodes, child => {
+            if (child.tagName === 'STYLE') {
+              items.push(child.sheet);
+            }
+          });
+          return items;
+        },
+      });
+    }
+    return shadowRoot;
   } else if (shadowDomSupported == ShadowDomVersion.V0) {
     return hostElement.createShadowRoot();
   }
@@ -79,7 +97,7 @@ export function createShadowRoot(hostElement) {
 function createShadowRootPolyfill(hostElement) {
   const doc = hostElement.ownerDocument;
   /** @const {!Window} */
-  const win = doc.defaultView;
+  const win = toWin(doc.defaultView);
 
   // Host CSS polyfill.
   hostElement.classList.add('i-amphtml-shadow-host-polyfill');

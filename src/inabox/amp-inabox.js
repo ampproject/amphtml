@@ -29,7 +29,7 @@ import {installStylesForDoc, makeBodyVisible} from '../style-installer';
 import {installErrorReporting} from '../error';
 import {installDocService} from '../service/ampdoc-impl';
 import {installCacheServiceWorker} from '../service-worker/install';
-import {stubElementsForDoc} from '../custom-element';
+import {stubElementsForDoc} from '../service/custom-element-registry';
 import {
     installAmpdocServices,
     installBuiltins,
@@ -88,7 +88,6 @@ startupChunk(self.document, function initial() {
       // runtime tries to install the normal one.
       installViewerServiceForDoc(ampdoc);
       installInaboxViewportService(ampdoc);
-
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();

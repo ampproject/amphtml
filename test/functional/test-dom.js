@@ -18,7 +18,7 @@ import * as dom from '../../src/dom';
 import {loadPromise} from '../../src/event-helper';
 import {toArray} from '../../src/types';
 import {BaseElement} from '../../src/base-element';
-import {createAmpElementProto} from '../../src/custom-element';
+import {createAmpElementProtoForTesting} from '../../src/custom-element';
 
 
 describes.sandboxed('DOM', {}, env => {
@@ -962,7 +962,8 @@ describes.realWin('DOM', {
       doc.body.appendChild(element);
       env.win.setTimeout(() => {
         doc.registerElement('amp-test', {
-          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
+          prototype: createAmpElementProtoForTesting(
+              env.win, 'amp-test', TestElement),
         });
       }, 100);
       return dom.whenUpgradedToCustomElement(element).then(element => {

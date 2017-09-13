@@ -158,7 +158,7 @@ Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or 
 
 #### Updating state with `AMP.setState()`
 
-The [`AMP.setState()` action](../../spec/amp-actions-and-events.md) merges an object literal into the state. For example, when the below button is pressed, `AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the object literal with the state.
+The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges an object literal into the state. For example, when the below button is pressed, `AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the object literal with the state.
 
 ```html
 <!-- Like JavaScript, you can reference existing
@@ -176,8 +176,19 @@ When triggered by certain events, `AMP.setState()` also can access event-related
 <input type="range" on="change:AMP.setState({myRangeValue: event.value})">
 ```
 
+#### Modifying history with `AMP.pushState()`
 
- See [Actions and Events in AMP](../../spec/amp-actions-and-events.md) for more details.
+The [`AMP.pushState()`](../../spec/amp-actions-and-events.md#amp) action is similar to `AMP.setState()` except it also pushes a new entry
+onto the browser history stack. Popping this history entry (e.g. by navigating back) restores
+the previous value of variables set by `AMP.pushState()`.
+
+For example:
+```html
+<button on="tap:AMP.pushState({foo: '123'})">Set 'foo' to 123</button>
+```
+
+- Tapping the button will set variable `foo` to 123 and push a new history entry.
+- Navigating back will restore `foo` to its previous value, "bar" (equivalent to calling `AMP.setState({foo: 'bar'})`.
 
 ### Expressions
 
