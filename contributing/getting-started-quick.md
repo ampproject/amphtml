@@ -29,7 +29,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * Install [npm](https://www.npmjs.com/get-npm)`
 
-* Install Gulp by running `sudo npm install -g gulp`
+* Install Gulp by running `npm install -g gulp` (on some platforms this command might required elevated privileges using `sudo`)
 
 * Add this line to your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows):
 
@@ -62,6 +62,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 # Create commits to contain your changes
 
 * Edit files in your favorite editor
+* If you edited `package.json` run `npm prune && npm install` to generated an updated `package-lock.json` file
 * Add each file you change: `git add <file>`
 * Create a commit: `git commit -m "<your commit message>"`
 * Instead of `add`ing each file individually you can use the `-a` flag on the commit instead

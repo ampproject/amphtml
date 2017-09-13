@@ -157,7 +157,10 @@ amphtml uses Node.js, the npm package manager and the Gulp build system to build
 
 * Install [npm](https://www.npmjs.com/get-npm)
 
-* In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running `npm install`
+* In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
+   ```
+   npm install
+   ```
 
    You should see a progress indicator and some messages scrolling by.  You may see some warnings about optional dependencies that are generally safe to ignore.
 
@@ -172,8 +175,10 @@ amphtml uses Node.js, the npm package manager and the Gulp build system to build
    You can install Gulp using npm:
 
    ```
-   sudo npm install -g gulp
+   npm install -g gulp
    ```
+
+   On some platform the preceding command might require elevated privileges using `sudo`.
 
 Now whenever you're ready to build amphtml and start up your local server, simply go to your local repository directory and run:
 

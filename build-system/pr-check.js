@@ -380,6 +380,20 @@ function main(argv) {
     process.exit(1);
   }
 
+  if (files.indexOf('package.json') != -1 && files.indexOf('package-lock.json') == -1) {
+    console.error(fileLogPrefix, util.colors.red('ERROR:'),
+        'Updates to', util.colors.cyan('package.json'),
+        'must be accompanied by a corresponding update to',
+        util.colors.cyan('package-lock.json'));
+    console.error(fileLogPrefix, util.colors.yellow('NOTE:'),
+        'To update', util.colors.cyan('package-lock.json'), 'after changing',
+        util.colors.cyan('package.json') + ',', 'run',
+        '"' + util.colors.cyan('npm purge && npm install') + '"',
+        'and include the change to', util.colors.cyan('package-lock.json'),
+        'in your PR.');
+    process.exit(1);
+  }
+
   const sortedBuildTargets = [];
   for (const t of buildTargets) {
     sortedBuildTargets.push(t);
