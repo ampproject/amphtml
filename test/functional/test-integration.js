@@ -25,10 +25,10 @@ import {
   validateAllowedTypes,
   parseFragment,
 } from '../../3p/integration';
-import {registrations, register} from '../../3p/3p';
+import {getRegistrations, register} from '../../3p/3p';
 
 describe('3p integration.js', () => {
-
+  const registrations = getRegistrations();
   afterEach(() => {
     delete registrations.testAction;
   });

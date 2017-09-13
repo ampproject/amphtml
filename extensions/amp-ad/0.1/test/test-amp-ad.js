@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {a4aRegistry} from '../../../../ads/_a4a-config';
+import {getA4ARegistry} from '../../../../ads/_a4a-config';
 import {adConfig} from '../../../../ads/_config';
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
@@ -24,6 +24,7 @@ import {stubService} from '../../../../testing/test-helper';
 
 describes.realWin('Ad loader', {amp: true}, env => {
   let win, doc;
+  const a4aRegistry = getA4ARegistry();
   let a4aRegistryBackup;
   let registryBackup;
   const tagNames = ['amp-ad', 'amp-embed'];

@@ -17,7 +17,7 @@ import {CSS} from '../../../build/amp-ad-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
-import {a4aRegistry} from '../../../ads/_a4a-config';
+import {getA4ARegistry} from '../../../ads/_a4a-config';
 import {adConfig} from '../../../ads/_config';
 import {user} from '../../../src/log';
 import {Services} from '../../../src/services';
@@ -49,6 +49,7 @@ export class AmpAd extends AMP.BaseElement {
 
   /** @override */
   upgradeCallback() {
+    const a4aRegistry = getA4ARegistry();
     // Block whole ad load if a consent is needed.
     /** @const {string} */
     const consentId = this.element.getAttribute('data-consent-notification-id');
