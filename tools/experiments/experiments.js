@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
 import {reportError} from '../../src/error';

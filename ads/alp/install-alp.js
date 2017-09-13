@@ -16,8 +16,6 @@
 
 // Utility file that generates URLs suitable for AMP's impression tracking.
 
-import '../../third_party/babel/custom-babel-helpers';
-
 import {installAlpClickHandler, warmupStatic} from './handler';
 import {initLogConstructor, setReportError} from '../../src/log';
 import {reportError} from '../../src/error';

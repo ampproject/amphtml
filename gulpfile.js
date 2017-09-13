@@ -816,8 +816,23 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
+  var browsers = [];
+  if (process.env.TRAVIS) {
+    browsers.push('last 2 versions', 'safari >= 9');
+  } else {
+    browsers.push('Last 4 Chrome versions');
+  }
+
   var bundler = browserify(srcDir + srcFilename, {debug: true})
-      .transform(babel, {loose: argv.strictBabelTransform ? undefined : 'all'});
+      .transform(babel, {
+        presets: [
+          ["env", {
+            targets: {
+              browsers: browsers,
+            },
+          }]
+        ],
+      });
   if (options.watch) {
     bundler = watchify(bundler);
   }
