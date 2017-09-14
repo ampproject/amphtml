@@ -560,4 +560,4 @@ If provided, the page will not process analytics requests until an [amp-user-not
 
 
 ## Analytics for AMP components
-Individual AMP component can implement with AMP analytics to send analytics data. For more information, please refer to [Implementing analytics for AMP components](./amp-components-analytics.md)
+AMP component developers can implement collection of data using AMP analytics. For more information, please refer to [Implementing analytics for AMP components](./amp-components-analytics.md)
