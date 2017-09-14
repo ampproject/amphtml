@@ -307,7 +307,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.element.getAttribute('height') == 'fluid';
   }
 
-
   /** @override */
   isValidElement() {
     return isGoogleAdsA4AValidEnvironment(this.win) &&

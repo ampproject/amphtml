@@ -1375,6 +1375,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaNameAttrOfXOriginIframe_(creativeBody) {
+    /** @type {string} */
     const method = (this.isFluid && XORIGIN_MODE.SAFEFRAME) ||
         this.experimentalNonAmpCreativeRenderMethod_;
     dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
@@ -1407,6 +1408,7 @@ export class AmpA4A extends AMP.BaseElement {
           return Promise.reject('Unrecognized rendering mode request');
       }
       // TODO(bradfrizzell): change name of function and var
+      this.sentinel = 'sentinel';  // TODO(levitzky) REMOVE BEFORE SUBMITTING
       let contextMetadata = getContextMetadata(
           this.win,
           this.element,
