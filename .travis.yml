@@ -16,18 +16,13 @@ before_install:
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb
   - npm install -g npm@'^5.0.0'
-  - node -e "console.log('before_install SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
-  - node -e "console.log('before_install SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
-install:
-  - node -e "console.log('install SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
-  - node -e "console.log('install SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
+  - node -e "console.log('SAUCE_CREDENTIALS_APPLIED', process.env.SAUCE_CREDENTIALS_APPLIED);"
+  - sudo cat .travis.yml
 before_script:
   - pip install --user protobuf
   - gem install percy-capybara phantomjs poltergeist
   # Poltergeist requires an absolute path to find phantomjs. See #10305.
   - export PATH="`pwd`/node_modules/.bin:$PATH"
-  - node -e "console.log('before_script SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
-  - node -e "console.log('before_script SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
 script: node build-system/pr-check.js
 branches:
   only:
@@ -37,8 +32,7 @@ branches:
     - /^amp-release-.*$/
 env:
   global:
-    - export SAUCE_USERNAME="`node build-system/get-sauce-credentials.js --username`"
-    - export SAUCE_ACCESS_KEY_ENCRYPTED="`node build-system/get-sauce-credentials.js --access_key_encrypted`"
+    - SAUCE_CREDENTIALS_APPLIED="`node build-system/apply-sauce-credentials.js`"
     - NPM_CONFIG_PROGRESS="false"
 matrix:
   include:
@@ -61,9 +55,9 @@ matrix:
           - protobuf-compiler
           - python-protobuf
         sauce_connect:
-          username: "#{ENV[SAUCE_USERNAME]}"
+          username: "PLACEHOLDER_SAUCE_USERNAME"
         jwt:
-          secure: "#{ENV[SAUCE_ACCESS_KEY_ENCRYPTED]}"
+          secure: "PLACEHOLDER_SAUCE_ACCESS_KEY_ENCRYPTED"
 cache:
   directories:
   - node_modules
