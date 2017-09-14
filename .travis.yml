@@ -18,6 +18,9 @@ before_install:
   - npm install -g npm@'^5.0.0'
   - node -e "console.log('before_install SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
   - node -e "console.log('before_install SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
+install:
+  - node -e "console.log('install SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
+  - node -e "console.log('install SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
 before_script:
   - pip install --user protobuf
   - gem install percy-capybara phantomjs poltergeist
@@ -60,7 +63,7 @@ matrix:
         sauce_connect:
           username: "amphtml"
         jwt:
-          secure: "<% ENV['SAUCE_ACCESS_KEY_ENCRYPTED'] %>"
+          secure: "foobar"
 cache:
   directories:
   - node_modules
