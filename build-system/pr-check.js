@@ -290,19 +290,6 @@ const command = {
   },
   runIntegrationTests: function(compiled) {
     // Integration tests with all saucelabs browsers
-    let committer = getStdout(`git log -1 --pretty=format:'%ae'`).trim();
-    if (process.env.SAUCE_USERNAME !== 'amphtml') {
-      util.log(fileLogPrefix,
-          'Using Sauce Labs credentials for', util.colors.cyan(committer),
-          'with username', util.colors.cyan(process.env.SAUCE_USERNAME));
-    } else {
-      util.log(fileLogPrefix,
-          'Could not find Sauce Labs credentials for',
-          util.colors.cyan(committer),
-          '(falling back to',
-          util.colors.cyan(process.env.SAUCE_USERNAME),
-          'credentials)');
-    }
     let cmd = `${gulp} test --nobuild --saucelabs --integration`;
     if (compiled) {
       cmd += ' --compiled';
