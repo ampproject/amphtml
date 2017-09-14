@@ -2,23 +2,30 @@ language: node_js
 sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
 dist: trusty
 node_js:
-  - "4"
+  - "4.7"
 python:
   - "2.7"
 notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
-addons:
-  hosts:
-    - ads.localhost
-    - iframe.localhost
-    # Requested by some tests because they need a valid font host,
-    # but should not resolve in tests.
-    - fonts.googleapis.com
-  apt:
-    packages:
-    - protobuf-compiler
-    - python-protobuf
+before_install:
+  - export CHROME_BIN=google-chrome
+  - export DISPLAY=:99.0
+  - unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
+  - sh -e /etc/init.d/xvfb start
+  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  - sudo dpkg -i google-chrome*.deb
+  - npm install -g npm@'^5.0.0'
+  - node build-system/set-sauce-credentials.js
+  - node -e "console.log('before_install SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
+  - node -e "console.log('before_install SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
+before_script:
+  - pip install --user protobuf
+  - gem install percy-capybara phantomjs poltergeist
+  # Poltergeist requires an absolute path to find phantomjs. See #10305.
+  - export PATH="`pwd`/node_modules/.bin:$PATH"
+  - node -e "console.log('before_install SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
+  - node -e "console.log('before_install SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
 script: node build-system/pr-check.js
 branches:
   only:
@@ -33,31 +40,31 @@ env:
     - NPM_CONFIG_PROGRESS="false"
 matrix:
   include:
-    - env: BUILD_SHARD="pre_build_checks_and_unit_tests"
-      before_install:
-        - export CHROME_BIN=google-chrome
-        - export DISPLAY=:99.0
-        - sh -e /etc/init.d/xvfb start
-        - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        - sudo dpkg -i google-chrome*.deb
-      before_script:
-        - pip install --user protobuf
-        - gem install percy-capybara
-        - gem install phantomjs
-        - gem install poltergeist
-    - env: BUILD_SHARD="integration_tests"
-      before_install:
-        - node -e "console.log('before_install SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
-        - node -e "console.log('before_install SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
-      before_script:
-        - pip install --user protobuf
-        - node -e "console.log('before_script SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
-        - node -e "console.log('before_script SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
+    - env: BUILD_SHARD="unit_tests"
       addons:
-        sauce_connect: true
+        hosts:
+          - ads.localhost
+          - iframe.localhost
+          # Requested by some tests because they need a valid font host,
+          # but should not resolve in tests.
+          - fonts.googleapis.com
+        apt:
+          packages:
+          - protobuf-compiler
+          - python-protobuf
+    - env: BUILD_SHARD="integration_tests"
+      addons:
+        apt:
+          packages:
+          - protobuf-compiler
+          - python-protobuf
+        sauce_connect:
+          username: "amphtml"
         jwt:
           secure: <% ENV['SAUCE_ACCESS_KEY_ENCRYPTED'] %>
 cache:
-  yarn: true
   directories:
   - node_modules
+  - .gem
+  pip: true
+  bundler: true
