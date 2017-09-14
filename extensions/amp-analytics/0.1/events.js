@@ -16,12 +16,21 @@
 
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
+import {
+  PlayingStates,
+  VideoAnalyticsDetailsDef,
+  VideoAnalyticsEvents,
+} from '../../../src/video-interface';
+import {dev, user} from '../../../src/log';
+import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {user} from '../../../src/log';
 import {startsWith} from '../../../src/string';
 
+const MIN_TIMER_INTERVAL_SECONDS = 0.5;
+const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
+const TAG = 'analytics-events';
 
 /**
  * @interface
@@ -397,6 +406,177 @@ export class IniLoadTracker extends EventTracker {
       signals.whenSignal(CommonSignals.INI_LOAD),
       signals.whenSignal(CommonSignals.LOAD_END),
     ]);
+  }
+}
+
+
+/**
+ * Tracks timer events.
+ */
+export class TimerEventTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+    /** @const @private {!Array<number>} */
+    this.trackers_ = [];
+  }
+
+  /** @override */
+  dispose() {
+    const win = this.root.ampdoc.win;
+    this.trackers_.forEach(intervalId => {
+      win.clearInterval(intervalId);
+    });
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    const timerSpec = config['timerSpec'];
+    user().assert(timerSpec && typeof timerSpec == 'object',
+        'Bad timer specification');
+    user().assert('interval' in timerSpec,
+        'Timer interval specification required');
+    const interval = Number(timerSpec['interval']) || 0;
+    user().assert(interval >= MIN_TIMER_INTERVAL_SECONDS,
+        'Bad timer interval specification');
+    const maxTimerLength = 'maxTimerLength' in timerSpec ?
+        Number(timerSpec['maxTimerLength']) : DEFAULT_MAX_TIMER_LENGTH_SECONDS;
+    user().assert(maxTimerLength == null || maxTimerLength > 0,
+        'Bad maxTimerLength specification');
+    const callImmediate = 'immediate' in timerSpec ?
+        Boolean(timerSpec['immediate']) : true;
+
+    const win = this.root.ampdoc.win;
+    const intervalId = win.setInterval(() => {
+      listener(this.createEvent_(eventType));
+    }, interval * 1000);
+    this.trackers_.push(intervalId);
+    win.setTimeout(() => {
+      this.removeTracker_(intervalId);
+    }, maxTimerLength * 1000);
+    if (callImmediate) {
+      listener(this.createEvent_(eventType));
+    }
+    return () => {
+      this.removeTracker_(intervalId);
+    };
+  }
+
+  /**
+   * @param {string} eventType
+   * @return {!AnalyticsEvent}
+   * @private
+   */
+  createEvent_(eventType) {
+    return new AnalyticsEvent(this.root.getRootElement(), eventType);
+  }
+
+  /**
+   * @param {number} intervalId
+   * @private
+   */
+  removeTracker_(intervalId) {
+    const win = this.root.ampdoc.win;
+    win.clearInterval(intervalId);
+    const index = this.trackers_.indexOf(intervalId);
+    if (index != -1) {
+      this.trackers_.splice(index, 1);
+    }
+  }
+}
+
+
+/**
+ * Tracks video session events
+ */
+export class VideoEventTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+
+    /** @private {?Observable<!Event>} */
+    this.sessionObservable_ = new Observable();
+
+    /** @private {?Function} */
+    this.boundOnSession_ = e => {
+      this.sessionObservable_.fire(e);
+    };
+
+    Object.keys(VideoAnalyticsEvents).forEach(key => {
+      this.root.getRoot().addEventListener(
+          VideoAnalyticsEvents[key], this.boundOnSession_);
+    });
+  }
+
+  /** @override */
+  dispose() {
+    const root = this.root.getRoot();
+    Object.keys(VideoAnalyticsEvents).forEach(key => {
+      root.removeEventListener(VideoAnalyticsEvents[key], this.boundOnSession_);
+    });
+    this.boundOnSession_ = null;
+    this.sessionObservable_ = null;
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    const videoSpec = config['videoSpec'] || {};
+    const selector = config['selector'] || videoSpec['selector'];
+    const selectionMethod = config['selectionMethod'] || null;
+    const targetReady =
+        this.root.getElement(context, selector, selectionMethod);
+
+    const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
+    const excludeAutoplay = videoSpec['exclude-autoplay'];
+    const interval = videoSpec['interval'];
+    const on = config['on'];
+
+    let intervalCounter = 0;
+
+    return this.sessionObservable_.add(event => {
+      const type = event.type;
+      const isVisibleType = (type === VideoAnalyticsEvents.SESSION_VISIBLE);
+      const normalizedType =
+          isVisibleType ? VideoAnalyticsEvents.SESSION : type;
+      const details = /** @type {!VideoAnalyticsDetailsDef} */ (getData(event));
+
+      if (normalizedType !== on) {
+        return;
+      }
+
+      if (normalizedType === VideoAnalyticsEvents.SECONDS_PLAYED && !interval) {
+        user().error(TAG, 'video-seconds-played requires interval spec ' +
+            'with non-zero value');
+        return;
+      }
+
+      if (normalizedType === VideoAnalyticsEvents.SECONDS_PLAYED) {
+        intervalCounter++;
+        if (intervalCounter % interval !== 0) {
+          return;
+        }
+      }
+
+      if (isVisibleType && !endSessionWhenInvisible) {
+        return;
+      }
+
+      if (excludeAutoplay && details['state'] === PlayingStates.PLAYING_AUTO) {
+        return;
+      }
+
+      const el = dev().assertElement(event.target,
+          'No target specified by video session event.');
+      targetReady.then(target => {
+        if (target.contains(el)) {
+          listener(new AnalyticsEvent(target, normalizedType, details));
+        }
+      });
+    });
   }
 }
 

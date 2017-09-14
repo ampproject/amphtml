@@ -18,13 +18,14 @@ import {
   additionalDimensions,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
-  extractGoogleAdCreativeAndSignature,
   EXPERIMENT_ATTRIBUTE,
   googleAdUrl,
   mergeExperimentIds,
+  maybeAppendErrorParameter,
+  TRUNCATION_PARAM,
 } from '../utils';
+import {buildUrl} from '../url-builder';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
@@ -67,50 +68,6 @@ function noopMethods(impl, doc, sandbox) {
 }
 
 describe('Google A4A utils', () => {
-
-  describe('#extractGoogleAdCreativeAndSignature', () => {
-    it('should return body and signature', () => {
-      const creative = 'some test data';
-      const headerData = {
-        'X-AmpAdSignature': 'AQAB',
-      };
-      const headers = {
-        has: h => { return h in headerData; },
-        get: h => { return headerData[h]; },
-      };
-      return expect(extractGoogleAdCreativeAndSignature(creative, headers))
-          .to.eventually.deep.equal({
-            creative,
-            signature: base64UrlDecodeToBytes('AQAB'),
-          });
-    });
-
-    it('should return body and signature and size', () => {
-      const creative = 'some test data';
-      const headerData = {
-        'X-AmpAdSignature': 'AQAB',
-      };
-      const headers = {
-        has: h => { return h in headerData; },
-        get: h => { return headerData[h]; },
-      };
-      return expect(extractGoogleAdCreativeAndSignature(creative, headers))
-          .to.eventually.deep.equal({
-            creative,
-            signature: base64UrlDecodeToBytes('AQAB'),
-          });
-    });
-
-    it('should return null when no signature header is present', () => {
-      const creative = 'some test data';
-      const headers = {
-        has: unused => { return false; },
-        get: h => { throw new Error('Tried to get ' + h); },
-      };
-      return expect(extractGoogleAdCreativeAndSignature(creative, headers))
-          .to.eventually.deep.equal({creative, signature: null});
-    });
-  });
 
   //TODO: Add tests for other utils functions.
 
@@ -280,36 +237,6 @@ describe('Google A4A utils', () => {
       sandbox = sinon.sandbox.create();
     });
 
-    it('should have the correct ifi numbers', function() {
-      // When ran locally, this test tends to exceed 2000ms timeout.
-      this.timeout(5000);
-      // Reset counter for purpose of this test.
-      delete window['ampAdGoogleIfiCounter'];
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        doc.win = window;
-        const elem = createElementWithAttributes(doc, 'amp-a4a', {
-          'type': 'adsense',
-          'width': '320',
-          'height': '50',
-        });
-        const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
-        return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], [], []).then(url1 => {
-            expect(url1).to.match(/ifi=1/);
-            return googleAdUrl(impl, '', 0, [], [], []).then(url2 => {
-              expect(url2).to.match(/ifi=2/);
-              return googleAdUrl(impl, '', 0, [], [], []).then(url3 => {
-                expect(url3).to.match(/ifi=3/);
-              });
-            });
-          });
-        });
-      });
-    });
-
     it('should set ad position', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
@@ -345,16 +272,15 @@ describe('Google A4A utils', () => {
         });
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
-        impl.win.AMP_CONFIG = impl.win.AMP_CONFIG || {};
-        impl.win.AMP_CONFIG.canary = true;
+        impl.win.AMP_CONFIG = {type: 'canary'};
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.match(/art=2/);
+            expect(url1).to.match(/[&?]art=2/);
           });
         });
       });
     });
-    it('should not specify that this is canary', () => {
+    it('should specify that this is control', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
@@ -366,11 +292,49 @@ describe('Google A4A utils', () => {
         });
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
-        impl.win.AMP_CONFIG = impl.win.AMP_CONFIG || {};
-        impl.win.AMP_CONFIG.canary = false;
+        impl.win.AMP_CONFIG = {type: 'control'};
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.not.match(/art=2/);
+            expect(url1).to.match(/[&?]art=1/);
+          });
+        });
+      });
+    });
+    it('should not have `art` parameter when AMP_CONFIG is undefined', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = window;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+            expect(url1).to.not.match(/[&?]art=/);
+          });
+        });
+      });
+    });
+    it('should not have `art` parameter when binary type is production', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = window;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        impl.win.AMP_CONFIG = {type: 'production'};
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+            expect(url1).to.not.match(/[&?]art=/);
           });
         });
       });
@@ -417,6 +381,22 @@ describe('Google A4A utils', () => {
     });
     it('should return empty string for invalid input', () => {
       expect(mergeExperimentIds(['frob'])).to.equal('');
+    });
+  });
+
+  describe('#maybeAppendErrorParameter', () => {
+    const url = 'https://foo.com/bar?hello=world&one=true';
+    it('should append parameter', () => {
+      expect(maybeAppendErrorParameter(url, 'n')).to.equal(url + '&aet=n');
+    });
+    it('should not append parameter if already present', () => {
+      expect(maybeAppendErrorParameter(url + '&aet=already', 'n')).to.not.be.ok;
+    });
+    it('should not append parameter if truncated', () => {
+      const truncUrl = buildUrl(
+          'https://foo.com/bar', {hello: 'world'}, 15, TRUNCATION_PARAM);
+      expect(truncUrl.indexOf(TRUNCATION_PARAM.name) != -1);
+      expect(maybeAppendErrorParameter(truncUrl, 'n')).to.not.be.ok;
     });
   });
 });

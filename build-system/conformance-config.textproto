@@ -65,6 +65,27 @@ requirement: {
   value: 'String.fromCodePoint'
 }
 
+# Object
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Object.values is not allowed'
+  value: 'Object.values'
+  whitelist: 'extensions/amp-bind/0.1/bind-expression.js' # Polyfills IE case.
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Object.entries is not allowed'
+  value: 'Object.entries'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Object.getOwnPropertyDescriptors is not allowed'
+  value: 'Object.getOwnPropertyDescriptors'
+}
+
 # Array
 
 requirement: {
@@ -188,7 +209,7 @@ requirement: {
 requirement: {
   type: RESTRICTED_METHOD_CALL
   error_message: 'postMessage must be called with a string or a JsonObject'
-  value: 'Window.prototype.postMessage:function((string|?JsonObject), string)'
+  value: 'Window.prototype.postMessage:function((string|?JsonObject), string, (Array|Transferable)=)'
   # Guaranteed same version call
   whitelist: 'src/web-worker/web-worker.js'
   # Allowing violations in ads code for now.

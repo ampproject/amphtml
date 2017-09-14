@@ -21,7 +21,8 @@ import {
 } from '../../testing/iframe';
 import {AmpEvents} from '../../src/amp-events';
 
-describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
+describe.configure().enableIe().retryOnSaucelabs().run('Rendering of' +
+    ' one ad', () => {
   let fixture;
   let beforeHref;
 

@@ -14,60 +14,52 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-youtube';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {adopt} from '../../../../src/runtime';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import * as sinon from 'sinon';
 
-adopt(window);
 
-describe('amp-youtube', function() {
+describes.realWin('amp-youtube', {
+  amp: {
+    extensions: ['amp-youtube'],
+  },
+}, function(env) {
   this.timeout(5000);
-  let sandbox;
-  const timer = timerFor(window);
+  let win, doc;
+  let timer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    win = env.win;
+    doc = win.document;
+    timer = Services.timerFor(win);
   });
 
   function getYt(attributes, opt_responsive, opt_beforeLayoutCallback) {
-    return createIframePromise(
-        true, opt_beforeLayoutCallback).then(iframe => {
-          doNotLoadExternalResourcesInTest(iframe.win);
-          const yt = iframe.doc.createElement('amp-youtube');
-
-          // TODO(mkhatib): During tests, messages are not being correctly
-          // caught and hence the ready promise will never resolve.
-          // For now, this resolves the ready promise after a while.
-          timer.promise(50).then(() => {
-            const ytIframe = yt.querySelector('iframe');
-            yt.implementation_.handleYoutubeMessages_({
-              origin: 'https://www.youtube.com',
-              source: ytIframe.contentWindow,
-              data: JSON.stringify({event: 'onReady'}),
-            });
-          });
-
-          for (const key in attributes) {
-            yt.setAttribute(key, attributes[key]);
-          }
-          yt.setAttribute('width', '111');
-          yt.setAttribute('height', '222');
-          if (opt_responsive) {
-            yt.setAttribute('layout', 'responsive');
-          }
-          return iframe.addElement(yt);
-        });
+    const yt = doc.createElement('amp-youtube');
+    for (const key in attributes) {
+      yt.setAttribute(key, attributes[key]);
+    }
+    yt.setAttribute('width', '111');
+    yt.setAttribute('height', '222');
+    if (opt_responsive) {
+      yt.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(yt);
+    return yt.build().then(() => {
+      if (opt_beforeLayoutCallback) {
+        opt_beforeLayoutCallback(yt);
+      }
+      return yt.layoutCallback();
+    }).then(() => {
+      const ytIframe = yt.querySelector('iframe');
+      yt.implementation_.handleYoutubeMessages_({
+        origin: 'https://www.youtube.com',
+        source: ytIframe.contentWindow,
+        data: JSON.stringify({event: 'onReady'}),
+      });
+    }).then(() => yt);
   }
 
   it('renders', () => {
@@ -266,7 +258,7 @@ describe('amp-youtube', function() {
             return p;
           })
           .then(() => {
-            const p = listenOncePromise(yt, VideoEvents.PLAY);
+            const p = listenOncePromise(yt, VideoEvents.PLAYING);
             sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
             return p;
           })
@@ -276,24 +268,23 @@ describe('amp-youtube', function() {
             return p;
           })
           .then(() => {
-        // Make sure pause is triggered when video stops
-            const p = listenOncePromise(yt, VideoEvents.PAUSE);
-            sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
-            sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 0});
-            return p;
-          })
-          .then(() => {
             const p = listenOncePromise(yt, VideoEvents.UNMUTED);
             sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
             return p;
           }).then(() => {
-        // Should not send the unmute event twice if already sent once.
+            // Should not send the unmute event twice if already sent once.
             const p = listenOncePromise(yt, VideoEvents.UNMUTED).then(() => {
               assert.fail('Should not have dispatch unmute message twice');
             });
             sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
             const successTimeout = timer.promise(10);
             return Promise.race([p, successTimeout]);
+          }).then(() => {
+            // Make sure pause and end are triggered when video ends.
+            const pEnded = listenOncePromise(yt, VideoEvents.ENDED);
+            const pPause = listenOncePromise(yt, VideoEvents.PAUSE);
+            sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 0});
+            return Promise.all([pEnded, pPause]);
           });
     });
   });

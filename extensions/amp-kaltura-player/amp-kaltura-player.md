@@ -35,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
@@ -53,20 +55,19 @@ Example:
 
 ## Attributes
 
-**data-partner**
+##### data-partner
 
 The Kaltura partner id. This attribute is mandatory.
 
-**data-uiconf**
+##### data-uiconf
 
 The Kaltura player id - uiconf id.
 
-**data-entryid**
+##### data-entryid
 
 The Kaltura entry id.
 
-
-**data-param-***
+##### data-param-*
 
 All `data-param-*` attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.
 
@@ -74,7 +75,7 @@ Keys and values will be URI encoded. Keys will be camel cased.
 
 - `data-param-streamerType="auto"` becomes `&flashvars[streamerType]=auto`
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

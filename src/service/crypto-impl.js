@@ -16,7 +16,7 @@
 
 import {registerServiceBuilder, getService} from '../service';
 import {dev} from '../log';
-import {extensionsFor} from '../services';
+import {Services} from '../services';
 import {stringToBytes, utf8EncodeSync} from '../utils/bytes';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
 
@@ -117,8 +117,8 @@ export class Crypto {
     if (this.polyfillPromise_) {
       return this.polyfillPromise_;
     }
-    return this.polyfillPromise_ = extensionsFor(this.win_)
-        .loadExtension('amp-crypto-polyfill')
+    return this.polyfillPromise_ = Services.extensionsFor(this.win_)
+        .preloadExtension('amp-crypto-polyfill')
         .then(() => getService(this.win_, 'crypto-polyfill'));
   }
 

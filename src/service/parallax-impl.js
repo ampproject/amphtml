@@ -20,7 +20,7 @@ import {registerServiceBuilderForDoc} from '../service';
 import {setStyles} from '../style';
 import {toArray} from '../types';
 import {user} from '../log';
-import {viewportForDoc, vsyncFor} from '../services';
+import {Services} from '../services';
 
 const ATTR = 'amp-fx-parallax';
 const EXPERIMENT = ATTR;
@@ -52,8 +52,8 @@ export class ParallaxService {
    */
   installParallaxHandlers_(global) {
     const doc = global.document;
-    const viewport = viewportForDoc(doc);
-    const vsync = vsyncFor(global);
+    const viewport = Services.viewportForDoc(doc);
+    const vsync = Services.vsyncFor(global);
 
     const elements = toArray(doc.querySelectorAll(`[${ATTR}]`));
     const parallaxElements = elements.map(
@@ -69,7 +69,7 @@ export class ParallaxService {
    * Update each [amp-fx-parallax] element with the new scroll position.
    * Notify any listeners.
    * @param {!Array<!ParallaxElement>} elements
-   * @param {!./viewport-impl.Viewport} viewport
+   * @param {!./viewport/viewport-impl.Viewport} viewport
    * @private
    */
   parallaxMutate_(elements, viewport) {
@@ -181,7 +181,7 @@ export class ParallaxElement {
 
   /**
    * True if the element is in the viewport.
-   * @param {!./viewport-impl.Viewport} viewport
+   * @param {!./viewport/viewport-impl.Viewport} viewport
    * @return {boolean}
    */
   shouldUpdate(viewport) {

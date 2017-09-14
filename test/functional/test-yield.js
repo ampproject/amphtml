@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import 'regenerator-runtime/runtime';
 import * as lolex from 'lolex';
 import {macroTask} from '../../testing/yield';
 

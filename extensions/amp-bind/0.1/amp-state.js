@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {bindForDoc, viewerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
+import {map} from '../../../src/utils/object';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -42,7 +43,7 @@ export class AmpState extends AMP.BaseElement {
   activate(unusedInvocation) {
     // TODO(choumx): Remove this after a few weeks in production.
     const TAG = this.getName_();
-    user().error(TAG,
+    this.user().error(TAG,
         'Please use AMP.setState() action explicitly, e.g. ' +
         'on="submit-success:AMP.setState({myAmpState: event.response})"');
   }
@@ -53,13 +54,13 @@ export class AmpState extends AMP.BaseElement {
     this.element.setAttribute('aria-hidden', 'true');
 
     // Don't parse or fetch in prerender mode.
-    const viewer = viewerForDoc(this.getAmpDoc());
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(() => this.initialize_());
   }
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    const viewer = viewerForDoc(this.getAmpDoc());
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
     if (!viewer.isVisible()) {
       const TAG = this.getName_();
       dev().error(TAG, 'Viewer must be visible before mutation.');
@@ -98,17 +99,19 @@ export class AmpState extends AMP.BaseElement {
     const TAG = this.getName_();
     const children = this.element.children;
     if (children.length != 1) {
-      user().error(TAG, 'Should contain exactly one <script> child.');
+      this.user().error(
+          TAG, 'Should contain exactly one <script> child.');
       return;
     }
     const firstChild = children[0];
     if (!isJsonScriptTag(firstChild)) {
-      user().error(TAG,
+      this.user().error(TAG,
           'State should be in a <script> tag with type="application/json".');
       return;
     }
     const json = tryParseJson(firstChild.textContent, e => {
-      user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
+      this.user().error(
+          TAG, 'Failed to parse state. Is it valid JSON?', e);
     });
     this.updateState_(json, /* isInit */ true);
   }
@@ -146,9 +149,10 @@ export class AmpState extends AMP.BaseElement {
       return;
     }
     const id = user().assert(this.element.id, '<amp-state> must have an id.');
-    const state = Object.create(null);
+    const state = /** @type {!JsonObject} */ (map());
     state[id] = json;
-    bindForDoc(this.element).then(bind => {
+    Services.bindForDocOrNull(this.element).then(bind => {
+      dev().assert(bind, 'Bind service can not be found.');
       bind.setState(state,
           /* opt_skipEval */ isInit, /* opt_isAmpStateMutation */ !isInit);
     });

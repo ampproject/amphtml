@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
 import {ValidationBubble} from './validation-bubble';
-import {getAmpDoc} from '../../../src/ampdoc';
+import {createCustomEvent} from '../../../src/event-helper';
+import {dev} from '../../../src/log';
+import {getAmpdoc} from '../../../src/service';
+import {toWin} from '../../../src/types';
 
 
 /** @type {boolean|undefined} */
@@ -51,6 +53,7 @@ export function setCheckValiditySupportedForTesting(isSupported) {
 const CustomValidationTypes = {
   AsYouGo: 'as-you-go',
   ShowAllOnSubmit: 'show-all-on-submit',
+  InteractAndSubmit: 'interact-and-submit',
   ShowFirstOnSubmit: 'show-first-on-submit',
 };
 
@@ -69,10 +72,16 @@ export class FormValidator {
     this.form = form;
 
     /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc = getAmpDoc(form);
+    this.ampdoc = getAmpdoc(form);
 
     /** @protected @const {!Document} */
     this.doc = /** @type {!Document} */ (form.ownerDocument);
+
+    /**
+     * Tribool indicating last known validity of form.
+     * @private {boolean|null}
+     */
+    this.formValidity_ = null;
   }
 
   /**
@@ -89,6 +98,22 @@ export class FormValidator {
    * @param {!Event} unusedEvent
    */
   onInput(unusedEvent) {}
+
+  /**
+   * Fires a valid/invalid event from the form if its validity state
+   * has changed since the last invocation of this function.
+   * @visibleForTesting
+   */
+  fireValidityEventIfNecessary() {
+    const previousValidity = this.formValidity_;
+    this.formValidity_ = this.form.checkValidity();
+    if (previousValidity !== this.formValidity_) {
+      const win = toWin(this.form.ownerDocument.defaultView);
+      const type = this.formValidity_ ? 'valid' : 'invalid';
+      const event = createCustomEvent(win, type, null, {bubbles: true});
+      this.form.dispatchEvent(event);
+    }
+  }
 }
 
 
@@ -98,8 +123,8 @@ export class DefaultValidator extends FormValidator {
   /** @override */
   report() {
     this.form.reportValidity();
+    this.fireValidityEventIfNecessary();
   }
-
 }
 
 
@@ -123,6 +148,8 @@ export class PolyfillDefaultValidator extends FormValidator {
         break;
       }
     }
+
+    this.fireValidityEventIfNecessary();
   }
 
   /** @override */
@@ -291,13 +318,14 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
         break;
       }
     }
+
+    this.fireValidityEventIfNecessary();
   }
 
   /** @override */
   shouldValidateOnInteraction(input) {
     return !!this.getVisibleValidationFor(input);
   }
-
 }
 
 
@@ -319,6 +347,8 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
     if (firstInvalidInput) {
       firstInvalidInput./*REVIEW*/focus();
     }
+
+    this.fireValidityEventIfNecessary();
   }
 
   /** @override */
@@ -333,6 +363,27 @@ export class AsYouGoValidator extends AbstractCustomValidator {
   /** @override */
   shouldValidateOnInteraction(unusedInput) {
     return true;
+  }
+
+  /** @override */
+  onInteraction(event) {
+    super.onInteraction(event);
+    this.fireValidityEventIfNecessary();
+  }
+}
+
+
+/** @private visible for testing */
+export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
+  /** @override */
+  shouldValidateOnInteraction(unusedInput) {
+    return true;
+  }
+
+  /** @override */
+  onInteraction(event) {
+    super.onInteraction(event);
+    this.fireValidityEventIfNecessary();
   }
 }
 
@@ -351,6 +402,8 @@ export function getFormValidator(form) {
       return new AsYouGoValidator(form);
     case CustomValidationTypes.ShowAllOnSubmit:
       return new ShowAllOnSubmitValidator(form);
+    case CustomValidationTypes.InteractAndSubmit:
+      return new InteractAndSubmitValidator(form);
     case CustomValidationTypes.ShowFirstOnSubmit:
       return new ShowFirstOnSubmitValidator(form);
   }

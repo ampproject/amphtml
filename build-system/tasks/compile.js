@@ -97,11 +97,6 @@ function compile(entryModuleFilenames, outputDir,
     const checkTypes = options.checkTypes || argv.typecheck_only;
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
-    if (!process.env.TRAVIS) {
-      util.log(
-          'Starting closure compiler for',
-          util.colors.cyan(entryModuleFilenames));
-    }
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
     if (!options.preventRemoveAndMakeDir) {
@@ -154,6 +149,8 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-bind/**/*.js',
       // Needed to access form impl from other extensions
       'extensions/amp-form/**/*.js',
+      // Needed for AccessService
+      'extensions/amp-access/**/*.js',
       // Needed to access UserNotificationManager from other extensions
       'extensions/amp-user-notification/**/*.js',
       'src/*.js',
@@ -283,6 +280,8 @@ function compile(entryModuleFilenames, outputDir,
           'build/patched-module/',
           // Can't seem to suppress `(0, win.eval)` suspicious code warning
           '3p/environment.js',
+          // Generated code.
+          'extensions/amp-access/0.1/access-expr-impl.js',
         ],
         jscomp_error: [],
       }
@@ -344,15 +343,6 @@ function compile(entryModuleFilenames, outputDir,
         .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
         .pipe(gulp.dest(outputDir))
         .on('end', function() {
-          if (!process.env.TRAVIS) {
-            util.log(
-                'Compiled',
-                util.colors.cyan(entryModuleFilename),
-                'to',
-                outputDir + '/' + outputFilename,
-                'via',
-                intermediateFilename);
-          }
           gulp.src(intermediateFilename + '.map')
               .pipe(rename(outputFilename + '.map'))
               .pipe(gulp.dest(outputDir))

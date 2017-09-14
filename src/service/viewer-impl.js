@@ -17,7 +17,7 @@
 import {Observable} from '../observable';
 import {findIndex} from '../utils/array';
 import {dict, map} from '../utils/object';
-import {documentStateFor} from './document-state';
+import {Services} from '../services';
 import {registerServiceBuilderForDoc} from '../service';
 import {dev, duplicateErrorIfNecessary} from '../log';
 import {isIframed} from '../dom';
@@ -28,7 +28,6 @@ import {
   removeFragment,
   isProxyOrigin,
 } from '../url';
-import {timerFor} from '../services';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
 
@@ -95,7 +94,7 @@ export class Viewer {
     this.isIframed_ = isIframed(this.win);
 
     /** @const {!./document-state.DocumentState} */
-    this.docState_ = documentStateFor(this.win);
+    this.docState_ = Services.documentStateFor(this.win);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = true;
@@ -247,7 +246,7 @@ export class Viewer {
      * @private @const {?Promise}
      */
     this.messagingReadyPromise_ = this.isEmbedded_ ?
-        timerFor(this.win).timeoutPromise(
+        Services.timerFor(this.win).timeoutPromise(
             20000,
             new Promise(resolve => {
               this.messagingReadyResolver_ = resolve;
@@ -285,6 +284,11 @@ export class Viewer {
       trustedViewerResolved = (this.win.location.ancestorOrigins.length > 0 &&
           this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]));
       trustedViewerPromise = Promise.resolve(trustedViewerResolved);
+    } else if (!this.params_['origin']) {
+      // TODO(dvoytenko, #10991): Remove "origin" parameter check once all
+      // clients properly implement handshake.
+      trustedViewerResolved = false;
+      trustedViewerPromise = Promise.resolve(false);
     } else {
       // Wait for comms channel to confirm the origin.
       trustedViewerResolved = undefined;
@@ -306,7 +310,8 @@ export class Viewer {
         resolve(this.win.location.ancestorOrigins[0]);
       } else {
         // Race to resolve with a timer.
-        timerFor(this.win).delay(() => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
+        Services.timerFor(this.win).delay(
+            () => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
         this.viewerOriginResolver_ = resolve;
       }
     });

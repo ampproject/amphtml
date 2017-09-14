@@ -41,6 +41,8 @@ class Shell {
     /** @private {string} */
     this.currentPage_ = win.location.pathname;
 
+    this.sidebarCloseButton_ = document.querySelector('#sidebarClose');
+
     win.addEventListener('popstate', this.handlePopState_.bind(this));
     win.document.documentElement.addEventListener('click',
         this.handleNavigate_.bind(this));
@@ -85,15 +87,16 @@ class Shell {
   }
 
   /**
+   * @param {!Event} e
    */
   handleNavigate_(e) {
     if (e.defaultPrevented) {
       return false;
     }
-    if (event.button) {
+    if (e.button) {
       return false;
     }
-    let a = event.target;
+    let a = e.target;
     while (a) {
       if (a.tagName == 'A' && a.href) {
         break;
@@ -110,7 +113,7 @@ class Shell {
         const newPage = url.pathname + location.search;
         log('Internal link to: ', newPage);
         if (newPage != this.currentPage_) {
-          this.navigateTo(newPage);
+          this.closeSidebar().then(() => this.navigateTo(newPage));
         }
       }
     }
@@ -177,6 +180,19 @@ class Shell {
     }
     this.a_.href = url;
     return this.a_.href;
+  }
+
+  closeSidebar() {
+    if (this.sidebarCloseButton_) {
+      return new Promise(resolve => {
+        this.sidebarCloseButton_.click();
+        // TODO implement a better method to detect when
+        // closing sidebar has finished
+        setTimeout(() => resolve(), 100);
+      });
+    } else {
+      return Promise.resolve();
+    }
   }
 }
 
@@ -326,7 +342,7 @@ class AmpViewer {
  * @return {boolean}
  */
 function isShellUrl(url) {
-  return (url == '/pwa' || url == '/pwa/');
+  return (url == '/pwa' || url == '/pwa/' || url == '/pwa/ampdoc-shell');
 }
 
 
@@ -379,7 +395,8 @@ function streamDocument(url, writer) {
     return fetch(url).then(response => {
       // This should be a lot simpler with transforming streams and pipes,
       // but, TMK, these are not supported anywhere yet.
-      const reader = response.body.getReader();
+      const /** !ReadableStreamDefaultReader */ reader = response.body
+          .getReader();
       const decoder = new TextDecoder();
       function readChunk(chunk) {
         const text = decoder.decode(

@@ -68,6 +68,7 @@ exports.rules = [
     filesMatching: '3p/**/*.js',
     mustNotDependOn: 'src/**/*.js',
     whitelist: [
+      '3p/**->src/utils/function.js',
       '3p/**->src/utils/object.js',
       '3p/**->src/log.js',
       '3p/**->src/types.js',
@@ -173,20 +174,23 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-gfycat/0.1/amp-gfycat.js->' +
+          'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->src/service/variable-source.js',
       'extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-3q-player/0.1/amp-3q-player.js->' +
-        'src/service/video-manager-impl.js',
+          'src/service/video-manager-impl.js',
       'extensions/amp-ima-video/0.1/amp-ima-video.js->' +
-        'src/service/video-manager-impl.js',
+          'src/service/video-manager-impl.js',
       'extensions/amp-fx-parallax/0.1/amp-fx-parallax.js->' +
           'src/service/parallax-impl.js',
-      // TODO(@zhouyx, #9213) Remove this item.
-      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js->' +
-          'src/service/position-observer-impl.js',
-      'extensions/amp-animation/0.1/scrollbound-scene.js->' +
-          'src/service/position-observer-impl.js',
+      'extensions/amp-analytics/0.1/iframe-transport.js->' +
+          'src/service/extension-location.js',
+      'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
+          'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
+          'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
     ],

@@ -25,20 +25,14 @@ import {
 } from '../form-validators';
 import {
   CONFIG_KEY,
-  FORM_VERIFY_EXPERIMENT,
 } from '../form-verifiers';
 import * as sinon from 'sinon';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {
   cidServiceForDocForTesting,
 } from '../../../../src/service/cid-impl';
-import {
-  actionServiceForDoc,
-  documentInfoForDoc,
-  timerFor,
-} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import '../../../amp-selector/0.1/amp-selector';
-import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
 import {AmpEvents} from '../../../../src/amp-events';
@@ -52,16 +46,16 @@ describes.repeated('', {
     amp: {
       runtimeOn: false,
       ampdoc: variant.ampdoc,
-      extensions: ['amp-selector'],  // amp-form is installed as service.
+      extensions: ['amp-form', 'amp-selector'],  // amp-form is installed as service.
     },
   }, env => {
 
     let sandbox;
-    const timer = timerFor(window);
+    const timer = Services.timerFor(window);
 
     function getAmpForm(form, canonical = 'https://example.com/amps.html') {
       new AmpFormService(env.ampdoc);
-      documentInfoForDoc(env.ampdoc).canonicalUrl = canonical;
+      Services.documentInfoForDoc(env.ampdoc).canonicalUrl = canonical;
       cidServiceForDocForTesting(env.ampdoc);
       env.ampdoc.getBody().appendChild(form);
       const ampForm = new AmpForm(form, 'amp-form-test-id');
@@ -433,7 +427,6 @@ describes.repeated('', {
     });
 
     it('should allow verifying elements with a presubmit request', () => {
-      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, true);
       const formPromise = getAmpForm(getVerificationForm(
           env.win.document));
       const fetchRejectPromise = Promise.reject({
@@ -465,7 +458,6 @@ describes.repeated('', {
     });
 
     it('should only use the more recent verify request', () => {
-      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, true);
       const formPromise = getAmpForm(getVerificationForm(
           env.win.document, asyncVerifyConfig));
 
@@ -640,7 +632,7 @@ describes.repeated('', {
         }).then(() => {
           expect(spy.calledOnce).to.be.true;
           expect(spy).calledWithMatch({
-            type: AmpEvents.TEMPLATE_RENDERED,
+            type: AmpEvents.DOM_UPDATE,
             bubbles: true,
           });
         });
@@ -1253,7 +1245,7 @@ describes.repeated('', {
     it('should install action handler and handle submit action', () => {
       const form = getForm();
       document.body.appendChild(form);
-      const actions = actionServiceForDoc(form.ownerDocument);
+      const actions = Services.actionServiceForDoc(form.ownerDocument);
 
       sandbox.stub(actions, 'installActionHandler');
       const ampForm = new AmpForm(form);

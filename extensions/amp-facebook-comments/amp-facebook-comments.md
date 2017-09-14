@@ -31,6 +31,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Overview
 
 You can use the `amp-facebook-comments` component to embed the [Facebook comments plugin](https://developers.facebook.com/docs/plugins/comments).
@@ -46,23 +48,23 @@ You can use the `amp-facebook-comments` component to embed the [Facebook comment
 ```
 ## Attributes
 
-**data-href** (required)
+##### data-href (required)
 
 The URL of the comments page. For example, `http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html`.
 
-**data-numposts** (optional)
+##### data-numposts (optional)
 
 The number of comments to show.  For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
-**data-order-by** (optional)
+##### data-order-by (optional)
 
 The order to use when displaying comments. For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
-**data-colorscheme** (optional)
+##### data-colorscheme (optional)
 
 The color scheme. For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

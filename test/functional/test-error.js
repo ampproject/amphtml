@@ -22,6 +22,7 @@ import {
   isCancellation,
   reportError,
   detectJsEngineFromStack,
+  reportErrorToAnalytics,
 } from '../../src/error';
 import {parseUrl, parseQueryString} from '../../src/url';
 import {user} from '../../src/log';
@@ -30,9 +31,10 @@ import {
   toggleExperiment,
 } from '../../src/experiments';
 import * as sinon from 'sinon';
-
+import * as analytics from '../../src/analytics';
 
 describes.fakeWin('installErrorReporting', {}, env => {
+  let sandbox;
   let win;
   let rejectedPromiseError;
   let rejectedPromiseEvent;
@@ -41,6 +43,7 @@ describes.fakeWin('installErrorReporting', {}, env => {
   beforeEach(() => {
     win = env.win;
     installErrorReporting(win);
+    sandbox = env.sandbox;
     rejectedPromiseEventCancelledSpy = sandbox.spy();
     rejectedPromiseError = new Error('error');
     rejectedPromiseEvent = {
@@ -85,7 +88,7 @@ describes.fakeWin('installErrorReporting', {}, env => {
 });
 
 
-describe('reportErrorToServer', () => {
+describe.configure().run('reportErrorToServer', () => {
   let sandbox;
   let onError;
 
@@ -503,7 +506,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 });
 
-describe('detectJsEngineFromStack', () => {
+describe.configure().run('detectJsEngineFromStack', () => {
   // Note that these are not true of every case. You can emulate iOS Safari
   // on Desktop Chrome and break this. These tests are explicitly for
   // SauceLabs, which runs does not masquerade with UserAgent.
@@ -537,5 +540,29 @@ describe('detectJsEngineFromStack', () => {
     it.configure().ifEdge().run('detects edge as IE', () => {
       expect(detectJsEngineFromStack()).to.equal('IE');
     });
+  });
+});
+
+
+describes.fakeWin('user error reporting', {amp: true}, env => {
+  let win;
+  let sandbox;
+  const error = new Error('ERROR','user error');
+  let analyticsEventSpy;
+
+  beforeEach(() => {
+    sandbox = env.sandbox;
+    win = env.win;
+    analyticsEventSpy = sandbox.spy(analytics, 'triggerAnalyticsEvent');
+    toggleExperiment(win, 'user-error-reporting', true);
+  });
+
+  it('should trigger triggerAnalyticsEvent with correct arguments', () => {
+    reportErrorToAnalytics(error, win);
+    expect(analyticsEventSpy).to.have.been.called;
+    expect(analyticsEventSpy).to.have.been.calledWith(
+        sinon.match.any,
+        'user-error',
+        {errorName: error.name, errorMessage: error.message});
   });
 });

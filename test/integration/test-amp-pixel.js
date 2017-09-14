@@ -19,7 +19,9 @@ import {
   withdrawRequest,
 } from '../../testing/test-helper';
 
-describe('amp-pixel', () => {
+describe.configure().run('amp-pixel', function() {
+  this.timeout(15000);
+
   describes.integration('amp-pixel integration test', {
     body: `<amp-pixel src="${depositRequestUrl('has-referrer')}">`,
   }, env => {

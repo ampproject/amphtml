@@ -16,7 +16,7 @@
 
 import {dev} from './log';
 import {getServicePromise} from './service';
-import {timerFor} from './services';
+import {Services} from './services';
 
 /**
  * A map of services that delay rendering. The key is the name of the service
@@ -56,7 +56,7 @@ const LOAD_TIMEOUT = 3000;
  */
 export function waitForServices(win) {
   const promises = includedServices(win).map(service => {
-    return timerFor(win).timeoutPromise(
+    return Services.timerFor(win).timeoutPromise(
         LOAD_TIMEOUT,
         getServicePromise(win, service),
         `Render timeout waiting for service ${service} to be ready.`

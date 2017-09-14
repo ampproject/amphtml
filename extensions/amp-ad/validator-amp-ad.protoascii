@@ -51,7 +51,6 @@ tags: {  # <amp-ad>
   # If modifying disallowed_ancestors, then please also edit
   # extensions/amp-auto-ads/*/placement.js
   disallowed_ancestor: "AMP-APP-BANNER"
-  disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
   attrs: { name: "json" }
   attrs: {
@@ -83,7 +82,6 @@ tags: {  # <amp-ad data-multi-size>
   # If modifying disallowed_ancestors, then please also edit
   # extensions/amp-auto-ads/*/placement.js
   disallowed_ancestor: "AMP-APP-BANNER"
-  disallowed_ancestor: "AMP-SIDEBAR"
   # amp-ad elements cannot be both children of an amp ad container and have
   # data-multi-size attribute.
   disallowed_ancestor: "AMP-CAROUSEL"
@@ -124,7 +122,6 @@ tags: {  # <amp-embed>
   requires_extension: "amp-ad"  # See note at top of file
   also_requires_tag_warning: "amp-ad extension .js script"
   disallowed_ancestor: "AMP-APP-BANNER"
-  disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
   attrs: { name: "json" }
   attrs: {
@@ -154,7 +151,6 @@ tags: {  # <amp-embed data-multi-size>
   requires_extension: "amp-ad"  # See note at top of file
   also_requires_tag_warning: "amp-ad extension .js script"
   disallowed_ancestor: "AMP-APP-BANNER"
-  disallowed_ancestor: "AMP-SIDEBAR"
   # amp-embed elements cannot be both children of an amp ad container and have
   # data-multi-size attribute.
   disallowed_ancestor: "AMP-CAROUSEL"

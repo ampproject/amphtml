@@ -17,14 +17,25 @@
 import {createIframePromise} from '../../testing/iframe';
 import {BaseElement} from '../../src/base-element';
 import {installImg, AmpImg} from '../../builtins/amp-img';
-import {resourcesForDoc} from '../../src/services';
+import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('amp-img', () => {
   let sandbox;
+  let screenWidth;
+  let windowWidth;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    screenWidth = 320;
+    windowWidth = 320;
+    sandbox.stub(BaseElement.prototype, 'isInViewport')
+        .returns(true);
+    sandbox.stub(BaseElement.prototype, 'getViewport', () => {
+      return {
+        getWidth: () => windowWidth,
+      };
+    });
   });
 
   afterEach(() => {
@@ -32,10 +43,12 @@ describe('amp-img', () => {
   });
 
   function getImg(attributes, children) {
-    sandbox.stub(BaseElement.prototype, 'isInViewport')
-        .returns(true);
     return createIframePromise().then(iframe => {
       installImg(iframe.win);
+      Object.defineProperty(iframe.win.screen, 'width', {
+        get: () => screenWidth,
+      });
+
       const img = iframe.doc.createElement('amp-img');
       for (const key in attributes) {
         img.setAttribute(key, attributes[key]);
@@ -98,6 +111,8 @@ describe('amp-img', () => {
   });
 
   it('should load an img with srcset', () => {
+    windowWidth = 320;
+    screenWidth = 4000;
     return getImg({
       srcset: 'bad.jpg 2000w, /examples/img/sample.jpg 1000w',
       width: 300,
@@ -106,6 +121,40 @@ describe('amp-img', () => {
       const img = ampImg.querySelector('img');
       expect(img.tagName).to.equal('IMG');
       expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
+      expect(img.hasAttribute('referrerpolicy')).to.be.false;
+    });
+  });
+
+  it('should load larger image on larger screen', () => {
+    windowWidth = 3000;
+    screenWidth = 300;
+    return getImg({
+      srcset: '/examples/img/sample.jpg?large 2000w, ' +
+          '/examples/img/small.jpg?small 1000w',
+      width: 300,
+      height: 200,
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.tagName).to.equal('IMG');
+      expect(img.getAttribute('src')).to.equal(
+          '/examples/img/sample.jpg?large');
+      expect(img.hasAttribute('referrerpolicy')).to.be.false;
+    });
+  });
+
+  it('should fall back to screen width for srcset', () => {
+    windowWidth = 0;
+    screenWidth = 3000;
+    return getImg({
+      srcset: '/examples/img/sample.jpg?large 2000w, ' +
+          '/examples/img/small.jpg?small 1000w',
+      width: 300,
+      height: 200,
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.tagName).to.equal('IMG');
+      expect(img.getAttribute('src')).to.equal(
+          '/examples/img/sample.jpg?large');
       expect(img.hasAttribute('referrerpolicy')).to.be.false;
     });
   });
@@ -137,7 +186,7 @@ describe('amp-img', () => {
       el.setAttribute('src', 'test.jpg');
       el.setAttribute('width', 100);
       el.setAttribute('height', 100);
-      el.getResources = () => resourcesForDoc(document);
+      el.getResources = () => Services.resourcesForDoc(document);
       impl = new AmpImg(el);
       impl.createdCallback();
       sandbox.stub(impl, 'getLayoutWidth').returns(100);
@@ -149,6 +198,11 @@ describe('amp-img', () => {
           mutate(fn) {
             fn();
           },
+        };
+      };
+      impl.getViewport = function() {
+        return {
+          getWidth: () => windowWidth,
         };
       };
     });
@@ -183,6 +237,27 @@ describe('amp-img', () => {
         expect(errorSpy).to.be.calledOnce;
         expect(toggleSpy).to.be.calledOnce;
         expect(toggleSpy.firstCall.args[0]).to.be.true;
+        expect(toggleElSpy.firstCall.args[0]).to.be.true;
+      });
+    });
+
+    it('should hide child placeholder elements if loading fails', () => {
+      sandbox.stub(impl, 'loadPromise').returns(Promise.reject());
+      const errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
+      const toggleSpy = sandbox.spy(impl, 'toggleFallback');
+      const togglePlaceholderSpy = sandbox.spy(impl, 'togglePlaceholder');
+      impl.buildCallback();
+      expect(errorSpy).to.have.not.been.called;
+      expect(toggleSpy).to.have.not.been.called;
+      expect(togglePlaceholderSpy).to.have.not.been.called;
+      expect(toggleElSpy).to.have.not.been.called;
+
+      return impl.layoutCallback().catch(() => {
+        expect(errorSpy).to.be.calledOnce;
+        expect(toggleSpy).to.be.calledOnce;
+        expect(toggleSpy.firstCall.args[0]).to.be.true;
+        expect(togglePlaceholderSpy).to.be.calledOnce;
+        expect(togglePlaceholderSpy.firstCall.args[0]).to.be.false;
         expect(toggleElSpy.firstCall.args[0]).to.be.true;
       });
     });

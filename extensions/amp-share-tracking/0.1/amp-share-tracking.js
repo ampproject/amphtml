@@ -15,8 +15,7 @@
  */
 
 import {isExperimentOn} from '../../../src/experiments';
-import {xhrFor} from '../../../src/services';
-import {historyForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {registerServiceBuilder} from '../../../src/service';
 import {Layout} from '../../../src/layout';
 import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
@@ -143,17 +142,19 @@ export class AmpShareTracking extends AMP.BaseElement {
       credentials: 'include',
       body: dict(),
     };
-    return xhrFor(this.win).fetchJson(vendorUrl, postReq)
+    return Services.xhrFor(this.win).fetchJson(vendorUrl, postReq)
         .then(res => res.json())
         .then(json => {
           if (json.fragment) {
             return json.fragment;
           }
-          user().error(TAG, 'The response from [' + vendorUrl + '] does not ' +
+          this.user().error(
+              TAG, 'The response from [' + vendorUrl + '] does not ' +
             'have a fragment value.');
           return '';
         }, err => {
-          user().error(TAG, 'The request to share-tracking endpoint failed:',
+          this.user().error(
+              TAG, 'The request to share-tracking endpoint failed:',
               err);
           return '';
         });
@@ -209,7 +210,7 @@ export class AmpShareTracking extends AMP.BaseElement {
 
   /** @private @return {!../../../src/service/history-impl.History} */
   getHistory_() {
-    return historyForDoc(this.getAmpDoc());
+    return Services.historyForDoc(this.getAmpDoc());
   }
 
 }

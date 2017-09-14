@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  MockA4AImpl,
-  TEST_URL,
-  SIGNATURE_HEADER,
-} from './utils';
+import {FetchMock, networkFailure} from './fetch-mock';
+import {MockA4AImpl, TEST_URL} from './utils';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
   AmpA4A,
@@ -28,96 +25,103 @@ import {
   protectFunctionWrapper,
   assignAdUrlToError,
 } from '../amp-a4a';
+import {
+  AMP_SIGNATURE_HEADER,
+  LEGACY_VERIFIER_EID,
+  NEW_VERIFIER_EID,
+  VERIFIER_EXP_NAME,
+  signatureVerifierFor,
+} from '../legacy-signature-verifier';
+import {VerificationStatus} from '../signature-verifier';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
+import {utf8EncodeSync} from '../../../../src/utils/bytes';
 import {Signals} from '../../../../src/utils/signals';
-import {Xhr} from '../../../../src/service/xhr-impl';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {cancellation} from '../../../../src/error';
+import {forceExperimentBranch} from '../../../../src/experiments';
 import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
-import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {utf8Encode} from '../../../../src/utils/bytes';
-import {resetScheduledElementForTesting} from '../../../../src/custom-element';
-import {urlReplacementsForDoc} from '../../../../src/services';
+import {
+  resetScheduledElementForTesting,
+} from '../../../../src/service/custom-element-registry';
+import {Services} from '../../../../src/services';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
-import {platformFor, timerFor} from '../../../../src/services';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev, user} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
-
-function setupForAdTesting(fixture) {
-  installDocService(fixture.win, /* isSingleDoc */ true);
-  const doc = fixture.doc;
-  // TODO(a4a-cam@): This is necessary in the short term, until A4A is
-  // smarter about host document styling.  The issue is that it needs to
-  // inherit the AMP runtime style element in order for shadow DOM-enclosed
-  // elements to behave properly.  So we have to set up a minimal one here.
-  const ampStyle = doc.createElement('style');
-  ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
-  doc.head.appendChild(ampStyle);
-}
+// Need the following side-effect import because in actual production code,
+// Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
+// always available for them. However, when we test an impl in isolation,
+// AmpAd is not loaded already, so we need to load it separately.
+import '../../../amp-ad/0.1/amp-ad';
 
 describe('amp-a4a', () => {
   let sandbox;
-  let xhrMock;
-  let xhrMockJson;
+  let fetchMock;
   let getSigningServiceNamesMock;
   let viewerWhenVisibleMock;
-  let mockResponse;
+  let adResponse;
   let onCreativeRenderSpy;
-  let headers;
+  let getResourceStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
-    xhrMockJson = sandbox.stub(Xhr.prototype, 'fetchJson');
+    fetchMock = null;
     getSigningServiceNamesMock = sandbox.stub(AmpA4A.prototype,
         'getSigningServiceNames');
     onCreativeRenderSpy =
         sandbox.spy(AmpA4A.prototype, 'onCreativeRender');
     getSigningServiceNamesMock.returns(['google']);
-    xhrMockJson.withArgs(
-        'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-        {
-          mode: 'cors',
-          method: 'GET',
-          ampCors: false,
-          credentials: 'omit',
-        }).returns(Promise.resolve({
-          json() {
-            return Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]});
-          },
-        }));
     viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     viewerWhenVisibleMock.returns(Promise.resolve());
-    mockResponse = {
-      arrayBuffer() {
-        return utf8Encode(validCSSAmp.reserialized);
+    getResourceStub = sandbox.stub(AmpA4A.prototype, 'getResource');
+    getResourceStub.returns({
+      getUpgradeDelayMs: () => 12345,
+    });
+    adResponse = {
+      headers: {
+        'AMP-Access-Control-Allow-Source-Origin': 'about:srcdoc',
+        'AMP-Fast-Fetch-Signature': validCSSAmp.signatureHeader,
       },
-      bodyUsed: false,
-      headers: new FetchResponseHeaders({
-        getResponseHeader(name) {
-          return headers[name];
-        },
-      }),
-      catch: callback => callback(),
+      body: validCSSAmp.reserialized,
     };
-    headers = {};
-    headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+    adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
   });
 
   afterEach(() => {
+    if (fetchMock) {
+      fetchMock./*OK*/restore();
+      fetchMock = null;
+    }
     sandbox.restore();
     resetScheduledElementForTesting(window, 'amp-a4a');
   });
+
+  function setupForAdTesting(fixture) {
+    expect(fetchMock).to.be.null;
+    fetchMock = new FetchMock(fixture.win);
+    fetchMock.getOnce(
+        'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+          body: validCSSAmp.publicKeyset,
+          status: 200,
+          headers: {'Content-Type': 'application/jwk-set+json'},
+        });
+    installDocService(fixture.win, /* isSingleDoc */ true);
+    const doc = fixture.doc;
+    // TODO(a4a-cam@): This is necessary in the short term, until A4A is
+    // smarter about host document styling.  The issue is that it needs to
+    // inherit the AMP runtime style element in order for shadow DOM-enclosed
+    // elements to behave properly.  So we have to set up a minimal one here.
+    const ampStyle = doc.createElement('style');
+    ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
+    doc.head.appendChild(ampStyle);
+  }
 
   function createA4aElement(doc, opt_rect) {
     const element = createElementWithAttributes(doc, 'amp-a4a', {
@@ -126,7 +130,7 @@ describe('amp-a4a', () => {
       'type': 'adsense',
     });
     element.getAmpDoc = () => {
-      const ampdocService = ampdocServiceFor(doc.defaultView);
+      const ampdocService = Services.ampdocServiceFor(doc.defaultView);
       return ampdocService.getAmpDoc(element);
     };
     element.isBuilt = () => {return true;};
@@ -240,46 +244,48 @@ describe('amp-a4a', () => {
     let a4aElement;
     let a4a;
     let fixture;
-    beforeEach(() => {
-      xhrMock.withArgs(TEST_URL, {
-        mode: 'cors',
-        method: 'GET',
-        credentials: 'include',
-      }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createIframePromise().then(f => {
-        fixture = f;
-        setupForAdTesting(fixture);
-        a4aElement = createA4aElement(fixture.doc);
-        a4a = new MockA4AImpl(a4aElement);
-        a4a.buildCallback();
-        return fixture;
-      });
-    });
+    beforeEach(() => createIframePromise().then(f => {
+      fixture = f;
+      setupForAdTesting(fixture);
+      fetchMock.getOnce(
+          TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+          {name: 'ad'});
+      a4aElement = createA4aElement(fixture.doc);
+      a4a = new MockA4AImpl(a4aElement);
+      a4a.releaseType_ = '0';
+      return fixture;
+    }));
 
     it('for SafeFrame rendering case', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+      delete adResponse.headers[AMP_SIGNATURE_HEADER];
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
-      headers[RENDERING_TYPE_HEADER] = 'safeframe';
+      adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
       a4a.buildCallback();
+      const lifecycleEventStub =
+          sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
         expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+        expect(lifecycleEventStub).to.be.calledWith('renderSafeFrameStart',
+            {'isAmpCreative': false, 'releaseType': '0'});
       });
     });
 
     it('for ios defaults to SafeFrame rendering', () => {
-      const platform = platformFor(fixture.win);
+      const platform = Services.platformFor(fixture.win);
       sandbox.stub(platform, 'isIos').returns(true);
       a4a = new MockA4AImpl(a4aElement);
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+      delete adResponse.headers[AMP_SIGNATURE_HEADER];
       // Ensure no rendering type header (ios on safari will default to
       // safeframe).
-      delete headers[RENDERING_TYPE_HEADER];
+      delete adResponse.headers[RENDERING_TYPE_HEADER];
       fixture.doc.body.appendChild(a4aElement);
       a4a.buildCallback();
       a4a.onLayoutMeasure();
@@ -296,7 +302,8 @@ describe('amp-a4a', () => {
 
     it('for cached content iframe rendering case', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+      delete adResponse.headers[AMP_SIGNATURE_HEADER];
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -307,8 +314,26 @@ describe('amp-a4a', () => {
       });
     });
 
-    it('for A4A friendly iframe rendering case', () => {
+    it('for A4A friendly iframe rendering case with legacy verifier', () => {
       expect(a4a.friendlyIframeEmbed_).to.not.exist;
+      forceExperimentBranch(
+          fixture.win, VERIFIER_EXP_NAME, LEGACY_VERIFIER_EID);
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        const child = a4aElement.querySelector('iframe[srcdoc]');
+        expect(child).to.be.ok;
+        expect(child).to.be.visible;
+        const a4aBody = child.contentDocument.body;
+        expect(a4aBody).to.be.ok;
+        expect(a4aBody).to.be.visible;
+        expect(a4a.friendlyIframeEmbed_).to.exist;
+      });
+    });
+
+    it('for A4A friendly iframe rendering case with new verifier', () => {
+      expect(a4a.friendlyIframeEmbed_).to.not.exist;
+      forceExperimentBranch(fixture.win, VERIFIER_EXP_NAME, NEW_VERIFIER_EID);
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -350,7 +375,8 @@ describe('amp-a4a', () => {
 
     it('should reset state to null on non-FIE unlayoutCallback', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+      delete adResponse.headers[AMP_SIGNATURE_HEADER];
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -393,25 +419,34 @@ describe('amp-a4a', () => {
         expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.true;
       });
     });
+
+    it('for requests from insecure HTTP pages', () => {
+      sandbox.stub(Services.cryptoFor(fixture.win), 'isPkcsAvailable')
+          .returns(false);
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        const child = a4aElement.querySelector('iframe[src]');
+        expect(child).to.be.ok;
+        expect(child).to.be.visible;
+        expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+      });
+    });
   });
   describe('layoutCallback cancels properly', () => {
     let a4aElement;
     let a4a;
     let fixture;
-    beforeEach(() => {
-      xhrMock.withArgs(TEST_URL, {
-        mode: 'cors',
-        method: 'GET',
-        credentials: 'include',
-      }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createIframePromise().then(f => {
-        fixture = f;
-        setupForAdTesting(fixture);
-        a4aElement = createA4aElement(fixture.doc);
-        a4a = new MockA4AImpl(a4aElement);
-        return fixture;
-      });
-    });
+    beforeEach(() => createIframePromise().then(f => {
+      fixture = f;
+      setupForAdTesting(fixture);
+      fetchMock.getOnce(
+          TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+          {name: 'ad'});
+      a4aElement = createA4aElement(fixture.doc);
+      a4a = new MockA4AImpl(a4aElement);
+      return fixture;
+    }));
 
     it('when unlayoutCallback called after adPromise', () => {
       a4a.buildCallback();
@@ -459,24 +494,26 @@ describe('amp-a4a', () => {
   describe('cross-domain rendering', () => {
     let a4aElement;
     let a4a;
+    let lifecycleEventStub;
     beforeEach(() => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+      delete adResponse.headers[AMP_SIGNATURE_HEADER];
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
-      headers[RENDERING_TYPE_HEADER] = 'safeframe';
-      xhrMock.withArgs(TEST_URL, {
-        mode: 'cors',
-        method: 'GET',
-        credentials: 'include',
-      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
         const doc = fixture.doc;
         a4aElement = createA4aElement(doc);
         a4a = new MockA4AImpl(a4aElement);
+        a4a.releaseType_ = '0';
         a4a.createdCallback();
         a4a.firstAttachedCallback();
         a4a.buildCallback();
+        lifecycleEventStub = sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
         expect(onCreativeRenderSpy).to.not.be.called;
       });
     });
@@ -487,7 +524,7 @@ describe('amp-a4a', () => {
         devErrLogSpy = sandbox.spy(dev(), 'error');
         // If rendering type is unknown, should fall back to cached content
         // iframe and generate an error.
-        headers[RENDERING_TYPE_HEADER] = 'random illegal value';
+        adResponse.headers[RENDERING_TYPE_HEADER] = 'random illegal value';
         a4a.onLayoutMeasure();
       });
 
@@ -498,7 +535,9 @@ describe('amp-a4a', () => {
           expect(devErrLogSpy).to.be.calledOnce;
           expect(devErrLogSpy.getCall(0).args[1]).to.have.string(
               'random illegal value');
-          expect(xhrMock).to.be.calledOnce;
+          expect(fetchMock.called('ad')).to.be.true;
+          expect(lifecycleEventStub).to.be.calledWith('renderCrossDomainStart',
+              {'isAmpCreative': false, 'releaseType': '0'});
         });
       });
     });
@@ -506,7 +545,7 @@ describe('amp-a4a', () => {
     describe('#renderViaNameFrame', () => {
       beforeEach(() => {
         // If rendering type is nameframe, we SHOULD attach a NameFrame.
-        headers[RENDERING_TYPE_HEADER] = 'nameframe';
+        adResponse.headers[RENDERING_TYPE_HEADER] = 'nameframe';
         a4a.onLayoutMeasure();
       });
 
@@ -516,7 +555,7 @@ describe('amp-a4a', () => {
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
           verifyNameFrameRender(a4aElement);
-          expect(xhrMock).to.be.calledOnce;
+          expect(fetchMock.called('ad')).to.be.true;
         });
       });
 
@@ -531,7 +570,7 @@ describe('amp-a4a', () => {
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
           verifyNameFrameRender(a4aElement);
-          expect(xhrMock).to.be.calledOnce;
+          expect(fetchMock.called('ad')).to.be.true;
         });
       });
 
@@ -540,10 +579,11 @@ describe('amp-a4a', () => {
             it(`should not attach a NameFrame when header is ${headerVal}`,
                 () => {
                   // Make sure there's no signature, so that we go down the 3p iframe path.
-                  delete headers[SIGNATURE_HEADER];
+                  delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+                  delete adResponse.headers[AMP_SIGNATURE_HEADER];
                   // If rendering type is anything but nameframe, we SHOULD NOT
                   // attach a NameFrame.
-                  headers[RENDERING_TYPE_HEADER] = headerVal;
+                  adResponse.headers[RENDERING_TYPE_HEADER] = headerVal;
                   a4a.onLayoutMeasure();
                   return a4a.layoutCallback().then(() => {
                     // Force vsync system to run all queued tasks, so that
@@ -558,7 +598,7 @@ describe('amp-a4a', () => {
                       expect(unsafeChild.getAttribute('src')).to.have.string(
                           TEST_URL);
                     }
-                    expect(xhrMock).to.be.calledOnce;
+                    expect(fetchMock.called('ad')).to.be.true;
                   });
                 });
           });
@@ -567,7 +607,7 @@ describe('amp-a4a', () => {
     describe('#renderViaSafeFrame', () => {
       beforeEach(() => {
         // If rendering type is safeframe, we SHOULD attach a SafeFrame.
-        headers[RENDERING_TYPE_HEADER] = 'safeframe';
+        adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
         a4a.onLayoutMeasure();
       });
 
@@ -577,7 +617,7 @@ describe('amp-a4a', () => {
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
           verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
-          expect(xhrMock).to.be.calledOnce;
+          expect(fetchMock.called('ad')).to.be.true;
         });
       });
 
@@ -588,7 +628,7 @@ describe('amp-a4a', () => {
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
           verifySafeFrameRender(a4aElement, '1-2-3');
-          expect(xhrMock).to.be.calledOnce;
+          expect(fetchMock.called('ad')).to.be.true;
         });
       });
 
@@ -603,7 +643,7 @@ describe('amp-a4a', () => {
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
           verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
-          expect(xhrMock).to.be.calledOnce;
+          expect(fetchMock.called('ad')).to.be.true;
         });
       });
 
@@ -613,7 +653,7 @@ describe('amp-a4a', () => {
                 () => {
                   // If rendering type is anything but safeframe, we SHOULD NOT attach a
                   // SafeFrame.
-                  headers[RENDERING_TYPE_HEADER] = headerVal;
+                  adResponse.headers[RENDERING_TYPE_HEADER] = headerVal;
                   a4a.onLayoutMeasure();
                   return a4a.layoutCallback().then(() => {
                     // Force vsync system to run all queued tasks, so that
@@ -630,7 +670,7 @@ describe('amp-a4a', () => {
                       expect(unsafeChild.getAttribute('src')).to.have.string(
                           TEST_URL);
                     }
-                    expect(xhrMock).to.be.calledOnce;
+                    expect(fetchMock.called('ad')).to.be.true;
                   });
                 });
           });
@@ -648,7 +688,7 @@ describe('amp-a4a', () => {
           // whether it's necessary or perhaps hazardous.  Feedback welcome.
           a4a.vsync_.runScheduledTasks_();
           expect(a4a.experimentalNonAmpCreativeRenderMethod_).to.be.null;
-          expect(xhrMock).to.be.calledOnce;
+          expect(fetchMock.called('ad')).to.be.true;
         });
       });
     });
@@ -657,26 +697,22 @@ describe('amp-a4a', () => {
   describe('cross-domain vs A4A', () => {
     let a4a;
     let a4aElement;
-    beforeEach(() => {
-      xhrMock.withArgs(TEST_URL, {
-        mode: 'cors',
-        method: 'GET',
-        credentials: 'include',
-      }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        a4aElement = createA4aElement(doc);
-        a4a = new MockA4AImpl(a4aElement);
-      });
-    });
+    beforeEach(() => createIframePromise().then(fixture => {
+      setupForAdTesting(fixture);
+      fetchMock.getOnce(
+          TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+          {name: 'ad'});
+      const doc = fixture.doc;
+      a4aElement = createA4aElement(doc);
+      a4a = new MockA4AImpl(a4aElement);
+    }));
     afterEach(() => {
-      expect(xhrMock).to.be.calledOnce;
+      expect(fetchMock.called('ad')).to.be.true;
     });
 
     ['nameframe', 'safeframe'].forEach(renderType => {
       it(`should not use ${renderType} if creative is A4A`, () => {
-        headers[RENDERING_TYPE_HEADER] = renderType;
+        adResponse.headers[RENDERING_TYPE_HEADER] = renderType;
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
@@ -689,7 +725,7 @@ describe('amp-a4a', () => {
 
       it(`should not use ${renderType} even if onLayoutMeasure called ` +
           'multiple times', () => {
-        headers[RENDERING_TYPE_HEADER] = renderType;
+        adResponse.headers[RENDERING_TYPE_HEADER] = renderType;
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         a4a.onLayoutMeasure();
@@ -707,38 +743,36 @@ describe('amp-a4a', () => {
         });
       });
     });
+  });
 
-    it('should set height/width on iframe matching header value', () => {
-      // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
-      headers['X-CreativeSize'] = '320x50';
-      xhrMock.withArgs(TEST_URL, {
-        mode: 'cors',
-        method: 'GET',
-        credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
-      }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        const a4aElement = createA4aElement(doc);
-        a4aElement.setAttribute('width', 480);
-        a4aElement.setAttribute('height', 75);
-        a4aElement.setAttribute('type', 'doubleclick');
-        const a4a = new MockA4AImpl(a4aElement);
-        doc.body.appendChild(a4aElement);
-        a4a.buildCallback();
-        a4a.onLayoutMeasure();
-        const renderPromise = a4a.layoutCallback();
-        return renderPromise.then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
-          const child = a4aElement.querySelector('iframe[name]');
-          expect(child).to.be.ok;
-          expect(child.getAttribute('width')).to.equal('320');
-          expect(child.getAttribute('height')).to.equal('50');
-        });
+  it('should set height/width on iframe matching header value', () => {
+    // Make sure there's no signature, so that we go down the 3p iframe path.
+    delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+    delete adResponse.headers[AMP_SIGNATURE_HEADER];
+    adResponse.headers['X-CreativeSize'] = '320x50';
+    return createIframePromise().then(fixture => {
+      setupForAdTesting(fixture);
+      fetchMock.getOnce(
+          TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+          {name: 'ad'});
+      const doc = fixture.doc;
+      const a4aElement = createA4aElement(doc);
+      a4aElement.setAttribute('width', 480);
+      a4aElement.setAttribute('height', 75);
+      a4aElement.setAttribute('type', 'doubleclick');
+      const a4a = new MockA4AImpl(a4aElement);
+      doc.body.appendChild(a4aElement);
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      const renderPromise = a4a.layoutCallback();
+      return renderPromise.then(() => {
+        // Force vsync system to run all queued tasks, so that DOM mutations
+        // are actually completed before testing.
+        a4a.vsync_.runScheduledTasks_();
+        const child = a4aElement.querySelector('iframe[name]');
+        expect(child).to.be.ok;
+        expect(child.getAttribute('width')).to.equal('320');
+        expect(child.getAttribute('height')).to.equal('50');
       });
     });
   });
@@ -746,10 +780,13 @@ describe('amp-a4a', () => {
   describe('#onLayoutMeasure', () => {
     it('resumeCallback calls onLayoutMeasure', () => {
       // Force non-FIE
-      delete headers[SIGNATURE_HEADER];
-      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+      delete adResponse.headers[AMP_SIGNATURE_HEADER];
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const s = doc.createElement('style');
@@ -765,7 +802,7 @@ describe('amp-a4a', () => {
           expect(renderNonAmpCreativeSpy.calledOnce,
               'renderNonAmpCreative_ called exactly once').to.be.true;
           a4a.unlayoutCallback();
-          sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+          getResourceStub.returns(
             {'hasBeenMeasured': () => true, 'isMeasureRequested': () => false});
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
           a4a.resumeCallback();
@@ -775,9 +812,11 @@ describe('amp-a4a', () => {
       });
     });
     it('resumeCallback does not call onLayoutMeasure for FIE', () => {
-      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const s = doc.createElement('style');
@@ -801,10 +840,13 @@ describe('amp-a4a', () => {
     });
     it('resumeCallback w/ measure required no onLayoutMeasure', () => {
       // Force non-FIE
-      delete headers[SIGNATURE_HEADER];
-      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+      delete adResponse.headers[AMP_SIGNATURE_HEADER];
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const s = doc.createElement('style');
@@ -821,8 +863,7 @@ describe('amp-a4a', () => {
               'renderNonAmpCreative_ called exactly once').to.be.true;
           a4a.unlayoutCallback();
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
-          sandbox.stub(AmpA4A.prototype, 'getResource').returns(
-            {'hasBeenMeasured': () => false});
+          getResourceStub.returns({'hasBeenMeasured': () => false});
           a4a.resumeCallback();
           expect(onLayoutMeasureSpy).to.not.be.called;
           expect(a4a.fromResumeCallback).to.be.true;
@@ -830,24 +871,23 @@ describe('amp-a4a', () => {
       });
     });
     it('should run end-to-end and render in friendly iframe', () => {
-      xhrMock.withArgs(TEST_URL, {
-        mode: 'cors',
-        method: 'GET',
-        credentials: 'include',
-      }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.releaseType_ = '0';
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
-        const extractCreativeAndSignatureSpy = sandbox.spy(
-            a4a, 'extractCreativeAndSignature');
         const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
-        const loadExtensionSpy =
-            sandbox.spy(Extensions.prototype, 'loadExtension');
+        const preloadExtensionSpy =
+            sandbox.spy(Extensions.prototype, 'preloadExtension');
         a4a.buildCallback();
+        const lifecycleEventStub =
+            sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(promiseResult => {
@@ -856,11 +896,11 @@ describe('amp-a4a', () => {
           expect(a4a.isVerifiedAmpCreative_).to.be.true;
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
-          expect(xhrMock.calledOnce,
-              'xhr.fetchTextAndHeaders called exactly once').to.be.true;
-          expect(extractCreativeAndSignatureSpy.calledOnce,
-              'extractCreativeAndSignatureSpy called exactly once').to.be.true;
-          expect(loadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
+          expect(fetchMock.called('ad')).to.be.true;
+          expect(preloadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
+          expect(doc.querySelector('link[rel=preload]' +
+            '[href="https://fonts.googleapis.com/css?family=Questrial"]'))
+              .to.be.ok;
           return a4a.layoutCallback().then(() => {
             expect(renderAmpCreativeSpy.calledOnce,
                 'renderAmpCreative_ called exactly once').to.be.true;
@@ -892,14 +932,21 @@ describe('amp-a4a', () => {
             expect(onCreativeRenderSpy).to.be.calledOnce;
             expect(updatePriorityStub).to.be.calledOnce;
             expect(updatePriorityStub.args[0][0]).to.equal(0);
+            expect(lifecycleEventStub).to.be.calledWith(
+                'adResponseValidateEnd', {
+                  'signatureValidationResult': 0,
+                  'releaseType': '0',
+                });
           });
         });
       });
     });
     it('must not be position:fixed', () => {
-      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const s = doc.createElement('style');
@@ -912,14 +959,17 @@ describe('amp-a4a', () => {
       });
     });
     it('does not initialize promise chain 0 height/width', () => {
-      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
         const doc = fixture.doc;
         const rect = layoutRectLtwh(0, 0, 200, 0);
         const a4aElement = createA4aElement(doc, rect);
         const a4a = new MockA4AImpl(a4aElement);
         // test 0 height
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.not.be.ok;
         // test 0 width
@@ -934,21 +984,19 @@ describe('amp-a4a', () => {
       });
     });
     function executeLayoutCallbackTest(isValidCreative, opt_failAmpRender) {
-      xhrMock.withArgs(TEST_URL, {
-        mode: 'cors',
-        method: 'GET',
-        credentials: 'include',
-      }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
         if (!isValidCreative) {
-          sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
-              Promise.resolve({creative: mockResponse.arrayBuffer()}));
+          delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+          delete adResponse.headers[AMP_SIGNATURE_HEADER];
         }
         if (opt_failAmpRender) {
           sandbox.stub(a4a, 'renderAmpCreative_').returns(
@@ -960,8 +1008,7 @@ describe('amp-a4a', () => {
         return a4a.adPromise_.then(promiseResult => {
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
-          expect(xhrMock.calledOnce,
-              'xhr.fetchTextAndHeaders called exactly once').to.be.true;
+          expect(fetchMock.called('ad')).to.be.true;
           expect(a4a.isVerifiedAmpCreative_).to.equal(isValidCreative);
           if (isValidCreative) {
             expect(promiseResult).to.be.ok;
@@ -1001,81 +1048,26 @@ describe('amp-a4a', () => {
     it('#layoutCallback AMP render fail, recover non-AMP', () => {
       return executeLayoutCallbackTest(true, true);
     });
-    it('should not leak full response to rendered dom', () => {
-      xhrMock.withArgs(TEST_URL, {
-        mode: 'cors',
-        method: 'GET',
-        credentials: 'include',
-      }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        const a4aElement = createA4aElement(doc);
-        const a4a = new MockA4AImpl(a4aElement);
-        const fullResponse = `<html amp>
-            <body>
-            <div class="forTest"></div>
-            <script class="hostile">
-            // Some hostile JavaScript
-            assert.fail('This code should never be executed!');
-            </script>
-            <noscript>${validCSSAmp.reserialized}</noscript>
-            <script type="application/json" amp-ad-metadata>
-            {
-               "bodyAttributes" : "",
-               "bodyUtf16CharOffsets" : [ 10, 1000000 ],
-               "cssUtf16CharOffsets" : [ 0, 0 ]
-            }
-            </script>
-            </body></html>`;
-        mockResponse.arrayBuffer = () => {
-          return utf8Encode(fullResponse);
-        };
-        // Return value from `#extractCreativeAndSignature` is a sub-doc of
-        // the full response.  To validate this test, comment out the following
-        // statement and verify that test fails, with full response spliced in
-        // to shadow doc.
-        sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
-            utf8Encode(validCSSAmp.reserialized).then(c => {
-              return {
-                creative: c,
-                signature: base64UrlDecodeToBytes(validCSSAmp.signature),
-              };
-            }));
-        a4a.buildCallback();
-        a4a.onLayoutMeasure();
-        return a4a.layoutCallback().then(() => {
-          expect(a4a.isVerifiedAmpCreative_).to.be.true;
-          const friendlyIframe = a4aElement.getElementsByTagName('iframe')[0];
-          expect(friendlyIframe).to.be.ok;
-          expect(friendlyIframe.getAttribute('srcdoc')).to.be.ok;
-          expect(friendlyIframe.src).to.not.be.ok;
-          const frameDoc = friendlyIframe.contentDocument;
-          expect(frameDoc.querySelector('div[class=forTest]')).to.not.be.ok;
-          expect(frameDoc.querySelector('script[class=hostile]')).to.not.be.ok;
-          expect(frameDoc.querySelector('style[amp-custom]')).to.be.ok;
-          expect(frameDoc.body.innerHTML, 'body content')
-              .to.contain('Hello, world.');
-          expect(onCreativeRenderSpy.withArgs(true)).to.be.calledOnce;
-        });
-      });
-    });
     it('should run end-to-end in the presence of an XHR error', () => {
-      xhrMock.onFirstCall().returns(Promise.reject(new Error('XHR Error')));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+            Promise.reject(networkFailure()), {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        const onNetworkFailureSpy = sandbox.spy(a4a, 'onNetworkFailure');
         a4a.buildCallback();
         const lifecycleEventStub = sandbox.stub(
             a4a, 'protectedEmitLifecycleEvent_');
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.layoutCallback().then(() => {
-          expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
-              .to.be.true;
+          expect(getAdUrlSpy, 'getAdUrl called exactly once').to.be.calledOnce;
+          expect(onNetworkFailureSpy,
+              'onNetworkFailureSpy called exactly once').to.be.calledOnce;
           // Verify iframe presence and lack of visibility hidden
           const iframe = a4aElement.querySelector('iframe[src]');
           expect(iframe).to.be.ok;
@@ -1086,10 +1078,69 @@ describe('amp-a4a', () => {
         });
       });
     });
-    it('should handle XHR error when resolves before layoutCallback', () => {
-      xhrMock.onFirstCall().returns(Promise.reject(new Error('XHR Error')));
+    it('should use adUrl from onNetworkFailure', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+            Promise.reject(networkFailure()), {name: 'ad'});
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        const a4a = new MockA4AImpl(a4aElement);
+        const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        sandbox.stub(a4a, 'onNetworkFailure')
+            .withArgs(sinon.match(val =>
+              val.message && val.message.indexOf('XHR Failed fetching') == 0),
+            TEST_URL)
+            .returns({adUrl: TEST_URL + '&err=true'});
+        a4a.buildCallback();
+        const lifecycleEventStub = sandbox.stub(
+            a4a, 'protectedEmitLifecycleEvent_');
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
+        return a4a.layoutCallback().then(() => {
+          expect(getAdUrlSpy, 'getAdUrl called exactly once').to.be.calledOnce;
+          // Verify iframe presence and lack of visibility hidden
+          const iframe = a4aElement.querySelector('iframe[src]');
+          expect(iframe).to.be.ok;
+          expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
+          expect(/&err=true/.test(iframe.src), iframe.src).to.be.true;
+          expect(iframe).to.be.visible;
+          expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+          expect(lifecycleEventStub).to.be.calledWith('networkError');
+        });
+      });
+    });
+    it('should not execute frame GET if disabled via onNetworkFailure', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+            Promise.reject(networkFailure()), {name: 'ad'});
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        const a4a = new MockA4AImpl(a4aElement);
+        const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        sandbox.stub(a4a, 'onNetworkFailure')
+            .withArgs(sinon.match(val =>
+              val.message && val.message.indexOf('XHR Failed fetching') == 0),
+            TEST_URL)
+            .returns({frameGetDisabled: true});
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          expect(getAdUrlSpy, 'getAdUrl called exactly once').to.be.calledOnce;
+          const iframe = a4aElement.querySelector('iframe');
+          expect(iframe).to.not.be.ok;
+        });
+      });
+    });
+    it('should handle XHR error when resolves before layoutCallback', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+            Promise.reject(networkFailure()), {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
@@ -1106,19 +1157,22 @@ describe('amp-a4a', () => {
       });
     });
     it('should handle XHR error when resolves after layoutCallback', () => {
-      let rejectXhr;
-      xhrMock.onFirstCall().returns(new Promise((unusedResolve, reject) => {
-        rejectXhr = reject;
-      }));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        let rejectXhr;
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+            new Promise((unusedResolve, reject) => {
+              rejectXhr = reject;
+            }),
+            {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         const layoutCallbackPromise = a4a.layoutCallback();
-        rejectXhr(new Error('XHR Error'));
+        rejectXhr(networkFailure());
         return layoutCallbackPromise.then(() => {
           // Verify iframe presence and lack of visibility hidden
           expect(a4aElement.querySelectorAll('iframe').length).to.equal(1);
@@ -1130,21 +1184,13 @@ describe('amp-a4a', () => {
       });
     });
     it('should collapse for 204 response code', () => {
-      xhrMock.onFirstCall().returns(Promise.resolve({
-        arrayBuffer() {
-          return utf8Encode(validCSSAmp.reserialized);
-        },
-        bodyUsed: false,
-        headers: new FetchResponseHeaders({
-          getResponseHeader(name) {
-            return headers[name];
-          },
-        }),
-        catch: callback => callback(),
-        status: 204,
-      }));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        adResponse.status = 204;
+        adResponse.body = null;
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
@@ -1179,7 +1225,7 @@ describe('amp-a4a', () => {
             expect(unlayoutUISpy).to.be.calledOnce;
             expect(a4a.originalSlotSize_).to.be.ok;
             attemptChangeSizeResolver();
-            return timerFor(a4a.win).promise(1).then(() => {
+            return Services.timerFor(a4a.win).promise(1).then(() => {
               expect(a4a.originalSlotSize_).to.not.be.ok;
             });
           });
@@ -1187,20 +1233,12 @@ describe('amp-a4a', () => {
       });
     });
     it('should collapse for empty array buffer', () => {
-      xhrMock.onFirstCall().returns(Promise.resolve({
-        arrayBuffer() {
-          return utf8Encode('');
-        },
-        bodyUsed: false,
-        headers: new FetchResponseHeaders({
-          getResponseHeader(name) {
-            return headers[name];
-          },
-        }),
-        catch: callback => callback(),
-      }));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        adResponse.body = '';
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
@@ -1233,7 +1271,7 @@ describe('amp-a4a', () => {
             a4a.unlayoutCallback();
             expect(a4a.originalSlotSize_).to.be.ok;
             attemptChangeSizeResolver();
-            return timerFor(a4a.win).promise(1).then(() => {
+            return Services.timerFor(a4a.win).promise(1).then(() => {
               expect(a4a.originalSlotSize_).to.not.be.ok;
             });
           });
@@ -1241,19 +1279,22 @@ describe('amp-a4a', () => {
       });
 
       it('should process safeframe version header properly', () => {
-        headers[SAFEFRAME_VERSION_HEADER] = '1-2-3';
-        headers[RENDERING_TYPE_HEADER] = 'safeframe';
-        delete headers[SIGNATURE_HEADER];
-        xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+        adResponse.headers[SAFEFRAME_VERSION_HEADER] = '1-2-3';
+        adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
+        delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+        delete adResponse.headers[AMP_SIGNATURE_HEADER];
         return createIframePromise().then(fixture => {
           setupForAdTesting(fixture);
+          fetchMock.getOnce(
+              TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+              () => adResponse, {name: 'ad'});
           const doc = fixture.doc;
           const a4aElement = createA4aElement(doc);
           const a4a = new MockA4AImpl(a4aElement);
           a4a.buildCallback();
           a4a.onLayoutMeasure();
           return a4a.adPromise_.then(() => {
-            expect(xhrMock).to.be.calledOnce;
+            expect(fetchMock.called('ad')).to.be.true;
             return a4a.layoutCallback().then(() => {
               verifySafeFrameRender(a4aElement, '1-2-3');
               // Verify preload to safeframe with header version.
@@ -1270,13 +1311,11 @@ describe('amp-a4a', () => {
       let getAdUrlSpy;
       let a4a;
       beforeEach(() => {
-        xhrMock.withArgs(TEST_URL, {
-          mode: 'cors',
-          method: 'GET',
-          credentials: 'include',
-        }).onFirstCall().returns(Promise.resolve(mockResponse));
         return createIframePromise().then(fixture => {
           setupForAdTesting(fixture);
+          fetchMock.getOnce(
+              TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+              () => adResponse, {name: 'ad'});
           const doc = fixture.doc;
           const a4aElement = createA4aElement(doc);
           a4a = new MockA4AImpl(a4aElement);
@@ -1285,13 +1324,15 @@ describe('amp-a4a', () => {
         });
       });
       it('should not delay request when in viewport', () => {
-        sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+        getResourceStub.returns(
             {
+              getUpgradeDelayMs: () => 1,
               renderOutsideViewport: () => true,
               whenWithinRenderOutsideViewport: () => {
                 throw new Error('failure!');
               },
             });
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_);
         return a4a.adPromise_.then(() => {
@@ -1300,17 +1341,19 @@ describe('amp-a4a', () => {
       });
       it('should delay request until within renderOutsideViewport',() => {
         let whenWithinRenderOutsideViewportResolve;
-        sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+        getResourceStub.returns(
             {
+              getUpgradeDelayMs: () => 1,
               renderOutsideViewport: () => false,
               whenWithinRenderOutsideViewport: () => new Promise(resolve => {
                 whenWithinRenderOutsideViewportResolve = resolve;
               }),
             });
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_);
         // Delay to all getAdUrl to potentially execute.
-        return timerFor(a4a.win).promise(1).then(() => {
+        return Services.timerFor(a4a.win).promise(1).then(() => {
           expect(getAdUrlSpy).to.not.be.called;
           whenWithinRenderOutsideViewportResolve();
           return a4a.adPromise_.then(() => {
@@ -1320,19 +1363,22 @@ describe('amp-a4a', () => {
       });
     });
     it('should ignore invalid safeframe version header', () => {
-      headers[SAFEFRAME_VERSION_HEADER] = 'some-bad-item';
-      headers[RENDERING_TYPE_HEADER] = 'safeframe';
-      delete headers[SIGNATURE_HEADER];
-      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      adResponse.headers[SAFEFRAME_VERSION_HEADER] = 'some-bad-item';
+      adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+      delete adResponse.headers[AMP_SIGNATURE_HEADER];
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         return a4a.adPromise_.then(() => {
-          expect(xhrMock).to.be.calledOnce;
+          expect(fetchMock.called('ad')).to.be.true;
           return a4a.layoutCallback().then(() => {
             verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
           });
@@ -1528,8 +1574,8 @@ describe('amp-a4a', () => {
             }),
             'Some style is "background: green"').to.be.true;
         expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
-        expect(urlReplacementsForDoc(frameDoc))
-            .to.not.equal(urlReplacementsForDoc(a4aElement));
+        expect(Services.urlReplacementsForDoc(frameDoc))
+            .to.not.equal(Services.urlReplacementsForDoc(a4aElement));
       });
     });
 
@@ -1585,15 +1631,13 @@ describe('amp-a4a', () => {
     it('verify state reset', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.buildCallback();
-        xhrMock.withArgs(TEST_URL, {
-          mode: 'cors',
-          method: 'GET',
-          credentials: 'include',
-        }).returns(Promise.resolve(mockResponse));
         return a4a.onLayoutMeasure(() => {
           expect(a4a.adPromise_).to.not.be.null;
           expect(a4a.element.children).to.have.lengthOf(1);
@@ -1604,15 +1648,13 @@ describe('amp-a4a', () => {
     it('attemptChangeSize reverts', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.buildCallback();
-        xhrMock.withArgs(TEST_URL, {
-          mode: 'cors',
-          method: 'GET',
-          credentials: 'include',
-        }).returns(Promise.resolve(mockResponse));
         a4a.onLayoutMeasure();
         const attemptChangeSizeStub =
           sandbox.stub(AMP.BaseElement.prototype, 'attemptChangeSize');
@@ -1698,71 +1740,76 @@ describe('amp-a4a', () => {
       });
     });
 
-    describe('verifyCreativeSignature_', () => {
+    describe('verifySignature_', () => {
       let stubVerifySignature;
       let a4a;
       beforeEach(() => {
         return createIframePromise().then(fixture => {
+          forceExperimentBranch(
+              fixture.win, VERIFIER_EXP_NAME, LEGACY_VERIFIER_EID);
           setupForAdTesting(fixture);
           const a4aElement = createA4aElement(fixture.doc);
           a4a = new MockA4AImpl(a4aElement);
           a4a.buildCallback();
           stubVerifySignature =
-              sandbox.stub(a4a.signatureVerifier_, 'verifySignature');
+              sandbox.stub(signatureVerifierFor(a4a.win), 'verifySignature_');
         });
       });
 
       it('properly handles all failures', () => {
-        // Single provider with first key fails but second key passes validation
-        a4a.win.ampA4aValidationKeys = (() => {
+        // Multiple providers with multiple keys each that all fail validation
+        signatureVerifierFor(a4a.win).keys_ = (() => {
           const providers = [];
           for (let i = 0; i < 10; i++) {
-            const serviceName = `test-service${i}`;
-            providers[i] = Promise.resolve({serviceName, keys: [
-              Promise.resolve({serviceName}),
-              Promise.resolve({serviceName}),
+            const signingServiceName = `test-service${i}`;
+            providers[i] = Promise.resolve({signingServiceName, keys: [
+              Promise.resolve({signingServiceName}),
+              Promise.resolve({signingServiceName}),
             ]});
           }
           return providers;
         })();
         stubVerifySignature.returns(Promise.resolve(false));
-        return a4a.verifyCreativeSignature_('some_creative', 'some_sig')
-            .then(() => {
-              throw new Error('should have triggered rejection');
-            })
-            .catch(err => {
+        const headers = new Headers();
+        headers.set(AMP_SIGNATURE_HEADER, 'some_sig');
+        return signatureVerifierFor(a4a.win).verify(
+            utf8EncodeSync('some_creative'), headers, () => {})
+            .then(status => {
+              expect(status).to.equal(
+                  VerificationStatus.ERROR_SIGNATURE_MISMATCH);
               expect(stubVerifySignature).to.be.callCount(20);
-              expect(err).to.equal(
-                  'No validation service could verify this key');
             });
       });
 
       it('properly handles multiple keys for one provider', () => {
         // Single provider with first key fails but second key passes validation
-        const serviceName = 'test-service';
-        a4a.win.ampA4aValidationKeys = [
-          Promise.resolve({serviceName, keys: [
-            Promise.resolve({serviceName: '1'}),
-            Promise.resolve({serviceName: '2'}),
+        const signingServiceName = 'test-service';
+        signatureVerifierFor(a4a.win).keys_ = [
+          Promise.resolve({signingServiceName, keys: [
+            Promise.resolve({signingServiceName: '1'}),
+            Promise.resolve({signingServiceName: '2'}),
           ]}),
         ];
         const creative = 'some_creative';
+        const headers = new Headers();
+        headers.set(AMP_SIGNATURE_HEADER, 'some_sig');
         stubVerifySignature.onCall(0).returns(Promise.resolve(false));
         stubVerifySignature.onCall(1).returns(Promise.resolve(true));
-        return a4a.verifyCreativeSignature_(creative, 'some_sig')
-            .then(verifiedCreative => {
+        return signatureVerifierFor(a4a.win).verify(
+            utf8EncodeSync(creative), headers, () => {})
+            .then(status => {
               expect(stubVerifySignature).to.be.calledTwice;
-              expect(verifiedCreative).to.equal(creative);
+              expect(status).to.equal(VerificationStatus.OK);
             });
       });
 
       it('properly stops verification at first valid key', () => {
         // Single provider where first key fails, second passes, and third
         // never calls verifySignature.
-        const serviceName = 'test-service';
+        const signingServiceName = 'test-service';
         let keyInfoResolver;
-        a4a.win.ampA4aValidationKeys = [
-          Promise.resolve({serviceName, keys: [
+        signatureVerifierFor(a4a.win).keys_ = [
+          Promise.resolve({signingServiceName, keys: [
             Promise.resolve({}),
             Promise.resolve({}),
             new Promise(resolver => {
@@ -1771,7 +1818,8 @@ describe('amp-a4a', () => {
           ]}),
         ];
         const creative = 'some_creative';
-        const signature = 'some_signature';
+        const headers = new Headers();
+        headers.set(AMP_SIGNATURE_HEADER, 'some_signature');
         stubVerifySignature.onCall(0).returns(Promise.resolve(false));
         stubVerifySignature.onCall(1).returns(Promise.resolve(true));
 
@@ -1780,10 +1828,11 @@ describe('amp-a4a', () => {
         // execute.
         setTimeout(() => {keyInfoResolver({}); }, 0);
 
-        return a4a.verifyCreativeSignature_(creative, signature)
-            .then(verifiedCreative => {
+        return signatureVerifierFor(a4a.win).verify(
+            utf8EncodeSync(creative), headers, () => {})
+            .then(status => {
               expect(stubVerifySignature).to.be.calledTwice;
-              expect(verifiedCreative).to.equal(creative);
+              expect(status).to.equal(VerificationStatus.OK);
             });
       });
     });
@@ -1874,276 +1923,6 @@ describe('amp-a4a', () => {
     });
   });
 
-  describe('#getKeyInfoSets_', () => {
-    let fixture;
-    let win;
-    let a4aElement;
-    beforeEach(() => {
-      return createIframePromise().then(f => {
-        setupForAdTesting(f);
-        fixture = f;
-        win = fixture.win;
-        a4aElement = createA4aElement(fixture.doc);
-        return fixture;
-      });
-    });
-
-    function verifyIsKeyInfo(keyInfo) {
-      expect(keyInfo).to.be.ok;
-      expect(keyInfo).to.have.all.keys(
-          ['serviceName', 'hash', 'cryptoKey']);
-      expect(keyInfo.serviceName).to.be.a('string').and.not.to.equal('');
-      expect(keyInfo.hash).to.be.instanceOf(Uint8Array);
-    }
-
-    it('should fetch a single key', () => {
-      expect(win.ampA4aValidationKeys).not.to.exist;
-      // Key fetch happens on A4A class construction.
-      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
-      a4a.buildCallback();
-      const result = win.ampA4aValidationKeys;
-      expect(result).to.be.instanceof(Array);
-      expect(result).to.have.lengthOf(1);
-      return Promise.all(result).then(serviceInfos => {
-        expect(xhrMockJson).to.be.calledOnce;
-        expect(xhrMockJson).to.be.calledWith(
-            'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
-              mode: 'cors',
-              method: 'GET',
-              ampCors: false,
-              credentials: 'omit',
-            });
-        const serviceInfo = serviceInfos[0];
-        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
-        expect(serviceInfo['serviceName']).to.equal('google');
-        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
-        expect(serviceInfo['keys']).to.have.lengthOf(1);
-        const keyInfoPromise = serviceInfo['keys'][0];
-        expect(keyInfoPromise).to.be.an.instanceof(win.Promise);
-        return keyInfoPromise.then(keyInfo => {
-          verifyIsKeyInfo(keyInfo);
-        });
-      });
-    });
-
-    it('should wait for first visible', () => {
-      let firstVisibleResolve;
-      viewerWhenVisibleMock.returns(
-          new Promise(resolve => {
-            firstVisibleResolve = resolve;
-          }));
-      expect(win.ampA4aValidationKeys).not.to.exist;
-      // Key fetch happens on A4A class construction.
-      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
-      a4a.buildCallback();
-      const result = win.ampA4aValidationKeys;
-      expect(xhrMockJson).to.not.be.called;
-      firstVisibleResolve();
-      return Promise.all(result).then(() => {
-        expect(xhrMockJson).to.be.calledOnce;
-      });
-    });
-
-    it('should fetch multiple keys', () => {
-      // For our purposes, re-using the same key is fine.
-      const testKey = JSON.parse(validCSSAmp.publicKey);
-      xhrMockJson.withArgs(
-          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
-            mode: 'cors',
-            method: 'GET',
-            ampCors: false,
-            credentials: 'omit',
-          }).returns(Promise.resolve({
-            json() {
-              return Promise.resolve({keys: [testKey, testKey, testKey]});
-            },
-          }));
-      expect(win.ampA4aValidationKeys).not.to.exist;
-      // Key fetch happens on A4A class construction.
-      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
-      a4a.buildCallback();
-      const result = win.ampA4aValidationKeys;
-      expect(result).to.be.instanceof(Array);
-      expect(result).to.have.lengthOf(1);  // Only one service.
-      return Promise.all(result).then(serviceInfos => {
-        expect(xhrMockJson).to.be.calledOnce;
-        expect(xhrMockJson).to.be.calledWith(
-            'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
-              mode: 'cors',
-              method: 'GET',
-              ampCors: false,
-              credentials: 'omit',
-            });
-        expect(serviceInfos).to.have.lengthOf(1);  // Only one service.
-        const serviceInfo = serviceInfos[0];
-        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
-        expect(serviceInfo['serviceName']).to.equal('google');
-        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
-        expect(serviceInfo['keys']).to.have.lengthOf(3);
-        return Promise.all(serviceInfo['keys'].map(keyInfoPromise =>
-          keyInfoPromise.then(keyInfo => verifyIsKeyInfo(keyInfo))));
-      });
-    });
-
-    it('should fetch from multiple services', () => {
-      getSigningServiceNamesMock.returns(['google', 'google-dev']);
-      // For our purposes, we don't care what the key is, so long as it's valid.
-      xhrMockJson.withArgs(
-          'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json', {
-            mode: 'cors',
-            method: 'GET',
-            ampCors: false,
-            credentials: 'omit',
-          }).returns(Promise.resolve({
-            json() {
-              return Promise.resolve({keys: [
-                JSON.parse(validCSSAmp.publicKey),
-              ]});
-            },
-          }));
-      expect(win.ampA4aValidationKeys).not.to.exist;
-      // Key fetch happens on A4A class construction.
-      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
-      a4a.buildCallback();
-      const result = win.ampA4aValidationKeys;
-      expect(result).to.be.instanceof(Array);
-      expect(result).to.have.lengthOf(2);  // Two services.
-      return Promise.all(result).then(serviceInfos => {
-        expect(xhrMockJson).to.be.calledTwice;
-        serviceInfos.map(serviceInfo => {
-          expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
-          expect(serviceInfo['serviceName']).to.have.string('google');
-          expect(serviceInfo['keys']).to.be.an.instanceof(Array);
-          expect(serviceInfo['keys']).to.have.lengthOf(1);
-          const keyInfoPromise = serviceInfo['keys'][0];
-          expect(keyInfoPromise).to.be.an.instanceof(win.Promise);
-          return keyInfoPromise.then(keyInfo => {
-            verifyIsKeyInfo(keyInfo);
-          });
-        });
-      });
-    });
-
-    it('Should gracefully handle malformed key responses', () => {
-      xhrMockJson.withArgs(
-          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
-            mode: 'cors',
-            method: 'GET',
-            ampCors: false,
-            credentials: 'omit',
-          }).returns(Promise.resolve({
-            json() {
-              return Promise.resolve({keys: ['invalid key data']});
-            },
-          }));
-      expect(win.ampA4aValidationKeys).not.to.exist;
-      // Key fetch happens on A4A class construction.
-      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
-      a4a.buildCallback();
-      const result = win.ampA4aValidationKeys;
-      expect(result).to.be.instanceof(Array);
-      expect(result).to.have.lengthOf(1);  // Only one service.
-      return Promise.all(result).then(serviceInfos => {
-        expect(xhrMockJson).to.be.calledOnce;
-        expect(xhrMockJson).to.be.calledWith(
-            'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
-              mode: 'cors',
-              method: 'GET',
-              ampCors: false,
-              credentials: 'omit',
-            });
-        expect(serviceInfos[0]).to.have.all.keys(['serviceName', 'keys']);
-        expect(serviceInfos[0]['serviceName']).to.equal('google');
-        expect(serviceInfos[0]['keys']).to.be.an.instanceof(Array);
-        expect(serviceInfos[0]['keys']).to.be.empty;
-      });
-    });
-
-    it('should gracefully handle network errors in a single service', () => {
-      xhrMockJson.withArgs(
-          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
-            mode: 'cors',
-            method: 'GET',
-            ampCors: false,
-            credentials: 'omit',
-          }).returns(Promise.reject(
-              new TypeError('some random network error')));
-      expect(win.ampA4aValidationKeys).not.to.exist;
-      // Key fetch happens on A4A class construction.
-      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
-      a4a.buildCallback();
-      const result = win.ampA4aValidationKeys;
-      expect(result).to.be.instanceof(Array);
-      expect(result).to.have.lengthOf(1);  // Only one service.
-      return result[0].then(serviceInfo => {
-        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
-        expect(serviceInfo['serviceName']).to.equal('google');
-        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
-        expect(serviceInfo['keys']).to.be.empty;
-      });
-    });
-
-    it('should handle success in one service and net error in another', () => {
-      getSigningServiceNamesMock.returns(['google', 'google-dev']);
-      xhrMockJson.withArgs(
-          'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json', {
-            mode: 'cors',
-            method: 'GET',
-            ampCors: false,
-            credentials: 'omit',
-          }).returns(Promise.reject(
-              new TypeError('some random network error')));
-      expect(win.ampA4aValidationKeys).not.to.exist;
-      // Key fetch happens on A4A class construction.
-      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
-      a4a.buildCallback();
-      const result = win.ampA4aValidationKeys;
-      expect(result).to.be.instanceof(Array);
-      expect(result).to.have.lengthOf(2);  // Two services.
-      return Promise.all(result.map(  // For each service...
-          serviceInfoPromise => serviceInfoPromise.then(serviceInfo => {
-            expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
-            const serviceName = serviceInfo.serviceName;
-            expect(serviceInfo['keys']).to.be.an.instanceof(Array);
-            if (serviceName == 'google') {
-              expect(serviceInfo['keys']).to.have.lengthOf(1);
-              const keyInfoPromise = serviceInfo['keys'][0];
-              expect(keyInfoPromise).to.be.an.instanceof(win.Promise);
-              return keyInfoPromise.then(keyInfo => {
-                verifyIsKeyInfo(keyInfo);
-              });
-            } else if (serviceName == 'google-dev') {
-              expect(serviceInfo['keys']).to.be.empty;
-            } else {
-              throw new Error(
-                  `Unexpected service name: ${serviceName} is neither ` +
-                  'google nor google-dev');
-            }
-          }))).then(() => {
-            expect(xhrMockJson).to.be.calledTwice;
-          });
-    });
-
-    it('should return valid object on invalid service name', () => {
-      getSigningServiceNamesMock.returns(['fnord']);
-      expect(win.ampA4aValidationKeys).not.to.exist;
-      // Key fetch happens on A4A class construction.
-      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
-      a4a.buildCallback();
-      const result = win.ampA4aValidationKeys;
-      expect(xhrMockJson).not.to.be.called;
-      expect(result).to.be.instanceof(Array);
-      expect(result).to.have.lengthOf(1);
-      expect(result[0]).to.be.instanceof(Promise);
-      return result[0].then(serviceInfo => {
-        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
-        expect(serviceInfo['serviceName']).to.equal('fnord');
-        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
-        expect(serviceInfo['keys']).to.be.empty;
-      });
-    });
-  });
-
   describe('#assignAdUrlToError', () => {
 
     it('should attach info to error correctly', () => {
@@ -2170,21 +1949,90 @@ describe('amp-a4a', () => {
   describe('#extractSize', () => {
 
     it('should return a size', () => {
-      expect(AmpA4A.prototype.extractSize({
-        get(name) {
-	  return {'X-CreativeSize': '320x50'}[name];
-        },
-      })).to.deep.equal({width: 320, height: 50});
+      expect(AmpA4A.prototype.extractSize(new Headers({
+        'X-CreativeSize': '320x50',
+      }))).to.deep.equal({width: 320, height: 50});
     });
 
     it('should return no size', () => {
-      expect(AmpA4A.prototype.extractSize({
-        get(unusedName) {
-	  return null;
-        },
-      })).to.be.null;
+      expect(AmpA4A.prototype.extractSize(new Headers())).to.be.null;
     });
   });
+
+  describe('refresh', () => {
+    let sandbox;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('should effectively reset the slot and invoke given callback', () => {
+      return createIframePromise().then(f => {
+        const fixture = f;
+        setupForAdTesting(fixture);
+        const a4aElement = createA4aElement(fixture.doc);
+        const a4a = new MockA4AImpl(a4aElement);
+        a4a.adPromise_ = Promise.resolve();
+        a4a.getAmpDoc = () => a4a.win.document;
+        a4a.getResource = () => {
+          return {
+            layoutCanceled: () => {},
+          };
+        };
+        a4a.mutateElement = func => func();
+        a4a.togglePlaceholder = sandbox.spy();
+
+        // We don't really care about the behavior of the following methods, so
+        // long as they're called the appropriate number of times. We stub them
+        // out here because they would otherwise throw errors unrelated to the
+        // behavior actually being tested.
+        const initiateAdRequestMock =
+            sandbox.stub(AmpA4A.prototype, 'initiateAdRequest');
+        initiateAdRequestMock.returns(undefined);
+        const tearDownSlotMock = sandbox.stub(AmpA4A.prototype, 'tearDownSlot');
+        tearDownSlotMock.returns(undefined);
+        const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
+        destroyFrameMock.returns(undefined);
+
+        expect(a4a.isRefreshing).to.be.false;
+        return a4a.refresh(() => {}).then(() => {
+          expect(initiateAdRequestMock).to.be.calledOnce;
+          expect(tearDownSlotMock).to.be.calledOnce;
+          expect(a4a.togglePlaceholder).to.be.calledOnce;
+          expect(a4a.isRefreshing).to.be.true;
+          expect(a4a.isRelayoutNeededFlag).to.be.true;
+        });
+      });
+    });
+  });
+
+  describe('buildCallback', () => {
+    let sandbox;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('should emit upgradeDelay lifecycle ping', () => {
+      return createIframePromise().then(fixture => {
+        const a4a = new MockA4AImpl(createA4aElement(fixture.doc));
+        const emitLifecycleEventSpy = sandbox.spy(a4a, 'emitLifecycleEvent');
+        a4a.buildCallback();
+        expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
+          'forced_delta': 12345,
+        })).to.be.calledOnce;
+      });
+    });
+  });
+
   // TODO(tdrl): Other cases to handle for parsing JSON metadata:
   //   - Metadata tag(s) missing
   //   - JSON parse failure

@@ -17,14 +17,16 @@
 import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
 import {Signals} from '../../../../src/utils/signals';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {
   createIframeWithMessageStub,
   expectPostMessage,
 } from '../../../../testing/iframe';
 import {AmpAdUIHandler} from '../amp-ad-ui';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
+import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {toggleExperiment} from '../../../../src/experiments';
+
 
 describe('amp-ad-xorigin-iframe-handler', () => {
   let sandbox;
@@ -37,7 +39,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    const ampdocService = ampdocServiceFor(window);
+    const ampdocService = Services.ampdocServiceFor(window);
     const ampdoc = ampdocService.getAmpDoc();
     const adElement = document.createElement('container-element');
     adElement.getAmpDoc = () => ampdoc;
@@ -192,7 +194,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           const clock = sandbox.useFakeTimers();
           clock.tick(0);
           const timeoutPromise =
-              timerFor(window).timeoutPromise(2000, initPromise);
+              Services.timerFor(window).timeoutPromise(2000, initPromise);
           clock.tick(2001);
           return expect(timeoutPromise).to.eventually
               .be.rejectedWith(/timeout/);
@@ -212,6 +214,22 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         });
         return initPromise.then(() => {
           expect(signals.get('ini-load')).to.be.ok;
+        });
+      });
+
+      it('should be able to use user-error API', () => {
+        const err = new Error();
+        err.message = 'error test';
+        const userErrorReportSpy =
+                sandbox.spy/*OK*/(iframeHandler, 'userErrorForAnalytics_');
+        iframe.postMessageToParent({
+          type: 'user-error-in-iframe',
+          sentinel: 'amp3ptest' + testIndex,
+          message: err.message,
+        });
+        return initPromise.then(() => {
+          expect(userErrorReportSpy).to.be.called;
+          expect(userErrorReportSpy).to.be.calledWith('error test');
         });
       });
     });
@@ -344,6 +362,34 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           requestedWidth: undefined,
           requestedHeight: 217,
           type: 'embed-size-changed',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
+    });
+
+    it('should be able to use send-positions API to send position', () => {
+      toggleExperiment(window, 'inabox-position-api', true);
+      const iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
+      const iframe = createIframeWithMessageStub(window);
+      iframe.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
+      iframe.name = 'test_nomaster';
+      iframeHandler.init(iframe);
+      sandbox.stub/*OK*/(
+          iframeHandler.viewport_, 'getClientRectAsync', () => {
+            return Promise.resolve(layoutRectLtwh(1, 1, 1, 1));
+          });
+      sandbox.stub/*OK*/(iframeHandler.viewport_, 'getRect', () => {
+        return layoutRectLtwh(1, 1, 1, 1);
+      });
+      iframe.postMessageToParent({
+        type: 'send-positions',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+      return iframe.expectMessageFromParent('position').then(data => {
+        expect(data).to.jsonEqual({
+          targetRect: layoutRectLtwh(1, 1, 1, 1),
+          viewportRect: layoutRectLtwh(1, 1, 1, 1),
+          type: 'position',
           sentinel: 'amp3ptest' + testIndex,
         });
       });

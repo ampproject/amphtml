@@ -16,9 +16,8 @@
 
 import {assertHttpsUrl} from '../../../src/url';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {urlReplacementsForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/services';
 
 
 /**
@@ -36,15 +35,16 @@ let cachedResponsePromises_ = {};
  */
 function fetch_(win, url) {
   if (!(url in cachedResponsePromises_)) {
-    cachedResponsePromises_[url] = xhrFor(win).fetchJson(url)
+    cachedResponsePromises_[url] = Services.xhrFor(win)
+        .fetchJson(url, {credentials: 'include'})
         .then(res => res.json());
   }
   return cachedResponsePromises_[url];
 }
 
 
-/** Visible for testing. */
-export function clearResponseCache() {
+/** @visibleForTesting */
+export function clearResponseCacheForTesting() {
   cachedResponsePromises_ = {};
 }
 
@@ -81,7 +81,7 @@ export class AmpCallTracking extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return urlReplacementsForDoc(this.getAmpDoc())
+    return Services.urlReplacementsForDoc(this.getAmpDoc())
         .expandAsync(user().assertString(this.configUrl_))
         .then(url => fetch_(this.win, url))
         .then(data => {
@@ -97,4 +97,6 @@ export class AmpCallTracking extends AMP.BaseElement {
 }
 
 
-AMP.registerElement('amp-call-tracking', AmpCallTracking);
+AMP.extension('amp-call-tracking', '0.1', AMP => {
+  AMP.registerElement('amp-call-tracking', AmpCallTracking);
+});

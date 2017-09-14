@@ -48,12 +48,32 @@ var commonTestPaths = [
     nocache: false,
     watched: true,
   },
+  {
+    pattern: 'test/coverage/**/*',
+    included: false,
+    nocache: false,
+    watched: false,
+  },
 ];
 
-var testPaths = commonTestPaths.concat([
+var basicTestPaths = [
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
+];
+
+var testPaths = commonTestPaths.concat(basicTestPaths);
+
+var a4aTestPaths = [
+  'extensions/amp-a4a/**/test/**/*.js',
+  'extensions/amp-ad-network-*/**/test/**/*.js',
+  'ads/google/a4a/test/*.js'
+];
+
+var unitTestPaths = commonTestPaths.concat([
+  'test/functional/**/*.js',
+  'ads/**/test/test-*.js',
+  'extensions/**/test/*.js',
 ]);
 
 var integrationTestPaths = commonTestPaths.concat([
@@ -65,7 +85,10 @@ var integrationTestPaths = commonTestPaths.concat([
 /** @const  */
 module.exports = {
   commonTestPaths: commonTestPaths,
+  basicTestPaths: basicTestPaths,
   testPaths: testPaths,
+  a4aTestPaths: a4aTestPaths,
+  unitTestPaths: unitTestPaths,
   integrationTestPaths: integrationTestPaths,
   lintGlobs: [
     '**/*.js',
@@ -82,6 +105,7 @@ module.exports = {
     '!extensions/amp-access/0.1/access-expr-impl.js',
     '!extensions/amp-animation/0.1/css-expr-impl.js',
     '!extensions/amp-bind/0.1/bind-expr-impl.js',
+    '!test/coverage/**/*.*',
   ],
   jsonGlobs: [
     '**/*.json',
@@ -96,6 +120,7 @@ module.exports = {
     '!{node_modules,build,dist,dist.tools,' +
         'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
     '!dist.3p/current/**/ampcontext-lib.js',
+    '!dist.3p/current/**/iframe-transport-client-lib.js',
     '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
     '!validator/nodejs/node_modules/**/*.*',
@@ -109,6 +134,7 @@ module.exports = {
     // of the AMP runtime, so shouldn't be checked.
     '!extensions/amp-a4a/*/test/testdata/*.js',
     '!examples/*.js',
+    '!test/coverage/**/*.*',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
 };

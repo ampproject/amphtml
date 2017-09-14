@@ -18,12 +18,17 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
   installActivityServiceForTesting,
 } from '../../extensions/amp-analytics/0.1/activity-impl';
-import {activityForDoc, viewerForDoc, viewportForDoc} from '../../src/services';
+import {Services} from '../../src/services';
+import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {installViewportServiceForDoc} from '../../src/service/viewport-impl';
-import {markElementScheduledForTesting} from '../../src/custom-element';
+import {
+  installViewportServiceForDoc,
+} from '../../src/service/viewport/viewport-impl';
+import {
+  markElementScheduledForTesting,
+} from '../../src/service/custom-element-registry';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
@@ -97,11 +102,12 @@ describe('Activity getTotalEngagedTime', () => {
       isSingleDoc: () => true,
     }};
 
+    installDocumentStateService(fakeWin);
     installTimerService(fakeWin);
     installVsyncService(fakeWin);
     installPlatformService(fakeWin);
     installViewerServiceForDoc(ampdoc);
-    viewer = viewerForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
 
     const whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolve = resolve;
@@ -112,7 +118,7 @@ describe('Activity getTotalEngagedTime', () => {
     });
 
     installViewportServiceForDoc(ampdoc);
-    viewport = viewportForDoc(ampdoc);
+    viewport = Services.viewportForDoc(ampdoc);
 
     sandbox.stub(viewport, 'onScroll', handler => {
       scrollObservable.add(handler);
@@ -121,7 +127,7 @@ describe('Activity getTotalEngagedTime', () => {
     markElementScheduledForTesting(fakeWin, 'amp-analytics');
     installActivityServiceForTesting(ampdoc);
 
-    return activityForDoc(ampdoc).then(a => {
+    return Services.activityForDoc(ampdoc).then(a => {
       activity = a;
     });
   });

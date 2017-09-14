@@ -34,10 +34,11 @@ let PropertyRulesDef;
  * @private {Object<string, ?PropertyRulesDef>}
  */
 const GLOBAL_PROPERTY_RULES = {
-  'text': null,
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
+  'hidden': null,
+  'text': null,
 };
 
 /**
@@ -162,7 +163,7 @@ export class BindValidator {
       const re = /^([^:\/?#.]+):[\s\S]*$/;
       const match = re.exec(url);
       if (match !== null) {
-        const protocol = match[1].toLowerCase().trimLeft();
+        const protocol = match[1].toLowerCase().trim();
         // hasOwnProperty() needed since nested objects are not prototype-less.
         if (!allowedProtocols.hasOwnProperty(protocol)) {
           return false;

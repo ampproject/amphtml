@@ -19,9 +19,8 @@ import {Layout} from './layout';
 import {getData} from './event-helper';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
-import {isArray} from './types';
-import {viewportForDoc} from './services';
-import {vsyncFor} from './services';
+import {isArray, toWin} from './types';
+import {Services} from './services';
 import {user} from './log';
 
 /**
@@ -141,7 +140,7 @@ export class BaseElement {
     this.inViewport_ = false;
 
     /** @public @const {!Window} */
-    this.win = element.ownerDocument.defaultView;
+    this.win = toWin(element.ownerDocument.defaultView);
 
     /**
      * Maps action name to struct containing the action handler and minimum
@@ -235,7 +234,7 @@ export class BaseElement {
 
   /** @public @return {!./service/vsync-impl.Vsync} */
   getVsync() {
-    return vsyncFor(this.win);
+    return Services.vsyncFor(this.win);
   }
 
   /**
@@ -321,6 +320,11 @@ export class BaseElement {
    * class set on it.
    *
    * This callback is executed early after the element has been attached to DOM.
+   *
+   * This callback can either immediately return or return a promise if the
+   * build steps are asynchronous.
+   *
+   * @return {!Promise|undefined}
    */
   buildCallback() {
     // Subclasses may override.
@@ -503,7 +507,7 @@ export class BaseElement {
    * @return {ActionTrust}
    */
   activationTrust() {
-    return ActionTrust.MEDIUM;
+    return ActionTrust.HIGH;
   }
 
   /**
@@ -529,15 +533,14 @@ export class BaseElement {
    * Registers the action handler for the method with the specified name.
    *
    * The handler is only invoked by events with trust equal to or greater than
-   * `minTrust` (or ActionTrust.MEDIUM if not provided). Otherwise, a
-   * user error is logged.
+   * `minTrust`. Otherwise, a user error is logged.
    *
    * @param {string} method
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(method, handler, minTrust = ActionTrust.MEDIUM) {
+  registerAction(method, handler, minTrust = ActionTrust.HIGH) {
     this.initActionMap_();
     this.actionMap_[method] = {handler, minTrust};
   }
@@ -555,7 +558,7 @@ export class BaseElement {
   executeAction(invocation, unusedDeferred) {
     if (invocation.method == 'activate') {
       if (invocation.satisfiesTrust(this.activationTrust())) {
-        this.activate(invocation);
+        return this.activate(invocation);
       }
     } else {
       this.initActionMap_();
@@ -564,7 +567,7 @@ export class BaseElement {
           this);
       const {handler, minTrust} = holder;
       if (invocation.satisfiesTrust(minTrust)) {
-        handler(invocation);
+        return handler(invocation);
       }
     }
   }
@@ -728,10 +731,10 @@ export class BaseElement {
 
   /**
    * Returns the viewport within which the element operates.
-   * @return {!./service/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-impl.Viewport}
    */
   getViewport() {
-    return viewportForDoc(this.getAmpDoc());
+    return Services.viewportForDoc(this.getAmpDoc());
   }
 
   /**
@@ -947,4 +950,8 @@ export class BaseElement {
    * @public
    */
   onLayoutMeasure() {}
+
+  user() {
+    return user(this.element);
+  }
 }

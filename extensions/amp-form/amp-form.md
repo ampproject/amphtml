@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Stable with the following Experimental feature: <a href="#verification-(experimental)">Verification</a></td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -68,7 +68,7 @@ The value for the `target` attribute must be either `_blank` or `_top`.
 
 For GET submissions, at least one of `action` or `action-xhr` must be provided.
 
-This attribute is required for `method=GET`. The value must be an `https` URL and must not be a link to a CDN (does **NOT** link to https://cdn.ampproject.org). For `method=POST`, the `action` attribute is invalid, use  `action-xhr` instead.
+This attribute is required for `method=GET`. The value must be an `https` URL and must not be a link to a CDN (does **NOT** link to `https://cdn.ampproject.org`). For `method=POST`, the `action` attribute is invalid, use  `action-xhr` instead.
 
 
 {% call callout('Note', type='note') %}
@@ -122,6 +122,8 @@ For details on valid inputs and fields, see [amp-form rules](https://github.com/
 * **submit**: Emitted whenever the form is submitted and before the submission is complete.
 * **submit-success**: Emitted whenever the form submission is done and the response is a success.
 * **submit-error**: Emitted whenever the form submission is done and the response is an error.
+* **valid**: Emitted whenever the form's validation state changes to "valid" (in accordance with its [reporting strategy](#reporting-strategies)).
+* **invalid**: Emitted whenever the form's validation state to "invalid" (in accordance with its [reporting strategy](#reporting-strategies)).
 
 These events can be used through the [`on` attribute](../../spec/amp-html-format.md#on).
 For example, the following listens to both `submit-success` and `submit-error` and shows different lightboxes depending on the event.
@@ -134,7 +136,7 @@ For example, the following listens to both `submit-success` and `submit-error` a
 See the [full example here](../../examples/forms.amp.html).
 
 #### Input Events
-AMP exposes `change` events on inputs. This allows you to use the [`on` attribute](../../spec/amp-html-format.md#on) to execute an action on any element when an input value changes.
+AMP exposes `change` and `input-debounced` events on child `<input>` elements. This allows you to use the [`on` attribute](../../spec/amp-html-format.md#on) to execute an action on any element when an input value changes.
 
 For example, a common use case is to submit a form on input change (selecting a radio button to answer a poll, choosing a language from a `select` input to translate a page, etc.).
 
@@ -331,9 +333,10 @@ The `show-all-on-submit` reporting option shows all validation errors on all inv
 #### As You Go
 The `as-you-go` reporting option allows your user to see validation messages as they're interacting with the input. For example, if the user types an invalid email address, the user will see the error right away.  Once they correct the value, the error goes away.
 
-## Verification (Experimental)
+#### Interact and Submit
+The `interact-and-submit` reporting option combines the behavior of `show-all-on-submit` and `as-you-go`. Individual fields will show any errors immediately after interactions, and on submit the form will show errors on all invalid fields.
 
-This feature is still experimental, so you need to [enable the experiment](https://www.ampproject.org/docs/reference/experimental) to use form verification.
+## Verification
 
 HTML5 validation gives feedback based only on information available on the page, such as if a value matches a certain pattern. With `amp-form` verification you can give the user feedback that HTML5 validation alone cannot. For example, a form can use verification to check if an email address has already been registered. Another use-case is verifying that a city field and a zip code field match each other.
 
@@ -378,8 +381,12 @@ Here's an example:
         </template>
     </div>
 </form>
+```
 
-The form sends a `__amp_form_verify` field as part of the form data to let the server know the request is a verify request and not a formal submit.
+The form sends a `__amp_form_verify` field as part of the form data as a hint to
+the server that the request is a verify request and not a formal submit.
+This is helpful so the server knows not to store the verify request if the same
+endpoint is used for verification and for submit.
 
 ```
 

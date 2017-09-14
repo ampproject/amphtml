@@ -15,7 +15,7 @@
  */
 'use strict';
 
-require('./babel-helpers');
+require('./ava');
 require('./changelog');
 require('./check-links');
 require('./clean');
@@ -26,7 +26,9 @@ require('./compile-css-expr');
 require('./csvify-size');
 require('./dep-check');
 require('./get-zindex');
+require('./gen-codeowners');
 require('./extension-generator');
+require('./process-github-issues');
 require('./json-check');
 require('./lint');
 require('./prepend-global');
@@ -37,3 +39,4 @@ require('./serve');
 require('./size');
 require('./todos');
 require('./validator');
+require('./visual-diff');

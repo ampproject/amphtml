@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {
+  getDataParamsFromAttributes,
+  removeElement,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
-import {removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
@@ -28,7 +33,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {isObject} from '../../../src/types';
 import {dict} from '../../../src/utils/object';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {startsWith} from '../../../src/string';
 
 /**
@@ -139,7 +144,7 @@ class AmpYoutube extends AMP.BaseElement {
     }
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @return {string} */
@@ -154,7 +159,8 @@ class AmpYoutube extends AMP.BaseElement {
     if ('autoplay' in params) {
       // Autoplay is managed by video manager, do not pass it to YouTube.
       delete params['autoplay'];
-      user().error('AMP-YOUTUBE', 'Use autoplay attribute instead of ' +
+      this.user().error(
+          'AMP-YOUTUBE', 'Use autoplay attribute instead of ' +
           'data-param-autoplay');
     }
 
@@ -301,11 +307,14 @@ class AmpYoutube extends AMP.BaseElement {
     if (data['event'] == 'infoDelivery' &&
         data['info'] && data['info']['playerState'] !== undefined) {
       this.playerState_ = data['info']['playerState'];
-      if (this.playerState_ == PlayerStates.PAUSED ||
-          this.playerState_ == PlayerStates.ENDED) {
+      if (this.playerState_ == PlayerStates.PAUSED) {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+      } else if (this.playerState_ == PlayerStates.ENDED) {
+        // YT does not fire pause and ended together.
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        this.element.dispatchCustomEvent(VideoEvents.ENDED);
       } else if (this.playerState_ == PlayerStates.PLAYING) {
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       }
     } else if (data['event'] == 'infoDelivery' &&
         data['info'] && data['info']['muted'] !== undefined) {
@@ -432,6 +441,67 @@ class AmpYoutube extends AMP.BaseElement {
   hideControls() {
     // Not supported.
   }
-};
 
-AMP.registerElement('amp-youtube', AmpYoutube);
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    // Youtube already updates the Media Session so no need for the video
+    // manager to update it too
+    return true;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
+  }
+}
+
+
+AMP.extension('amp-youtube', '0.1', AMP => {
+  AMP.registerElement('amp-youtube', AmpYoutube);
+});

@@ -17,7 +17,7 @@
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
-import {timerFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {numeric} from '../../../src/transition';
 import {dev} from '../../../src/log';
 
@@ -61,7 +61,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     this.cells_.forEach(cell => {
       this.setAsOwner(cell);
-      cell.classList.add('amp-carousel-slide', 'amp-scrollable-carousel-slide');
+      cell.classList.add('amp-carousel-slide');
+      cell.classList.add('amp-scrollable-carousel-slide');
       this.container_.appendChild(cell);
     });
 
@@ -127,7 +128,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   waitForScroll_(startingScrollLeft) {
-    this.scrollTimerId_ = timerFor(this.win).delay(() => {
+    this.scrollTimerId_ = Services.timerFor(this.win).delay(() => {
       // TODO(yuxichen): test out the threshold for identifying fast scrolling
       if (Math.abs(startingScrollLeft - this.pos_) < 30) {
         dev().fine(TAG, 'slow scrolling: ' + startingScrollLeft + ' - '
@@ -149,7 +150,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   commitSwitch_(pos) {
-    dev().fine(TAG, 'commitSwitch_');
     this.updateInViewport_(pos, this.oldPos_);
     this.doLayout_(pos);
     this.preloadNext_(pos, Math.sign(pos - this.oldPos_));

@@ -22,11 +22,10 @@
 
 import {getService, registerServiceBuilder} from './service';
 import {parseUrl} from './url';
-import {timerFor} from './services';
-import {platformFor} from './services';
-import {viewerForDoc} from './services';
+import {Services} from './services';
 import {dev} from './log';
 import {startsWith} from './string';
+import {toWin} from './types';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
@@ -53,15 +52,14 @@ function getPreconnectFeatures(win) {
   if (!preconnectFeatures) {
     const linkTag = win.document.createElement('link');
     const tokenList = linkTag['relList'];
-    linkTag.rel = 'preload';
-    linkTag.rel = 'invalid-value';
+    linkTag.as = 'invalid-value';
     if (!tokenList || !tokenList.supports) {
       return {};
     }
     preconnectFeatures = {
       preconnect: tokenList.supports('preconnect'),
       preload: tokenList.supports('preload'),
-      onlyValidAs: linkTag.rel != 'invalid-value',
+      onlyValidAs: linkTag.as != 'invalid-value',
     };
   }
   return preconnectFeatures;
@@ -99,7 +97,7 @@ class PreconnectService {
      */
     this.urls_ = {};
     /** @private @const {!./service/platform-impl.Platform}  */
-    this.platform_ = platformFor(win);
+    this.platform_ = Services.platformFor(win);
     // Mark current origin as preconnected.
     this.origins_[parseUrl(win.location.href).origin] = true;
 
@@ -112,7 +110,7 @@ class PreconnectService {
     this.features_ = getPreconnectFeatures(win);
 
     /** @private @const {!./service/timer-impl.Timer} */
-    this.timer_ = timerFor(win);
+    this.timer_ = Services.timerFor(win);
   }
 
   /**
@@ -288,10 +286,10 @@ class PreconnectService {
       const url = origin +
           '/amp_preconnect_polyfill_404_or_other_error_expected.' +
           '_Do_not_worry_about_it?' + cacheBust;
-      // We use an XHR without withCredentials(true), so we do not send cookies
-      // to the host and the host cannot set cookies.
       const xhr = new XMLHttpRequest();
       xhr.open('HEAD', url, true);
+      // We only support credentialed preconnect for now.
+      xhr.withCredentials = true;
 
       xhr.send();
     });
@@ -321,7 +319,7 @@ export class Preconnect {
    */
   getViewer_() {
     if (!this.viewer_) {
-      this.viewer_ = viewerForDoc(this.element_);
+      this.viewer_ = Services.viewerForDoc(this.element_);
     }
     return this.viewer_;
   }
@@ -359,7 +357,7 @@ export class Preconnect {
  * @return {!Preconnect}
  */
 export function preconnectForElement(element) {
-  const serviceHolder = element.ownerDocument.defaultView;
+  const serviceHolder = toWin(element.ownerDocument.defaultView);
   registerServiceBuilder(serviceHolder, 'preconnect', PreconnectService);
   const preconnectService = getService(serviceHolder, 'preconnect');
   return new Preconnect(preconnectService, element);

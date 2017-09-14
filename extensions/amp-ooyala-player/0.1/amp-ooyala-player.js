@@ -16,15 +16,20 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
-import {removeElement} from '../../../src/dom';
+import {user, dev} from '../../../src/log';
+import {
+  removeElement,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isObject} from '../../../src/types';
 import {getData, listen} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -63,7 +68,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     });
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @override */
@@ -163,7 +168,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       return; // We only process valid JSON.
     }
     if (data['data'] == 'playing') {
-      this.element.dispatchCustomEvent(VideoEvents.PLAY);
+      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
     } else if (data['data'] == 'paused') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
     } else if (data['data'] == 'muted') {
@@ -225,6 +230,65 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   /** @override */
   hideControls() {
   }
-};
 
-AMP.registerElement('amp-ooyala-player', AmpOoyalaPlayer);
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
+  }
+}
+
+
+AMP.extension('amp-ooyala-player', '0.1', AMP => {
+  AMP.registerElement('amp-ooyala-player', AmpOoyalaPlayer);
+});

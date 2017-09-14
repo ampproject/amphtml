@@ -22,42 +22,31 @@ import {
 } from '../events';
 import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
+import {variableServiceFor} from '../variables';
 import {
-  installVariableService,
-  variableServiceFor,
-} from '../variables';
-import {
-  installUserNotificationManager,
+  installUserNotificationManagerForTesting,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
-import {
-  userNotificationManagerFor,
-} from '../../../../src/services';
-import {adopt} from '../../../../src/runtime';
-import {createIframePromise} from '../../../../testing/iframe';
 import {
   getService,
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
-import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {map} from '../../../../src/utils/object';
 import {cidServiceForDocForTesting} from
     '../../../../src/service/cid-impl';
-import {urlReplacementsForDoc} from '../../../../src/services';
-import * as sinon from 'sinon';
-
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-
+import {Services} from '../../../../src/services';
+import * as log from '../../../../src/log';
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
 
-adopt(window);
 
-describe('amp-analytics', function() {
-
-  let sandbox;
-  let windowApi;
+describes.realWin('amp-analytics', {
+  amp: {
+    extensions: ['amp-analytics'],
+  },
+}, function(env) {
+  let win, doc;
   let sendRequestSpy;
   let configWithCredentials;
   let uidService;
@@ -77,58 +66,47 @@ describe('amp-analytics', function() {
   };
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
     configWithCredentials = false;
-    return createIframePromise().then(iframe => {
-      iframe.doc.title = 'Test Title';
-      markElementScheduledForTesting(iframe.win, 'amp-analytics');
-      markElementScheduledForTesting(iframe.win, 'amp-user-notification');
-      resetServiceForTesting(iframe.win, 'xhr');
-      registerServiceBuilder(iframe.win, 'xhr', function() {
-        return {fetchJson: (url, init) => {
-          expect(init.requireAmpResponseSourceOrigin).to.be.undefined;
-          if (configWithCredentials) {
-            expect(init.credentials).to.equal('include');
-          } else {
-            expect(init.credentials).to.undefined;
-          }
-          return Promise.resolve({
-            json() {
-              return Promise.resolve(JSON.parse(jsonMockResponses[url]));
-            },
-          });
-        }};
-      });
-
-      resetServiceForTesting(iframe.win, 'crypto');
-      installCryptoService(iframe.win, 'crypto');
-      crypto = getService(iframe.win, 'crypto');
-      const link = document.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      link.setAttribute('href', './test-canonical.html');
-      iframe.win.document.head.appendChild(link);
-      windowApi = iframe.win;
-      ampdoc = new AmpDocSingle(windowApi);
-      cidServiceForDocForTesting(ampdoc);
-      viewer = windowApi.services.viewer.obj;
-      ins = instrumentationServiceForDocForTesting(ampdoc);
-      installVariableService(iframe.win);
-      installUserNotificationManager(iframe.win);
-      return userNotificationManagerFor(iframe.win).then(manager => {
-        uidService = manager;
-      });
+    doc.title = 'Test Title';
+    resetServiceForTesting(win, 'xhr');
+    registerServiceBuilder(win, 'xhr', function() {
+      return {fetchJson: (url, init) => {
+        expect(init.requireAmpResponseSourceOrigin).to.be.undefined;
+        if (configWithCredentials) {
+          expect(init.credentials).to.equal('include');
+        } else {
+          expect(init.credentials).to.undefined;
+        }
+        return Promise.resolve({
+          json() {
+            return Promise.resolve(JSON.parse(jsonMockResponses[url]));
+          },
+        });
+      }};
     });
-  });
-
-  afterEach(() => {
-    windowApi.document.body.classList.remove('i-amphtml-element');
-    sandbox.restore();
+    resetServiceForTesting(win, 'crypto');
+    installCryptoService(win, 'crypto');
+    crypto = getService(win, 'crypto');
+    const link = doc.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    link.setAttribute('href', './test-canonical.html');
+    doc.head.appendChild(link);
+    cidServiceForDocForTesting(ampdoc);
+    viewer = win.services.viewer.obj;
+    ins = instrumentationServiceForDocForTesting(ampdoc);
+    installUserNotificationManagerForTesting(ampdoc);
+    return Services.userNotificationManagerForDoc(ampdoc).then(manager => {
+      uidService = manager;
+    });
   });
 
   function getAnalyticsTag(config, attrs) {
     config = JSON.stringify(config);
-    const el = windowApi.document.createElement('amp-analytics');
-    const script = windowApi.document.createElement('script');
+    const el = doc.createElement('amp-analytics');
+    const script = doc.createElement('script');
     script.textContent = config;
     script.setAttribute('type', 'application/json');
     el.appendChild(script);
@@ -136,7 +114,7 @@ describe('amp-analytics', function() {
       el.setAttribute(k, attrs[k]);
     }
 
-    windowApi.document.body.appendChild(el);
+    doc.body.appendChild(el);
 
     el.connectedCallback();
     const analytics = new AmpAnalytics(el);
@@ -177,8 +155,8 @@ describe('amp-analytics', function() {
    * inline config and iframePings/optout are not allowed to be used without
    * AMP team's approval.
    *
-   * @param {!JSONObject} config The inline config to update.
-   * @return {!JSONObject}
+   * @param {!JsonObject} config The inline config to update.
+   * @return {!JsonObject}
    */
   function clearVendorOnlyConfig(config) {
     for (const t in config.triggers) {
@@ -216,7 +194,8 @@ describe('amp-analytics', function() {
             const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
             analytics.createdCallback();
             analytics.buildCallback();
-            const urlReplacements = urlReplacementsForDoc(analytics.element);
+            const urlReplacements =
+                Services.urlReplacementsForDoc(analytics.element);
             sandbox.stub(urlReplacements.getVariableSource(), 'get',
                 function(name) {
                   expect(this.replacements_).to.have.property(name);
@@ -277,10 +256,10 @@ describe('amp-analytics', function() {
 
   it('does not send a hit when config is not in a script tag', function() {
     const config = JSON.stringify(trivialConfig);
-    const el = windowApi.document.createElement('amp-analytics');
+    const el = doc.createElement('amp-analytics');
     el.textContent = config;
     const analytics = new AmpAnalytics(el);
-    windowApi.document.body.appendChild(el);
+    doc.body.appendChild(el);
     el.connectedCallback();
     analytics.createdCallback();
     analytics.buildCallback();
@@ -295,7 +274,7 @@ describe('amp-analytics', function() {
 
   it('does start initialization when requested', () => {
     const config = JSON.stringify(trivialConfig);
-    const el = windowApi.document.createElement('amp-analytics');
+    const el = doc.createElement('amp-analytics');
     el.setAttribute('trigger', 'immediate');
     el.textContent = config;
     const whenFirstVisibleStub = sandbox.stub(
@@ -327,11 +306,11 @@ describe('amp-analytics', function() {
 
   it('does not send a hit when script tag does not have a type attribute',
       function() {
-        const el = windowApi.document.createElement('amp-analytics');
-        const script = windowApi.document.createElement('script');
+        const el = doc.createElement('amp-analytics');
+        const script = doc.createElement('script');
         script.textContent = JSON.stringify(trivialConfig);
         el.appendChild(script);
-        windowApi.document.body.appendChild(el);
+        doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.connectedCallback();
         analytics.createdCallback();
@@ -459,6 +438,64 @@ describe('amp-analytics', function() {
     });
   });
 
+  describe('should assert against override vendor transport config', () => {
+    let errorSpy;
+
+    beforeEach(() => {
+      errorSpy = sandbox.spy();
+      sandbox.stub(log, 'user', () => {
+        return {
+          error: errorSpy,
+          assert: () => {},
+        };
+      });
+    });
+
+    it('should assert error when override', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/${bar}'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'transport': {'beacon': 'true'},
+      }, {'type': 'xyz'});
+      analytics.predefinedConfig_ = {
+        'xyz': {
+          'requests': {'foo': '/bar', 'bar': 'foobar'},
+        },
+      };
+      return analytics.layoutCallback().then(() => {
+        expect(errorSpy).to.be.calledWith('AmpAnalytics <unknown id>',
+            'Inline or remote config should not ' +
+            'overwrite vendor transport settings');
+      });
+    });
+
+    it('should not assert if not override transport', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/${bar}'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {'type': 'xyz'});
+      analytics.predefinedConfig_ = {
+        'xyz': {
+          'requests': {'foo': '/bar', 'bar': 'foobar'},
+        },
+      };
+      return analytics.layoutCallback().then(() => {
+        expect(errorSpy).to.not.be.called;
+      });
+    });
+
+    it('should not assert if vendor default config not used', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/${bar}'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'transport': {'beacon': 'true'},
+      }, {'type': 'xyz'});
+      return analytics.layoutCallback().then(() => {
+        expect(errorSpy).to.not.be.called;
+      });
+    });
+  });
+
   it('merges objects correctly', function() {
     const analytics = getAnalyticsTag(trivialConfig);
 
@@ -579,7 +616,7 @@ describe('amp-analytics', function() {
         const analytics = getAnalyticsTag();
         const analyticsGroup = ins.createAnalyticsGroup(analytics.element);
 
-        const el1 = windowApi.document.createElement('div');
+        const el1 = doc.createElement('div');
         el1.className = 'x';
         el1.dataset.varsTest = 'foo';
         analyticsGroup.root_.getRootElement().appendChild(el1);
@@ -688,7 +725,7 @@ describe('amp-analytics', function() {
           'qp_foo': '${queryParam(foo)}',
         },
       }]});
-    const urlReplacements = urlReplacementsForDoc(analytics.element);
+    const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
     sandbox.stub(urlReplacements.getVariableSource(), 'get',
         function(name) {
           return {sync: param => {
@@ -773,7 +810,7 @@ describe('amp-analytics', function() {
 
   describe('optout', () => {
     it('works for vendor config when optout returns false', function() {
-      windowApi['foo'] = {'bar': function() { return false; }};
+      win['foo'] = {'bar': function() { return false; }};
       const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
       analytics.predefinedConfig_.testVendor = {'optout': 'foo.bar'};
       return waitForSendRequest(analytics).then(() => {
@@ -783,7 +820,7 @@ describe('amp-analytics', function() {
     });
 
     it('works for vendor config when optout returns false', function() {
-      windowApi['foo'] = {'bar': function() { return true; }};
+      win['foo'] = {'bar': function() { return true; }};
       const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
       analytics.predefinedConfig_.testVendor = {'optout': 'foo.bar'};
       return waitForNoSendRequest(analytics);
@@ -968,7 +1005,7 @@ describe('amp-analytics', function() {
       config.triggers.sampled.sampleSpec.sampleOn = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005));
@@ -1088,7 +1125,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 1});
       return waitForSendRequest(analytics).then(() => {
@@ -1121,7 +1158,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns(null);
 
@@ -1136,7 +1173,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 0});
 
@@ -1151,7 +1188,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: false});
 
@@ -1166,7 +1203,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: null});
 
@@ -1181,7 +1218,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: NaN});
 
@@ -1196,7 +1233,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: undefined});
 
@@ -1222,7 +1259,7 @@ describe('amp-analytics', function() {
       config.enabled = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 1});
       return waitForSendRequest(analytics).then(() => {
@@ -1257,7 +1294,7 @@ describe('amp-analytics', function() {
       config.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1274,7 +1311,7 @@ describe('amp-analytics', function() {
 
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1289,7 +1326,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${foo}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns('page');
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1378,11 +1415,11 @@ describe('amp-analytics', function() {
     beforeEach(() => {
       // Unfortunately need to fake sandbox analytics element's parent
       // to an AMP element
-      windowApi.document.body.classList.add('i-amphtml-element');
+      doc.body.classList.add('i-amphtml-element');
     });
 
     afterEach(() => {
-      windowApi.document.body.classList.remove('i-amphtml-element');
+      doc.body.classList.remove('i-amphtml-element');
     });
 
     it('should not fetch remote config', () => {
@@ -1567,7 +1604,7 @@ describe('amp-analytics', function() {
         'sandbox': 'true',
       }, true);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005))

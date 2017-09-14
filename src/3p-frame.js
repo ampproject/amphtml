@@ -18,11 +18,11 @@ import {dev, user} from './log';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
-import {dashToCamelCase} from './string';
 import {dict} from './utils/object';
 import {parseUrl, assertHttpsUrl} from './url';
 import {urls} from './config';
 import {setStyle} from './style';
+import {startsWith} from './string';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
@@ -133,12 +133,13 @@ export function getIframe(
  * visibleForTesting
  */
 export function addDataAndJsonAttributes_(element, attributes) {
-  for (let i = 0; i < element.attributes.length; i++) {
-    const attr = element.attributes[i];
-    if (attr.name.indexOf('data-') != 0) {
-      continue;
+  const dataset = element.dataset;
+  for (const name in dataset) {
+    // data-vars- is reserved for amp-analytics
+    // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
+    if (!startsWith(name, 'vars')) {
+      attributes[name] = dataset[name];
     }
-    attributes[dashToCamelCase(attr.name.substr(5))] = attr.value;
   }
   const json = element.getAttribute('json');
   if (json) {
@@ -201,6 +202,7 @@ export function setDefaultBootstrapBaseUrlForTesting(url) {
 
 export function resetBootstrapBaseUrlForTesting(win) {
   win.bootstrapBaseUrl = undefined;
+  win.defaultBootstrapBaseUrl = undefined;
 }
 
 /**
@@ -210,18 +212,22 @@ export function resetBootstrapBaseUrlForTesting(win) {
  * @return {string}
  */
 export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
+  if (parentWindow.defaultBootstrapBaseUrl) {
+    return parentWindow.defaultBootstrapBaseUrl;
+  }
   const srcFileBasename = opt_srcFileBasename || 'frame';
   if (getMode().localDev || getMode().test) {
     if (overrideBootstrapBaseUrl) {
-      return overrideBootstrapBaseUrl;
+      return parentWindow.defaultBootstrapBaseUrl = overrideBootstrapBaseUrl;
     }
-    return getAdsLocalhost(parentWindow)
+    return parentWindow.defaultBootstrapBaseUrl = getAdsLocalhost(parentWindow)
         + '/dist.3p/'
         + (getMode().minified ? `$internalRuntimeVersion$/${srcFileBasename}`
             : `current/${srcFileBasename}.max`)
         + '.html';
   }
-  return 'https://' + getSubDomain(parentWindow) +
+  return parentWindow.defaultBootstrapBaseUrl = 'https://' +
+      getSubDomain(parentWindow) +
       `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
       `${srcFileBasename}.html`;
 }

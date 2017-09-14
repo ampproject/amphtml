@@ -24,6 +24,8 @@ import {
   CustomEventTracker,
   IniLoadTracker,
   SignalTracker,
+  TimerEventTracker,
+  VideoEventTracker,
   VisibilityTracker,
 } from './events';
 import {Observable} from '../../../src/observable';
@@ -38,12 +40,9 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
-import {timerFor} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
-import {viewportForDoc} from '../../../src/services';
+import {startsWith} from '../../../src/string';
+import {Services} from '../../../src/services';
 
-const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
-const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
 const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
@@ -94,6 +93,11 @@ const EVENT_TRACKERS = {
     allowedFor: ALLOWED_FOR_ALL,
     klass: IniLoadTracker,
   },
+  'timer': {
+    name: 'timer',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: TimerEventTracker,
+  },
   'visible': {
     name: 'visible',
     allowedFor: ALLOWED_FOR_ALL,
@@ -103,6 +107,11 @@ const EVENT_TRACKERS = {
     name: 'visible', // Reuse tracker with visibility
     allowedFor: ALLOWED_FOR_ALL,
     klass: VisibilityTracker,
+  },
+  'video': {
+    name: 'video',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: VideoEventTracker,
   },
 };
 
@@ -139,19 +148,19 @@ export class InstrumentationService {
     this.ampdocRoot_ = new AmpdocAnalyticsRoot(this.ampdoc);
 
     /** @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(this.ampdoc.win);
+    this.timer_ = Services.timerFor(this.ampdoc.win);
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.ampdoc);
+    this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
-    /** @const {!../../../src/service/viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(this.ampdoc);
+    /** @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private {boolean} */
     this.scrollHandlerRegistered_ = false;
 
     /** @private {!Observable<
-        !../../../src/service/viewport-impl.ViewportChangedEventDef>} */
+        !../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
     this.scrollObservable_ = new Observable();
   }
 
@@ -261,10 +270,6 @@ export class InstrumentationService {
         relayoutAll: false,
         velocity: 0,  // Hack for typing.
       });
-    } else if (eventType === AnalyticsEventType.TIMER) {
-      if (this.isTimerSpecValid_(config['timerSpec'])) {
-        this.createTimerListener_(listener, config['timerSpec']);
-      }
     }
   }
 
@@ -281,7 +286,7 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!../../../src/service/viewport-impl.ViewportChangedEventDef} e
+   * @param {!../../../src/service/viewport/viewport-impl.ViewportChangedEventDef} e
    * @private
    */
   onScroll_(e) {
@@ -378,55 +383,6 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {JsonObject} timerSpec
-   * @private
-   */
-  isTimerSpecValid_(timerSpec) {
-    if (!timerSpec || typeof timerSpec != 'object') {
-      user().error(TAG, 'Bad timer specification');
-      return false;
-    } else if (!('interval' in timerSpec)) {
-      user().error(TAG, 'Timer interval specification required');
-      return false;
-    } else if (typeof timerSpec['interval'] !== 'number' ||
-               timerSpec['interval'] < MIN_TIMER_INTERVAL_SECONDS_) {
-      user().error(TAG, 'Bad timer interval specification');
-      return false;
-    } else if (('maxTimerLength' in timerSpec) &&
-              (typeof timerSpec['maxTimerLength'] !== 'number' ||
-                  timerSpec['maxTimerLength'] <= 0)) {
-      user().error(TAG, 'Bad maxTimerLength specification');
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  /**
-   * @param {!function(!AnalyticsEvent)} listener
-   * @param {JsonObject} timerSpec
-   * @private
-   */
-  createTimerListener_(listener, timerSpec) {
-    const hasImmediate = 'immediate' in timerSpec;
-    const callImmediate = hasImmediate ? Boolean(timerSpec['immediate']) : true;
-    const intervalId = this.ampdoc.win.setInterval(
-        listener.bind(null, this.createEventDepr_(AnalyticsEventType.TIMER)),
-        timerSpec['interval'] * 1000
-    );
-
-    if (callImmediate) {
-      listener(this.createEventDepr_(AnalyticsEventType.TIMER));
-    }
-
-    const maxTimerLength = timerSpec['maxTimerLength'] ||
-        DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
-    this.ampdoc.win.setTimeout(
-        this.ampdoc.win.clearInterval.bind(this.ampdoc.win, intervalId),
-        maxTimerLength * 1000);
-  }
-
-  /**
    * Checks to confirm that a given trigger type is allowed for the element.
    * Specifically, it confirms that if the element is in the embed, only a
    * subset of the trigger types are allowed.
@@ -488,7 +444,9 @@ export class AnalyticsGroup {
    */
   addTrigger(config, handler) {
     const eventType = dev().assertString(config['on']);
-    let trackerProfile = EVENT_TRACKERS[eventType];
+    const trackerKey = startsWith(eventType, 'video-') ? 'video' : eventType;
+
+    let trackerProfile = EVENT_TRACKERS[trackerKey];
     if (!trackerProfile && !isEnumValue(AnalyticsEventType, eventType)) {
       trackerProfile = EVENT_TRACKERS['custom'];
     }
