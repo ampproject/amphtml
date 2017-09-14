@@ -15,6 +15,9 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {user} from '../../../src/log';
+import {removeElement} from '../../../src/dom';
+import {listen} from '../../../src/event-helper';
 
 export class AmpVkPoll extends AMP.BaseElement {
 
@@ -22,24 +25,134 @@ export class AmpVkPoll extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {string} */
-    this.myText_ = 'hello world';
+    /** @private {?Element} */
+    this.iframe_ = null;
 
-    /** @private {!Element} */
-    this.container_ = this.win.document.createElement('div');
+    /** @private {?Promise} */
+    this.iframePromise_ = null;
+
+    /** @private {?Number} */
+    this.height_ = 0;
+
+    /** @private {?String} */
+    this.iframeUrl_ = 'https://vk.com/al_widget_poll.php';
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
+
+    this.pageReferrer_ = this.element.ownerDocument.referrer;
+    this.pageUrl_ = this.element.ownerDocument
+        .location.href.replace(/#.*$/, '');
+  }
+
+  getIFrameSrc() {
+    let queryString = this.iframeUrl_;
+
+    const queryParams = this.getIframeParameters();
+
+    let i = 0;
+    for (const param in queryParams) {
+      const divider = i++ === 0 ? '?' : '&';
+      queryString += `${divider}${param}=${
+          encodeURIComponent(queryParams[param])}`;
+    }
+    return queryString;
+  }
+
+  /** @override */
+  getIframeParameters() {
+    return {
+      'app': this.appId_,
+      'width': '100%',
+      '_ver': 1,
+      'poll_id': this.pollId_,
+      'url': this.pageUrl_,
+      'referrer': this.pageReferrer_,
+      'title': '',
+    };
+  }
+
+  /** @override */
+  layoutCallback() {
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    this.iframe_ = iframe;
+
+    this.unlistenMessage_ = listen(
+        this.win,
+        'message',
+        this.handleVkIframeMessage_.bind(this)
+    );
+
+    iframe.src = this.getIFrameSrc();
+    iframe.setAttribute('name', 'fXD');
+    iframe.setAttribute('scrolling', 'no');
+    iframe.setAttribute('frameborder', '0');
+
+    this.applyFillContent(iframe);
+    this.element.appendChild(iframe);
+
+    return this.iframePromise_ = this.loadPromise(iframe);
   }
 
   /** @override */
   buildCallback() {
-    this.container_.textContent = this.myText_;
-    this.element.appendChild(this.container_);
-    this.applyFillContent(this.container_, /* replacedContent */ true);
+    user().assert(this.element.getAttribute('data-appid'),
+        'The data-appid attribute is required for <amp-vk-poll> %s',
+        this.element);
+
+    user().assert(this.element.getAttribute('data-pollid'),
+        'The data-pollid attribute is required for <amp-vk-poll> %s',
+        this.element);
+
+    this.pollId_ = this.element.getAttribute('data-pollid');
+    this.appId_ = this.element.getAttribute('data-appid');
+  }
+
+  /**
+   * @param {!Event} e
+   * @private
+   */
+  handleVkIframeMessage_(e) {
+    if (e.origin !== 'https://vk.com' ||
+        e.source !== this.iframe_.contentWindow) {
+      return;
+    }
+    const matches = e.data.match(/\[\"resize",\[(\d+)\]]/);
+    if (matches && matches[1]) {
+      const newHeight = parseInt(matches[1], 10);
+      if (this.height_ !== newHeight) {
+        this.height_ = newHeight;
+        this./*OK*/changeHeight(newHeight);
+      }
+    }
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
+    return layout === Layout.RESPONSIVE ||
+        layout === Layout.FLEX_ITEM ||
+        layout === Layout.FIXED;
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+      this.iframePromise_ = null;
+    }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
+    return true;  // Call layoutCallback again.
   }
 }
 
-AMP.registerElement('amp-vk-poll', AmpVkPoll);
+AMP.extension('amp-vk-poll', '0.1', AMP => {
+  AMP.registerElement('amp-vk-poll', AmpVkPoll);
+});

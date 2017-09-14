@@ -14,25 +14,129 @@
  * limitations under the License.
  */
 
-import {AmpVkPoll} from '../amp-vk-poll';
+const POLL_PARAMS = {
+  appid: '6183531',
+  pollid: '274032322_b0edc316c28c89d03a',
+};
+
+import '../amp-vk-poll';
+import {Layout} from '../../../../src/layout';
 
 describes.realWin('amp-vk-poll', {
   amp: {
     extensions: ['amp-vk-poll'],
-  }
+  },
 }, env => {
 
-  let win;
-  let element;
+  let win, doc;
 
   beforeEach(() => {
     win = env.win;
-    element = win.document.createElement('amp-vk-poll');
-    win.document.body.appendChild(element);
+    doc = win.document;
   });
 
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
+  function createAmpVkElement(dataParams, layout) {
+    const ele = doc.createElement('amp-vk-poll');
+
+    for (const param in dataParams) {
+      ele.setAttribute(`data-${param}`, dataParams[param]);
+    }
+
+    ele.setAttribute('width', 500);
+    ele.setAttribute('height', 300);
+
+    if (layout) {
+      ele.setAttribute('layout', layout);
+    }
+
+    doc.body.appendChild(ele);
+
+    return ele.build().then(() => {
+      return ele.layoutCallback();
+    }).then(() => ele);
+  }
+
+  it('requires data-appid', () => {
+    const params = Object.assign({}, POLL_PARAMS);
+    delete params.appid;
+    return createAmpVkElement(params).should.eventually.be.rejectedWith(
+        /The data-appid attribute is required for/);
   });
+
+  it('requires data-pollid', () => {
+    const params = Object.assign({}, POLL_PARAMS);
+    delete params.pollid;
+    return createAmpVkElement(params).should.eventually.be.rejectedWith(
+        /The data-pollid attribute is required for/);
+  });
+
+  it('renders iframe in amp-vk-poll', () => {
+    return createAmpVkElement(POLL_PARAMS).then(vkPoll => {
+      const iframe = vkPoll.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+    });
+  });
+
+  it('renders responsively', () => {
+    return createAmpVkElement(POLL_PARAMS, Layout.RESPONSIVE).then(vkPoll => {
+      const iframe = vkPoll.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
+    });
+  });
+
+  it('sets correct src url to the vk iFrame', () => {
+    return createAmpVkElement(POLL_PARAMS, Layout.RESPONSIVE).then(vkPoll => {
+      const iframe = vkPoll.querySelector('iframe');
+      const referrer = encodeURIComponent(vkPoll.ownerDocument.referrer);
+      const url = encodeURIComponent(
+          vkPoll.ownerDocument.location.href.replace(/#.*$/, '')
+      );
+      const correctIFrameSrc = `https://vk.com/al_widget_poll.php?\
+app=6183531&width=100%25\
+&_ver=1&poll_id=274032322_b0edc316c28c89d03a\
+&url=${url}&referrer=${referrer}&title=`;
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.equal(correctIFrameSrc);
+    });
+  });
+
+  it('resizes amp-vk element in response to messages from VK iframe', () => {
+    return createAmpVkElement(POLL_PARAMS).then(vkPoll => {
+      const impl = vkPoll.implementation_;
+      const iframe = vkPoll.querySelector('iframe');
+      const changeHeight = sandbox.spy(impl, 'changeHeight');
+      const fakeHeight = 555;
+
+      expect(iframe).to.not.be.null;
+
+      generatePostMessage(vkPoll, iframe, fakeHeight);
+
+      expect(changeHeight).to.be.calledOnce;
+      expect(changeHeight.firstCall.args[0]).to.equal(fakeHeight);
+    });
+  });
+
+  it('removes iframe after unlayoutCallback', () => {
+    return createAmpVkElement(POLL_PARAMS).then(vkPost => {
+      const iframe = vkPost.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const obj = vkPost.implementation_;
+      obj.unlayoutCallback();
+      expect(vkPost.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+      expect(obj.unlayoutOnPause()).to.be.true;
+    });
+  });
+
+  function generatePostMessage(ins, iframe, height) {
+    ins.implementation_.handleVkIframeMessage_({
+      origin: 'https://vk.com',
+      source: iframe.contentWindow,
+      data: JSON.stringify([
+        'resize',
+        [height],
+      ]),
+    });
+  }
 });
