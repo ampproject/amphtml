@@ -1,4 +1,4 @@
-import {xhrFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {Layout} from '../../../src/layout';
 
 const requests = {};
@@ -6,9 +6,9 @@ const requests = {};
 export default class AmpFetch extends AMP.BaseElement {
   constructor(element) {
     super(element);
-    this.xhr_ = xhrFor(element.ownerDocument.defaultView);
+    this.xhr_ = Services.xhrFor(element.ownerDocument.defaultView);
   }
-  
+
   buildCallback() {
     this.url = this.element.getAttribute('url');
   }
@@ -25,4 +25,8 @@ export default class AmpFetch extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-fetch', AmpFetch);
+
+AMP.extension('amp-fetch', '1.0', AMP => {
+  AMP.registerElement('amp-fetch', AmpFetch);
+});
+

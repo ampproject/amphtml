@@ -1,4 +1,4 @@
-import {xhrFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {createLoaderElement} from '../../../src/loader';
 import {Layout} from '../../../src/layout';
@@ -18,7 +18,7 @@ export default class AmpShadowDocLoader extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    this.xhr_ = xhrFor(element.ownerDocument.defaultView);
+    this.xhr_ = Services.xhrFor(element.ownerDocument.defaultView);
     this.ampDocRequest_ = null;
     this.ampDoc_ = null;
     this.retry_ = this.retry_.bind(this);
@@ -174,4 +174,7 @@ export default class AmpShadowDocLoader extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-shadow-doc-loader', AmpShadowDocLoader, CSS);
+AMP.extension('amp-shadow-doc-loader', '1.0', AMP => {
+  AMP.registerElement('amp-shadow-doc-loader', AmpShadowDocLoader, CSS);
+});
+

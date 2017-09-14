@@ -1,31 +1,38 @@
 import * as sinon from 'sinon';
 
 import {installXhrService} from '../../../../src/service/xhr-impl';
-import {xhrFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import AmpFetch from '../amp-fetch';
 
-let sandbox;
-let xhr;
-let xhrMock;
-let element;
+describes.realWin('amp-fetch extension', {
+  amp: {
+    extensions: ['amp-fetch'],
+  },
+}, env => {
+  let win, doc, ampdoc;
 
-function setup() {
-  sandbox = sinon.sandbox.create();
-  installXhrService(window);
-  xhr = xhrFor(window);
-  xhrMock = sandbox.mock(xhr);
-  element = document.createElement('div');
+  let sandbox;
+  let xhr;
+  let xhrMock;
+  let element;
 
-  element.setAttribute('url', 'document-url');
-}
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
 
-function teardown() {
-  sandbox.restore();
-}
+    sandbox = sinon.sandbox.create();
+    installXhrService(win);
+    xhr = Services.xhrFor(win);
+    xhrMock = sandbox.mock(xhr);
+    element = doc.createElement('div');
 
-describe('amp-fetch', () => {
-  beforeEach(setup);
-  afterEach(teardown);
+    element.setAttribute('url', 'document-url');
+  });
+
+  afterEach(() => {
+      sandbox.restore();
+  });
 
   it('should store document url', function() {
     const ampFetch = new AmpFetch(element);
@@ -70,4 +77,9 @@ describe('amp-fetch', () => {
 
     xhrMock.verify();
   });
+
 });
+
+
+
+

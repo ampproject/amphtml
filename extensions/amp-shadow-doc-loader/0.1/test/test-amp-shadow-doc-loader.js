@@ -1,11 +1,15 @@
 import * as sinon from 'sinon';
 import {installXhrService} from '../../../../src/service/xhr-impl';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
 import AmpShadowDocLoader from '../amp-shadow-doc-loader';
-import {xhrFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 
+describes.realWin('amp-shadow-doc-loader extension', {
+    amp: {
+        extensions: ['amp-shadow-doc-loader'],
+    },
+}, env => {
 
-describe('amp-shadow-doc-loader', () => {
+  let win, doc, ampdoc;
   let sandbox;
   let xhr;
   let xhrMock;
@@ -19,14 +23,18 @@ describe('amp-shadow-doc-loader', () => {
   };
 
   beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
+
     sandbox = sinon.sandbox.create();
-    installXhrService(window);
-    xhr = xhrFor(window);
+    installXhrService(win);
+    xhr = Services.xhrFor(win);
     xhrMock = sandbox.mock(xhr);
 
-    const ampDoc = ampdocServiceFor(window).getAmpDoc();
+    const ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
 
-    element = document.createElement('div');
+    element = doc.createElement('div');
     element.setAttribute('doc-url', 'http://localhost');
     element.setAttribute('retry-label', 'Try again');
     element.getAmpDoc = () => ampDoc;
