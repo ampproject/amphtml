@@ -1408,7 +1408,7 @@ export class AmpA4A extends AMP.BaseElement {
           return Promise.reject('Unrecognized rendering mode request');
       }
       // TODO(bradfrizzell): change name of function and var
-      this.sentinel = 'sentinel';  // TODO(levitzky) REMOVE BEFORE SUBMITTING
+      this.sentinel = 'sentinel';  // DO NOT SUBMIT
       let contextMetadata = getContextMetadata(
           this.win,
           this.element,

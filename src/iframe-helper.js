@@ -200,7 +200,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
       return;
     }
     const data = parseIfNeeded(getData(event));
-    data['sentinel'] = 'sentinel';  // TODO(levitzky) REMOVE BEFORE SUBMITTING
+    data['sentinel'] = 'sentinel';  // DO NOT SUBMIT
     if (!data || !data['sentinel']) {
       return;
     }

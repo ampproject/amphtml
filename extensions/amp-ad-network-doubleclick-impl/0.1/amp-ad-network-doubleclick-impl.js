@@ -627,15 +627,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (this.isFluid) {
         // If this is a Fluid slot, we must send an initial message to
         // safeframe.
-        if (this.iframe.contentWindow) {
-          this.iframe.contentWindow./*OK*/postMessage(
-              JSON.stringify(/** @type {!JsonObject} */
-                ({message: 'connect', c: 'sfchannel1'})),
-              'https://tpc.googlesyndication.com');
-        }
+        this.connectFluidMessagingChannel();
       }
       return Promise.resolve(result);
     });
+  }
+
+  /** @visibleForTesting */
+  connectFluidMessagingChannel() {
+    if (this.iframe.contentWindow) {
+      this.iframe.contentWindow./*OK*/postMessage(
+          JSON.stringify(/** @type {!JsonObject} */
+            ({message: 'connect', c: 'sfchannel1'})),
+          'https://tpc.googlesyndication.com');
+    }
   }
 
   /** @override */
