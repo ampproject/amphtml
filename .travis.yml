@@ -61,9 +61,9 @@ matrix:
           - protobuf-compiler
           - python-protobuf
         sauce_connect:
-          username: "amphtml"
+          username: "#{ENV[SAUCE_USERNAME]}"
         jwt:
-          secure: "foobar"
+          secure: "#{ENV[SAUCE_ACCESS_KEY_ENCRYPTED]}"
 cache:
   directories:
   - node_modules
