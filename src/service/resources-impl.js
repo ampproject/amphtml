@@ -222,6 +222,10 @@ export class Resources {
       this.lastScrollTime_ = Date.now();
     });
 
+    Services.layersForDoc(this.ampdoc).onScroll((/* elements */) => {
+      this.schedulePass();
+    });
+
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
     this.viewer_.onVisibilityChanged(() => {
@@ -1024,7 +1028,6 @@ export class Resources {
   }
 
   doPass() {
-    // TODO(@jridgewell): Oh man, total rewrite needed.
     if (!this.isRuntimeOn_) {
       dev().fine(TAG_, 'runtime is off');
       return;
@@ -1301,195 +1304,7 @@ export class Resources {
   }
 
   mutateWorkViaLayers_() {
-    // Read all necessary data before mutates.
-    // The height changing depends largely on the target element's position
-    // in the active viewport. When not in prerendering, we also consider the
-    // active viewport the part of the visible viewport below 10% from the top
-    // and above 25% from the bottom.
-    // This is basically the portion of the viewport where the reader is most
-    // likely focused right now. The main goal is to avoid drastic UI changes
-    // in that part of the content. The elements below the active viewport are
-    // freely resized. The elements above the viewport are resized and request
-    // scroll adjustment to avoid active viewport changing without user's
-    // action. The elements in the active viewport are not resized and instead
-    // the overflow callbacks are called.
-    const now = Date.now();
-    const viewportRect = this.viewport_.getRect();
-    const scrollHeight = this.viewport_.getScrollHeight();
-    const topOffset = viewportRect.height / 10;
-    const bottomOffset = viewportRect.height / 10;
-    const maxDocBottomOffset = scrollHeight - DOC_BOTTOM_OFFSET_LIMIT_;
-    const docBottomOffset = Math.max(scrollHeight * 0.85, maxDocBottomOffset);
-    const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
-        now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
-        now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
-
-    if (this.deferredMutates_.length > 0) {
-      dev().fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
-      const deferredMutates = this.deferredMutates_;
-      this.deferredMutates_ = [];
-      for (let i = 0; i < deferredMutates.length; i++) {
-        deferredMutates[i]();
-      }
-      this.maybeChangeHeight_ = true;
-    }
-    if (this.requestsChangeSize_.length > 0) {
-      dev().fine(TAG_, 'change size requests:',
-          this.requestsChangeSize_.length);
-      const requestsChangeSize = this.requestsChangeSize_;
-      this.requestsChangeSize_ = [];
-
-      // Find minimum top position and run all mutates.
-      let minTop = -1;
-      const scrollAdjSet = [];
-      let aboveVpHeightChange = 0;
-      for (let i = 0; i < requestsChangeSize.length; i++) {
-        const request = requestsChangeSize[i];
-        /** @const {!Resource} */
-        const resource = request.resource;
-        const box = resource.getLayoutBox();
-        const iniBox = resource.getInitialLayoutBox();
-
-        let topMarginDiff = 0;
-        let bottomMarginDiff = 0;
-        let topUnchangedBoundary = box.top;
-        let bottomDisplacedBoundary = box.bottom;
-        let newMargins = undefined;
-        if (request.marginChange) {
-          newMargins = request.marginChange.newMargins;
-          const margins = request.marginChange.currentMargins;
-          if (newMargins.top != undefined) {
-            topMarginDiff = newMargins.top - margins.top;
-          }
-          if (newMargins.bottom != undefined) {
-            bottomMarginDiff = newMargins.bottom - margins.bottom;
-          }
-          if (topMarginDiff) {
-            topUnchangedBoundary = box.top - margins.top;
-          }
-          if (bottomMarginDiff) {
-            // The lowest boundary of the element that would appear to be
-            // resized as a result of this size change. If the bottom margin is
-            // being changed then it is the bottom edge of the margin box,
-            // otherwise it is the bottom edge of the layout box as set above.
-            bottomDisplacedBoundary = box.bottom + margins.bottom;
-          }
-        }
-        const heightDiff = request.newHeight - box.height;
-
-        // Check resize rules. It will either resize element immediately, or
-        // wait until scrolling stops or will call the overflow callback.
-        let resize = false;
-        if (heightDiff == 0 && topMarginDiff == 0 && bottomMarginDiff == 0) {
-          // 1. Nothing to resize.
-        } else if (request.force || !this.visible_) {
-          // 2. An immediate execution requested or the document is hidden.
-          resize = true;
-        } else if (this.activeHistory_.hasDescendantsOf(resource.element)) {
-          // 3. Active elements are immediately resized. The assumption is that
-          // the resize is triggered by the user action or soon after.
-          resize = true;
-        } else if (topUnchangedBoundary >= viewportRect.bottom - bottomOffset ||
-            (topMarginDiff == 0 && box.bottom + Math.min(heightDiff, 0) >=
-             viewportRect.bottom - bottomOffset)) {
-          // 4. Elements under viewport are resized immediately, but only if
-          // an element's boundary is not changed above the viewport after
-          // resize.
-          resize = true;
-        } else if (viewportRect.top > 1 &&
-            bottomDisplacedBoundary <= viewportRect.top + topOffset) {
-          // 5. Elements above the viewport can only be resized if we are able
-          // to compensate the height change by setting scrollTop and only if
-          // the page has already been scrolled by some amount (1px due to iOS).
-          // Otherwise the scrolling might move important things like the menu
-          // bar out of the viewport at initial page load.
-          if (heightDiff < 0 &&
-              viewportRect.top + aboveVpHeightChange < -heightDiff) {
-            // Do nothing if height abobe viewport height can't compensate
-            // height decrease
-            continue;
-          }
-          // Can only resized when scrollinghas stopped,
-          // otherwise defer util next cycle.
-          if (isScrollingStopped) {
-            // These requests will be executed in the next animation cycle and
-            // adjust the scroll position.
-            aboveVpHeightChange = aboveVpHeightChange + heightDiff;
-            scrollAdjSet.push(request);
-          } else {
-            // Defer till next cycle.
-            this.requestsChangeSize_.push(request);
-          }
-          continue;
-        } else if (iniBox.bottom >= docBottomOffset ||
-                      box.bottom >= docBottomOffset) {
-          // 6. Elements close to the bottom of the document (not viewport)
-          // are resized immediately.
-          resize = true;
-        } else if (heightDiff < 0 || topMarginDiff < 0 ||
-              bottomMarginDiff < 0) {
-          // 7. The new height (or one of the margins) is smaller than the
-          // current one.
-        } else {
-          // 8. Element is in viewport don't resize and try overflow callback
-          // instead.
-          request.resource.overflowCallback(/* overflown */ true,
-              request.newHeight, request.newWidth, newMargins);
-        }
-
-        if (resize) {
-          if (box.top >= 0) {
-            minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
-          }
-          request.resource./*OK*/changeSize(
-              request.newHeight, request.newWidth, newMargins);
-          request.resource.overflowCallback(/* overflown */ false,
-              request.newHeight, request.newWidth, newMargins);
-          this.maybeChangeHeight_ = true;
-        }
-
-        if (request.callback) {
-          request.callback(/* hasSizeChanged */resize);
-        }
-      }
-
-      if (minTop != -1) {
-        this.setRelayoutTop_(minTop);
-      }
-
-      // Execute scroll-adjusting resize requests, if any.
-      if (scrollAdjSet.length > 0) {
-        this.vsync_.run({
-          measure: state => {
-            state./*OK*/scrollHeight = this.viewport_./*OK*/getScrollHeight();
-            state./*OK*/scrollTop = this.viewport_./*OK*/getScrollTop();
-          },
-          mutate: state => {
-            let minTop = -1;
-            scrollAdjSet.forEach(request => {
-              const box = request.resource.getLayoutBox();
-              minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
-              request.resource./*OK*/changeSize(
-                  request.newHeight, request.newWidth, request.marginChange ?
-                    request.marginChange.newMargins : undefined);
-              if (request.callback) {
-                request.callback(/* hasSizeChanged */true);
-              }
-            });
-            if (minTop != -1) {
-              this.setRelayoutTop_(minTop);
-            }
-            // Sync is necessary here to avoid UI jump in the next frame.
-            const newScrollHeight = this.viewport_./*OK*/getScrollHeight();
-            if (newScrollHeight != state./*OK*/scrollHeight) {
-              this.viewport_.setScrollTop(state./*OK*/scrollTop +
-                  (newScrollHeight - state./*OK*/scrollHeight));
-            }
-            this.maybeChangeHeight_ = true;
-          },
-        }, {});
-      }
-    }
+    this.mutateWorkViaResources_();
   }
 
   /**
@@ -1497,7 +1312,9 @@ export class Resources {
    * @private
    */
   setRelayoutTop_(relayoutTop) {
-    if (this.relayoutTop_ == -1) {
+    if (true) {
+      this.relayoutAll_ = true;
+    } else if (this.relayoutTop_ == -1) {
       this.relayoutTop_ = relayoutTop;
     } else {
       this.relayoutTop_ = Math.min(relayoutTop, this.relayoutTop_);
@@ -1585,8 +1402,6 @@ export class Resources {
                 relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop) {
           const wasDisplayed = r.isDisplayed();
           r.measure();
-          // TODO: Optimize this.
-          Services.layersForDoc(this.ampdoc).remeasure(r.element);
           if (wasDisplayed && !r.isDisplayed()) {
             if (!toUnload) {
               toUnload = [];
@@ -1791,6 +1606,7 @@ export class Resources {
     // TODO(@jridgewell): these should be taking into account the active
     // scroller, which may not be the root scroller. Maybe a weighted average
     // of "scroller scrolls necessary" to see the element.
+    // Demo at https://output.jsbin.com/hicigom/quiet
     const viewport = this.viewport_.getRect();
     const box = task.resource.getLayoutBox();
     let posPriority = Math.floor((box.top - viewport.top) / viewport.height);

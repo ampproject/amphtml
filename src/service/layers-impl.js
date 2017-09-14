@@ -78,6 +78,8 @@ export class LayoutLayers {
     this.ampdoc_ = ampdoc;
     this.win_ = win;
 
+    this.onScroll_ = null;
+
     /** @const {!Document} */
     this.document_ = win.document;
 
@@ -223,8 +225,13 @@ export class LayoutLayers {
       layer = this.declareLayer_(element);
     }
 
-    // This will eventually tell Resources that these elements have scrolled.
-    // Services.resourcesForDoc(this.ampdoc_).scrollTick(layer.getElements());
+    if (this.onScroll_) {
+      this.onScroll_(/* layer.getElements() */);
+    }
+  }
+
+  onScroll(handler) {
+    this.onScroll_ = handler;
   }
 
   getScrollingElement() {

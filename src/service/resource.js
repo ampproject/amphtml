@@ -676,11 +676,16 @@ export class Resource {
     let scrollPenalty = 1;
     let distance;
 
-    if (viewportBox.right < layoutBox.left ||
-        viewportBox.left > layoutBox.right) {
-      // TODO
-      // If outside of viewport's x-axis, element is not in viewport.
-      return false;
+    if (true) {
+      distance += Math.max(0,
+          layoutBox.left - viewportBox.right,
+          viewportBox.left - layoutBox.right);
+    } else {
+      if (viewportBox.right < layoutBox.left ||
+          viewportBox.left > layoutBox.right) {
+        // If outside of viewport's x-axis, element is not in viewport.
+        return false;
+      }
     }
 
     if (viewportBox.bottom < layoutBox.top) {
