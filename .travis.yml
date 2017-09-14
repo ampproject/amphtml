@@ -23,8 +23,9 @@ before_script:
   - gem install percy-capybara phantomjs poltergeist
   # Poltergeist requires an absolute path to find phantomjs. See #10305.
   - export PATH="`pwd`/node_modules/.bin:$PATH"
-  - node -e "console.log('before_install SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
-  - node -e "console.log('before_install SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
+  - node -e "console.log('before_script SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
+  - node -e "console.log('before_script SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
+script: node build-system/pr-check.js
 branches:
   only:
     - master
@@ -50,35 +51,16 @@ matrix:
           packages:
           - protobuf-compiler
           - python-protobuf
-      script: node build-system/pr-check.js
     - env: BUILD_SHARD="integration_tests"
-      stages:
-        - setup-sauce
-        - init-addons
-        - run-pr-check
-      jobs:
-        include:
-          - stage: setup-sauce
-            script: export SAUCE_USERNAME="`node build-system/get-sauce-credentials.js --username`"
-            script: export SAUCE_ACCESS_KEY_ENCRYPTED="`node build-system/get-sauce-credentials.js --access_key_encrypted`"
-            script: node -e "console.log('before_install SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
-            script: node -e "console.log('before_install SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
-          - stage: init-addons
-            addons:
-              apt:
-                packages:
-                - protobuf-compiler
-                - python-protobuf
-              sauce_connect:
-                username: "amphtml"
-              jwt:
-                secure: <% ENV['SAUCE_ACCESS_KEY_ENCRYPTED'] %>
-            script: node -e "console.log('before_install SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
-            script: node -e "console.log('before_install SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
-          - stage: run-pr-check
-            script: node -e "console.log('before_install SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
-            script: node -e "console.log('before_install SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
-            script: node build-system/pr-check.js
+      addons:
+        apt:
+          packages:
+          - protobuf-compiler
+          - python-protobuf
+        sauce_connect:
+          username: "amphtml"
+        jwt:
+          secure: "<% ENV['SAUCE_ACCESS_KEY_ENCRYPTED'] %>"
 cache:
   directories:
   - node_modules
