@@ -66,7 +66,7 @@ export class AmpAdExit extends AMP.BaseElement {
 
     this.registerAction('exit', this.exit.bind(this));
 
-    /** @private @const {!Object<string, Object<string, string>} */
+    /** @private @const {!Object<string, Object<string, string>>} */
     this.vendorResponses_ = {};
 
     try {
@@ -79,10 +79,10 @@ export class AmpAdExit extends AMP.BaseElement {
 
     this.unlisten_ = listen(this.getAmpDoc().win, 'message', event => {
       const responseMessage = deserializeMessage(getData(event));
-      if (!responseMessage || !responseMessage.type ||
-          responseMessage.type != MessageType.IFRAME_TRANSPORT_RESPONSE ||
-          !responseMessage.creativeId ||
-          responseMessage.creativeId != this.ampAdResourceId_) {
+      if (!responseMessage || !responseMessage['type'] ||
+          responseMessage['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE ||
+          !responseMessage['creativeId'] ||
+          responseMessage['creativeId'] != this.ampAdResourceId_) {
         return;
       }
 
@@ -95,7 +95,7 @@ export class AmpAdExit extends AMP.BaseElement {
       assertOriginMatchesVendor(event.origin, vendor);
 
       this.vendorResponses_[vendor] = responseMessage['message'];
-    }, false);
+    });
   }
 
   /** @override */
