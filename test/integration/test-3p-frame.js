@@ -288,6 +288,19 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
         'https://example.com/boot/remote.html?$internalRuntimeVersion$');
   });
 
+  it('should return different values for different file names', () => {
+    window.AMP_MODE = {};
+    let match =
+        /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/
+        .exec(getDefaultBootstrapBaseUrl(window));
+    const domain = match && match[1];
+    expect(domain).to.be.ok;
+    match =
+        /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame2\.html$/
+        .exec(getDefaultBootstrapBaseUrl(window, 'frame2'));
+    expect(match && match[1]).to.equal(domain);
+  });
+
   it('should pick the right bootstrap url (custom)', () => {
     addCustomBootstrap('http://example.com/boot/remote.html');
     expect(() => {
