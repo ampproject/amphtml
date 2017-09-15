@@ -64,29 +64,32 @@ export class AmpVk extends AMP.BaseElement {
     const pageUrl = this.element.ownerDocument
         .location.href.replace(/#.*$/, '');
     const pageReferrer = this.element.ownerDocument.referrer;
+    const createdTime = Number(new Date()).toString(16);
+
+    let q = '';
+    let src = this.iframeUrl_;
 
     const queryParams = {
       'app': 0,
       'width': '100%',
-      'startWidth': startWidth,
       '_ver': 1,
       'owner_id': ownerId,
       'post_id': postId,
       'hash': hash,
+      'amp': 1,
+      'startWidth': startWidth,
       'url': pageUrl,
       'referrer': pageReferrer,
-      'title': '',
+      'title': 'AMP Post',
     };
 
-    let queryString = this.iframeUrl_;
-
-    let i = 0;
     for (const param in queryParams) {
-      const divider = i++ === 0 ? '?' : '&';
-      queryString += `${divider}${param}=${
-          encodeURIComponent(queryParams[param])}`;
+      q += `&${param}=${encodeURIComponent(queryParams[param])}`;
     }
-    return queryString;
+
+    src += `?${q.substr(1)}&${createdTime}`;
+
+    return src;
   }
 
   /** @override */

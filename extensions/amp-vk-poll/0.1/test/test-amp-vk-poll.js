@@ -93,8 +93,8 @@ describes.realWin('amp-vk-poll', {
           vkPoll.ownerDocument.location.href.replace(/#.*$/, '')
       );
       const correctIFrameSrc = `https://vk.com/al_widget_poll.php?\
-app=6183531&width=100%25&_ver=1&poll_id=274086843_1a2a465f60fff4699f\
-&url=${url}&title=AMP%20Post&description=&referrer=${referrer}`;
+app=6183531&width=100%25&_ver=1&poll_id=274086843_1a2a465f60fff4699f&amp=1\
+&url=${url}&title=AMP%20Poll&description=&referrer=${referrer}`;
 
       expect(iframe).to.not.be.null;
       const timeArgPosition = iframe.src.lastIndexOf('&');

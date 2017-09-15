@@ -61,8 +61,9 @@ export class AmpVkPoll extends AMP.BaseElement {
       'width': '100%',
       '_ver': 1,
       'poll_id': pollId,
+      'amp': 1,
       'url': pageUrl,
-      'title': 'AMP Post',
+      'title': 'AMP Poll',
       'description': '',
       'referrer': pageReferrer,
     };

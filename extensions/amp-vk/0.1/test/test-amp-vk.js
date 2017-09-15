@@ -101,12 +101,13 @@ describes.realWin('amp-vk', {
           vkPost.ownerDocument.location.href.replace(/#.*$/, '')
       );
       const startWidth = iframe.offsetWidth;
-      const correctIFrameSrc = `https://vk.com/widget_post.php?\
-app=0&width=100%25&startWidth=${startWidth}\
-&_ver=1&owner_id=1&post_id=45616&hash=Yc8_Z9pnpg8aKMZbVcD-jK45eAk&\
-url=${url}&referrer=${referrer}&title=`;
+      const correctIFrameSrc = `https://vk.com/widget_post.php?app=0&width=100%25\
+&_ver=1&owner_id=1&post_id=45616&hash=Yc8_Z9pnpg8aKMZbVcD-jK45eAk&amp=1\
+&startWidth=${startWidth}&url=${url}&referrer=${referrer}&title=AMP%20Post`;
       expect(iframe).to.not.be.null;
-      expect(iframe.src).to.equal(correctIFrameSrc);
+      const timeArgPosition = iframe.src.lastIndexOf('&');
+      const iframeSrcWithoutTime = iframe.src.substr(0, timeArgPosition);
+      expect(iframeSrcWithoutTime).to.equal(correctIFrameSrc);
     });
   });
 
