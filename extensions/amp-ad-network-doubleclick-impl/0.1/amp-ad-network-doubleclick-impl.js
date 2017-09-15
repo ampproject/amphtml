@@ -83,6 +83,7 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {getContextMetadata} from '../../../src/iframe-attributes';
 import {listenFor} from '../../../src/iframe-helper';
 import {
   getPublisherSpecifiedRefreshInterval,
@@ -294,6 +295,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {number} */
     this.ifi_ = 0;
 
+    /** @private {boolean} */
+    this.isFluid_ = false;
+
     /** @private {?string} */
     this.fluidImpressionUrl_ = null;
 
@@ -324,8 +328,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.isFluid = this.element.getAttribute('height') == 'fluid';
-    this.creativeSize = this.isFluid ?
+    this.isFluid_ = this.element.getAttribute('height') == 'fluid';
+    this.creativeSize = this.isFluid_ ?
         {width: 0, height: 0} : this.creativeSize;
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
@@ -411,7 +415,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getBlockParameters_() {
     dev().assert(this.initialSize_);
     dev().assert(this.jsonTargeting_);
-    let sizeStr = this.isFluid ?
+    let sizeStr = this.isFluid_ ?
         '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
@@ -431,7 +435,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.initialSize_.width,
           this.initialSize_.height,
           multiSizeValidation == 'true',
-          this.isFluid);
+          this.isFluid_);
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
           .join('|');
@@ -456,7 +460,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.jsonTargeting_['categoryExclusions']) || null),
       'ifi': this.ifi_,
       rc,
-      'fluid': this.isFluid ? 'height' : null,
+      'fluid': this.isFluid_ ? 'height' : null,
     }, googleBlockParameters(this));
   }
 
@@ -470,7 +474,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('data-override-height')) ||
       Number(this.element.getAttribute('height'));
-    this.initialSize_ = this.isFluid ? {width: 0, height: 0} : width && height
+    this.initialSize_ = this.isFluid_ ? {width: 0, height: 0} : width && height
         ? {width, height}
         // width/height could be 'auto' in which case we fallback to measured.
         : this.getIntersectionElementLayoutBox();
@@ -525,6 +529,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.getAmpDoc(), 'amp-analytics');
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
     this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
     this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
 
@@ -534,6 +539,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
 =======
     if (!this.isFluid) {
+=======
+    if (!this.isFluid_) {
+>>>>>>> Removed all references to this.isFluid in AmpA4A.
       this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
       this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
     } else {
@@ -624,7 +632,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               continuousTimeMin: 1,
             });
     return frameLoadPromise.then(result => {
-      if (this.isFluid) {
+      if (this.isFluid_) {
         // If this is a Fluid slot, we must send an initial message to
         // safeframe.
         this.connectFluidMessagingChannel();
@@ -729,6 +737,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   setupListenersForFluid(iframe) {
+    if (!this.isFluid_) {
+      return;
+    }
     listenFor(iframe, 'creative_geometry_update', data => {
       // The first creative_geometry_update message will contain bad
       // geometric data, as it will have been computed using the initial,
@@ -1105,6 +1116,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getPreconnectUrls() {
     return ['https://partner.googleadservices.com',
       'https://tpc.googlesyndication.com'];
+  }
+
+  /** @override */
+  getNonAmpCreativeRenderingMethod(headerValue) {
+    if (this.isFluid_) {
+      return XORIGIN_MODE.SAFEFRAME;
+    }
+    return super.getNonAmpCreativeRenderingMethod(headerValue);
+  }
+
+  /** @override */
+  getCrossDomainFrameAttributes() {
+    return getContextMetadata(
+          this.win,
+          this.element,
+          this.sentinel,
+          /* attributes */ undefined,
+          this.isFluid_ ? this.safeframeVersion : '');
   }
 }
 

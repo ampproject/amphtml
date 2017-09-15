@@ -31,7 +31,7 @@ import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
 } from '../../../src/friendly-iframe-embed';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -248,7 +248,7 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?XORIGIN_MODE}
      */
     this.experimentalNonAmpCreativeRenderMethod_ =
-      Services.platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
+        this.getNonAmpCreativeRenderingMethod();
 
     /**
      * Gets a notion of current time, in ms.  The value is not necessarily
@@ -293,8 +293,8 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.fromResumeCallback = false;
 
-    /** @private {string} */
-    this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
+    /** @protected {string} */
+    this.safeframeVersion = DEFAULT_SAFEFRAME_VERSION;
 
     /**
      * @protected {boolean} Indicates whether the ad is currently in the
@@ -311,9 +311,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.releaseType_ = getBinaryTypeNumericalCode(getBinaryType(this.win)) ||
         '-1';
-
-    /** @protected {boolean} */
-    this.isFluid = false;
   }
 
   /** @override */
@@ -495,7 +492,8 @@ export class AmpA4A extends AMP.BaseElement {
    */
   shouldInitializePromiseChain_() {
     const slotRect = this.getIntersectionElementLayoutBox();
-    if (!this.isFluid && (slotRect.height == 0 || slotRect.width == 0)) {
+    if (this.getLayout() != Layout.FLUID &&
+        (slotRect.height == 0 || slotRect.width == 0)) {
       dev().fine(
           TAG, 'onLayoutMeasure canceled due height/width 0', this.element);
       return false;
@@ -616,8 +614,8 @@ export class AmpA4A extends AMP.BaseElement {
           // an acceptable solution to the 'Safari on iOS doesn't fetch
           // iframe src from cache' issue.  See
           // https://github.com/ampproject/amphtml/issues/5614
-          const method = fetchResponse.headers.get(RENDERING_TYPE_HEADER) ||
-              this.experimentalNonAmpCreativeRenderMethod_;
+          const method = this.getNonAmpCreativeRenderingMethod(
+              fetchResponse.headers.get(RENDERING_TYPE_HEADER));
           this.experimentalNonAmpCreativeRenderMethod_ = method;
           if (method && !isEnumValue(XORIGIN_MODE, method)) {
             dev().error('AMP-A4A', `cross-origin render mode header ${method}`);
@@ -626,7 +624,7 @@ export class AmpA4A extends AMP.BaseElement {
             fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
           if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
               safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
-            this.safeframeVersion_ = safeframeVersionHeader;
+            this.safeframeVersion = safeframeVersionHeader;
             this.preconnect.preload(this.getSafeframePath_());
           }
           // Note: Resolving a .then inside a .then because we need to capture
@@ -666,15 +664,10 @@ export class AmpA4A extends AMP.BaseElement {
           const {bytes, headers} = responseParts;
           const size = this.extractSize(responseParts.headers);
           this.creativeSize = size || this.creativeSize;
-          if ((this.isFluid || this.experimentalNonAmpCreativeRenderMethod_ !=
-              XORIGIN_MODE.CLIENT_CACHE) &&
+          if (this.experimentalNonAmpCreativeRenderMethod_ !=
+              XORIGIN_MODE.CLIENT_CACHE &&
               bytes) {
             this.creativeBody_ = bytes;
-          }
-          if (this.isFluid) {
-            // Since Fluid ads always render in a cross-domain frame, no need to
-            // perform signature verification.
-            return Promise.resolve(bytes);
           }
           this.protectedEmitLifecycleEvent_('adResponseValidateStart');
           return this.keysetPromise_
@@ -716,7 +709,7 @@ export class AmpA4A extends AMP.BaseElement {
           // Need to know if creative was verified as part of render outside
           // viewport but cannot wait on promise.  Sadly, need a state a
           // variable.
-          this.isVerifiedAmpCreative_ = !this.isFluid && !!creative;
+          this.isVerifiedAmpCreative_ = !!creative;
           return creative && utf8Decode(creative);
         })
         // This block returns CreativeMetaDataDef iff the creative was verified
@@ -886,11 +879,6 @@ export class AmpA4A extends AMP.BaseElement {
         this.protectedEmitLifecycleEvent_('iframeAlreadyExists');
         return Promise.resolve();
       }
-      if (this.isFluid) {
-        return this.creativeBody_
-            ? this.renderViaNameAttrOfXOriginIframe_(this.creativeBody_)
-            : Promise.resolve(this.forceCollapse());
-      }
       if (!creativeMetaData) {
         // Non-AMP creative case, will verify ad url existence.
         return this.renderNonAmpCreative_();
@@ -972,8 +960,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.isVerifiedAmpCreative_ = false;
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
-        Services.platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
-    this.isFluid = false;
+        this.getNonAmpCreativeRenderingMethod();
   }
 
   /**
@@ -1321,7 +1308,7 @@ export class AmpA4A extends AMP.BaseElement {
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe', /** @type {!JsonObject} */ (
         Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES)));
-    if (this.isFluid && this.iframe) {
+    if (this.iframe) {
       this.setupListenersForFluid(this.iframe);
     }
     // TODO(keithwrightbos): noContentCallback?
@@ -1376,8 +1363,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaNameAttrOfXOriginIframe_(creativeBody) {
     /** @type {string} */
-    const method = (this.isFluid && XORIGIN_MODE.SAFEFRAME) ||
-        this.experimentalNonAmpCreativeRenderMethod_;
+    const method = this.experimentalNonAmpCreativeRenderMethod_;
     dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
         method == XORIGIN_MODE.NAMEFRAME,
         'Unrecognized A4A cross-domain rendering mode: %s', method);
@@ -1409,19 +1395,14 @@ export class AmpA4A extends AMP.BaseElement {
       }
       // TODO(bradfrizzell): change name of function and var
       this.sentinel = 'sentinel';  // DO NOT SUBMIT
-      let contextMetadata = getContextMetadata(
-          this.win,
-          this.element,
-          this.sentinel,
-          /* attributes */ undefined,
-          this.isFluid ? this.safeframeVersion_ : '');
+      let contextMetadata = this.getCrossDomainFrameAttributes();
       // TODO(bradfrizzell) Clean up name assigning.
       if (method == XORIGIN_MODE.NAMEFRAME) {
         contextMetadata['creative'] = creative;
         name = JSON.stringify(contextMetadata);
       } else if (method == XORIGIN_MODE.SAFEFRAME) {
         contextMetadata = JSON.stringify(contextMetadata);
-        name = `${this.safeframeVersion_};${creative.length};${creative}` +
+        name = `${this.safeframeVersion};${creative.length};${creative}` +
             `${contextMetadata}`;
       }
       return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
@@ -1538,7 +1519,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getSafeframePath_() {
     return 'https://tpc.googlesyndication.com/safeframe/' +
-      `${this.safeframeVersion_}/html/container.html`;
+      `${this.safeframeVersion}/html/container.html`;
   }
 
   /**
@@ -1588,7 +1569,32 @@ export class AmpA4A extends AMP.BaseElement {
 >>>>>>> Moved listener setup to doubleclick.
 =======
   setupListenersForFluid(unusedIframe) {}
+<<<<<<< HEAD
 >>>>>>> Lint stuff.
+=======
+
+  /**
+   * @param {?string} headerValue Method as given in header.
+   */
+  getNonAmpCreativeRenderingMethod(headerValue) {
+    if (headerValue) {
+      return headerValue;
+    } else if (this.experimentalNonAmpCreativeRenderMethod_) {
+      return this.experimentalNonAmpCreativeRenderMethod_;
+    }
+    return Services.platformFor(this.win).isIos() ?
+        XORIGIN_MODE.SAFEFRAME : null;
+  }
+
+  /**
+   * Returns iframe attributes necessary to render creative in cross-domain
+   * frame.
+   * @return {!JsonObject}
+   */
+  getCrossDomainFrameAttributes() {
+    return getContextMetadata(this.win, this.element, this.sentinel);
+  }
+>>>>>>> Removed all references to this.isFluid in AmpA4A.
 }
 
 /**
