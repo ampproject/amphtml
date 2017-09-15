@@ -38,18 +38,13 @@ export let FrameData;
 export class IframeTransport {
   /**
    * @param {!Window} ampWin The window object of the AMP document
-   * @param {!Window} win The window object of the innermost document
-   * containing the amp-analytics tag (e.g. a creative iframe)
    * @param {!string} type The value of the amp-analytics tag's type attribute
    * @param {!JsonObject} config
    * @param {!string} ampAdResourceId The resourceID of the enclosing amp-ad tag
    */
-  constructor(ampWin, win, type, config, ampAdResourceId) {
-    /** @private @const {!Window} win */
+  constructor(ampWin, type, config, ampAdResourceId) {
+    /** @private @const {!Window} */
     this.ampWin_ = ampWin;
-
-    /** @private @const {!Window} win */
-    this.win_ = win;
 
     /** @private @const {string} */
     this.type_ = type;
