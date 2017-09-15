@@ -191,7 +191,7 @@ function dropListenSentinel(listenSentinel) {
  * Registers the global listenFor event listener if it has yet to be.
  * @param {!Window} parentWin
  */
-function registerGlobalListenerIfNeeded(parentWin) {
+function registerGlobalListenerIfNeeded(parentWin) { debugger;
   if (parentWin.listeningFors) {
     return;
   }

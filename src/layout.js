@@ -21,7 +21,7 @@
 
 import {dev, user} from './log';
 import {isFiniteNumber} from './types';
-import {setStyle, setStyles} from './style';
+import {computedStyle, setStyle, setStyles} from './style';
 import {startsWith} from './string';
 
 
@@ -441,7 +441,8 @@ export function applyStaticLayout(element) {
     }
   } else if (layout == Layout.FLUID) {
     element.classList.add('i-amphtml-layout-awaiting-size');
-    setStyle(element, 'width', width ? width : '100%');
+    setStyle(element, 'width', width ?
+        width : computedStyle(window, element.parentElement).width);
   }
   return layout;
 }

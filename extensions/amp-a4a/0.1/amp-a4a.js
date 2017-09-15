@@ -54,6 +54,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
+import {listenFor} from '../../../src/iframe-helper';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
 
 /** @type {Array<string>} */
@@ -1309,7 +1310,10 @@ export class AmpA4A extends AMP.BaseElement {
         'iframe', /** @type {!JsonObject} */ (
         Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES)));
     if (this.iframe) {
-      this.setupListenersForFluid(this.iframe);
+      const listeners = this.getXdomainCreativeFrameMessageListeners();
+      Object.keys(listeners)
+          .forEach(key => listenFor(
+              this.iframe, key, listeners[key], /* opt_is3p */ true));
     }
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
@@ -1395,7 +1399,9 @@ export class AmpA4A extends AMP.BaseElement {
       }
       // TODO(bradfrizzell): change name of function and var
       this.sentinel = 'sentinel';  // DO NOT SUBMIT
-      let contextMetadata = this.getCrossDomainFrameAttributes();
+      let contextMetadata = getContextMetadata(
+          this.win, this.element, this.sentinel,
+          this.getAdditionalContextMetadata());
       // TODO(bradfrizzell) Clean up name assigning.
       if (method == XORIGIN_MODE.NAMEFRAME) {
         contextMetadata['creative'] = creative;
@@ -1591,8 +1597,17 @@ export class AmpA4A extends AMP.BaseElement {
    * frame.
    * @return {!JsonObject}
    */
-  getCrossDomainFrameAttributes() {
-    return getContextMetadata(this.win, this.element, this.sentinel);
+  getAdditionalContextMetadata() {
+    return {};
+  }
+
+  /**
+   * This method may be extended to return a set of events that will be
+   * subscribed to once the cross domain iframe is available.
+   * @return {!Object<string, !function(!Element, string, function(Object))}
+   */
+  getXdomainCreativeFrameMessageListeners() {
+    return {};
   }
 >>>>>>> Removed all references to this.isFluid in AmpA4A.
 }

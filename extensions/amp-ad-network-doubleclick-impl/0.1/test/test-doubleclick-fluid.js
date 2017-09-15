@@ -152,12 +152,12 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   it('should setup postMessage listeners', () => {
     impl.buildCallback();
-    const setupListenersForFluidSpy =
-        sandbox.spy(impl, 'setupListenersForFluid');
+    const getXdomainCreativeFrameMessageListenersSpy =
+        sandbox.spy(impl, 'getXdomainCreativeFrameMessageListeners');
     return utf8Encode('foo').then(creative => {
       impl.sentinel = 'sentinel';
       return impl.renderViaNameAttrOfXOriginIframe_(creative).then(() => {
-        expect(setupListenersForFluidSpy).to.be.calledOnce;
+        expect(getXdomainCreativeFrameMessageListenersSpy).to.be.calledOnce;
       });
     });
   });
