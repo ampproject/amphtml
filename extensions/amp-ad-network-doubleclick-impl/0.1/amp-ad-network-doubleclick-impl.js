@@ -745,7 +745,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           position: 'relative',
         });
       } else {
-        const payload = JSON.parse(data['p']);
+        const payload = tryParseJson(data['p']);
         this.attemptChangeSize(payload.height, payload.width)
             .then(() => {
               if (!this.fluidImpressionFired_) {

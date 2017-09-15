@@ -62,6 +62,10 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     const ampStyle = doc.createElement('style');
     ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
     doc.head.appendChild(ampStyle);
+    doc.body.appendChild(createElementWithAttributes(
+        env.win.document, 'div', {
+          'style': 'width: 1px; height: 1000px;',
+        }));
     element = createElementWithAttributes(env.win.document, 'amp-ad', {
       'height': 'fluid',
       'type': 'doubleclick',
@@ -204,6 +208,38 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
           expect(styleString).to.match(/width: 100%/);
           expect(styleString).to.match(/height: 100%/);
           expect(styleString).to.match(/position: relative/);
+        });
+      });
+    });
+  });
+
+  it('should fire delayed impression ping', () => {
+    impl.buildCallback();
+    const rawCreative = `
+        <script>
+        parent./*OK*/postMessage(
+            JSON.stringify(/** @type {!JsonObject} */ ({
+              type: 'creative_geometry_update',
+              sentinel: 'sentinel',
+            })), '*');
+        parent./*OK*/postMessage(
+            JSON.stringify(/** @type {!JsonObject} */ ({
+              type: 'creative_geometry_update',
+              sentinel: 'sentinel',
+              p: '{"width":"1px","height":"1px"}',
+            })), '*');
+        </script>`;
+    const fireDelayedImpressionsSpy =
+        sandbox.spy(impl, 'fireDelayedImpressions');
+    impl.fluidImpressionUrl_ = 'http://www.foo.bar/';
+    impl.attemptChangeSize = () => Promise.resolve();
+    return utf8Encode(rawCreative).then(creative => {
+      impl.sentinel = 'sentinel';
+      impl.initiateAdRequest();
+      return impl.adPromise_.then(() => {
+        impl.creativeBody_ = creative;
+        return impl.layoutCallback().then(() => {
+          expect(fireDelayedImpressionsSpy).to.be.calledOnce;
         });
       });
     });
