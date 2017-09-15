@@ -1554,6 +1554,7 @@ export class AmpA4A extends AMP.BaseElement {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
    * Whether preferential render should still be utilized if web crypto is unavailable,
    * and crypto signature header is present.
    * @return {!boolean}
@@ -1584,6 +1585,9 @@ export class AmpA4A extends AMP.BaseElement {
 =======
 >>>>>>> Removing some unused code.
    * @param {?string} headerValue Method as given in header.
+=======
+   * @param {string=} headerValue Method as given in header.
+>>>>>>> Type fixes.
    */
   getNonAmpCreativeRenderingMethod(headerValue) {
     if (headerValue) {
@@ -1601,13 +1605,13 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!JsonObject}
    */
   getAdditionalContextMetadata() {
-    return {};
+    return /** @type {!JsonObject} */ ({});
   }
 
   /**
    * This method may be extended to return a set of events that will be
    * subscribed to once the cross domain iframe is available.
-   * @return {!Object<string, !function(!Element, string, function(Object))}
+   * @return {!Object<string, !function(!JsonObject, !Window, string)>}
    */
   getXdomainCreativeFrameMessageListeners() {
     return {};

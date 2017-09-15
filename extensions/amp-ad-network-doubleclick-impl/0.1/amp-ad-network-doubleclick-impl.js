@@ -1089,7 +1089,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdditionalContextMetadata() {
-    const attributes = {};
+    const attributes = /** @type {!JsonObject} */ ({});
     if (this.isFluid_) {
       attributes['uid'] = 1;
       attributes['hostPeerName'] = this.win.location.origin;
@@ -1155,10 +1155,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           });
         } else {
           const payload = tryParseJson(data['p']);
-          if (payload.width == 0) {
+          if (payload['width'] == 0) {
             return;
           }
-          this.attemptChangeSize(payload.height)
+          this.attemptChangeSize(payload['height'], undefined)
               .then(() => {
                 if (!this.fluidImpressionFired_) {
                   if (this.fluidImpressionUrl_) {
