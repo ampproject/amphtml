@@ -443,7 +443,7 @@ export function applyStaticLayout(element) {
     element.classList.add('i-amphtml-layout-awaiting-size');
     setStyle(element, 'width', width ?
         width : computedStyle(self,
-          /** @type {!Element} */ (element.parentElement)).width);
+            dev().assertElement(element.parentElement)).width);
   }
   return layout;
 }
