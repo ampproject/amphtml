@@ -200,7 +200,6 @@ function registerGlobalListenerIfNeeded(parentWin) {
       return;
     }
     const data = parseIfNeeded(getData(event));
-    data['sentinel'] = 'sentinel';  // DO NOT SUBMIT
     if (!data || !data['sentinel']) {
       return;
     }
