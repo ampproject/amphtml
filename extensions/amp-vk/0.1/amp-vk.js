@@ -34,7 +34,7 @@ export class AmpVk extends AMP.BaseElement {
     /** @private {?string} */
     this.iframeUrl_ = null;
 
-    /** @private {?object} */
+    /** @private {?Object} */
     this.iframeParams_ = null;
 
     /** @private {?Element} */
