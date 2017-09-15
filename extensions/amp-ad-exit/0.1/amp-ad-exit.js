@@ -15,12 +15,18 @@
  */
 
 import {makeClickDelaySpec} from './filters/click-delay';
-import {assertConfig, TransportMode} from './config';
+import {assertConfig, assertOriginMatchesVendor, TransportMode} from './config';
 import {createFilter} from './filters/factory';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {Services} from '../../../src/services';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
+import {
+  listen,
+  deserializeMessage,
+} from '../../../src/3p-frame-messaging';
+import {getData} from '../../../src/event-helper';
+import {MessageType} from '../../../src/3p-frame-messaging';
 
 const TAG = 'amp-ad-exit';
 
@@ -59,6 +65,44 @@ export class AmpAdExit extends AMP.BaseElement {
     this.userFilters_ = {};
 
     this.registerAction('exit', this.exit.bind(this));
+
+    /** @private @const {!Object<string, Object<string, string>} */
+    this.vendorResponses_ = {};
+
+    try {
+      this.ampAdResourceId_ = this.element.ownerDocument.defaultView
+        .frameElement.parentElement.getResourceId();
+    } catch (e) {
+      this.user().error(TAG,
+          'No friendly parent amp-ad element was found for amp-ad-exit tag.');
+    }
+
+    this.unlisten_ = listen(this.getAmpDoc().win, 'message', event => {
+      const responseMessage = deserializeMessage(getData(event));
+      if (!responseMessage || !responseMessage.type ||
+          responseMessage.type != MessageType.IFRAME_TRANSPORT_RESPONSE ||
+          !responseMessage.creativeId ||
+          responseMessage.creativeId != this.ampAdResourceId_) {
+        return;
+      }
+
+      dev().assert(responseMessage && responseMessage['message'],
+          'Received empty response from 3p analytics frame');
+      dev().assert(responseMessage && responseMessage['vendor'],
+          'Received response from 3p analytics frame that does not indicate' +
+        ' vendor');
+      const vendor = responseMessage['vendor'];
+      assertOriginMatchesVendor(event.origin, vendor);
+
+      this.vendorResponses_[vendor] = responseMessage['message'];
+    }, false);
+  }
+
+  /** @override */
+  detachedCallback() {
+    if (this.unlisten_) {
+      this.unlisten_();
+    }
   }
 
   /**
@@ -90,7 +134,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * @return {function(string): string}
    */
   getUrlVariableRewriter_(args, event, target) {
-    const vars = {
+    const substitutionFunctions = {
       'CLICK_X': () => event.clientX,
       'CLICK_Y': () => event.clientY,
     };
@@ -100,18 +144,66 @@ export class AmpAdExit extends AMP.BaseElement {
       'CLICK_Y': true,
     };
     if (target.vars) {
-      for (const customVar in target.vars) {
-        if (customVar[0] == '_') {
-          vars[customVar] = () =>
-              args[customVar] == undefined ?
-                target.vars[customVar].defaultValue : args[customVar];
-          whitelist[customVar] = true;
+      for (const customVarName in target.vars) {
+        if (customVarName[0] == '_') {
+          const customVar =
+              /** @type {./config.Variable} */ (target.vars[customVarName]);
+          if (customVar) {
+            /*
+              Example:
+              The amp-ad-exit target has a variable representing the
+               priority of something, which is defined as follows:
+               "vars": {
+                 "_pty": {
+                   "defaultValue": "unknown",
+                   "iframeTransportSignal":
+                      "IFRAME_TRANSPORT_SIGNAL(vendorXYZ, priority)"
+                 },
+                 ...
+               }
+               The cross-domain iframe of vendorXYZ has sent the
+               following response for the creative:
+                 { priority: medium, category: W }
+               This is just example data. The keys/values in that object can
+               be any strings.
+               The code below will create substitutionFunctions['_pty'],
+               which in this example will return "medium".
+             */
+            substitutionFunctions[customVarName] = () => {
+              if (customVar.hasOwnProperty('iframeTransportSignal')) {
+                const matches = customVar['iframeTransportSignal'].match(
+                    /IFRAME_TRANSPORT_SIGNAL\(([\w-]+),\s*([\w-]+)\)/);
+                user().assert(matches && matches.length == 3,
+                    'Malformed value for iframeTransportSignal');
+                // It's a 3p analytics variable
+                const vendorResponses = this.vendorResponses_[matches[1]];
+                if (vendorResponses) {
+                  /* The vendor (in the example above, "vendorXYZ") has
+                     responded to this creative. Need to check whether that
+                     response contains a property that matches the
+                     second parameter to IFRAME_TRANSPORT_SIGNAL (ex:
+                     "priority") for this custom variable. If so, return the
+                     value in the response object that is associated with
+                     that key.
+                  */
+                  const responseKey = matches[2];
+                  if (vendorResponses.hasOwnProperty(responseKey)) {
+                    return vendorResponses[responseKey];
+                  }
+                }
+              }
+              // Either it's not a 3p analytics variable, or it is one but
+              // no matching response has been received yet.
+              return args[customVarName] || customVar.defaultValue;
+            };
+            whitelist[customVarName] = true;
+          }
         }
       }
     }
     const replacements = Services.urlReplacementsForDoc(this.getAmpDoc());
     return url => replacements.expandUrlSync(
-        url, vars, undefined /* opt_collectVars */, whitelist);
+        url, substitutionFunctions, undefined /* opt_collectVars */, whitelist);
   }
 
   /**
@@ -168,7 +260,6 @@ export class AmpAdExit extends AMP.BaseElement {
         'be inside a <script> tag with type="application/json"');
     try {
       const config = assertConfig(parseJson(child.textContent));
-      // const userFilters = {};
       for (const name in config.filters) {
         this.userFilters_[name] =
             createFilter(name, config.filters[name], this);
@@ -204,7 +295,6 @@ export class AmpAdExit extends AMP.BaseElement {
     }
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAdExit);
