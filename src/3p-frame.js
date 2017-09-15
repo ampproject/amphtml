@@ -223,7 +223,7 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   // Ensure same sub-domain is used despite potentially different file.
   parentWindow.defaultBootstrapSubDomain =
       parentWindow.defaultBootstrapSubDomain || getSubDomain(parentWindow);
-  return parentWindow.defaultBootstrapSubDomain +
+  return 'https://' + parentWindow.defaultBootstrapSubDomain +
       `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
       `${srcFileBasename}.html`;
 }
