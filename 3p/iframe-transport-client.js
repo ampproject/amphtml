@@ -61,7 +61,7 @@ export class IframeTransportClient {
           events.forEach(event => {
             try {
               this.listener_ &&
-                  this.listener_(event.message, event.transportId);
+                  this.listener_(event.message, event.creativeId);
             } catch (e) {
               user().error(TAG_,
                   'Exception in callback passed to onAnalyticsEvent: ' +
@@ -80,6 +80,19 @@ export class IframeTransportClient {
    */
   onAnalyticsEvent(callback) {
     this.listener_ = callback;
+  }
+
+  /**
+   * Sends a message back to the creative
+   * @param {string} vendor The name of the 3p vendor used in the
+   * <amp-analytics> tag
+   * @param {string} creativeId An ID uniquely identifying which creative
+   * shall receive the event
+   * @param {!Object<string,string>} response
+   */
+  sendMessageToCreative(vendor, creativeId, response) {
+    this.client_./*OK*/sendMessage(MessageType.IFRAME_TRANSPORT_RESPONSE,
+        /** @type {JsonObject} */({creativeId, vendor, message: response}));
   }
 
   /**

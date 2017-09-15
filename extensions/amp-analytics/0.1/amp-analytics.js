@@ -224,9 +224,17 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.instrumentation_.createAnalyticsGroup(this.element);
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      let ampAdResourceId;
+      try {
+        ampAdResourceId = this.element.ownerDocument.defaultView
+            .frameElement.parentElement.getResourceId();
+      } catch (e) {
+        this.user().error(TAG, 'No friendly parent amp-ad element was found' +
+            ' for amp-analytics tag.');
+      }
       this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
-        this.element.getAttribute('type'),
-        this.config_['transport']);
+        this.win, this.element.getAttribute('type'),
+        this.config_['transport'], ampAdResourceId);
     }
 
     const promises = [];
@@ -832,7 +840,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     return new ExpansionOptions(vars, opt_iterations, opt_noEncode);
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   // Register doc-service factory.
