@@ -178,11 +178,13 @@ def verifyBuildStatus(status, buildId)
       log('warning',
           'Percy build ' + cyan("#{buildId}") + ' contains visual diffs.')
       log('warning',
-          'If they are intentional, you must first approve the build at' +
+          'If they are intentional, you must first approve the build at ' +
           cyan("#{PERCY_BUILD_URL}/#{buildId}") +
-          ' to allow your PR to be merged, and then approve the build at ' +
-          cyan("#{PERCY_BUILD_URL}") +
-          ' from when your PR is merged to the master branch.')
+          ' to allow your PR to be merged.')
+      log('warning',
+          'You must then wait for your merged PR to be tested on master, and ' +
+          'approve the next "master" build at ' + cyan("#{PERCY_BUILD_URL}") +
+          ' in order to update the visual diff baseline snapshots.')
     end
   else
     log('info',
