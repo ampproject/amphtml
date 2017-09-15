@@ -740,8 +740,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (/width: 0px/.test(styleString) &&
           /height: 0px/.test(styleString)) {
         setStyles(iframe, {
-          'width': '100%',
-          'height': '100%',
+          width: '100%',
+          height: '100%',
           position: 'relative',
         });
       } else {
