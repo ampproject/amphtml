@@ -47,6 +47,14 @@ export class AmpVkPoll extends AMP.BaseElement {
     this.unlistenMessage_ = null;
   }
 
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://vk.com', opt_onLayout);
+  }
+
   getIFrameSrc(apiId, pollId) {
     const pageUrl = this.element.ownerDocument
         .location.href.replace(/#.*$/, '');
