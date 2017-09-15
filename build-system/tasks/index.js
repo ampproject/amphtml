@@ -16,7 +16,6 @@
 'use strict';
 
 require('./ava');
-require('./babel-helpers');
 require('./changelog');
 require('./check-links');
 require('./clean');

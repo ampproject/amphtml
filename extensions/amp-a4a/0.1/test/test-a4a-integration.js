@@ -24,7 +24,7 @@ import {
 import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {adConfig} from '../../../../ads/_config';
-import {a4aRegistry} from '../../../../ads/_a4a-config';
+import {getA4ARegistry} from '../../../../ads/_a4a-config';
 import {signingServerURLs} from '../../../../ads/_a4a-config';
 import {
     resetScheduledElementForTesting,
@@ -88,8 +88,10 @@ describe('integration test: a4a', () => {
   let fetchMock;
   let adResponse;
   let a4aElement;
+  let a4aRegistry;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    a4aRegistry = getA4ARegistry();
     adConfig['mock'] = {};
     a4aRegistry['mock'] = () => {return true;};
     return createIframePromise().then(f => {
