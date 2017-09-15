@@ -140,7 +140,6 @@ declareExtension('amp-viewer-integration', '0.1', {
 });
 declareExtension('amp-video', '0.1', false);
 declareExtension('amp-vk', '0.1', false);
-declareExtension('amp-vk-poll', '0.1', false);
 declareExtension('amp-youtube', '0.1', false);
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);

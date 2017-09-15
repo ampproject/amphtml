@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays a VK Post embed</td>
+    <td>Displays a VK Post or Poll embed</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -33,13 +33,14 @@ limitations under the License.
 
 ## Behavior
 
-You can use the `amp-vk` component to embed a VK Post
+You can use the `amp-vk` component to embed a VK Post or VK Poll widget
 
-Example:
+Example of a Post widget:
 ```html
 <amp-vk
     width="500"
     height="300"
+    data-embedtype="post"
     layout="responsive"
     data-owner_id="1"
     data-post_id="45616"
@@ -47,21 +48,45 @@ Example:
 </amp-vk>
 ```
 
+Example of a Poll widget:
+```html
+<amp-vk
+    width="400"
+    height="300"
+    layout="responsive"
+    data-embedtype="poll"
+    data-api_id="6183531"
+    data-poll_id="274086843_1a2a465f60fff4699f">
+</amp-vk>
+```
+
 ## Attributes
 
-For additional information about widget attributes please see <a href="https://vk.com/dev/widget_post">VK Post widget documentation</a>  
+For additional information about Post widget attributes please see <a href="https://vk.com/dev/widget_post">VK Post widget documentation</a>  
+
+##### data-embedtype (required)
+
+The type of embed, either `post` or `poll`.
 
 ##### data-owner_id
 
-Owner id of a vk.com post
+Owner id of a vk.com post. Supported when `data-embedtype` is `post`.
 
 ##### data-post_id
 
-Post id of a post
+Post id of a post. Supported when `data-embedtype` is `post`.
 
 ##### data-hash
 
-Security hash for the widget connection
+Security hash for the widget connection. Supported when `data-embedtype` is `post`.
+
+##### data-api_id
+
+API id of a Poll. Supported when `data-embedtype` is `poll`.
+
+##### data-poll_id
+
+Id of a poll. Supported when `data-embedtype` is `poll`.
 
 ##### common attributes
 

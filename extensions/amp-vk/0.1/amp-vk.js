@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+const embedTypes = {
+  POST: 'post',
+  POLL: 'poll',
+};
+
+
 import {Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
@@ -26,7 +32,10 @@ export class AmpVk extends AMP.BaseElement {
     super(element);
 
     /** @private {?string} */
-    this.iframeUrl_ = 'https://vk.com/widget_post.php';
+    this.iframeUrl_ = null;
+
+    /** @private {?object} */
+    this.iframeParams_ = null;
 
     /** @private {?Element} */
     this.iframe_ = null;
@@ -41,6 +50,9 @@ export class AmpVk extends AMP.BaseElement {
     this.unlistenMessage_ = null;
 
     /** @private {?string} */
+    this.embedType_ = null;
+
+    /** @private {?string} */
     this.ownerId_ = null;
 
     /** @private {?string} */
@@ -48,6 +60,12 @@ export class AmpVk extends AMP.BaseElement {
 
     /** @private {?string} */
     this.hash_ = null;
+
+    /** @private {?String} */
+    this.apiId_ = null;
+
+    /** @private {?String} */
+    this.pollId_ = null;
   }
 
   /**
@@ -59,7 +77,7 @@ export class AmpVk extends AMP.BaseElement {
   }
 
   /** @private */
-  getIFrameSrc_(ownerId, postId, hash) {
+  getIFrameSrc_() {
     const startWidth = this.element./*OK*/offsetWidth;
     const pageUrl = this.element.ownerDocument
         .location.href.replace(/#.*$/, '');
@@ -67,21 +85,37 @@ export class AmpVk extends AMP.BaseElement {
     const createdTime = Number(new Date()).toString(16);
 
     let q = '';
-    let src = this.iframeUrl_;
+    let src, queryParams;
 
-    const queryParams = {
-      'app': 0,
-      'width': '100%',
-      '_ver': 1,
-      'owner_id': ownerId,
-      'post_id': postId,
-      'hash': hash,
-      'amp': 1,
-      'startWidth': startWidth,
-      'url': pageUrl,
-      'referrer': pageReferrer,
-      'title': 'AMP Post',
-    };
+    if (this.embedType_ === embedTypes.POST) {
+      src = 'https://vk.com/widget_post.php';
+      queryParams = {
+        'app': 0,
+        'width': '100%',
+        '_ver': 1,
+        'owner_id': this.ownerId_,
+        'post_id': this.postId_,
+        'hash': this.hash_,
+        'amp': 1,
+        'startWidth': startWidth,
+        'url': pageUrl,
+        'referrer': pageReferrer,
+        'title': 'AMP Post',
+      };
+    } else if (this.embedType_ === embedTypes.POLL) {
+      src = 'https://vk.com/al_widget_poll.php';
+      queryParams = {
+        'app': this.apiId_,
+        'width': '100%',
+        '_ver': 1,
+        'poll_id': this.pollId_,
+        'amp': 1,
+        'url': pageUrl,
+        'title': 'AMP Poll',
+        'description': '',
+        'referrer': pageReferrer,
+      };
+    }
 
     for (const param in queryParams) {
       q += `&${param}=${encodeURIComponent(queryParams[param])}`;
@@ -94,21 +128,49 @@ export class AmpVk extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    user().assert(this.element.getAttribute('data-embedtype'),
+        'The data-embedtype attribute is required for <amp-vk> %s',
+        this.element);
+
+    this.embedType_ = this.element.getAttribute('data-embedtype');
+
+    if (this.embedType_ === embedTypes.POST) {
+      this.postBuildCallback_();
+    } else if (this.embedType_ === embedTypes.POLL) {
+      this.pollBuildCallback_();
+    }
+  }
+
+  /** @private */
+  postBuildCallback_() {
     user().assert(this.element.getAttribute('data-hash'),
-        'The data-hash attribute is required for <amp-vk-3p> %s',
+        'The data-hash attribute is required for <amp-vk> Post %s',
         this.element);
 
     user().assert(this.element.getAttribute('data-owner_id'),
-        'The data-owner_id attribute is required for <amp-vk-3p> %s',
+        'The data-owner_id attribute is required for <amp-vk> Post %s',
         this.element);
 
     user().assert(this.element.getAttribute('data-post_id'),
-        'The data-post_id attribute is required for <amp-vk-3p> %s',
+        'The data-post_id attribute is required for <amp-vk> Post %s',
         this.element);
 
     this.ownerId_ = this.element.getAttribute('data-owner_id');
     this.postId_ = this.element.getAttribute('data-post_id');
     this.hash_ = this.element.getAttribute('data-hash');
+  }
+
+  /** @private */
+  pollBuildCallback_() {
+    user().assert(this.element.getAttribute('data-api_id'),
+        'The data-api_id attribute is required for <amp-vk> Poll %s',
+        this.element);
+
+    user().assert(this.element.getAttribute('data-poll_id'),
+        'The data-poll_id attribute is required for <amp-vk> Poll %s',
+        this.element);
+    this.pollId_ = this.element.getAttribute('data-poll_id');
+    this.apiId_ = this.element.getAttribute('data-api_id');
   }
 
   /** @override */
@@ -122,7 +184,7 @@ export class AmpVk extends AMP.BaseElement {
         this.handleVkIframeMessage_.bind(this)
     );
 
-    iframe.src = this.getIFrameSrc_(this.ownerId_, this.postId_, this.hash_);
+    iframe.src = this.getIFrameSrc_();
     iframe.setAttribute('name', 'fXD');
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
