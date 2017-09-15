@@ -17,7 +17,7 @@
 import {Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 
 export class AmpVkPoll extends AMP.BaseElement {
 
@@ -31,24 +31,38 @@ export class AmpVkPoll extends AMP.BaseElement {
     /** @private {?Promise} */
     this.iframePromise_ = null;
 
-    /** @private {?Number} */
-    this.height_ = 0;
+    /** @private {?string} */
+    this.iframeUrl_ = 'https://vk.com/al_widget_poll.php';
+
+    /** @private {?number} */
+    this.widgetHeight_ = 0;
 
     /** @private {?String} */
-    this.iframeUrl_ = 'https://vk.com/al_widget_poll.php';
+    this.apiId_ = null;
+
+    /** @private {?String} */
+    this.pollId_ = null;
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
-
-    this.pageReferrer_ = this.element.ownerDocument.referrer;
-    this.pageUrl_ = this.element.ownerDocument
-        .location.href.replace(/#.*$/, '');
   }
 
-  getIFrameSrc() {
+  getIFrameSrc(apiId, pollId) {
+    const pageUrl = this.element.ownerDocument
+        .location.href.replace(/#.*$/, '');
+    const pageReferrer = this.element.ownerDocument.referrer;
+
     let queryString = this.iframeUrl_;
 
-    const queryParams = this.getIframeParameters();
+    const queryParams = {
+      'app': apiId,
+      'width': '100%',
+      '_ver': 1,
+      'poll_id': pollId,
+      'url': pageUrl,
+      'referrer': pageReferrer,
+      'title': '',
+    };
 
     let i = 0;
     for (const param in queryParams) {
@@ -57,19 +71,6 @@ export class AmpVkPoll extends AMP.BaseElement {
           encodeURIComponent(queryParams[param])}`;
     }
     return queryString;
-  }
-
-  /** @override */
-  getIframeParameters() {
-    return {
-      'app': this.appId_,
-      'width': '100%',
-      '_ver': 1,
-      'poll_id': this.pollId_,
-      'url': this.pageUrl_,
-      'referrer': this.pageReferrer_,
-      'title': '',
-    };
   }
 
   /** @override */
@@ -83,7 +84,7 @@ export class AmpVkPoll extends AMP.BaseElement {
         this.handleVkIframeMessage_.bind(this)
     );
 
-    iframe.src = this.getIFrameSrc();
+    iframe.src = this.getIFrameSrc(this.apiId_, this.pollId_);
     iframe.setAttribute('name', 'fXD');
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
@@ -96,16 +97,16 @@ export class AmpVkPoll extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(this.element.getAttribute('data-appid'),
-        'The data-appid attribute is required for <amp-vk-poll> %s',
+    user().assert(this.element.getAttribute('data-api_id'),
+        'The data-api_id attribute is required for <amp-vk-poll> %s',
         this.element);
 
-    user().assert(this.element.getAttribute('data-pollid'),
-        'The data-pollid attribute is required for <amp-vk-poll> %s',
+    user().assert(this.element.getAttribute('data-poll_id'),
+        'The data-poll_id attribute is required for <amp-vk-poll> %s',
         this.element);
 
-    this.pollId_ = this.element.getAttribute('data-pollid');
-    this.appId_ = this.element.getAttribute('data-appid');
+    this.pollId_ = this.element.getAttribute('data-poll_id');
+    this.apiId_ = this.element.getAttribute('data-api_id');
   }
 
   /**
@@ -117,12 +118,17 @@ export class AmpVkPoll extends AMP.BaseElement {
         e.source !== this.iframe_.contentWindow) {
       return;
     }
-    const matches = e.data.match(/\[\"resize",\[(\d+)\]]/);
-    if (matches && matches[1]) {
-      const newHeight = parseInt(matches[1], 10);
-      if (this.height_ !== newHeight) {
-        this.height_ = newHeight;
-        this./*OK*/changeHeight(newHeight);
+
+    const eventData = getData(e);
+    if (eventData) {
+      const regExp = /\[\"resize",\[(\d+)\]]/;
+      const matches = regExp.exec(eventData);
+      if (matches && matches[1]) {
+        const newHeight = parseInt(matches[1], 10);
+        if (this.widgetHeight_ !== newHeight) {
+          this.widgetHeight_ = newHeight;
+          this./*OK*/changeHeight(newHeight);
+        }
       }
     }
   }

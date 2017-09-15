@@ -17,7 +17,7 @@
 import {Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 
 export class AmpVk extends AMP.BaseElement {
 
@@ -35,7 +35,7 @@ export class AmpVk extends AMP.BaseElement {
     this.iframePromise_ = null;
 
     /** @private {?number} */
-    this.height_ = 0;
+    this.widgetHeight_ = 0;
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
@@ -139,12 +139,16 @@ export class AmpVk extends AMP.BaseElement {
         e.source !== this.iframe_.contentWindow) {
       return;
     }
-    const matches = e.data.match(/\[\"resize",\[(\d+)\]]/);
-    if (matches && matches[1]) {
-      const newHeight = parseInt(matches[1], 10);
-      if (this.height_ !== newHeight) {
-        this.height_ = newHeight;
-        this./*OK*/changeHeight(newHeight);
+    const eventData = getData(e);
+    if (eventData) {
+      const regExp = /\[\"resize",\[(\d+)\]]/;
+      const matches = regExp.exec(eventData);
+      if (matches && matches[1]) {
+        const newHeight = parseInt(matches[1], 10);
+        if (this.widgetHeight_ !== newHeight) {
+          this.widgetHeight_ = newHeight;
+          this./*OK*/changeHeight(newHeight);
+        }
       }
     }
   }

@@ -15,8 +15,8 @@
  */
 
 const POLL_PARAMS = {
-  appid: '6183531',
-  pollid: '274032322_b0edc316c28c89d03a',
+  api_id: '6183531',
+  poll_id: '274032322_b0edc316c28c89d03a',
 };
 
 import '../amp-vk-poll';
@@ -56,18 +56,18 @@ describes.realWin('amp-vk-poll', {
     }).then(() => ele);
   }
 
-  it('requires data-appid', () => {
+  it('requires data-api_id', () => {
     const params = Object.assign({}, POLL_PARAMS);
-    delete params.appid;
+    delete params.api_id;
     return createAmpVkElement(params).should.eventually.be.rejectedWith(
-        /The data-appid attribute is required for/);
+        /The data-api_id attribute is required for/);
   });
 
-  it('requires data-pollid', () => {
+  it('requires data-poll_id', () => {
     const params = Object.assign({}, POLL_PARAMS);
-    delete params.pollid;
+    delete params.poll_id;
     return createAmpVkElement(params).should.eventually.be.rejectedWith(
-        /The data-pollid attribute is required for/);
+        /The data-poll_id attribute is required for/);
   });
 
   it('renders iframe in amp-vk-poll', () => {
