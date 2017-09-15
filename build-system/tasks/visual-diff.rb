@@ -167,18 +167,24 @@ def verifyBuildStatus(status, buildId)
     raise "Percy build not processed after #{BUILD_PROCESSING_TIMEOUT_SECS}s"
   end
   if status['total_comparisons_diff'] != 0
-    branches = ['release', 'canary', 'amp-release']
+    branches = ['master', 'release', 'canary', 'amp-release']
     if branches.any? { |branch| status['branch'].include? branch }
-      # If there are visual diffs on a release branch, fail Travis.
+      # If there are visual diffs on master or a release branch, fail Travis.
       raise "Found visual diffs in branch #{status['branch']}."
     else
-      # For master and PR branches, just print a warning, since the diff may be
-      # intentional.
+      # For PR branches, just print a warning since the diff may be intentional,
+      # with instructions for how to approve the new snapshots so they are used
+      # as the baseline for future visual diff builds.
       log('warning',
           'Percy build ' + cyan("#{buildId}") + ' contains visual diffs.')
       log('warning',
-          'If the diffs are intentional, you must approve the snapshots at ' +
-          cyan("#{PERCY_BUILD_URL}/#{buildId}"))
+          'If they are intentional, you must first approve the build at ' +
+          cyan("#{PERCY_BUILD_URL}/#{buildId}") +
+          ' to allow your PR to be merged.')
+      log('warning',
+          'You must then wait for your merged PR to be tested on master, and ' +
+          'approve the next "master" build at ' + cyan("#{PERCY_BUILD_URL}") +
+          ' in order to update the visual diff baseline snapshots.')
     end
   else
     log('info',
