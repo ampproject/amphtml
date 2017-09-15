@@ -60,7 +60,7 @@ export class AmpVk extends AMP.BaseElement {
 
   /** @private */
   getIFrameSrc_(ownerId, postId, hash) {
-    const startWidth = this.element.offsetWidth;
+    const startWidth = this.element./*OK*/offsetWidth;
     const pageUrl = this.element.ownerDocument
         .location.href.replace(/#.*$/, '');
     const pageReferrer = this.element.ownerDocument.referrer;
