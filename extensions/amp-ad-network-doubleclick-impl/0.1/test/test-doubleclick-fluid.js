@@ -81,6 +81,11 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     multiSizeImpl = new AmpAdNetworkDoubleclickImpl(
         multiSizeElement, env.win.document, env.win);
     xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+
+    const getLayout = () => 'fluid';
+    impl.getLayout = getLayout;
+    multiSizeImpl.getLayout = getLayout;
+    impl.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
   });
 
   afterEach(() => {
@@ -91,7 +96,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   it('should be fluid enabled', () => {
     impl.buildCallback();
-    expect(impl.isFluid).to.be.true;
+    expect(impl.isFluid_).to.be.true;
   });
 
   it('should have a supported layout', () => {
@@ -157,7 +162,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     });
   });
 
-  it('should setup postMessage listeners', () => {
+  it('should send initial postMessage', () => {
     impl.buildCallback();
     const connectFluidMessagingChannelSpy =
         sandbox.spy(impl, 'connectFluidMessagingChannel');
