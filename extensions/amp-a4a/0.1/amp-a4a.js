@@ -236,9 +236,9 @@ export class AmpA4A extends AMP.BaseElement {
      * later with what the network implementation returns via extractSize.
      * Note: Either value may be 'auto' (i.e., non-numeric).
      *
-     * @protected {?({width, height}|../../../src/layout-rect.LayoutRectDef)}
+     * @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)}
      */
-    this.creativeSize = null;
+    this.creativeSize_ = null;
 
     /** @private {?../../../src/layout-rect.LayoutRectDef} */
     this.originalSlotSize_ = null;
@@ -335,7 +335,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.creativeSize = {
+    this.creativeSize_ = {
       width: this.element.getAttribute('width'),
       height: this.element.getAttribute('height'),
     };
@@ -664,7 +664,7 @@ export class AmpA4A extends AMP.BaseElement {
           }
           const {bytes, headers} = responseParts;
           const size = this.extractSize(responseParts.headers);
-          this.creativeSize = size || this.creativeSize;
+          this.creativeSize_ = size || this.creativeSize_;
           if (this.experimentalNonAmpCreativeRenderMethod_ !=
               XORIGIN_MODE.CLIENT_CACHE &&
               bytes) {
@@ -1221,8 +1221,8 @@ export class AmpA4A extends AMP.BaseElement {
             dict({
               // NOTE: It is possible for either width or height to be 'auto',
               // a non-numeric value.
-              'height': this.creativeSize.height,
-              'width': this.creativeSize.width,
+              'height': this.creativeSize_.height,
+              'width': this.creativeSize_.width,
               'frameborder': '0',
               'allowfullscreen': '',
               'allowtransparency': '',
@@ -1298,8 +1298,8 @@ export class AmpA4A extends AMP.BaseElement {
    */
   iframeRenderHelper_(attributes) {
     const mergedAttributes = Object.assign(attributes, dict({
-      'height': this.creativeSize.height,
-      'width': this.creativeSize.width,
+      'height': this.creativeSize_.height,
+      'width': this.creativeSize_.width,
     }));
 
     if (this.sentinel) {

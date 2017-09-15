@@ -328,8 +328,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     this.isFluid_ = this.element.getAttribute('height') == 'fluid';
-    this.creativeSize = this.isFluid_ ?
-        {width: 0, height: 0} : this.creativeSize;
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
       addExperimentIdToElement(verifierEid, this.element);

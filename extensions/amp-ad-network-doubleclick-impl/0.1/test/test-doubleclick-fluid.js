@@ -103,11 +103,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     expect(impl.isLayoutSupported()).to.be.true;
   });
 
-  it('should have creativeSize of 0x0', () => {
-    impl.buildCallback();
-    expect(impl.creativeSize).to.deep.equal(initialSize);
-  });
-
   it('should NOT load delayed impression amp-pixels', () => {
     const fireDelayedImpressionsSpy =
         sandbox.spy(impl, 'fireDelayedImpressions');
