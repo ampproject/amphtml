@@ -83,7 +83,6 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listenFor} from '../../../src/iframe-helper';
 import {
   getPublisherSpecifiedRefreshInterval,
   RefreshManager,
