@@ -93,11 +93,13 @@ describes.realWin('amp-vk-poll', {
           vkPoll.ownerDocument.location.href.replace(/#.*$/, '')
       );
       const correctIFrameSrc = `https://vk.com/al_widget_poll.php?\
-app=6183531&width=100%25\
-&_ver=1&poll_id=274086843_1a2a465f60fff4699f\
-&url=${url}&referrer=${referrer}&title=`;
+app=6183531&width=100%25&_ver=1&poll_id=274086843_1a2a465f60fff4699f\
+&url=${url}&title=AMP%20Post&description=&referrer=${referrer}`;
+
       expect(iframe).to.not.be.null;
-      expect(iframe.src).to.equal(correctIFrameSrc);
+      const timeArgPosition = iframe.src.lastIndexOf('&');
+      const iframeSrcWithoutTime = iframe.src.substr(0, timeArgPosition);
+      expect(iframeSrcWithoutTime).to.equal(correctIFrameSrc);
     });
   });
 

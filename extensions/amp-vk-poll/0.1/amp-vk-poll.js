@@ -51,8 +51,10 @@ export class AmpVkPoll extends AMP.BaseElement {
     const pageUrl = this.element.ownerDocument
         .location.href.replace(/#.*$/, '');
     const pageReferrer = this.element.ownerDocument.referrer;
+    const createdTime = Number(new Date()).toString(16);
 
-    let queryString = this.iframeUrl_;
+    let q = '';
+    let src = this.iframeUrl_;
 
     const queryParams = {
       'app': apiId,
@@ -60,17 +62,18 @@ export class AmpVkPoll extends AMP.BaseElement {
       '_ver': 1,
       'poll_id': pollId,
       'url': pageUrl,
+      'title': 'AMP Post',
+      'description': '',
       'referrer': pageReferrer,
-      'title': '',
     };
 
-    let i = 0;
     for (const param in queryParams) {
-      const divider = i++ === 0 ? '?' : '&';
-      queryString += `${divider}${param}=${
-          encodeURIComponent(queryParams[param])}`;
+      q += `&${param}=${encodeURIComponent(queryParams[param])}`;
     }
-    return queryString;
+
+    src += `?${q.substr(1)}&${createdTime}`;
+
+    return src;
   }
 
   /** @override */
