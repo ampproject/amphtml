@@ -58,14 +58,14 @@ describes.realWin('amp-vk-poll', {
 
   it('requires data-api_id', () => {
     const params = Object.assign({}, POLL_PARAMS);
-    delete params.api_id;
+    delete params['api_id'];
     return createAmpVkElement(params).should.eventually.be.rejectedWith(
         /The data-api_id attribute is required for/);
   });
 
   it('requires data-poll_id', () => {
     const params = Object.assign({}, POLL_PARAMS);
-    delete params.poll_id;
+    delete params['poll_id'];
     return createAmpVkElement(params).should.eventually.be.rejectedWith(
         /The data-poll_id attribute is required for/);
   });

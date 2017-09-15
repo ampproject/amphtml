@@ -17,49 +17,31 @@
 tags: {  # amp-vk-poll
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-vk-poll extension .js script"
-  satisfies: "amp-vk-poll extension .js script"
-  requires: "amp-vk-poll"
-  mandatory_parent: "HEAD"
-  unique: true
-  extension_unused_unless_tag_present: "amp-vk-poll"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-vk-poll"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    requires_usage: DEPRECATED_WARNING
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-vk-poll"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\.ampproject\.org/v0/amp-vk-poll-(latest|0\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-vk-poll"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-vk-poll>
   html_format: AMP
   tag_name: "AMP-VK-POLL"
-  satisfies: "amp-vk-poll"
-  requires: "amp-vk-poll extension .js script"
+  requires_extension: "amp-vk-poll"
+  attrs: {
+    name: "data-api_id"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-poll_id"
+    mandatory: true
+  }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-hello-world"
   amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FLEX_ITEM
     supported_layouts: RESPONSIVE
   }
 }

@@ -19,11 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Displays a VK Post embed</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -31,21 +27,45 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
+    <td>fixed, responsive, flex-item</td>
   </tr>
 </table>
 
 ## Behavior
 
-FILL THIS IN. What does this extension do?
+You can use the `amp-vk` component to embed a VK Post
+
+Example:
+```html
+<amp-vk
+    width="500"
+    height="300"
+    layout="responsive"
+    data-owner_id="1"
+    data-post_id="45616"
+    data-hash="Yc8_Z9pnpg8aKMZbVcD-jK45eAk">
+</amp-vk>
+```
 
 ## Attributes
 
-FILL THIS IN. Does this extension allow for properties to configure?
+For additional information about widget attributes please see <a href="https://vk.com/dev/widget_post">VK Post widget documentation</a>  
+
+##### data-owner_id
+
+Owner id of a vk.com post
+
+##### data-post_id
+
+Post id of a post
+
+##### data-hash
+
+Security hash for the widget connection
+
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 See [amp-vk rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vk/validator-amp-vk.protoascii) in the AMP validator specification.

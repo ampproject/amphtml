@@ -19,11 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Displays a VK Poll embed</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -31,21 +27,29 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
+    <td>fixed, responsive, flex-item</td>
   </tr>
 </table>
 
 ## Behavior
 
-FILL THIS IN. What does this extension do?
+You can use the `amp-vk-poll` component to embed a VK Poll
 
 ## Attributes
 
-FILL THIS IN. Does this extension allow for properties to configure?
+For additional information about Poll widget attributes please see <a href="https://vk.com/dev/widget_poll">VK Poll widget documentation</a>  
+
+##### data-api_id
+
+API id of a Poll
+
+##### data-poll_id
+
+Id of a poll
+
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 See [amp-vk-poll rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vk-poll/validator-amp-vk-poll.protoascii) in the AMP validator specification.
