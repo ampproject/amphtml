@@ -170,7 +170,14 @@ def verifyBuildStatus(status, buildId)
     branches = ['master', 'release', 'canary', 'amp-release']
     if branches.any? { |branch| status['branch'].include? branch }
       # If there are visual diffs on master or a release branch, fail Travis.
-      raise "Found visual diffs in branch #{status['branch']}."
+      # For master, print instructions for how to approve new visual changes.
+      if status['branch'] === 'master'
+        log('error',
+            'Found visual diffs. If the changes are intentional, you must ' +
+            'approve the build at ' + cyan("#{PERCY_BUILD_URL}/#{buildId}") +
+            ' in order to update the baseline snapshots.')
+      end
+      raise "Found visual diffs on branch #{status['branch']}."
     else
       # For PR branches, just print a warning since the diff may be intentional,
       # with instructions for how to approve the new snapshots so they are used
