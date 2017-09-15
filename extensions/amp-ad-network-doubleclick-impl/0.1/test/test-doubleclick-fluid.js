@@ -16,9 +16,7 @@
 
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {Services} from '../../../../src/services';
 import {utf8Encode} from '../../../../src/utils/bytes';
-import {Xhr} from '../../../../src/service/xhr-impl';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
@@ -47,7 +45,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   let element;
   let multiSizeElement;
   let sandbox;
-  let xhrMock;
 
   const initialSize = {width: 0, height: 0};
 
@@ -80,7 +77,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     doc.body.appendChild(multiSizeElement);
     multiSizeImpl = new AmpAdNetworkDoubleclickImpl(
         multiSizeElement, env.win.document, env.win);
-    xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
 
     const getLayout = () => 'fluid';
     impl.getLayout = getLayout;
@@ -91,7 +87,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   afterEach(() => {
     sandbox.restore();
     impl = null;
-    xhrMock = null;
   });
 
   it('should be fluid enabled', () => {

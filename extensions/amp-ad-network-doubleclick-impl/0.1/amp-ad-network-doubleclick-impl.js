@@ -1138,7 +1138,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getXdomainCreativeFrameMessageListeners() {
     return !this.isFluid_ ? {} : {
-      'creative_geometry_update': data => { debugger;
+      'creative_geometry_update': data => {
         // The first creative_geometry_update message will contain bad
         // geometric data, as it will have been computed using the initial,
         // incorrect, iframe style. We use this first message as a
@@ -1162,12 +1162,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               .then(() => {
                 if (!this.fluidImpressionFired_) {
                   if (this.fluidImpressionUrl_) {
-                    this.fireDelayedImpressions(this.fluidImpressionUrl_, false);
+                    this.fireDelayedImpressions(
+                        this.fluidImpressionUrl_, false);
                   }
                   this.fluidImpressionFired_ = true;
                 }
               })
-          .catch(() => this.forceCollapse());
+              .catch(() => this.forceCollapse());
         }
       },
     };

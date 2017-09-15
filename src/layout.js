@@ -442,7 +442,7 @@ export function applyStaticLayout(element) {
   } else if (layout == Layout.FLUID) {
     element.classList.add('i-amphtml-layout-awaiting-size');
     setStyle(element, 'width', width ?
-        width : computedStyle(window, element.parentElement).width);
+        width : computedStyle(self, element.parentElement).width);
   }
   return layout;
 }
