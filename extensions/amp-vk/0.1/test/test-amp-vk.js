@@ -15,9 +15,9 @@
  */
 
 const POST_PARAMS = {
-  hash: 'Yc8_Z9pnpg8aKMZbVcD-jK45eAk',
-  ownerid: '1',
-  postid: '45616',
+  'hash': 'Yc8_Z9pnpg8aKMZbVcD-jK45eAk',
+  'owner_id': '1',
+  'post_id': '45616',
 };
 
 import '../amp-vk';
@@ -59,23 +59,23 @@ describes.realWin('amp-vk', {
 
   it('requires data-hash', () => {
     const params = Object.assign({}, POST_PARAMS);
-    delete params.hash;
+    delete params['hash'];
     return createAmpVkElement(params).should.eventually.be.rejectedWith(
         /The data-hash attribute is required for/);
   });
 
-  it('requires data-ownerid', () => {
+  it('requires data-owner_id', () => {
     const params = Object.assign({}, POST_PARAMS);
-    delete params.ownerid;
+    delete params['owner_id'];
     return createAmpVkElement(params).should.eventually.be.rejectedWith(
-        /The data-ownerid attribute is required for/);
+        /The data-owner_id attribute is required for/);
   });
 
-  it('requires data-postid', () => {
+  it('requires data-post_id', () => {
     const params = Object.assign({}, POST_PARAMS);
-    delete params.postid;
+    delete params['post_id'];
     return createAmpVkElement(params).should.eventually.be.rejectedWith(
-        /The data-postid attribute is required for/);
+        /The data-post_id attribute is required for/);
   });
 
   it('renders iframe in amp-vk', () => {

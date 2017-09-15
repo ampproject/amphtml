@@ -25,7 +25,7 @@ export class AmpVk extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?String} */
+    /** @private {?string} */
     this.iframeUrl_ = 'https://vk.com/widget_post.php';
 
     /** @private {?Element} */
@@ -34,15 +34,20 @@ export class AmpVk extends AMP.BaseElement {
     /** @private {?Promise} */
     this.iframePromise_ = null;
 
-    /** @private {?Number} */
+    /** @private {?number} */
     this.height_ = 0;
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
 
-    this.pageReferrer_ = this.element.ownerDocument.referrer;
-    this.pageUrl_ = this.element.ownerDocument
-        .location.href.replace(/#.*$/, '');
+    /** @private {?string} */
+    this.ownerId_ = null;
+
+    /** @private {?string} */
+    this.postId_ = null;
+
+    /** @private {?string} */
+    this.hash_ = null;
   }
 
   /**
@@ -53,10 +58,27 @@ export class AmpVk extends AMP.BaseElement {
     this.preconnect.url('https://vk.com', opt_onLayout);
   }
 
-  getIFrameSrc() {
-    let queryString = this.iframeUrl_;
+  /** @private */
+  getIFrameSrc_(ownerId, postId, hash) {
+    const startWidth = this.element.offsetWidth;
+    const pageUrl = this.element.ownerDocument
+        .location.href.replace(/#.*$/, '');
+    const pageReferrer = this.element.ownerDocument.referrer;
 
-    const queryParams = this.getIframeParameters();
+    const queryParams = {
+      'app': 0,
+      'width': '100%',
+      'startWidth': startWidth,
+      '_ver': 1,
+      'owner_id': ownerId,
+      'post_id': postId,
+      'hash': hash,
+      'url': pageUrl,
+      'referrer': pageReferrer,
+      'title': '',
+    };
+
+    let queryString = this.iframeUrl_;
 
     let i = 0;
     for (const param in queryParams) {
@@ -67,37 +89,22 @@ export class AmpVk extends AMP.BaseElement {
     return queryString;
   }
 
-  getIframeParameters() {
-    return {
-      'app': 0,
-      'width': '100%',
-      'startWidth': this.element.offsetWidth,
-      '_ver': 1,
-      'owner_id': this.ownerId_,
-      'post_id': this.postId_,
-      'hash': this.hash_,
-      'url': this.pageUrl_,
-      'referrer': this.pageReferrer_,
-      'title': '',
-    };
-  }
-
   /** @override */
   buildCallback() {
     user().assert(this.element.getAttribute('data-hash'),
         'The data-hash attribute is required for <amp-vk-3p> %s',
         this.element);
 
-    user().assert(this.element.getAttribute('data-ownerid'),
-        'The data-ownerid attribute is required for <amp-vk-3p> %s',
+    user().assert(this.element.getAttribute('data-owner_id'),
+        'The data-owner_id attribute is required for <amp-vk-3p> %s',
         this.element);
 
-    user().assert(this.element.getAttribute('data-postid'),
-        'The data-postid attribute is required for <amp-vk-3p> %s',
+    user().assert(this.element.getAttribute('data-post_id'),
+        'The data-post_id attribute is required for <amp-vk-3p> %s',
         this.element);
 
-    this.ownerId_ = this.element.getAttribute('data-ownerid');
-    this.postId_ = this.element.getAttribute('data-postid');
+    this.ownerId_ = this.element.getAttribute('data-owner_id');
+    this.postId_ = this.element.getAttribute('data-post_id');
     this.hash_ = this.element.getAttribute('data-hash');
   }
 
@@ -112,7 +119,7 @@ export class AmpVk extends AMP.BaseElement {
         this.handleVkIframeMessage_.bind(this)
     );
 
-    iframe.src = this.getIFrameSrc();
+    iframe.src = this.getIFrameSrc_(this.ownerId_, this.postId_, this.hash_);
     iframe.setAttribute('name', 'fXD');
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
@@ -168,9 +175,6 @@ export class AmpVk extends AMP.BaseElement {
   }
 }
 
-if (!window.isAmpVkRegistered) {
-  AMP.extension('amp-vk', '0.1', AMP => {
-    AMP.registerElement('amp-vk', AmpVk);
-  });
-  window.isAmpVkRegistered = true;
-}
+AMP.extension('amp-vk', '0.1', AMP => {
+  AMP.registerElement('amp-vk', AmpVk);
+});
