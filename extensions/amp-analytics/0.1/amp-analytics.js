@@ -48,6 +48,8 @@ import {sendRequest, sendRequestUsingIframe} from './transport';
 import {serializeResourceTiming} from './resource-timing';
 import {toggle} from '../../../src/style';
 
+import { extensionReady } from './extension-events';
+
 const TAG = 'amp-analytics';
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
@@ -166,7 +168,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   layoutCallback() {
     // Now that we are rendered, stop rendering the element to reduce
     // resource consumption.
-    return this.ensureInitialized_();
+    return this.ensureInitialized_().then(() => extensionReady(this.element));
   }
 
   /** @override */
