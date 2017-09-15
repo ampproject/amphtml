@@ -15,8 +15,8 @@
  */
 
 const POLL_PARAMS = {
-  api_id: '6183531',
-  poll_id: '274032322_b0edc316c28c89d03a',
+  'api_id': '6183531',
+  'poll_id': '274086843_1a2a465f60fff4699f',
 };
 
 import '../amp-vk-poll';
@@ -94,7 +94,7 @@ describes.realWin('amp-vk-poll', {
       );
       const correctIFrameSrc = `https://vk.com/al_widget_poll.php?\
 app=6183531&width=100%25\
-&_ver=1&poll_id=274032322_b0edc316c28c89d03a\
+&_ver=1&poll_id=274086843_1a2a465f60fff4699f\
 &url=${url}&referrer=${referrer}&title=`;
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(correctIFrameSrc);
