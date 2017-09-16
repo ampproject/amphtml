@@ -44,24 +44,24 @@ describes.realWin('amp-vk', {
   });
 
   function createAmpVkElement(dataParams, layout) {
-    const ele = doc.createElement('amp-vk');
+    const element = doc.createElement('amp-vk');
 
     for (const param in dataParams) {
-      ele.setAttribute(`data-${param}`, dataParams[param]);
+      element.setAttribute(`data-${param}`, dataParams[param]);
     }
 
-    ele.setAttribute('width', 500);
-    ele.setAttribute('height', 300);
+    element.setAttribute('width', 500);
+    element.setAttribute('height', 300);
 
     if (layout) {
-      ele.setAttribute('layout', layout);
+      element.setAttribute('layout', layout);
     }
 
-    doc.body.appendChild(ele);
+    doc.body.appendChild(element);
 
-    return ele.build().then(() => {
-      return ele.layoutCallback();
-    }).then(() => ele);
+    return element.build().then(() => {
+      return element.layoutCallback();
+    }).then(() => element);
   }
 
   it('requires data-embedtype', () => {
