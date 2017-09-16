@@ -33,7 +33,6 @@ tags: {  # <amp-vk>
   attrs: {
     name: "data-embedtype"
     mandatory: true
-    value_regex_casei: "(post|poll)"
   }
   attrs: {
     name: "data-owner_id"
