@@ -42,8 +42,8 @@ Example of a Post widget:
     height="300"
     data-embedtype="post"
     layout="responsive"
-    data-owner_id="1"
-    data-post_id="45616"
+    data-owner-id="1"
+    data-post-id="45616"
     data-hash="Yc8_Z9pnpg8aKMZbVcD-jK45eAk">
 </amp-vk>
 ```
@@ -55,8 +55,8 @@ Example of a Poll widget:
     height="300"
     layout="responsive"
     data-embedtype="poll"
-    data-api_id="6183531"
-    data-poll_id="274086843_1a2a465f60fff4699f">
+    data-api-id="6183531"
+    data-poll-id="274086843_1a2a465f60fff4699f">
 </amp-vk>
 ```
 
@@ -68,11 +68,11 @@ For additional information about Post widget attributes please see <a href="http
 
 The type of embed, either `post` or `poll`.
 
-##### data-owner_id
+##### data-owner-id
 
 Owner id of a vk.com post. Supported when `data-embedtype` is `post`.
 
-##### data-post_id
+##### data-post-id
 
 Post id of a post. Supported when `data-embedtype` is `post`.
 
@@ -80,11 +80,11 @@ Post id of a post. Supported when `data-embedtype` is `post`.
 
 Security hash for the widget connection. Supported when `data-embedtype` is `post`.
 
-##### data-api_id
+##### data-api-id
 
 API id of a Poll. Supported when `data-embedtype` is `poll`.
 
-##### data-poll_id
+##### data-poll-id
 
 Id of a poll. Supported when `data-embedtype` is `poll`.
 

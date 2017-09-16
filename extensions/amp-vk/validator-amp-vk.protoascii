@@ -35,19 +35,19 @@ tags: {  # <amp-vk>
     mandatory: true
   }
   attrs: {
-    name: "data-owner_id"
+    name: "data-owner-id"
   }
   attrs: {
-    name: "data-post_id"
+    name: "data-post-id"
   }
   attrs: {
     name: "data-hash"
   }
   attrs: {
-    name: "data-api_id"
+    name: "data-api-id"
   }
   attrs: {
-    name: "data-poll_id"
+    name: "data-poll-id"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {

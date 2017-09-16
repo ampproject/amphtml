@@ -78,6 +78,7 @@ export class AmpVk extends AMP.BaseElement {
 
   /** @private */
   getIFrameSrc_() {
+    // cachebusting query parameter
     const createdTime = Number(new Date()).toString(16);
     let iframeSrcPromise;
 
@@ -152,12 +153,12 @@ export class AmpVk extends AMP.BaseElement {
 
   /** @private */
   postBuildCallback_() {
-    this.ownerId_ = user().assert(this.element.getAttribute('data-owner_id'),
-        'The data-owner_id attribute is required for <amp-vk> Post %s',
+    this.ownerId_ = user().assert(this.element.getAttribute('data-owner-id'),
+        'The data-owner-id attribute is required for <amp-vk> Post %s',
         this.element);
 
-    this.postId_ = user().assert(this.element.getAttribute('data-post_id'),
-        'The data-post_id attribute is required for <amp-vk> Post %s',
+    this.postId_ = user().assert(this.element.getAttribute('data-post-id'),
+        'The data-post-id attribute is required for <amp-vk> Post %s',
         this.element);
 
     this.hash_ = user().assert(this.element.getAttribute('data-hash'),
@@ -167,12 +168,12 @@ export class AmpVk extends AMP.BaseElement {
 
   /** @private */
   pollBuildCallback_() {
-    this.apiId_ = user().assert(this.element.getAttribute('data-api_id'),
-        'The data-api_id attribute is required for <amp-vk> Poll %s',
+    this.apiId_ = user().assert(this.element.getAttribute('data-api-id'),
+        'The data-api-id attribute is required for <amp-vk> Poll %s',
         this.element);
 
-    this.pollId_ = user().assert(this.element.getAttribute('data-poll_id'),
-        'The data-poll_id attribute is required for <amp-vk> Poll %s',
+    this.pollId_ = user().assert(this.element.getAttribute('data-poll-id'),
+        'The data-poll-id attribute is required for <amp-vk> Poll %s',
         this.element);
   }
 

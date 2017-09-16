@@ -17,14 +17,14 @@
 const POST_PARAMS = {
   'embedtype': 'post',
   'hash': 'Yc8_Z9pnpg8aKMZbVcD-jK45eAk',
-  'owner_id': '1',
-  'post_id': '45616',
+  'owner-id': '1',
+  'post-id': '45616',
 };
 
 const POLL_PARAMS = {
   'embedtype': 'poll',
-  'api_id': '6183531',
-  'poll_id': '274086843_1a2a465f60fff4699f',
+  'api-id': '6183531',
+  'poll-id': '274086843_1a2a465f60fff4699f',
 };
 
 import '../amp-vk';
@@ -92,18 +92,18 @@ describes.realWin('amp-vk', {
         /The data-hash attribute is required for/);
   });
 
-  it('post::requires data-owner_id', () => {
+  it('post::requires data-owner-id', () => {
     const params = Object.assign({}, POST_PARAMS);
-    delete params['owner_id'];
+    delete params['owner-id'];
     return createAmpVkElement(params).should.eventually.be.rejectedWith(
-        /The data-owner_id attribute is required for/);
+        /The data-owner-id attribute is required for/);
   });
 
-  it('post::requires data-post_id', () => {
+  it('post::requires data-post-id', () => {
     const params = Object.assign({}, POST_PARAMS);
-    delete params['post_id'];
+    delete params['post-id'];
     return createAmpVkElement(params).should.eventually.be.rejectedWith(
-        /The data-post_id attribute is required for/);
+        /The data-post-id attribute is required for/);
   });
 
   it('post::renders iframe in amp-vk', () => {
@@ -141,18 +141,18 @@ describes.realWin('amp-vk', {
 
   // Poll tests
 
-  it('poll::requires data-api_id', () => {
+  it('poll::requires data-api-id', () => {
     const params = Object.assign({}, POLL_PARAMS);
-    delete params['api_id'];
+    delete params['api-id'];
     return createAmpVkElement(params).should.eventually.be.rejectedWith(
-        /The data-api_id attribute is required for/);
+        /The data-api-id attribute is required for/);
   });
 
-  it('poll::requires data-poll_id', () => {
+  it('poll::requires data-poll-id', () => {
     const params = Object.assign({}, POLL_PARAMS);
-    delete params['poll_id'];
+    delete params['poll-id'];
     return createAmpVkElement(params).should.eventually.be.rejectedWith(
-        /The data-poll_id attribute is required for/);
+        /The data-poll-id attribute is required for/);
   });
 
   it('poll::renders iframe in amp-vk', () => {
