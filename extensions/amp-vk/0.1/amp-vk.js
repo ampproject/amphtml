@@ -76,7 +76,10 @@ export class AmpVk extends AMP.BaseElement {
     this.preconnect.url('https://vk.com', opt_onLayout);
   }
 
-  /** @private */
+  /**
+   * @return {Promise}
+   * @private
+   */
   getIFrameSrc_() {
     // cachebusting query parameter
     const createdTime = Number(new Date()).toString(16);
@@ -93,7 +96,10 @@ export class AmpVk extends AMP.BaseElement {
     });
   }
 
-  /** @private */
+  /**
+   * @return {Promise}
+   * @private
+   */
   getVkPostIFrameSrc_() {
     return Services.viewerForDoc(this.element).getReferrerUrl().then(ref => {
       const startWidth = this.element./*OK*/offsetWidth;
@@ -117,7 +123,10 @@ export class AmpVk extends AMP.BaseElement {
     });
   }
 
-  /** @private */
+  /**
+   * @return {Promise}
+   * @private
+   */
   getVkPollIFrameSrc_() {
     return Services.viewerForDoc(this.element).getReferrerUrl().then(ref => {
       const pageUrl = this.getAmpDoc().getUrl();
