@@ -100,6 +100,23 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		"compute.googleapis.com/resource_type": "logger",
 		"compute.googleapis.com/resource_id":   "errors"}
 
+	// We're temporarily forwarding 100% of traffic to the JS error tracker.
+	if rand.Float64() < 1 {
+		urlString := strings.Replace(r.URL.String(), "amp-error-reporting", "amp-error-reporting-js", 1)
+		client := urlfetch.Client(c)
+		req, err := http.NewRequest("GET", urlString, nil)
+		if err == nil {
+			req.Header.Set("User-Agent", r.UserAgent())
+			req.Header.Set("Referer", r.Referer())
+			_, err := client.Do(req)
+			if err != nil {
+				log.Errorf(c, "Error forwarding report: %v", err)
+			}
+		} else {
+			log.Errorf(c, "Error making forwarding request: %v", err)
+		}
+	}
+
 	// Fill query params into JSON struct.
 	line, _ := strconv.Atoi(r.URL.Query().Get("l"))
 	errorType := "default"
@@ -171,22 +188,6 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "THROTTLED\n")
 		return
-	}
-	// We're temporarily forwarding 100% of traffic to the JS error tracker.
-	if rand.Float64() < 1 {
-		urlString := strings.Replace(r.URL.String(), "amp-error-reporting", "amp-error-reporting-js", 1)
-		client := urlfetch.Client(c)
-		req, err := http.NewRequest("GET", urlString, nil)
-		if err == nil {
-			req.Header.Set("User-Agent", r.UserAgent())
-			req.Header.Set("Referer", r.Referer())
-			_, err := client.Do(req)
-			if err != nil {
-				log.Errorf(c, "Error forwarding report: %v", err)
-			}
-		} else {
-			log.Errorf(c, "Error making forwarding request: %v", err)
-		}
 	}
 
 	exception := r.URL.Query().Get("s")
