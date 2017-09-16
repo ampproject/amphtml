@@ -100,8 +100,8 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		"compute.googleapis.com/resource_type": "logger",
 		"compute.googleapis.com/resource_id":   "errors"}
 
-	// We're temporarily forwarding 100% of traffic to the JS error tracker.
-	if rand.Float64() < 1 {
+	// We're temporarily forwarding 0% of traffic to the JS error tracker.
+	if rand.Float64() < 0 {
 		urlString := strings.Replace(r.URL.String(), "amp-error-reporting", "amp-error-reporting-js", 1)
 		client := urlfetch.Client(c)
 		req, err := http.NewRequest("GET", urlString, nil)
