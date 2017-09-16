@@ -36,9 +36,6 @@ export class AmpVk extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?string} */
-    this.iframeUrl_ = null;
-
     /** @private {?Element} */
     this.iframe_ = null;
 
@@ -77,10 +74,10 @@ export class AmpVk extends AMP.BaseElement {
 
   /** @private */
   getIFrameSrc_() {
-    const startWidth = this.element./*OK*/offsetWidth;
-    const pageUrl = this.getAmpDoc().getUrl();
-    const createdTime = Number(new Date()).toString(16);
-    let src, queryParams;
+      const startWidth = this.element./*OK*/offsetWidth;
+      const pageUrl = this.getAmpDoc().getUrl();
+      const createdTime = Number(new Date()).toString(16);
+      let src, queryParams;
 
     return Services.viewerForDoc(this.element).getReferrerUrl().then(ref => {
       if (this.embedType_ === EmbedType.POST) {
