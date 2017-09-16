@@ -122,11 +122,9 @@ export class AmpVk extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(this.element.getAttribute('data-embedtype'),
+    this.embedType_ = user().assert(this.element.getAttribute('data-embedtype'),
         'The data-embedtype attribute is required for <amp-vk> %s',
         this.element);
-
-    this.embedType_ = this.element.getAttribute('data-embedtype');
 
     if (this.embedType_ === EmbedType.POST) {
       this.postBuildCallback_();
@@ -137,34 +135,28 @@ export class AmpVk extends AMP.BaseElement {
 
   /** @private */
   postBuildCallback_() {
-    user().assert(this.element.getAttribute('data-hash'),
-        'The data-hash attribute is required for <amp-vk> Post %s',
-        this.element);
-
-    user().assert(this.element.getAttribute('data-owner_id'),
+    this.ownerId_ = user().assert(this.element.getAttribute('data-owner_id'),
         'The data-owner_id attribute is required for <amp-vk> Post %s',
         this.element);
 
-    user().assert(this.element.getAttribute('data-post_id'),
+    this.postId_ = user().assert(this.element.getAttribute('data-post_id'),
         'The data-post_id attribute is required for <amp-vk> Post %s',
         this.element);
 
-    this.ownerId_ = this.element.getAttribute('data-owner_id');
-    this.postId_ = this.element.getAttribute('data-post_id');
-    this.hash_ = this.element.getAttribute('data-hash');
+    this.hash_ = user().assert(this.element.getAttribute('data-hash'),
+        'The data-hash attribute is required for <amp-vk> Post %s',
+        this.element);
   }
 
   /** @private */
   pollBuildCallback_() {
-    user().assert(this.element.getAttribute('data-api_id'),
+    this.apiId_ = user().assert(this.element.getAttribute('data-api_id'),
         'The data-api_id attribute is required for <amp-vk> Poll %s',
         this.element);
 
-    user().assert(this.element.getAttribute('data-poll_id'),
+    this.pollId_ = user().assert(this.element.getAttribute('data-poll_id'),
         'The data-poll_id attribute is required for <amp-vk> Poll %s',
         this.element);
-    this.pollId_ = this.element.getAttribute('data-poll_id');
-    this.apiId_ = this.element.getAttribute('data-api_id');
   }
 
   /** @override */
@@ -183,6 +175,7 @@ export class AmpVk extends AMP.BaseElement {
       iframe.setAttribute('name', 'fXD');
       iframe.setAttribute('scrolling', 'no');
       iframe.setAttribute('frameborder', '0');
+      iframe.setAttribute('allowfullscreen', 'true');
 
       this.applyFillContent(iframe);
       this.element.appendChild(iframe);
