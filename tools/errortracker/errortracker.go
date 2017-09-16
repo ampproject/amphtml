@@ -86,6 +86,20 @@ func cloudAuthContext(r *http.Request) (context.Context, error) {
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
+	c, _ := cloudAuthContext(r)
+	logc, err := logging.NewClient(c, appengine.AppID(c), "javascript.errors")
+	if err != nil {
+		http.Error(w, "Cannot connect to Google Cloud Logging",
+			http.StatusInternalServerError)
+		log.Errorf(c, "Cannot connect to Google Cloud Logging: %v", err)
+		return
+	}
+	// Note: Error Reporting currently ignores non-GCE and non-AWS logs.
+	logc.ServiceName = "compute.googleapis.com"
+	logc.CommonLabels = map[string]string{
+		"compute.googleapis.com/resource_type": "logger",
+		"compute.googleapis.com/resource_id":   "errors"}
+
 	// We're temporarily forwarding 100% of traffic to the JS error tracker.
 	if rand.Float64() < 1 {
 		urlString := strings.Replace(r.URL.String(), "amp-error-reporting", "amp-error-reporting-js", 1)
@@ -102,20 +116,6 @@ func handle(w http.ResponseWriter, r *http.Request) {
 			log.Errorf(c, "Error making forwarding request: %v", err)
 		}
 	}
-
-	c, _ := cloudAuthContext(r)
-	logc, err := logging.NewClient(c, appengine.AppID(c), "javascript.errors")
-	if err != nil {
-		http.Error(w, "Cannot connect to Google Cloud Logging",
-			http.StatusInternalServerError)
-		log.Errorf(c, "Cannot connect to Google Cloud Logging: %v", err)
-		return
-	}
-	// Note: Error Reporting currently ignores non-GCE and non-AWS logs.
-	logc.ServiceName = "compute.googleapis.com"
-	logc.CommonLabels = map[string]string{
-		"compute.googleapis.com/resource_type": "logger",
-		"compute.googleapis.com/resource_id":   "errors"}
 
 	// Fill query params into JSON struct.
 	line, _ := strconv.Atoi(r.URL.Query().Get("l"))
