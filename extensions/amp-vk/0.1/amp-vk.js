@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-const embedTypes = {
+/**
+ * @enum {string}
+ */
+const EmbedType = {
   POST: 'post',
   POLL: 'poll',
 };
@@ -33,9 +36,6 @@ export class AmpVk extends AMP.BaseElement {
 
     /** @private {?string} */
     this.iframeUrl_ = null;
-
-    /** @private {?Object} */
-    this.iframeParams_ = null;
 
     /** @private {?Element} */
     this.iframe_ = null;
@@ -87,7 +87,7 @@ export class AmpVk extends AMP.BaseElement {
     let q = '';
     let src, queryParams;
 
-    if (this.embedType_ === embedTypes.POST) {
+    if (this.embedType_ === EmbedType.POST) {
       src = 'https://vk.com/widget_post.php';
       queryParams = {
         'app': 0,
@@ -102,7 +102,7 @@ export class AmpVk extends AMP.BaseElement {
         'referrer': pageReferrer,
         'title': 'AMP Post',
       };
-    } else if (this.embedType_ === embedTypes.POLL) {
+    } else if (this.embedType_ === EmbedType.POLL) {
       src = 'https://vk.com/al_widget_poll.php';
       queryParams = {
         'app': this.apiId_,
@@ -134,9 +134,9 @@ export class AmpVk extends AMP.BaseElement {
 
     this.embedType_ = this.element.getAttribute('data-embedtype');
 
-    if (this.embedType_ === embedTypes.POST) {
+    if (this.embedType_ === EmbedType.POST) {
       this.postBuildCallback_();
-    } else if (this.embedType_ === embedTypes.POLL) {
+    } else if (this.embedType_ === EmbedType.POLL) {
       this.pollBuildCallback_();
     }
   }
