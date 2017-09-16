@@ -29,6 +29,7 @@ const POLL_PARAMS = {
 
 import '../amp-vk';
 import {Layout} from '../../../../src/layout';
+import {Resource} from '../../../../src/service/resource';
 
 describes.realWin('amp-vk', {
   amp: {
@@ -60,6 +61,8 @@ describes.realWin('amp-vk', {
     doc.body.appendChild(element);
 
     return element.build().then(() => {
+      const resource = Resource.forElement(element);
+      resource.measure();
       return element.layoutCallback();
     }).then(() => element);
   }
@@ -123,12 +126,14 @@ describes.realWin('amp-vk', {
 
   it('post::sets correct src url to the vk iFrame', () => {
     return createAmpVkElement(POST_PARAMS, Layout.RESPONSIVE).then(vkPost => {
+      const impl = vkPost.implementation_;
       const iframe = vkPost.querySelector('iframe');
       const referrer = encodeURIComponent(vkPost.ownerDocument.referrer);
       const url = encodeURIComponent(
           vkPost.ownerDocument.location.href.replace(/#.*$/, '')
       );
-      const startWidth = iframe.offsetWidth;
+      impl.onLayoutMeasure();
+      const startWidth = impl.getLayoutWidth();
       const correctIFrameSrc = `https://vk.com/widget_post.php?app=0&width=100%25\
 &_ver=1&owner_id=1&post_id=45616&hash=Yc8_Z9pnpg8aKMZbVcD-jK45eAk&amp=1\
 &startWidth=${startWidth}&url=${url}&referrer=${referrer}&title=AMP%20Post`;
