@@ -217,11 +217,15 @@ class AmpViewer {
       Element.prototype.attachShadow ||
       Element.prototype.createShadowRoot
     );
-    const shadowDomReadyPromise = isShadowDomSupported ?
-        Promise.resolve() :
-        new Promise(resolve => {
-          this.win.addEventListener('WebComponentsReady', resolve);
-        });
+    const shadowDomReadyPromise = new Promise((resolve, reject) => {
+      if(isShadowDomSupported) {
+        resolve();
+      } else if (this.win.document.querySelector('script[src*=webcomponents]')) {
+        this.win.addEventListener('WebComponentsReady', resolve);
+      } else {
+        reject();
+      }
+    });
 
     this.readyPromise_ = Promise.all([
       ampReadyPromise,
