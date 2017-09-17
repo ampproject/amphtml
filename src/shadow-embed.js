@@ -149,11 +149,6 @@ function createShadowRootPolyfill(hostElement) {
     },
   });
 
-  // CSS isolation.
-  installCssTransformer(shadowRoot, css => {
-    return transformShadowCss(shadowRoot, css);
-  });
-
   return shadowRoot;
 }
 
@@ -231,9 +226,6 @@ export function importShadowBody(shadowRoot, body, deep) {
  * @return {string}
  */
 export function transformShadowCss(shadowRoot, css) {
-  if (isShadowCssSupported()) {
-    return css;
-  }
   return scopeShadowCss(shadowRoot, css);
 }
 
