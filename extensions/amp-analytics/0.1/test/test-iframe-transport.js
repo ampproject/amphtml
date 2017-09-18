@@ -68,8 +68,8 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
     const frame1 = IframeTransport.getFrameData(iframeTransport.getType());
     const frame2 = IframeTransport.getFrameData(iframeTransport2.getType());
     expectAllUnique([iframeTransport.getCreativeId(),
-        iframeTransport2.getCreativeId(),
-        frame1.frame.sentinel, frame2.frame.sentinel]);
+      iframeTransport2.getCreativeId(),
+      frame1.frame.sentinel, frame2.frame.sentinel]);
   });
 
   it('correctly tracks usageCount and destroys iframes', () => {

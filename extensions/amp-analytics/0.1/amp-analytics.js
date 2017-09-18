@@ -233,7 +233,7 @@ export class AmpAnalytics extends AMP.BaseElement {
             ' for amp-analytics tag.');
       }
       this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
-        this.win, this.element.getAttribute('type'),
+        this.element.getAttribute('type'),
         this.config_['transport'], ampAdResourceId);
     }
 
