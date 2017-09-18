@@ -690,6 +690,8 @@ export class AmpA4A extends AMP.BaseElement {
                     return bytes;
                   case VerificationStatus.UNVERIFIED:
                     return null;
+                  case VerificationStatus.CRYPTO_UNAVAILABLE:
+                    return this.cryptoUnavailable(bytes);
                   // TODO(@taymonbeal, #9274): differentiate between these
                   case VerificationStatus.ERROR_KEY_NOT_FOUND:
                   case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
@@ -1538,6 +1540,10 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {!Object<string, string|number>=} opt_extraVariables
    */
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
+
+  cryptoUnavailable(bytes) {
+    return null;
+  }
 }
 
 /**
