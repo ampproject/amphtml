@@ -1,0 +1,8 @@
+{
+  "root": true,
+  "extends": "eslint-config-es5",
+  "parserOptions": {
+    "ecmaVersion": 6
+  },
+  "plugins": ["eslint-plugin-google-camelcase"]
+}
