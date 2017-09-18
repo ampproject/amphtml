@@ -132,23 +132,23 @@ export class DoubleclickA4aEligibility {
     const urlExperimentId = extractUrlExperimentId(win, element);
     let experimentName = DFP_CANONICAL_FF_EXPERIMENT_NAME;
 
-    if (!this.supportsCrypto(win)) {
-      experimentId = this.maybeSelectExperiment(win, element, [
-        DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_CONTROL,
-        DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
-      ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
-      if (!experimentId) {
-        return false;
-      }
-    } else if (!this.isCdnProxy(win)) {
+    if (!this.isCdnProxy(win)) {
       // Ensure that forcing FF via url is applied if test/localDev.
-      experimentId = (urlExperimentId == -1 &&
-          (getMode(win).localDev ||	getMode(win).test)) ?
-          MANUAL_EXPERIMENT_ID :
-          this.maybeSelectExperiment(win, element, [
-            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
-            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
-          ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
+      if (urlExperimentId == -1 &&
+          (getMode(win).localDev ||	getMode(win).test)) {
+        experimentId = MANUAL_EXPERIMENT_ID;
+      } else if (!this.supportsCrypto(win)) {
+        experimentId = this.maybeSelectExperiment(win, element, [
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_CONTROL,
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
+        ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
+
+      } else {
+        experimentId = this.maybeSelectExperiment(win, element, [
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
+        ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
+      }
       // If no experiment selected, return false.
       if (!experimentId) {
         return false;

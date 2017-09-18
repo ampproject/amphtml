@@ -691,7 +691,8 @@ export class AmpA4A extends AMP.BaseElement {
                   case VerificationStatus.UNVERIFIED:
                     return null;
                   case VerificationStatus.CRYPTO_UNAVAILABLE:
-                    return this.ffWithoutCrypto() ? null : bytes;
+                    return this.preferentialRenderWithoutCrypto() ?
+                      null : bytes;
                   // TODO(@taymonbeal, #9274): differentiate between these
                   case VerificationStatus.ERROR_KEY_NOT_FOUND:
                   case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
@@ -1542,10 +1543,10 @@ export class AmpA4A extends AMP.BaseElement {
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
 
   /**
-   * Whether Fast Fetch should still be utilized if web crypto is unavailable.
+   * Whether preferential render should still be utilized if web crypto is unavailable.
    * @return {!boolean}
    */
-  ffWithoutCrypto() {
+  preferentialRenderWithoutCrypto() {
     return false;
   }
 }
