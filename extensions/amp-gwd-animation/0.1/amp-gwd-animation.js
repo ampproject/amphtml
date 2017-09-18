@@ -95,10 +95,10 @@ export class GwdAnimation extends AMP.BaseElement {
     if (gwdPageDeck) {
       user().assert(this.element.id, `The ${TAG} element must have an id.`);
 
-      const setCurrentPageActionDef =
+      const setCurrentPageAction =
           `${this.element.id}.setCurrentPage(index=event.index)`;
-      insertEventActionBinding(
-          gwdPageDeck, 'slideChange', setCurrentPageActionDef);
+      addAction(
+          this.getAmpDoc(), gwdPageDeck, 'slideChange', setCurrentPageAction);
     }
 
     // Register handlers for supported actions.
@@ -153,41 +153,42 @@ export class GwdAnimation extends AMP.BaseElement {
 }
 
 /**
- * Modifies the given element's `on` attribute to include the given event and
- * action handler definition.
- * TODO(sklobovskaya): There is currently no other mechanism by which an event
- * handler can be programmatically added. If one becomes available, would
- * prefer to use that instead of manipulating the action defs string.
- * @param {!Element} element The target element.
- * @param {string} event The event name, e.g., 'slideChange'
- * @param {string} actionStr e.g., `someDiv.hide`
+ * Adds an event action definition to a node.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element} element The target element whose actions to update.
+ * @param {string} event The event name, e.g., 'slideChange'.
+ * @param {string} actionStr e.g., `someDiv.hide`.
  * @private Visible for testing.
  */
-export function insertEventActionBinding(element, event, actionStr) {
-  const currentOnAttrVal = element.getAttribute('on') || '';
+export function addAction(ampdoc, element, event, actionStr) {
+  // Assemble the new actions string by splicing in the new action string
+  // with any existing actions.
+  let newActionsStr;
+
+  const currentActionsStr = element.getAttribute('on') || '';
   const eventPrefix = `${event}:`;
-  const eventDefIndex = currentOnAttrVal.indexOf(eventPrefix);
-  let newOnAttrVal;
+  const eventActionsIndex = currentActionsStr.indexOf(eventPrefix);
 
-  if (eventDefIndex != -1) {
+  if (eventActionsIndex != -1) {
     // Some actions already defined for this event. Splice in the new action.
-    const actionsStartIndex = eventDefIndex + eventPrefix.length;
+    const actionsStartIndex = eventActionsIndex + eventPrefix.length;
 
-    newOnAttrVal =
-        currentOnAttrVal.substr(0, actionsStartIndex) +
+    newActionsStr =
+        currentActionsStr.substr(0, actionsStartIndex) +
         actionStr + ',' +
-        currentOnAttrVal.substr(actionsStartIndex);
+        currentActionsStr.substr(actionsStartIndex);
   } else {
-    // No actions defined yet for this event. Create the event:action def and
-    // append it to the existing defs.
-    newOnAttrVal = currentOnAttrVal;
-    if (newOnAttrVal) {
-      newOnAttrVal += ';';
+    // No actions defined yet for this event. Create the event:action string and
+    // append it to the existing actions string.
+    newActionsStr = currentActionsStr;
+    if (newActionsStr) {
+      newActionsStr += ';';
     }
-    newOnAttrVal += `${eventPrefix}${actionStr}`;
+    newActionsStr += `${eventPrefix}${actionStr}`;
   }
 
-  element.setAttribute('on', newOnAttrVal);
+  // Reset the element's actions with the new actions string.
+  Services.actionServiceForDoc(ampdoc).setActions(element, newActionsStr);
 };
 
 AMP.extension(TAG, '0.1', AMP => {

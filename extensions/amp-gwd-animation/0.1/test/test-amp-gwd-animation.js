@@ -17,7 +17,7 @@ import {
   EXPERIMENT,
   GWD_PAGEDECK_ID,
   TAG,
-  insertEventActionBinding,
+  addAction,
 } from '../amp-gwd-animation';
 import {
   ANIMATIONS_DISABLED_CLASS,
@@ -30,6 +30,7 @@ import {
 } from '../amp-gwd-animation-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 import {getServiceForDoc} from '../../../../src/service';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 
@@ -106,7 +107,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
 
         ampdoc.getBody().innerHTML =
             `<amp-carousel id="pagedeck"
-                on="slideChange:someDiv.hide;someEvent:someDiv.show">
+                on="slideChange:node1.hide;event1:node1.show">
               <div id="page1" class="${GWD_PAGE_WRAPPER_CLASS}">
                 <div>
                   <div id="not-an-event"></div>
@@ -144,8 +145,8 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       });
       */
 
-      it('should initialize on body available', () => {
-        // Waiting for body available is only necessary here to avoid JS errors
+      it('should initialize on bodyAvailable', () => {
+        // Waiting for bodyAvailable is only necessary here to avoid JS errors
         // caused by beforeEach building the element after a test case
         // environment has already been disposed.
         return ampdoc.whenBodyAvailable().then(() => {
@@ -170,6 +171,14 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         });
       });
 
+      it('should install slideChange listeners on the GWD pagedeck', () => {
+        return ampdoc.whenBodyAvailable().then(() => {
+          const pagedeck = ampdoc.getRootNode().getElementById(GWD_PAGEDECK_ID);
+          expect(pagedeck.getAttribute('on')).to.contain('setCurrentPage');
+          // @see addAction test case below.
+        });
+      });
+
       it('should set a page as current', () => {
         return ampdoc.whenBodyAvailable().then(() => {
           // Set page 1 as current.
@@ -184,14 +193,6 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
 
           const page2 = ampdoc.getRootNode().getElementById('page2');
           expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
-        });
-      });
-
-      it('should install slideChange listeners on the GWD pagedeck', () => {
-        return ampdoc.whenBodyAvailable().then(() => {
-          const pagedeck = ampdoc.getRootNode().getElementById(GWD_PAGEDECK_ID);
-          expect(pagedeck.getAttribute('on')).to.contain('setCurrentPage');
-          // @see insertEventActionBinding test case below.
         });
       });
 
@@ -291,7 +292,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           expect(page1Elem.getAttribute(CURRENT_LABEL_ANIMATION_ATTR))
               .to.equal('foo');
 
-          // Repeated invocations should not have an effect (animation will be
+          // Repeated invocations should have no effect (animation will be
           // restarted, however).
           impl.executeAction(invocation);
           expect(page1Elem.classList.contains('foo')).to.be.true;
@@ -377,21 +378,21 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
 
           // gotoAndPlayNTimes invocations originating from a different timeline
           // event begin their own counters.
-          const invocationFromOtherEvent = {
+          const invocationFromEvent2 = {
             method: 'gotoAndPlayNTimes',
             args: {id: 'page1', label: 'foo', N: 1},
             event: {eventName: 'event-2'},  // Different event.
             satisfiesTrust: () => true,
           };
 
-          impl.executeAction(invocationFromOtherEvent);
+          impl.executeAction(invocationFromEvent2);
           expect(page1Elem.classList.contains('foo')).to.be.true;
 
           page1Elem.classList.remove('foo');
 
-          // Counter for event-2 has now run out; no more gotoAndPlays may
+          // Counter for 'event-2' has now run out; no more gotoAndPlays may
           // execute.
-          impl.executeAction(invocationFromOtherEvent);
+          impl.executeAction(invocationFromEvent2);
           expect(page1Elem.classList.contains('foo')).to.be.false;
 
           // Test handling missing arguments.
@@ -440,33 +441,38 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
   });
 });
 
-describe('insertEventActionBinding', () => {
-  it('should insert when no existing action definitions', () => {
-    const element = document.createElement('div');
+describe('addAction', () => {
+  let ampdoc;
 
-    insertEventActionBinding(element, 'someEvent', 'someDiv.foo()');
-
-    expect(element.getAttribute('on')).to.equal('someEvent:someDiv.foo()');
+  beforeEach(() => {
+    ampdoc = new AmpDocSingle(window);
   });
 
-  it('should insert when other actions defined for this event', () => {
+  it('should insert when no existing actions', () => {
     const element = document.createElement('div');
-    element.setAttribute(
-        'on', 'someEvent:otherDiv.hide;otherEvent:otherDiv.show');
 
-    insertEventActionBinding(element, 'someEvent', 'someDiv.foo()');
+    addAction(ampdoc, element, 'event1', 'node1.foo()');
+
+    expect(element.getAttribute('on')).to.equal('event1:node1.foo()');
+  });
+
+  it('should insert when actions defined for this event', () => {
+    const element = document.createElement('div');
+    element.setAttribute('on', 'event1:node2.hide;event2:node2.show');
+
+    addAction(ampdoc, element, 'event1', 'node1.foo()');
 
     expect(element.getAttribute('on')).to.equal(
-        'someEvent:someDiv.foo(),otherDiv.hide;otherEvent:otherDiv.show');
+        'event1:node1.foo(),node2.hide;event2:node2.show');
   });
 
   it('should insert when actions defined for other events only', () => {
     const element = document.createElement('div');
-    element.setAttribute('on', 'otherEvent:otherDiv.hide');
+    element.setAttribute('on', 'event2:node2.hide');
 
-    insertEventActionBinding(element, 'someEvent', 'someDiv.foo()');
+    addAction(ampdoc, element, 'event1', 'node1.foo()');
 
     expect(element.getAttribute('on')).to.equal(
-        'otherEvent:otherDiv.hide;someEvent:someDiv.foo()');
+        'event2:node2.hide;event1:node1.foo()');
   });
 });

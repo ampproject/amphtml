@@ -383,7 +383,7 @@ export class AmpGwdRuntimeService {
 
     const timelineEvent = createCustomEvent(
         this.ampdoc_.win,
-        `${GWD_TIMELINE_EVENT}`,
+        GWD_TIMELINE_EVENT,
         {eventName: userEventName, sourceEvent: event});
 
     this.ampdoc_.getRootNode().dispatchEvent(timelineEvent);
