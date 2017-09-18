@@ -559,14 +559,14 @@ export function resetLogConstructorForTesting() {
  *  2. Development mode is enabled via `#development=1` or logging is explicitly
  *     enabled via `#log=D` where D >= 1.
  *
- * @param {!Element=} opt_element
+ * @param {!AMP.BaseElement|!Element=} opt_element
  * @return {!Log}
  */
 export function user(opt_element) {
   if (!logs.user) {
     logs.user = getUserLogger(USER_ERROR_SENTINEL);
   }
-  if (!isFromEmbed(logs.user.win, opt_element)) {
+  if (!isFromEmbed(logs.user.win, opt_element.element)) {
     return logs.user;
   } else {
     if (logs.userForEmbed) {

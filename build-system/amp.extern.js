@@ -284,7 +284,9 @@ window.AMP;
  */
 AMP.BaseElement = class {
   /** @param {!AmpElement} element */
-  constructor(element) {}
+  constructor(element) {
+    this.element = element;
+  }
 };
 
 /**

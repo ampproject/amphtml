@@ -952,6 +952,6 @@ export class BaseElement {
   onLayoutMeasure() {}
 
   user() {
-    return user(this.element);
+    return user(this);
   }
 }
