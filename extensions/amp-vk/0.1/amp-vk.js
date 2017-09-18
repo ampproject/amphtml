@@ -40,9 +40,6 @@ export class AmpVk extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?Promise} */
-    this.iframePromise_ = null;
-
     /** @private {?number} */
     this.widgetHeight_ = 0;
 
@@ -207,7 +204,7 @@ export class AmpVk extends AMP.BaseElement {
       this.applyFillContent(iframe);
       this.element.appendChild(iframe);
 
-      return this.iframePromise_ = this.loadPromise(iframe);
+      return this.loadPromise(iframe);
     });
   }
 
@@ -251,7 +248,6 @@ export class AmpVk extends AMP.BaseElement {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
-      this.iframePromise_ = null;
     }
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
