@@ -1591,8 +1591,6 @@ export class AmpA4A extends AMP.BaseElement {
   getNonAmpCreativeRenderingMethod(headerValue) {
     if (headerValue) {
       return headerValue;
-    } else if (this.experimentalNonAmpCreativeRenderMethod_) {
-      return this.experimentalNonAmpCreativeRenderMethod_;
     }
     return Services.platformFor(this.win).isIos() ?
         XORIGIN_MODE.SAFEFRAME : null;
