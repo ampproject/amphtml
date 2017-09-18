@@ -24,7 +24,7 @@ const TAG_ = 'iframe-transport-client';
 
 /**
  * Receives event messages bound for this cross-domain iframe, from all
- * creatives
+ * creatives.
  */
 export class IframeTransportClient {
 
@@ -49,7 +49,7 @@ export class IframeTransportClient {
           const events =
               /**
                * @type
-               * {!Array<../src/3p-frame-messaging.IframeTransportEvent>}
+               *   {!Array<../src/3p-frame-messaging.IframeTransportEvent>}
                */
               (eventData['events']);
           user().assert(events,
@@ -83,20 +83,20 @@ export class IframeTransportClient {
   }
 
   /**
-   * Sends a message back to the creative
+   * Sends a message back to the creative.
    * @param {string} vendor The name of the 3p vendor used in the
-   * <amp-analytics> tag
+   *   <amp-analytics> tag
    * @param {string} creativeId An ID uniquely identifying which creative
    * shall receive the event
    * @param {!Object<string,string>} response
    */
   sendMessageToCreative(vendor, creativeId, response) {
     this.client_./*OK*/sendMessage(MessageType.IFRAME_TRANSPORT_RESPONSE,
-        /** @type {JsonObject} */({creativeId, vendor, message: response}));
+        /** @type {!JsonObject} */({creativeId, vendor, message: response}));
   }
 
   /**
-   * Gets the IframeMessagingClient
+   * Gets the IframeMessagingClient.
    * @returns {!IframeMessagingClient}
    * @VisibleForTesting
    */
