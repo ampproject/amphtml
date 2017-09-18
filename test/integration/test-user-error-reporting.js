@@ -83,4 +83,36 @@ describe.configure().run('user-error', function() {
       return expect(withdrawRequest(env.win, randomId)).to.be.ok;
     });
   });
+
+  describes.integration('3p user-error integration test', {
+    extensions: ['amp-analytics', 'amp-ad'],
+    hash: 'log=0',
+    experiments: ['user-error-reporting'],
+
+    body: () => `
+    <amp-ad width=300 height=250
+        type="_ping_"
+        data-url='not-exist'
+        data-valid='false'
+        data-error='true'>
+    </amp-ad>
+
+    <amp-analytics><script type="application/json">
+          {
+              "requests": {
+                  "error": "${depositRequestUrl(randomId)}"
+              },
+              "triggers": {
+                  "userError": {
+                      "on": "user-error",
+                      "request": "error"
+                  }
+              }
+          }
+    </script></amp-analytics>`,
+  }, env => {
+    it('should ping correct host with 3p error message', () => {
+      return expect(withdrawRequest(env.win, randomId)).to.eventually.be.ok;
+    });
+  });
 });
