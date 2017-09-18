@@ -24,6 +24,16 @@ import {loadScript} from '../3p/3p';
 export function capirs(global, data) {
   validateData(data, ['begunAutoPad', 'begunBlockId']);
 
+  if (data['customCss']) {
+    const style = window.document.createElement('style');
+    if (style.styleSheet) {
+      style.styleSheet.cssText = data['customCss'];
+    } else {
+      style.appendChild(document.createTextNode(data['customCss']));
+    }
+    global.document.body.appendChild(style);
+  }
+
   global['begun_callbacks'] = {
     lib: {
       init: () => {
