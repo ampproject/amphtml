@@ -260,6 +260,15 @@ export class Services {
   }
 
   /**
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-animation/0.1/web-animation-service.WebAnimationService}>}
+   */
+  static webAnimationServiceForOrNull(win) {
+    return getElementServiceIfAvailable(
+        win, 'web-animation', 'amp-animation', true);
+  }
+
+  /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService}>}
    */
