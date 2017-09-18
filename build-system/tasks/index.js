@@ -16,7 +16,6 @@
 'use strict';
 
 require('./ava');
-require('./babel-helpers');
 require('./changelog');
 require('./check-links');
 require('./clean');
@@ -29,6 +28,7 @@ require('./dep-check');
 require('./get-zindex');
 require('./gen-codeowners');
 require('./extension-generator');
+require('./process-github-issues');
 require('./json-check');
 require('./lint');
 require('./prepend-global');

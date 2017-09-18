@@ -384,17 +384,26 @@ actions that apply to the whole document.
     <td>Navigates back in history.</td>
   </tr>
   <tr>
-    <td><code>setState({foo: 'bar'})</code></td>
-    <td>
-      <p>Requires <a href="../extensions/amp-bind/amp-bind.md">amp-bind</a>. Merges an object literal into the bindable state. See <a href="../extensions/amp-bind/amp-bind.md#ampsetstate">more details</a>.</p>
-      <p>When used with <a href="#multiple-actions-for-one-event">multiple actions</a>, subsequent actions will wait for <code>setState()</code> to complete before invocation. Only a single <code>setState()</code> is allowed per event.</p>
-    </td>
-  </tr>
-  <tr>
     <td><code>print</code></td>
     <td>Opens the Print Dialog to print the current page.</td>
   </tr>
+  <tr>
+    <td><code>setState({foo: 'bar'})</code><sup>1</sup></td>
+    <td>
+      <p>Requires <a href="../extensions/amp-bind/amp-bind.md#updating-state-with-ampsetstate">amp-bind</a>.</p>
+      <p>Merges an object literal into the bindable state.</p>
+      <p></p>
+    </td>
+  </tr>
+  <tr>
+    <td><code>pushState({foo: 'bar'})</code><sup>1</sup></td>
+    <td>
+      <p>Requires <a href="../extensions/amp-bind/amp-bind.md#modifying-history-with-amppushstate">amp-bind</a>.</p>
+      <p>Merges an object literal into the bindable state and pushes a new entry onto browser history stack. Popping the entry will restore the previous values of variables (in this example, <code>foo</code>).    </td>
+  </tr>
 </table>
+
+<sup>1</sup>When used with <a href="#multiple-actions-for-one-event">multiple actions</a>, subsequent actions will wait for <code>setState()</code> or <code>pushState()</code> to complete before invocation. Only a single <code>setState()</code> or <code>pushState()</code> is allowed per event.
 
 ### `amp-access`
 

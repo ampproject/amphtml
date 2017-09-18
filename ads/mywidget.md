@@ -29,12 +29,14 @@ Please visit our [website](https://widget.my.com) for more information about us.
 ```html
 <amp-embed height="250"
       type="mywidget"
-      data-cid="your_campaign_id">
-  <div placeholder>Loading myWidget recommendations.</div>
-  <div fallback>No recommendations for you.</div>
+      data-cid="your-campaign-id">
 </amp-embed>
 ```
 
+## Configuration
+
+For semantics of configuration, please see [ad network documentation](https://widget.my.com/docs/dev/amp/).
+
 Required parameters:
 
-- `data-cid`
+- data-cid

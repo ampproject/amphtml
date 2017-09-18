@@ -18,7 +18,6 @@
  * The entry point for AMP inabox runtime (inabox-v0.js).
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import '../polyfills';
 import {Services} from '../services';
 import {startupChunk} from '../chunk';
