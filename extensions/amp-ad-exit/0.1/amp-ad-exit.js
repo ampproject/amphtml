@@ -69,33 +69,8 @@ export class AmpAdExit extends AMP.BaseElement {
     /** @private @const {!Object<string, Object<string, string>>} */
     this.vendorResponses_ = {};
 
-    try {
-      this.ampAdResourceId_ = this.element.ownerDocument.defaultView
-        .frameElement.parentElement.getResourceId();
-    } catch (e) {
-      this.user().error(TAG,
-          'No friendly parent amp-ad element was found for amp-ad-exit tag.');
-    }
-
-    this.unlisten_ = listen(this.getAmpDoc().win, 'message', event => {
-      const responseMessage = deserializeMessage(getData(event));
-      if (!responseMessage || !responseMessage['type'] ||
-          responseMessage['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE ||
-          !responseMessage['creativeId'] ||
-          responseMessage['creativeId'] != this.ampAdResourceId_) {
-        return;
-      }
-
-      dev().assert(responseMessage && responseMessage['message'],
-          'Received empty response from 3p analytics frame');
-      dev().assert(responseMessage && responseMessage['vendor'],
-          'Received response from 3p analytics frame that does not indicate' +
-        ' vendor');
-      const vendor = responseMessage['vendor'];
-      assertOriginMatchesVendor(event.origin, vendor);
-
-      this.vendorResponses_[vendor] = responseMessage['message'];
-    });
+    /** @private {?function()} */
+    this.unlisten_ = null;
   }
 
   /** @override */
@@ -194,7 +169,8 @@ export class AmpAdExit extends AMP.BaseElement {
               }
               // Either it's not a 3p analytics variable, or it is one but
               // no matching response has been received yet.
-              return args[customVarName] || customVar.defaultValue;
+              return (args && args.hasOwnProperty(customVarName)) ?
+                  args[customVarName] : customVar.defaultValue;
             };
             whitelist[customVarName] = true;
           }
@@ -281,6 +257,36 @@ export class AmpAdExit extends AMP.BaseElement {
       this.user().error(TAG, 'Invalid JSON config', e);
       throw e;
     }
+
+    this.unlisten_ = listen(this.getAmpDoc().win, 'message', event => {
+      const responseMessage = deserializeMessage(getData(event));
+
+      let ampAdResourceId;
+      try {
+        ampAdResourceId = this.element.ownerDocument.defaultView
+          .frameElement.parentElement.getResourceId();
+      } catch (e) {
+        this.user().error(TAG,
+            'No friendly parent amp-ad element was found for amp-ad-exit tag.');
+      }
+
+      if (!responseMessage || !responseMessage['type'] ||
+        responseMessage['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE ||
+        !responseMessage['creativeId'] ||
+        responseMessage['creativeId'] != ampAdResourceId) {
+        return;
+      }
+
+      dev().assert(responseMessage && responseMessage['message'],
+          'Received empty response from 3p analytics frame');
+      dev().assert(responseMessage && responseMessage['vendor'],
+          'Received response from 3p analytics frame that does not indicate' +
+        ' vendor');
+      const vendor = responseMessage['vendor'];
+      assertOriginMatchesVendor(event.origin, vendor);
+
+      this.vendorResponses_[vendor] = responseMessage['message'];
+    });
   }
 
   /** @override */

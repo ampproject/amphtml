@@ -61,7 +61,7 @@ export class IframeTransportClient {
           events.forEach(event => {
             try {
               this.listener_ &&
-                  this.listener_(event.message, event.transportId);
+                  this.listener_(event.message, event.creativeId);
             } catch (e) {
               user().error(TAG_,
                   'Exception in callback passed to onAnalyticsEvent: ' +
