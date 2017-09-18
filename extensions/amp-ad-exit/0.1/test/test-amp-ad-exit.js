@@ -408,7 +408,7 @@ describes.realWin('amp-ad-exit', {
     if (!win.navigator) {
       win.navigator = {sendBeacon: () => false};
     }
-    const sendBeacon = sandbox.stub(win.navigator, 'sendBeacon', () => true);
+    const sendBeacon = sandbox.stub(win.navigator, 'sendBeacon').returns(true);
 
     element.implementation_.executeAction({
       method: 'exit',
@@ -545,9 +545,7 @@ describes.realWin('amp-ad-exit', {
   });
 
   it('should replace custom URL variables with 3P Analytics defaults', () => {
-    const open = sandbox.stub(win, 'open', () => {
-      return {name: 'fakeWin'};
-    });
+    const open = sandbox.stub(win, 'open').returns({name: 'fakeWin'});
 
     element.implementation_.executeAction({
       method: 'exit',

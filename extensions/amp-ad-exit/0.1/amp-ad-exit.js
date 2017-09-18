@@ -145,7 +145,7 @@ export class AmpAdExit extends AMP.BaseElement {
                which in this example will return "medium".
              */
             substitutionFunctions[customVarName] = () => {
-              if (customVar.hasOwnProperty('iframeTransportSignal')) {
+              if ('iframeTransportSignal' in customVar) {
                 const matches = customVar['iframeTransportSignal'].match(
                     /IFRAME_TRANSPORT_SIGNAL\(([\w-]+),\s*([\w-]+)\)/);
                 user().assert(matches && matches.length == 3,
@@ -162,14 +162,14 @@ export class AmpAdExit extends AMP.BaseElement {
                      that key.
                   */
                   const responseKey = matches[2];
-                  if (vendorResponses.hasOwnProperty(responseKey)) {
+                  if (responseKey in vendorResponses) {
                     return vendorResponses[responseKey];
                   }
                 }
               }
               // Either it's not a 3p analytics variable, or it is one but
               // no matching response has been received yet.
-              return (args && args.hasOwnProperty(customVarName)) ?
+              return (customVarName in args) ?
                   args[customVarName] : customVar.defaultValue;
             };
             whitelist[customVarName] = true;
@@ -254,7 +254,7 @@ export class AmpAdExit extends AMP.BaseElement {
       this.transport_.beacon = config.transport[TransportMode.BEACON] !== false;
       this.transport_.image = config.transport[TransportMode.IMAGE] !== false;
     } catch (e) {
-      this.user().error(TAG, 'Invalid JSON config', e);
+      user().error(TAG, 'Invalid JSON config', e);
       throw e;
     }
 
@@ -266,7 +266,7 @@ export class AmpAdExit extends AMP.BaseElement {
         ampAdResourceId = this.element.ownerDocument.defaultView
           .frameElement.parentElement.getResourceId();
       } catch (e) {
-        this.user().error(TAG,
+        user().error(TAG,
             'No friendly parent amp-ad element was found for amp-ad-exit tag.');
       }
 
@@ -281,7 +281,7 @@ export class AmpAdExit extends AMP.BaseElement {
           'Received empty response from 3p analytics frame');
       dev().assert(responseMessage && responseMessage['vendor'],
           'Received response from 3p analytics frame that does not indicate' +
-        ' vendor');
+          ' vendor');
       const vendor = responseMessage['vendor'];
       assertOriginMatchesVendor(event.origin, vendor);
 

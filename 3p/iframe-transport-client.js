@@ -24,7 +24,7 @@ const TAG_ = 'iframe-transport-client';
 
 /**
  * Receives event messages bound for this cross-domain iframe, from all
- * creatives
+ * creatives.
  */
 export class IframeTransportClient {
 
@@ -49,7 +49,7 @@ export class IframeTransportClient {
           const events =
               /**
                * @type
-               * {!Array<../src/3p-frame-messaging.IframeTransportEvent>}
+               *   {!Array<../src/3p-frame-messaging.IframeTransportEvent>}
                */
               (eventData['events']);
           user().assert(events,
@@ -83,7 +83,7 @@ export class IframeTransportClient {
   }
 
   /**
-   * Gets the IframeMessagingClient
+   * Gets the IframeMessagingClient.
    * @returns {!IframeMessagingClient}
    * @VisibleForTesting
    */
