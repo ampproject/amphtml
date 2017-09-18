@@ -89,6 +89,8 @@ import {
   addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
 
+import '../../amp-a4a/0.1/real-time-config-manager';
+
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
 
@@ -695,7 +697,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     let endpoint;
     rtcConfig = tryParseJson(ampRtcPageElement.textContent);
     if (!isObject(rtcConfig) || !(endpoint = rtcConfig['endpoint']) ||
-        typeof endpoint != 'string' || !isSecureUrl(endpoint)) {
+        typeof endpoint != 'string' /* ||  !isSecureUrl(endpoint) */) {
       user().warn(TAG, 'Sending ad request without RTC callout,' +
           `invalid RTC config: ${ampRtcPageElement.textContent}`);
       return Promise.resolve();
@@ -716,22 +718,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         Services.xhrFor(this.win).fetchJson(
             endpoint, {credentials: 'include'}).then(res => {
               rtcTotalTime = Date.now() - startTime;
-              /*
-              *  disableSWR should be set to true if the endpoint is not
-              *  returning cache headers.
-              */
-              verifyRtcConfigMember('disableStaleWhileRevalidate', 'boolean');
-              if (rtcConfig['disableStaleWhileRevalidate'] !== true) {
-                const headers = new Headers();
-                headers.append('Cache-Control', 'max-age=0');
-                // Repopulate the cache.
-                Services.xhrFor(this.win).fetchJson(endpoint, {
-                  credentials: 'include',
-                  headers,
-                }).catch(err => {
-                  this.user().error(TAG, err.message);
-                });
-              }
+
               // Non-200 status codes are forbidden for RTC.
               // TODO: Add to fetchResponse the ability to
               // check for redirects as well.

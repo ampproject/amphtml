@@ -41,7 +41,7 @@ import {utf8Decode} from '../../../src/utils/bytes';
 import {getBinaryType, isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
-import {parseJson} from '../../../src/json';
+import {parseJson, tryParseJson} from '../../../src/json';
 import {handleClick} from '../../../ads/alp/handler';
 import {
   getDefaultBootstrapBaseUrl,
@@ -362,6 +362,7 @@ export class AmpA4A extends AMP.BaseElement {
         });
   }
 
+
   /** @override */
   renderOutsideViewport() {
     // Ensure non-verified AMP creatives are throttled.
@@ -568,6 +569,9 @@ export class AmpA4A extends AMP.BaseElement {
     this.adPromise_ = Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
         .then(() => {
           checkStillCurrent();
+          if (this.supportsRealTimeConfig_()) {
+            this.RealTimeConfigManager.executeRealTimeConfig();
+          }
           // See if experiment that delays request until slot is within
           // renderOutsideViewport. Within render outside viewport will not
           // resolve if already within viewport thus the check for already
@@ -1538,6 +1542,13 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {!Object<string, string|number>=} opt_extraVariables
    */
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
+
+  supportsRealTimeConfig_() {
+    if (!!AMP.RealTimeConfigManager) {
+      this.RealTimeConfigManager = new AMP.RealTimeConfigManager(this.element, this.win);
+      return this.RealTimeConfigManager.validateRtcConfig();
+    }
+  }
 }
 
 /**
