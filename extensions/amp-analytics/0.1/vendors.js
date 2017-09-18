@@ -922,6 +922,74 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'mediator': {
+    'requests': {
+      'host': '//collector.mediator.media/amp/?',
+      'prefix': '${host}cid=${mediator_id}&url=${canonicalUrl}&ref=${documentReferrer}&p=4&',
+      'suffix': 'vh=${viewportHeight}&sh=${scrollHeight}&st=${scrollTop}',
+      'pageview': '${prefix}e=v',
+      'timer': '${prefix}e=t&${suffix}',
+      's0': '${prefix}e=s0',
+      's1': '${prefix}e=s1',
+      's2': '${prefix}e=s2',
+      's3': '${prefix}e=s3'
+    },
+    'vars': {
+      'mediator_id': ''
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      },
+      'scrollPing0': {
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': [
+            1
+          ]
+        },
+        'request': 's0'
+      },
+      'scrollPing1': {
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': [
+            33
+          ]
+        },
+        'request': 's1'
+      },
+      'scrollPing2': {
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': [
+            66
+          ]
+        },
+        'request': 's2'
+      },
+      'scrollPing3': {
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': [
+            99
+          ]
+        },
+        'request': 's3'
+      },
+      'pageTimer': {
+        'on': 'timer',
+        'timerSpec': {
+          'immediate': false,
+          'interval': 5,
+          'maxTimerLength': 600
+        },
+        'request': 'timer'
+      }
+    }
+  },
+
   'metrika': {
     'transport': {'beacon': true, 'xhrpost': true, 'image': false},
     'requests': {
