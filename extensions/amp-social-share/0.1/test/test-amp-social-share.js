@@ -168,7 +168,25 @@ describes.realWin('amp-social-share', {
     });
   });
 
-  it('opens mailto: window in _top on iOS Safari', () => {
+  it('opens mailto: window in _top on iOS Safari with recipient', () => {
+    const params = {
+      'recipient': 'sample@xyz.com',
+    };
+    isIos = true;
+    isSafari = true;
+    return getShare('email', undefined, params).then(el => {
+      el.implementation_.handleClick_();
+      expect(el.implementation_.win.open).to.be.calledOnce;
+      expect(el.implementation_.win.open).to.be.calledWith(
+          'mailto:sample%40xyz.com?subject=doc%20title&' +
+            'body=https%3A%2F%2Fcanonicalexample.com%2F' +
+            '&recipient=sample%40xyz.com',
+          '_top', 'resizable,scrollbars,width=640,height=480'
+      );
+    });
+  });
+
+  it('opens mailto: window in _top on iOS Safari without recipient', () => {
     isIos = true;
     isSafari = true;
     return getShare('email').then(el => {
@@ -176,7 +194,7 @@ describes.realWin('amp-social-share', {
       expect(el.implementation_.win.open).to.be.calledOnce;
       expect(el.implementation_.win.open).to.be.calledWith(
           'mailto:?subject=doc%20title&' +
-            'body=https%3A%2F%2Fcanonicalexample.com%2F',
+            'body=https%3A%2F%2Fcanonicalexample.com%2F&recipient=',
           '_top', 'resizable,scrollbars,width=640,height=480'
       );
     });
