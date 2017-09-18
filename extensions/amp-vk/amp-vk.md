@@ -19,11 +19,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays a VK Post or Poll embed</td>
+    <td>Embeds a [VK](https://vk.com/) post or poll widget.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-vk-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-vk" src="https://cdn.ampproject.org/v0/amp-vk-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -33,9 +33,9 @@ limitations under the License.
 
 ## Behavior
 
-You can use the `amp-vk` component to embed a VK Post or VK Poll widget
+You can use the `amp-vk` component to embed a [VK](https://vk.com/) post or poll widget.
 
-Example of a Post widget:
+Example of a post widget:
 ```html
 <amp-vk
     width="500"
@@ -48,7 +48,7 @@ Example of a Post widget:
 </amp-vk>
 ```
 
-Example of a Poll widget:
+Example of a poll widget:
 ```html
 <amp-vk
     width="400"
@@ -62,7 +62,7 @@ Example of a Poll widget:
 
 ## Attributes
 
-For additional information about Post widget attributes please see <a href="https://vk.com/dev/widget_post">VK Post widget documentation</a>  
+For additional information about widgets attributes, please see [VK post widget documentation](https://vk.com/dev/widget_post) and [VK poll widget documentation](https://vk.com/dev/widget_poll).  
 
 ##### data-embedtype (required)
 
@@ -82,7 +82,7 @@ Security hash for the widget connection. Supported when `data-embedtype` is `pos
 
 ##### data-api-id
 
-API id of a Poll. Supported when `data-embedtype` is `poll`.
+API id of a poll. Supported when `data-embedtype` is `poll`.
 
 ##### data-poll-id
 
