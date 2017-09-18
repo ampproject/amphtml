@@ -134,8 +134,8 @@ export class DoubleclickA4aEligibility {
 
     if (!this.supportsCrypto(win)) {
       experimentId = this.maybeSelectExperiment(win, element, [
-            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_CONTROL,
-            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
+        DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_CONTROL,
+        DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
       ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
       if (!experimentId) {
         return false;

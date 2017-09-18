@@ -51,7 +51,7 @@ export const VerificationStatus = {
   ERROR_SIGNATURE_MISMATCH: 3,
 
   /**
-   * Verificaiton failed because the page does not have web crypto available,
+   * Verification failed because the page does not have web crypto available,
    * i.e. is not SSL.
    */
   CRYPTO_UNAVAILABLE: 4,

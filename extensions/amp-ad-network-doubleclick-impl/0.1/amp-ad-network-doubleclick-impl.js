@@ -31,6 +31,7 @@ import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
 import {
   experimentFeatureEnabled,
   DOUBLECLICK_EXPERIMENT_FEATURE,
+  DFP_CANONICAL_FF_EXPERIMENT_NAME,
 } from './doubleclick-a4a-config';
 import {
   isInManualExperiment,
@@ -360,10 +361,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  cryptoUnavailable(bytes) {
+  ffWithoutCrypto() {
     return experimentFeatureEnabled(
         this.win, DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
-        DFP_CANONICAL_FF_EXPERIMENT_NAME) ? bytes : null;
+        DFP_CANONICAL_FF_EXPERIMENT_NAME);
   }
 
   /**
