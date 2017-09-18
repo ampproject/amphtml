@@ -122,7 +122,7 @@ export class AmpAdExit extends AMP.BaseElement {
       for (const customVarName in target.vars) {
         if (customVarName[0] == '_') {
           const customVar =
-              /** @type {./config.Variable} */ (target.vars[customVarName]);
+              /** @type {!./config.Variable} */ (target.vars[customVarName]);
           if (customVar) {
             /*
               Example:
