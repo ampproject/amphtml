@@ -2056,8 +2056,12 @@ describe('amp-a4a', () => {
                 .returns(false);
             a4a.buildCallback();
             a4a.onLayoutMeasure();
-            return a4a.adPromise_.then(() => {
-              expect(a4a.isVerifiedAmpCreative_).to.be.false;
+            return a4a.layoutCallback().then(() => {
+              // Force vsync system to run all queued tasks, so that DOM mutations
+              // are actually completed before testing.
+              a4a.vsync_.runScheduledTasks_();
+              expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
+              expect(a4aElement.querySelector('iframe[srcdoc]')).to.not.be.ok;
             });
           });
 
@@ -2069,8 +2073,11 @@ describe('amp-a4a', () => {
             'shouldPreferentialRenderWithoutCrypto', () => true);
         a4a.buildCallback();
         a4a.onLayoutMeasure();
-        return a4a.adPromise_.then(() => {
-          expect(a4a.isVerifiedAmpCreative_).to.be.true;
+        return a4a.layoutCallback().then(() => {
+             // Force vsync system to run all queued tasks, so that DOM mutations
+             // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          verifyA4ARender(a4aElement);
         });
       });
 
@@ -2081,8 +2088,12 @@ describe('amp-a4a', () => {
             'shouldPreferentialRenderWithoutCrypto', () => true);
         a4a.buildCallback();
         a4a.onLayoutMeasure();
-        return a4a.adPromise_.then(() => {
-          expect(a4a.isVerifiedAmpCreative_).to.be.false;
+        return a4a.layoutCallback().then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
+          expect(a4aElement.querySelector('iframe[srcdoc]')).to.not.be.ok;
         });
       });
     });
