@@ -242,7 +242,7 @@ export class LegacySignatureVerifier {
    */
   verify(creative, headers, lifecycleCallback) {
     if (!this.isAvailable_()) {
-      return Promise.resolve(VerificationStatus.UNVERIFIED);
+      return Promise.resolve(VerificationStatus.CRYPTO_UNAVAILABLE);
     }
     const headerValue = headers.get(AMP_SIGNATURE_HEADER);
     if (!headerValue) {
