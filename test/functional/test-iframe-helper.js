@@ -200,4 +200,27 @@ describe('iframe-helper', function() {
     // breaks loose.
     postMessageSpy/*OK*/.restore();
   });
+
+  it('should remember type key in global list', () => {
+    const sentinel = generateSentinel(testIframe.ownerDocument.defaultView);
+    testIframe.src = nestedIframeSrc + '#amp-3p-sentinel=' + sentinel;
+    testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
+    IframeHelper.listenFor(testIframe, 'foo', () => {},
+        true  /* opt_is3P */, true /* opt_includingNestedWindows */,
+        'myTypeKey');
+    expect(testIframe.ownerDocument.defaultView[
+        IframeHelper.GLOBAL_TYPE_KEYS_NAME]).to.deep.equal(
+            ['myTypeKey', 'type']);
+  });
+
+  it('should have single default value in global type key list', () => {
+    const sentinel = generateSentinel(testIframe.ownerDocument.defaultView);
+    testIframe.src = nestedIframeSrc + '#amp-3p-sentinel=' + sentinel;
+    testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
+    IframeHelper.listenFor(testIframe, 'foo', () => {},
+        true  /* opt_is3P */, true /* opt_includingNestedWindows */);
+    expect(testIframe.ownerDocument.defaultView[
+        IframeHelper.GLOBAL_TYPE_KEYS_NAME]).to.deep.equal(['type']);
+  });
+
 });

@@ -28,6 +28,8 @@ import {tryParseJson} from './json';
  */
 const UNLISTEN_SENTINEL = 'unlisten';
 
+export const GLOBAL_TYPE_KEYS_NAME = 'AMP_EVENT_TYPE_KEYS';
+
 /**
  * @typedef {{
  *   frame: !Element,
@@ -190,17 +192,18 @@ function dropListenSentinel(listenSentinel) {
 /**
  * Registers the global listenFor event listener if it has yet to be.
  * @param {!Window} parentWin
- * @param {string=} opt_typeKey Key to index event type.
  */
-function registerGlobalListenerIfNeeded(parentWin, opt_typeKey) {
+function registerGlobalListenerIfNeeded(parentWin) {
   if (parentWin.listeningFors) {
     return;
   }
+  parentWin[GLOBAL_TYPE_KEYS_NAME].push('type');
   const listenForListener = function(event) {
     if (!getData(event)) {
       return;
     }
     const data = parseIfNeeded(getData(event));
+    data['sentinel'] = 'sentinel';
     if (!data || !data['sentinel']) {
       return;
     }
@@ -215,8 +218,14 @@ function registerGlobalListenerIfNeeded(parentWin, opt_typeKey) {
       return;
     }
 
-    let listeners = listenForEvents[data['type']] ||
-        (opt_typeKey && listenForEvents[data[opt_typeKey]]);
+    let listeners;
+    for (let i = 0; i < parentWin[GLOBAL_TYPE_KEYS_NAME].length; i++) {
+      const typeKey = parentWin[GLOBAL_TYPE_KEYS_NAME][i];
+      listeners = listenForEvents[data[typeKey]];
+      if (listeners) {
+        break;
+      }
+    }
     if (!listeners) {
       return;
     }
@@ -257,7 +266,12 @@ export function listenFor(
   dev().assert(callback);
   const parentWin = iframe.ownerDocument.defaultView;
 
-  registerGlobalListenerIfNeeded(parentWin, opt_typeKey);
+  parentWin[GLOBAL_TYPE_KEYS_NAME] = parentWin[GLOBAL_TYPE_KEYS_NAME] || [];
+  if (opt_typeKey) {
+    parentWin[GLOBAL_TYPE_KEYS_NAME].push(opt_typeKey);
+  }
+
+  registerGlobalListenerIfNeeded(parentWin);
 
   const listenForEvents = getOrCreateListenForEvents(
       parentWin,
