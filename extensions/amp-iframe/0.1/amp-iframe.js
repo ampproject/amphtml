@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {
   IntersectionObserverApi,
 } from '../../../src/intersection-observer-polyfill';
@@ -21,6 +22,7 @@ import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {closestBySelector, removeElement} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {endsWith} from '../../../src/string';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
@@ -28,6 +30,12 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {isSecureUrl, parseUrl, removeFragment} from '../../../src/url';
 import {listenFor} from '../../../src/iframe-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
+import {removeElement, closestBySelector} from '../../../src/dom';
+import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
+import {Services} from '../../../src/services';
+import {user, dev} from '../../../src/log';
+import {utf8EncodeSync} from '../../../src/utils/bytes';
+import {urls} from '../../../src/config';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
 import {utf8Encode} from '../../../src/utils/bytes.js';
@@ -60,6 +68,7 @@ export class AmpIframe extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
     /** @private {?Element} */
     this.placeholder_ = null;
 
@@ -115,6 +124,12 @@ export class AmpIframe extends AMP.BaseElement {
 
     /** @private {boolean|undefined} */
     this.isInContainer_ = undefined;
+
+    /**
+     * The origin of URL at `src` attr, if available. Otherwise, null.
+     * @private {string}
+     */
+    this.targetOrigin_ = null;
   }
 
   /** @override */
@@ -236,6 +251,7 @@ export class AmpIframe extends AMP.BaseElement {
   buildCallback() {
     this.placeholder_ = this.getPlaceholder();
     this.isClickToPlay_ = !!this.placeholder_;
+
     this.isResizable_ = this.element.hasAttribute('resizable');
     if (this.isResizable_) {
       this.element.setAttribute('scrolling', 'no');
@@ -246,6 +262,8 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     this.container_ = makeIOsScrollable(this.element);
+
+    this.registerActionsAndEvents_();
   }
 
   /**
@@ -534,6 +552,7 @@ export class AmpIframe extends AMP.BaseElement {
   /**
    * Whether this is iframe may have tracking as its primary use case.
    * @return {boolean}
+   * @private
    */
   looksLikeTrackingIframe_() {
     const box = this.element.getLayoutBox();
@@ -548,7 +567,78 @@ export class AmpIframe extends AMP.BaseElement {
     }
     return !this.isInContainer_;
   }
-}
+
+  /**
+   * Registers 'postMessage' action and 'message' event.
+   * @private
+   */
+  registerActionsAndEvents_() {
+    const src = this.element.getAttribute('src');
+    if (src) {
+      this.targetOrigin_ = parseUrl(src).origin;
+    }
+
+    this.registerAction('postMessage', invocation => {
+      if (this.targetOrigin_) {
+        this.iframe_.contentWindow./*OK*/postMessage(
+            invocation.args, this.targetOrigin_);
+      } else {
+        user().error(TAG_, '"postMessage" only allowed with src with origin.');
+      }
+    }, ActionTrust.HIGH);
+
+    if (this.targetOrigin_) {
+      const maxUnexpectedMessages = 10;
+      let unexpectedMessages = 0;
+
+      const listener = e => {
+        if (e.source !== this.iframe_.contentWindow) {
+          // Ignore messages from other iframes.
+          return;
+        }
+        if (e.origin !== this.targetOrigin_) {
+          user().error(TAG_, '"message" received from unexpected origin: ' +
+              e.origin + '. Only allowed from: ' + this.targetOrigin_);
+          return;
+        }
+        if (!this.isUserGesture_()) {
+          unexpectedMessages++;
+          user().error(TAG_, '"message" event may only be triggered ' +
+              'from a user gesture.');
+          // Disable the 'message' event if the iframe is behaving badly.
+          if (unexpectedMessages >= maxUnexpectedMessages) {
+            this.win.removeEventListener('message', listener);
+          }
+          return;
+        }
+        const event = createCustomEvent(this.win, 'amp-iframe:message', e.data);
+        const actionService = Services.actionServiceForDoc(this.getAmpDoc());
+        actionService.trigger(this.element, 'message', event, ActionTrust.HIGH);
+      };
+      // TODO(choumx): Consider using global listener in iframe-helper.
+      this.win.addEventListener('message', listener);
+    }
+  }
+
+  /**
+   * Returns true if a user gesture was recently performed.
+   * @return {boolean}
+   * @private
+   */
+  isUserGesture_() {
+    // Best effort polyfill until native support is available: check that
+    // iframe has focus and audio playback isn't immediately paused.
+    if (this.getAmpDoc().getRootNode().activeElement !== this.iframe_) {
+      return false;
+    }
+    const audio = this.win.document.createElement('audio');
+    audio.play();
+    if (audio.paused) {
+      return false;
+    }
+    return true;
+  }
+};
 
 /**
  * We always set a sandbox. Default is that none of the things that need
@@ -561,7 +651,6 @@ function setSandbox(element, iframe, sandbox) {
   const allows = sandbox || '';
   iframe.setAttribute('sandbox', allows);
 }
-
 
 /**
  * If scrolling is allowed for the iframe, wraps the element into a container
