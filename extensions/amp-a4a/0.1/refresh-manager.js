@@ -122,7 +122,7 @@ export class RefreshManager {
 
     /** @const @private {?number} */
     this.refreshIntervalMsecs_ = (refreshIntervalMsecs &&
-        refreshIntervalMsecs > 30000) ||
+        refreshIntervalMsecs >= 30000) ||
         this.getPublisherSpecifiedRefreshInterval_();
 
     /** @const @private {!RefreshConfig} */
