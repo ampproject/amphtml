@@ -259,7 +259,6 @@ function reportPostambule(reportFile) {
  * @param {!Object} record screenshot diff results record
  */
 function reportRecord(reportFile, file, dir, record) {
-
   /**
    * Create html for a thumbnail link
    * @param {string} file file path to a thumbnail image
@@ -300,11 +299,13 @@ gulp.task('make-golden', 'Creates a "golden" screenshot', makeGolden, {
 });
 
 gulp.task('test-screenshots', 'Tests screenshots against "golden" images',
-    testScreenshots, {
-  options: {
-    'host': '  The host. Defaults to "http://localhost:8000".',
-    'name': '  The name of the run. Defaults to "screenshots".' +
-        ' The run files are placed in the "build/{name}" dir.',
-    'verbose': '  Verbose logging. Default is false. Shorthand is "-v"'
+    testScreenshots,
+  {
+    options: {
+      'host': '  The host. Defaults to "http://localhost:8000".',
+      'name': '  The name of the run. Defaults to "screenshots".' +
+      ' The run files are placed in the "build/{name}" dir.',
+      'verbose': '  Verbose logging. Default is false. Shorthand is "-v"'
+    }
   }
-});
+);

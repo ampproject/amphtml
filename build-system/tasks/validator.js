@@ -23,14 +23,14 @@ var execOrDie = require('../exec.js').execOrDie;
  * Simple wrapper around the python based validator build.
  */
 function validator() {
-  execOrDie('cd validator && python build.py')
+  execOrDie('cd validator && python build.py');
 }
 
 /**
  * Simple wrapper around the python based validator webui build.
  */
 function validatorWebui() {
-  execOrDie('cd validator/webui && python build.py')
+  execOrDie('cd validator/webui && python build.py');
 }
 
 gulp.task('validator', 'Builds and tests the AMP validator.', validator);

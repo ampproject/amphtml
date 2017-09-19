@@ -35,10 +35,10 @@ gulp.task('compile-bind-expr', function() {
   var jsExports = 'exports.parser = parser;';
 
   var out = [
-      license,
-      suppressCheckTypes,
-      imports,
-      jsModule,
-      jsExports].join('\n\n') + '\n';
+    license,
+    suppressCheckTypes,
+    imports,
+    jsModule,
+    jsExports].join('\n\n') + '\n';
   fs.writeFileSync(path + 'bind-expr-impl.js', out);
 });

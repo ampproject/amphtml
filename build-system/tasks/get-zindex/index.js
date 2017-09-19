@@ -25,12 +25,12 @@ var util = require('gulp-util');
 
 var tableHeaders = [
  ['selector', 'z-index', 'file'],
- ['---', '---', '---'],
+ ['---', '---', '---']
 ];
 
 var tableOptions = {
   align: ['l', 'l', 'l'],
-  hsep: '   |   ',
+  hsep: '   |   '
 };
 
 

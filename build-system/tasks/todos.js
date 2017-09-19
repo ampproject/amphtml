@@ -104,7 +104,7 @@ function githubRequest(path, opt_method, opt_data) {
     },
     qs: {
       access_token: GITHUB_ACCESS_TOKEN
-    },
+    }
   };
   if (opt_method) {
     options.method = opt_method;

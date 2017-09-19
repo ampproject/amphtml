@@ -33,6 +33,7 @@ var shuffleSeed = require('shuffle-seed');
 const green = util.colors.green;
 const yellow = util.colors.yellow;
 const cyan = util.colors.cyan;
+const preTestTasks = argv.nobuild ? [] : (argv.unit ? ['css'] : ['build']);
 
 
 /**
@@ -68,14 +69,14 @@ function getConfig() {
             'SL_Chrome_latest',
             'SL_Chrome_45',
             'SL_Firefox_latest',
-            //'SL_Safari_8' // Disabled due to flakiness and low market share
+            // 'SL_Safari_8' // Disabled due to flakiness and low market share
             'SL_Safari_9',
             'SL_Edge_latest',
-            //'SL_iOS_8_4', // Disabled due to flakiness and low market share
+            // 'SL_iOS_8_4', // Disabled due to flakiness and low market share
             'SL_iOS_9_1',
             'SL_iOS_10_0',
-            'SL_IE_11',
-          ],
+            'SL_IE_11'
+          ]
     });
   }
   return karmaDefault;
@@ -88,7 +89,7 @@ function getAdTypes() {
     // filename: [type1, type2, ... ]
     adblade: ['adblade', 'industrybrains'],
     mantis: ['mantis-display', 'mantis-recommend'],
-    weborama: ['weborama-display'],
+    weborama: ['weborama-display']
   };
 
   // Start with Google ad types
@@ -137,7 +138,7 @@ function printArgvMessages() {
     randomize: 'Randomizing the order in which tests are run.',
     a4a: 'Running only A4A tests.',
     seed: 'Randomizing test order with seed ' + cyan(argv.seed) + '.',
-    compiled:  'Running tests against minified code.',
+    compiled: 'Running tests against minified code.',
     grep: 'Only running tests that match the pattern "' +
         cyan(argv.grep) + '".'
   };
@@ -166,14 +167,13 @@ function printArgvMessages() {
 /**
  * Run tests.
  */
-gulp.task('test', 'Runs tests',
-    argv.nobuild ? [] : (argv.unit ? ['css'] : ['build']), function(done) {
+gulp.task('test', 'Runs tests', preTestTasks, function(done) {
   if (!argv.nohelp) {
     printArgvMessages();
   }
 
   if (!argv.integration && process.env.AMPSAUCE_REPO) {
-    console./*OK*/info('Deactivated for ampsauce repo')
+    console./* OK*/info('Deactivated for ampsauce repo');
   }
 
   var c = getConfig();
@@ -231,7 +231,7 @@ gulp.task('test', 'Runs tests',
     useCompiledJs: !!argv.compiled,
     saucelabs: !!argv.saucelabs,
     adTypes: getAdTypes(),
-    mochaTimeout: c.client.mocha.timeout,
+    mochaTimeout: c.client.mocha.timeout
   };
 
   if (argv.compiled) {
@@ -242,7 +242,7 @@ gulp.task('test', 'Runs tests',
 
   if (argv.grep) {
     c.client.mocha = {
-      'grep': argv.grep,
+      'grep': argv.grep
     };
   }
 
@@ -263,11 +263,11 @@ gulp.task('test', 'Runs tests',
         { type: 'lcov', subdir: 'report-lcov' },
         { type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt' },
         { type: 'text', subdir: '.', file: 'text.txt' },
-        { type: 'text-summary', subdir: '.', file: 'text-summary.txt' },
+        { type: 'text-summary', subdir: '.', file: 'text-summary.txt' }
       ],
       instrumenterOptions: {
         istanbul: {
-          noCompact: true,
+          noCompact: true
         }
       }
     };
@@ -281,9 +281,9 @@ gulp.task('test', 'Runs tests',
         port: 31862,
         host: 'localhost',
         directoryListing: true,
-        middleware: [app],
+        middleware: [app]
       })
-      .on('kill', function () {
+      .on('kill', function() {
         util.log(yellow(
             'Shutting down test responses server on localhost:31862'));
         process.nextTick(function() {
@@ -327,6 +327,6 @@ gulp.task('test', 'Runs tests',
     'glob': '  Explicitly expands test paths using glob before passing ' +
         'to Karma',
     'nohelp': '  Silence help messages that are printed prior to test run',
-    'a4a': '  Runs all A4A tests',
+    'a4a': '  Runs all A4A tests'
   }
 });

@@ -55,9 +55,9 @@ function serve() {
       'SERVE_PROCESS_ID': process.pid,
       'SERVE_QUIET': quiet
     },
-    stdout: !quiet,
+    stdout: !quiet
   })
-  .once('quit', function () {
+  .once('quit', function() {
     util.log(util.colors.green('Shutting down server'));
   });
   if (!quiet) {
@@ -75,14 +75,14 @@ gulp.task(
     'serve',
     'Serves content in root dir over ' + getHost() + '/',
     serve,
-    {
-      options: {
-        'host': '  Hostname or IP address to bind to (default: localhost)',
-        'port': '  Specifies alternative port (default: 8000)',
-        'https': '  Use HTTPS server (default: false)',
-        'quiet': '  Do not log HTTP requests (default: false)'
-      }
+  {
+    options: {
+      'host': '  Hostname or IP address to bind to (default: localhost)',
+      'port': '  Specifies alternative port (default: 8000)',
+      'https': '  Use HTTPS server (default: false)',
+      'quiet': '  Do not log HTTP requests (default: false)'
     }
+  }
 );
 
 function getHost() {

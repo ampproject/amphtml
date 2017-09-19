@@ -23,11 +23,11 @@ var result = {
   'test.css': {
     '.selector-1': '1',
     '.selector-2': '0',
-    '.selector-3': '99',
+    '.selector-3': '99'
   },
   'test-2.css': {
-    '.selector-4': '80',
-  },
+    '.selector-4': '80'
+  }
 };
 
 test.cb('collects selectors', t => {
@@ -49,7 +49,7 @@ test('sync - create array of arrays with z index order', t => {
     ['.selector-2', '0', 'test.css'],
     ['.selector-1', '1', 'test.css'],
     ['.selector-4', '80', 'test-2.css'],
-    ['.selector-3', '99', 'test.css'],
+    ['.selector-3', '99', 'test.css']
   ];
   t.deepEqual(table, expected);
 });

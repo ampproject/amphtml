@@ -30,7 +30,7 @@ test('sync - build out correct CODEOWNERS', t => {
       {'ampproject/group': ['*.protoascii']}
     ],
     ads: ['username3', '@username1'],
-    'some/deeply/nested/dir': ['username5', {'ampproject/group2': ['some.js']}],
+    'some/deeply/nested/dir': ['username5', {'ampproject/group2': ['some.js']}]
   };
   t.plan(1);
   const result = m.buildCodeownersFile(owners);

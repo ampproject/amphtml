@@ -121,7 +121,7 @@ function parseSizeFile(file) {
 
     return {
       name: `"${name}"`,
-      size: `"${reversePrettyBytes(columns[minPos])}"`,
+      size: `"${reversePrettyBytes(columns[minPos])}"`
     };
   }).filter(x => !!x);
 }
@@ -146,7 +146,7 @@ function mergeTables(dateTimes, tables) {
       }
       obj[name].push({
         size: field.size,
-        dateTime: field.dateTime,
+        dateTime: field.dateTime
       });
     });
   });
@@ -245,7 +245,7 @@ function serializeCheckout(logs) {
 }
 
 function csvify() {
-  var shaAndDate = "%H %ai";
+  var shaAndDate = '%H %ai';
   return getLog(shaAndDate)
       .then(logs => {
         // Reverse it from oldest to newest

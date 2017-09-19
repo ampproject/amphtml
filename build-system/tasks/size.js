@@ -34,12 +34,12 @@ var FILENAME_POS = 2;
 // normalized table headers
 var tableHeaders = [
   ['max', 'min', 'gzip', 'file'],
-  ['---', '---', '---', '---'],
+  ['---', '---', '---', '---']
 ];
 
 var tableOptions = {
   align: ['r', 'r', 'r', 'l'],
-  hsep: '   |   ',
+  hsep: '   |   '
 };
 
 /**
@@ -181,7 +181,7 @@ function onFileThrough(rows, file, enc, cb) {
   rows.push([
     prettyBytes(file.contents.length),
     prettyBytes(gzipSize.sync(file.contents)),
-    file.relative,
+    file.relative
   ]);
 
   cb(null, file);
@@ -199,7 +199,7 @@ function onFileThroughEnd(rows, cb) {
   rows = normalizeRows(rows);
   rows.unshift.apply(rows, tableHeaders);
   var tbl = table(rows, tableOptions);
-  console/*OK*/.log(tbl);
+  console/* OK*/.log(tbl);
   fs.writeFileSync('test/size.txt', tbl);
   cb();
 }
@@ -224,12 +224,12 @@ function sizer() {
  */
 function sizeTask() {
   gulp.src([
-      'dist/**/*.js',
-      '!dist/**/*-latest.js',
-      '!dist/**/*check-types.js',
-      '!dist/**/amp-viewer-host.max.js',
-      'dist.3p/{current,current-min}/**/*.js',
-    ])
+    'dist/**/*.js',
+    '!dist/**/*-latest.js',
+    '!dist/**/*check-types.js',
+    '!dist/**/amp-viewer-host.max.js',
+    'dist.3p/{current,current-min}/**/*.js'
+  ])
     .pipe(sizer())
     .pipe(gulp.dest(tempFolderName))
     .on('end', del.bind(null, [tempFolderName]));

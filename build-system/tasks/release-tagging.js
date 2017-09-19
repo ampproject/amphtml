@@ -36,7 +36,7 @@ var verbose = (argv.verbose || argv.v);
 
 var LABELS = {
   'canary': 'PR use: In Canary',
-  'prod': 'PR use: In Production',
+  'prod': 'PR use: In Production'
 };
 
 
@@ -71,7 +71,7 @@ function releaseTagFor(type, dir) {
     util.log('Git tag: ', tag);
     return gitExec({
       cwd: ampDir,
-      args: 'checkout ' + tag,
+      args: 'checkout ' + tag
     });
   });
 
@@ -83,7 +83,7 @@ function releaseTagFor(type, dir) {
     var dateIso = date.toISOString().split('T')[0];
     return gitExec({
       cwd: ampDir,
-      args: 'log --pretty=oneline --since=' + dateIso,
+      args: 'log --pretty=oneline --since=' + dateIso
     });
   }).then(function(output) {
     var lines = output.split('\n');
@@ -152,13 +152,13 @@ function gitFetch(dir) {
   } else {
     clonePromise = gitExec({
       cwd: dir,
-      args: 'clone https://github.com/ampproject/amphtml.git',
+      args: 'clone https://github.com/ampproject/amphtml.git'
     });
   }
   return clonePromise.then(function(arg) {
     return gitExec({
       cwd: ampDir,
-      args: 'fetch --tags',
+      args: 'fetch --tags'
     });
   });
 }
@@ -178,7 +178,7 @@ function githubRequest(path, opt_method, opt_data) {
     },
     qs: {
       access_token: GITHUB_ACCESS_TOKEN
-    },
+    }
   };
   if (opt_method) {
     options.method = opt_method;
@@ -221,6 +221,6 @@ function releaseTag() {
 gulp.task('release:tag', 'Tag the releases in pull requests', releaseTag, {
   options: {
     dryrun: '  Generate update log but dont push it out',
-    type: '  Either of "canary", "prod" or "all". Default is "all".',
+    type: '  Either of "canary", "prod" or "all". Default is "all".'
   }
 });

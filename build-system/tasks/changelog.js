@@ -45,26 +45,26 @@ const pullOptions = {
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
     'Accept': 'application/vnd.github.v3+json'
-  },
+  }
 };
 const latestReleaseOptions = {
   url: 'https://api.github.com/repos/ampproject/amphtml/releases/latest',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
     'Accept': 'application/vnd.github.v3+json'
-  },
-}
+  }
+};
 
 if (GITHUB_ACCESS_TOKEN) {
   pullOptions.qs = {
     access_token: GITHUB_ACCESS_TOKEN
-  }
+  };
 }
 
 if (GITHUB_ACCESS_TOKEN) {
   latestReleaseOptions.qs = {
     access_token: GITHUB_ACCESS_TOKEN
-  }
+  };
 }
 
 /**
@@ -157,9 +157,9 @@ function getGitMetadata() {
  * @return {!GitMetadataDef}
  */
 function getBaseCanaryVersion(gitMetadata) {
-  var command = `git show-ref --tags | ` +
-      `grep $(git show-ref refs/remotes/origin/canary | cut -d ' ' -f 1) | ` +
-      `cut -d '/' -f 3`;
+  var command = 'git show-ref --tags | ' +
+      'grep $(git show-ref refs/remotes/origin/canary | cut -d \' \' -f 1) | ' +
+      'cut -d \'/\' -f 3';
 
   if (isAmpRelease(argv.branch)) {
     return exec(command).then((baseCanaryVersion) => {
@@ -201,7 +201,7 @@ function submitReleaseNotes(version, changelog, sha) {
   if (GITHUB_ACCESS_TOKEN) {
     options.qs = {
       access_token: GITHUB_ACCESS_TOKEN
-    }
+    };
   }
 
   return request(options).then(function() {
@@ -227,28 +227,28 @@ function buildChangelog(gitMetadata) {
 
   if (gitMetadata.baseTag && isAmpRelease(argv.branch)) {
     changelog += `## Based on original release: [${gitMetadata.baseTag}]` +
-        `(https://github.com/ampproject/amphtml/releases/` +
+        '(https://github.com/ampproject/amphtml/releases/' +
         `tag/${gitMetadata.baseTag})\n\n`;
   }
 
   // Append all titles
   changelog += gitMetadata.logs.filter(function(log) {
-        var pr = log.pr;
-        if (!pr) {
-          return true;
-        }
-        // Ignore pr's that are just all docs changes.
-        return !pr.filenames.every(function(filename) {
-          return config.changelogIgnoreFileTypes.test(filename);
-        });
-      })
-      .map(function(log) {
-        var pr = log.pr;
-        if (!pr) {
-          return '  - ' + log.title;
-        }
-        return `  - ${pr.title.trim()} (#${pr.id})`;
-      }).join('\n');
+    var pr = log.pr;
+    if (!pr) {
+      return true;
+    }
+    // Ignore PRs that are just all docs changes.
+    return !pr.filenames.every(function(filename) {
+      return config.changelogIgnoreFileTypes.test(filename);
+    });
+  })
+  .map(function(log) {
+    var pr = log.pr;
+    if (!pr) {
+      return '  - ' + log.title;
+    }
+    return `  - ${pr.title.trim()} (#${pr.id})`;
+  }).join('\n');
   changelog += '\n\n## Breakdown by component\n\n';
   var sections = buildSections(gitMetadata);
 
@@ -372,9 +372,9 @@ function getGithubPullRequestsMetadata(gitMetadata) {
   // (erwinm): Github seems to only return data for the first 3 pages
   // from my manual testing.
   return BBPromise.all([
-      getClosedPullRequests(1),
-      getClosedPullRequests(2),
-      getClosedPullRequests(3),
+    getClosedPullRequests(1),
+    getClosedPullRequests(2),
+    getClosedPullRequests(3)
   ])
   .then(requests => [].concat.apply([], requests))
   .then(prs => {
@@ -437,11 +437,11 @@ function getClosedPullRequests(opt_page) {
   options.qs = {
     state: 'closed',
     page: opt_page,
-    access_token: GITHUB_ACCESS_TOKEN,
+    access_token: GITHUB_ACCESS_TOKEN
   };
   return request(options).then(res => {
     const prs = JSON.parse(res.body);
-    assert(Array.isArray(prs), `prs must be an array.`);
+    assert(Array.isArray(prs), 'prs must be an array.');
     return prs;
   });
 }
@@ -454,7 +454,7 @@ function getClosedPullRequests(opt_page) {
 function getPullRequest(prOption, log) {
   return request(prOption).then(function(res) {
     var pr = JSON.parse(res.body);
-    assert(typeof pr == 'object', 'Pull Requests Metadata must be an object');
+    assert(typeof pr === 'object', 'Pull Requests Metadata must be an object');
     log.pr = buildPrMetadata(pr);
     return log.pr;
   });
@@ -494,7 +494,7 @@ function errHandler(err) {
  * @return {boolean}
  */
 function isPrIdInTitle(str) {
-  return str./*OK*/indexOf('Merge pull request #') == 0;
+  return str./* OK*/indexOf('Merge pull request #') == 0;
 }
 
 /**
@@ -515,7 +515,7 @@ function getPrIdFromCommit(commit) {
  * @return {boolean}
  */
 function isJs(str) {
-  return str./*OK*/endsWith('.js');
+  return str./* OK*/endsWith('.js');
 }
 
 /**
@@ -524,7 +524,7 @@ function isJs(str) {
  * @return {boolean}
  */
 function isAmpRelease(str) {
-  return !!(str && str./*OK*/indexOf('amp-release') == 0);
+  return !!(str && str./* OK*/indexOf('amp-release') == 0);
 }
 
 /**
@@ -537,7 +537,7 @@ function buildPrMetadata(pr) {
     title: pr.title,
     body: pr.body,
     merge_commit_sha: pr.merge_commit_sha,
-    url: pr._links.self.href,
+    url: pr._links.self.href
   };
 }
 
@@ -558,7 +558,7 @@ function changelogUpdate() {
 }
 
 function update() {
-  var url = `https://api.github.com/repos/ampproject/amphtml/releases/tags/` +
+  var url = 'https://api.github.com/repos/ampproject/amphtml/releases/tags/' +
       `${argv.version}`;
   var tagsOptions = {
     url: url,
@@ -566,7 +566,7 @@ function update() {
     headers: {
       'User-Agent': 'amp-changelog-gulp-task',
       'Accept': 'application/vnd.github.v3+json'
-    },
+    }
   };
 
   var releasesOptions = {
@@ -577,16 +577,16 @@ function update() {
     headers: {
       'User-Agent': 'amp-changelog-gulp-task',
       'Accept': 'application/vnd.github.v3+json'
-    },
+    }
   };
 
   if (GITHUB_ACCESS_TOKEN) {
     tagsOptions.qs = {
       access_token: GITHUB_ACCESS_TOKEN
-    }
+    };
     releasesOptions.qs = {
       access_token: GITHUB_ACCESS_TOKEN
-    }
+    };
   }
 
   return request(tagsOptions).then(res => {
@@ -597,9 +597,9 @@ function update() {
     var id = release.id;
     releasesOptions.url += id;
     if (argv.suffix) {
-      releasesOptions.body['body'] = release.body + argv.message;
+      releasesOptions.body.body = release.body + argv.message;
     } else {
-      releasesOptions.body['body'] = argv.message + release.body;
+      releasesOptions.body.body = argv.message + release.body;
     }
     return request(releasesOptions).then(() => {
       util.log(util.colors.green('Update Successful.'));
@@ -614,14 +614,15 @@ gulp.task('changelog', 'Create github release draft', changelog, {
   options: {
     dryrun: '  Generate changelog but dont push it out',
     type: '  Pass in "canary" to generate a canary changelog',
-    version: '  The git tag and github release label',
+    version: '  The git tag and github release label'
   }
 });
 
-gulp.task('changelog:update', 'Update github release. Ex. prepend ' +
-    'canary percentage changes to release', changelogUpdate, {
+const updateMessage = 'Update github release. Ex. prepend ' +
+    'canary percentage changes to release';
+gulp.task('changelog:update', updateMessage, changelogUpdate, {
   options: {
     dryrun: '  Generate changelog but dont push it out',
-    version: '  The git tag and github release label',
+    version: '  The git tag and github release label'
   }
 });

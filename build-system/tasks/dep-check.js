@@ -60,7 +60,6 @@ var GlobsDef;
  * @constructor @final @struct
  */
 function Rule(config) {
-
   /** @private @const {!RuleConfigDef} */
   this.config_ = config;
 
@@ -157,7 +156,7 @@ function getSrcs() {
       .filter(x => fs.statSync(x).isDirectory())
       .map(getEntryModule)
       // Concat the core binary and integration binary as entry points.
-      .concat(`src/amp.js`, `3p/integration.js`));
+      .concat('src/amp.js', '3p/integration.js'));
   });
 }
 
@@ -182,7 +181,7 @@ function getGraph(entryModule) {
   bundler.pipeline.get('deps').push(through.obj(function(row, enc, next) {
     module.deps.push({
       name: row.file.replace(absPathRegExp, ''),
-      deps: row.deps,
+      deps: row.deps
     });
     this.push(row);
     next();
@@ -284,7 +283,7 @@ function toArrayOrDefault(value, defaultValue) {
   if (Array.isArray(value)) {
     return value;
   }
-  if (typeof value == 'string') {
+  if (typeof value === 'string') {
     return [value];
   }
   return defaultValue;

@@ -35,22 +35,22 @@ const issuesOptions = {
   url: 'https://api.github.com/repos/ampproject/amphtml/issues',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
-    'Accept': 'application/vnd.github.v3+json',
+    'Accept': 'application/vnd.github.v3+json'
   },
   qs: {
-    access_token: GITHUB_ACCESS_TOKEN,
-  },
+    access_token: GITHUB_ACCESS_TOKEN
+  }
 };
 
 const milestoneOptions = {
   url: 'https://api.github.com/repos/ampproject/amphtml/milestones',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
-    'Accept': 'application/vnd.github.v3+json',
+    'Accept': 'application/vnd.github.v3+json'
   },
   qs: {
-    access_token: GITHUB_ACCESS_TOKEN,
-  },
+    access_token: GITHUB_ACCESS_TOKEN
+  }
 };
 
 // 4 is the number for Milestone 'Backlog Bugs'
@@ -75,7 +75,7 @@ function processIssues() {
   }
   return updateGitHubIssues().then(function() {
     util.log(util.colors.blue('automation applied'));
-  })
+  });
 }
 
 /**
@@ -90,11 +90,11 @@ function getIssues(opt_page) {
     state: 'open',
     page: opt_page,
     per_page: 100,
-    access_token: GITHUB_ACCESS_TOKEN,
+    access_token: GITHUB_ACCESS_TOKEN
   };
   return request(options).then(res => {
     const issues = JSON.parse(res.body);
-    assert(Array.isArray(issues), `issues must be an array.`);
+    assert(Array.isArray(issues), 'issues must be an array.');
     return issues;
   });
 }
@@ -104,14 +104,14 @@ function getIssues(opt_page) {
  * depending if missing milestone or label,
  * tasks applied as per design go/ampgithubautomation
  */
-function updateGitHubIssues(){
+function updateGitHubIssues() {
   var promise = Promise.resolve();
   return BBPromise.all([
     getIssues(1),
     getIssues(2),
     getIssues(3),
     getIssues(4),
-    getIssues(5),
+    getIssues(5)
   ])
   .then(requests => [].concat.apply([], requests))
   .then(issues => {
@@ -127,8 +127,8 @@ function updateGitHubIssues(){
 
       // Get the title and state of the milestone
       if (milestone) {
-        milestoneTitle = milestone['title'];
-        milestoneState = milestone['state'];
+        milestoneTitle = milestone.title;
+        milestoneState = milestone.state;
       }
       // Get the labels we want to check
       labels.forEach(function(label) {
@@ -156,37 +156,31 @@ function updateGitHubIssues(){
             updates.push(applyMilestone(issue, issueNewMilestone));
           }
         }
-        //if issueType is not null, add correct milestones
+        // if issueType is not null, add correct milestones
         if (issueType != null) {
           if (milestoneTitle === 'Pending Triage' || milestone == null) {
             if (issueType === 'Type: Feature Request') {
               issueNewMilestone = MILESTONE_NEW_FRS;
               updates.push(applyMilestone(issue, issueNewMilestone));
-            }
-            else if (issueType === 'Related to: Documentation' ||
+            } else if (issueType === 'Related to: Documentation' ||
                 issueType === 'Type: Design Review' ||
                 issueType === 'Type: Weekly Status') {
               issueNewMilestone = MILESTONE_DOCS_UPDATES;
               updates.push(applyMilestone(issue, issueNewMilestone));
-            }
-            else if (issueType === 'Type: Bug' ||
+            } else if (issueType === 'Type: Bug' ||
                 issueType === 'Related to: Flaky Tests') {
               issueNewMilestone = MILESTONE_BACKLOG_BUGS;
               updates.push(applyMilestone(issue, issueNewMilestone));
-            }
-            else if (milestone == null) {
+            } else if (milestone == null) {
               updates.push(applyMilestone(issue, issueNewMilestone));
             }
           }
-        }
-        else if (milestone == null) {
+        } else if (milestone == null) {
           updates.push(applyMilestone(issue, issueNewMilestone));
-        }
-        else if (milestoneTitle === 'Prioritized FRs' ||
+        } else if (milestoneTitle === 'Prioritized FRs' ||
           milestoneTitle === 'New FRs') {
           updates.push(applyLabel(issue, 'Type: Feature Request'));
-        }
-        else if (milestoneTitle === 'Backlog Bugs' ||
+        } else if (milestoneTitle === 'Backlog Bugs' ||
           milestoneTitle.startsWith('Sprint')) {
           updates.push(applyLabel(issue, 'Type: Bug'));
         }
@@ -203,9 +197,8 @@ function updateGitHubIssues(){
             util.log(util.inspect(update, { depth: null }));
           });
           return Promise.resolve();
-        } else {
-          return Promise.all(updates);
         }
+        return Promise.all(updates);
       });
     });
     return issues;
@@ -222,7 +215,7 @@ function applyMilestone(issue, milestoneNumber) {
   options.qs = {
     state: 'open',
     per_page: 100,
-    access_token: GITHUB_ACCESS_TOKEN,
+    access_token: GITHUB_ACCESS_TOKEN
   };
 
   issue.milestone = milestoneNumber;
@@ -247,7 +240,7 @@ function applyLabel(issue, label) {
   options.qs = {
     state: 'open',
     per_page: 100,
-    access_token: GITHUB_ACCESS_TOKEN,
+    access_token: GITHUB_ACCESS_TOKEN
   };
   return createGithubRequest(
       '/issues/' + issue.number + '/labels',
@@ -274,11 +267,11 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
     body: {},
     headers: {
       'User-Agent': 'amp-changelog-gulp-task',
-      'Accept': 'application/vnd.github.v3+json',
+      'Accept': 'application/vnd.github.v3+json'
     },
     qs: {
-      access_token: GITHUB_ACCESS_TOKEN,
-    },
+      access_token: GITHUB_ACCESS_TOKEN
+    }
   };
   if (opt_method) {
     options.method = opt_method;
@@ -286,7 +279,7 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
   if (opt_data) {
     options.json = true;
     if (typeRequest === 'milestone') {
-      options.body['milestone'] = opt_data;
+      options.body.milestone = opt_data;
     } else {
       options.body = opt_data;
     }
@@ -301,7 +294,7 @@ gulp.task(
   processIssues,
   {
     options: {
-      dryrun: '  Generate process but don\'t push it out',
+      dryrun: '  Generate process but don\'t push it out'
     }
   }
 );

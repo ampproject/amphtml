@@ -35,21 +35,19 @@ var util = require('gulp-util');
 function getMarkdownFiles() {
   if (!!argv.files) {
     return argv.files.split(',');
-  } else {
-    if (!!process.env.TRAVIS_PULL_REQUEST_SHA) {
-      // On Travis, derive the list of .md files from the latest commit.
-      var filesInPr =
-          getStdout(`git diff --name-only master...HEAD`).trim().split('\n');
-      return filesInPr.filter(function(file) {
-        return path.extname(file) == '.md'
-      });
-    } else {
-      // A list of files is required when check-links is run locally.
-      util.log(util.colors.red(
-          'Error: A list of markdown files must be specified via --files'));
-      process.exit(1);
-    }
   }
+  if (!!process.env.TRAVIS_PULL_REQUEST_SHA) {
+    // On Travis, derive the list of .md files from the latest commit.
+    var filesInPr =
+          getStdout('git diff --name-only master...HEAD').trim().split('\n');
+    return filesInPr.filter(function(file) {
+      return path.extname(file) == '.md';
+    });
+  }
+  // A list of files is required when check-links is run locally.
+  util.log(util.colors.red(
+      'Error: A list of markdown files must be specified via --files'));
+  process.exit(1);
 }
 
 /**
@@ -72,12 +70,12 @@ function checkLinks() {
         return;
       }
       var deadLinksFoundInFile = false;
-      results.forEach(function (result) {
+      results.forEach(function(result) {
         // Skip links to files that were introduced by the PR.
         if (isLinkToFileIntroducedByPR(result.link)) {
           return;
         }
-        if(result.status === 'dead') {
+        if (result.status === 'dead') {
           deadLinksFound = true;
           deadLinksFoundInFile = true;
           util.log('[%s] %s', chalk.red('✖'), result.link);
@@ -85,7 +83,7 @@ function checkLinks() {
           util.log('[%s] %s', chalk.green('✔'), result.link);
         }
       });
-      if(deadLinksFoundInFile) {
+      if (deadLinksFoundInFile) {
         filesWithDeadLinks.push(markdownFiles[index]);
         util.log(
             util.colors.red('ERROR'),
@@ -99,21 +97,21 @@ function checkLinks() {
       }
     });
     if (deadLinksFound) {
-        util.log(
-            util.colors.red('ERROR'),
-            'Please update dead link(s) in',
-            util.colors.magenta(filesWithDeadLinks.join(',')),
-            'or whitelist them in build-system/tasks/check-links.js');
-        util.log(
-            util.colors.yellow('NOTE'),
-            'If the link(s) above are illustrative and aren\'t meant to work,',
-            'surrounding them with backticks or <code></code> will exempt them',
-            'from the link checker.');
-        process.exit(1);
+      util.log(
+          util.colors.red('ERROR'),
+          'Please update dead link(s) in',
+          util.colors.magenta(filesWithDeadLinks.join(',')),
+          'or whitelist them in build-system/tasks/check-links.js');
+      util.log(
+          util.colors.yellow('NOTE'),
+          'If the link(s) above are illustrative and aren\'t meant to work,',
+          'surrounding them with backticks or <code></code> will exempt them',
+          'from the link checker.');
+      process.exit(1);
     } else {
-        util.log(
-            util.colors.green('SUCCESS'),
-            'All links in all markdown files in this PR are alive.');
+      util.log(
+          util.colors.green('SUCCESS'),
+          'All links in all markdown files in this PR are alive.');
     }
   });
 }
@@ -126,7 +124,7 @@ function checkLinks() {
  */
 function isLinkToFileIntroducedByPR(link) {
   var filesAdded =
-      getStdout(`git diff --name-only --diff-filter=ARC master...HEAD`)
+      getStdout('git diff --name-only --diff-filter=ARC master...HEAD')
       .trim().split('\n');
   return filesAdded.some(function(file) {
     return (file.length > 0 && link.includes(path.parse(file).base));
@@ -175,7 +173,7 @@ function runLinkChecker(markdownFile) {
   var markdown = fs.readFileSync(markdownFile).toString();
   var filteredMarkdown = filterWhitelistedLinks(markdown);
   var opts = {
-    baseUrl : 'file://' + path.dirname(path.resolve((markdownFile)))
+    baseUrl: 'file://' + path.dirname(path.resolve((markdownFile)))
   };
   return markdownLinkCheck(filteredMarkdown, opts);
 }
@@ -183,8 +181,10 @@ function runLinkChecker(markdownFile) {
 gulp.task(
     'check-links',
     'Detects dead links in markdown files',
-    checkLinks, {
+    checkLinks,
+  {
     options: {
       'files': '  CSV list of files in which to check links'
     }
-});
+  }
+);

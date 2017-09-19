@@ -25,7 +25,7 @@ module.exports = {
     'mocha',
     'chai-as-promised',
     'sinon-chai',
-    'chai',
+    'chai'
   ],
 
   preprocessors: {
@@ -34,31 +34,31 @@ module.exports = {
     'test/**/*.js': ['browserify'],
     'ads/**/test/test-*.js': ['browserify'],
     'extensions/**/test/**/*.js': ['browserify'],
-    'testing/**/*.js': ['browserify'],
+    'testing/**/*.js': ['browserify']
   },
 
   browserify: {
     watch: true,
     debug: true,
     transform: [
-      ['babelify'],
+      ['babelify']
     ],
-    bundleDelay: 900,
+    bundleDelay: 900
   },
 
   reporters: process.env.TRAVIS ? ['super-dots', 'mocha'] : ['dots', 'mocha'],
 
   superDotsReporter: {
     color: {
-      success : 'green',
-      failure : 'red',
-      ignore  : 'yellow'
+      success: 'green',
+      failure: 'red',
+      ignore: 'yellow'
     },
     icon: {
-      success : '●',
-      failure : '●',
-      ignore  : '○',
-    },
+      success: '●',
+      failure: '●',
+      ignore: '○'
+    }
   },
 
   mochaReporter: {
@@ -66,13 +66,13 @@ module.exports = {
     colors: {
       success: 'green',
       error: 'red',
-      info: 'yellow',
+      info: 'yellow'
     },
     symbols: {
-      success : '●',
+      success: '●',
       error: '●',
-      info: '○',
-    },
+      info: '○'
+    }
   },
 
   port: 9876,
@@ -86,7 +86,7 @@ module.exports = {
     '/examples/': '/base/examples/',
     '/extensions/': '/base/extensions/',
     '/src/': '/base/src/',
-    '/test/': '/base/test/',
+    '/test/': '/base/test/'
   },
 
   // Can't import the Karma constant config.LOG_ERROR, so we hard code it here.
@@ -96,22 +96,22 @@ module.exports = {
   autoWatch: true,
 
   browsers: [
-    process.env.TRAVIS ? 'Chrome_travis_ci' : 'Chrome_no_extensions',
+    process.env.TRAVIS ? 'Chrome_travis_ci' : 'Chrome_no_extensions'
   ],
 
   // Number of sauce tests to start in parallel
   concurrency: 6,
 
   customLaunchers: {
-    /*eslint "google-camelcase/google-camelcase": 0*/
+    /* eslint "google-camelcase/google-camelcase": 0*/
     Chrome_travis_ci: {
       base: 'Chrome',
-      flags: ['--no-sandbox', '--disable-extensions'],
+      flags: ['--no-sandbox', '--disable-extensions']
     },
     Chrome_no_extensions: {
       base: 'Chrome',
       // Dramatically speeds up iframe creation time.
-      flags: ['--disable-extensions'],
+      flags: ['--disable-extensions']
     },
     // SauceLabs configurations.
     // New configurations can be created here:
@@ -119,58 +119,58 @@ module.exports = {
     SL_Chrome_android: {
       base: 'SauceLabs',
       browserName: 'android',
-      version: 'latest',
+      version: 'latest'
     },
     SL_Chrome_latest: {
       base: 'SauceLabs',
       browserName: 'chrome',
-      version: 'latest',
+      version: 'latest'
     },
     SL_Chrome_45: {
       base: 'SauceLabs',
       browserName: 'chrome',
-      version: '45',
+      version: '45'
     },
     SL_iOS_8_4: {
       base: 'SauceLabs',
       browserName: 'iphone',
-      version: '8.4',
+      version: '8.4'
     },
     SL_iOS_9_1: {
       base: 'SauceLabs',
       browserName: 'iphone',
-      version: '9.1',
+      version: '9.1'
     },
     SL_iOS_10_0: {
       base: 'SauceLabs',
       browserName: 'iphone',
-      version: '10.0',
+      version: '10.0'
     },
     SL_Firefox_latest: {
       base: 'SauceLabs',
       browserName: 'firefox',
-      version: 'latest',
+      version: 'latest'
     },
     SL_IE_11: {
       base: 'SauceLabs',
       browserName: 'internet explorer',
-      version: 11,
+      version: 11
     },
     SL_Edge_latest: {
       base: 'SauceLabs',
       browserName: 'microsoftedge',
-      version: 'latest',
+      version: 'latest'
     },
     SL_Safari_9: {
       base: 'SauceLabs',
       browserName: 'safari',
-      version: 9,
+      version: 9
     },
     SL_Safari_8: {
       base: 'SauceLabs',
       browserName: 'safari',
-      version: 8,
-    },
+      version: 8
+    }
   },
 
   sauceLabs: {
@@ -179,17 +179,17 @@ module.exports = {
     startConnect: false,
     connectOptions: {
       port: 5757,
-      logfile: 'sauce_connect.log',
-    },
+      logfile: 'sauce_connect.log'
+    }
   },
 
   client: {
     mocha: {
       reporter: 'html',
       // Longer timeout on Travis; fail quickly at local.
-      timeout: process.env.TRAVIS ? 10000 : 2000,
+      timeout: process.env.TRAVIS ? 10000 : 2000
     },
-    captureConsole: false,
+    captureConsole: false
   },
 
   singleRun: true,
@@ -221,7 +221,7 @@ module.exports = {
     {
       'middleware:custom': ['factory', function() {
         return require(require.resolve('../app.js'));
-      }],
-    },
-  ],
+      }]
+    }
+  ]
 };

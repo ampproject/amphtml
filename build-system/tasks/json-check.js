@@ -40,6 +40,6 @@ function checkValidJson() {
           process.exit(1);
         }
       });
-  }
+}
 
 gulp.task('json-syntax', 'Check that JSON files are valid JSON.', checkValidJson);

@@ -47,7 +47,7 @@ cssnano = cssnano({
   reduceIdents: false,
   zindex: false,
   svgo: {
-    encode: true,
+    encode: true
   }
 });
 
@@ -65,12 +65,12 @@ exports.jsifyCssAsync = function(filename) {
   var css = fs.readFileSync(filename, 'utf8');
   var transformers = [cssprefixer, cssnano];
   return postcss(transformers).use(postcssImport).process(css.toString(), {
-        'from': filename
-      }).then(function(result) {
-        result.warnings().forEach(function(warn) {
-          $$.util.log($$.util.colors.red(warn.toString()));
-        });
-        var css = result.css;
-        return css + '\n/*# sourceURL=/' + filename + '*/';
-      });
+    'from': filename
+  }).then(function(result) {
+    result.warnings().forEach(function(warn) {
+      $$.util.log($$.util.colors.red(warn.toString()));
+    });
+    var css = result.css;
+    return css + '\n/*# sourceURL=/' + filename + '*/';
+  });
 };

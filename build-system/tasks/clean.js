@@ -30,7 +30,7 @@ function clean() {
     'dist.3p',
     'dist.tools',
     'build',
-    '.amp-build',
+    '.amp-build'
   ]);
 }
 

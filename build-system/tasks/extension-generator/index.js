@@ -98,7 +98,7 @@ tags: {  # <${name}>
 }
 
 function getMarkdownExtensionFile(name) {
-return `<!--
+  return `<!--
 Copyright ${year} The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -246,7 +246,7 @@ AMP.registerElement('${name}', ${className});
 }
 
 function getExamplesFile(name) {
-return `<!doctype html>
+  return `<!doctype html>
 <html ⚡>
 <head>
   <meta charset="utf-8">
@@ -294,6 +294,6 @@ function makeExtension() {
 
 gulp.task('make-extension', 'Create an extension skeleton', makeExtension, {
   options: {
-    name: '  The name of the extension. Preferable prefixed with `amp-*`',
+    name: '  The name of the extension. Preferable prefixed with `amp-*`'
   }
 });

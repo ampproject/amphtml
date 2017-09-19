@@ -32,7 +32,7 @@ var util = require('gulp-util');
  */
 function numConfigs(str) {
   var re = /\/\*AMP_CONFIG\*\//g;
-  var matches = str.match(re)
+  var matches = str.match(re);
   return matches == null ? 0 : matches.length;
 }
 
@@ -101,7 +101,7 @@ function writeTarget(filename, fileString, opt_dryrun) {
  * @return {string}
  */
 function valueOrDefault(value, defaultValue) {
-  if (typeof value == 'string') {
+  if (typeof value === 'string') {
     return value;
   }
   return defaultValue;
@@ -133,7 +133,7 @@ function main() {
     return;
   }
 
-  var globs = [].concat(argv.files).filter(x => typeof x == 'string');
+  var globs = [].concat(argv.files).filter(x => typeof x === 'string');
   var branch = argv.branch;
   var filename = '';
 
@@ -147,10 +147,10 @@ function main() {
   }
   return checkoutBranchConfigs(filename, branch)
       .then(() => {
-       return Promise.all([
-         fs.readFileAsync(filename),
-         fs.readFileAsync(target),
-       ]);
+        return Promise.all([
+          fs.readFileAsync(filename),
+          fs.readFileAsync(target)
+        ]);
       })
       .then(files => {
         var configFile;
@@ -180,7 +180,7 @@ gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
         'Uses master by default.',
     'local': '  Don\'t switch branches and use local config',
     'remove': '  Removes previously prepended json config from the target ' +
-        'file (if present).',
+        'file (if present).'
   }
 });
 

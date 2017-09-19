@@ -51,7 +51,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
             next();
             resolve();
           }, function(e) {
-            console./*OK*/error(util.colors.red('Compilation error',
+            console./* OK*/error(util.colors.red('Compilation error',
                 e.message));
             process.exit(1);
           });
@@ -103,7 +103,7 @@ function compile(entryModuleFilenames, outputDir,
       cleanupBuildDir();
     }
     var unneededFiles = [
-      'build/fake-module/third_party/babel/custom-babel-helpers.js',
+      'build/fake-module/third_party/babel/custom-babel-helpers.js'
     ];
     var wrapper = '(function(){%output%})();';
     if (options.wrapper) {
@@ -171,14 +171,14 @@ function compile(entryModuleFilenames, outputDir,
       'node_modules/web-animations-js/web-animations.install.js',
       'build/patched-module/document-register-element/build/' +
           'document-register-element.node.js',
-      //'node_modules/core-js/modules/**.js',
+      // 'node_modules/core-js/modules/**.js',
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
       '!node_modules/core-js/modules/library/**.js',
       // Don't include tests.
       '!**_test.js',
       '!**/test-*.js',
-      '!**/*.extern.js',
+      '!**/*.extern.js'
     ];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
@@ -196,7 +196,7 @@ function compile(entryModuleFilenames, outputDir,
     if (options.include3pDirectories) {
       srcs.push(
         '3p/**/*.js',
-        'ads/**/*.js')
+        'ads/**/*.js');
     }
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
@@ -224,13 +224,13 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/closure-compiler/externs/performance_observer.js',
       'third_party/closure-compiler/externs/shadow_dom.js',
       'third_party/closure-compiler/externs/streams.js',
-      'third_party/closure-compiler/externs/web_animations.js',
+      'third_party/closure-compiler/externs/web_animations.js'
     ];
     if (options.externs) {
       externs = externs.concat(options.externs);
     }
 
-    /*eslint "google-camelcase/google-camelcase": 0*/
+    /* eslint "google-camelcase/google-camelcase": 0*/
     var compilerOptions = {
       // Temporary shipping with our own compiler that has a single patch
       // applied
@@ -253,7 +253,7 @@ function compile(entryModuleFilenames, outputDir,
         js_module_root: [
           'node_modules/',
           'build/patched-module/',
-          'build/fake-module/',
+          'build/fake-module/'
         ],
         entry_point: entryModuleFilenames,
         process_common_js_modules: true,
@@ -281,9 +281,9 @@ function compile(entryModuleFilenames, outputDir,
           // Can't seem to suppress `(0, win.eval)` suspicious code warning
           '3p/environment.js',
           // Generated code.
-          'extensions/amp-access/0.1/access-expr-impl.js',
+          'extensions/amp-access/0.1/access-expr-impl.js'
         ],
-        jscomp_error: [],
+        jscomp_error: []
       }
     };
 
@@ -329,9 +329,9 @@ function compile(entryModuleFilenames, outputDir,
     var stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./*OK*/error(util.colors.red('Error compiling',
+          console./* OK*/error(util.colors.red('Error compiling',
               entryModuleFilenames));
-          console./*OK*/error(util.colors.red(err.message));
+          console./* OK*/error(util.colors.red(err.message));
           process.exit(1);
         });
 
@@ -351,7 +351,7 @@ function compile(entryModuleFilenames, outputDir,
     }
     return stream;
   });
-};
+}
 
 function patchRegisterElement() {
   var file;

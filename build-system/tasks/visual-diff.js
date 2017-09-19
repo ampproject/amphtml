@@ -37,15 +37,15 @@ gulp.task(
     'visual-diff',
     'Runs the AMP visual diff tests.',
     visualDiff,
-    {
-      options: {
-        'master': '  Includes a blank snapshot (baseline for skipped builds)',
-        'verify': '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
-        'skip': '  Creates a dummy Percy build with only a blank snapshot',
-        'percy_debug': '  Prints debug info from Percy libraries',
-        'phantomjs_debug': '  Prints debug info from PhantomJS libraries',
-        'webserver_debug': '  Prints debug info from the local gulp webserver',
-        'debug': '  Prints all the above debug info',
-      }
+  {
+    options: {
+      'master': '  Includes a blank snapshot (baseline for skipped builds)',
+      'verify': '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
+      'skip': '  Creates a dummy Percy build with only a blank snapshot',
+      'percy_debug': '  Prints debug info from Percy libraries',
+      'phantomjs_debug': '  Prints debug info from PhantomJS libraries',
+      'webserver_debug': '  Prints debug info from the local gulp webserver',
+      'debug': '  Prints all the above debug info'
     }
+  }
 );

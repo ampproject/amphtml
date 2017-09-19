@@ -35,10 +35,10 @@ gulp.task('compile-css-expr', function() {
   var jsExports = 'exports.parser = parser;';
 
   var out = [
-      license,
-      suppressCheckTypes,
-      imports,
-      jsModule,
-      jsExports].join('\n\n') + '\n';
+    license,
+    suppressCheckTypes,
+    imports,
+    jsModule,
+    jsExports].join('\n\n') + '\n';
   fs.writeFileSync(path + 'css-expr-impl.js', out);
 });

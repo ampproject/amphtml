@@ -32,7 +32,7 @@ var isWatching = (argv.watch || argv.w) || false;
 var options = {
   fix: false,
   rulePaths: ['build-system/eslint-rules/'],
-  plugins: ['eslint-plugin-google-camelcase'],
+  plugins: ['eslint-plugin-google-camelcase']
 };
 
 /**
@@ -44,13 +44,12 @@ var options = {
 function getBuildSystemFiles() {
   if (process.env.TRAVIS) {
     var filesInPr =
-        getStdout(`git diff --name-only master...HEAD`).trim().split('\n');
+        getStdout('git diff --name-only master...HEAD').trim().split('\n');
     return filesInPr.filter(function(file) {
-      return file.startsWith('build-system') && path.extname(file) == '.js'
+      return file.startsWith('build-system') && path.extname(file) == '.js';
     });
-  } else {
-    return config.buildSystemLintGlobs;
   }
+  return config.buildSystemLintGlobs;
 }
 
 /**
@@ -124,19 +123,18 @@ function lint() {
   if (argv.build_system) {
     var stream =
         initializeStream(getBuildSystemFiles(), { base: 'build-system' });
-    return runLinter('./build-system/', stream, options);
-  } else {
-    var stream = initializeStream(config.lintGlobs, {});
-    return runLinter('.', stream, options);
+    return runLinter('./build-system/', stream, buildSystemOptions);
   }
+  var stream = initializeStream(config.lintGlobs, {});
+  return runLinter('.', stream, options);
 }
 
 
 gulp.task('lint', 'Validates against Google Closure Linter', lint,
-{
-  options: {
-    'build_system': '  Runs the linter against the build system directory',
-    'watch': '  Watches for changes in files, validates against the linter',
-    'fix': '  Fixes simple lint errors (spacing etc).'
-  }
-});
+  {
+    options: {
+      'build_system': '  Runs the linter against the build system directory',
+      'watch': '  Watches for changes in files, validates against the linter',
+      'fix': '  Fixes simple lint errors (spacing etc).'
+    }
+  });
