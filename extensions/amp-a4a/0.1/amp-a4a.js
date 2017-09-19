@@ -1543,7 +1543,8 @@ export class AmpA4A extends AMP.BaseElement {
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
 
   /**
-   * Whether preferential render should still be utilized if web crypto is unavailable.
+   * Whether preferential render should still be utilized if web crypto is unavailable,
+   * and crypto signature header is present.
    * @return {!boolean}
    */
   shouldPreferentialRenderWithoutCrypto() {

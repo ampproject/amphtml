@@ -451,6 +451,16 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
             .to.eventually.equal(VerificationStatus.UNVERIFIED);
       });
 
+      it('should return UNVERIFIED on no header when crypto unavailable',
+          () => {
+            env.sandbox.stub(env.win, 'crypto', undefined);
+            env.fetchMock.getOnce(
+                'https://signingservice1.net/keyset.json', jwkSet([key1]));
+            verifier.loadKeyset('service-1');
+            expect(verifier.verify(creative1, new Headers(), noop))
+                .to.eventually.equal(VerificationStatus.UNVERIFIED);
+          });
+
       it('should return ERROR_SIGNATURE_MISMATCH on malformed header', () => {
         env.fetchMock.getOnce(
             'https://signingservice1.net/keyset.json', jwkSet([key1]));
