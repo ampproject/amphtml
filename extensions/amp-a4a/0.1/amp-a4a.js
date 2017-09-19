@@ -583,7 +583,9 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent();
-          return /** @type {!Promise<?string>} */(this.getAdUrl());
+          const rtcResponsesPromise = this.RealTimeConfigManager ?
+                this.RealTimeConfigManager.rtcResponses : null;
+          return /** @type {!Promise<?string>} */(this.getAdUrl(rtcResponsesPromise));
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */

@@ -14,6 +14,8 @@ export class RealTimeConfigManager {
 
     this.rtcConfig = null;
     this.calloutUrls = [];
+
+    this.rtcResponses = null;
   }
 
   executeRealTimeConfig() {
@@ -35,13 +37,13 @@ export class RealTimeConfigManager {
         this.calloutUrls.push(this.rtcConfig.urls[i]);
       }
     }
-
+    this.validateUrls();
     const rtcPromiseArray = [];
     let rtcMaxTime;
     let url;
     for (urlIndex in this.calloutUrls) {
       url = this.calloutUrls[urlIndex];
-      let rtcStartTime = Date.now(); // TODO: Do the promises all see this as the same? or properly?
+      let rtcStartTime = Date.now();
       rtcPromiseArray.push(Services.timerFor(this.win).timeoutPromise(
           rtcTimeout,
           Services.xhrFor(this.win).fetchJson(
@@ -52,31 +54,40 @@ export class RealTimeConfigManager {
                 // TODO: Add to fetchResponse the ability to
                 // check for redirects as well.
                 if (res.status != 200) {
-                  return {rtcTotalTime};
+                  return {rtcTime, error: "Non-200 Status"};
                 }
                 return res.text().then(text => {
                   // An empty text response is fine, just means
                   // we have nothing to merge.
                   if (!text) {
-                    return {rtcTime, success: true};
+                    return {rtcTime};
                   }
                   const rtcResponse = tryParseJson(text);
                   return {rtcResponse, rtcTime};
                 });
-              })));
+              })
+      ));
     }
-    return Promise.all(rtcPromiseArray).then(rtcResponses => {
-      console.log(rtcResponses);
+    this.rtcResponses = Promise.all(rtcPromiseArray).then(rtcResponses => {
+      return this.validateResponses(rtcResponses);
     });
+    return this.rtcResponses;
   }
-
-
 
   validateRtcConfig() {
     this.rtcConfig = tryParseJson(this.element.getAttribute('prerequest-callouts'));
     return !!this.rtcConfig;
     // Actually validate the rtc config a little better plz, thx.
 
+  }
+
+  validateResponses(rtcResponses) {
+    return rtcResponses;
+  }
+
+  validateUrls() {
+    // verify
+    this.calloutUrls = this.calloutUrls;
   }
 }
 
