@@ -98,12 +98,21 @@ function runLinter(path, stream, options) {
     }))
     .pipe(gulpIf(isFixed, gulp.dest(path)))
     .pipe(eslint.failAfterError())
-    .on('end', function() {
+    .on('error', function() {
       if (errorsFound && !options.fix) {
-        util.log(util.colors.blue('Use "--fix" with your `gulp lint` command ' +
-            'to automatically fix some of these lint warnings/errors. ' +
-            'This is a destructive operation (operates on the file system), ' +
-            'so please make sure you commit before running.'));
+        if (!!process.env.TRAVIS_PULL_REQUEST_SHA) {
+          util.log(util.colors.yellow('NOTE:'),
+              'The linter is currently running in warning mode.',
+              'The errors found above must eventually be fixed.');
+        } else {
+          util.log(util.colors.yellow('NOTE:'),
+              'You can use', util.colors.cyan('--fix'), 'with your',
+              util.colors.cyan('gulp lint'),
+              'command to automatically fix some of these lint errors.');
+          util.log(util.colors.yellow('WARNING:'),
+              'Since this is a destructive operation (operates on the file',
+              'system), make sure you commit before running the command.');
+        }
       }
     });
 }
