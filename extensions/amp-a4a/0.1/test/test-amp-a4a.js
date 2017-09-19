@@ -2033,8 +2033,61 @@ describe('amp-a4a', () => {
     });
   });
 
-  describe('shouldPreferentialRenderWithoutCrypto', () => {
-    it('returns false by default', () => {
+  describe('canonical AMP', () => {
+    describe('preferential rendering', () => {
+      let a4aElement;
+      let a4a;
+      let fixture;
+      beforeEach(() => createIframePromise().then(f => {
+        fixture = f;
+        setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
+        a4aElement = createA4aElement(fixture.doc);
+        a4a = new MockA4AImpl(a4aElement);
+        a4a.releaseType_ = '0';
+        return fixture;
+      }));
+
+      it('by default not allowed if crypto signature present but no SSL',
+          () => {
+            sandbox.stub(Services.cryptoFor(fixture.win), 'isPkcsAvailable')
+                .returns(false);
+            a4a.buildCallback();
+            a4a.onLayoutMeasure();
+            return a4a.adPromise_.then(() => {
+              expect(a4a.isVerifiedAmpCreative_).to.be.false;
+            });
+          });
+
+      it('allowed if crypto signature present, no SSL, and overrided' +
+         ' shouldPreferentialRenderWithoutCrypto', () => {
+        sandbox.stub(Services.cryptoFor(fixture.win), 'isPkcsAvailable')
+            .returns(false);
+        sandbox.stub(AmpA4A.prototype,
+            'shouldPreferentialRenderWithoutCrypto', () => true);
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.adPromise_.then(() => {
+          expect(a4a.isVerifiedAmpCreative_).to.be.true;
+        });
+      });
+
+      it('not allowed if no crypto signature present', () => {
+        delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+        delete adResponse.headers[AMP_SIGNATURE_HEADER];
+        sandbox.stub(AmpA4A.prototype,
+            'shouldPreferentialRenderWithoutCrypto', () => true);
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.adPromise_.then(() => {
+          expect(a4a.isVerifiedAmpCreative_).to.be.false;
+        });
+      });
+    });
+
+    it('shouldPreferentialRenderWithoutCrypto returns false by default', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
