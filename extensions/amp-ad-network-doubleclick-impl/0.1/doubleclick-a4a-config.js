@@ -58,6 +58,8 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   HOLDBACK_INTERNAL: '2092614',
   CANONICAL_CONTROL: '21060932',
   CANONICAL_EXPERIMENT: '21060933',
+  CANONICAL_HTTP_CONTROL: '21061030',
+  CANONICAL_HTTP_EXPERIMENT: '21061031',
   CACHE_EXTENSION_INJECTION_CONTROL: '21060955',
   CACHE_EXTENSION_INJECTION_EXP: '21060956',
 };
@@ -124,21 +126,28 @@ export class DoubleclickA4aEligibility {
   isA4aEnabled(win, element) {
     let experimentId;
     if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
-        element.hasAttribute('useSameDomainRenderingUntilDeprecated') ||
-        !this.supportsCrypto(win)) {
+        element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
       return false;
     }
     const urlExperimentId = extractUrlExperimentId(win, element);
     let experimentName = DFP_CANONICAL_FF_EXPERIMENT_NAME;
+
     if (!this.isCdnProxy(win)) {
       // Ensure that forcing FF via url is applied if test/localDev.
-      experimentId = (urlExperimentId == -1 &&
-          (getMode(win).localDev ||	getMode(win).test)) ?
-          MANUAL_EXPERIMENT_ID :
-          this.maybeSelectExperiment(win, element, [
-            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
-            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
-          ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
+      if (urlExperimentId == -1 &&
+          (getMode(win).localDev || getMode(win).test)) {
+        experimentId = MANUAL_EXPERIMENT_ID;
+      } else if (!this.supportsCrypto(win)) {
+        experimentId = this.maybeSelectExperiment(win, element, [
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_CONTROL,
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
+        ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
+      } else {
+        experimentId = this.maybeSelectExperiment(win, element, [
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
+        ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
+      }
       // If no experiment selected, return false.
       if (!experimentId) {
         return false;
@@ -172,6 +181,7 @@ export class DoubleclickA4aEligibility {
       DOUBLECLICK_EXPERIMENT_FEATURE.SFG_CONTROL_ID,
       DOUBLECLICK_EXPERIMENT_FEATURE.SFG_EXP_ID,
       DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_CONTROL,
     ].includes(experimentId);
   }
 
@@ -210,8 +220,10 @@ export function doubleclickIsA4AEnabled(win, element) {
 /**
  * @param {!Window} win
  * @param {!DOUBLECLICK_EXPERIMENT_FEATURE} feature
+ * @param {string=} opt_experimentName
  * @return {boolean} whether feature is enabled
  */
-export function experimentFeatureEnabled(win, feature) {
-  return getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) == feature;
+export function experimentFeatureEnabled(win, feature, opt_experimentName) {
+  const experimentName = opt_experimentName || DOUBLECLICK_A4A_EXPERIMENT_NAME;
+  return getExperimentBranch(win, experimentName) == feature;
 }
