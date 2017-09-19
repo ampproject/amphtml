@@ -135,7 +135,7 @@ export class DoubleclickA4aEligibility {
     if (!this.isCdnProxy(win)) {
       // Ensure that forcing FF via url is applied if test/localDev.
       if (urlExperimentId == -1 &&
-          (getMode(win).localDev ||	getMode(win).test)) {
+          (getMode(win).localDev || getMode(win).test)) {
         experimentId = MANUAL_EXPERIMENT_ID;
       } else if (!this.supportsCrypto(win)) {
         experimentId = this.maybeSelectExperiment(win, element, [
