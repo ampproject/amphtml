@@ -1589,11 +1589,13 @@ export class AmpA4A extends AMP.BaseElement {
 >>>>>>> Type fixes.
    */
   getNonAmpCreativeRenderingMethod(headerValue) {
-    if (headerValue && !isEnumValue(XORIGIN_MODE, headerValue)) {
-      dev().error(
-          'AMP-A4A', `cross-origin render mode header ${headerValue}`);
-    } else if (headerValue) {
-      return headerValue;
+    if (headerValue) {
+      if (!isEnumValue(XORIGIN_MODE, headerValue)) {
+        dev().error(
+            'AMP-A4A', `cross-origin render mode header ${headerValue}`);
+      } else {
+        return headerValue;
+      }
     }
     return Services.platformFor(this.win).isIos() ?
         XORIGIN_MODE.SAFEFRAME : null;
