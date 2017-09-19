@@ -101,7 +101,7 @@ export class RefreshManager {
   /**
    * @param {!./amp-a4a.AmpA4A} a4a The AmpA4A instance to be refreshed.
    * @param {!RefreshConfig} config
-   * @param {number=} refreshIntervalSecs Refresh interval in seconds.
+   * @param {number=} refreshIntervalMsecs Refresh interval in seconds.
    */
   constructor(a4a, config, refreshIntervalMsecs) {
 
@@ -121,8 +121,9 @@ export class RefreshManager {
     this.adType_ = this.element_.getAttribute('type').toLowerCase();
 
     /** @const @private {?number} */
-    this.refreshIntervalMsecs_ = (refreshIntervalMsecs &&
-        refreshIntervalMsecs >= 30000) ||
+    this.refreshIntervalMsecs_ =
+        (refreshIntervalMsecs && this.checkAndSanitizeRefreshInterval_(
+            refreshIntervalMsecs, /* useMsecs */ true)) ||
         this.getPublisherSpecifiedRefreshInterval_();
 
     /** @const @private {!RefreshConfig} */
@@ -306,18 +307,20 @@ export class RefreshManager {
    * seconds to milliseconds.
    *
    * @param {(number|string)} refreshInterval
+   * @param {boolean=} useMsecs Uses ms as unit of time rather than seconds.
    * @return {?number}
    */
-  checkAndSanitizeRefreshInterval_(refreshInterval) {
+  checkAndSanitizeRefreshInterval_(refreshInterval, useMsecs) {
     const refreshIntervalNum = Number(refreshInterval);
-    if (isNaN(refreshIntervalNum) ||
-        refreshIntervalNum < MIN_REFRESH_INTERVAL) {
+    const upperBound = useMsecs ?
+        MIN_REFRESH_INTERVAL * 1000 : MIN_REFRESH_INTERVAL;
+    if (isNaN(refreshIntervalNum) || refreshIntervalNum < upperBound) {
       user().warn(TAG,
           'invalid refresh interval, must be a number no less than ' +
-          `${MIN_REFRESH_INTERVAL}: ${refreshInterval}`);
+          `${upperBound}: ${refreshInterval}`);
       return null;
     }
-    return refreshIntervalNum * 1000;
+    return useMsecs ? refreshIntervalNum : refreshIntervalNum * 1000;
   }
 
   /**
