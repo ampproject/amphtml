@@ -59,7 +59,7 @@ describe('refresh-manager', () => {
         RefreshManager.prototype, 'getPublisherSpecifiedRefreshInterval_');
     const refreshManager = new RefreshManager(mockA4a, config);
     expect(getPublisherSpecifiedRefreshIntervalSpy).to.be.calledOnce;
-    expect(refreshManager.refreshInterval_).to.equal(35000);
+    expect(refreshManager.refreshIntervalMsecs_).to.equal(35000);
   });
 
   it('should get refreshInterval from meta tag', () => {
@@ -72,12 +72,12 @@ describe('refresh-manager', () => {
     window.document.head.appendChild(meta);
     const refreshManager = new RefreshManager(mockA4a, config);
     expect(getPublisherSpecifiedRefreshIntervalSpy).to.be.calledOnce;
-    expect(refreshManager.refreshInterval_).to.equal(40000);
+    expect(refreshManager.refreshIntervalMsecs_).to.equal(40000);
   });
 
   it('should get refreshInterval from constructor', () => {
     const refreshManager = new RefreshManager(mockA4a, config, 30);
-    expect(refreshManager.refreshInterval_).to.equal(30000);
+    expect(refreshManager.refreshIntervalMsecs_).to.equal(30000);
   });
 
   it('should call convertConfiguration_ and set proper units', () => {
@@ -160,7 +160,7 @@ describe('refresh-manager', () => {
       visiblePercentageMin: 0,
       continuousTimeMin: 0,
     };
-    refreshManager.refreshInterval_ = 0;
+    refreshManager.refreshIntervalMsecs_ = 0;
     refreshManager.initiateRefreshCycle();
     timerFor(window).promise(500).then(() => {
       // Twice because constructor calls initiateRefreshCycle().

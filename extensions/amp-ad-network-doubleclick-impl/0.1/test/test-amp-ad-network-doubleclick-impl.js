@@ -226,7 +226,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           'initializeRefreshManagerIfEligible_');
       impl.extractSize({
         get(name) {
-          return name == 'force-refresh' ? '30' : undefined;
+          return name == 'amp-force-refresh' ? '30' : undefined;
         },
         has(name) {
           return !!this.get(name);

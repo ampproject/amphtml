@@ -101,9 +101,9 @@ export class RefreshManager {
   /**
    * @param {!./amp-a4a.AmpA4A} a4a The AmpA4A instance to be refreshed.
    * @param {!RefreshConfig} config
-   * @param {number=} refreshInterval
+   * @param {number=} refreshIntervalSec Refresh interval in seconds.
    */
-  constructor(a4a, config, refreshInterval) {
+  constructor(a4a, config, refreshIntervalSecs) {
 
     /** @private {string} */
     this.state_ = RefreshLifecycleState.INITIAL;
@@ -121,7 +121,8 @@ export class RefreshManager {
     this.adType_ = this.element_.getAttribute('type').toLowerCase();
 
     /** @const @private {?number} */
-    this.refreshInterval_ = (refreshInterval * 1000) ||
+    this.refreshIntervalMsecs_ = (refreshIntervalSecs &&
+        this.checkAndSanitizeRefreshInterval_(refreshIntervalSecs)) ||
         this.getPublisherSpecifiedRefreshInterval_();
 
     /** @const @private {!RefreshConfig} */
@@ -137,7 +138,7 @@ export class RefreshManager {
     this.visibilityTimeoutId_ = null;
 
     /** @private {boolean} */
-    this.isRefreshable_ = !!(this.config_ && this.refreshInterval_);
+    this.isRefreshable_ = !!(this.config_ && this.refreshIntervalMsecs_);
 
     if (this.isRefreshable_) {
       const managerId = String(refreshManagerIdCounter++);
@@ -247,7 +248,7 @@ export class RefreshManager {
             this.config_.visiblePercentageMin).unobserve(this.element_);
         this.a4a_.refresh(() => this.initiateRefreshCycle());
         resolve(true);
-      }, /** @type {number} */ (this.refreshInterval_));
+      }, /** @type {number} */ (this.refreshIntervalMsecs_));
     });
   }
 

@@ -498,7 +498,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
     this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
 
-    const refreshInterval = Number(responseHeaders.get('force-refresh'));
+    const refreshInterval = Number(responseHeaders.get('amp-force-refresh'));
     if (refreshInterval) {
       this.initializeRefreshManagerIfEligible_(refreshInterval);
     }
