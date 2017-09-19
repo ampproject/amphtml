@@ -75,6 +75,11 @@ describe('refresh-manager', () => {
     expect(refreshManager.refreshInterval_).to.equal(40000);
   });
 
+  it('should get refreshInterval from constructor', () => {
+    const refreshManager = new RefreshManager(mockA4a, config, 30);
+    expect(refreshManager.refreshInterval_).to.equal(30000);
+  });
+
   it('should call convertConfiguration_ and set proper units', () => {
     const getConfigurationSpy = sandbox.spy(
         RefreshManager.prototype, 'convertAndSanitizeConfiguration_');

@@ -220,6 +220,20 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(fireDelayedImpressionsSpy.withArgs(
           'https://c.com?e=f,https://d.com?g=h', true)).to.be.calledOnce;
     });
+
+    it('should initialize refresh manager', () => {
+      const refreshSpy = sandbox.spy(impl,
+          'initializeRefreshManagerIfEligible_');
+      impl.extractSize({
+        get(name) {
+          return name == 'force-refresh' ? '30' : undefined;
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(refreshSpy.withArgs('30')).to.not.be.called;
+    });
   });
 
   describe('#onCreativeRender', () => {
