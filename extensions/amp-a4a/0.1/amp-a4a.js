@@ -1313,7 +1313,10 @@ export class AmpA4A extends AMP.BaseElement {
       const listeners = this.getXdomainCreativeFrameMessageListeners();
       Object.keys(listeners)
           .forEach(key => listenFor(
-              this.iframe, key, listeners[key], /* opt_is3p */ true));
+              this.iframe, key, listeners[key],
+              /* opt_is3p */ true,
+              /* opt_includingNestedWindows */ false,
+              /* opt_keyType */ 's'));
     }
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
@@ -1590,6 +1593,10 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getNonAmpCreativeRenderingMethod(headerValue) {
     if (headerValue) {
+      if (!isEnumValue(XORIGIN_MODE, headerValue)) {
+        dev().error(
+            'AMP-A4A', `cross-origin render mode header ${headerValue}`);
+      }
       return headerValue;
     }
     return Services.platformFor(this.win).isIos() ?
@@ -1597,8 +1604,8 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Returns iframe attributes necessary to render creative in cross-domain
-   * frame.
+   * Returns base object that will be written to cross-domain iframe name
+   * attribute.
    * @return {!JsonObject}
    */
   getAdditionalContextMetadata() {

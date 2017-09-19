@@ -187,7 +187,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         <script>
         parent./*OK*/postMessage(
             JSON.stringify(/** @type {!JsonObject} */ ({
-              type: 'creative_geometry_update',
+              s: 'creative_geometry_update',
               sentinel: 'sentinel',
               width: '1px',
               height: '1px',
@@ -214,12 +214,12 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         <script>
         parent./*OK*/postMessage(
             JSON.stringify(/** @type {!JsonObject} */ ({
-              type: 'creative_geometry_update',
+              s: 'creative_geometry_update',
               sentinel: 'sentinel',
             })), '*');
         parent./*OK*/postMessage(
             JSON.stringify(/** @type {!JsonObject} */ ({
-              type: 'creative_geometry_update',
+              s: 'creative_geometry_update',
               sentinel: 'sentinel',
               p: '{"width":"1px","height":"1px"}',
             })), '*');

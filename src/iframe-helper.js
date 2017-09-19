@@ -190,8 +190,9 @@ function dropListenSentinel(listenSentinel) {
 /**
  * Registers the global listenFor event listener if it has yet to be.
  * @param {!Window} parentWin
+ * @param {string=} typeKey Key to index event type.
  */
-function registerGlobalListenerIfNeeded(parentWin) {
+function registerGlobalListenerIfNeeded(parentWin, typeKey = 'type') {
   if (parentWin.listeningFors) {
     return;
   }
@@ -216,7 +217,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
 
     // SafeFrame's postmessaging protocol specifies the message type under
     // parameter 's'.
-    let listeners = listenForEvents[data['type'] || data['s']];
+    let listeners = listenForEvents[data[typeKey]];
     if (!listeners) {
       return;
     }
@@ -245,17 +246,19 @@ function registerGlobalListenerIfNeeded(parentWin) {
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  * @param {boolean=} opt_includingNestedWindows set to true if a messages from
  *     nested frames should also be accepted.
+ * @param {string=} opt_keyType Key to index event type.
  * @return {!UnlistenDef}
  */
 export function listenFor(
-    iframe, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows) {
+    iframe, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows,
+    opt_keyType) {
   dev().assert(iframe.src, 'only iframes with src supported');
   dev().assert(!iframe.parentNode, 'cannot register events on an attached ' +
       'iframe. It will cause hair-pulling bugs like #2942');
   dev().assert(callback);
   const parentWin = iframe.ownerDocument.defaultView;
 
-  registerGlobalListenerIfNeeded(parentWin);
+  registerGlobalListenerIfNeeded(parentWin, opt_keyType);
 
   const listenForEvents = getOrCreateListenForEvents(
       parentWin,

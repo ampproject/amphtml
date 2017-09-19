@@ -298,9 +298,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {?string} */
     this.fluidImpressionUrl_ = null;
-
-    /** @private {boolean} */
-    this.fluidImpressionFired_ = false;
   }
 
   /** @override */
@@ -633,18 +630,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // safeframe.
         this.connectFluidMessagingChannel();
       }
-      return Promise.resolve(result);
+      return result;
     });
   }
 
   /** @visibleForTesting */
   connectFluidMessagingChannel() {
-    if (this.iframe.contentWindow) {
-      this.iframe.contentWindow./*OK*/postMessage(
-          JSON.stringify(/** @type {!JsonObject} */
-            ({message: 'connect', c: 'sfchannel1'})),
-          'https://tpc.googlesyndication.com');
-    }
+    dev().assert(this.iframe.contentWindow,
+        'Frame contentWindow unavailable.');
+    this.iframe.contentWindow./*OK*/postMessage(
+        JSON.stringify(/** @type {!JsonObject} */
+          ({message: 'connect', c: 'sfchannel1'})),
+        'https://tpc.googlesyndication.com');
   }
 
   /** @override */
@@ -1080,10 +1077,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getNonAmpCreativeRenderingMethod(headerValue) {
-    if (this.isFluid_) {
-      return XORIGIN_MODE.SAFEFRAME;
-    }
-    return super.getNonAmpCreativeRenderingMethod(headerValue);
+    return this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
+        super.getNonAmpCreativeRenderingMethod(headerValue);
   }
 
   /** @override */
@@ -1159,12 +1154,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           }
           this.attemptChangeSize(payload['height'], undefined)
               .then(() => {
-                if (!this.fluidImpressionFired_) {
-                  if (this.fluidImpressionUrl_) {
-                    this.fireDelayedImpressions(
-                        this.fluidImpressionUrl_, false);
-                  }
-                  this.fluidImpressionFired_ = true;
+                if (this.fluidImpressionUrl_) {
+                  this.fireDelayedImpressions(this.fluidImpressionUrl_, false);
+                  this.fluidImpressionUrl_ = null;
                 }
               })
               .catch(() => this.forceCollapse());
