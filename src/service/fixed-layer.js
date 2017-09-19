@@ -563,7 +563,12 @@ export class FixedLayer {
       if (state.fixed || !this.transfer_) {
         // Fixed positions always need top offsetting, as well as stickies on
         // non iOS Safari.
-        setStyle(element, 'top', `calc(${state.top} + ${this.paddingTop_}px)`);
+        // Since we only care about <amp-sticky-ad> bottom value, we will not
+        // offset its top value.
+        if (element.tagName != 'AMP-STICKY-AD') {
+          setStyle(
+              element, 'top', `calc(${state.top} + ${this.paddingTop_}px)`);
+        }
       } else {
         // On iOS Safari (this.transfer_ = true), stickies need to be cannot
         // have an offset because they are already offset by the padding-top.
