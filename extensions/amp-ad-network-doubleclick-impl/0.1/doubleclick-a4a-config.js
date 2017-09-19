@@ -221,7 +221,7 @@ export function doubleclickIsA4AEnabled(win, element) {
 /**
  * @param {!Window} win
  * @param {!DOUBLECLICK_EXPERIMENT_FEATURE} feature
- * @param {?string} opt_experimentName
+ * @param {string=} opt_experimentName
  * @return {boolean} whether feature is enabled
  */
 export function experimentFeatureEnabled(win, feature, opt_experimentName) {
