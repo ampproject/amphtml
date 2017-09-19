@@ -99,6 +99,7 @@ describe('doubleclick-a4a-config', () => {
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
       ], DFP_CANONICAL_FF_EXPERIMENT_NAME) ;
+      expect(maybeSelectExperimentSpy.callCount).to.equal(1);
 
     });
 
@@ -117,6 +118,7 @@ describe('doubleclick-a4a-config', () => {
             DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_CONTROL,
             DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
           ], DFP_CANONICAL_FF_EXPERIMENT_NAME) ;
+          expect(maybeSelectExperimentSpy.callCount).to.equal(1);
         });
 
     it('should return false if no canonical AMP experiment branch', () => {
