@@ -325,7 +325,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           // this time to pass makes the test flaky. Stub setTimeout to
           // execute the callback synchronously.
           const origSetTimeout = ampdoc.win.setTimeout;
-          ampdoc.win.setTimeout = (func) => func();
+          ampdoc.win.setTimeout = func => func();
 
           // Test a valid gotoAndPause invocation. Verify animation was
           // switched to the label and has been paused.
