@@ -152,10 +152,6 @@ Providing a click-to-play overlay is a common UX feature for video players on th
 
 For a detailed example, visit AMP By Example's  [Click-to-play overlay for amp-video](https://ampbyexample.com/advanced/click-to-play_overlay_for_amp-video/).
 
-## Adaptive-bit-rate using HLS
-
-iOS and certain platfroms such as Chrome on Android support HLS natively and therefore
-
 ## Validation
 
 See [amp-video rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
