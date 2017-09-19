@@ -42,6 +42,7 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'controls',
   'crossorigin',
   'poster',
+  'controlsList',
 ];
 
 /**
