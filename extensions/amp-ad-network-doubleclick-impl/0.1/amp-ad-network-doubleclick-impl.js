@@ -82,7 +82,7 @@ import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {
   getPublisherSpecifiedRefreshInterval,
   RefreshManager,
@@ -303,7 +303,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout) ||
-        this.element.getAttribute('height').toLowerCase() == 'fluid';
+        this.element.getLayout() == Layout.FLUID;
   }
 
   /** @override */
@@ -323,7 +323,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.isFluid_ = this.element.getAttribute('height') == 'fluid';
+    this.isFluid_ = this.element.getLayout() == Layout.FLUID;
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
       addExperimentIdToElement(verifierEid, this.element);
