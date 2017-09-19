@@ -2038,7 +2038,7 @@ describe('amp-a4a', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
-        a4aElement = createA4aElement(doc);
+        const a4aElement = createA4aElement(doc);
         const a4a = new AmpA4A(a4aElement);
         expect(a4a.shouldPreferentialRenderWithoutCrypto()).to.be.false;
       });
