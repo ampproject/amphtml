@@ -50,6 +50,12 @@ export const VerificationStatus = {
    */
   ERROR_SIGNATURE_MISMATCH: 3,
 
+  /**
+   * Verification failed because the page does not have web crypto available,
+   * i.e. is not SSL.
+   */
+  CRYPTO_UNAVAILABLE: 4,
+
 };
 
 /**
@@ -244,7 +250,7 @@ export class SignatureVerifier {
       signingServiceName, keypairId, signature, creative, lifecycleCallback) {
     if (!this.signers_) {
       // Web Cryptography isn't available.
-      return Promise.resolve(VerificationStatus.UNVERIFIED);
+      return Promise.resolve(VerificationStatus.CRYPTO_UNAVAILABLE);
     }
     const signer = this.signers_[signingServiceName];
     dev().assert(

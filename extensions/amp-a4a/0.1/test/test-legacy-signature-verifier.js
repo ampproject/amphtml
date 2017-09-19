@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {LegacySignatureVerifier} from '../legacy-signature-verifier';
+import {VerificationStatus} from '../signature-verifier';
 
 describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
 
@@ -204,6 +206,32 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
     expect(result).to.have.lengthOf(1);
     return Promise.all(result).then(() => {
       expect(fetchMock.called('keyset')).to.be.true;
+    });
+  });
+
+  describe('verify', () => {
+    let sandbox;
+    beforeEach(() => {
+      sandbox = sinon.sandbox;
+    });
+
+    it('should return UNVERIFIED if no signature provided', () => {
+      const headers = new Headers();
+      sandbox.stub(
+          LegacySignatureVerifier.prototype, 'isAvailable_', () => false);
+      return verifier.verify(null, headers, null).then(status => {
+        expect(status).to.equal(VerificationStatus.UNVERIFIED);
+      });
+    });
+
+    it('should return CRYPTO_UNAVAILABLE if signature + no crypto', () => {
+      const headers = new Headers();
+      headers.append('X-AmpAdSignature', 'dummy-signature');
+      sandbox.stub(
+          LegacySignatureVerifier.prototype, 'isAvailable_', () => false);
+      return verifier.verify(null, headers, null).then(status => {
+        expect(status).to.equal(VerificationStatus.CRYPTO_UNAVAILABLE);
+      });
     });
   });
 });
