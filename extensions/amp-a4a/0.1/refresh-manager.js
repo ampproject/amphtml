@@ -101,8 +101,9 @@ export class RefreshManager {
   /**
    * @param {!./amp-a4a.AmpA4A} a4a The AmpA4A instance to be refreshed.
    * @param {!RefreshConfig} config
+   * @param {number=} refreshInterval
    */
-  constructor(a4a, config) {
+  constructor(a4a, config, refreshInterval) {
 
     /** @private {string} */
     this.state_ = RefreshLifecycleState.INITIAL;
@@ -120,7 +121,8 @@ export class RefreshManager {
     this.adType_ = this.element_.getAttribute('type').toLowerCase();
 
     /** @const @private {?number} */
-    this.refreshInterval_ = this.getPublisherSpecifiedRefreshInterval_();
+    this.refreshInterval_ = (refreshInterval * 1000) ||
+        this.getPublisherSpecifiedRefreshInterval_();
 
     /** @const @private {!RefreshConfig} */
     this.config_ = this.convertAndSanitizeConfiguration_(config);
