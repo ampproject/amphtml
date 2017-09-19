@@ -618,9 +618,6 @@ export class AmpA4A extends AMP.BaseElement {
           const method = this.getNonAmpCreativeRenderingMethod(
               fetchResponse.headers.get(RENDERING_TYPE_HEADER));
           this.experimentalNonAmpCreativeRenderMethod_ = method;
-          if (method && !isEnumValue(XORIGIN_MODE, method)) {
-            dev().error('AMP-A4A', `cross-origin render mode header ${method}`);
-          }
           const safeframeVersionHeader =
             fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
           if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
