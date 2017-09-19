@@ -68,7 +68,7 @@ const VENDOR_ANIMATIONEND_EVENTS = ['animationend', 'webkitAnimationEnd'];
  * before triggering pause.
  * @const {number}
  */
-export const GOTO_AND_PAUSE_DELAY = 40;
+const GOTO_AND_PAUSE_DELAY = 40;
 
 /**
  * The GWD runtime service ID (arbitrary string).

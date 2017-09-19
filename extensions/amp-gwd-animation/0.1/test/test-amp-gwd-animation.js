@@ -22,7 +22,6 @@ import {
 import {
   ANIMATIONS_DISABLED_CLASS,
   CURRENT_LABEL_ANIMATION_ATTR,
-  GOTO_AND_PAUSE_DELAY,
   GWD_PAGE_WRAPPER_CLASS,
   GWD_SERVICE_NAME,
   PlaybackCssClass,
@@ -312,7 +311,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         });
       });
 
-      it('should execute gotoAndPause', done => {
+      it('should execute gotoAndPause', () => {
         return ampdoc.whenBodyAvailable().then(() => {
           // Test handling missing arguments.
           const invocation = {
@@ -322,16 +321,20 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           };
           invokeWithSomeArgsUndefined(impl, invocation);
 
-          // Test a valid gotoAndPause invocation.
+          // gotoAndPause invokes a pause after a short delay, but waiting for
+          // this time to pass makes the test flaky. Stub setTimeout to
+          // execute the callback synchronously.
+          const origSetTimeout = ampdoc.win.setTimeout;
+          ampdoc.win.setTimeout = (func) => func();
+
+          // Test a valid gotoAndPause invocation. Verify animation was
+          // switched to the label and has been paused.
           impl.executeAction(invocation);
           expect(page1Elem.classList.contains('foo')).to.be.true;
+          expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE))
+              .to.be.true;
 
-          // The pause class is eventually added.
-          setTimeout(() => {
-            expect(page1Elem.classList.contains(PlaybackCssClass.PAUSE))
-                .to.be.true;
-            done();
-          }, GOTO_AND_PAUSE_DELAY);
+          ampdoc.win.setTimeout = origSetTimeout;
         });
       });
 
