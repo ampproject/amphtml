@@ -692,7 +692,7 @@ export class AmpA4A extends AMP.BaseElement {
                     return null;
                   case VerificationStatus.CRYPTO_UNAVAILABLE:
                     return this.preferentialRenderWithoutCrypto() ?
-                      null : bytes;
+                      bytes : null;
                   // TODO(@taymonbeal, #9274): differentiate between these
                   case VerificationStatus.ERROR_KEY_NOT_FOUND:
                   case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
