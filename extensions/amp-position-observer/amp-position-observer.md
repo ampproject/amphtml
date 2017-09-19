@@ -19,9 +19,8 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Monitors position of an element within the viewport as user scrolls
-    and dispatches <code>enter</code>, <code>exit</code> and <code>scroll</code> events that can be used with
-    other components such as <code>&lt;amp-animation></code>
+    <td>Monitors the position of an element within the viewport as a user scrolls, and dispatches <code>enter</code>, <code>exit</code> and <code>scroll</code> events that can be used with
+    other components, such as <code>&lt;amp-animation>.</code>
     </td>
   </tr>
   <tr>
@@ -35,8 +34,10 @@ limitations under the License.
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
-      <a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-position-observer.amp.html">amp-position-observer</a><br>
-      <a href="https://codepen.io/collection/nMJYrv/">CodePen collection with 6 samples</a>
+      <ul>
+      <li><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-position-observer.amp.html">amp-position-observer</a></li>
+      <li><a href="https://codepen.io/collection/nMJYrv/">CodePen collection with 6 samples</a></li>
+      </ul>
     </td>
   </tr>
 </table>
@@ -44,27 +45,33 @@ limitations under the License.
 [TOC]
 
 ## What is amp-position-observer?
-`amp-position-observer` is a functional component that monitors position of an
-element within the viewport as user scrolls and dispatches
+`amp-position-observer` is a functional component that monitors the position of an
+element within the viewport as a user scrolls, and dispatches
 `enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**)
 which can be used to trigger actions (**Only Low Trust Actions**) on other components.
-It is only useful when used with other components and does not do anything on its own.
+
+The `amp-position-observer` component is only useful when used with other components and does not do anything on its own.
 
 ## What can I do with amp-position-observer?
+
 Currently [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
 and several video players in AMP are the only components that allow low-trust events
 to trigger their actions such as starting an animation, seeking to a position
-within the animation, pausing a video, etc...
+within the animation, pausing a video, etc.
 
 ### Scroll-bound animations
-`amp-animation` exposes a `seekTo` action that can be tied to the `scroll` event
+The `amp-animation` component exposes a `seekTo` action that can be tied to the `scroll` event
 of `amp-position-observer` to implement scroll-bound animations.
 
-### Example:
-Imagine an animation where the hour hand of a clock rotates as user scrolls
+#### Example: Animation rotates as user scrolls
+Imagine an animation where the hour hand of a clock rotates as the user scrolls
 the page.
 
-![Scrollbound animation demo](https://user-images.githubusercontent.com/2099009/29105493-e22a6500-7c82-11e7-9f5e-95c33c76f362.gif)
+<amp-img alt="Scrollbound animation demo" layout="fixed" src="https://user-images.githubusercontent.com/2099009/29105493-e22a6500-7c82-11e7-9f5e-95c33c76f362.gif" width="304" height="540">
+  <noscript>
+    <img alt="Scrollbound animation demo" src="https://user-images.githubusercontent.com/2099009/29105493-e22a6500-7c82-11e7-9f5e-95c33c76f362.gif" />
+  </noscript>
+</amp-img>
 
 ```html
 <!-- An animation that rotates a clock hand 180 degrees. -->
@@ -110,20 +117,25 @@ the page.
 ```
 
 ### Animation scenes that start/pause based on visibility in the viewport
-`amp-animation` also exposes `start` and `pause` actions that can be tied to the
-`enter` and `exit` events of `amp-position-observer` to control when animation
+
+The `amp-animation` component also exposes `start` and `pause` actions that can be tied to the
+`enter` and `exit` events of `amp-position-observer` to control when an animation
 starts/pauses based on visibility.
 
-`amp-position-observer` exposes various visibility configurations such as
+The `amp-position-observer` component exposes various visibility configurations such as
 `intersection-ratios` and `viewport-margins` (similar to [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)) that
 can be used to fine-tune when the target is considered visible.
 
-## Example
+#### Example: Animation starts and pauses based on visibility
 Consider the same clock animation, but this time the hand animates with time, except
 we like the animation to start when clock is at least 50% visible and pause as soon
 as clock becomes less than 50% visible.
 
-![visibility demo](https://user-images.githubusercontent.com/2099009/29105727-a7d9a80a-7c84-11e7-8d4a-794f38ea5a5c.gif)
+<amp-img alt="visibility demo" layout="fixed" src="https://user-images.githubusercontent.com/2099009/29105727-a7d9a80a-7c84-11e7-8d4a-794f38ea5a5c.gif" width="304" height="540">
+  <noscript>
+    <img alt="visibility demo" src="https://user-images.githubusercontent.com/2099009/29105727-a7d9a80a-7c84-11e7-8d4a-794f38ea5a5c.gif" />
+  </noscript>
+</amp-img>
 
 
 ```html
@@ -172,57 +184,34 @@ as clock becomes less than 50% visible.
     <div class="clock-hand"></div>
   </amp-img>
 </div>
-
-
 ```
 
 ## Attributes
 
 #### target-id (optional)
-Specifies what element to observe via its ID.
-If **not specified** the **parent** of `<amp-position-observer>` will be used as the target.
+Specifies the ID of the element to observe. If **not specified**, the **parent** of `<amp-position-observer>` is used as the target.
 
 #### intersection-ratios (optional)
 
-A number between 0 and 1 which defines how much of the target should be visible in
-the viewport before `<amp-position-observer>` triggers any of its events.
+Defines how much of the target should be visible in the viewport before `<amp-position-observer>` triggers any of its events. The value is a number between 0 and 1 (default is 0).
 
-Different ratios for top vs. bottom can be specified by providing two values (`<top> <bottom>`).
+You can specify different ratios for top vs. bottom by providing two values (`<top> <bottom>`).
 
-Defaults to 0.
-
-`intersection-ratios="0"` means `enter` is triggered as soon as a single pixel
-of the target comes into viewport and `exit` is triggered as soon as the very last pixel
-of the target goes out of the viewport.
-
-`intersection-ratios="0.5"` means `enter` is triggered as soon as 50% of
-of the target comes into viewport and `exit` is triggered as soon as less than
-50% of the target is in the viewport.
-
-
-`intersection-ratios="1"` means `enter` is triggered when target is fully visible
-and `exit` is triggered as soon as a single pixel goes out of the viewport.
-
-
-`intersection-ratios="0 1"` makes the conditions different depending on whether
-the target is entering/exiting from top (0 will be used) or bottom (1 will be used).
+- `intersection-ratios="0"` means `enter` is triggered as soon as a single pixel of the target comes into viewport and `exit` is triggered as soon as the very last pixel of the target goes out of the viewport.
+- `intersection-ratios="0.5"` means `enter` is triggered as soon as 50% of the target comes into viewport and `exit` is triggered as soon as less than 50% of the target is in the viewport.
+- `intersection-ratios="1"` means `enter` is triggered when target is fully visible and `exit` is triggered as soon as a single pixel goes out of the viewport.
+- `intersection-ratios="0 1"` makes the conditions different depending on whether the target is entering/exiting from top (0 will be used) or bottom (1 will be used).
 
 
 #### viewport-margins (optional)
 
-A `px` or `vh` value which can be used to shrink the area of the viewport used
-for visibility calculations. A number without a unit will be assumed `px`
+A `px` or `vh` value which can be used to shrink the area of the viewport used for visibility calculations. A number without a unit will be assumed `px`. Defaults to 0.
 
-Different values for top vs. bottom can be specified by providing two values (`<top> <bottom>`).
+You can specify different values for top vs. bottom by providing two values (`<top> <bottom>`).
 
-Defaults to 0.
-
-`viewport-margins="100px"` means shrink the viewport by 100px from the top and 100px from the bottom.
-
-`viewport-margins="25vh"` means shrink the viewport by 25% from the top and 25% from the bottom.
-Effectively only considering the middle 50% of the viewport.
-
-`viewport-margins="100px 10vh"` means shrink the viewport by 100px from the top and 10% from the bottom.
+- `viewport-margins="100px"` means shrink the viewport by 100px from the top and 100px from the bottom.
+- `viewport-margins="25vh"` means shrink the viewport by 25% from the top and 25% from the bottom. Effectively only considering the middle 50% of the viewport.
+- `viewport-margins="100px 10vh"` means shrink the viewport by 100px from the top and 10% from the bottom.
 
 ## Validation
 
