@@ -2033,6 +2033,18 @@ describe('amp-a4a', () => {
     });
   });
 
+  describe('shouldPreferentialRenderWithoutCrypto', () => {
+    it('returns false by default', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        a4aElement = createA4aElement(doc);
+        const a4a = new AmpA4A(a4aElement);
+        expect(a4a.shouldPreferentialRenderWithoutCrypto()).to.be.false;
+      });
+    });
+  });
+
   // TODO(tdrl): Other cases to handle for parsing JSON metadata:
   //   - Metadata tag(s) missing
   //   - JSON parse failure

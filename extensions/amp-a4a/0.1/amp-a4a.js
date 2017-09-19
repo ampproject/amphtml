@@ -691,7 +691,7 @@ export class AmpA4A extends AMP.BaseElement {
                   case VerificationStatus.UNVERIFIED:
                     return null;
                   case VerificationStatus.CRYPTO_UNAVAILABLE:
-                    return this.preferentialRenderWithoutCrypto() ?
+                    return this.shouldPreferentialRenderWithoutCrypto() ?
                       bytes : null;
                   // TODO(@taymonbeal, #9274): differentiate between these
                   case VerificationStatus.ERROR_KEY_NOT_FOUND:
@@ -1546,7 +1546,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Whether preferential render should still be utilized if web crypto is unavailable.
    * @return {!boolean}
    */
-  preferentialRenderWithoutCrypto() {
+  shouldPreferentialRenderWithoutCrypto() {
     return false;
   }
 }
