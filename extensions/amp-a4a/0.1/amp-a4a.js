@@ -569,9 +569,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.adPromise_ = Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
         .then(() => {
           checkStillCurrent();
-          if (this.supportsRealTimeConfig_()) {
-            this.RealTimeConfigManager.executeRealTimeConfig();
-          }
+          this.tryExecuteRealTimeConfig_();
           // See if experiment that delays request until slot is within
           // renderOutsideViewport. Within render outside viewport will not
           // resolve if already within viewport thus the check for already
@@ -1543,10 +1541,12 @@ export class AmpA4A extends AMP.BaseElement {
    */
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
 
-  supportsRealTimeConfig_() {
+  tryExecuteRealTimeConfig_() {
     if (!!AMP.RealTimeConfigManager) {
-      this.RealTimeConfigManager = new AMP.RealTimeConfigManager(this.element, this.win);
-      return this.RealTimeConfigManager.validateRtcConfig();
+      this.RealTimeConfigManager = new AMP.RealTimeConfigManager(this.element, this.win)
+      if (this.RealTimeConfigManager.validateRtcConfig()) {
+        this.RealTimeConfigManager.executeRealTimeConfig();
+      };
     }
   }
 }
