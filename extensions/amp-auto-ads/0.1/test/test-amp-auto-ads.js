@@ -151,7 +151,7 @@ describes.realWin('amp-auto-ads', {
     };
     sandbox.spy(xhr, 'fetchJson');
 
-    const viewer = Services.viewerForDoc(env.ampdoc)
+    const viewer = Services.viewerForDoc(env.ampdoc);
     whenVisible = sandbox.stub(viewer, 'whenFirstVisible');
     whenVisible.returns(Promise.resolve());
 
