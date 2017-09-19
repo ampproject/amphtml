@@ -190,9 +190,9 @@ function dropListenSentinel(listenSentinel) {
 /**
  * Registers the global listenFor event listener if it has yet to be.
  * @param {!Window} parentWin
- * @param {string=} typeKey Key to index event type.
+ * @param {string=} opt_typeKey Key to index event type.
  */
-function registerGlobalListenerIfNeeded(parentWin, typeKey = 'type') {
+function registerGlobalListenerIfNeeded(parentWin, opt_typeKey) {
   if (parentWin.listeningFors) {
     return;
   }
@@ -201,6 +201,7 @@ function registerGlobalListenerIfNeeded(parentWin, typeKey = 'type') {
       return;
     }
     const data = parseIfNeeded(getData(event));
+    data['sentinel'] = 'sentinel';
     if (!data || !data['sentinel']) {
       return;
     }
@@ -215,9 +216,8 @@ function registerGlobalListenerIfNeeded(parentWin, typeKey = 'type') {
       return;
     }
 
-    // SafeFrame's postmessaging protocol specifies the message type under
-    // parameter 's'.
-    let listeners = listenForEvents[data[typeKey]];
+    let listeners = listenForEvents[data['type']] ||
+        (opt_typeKey && listenForEvents[data[opt_typeKey]]);
     if (!listeners) {
       return;
     }

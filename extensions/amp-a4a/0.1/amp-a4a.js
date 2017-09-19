@@ -1398,6 +1398,7 @@ export class AmpA4A extends AMP.BaseElement {
           return Promise.reject('Unrecognized rendering mode request');
       }
       // TODO(bradfrizzell): change name of function and var
+      this.sentinel = 'sentinel';
       let contextMetadata = getContextMetadata(
           this.win, this.element, this.sentinel,
           this.getAdditionalContextMetadata());
@@ -1589,11 +1590,10 @@ export class AmpA4A extends AMP.BaseElement {
 >>>>>>> Type fixes.
    */
   getNonAmpCreativeRenderingMethod(headerValue) {
-    if (headerValue) {
-      if (!isEnumValue(XORIGIN_MODE, headerValue)) {
-        dev().error(
-            'AMP-A4A', `cross-origin render mode header ${headerValue}`);
-      }
+    if (headerValue && !isEnumValue(XORIGIN_MODE, headerValue)) {
+      dev().error(
+          'AMP-A4A', `cross-origin render mode header ${headerValue}`);
+    } else if (headerValue) {
       return headerValue;
     }
     return Services.platformFor(this.win).isIos() ?

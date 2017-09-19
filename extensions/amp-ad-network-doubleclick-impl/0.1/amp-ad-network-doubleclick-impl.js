@@ -303,7 +303,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout) ||
-        this.element.getAttribute('height') == 'fluid';
+        this.element.getAttribute('height').toLowerCase() == 'fluid';
   }
 
   /** @override */
@@ -467,10 +467,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('data-override-height')) ||
       Number(this.element.getAttribute('height'));
-    this.initialSize_ = this.isFluid_ ? {width: 0, height: 0} : width && height
-        ? {width, height}
-        // width/height could be 'auto' in which case we fallback to measured.
-        : this.getIntersectionElementLayoutBox();
+    this.initialSize_ = this.isFluid_ ? {width: 0, height: 0} :
+        (width && height ?
+         // width/height could be 'auto' in which case we fallback to measured.
+         {width, height} : this.getIntersectionElementLayoutBox());
     this.jsonTargeting_ =
       tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey_ = this.generateAdKey_(
@@ -1149,9 +1149,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           });
         } else {
           const payload = tryParseJson(data['p']);
-          if (payload['width'] == 0) {
-            return;
-          }
           this.attemptChangeSize(payload['height'], undefined)
               .then(() => {
                 if (this.fluidImpressionUrl_) {
