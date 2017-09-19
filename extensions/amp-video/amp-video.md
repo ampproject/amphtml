@@ -100,9 +100,9 @@ If present, the video will automatically loop back to the start upon reaching th
 
 Required if a `track` resource is hosted on a different origin than the document.
 
-##### muted (deprecated)
+##### controlsList
 
-The `muted` attribute is deprecated and no longer has any effect. The `autoplay` attribute automatically controls the mute behavior.
+Same as [controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) attribute of HTML5 video element. Only supported by certain browsers. Please see [https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) for details.
 
 ##### common attributes
 
@@ -151,6 +151,10 @@ notification throught the MediaSessionAPI.
 Providing a click-to-play overlay is a common UX feature for video players on the web.  For example, you could display a custom play icon that the user can click, as well as include the title of the video, different sized poster images, and so on.  Because the `amp-video` component supports the standard `play` AMP action, you can easily implement click-to-play.
 
 For a detailed example, visit AMP By Example's  [Click-to-play overlay for amp-video](https://ampbyexample.com/advanced/click-to-play_overlay_for_amp-video/).
+
+## Adaptive-bit-rate using HLS
+
+iOS and certain platfroms such as Chrome on Android support HLS natively and therefore
 
 ## Validation
 
