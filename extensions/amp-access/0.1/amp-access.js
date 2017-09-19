@@ -200,7 +200,7 @@ export class AccessService {
     // Only re-authorize sections if the response is already available.
     // Otherwise, just wait for the authorization - it will cover new sections.
     // But wait for the last authorization operation to complete.
-    const response = his.authResponse_;
+    const response = this.authResponse_;
     if (response) {
       return this.lastAuthorizationPromise_.then(() => {
         const target = dev().assertElement(event.target);
