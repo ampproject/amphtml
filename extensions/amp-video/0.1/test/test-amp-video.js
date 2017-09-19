@@ -172,7 +172,7 @@ describes.realWin('amp-video', {
       height: 90,
       'poster': 'img.png',
       'controls': '',
-      'controlsList': 'nofullscreen nodownload noremote',
+      'controlsList': 'nofullscreen nodownload noremoteplayback',
     }, null, function(element) {
       // Should set appropriate attributes in buildCallback
       const video = element.querySelector('video');
@@ -187,7 +187,7 @@ describes.realWin('amp-video', {
       expect(video.getAttribute('poster')).to.equal('img.png');
       expect(video.getAttribute('controls')).to.exist;
       expect(video.getAttribute('controlsList')).to.equal(
-          'nofullscreen nodownload noremote');
+          'nofullscreen nodownload noremoteplayback');
     });
   });
 
