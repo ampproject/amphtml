@@ -78,7 +78,7 @@ tags: {  # <amp-video>
   attrs: { name: "[artwork]" }
   attrs: { name: "[attribution]" }
   attrs: { name: "[controls]" }
-  attrs: { name: "[controlsList]" }
+  attrs: { name: "[controlslist]" }
   attrs: { name: "[loop]" }
   attrs: { name: "[poster]" }
   attrs: { name: "[preload]" }
