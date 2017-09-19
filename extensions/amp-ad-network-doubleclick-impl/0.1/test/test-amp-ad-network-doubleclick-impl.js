@@ -32,6 +32,7 @@ import {
   CORRELATOR_CLEAR_EXP_NAME,
 } from '../amp-ad-network-doubleclick-impl';
 import {
+  DFP_CANONICAL_FF_EXPERIMENT_NAME,
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
   DOUBLECLICK_EXPERIMENT_FEATURE,
 } from '../doubleclick-a4a-config';
@@ -916,6 +917,30 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(onVisibilityChangedHandler).to.not.be.ok;
       expect(isInExperiment(elem2, CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT))
           .to.be.true;
+    });
+  });
+
+  describe('shouldPreferentialRenderWithoutCrypto', () => {
+    beforeEach(() => {
+      element = doc.createElement('amp-ad');
+      element.setAttribute('type', 'doubleclick');
+      element.setAttribute('data-ad-client', 'adsense');
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+    });
+
+    afterEach(() => {
+      doc.body.removeChild(element);
+    });
+
+    it('should return false when not in canonical non-SSL experiment', () => {
+      expect(impl.shouldPreferentialRenderWithoutCrypto()).to.be.false;
+    });
+
+    it('should return true when in canonical non-SSL experiment', () => {
+      forceExperimentBranch(impl.win, DFP_CANONICAL_FF_EXPERIMENT_NAME,
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT);
+      expect(impl.shouldPreferentialRenderWithoutCrypto()).to.be.true;
     });
   });
 });
