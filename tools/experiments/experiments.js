@@ -277,6 +277,11 @@ const EXPERIMENTS = [
     name: 'Position API for foreign iframe',
     spec: 'https://github.com/ampproject/amphtml/issues/10995',
   },
+  {
+    id: 'amp-story',
+    name: 'Visual storytelling in AMP',
+    spec: 'https://github.com/ampproject/amphtml/issues/11329',
+  },
 ];
 
 if (getMode().localDev) {
