@@ -226,13 +226,13 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           'initializeRefreshManagerIfEligible_');
       impl.extractSize({
         get(name) {
-          return name == 'amp-force-refresh' ? '30' : undefined;
+          return name == 'amp-force-refresh' ? '30000' : undefined;
         },
         has(name) {
           return !!this.get(name);
         },
       });
-      expect(refreshSpy.withArgs('30')).to.not.be.called;
+      expect(refreshSpy.withArgs(30000)).to.be.called;
     });
   });
 

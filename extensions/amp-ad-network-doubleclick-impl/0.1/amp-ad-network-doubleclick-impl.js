@@ -591,15 +591,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @private
    */
   initializeRefreshManagerIfEligible_(refreshInterval) {
-    this.refreshManager_ = this.useSra ||
-        getEnclosingContainerTypes(this.element).filter(container =>
+    this.refreshManager_ = this.refreshManager_ || (!this.useSra &&
+        !getEnclosingContainerTypes(this.element).filter(container =>
             container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
-            container != ValidAdContainerTypes['AMP-STICKY-AD']).length
-            ? null
-            : this.refreshManager_ || new RefreshManager(this, {
-              visiblePercentageMin: 50,
-              continuousTimeMin: 1,
-            }, refreshInterval);
+            container != ValidAdContainerTypes['AMP-STICKY-AD']).length &&
+        new RefreshManager(this, {
+          visiblePercentageMin: 50,
+          continuousTimeMin: 1,
+        }, refreshInterval));
   }
 
   /** @override */

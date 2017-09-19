@@ -103,7 +103,7 @@ export class RefreshManager {
    * @param {!RefreshConfig} config
    * @param {number=} refreshIntervalSecs Refresh interval in seconds.
    */
-  constructor(a4a, config, refreshIntervalSecs) {
+  constructor(a4a, config, refreshIntervalMsecs) {
 
     /** @private {string} */
     this.state_ = RefreshLifecycleState.INITIAL;
@@ -121,8 +121,8 @@ export class RefreshManager {
     this.adType_ = this.element_.getAttribute('type').toLowerCase();
 
     /** @const @private {?number} */
-    this.refreshIntervalMsecs_ = (refreshIntervalSecs &&
-        this.checkAndSanitizeRefreshInterval_(refreshIntervalSecs)) ||
+    this.refreshIntervalMsecs_ = (refreshIntervalMsecs &&
+        refreshIntervalMsecs > 30000) ||
         this.getPublisherSpecifiedRefreshInterval_();
 
     /** @const @private {!RefreshConfig} */

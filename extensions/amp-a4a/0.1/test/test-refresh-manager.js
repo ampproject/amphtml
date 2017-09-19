@@ -76,7 +76,7 @@ describe('refresh-manager', () => {
   });
 
   it('should get refreshInterval from constructor', () => {
-    const refreshManager = new RefreshManager(mockA4a, config, 30);
+    const refreshManager = new RefreshManager(mockA4a, config, 30000);
     expect(refreshManager.refreshIntervalMsecs_).to.equal(30000);
   });
 
