@@ -255,6 +255,7 @@ function determineBuildTargets(filePaths) {
 const command = {
   testBuildSystem: function() {
     timedExecOrDie(`${gulp} ava`);
+    timedExec(`${gulp} lint --build_system`);  // Run in warning mode initially.
   },
   testDocumentLinks: function(files) {
     timedExecOrDie(`${gulp} check-links`);

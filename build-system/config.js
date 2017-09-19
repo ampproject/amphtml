@@ -90,6 +90,11 @@ module.exports = {
   a4aTestPaths: a4aTestPaths,
   unitTestPaths: unitTestPaths,
   integrationTestPaths: integrationTestPaths,
+  buildSystemLintGlobs: [
+    'build-system/tasks/**/*.js',
+    '!build-system/eslint-rules/**/*.*',
+    '!build-system/node_modules/**/*.*',
+  ],
   lintGlobs: [
     '**/*.js',
     '!**/*.extern.js',
