@@ -101,7 +101,7 @@ export class RefreshManager {
   /**
    * @param {!./amp-a4a.AmpA4A} a4a The AmpA4A instance to be refreshed.
    * @param {!RefreshConfig} config
-   * @param {number=} refreshIntervalSec Refresh interval in seconds.
+   * @param {number=} refreshIntervalSecs Refresh interval in seconds.
    */
   constructor(a4a, config, refreshIntervalSecs) {
 
