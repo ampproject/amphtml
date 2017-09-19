@@ -147,15 +147,15 @@ export class AmpAdExit extends AMP.BaseElement {
              */
             substitutionFunctions[customVarName] = () => {
               if ('iframeTransportSignal' in customVar) {
-                const vendorResponse = replacements.expandStringSync(
-                  customVar.iframeTransportSignal, {
-                    'IFRAME_TRANSPORT_SIGNAL': (vendor, responseKey) => {
-                      const vendorResponses = this.vendorResponses_[vendor];
-                      if (vendorResponses && responseKey in vendorResponses) {
-                        return vendorResponses[responseKey];
-                      }
-                    }
-                  });
+                const vendorResponse = replacements./*OK*/expandStringSync(
+                    customVar.iframeTransportSignal, {
+                      'IFRAME_TRANSPORT_SIGNAL': (vendor, responseKey) => {
+                        const vendorResponses = this.vendorResponses_[vendor];
+                        if (vendorResponses && responseKey in vendorResponses) {
+                          return vendorResponses[responseKey];
+                        }
+                      },
+                    });
                 if (vendorResponse != '') {
                   // Caveat: If the vendor's response *is* the empty string,
                   // then this will cause the arg/default value to be returned.
