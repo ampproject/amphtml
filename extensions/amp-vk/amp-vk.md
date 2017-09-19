@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Embeds a [VK](https://vk.com/) post or poll widget.</td>
+        <td>Embeds a <a href="https://vk.com/">VK</a> post or poll widget.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
