@@ -55,7 +55,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
         .verifyCreativeAndSignature(
         'service-1', 'key-1', creative1, new Uint8Array(256), noop)
         .then(status => {
-          expect(status).to.equal(VerificationStatus.UNVERIFIED);
+          expect(status).to.equal(VerificationStatus.CRYPTO_UNAVAILABLE);
           expect(env.fetchMock.called()).to.be.false;
         });
   });
