@@ -79,7 +79,7 @@ const EXIT_CONFIG = {
         _foo: {
           defaultValue: 'foo-default',
           iframeTransportSignal:
-            'IFRAME_TRANSPORT_SIGNAL(' + TEST_3P_VENDOR + ', collected-data)',
+            'IFRAME_TRANSPORT_SIGNAL(' + TEST_3P_VENDOR + ',collected-data)',
         },
         _bar: {
           defaultValue: 'bar-default',
@@ -400,7 +400,7 @@ describes.realWin('amp-ad-exit', {
     expect(sendBeacon).to.have.been.calledWith(trackingMatcher, '');
   });
 
-  it('should replace custom URL variables', () => {
+  it('should replace custom URL variables with vars', () => {
     const open = sandbox.stub(win, 'open', () => {
       return {name: 'fakeWin'};
     });

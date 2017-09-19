@@ -118,6 +118,7 @@ export class AmpAdExit extends AMP.BaseElement {
       'CLICK_X': true,
       'CLICK_Y': true,
     };
+    const replacements = Services.urlReplacementsForDoc(this.getAmpDoc());
     if (target.vars) {
       for (const customVarName in target.vars) {
         if (customVarName[0] == '_') {
@@ -132,7 +133,7 @@ export class AmpAdExit extends AMP.BaseElement {
                  "_pty": {
                    "defaultValue": "unknown",
                    "iframeTransportSignal":
-                      "IFRAME_TRANSPORT_SIGNAL(vendorXYZ, priority)"
+                      "IFRAME_TRANSPORT_SIGNAL(vendorXYZ,priority)"
                  },
                  ...
                }
@@ -146,38 +147,32 @@ export class AmpAdExit extends AMP.BaseElement {
              */
             substitutionFunctions[customVarName] = () => {
               if ('iframeTransportSignal' in customVar) {
-                const matches = customVar['iframeTransportSignal'].match(
-                    /IFRAME_TRANSPORT_SIGNAL\(([\w-]+),\s*([\w-]+)\)/);
-                user().assert(matches && matches.length == 3,
-                    'Malformed value for iframeTransportSignal');
-                // It's a 3p analytics variable
-                const vendorResponses = this.vendorResponses_[matches[1]];
-                if (vendorResponses) {
-                  /* The vendor (in the example above, "vendorXYZ") has
-                     responded to this creative. Need to check whether that
-                     response contains a property that matches the
-                     second parameter to IFRAME_TRANSPORT_SIGNAL (ex:
-                     "priority") for this custom variable. If so, return the
-                     value in the response object that is associated with
-                     that key.
-                  */
-                  const responseKey = matches[2];
-                  if (responseKey in vendorResponses) {
-                    return vendorResponses[responseKey];
-                  }
+                const vendorResponse = replacements.expandStringSync(
+                  customVar.iframeTransportSignal, {
+                    'IFRAME_TRANSPORT_SIGNAL': (vendor, responseKey) => {
+                      const vendorResponses = this.vendorResponses_[vendor];
+                      if (vendorResponses && responseKey in vendorResponses) {
+                        return vendorResponses[responseKey];
+                      }
+                    }
+                  });
+                if (vendorResponse != '') {
+                  // Caveat: If the vendor's response *is* the empty string,
+                  // then this will cause the arg/default value to be returned.
+                  return vendorResponse;
                 }
               }
-              // Either it's not a 3p analytics variable, or it is one but
-              // no matching response has been received yet.
+
+              // Either it's not a 3p analytics variable, or it is one
+              // but no matching response has been received yet.
               return (customVarName in args) ?
-                  args[customVarName] : customVar.defaultValue;
+                args[customVarName] : customVar.defaultValue;
             };
             whitelist[customVarName] = true;
           }
         }
       }
     }
-    const replacements = Services.urlReplacementsForDoc(this.getAmpDoc());
     return url => replacements.expandUrlSync(
         url, substitutionFunctions, undefined /* opt_collectVars */, whitelist);
   }
