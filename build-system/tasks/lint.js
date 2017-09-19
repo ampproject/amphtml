@@ -100,7 +100,7 @@ function runLinter(path, stream, options) {
     .pipe(eslint.failAfterError())
     .on('error', function() {
       if (errorsFound && !options.fix) {
-        if (!!process.env.TRAVIS_PULL_REQUEST_SHA) {
+        if (process.env.TRAVIS) {
           util.log(util.colors.yellow('NOTE:'),
               'The linter is currently running in warning mode.',
               'The errors found above must eventually be fixed.');
