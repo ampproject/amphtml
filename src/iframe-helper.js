@@ -28,8 +28,6 @@ import {tryParseJson} from './json';
  */
 const UNLISTEN_SENTINEL = 'unlisten';
 
-export const GLOBAL_TYPE_KEYS_NAME = 'AMP_EVENT_TYPE_KEYS';
-
 /**
  * @typedef {{
  *   frame: !Element,
@@ -197,7 +195,6 @@ function registerGlobalListenerIfNeeded(parentWin) {
   if (parentWin.listeningFors) {
     return;
   }
-  parentWin[GLOBAL_TYPE_KEYS_NAME].push('type');
   const listenForListener = function(event) {
     if (!getData(event)) {
       return;
@@ -217,14 +214,9 @@ function registerGlobalListenerIfNeeded(parentWin) {
       return;
     }
 
-    let listeners;
-    for (let i = 0; i < parentWin[GLOBAL_TYPE_KEYS_NAME].length; i++) {
-      const typeKey = parentWin[GLOBAL_TYPE_KEYS_NAME][i];
-      listeners = listenForEvents[data[typeKey]];
-      if (listeners) {
-        break;
-      }
-    }
+    // TODO(levitzky) Implement more generic and sustainable way of getting
+    // listener type.
+    let listeners = listenForEvents[data['type'] || data['s']];
     if (!listeners) {
       return;
     }
@@ -253,22 +245,15 @@ function registerGlobalListenerIfNeeded(parentWin) {
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  * @param {boolean=} opt_includingNestedWindows set to true if a messages from
  *     nested frames should also be accepted.
- * @param {string=} opt_typeKey Key to index event type.
  * @return {!UnlistenDef}
  */
 export function listenFor(
-    iframe, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows,
-    opt_typeKey) {
+    iframe, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows) {
   dev().assert(iframe.src, 'only iframes with src supported');
   dev().assert(!iframe.parentNode, 'cannot register events on an attached ' +
       'iframe. It will cause hair-pulling bugs like #2942');
   dev().assert(callback);
   const parentWin = iframe.ownerDocument.defaultView;
-
-  parentWin[GLOBAL_TYPE_KEYS_NAME] = parentWin[GLOBAL_TYPE_KEYS_NAME] || [];
-  if (opt_typeKey) {
-    parentWin[GLOBAL_TYPE_KEYS_NAME].push(opt_typeKey);
-  }
 
   registerGlobalListenerIfNeeded(parentWin);
 
