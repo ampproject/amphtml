@@ -25,11 +25,11 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * [Install and set up Git](https://help.github.com/articles/set-up-git/); in the "Authenticating" step of that page use SSH instead of HTTPS
 
-* Install [NodeJS](https://nodejs.org/) version >= 4.7
+* Install [NodeJS](https://nodejs.org/) version >= 6
 
-* If the version of [npm](https://www.npmjs.com/) that was installed with NodeJS is lower than version 5, upgrade it by running `npm install -g npm@latest` (this command might require elevated privileges using `sudo` on some platforms)
+* Install [Yarn](https://yarnpkg.com/) version >= 1.0.2, follow the instructions on the website or install it with npm: `npm install -g yarn@latest` (this command might require elevated privileges using `sudo` on some platforms)
 
-* Install Gulp by running `npm install -g gulp` (as before, this command might require `sudo`)
+* Install Gulp by running `yarn global add gulp` (as before, this command might require `sudo`)
 
 * Add this line to your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows):
 
@@ -48,7 +48,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 * Go to the branch: `git checkout <branch name>`
 
 # Build AMP & run a local server
-* Make sure you have the latest packages (after you pull): `npm install`
+* Make sure you have the latest packages (after you pull): `yarn`
 * Start the server: `gulp`
 * Access your server at [http://localhost:8000](http://localhost:8000)
 * Access your sample pages at [http://localhost:8000/examples](http://localhost:8000/examples)
@@ -62,7 +62,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 # Create commits to contain your changes
 
 * Edit files in your favorite editor
-* If you edited `package.json`, run `npm prune && npm install` to generate an updated `package-lock.json` file
+* If you edited `package.json`, run `yarn install` to generate an updated `yarn.lock` file
 * Add each file you change: `git add <file>`
 * Create a commit: `git commit -m "<your commit message>"`
 * Instead of `add`ing each file individually you can use the `-a` flag on the commit instead

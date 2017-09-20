@@ -18,7 +18,8 @@ limitations under the License.
 
 ## Requirements
 - git
-- node + npm
+- node 6+
+- yarn 1.0.2+ (see https://yarnpkg.com/)
 - gulp (installed globally)
 - java 8
 
@@ -28,7 +29,7 @@ git clone https://github.com/ampproject/amphtml.git
 cd amphtml
 # Checkout a tag
 git checkout 123456789
-npm install
+yarn
 gulp clean
 # We only need to build the css files, no need to generate `max` files
 gulp build --css-only
