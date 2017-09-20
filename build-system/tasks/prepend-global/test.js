@@ -16,23 +16,23 @@
 'use strict';
 
 
-var BBPromise = require('bluebird');
-var fs = BBPromise.promisifyAll(require('fs'));
-var m = require('./');
-var test = require('ava');
+const BBPromise = require('bluebird');
+const fs = BBPromise.promisifyAll(require('fs'));
+const m = require('./');
+const test = require('ava');
 
-var targetFile = 'target-file.js';
+const targetFile = 'target-file.js';
 
 test('sync - prepends global config', t => {
   t.plan(1);
-  var res = m.prependConfig('{"hello":"world"}', 'var x = 1 + 1;');
+  const res = m.prependConfig('{"hello":"world"}', 'var x = 1 + 1;');
   t.is(res, 'self.AMP_CONFIG||(self.AMP_CONFIG={"hello":"world"});' +
       '/*AMP_CONFIG*/var x = 1 + 1;');
 });
 
 test('sync - valueOrDefault', t => {
   t.plan(2);
-  var res = m.valueOrDefault(true, 'hello');
+  let res = m.valueOrDefault(true, 'hello');
   t.is(res, 'hello');
   res = m.valueOrDefault('world', 'hello');
   t.is(res, 'world');
@@ -40,13 +40,13 @@ test('sync - valueOrDefault', t => {
 
 test('sync - sanityCheck', t => {
   t.plan(3);
-  var badStr = 'self.AMP_CONFIG||(self.AMP_CONFIG={"hello":"world"})' +
+  const badStr = 'self.AMP_CONFIG||(self.AMP_CONFIG={"hello":"world"})' +
       '/*AMP_CONFIG*/' +
       'self.AMP_CONFIG||(self.AMP_CONFIG={"hello":"world"})' +
       '/*AMP_CONFIG*/' +
       'var x = 1 + 1;';
-  var badStr2 = 'var x = 1 + 1;';
-  var goodStr = 'self.AMP_CONFIG||(self.AMP_CONFIG={"hello":"world"})' +
+  const badStr2 = 'var x = 1 + 1;';
+  const goodStr = 'self.AMP_CONFIG||(self.AMP_CONFIG={"hello":"world"})' +
       '/*AMP_CONFIG*/' +
       'var x = 1 + 1;';
   t.false(m.numConfigs(badStr) == 1);

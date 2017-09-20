@@ -27,7 +27,7 @@ test('sync - build out correct CODEOWNERS', t => {
     '*': [
       'username1',
       '@username2',
-      {'ampproject/group': ['*.protoascii']}
+      {'ampproject/group': ['*.protoascii']},
     ],
     ads: ['username3', '@username1'],
     'some/deeply/nested/dir': ['username5', {'ampproject/group2': ['some.js']}],

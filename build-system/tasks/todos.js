@@ -15,18 +15,18 @@
  */
 'use strict';
 
-var BBPromise = require('bluebird');
-var gulp = require('gulp-help')(require('gulp'));
-var path = require('path');
-var srcGlobs = require('../config').presubmitGlobs;
-var util = require('gulp-util');
-var through2 = require('through2');
-var request = BBPromise.promisify(require('request'));
+const BBPromise = require('bluebird');
+const gulp = require('gulp-help')(require('gulp'));
+const path = require('path');
+const srcGlobs = require('../config').presubmitGlobs;
+const util = require('gulp-util');
+const through2 = require('through2');
+const request = BBPromise.promisify(require('request'));
 
-var GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
+const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 
 /** @type {!Object<string, !Promise<number>>} */
-var issueCache = Object.create(null);
+const issueCache = Object.create(null);
 
 
 /**
@@ -36,17 +36,17 @@ var issueCache = Object.create(null);
  * @return {Promise<number>} Number of found closed TODOs.
  */
 function findClosedTodosInFile(file) {
-  var contents = file.contents.toString();
-  var todos = contents.match(/TODO\([^\)]*\)/g);
+  const contents = file.contents.toString();
+  const todos = contents.match(/TODO\([^\)]*\)/g);
   if (!todos || todos.length == 0) {
     return Promise.resolve(0);
   }
 
-  var promises = [];
-  for (var i = 0; i < todos.length; i++) {
-    var todo = todos[i];
-    var parts = /TODO\([^\)]*\#(\d*)\)/.exec(todo);
-    var issueId = parts ? parts[1] : null;
+  const promises = [];
+  for (let i = 0; i < todos.length; i++) {
+    const todo = todos[i];
+    const parts = /TODO\([^\)]*\#(\d*)\)/.exec(todo);
+    const issueId = parts ? parts[1] : null;
     if (!issueId) {
       continue;
     }
@@ -79,8 +79,8 @@ function reportClosedIssue(file, issueId, todo) {
   }
   return issueCache[issueId] = githubRequest('/issues/' + issueId)
       .then(response => {
-        var issue = JSON.parse(response.body);
-        var value = issue.state == 'closed' ? 1 : 0;
+        const issue = JSON.parse(response.body);
+        const value = issue.state == 'closed' ? 1 : 0;
         if (value) {
           util.log(util.colors.red(todo, 'in', file.path));
         }
@@ -96,14 +96,14 @@ function reportClosedIssue(file, issueId, todo) {
  * @return {!Promise<*>}
  */
 function githubRequest(path, opt_method, opt_data) {
-  var options = {
+  const options = {
     url: 'https://api.github.com/repos/ampproject/amphtml' + path,
     headers: {
       'User-Agent': 'amp-changelog-gulp-task',
-      'Accept': 'application/vnd.github.v3+json'
+      'Accept': 'application/vnd.github.v3+json',
     },
     qs: {
-      access_token: GITHUB_ACCESS_TOKEN
+      access_token: GITHUB_ACCESS_TOKEN,
     },
   };
   if (opt_method) {
@@ -121,20 +121,20 @@ function githubRequest(path, opt_method, opt_data) {
  * todos:find-closed task.
  */
 function findClosedTodosTask() {
-  var foundCount = 0;
+  let foundCount = 0;
   return gulp.src(srcGlobs)
-    .pipe(through2.obj(function(file, enc, cb) {
-      findClosedTodosInFile(file).then(function(count) {
-        foundCount += count;
-        cb();
+      .pipe(through2.obj(function(file, enc, cb) {
+        findClosedTodosInFile(file).then(function(count) {
+          foundCount += count;
+          cb();
+        });
+      }))
+      .on('end', function() {
+        if (foundCount > 0) {
+          util.log(util.colors.red('Found closed TODOs: ', foundCount));
+          process.exit(1);
+        }
       });
-    }))
-    .on('end', function() {
-      if (foundCount > 0) {
-        util.log(util.colors.red('Found closed TODOs: ', foundCount));
-        process.exit(1);
-      }
-    });
 }
 
 
