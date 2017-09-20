@@ -18,6 +18,7 @@ import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {Services} from '../services';
 import {
+  setImportantStyles,
   setStyle,
   setStyles,
   computedStyle,
@@ -275,7 +276,7 @@ export class FixedLayer {
         // large value (to catch cases where sticky-tops are in a long way
         // down inside a scroller).
         for (let i = 0; i < elements.length; i++) {
-          setStyles(elements[i].element, {
+          setImportantStyles(elements[i].element, {
             top: '',
             bottom: '-9999vh',
             transition: 'none',
