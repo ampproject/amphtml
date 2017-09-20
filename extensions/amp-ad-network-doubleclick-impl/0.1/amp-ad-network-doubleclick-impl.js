@@ -70,7 +70,7 @@ import {isObject} from '../../../src/types';
 import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {setStyles} from '../../../src/style';
+import {setStyles, computedStyle} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
@@ -1132,7 +1132,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getXdomainCreativeFrameMessageListeners() {
     return !this.isFluid_ ? {} : {
-      'creative_geometry_update': data => {
+      'creative_geometry_update': data => { debugger;
         // The first creative_geometry_update message will contain bad
         // geometric data, as it will have been computed using the initial,
         // incorrect, iframe style. We use this first message as a
@@ -1146,6 +1146,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             width: '100%',
             height: '100%',
             position: 'relative',
+          });
+          setStyles(this.element, {
+            width: computedStyle(this.win,
+                       dev().assertElement(this.element.parentElement)).width,
           });
         } else {
           const payload = tryParseJson(data['p']);
