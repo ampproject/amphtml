@@ -1572,15 +1572,6 @@ export class AmpA4A extends AMP.BaseElement {
   getAdditionalContextMetadata() {
     return /** @type {!JsonObject} */ ({});
   }
-
-  /**
-   * This method may be extended to return a set of events that will be
-   * subscribed to once the cross domain iframe is available.
-   * @return {!Object<string, !function(!JsonObject, !Window, string)>}
-   */
-  getXdomainCreativeFrameMessageListeners() {
-    return {};
-  }
 }
 
 /**
