@@ -557,8 +557,10 @@ export class Resource {
    * @return {boolean}
    */
   isDisplayed() {
-    return (this.element.getLayout() == Layout.FLUID ||
-          (this.layoutBox_.height > 0 && this.layoutBox_.width > 0)) &&
+    const isFluid = this.element.getLayout() == Layout.FLUID;
+    const hasNonZeroSize = this.layoutBox_.height > 0 &&
+        this.layoutBox_.width > 0;
+    return (isFluid || hasNonZeroSize) &&
         !!this.element.ownerDocument &&
         !!this.element.ownerDocument.defaultView;
   }

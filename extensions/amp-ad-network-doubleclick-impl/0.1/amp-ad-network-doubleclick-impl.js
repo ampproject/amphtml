@@ -138,6 +138,9 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
  */
 export const TFCD = 'tagForChildDirectedTreatment';
 
+/** @const {string */
+export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
+
 /** @private {?Promise} */
 let sraRequests = null;
 
@@ -303,8 +306,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout) ||
-        this.element.getLayout() == Layout.FLUID;
+    return isLayoutSizeDefined(layout) || layout == Layout.FLUID;
   }
 
   /** @override */
@@ -327,7 +329,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.isFluid_ = this.element.getLayout() == Layout.FLUID;
     if (this.isFluid_) {
       this.win.addEventListener(
-          'message', this.receiveMessageForFluid.bind(this), false);
+          'message', this.receiveMessageForFluid_.bind(this), false);
     }
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
@@ -383,16 +385,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Handles Fluid-related messages dispatched from SafeFrame.
    * @param {!Event} event
+   * @private
    */
-  receiveMessageForFluid(event) {
-    if (event.origin != 'https://tpc.googlesyndication.com') {
-      return;
-    }
+  receiveMessageForFluid_(event) {
     const data = tryParseJson(getData(event));
-    if (!data || data['s'] != 'creative_geometry_update' ||
-        data['sentinel'] != this.sentinel) {
+    if (event.origin != SAFEFRAME_ORIGIN || !data ||
+        data['s'] != 'creative_geometry_update') {
       return;
     }
+    user().assert(TAG, data['sentinel'] == this.sentinel,
+        `Expected sentinel value to match ${this.sentinel} but found` +
+        `${data['sentinel']}`);
     // The first creative_geometry_update message will contain bad
     // geometric data, as it will have been computed using the initial,
     // incorrect, iframe style. We use this first message as a
@@ -402,18 +405,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const styleString = this.iframe.getAttribute('style');
     if (/width: 0px/.test(styleString) &&
         /height: 0px/.test(styleString)) {
-      setStyles(this.iframe, {
-        width: '100%',
-        height: '100%',
-        position: 'relative',
-      });
-      setStyles(this.element, {
-        width: computedStyle(this.win,
-            dev().assertElement(this.element.parentElement)).width,
+      this.getVsync().mutate(() => {
+        setStyles(this.iframe, {
+          width: '100%',
+          height: '100%',
+          position: 'relative',
+        });
+        setStyles(this.element, {
+          width: computedStyle(this.win,
+              dev().assertElement(this.element.parentElement)).width,
+        });
       });
     } else {
       const payload = tryParseJson(data['p']);
-      this.attemptChangeSize(payload['height'], undefined)
+      if (!payload || !payload['height']) {
+        // TODO(levitzky) Add actual error handling here.
+        this.forceCollapse();
+        return;
+      }
+      this.attemptChangeHeight(payload['height'])
           .then(() => {
             if (this.fluidImpressionUrl_) {
               this.fireDelayedImpressions(this.fluidImpressionUrl_, false);
@@ -421,6 +431,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             }
             this.onFluidResize();
           })
+          // TODO(levitzky) Add more error handling here
           .catch(() => this.forceCollapse());
     }
   }
@@ -573,6 +584,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
     this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
 
@@ -590,6 +602,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     } else {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
 >>>>>>> Refactors.
+=======
+    if (this.isFluid_) {
+      this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
+    } else {
+      this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
+      this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
+>>>>>>> PR feedback.
     }
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
@@ -691,7 +710,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.iframe.contentWindow./*OK*/postMessage(
         JSON.stringify(/** @type {!JsonObject} */
           ({message: 'connect', c: 'sfchannel1'})),
-        'https://tpc.googlesyndication.com');
+        SAFEFRAME_ORIGIN);
   }
 
   /**
@@ -704,7 +723,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.iframe.contentWindow./*OK*/postMessage(
         JSON.stringify(/** @type {!JsonObject} */
           ({message: 'resize-complete', c: 'sfchannel1'})),
-        'https://tpc.googlesyndication.com');
+        SAFEFRAME_ORIGIN);
   }
 
   /** @override */
@@ -1135,7 +1154,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   getPreconnectUrls() {
     return ['https://partner.googleadservices.com',
-      'https://tpc.googlesyndication.com'];
+      SAFEFRAME_ORIGIN];
   }
 
   /** @override */
