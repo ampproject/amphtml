@@ -204,7 +204,8 @@ export class AccessService {
     if (response) {
       return this.lastAuthorizationPromise_.then(() => {
         const target = dev().assertElement(event.target);
-        this.applyAuthorizationToRoot_(target, response);
+        this.applyAuthorizationToRoot_(target,
+            /** @type {!JsonObject} */ (response));
       });
     }
   }
