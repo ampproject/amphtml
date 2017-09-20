@@ -644,6 +644,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         'https://tpc.googlesyndication.com');
   }
 
+  /**
+   * Notifies the Fluid creative that its container has been resized.
+   * @visibleForTesting
+   */
+  onFluidResize() {
+    dev().assert(this.iframe.contentWindow,
+        'Frame contentWindow unavailable.');
+    this.iframe.contentWindow./*OK*/postMessage(
+        JSON.stringify(/** @type {!JsonObject} */
+          ({message: 'resize-complete', c: 'sfchannel1'})),
+        'https://tpc.googlesyndication.com');
+  }
+
   /** @override */
   refresh(refreshEndCallback) {
     this.refreshCount_++;
@@ -1159,6 +1172,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   this.fireDelayedImpressions(this.fluidImpressionUrl_, false);
                   this.fluidImpressionUrl_ = null;
                 }
+                this.onFluidResize();
               })
               .catch(() => this.forceCollapse());
         }

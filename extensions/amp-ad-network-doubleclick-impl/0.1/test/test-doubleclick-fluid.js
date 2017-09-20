@@ -226,6 +226,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         </script>`;
     const fireDelayedImpressionsSpy =
         sandbox.spy(impl, 'fireDelayedImpressions');
+    const onFluidResizeSpy = sandbox.spy(impl, 'onFluidResize');
     impl.fluidImpressionUrl_ = 'http://www.foo.bar/';
     impl.attemptChangeSize = () => Promise.resolve();
     return utf8Encode(rawCreative).then(creative => {
@@ -235,6 +236,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         impl.creativeBody_ = creative;
         return impl.layoutCallback().then(() => {
           expect(fireDelayedImpressionsSpy).to.be.calledOnce;
+          expect(onFluidResizeSpy).to.be.calledOnce;
         });
       });
     });
