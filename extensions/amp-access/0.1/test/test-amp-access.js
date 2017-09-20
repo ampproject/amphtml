@@ -20,6 +20,7 @@ import {AccessServerAdapter} from '../amp-access-server';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {AccessVendorAdapter} from '../amp-access-vendor';
 import {AccessService} from '../amp-access';
+import {AmpEvents} from '../../../../src/amp-events';
 import {Observable} from '../../../../src/observable';
 import {cidServiceForDocForTesting} from
     '../../../../src/service/cid-impl';
@@ -632,6 +633,51 @@ describes.fakeWin('AccessService authorization', {
       expect(document.documentElement).to.have.class('amp-access-error');
       expect(elementOn).not.to.have.attribute('amp-access-hide');
       expect(elementOff).not.to.have.attribute('amp-access-hide');
+    });
+  });
+
+  it('should apply authorization response to new sections', () => {
+    function createElements() {
+      const container = win.document.createElement('div');
+      const elementOff = win.document.createElement('div');
+      elementOff.setAttribute('amp-access', 'NOT access');
+      container.appendChild(elementOff);
+      const elementOn = win.document.createElement('div');
+      elementOn.setAttribute('amp-access', 'access');
+      container.appendChild(elementOn);
+      return {container, elementOn, elementOff};
+    }
+    function dispatchUpdateEvent(target) {
+      const event = win.document.createEvent('Event');
+      event.initEvent(AmpEvents.DOM_UPDATE, true, true);
+      target.dispatchEvent(event);
+    }
+    expectGetReaderId('reader1');
+    adapterMock.expects('authorize')
+        .withExactArgs()
+        .returns(Promise.resolve({access: true}))
+        .once();
+    const early = createElements();
+    const later = createElements();
+    // Add "early" elements right away.
+    win.document.body.appendChild(early.container);
+    dispatchUpdateEvent(early.container);
+    expect(early.elementOn).not.to.have.attribute('amp-access-hide');
+    expect(early.elementOff).not.to.have.attribute('amp-access-hide');
+    return service.runAuthorization_().then(() => {
+      // "early" applied by the authorization response.
+      expect(early.elementOn).not.to.have.attribute('amp-access-hide');
+      expect(early.elementOff).to.have.attribute('amp-access-hide');
+
+      // "later" is not applied yet, not even after event.
+      win.document.body.appendChild(later.container);
+      dispatchUpdateEvent(later.container);
+      expect(later.elementOn).not.to.have.attribute('amp-access-hide');
+      expect(later.elementOff).not.to.have.attribute('amp-access-hide');
+      return service.lastAuthorizationPromise_;
+    }).then(() => {
+      expect(later.elementOn).not.to.have.attribute('amp-access-hide');
+      expect(later.elementOff).to.have.attribute('amp-access-hide');
     });
   });
 
