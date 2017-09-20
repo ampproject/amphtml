@@ -589,7 +589,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.element, this.win, 'doubleclick')) {
       this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
     }
-    
+
     if (this.isFluid_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
     } else {
