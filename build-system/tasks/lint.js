@@ -19,11 +19,9 @@
 const argv = require('minimist')(process.argv.slice(2));
 const config = require('../config');
 const eslint = require('gulp-eslint');
-const getStdout = require('../exec.js').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
 const gulpIf = require('gulp-if');
 const lazypipe = require('lazypipe');
-const path = require('path');
 const util = require('gulp-util');
 const watch = require('gulp-watch');
 
@@ -34,23 +32,6 @@ const options = {
   rulePaths: ['build-system/eslint-rules/'],
   plugins: ['eslint-plugin-google-camelcase'],
 };
-
-/**
- * On travis, we'll start by linting just the build-system files that are being
- * changed in the current PR. For local runs, we lint all build-system files.
- *
- * @return {!Array<string>}
- */
-function getBuildSystemFiles() {
-  if (process.env.TRAVIS) {
-    const filesInPr =
-        getStdout('git diff master --name-only').trim().split('\n');
-    return filesInPr.filter(function(file) {
-      return file.startsWith('build-system') && path.extname(file) == '.js';
-    });
-  }
-  return config.buildSystemLintGlobs;
-}
 
 /**
  * Checks if current Vinyl file has been fixed by eslint.
@@ -95,19 +76,14 @@ function runLinter(path, stream, options) {
       .pipe(eslint.failAfterError())
       .on('error', function() {
         if (errorsFound && !options.fix) {
-          if (process.env.TRAVIS) {
-            util.log(util.colors.yellow('NOTE:'),
-                'The linter is currently running in warning mode.',
-                'The errors found above must eventually be fixed.');
-          } else {
-            util.log(util.colors.yellow('NOTE:'),
-                'You can use', util.colors.cyan('--fix'), 'with your',
-                util.colors.cyan('gulp lint'),
-                'command to automatically fix some of these lint errors.');
-            util.log(util.colors.yellow('WARNING:'),
-                'Since this is a destructive operation (operates on the file',
-                'system), make sure you commit before running the command.');
-          }
+          util.log(util.colors.red('ERROR:'),
+              'Lint errors found.');
+          util.log(util.colors.yellow('NOTE:'),
+              'You can run', util.colors.cyan('gulp lint --fix'),
+              'to automatically fix some of these lint errors.');
+          util.log(util.colors.yellow('WARNING:'),
+              'Since this is a destructive operation (operates on the file',
+              'system), make sure you commit before running the command.');
         }
       });
 }
@@ -120,12 +96,7 @@ function lint() {
   if (argv.fix) {
     options.fix = true;
   }
-  let stream;
-  if (argv.build_system) {
-    stream = initializeStream(getBuildSystemFiles(), {base: 'build-system'});
-    return runLinter('./build-system/', stream, options);
-  }
-  stream = initializeStream(config.lintGlobs, {});
+  const stream = initializeStream(config.lintGlobs, {});
   return runLinter('.', stream, options);
 }
 
@@ -133,7 +104,6 @@ function lint() {
 gulp.task('lint', 'Validates against Google Closure Linter', lint,
     {
       options: {
-        'build_system': '  Runs the linter against the build system directory',
         'watch': '  Watches for changes in files, validates against the linter',
         'fix': '  Fixes simple lint errors (spacing etc).',
       },

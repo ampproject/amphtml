@@ -25,7 +25,6 @@
  * presubmit checking, via the determineBuildTargets method.
  */
 const atob = require('atob');
-const exec = require('./exec.js').exec;
 const execOrDie = require('./exec.js').execOrDie;
 const getStdout = require('./exec.js').getStdout;
 const path = require('path');
@@ -59,16 +58,6 @@ function stopTimer(functionName, startTime) {
   console.log(
       fileLogPrefix, 'Done running', util.colors.cyan(functionName),
       'Total time:', util.colors.green(mins + 'm ' + secs + 's'));
-}
-
-/**
- * Executes the provided command and times it.
- * @param {string} cmd
- */
-function timedExec(cmd) {
-  const startTime = startTimer(cmd);
-  exec(cmd);
-  stopTimer(cmd, startTime);
 }
 
 /**
@@ -255,18 +244,17 @@ const command = {
   testBuildSystem: function() {
     timedExecOrDie(`${gulp} ava`);
   },
-  lintBuildSystem: function() {
-    timedExec(`${gulp} lint --build_system`);  // Run in warning mode initially.
-  },
   testDocumentLinks: function() {
     timedExecOrDie(`${gulp} check-links`);
   },
   cleanBuild: function() {
     timedExecOrDie(`${gulp} clean`);
   },
-  runJsonAndLintChecks: function() {
-    timedExecOrDie(`${gulp} json-syntax`);
+  runLintCheck: function() {
     timedExecOrDie(`${gulp} lint`);
+  },
+  runJsonCheck: function() {
+    timedExecOrDie(`${gulp} json-syntax`);
   },
   buildCss: function() {
     timedExecOrDie(`${gulp} css`);
@@ -329,7 +317,8 @@ function runAllCommands() {
     command.cleanBuild();
     command.buildRuntime();
     command.runVisualDiffTests(/* opt_mode */ 'master');
-    command.runJsonAndLintChecks();
+    command.runLintCheck();
+    command.runJsonCheck();
     command.runDepAndTypeChecks();
     command.runUnitTests();
     command.verifyVisualDiffTests();
@@ -398,13 +387,17 @@ function main() {
 
   console.log(
       fileLogPrefix, 'Detected build targets:',
-      util.colors.cyan(buildTargets.concat().sort().join(', ')));
+      util.colors.cyan(Array.from(buildTargets).sort().join(', ')));
 
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == 'unit_tests') {
     if (buildTargets.has('BUILD_SYSTEM')) {
       command.testBuildSystem();
-      command.lintBuildSystem();
+    }
+    if (buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('INTEGRATION_TEST')) {
+      command.runLintCheck();
     }
     if (buildTargets.has('DOCS')) {
       command.testDocumentLinks();
@@ -413,7 +406,7 @@ function main() {
         buildTargets.has('INTEGRATION_TEST')) {
       command.cleanBuild();
       command.buildCss();
-      command.runJsonAndLintChecks();
+      command.runJsonCheck();
       command.runDepAndTypeChecks();
       // Run unit tests only if the PR contains runtime changes.
       if (buildTargets.has('RUNTIME')) {

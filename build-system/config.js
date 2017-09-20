@@ -90,16 +90,13 @@ module.exports = {  // eslint-disable-line no-undef
   a4aTestPaths,
   unitTestPaths,
   integrationTestPaths,
-  buildSystemLintGlobs: [
-    'build-system/**/*.js',
-    '!build-system/eslint-rules/**/*.*',
-    '!build-system/node_modules/**/*.*',
-  ],
   lintGlobs: [
     '**/*.js',
     '!**/*.extern.js',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
-        'third_party,build-system}/**/*.*',
+        'third_party}/**/*.*',
+    '!build-system/eslint-rules/**/*.*',
+    '!build-system/node_modules/**/*.*',
     '!{testing,examples}/**/*.*',
     // TODO: temporary, remove when validator is up to date
     '!validator/**/*.*',
