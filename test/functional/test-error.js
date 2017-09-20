@@ -88,13 +88,16 @@ describes.fakeWin('installErrorReporting', {}, env => {
 });
 
 
-describe.configure().run('reportErrorToServer', () => {
+describe('reportErrorToServer', () => {
   let sandbox;
   let onError;
+  let nextRandomNumber;
 
   beforeEach(() => {
     onError = window.onerror;
     sandbox = sinon.sandbox.create();
+    nextRandomNumber = 0;
+    sandbox.stub(Math, 'random', () => nextRandomNumber);
   });
 
   afterEach(() => {
@@ -334,8 +337,21 @@ describe.configure().run('reportErrorToServer', () => {
     expect(url).to.be.undefined;
   });
 
+  it('should throttle user errors', () => {
+    nextRandomNumber = 0.2;
+    let e = '';
+    try {
+      user().assert(false, 'XYZ');
+    } catch (error) {
+      e = error;
+    }
+    const url =
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
+    expect(url).to.be.undefined;
+  });
+
   it('should not report load errors', () => {
-    sandbox.stub(Math, 'random', () => (1e-3 + 1e-4));
+    nextRandomNumber = 1e-3 + 1e-4;
     const e = new Error('Failed to load:');
     const url =
         getErrorReportUrl(undefined, undefined, undefined, undefined, e);
@@ -343,7 +359,7 @@ describe.configure().run('reportErrorToServer', () => {
   });
 
   it('should report throttled load errors at threshold', () => {
-    sandbox.stub(Math, 'random', () => 1e-3);
+    nextRandomNumber = 1e-3;
     const e = new Error('Failed to load:');
     const url =
         getErrorReportUrl(undefined, undefined, undefined, undefined, e);
@@ -352,7 +368,7 @@ describe.configure().run('reportErrorToServer', () => {
   });
 
   it('should not report Script errors', () => {
-    sandbox.stub(Math, 'random', () => (1e-3 + 1e-4));
+    nextRandomNumber = 1e-3 + 1e-4;
     const e = new Error('Script error.');
     const url =
         getErrorReportUrl(undefined, undefined, undefined, undefined, e);
@@ -360,7 +376,7 @@ describe.configure().run('reportErrorToServer', () => {
   });
 
   it('should report throttled Script errors at threshold', () => {
-    sandbox.stub(Math, 'random', () => 1e-3);
+    nextRandomNumber = 1e-3;
     const e = new Error('Script error.');
     const url =
         getErrorReportUrl(undefined, undefined, undefined, undefined, e);
@@ -370,7 +386,7 @@ describe.configure().run('reportErrorToServer', () => {
 
 
   it('should report throttled load errors under threshold', () => {
-    sandbox.stub(Math, 'random', () => (1e-3 - 1e-4));
+    nextRandomNumber = 1e-3 - 1e-4;
     const e = new Error('Failed to load:');
     const url =
         getErrorReportUrl(undefined, undefined, undefined, undefined, e);
