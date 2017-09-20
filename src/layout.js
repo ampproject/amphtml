@@ -441,7 +441,9 @@ export function applyStaticLayout(element) {
     }
   } else if (layout == Layout.FLUID) {
     element.classList.add('i-amphtml-layout-awaiting-size');
-    setStyle(element, 'width', width ? width : 'auto');
+    if (width) {
+      setStyle(element, 'width', width);
+    }
   }
   return layout;
 }

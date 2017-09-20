@@ -557,8 +557,8 @@ export class Resource {
    * @return {boolean}
    */
   isDisplayed() {
-    return true || ((this.element.getLayout() == Layout.FLUID ||
-          this.layoutBox_.height > 0) && this.layoutBox_.width > 0) &&
+    return (this.element.getLayout() == Layout.FLUID ||
+          (this.layoutBox_.height > 0 && this.layoutBox_.width > 0)) &&
         !!this.element.ownerDocument &&
         !!this.element.ownerDocument.defaultView;
   }

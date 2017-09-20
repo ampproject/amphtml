@@ -1132,7 +1132,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getXdomainCreativeFrameMessageListeners() {
     return !this.isFluid_ ? {} : {
-      'creative_geometry_update': data => { debugger;
+      'creative_geometry_update': data => {
         // The first creative_geometry_update message will contain bad
         // geometric data, as it will have been computed using the initial,
         // incorrect, iframe style. We use this first message as a
