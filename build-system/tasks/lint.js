@@ -46,7 +46,7 @@ var buildSystemOptions = {
  * @return {!Array<string>}
  */
 function getBuildSystemFiles() {
-  if (!!process.env.TRAVIS_PULL_REQUEST_SHA) {
+  if (process.env.TRAVIS) {
     var filesInPr =
         getStdout(`git diff --name-only master...HEAD`).trim().split('\n');
     return filesInPr.filter(function(file) {
