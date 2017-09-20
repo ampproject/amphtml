@@ -1149,7 +1149,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           });
           setStyles(this.element, {
             width: computedStyle(this.win,
-                       dev().assertElement(this.element.parentElement)).width,
+                dev().assertElement(this.element.parentElement)).width,
           });
         } else {
           const payload = tryParseJson(data['p']);
