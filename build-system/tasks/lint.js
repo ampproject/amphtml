@@ -34,10 +34,6 @@ var options = {
   rulePaths: ['build-system/eslint-rules/'],
   plugins: ['eslint-plugin-google-camelcase'],
 };
-var buildSystemOptions = {
-  fix: false,
-  plugins: ['eslint-plugin-google-camelcase'],
-};
 
 /**
  * On travis, we'll start by linting just the build-system files that are being
@@ -124,12 +120,11 @@ function runLinter(path, stream, options) {
 function lint() {
   if (argv.fix) {
     options.fix = true;
-    buildSystemOptions.fix = true;
   }
   if (argv.build_system) {
     var stream =
         initializeStream(getBuildSystemFiles(), { base: 'build-system' });
-    return runLinter('./build-system/', stream, buildSystemOptions);
+    return runLinter('./build-system/', stream, options);
   } else {
     var stream = initializeStream(config.lintGlobs, {});
     return runLinter('.', stream, options);
