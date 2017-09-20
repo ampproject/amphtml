@@ -101,9 +101,8 @@ export class RefreshManager {
   /**
    * @param {!./amp-a4a.AmpA4A} a4a The AmpA4A instance to be refreshed.
    * @param {!RefreshConfig} config
-   * @param {number=} refreshIntervalMsecs Refresh interval in seconds.
    */
-  constructor(a4a, config, refreshIntervalMsecs) {
+  constructor(a4a, config) {
 
     /** @private {string} */
     this.state_ = RefreshLifecycleState.INITIAL;
@@ -121,10 +120,7 @@ export class RefreshManager {
     this.adType_ = this.element_.getAttribute('type').toLowerCase();
 
     /** @const @private {?number} */
-    this.refreshIntervalMsecs_ =
-        (refreshIntervalMsecs && this.checkAndSanitizeRefreshInterval_(
-            refreshIntervalMsecs, /* useMsecs */ true)) ||
-        this.getPublisherSpecifiedRefreshInterval_();
+    this.refreshInterval_ = this.getPublisherSpecifiedRefreshInterval_();
 
     /** @const @private {!RefreshConfig} */
     this.config_ = this.convertAndSanitizeConfiguration_(config);
@@ -139,7 +135,7 @@ export class RefreshManager {
     this.visibilityTimeoutId_ = null;
 
     /** @private {boolean} */
-    this.isRefreshable_ = !!(this.config_ && this.refreshIntervalMsecs_);
+    this.isRefreshable_ = !!(this.config_ && this.refreshInterval_);
 
     if (this.isRefreshable_) {
       const managerId = String(refreshManagerIdCounter++);
@@ -249,7 +245,7 @@ export class RefreshManager {
             this.config_.visiblePercentageMin).unobserve(this.element_);
         this.a4a_.refresh(() => this.initiateRefreshCycle());
         resolve(true);
-      }, /** @type {number} */ (this.refreshIntervalMsecs_));
+      }, /** @type {number} */ (this.refreshInterval_));
     });
   }
 
@@ -307,20 +303,18 @@ export class RefreshManager {
    * seconds to milliseconds.
    *
    * @param {(number|string)} refreshInterval
-   * @param {boolean=} useMsecs Uses ms as unit of time rather than seconds.
    * @return {?number}
    */
-  checkAndSanitizeRefreshInterval_(refreshInterval, useMsecs) {
+  checkAndSanitizeRefreshInterval_(refreshInterval) {
     const refreshIntervalNum = Number(refreshInterval);
-    const upperBound = useMsecs ?
-        MIN_REFRESH_INTERVAL * 1000 : MIN_REFRESH_INTERVAL;
-    if (isNaN(refreshIntervalNum) || refreshIntervalNum < upperBound) {
+    if (isNaN(refreshIntervalNum) ||
+        refreshIntervalNum < MIN_REFRESH_INTERVAL) {
       user().warn(TAG,
           'invalid refresh interval, must be a number no less than ' +
-          `${upperBound}: ${refreshInterval}`);
+          `${MIN_REFRESH_INTERVAL}: ${refreshInterval}`);
       return null;
     }
-    return useMsecs ? refreshIntervalNum : refreshIntervalNum * 1000;
+    return refreshIntervalNum * 1000;
   }
 
   /**

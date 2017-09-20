@@ -500,7 +500,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     const refreshInterval = Number(responseHeaders.get('amp-force-refresh'));
     if (refreshInterval) {
-      this.initializeRefreshManagerIfEligible_(refreshInterval);
+      this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
+      this.initializeRefreshManagerIfEligible_();
     }
 
     // If the server returned a size, use that, otherwise use the size that we
@@ -585,22 +586,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Will initialize a refresh manager for this slot if this slot is
    * refresh-enabled and is not part of an SRA set. If a refresh manager is
    * already initialized for this slot, it will be reused.
-   * @param {number=} refreshInterval The refresh interval in seconds. If
-   *    passed, will forcefully enable refresh on this slot, regardless of
-   *    initial page configuration (e.g., meta tags and slot attributes).
    * @private
    */
-  initializeRefreshManagerIfEligible_(refreshInterval) {
-    this.refreshManager_ = this.refreshManager_;
-    if (!this.refreshManager_ && !this.useSra &&
-        !getEnclosingContainerTypes(this.element).filter(container =>
-            container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
-            container != ValidAdContainerTypes['AMP-STICKY-AD']).length) {
-      this.refreshManager_ = new RefreshManager(this, {
-        visiblePercentageMin: 50,
-        continuousTimeMin: 1,
-      }, refreshInterval);
+  initializeRefreshManagerIfEligible_() {
+    if (this.refreshManager_ || this.useSra ||
+        getEnclosingContainerTypes(this.element).filter(container =>
+          container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
+          container != ValidAdContainerTypes['AMP-STICKY-AD']).length) {
+      return;
     }
+    this.refreshManager_ = new RefreshManager(this, {
+      visiblePercentageMin: 50,
+      continuousTimeMin: 1,
+    });
   }
 
   /** @override */
