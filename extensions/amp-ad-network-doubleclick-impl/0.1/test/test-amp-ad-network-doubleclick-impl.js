@@ -232,7 +232,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           return !!this.get(name);
         },
       });
-      expect(refreshSpy.withArgs(30000)).to.be.called;
+      expect(refreshSpy).to.be.called;
     });
   });
 
