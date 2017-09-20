@@ -15,21 +15,21 @@
  */
 'use strict';
 
-var fs = require('fs-extra');
-var argv = require('minimist')(process.argv.slice(2));
-var closureCompiler = require('gulp-closure-compiler');
-var gulp = require('gulp');
-var rename = require('gulp-rename');
-var replace = require('gulp-replace');
-var util = require('gulp-util');
-var internalRuntimeVersion = require('../internal-version').VERSION;
-var internalRuntimeToken = require('../internal-version').TOKEN;
-var rimraf = require('rimraf');
+const fs = require('fs-extra');
+const argv = require('minimist')(process.argv.slice(2));
+const closureCompiler = require('gulp-closure-compiler');
+const gulp = require('gulp');
+const rename = require('gulp-rename');
+const replace = require('gulp-replace');
+const util = require('gulp-util');
+const internalRuntimeVersion = require('../internal-version').VERSION;
+const internalRuntimeToken = require('../internal-version').TOKEN;
+const rimraf = require('rimraf');
 
-var isProdBuild = !!argv.type;
-var queue = [];
-var inProgress = 0;
-var MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
+const isProdBuild = !!argv.type;
+const queue = [];
+let inProgress = 0;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intent to continue using
@@ -51,7 +51,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
             next();
             resolve();
           }, function(e) {
-            console./*OK*/error(util.colors.red('Compilation error',
+            console./* OK*/error(util.colors.red('Compilation error',
                 e.message));
             process.exit(1);
           });
@@ -87,7 +87,7 @@ exports.cleanupBuildDir = cleanupBuildDir;
 function compile(entryModuleFilenames, outputDir,
     outputFilename, options) {
   return new Promise(function(resolve, reject) {
-    var entryModuleFilename;
+    let entryModuleFilename;
     if (entryModuleFilenames instanceof Array) {
       entryModuleFilename = entryModuleFilenames[0];
     } else {
@@ -95,17 +95,17 @@ function compile(entryModuleFilenames, outputDir,
       entryModuleFilenames = [entryModuleFilename];
     }
     const checkTypes = options.checkTypes || argv.typecheck_only;
-    var intermediateFilename = 'build/cc/' +
+    const intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
     if (!options.preventRemoveAndMakeDir) {
       cleanupBuildDir();
     }
-    var unneededFiles = [
+    const unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
     ];
-    var wrapper = '(function(){%output%})();';
+    let wrapper = '(function(){%output%})();';
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
     }
@@ -117,7 +117,7 @@ function compile(entryModuleFilenames, outputDir,
     if (/development/.test(internalRuntimeToken)) {
       throw new Error('Should compile with a prod token');
     }
-    var sourceMapBase = 'http://localhost:8000/';
+    let sourceMapBase = 'http://localhost:8000/';
     if (isProdBuild) {
       // Point sourcemap to fetch files from correct GitHub tag.
       sourceMapBase = 'https://raw.githubusercontent.com/ampproject/amphtml/' +
@@ -171,7 +171,7 @@ function compile(entryModuleFilenames, outputDir,
       'node_modules/web-animations-js/web-animations.install.js',
       'build/patched-module/document-register-element/build/' +
           'document-register-element.node.js',
-      //'node_modules/core-js/modules/**.js',
+      // 'node_modules/core-js/modules/**.js',
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
       '!node_modules/core-js/modules/library/**.js',
@@ -187,7 +187,7 @@ function compile(entryModuleFilenames, outputDir,
       if (!filename.includes('extensions/')) {
         return;
       }
-      var path = filename.replace(/\/[^/]+\.js$/, '/**/*.js');
+      const path = filename.replace(/\/[^/]+\.js$/, '/**/*.js');
       srcs.push(path);
     });
     if (options.extraGlobs) {
@@ -195,16 +195,16 @@ function compile(entryModuleFilenames, outputDir,
     }
     if (options.include3pDirectories) {
       srcs.push(
-        '3p/**/*.js',
-        'ads/**/*.js')
+          '3p/**/*.js',
+          'ads/**/*.js');
     }
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
     if (options.includePolyfills) {
       srcs.push(
-        '!build/fake-module/src/polyfills.js',
-        '!build/fake-module/src/polyfills/**/*.js'
+          '!build/fake-module/src/polyfills.js',
+          '!build/fake-module/src/polyfills/**/*.js'
       );
     } else {
       srcs.push('!src/polyfills.js');
@@ -218,7 +218,7 @@ function compile(entryModuleFilenames, outputDir,
       }
     });
 
-    var externs = [
+    let externs = [
       'build-system/amp.extern.js',
       'third_party/closure-compiler/externs/intersection_observer.js',
       'third_party/closure-compiler/externs/performance_observer.js',
@@ -230,8 +230,8 @@ function compile(entryModuleFilenames, outputDir,
       externs = externs.concat(options.externs);
     }
 
-    /*eslint "google-camelcase/google-camelcase": 0*/
-    var compilerOptions = {
+    /* eslint "google-camelcase/google-camelcase": 0*/
+    const compilerOptions = {
       // Temporary shipping with our own compiler that has a single patch
       // applied
       compilerPath: 'build-system/runner/dist/runner.jar',
@@ -249,7 +249,7 @@ function compile(entryModuleFilenames, outputDir,
         // If you need a polyfill. Manually include them in the
         // respective top level polyfills.js files.
         rewrite_polyfills: false,
-        externs: externs,
+        externs,
         js_module_root: [
           'node_modules/',
           'build/patched-module/',
@@ -284,7 +284,7 @@ function compile(entryModuleFilenames, outputDir,
           'extensions/amp-access/0.1/access-expr-impl.js',
         ],
         jscomp_error: [],
-      }
+      },
     };
 
     // For now do type check separately
@@ -305,13 +305,13 @@ function compile(entryModuleFilenames, outputDir,
       if (argv.nti) {
         compilerOptions.compilerFlags.new_type_inf = true;
         compilerOptions.compilerFlags.jscomp_off.push(
-          'newCheckTypesExtraChecks');
+            'newCheckTypesExtraChecks');
         compilerOptions.compilerFlags.externs.push(
-          'build-system/amp.nti.extern.js'
+            'build-system/amp.nti.extern.js'
         );
       } else {
         compilerOptions.compilerFlags.externs.push(
-          'build-system/amp.oti.extern.js'
+            'build-system/amp.oti.extern.js'
         );
       }
     }
@@ -326,12 +326,12 @@ function compile(entryModuleFilenames, outputDir,
       delete compilerOptions.compilerFlags.define;
     }
 
-    var stream = gulp.src(srcs)
+    let stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./*OK*/error(util.colors.red('Error compiling',
+          console./* OK*/error(util.colors.red('Error compiling',
               entryModuleFilenames));
-          console./*OK*/error(util.colors.red(err.message));
+          console./* OK*/error(util.colors.red(err.message));
           process.exit(1);
         });
 
@@ -351,10 +351,10 @@ function compile(entryModuleFilenames, outputDir,
     }
     return stream;
   });
-};
+}
 
 function patchRegisterElement() {
-  var file;
+  let file;
   // Copies document-register-element into a new file that has an export.
   // This works around a bug in closure compiler, where without the
   // export this module does not generate a goog.provide which fails

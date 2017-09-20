@@ -39,9 +39,9 @@ function buildCodeownersFile(dirs) {
       if (typeof item === 'string') {
         // Allow leading `@` to be optional
         codeowners += item.indexOf('@') !== 0 ? `@${item}` : item;
-        let nextItem = arr[i + 1];
+        const nextItem = arr[i + 1];
         // Look ahead if we need to add a space
-        if (nextItem && typeof nextItem  === 'string') {
+        if (nextItem && typeof nextItem === 'string') {
           codeowners += ' ';
         }
       } else {
@@ -60,8 +60,8 @@ function buildCodeownersFile(dirs) {
         // ```js
         // {'ampproject/somegroup': ['some.js']}
         // ```
-        let subItemUsername = Object.keys(item)[0];
-        let username = subItemUsername.indexOf('@') !== 0 ?
+        const subItemUsername = Object.keys(item)[0];
+        const username = subItemUsername.indexOf('@') !== 0 ?
             `@${subItemUsername}` : subItemUsername;
         item[subItemUsername].forEach(function(pattern) {
           codeowners += `${dirpath === '*' ? pattern :
