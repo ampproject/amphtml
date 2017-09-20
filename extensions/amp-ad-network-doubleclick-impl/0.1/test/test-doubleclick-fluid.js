@@ -95,7 +95,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   });
 
   it('should have a supported layout', () => {
-    expect(impl.isLayoutSupported()).to.be.true;
+    expect(impl.isLayoutSupported('fluid')).to.be.true;
   });
 
   it('should NOT load delayed impression amp-pixels', () => {
@@ -142,13 +142,12 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   it('should setup postMessage listeners', () => {
     impl.buildCallback();
-    const getXdomainCreativeFrameMessageListenersSpy =
-        sandbox.spy(impl, 'getXdomainCreativeFrameMessageListeners');
-    return utf8Encode('foo').then(creative => {
-      impl.sentinel = 'sentinel';
-      return impl.renderViaNameAttrOfXOriginIframe_(creative).then(() => {
-        expect(getXdomainCreativeFrameMessageListenersSpy).to.be.calledOnce;
-      });
+    impl.connectFluidMessagingChannel = () => {};
+    const connectFluidMessagingChannelSpy =
+        sandbox.spy(impl, 'connectFluidMessagingChannel');
+    impl.sentinel = 'sentinel';
+    return impl.layoutCallback().then(() => {
+      expect(connectFluidMessagingChannelSpy).to.be.calledOnce;
     });
   });
 
@@ -182,6 +181,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
 
   it('should style iframe with width/height 100% and pos: relative', () => {
+    impl.getVsync = () => {
+      mutate: fn => fn();
+    };
     impl.buildCallback();
     const rawCreative = `
         <script>
@@ -209,6 +211,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   });
 
   it('should fire delayed impression ping', () => {
+    impl.getVsync = () => {
+      mutate: fn => fn();
+    };
     impl.buildCallback();
     const rawCreative = `
         <script>
