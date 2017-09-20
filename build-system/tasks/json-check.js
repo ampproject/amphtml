@@ -15,16 +15,16 @@
  */
 'use strict';
 
-var gulp = require('gulp-help')(require('gulp'));
-var jsonGlobs = require('../config').jsonGlobs;
-var util = require('gulp-util');
-var through2 = require('through2');
+const gulp = require('gulp-help')(require('gulp'));
+const jsonGlobs = require('../config').jsonGlobs;
+const util = require('gulp-util');
+const through2 = require('through2');
 
 /**
  * Fail if JSON files are valid.
  */
 function checkValidJson() {
-  var hasError = false;
+  let hasError = false;
   return gulp.src(jsonGlobs)
       .pipe(through2.obj(function(file, enc, cb) {
         try {
@@ -40,6 +40,6 @@ function checkValidJson() {
           process.exit(1);
         }
       });
-  }
+}
 
 gulp.task('json-syntax', 'Check that JSON files are valid JSON.', checkValidJson);
