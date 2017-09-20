@@ -155,7 +155,7 @@ function getSrcs() {
         .map(x => `extensions/${x}`)
         .filter(x => fs.statSync(x).isDirectory())
         .map(getEntryModule)
-      // Concat the core binary and integration binary as entry points.
+        // Concat the core binary and integration binary as entry points.
         .concat('src/amp.js', '3p/integration.js'));
   });
 }

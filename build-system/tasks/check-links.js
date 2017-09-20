@@ -65,13 +65,13 @@ function checkLinks() {
         let deadLinksFound = false;
         const filesWithDeadLinks = [];
         allResults.map(function(results, index) {
-      // Skip files that were deleted by the PR.
+          // Skip files that were deleted by the PR.
           if (!fs.existsSync(markdownFiles[index])) {
             return;
           }
           let deadLinksFoundInFile = false;
           results.forEach(function(result) {
-        // Skip links to files that were introduced by the PR.
+            // Skip links to files that were introduced by the PR.
             if (isLinkToFileIntroducedByPR(result.link)) {
               return;
             }

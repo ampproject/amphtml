@@ -389,10 +389,10 @@ function getGithubPullRequestsMetadata(gitMetadata) {
             prOptions.url += `/${id}`;
             const fileOptions = extend({}, prOptions);
             fileOptions.url += '/files';
-        // If we couldn't find the matching pull request from 3 pages
-        // of closed pull request try and fetch it through the id
-        // if we can retrieve it from the commit message (only available
-        // through github merge).
+            // If we couldn't find the matching pull request from 3 pages
+            // of closed pull request try and fetch it through the id
+            // if we can retrieve it from the commit message (only available
+            // through github merge).
             return getPullRequest(prOptions, log);
           }
           return BBPromise.resolve();

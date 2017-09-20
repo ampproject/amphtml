@@ -125,22 +125,24 @@ function updateGitHubIssues() {
           let hasPriority = false;
           let issueNewMilestone = MILESTONE_PENDING_TRIAGE;
 
-      // Get the title and state of the milestone
+          // Get the title and state of the milestone
           if (milestone) {
             milestoneTitle = milestone.title;
             milestoneState = milestone.state;
           }
-      // Get the labels we want to check
+          // Get the labels we want to check
           labels.forEach(function(label) {
             if (label) {
-          // Check if the issues has type
+              // Check if the issues has type
               if (label.name.startsWith('Type') ||
              label.name.startsWith('Related')) {
                 issueType = label.name;
               }
-          // Check if the issues has Priority
-              if (label.name.startsWith('P0') || label.name.startsWith('P1')
-             || label.name.startsWith('P2') || label.name.startsWith('P3')) {
+              // Check if the issues has Priority
+              if (label.name.startsWith('P0') ||
+                  label.name.startsWith('P1') ||
+                  label.name.startsWith('P2') ||
+                  label.name.startsWith('P3')) {
                 hasPriority = true;
               }
             }
@@ -148,7 +150,7 @@ function updateGitHubIssues() {
           promise = promise.then(function() {
             util.log('Update ' + issue.number);
             const updates = [];
-        // Milestone task: move issue from closed milestone
+            // Milestone task: move issue from closed milestone
             if (milestone) {
               if (milestoneTitle.startsWith('Sprint') &&
              milestoneState === 'closed') {
@@ -156,19 +158,19 @@ function updateGitHubIssues() {
                 updates.push(applyMilestone(issue, issueNewMilestone));
               }
             }
-        // if issueType is not null, add correct milestones
+            // if issueType is not null, add correct milestones
             if (issueType != null) {
               if (milestoneTitle === 'Pending Triage' || milestone == null) {
                 if (issueType === 'Type: Feature Request') {
                   issueNewMilestone = MILESTONE_NEW_FRS;
                   updates.push(applyMilestone(issue, issueNewMilestone));
                 } else if (issueType === 'Related to: Documentation' ||
-                issueType === 'Type: Design Review' ||
-                issueType === 'Type: Weekly Status') {
+                    issueType === 'Type: Design Review' ||
+                    issueType === 'Type: Weekly Status') {
                   issueNewMilestone = MILESTONE_DOCS_UPDATES;
                   updates.push(applyMilestone(issue, issueNewMilestone));
                 } else if (issueType === 'Type: Bug' ||
-                issueType === 'Related to: Flaky Tests') {
+                    issueType === 'Related to: Flaky Tests') {
                   issueNewMilestone = MILESTONE_BACKLOG_BUGS;
                   updates.push(applyMilestone(issue, issueNewMilestone));
                 } else if (milestone == null) {
@@ -178,21 +180,21 @@ function updateGitHubIssues() {
             } else if (milestone == null) {
               updates.push(applyMilestone(issue, issueNewMilestone));
             } else if (milestoneTitle === 'Prioritized FRs' ||
-          milestoneTitle === 'New FRs') {
+                milestoneTitle === 'New FRs') {
               updates.push(applyLabel(issue, 'Type: Feature Request'));
             } else if (milestoneTitle === 'Backlog Bugs' ||
-          milestoneTitle.startsWith('Sprint')) {
+                milestoneTitle.startsWith('Sprint')) {
               updates.push(applyLabel(issue, 'Type: Bug'));
             }
-        // Apply default priority if no priority
+            // Apply default priority if no priority
             if (hasPriority == false && milestoneTitle != 'New FRs' &&
-          milestoneTitle !== '3P Implementation' &&
-          milestoneTitle !== 'Pending Triage' && milestone != null) {
+                milestoneTitle !== '3P Implementation' &&
+                milestoneTitle !== 'Pending Triage' && milestone != null) {
               updates.push(applyLabel(issue, 'P2: Soon'));
             }
             if (isDryrun) {
               util.log('Performing a dry run. ' +
-              'These are the updates that would have been applied:');
+                  'These are the updates that would have been applied:');
               updates.forEach(function(update) {
                 util.log(util.inspect(update, {depth: null}));
               });
