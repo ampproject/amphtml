@@ -582,9 +582,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
     this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
 
@@ -592,23 +589,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (refreshInterval && !getPublisherSpecifiedRefreshInterval(
         this.element, this.win, 'doubleclick')) {
       this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
-=======
-    if (!this.isFluid) {
-=======
-    if (!this.isFluid_) {
->>>>>>> Removed all references to this.isFluid in AmpA4A.
-      this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
-      this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
-    } else {
-      this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
->>>>>>> Refactors.
-=======
+    }
+    
     if (this.isFluid_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
     } else {
       this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
       this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
->>>>>>> PR feedback.
     }
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
