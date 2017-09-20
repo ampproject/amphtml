@@ -29,7 +29,7 @@
  *   whitelist: (string|!Array<string>|undefined),
  * }}
  */
-var RuleConfigDef;
+let RuleConfigDef;
 
 // It is often OK to add things to the whitelist, but make sure to highlight
 // this in review.

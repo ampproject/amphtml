@@ -15,7 +15,7 @@
  */
 'use strict';
 
-var commonTestPaths = [
+const commonTestPaths = [
   'test/_init_tests.js',
   'test/fixtures/*.html',
   {
@@ -56,27 +56,27 @@ var commonTestPaths = [
   },
 ];
 
-var basicTestPaths = [
+const basicTestPaths = [
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
 ];
 
-var testPaths = commonTestPaths.concat(basicTestPaths);
+const testPaths = commonTestPaths.concat(basicTestPaths);
 
-var a4aTestPaths = [
+const a4aTestPaths = [
   'extensions/amp-a4a/**/test/**/*.js',
   'extensions/amp-ad-network-*/**/test/**/*.js',
-  'ads/google/a4a/test/*.js'
+  'ads/google/a4a/test/*.js',
 ];
 
-var unitTestPaths = commonTestPaths.concat([
+const unitTestPaths = commonTestPaths.concat([
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/*.js',
 ]);
 
-var integrationTestPaths = commonTestPaths.concat([
+const integrationTestPaths = commonTestPaths.concat([
   'test/integration/**/*.js',
   'test/functional/test-error.js',
   'extensions/**/test/integration/**/*.js',
@@ -84,14 +84,14 @@ var integrationTestPaths = commonTestPaths.concat([
 
 /** @const  */
 module.exports = {
-  commonTestPaths: commonTestPaths,
-  basicTestPaths: basicTestPaths,
-  testPaths: testPaths,
-  a4aTestPaths: a4aTestPaths,
-  unitTestPaths: unitTestPaths,
-  integrationTestPaths: integrationTestPaths,
+  commonTestPaths,
+  basicTestPaths,
+  testPaths,
+  a4aTestPaths,
+  unitTestPaths,
+  integrationTestPaths,
   buildSystemLintGlobs: [
-    'build-system/tasks/**/*.js',
+    'build-system/**/*.js',
     '!build-system/eslint-rules/**/*.*',
     '!build-system/node_modules/**/*.*',
   ],
@@ -141,5 +141,5 @@ module.exports = {
     '!examples/*.js',
     '!test/coverage/**/*.*',
   ],
-  changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
+  changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
 };

@@ -61,10 +61,10 @@ ExtensionPayload.prototype.v;
 /**
  * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}
  */
-var JsonValue;
+let JsonValue;
 
 // Node.js global
-var process = {};
+const process = {};
 process.env;
 process.env.NODE_ENV;
 process.env.SERVE_MODE;
@@ -165,41 +165,41 @@ IntersectionObserverEntry.prototype.rootBounds;
 // TODO (remove after we update closure compiler externs)
 window.PerformancePaintTiming;
 window.PerformanceObserver;
-Object.prototype.entryTypes
+Object.prototype.entryTypes;
 
 // Externed explicitly because this private property is read across
 // binaries.
 Element.implementation_ = {};
 
 /** @typedef {number}  */
-var time;
+let time;
 
 /**
  * This type signifies a callback that can be called to remove the listener.
  * @typedef {function()}
  */
-var UnlistenDef;
+let UnlistenDef;
 
 
 /**
  * Just an element, but used with AMP custom elements..
  * @typedef {!Element}
  */
-var AmpElement;
+let AmpElement;
 
 // Temp until we figure out forward declarations
 /** @constructor */
-var AccessService = function() {};
+const AccessService = function() {};
 /** @constructor @struct */
-var UserNotificationManager = function() {};
+const UserNotificationManager = function() {};
 UserNotificationManager.prototype.get;
 /** @constructor @struct */
-var Cid = function() {};
+const Cid = function() {};
 /** @constructor @struct */
-var Activity = function() {};
+const Activity = function() {};
 
 // data
-var data;
+let data;
 data.tweetid;
 data.requestedHeight;
 data.requestedWidth;
@@ -212,22 +212,22 @@ data.orderBy;
 data.colorscheme;
 
 // 3p code
-var twttr;
+let twttr;
 twttr.events;
 twttr.events.bind;
 twttr.widgets;
 twttr.widgets.createTweet;
 
-var FB;
+let FB;
 FB.init;
 
-var gist;
+let gist;
 gist.gistid;
 
 // Validator
-var amp;
+let amp;
 amp.validator;
-amp.validator.validateUrlAndLog = function(string, doc, filter) {}
+amp.validator.validateUrlAndLog = function(string, doc, filter) {};
 
 // Temporary Access types (delete when amp-access is compiled
 // for type checking).
@@ -244,7 +244,7 @@ AccessService.prototype.getAuthdataField = function(field) {};
  *   createCookieIfNotPresent: (boolean|undefined),
  * }}
  */
-var GetCidDef;
+let GetCidDef;
 /**
  * @param {string|!GetCidDef} externalCidScope Name of the fallback cookie
  *     for the case where this doc is not served by an AMP proxy. GetCidDef
@@ -269,9 +269,9 @@ var GetCidDef;
  *      given.
  */
 Cid.prototype.get = function(
-    externalCidScope, consent, opt_persistenceConsent) {}
+    externalCidScope, consent, opt_persistenceConsent) {};
 
-var AMP = {};
+const AMP = {};
 window.AMP;
 // Externed explicitly because we do not export Class shaped names
 // by default.
@@ -329,7 +329,7 @@ AMP.AmpAdUIHandler = class {
   unit would collide with a renamed private property in the inheriting class
   in extensions.
  */
-var SomeBaseElementLikeClass;
+let SomeBaseElementLikeClass;
 SomeBaseElementLikeClass.prototype.layout_;
 
 /** @type {number} */

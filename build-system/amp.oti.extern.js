@@ -24,4 +24,4 @@
  * transition and "false" for ongoing.
  * @typedef {function(number, boolean):?|function(number):?}
  */
-var TransitionDef;
+let TransitionDef;
