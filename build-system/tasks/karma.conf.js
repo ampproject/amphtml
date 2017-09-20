@@ -18,7 +18,7 @@
 /**
  * @param {!Object} config
  */
-module.exports = {
+module.exports = {  // eslint-disable-line no-undef
   frameworks: [
     'fixture',
     'browserify',

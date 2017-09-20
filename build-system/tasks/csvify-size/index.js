@@ -17,8 +17,8 @@
 
 
 const BBPromise = require('bluebird');
-const child_process = require('child_process');
-const exec = BBPromise.promisify(child_process.exec);
+const childProcess = require('child_process');
+const exec = BBPromise.promisify(childProcess.exec);
 const fs = BBPromise.promisifyAll(require('fs'));
 const gulp = require('gulp-help')(require('gulp'));
 const util = require('gulp-util');
@@ -29,7 +29,7 @@ const prettyBytesUnits = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 /**
  * @typedef {!Array<Fields>}
  */
-let Tables;
+let Tables;  // eslint-disable-line no-unused-vars
 
 /**
  * @typedef {{
@@ -38,11 +38,9 @@ let Tables;
  *   size: string
  * }}
  */
-let Fields;
+let Fields;  // eslint-disable-line no-unused-vars
 
 const filePath = 'test/size.txt';
-
-const fileSizes = Object.create(null);
 
 const tableHeaders = [
   ['"datetime"'],
@@ -65,7 +63,6 @@ function getLog(format) {
  */
 function parseSizeFile(file) {
   const lines = file.trim().split('\n');
-  const minSizePos = 0;
   const headers = lines[0].trim().split('|').map(x => x.trim());
   let minPos = -1;
   // Find the "min" column which is the closure compiled or the "size" column
@@ -164,12 +161,13 @@ function mergeTables(dateTimes, tables) {
   // populate all other columns with their respective file size if any.
   dateTimes.forEach(dateTime => {
     // Seed array with empty string values
-    const row = Array.apply(null, Array(tableHeaders[0].length)).map(x => '""');
+    const row =
+        Array.apply(null, Array(tableHeaders[0].length)).map(unusedX => '""');
     rows.push(row);
     row[0] = dateTime;
     // Exclude the datetime column
     tableHeaders[0].slice(1).forEach((fileName, colIdx) => {
-      var colIdx = colIdx + 1;
+      colIdx = colIdx + 1;
       let curField = null;
       for (let i = 0; i < obj[fileName].length; i++) {
         curField = obj[fileName][i];

@@ -28,7 +28,6 @@ const util = require('gulp-util');
 const tempFolderName = '__size-temp';
 
 const MIN_FILE_SIZE_POS = 0;
-const GZIP_POS = 1;
 const FILENAME_POS = 2;
 
 // normalized table headers

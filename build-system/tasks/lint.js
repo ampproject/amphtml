@@ -44,7 +44,7 @@ const options = {
 function getBuildSystemFiles() {
   if (process.env.TRAVIS) {
     const filesInPr =
-        getStdout('git diff --name-only master...HEAD').trim().split('\n');
+        getStdout('git diff master --name-only').trim().split('\n');
     return filesInPr.filter(function(file) {
       return file.startsWith('build-system') && path.extname(file) == '.js';
     });
@@ -89,7 +89,7 @@ function runLinter(path, stream, options) {
   return stream.pipe(eslint(options))
       .pipe(eslint.formatEach('stylish', function(msg) {
         errorsFound = true;
-        util.log(util.colors.red(msg));
+        util.log(msg);
       }))
       .pipe(gulpIf(isFixed, gulp.dest(path)))
       .pipe(eslint.failAfterError())
@@ -120,12 +120,12 @@ function lint() {
   if (argv.fix) {
     options.fix = true;
   }
+  let stream;
   if (argv.build_system) {
-    var stream =
-        initializeStream(getBuildSystemFiles(), {base: 'build-system'});
+    stream = initializeStream(getBuildSystemFiles(), {base: 'build-system'});
     return runLinter('./build-system/', stream, options);
   }
-  var stream = initializeStream(config.lintGlobs, {});
+  stream = initializeStream(config.lintGlobs, {});
   return runLinter('.', stream, options);
 }
 
