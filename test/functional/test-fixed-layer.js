@@ -17,6 +17,7 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {endsWith} from '../../src/string';
 import * as sinon from 'sinon';
 
 
@@ -176,11 +177,63 @@ describe('FixedLayer', () => {
         return id;
       },
       style: {
-        top: '15px',
-        bottom: '',
-        position: '',
-        opacity: '0.9',
-        visibility: 'visible',
+        _top: '15px',
+        _bottom: '',
+        _position: '',
+        _opacity: '0.9',
+        _visibility: 'visible',
+        _transition: '',
+
+        get top() {
+          return this._top;
+        },
+        set top(v) {
+          elem.style.setProperty('top', v);
+        },
+        get bottom() {
+          return this._bottom;
+        },
+        set bottom(v) {
+          elem.style.setProperty('bottom', v);
+        },
+        get position() {
+          return this._position;
+        },
+        set position(v) {
+          elem.style.setProperty('position', v);
+        },
+        get opacity() {
+          return this._opacity;
+        },
+        set opacity(v) {
+          elem.style.setProperty('opacity', v);
+        },
+        get visibility() {
+          return this._visibility;
+        },
+        set visibility(v) {
+          elem.style.setProperty('visibility', v);
+        },
+        get transition() {
+          return this._transition;
+        },
+        set transition(v) {
+          elem.style.setProperty('transition', v);
+        },
+
+        setProperty(prop, value, priority) {
+          const privProp = '_' + prop;
+
+          // Override if important
+          if (priority === 'important') {
+            elem.style[privProp] = `${value} !${priority}`;
+          } else if (elem.style[privProp] ||
+              !endsWith(elem.computedStyle[prop], '!important')) {
+            // If element style is already set, we can override
+            // Or, if computed style is not important priority
+            elem.style[privProp] = value;
+          }
+        },
       },
       computedStyle: {
         opacity: '0.9',
@@ -189,7 +242,7 @@ describe('FixedLayer', () => {
         get top() {
           if (elem.computedStyle.transition &&
               elem.style.transition !== '' &&
-              elem.style.transition !== 'none') {
+              elem.style.transition !== 'none !important') {
             return this._oldTop;
           }
           if (elem.style.bottom) {
@@ -746,11 +799,11 @@ describe('FixedLayer', () => {
 
       expect(state['F0'].fixed).to.be.true;
       expect(state['F0'].top).to.equal('0px');
-      expect(element1.style.transition).to.equal('none');
+      expect(element1.style.transition).to.equal('none !important');
 
       expect(state['F4'].sticky).to.be.true;
       expect(state['F4'].top).to.equal('0px');
-      expect(element5.style.transition).to.equal('none');
+      expect(element5.style.transition).to.equal('none !important');
 
       vsyncTasks[0].mutate({});
       expect(element1.style.transition).to.equal('');
@@ -916,12 +969,12 @@ describe('FixedLayer', () => {
 
       fixedLayer.transformMutate('translateY(-10px)');
       expect(fe.element.style.transform).to.be.undefined;
-      expect(fe.element.style.transition).to.be.undefined;
+      expect(fe.element.style.transition).to.equal('');
 
       // Reset back.
       fixedLayer.transformMutate(null);
       expect(fe.element.style.transform).to.be.undefined;
-      expect(fe.element.style.transition).to.be.undefined;
+      expect(fe.element.style.transition).to.equal('');
     });
 
     it('should compound transform with anchored top', () => {
