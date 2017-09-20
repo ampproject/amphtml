@@ -1191,14 +1191,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     return attributes;
   }
-
-  /** @override */
-  getXdomainCreativeFrameMessageListeners() {
-    return !this.isFluid_ ? {} : {
-      'creative_geometry_update': data => {
-      },
-    };
-  }
 }
 
 
