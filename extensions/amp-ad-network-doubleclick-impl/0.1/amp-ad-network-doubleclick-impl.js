@@ -361,13 +361,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
   }
 
-  /** @override */
-  shouldPreferentialRenderWithoutCrypto() {
-    return experimentFeatureEnabled(
-        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
-        DFP_CANONICAL_FF_EXPERIMENT_NAME);
-  }
-
   /**
    * @return {!{
    *  resolver: ?function(?../../../src/service/xhr-impl.FetchResponse),
