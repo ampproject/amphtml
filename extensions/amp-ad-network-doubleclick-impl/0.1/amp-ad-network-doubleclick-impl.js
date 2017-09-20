@@ -138,7 +138,7 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
  */
 export const TFCD = 'tagForChildDirectedTreatment';
 
-/** @const {string */
+/** @const {string} */
 export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 
 /** @private {?Promise} */
@@ -393,7 +393,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         data['s'] != 'creative_geometry_update') {
       return;
     }
-    user().assert(TAG, data['sentinel'] == this.sentinel,
+    user().assert(data['sentinel'] == this.sentinel,
         `Expected sentinel value to match ${this.sentinel} but found` +
         `${data['sentinel']}`);
     // The first creative_geometry_update message will contain bad
@@ -406,7 +406,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (/width: 0px/.test(styleString) &&
         /height: 0px/.test(styleString)) {
       this.getVsync().mutate(() => {
-        setStyles(this.iframe, {
+        setStyles(dev().assertElement(this.iframe), {
           width: '100%',
           height: '100%',
           position: 'relative',
