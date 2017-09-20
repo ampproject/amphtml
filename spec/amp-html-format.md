@@ -224,7 +224,7 @@ Internal AMP attributes prefixed with `i-amp-` are disallowed in AMP HTML.
 
 Internal AMP class names prefixed with `-amp-` and `i-amp-` are disallowed in AMP HTML.
 
-Consult AMP documentation for meaning of class names prefixed with `amp-`. The use of these classes is allowed and meant to allow customization of some features of AMP runtime and extensions.
+Consult [AMP documentation](amp-css-classes.md) for meaning of class names prefixed with `amp-`. The use of these classes is allowed and meant to allow customization of some features of AMP runtime and extensions.
 
 All other authored class names are allowed in AMP HTML markup.
 
