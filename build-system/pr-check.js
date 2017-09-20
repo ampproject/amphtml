@@ -255,6 +255,8 @@ function determineBuildTargets(filePaths) {
 const command = {
   testBuildSystem: function() {
     timedExecOrDie(`${gulp} ava`);
+  },
+  lintBuildSystem: function() {
     timedExec(`${gulp} lint --build_system`);  // Run in warning mode initially.
   },
   testDocumentLinks: function(files) {
@@ -410,6 +412,7 @@ function main(argv) {
   if (process.env.BUILD_SHARD == "unit_tests") {
     if (buildTargets.has('BUILD_SYSTEM')) {
       command.testBuildSystem();
+      command.lintBuildSystem();
     }
     if (buildTargets.has('DOCS')) {
       command.testDocumentLinks(files);
