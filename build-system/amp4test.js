@@ -15,7 +15,9 @@
  */
 'use strict';
 
-const app = module.exports = require('express').Router();
+const app = module.exports = require('express').Router();  // eslint-disable-line no-undef
+
+/*eslint "max-len": 0*/
 
 app.use('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');

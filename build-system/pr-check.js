@@ -28,7 +28,6 @@ const atob = require('atob');
 const exec = require('./exec.js').exec;
 const execOrDie = require('./exec.js').execOrDie;
 const getStdout = require('./exec.js').getStdout;
-const minimist = require('minimist');
 const path = require('path');
 const util = require('gulp-util');
 
@@ -259,7 +258,7 @@ const command = {
   lintBuildSystem: function() {
     timedExec(`${gulp} lint --build_system`);  // Run in warning mode initially.
   },
-  testDocumentLinks: function(files) {
+  testDocumentLinks: function() {
     timedExecOrDie(`${gulp} check-links`);
   },
   cleanBuild: function() {
@@ -349,10 +348,9 @@ function runAllCommands() {
 /**
  * The main method for the script execution which much like a C main function
  * receives the command line arguments and returns an exit status.
- * @param {!Array<string>} argv
  * @returns {number}
  */
-function main(argv) {
+function main() {
   const startTime = startTimer('pr-check.js');
   console.log(
       fileLogPrefix, 'Running build shard',
@@ -398,15 +396,9 @@ function main(argv) {
     process.exit(1);
   }
 
-  const sortedBuildTargets = [];
-  for (const t of buildTargets) {
-    sortedBuildTargets.push(t);
-  }
-  sortedBuildTargets.sort();
-
   console.log(
       fileLogPrefix, 'Detected build targets:',
-      util.colors.cyan(sortedBuildTargets.join(', ')));
+      util.colors.cyan(buildTargets.concat().sort().join(', ')));
 
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == 'unit_tests') {
@@ -415,7 +407,7 @@ function main(argv) {
       command.lintBuildSystem();
     }
     if (buildTargets.has('DOCS')) {
-      command.testDocumentLinks(files);
+      command.testDocumentLinks();
     }
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('INTEGRATION_TEST')) {

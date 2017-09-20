@@ -28,7 +28,6 @@ const formidable = require('formidable');
 const jsdom = require('jsdom');
 const path = require('path');
 const request = require('request');
-const url = require('url');
 const pc = process;
 
 app.use(bodyParser.json());
@@ -1092,7 +1091,7 @@ function addViewerIntegrationScript(ampJsVersion, file) {
     return file;
   }
   let viewerScript;
-  if (Number.isInteger(ampJsVersion)) {
+  if (Number.isInteger(ampJsVersion)) {  // eslint-disable-line no-es2015-number-props
     // Viewer integration script from gws, such as
     // https://cdn.ampproject.org/viewer/google/v7.js
     viewerScript =
@@ -1199,4 +1198,4 @@ function generateInfo(filePath) {
       '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>';
 }
 
-module.exports = app;
+module.exports = app;  // eslint-disable-line no-undef

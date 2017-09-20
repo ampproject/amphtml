@@ -19,7 +19,7 @@
  * @fileoverview Provides functions for executing tasks in a child process.
  */
 
-const child_process = require('child_process');
+const childProcess = require('child_process');
 const util = require('gulp-util');
 
 /**
@@ -30,7 +30,7 @@ const util = require('gulp-util');
  * @return {<Object>} Process info.
  */
 function spawnProcess(cmd, options) {
-  return child_process.spawnSync('/bin/sh', ['-c', cmd], options);
+  return childProcess.spawnSync('/bin/sh', ['-c', cmd], options);
 }
 
 /**

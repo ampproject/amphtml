@@ -15,6 +15,8 @@
  */
 'use strict';
 
+/*eslint "max-len": 0*/
+
 /**
  * - type - Is assumed to be "forbidden" if not provided.
  * - filesMatching - Is assumed to be all files if not provided.

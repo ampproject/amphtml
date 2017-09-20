@@ -83,7 +83,7 @@ const integrationTestPaths = commonTestPaths.concat([
 ]);
 
 /** @const  */
-module.exports = {
+module.exports = {  // eslint-disable-line no-undef
   commonTestPaths,
   basicTestPaths,
   testPaths,
