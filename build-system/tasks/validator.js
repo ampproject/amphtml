@@ -15,8 +15,8 @@
  */
 'use strict';
 
-var gulp = require('gulp-help')(require('gulp'));
-var execOrDie = require('../exec.js').execOrDie;
+const gulp = require('gulp-help')(require('gulp'));
+const execOrDie = require('../exec.js').execOrDie;
 
 
 /**

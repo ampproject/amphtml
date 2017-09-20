@@ -33,7 +33,10 @@
     "sandbox": true,
     "context": false,
     "global": false,
-    "describes": true
+    "describes": true,
+    "require": false,
+    "process": false,
+    "exports": false
   },
   "rules": {
     "array-bracket-spacing": [2, "never"],

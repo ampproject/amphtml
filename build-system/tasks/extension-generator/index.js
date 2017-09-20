@@ -15,10 +15,10 @@
  */
 'use strict';
 
-var argv = require('minimist')(process.argv.slice(2));
-var fs = require('fs-extra');
-var gulp = require('gulp-help')(require('gulp'));
-var util = require('gulp-util');
+const argv = require('minimist')(process.argv.slice(2));
+const fs = require('fs-extra');
+const gulp = require('gulp-help')(require('gulp'));
+const util = require('gulp-util');
 
 
 const year = new Date().getFullYear();
@@ -294,6 +294,6 @@ function makeExtension() {
 
 gulp.task('make-extension', 'Create an extension skeleton', makeExtension, {
   options: {
-    name: '  The name of the extension. Preferable prefixed with `amp-*`'
-  }
+    name: '  The name of the extension. Preferable prefixed with `amp-*`',
+  },
 });

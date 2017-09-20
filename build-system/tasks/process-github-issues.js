@@ -14,43 +14,43 @@
  * limitations under the License.
  */
 'use strict';
-var BBPromise = require('bluebird');
-var argv = require('minimist')(process.argv.slice(2));
-var assert = require('assert');
-var child_process = require('child_process');
-var extend = require('util')._extend;
-var git = require('gulp-git');
-var gulp = require('gulp-help')(require('gulp'));
-var request = BBPromise.promisify(require('request'));
-var util = require('gulp-util');
+const BBPromise = require('bluebird');
+const argv = require('minimist')(process.argv.slice(2));
+const assert = require('assert');
+const child_process = require('child_process');
+const extend = require('util')._extend;
+const git = require('gulp-git');
+const gulp = require('gulp-help')(require('gulp'));
+const request = BBPromise.promisify(require('request'));
+const util = require('gulp-util');
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
-var exec = BBPromise.promisify(child_process.exec);
-var gitExec = BBPromise.promisify(git.exec);
+const exec = BBPromise.promisify(child_process.exec);
+const gitExec = BBPromise.promisify(git.exec);
 
-var verbose = (argv.verbose || argv.v);
-var isDryrun = argv.dryrun;
+const verbose = (argv.verbose || argv.v);
+const isDryrun = argv.dryrun;
 
 const issuesOptions = {
   url: 'https://api.github.com/repos/ampproject/amphtml/issues',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
-    'Accept': 'application/vnd.github.v3+json'
+    'Accept': 'application/vnd.github.v3+json',
   },
   qs: {
-    access_token: GITHUB_ACCESS_TOKEN
-  }
+    access_token: GITHUB_ACCESS_TOKEN,
+  },
 };
 
 const milestoneOptions = {
   url: 'https://api.github.com/repos/ampproject/amphtml/milestones',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
-    'Accept': 'application/vnd.github.v3+json'
+    'Accept': 'application/vnd.github.v3+json',
   },
   qs: {
-    access_token: GITHUB_ACCESS_TOKEN
-  }
+    access_token: GITHUB_ACCESS_TOKEN,
+  },
 };
 
 // 4 is the number for Milestone 'Backlog Bugs'
@@ -85,12 +85,12 @@ function processIssues() {
  * @return {!Promise<!Array<}
  */
 function getIssues(opt_page) {
-  var options = extend({}, issuesOptions);
+  const options = extend({}, issuesOptions);
   options.qs = {
     state: 'open',
     page: opt_page,
     per_page: 100,
-    access_token: GITHUB_ACCESS_TOKEN
+    access_token: GITHUB_ACCESS_TOKEN,
   };
   return request(options).then(res => {
     const issues = JSON.parse(res.body);
@@ -105,104 +105,104 @@ function getIssues(opt_page) {
  * tasks applied as per design go/ampgithubautomation
  */
 function updateGitHubIssues() {
-  var promise = Promise.resolve();
+  let promise = Promise.resolve();
   return BBPromise.all([
     getIssues(1),
     getIssues(2),
     getIssues(3),
     getIssues(4),
-    getIssues(5)
+    getIssues(5),
   ])
-  .then(requests => [].concat.apply([], requests))
-  .then(issues => {
-    const allIssues = issues;
-    allIssues.forEach(function(issue) {
-      var labels = issue.labels;
-      var issueType;
-      var milestone = issue.milestone;
-      var milestoneTitle;
-      var milestoneState;
-      var hasPriority = false;
-      var issueNewMilestone = MILESTONE_PENDING_TRIAGE;
+      .then(requests => [].concat.apply([], requests))
+      .then(issues => {
+        const allIssues = issues;
+        allIssues.forEach(function(issue) {
+          const labels = issue.labels;
+          let issueType;
+          const milestone = issue.milestone;
+          let milestoneTitle;
+          let milestoneState;
+          let hasPriority = false;
+          let issueNewMilestone = MILESTONE_PENDING_TRIAGE;
 
       // Get the title and state of the milestone
-      if (milestone) {
-        milestoneTitle = milestone.title;
-        milestoneState = milestone.state;
-      }
+          if (milestone) {
+            milestoneTitle = milestone.title;
+            milestoneState = milestone.state;
+          }
       // Get the labels we want to check
-      labels.forEach(function(label) {
-        if (label) {
+          labels.forEach(function(label) {
+            if (label) {
           // Check if the issues has type
-          if (label.name.startsWith('Type') ||
+              if (label.name.startsWith('Type') ||
              label.name.startsWith('Related')) {
-            issueType = label.name;
-          }
+                issueType = label.name;
+              }
           // Check if the issues has Priority
-          if (label.name.startsWith('P0') || label.name.startsWith('P1')
+              if (label.name.startsWith('P0') || label.name.startsWith('P1')
              || label.name.startsWith('P2') || label.name.startsWith('P3')) {
-            hasPriority = true;
-          }
-        }
-      });
-      promise = promise.then(function() {
-        util.log('Update ' + issue.number);
-        var updates = [];
+                hasPriority = true;
+              }
+            }
+          });
+          promise = promise.then(function() {
+            util.log('Update ' + issue.number);
+            const updates = [];
         // Milestone task: move issue from closed milestone
-        if (milestone) {
-          if (milestoneTitle.startsWith('Sprint') &&
+            if (milestone) {
+              if (milestoneTitle.startsWith('Sprint') &&
              milestoneState === 'closed') {
-            issueNewMilestone = MILESTONE_BACKLOG_BUGS;
-            updates.push(applyMilestone(issue, issueNewMilestone));
-          }
-        }
+                issueNewMilestone = MILESTONE_BACKLOG_BUGS;
+                updates.push(applyMilestone(issue, issueNewMilestone));
+              }
+            }
         // if issueType is not null, add correct milestones
-        if (issueType != null) {
-          if (milestoneTitle === 'Pending Triage' || milestone == null) {
-            if (issueType === 'Type: Feature Request') {
-              issueNewMilestone = MILESTONE_NEW_FRS;
-              updates.push(applyMilestone(issue, issueNewMilestone));
-            } else if (issueType === 'Related to: Documentation' ||
+            if (issueType != null) {
+              if (milestoneTitle === 'Pending Triage' || milestone == null) {
+                if (issueType === 'Type: Feature Request') {
+                  issueNewMilestone = MILESTONE_NEW_FRS;
+                  updates.push(applyMilestone(issue, issueNewMilestone));
+                } else if (issueType === 'Related to: Documentation' ||
                 issueType === 'Type: Design Review' ||
                 issueType === 'Type: Weekly Status') {
-              issueNewMilestone = MILESTONE_DOCS_UPDATES;
-              updates.push(applyMilestone(issue, issueNewMilestone));
-            } else if (issueType === 'Type: Bug' ||
+                  issueNewMilestone = MILESTONE_DOCS_UPDATES;
+                  updates.push(applyMilestone(issue, issueNewMilestone));
+                } else if (issueType === 'Type: Bug' ||
                 issueType === 'Related to: Flaky Tests') {
-              issueNewMilestone = MILESTONE_BACKLOG_BUGS;
-              updates.push(applyMilestone(issue, issueNewMilestone));
+                  issueNewMilestone = MILESTONE_BACKLOG_BUGS;
+                  updates.push(applyMilestone(issue, issueNewMilestone));
+                } else if (milestone == null) {
+                  updates.push(applyMilestone(issue, issueNewMilestone));
+                }
+              }
             } else if (milestone == null) {
               updates.push(applyMilestone(issue, issueNewMilestone));
-            }
-          }
-        } else if (milestone == null) {
-          updates.push(applyMilestone(issue, issueNewMilestone));
-        } else if (milestoneTitle === 'Prioritized FRs' ||
+            } else if (milestoneTitle === 'Prioritized FRs' ||
           milestoneTitle === 'New FRs') {
-          updates.push(applyLabel(issue, 'Type: Feature Request'));
-        } else if (milestoneTitle === 'Backlog Bugs' ||
+              updates.push(applyLabel(issue, 'Type: Feature Request'));
+            } else if (milestoneTitle === 'Backlog Bugs' ||
           milestoneTitle.startsWith('Sprint')) {
-          updates.push(applyLabel(issue, 'Type: Bug'));
-        }
+              updates.push(applyLabel(issue, 'Type: Bug'));
+            }
         // Apply default priority if no priority
-        if (hasPriority == false && milestoneTitle != 'New FRs' &&
+            if (hasPriority == false && milestoneTitle != 'New FRs' &&
           milestoneTitle !== '3P Implementation' &&
           milestoneTitle !== 'Pending Triage' && milestone != null) {
-          updates.push(applyLabel(issue, 'P2: Soon'));
-        }
-        if (isDryrun) {
-          util.log('Performing a dry run. ' +
+              updates.push(applyLabel(issue, 'P2: Soon'));
+            }
+            if (isDryrun) {
+              util.log('Performing a dry run. ' +
               'These are the updates that would have been applied:');
-          updates.forEach(function(update) {
-            util.log(util.inspect(update, { depth: null }));
+              updates.forEach(function(update) {
+                util.log(util.inspect(update, {depth: null}));
+              });
+              return Promise.resolve();
+            }
+            return Promise.all(updates);
           });
-          return Promise.resolve();
-        }
-        return Promise.all(updates);
+        });
+        return issues;
       });
-    });
-    return issues;
-  });
 }
 
 /**
@@ -211,11 +211,11 @@ function updateGitHubIssues() {
  * @return {!Promise<*>}
  */
 function applyMilestone(issue, milestoneNumber) {
-  var options = extend({}, milestoneOptions);
+  const options = extend({}, milestoneOptions);
   options.qs = {
     state: 'open',
     per_page: 100,
-    access_token: GITHUB_ACCESS_TOKEN
+    access_token: GITHUB_ACCESS_TOKEN,
   };
 
   issue.milestone = milestoneNumber;
@@ -236,11 +236,11 @@ function applyMilestone(issue, milestoneNumber) {
  * @return {!Promise<*>}
  */
 function applyLabel(issue, label) {
-  var options = extend({}, milestoneOptions);
+  const options = extend({}, milestoneOptions);
   options.qs = {
     state: 'open',
     per_page: 100,
-    access_token: GITHUB_ACCESS_TOKEN
+    access_token: GITHUB_ACCESS_TOKEN,
   };
   return createGithubRequest(
       '/issues/' + issue.number + '/labels',
@@ -262,16 +262,16 @@ function applyLabel(issue, label) {
  * @return {!Promise<*>}
  */
 function createGithubRequest(path, opt_method, opt_data, typeRequest) {
-  var options = {
+  const options = {
     url: 'https://api.github.com/repos/ampproject/amphtml' + path,
     body: {},
     headers: {
       'User-Agent': 'amp-changelog-gulp-task',
-      'Accept': 'application/vnd.github.v3+json'
+      'Accept': 'application/vnd.github.v3+json',
     },
     qs: {
-      access_token: GITHUB_ACCESS_TOKEN
-    }
+      access_token: GITHUB_ACCESS_TOKEN,
+    },
   };
   if (opt_method) {
     options.method = opt_method;
@@ -288,13 +288,13 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
 }
 
 gulp.task(
-  'process-github-issues',
-  'Automatically updates the labels '
+    'process-github-issues',
+    'Automatically updates the labels '
       + 'and milestones of all open issues at github.com/ampproject/amphtml.',
-  processIssues,
-  {
-    options: {
-      dryrun: '  Generate process but don\'t push it out'
+    processIssues,
+    {
+      options: {
+        dryrun: '  Generate process but don\'t push it out',
+      },
     }
-  }
 );

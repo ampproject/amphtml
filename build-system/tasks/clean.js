@@ -15,8 +15,8 @@
  */
 'use strict';
 
-var del = require('del');
-var gulp = require('gulp-help')(require('gulp'));
+const del = require('del');
+const gulp = require('gulp-help')(require('gulp'));
 
 
 /**
@@ -30,7 +30,7 @@ function clean() {
     'dist.3p',
     'dist.tools',
     'build',
-    '.amp-build'
+    '.amp-build',
   ]);
 }
 
