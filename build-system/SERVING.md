@@ -18,7 +18,7 @@ limitations under the License.
 
 ## Requirements
 - git
-- node 4.8+
+- node 6+
 - gulp (installed globally)
 - java 8
 - yarn 1.0.2+ (see https://yarnpkg.com/)

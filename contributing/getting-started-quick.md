@@ -25,7 +25,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * [Install and set up Git](https://help.github.com/articles/set-up-git/); in the "Authenticating" step of that page use SSH instead of HTTPS
 
-* Install [NodeJS](https://nodejs.org/) version >= 4.8
+* Install [NodeJS](https://nodejs.org/) version >= 6
 
 * Install [Yarn](https://yarnpkg.com/) version >= 1.0.2, follow the instructions on the website or install it with npm: `npm install -g yarn@latest` (this command might require elevated privileges using `sudo` on some platforms)
 
