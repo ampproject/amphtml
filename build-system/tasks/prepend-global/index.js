@@ -15,13 +15,13 @@
  */
 'use strict';
 
-var BBPromise = require('bluebird');
-var argv = require('minimist')(process.argv.slice(2));
-var child_process = require('child_process');
-var exec = BBPromise.promisify(child_process.exec);
-var fs = BBPromise.promisifyAll(require('fs'));
-var gulp = require('gulp-help')(require('gulp'));
-var util = require('gulp-util');
+const BBPromise = require('bluebird');
+const argv = require('minimist')(process.argv.slice(2));
+const child_process = require('child_process');
+const exec = BBPromise.promisify(child_process.exec);
+const fs = BBPromise.promisifyAll(require('fs'));
+const gulp = require('gulp-help')(require('gulp'));
+const util = require('gulp-util');
 
 
 /**
@@ -31,8 +31,8 @@ var util = require('gulp-util');
  * @return {number}
  */
 function numConfigs(str) {
-  var re = /\/\*AMP_CONFIG\*\//g;
-  var matches = str.match(re)
+  const re = /\/\*AMP_CONFIG\*\//g;
+  const matches = str.match(re);
   return matches == null ? 0 : matches.length;
 }
 
@@ -57,7 +57,7 @@ function checkoutBranchConfigs(filename, opt_branch) {
   if (argv.local) {
     return Promise.resolve();
   }
-  var branch = opt_branch || 'origin/master';
+  const branch = opt_branch || 'origin/master';
   // One bad path here will fail the whole operation.
   return exec(`git checkout ${branch} ${filename}`)
       .catch(function(e) {
@@ -101,15 +101,15 @@ function writeTarget(filename, fileString, opt_dryrun) {
  * @return {string}
  */
 function valueOrDefault(value, defaultValue) {
-  if (typeof value == 'string') {
+  if (typeof value === 'string') {
     return value;
   }
   return defaultValue;
 }
 
 function main() {
-  var TESTING_HOST = process.env.AMP_TESTING_HOST;
-  var target = argv.target || TESTING_HOST;
+  const TESTING_HOST = process.env.AMP_TESTING_HOST;
+  const target = argv.target || TESTING_HOST;
 
   if (!target) {
     util.log(util.colors.red('Missing --target.'));
@@ -118,14 +118,14 @@ function main() {
 
   if (argv.remove) {
     return fs.readFileAsync(target)
-    .then(file => {
-      var contents = file.toString();
-      sanityCheck(contents);
-      var config =
+        .then(file => {
+          let contents = file.toString();
+          sanityCheck(contents);
+          const config =
           /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
-      contents = contents.replace(config, '');
-      return writeTarget(target, contents, argv.dryrun);
-    });
+          contents = contents.replace(config, '');
+          return writeTarget(target, contents, argv.dryrun);
+        });
   }
 
   if (!(argv.prod || argv.canary)) {
@@ -133,9 +133,9 @@ function main() {
     return;
   }
 
-  var globs = [].concat(argv.files).filter(x => typeof x == 'string');
-  var branch = argv.branch;
-  var filename = '';
+  const globs = [].concat(argv.files).filter(x => typeof x === 'string');
+  const branch = argv.branch;
+  let filename = '';
 
   // Prod by default.
   if (argv.canary) {
@@ -147,20 +147,20 @@ function main() {
   }
   return checkoutBranchConfigs(filename, branch)
       .then(() => {
-       return Promise.all([
-         fs.readFileAsync(filename),
-         fs.readFileAsync(target),
-       ]);
+        return Promise.all([
+          fs.readFileAsync(filename),
+          fs.readFileAsync(target),
+        ]);
       })
       .then(files => {
-        var configFile;
+        let configFile;
         try {
           configFile = JSON.stringify(JSON.parse(files[0].toString()));
         } catch (e) {
           util.log(util.colors.red(`Error parsing config file: ${filename}`));
           throw e;
         }
-        var targetFile = files[1].toString();
+        const targetFile = files[1].toString();
         return prependConfig(configFile, targetFile);
       })
       .then(fileString => {
@@ -181,7 +181,7 @@ gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
     'local': '  Don\'t switch branches and use local config',
     'remove': '  Removes previously prepended json config from the target ' +
         'file (if present).',
-  }
+  },
 });
 
 exports.checkoutBranchConfigs = checkoutBranchConfigs;

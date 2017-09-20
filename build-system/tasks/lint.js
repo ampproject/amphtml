@@ -16,20 +16,20 @@
 'use strict';
 
 
-var argv = require('minimist')(process.argv.slice(2));
-var config = require('../config');
-var eslint = require('gulp-eslint');
-var getStdout = require('../exec.js').getStdout;
-var gulp = require('gulp-help')(require('gulp'));
-var gulpIf = require('gulp-if');
-var lazypipe = require('lazypipe');
-var path = require('path');
-var util = require('gulp-util');
-var watch = require('gulp-watch');
+const argv = require('minimist')(process.argv.slice(2));
+const config = require('../config');
+const eslint = require('gulp-eslint');
+const getStdout = require('../exec.js').getStdout;
+const gulp = require('gulp-help')(require('gulp'));
+const gulpIf = require('gulp-if');
+const lazypipe = require('lazypipe');
+const path = require('path');
+const util = require('gulp-util');
+const watch = require('gulp-watch');
 
-var isWatching = (argv.watch || argv.w) || false;
+const isWatching = (argv.watch || argv.w) || false;
 
-var options = {
+const options = {
   fix: false,
   rulePaths: ['build-system/eslint-rules/'],
   plugins: ['eslint-plugin-google-camelcase'],
@@ -43,14 +43,13 @@ var options = {
  */
 function getBuildSystemFiles() {
   if (process.env.TRAVIS) {
-    var filesInPr =
-        getStdout(`git diff --name-only master...HEAD`).trim().split('\n');
+    const filesInPr =
+        getStdout('git diff --name-only master...HEAD').trim().split('\n');
     return filesInPr.filter(function(file) {
-      return file.startsWith('build-system') && path.extname(file) == '.js'
+      return file.startsWith('build-system') && path.extname(file) == '.js';
     });
-  } else {
-    return config.buildSystemLintGlobs;
   }
+  return config.buildSystemLintGlobs;
 }
 
 /**
@@ -70,9 +69,9 @@ function isFixed(file) {
  * @return {!ReadableStream}
  */
 function initializeStream(globs, streamOptions) {
-  var stream = gulp.src(globs, streamOptions);
+  let stream = gulp.src(globs, streamOptions);
   if (isWatching) {
-    var watcher = lazypipe().pipe(watch, globs);
+    const watcher = lazypipe().pipe(watch, globs);
     stream = stream.pipe(watcher());
   }
   return stream;
@@ -86,31 +85,31 @@ function initializeStream(globs, streamOptions) {
  * @return {boolean}
  */
 function runLinter(path, stream, options) {
-  var errorsFound = false;
+  let errorsFound = false;
   return stream.pipe(eslint(options))
-    .pipe(eslint.formatEach('stylish', function(msg) {
-      errorsFound = true;
-      util.log(util.colors.red(msg));
-    }))
-    .pipe(gulpIf(isFixed, gulp.dest(path)))
-    .pipe(eslint.failAfterError())
-    .on('error', function() {
-      if (errorsFound && !options.fix) {
-        if (process.env.TRAVIS) {
-          util.log(util.colors.yellow('NOTE:'),
-              'The linter is currently running in warning mode.',
-              'The errors found above must eventually be fixed.');
-        } else {
-          util.log(util.colors.yellow('NOTE:'),
-              'You can use', util.colors.cyan('--fix'), 'with your',
-              util.colors.cyan('gulp lint'),
-              'command to automatically fix some of these lint errors.');
-          util.log(util.colors.yellow('WARNING:'),
-              'Since this is a destructive operation (operates on the file',
-              'system), make sure you commit before running the command.');
+      .pipe(eslint.formatEach('stylish', function(msg) {
+        errorsFound = true;
+        util.log(util.colors.red(msg));
+      }))
+      .pipe(gulpIf(isFixed, gulp.dest(path)))
+      .pipe(eslint.failAfterError())
+      .on('error', function() {
+        if (errorsFound && !options.fix) {
+          if (process.env.TRAVIS) {
+            util.log(util.colors.yellow('NOTE:'),
+                'The linter is currently running in warning mode.',
+                'The errors found above must eventually be fixed.');
+          } else {
+            util.log(util.colors.yellow('NOTE:'),
+                'You can use', util.colors.cyan('--fix'), 'with your',
+                util.colors.cyan('gulp lint'),
+                'command to automatically fix some of these lint errors.');
+            util.log(util.colors.yellow('WARNING:'),
+                'Since this is a destructive operation (operates on the file',
+                'system), make sure you commit before running the command.');
+          }
         }
-      }
-    });
+      });
 }
 
 /**
@@ -123,20 +122,19 @@ function lint() {
   }
   if (argv.build_system) {
     var stream =
-        initializeStream(getBuildSystemFiles(), { base: 'build-system' });
+        initializeStream(getBuildSystemFiles(), {base: 'build-system'});
     return runLinter('./build-system/', stream, options);
-  } else {
-    var stream = initializeStream(config.lintGlobs, {});
-    return runLinter('.', stream, options);
   }
+  var stream = initializeStream(config.lintGlobs, {});
+  return runLinter('.', stream, options);
 }
 
 
 gulp.task('lint', 'Validates against Google Closure Linter', lint,
-{
-  options: {
-    'build_system': '  Runs the linter against the build system directory',
-    'watch': '  Watches for changes in files, validates against the linter',
-    'fix': '  Fixes simple lint errors (spacing etc).'
-  }
-});
+    {
+      options: {
+        'build_system': '  Runs the linter against the build system directory',
+        'watch': '  Watches for changes in files, validates against the linter',
+        'fix': '  Fixes simple lint errors (spacing etc).',
+      },
+    });

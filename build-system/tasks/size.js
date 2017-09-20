@@ -15,29 +15,29 @@
  */
 'use strict';
 
-var del = require('del');
-var fs = require('fs');
-var gulp = require('gulp-help')(require('gulp'));
-var gzipSize = require('gzip-size');
-var prettyBytes = require('pretty-bytes');
-var table = require('text-table');
-var through = require('through2');
-var util = require('gulp-util');
+const del = require('del');
+const fs = require('fs');
+const gulp = require('gulp-help')(require('gulp'));
+const gzipSize = require('gzip-size');
+const prettyBytes = require('pretty-bytes');
+const table = require('text-table');
+const through = require('through2');
+const util = require('gulp-util');
 
 
-var tempFolderName = '__size-temp';
+const tempFolderName = '__size-temp';
 
-var MIN_FILE_SIZE_POS = 0;
-var GZIP_POS = 1;
-var FILENAME_POS = 2;
+const MIN_FILE_SIZE_POS = 0;
+const GZIP_POS = 1;
+const FILENAME_POS = 2;
 
 // normalized table headers
-var tableHeaders = [
+const tableHeaders = [
   ['max', 'min', 'gzip', 'file'],
   ['---', '---', '---', '---'],
 ];
 
-var tableOptions = {
+const tableOptions = {
   align: ['r', 'r', 'r', 'l'],
   hsep: '   |   ',
 };
@@ -51,9 +51,9 @@ var tableOptions = {
  * @return {number}
  */
 function findMaxIndexByFilename(rows, predicate) {
-  for (var i = 0; i < rows.length; i++) {
-    var curRow = rows[i];
-    var curFilename = curRow[FILENAME_POS];
+  for (let i = 0; i < rows.length; i++) {
+    const curRow = rows[i];
+    const curFilename = curRow[FILENAME_POS];
     if (predicate(curFilename)) {
       return i;
     }
@@ -70,10 +70,10 @@ function findMaxIndexByFilename(rows, predicate) {
  * @param {boolean} mergeNames
  */
 function normalizeRow(rows, minFilename, maxFilename, mergeNames) {
-  var minIndex = findMaxIndexByFilename(rows, function(filename) {
+  const minIndex = findMaxIndexByFilename(rows, function(filename) {
     return filename == minFilename;
   });
-  var maxIndex = findMaxIndexByFilename(rows, function(filename) {
+  const maxIndex = findMaxIndexByFilename(rows, function(filename) {
     return filename == maxFilename;
   });
 
@@ -123,8 +123,8 @@ function normalizeRows(rows) {
   normalizeRow(rows, 'sw-kill.js', 'sw-kill.max.js', true);
 
   // normalize extensions
-  var curName = null;
-  var i = rows.length;
+  let curName = null;
+  let i = rows.length;
   // we are mutating in place... kind of icky but this will do fow now.
   while (i--) {
     curName = rows[i][FILENAME_POS];
@@ -142,8 +142,8 @@ function normalizeRows(rows) {
  * @param {string} filename
  */
 function normalizeExtension(rows, filename) {
-  var isMax = /\.max\.js$/.test(filename);
-  var counterpartName = filename.replace(/(v0\/.*?)(\.max)?(\.js)$/,
+  const isMax = /\.max\.js$/.test(filename);
+  const counterpartName = filename.replace(/(v0\/.*?)(\.max)?(\.js)$/,
       function(full, grp1, grp2, grp3) {
         if (isMax) {
           return grp1 + grp3;
@@ -198,8 +198,8 @@ function onFileThrough(rows, file, enc, cb) {
 function onFileThroughEnd(rows, cb) {
   rows = normalizeRows(rows);
   rows.unshift.apply(rows, tableHeaders);
-  var tbl = table(rows, tableOptions);
-  console/*OK*/.log(tbl);
+  const tbl = table(rows, tableOptions);
+  console/* OK*/.log(tbl);
   fs.writeFileSync('test/size.txt', tbl);
   cb();
 }
@@ -210,7 +210,7 @@ function onFileThroughEnd(rows, cb) {
  * @return {!Stream} a Writable Stream
  */
 function sizer() {
-  var rows = [];
+  const rows = [];
   return through.obj(
       onFileThrough.bind(null, rows),
       onFileThroughEnd.bind(null, rows)
@@ -224,15 +224,15 @@ function sizer() {
  */
 function sizeTask() {
   gulp.src([
-      'dist/**/*.js',
-      '!dist/**/*-latest.js',
-      '!dist/**/*check-types.js',
-      '!dist/**/amp-viewer-host.max.js',
-      'dist.3p/{current,current-min}/**/*.js',
-    ])
-    .pipe(sizer())
-    .pipe(gulp.dest(tempFolderName))
-    .on('end', del.bind(null, [tempFolderName]));
+    'dist/**/*.js',
+    '!dist/**/*-latest.js',
+    '!dist/**/*check-types.js',
+    '!dist/**/amp-viewer-host.max.js',
+    'dist.3p/{current,current-min}/**/*.js',
+  ])
+      .pipe(sizer())
+      .pipe(gulp.dest(tempFolderName))
+      .on('end', del.bind(null, [tempFolderName]));
 }
 
 gulp.task('size', 'Runs a report on artifact size', sizeTask);
