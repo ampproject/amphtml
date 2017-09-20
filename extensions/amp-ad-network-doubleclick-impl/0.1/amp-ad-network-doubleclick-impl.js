@@ -402,9 +402,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // triggering point to restyle the iframe, which will in turn cause
     // safeframe to send another creative_geometry_update message, this
     // time containing the correct information.
-    const styleString = this.iframe.getAttribute('style');
-    if (/width: 0px/.test(styleString) &&
-        /height: 0px/.test(styleString)) {
+    if (this.iframe.style.width == '0px' &&
+        this.iframe.style.height == '0px') {
       this.getVsync().mutate(() => {
         setStyles(dev().assertElement(this.iframe), {
           width: '100%',
