@@ -182,7 +182,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   it('should style iframe with width/height 100% and pos: relative', () => {
     impl.getVsync = () => {
-      mutate: fn => fn();
+      return {
+        mutate: fn => fn(),
+      };
     };
     impl.buildCallback();
     const rawCreative = `
@@ -212,7 +214,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   it('should fire delayed impression ping', () => {
     impl.getVsync = () => {
-      mutate: fn => fn();
+      return {
+        mutate: fn => fn(),
+      };
     };
     impl.buildCallback();
     const rawCreative = `
@@ -233,7 +237,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         sandbox.spy(impl, 'fireDelayedImpressions');
     const onFluidResizeSpy = sandbox.spy(impl, 'onFluidResize');
     impl.fluidImpressionUrl_ = 'http://www.foo.bar/';
-    impl.attemptChangeSize = () => Promise.resolve();
+    impl.attemptChangeHeight = () => Promise.resolve();
     return utf8Encode(rawCreative).then(creative => {
       impl.sentinel = 'sentinel';
       impl.initiateAdRequest();
