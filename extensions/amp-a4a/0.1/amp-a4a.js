@@ -1312,8 +1312,7 @@ export class AmpA4A extends AMP.BaseElement {
           .forEach(key => listenFor(
               this.iframe, key, listeners[key],
               /* opt_is3p */ true,
-              /* opt_includingNestedWindows */ false,
-              /* opt_keyType */ 's'));
+              /* opt_includingNestedWindows */ false));
     }
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
