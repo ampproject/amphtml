@@ -83,6 +83,7 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {
+  getPublisherSpecifiedRefreshInterval,
   RefreshManager,
   DATA_ATTR_NAME,
 } from '../../amp-a4a/0.1/refresh-manager';
@@ -505,6 +506,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
     this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
+
+    const refreshInterval = Number(responseHeaders.get('amp-force-refresh'));
+    if (refreshInterval && !getPublisherSpecifiedRefreshInterval(
+        this.element, this.win, 'doubleclick')) {
+      this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
+    }
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);
