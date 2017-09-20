@@ -39,6 +39,61 @@ export const METATAG_NAME = 'amp-ad-enable-refresh';
 const TAG = 'AMP-AD';
 
 /**
+ * Retrieves the publisher-specified refresh interval, if one were set. This
+ * function first checks for appropriate slot attributes and then for
+ * metadata tags, preferring whichever it finds first.
+ * @param {!Element} element
+ * @param {!Window} win
+ * @param {string} adType
+ * @return {?number}
+ */
+export function getPublisherSpecifiedRefreshInterval(element, win, adType) {
+  const refreshInterval = element.getAttribute(DATA_ATTR_NAME);
+  if (refreshInterval) {
+    return checkAndSanitizeRefreshInterval(refreshInterval);
+  }
+  let metaTag;
+  const metaTagContent = ((metaTag = win.document
+        .getElementsByName(METATAG_NAME))
+      && metaTag[0]
+      && metaTag[0].getAttribute('content'));
+  if (!metaTagContent) {
+    return null;
+  }
+  const networkIntervalPairs = metaTagContent.split(',');
+  for (let i = 0; i < networkIntervalPairs.length; i++) {
+    const pair = networkIntervalPairs[i].split('=');
+    user().assert(pair.length == 2, 'refresh metadata config must be of ' +
+        'the form `network_type=refresh_interval`');
+    if (pair[0].toLowerCase() == adType) {
+      return checkAndSanitizeRefreshInterval(pair[1]);
+    }
+  }
+  return null;
+}
+
+/**
+ * Ensures that refreshInterval is a number no less than 30. Returns null if
+ * the given input fails to meet these criteria. This also converts from
+ * seconds to milliseconds.
+ *
+ * @param {(number|string)} refreshInterval
+ * @return {?number}
+ */
+function checkAndSanitizeRefreshInterval(refreshInterval) {
+  const refreshIntervalNum = Number(refreshInterval);
+  if (isNaN(refreshIntervalNum) ||
+      refreshIntervalNum < MIN_REFRESH_INTERVAL) {
+    user().warn(TAG,
+        'invalid refresh interval, must be a number no less than ' +
+        `${MIN_REFRESH_INTERVAL}: ${refreshInterval}`);
+    return null;
+  }
+  return refreshIntervalNum * 1000;
+}
+
+
+/**
  * Defines the DFA states for the refresh cycle.
  *
  * 1. All newly registered elements begin in the INITIAL state.
@@ -120,7 +175,8 @@ export class RefreshManager {
     this.adType_ = this.element_.getAttribute('type').toLowerCase();
 
     /** @const @private {?number} */
-    this.refreshInterval_ = this.getPublisherSpecifiedRefreshInterval_();
+    this.refreshInterval_ = getPublisherSpecifiedRefreshInterval(
+        this.element_, this.win_, this.adType_);
 
     /** @const @private {!RefreshConfig} */
     this.config_ = this.convertAndSanitizeConfiguration_(config);
@@ -263,58 +319,6 @@ export class RefreshManager {
     config['continuousTimeMin'] *= 1000;
     config['visiblePercentageMin'] /= 100;
     return config;
-  }
-
-  /**
-   * Retrieves the publisher-specified refresh interval, if one were set. This
-   * function first checks for appropriate slot attributes and then for
-   * metadata tags, preferring whichever it finds first.
-   *
-   * @return {?number}
-   */
-  getPublisherSpecifiedRefreshInterval_() {
-    const refreshInterval = this.element_.getAttribute(DATA_ATTR_NAME);
-    if (refreshInterval) {
-      return this.checkAndSanitizeRefreshInterval_(refreshInterval);
-    }
-    let metaTag;
-    const metaTagContent = ((metaTag = this.win_.document
-          .getElementsByName(METATAG_NAME))
-        && metaTag[0]
-        && metaTag[0].getAttribute('content'));
-    if (!metaTagContent) {
-      return null;
-    }
-    const networkIntervalPairs = metaTagContent.split(',');
-    for (let i = 0; i < networkIntervalPairs.length; i++) {
-      const pair = networkIntervalPairs[i].split('=');
-      user().assert(pair.length == 2, 'refresh metadata config must be of ' +
-          'the form `network_type=refresh_interval`');
-      if (pair[0].toLowerCase() == this.adType_) {
-        return this.checkAndSanitizeRefreshInterval_(pair[1]);
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Ensures that refreshInterval is a number no less than 30. Returns null if
-   * the given input fails to meet these criteria. This also converts from
-   * seconds to milliseconds.
-   *
-   * @param {(number|string)} refreshInterval
-   * @return {?number}
-   */
-  checkAndSanitizeRefreshInterval_(refreshInterval) {
-    const refreshIntervalNum = Number(refreshInterval);
-    if (isNaN(refreshIntervalNum) ||
-        refreshIntervalNum < MIN_REFRESH_INTERVAL) {
-      user().warn(TAG,
-          'invalid refresh interval, must be a number no less than ' +
-          `${MIN_REFRESH_INTERVAL}: ${refreshInterval}`);
-      return null;
-    }
-    return refreshIntervalNum * 1000;
   }
 
   /**

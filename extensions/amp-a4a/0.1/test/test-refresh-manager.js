@@ -55,23 +55,17 @@ describe('refresh-manager', () => {
   });
 
   it('should get refreshInterval from slot', () => {
-    const getPublisherSpecifiedRefreshIntervalSpy = sandbox.spy(
-        RefreshManager.prototype, 'getPublisherSpecifiedRefreshInterval_');
     const refreshManager = new RefreshManager(mockA4a, config);
-    expect(getPublisherSpecifiedRefreshIntervalSpy).to.be.calledOnce;
     expect(refreshManager.refreshInterval_).to.equal(35000);
   });
 
   it('should get refreshInterval from meta tag', () => {
-    const getPublisherSpecifiedRefreshIntervalSpy = sandbox.spy(
-        RefreshManager.prototype, 'getPublisherSpecifiedRefreshInterval_');
     mockA4a.element.removeAttribute(DATA_ATTR_NAME);
     const meta = window.document.createElement('meta');
     meta.setAttribute('name', METATAG_NAME);
     meta.setAttribute('content', 'doubleclick=40');
     window.document.head.appendChild(meta);
     const refreshManager = new RefreshManager(mockA4a, config);
-    expect(getPublisherSpecifiedRefreshIntervalSpy).to.be.calledOnce;
     expect(refreshManager.refreshInterval_).to.equal(40000);
   });
 
