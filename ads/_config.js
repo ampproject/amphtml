@@ -752,6 +752,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  yengo: {
+    renderStartImplemented: true,
+  },
+
   yieldbot: {
     prefetch: [
       'https://cdn.yldbt.com/js/yieldbot.intent.amp.js',
