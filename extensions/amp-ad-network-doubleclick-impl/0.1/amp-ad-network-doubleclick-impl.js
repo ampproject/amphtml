@@ -63,6 +63,7 @@ import {
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {stringHash32} from '../../../src/string';
 import {removeElement, createElementWithAttributes} from '../../../src/dom';
+import {getData} from '../../../src/event-helper';
 import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -324,6 +325,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     this.isFluid_ = this.element.getLayout() == Layout.FLUID;
+    if (this.isFluid_) {
+      this.win.addEventListener(
+          'message', this.receiveMessageForFluid.bind(this), false);
+    }
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
       addExperimentIdToElement(verifierEid, this.element);
@@ -373,6 +378,51 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         }
       }
     });
+  }
+
+  /**
+   * Handles Fluid-related messages dispatched from SafeFrame.
+   * @param {!Event} event
+   */
+  receiveMessageForFluid(event) {
+    if (event.origin != 'https://tpc.googlesyndication.com') {
+      return;
+    }
+    const data = tryParseJson(getData(event));
+    if (!data || data['s'] != 'creative_geometry_update' ||
+        data['sentinel'] != this.sentinel) {
+      return;
+    }
+    // The first creative_geometry_update message will contain bad
+    // geometric data, as it will have been computed using the initial,
+    // incorrect, iframe style. We use this first message as a
+    // triggering point to restyle the iframe, which will in turn cause
+    // safeframe to send another creative_geometry_update message, this
+    // time containing the correct information.
+    const styleString = this.iframe.getAttribute('style');
+    if (/width: 0px/.test(styleString) &&
+        /height: 0px/.test(styleString)) {
+      setStyles(this.iframe, {
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+      });
+      setStyles(this.element, {
+        width: computedStyle(this.win,
+            dev().assertElement(this.element.parentElement)).width,
+      });
+    } else {
+      const payload = tryParseJson(data['p']);
+      this.attemptChangeSize(payload['height'], undefined)
+          .then(() => {
+            if (this.fluidImpressionUrl_) {
+              this.fireDelayedImpressions(this.fluidImpressionUrl_, false);
+              this.fluidImpressionUrl_ = null;
+            }
+            this.onFluidResize();
+          })
+          .catch(() => this.forceCollapse());
+    }
   }
 
   /** @override */
@@ -1146,36 +1196,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getXdomainCreativeFrameMessageListeners() {
     return !this.isFluid_ ? {} : {
       'creative_geometry_update': data => {
-        // The first creative_geometry_update message will contain bad
-        // geometric data, as it will have been computed using the initial,
-        // incorrect, iframe style. We use this first message as a
-        // triggering point to restyle the iframe, which will in turn cause
-        // safeframe to send another creative_geometry_update message, this
-        // time containing the correct information.
-        const styleString = this.iframe.getAttribute('style');
-        if (/width: 0px/.test(styleString) &&
-            /height: 0px/.test(styleString)) {
-          setStyles(this.iframe, {
-            width: '100%',
-            height: '100%',
-            position: 'relative',
-          });
-          setStyles(this.element, {
-            width: computedStyle(this.win,
-                dev().assertElement(this.element.parentElement)).width,
-          });
-        } else {
-          const payload = tryParseJson(data['p']);
-          this.attemptChangeSize(payload['height'], undefined)
-              .then(() => {
-                if (this.fluidImpressionUrl_) {
-                  this.fireDelayedImpressions(this.fluidImpressionUrl_, false);
-                  this.fluidImpressionUrl_ = null;
-                }
-                this.onFluidResize();
-              })
-              .catch(() => this.forceCollapse());
-        }
       },
     };
   }

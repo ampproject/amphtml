@@ -54,7 +54,6 @@ import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {listenFor} from '../../../src/iframe-helper';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
 
 /** @type {Array<string>} */
@@ -1306,14 +1305,6 @@ export class AmpA4A extends AMP.BaseElement {
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe', /** @type {!JsonObject} */ (
         Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES)));
-    if (this.iframe) {
-      const listeners = this.getXdomainCreativeFrameMessageListeners();
-      Object.keys(listeners)
-          .forEach(key => listenFor(
-              this.iframe, key, listeners[key],
-              /* opt_is3p */ true,
-              /* opt_includingNestedWindows */ false));
-    }
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
     // Iframe is appended to element as part of xorigin frame handler init.

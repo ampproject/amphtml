@@ -214,9 +214,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
       return;
     }
 
-    // TODO(levitzky) Implement more generic and sustainable way of getting
-    // listener type.
-    let listeners = listenForEvents[data['type'] || data['s']];
+    let listeners = listenForEvents[data['type']];
     if (!listeners) {
       return;
     }
