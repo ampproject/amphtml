@@ -581,8 +581,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-    this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
-    this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
 
     const refreshInterval = Number(responseHeaders.get('amp-force-refresh'));
     if (refreshInterval && !getPublisherSpecifiedRefreshInterval(
