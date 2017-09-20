@@ -1550,10 +1550,6 @@ export class AmpA4A extends AMP.BaseElement {
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
 
   /**
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
    * Whether preferential render should still be utilized if web crypto is unavailable,
    * and crypto signature header is present.
    * @return {!boolean}
@@ -1561,32 +1557,9 @@ export class AmpA4A extends AMP.BaseElement {
   shouldPreferentialRenderWithoutCrypto() {
     return false;
   }
-=======
-   * Callback executed when a Fluid creative is allowed to resize.
-   */
-  onFluidExpansion() {}
->>>>>>> Refactors.
-=======
-   * Sets up postmessage listener for incoming messages for fluid-enabled
-   * slots. To be overriden by implementing networks.
-   * @param {Element} unusedIframe The source frame for the messages.
-   */
-<<<<<<< HEAD
-  setupListenersForFluid(iframe) {}
->>>>>>> Moved listener setup to doubleclick.
-=======
-  setupListenersForFluid(unusedIframe) {}
-<<<<<<< HEAD
->>>>>>> Lint stuff.
-=======
 
   /**
-=======
->>>>>>> Removing some unused code.
-   * @param {?string} headerValue Method as given in header.
-=======
    * @param {string=} headerValue Method as given in header.
->>>>>>> Type fixes.
    */
   getNonAmpCreativeRenderingMethod(headerValue) {
     if (headerValue) {
@@ -1618,7 +1591,6 @@ export class AmpA4A extends AMP.BaseElement {
   getXdomainCreativeFrameMessageListeners() {
     return {};
   }
->>>>>>> Removed all references to this.isFluid in AmpA4A.
 }
 
 /**
