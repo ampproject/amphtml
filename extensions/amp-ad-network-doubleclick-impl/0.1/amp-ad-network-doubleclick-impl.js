@@ -31,6 +31,7 @@ import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
 import {
   experimentFeatureEnabled,
   DOUBLECLICK_EXPERIMENT_FEATURE,
+  DFP_CANONICAL_FF_EXPERIMENT_NAME,
 } from './doubleclick-a4a-config';
 import {
   isInManualExperiment,
@@ -82,6 +83,7 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {
+  getPublisherSpecifiedRefreshInterval,
   RefreshManager,
   DATA_ATTR_NAME,
 } from '../../amp-a4a/0.1/refresh-manager';
@@ -359,6 +361,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
   }
 
+  /** @override */
+  shouldPreferentialRenderWithoutCrypto() {
+    return experimentFeatureEnabled(
+        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
+        DFP_CANONICAL_FF_EXPERIMENT_NAME);
+  }
+
   /**
    * @return {!{
    *  resolver: ?function(?../../../src/service/xhr-impl.FetchResponse),
@@ -499,11 +508,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
 
     const refreshInterval = Number(responseHeaders.get('amp-force-refresh'));
-    if (refreshInterval) {
+    if (refreshInterval && !getPublisherSpecifiedRefreshInterval(
+        this.element, this.win, 'doubleclick')) {
       this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
-      this.initializeRefreshManagerIfEligible_();
     }
-
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);
@@ -578,27 +586,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
       user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
     }
-    this.initializeRefreshManagerIfEligible_();
-    return superReturnValue;
-  }
-
-  /**
-   * Will initialize a refresh manager for this slot if this slot is
-   * refresh-enabled and is not part of an SRA set. If a refresh manager is
-   * already initialized for this slot, it will be reused.
-   * @private
-   */
-  initializeRefreshManagerIfEligible_() {
-    if (this.refreshManager_ || this.useSra ||
+    this.refreshManager_ = this.useSra ||
         getEnclosingContainerTypes(this.element).filter(container =>
-          container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
-          container != ValidAdContainerTypes['AMP-STICKY-AD']).length) {
-      return;
-    }
-    this.refreshManager_ = new RefreshManager(this, {
-      visiblePercentageMin: 50,
-      continuousTimeMin: 1,
-    });
+            container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
+            container != ValidAdContainerTypes['AMP-STICKY-AD']).length
+            ? null
+            : this.refreshManager_ || new RefreshManager(this, {
+              visiblePercentageMin: 50,
+              continuousTimeMin: 1,
+            });
+    return superReturnValue;
   }
 
   /** @override */
