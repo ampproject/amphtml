@@ -36,7 +36,7 @@ export function getMultiSizeDimensions(
     primaryWidth,
     primaryHeight,
     multiSizeValidation,
-    isFluid) {
+    isFluid = false) {
 
   const dimensions = [];
   const arrayOfSizeStrs = multiSizeDataStr.split(',');
