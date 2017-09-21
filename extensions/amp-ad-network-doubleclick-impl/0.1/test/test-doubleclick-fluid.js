@@ -179,39 +179,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     });
   });
 
-
-  it('should style iframe with width/height 100% and pos: relative', () => {
-    impl.getVsync = () => {
-      return {
-        mutate: fn => fn(),
-      };
-    };
-    impl.buildCallback();
-    const rawCreative = `
-        <script>
-        parent./*OK*/postMessage(
-            JSON.stringify(/** @type {!JsonObject} */ ({
-              s: 'creative_geometry_update',
-              sentinel: 'sentinel',
-              width: '1px',
-              height: '1px',
-            })), '*');
-        </script>`;
-    return utf8Encode(rawCreative).then(creative => {
-      impl.sentinel = 'sentinel';
-      impl.initiateAdRequest();
-      return impl.adPromise_.then(() => {
-        impl.creativeBody_ = creative;
-        return impl.layoutCallback().then(() => {
-          const styleString = impl.iframe.getAttribute('style');
-          expect(styleString).to.match(/width: 100%/);
-          expect(styleString).to.match(/height: 100%/);
-          expect(styleString).to.match(/position: relative/);
-        });
-      });
-    });
-  });
-
   it('should fire delayed impression ping', () => {
     impl.getVsync = () => {
       return {
@@ -221,11 +188,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.buildCallback();
     const rawCreative = `
         <script>
-        parent./*OK*/postMessage(
-            JSON.stringify(/** @type {!JsonObject} */ ({
-              s: 'creative_geometry_update',
-              sentinel: 'sentinel',
-            })), '*');
         parent./*OK*/postMessage(
             JSON.stringify(/** @type {!JsonObject} */ ({
               s: 'creative_geometry_update',

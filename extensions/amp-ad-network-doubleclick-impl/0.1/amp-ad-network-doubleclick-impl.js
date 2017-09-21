@@ -396,43 +396,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     user().assert(data['sentinel'] == this.sentinel,
         `Expected sentinel value to match ${this.sentinel} but found` +
         `${data['sentinel']}`);
-    // The first creative_geometry_update message will contain bad
-    // geometric data, as it will have been computed using the initial,
-    // incorrect, iframe style. We use this first message as a
-    // triggering point to restyle the iframe, which will in turn cause
-    // safeframe to send another creative_geometry_update message, this
-    // time containing the correct information.
-    if (this.iframe.style.width == '0px' &&
-        this.iframe.style.height == '0px') {
-      this.getVsync().mutate(() => {
-        setStyles(dev().assertElement(this.iframe), {
-          width: '100%',
-          height: '100%',
-          position: 'relative',
-        });
-        setStyles(this.element, {
-          width: computedStyle(this.win,
-              dev().assertElement(this.element.parentElement)).width,
-        });
-      });
-    } else {
-      const payload = tryParseJson(data['p']);
-      if (!payload || !payload['height']) {
-        // TODO(levitzky) Add actual error handling here.
-        this.forceCollapse();
-        return;
-      }
-      this.attemptChangeHeight(payload['height'])
-          .then(() => {
-            if (this.fluidImpressionUrl_) {
-              this.fireDelayedImpressions(this.fluidImpressionUrl_, false);
-              this.fluidImpressionUrl_ = null;
-            }
-            this.onFluidResize();
-          })
-          // TODO(levitzky) Add more error handling here
-          .catch(() => this.forceCollapse());
+    const payload = tryParseJson(data['p']);
+    if (!payload || !payload['height']) {
+      // TODO(levitzky) Add actual error handling here.
+      this.forceCollapse();
+      return;
     }
+    if (`${payload['height']}px` == this.element.style.height) {
+      return;
+    }
+    this.attemptChangeHeight(payload['height'])
+        .then(() => this.onFluidResize())
+        .catch(() => {
+          // TODO(levitzky) Add more error handling here
+          this.forceCollapse();
+        });
   }
 
   /** @override */
@@ -677,6 +655,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               visiblePercentageMin: 50,
               continuousTimeMin: 1,
             });
+    if (this.isFluid_ && !this.element.style.width) {
+      setStyles(this.element, {
+        width: '100%',
+      });
+    }
     return frameLoadPromise.then(result => {
       if (this.isFluid_) {
         // If this is a Fluid slot, we must send an initial message to
@@ -698,10 +681,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * Notifies the Fluid creative that its container has been resized.
+   * Fires a delayed impression and notifies the Fluid creative that its
+   * container has been resized.
    * @visibleForTesting
    */
   onFluidResize() {
+    if (this.fluidImpressionUrl_) {
+      this.fireDelayedImpressions(this.fluidImpressionUrl_, false);
+      this.fluidImpressionUrl_ = null;
+    }
     dev().assert(this.iframe.contentWindow,
         'Frame contentWindow unavailable.');
     this.iframe.contentWindow./*OK*/postMessage(
