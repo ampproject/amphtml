@@ -569,22 +569,23 @@ export class AmpA4A extends AMP.BaseElement {
     this.adPromise_ = Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
         .then(() => {
           checkStillCurrent();
-          this.tryExecuteRealTimeConfig_();
           // See if experiment that delays request until slot is within
           // renderOutsideViewport. Within render outside viewport will not
           // resolve if already within viewport thus the check for already
           // meeting the definition as opposed to waiting on the promise.
           if (this.delayAdRequestEnabled() &&
               !this.getResource().renderOutsideViewport()) {
-            return this.getResource().whenWithinRenderOutsideViewport();
+            return this.getResource().whenWithinRenderOutsideViewport().then(() => {
+              this.tryExecuteRealTimeConfig_();
+            });
+          } else {
+            return this.tryExecuteRealTimeConfig_();
           }
         })
         // This block returns the ad URL, if one is available.
         /** @return {!Promise<?string>} */
-        .then(() => {
+        .then(rtcResponsesPromise => {
           checkStillCurrent();
-          const rtcResponsesPromise = this.RealTimeConfigManager ?
-                this.RealTimeConfigManager.rtcResponses : null;
           return /** @type {!Promise<?string>} */(this.getAdUrl(rtcResponsesPromise));
         })
         // This block returns the (possibly empty) response to the XHR request.
@@ -1545,9 +1546,9 @@ export class AmpA4A extends AMP.BaseElement {
 
   tryExecuteRealTimeConfig_() {
     if (!!AMP.RealTimeConfigManager) {
-      this.RealTimeConfigManager = new AMP.RealTimeConfigManager(this.element, this.win)
-      if (this.RealTimeConfigManager.validateRtcConfig()) {
-        this.RealTimeConfigManager.executeRealTimeConfig(
+      this.realTimeConfigManager_ = new AMP.RealTimeConfigManager(this.element, this.win)
+      if (this.realTimeConfigManager_.validateRtcConfig()) {
+        this.realTimeConfigManager_.executeRealTimeConfig(
             this.getCustomRealTimeConfigMacros_());
       };
     }

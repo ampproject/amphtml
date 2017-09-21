@@ -27,13 +27,13 @@ export class RealTimeConfigManager {
     this.validateUrls();
     const rtcPromiseArray = [];
     let url;
-    for (urlIndex in this.calloutUrls) {
-      url = this.calloutUrls[urlIndex];
+    this.calloutUrls.forEach(url => {
       let rtcStartTime = Date.now();
       rtcPromiseArray.push(Services.timerFor(this.win).timeoutPromise(
           rtcTimeout,
           Services.xhrFor(this.win).fetchJson(
               url, {credentials: 'include'}).then(res => {
+                // can use timerFor
                 let rtcTime = Date.now() - rtcStartTime;
                 // Non-200 status codes are forbidden for RTC.
                 // TODO: Add to fetchResponse the ability to
@@ -52,7 +52,7 @@ export class RealTimeConfigManager {
                 });
               })
       ));
-    }
+    });
     return this.rtcResponses = Promise.all(rtcPromiseArray);
   }
 
@@ -65,14 +65,12 @@ export class RealTimeConfigManager {
    * Delete any urls from this.calloutUrls that are not valid.
    */
   validateUrls() {
-    for (index in this.calloutUrls) {
-      if (!isSecureUrl(this.calloutUrls[index])) {
-        this.calloutUrls.splice(index, 1);
-      }
-    }
+    this.calloutUrls.filter(url => isSecureUrl);
   }
 
   inflateVendorUrls() {
+
+    // Switch to use url-replacement-service
     let baseUrl;
     if (this.rtcConfig.vendors) {
       for (vendor in this.rtcConfig.vendors) {
