@@ -27,6 +27,7 @@
 const atob = require('atob');
 const execOrDie = require('./exec').execOrDie;
 const getStdout = require('./exec').getStdout;
+const getStderr = require('./exec').getStderr;
 const path = require('path');
 const util = require('gulp-util');
 
@@ -374,9 +375,11 @@ function main() {
 
   // Make sure package.json and yarn.lock are in sync.
   if (files.indexOf('package.json') != -1 || files.indexOf('yarn.lock') != -1) {
-    const yarnIntegrityCheck = getStdout('yarn check --integrity');
+    const yarnIntegrityCheck = getStderr('yarn check --integrity').trim();
     if (yarnIntegrityCheck.includes('error')) {
-      console.error(fileLogPrefix, yarnIntegrityCheck);
+      console.error(fileLogPrefix, util.colors.red('ERROR:'),
+          'Found the following', util.colors.cyan('yarn'), 'errors:\n' +
+          util.colors.cyan(yarnIntegrityCheck));
       console.error(fileLogPrefix, util.colors.red('ERROR:'),
           'Updates to', util.colors.cyan('package.json'),
           'must be accompanied by a corresponding update to',
@@ -385,7 +388,7 @@ function main() {
           'To update', util.colors.cyan('yarn.lock'), 'after changing',
           util.colors.cyan('package.json') + ',', 'run',
           '"' + util.colors.cyan('yarn install') + '"',
-          'and include the change to', util.colors.cyan('yarn.lock'),
+          'and include the updated', util.colors.cyan('yarn.lock'),
           'in your PR.');
       process.exit(1);
     }
