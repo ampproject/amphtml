@@ -151,7 +151,7 @@ function trySetCookie(win, name, value, expirationTime, domain) {
  * @param {string} name For the error message.
  */
 function checkOriginForSettingCookie(win, options, name) {
-  if (options && options.allowOnProxyOrigin) {
+  if (urls.localDev || (options && options.allowOnProxyOrigin)) {
     return;
   }
   if (isProxyOrigin(win.location.href)) {

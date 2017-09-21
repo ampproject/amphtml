@@ -31,6 +31,15 @@ function calculateScriptBaseUrl(location, opt_isLocalDev) {
 }
 
 /**
+ * Calculates the base url for any script based on config.scriptPath
+ * @return {string}
+ *
+ * */
+function calculateScriptPath() {
+  return urls.scriptPath || `/rtv/${getMode().rtvVersion}/v0/`;
+}
+
+    /**
  * Calculate script url for an extension.
  * @param {!Location} location The window's location
  * @param {string} extensionId
@@ -40,10 +49,8 @@ function calculateScriptBaseUrl(location, opt_isLocalDev) {
  */
 export function calculateExtensionScriptUrl(location, extensionId,
   opt_extensionVersion, opt_isLocalDev) {
-  const base = calculateScriptBaseUrl(location, opt_isLocalDev);
-  const rtv = getMode().rtvVersion;
-  const extensionVersion = opt_extensionVersion || '0.1';
-  return `${base}/rtv/${rtv}/v0/${extensionId}-${extensionVersion}.js`;
+    const base = calculateScriptBaseUrl(location, opt_isLocalDev);
+    return `${base}${calculateScriptPath()}${extensionId}-0.1.js`;
 }
 
 /**
