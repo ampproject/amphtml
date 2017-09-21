@@ -153,21 +153,18 @@ Now that you have all of the files copied locally you can actually build the cod
 
 amphtml uses Node.js, the Yarn package manager and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.  Installing these and getting amphtml built is straightforward:
 
-* Install [NodeJS](https://nodejs.org/) version >= 6 (which includes npm)
+* Install the LTS version of [NodeJS](https://nodejs.org/)
 
-* Install [Yarn](https://yarnpkg.com/) version >= 1.0.2, follow the instructions on the website or install it with npm:
+* Install the stable version of [Yarn](https://yarnpkg.com/en/docs/install) (this may require elevated privileges using `sudo` on some platforms)
    ```
-   npm install -g yarn@latest
+   curl -o- -L https://yarnpkg.com/install.sh | bash
    ```
-
-   The preceding command might require elevated privileges using `sudo` on some platforms.
 
 * In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
    ```
    yarn
    ```
-
-   You should see a progress indicator and some messages scrolling by.  You may see some warnings about optional dependencies that are generally safe to ignore.
+   You will see a progress indicator and some messages scrolling by.  You may see some warnings about optional dependencies, which are generally safe to ignore.
 
 * For some local testing we refer to fake local URLs in order to simulate referencing third party URLs.  This requires extra setup so your browser will know that these URLs actually point to your local server.
 
@@ -278,7 +275,9 @@ The common workflow for making changes to files in Git is:
 
 * edit some files using your favorite editor
 
-* if you edited `package.json`, run `yarn install` to generate an updated `yarn.lock` file
+* if your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which will automatically update `package.json` and `yarn.lock`
+
+* if you manually edited `package.json`, run `yarn install` to install the dependency and generate an updated `yarn.lock` file
 
 * tell Git that you care about these changes by _staging_ them using the `git add` command
 
