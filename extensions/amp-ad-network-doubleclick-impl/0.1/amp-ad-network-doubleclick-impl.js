@@ -71,7 +71,7 @@ import {isObject} from '../../../src/types';
 import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {setStyles, computedStyle} from '../../../src/style';
+import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
