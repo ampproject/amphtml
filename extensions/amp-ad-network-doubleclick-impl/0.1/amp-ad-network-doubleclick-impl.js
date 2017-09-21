@@ -71,7 +71,7 @@ import {isObject} from '../../../src/types';
 import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {setStyles} from '../../../src/style';
+import {setStyles, computedStyle} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
@@ -650,7 +650,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (this.isFluid_) {
         if (!this.element.style.width) {
           setStyles(this.element, {
-            width: '100%',
+            width: computedStyle(this.win,
+                dev().assertElement(this.element.parentElement)).width,
           });
         }
         // If this is a Fluid slot, we must send an initial message to
@@ -1308,7 +1309,7 @@ function getFirstInstanceValue_(instances, extractFn) {
 /**
  * Maps a sentinel value to an object consisting of the impl to which that
  * sentinel value belongs and the corresponding message handler for that impl.
- * @type{Object<string, Object> */
+ * @type{!Object<string, !Object>} */
 const fluidListeners = {};
 let listenerForFluidRegistered = false;
 
