@@ -46,6 +46,7 @@ export class AmpAnim extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.img_ = new Image();
+    this.img_.setAttribute('async', '');
     this.propagateAttributes(['alt', 'aria-label',
       'aria-describedby', 'aria-labelledby'], this.img_);
     this.applyFillContent(this.img_, true);
@@ -121,8 +122,10 @@ export class AmpAnim extends AMP.BaseElement {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
-    const src = this.srcset_.select(this.getLayoutWidth(),
-        this.getDpr()).url;
+    const src = this.srcset_.select(
+      // The width should never be 0, but we fall back to the screen width
+      // just in case.
+      this.getViewport().getWidth() || this.win.screen.width).url;
     if (src == this.img_.getAttribute('src')) {
       return Promise.resolve();
     }
