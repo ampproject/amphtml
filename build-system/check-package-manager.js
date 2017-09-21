@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const getStdout = require('./exec').getStdout;
 const setupInstructionsUrl = 'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
 
 // Color formatting may not yet be available via gulp-util.
@@ -23,7 +22,6 @@ function red(text) {return '\x1b[31m' + text + '\x1b[0m';}
 function cyan(text) {return '\x1b[36m' + text + '\x1b[0m';}
 function green(text) {return '\x1b[32m' + text + '\x1b[0m';}
 function yellow(text) {return '\x1b[33m' + text + '\x1b[0m';}
-
 
 /**
  * @fileoverview Makes sure that packages are being installed via yarn
@@ -51,22 +49,11 @@ function main() {
     console/*OK*/.log(cyan('$'), 'yarn remove [package_name]', '\n');
     console/*OK*/.log(yellow('For detailed instructions, see'),
         cyan(setupInstructionsUrl), '\n');
-    return -1;
+    return 1;
   }
 
-  // If yarn is being run, perform a version check and proceed with the install.
-  const yarnVersion = getStdout('yarn --version').trim();
-  if (yarnVersion.startsWith('0.')) {
-    console/*OK*/.log(yellow('\nDetected yarn'), cyan(yarnVersion));
-    console/*OK*/.log(yellow(
-        'It\'s recommended that you upgrade to the latest stable version.'));
-    console/*OK*/.log(yellow('See'), cyan('https://yarnpkg.com/docs/install'),
-        yellow('for instructions.'));
-    console/*OK*/.log(yellow('Installing packages...'), '\n');
-  } else {
-    console/*OK*/.log(green('\nDetected yarn'), cyan(yarnVersion));
-    console/*OK*/.log(green('Installing packages...'), '\n');
-  }
+  // If yarn is being run, proceed with the install.
+  console/*OK*/.log(green('Detected yarn. Installing packages...'));
   return 0;
 }
 

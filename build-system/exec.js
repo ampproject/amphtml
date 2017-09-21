@@ -20,6 +20,7 @@
  */
 
 const childProcess = require('child_process');
+const util = require('gulp-util');
 
 /**
  * Spawns the given command in a child process with the given options.
@@ -40,7 +41,7 @@ function spawnProcess(cmd, options) {
 exports.exec = function(cmd) {
   const p = spawnProcess(cmd, {'stdio': 'inherit'});
   if (p.status != 0) {
-    console/*OK*/.log('\nCommand failed: ' + cmd);
+    console/*OK*/.log(util.colors.yellow('\nCommand failed: ' + cmd));
   }
 };
 
@@ -52,7 +53,7 @@ exports.exec = function(cmd) {
 exports.execOrDie = function(cmd) {
   const p = spawnProcess(cmd, {'stdio': 'inherit'});
   if (p.status != 0) {
-    console/*OK*/.error('\nCommand failed: ' + cmd);
+    console/*OK*/.error(util.colors.red('\nCommand failed: ' + cmd));
     process.exit(p.status);
   }
 };

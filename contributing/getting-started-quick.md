@@ -25,9 +25,9 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * [Install and set up Git](https://help.github.com/articles/set-up-git/); in the "Authenticating" step of that page use SSH instead of HTTPS
 
-* Install the LTS version of [NodeJS](https://nodejs.org/)
+* Install [NodeJS](https://nodejs.org/) version >= 6 (which includes npm)
 
-* Install the stable version of [Yarn](https://yarnpkg.com/en/docs/install) (this may require elevated privileges using `sudo` on some platforms)
+* Install [Yarn](https://yarnpkg.com/) version >= 1.0.2 (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
 
 * Install Gulp by running `yarn global add gulp` (this may require elevated privileges using `sudo` on some platforms)
 
