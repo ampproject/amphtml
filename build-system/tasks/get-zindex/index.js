@@ -87,11 +87,11 @@ function onFileThrough(file, enc, cb) {
  * @param {function()} cb callback to end the stream
  * @return {!Array<!Array<string>>}
  */
-function createTable(filesData, unusedCb) {
+function createTable(filesData) {
   const rows = [];
-  Object.keys(filesData).sort().forEach((fileName, unusedFileIdx) => {
+  Object.keys(filesData).sort().forEach(fileName => {
     const selectors = filesData[fileName];
-    Object.keys(selectors).sort().forEach((selectorName, unusedSelectorIdx) => {
+    Object.keys(selectors).sort().forEach(selectorName => {
       const zIndex = selectors[selectorName];
       const row = [selectorName, zIndex, fileName];
       rows.push(row);

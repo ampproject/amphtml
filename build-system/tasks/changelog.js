@@ -533,11 +533,11 @@ function isAmpRelease(str) {
  */
 function buildPrMetadata(pr) {
   return {
-    id: pr.number,
-    title: pr.title,
-    body: pr.body,
-    merge_commit_sha: pr.merge_commit_sha,  // eslint-disable-line google-camelcase/google-camelcase
-    url: pr._links.self.href,
+    'id': pr.number,
+    'title': pr.title,
+    'body': pr.body,
+    'merge_commit_sha': pr.merge_commit_sha,
+    'url': pr._links.self.href,
   };
 }
 

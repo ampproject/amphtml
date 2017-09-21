@@ -45,8 +45,8 @@ function isFixed(file) {
 
 /**
  * Initializes the linter stream based on globs
- * @param {!object} globs
- * @param {!object} streamOptions
+ * @param {!Object} globs
+ * @param {!Object} streamOptions
  * @return {!ReadableStream}
  */
 function initializeStream(globs, streamOptions) {
@@ -62,7 +62,7 @@ function initializeStream(globs, streamOptions) {
  * Runs the linter on the given stream using the given options.
  * @param {!string} path
  * @param {!ReadableStream} stream
- * @param {!object} options
+ * @param {!Object} options
  * @return {boolean}
  */
 function runLinter(path, stream, options) {

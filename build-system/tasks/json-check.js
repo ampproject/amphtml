@@ -26,7 +26,7 @@ const through2 = require('through2');
 function checkValidJson() {
   let hasError = false;
   return gulp.src(jsonGlobs)
-      .pipe(through2.obj(function(file, unusedEnc, unusedCb) {
+      .pipe(through2.obj(function(file) {
         try {
           JSON.parse(file.contents.toString());
         } catch (e) {

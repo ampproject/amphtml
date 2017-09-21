@@ -25,8 +25,8 @@
  * presubmit checking, via the determineBuildTargets method.
  */
 const atob = require('atob');
-const execOrDie = require('./exec.js').execOrDie;
-const getStdout = require('./exec.js').getStdout;
+const execOrDie = require('./exec').execOrDie;
+const getStdout = require('./exec').getStdout;
 const path = require('path');
 const util = require('gulp-util');
 
@@ -398,6 +398,7 @@ function main() {
     }
     if (buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('RUNTIME') ||
+        buildTargets.has('VISUAL_DIFF') ||
         buildTargets.has('INTEGRATION_TEST')) {
       command.runLintCheck();
     }

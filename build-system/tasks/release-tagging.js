@@ -150,7 +150,7 @@ function gitFetch(dir) {
       args: 'clone https://github.com/ampproject/amphtml.git',
     });
   }
-  return clonePromise.then(function(unusedArg) {
+  return clonePromise.then(function() {
     return gitExec({
       cwd: ampDir,
       args: 'fetch --tags',

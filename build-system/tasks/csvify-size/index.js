@@ -162,7 +162,7 @@ function mergeTables(dateTimes, tables) {
   dateTimes.forEach(dateTime => {
     // Seed array with empty string values
     const row =
-        Array.apply(null, Array(tableHeaders[0].length)).map(unusedX => '""');
+        Array.apply(null, Array(tableHeaders[0].length)).map(() => '""');
     rows.push(row);
     row[0] = dateTime;
     // Exclude the datetime column
