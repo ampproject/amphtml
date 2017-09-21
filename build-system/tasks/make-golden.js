@@ -204,7 +204,7 @@ function diffScreenshot_(file, dir, host, verbose, cb) {
           util.log(util.colors.red('Screenshot diff failed: ', file, error));
           cb({error});
         })
-        .on('end', function(res) {
+        .on('end', function() {
           const contents = fs.readFileSync(diffFile + '.json', 'utf8');
           const json = JSON.parse(contents);
           cb(json[0]);

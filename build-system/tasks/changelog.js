@@ -25,7 +25,7 @@
 const BBPromise = require('bluebird');
 const argv = require('minimist')(process.argv.slice(2));
 const assert = require('assert');
-const child_process = require('child_process');
+const childProcess = require('child_process');
 const config = require('../config');
 const extend = require('util')._extend;
 const git = require('gulp-git');
@@ -34,7 +34,7 @@ const request = BBPromise.promisify(require('request'));
 const util = require('gulp-util');
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
-const exec = BBPromise.promisify(child_process.exec);
+const exec = BBPromise.promisify(childProcess.exec);
 const gitExec = BBPromise.promisify(git.exec);
 
 const branch = argv.branch || 'canary';
@@ -57,13 +57,13 @@ const latestReleaseOptions = {
 
 if (GITHUB_ACCESS_TOKEN) {
   pullOptions.qs = {
-    access_token: GITHUB_ACCESS_TOKEN,
+    'access_token': GITHUB_ACCESS_TOKEN,
   };
 }
 
 if (GITHUB_ACCESS_TOKEN) {
   latestReleaseOptions.qs = {
-    access_token: GITHUB_ACCESS_TOKEN,
+    'access_token': GITHUB_ACCESS_TOKEN,
   };
 }
 
@@ -200,7 +200,7 @@ function submitReleaseNotes(version, changelog, sha) {
 
   if (GITHUB_ACCESS_TOKEN) {
     options.qs = {
-      access_token: GITHUB_ACCESS_TOKEN,
+      'access_token': GITHUB_ACCESS_TOKEN,
     };
   }
 
@@ -437,7 +437,7 @@ function getClosedPullRequests(opt_page) {
   options.qs = {
     state: 'closed',
     page: opt_page,
-    access_token: GITHUB_ACCESS_TOKEN,
+    'access_token': GITHUB_ACCESS_TOKEN,
   };
   return request(options).then(res => {
     const prs = JSON.parse(res.body);
@@ -533,11 +533,11 @@ function isAmpRelease(str) {
  */
 function buildPrMetadata(pr) {
   return {
-    id: pr.number,
-    title: pr.title,
-    body: pr.body,
-    merge_commit_sha: pr.merge_commit_sha,
-    url: pr._links.self.href,
+    'id': pr.number,
+    'title': pr.title,
+    'body': pr.body,
+    'merge_commit_sha': pr.merge_commit_sha,
+    'url': pr._links.self.href,
   };
 }
 
@@ -582,10 +582,10 @@ function update() {
 
   if (GITHUB_ACCESS_TOKEN) {
     tagsOptions.qs = {
-      access_token: GITHUB_ACCESS_TOKEN,
+      'access_token': GITHUB_ACCESS_TOKEN,
     };
     releasesOptions.qs = {
-      access_token: GITHUB_ACCESS_TOKEN,
+      'access_token': GITHUB_ACCESS_TOKEN,
     };
   }
 

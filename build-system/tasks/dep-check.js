@@ -16,16 +16,13 @@
 'use strict';
 
 
-const $$ = require('gulp-load-plugins')();
 const BBPromise = require('bluebird');
 const babel = require('babelify');
 const browserify = require('browserify');
-const buffer = require('vinyl-buffer');
 const depCheckConfig = require('../dep-check-config');
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const gulp = require('gulp-help')(require('gulp'));
 const minimatch = require('minimatch');
-const minimist = require('minimist');
 const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
@@ -34,7 +31,6 @@ const util = require('gulp-util');
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
-const argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
 const red = msg => util.log(util.colors.red(msg));
 
 
@@ -223,7 +219,7 @@ function flattenGraph(entryPoints) {
   entryPoints = entryPoints.map(entryPoint => entryPoint.deps);
   // Now make the graph have unique entries
   return flatten(entryPoints)
-      .reduce((acc, cur, i, arr) => {
+      .reduce((acc, cur) => {
         const name = cur.name;
         if (!acc[name]) {
           acc[name] = Object.keys(cur.deps)
@@ -256,7 +252,6 @@ function runRules(modules) {
 }
 
 function depCheck() {
-  const errorsFound = false;
   return getSrcs().then(entryPoints => {
     // This check is for extension folders that actually dont have
     // an extension entry point module yet.

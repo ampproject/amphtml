@@ -17,7 +17,6 @@
 
 const BBPromise = require('bluebird');
 const gulp = require('gulp-help')(require('gulp'));
-const path = require('path');
 const srcGlobs = require('../config').presubmitGlobs;
 const util = require('gulp-util');
 const through2 = require('through2');
@@ -103,7 +102,7 @@ function githubRequest(path, opt_method, opt_data) {
       'Accept': 'application/vnd.github.v3+json',
     },
     qs: {
-      access_token: GITHUB_ACCESS_TOKEN,
+      'access_token': GITHUB_ACCESS_TOKEN,
     },
   };
   if (opt_method) {

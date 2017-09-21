@@ -76,7 +76,7 @@ function onFileThrough(file, enc, cb) {
   postcss([zIndexCollector.bind(null, selectors)])
       .process(file.contents.toString(), {
         from: file.relative,
-      }).then(res => {
+      }).then(() => {
         cb(null, {name: file.relative, selectors});
       });
 }
@@ -87,11 +87,11 @@ function onFileThrough(file, enc, cb) {
  * @param {function()} cb callback to end the stream
  * @return {!Array<!Array<string>>}
  */
-function createTable(filesData, cb) {
+function createTable(filesData) {
   const rows = [];
-  Object.keys(filesData).sort().forEach((fileName, fileIdx) => {
+  Object.keys(filesData).sort().forEach(fileName => {
     const selectors = filesData[fileName];
-    Object.keys(selectors).sort().forEach((selectorName, selectorIdx) => {
+    Object.keys(selectors).sort().forEach(selectorName => {
       const zIndex = selectors[selectorName];
       const row = [selectorName, zIndex, fileName];
       rows.push(row);

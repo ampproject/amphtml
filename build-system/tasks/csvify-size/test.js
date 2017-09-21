@@ -19,7 +19,7 @@
 const test = require('ava');
 const m = require('./');
 
-
+/*eslint "max-len": 0*/
 test('sync - parse size.txt', t => {
   t.plan(2);
   const sizeFiles = [

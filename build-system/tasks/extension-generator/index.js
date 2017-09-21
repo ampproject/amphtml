@@ -23,6 +23,8 @@ const util = require('gulp-util');
 
 const year = new Date().getFullYear();
 
+/*eslint "max-len": 0*/
+
 function pascalCase(str) {
   return str[0].toUpperCase() + str.slice(1).replace(/-([a-z])/g,
       function(g) { return g[1].toUpperCase(); });
