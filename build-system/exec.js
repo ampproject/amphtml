@@ -19,8 +19,8 @@
  * @fileoverview Provides functions for executing tasks in a child process.
  */
 
-var child_process = require('child_process');
-var util = require('gulp-util');
+const childProcess = require('child_process');
+const util = require('gulp-util');
 
 /**
  * Spawns the given command in a child process with the given options.
@@ -29,8 +29,8 @@ var util = require('gulp-util');
  * @param {<Object>} options
  * @return {<Object>} Process info.
  */
-function spawnProcess(cmd, options){
-  return child_process.spawnSync('/bin/sh', ['-c', cmd], options);
+function spawnProcess(cmd, options) {
+  return childProcess.spawnSync('/bin/sh', ['-c', cmd], options);
 }
 
 /**
@@ -43,7 +43,7 @@ exports.exec = function(cmd) {
   if (p.status != 0) {
     console/*OK*/.log(util.colors.yellow('\nCommand failed: ' + cmd));
   }
-}
+};
 
 /**
  * Executes the provided command, and terminates the program in case of failure.
@@ -54,9 +54,9 @@ exports.execOrDie = function(cmd) {
   const p = spawnProcess(cmd, {'stdio': 'inherit'});
   if (p.status != 0) {
     console/*OK*/.error(util.colors.red('\nCommand failed: ' + cmd));
-    process.exit(p.status)
+    process.exit(p.status);
   }
-}
+};
 
 /**
  * Executes the provided command, returning its stdout.
@@ -71,7 +71,7 @@ exports.getStdout = function(cmd) {
         'cwd': process.cwd(),
         'env': process.env,
         'stdio': 'pipe',
-        'encoding': 'utf-8'
+        'encoding': 'utf-8',
       });
   return p.stdout;
-}
+};

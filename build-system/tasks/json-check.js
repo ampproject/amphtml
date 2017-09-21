@@ -26,7 +26,7 @@ const through2 = require('through2');
 function checkValidJson() {
   let hasError = false;
   return gulp.src(jsonGlobs)
-      .pipe(through2.obj(function(file, enc, cb) {
+      .pipe(through2.obj(function(file) {
         try {
           JSON.parse(file.contents.toString());
         } catch (e) {
@@ -42,4 +42,5 @@ function checkValidJson() {
       });
 }
 
-gulp.task('json-syntax', 'Check that JSON files are valid JSON.', checkValidJson);
+gulp.task(
+    'json-syntax', 'Check that JSON files are valid JSON.', checkValidJson);

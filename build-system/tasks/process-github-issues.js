@@ -17,16 +17,12 @@
 const BBPromise = require('bluebird');
 const argv = require('minimist')(process.argv.slice(2));
 const assert = require('assert');
-const child_process = require('child_process');
 const extend = require('util')._extend;
-const git = require('gulp-git');
 const gulp = require('gulp-help')(require('gulp'));
 const request = BBPromise.promisify(require('request'));
 const util = require('gulp-util');
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
-const exec = BBPromise.promisify(child_process.exec);
-const gitExec = BBPromise.promisify(git.exec);
 
 const verbose = (argv.verbose || argv.v);
 const isDryrun = argv.dryrun;
@@ -38,7 +34,7 @@ const issuesOptions = {
     'Accept': 'application/vnd.github.v3+json',
   },
   qs: {
-    access_token: GITHUB_ACCESS_TOKEN,
+    'access_token': GITHUB_ACCESS_TOKEN,
   },
 };
 
@@ -49,7 +45,7 @@ const milestoneOptions = {
     'Accept': 'application/vnd.github.v3+json',
   },
   qs: {
-    access_token: GITHUB_ACCESS_TOKEN,
+    'access_token': GITHUB_ACCESS_TOKEN,
   },
 };
 
@@ -87,10 +83,10 @@ function processIssues() {
 function getIssues(opt_page) {
   const options = extend({}, issuesOptions);
   options.qs = {
-    state: 'open',
-    page: opt_page,
-    per_page: 100,
-    access_token: GITHUB_ACCESS_TOKEN,
+    'state': 'open',
+    'page': opt_page,
+    'per_page': 100,
+    'access_token': GITHUB_ACCESS_TOKEN,
   };
   return request(options).then(res => {
     const issues = JSON.parse(res.body);
@@ -215,9 +211,9 @@ function updateGitHubIssues() {
 function applyMilestone(issue, milestoneNumber) {
   const options = extend({}, milestoneOptions);
   options.qs = {
-    state: 'open',
-    per_page: 100,
-    access_token: GITHUB_ACCESS_TOKEN,
+    'state': 'open',
+    'per_page': 100,
+    'access_token': GITHUB_ACCESS_TOKEN,
   };
 
   issue.milestone = milestoneNumber;
@@ -227,7 +223,8 @@ function applyMilestone(issue, milestoneNumber) {
       issue.milestone, 'milestone').then(function() {
         if (verbose) {
           util.log(util.colors.green(
-              'Milestone applied ' + milestone + ' for #' + issue.number));
+              'Milestone applied ' + issue.milestone +
+              ' for # ' + issue.number));
         }
       });
 }
@@ -240,9 +237,9 @@ function applyMilestone(issue, milestoneNumber) {
 function applyLabel(issue, label) {
   const options = extend({}, milestoneOptions);
   options.qs = {
-    state: 'open',
-    per_page: 100,
-    access_token: GITHUB_ACCESS_TOKEN,
+    'state': 'open',
+    'per_page': 100,
+    'access_token': GITHUB_ACCESS_TOKEN,
   };
   return createGithubRequest(
       '/issues/' + issue.number + '/labels',
@@ -250,7 +247,7 @@ function applyLabel(issue, label) {
       [label], 'label').then(function() {
         if (verbose) {
           util.log(util.colors.green(
-              'Label applied ' + label + ' for #' + issue.number));
+              'Label applied ' + label + ' for # ' + issue.number));
         }
       });
 }
@@ -272,7 +269,7 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
       'Accept': 'application/vnd.github.v3+json',
     },
     qs: {
-      access_token: GITHUB_ACCESS_TOKEN,
+      'access_token': GITHUB_ACCESS_TOKEN,
     },
   };
   if (opt_method) {

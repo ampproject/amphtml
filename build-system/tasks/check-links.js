@@ -16,14 +16,13 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-var path = require('path');
+const path = require('path');
 const BBPromise = require('bluebird');
 const chalk = require('chalk');
 const fs = require('fs-extra');
-const getStdout = require('../exec.js').getStdout;
+const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
 const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
-var path = require('path');
 const util = require('gulp-util');
 
 
@@ -104,9 +103,9 @@ function checkLinks() {
               'or whitelist them in build-system/tasks/check-links.js');
           util.log(
               util.colors.yellow('NOTE'),
-              'If the link(s) above are illustrative and aren\'t meant to work,',
-              'surrounding them with backticks or <code></code> will exempt them',
-              'from the link checker.');
+              'If the link(s) above are not meant to resolve to a real webpage',
+              'surrounding them with backticks will exempt them from the link',
+              'checker.');
           process.exit(1);
         } else {
           util.log(
