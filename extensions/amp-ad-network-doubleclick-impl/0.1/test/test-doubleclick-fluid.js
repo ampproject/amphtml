@@ -89,7 +89,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl = null;
   });
 
-  /*it('should be fluid enabled', () => {
+  it('should be fluid enabled', () => {
     impl.buildCallback();
     expect(impl.isFluid_).to.be.true;
   });
@@ -177,7 +177,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         expect(styleString).to.match(/height: 0px/);
       });
     });
-  });*/
+  });
 
   it('should fire delayed impression ping', () => {
     impl.buildCallback();
