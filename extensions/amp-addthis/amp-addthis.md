@@ -68,4 +68,7 @@ copying the last part of the URL. For example, in the URL `https://www.addthis.c
 
 ## Validation
 
+<!---
+TODO: Restore this once validation is completed.
 See [amp-instagram rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-addthis/0.1/validator-amp-addthis.protoascii) in the AMP validator specification.
+-->
