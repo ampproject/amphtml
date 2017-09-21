@@ -96,7 +96,13 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
-    'https://securepubads.g.doubleclick.net/gampad/ads';
+  'https://securepubads.g.doubleclick.net/gampad/ads';
+
+/** @private @enum {number} */
+const RTC_ATI_ENUM = {
+  RTC_SUCCESS: 2,
+  RTC_FAILURE: 3,
+};
 
 /** @private @const {!Object<string,string>} */
 const PAGE_LEVEL_PARAMS_ = {
@@ -455,7 +461,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.win, this.getAmpDoc(), startTime);
     return Promise.all([pageLevelParametersPromise, rtcResponsesPromise]).then(values => {
       pageLevelParameters = values[0];
-      const rtcParams = mergeRtcResponses(values[1]);
+      const rtcParams = this.mergeRtcResponses(values[1]);
       return googleAdUrl(
           this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
               this.getBlockParameters_(), rtcParams, pageLevelParameters));
@@ -463,8 +469,27 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   mergeRtcResponses(rtcResponses) {
-    // actually merge
-    return null;
+    let maxTime = 0;
+    let rtcParams = {};
+    let rtcSuccess;
+    for (index in rtcResponses) {
+      maxTime = (rtcResponses[index]['rtcTime'] > maxTime) ?
+          rtcResponses[index]['rtcTime'] : maxTime;
+      rtcParams = Object.assign(rtcParams, rtcResponses[index]['rtcResponse']);
+      rtcSuccess = rtcSuccess || !!rtcResponses[index]['rtcResponse'];
+    };
+    ['targeting', 'categoryExclusions'].forEach(key => {
+      if (!!rtcParams[key]) {
+        this.jsonTargeting_[key] =
+            !!this.jsonTargeting_[key] ?
+            deepMerge(this.jsonTargeting_[key], rtcParams[key]) :
+            rtcParams[key];
+      }
+    });
+    return {
+      'artc': maxTime,
+      'ati': !!rtcSuccess ? RTC_ATI_ENUM.RTC_SUCCESS : RTC_ATI_ENUM.RTC_FAILURE
+    };
   }
 
   /** @override */
