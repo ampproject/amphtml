@@ -37,7 +37,7 @@ function main() {
   // If npm is being run, print a message and cause 'npm install' to fail.
   if (process.env.npm_execpath.indexOf('yarn') === -1) {
     console/*OK*/.log(red(
-        '*** The AMP project now uses yarn for package management ***'), '\n');
+        '*** The AMP project uses yarn for package management ***'), '\n');
     console/*OK*/.log(yellow('To install all packages:'));
     console/*OK*/.log(cyan('$'), 'yarn', '\n');
     console/*OK*/.log(yellow(
