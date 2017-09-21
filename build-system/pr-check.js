@@ -25,10 +25,8 @@
  * presubmit checking, via the determineBuildTargets method.
  */
 const atob = require('atob');
-const exec = require('./exec.js').exec;
-const execOrDie = require('./exec.js').execOrDie;
-const getStdout = require('./exec.js').getStdout;
-const minimist = require('minimist');
+const execOrDie = require('./exec').execOrDie;
+const getStdout = require('./exec').getStdout;
 const path = require('path');
 const util = require('gulp-util');
 
@@ -63,16 +61,6 @@ function stopTimer(functionName, startTime) {
 }
 
 /**
- * Executes the provided command and times it.
- * @param {string} cmd
- */
-function timedExec(cmd) {
-  const startTime = startTimer(cmd);
-  exec(cmd);
-  stopTimer(cmd, startTime);
-}
-
-/**
  * Executes the provided command and times it. The program terminates in case of
  * failure.
  * @param {string} cmd
@@ -90,9 +78,9 @@ function timedExecOrDie(cmd) {
  */
 function filesInPr() {
   const files =
-      getStdout(`git diff --name-only master...HEAD`).trim().split('\n');
+      getStdout('git diff --name-only master...HEAD').trim().split('\n');
   const changeSummary =
-      getStdout(`git -c color.ui=always diff --stat master...HEAD`);
+      getStdout('git -c color.ui=always diff --stat master...HEAD');
   console.log(fileLogPrefix,
       'Testing the following changes at commit',
       util.colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
@@ -139,7 +127,9 @@ function isBuildSystemFile(filePath) {
  * @return {boolean}
  */
 function isValidatorFile(filePath) {
-  if (filePath.startsWith('validator/')) return true;
+  if (filePath.startsWith('validator/')) {
+    return true;
+  }
 
   // validator files for each extension
   if (!filePath.startsWith('extensions/')) {
@@ -218,14 +208,14 @@ function isFlagConfig(filePath) {
 function determineBuildTargets(filePaths) {
   if (filePaths.length == 0) {
     return new Set([
-        'BUILD_SYSTEM',
-        'VALIDATOR_WEBUI',
-        'VALIDATOR',
-        'RUNTIME',
-        'INTEGRATION_TEST',
-        'DOCS',
-        'FLAG_CONFIG',
-        'VISUAL_DIFF']);
+      'BUILD_SYSTEM',
+      'VALIDATOR_WEBUI',
+      'VALIDATOR',
+      'RUNTIME',
+      'INTEGRATION_TEST',
+      'DOCS',
+      'FLAG_CONFIG',
+      'VISUAL_DIFF']);
   }
   const targetSet = new Set();
   for (let i = 0; i < filePaths.length; i++) {
@@ -256,18 +246,17 @@ const command = {
   testBuildSystem: function() {
     timedExecOrDie(`${gulp} ava`);
   },
-  lintBuildSystem: function() {
-    timedExec(`${gulp} lint --build_system`);  // Run in warning mode initially.
-  },
-  testDocumentLinks: function(files) {
+  testDocumentLinks: function() {
     timedExecOrDie(`${gulp} check-links`);
   },
   cleanBuild: function() {
     timedExecOrDie(`${gulp} clean`);
   },
-  runJsonAndLintChecks: function() {
-    timedExecOrDie(`${gulp} json-syntax`);
+  runLintCheck: function() {
     timedExecOrDie(`${gulp} lint`);
+  },
+  runJsonCheck: function() {
+    timedExecOrDie(`${gulp} json-syntax`);
   },
   buildCss: function() {
     timedExecOrDie(`${gulp} css`);
@@ -325,12 +314,13 @@ const command = {
 
 function runAllCommands() {
   // Run different sets of independent tasks in parallel to reduce build time.
-  if (process.env.BUILD_SHARD == "unit_tests") {
+  if (process.env.BUILD_SHARD == 'unit_tests') {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
     command.runVisualDiffTests(/* opt_mode */ 'master');
-    command.runJsonAndLintChecks();
+    command.runLintCheck();
+    command.runJsonCheck();
     command.runDepAndTypeChecks();
     command.runUnitTests();
     command.verifyVisualDiffTests();
@@ -338,7 +328,7 @@ function runAllCommands() {
     command.buildValidatorWebUI();
     command.buildValidator();
   }
-  if (process.env.BUILD_SHARD == "integration_tests") {
+  if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
     command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
@@ -349,10 +339,9 @@ function runAllCommands() {
 /**
  * The main method for the script execution which much like a C main function
  * receives the command line arguments and returns an exit status.
- * @param {!Array<string>} argv
  * @returns {number}
  */
-function main(argv) {
+function main() {
   const startTime = startTimer('pr-check.js');
   console.log(
       fileLogPrefix, 'Running build shard',
@@ -398,30 +387,29 @@ function main(argv) {
     process.exit(1);
   }
 
-  const sortedBuildTargets = [];
-  for (const t of buildTargets) {
-    sortedBuildTargets.push(t);
-  }
-  sortedBuildTargets.sort();
-
   console.log(
       fileLogPrefix, 'Detected build targets:',
-      util.colors.cyan(sortedBuildTargets.join(', ')));
+      util.colors.cyan(Array.from(buildTargets).sort().join(', ')));
 
   // Run different sets of independent tasks in parallel to reduce build time.
-  if (process.env.BUILD_SHARD == "unit_tests") {
+  if (process.env.BUILD_SHARD == 'unit_tests') {
     if (buildTargets.has('BUILD_SYSTEM')) {
       command.testBuildSystem();
-      command.lintBuildSystem();
+    }
+    if (buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('VISUAL_DIFF') ||
+        buildTargets.has('INTEGRATION_TEST')) {
+      command.runLintCheck();
     }
     if (buildTargets.has('DOCS')) {
-      command.testDocumentLinks(files);
+      command.testDocumentLinks();
     }
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('INTEGRATION_TEST')) {
       command.cleanBuild();
       command.buildCss();
-      command.runJsonAndLintChecks();
+      command.runJsonCheck();
       command.runDepAndTypeChecks();
       // Run unit tests only if the PR contains runtime changes.
       if (buildTargets.has('RUNTIME')) {
@@ -430,7 +418,7 @@ function main(argv) {
     }
   }
 
-  if (process.env.BUILD_SHARD == "integration_tests") {
+  if (process.env.BUILD_SHARD == 'integration_tests') {
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME') ||
         buildTargets.has('VISUAL_DIFF')) {

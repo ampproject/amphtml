@@ -18,9 +18,8 @@
 /**
  * @fileoverview Creates an http server to handle responses for different test cases.
  */
-var app = require('express')();
-var bodyParser = require('body-parser');
-var morgan = require('morgan');
+const app = require('express')();
+const bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
 
@@ -31,7 +30,7 @@ function setCorsHeaders(req, res, next) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.query.__amp_source_origin) {
     res.setHeader('Access-Control-Expose-Headers',
-        'AMP-Access-Control-Allow-Source-Origin')
+        'AMP-Access-Control-Allow-Source-Origin');
     res.setHeader('AMP-Access-Control-Allow-Source-Origin',
         req.query.__amp_source_origin);
   }
@@ -61,7 +60,7 @@ app.use('/status/500', function(req, res) {
 
 app.use('/cookies/set', function(req, res) {
   delete req.query.__amp_source_origin;
-  for (var name in req.query) {
+  for (const name in req.query) {
     res./*OK*/cookie(name, req.query[name]);
   }
   res.json({
@@ -71,7 +70,7 @@ app.use('/cookies/set', function(req, res) {
 
 app.use('/response-headers', function(req, res) {
   delete req.query.__amp_source_origin;
-  for (var name in req.query) {
+  for (const name in req.query) {
     res.setHeader(name, req.query[name]);
   }
   res.json({});

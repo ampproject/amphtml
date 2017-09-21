@@ -20,7 +20,6 @@ const gulp = require('gulp-help')(require('gulp'));
 const glob = require('glob');
 const Karma = require('karma').Server;
 const config = require('../config');
-const read = require('file-reader');
 const fs = require('fs');
 const path = require('path');
 const util = require('gulp-util');

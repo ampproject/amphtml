@@ -17,8 +17,8 @@
 
 const BBPromise = require('bluebird');
 const argv = require('minimist')(process.argv.slice(2));
-const child_process = require('child_process');
-const exec = BBPromise.promisify(child_process.exec);
+const childProcess = require('child_process');
+const exec = BBPromise.promisify(childProcess.exec);
 const fs = BBPromise.promisifyAll(require('fs'));
 const gulp = require('gulp-help')(require('gulp'));
 const util = require('gulp-util');
@@ -42,7 +42,8 @@ function numConfigs(str) {
  * @param {string} str
  */
 function sanityCheck(str) {
-  if (numConfigs(str) != 1) {
+  const numMatches = numConfigs(str);
+  if (numMatches != 1) {
     throw new Error(
       'Found ' + numMatches + ' AMP_CONFIG(s) before write. Aborting!');
   }
@@ -133,7 +134,6 @@ function main() {
     return;
   }
 
-  const globs = [].concat(argv.files).filter(x => typeof x === 'string');
   const branch = argv.branch;
   let filename = '';
 

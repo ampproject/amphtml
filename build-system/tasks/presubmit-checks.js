@@ -23,9 +23,6 @@ const through2 = require('through2');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
-const es6polyfill = 'Not available because we do not currently' +
-    ' ship with a needed ES6 polyfill.';
-
 const requiresReviewPrivacy =
     'Usage of this API requires dedicated review due to ' +
     'being privacy sensitive. Please file an issue asking for permission' +
@@ -422,7 +419,7 @@ const forbiddenTerms = {
   'indexedDB': {
     message: requiresReviewPrivacy,
     whitelist: [
-      // https://docs.google.com/document/d/1tH_sj93Lo8XRpLP0cDSFNrBi1K_jmx_-q1sk_ZW3Nbg/edit#heading=h.ko4gxsan9svq
+      // https://docs.google.com/document/d/1tH_sj93Lo8XRpLP0cDSFNrBi1K_jmx_-q1sk_ZW3Nbg/edit#heading=h.ko4gxsan9svq  // eslint-disable-line max-len
       'src/service-worker/core.js',
       'src/service-worker/kill.js',
     ],
@@ -485,7 +482,7 @@ const forbiddenTerms = {
       'src/log.js',
     ],
   },
-  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {
+  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {  // eslint-disable-line max-len
     message: 'Logging message require explicitly `TAG`, or an all uppercase' +
         ' string as the first parameter',
   },
@@ -496,7 +493,7 @@ const forbiddenTerms = {
     ],
   },
   '\\.requireLayout\\(': {
-    message: 'requireLayout is restricted b/c it affects non-contained elements',
+    message: 'requireLayout is restricted b/c it affects non-contained elements',  // eslint-disable-line max-len
     whitelist: [
       'extensions/amp-animation/0.1/web-animations.js',
       'src/service/resources-impl.js',
@@ -588,8 +585,8 @@ const forbiddenTerms = {
   },
 };
 
-const ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
-    ' can thus not use most modern web APIs.';
+const ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded' +
+    ' and can thus not use most modern web APIs.';
 
 const forbidden3pTerms = {
   // We need to forbid promise usage because we don't have our own polyfill
@@ -695,7 +692,7 @@ const forbiddenTermsSrcInclusive = {
   // Super complicated regex that says "find any querySelector method call that
   // is passed as a variable anything that is not a string, or a string that
   // contains a space.
-  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': {
+  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': {  // eslint-disable-line max-len
     message: 'querySelector is not scoped to the element, but globally and ' +
     'filtered to just the elements inside the element. This leads to ' +
     'obscure bugs if you attempt to match a descendant of a descendant (ie ' +
@@ -716,8 +713,8 @@ const forbiddenTermsSrcInclusive = {
       'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',  // eslint-disable-line max-len
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',  // eslint-disable-line max-len
       'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
     ],
   },

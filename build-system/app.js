@@ -28,7 +28,6 @@ const formidable = require('formidable');
 const jsdom = require('jsdom');
 const path = require('path');
 const request = require('request');
-const url = require('url');
 const pc = process;
 
 app.use(bodyParser.json());
@@ -313,7 +312,7 @@ function proxyToAmpProxy(req, res, mode) {
     body = body
         // Unversion URLs.
         .replace(/https\:\/\/cdn\.ampproject\.org\/rtv\/\d+\//g,
-            'https://cdn.ampproject.org/')
+        'https://cdn.ampproject.org/')
         // <base> href pointing to the proxy, so that images, etc. still work.
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
     const inabox = req.query['inabox'] == '1';
@@ -512,24 +511,24 @@ function getLiveBlogItemWithBindAttributes() {
 }
 
 app.use('/examples/live-blog(-non-floating-button)?.amp.html',
-  (req, res, next) => {
-    if ('amp_latest_update_time' in req.query) {
-      res.setHeader('Content-Type', 'text/html');
-      res.end(getLiveBlogItem());
-      return;
-    }
-    next();
-  });
+    (req, res, next) => {
+      if ('amp_latest_update_time' in req.query) {
+        res.setHeader('Content-Type', 'text/html');
+        res.end(getLiveBlogItem());
+        return;
+      }
+      next();
+    });
 
 app.use('/examples/bind/live-list.amp.html',
-  (req, res, next) => {
-    if ('amp_latest_update_time' in req.query) {
-      res.setHeader('Content-Type', 'text/html');
-      res.end(getLiveBlogItemWithBindAttributes());
-      return;
-    }
-    next();
-  });
+    (req, res, next) => {
+      if ('amp_latest_update_time' in req.query) {
+        res.setHeader('Content-Type', 'text/html');
+        res.end(getLiveBlogItemWithBindAttributes());
+        return;
+      }
+      next();
+    });
 
 app.use('/examples/amp-fresh.amp.html', (req, res, next) => {
   if ('amp-fresh' in req.query && req.query['amp-fresh']) {
@@ -869,7 +868,7 @@ app.use([cloudflareDataDir], function fakeCors(req, res, next) {
  */
 app.get([fakeAdNetworkDataDir + '/*', cloudflareDataDir + '/*'], (req, res) => {
   let filePath = req.path;
-  let unwrap = !req.path.endsWith('.html');
+  const unwrap = !req.path.endsWith('.html');
   filePath = pc.cwd() + filePath;
   fs.readFileAsync(filePath).then(file => {
     res.setHeader('X-AmpAdRender', 'nameframe');
@@ -975,9 +974,9 @@ app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
     if (req.path.includes('v0.js')) {
       const path = req.path.replace(/rtv\/\d+/, '');
       return fs.readFileAsync(pc.cwd() + path, 'utf8')
-        .then(file => {
-          res.end(file);
-        }).catch(next);
+          .then(file => {
+            res.end(file);
+          }).catch(next);
     }
 
     res.end(`
@@ -1092,7 +1091,7 @@ function addViewerIntegrationScript(ampJsVersion, file) {
     return file;
   }
   let viewerScript;
-  if (Number.isInteger(ampJsVersion)) {
+  if (Number.isInteger(ampJsVersion)) {  // eslint-disable-line no-es2015-number-props
     // Viewer integration script from gws, such as
     // https://cdn.ampproject.org/viewer/google/v7.js
     viewerScript =

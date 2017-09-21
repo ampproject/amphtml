@@ -17,10 +17,6 @@
 
 const BBPromise = require('bluebird');
 const argv = require('minimist')(process.argv.slice(2));
-const assert = require('assert');
-const child_process = require('child_process');
-const config = require('../config');
-const extend = require('util')._extend;
 const fs = require('fs-extra');
 const git = require('gulp-git');
 const gulp = require('gulp-help')(require('gulp'));
@@ -28,7 +24,6 @@ const request = BBPromise.promisify(require('request'));
 const util = require('gulp-util');
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
-const exec = BBPromise.promisify(child_process.exec);
 const gitExec = BBPromise.promisify(git.exec);
 
 const isDryrun = argv.dryrun;
@@ -155,7 +150,7 @@ function gitFetch(dir) {
       args: 'clone https://github.com/ampproject/amphtml.git',
     });
   }
-  return clonePromise.then(function(arg) {
+  return clonePromise.then(function() {
     return gitExec({
       cwd: ampDir,
       args: 'fetch --tags',
@@ -177,7 +172,7 @@ function githubRequest(path, opt_method, opt_data) {
       'Accept': 'application/vnd.github.v3+json',
     },
     qs: {
-      access_token: GITHUB_ACCESS_TOKEN,
+      'access_token': GITHUB_ACCESS_TOKEN,
     },
   };
   if (opt_method) {

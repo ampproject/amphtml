@@ -18,7 +18,6 @@ const BBPromise = require('bluebird');
 const yaml = require('yamljs');
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const gulp = require('gulp-help')(require('gulp'));
-const glob = BBPromise.promisify(require('glob'));
 const intercept = require('gulp-intercept');
 const path = require('path');
 const minimist = require('minimist');
@@ -92,7 +91,7 @@ function generate(root, target, writeToDisk) {
         const dirname = path.relative(process.cwd(), path.dirname(file.path));
         dirs[dirname || '*'] = yaml.parse(file.contents.toString());
       }))
-      .on('end', function(cb) {
+      .on('end', function() {
         if (writeToDisk) {
           fs.removeSync(target);
           const codeowners = buildCodeownersFile(dirs, target, writeToDisk);

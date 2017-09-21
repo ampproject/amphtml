@@ -34,7 +34,7 @@ const quiet = process.env.SERVE_QUIET == 'true';
 
 // Exit if the port is in use.
 process.on('uncaughtException', function(err) {
-  if(err.errno === 'EADDRINUSE') {
+  if (err.errno === 'EADDRINUSE') {
     util.log(util.colors.red('Port', port, 'in use, shutting down server'));
   } else {
     util.log(util.colors.red(err));
@@ -52,11 +52,11 @@ setInterval(function() {
 
 // Start gulp webserver
 gulp.src(process.cwd())
-  .pipe(webserver({
-    port,
-    host,
-    directoryListing: true,
-    https: useHttps,
-    middleware: quiet ? [] : [morgan('dev'), app]
-  }));
+    .pipe(webserver({
+      port,
+      host,
+      directoryListing: true,
+      https: useHttps,
+      middleware: quiet ? [] : [morgan('dev'), app],
+    }));
 

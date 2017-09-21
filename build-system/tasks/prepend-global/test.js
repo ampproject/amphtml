@@ -16,12 +16,9 @@
 'use strict';
 
 
-const BBPromise = require('bluebird');
-const fs = BBPromise.promisifyAll(require('fs'));
 const m = require('./');
 const test = require('ava');
 
-const targetFile = 'target-file.js';
 
 test('sync - prepends global config', t => {
   t.plan(1);

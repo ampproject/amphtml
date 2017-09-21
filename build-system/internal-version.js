@@ -15,8 +15,8 @@
  */
 'use strict';
 
-var argv = require('minimist')(process.argv.slice(2));
-var crypto = require('crypto');
+const argv = require('minimist')(process.argv.slice(2));
+const crypto = require('crypto');
 
 // Used to e.g. references the ads binary from the runtime to get
 // version lock.
@@ -30,7 +30,7 @@ exports.VERSION = argv.version ?
 exports.TOKEN = getToken();
 
 function getToken() {
-  var task = process.argv[2];
+  const task = process.argv[2];
   // For tests build parent and child frame can get out of sync because
   // we do not version lock them. To fix this we use a fixed token.
   if (!task || task == 'build' || task == 'test') {
