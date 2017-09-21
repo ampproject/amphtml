@@ -20,7 +20,7 @@
     <amp-ad width="320" height="50"
             type="doubleclick"
             data-slot="/4119129/mobile_ad_banner"
-            prerequest-callouts='{"vendors": {"fakeVendor": {"SLOT_ID": "1", "PAGE_ID": "1"}}, "urls": ["https://localhost:4443/posts"], "timeoutMillis": 500}'
+            prerequest-callouts='{"vendors": {"fakeVendor": {"SLOT_ID": "1", "PAGE_ID": "1"}, "nonexistant-vendor": {"SLOT_ID": "1"}, "fakeVendor2": {"SLOT_ID": "1"}}, "urls": ["https://localhost:4443/posts?slot_id=SLOT_ID"], "timeoutMillis": 500}'
             json='{"targeting":{"food":["burgers","chicken"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
   </amp-ad>
 </body>

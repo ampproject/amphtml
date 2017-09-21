@@ -1547,9 +1547,18 @@ export class AmpA4A extends AMP.BaseElement {
     if (!!AMP.RealTimeConfigManager) {
       this.RealTimeConfigManager = new AMP.RealTimeConfigManager(this.element, this.win)
       if (this.RealTimeConfigManager.validateRtcConfig()) {
-        this.RealTimeConfigManager.executeRealTimeConfig();
+        this.RealTimeConfigManager.executeRealTimeConfig(
+            this.getCustomRealTimeConfigMacros_());
       };
     }
+  }
+
+  /**
+   * To be overriden by network impl. Should return a mapping of macro keys
+   * to values for substitution in publisher-specified URLs for RTC.
+   */
+  getCustomRealTimeConfigMacros_() {
+    return null;
   }
 }
 

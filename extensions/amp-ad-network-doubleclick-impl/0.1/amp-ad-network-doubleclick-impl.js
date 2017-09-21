@@ -438,10 +438,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl() {
-    // POPULATE THESE TODO TODO TODO DO NOT SUBMIT
-    rtcParams = {};
-
+  getAdUrl(rtcResponsesPromise) {
     if (this.iframe && !this.isRefreshing) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
       return '';
@@ -456,11 +453,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     const pageLevelParametersPromise = getPageLevelParameters_(
         this.win, this.getAmpDoc(), startTime);
-    return pageLevelParametersPromise.then(pageLevelParameters => {
-        return googleAdUrl(
-            this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
-                this.getBlockParameters_(), rtcParams, pageLevelParameters));
-      });
+    return Promise.all([pageLevelParametersPromise, rtcResponsesPromise]).then(values => {
+      pageLevelParameters = values[0];
+      const rtcParams = mergeRtcResponses(values[1]);
+      return googleAdUrl(
+          this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
+              this.getBlockParameters_(), rtcParams, pageLevelParameters));
+    });
+  }
+
+  mergeRtcResponses(rtcResponses) {
+    // actually merge
+    return null;
   }
 
   /** @override */
