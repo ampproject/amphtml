@@ -104,11 +104,7 @@ export class Performance {
     }
 
     // Tick window.onload event.
-    whenDocumentComplete(win.document).then(() => {
-      this.onload_();
-      this.flush();
-    });
-
+    whenDocumentComplete(win.document).then(() => this.onload_());
     this.registerPaintTimingObserver_();
   }
 
@@ -165,6 +161,7 @@ export class Performance {
   onload_() {
     this.tick('ol');
     this.tickLegacyFirstPaintTime_();
+    this.flush();
   }
 
   /**
@@ -179,9 +176,11 @@ export class Performance {
       list.getEntries().forEach(entry => {
         if (entry.name == 'first-paint') {
           this.tickDelta('fp', entry.startTime + entry.duration);
+          this.flush();
         }
         else if (entry.name == 'first-contentful-paint') {
           this.tickDelta('fcp', entry.startTime + entry.duration);
+          this.flush();
         }
       });
     });
