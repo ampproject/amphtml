@@ -30,6 +30,7 @@ import {
 import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {
   additionalDimensions,
+  getCorrelator,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
   isReportingEnabled,
@@ -107,14 +108,34 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      */
     this.ampAnalyticsConfig_ = null;
 
+    /**
+     * amp-analytics element generated based on this.ampAnalyticsConfig_
+     * @type {?Element}
+     * @private
+     */
+    this.ampAnalyticsElement_ = null;
+
+    /**
+     * Config to generate amp-analytics element for reporting on page load
+     * metrics
+     * @type {?JsonObject}
+     * @private
+     */
+    this.ampAnalyticsPageLoadMetricsConfig_ = null;
+
+    /**
+     * amp-analytics element generated based on
+     * this.ampAnalyticsPageLoadMetricsConfig_
+     * @type {?Element}
+     * @private
+     */
+    this.ampAnalyticsPageLoadMetricsElement_ = null;
+
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = Services.extensionsFor(this.win);
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
-
-    /** @private {?Element} */
-    this.ampAnalyticsElement_ = null;
 
     /** @private {?string} */
     this.qqid_ = null;
@@ -163,6 +184,40 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
       addExperimentIdToElement(verifierEid, this.element);
+    }
+
+    const correlator = getCorrelator(this.win);
+    this.ampAnalyticsPageLoadMetricsConfig_ = /** @type {JsonObject}*/ ({
+      'requests': {
+        'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
+            `&c=${correlator}` +
+            '&firstVisibleTime.${firstVisibleTime}',
+      },
+      'transport': {
+        'beacon': false,
+        'xhrpost': false,
+      },
+      'triggers': {
+        'iniLoad': {
+          'on': 'visible',
+          'request': 'fvt',
+          'selector': 'amp-ad',
+          'selectionMethod': 'closest',
+        },
+      },
+    });
+    // TODO(jonkeller): Add remaining metrics commented below to config
+    // 'met.a4a=makeBodyVisible.${MBV_VALUE}~' +
+    // 'firstContentfulPaint.${FCP_VALUE}~' +
+    // 'firstViewportReady.${FVR_VALUE}',
+    if (this.ampAnalyticsPageLoadMetricsConfig_) {
+      // Load amp-analytics extensions
+      this.extensions_./*OK*/installExtensionForDoc(
+        this.getAmpDoc(), 'amp-analytics');
+      dev().assert(!this.ampAnalyticsPageLoadMetricsElement_);
+      // addCsiSignalsToAmpAnalyticsConfig
+      this.ampAnalyticsPageLoadMetricsElement_ =
+        insertAnalyticsElement(this.element, this.ampAnalyticsPageLoadMetricsConfig_, true);
     }
 
     if (this.isResponsive_()) {
@@ -351,7 +406,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       removeElement(this.ampAnalyticsElement_);
       this.ampAnalyticsElement_ = null;
     }
+    if (this.ampAnalyticsPageLoadMetricsElement_) {
+      removeElement(this.ampAnalyticsPageLoadMetricsElement_);
+      this.ampAnalyticsPageLoadMetricsElement_ = null;
+    }
     this.ampAnalyticsConfig_ = null;
+    this.ampAnalyticsPageLoadMetricsConfig_ = null;
     this.qqid_ = null;
   }
 
