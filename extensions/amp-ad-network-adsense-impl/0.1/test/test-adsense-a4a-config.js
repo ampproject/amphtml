@@ -17,9 +17,7 @@
 import {
   adsenseIsA4AEnabled,
   ADSENSE_A4A_EXPERIMENT_NAME,
-  FF_DR_EXP_NAME,
   ADSENSE_EXPERIMENT_FEATURE,
-  INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP,
   URL_EXPERIMENT_MAPPING,
   fastFetchDelayedRequestEnabled,
 } from '../adsense-a4a-config';
@@ -129,21 +127,13 @@ describe('adsense-a4a-config', () => {
 
   describe('#fastFetchDelayedRequestEnabled', () => {
     [
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL_CONTROL, {
-        layer: ADSENSE_A4A_EXPERIMENT_NAME,
-        result: false,
-      }],
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL, {
+      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_CONTROL, {
         layer: ADSENSE_A4A_EXPERIMENT_NAME,
         result: true,
       }],
-      [INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.CONTROL, {
-        layer: FF_DR_EXP_NAME,
+      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_EXTERNAL, {
+        layer: ADSENSE_A4A_EXPERIMENT_NAME,
         result: false,
-      }],
-      [INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.EXPERIMENT, {
-        layer: FF_DR_EXP_NAME,
-        result: true,
       }],
     ].forEach(item => {
       it(`should return ${item[1].result} if in ${item[0]} experiment`, () => {
@@ -153,8 +143,8 @@ describe('adsense-a4a-config', () => {
       });
     });
 
-    it('should return false if not in any experiments', () => {
-      expect(fastFetchDelayedRequestEnabled(mockWin)).to.be.false;
+    it('should return true if not in any experiments', () => {
+      expect(fastFetchDelayedRequestEnabled(mockWin)).to.be.true;
     });
   });
 });
