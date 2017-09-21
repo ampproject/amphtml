@@ -383,7 +383,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @param {!JsonObject} data
    * @private
    */
-  receiveMessageForFluid_(data) {
+  receiveMessageForFluid_(data) { debugger;
     const payload = tryParseJson(data['p']);
     if (!payload || !payload['height']) {
       // TODO(levitzky) Add actual error handling here.
@@ -630,6 +630,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   layoutCallback() {
+    if (this.isFluid_) {
+      registerListenerForFluid(this, this.receiveMessageForFluid_.bind(this));
+    }
     const frameLoadPromise = super.layoutCallback();
     if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
       user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
@@ -645,7 +648,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             });
     return frameLoadPromise.then(result => {
       if (this.isFluid_) {
-        registerListenerForFluid(this, this.receiveMessageForFluid_.bind(this));
         if (!this.element.style.width) {
           setStyles(this.element, {
             width: '100%',
@@ -1303,8 +1305,12 @@ function getFirstInstanceValue_(instances, extractFn) {
   return null;
 }
 
-let listenerForFluidRegistered = false;
+/**
+ * Maps a sentinel value to an object consisting of the impl to which that
+ * sentinel value belongs and the corresponding message handler for that impl.
+ * @type{Object<string, Object> */
 const fluidListeners = {};
+let listenerForFluidRegistered = false;
 
 /**
  * @param {!AmpAdNetworkDoubleclickImpl} instance
@@ -1312,7 +1318,7 @@ const fluidListeners = {};
  */
 function registerListenerForFluid(instance, handler) {
   if (!fluidListeners[instance.sentinel]) {
-    fluidListeners[instance.sentinel] = handler;
+    fluidListeners[instance.sentinel] = {instance, handler};
   }
   if (!listenerForFluidRegistered) {
     instance.win.addEventListener('message', event => {
@@ -1323,8 +1329,18 @@ function registerListenerForFluid(instance, handler) {
       }
       dev().assert(fluidListeners[data['sentinel']],
           'postMessage listener does not exist');
-      fluidListeners[data['sentinel']](data);
+      fluidListeners[data['sentinel']].handler(data);
     }, false);
     listenerForFluidRegistered = true;
   }
+}
+
+/** @visibleForTesting */
+export function unregisterListenersForFluid() {
+  Object.keys(fluidListeners).forEach(key => {
+    fluidListeners[key].instance.win.removeEventListener(
+        'message', fluidListeners[key].handler);
+    delete fluidListeners[key];
+  });
+  listenerForFluidRegistered = false;
 }

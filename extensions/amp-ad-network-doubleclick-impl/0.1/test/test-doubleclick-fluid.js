@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
+import {
+  AmpAdNetworkDoubleclickImpl,
+  unregisterListenersForFluid,
+} from '../amp-ad-network-doubleclick-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {utf8Encode} from '../../../../src/utils/bytes';
 // Need the following side-effect import because in actual production code,
@@ -86,6 +89,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   afterEach(() => {
     sandbox.restore();
+    unregisterListenersForFluid();
     impl = null;
   });
 
@@ -183,6 +187,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.buildCallback();
     const rawCreative = `
         <script>
+        debugger;
         parent./*OK*/postMessage(
             JSON.stringify(/** @type {!JsonObject} */ ({
               s: 'creative_geometry_update',
@@ -190,10 +195,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
               p: '{"width":"1px","height":"1px"}',
             })), '*');
         </script>`;
-    const fireDelayedImpressionsSpy =
-        sandbox.spy(impl, 'fireDelayedImpressions');
     const onFluidResizeSpy = sandbox.spy(impl, 'onFluidResize');
-    impl.fluidImpressionUrl_ = 'http://www.foo.bar/';
     impl.attemptChangeHeight = () => Promise.resolve();
     return utf8Encode(rawCreative).then(creative => {
       impl.sentinel = 'sentinel';
@@ -201,7 +203,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
       return impl.adPromise_.then(() => {
         impl.creativeBody_ = creative;
         return impl.layoutCallback().then(() => {
-          expect(fireDelayedImpressionsSpy).to.be.calledOnce;
           expect(onFluidResizeSpy).to.be.calledOnce;
         });
       });
