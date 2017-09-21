@@ -327,10 +327,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     this.isFluid_ = this.element.getLayout() == Layout.FLUID;
-    if (this.isFluid_) {
-      this.win.addEventListener(
-          'message', this.receiveMessageForFluid_.bind(this), false);
-    }
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
       addExperimentIdToElement(verifierEid, this.element);
@@ -384,18 +380,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Handles Fluid-related messages dispatched from SafeFrame.
-   * @param {!Event} event
+   * @param {!JsonObject} data
    * @private
    */
-  receiveMessageForFluid_(event) {
-    const data = tryParseJson(getData(event));
-    if (event.origin != SAFEFRAME_ORIGIN || !data ||
-        data['s'] != 'creative_geometry_update') {
-      return;
-    }
-    user().assert(data['sentinel'] == this.sentinel,
-        `Expected sentinel value to match ${this.sentinel} but found` +
-        `${data['sentinel']}`);
+  receiveMessageForFluid_(data) {
     const payload = tryParseJson(data['p']);
     if (!payload || !payload['height']) {
       // TODO(levitzky) Add actual error handling here.
@@ -655,13 +643,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               visiblePercentageMin: 50,
               continuousTimeMin: 1,
             });
-    if (this.isFluid_ && !this.element.style.width) {
-      setStyles(this.element, {
-        width: '100%',
-      });
-    }
     return frameLoadPromise.then(result => {
       if (this.isFluid_) {
+        registerListenerForFluid(this, this.receiveMessageForFluid_.bind(this));
+        if (!this.element.style.width) {
+          setStyles(this.element, {
+            width: '100%',
+          });
+        }
         // If this is a Fluid slot, we must send an initial message to
         // safeframe.
         this.connectFluidMessagingChannel();
@@ -675,8 +664,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     dev().assert(this.iframe.contentWindow,
         'Frame contentWindow unavailable.');
     this.iframe.contentWindow./*OK*/postMessage(
-        JSON.stringify(/** @type {!JsonObject} */
-          ({message: 'connect', c: 'sfchannel1'})),
+        JSON.stringify(dict({'message': 'connect', 'c': 'sfchannel1'})),
         SAFEFRAME_ORIGIN);
   }
 
@@ -693,8 +681,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     dev().assert(this.iframe.contentWindow,
         'Frame contentWindow unavailable.');
     this.iframe.contentWindow./*OK*/postMessage(
-        JSON.stringify(/** @type {!JsonObject} */
-          ({message: 'resize-complete', c: 'sfchannel1'})),
+        JSON.stringify(dict({'message': 'resize-complete', 'c': 'sfchannel1'})),
         SAFEFRAME_ORIGIN);
   }
 
@@ -1137,14 +1124,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdditionalContextMetadata() {
-    const attributes = /** @type {!JsonObject} */ ({});
+    const attributes = dict({});
     if (this.isFluid_) {
       attributes['uid'] = 1;
       attributes['hostPeerName'] = this.win.location.origin;
       // The initial geometry isn't used for anything important, but it is
       // expected, so we pass this string with all zero values.
       attributes['initialGeometry'] = JSON.stringify(
-          /** @type {!JsonObject} */ ({
+          dict({
             'windowCoords_t': 0,
             'windowCoords_r': 0,
             'windowCoords_b': 0,
@@ -1162,15 +1149,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             'yInView': 0,
           }));
       attributes['permissions'] = JSON.stringify(
-          /** @type {!JsonObject} */ ({
-            expandByOverlay: false,
-            expandByPush: false,
-            readCookie: false,
-            writeCookie: false,
+          dict({
+            'expandByOverlay': false,
+            'expandByPush': false,
+            'readCookie': false,
+            'writeCookie': false,
           }));
       attributes['metadata'] = JSON.stringify(
-          /** @type {!JsonObject} */ ({
-            shared: {
+          dict({
+            'shared': {
               'sf_ver': this.safeframeVersion,
               'ck_on': 1,
               'flash_ver': '26.0.0',
@@ -1314,4 +1301,30 @@ function getFirstInstanceValue_(instances, extractFn) {
     }
   }
   return null;
+}
+
+let listenerForFluidRegistered = false;
+const fluidListeners = {};
+
+/**
+ * @param {!AmpAdNetworkDoubleclickImpl} instance
+ * @param {!function(!JsonObject)} handler
+ */
+function registerListenerForFluid(instance, handler) {
+  if (!fluidListeners[instance.sentinel]) {
+    fluidListeners[instance.sentinel] = handler;
+  }
+  if (!listenerForFluidRegistered) {
+    instance.win.addEventListener('message', event => {
+      const data = tryParseJson(getData(event));
+      if (event.origin != SAFEFRAME_ORIGIN || !data ||
+          data['s'] != 'creative_geometry_update') {
+        return;
+      }
+      dev().assert(fluidListeners[data['sentinel']],
+          'postMessage listener does not exist');
+      fluidListeners[data['sentinel']](data);
+    }, false);
+    listenerForFluidRegistered = true;
+  }
 }
