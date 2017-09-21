@@ -31,7 +31,6 @@ const getStderr = require('./exec').getStderr;
 const path = require('path');
 const util = require('gulp-util');
 
-const gulp = 'node_modules/gulp/bin/gulp.js';
 const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
 
 /**
@@ -245,45 +244,45 @@ function determineBuildTargets(filePaths) {
 
 const command = {
   testBuildSystem: function() {
-    timedExecOrDie(`${gulp} ava`);
+    timedExecOrDie('gulp ava');
   },
   testDocumentLinks: function() {
-    timedExecOrDie(`${gulp} check-links`);
+    timedExecOrDie('gulp check-links');
   },
   cleanBuild: function() {
-    timedExecOrDie(`${gulp} clean`);
+    timedExecOrDie('gulp clean');
   },
   runLintCheck: function() {
-    timedExecOrDie(`${gulp} lint`);
+    timedExecOrDie('gulp lint');
   },
   runJsonCheck: function() {
-    timedExecOrDie(`${gulp} json-syntax`);
+    timedExecOrDie('gulp json-syntax');
   },
   buildCss: function() {
-    timedExecOrDie(`${gulp} css`);
+    timedExecOrDie('gulp css');
   },
   buildRuntime: function() {
-    timedExecOrDie(`${gulp} build`);
+    timedExecOrDie('gulp build');
   },
   buildRuntimeMinified: function() {
-    timedExecOrDie(`${gulp} dist --fortesting`);
+    timedExecOrDie('gulp dist --fortesting');
   },
   runDepAndTypeChecks: function() {
-    timedExecOrDie(`${gulp} dep-check`);
-    timedExecOrDie(`${gulp} check-types`);
+    timedExecOrDie('gulp dep-check');
+    timedExecOrDie('gulp check-types');
   },
   runUnitTests: function() {
     // Unit tests with Travis' default chromium
-    timedExecOrDie(`${gulp} test --unit --nobuild`);
+    timedExecOrDie('gulp test --unit --nobuild');
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
     // timedExecOrDie(
-    //     `${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+    //     `gulp test --nobuild --saucelabs --oldchrome --compiled`);
   },
   runIntegrationTests: function(compiled) {
     // Integration tests with all saucelabs browsers
-    let cmd = `${gulp} test --nobuild --saucelabs --integration`;
+    let cmd = 'gulp test --nobuild --saucelabs --integration';
     if (compiled) {
       cmd += ' --compiled';
     }
@@ -291,7 +290,7 @@ const command = {
   },
   runVisualDiffTests: function(opt_mode) {
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    let cmd = `${gulp} visual-diff`;
+    let cmd = 'gulp visual-diff';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
     } else if (opt_mode === 'master') {
@@ -300,16 +299,16 @@ const command = {
     timedExecOrDie(cmd);
   },
   verifyVisualDiffTests: function() {
-    timedExecOrDie(`${gulp} visual-diff --verify`);
+    timedExecOrDie('gulp visual-diff --verify');
   },
   runPresubmitTests: function() {
-    timedExecOrDie(`${gulp} presubmit`);
+    timedExecOrDie('gulp presubmit');
   },
   buildValidatorWebUI: function() {
-    timedExecOrDie(`${gulp} validator-webui`);
+    timedExecOrDie('gulp validator-webui');
   },
   buildValidator: function() {
-    timedExecOrDie(`${gulp} validator`);
+    timedExecOrDie('gulp validator');
   },
 };
 
