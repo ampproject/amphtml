@@ -18,3 +18,4 @@ typings.json
 build-system/runner/TESTS-TestSuites.xml
 /test/manual/amp-ad.adtech.html
 test/coverage
+package-lock.json

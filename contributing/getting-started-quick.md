@@ -25,11 +25,11 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * [Install and set up Git](https://help.github.com/articles/set-up-git/); in the "Authenticating" step of that page use SSH instead of HTTPS
 
-* Install [NodeJS](https://nodejs.org/) version >= 6
+* Install [NodeJS](https://nodejs.org/) version >= 6 (which includes npm)
 
-* Install [Yarn](https://yarnpkg.com/) version >= 1.0.2, follow the instructions on the website or install it with npm: `npm install -g yarn@latest` (this command might require elevated privileges using `sudo` on some platforms)
+* Install [Yarn](https://yarnpkg.com/) version >= 1.0.2 (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
 
-* Install Gulp by running `yarn global add gulp` (as before, this command might require `sudo`)
+* Install Gulp by running `yarn global add gulp` (this may require elevated privileges using `sudo` on some platforms)
 
 * Add this line to your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows):
 
@@ -48,12 +48,14 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 * Go to the branch: `git checkout <branch name>`
 
 # Build AMP & run a local server
+
 * Make sure you have the latest packages (after you pull): `yarn`
 * Start the server: `gulp`
 * Access your server at [http://localhost:8000](http://localhost:8000)
 * Access your sample pages at [http://localhost:8000/examples](http://localhost:8000/examples)
 
 # Test AMP
+
 * Run the tests: `gulp test`
 * Run the tests in a specified set of files: `gulp test --files=<filename>`
 * Add the `--watch` flag to any `gulp test` command to automatically re-run the tests when a file changes
@@ -62,7 +64,8 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 # Create commits to contain your changes
 
 * Edit files in your favorite editor
-* If you edited `package.json`, run `yarn install` to generate an updated `yarn.lock` file
+* if your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which will automatically update `package.json` and `yarn.lock`
+* if you manually edited `package.json`, run `yarn install` to install the dependency and generate an updated `yarn.lock` file
 * Add each file you change: `git add <file>`
 * Create a commit: `git commit -m "<your commit message>"`
 * Instead of `add`ing each file individually you can use the `-a` flag on the commit instead
