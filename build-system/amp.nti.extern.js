@@ -27,4 +27,4 @@
  * @return {function(number):T}
  * @template T
  */
-const TransitionDef = function(unusedNormtime, unusedCompleted) {};
+var TransitionDef = function(unusedNormtime, unusedCompleted) {};

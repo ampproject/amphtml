@@ -127,7 +127,9 @@ function isBuildSystemFile(filePath) {
  * @return {boolean}
  */
 function isValidatorFile(filePath) {
-  if (filePath.startsWith('validator/')) {return true;}
+  if (filePath.startsWith('validator/')) {
+    return true;
+  }
 
   // validator files for each extension
   if (!filePath.startsWith('extensions/')) {

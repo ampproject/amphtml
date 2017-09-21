@@ -219,7 +219,7 @@ function flattenGraph(entryPoints) {
   entryPoints = entryPoints.map(entryPoint => entryPoint.deps);
   // Now make the graph have unique entries
   return flatten(entryPoints)
-      .reduce((acc, cur, unusedI, unusedArr) => {
+      .reduce((acc, cur) => {
         const name = cur.name;
         if (!acc[name]) {
           acc[name] = Object.keys(cur.deps)

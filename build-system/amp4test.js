@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const app = module.exports = require('express').Router();  // eslint-disable-line no-undef
+const app = module.exports = require('express').Router();
 
 /*eslint "max-len": 0*/
 

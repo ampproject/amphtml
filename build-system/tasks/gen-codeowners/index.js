@@ -91,7 +91,7 @@ function generate(root, target, writeToDisk) {
         const dirname = path.relative(process.cwd(), path.dirname(file.path));
         dirs[dirname || '*'] = yaml.parse(file.contents.toString());
       }))
-      .on('end', function(unusedCb) {
+      .on('end', function() {
         if (writeToDisk) {
           fs.removeSync(target);
           const codeowners = buildCodeownersFile(dirs, target, writeToDisk);

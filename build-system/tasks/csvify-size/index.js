@@ -27,9 +27,9 @@ const util = require('gulp-util');
 const prettyBytesUnits = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
 /**
- * @typedef {!Array<Fields>}
+ * @typedef {!Array<FieldsDef>}
  */
-let Tables;  // eslint-disable-line no-unused-vars
+let TablesDef;
 
 /**
  * @typedef {{
@@ -38,7 +38,7 @@ let Tables;  // eslint-disable-line no-unused-vars
  *   size: string
  * }}
  */
-let Fields;  // eslint-disable-line no-unused-vars
+let FieldsDef;
 
 const filePath = 'test/size.txt';
 
@@ -59,7 +59,7 @@ function getLog(format) {
 
 /**
  * @param {string} file
- * @return {!Tables}
+ * @return {!TablesDef}
  */
 function parseSizeFile(file) {
   const lines = file.trim().split('\n');
@@ -125,7 +125,7 @@ function parseSizeFile(file) {
 
 /**
  * @param {!Array<string>} dateTimes
- * @param {!Tables} tables
+ * @param {!TablesDef} tables
  * @return {!Array<!Array<string>>}
  */
 function mergeTables(dateTimes, tables) {

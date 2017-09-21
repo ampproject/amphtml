@@ -83,7 +83,7 @@ const integrationTestPaths = commonTestPaths.concat([
 ]);
 
 /** @const  */
-module.exports = {  // eslint-disable-line no-undef
+module.exports = {
   commonTestPaths,
   basicTestPaths,
   testPaths,
@@ -96,7 +96,6 @@ module.exports = {  // eslint-disable-line no-undef
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
         'third_party}/**/*.*',
     '!build-system/eslint-rules/**/*.*',
-    '!build-system/node_modules/**/*.*',
     '!{testing,examples}/**/*.*',
     // TODO: temporary, remove when validator is up to date
     '!validator/**/*.*',

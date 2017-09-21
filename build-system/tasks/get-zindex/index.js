@@ -76,7 +76,7 @@ function onFileThrough(file, enc, cb) {
   postcss([zIndexCollector.bind(null, selectors)])
       .process(file.contents.toString(), {
         from: file.relative,
-      }).then(unusedRes => {
+      }).then(() => {
         cb(null, {name: file.relative, selectors});
       });
 }

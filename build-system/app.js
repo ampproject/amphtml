@@ -1198,4 +1198,4 @@ function generateInfo(filePath) {
       '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>';
 }
 
-module.exports = app;  // eslint-disable-line no-undef
+module.exports = app;
