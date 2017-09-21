@@ -27,10 +27,10 @@
 const atob = require('atob');
 const execOrDie = require('./exec').execOrDie;
 const getStdout = require('./exec').getStdout;
+const getStderr = require('./exec').getStderr;
 const path = require('path');
 const util = require('gulp-util');
 
-const gulp = 'node_modules/gulp/bin/gulp.js';
 const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
 
 /**
@@ -244,45 +244,45 @@ function determineBuildTargets(filePaths) {
 
 const command = {
   testBuildSystem: function() {
-    timedExecOrDie(`${gulp} ava`);
+    timedExecOrDie('gulp ava');
   },
   testDocumentLinks: function() {
-    timedExecOrDie(`${gulp} check-links`);
+    timedExecOrDie('gulp check-links');
   },
   cleanBuild: function() {
-    timedExecOrDie(`${gulp} clean`);
+    timedExecOrDie('gulp clean');
   },
   runLintCheck: function() {
-    timedExecOrDie(`${gulp} lint`);
+    timedExecOrDie('gulp lint');
   },
   runJsonCheck: function() {
-    timedExecOrDie(`${gulp} json-syntax`);
+    timedExecOrDie('gulp json-syntax');
   },
   buildCss: function() {
-    timedExecOrDie(`${gulp} css`);
+    timedExecOrDie('gulp css');
   },
   buildRuntime: function() {
-    timedExecOrDie(`${gulp} build`);
+    timedExecOrDie('gulp build');
   },
   buildRuntimeMinified: function() {
-    timedExecOrDie(`${gulp} dist --fortesting`);
+    timedExecOrDie('gulp dist --fortesting');
   },
   runDepAndTypeChecks: function() {
-    timedExecOrDie(`${gulp} dep-check`);
-    timedExecOrDie(`${gulp} check-types`);
+    timedExecOrDie('gulp dep-check');
+    timedExecOrDie('gulp check-types');
   },
   runUnitTests: function() {
     // Unit tests with Travis' default chromium
-    timedExecOrDie(`${gulp} test --unit --nobuild`);
+    timedExecOrDie('gulp test --unit --nobuild');
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
     // timedExecOrDie(
-    //     `${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+    //     `gulp test --nobuild --saucelabs --oldchrome --compiled`);
   },
   runIntegrationTests: function(compiled) {
     // Integration tests with all saucelabs browsers
-    let cmd = `${gulp} test --nobuild --saucelabs --integration`;
+    let cmd = 'gulp test --nobuild --saucelabs --integration';
     if (compiled) {
       cmd += ' --compiled';
     }
@@ -290,7 +290,7 @@ const command = {
   },
   runVisualDiffTests: function(opt_mode) {
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    let cmd = `${gulp} visual-diff`;
+    let cmd = 'gulp visual-diff';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
     } else if (opt_mode === 'master') {
@@ -299,16 +299,16 @@ const command = {
     timedExecOrDie(cmd);
   },
   verifyVisualDiffTests: function() {
-    timedExecOrDie(`${gulp} visual-diff --verify`);
+    timedExecOrDie('gulp visual-diff --verify');
   },
   runPresubmitTests: function() {
-    timedExecOrDie(`${gulp} presubmit`);
+    timedExecOrDie('gulp presubmit');
   },
   buildValidatorWebUI: function() {
-    timedExecOrDie(`${gulp} validator-webui`);
+    timedExecOrDie('gulp validator-webui');
   },
   buildValidator: function() {
-    timedExecOrDie(`${gulp} validator`);
+    timedExecOrDie('gulp validator');
   },
 };
 
@@ -372,19 +372,25 @@ function main() {
     process.exit(1);
   }
 
-  // Make sure changes to package.json also update yarn.lock.
-  if (files.indexOf('package.json') != -1 && files.indexOf('yarn.lock') == -1) {
-    console.error(fileLogPrefix, util.colors.red('ERROR:'),
-        'Updates to', util.colors.cyan('package.json'),
-        'must be accompanied by a corresponding update to',
-        util.colors.cyan('yarn.lock'));
-    console.error(fileLogPrefix, util.colors.yellow('NOTE:'),
-        'To update', util.colors.cyan('yarn.lock'), 'after changing',
-        util.colors.cyan('package.json') + ',', 'run',
-        '"' + util.colors.cyan('yarn install') + '"',
-        'and include the change to', util.colors.cyan('yarn.lock'),
-        'in your PR.');
-    process.exit(1);
+  // Make sure package.json and yarn.lock are in sync.
+  if (files.indexOf('package.json') != -1 || files.indexOf('yarn.lock') != -1) {
+    const yarnIntegrityCheck = getStderr('yarn check --integrity').trim();
+    if (yarnIntegrityCheck.includes('error')) {
+      console.error(fileLogPrefix, util.colors.red('ERROR:'),
+          'Found the following', util.colors.cyan('yarn'), 'errors:\n' +
+          util.colors.cyan(yarnIntegrityCheck));
+      console.error(fileLogPrefix, util.colors.red('ERROR:'),
+          'Updates to', util.colors.cyan('package.json'),
+          'must be accompanied by a corresponding update to',
+          util.colors.cyan('yarn.lock'));
+      console.error(fileLogPrefix, util.colors.yellow('NOTE:'),
+          'To update', util.colors.cyan('yarn.lock'), 'after changing',
+          util.colors.cyan('package.json') + ',', 'run',
+          '"' + util.colors.cyan('yarn install') + '"',
+          'and include the updated', util.colors.cyan('yarn.lock'),
+          'in your PR.');
+      process.exit(1);
+    }
   }
 
   console.log(

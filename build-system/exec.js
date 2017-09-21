@@ -59,12 +59,12 @@ exports.execOrDie = function(cmd) {
 };
 
 /**
- * Executes the provided command, returning its stdout.
+ * Executes the provided command, returning the process object.
  * This will throw an exception if something goes wrong.
  * @param {string} cmd
- * @return {!Array<string>}
+ * @return {!Object}
  */
-exports.getStdout = function(cmd) {
+function getOutput(cmd) {
   const p = spawnProcess(
       cmd,
       {
@@ -73,5 +73,23 @@ exports.getStdout = function(cmd) {
         'stdio': 'pipe',
         'encoding': 'utf-8',
       });
-  return p.stdout;
+  return p;
+}
+
+/**
+ * Executes the provided command, returning its stdout.
+ * @param {string} cmd
+ * @return {string}
+ */
+exports.getStdout = function(cmd) {
+  return getOutput(cmd).stdout;
+};
+
+/**
+ * Executes the provided command, returning its stderr.
+ * @param {string} cmd
+ * @return {string}
+ */
+exports.getStderr = function(cmd) {
+  return getOutput(cmd).stderr;
 };
