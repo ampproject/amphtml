@@ -50,6 +50,7 @@ import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {clamp} from '../../../src/utils/math';
+import {dict} from '../../../src/utils/object';
 import {
   computedStyle,
   setStyle,
@@ -187,7 +188,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     }
 
     const correlator = getCorrelator(this.win);
-    this.ampAnalyticsPageLoadMetricsConfig_ = /** @type {JsonObject}*/ ({
+    this.ampAnalyticsPageLoadMetricsConfig_ = dict({
       'requests': {
         'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
             `&c=${correlator}` +
@@ -213,11 +214,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.ampAnalyticsPageLoadMetricsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/installExtensionForDoc(
-        this.getAmpDoc(), 'amp-analytics');
+          this.getAmpDoc(), 'amp-analytics');
       dev().assert(!this.ampAnalyticsPageLoadMetricsElement_);
-      // addCsiSignalsToAmpAnalyticsConfig
       this.ampAnalyticsPageLoadMetricsElement_ =
-        insertAnalyticsElement(this.element, this.ampAnalyticsPageLoadMetricsConfig_, true);
+        insertAnalyticsElement(this.element,
+            this.ampAnalyticsPageLoadMetricsConfig_, true);
     }
 
     if (this.isResponsive_()) {
