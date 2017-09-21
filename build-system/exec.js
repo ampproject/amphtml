@@ -53,7 +53,7 @@ exports.execOrDie = function(cmd) {
   const p = spawnProcess(cmd, {'stdio': 'inherit'});
   if (p.status != 0) {
     console/*OK*/.error('\nCommand failed: ' + cmd);
-    process.exit(p.status)
+    process.exit(p.status);
   }
 };
 
