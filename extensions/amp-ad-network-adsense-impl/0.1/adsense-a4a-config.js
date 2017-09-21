@@ -37,24 +37,12 @@ import {dev} from '../../../src/log';
 /** @const {!string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 
-/**
- * Unconditioned, client-side diverted experiment across all AdSense traffic.
- * @const {!string} @visibleForTesting
- */
-export const FF_DR_EXP_NAME = 'expAdSenseFFDR';
-
-/** @const @enum{string} @visibleForTesting */
-export const INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP = {
-  CONTROL: '21060901',
-  EXPERIMENT: '21060902',
-};
-
 /** @const @enum{string} @visibleForTesting */
 export const ADSENSE_EXPERIMENT_FEATURE = {
   HOLDBACK_EXTERNAL_CONTROL: '21060732',
   HOLDBACK_EXTERNAL: '21060733',
-  DELAYED_REQUEST_EXTERNAL_CONTROL: '21060734',
-  DELAYED_REQUEST_EXTERNAL: '21060735',
+  DELAYED_REQUEST_HOLDBACK_CONTROL: '21061056',
+  DELAYED_REQUEST_HOLDBACK_EXTERNAL: '21061057',
   HOLDBACK_INTERNAL_CONTROL: '2092615',
   HOLDBACK_INTERNAL: '2092616',
   CACHE_EXTENSION_INJECTION_CONTROL: '21060953',
@@ -72,8 +60,8 @@ export const URL_EXPERIMENT_MAPPING = {
   '1': ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL_CONTROL,
   '2': ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
   // Delay Request
-  '3': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL_CONTROL,
-  '4': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL,
+  '3': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_CONTROL,
+  '4': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_EXTERNAL,
   // AMP Cache extension injection
   '5': ADSENSE_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_CONTROL,
   '6': ADSENSE_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_EXP,
@@ -85,23 +73,6 @@ export const URL_EXPERIMENT_MAPPING = {
  * @returns {boolean}
  */
 export function adsenseIsA4AEnabled(win, element) {
-  // Select Fast fetch, delayed request across all traffic as its unconditioned.
-  // Note that this will "pollute" the SERP triggered control/experiments and
-  // will have no effect on delayed fetch.
-  const ffDrExperimentInfoMap =
-      /** @type {!Object<string, !ExperimentInfo>} */ ({});
-  ffDrExperimentInfoMap[FF_DR_EXP_NAME] = {
-    isTrafficEligible: () => true,
-    branches: [
-      INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.CONTROL,
-      INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.EXPERIMENT,
-    ],
-  };
-  randomlySelectUnsetExperiments(win, ffDrExperimentInfoMap);
-  const delayedFetchExperimentId = getExperimentBranch(win, FF_DR_EXP_NAME);
-  if (delayedFetchExperimentId) {
-    addExperimentIdToElement(delayedFetchExperimentId, element);
-  }
   if (!isGoogleAdsA4AValidEnvironment(win) ||
       !element.getAttribute('data-ad-client')) {
     return false;
@@ -147,9 +118,6 @@ export function adsenseIsA4AEnabled(win, element) {
  * @return {boolean} whether fast fetch delayed request experiment is enabled.
  */
 export function fastFetchDelayedRequestEnabled(win) {
-  return !!(
-      getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) ==
-        ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL ||
-      getExperimentBranch(win, FF_DR_EXP_NAME) ==
-        INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.EXPERIMENT);
+  return getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) !=
+      ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_EXTERNAL;
 }
