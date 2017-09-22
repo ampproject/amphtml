@@ -40,7 +40,7 @@ import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {getBinaryType, isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
-import {assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl, isSecureUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {handleClick} from '../../../ads/alp/handler';
 import {
@@ -106,7 +106,8 @@ export let SizeInfoDef;
 /** @typedef {{
       minifiedCreative: string,
       customElementExtensions: !Array<string>,
-      customStylesheets: !Array<{href: string}>
+      customStylesheets: !Array<{href: string}>,
+      ampImages: Array<string>|undefined,
     }} */
 let CreativeMetaDataDef;
 
@@ -738,6 +739,9 @@ export class AmpA4A extends AMP.BaseElement {
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach(font =>
               this.preconnect.preload(font.href));
+          // Preload any AMP images.
+          (creativeMetaDataDef.ampImages || []).forEach(image =>
+              isSecureUrl(image) && this.preconnect.preload(image));
           return creativeMetaDataDef;
         })
         .catch(error => {
@@ -1475,10 +1479,13 @@ export class AmpA4A extends AMP.BaseElement {
         metaData.customStylesheets.forEach(stylesheet => {
           if (!isObject(stylesheet) || !stylesheet['href'] ||
               typeof stylesheet['href'] !== 'string' ||
-              !/^https:\/\//i.test(stylesheet['href'])) {
+              !isSecureUrl(stylesheet['href'])) {
             throw new Error(errorMsg);
           }
         });
+      }
+      if (isArray(metaDataObj['ampImages'])) {
+        metaData.ampImages = metaDataObj['ampImages'];
       }
       // TODO(keithwrightbos): OK to assume ampRuntimeUtf16CharOffsets is before
       // metadata as its in the head?
