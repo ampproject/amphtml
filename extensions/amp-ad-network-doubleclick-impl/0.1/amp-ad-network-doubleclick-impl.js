@@ -293,7 +293,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  isValidElement(opt_doc) {
+  isValidElement() {
     /**
      * isValidElement used to also check that we are in a valid A4A environment,
      * however this is not necessary as that is checked by doubleclickIsA4AEnabled,
