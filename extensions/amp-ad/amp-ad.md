@@ -318,5 +318,6 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Dable](../../ads/dable.md)
 - [Engageya](../../ads/engageya.md)
 - [Outbrain](../../ads/outbrain.md)
+- [Smi2](../../ads/smi2.md)
 - [Taboola](../../ads/taboola.md)
 - [ZergNet](../../ads/zergnet.md)
