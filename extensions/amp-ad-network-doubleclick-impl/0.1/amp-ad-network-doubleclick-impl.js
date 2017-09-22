@@ -302,6 +302,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {?string} */
     this.fluidImpressionUrl_ = null;
+
+    /**
+     * Used to style fluid ad slot, if no width is provided.
+     * @private {number}
+     */
+    this.parentWidth_ = 0;
   }
 
   /** @override */
@@ -385,16 +391,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   receiveMessageForFluid_(data) {
     const payload = tryParseJson(data['p']);
-    if (!payload || !payload['height']) {
+    let newHeight;
+    if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
       // TODO(levitzky) Add actual error handling here.
       this.forceCollapse();
       return;
     }
-    if (`${payload['height']}px` == this.element.style.height) {
+    if (newHeight == parseInt(this.element.style.height, 10)) {
       return;
     }
-    this.attemptChangeHeight(payload['height'])
-        .then(() => this.onFluidResize())
+    this.attemptChangeHeight(newHeight)
+        .then(() => this.onFluidResize_())
         .catch(() => {
           // TODO(levitzky) Add more error handling here
           this.forceCollapse();
@@ -648,22 +655,38 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             });
     return frameLoadPromise.then(result => {
       if (this.isFluid_) {
-        if (!this.element.style.width) {
-          setStyles(this.element, {
-            width: computedStyle(this.win,
-                dev().assertElement(this.element.parentElement)).width,
-          });
-        }
+        this.measureAndLayoutForFluid_();
         // If this is a Fluid slot, we must send an initial message to
         // safeframe.
-        this.connectFluidMessagingChannel();
+        this.connectFluidMessagingChannel_();
       }
       return result;
     });
   }
 
-  /** @visibleForTesting */
-  connectFluidMessagingChannel() {
+  /**
+   * Performs the necessary measuring and layout steps needed to render fluid
+   * creatives. This includes computing the width of the ad slot's parent
+   * element as well as styling the ad slot's width to match, assuming no width
+   * for the slot has been provided.
+   */
+  measureAndLayoutForFluid_() {
+    if (!this.element.style.width) {
+      this.getVsync().run({
+        measure: () => {
+          this.parentWidth_ = computedStyle(this.win,
+              dev().assertElement(this.element.parentElement)).width;
+        },
+        mutate: () => setStyles(this.element, {width: this.parentWidth_}),
+      });
+    }
+  }
+
+  /**
+   * Postmessages an initial message to the fluid creative.
+   * @private
+   */
+  connectFluidMessagingChannel_() {
     dev().assert(this.iframe.contentWindow,
         'Frame contentWindow unavailable.');
     this.iframe.contentWindow./*OK*/postMessage(
@@ -674,9 +697,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Fires a delayed impression and notifies the Fluid creative that its
    * container has been resized.
-   * @visibleForTesting
+   * @private
    */
-  onFluidResize() {
+  onFluidResize_() {
     if (this.fluidImpressionUrl_) {
       this.fireDelayedImpressions(this.fluidImpressionUrl_, false);
       this.fluidImpressionUrl_ = null;

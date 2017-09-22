@@ -144,21 +144,10 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     });
   });
 
-  it('should setup postMessage listeners', () => {
-    impl.buildCallback();
-    impl.connectFluidMessagingChannel = () => {};
-    const connectFluidMessagingChannelSpy =
-        sandbox.spy(impl, 'connectFluidMessagingChannel');
-    impl.sentinel = 'sentinel';
-    return impl.layoutCallback().then(() => {
-      expect(connectFluidMessagingChannelSpy).to.be.calledOnce;
-    });
-  });
-
   it('should send initial postMessage', () => {
     impl.buildCallback();
     const connectFluidMessagingChannelSpy =
-        sandbox.spy(impl, 'connectFluidMessagingChannel');
+        sandbox.spy(impl, 'connectFluidMessagingChannel_');
     return utf8Encode('foo').then(creative => {
       impl.sentinel = 'sentinel';
       impl.adPromise_ = Promise.resolve();
@@ -184,10 +173,17 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   });
 
   it('should fire delayed impression ping', () => {
+    impl.getVsync = () => {
+      return {
+        run: runArgs => {
+          runArgs.measure();
+          runArgs.mutate();
+        },
+      };
+    };
     impl.buildCallback();
     const rawCreative = `
         <script>
-        debugger;
         parent./*OK*/postMessage(
             JSON.stringify(/** @type {!JsonObject} */ ({
               s: 'creative_geometry_update',
@@ -195,7 +191,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
               p: '{"width":"1px","height":"1px"}',
             })), '*');
         </script>`;
-    const onFluidResizeSpy = sandbox.spy(impl, 'onFluidResize');
+    const onFluidResizeSpy = sandbox.spy(impl, 'onFluidResize_');
     impl.attemptChangeHeight = () => Promise.resolve();
     return utf8Encode(rawCreative).then(creative => {
       impl.sentinel = 'sentinel';
