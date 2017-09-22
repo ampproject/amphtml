@@ -107,7 +107,7 @@ export let SizeInfoDef;
       minifiedCreative: string,
       customElementExtensions: !Array<string>,
       customStylesheets: !Array<{href: string}>,
-      ampImages: Array<string>|undefined,
+      ampImages: (Array<string>|undefined),
     }} */
 let CreativeMetaDataDef;
 
