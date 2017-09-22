@@ -127,15 +127,18 @@ describes.sandboxed('shadow-embed', {}, () => {
             }
 
             // Test scenarios where Shadow Css is not supported
-            it('Should add an id and class for CSS encapsulation to the shadow root', () => {
+            it('Should add an id and class for CSS \
+              encapsulation to the shadow root', () => {
               setDisableShadowCssForTesting(true);
               const shadowRoot = createShadowRoot(hostElement);
               expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
-              // Browserify does not support arrow functions with params. Just use old school for
-              const shadowRootClassListArray = toArray(shadowRoot.host.classList);
+              // Browserify does not support arrow functions with params.
+              // Just use old school for
+              const shadowRootClassListArray =
+                toArray(shadowRoot.host.classList);
               let foundShadowCssClass = false;
-              for(let i = 0; i < shadowRootClassListArray.length; i++) {
-                if(shadowRootClassListArray[i].match(/i-amphtml-sd-\d+/)) {
+              for (let i = 0; i < shadowRootClassListArray.length; i++) {
+                if (shadowRootClassListArray[i].match(/i-amphtml-sd-\d+/)) {
                   foundShadowCssClass = true;
                   break;
                 }
