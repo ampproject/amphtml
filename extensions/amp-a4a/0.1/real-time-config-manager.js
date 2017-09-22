@@ -2,6 +2,7 @@ import {Services} from '../../../src/services';
 import {tryParseJson} from '../../../src/json';
 import {isSecureUrl} from '../../../src/url';
 import {RTC_VENDORS} from './callout-vendors.js';
+import {UrlReplacements} from '../../../src/service/url-replacements-impl';
 
 
 /** Timeout in millis */
@@ -9,12 +10,14 @@ const DEFAULT_RTC_TIMEOUT = 1000;
 
 
 export class RealTimeConfigManager {
-  constructor(element, win) {
+  constructor(element, win, ampDoc) {
     this.element = element;
+    this.ampDoc = ampDoc;
     this.win = win;
     this.rtcConfig = null;
     this.calloutUrls = [];
     this.rtcResponses = null;
+    this.urlReplacements_ = new Services.urlReplacementsForDoc(this.ampDoc);
   }
 
   executeRealTimeConfig(customMacros) {
@@ -24,7 +27,6 @@ export class RealTimeConfigManager {
     const rtcTimeout = this.rtcConfig.timeoutMillis || DEFAULT_RTC_TIMEOUT;
     this.inflateVendorUrls();
     this.inflatePublisherUrls(customMacros);
-    this.validateUrls();
     const rtcPromiseArray = [];
     let url;
     this.calloutUrls.forEach(url => {
@@ -33,7 +35,7 @@ export class RealTimeConfigManager {
           rtcTimeout,
           Services.xhrFor(this.win).fetchJson(
               url, {credentials: 'include'}).then(res => {
-                // can use timerFor
+                // TODO: use timerFor  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 let rtcTime = Date.now() - rtcStartTime;
                 // Non-200 status codes are forbidden for RTC.
                 // TODO: Add to fetchResponse the ability to
@@ -53,6 +55,7 @@ export class RealTimeConfigManager {
               })
       ));
     });
+    // TODO: Catch errors thrown by promises in promise array
     return this.rtcResponses = Promise.all(rtcPromiseArray);
   }
 
@@ -61,44 +64,32 @@ export class RealTimeConfigManager {
     return this.rtcConfig && (this.rtcConfig.vendors || this.rtcConfig.urls);
   }
 
-  /**
-   * Delete any urls from this.calloutUrls that are not valid.
-   */
-  validateUrls() {
-    this.calloutUrls.filter(url => isSecureUrl);
-  }
-
   inflateVendorUrls() {
-
-    // Switch to use url-replacement-service
-    let baseUrl;
+    let url;
     if (this.rtcConfig.vendors) {
       for (vendor in this.rtcConfig.vendors) {
-        baseUrl = RTC_VENDORS[vendor];
-        if (!baseUrl) {
+        url = RTC_VENDORS[vendor];
+        if (!url) {
           console.log(`Vendor ${vendor} invalid`);
           continue;
         }
-        // If a publisher includes a macro that does not actually exist in the vendor URL,
-        // we are currently silently ignoring it.
-        for (macro in this.rtcConfig.vendors[vendor]) {
-          baseUrl = baseUrl.replace(macro, this.rtcConfig.vendors[vendor][macro]);
-        }
-        this.calloutUrls.push(baseUrl);
+        this.maybeInflateAndAddUrl(url, this.rtcConfig.vendors[vendor]);
       }
     }
   }
 
   inflatePublisherUrls(macros) {
-    let baseUrl;
     if (this.rtcConfig.urls) {
-      for (i in this.rtcConfig.urls) {
-        baseUrl = this.rtcConfig.urls[i];
-        for (macro in macros) {
-          baseUrl = baseUrl.replace(macro, macros[macro]);
-        }
-        this.calloutUrls.push(baseUrl);
-      }
+      this.rtcConfig.urls.forEach(url => {
+        this.maybeInflateAndAddUrl(url, macros);
+      });
+    }
+  }
+
+  maybeInflateAndAddUrl(url, macros) {
+    url = this.urlReplacements_.expandSync(url, macros);
+    if (isSecureUrl(url)) {
+      this.calloutUrls.push(url);
     }
   }
 }
