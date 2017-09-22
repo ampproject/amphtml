@@ -311,6 +311,8 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.releaseType_ = getBinaryTypeNumericalCode(getBinaryType(this.win)) ||
         '-1';
+
+    this.realTimeConfigManager_ = null;
   }
 
   /** @override */
@@ -1013,9 +1015,10 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
+   * @param {Array=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
-  getAdUrl() {
+  getAdUrl(opt_rtcResponsesPromise) {
     throw new Error('getAdUrl not implemented!');
   }
 
@@ -1549,7 +1552,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.realTimeConfigManager_ = new AMP.RealTimeConfigManager(
           this.element, this.win, this.getAmpDoc());
       if (this.realTimeConfigManager_.validateRtcConfig()) {
-        this.realTimeConfigManager_.executeRealTimeConfig(
+        return this.realTimeConfigManager_.executeRealTimeConfig(
             this.getCustomRealTimeConfigMacros_());
       };
     }

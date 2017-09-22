@@ -73,7 +73,7 @@ import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
-import {isSecureUrl, parseUrl} from '../../../src/url';
+import {isSecureUrl} from '../../../src/url';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
   isExperimentOn,
@@ -443,8 +443,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         `${this.initialSize_.width}x${this.initialSize_.height}`);
   }
 
-  /** @override */
-  getAdUrl(rtcResponsesPromise) {
+  /**
+   * @param {Array} opt_rtcResponsesPromise
+   * @override
+   */
+  getAdUrl(opt_rtcResponsesPromise) {
     if (this.iframe && !this.isRefreshing) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
       return '';
@@ -460,7 +463,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const pageLevelParametersPromise = getPageLevelParameters_(
         this.win, this.getAmpDoc(), startTime);
     return Promise.all(
-        [pageLevelParametersPromise, rtcResponsesPromise]).then(values => {
+        [pageLevelParametersPromise, opt_rtcResponsesPromise]).then(values => {
           const pageLevelParameters = values[0];
           const rtcParams = this.mergeRtcResponses(values[1]);
           return googleAdUrl(
@@ -470,14 +473,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   mergeRtcResponses(rtcResponses) {
-    let maxTime = 0;
     let rtcParams = {};
-    let rtcSuccess;
+    const artc = [];
+    const ati = [];
+    const ard = [];
     rtcResponses.forEach(rtcResponse => {
-      maxTime = (rtcResponse['rtcTime'] > maxTime) ?
-          rtcResponse['rtcTime'] : maxTime;
+      artc.push(rtcResponse['rtcTime']);
+      ati.push(!rtcResponse['error'] ? RTC_ATI_ENUM.RTC_SUCCESS :
+               RTC_ATI_ENUM.RTC_FAILURE);
+      ard.push(rtcResponse['hostname']);
       rtcParams = Object.assign(rtcParams, rtcResponse['rtcResponse']);
-      rtcSuccess = rtcSuccess || !!rtcResponse['rtcResponse'];
     });
     ['targeting', 'categoryExclusions'].forEach(key => {
       if (!!rtcParams[key]) {
@@ -487,9 +492,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             rtcParams[key];
       }
     });
-    return {
-      'artc': maxTime,
-      'ati': !!rtcSuccess ? RTC_ATI_ENUM.RTC_SUCCESS : RTC_ATI_ENUM.RTC_FAILURE,
+    return {'artc': artc.join(), 'ati': ati.join(), 'ard': ard.join()
     };
   }
 

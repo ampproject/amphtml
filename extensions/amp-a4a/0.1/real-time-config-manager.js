@@ -1,6 +1,6 @@
 import {Services} from '../../../src/services';
 import {tryParseJson} from '../../../src/json';
-import {isSecureUrl} from '../../../src/url';
+import {isSecureUrl, parseUrl} from '../../../src/url';
 import {RTC_VENDORS} from './callout-vendors.js';
 
 /** Timeout in millis */
@@ -13,7 +13,7 @@ export class RealTimeConfigManager {
     this.win = win;
     this.rtcConfig = null;
     this.calloutUrls = [];
-    this.urlReplacements_ = new Services.urlReplacementsForDoc(this.ampDoc);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(this.ampDoc);
   }
 
   executeRealTimeConfig(customMacros) {
@@ -34,23 +34,27 @@ export class RealTimeConfigManager {
           Services.xhrFor(this.win).fetchJson(
               url, {credentials: 'include'}).then(res => {
                 const rtcTime = Date.now() - rtcStartTime;
+                const hostname = parseUrl(url).hostname;
                 // Non-200 status codes are forbidden for RTC.
                 // TODO: Add to fetchResponse the ability to
                 // check for redirects as well.
                 if (res.status != 200) {
-                  return {rtcTime, error: 'Non-200 Status'};
+                  return {rtcTime, error: 'Non-200 Status', hostname};
                 }
                 return res.text().then(text => {
                   // An empty text response is fine, just means
                   // we have nothing to merge.
                   if (!text) {
-                    return {rtcTime};
+                    return {rtcTime, hostname};
                   }
                   const rtcResponse = tryParseJson(text);
-                  return {rtcResponse, rtcTime};
+                  return {rtcResponse, rtcTime, hostname};
                 });
-              })
-      ));
+              }).catch(err => {
+                const hostname = parseUrl(url).hostname;
+                const rtcTime = Date.now() - rtcStartTime;
+                return {error: err, rtcTime, hostname};
+              })));
     });
     // TODO: Catch errors thrown by promises in promise array
     return Promise.all(rtcPromiseArray);
@@ -59,33 +63,37 @@ export class RealTimeConfigManager {
   validateRtcConfig() {
     this.rtcConfig = tryParseJson(
         this.element.getAttribute('prerequest-callouts'));
-    return this.rtcConfig && (this.rtcConfig.vendors || this.rtcConfig.urls);
+    return this.rtcConfig && (this.rtcConfig['vendors'] || this.rtcConfig['urls']);
   }
 
   inflateVendorUrls() {
     let url;
-    if (this.rtcConfig.vendors) {
+    if (this.rtcConfig['vendors']) {
       let vendor;
-      for (vendor in this.rtcConfig.vendors) {
+      for (vendor in this.rtcConfig['vendors']) {
         url = RTC_VENDORS[vendor];
         if (!url) {
           console.log(`Vendor ${vendor} invalid`);
           continue;
         }
-        this.maybeInflateAndAddUrl(url, this.rtcConfig.vendors[vendor]);
+        this.maybeInflateAndAddUrl(url, this.rtcConfig['vendors'][vendor]);
       }
     }
   }
 
   inflatePublisherUrls(macros) {
-    if (this.rtcConfig.urls) {
-      this.rtcConfig.urls.forEach(url => {
+    if (this.rtcConfig['urls']) {
+      this.rtcConfig['urls'].forEach(url => {
         this.maybeInflateAndAddUrl(url, macros);
       });
     }
   }
 
   maybeInflateAndAddUrl(url, macros) {
+    // TODO: Is there a better place to put this check?
+    if (this.calloutUrls.length == 5) {
+      return;
+    }
     url = this.urlReplacements_.expandSync(url, macros);
     if (isSecureUrl(url)) {
       this.calloutUrls.push(url);
