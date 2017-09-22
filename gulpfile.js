@@ -217,7 +217,7 @@ declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* latestVersion */ '1.0', {hasCss: true});
 
 // MarfeelK EXTENSIONS
-declareExtension('amp-analytics-multi-page-tracker', '0.1', true);
+declareExtension('amp-analytics-multi-page-tracker', '0.1', false);
 declareExtension('amp-shadow-doc-loader', '0.1', true);
 declareExtension('amp-fetch', '0.1', false);
 
