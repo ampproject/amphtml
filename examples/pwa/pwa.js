@@ -223,7 +223,7 @@ class AmpViewer {
       } else if (this.win.document.querySelector('script[src*=webcomponents]')) {
         this.win.addEventListener('WebComponentsReady', resolve);
       } else {
-        reject();
+        reject('ShadowDOM is not supported, and an appropriate webcomponents polyfill was not found.');
       }
     });
 
