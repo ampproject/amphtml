@@ -71,7 +71,7 @@ import {isObject} from '../../../src/types';
 import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {setStyles, computedStyle} from '../../../src/style';
+import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
@@ -302,17 +302,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {?string} */
     this.fluidImpressionUrl_ = null;
-
-    /**
-     * Used to style fluid ad slot, if no width is provided.
-     * @private {number}
-     */
-    this.parentWidth_ = 0;
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout) || layout == Layout.FLUID;
+    return layout == Layout.FLUID || isLayoutSizeDefined(layout);
   }
 
   /** @override */
@@ -638,7 +632,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   layoutCallback() {
     if (this.isFluid_) {
       registerListenerForFluid(this);
-      this.measureAndLayoutForFluid_();
     }
     const frameLoadPromise = super.layoutCallback();
     if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
@@ -654,23 +647,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               continuousTimeMin: 1,
             });
     return frameLoadPromise;
-  }
-
-  /**
-   * Performs the necessary measuring and layout steps needed to render fluid
-   * creatives. This includes computing the width of the ad slot's parent
-   * element as well as styling the ad slot's width to match, assuming no width
-   * for the slot has been provided.
-   */
-  measureAndLayoutForFluid_() {
-    if (!this.element.style.width) {
-      this.getVsync().run({
-        // NOTE: We set the width of the container to 100%, which may effect
-        // publisher CSS. This is intentional, and in parity with how GPT fluid
-        // works.
-        mutate: () => setStyles(this.element, {width: '100%'}),
-      });
-    }
   }
 
   /**
@@ -1330,12 +1306,9 @@ let listenerForFluidRegistered = false;
  * @param {!AmpAdNetworkDoubleclickImpl} instance
  */
 function registerListenerForFluid(instance) {
-  if (!fluidListeners[instance.sentinel]) {
-    fluidListeners[instance.sentinel] = {
-      instance,
-      connectionEstablished: false,
-    };
-  }
+  fluidListeners[instance.sentinel] = fluidListeners[instance.sentinel] || {
+    instance, connectionEstablished: false,
+  };
   if (!listenerForFluidRegistered) {
     instance.win.addEventListener('message', event => {
       const data = tryParseJson(getData(event));
