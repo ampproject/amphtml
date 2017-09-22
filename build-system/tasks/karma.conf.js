@@ -23,7 +23,6 @@ module.exports = {
     'fixture',
     'browserify',
     'mocha',
-    'chai-as-promised',
     'sinon-chai',
     'chai',
   ],
@@ -204,7 +203,6 @@ module.exports = {
   plugins: [
     'karma-browserify',
     'karma-chai',
-    'karma-chai-as-promised',
     'karma-chrome-launcher',
     'karma-coverage',
     'karma-edge-launcher',
