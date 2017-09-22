@@ -686,6 +686,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Postmessages an initial message to the fluid creative.
+   * @visibleForTesting
    */
   connectFluidMessagingChannel() {
     dev().assert(this.iframe.contentWindow,
