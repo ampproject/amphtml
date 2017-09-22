@@ -86,7 +86,7 @@ describes.realWin('amp-install-serviceworker', {
   it('should be ok without service worker.', () => {
     const install = doc.createElement('amp-install-serviceworker');
     const implementation = install.implementation_;
-    expect(implementation).to.be.defined;
+    expect(implementation).to.not.be.undefined;
     install.setAttribute('src', 'https://example.com/sw.js');
     implementation.win = {
       location: {
@@ -102,7 +102,7 @@ describes.realWin('amp-install-serviceworker', {
   it('should do nothing with non-matching origins', () => {
     const install = doc.createElement('amp-install-serviceworker');
     const implementation = install.implementation_;
-    expect(implementation).to.be.defined;
+    expect(implementation).to.not.be.undefined;
     install.setAttribute('src', 'https://other-origin.com/sw.js');
     const p = new Promise(() => {});
     implementation.win = {
@@ -124,7 +124,7 @@ describes.realWin('amp-install-serviceworker', {
   it('should do nothing on proxy without iframe URL', () => {
     const install = doc.createElement('amp-install-serviceworker');
     const implementation = install.implementation_;
-    expect(implementation).to.be.defined;
+    expect(implementation).to.not.be.undefined;
     install.setAttribute('src', 'https://cdn.ampproject.org/sw.js');
     let calledSrc;
     const p = new Promise(() => {});

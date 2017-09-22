@@ -40,6 +40,24 @@ import * as describes from '../testing/describes';
 import {installYieldIt} from '../testing/yield';
 import stringify from 'json-stable-stringify';
 
+// Required in order to use chai-as-promised with ES6 code.
+// See https://github.com/domenic/chai-as-promised/issues/133
+// and https://github.com/ampproject/amphtml/issues/9707.
+const chai = require('chai');
+const sinon = require('sinon');
+const sinonChai = require('sinon-chai');
+const chaiAsPromised = require('chai-as-promised');
+const {
+  expect,
+  assert,
+} = chai;
+chai.use(chaiAsPromised);
+chai.use(sinonChai);
+
+global.chai = chai;
+global.expect = expect;
+global.assert = assert;
+
 // All exposed describes.
 global.describes = describes;
 
@@ -415,5 +433,3 @@ chai.Assertion.addMethod('jsonEqual', function(compare) {
       b
   );
 });
-
-sinon = null;

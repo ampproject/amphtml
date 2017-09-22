@@ -72,6 +72,10 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
     ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
   });
 
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   it('should delegate to viewer with url', () => {
     const stub = sandbox.stub(viewer, 'sendMessageAwaitResponse',
         () => Promise.resolve('#success=yes'));

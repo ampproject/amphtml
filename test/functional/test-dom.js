@@ -443,7 +443,7 @@ describes.sandboxed('DOM', {}, env => {
 
     const bSpy = sandbox.spy();
     dom.iterateCursor(fragment.querySelectorAll('b'), bSpy);
-    expect(bSpy).to.be.notCalled;
+    expect(bSpy).to.have.not.been.called;
   });
 
   it('iterateCursor should allow null elements in a list', () => {

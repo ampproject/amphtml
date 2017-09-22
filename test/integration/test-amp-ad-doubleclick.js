@@ -83,10 +83,10 @@ describe.configure().enableIe().retryOnSaucelabs().run('Rendering of' +
         expect(context.referrer).to.contain('http://localhost:' + location.port);
       }
       expect(context.pageViewId).to.be.greaterThan(0);
-      expect(context.initialLayoutRect).to.be.defined;
-      expect(context.initialLayoutRect.top).to.be.defined;
-      expect(context.initialIntersection).to.be.defined;
-      expect(context.initialIntersection.rootBounds).to.be.defined;
+      expect(context.initialLayoutRect).to.not.be.undefined;
+      expect(context.initialLayoutRect.top).to.not.be.undefined;
+      expect(context.initialIntersection).to.not.be.undefined;
+      expect(context.initialIntersection.rootBounds).to.not.be.undefined;
       expect(context.data.tagForChildDirectedTreatment).to.equal(0);
       expect(context.data.categoryExclusions).to.be.jsonEqual(['health']);
       expect(context.data.targeting).to.be.jsonEqual(
