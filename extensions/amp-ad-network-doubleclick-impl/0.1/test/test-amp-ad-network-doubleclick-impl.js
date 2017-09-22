@@ -151,7 +151,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       meta.setAttribute('name', 'amp-3p-iframe-src');
       doc.head.appendChild(meta);
       impl = new AmpAdNetworkDoubleclickImpl(element);
-      expect(impl.isValidElement(doc)).to.be.false;
+      expect(impl.isValidElement()).to.be.false;
     });
   });
 
