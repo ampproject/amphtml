@@ -866,11 +866,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return ['https://partner.googleadservices.com',
       'https://tpc.googlesyndication.com'];
   }
-
-  /** @override */
-  getCustomRealTimeConfigMacros_() {
-    return {SLOT_ID: '1234'};
-  }
 }
 
 

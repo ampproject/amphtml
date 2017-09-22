@@ -1546,7 +1546,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   tryExecuteRealTimeConfig_() {
     if (!!AMP.RealTimeConfigManager) {
-      this.realTimeConfigManager_ = new AMP.RealTimeConfigManager(this.element, this.win, this.getAmpDoc())
+      this.realTimeConfigManager_ = new AMP.RealTimeConfigManager(
+          this.element, this.win, this.getAmpDoc())
       if (this.realTimeConfigManager_.validateRtcConfig()) {
         this.realTimeConfigManager_.executeRealTimeConfig(
             this.getCustomRealTimeConfigMacros_());

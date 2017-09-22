@@ -16,7 +16,6 @@ export class RealTimeConfigManager {
     this.win = win;
     this.rtcConfig = null;
     this.calloutUrls = [];
-    this.rtcResponses = null;
     this.urlReplacements_ = new Services.urlReplacementsForDoc(this.ampDoc);
   }
 
@@ -27,15 +26,16 @@ export class RealTimeConfigManager {
     const rtcTimeout = this.rtcConfig.timeoutMillis || DEFAULT_RTC_TIMEOUT;
     this.inflateVendorUrls();
     this.inflatePublisherUrls(customMacros);
+    if (this.calloutUrls.length == 0) {
+      return Promise.resolve();
+    }
     const rtcPromiseArray = [];
-    let url;
     this.calloutUrls.forEach(url => {
       let rtcStartTime = Date.now();
       rtcPromiseArray.push(Services.timerFor(this.win).timeoutPromise(
           rtcTimeout,
           Services.xhrFor(this.win).fetchJson(
               url, {credentials: 'include'}).then(res => {
-                // TODO: use timerFor  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 let rtcTime = Date.now() - rtcStartTime;
                 // Non-200 status codes are forbidden for RTC.
                 // TODO: Add to fetchResponse the ability to
@@ -56,7 +56,7 @@ export class RealTimeConfigManager {
       ));
     });
     // TODO: Catch errors thrown by promises in promise array
-    return this.rtcResponses = Promise.all(rtcPromiseArray);
+    return Promise.all(rtcPromiseArray);
   }
 
   validateRtcConfig() {
