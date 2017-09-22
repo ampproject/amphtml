@@ -26,16 +26,18 @@ import {
   scopeShadowCss,
   setShadowDomStreamingSupportedForTesting,
 } from '../../src/shadow-embed';
+import {toArray} from '../../src/types';
 import {installStylesForDoc} from '../../src/style-installer';
 import {
   setShadowDomSupportedVersionForTesting,
+  setDisableShadowCssForTesting,
   ShadowDomVersion,
 } from '../../src/web-components';
-
 
 describes.sandboxed('shadow-embed', {}, () => {
   afterEach(() => {
     setShadowDomSupportedVersionForTesting(undefined);
+    setDisableShadowCssForTesting(undefined);
   });
 
   [ShadowDomVersion.NONE, ShadowDomVersion.V0, ShadowDomVersion.V1]
@@ -123,6 +125,34 @@ describes.sandboxed('shadow-embed', {}, () => {
                 doc.body.removeChild(hostElement);
               });
             }
+
+            // Test scenarios where Shadow Css is not supported
+            it('Should add an id and class for CSS encapsulation to the shadow root', () => {
+              setDisableShadowCssForTesting(true);
+              const shadowRoot = createShadowRoot(hostElement);
+              expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
+              // Browserify does not support arrow functions with params. Just use old school for
+              const shadowRootClassListArray = toArray(shadowRoot.host.classList);
+              let foundShadowCssClass = false;
+              for(let i = 0; i < shadowRootClassListArray.length; i++) {
+                if(shadowRootClassListArray[i].match(/i-amphtml-sd-\d+/)) {
+                  foundShadowCssClass = true;
+                  break;
+                }
+              }
+              expect(foundShadowCssClass).to.be.ok;
+            });
+
+            it('Should transform CSS for the shadow root', () => {
+              setDisableShadowCssForTesting(true);
+              const shadowRoot = createShadowRoot(hostElement);
+              const ampdoc = new AmpDocShadow(
+                  window, 'https://a.org/', shadowRoot);
+              const style = installStylesForDoc(ampdoc, 'body {}', null, true);
+              expect(shadowRoot.contains(style)).to.be.true;
+              const css = style.textContent.replace(/\s/g, '');
+              expect(css).to.match(/amp-body/);
+            });
           });
 
           describe('stylesheets', () => {

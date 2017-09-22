@@ -218,7 +218,7 @@ class AmpViewer {
       Element.prototype.createShadowRoot
     );
     const shadowDomReadyPromise = new Promise((resolve, reject) => {
-      if(isShadowDomSupported) {
+      if (isShadowDomSupported) {
         resolve();
       } else if (this.win.document.querySelector('script[src*=webcomponents]')) {
         this.win.addEventListener('WebComponentsReady', resolve);
