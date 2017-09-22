@@ -631,7 +631,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   layoutCallback() {
     if (this.isFluid_) {
-      registerListenerForFluid(this);
+      this.registerListenerForFluid_();
     }
     const frameLoadPromise = super.layoutCallback();
     if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
@@ -647,6 +647,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               continuousTimeMin: 1,
             });
     return frameLoadPromise;
+  }
+
+  /** @override  */
+  unlayoutCallback() {
+    super.unlayoutCallback();
+    this.maybeRemoveListenersForFluid();
   }
 
   /**
@@ -1161,6 +1167,49 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     return attributes;
   }
+
+  /** @private  */
+  registerListenerForFluid_() {
+    fluidListeners[this.sentinel] = fluidListeners[this.sentinel] || {
+      instance: this,
+      connectionEstablished: false,
+    };
+    if (Object.keys(fluidListeners).length == 1) {
+      this.win.addEventListener('message', this.fluidMessageListener_, false);
+    }
+  }
+
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  fluidMessageListener_(event) {
+    const data = tryParseJson(getData(event));
+    if (event.origin != SAFEFRAME_ORIGIN || !data || !data['sentinel']) {
+      return;
+    }
+    const listener = fluidListeners[data['sentinel']];
+    dev().assert(listener, 'postMessage listener does not exist');
+    if (data['s'] != 'creative_geometry_update') {
+      if (!listener.connectionEstablished) {
+        listener.instance.connectFluidMessagingChannel();
+        listener.connectionEstablished = true;
+      }
+      return;
+    }
+    listener.instance.receiveMessageForFluid(data);
+  }
+
+  /** @visibleForTesting */
+  maybeRemoveListenersForFluid() {
+    if (!this.isFluid_) {
+      return;
+    }
+    delete fluidListeners[this.sentinel];
+    if (!Object.keys(fluidListeners).length) {
+      this.win.removeEventListener('message', this.fluidMessageListener_);
+    }
+  }
 }
 
 
@@ -1296,46 +1345,10 @@ function getFirstInstanceValue_(instances, extractFn) {
 }
 
 /**
+ * Used to manage messages for different fluid ad slots.
+ *
  * Maps a sentinel value to an object consisting of the impl to which that
  * sentinel value belongs and the corresponding message handler for that impl.
- * @type{!Object<string, !Object>} */
-const fluidListeners = {};
-let listenerForFluidRegistered = false;
-
-/**
- * @param {!AmpAdNetworkDoubleclickImpl} instance
+ * @type{!Object<string, !Object>}
  */
-function registerListenerForFluid(instance) {
-  fluidListeners[instance.sentinel] = fluidListeners[instance.sentinel] || {
-    instance, connectionEstablished: false,
-  };
-  if (!listenerForFluidRegistered) {
-    instance.win.addEventListener('message', event => {
-      const data = tryParseJson(getData(event));
-      if (event.origin != SAFEFRAME_ORIGIN || !data || !data['sentinel']) {
-        return;
-      }
-      const listener = fluidListeners[data['sentinel']];
-      dev().assert(listener, 'postMessage listener does not exist');
-      if (data['s'] != 'creative_geometry_update') {
-        if (!listener.connectionEstablished) {
-          listener.instance.connectFluidMessagingChannel();
-          listener.connectionEstablished = true;
-        }
-        return;
-      }
-      listener.instance.receiveMessageForFluid(data);
-    }, false);
-    listenerForFluidRegistered = true;
-  }
-}
-
-/** @visibleForTesting */
-export function unregisterListenersForFluid() {
-  Object.keys(fluidListeners).forEach(key => {
-    fluidListeners[key].instance.win.removeEventListener(
-        'message', fluidListeners[key].handler);
-    delete fluidListeners[key];
-  });
-  listenerForFluidRegistered = false;
-}
+const fluidListeners = {};

@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  AmpAdNetworkDoubleclickImpl,
-  unregisterListenersForFluid,
-} from '../amp-ad-network-doubleclick-impl';
+import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {utf8Encode} from '../../../../src/utils/bytes';
 // Need the following side-effect import because in actual production code,
@@ -89,7 +86,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   afterEach(() => {
     sandbox.restore();
-    unregisterListenersForFluid();
+    impl.maybeRemoveListenersForFluid();
     impl = null;
   });
 
