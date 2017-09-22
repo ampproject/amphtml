@@ -166,6 +166,7 @@ import {sklik} from '../ads/sklik';
 import {slimcutmedia} from '../ads/slimcutmedia';
 import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
+import {smi2} from '../ads/smi2';
 import {sortable} from '../ads/sortable';
 import {sogouad} from '../ads/sogouad';
 import {sovrn} from '../ads/sovrn';
@@ -207,6 +208,7 @@ const AMP_EMBED_ALLOWED = {
   outbrain: true,
   plista: true,
   smartclip: true,
+  smi2: true,
   taboola: true,
   zergnet: true,
 };
@@ -334,6 +336,7 @@ register('sklik', sklik);
 register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
 register('smartclip', smartclip);
+register('smi2', smi2);
 register('sortable', sortable);
 register('sogouad', sogouad);
 register('sovrn', sovrn);
