@@ -22,7 +22,7 @@ import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {closestBySelector, removeElement} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent, getData} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {endsWith} from '../../../src/string';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
@@ -127,7 +127,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     /**
      * The origin of URL at `src` attr, if available. Otherwise, null.
-     * @private {string}
+     * @private {?string}
      */
     this.targetOrigin_ = null;
   }
@@ -611,7 +611,8 @@ export class AmpIframe extends AMP.BaseElement {
           }
           return;
         }
-        const event = createCustomEvent(this.win, 'amp-iframe:message', e.data);
+        const event =
+            createCustomEvent(this.win, 'amp-iframe:message', getData(e));
         const actionService = Services.actionServiceForDoc(this.getAmpDoc());
         actionService.trigger(this.element, 'message', event, ActionTrust.HIGH);
       };
