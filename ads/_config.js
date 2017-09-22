@@ -640,6 +640,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  smi2: {
+    renderStartImplemented: true,
+  },
+
   sogouad: {
     prefetch: 'https://theta.sogoucdn.com/wap/js/aw.js',
     renderStartImplemented: true,
