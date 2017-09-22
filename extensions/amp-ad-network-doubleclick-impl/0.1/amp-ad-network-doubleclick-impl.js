@@ -240,7 +240,7 @@ const fluidListeners = {};
  * @param {!Event} event
  * @private
  */
-function fluidMessageListener(event) {
+function fluidMessageListener_(event) {
   const data = tryParseJson(getData(event));
   if (event.origin != SAFEFRAME_ORIGIN || !data || !data['sentinel']) {
     return;
@@ -254,7 +254,7 @@ function fluidMessageListener(event) {
     }
     return;
   }
-  listener.instance.receiveMessageForFluid(data);
+  listener.instance.receiveMessageForFluid_(data);
 }
 
 
@@ -337,7 +337,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FLUID || isLayoutSizeDefined(layout);
+    this.isFluid_ = layout == Layout.FLUID;
+    return this.isFluid_ || isLayoutSizeDefined(layout);
   }
 
   /** @override */
@@ -357,7 +358,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.isFluid_ = this.element.getLayout() == Layout.FLUID;
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
       addExperimentIdToElement(verifierEid, this.element);
@@ -412,16 +412,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Handles Fluid-related messages dispatched from SafeFrame.
    * @param {!JsonObject} data
+   * @private
    */
-  receiveMessageForFluid(data) {
+  receiveMessageForFluid_(data) {
     const payload = tryParseJson(data['p']);
     let newHeight;
     if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
       // TODO(levitzky) Add actual error handling here.
       this.forceCollapse();
-      return;
-    }
-    if (newHeight == parseInt(this.element.style.height, 10)) {
       return;
     }
     this.attemptChangeHeight(newHeight)
@@ -683,7 +681,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override  */
   unlayoutCallback() {
     super.unlayoutCallback();
-    this.maybeRemoveListenersForFluid();
+    this.maybeRemoveListenerForFluid();
   }
 
   /**
@@ -1206,18 +1204,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       connectionEstablished: false,
     };
     if (Object.keys(fluidListeners).length == 1) {
-      this.win.addEventListener('message', fluidMessageListener, false);
+      this.win.addEventListener('message', fluidMessageListener_, false);
     }
   }
 
   /** @visibleForTesting */
-  maybeRemoveListenersForFluid() {
+  maybeRemoveListenerForFluid() {
     if (!this.isFluid_) {
       return;
     }
     delete fluidListeners[this.sentinel];
     if (!Object.keys(fluidListeners).length) {
-      this.win.removeEventListener('message', fluidMessageListener);
+      this.win.removeEventListener('message', fluidMessageListener_);
     }
   }
 }

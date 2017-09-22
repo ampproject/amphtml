@@ -80,18 +80,19 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
     const getLayout = () => 'fluid';
     impl.getLayout = getLayout;
+    impl.isLayoutSupported('fluid');
     multiSizeImpl.getLayout = getLayout;
+    multiSizeImpl.isLayoutSupported('fluid');
     impl.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
   });
 
   afterEach(() => {
     sandbox.restore();
-    impl.maybeRemoveListenersForFluid();
+    impl.maybeRemoveListenerForFluid();
     impl = null;
   });
 
   it('should be fluid enabled', () => {
-    impl.buildCallback();
     expect(impl.isFluid_).to.be.true;
   });
 
@@ -123,7 +124,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   });
 
   it('should contain sz=320x50 in ad request by default', () => {
-    impl.buildCallback();
     impl.initiateAdRequest();
     return impl.adPromise_.then(() => {
       expect(impl.adUrl_).to.be.ok;
@@ -132,7 +132,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   });
 
   it('should contain mulitple sizes in ad request', () => {
-    multiSizeImpl.buildCallback();
     multiSizeImpl.initiateAdRequest();
     return multiSizeImpl.adPromise_.then(() => {
       expect(multiSizeImpl.adUrl_).to.be.ok;
