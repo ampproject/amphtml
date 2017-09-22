@@ -93,7 +93,7 @@ Authorization is an endpoint provided by the publisher and called by the AMP Run
 
 ### Pingback Endpoint
 
-Pingback is an endpoint provided by the publisher and called by the AMP Runtime or Google AMP Cache. It is a credentialed CORS POST endpoint. AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. This endpoint is also called after the Reader has successfully completed the Login Flow. On of the main goals of the Pingback is for the Publisher to update metering information.
+Pingback is an endpoint provided by the publisher and called by the AMP Runtime or Google AMP Cache. It is a credentialed CORS POST endpoint. AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. This endpoint is also called after the Reader has successfully completed the Login Flow. One of the main goals of the Pingback is for the Publisher to update metering information.
 
 Pingback optional. It can be disabled by setting `noPingback` configuration property to `true`.
 
