@@ -144,20 +144,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     });
   });
 
-  it('should send initial postMessage', () => {
-    impl.buildCallback();
-    const connectFluidMessagingChannelSpy =
-        sandbox.spy(impl, 'connectFluidMessagingChannel_');
-    return utf8Encode('foo').then(creative => {
-      impl.sentinel = 'sentinel';
-      impl.adPromise_ = Promise.resolve();
-      impl.creativeBody_ = creative;
-      return impl.layoutCallback().then(() => {
-        expect(connectFluidMessagingChannelSpy).to.be.calledOnce;
-      });
-    });
-  });
-
   it('should have an iframe child with initial size 0x0', () => {
     impl.buildCallback();
     return utf8Encode('foo').then(creative => {
@@ -176,7 +162,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.getVsync = () => {
       return {
         run: runArgs => {
-          runArgs.measure();
           runArgs.mutate();
         },
       };
@@ -186,11 +171,18 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         <script>
         parent./*OK*/postMessage(
             JSON.stringify(/** @type {!JsonObject} */ ({
+              s: 'init_done',
+              sentinel: 'sentinel',
+            })), '*');
+        parent./*OK*/postMessage(
+            JSON.stringify(/** @type {!JsonObject} */ ({
               s: 'creative_geometry_update',
               sentinel: 'sentinel',
               p: '{"width":"1px","height":"1px"}',
             })), '*');
         </script>`;
+    const connectFluidMessagingChannelSpy =
+        sandbox.spy(impl, 'connectFluidMessagingChannel');
     const onFluidResizeSpy = sandbox.spy(impl, 'onFluidResize_');
     impl.attemptChangeHeight = () => Promise.resolve();
     return utf8Encode(rawCreative).then(creative => {
@@ -199,6 +191,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
       return impl.adPromise_.then(() => {
         impl.creativeBody_ = creative;
         return impl.layoutCallback().then(() => {
+          expect(connectFluidMessagingChannelSpy).to.be.calledOnce;
           expect(onFluidResizeSpy).to.be.calledOnce;
         });
       });

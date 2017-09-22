@@ -387,9 +387,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Handles Fluid-related messages dispatched from SafeFrame.
    * @param {!JsonObject} data
-   * @private
    */
-  receiveMessageForFluid_(data) {
+  receiveMessageForFluid(data) {
     const payload = tryParseJson(data['p']);
     let newHeight;
     if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
@@ -638,7 +637,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   layoutCallback() {
     if (this.isFluid_) {
-      registerListenerForFluid(this, this.receiveMessageForFluid_.bind(this));
+      registerListenerForFluid(this);
+      this.measureAndLayoutForFluid_();
     }
     const frameLoadPromise = super.layoutCallback();
     if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
@@ -653,15 +653,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               visiblePercentageMin: 50,
               continuousTimeMin: 1,
             });
-    return frameLoadPromise.then(result => {
-      if (this.isFluid_) {
-        this.measureAndLayoutForFluid_();
-        // If this is a Fluid slot, we must send an initial message to
-        // safeframe.
-        this.connectFluidMessagingChannel_();
-      }
-      return result;
-    });
+    return frameLoadPromise;
   }
 
   /**
@@ -673,20 +665,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   measureAndLayoutForFluid_() {
     if (!this.element.style.width) {
       this.getVsync().run({
-        measure: () => {
-          this.parentWidth_ = computedStyle(this.win,
-              dev().assertElement(this.element.parentElement)).width;
-        },
-        mutate: () => setStyles(this.element, {width: this.parentWidth_}),
+        // NOTE: We set the width of the container to 100%, which may effect
+        // publisher CSS. This is intentional, and in parity with how GPT fluid
+        // works.
+        mutate: () => setStyles(this.element, {width: '100%'}),
       });
     }
   }
 
   /**
    * Postmessages an initial message to the fluid creative.
-   * @private
    */
-  connectFluidMessagingChannel_() {
+  connectFluidMessagingChannel() {
     dev().assert(this.iframe.contentWindow,
         'Frame contentWindow unavailable.');
     this.iframe.contentWindow./*OK*/postMessage(
@@ -1338,22 +1328,30 @@ let listenerForFluidRegistered = false;
 
 /**
  * @param {!AmpAdNetworkDoubleclickImpl} instance
- * @param {!function(!JsonObject)} handler
  */
-function registerListenerForFluid(instance, handler) {
+function registerListenerForFluid(instance) {
   if (!fluidListeners[instance.sentinel]) {
-    fluidListeners[instance.sentinel] = {instance, handler};
+    fluidListeners[instance.sentinel] = {
+      instance,
+      connectionEstablished: false,
+    };
   }
   if (!listenerForFluidRegistered) {
     instance.win.addEventListener('message', event => {
       const data = tryParseJson(getData(event));
-      if (event.origin != SAFEFRAME_ORIGIN || !data ||
-          data['s'] != 'creative_geometry_update') {
+      if (event.origin != SAFEFRAME_ORIGIN || !data || !data['sentinel']) {
         return;
       }
-      dev().assert(fluidListeners[data['sentinel']],
-          'postMessage listener does not exist');
-      fluidListeners[data['sentinel']].handler(data);
+      const listener = fluidListeners[data['sentinel']];
+      dev().assert(listener, 'postMessage listener does not exist');
+      if (data['s'] != 'creative_geometry_update') {
+        if (!listener.connectionEstablished) {
+          listener.instance.connectFluidMessagingChannel();
+          listener.connectionEstablished = true;
+        }
+        return;
+      }
+      listener.instance.receiveMessageForFluid(data);
     }, false);
     listenerForFluidRegistered = true;
   }
