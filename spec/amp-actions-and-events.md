@@ -127,7 +127,7 @@ event.valueAsNumber</pre>
   <!-- input-debounced -->
   <tr>
     <td><code>input-debounced</code></td>
-    <td>Fired when the value of the element is changed. This is similar to the standard <code>input</code> event, but it only fires when 300ms have passed after the value of the input has stopped changing.</td>
+    <td>Fired when the value of the element is changed. This is similar to the standard <code>change</code> event, but it only fires when 300ms have passed after the value of the input has stopped changing.</td>
     <td>Elements that fire <code>input</code> event.</td>
     <td>Same as <code>change</code> event data.</td>
   </tr>
