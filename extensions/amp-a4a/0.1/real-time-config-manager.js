@@ -2,12 +2,9 @@ import {Services} from '../../../src/services';
 import {tryParseJson} from '../../../src/json';
 import {isSecureUrl} from '../../../src/url';
 import {RTC_VENDORS} from './callout-vendors.js';
-import {UrlReplacements} from '../../../src/service/url-replacements-impl';
-
 
 /** Timeout in millis */
 const DEFAULT_RTC_TIMEOUT = 1000;
-
 
 export class RealTimeConfigManager {
   constructor(element, win, ampDoc) {
@@ -31,17 +28,17 @@ export class RealTimeConfigManager {
     }
     const rtcPromiseArray = [];
     this.calloutUrls.forEach(url => {
-      let rtcStartTime = Date.now();
+      const rtcStartTime = Date.now();
       rtcPromiseArray.push(Services.timerFor(this.win).timeoutPromise(
           rtcTimeout,
           Services.xhrFor(this.win).fetchJson(
               url, {credentials: 'include'}).then(res => {
-                let rtcTime = Date.now() - rtcStartTime;
+                const rtcTime = Date.now() - rtcStartTime;
                 // Non-200 status codes are forbidden for RTC.
                 // TODO: Add to fetchResponse the ability to
                 // check for redirects as well.
                 if (res.status != 200) {
-                  return {rtcTime, error: "Non-200 Status"};
+                  return {rtcTime, error: 'Non-200 Status'};
                 }
                 return res.text().then(text => {
                   // An empty text response is fine, just means
@@ -60,13 +57,15 @@ export class RealTimeConfigManager {
   }
 
   validateRtcConfig() {
-    this.rtcConfig = tryParseJson(this.element.getAttribute('prerequest-callouts'));
+    this.rtcConfig = tryParseJson(
+        this.element.getAttribute('prerequest-callouts'));
     return this.rtcConfig && (this.rtcConfig.vendors || this.rtcConfig.urls);
   }
 
   inflateVendorUrls() {
     let url;
     if (this.rtcConfig.vendors) {
+      let vendor;
       for (vendor in this.rtcConfig.vendors) {
         url = RTC_VENDORS[vendor];
         if (!url) {

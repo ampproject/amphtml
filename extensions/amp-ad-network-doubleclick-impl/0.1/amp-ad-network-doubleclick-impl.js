@@ -459,25 +459,26 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     const pageLevelParametersPromise = getPageLevelParameters_(
         this.win, this.getAmpDoc(), startTime);
-    return Promise.all([pageLevelParametersPromise, rtcResponsesPromise]).then(values => {
-      pageLevelParameters = values[0];
-      const rtcParams = this.mergeRtcResponses(values[1]);
-      return googleAdUrl(
-          this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
-              this.getBlockParameters_(), rtcParams, pageLevelParameters));
-    });
+    return Promise.all(
+        [pageLevelParametersPromise, rtcResponsesPromise]).then(values => {
+          const pageLevelParameters = values[0];
+          const rtcParams = this.mergeRtcResponses(values[1]);
+          return googleAdUrl(
+              this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
+                  this.getBlockParameters_(), rtcParams, pageLevelParameters));
+        });
   }
 
   mergeRtcResponses(rtcResponses) {
     let maxTime = 0;
     let rtcParams = {};
     let rtcSuccess;
-    for (index in rtcResponses) {
-      maxTime = (rtcResponses[index]['rtcTime'] > maxTime) ?
-          rtcResponses[index]['rtcTime'] : maxTime;
-      rtcParams = Object.assign(rtcParams, rtcResponses[index]['rtcResponse']);
-      rtcSuccess = rtcSuccess || !!rtcResponses[index]['rtcResponse'];
-    };
+    rtcResponses.forEach(rtcResponse => {
+      maxTime = (rtcResponse['rtcTime'] > maxTime) ?
+          rtcResponse['rtcTime'] : maxTime;
+      rtcParams = Object.assign(rtcParams, rtcResponse['rtcResponse']);
+      rtcSuccess = rtcSuccess || !!rtcResponse['rtcResponse'];
+    });
     ['targeting', 'categoryExclusions'].forEach(key => {
       if (!!rtcParams[key]) {
         this.jsonTargeting_[key] =
@@ -488,7 +489,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
     return {
       'artc': maxTime,
-      'ati': !!rtcSuccess ? RTC_ATI_ENUM.RTC_SUCCESS : RTC_ATI_ENUM.RTC_FAILURE
+      'ati': !!rtcSuccess ? RTC_ATI_ENUM.RTC_SUCCESS : RTC_ATI_ENUM.RTC_FAILURE,
     };
   }
 

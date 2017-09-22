@@ -41,7 +41,7 @@ import {utf8Decode} from '../../../src/utils/bytes';
 import {getBinaryType, isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
-import {parseJson, tryParseJson} from '../../../src/json';
+import {parseJson} from '../../../src/json';
 import {handleClick} from '../../../ads/alp/handler';
 import {
   getDefaultBootstrapBaseUrl,
@@ -575,9 +575,8 @@ export class AmpA4A extends AMP.BaseElement {
           // meeting the definition as opposed to waiting on the promise.
           if (this.delayAdRequestEnabled() &&
               !this.getResource().renderOutsideViewport()) {
-            return this.getResource().whenWithinRenderOutsideViewport().then(() => {
-              return this.tryExecuteRealTimeConfig_();
-            });
+            return this.getResource().whenWithinRenderOutsideViewport().then(
+                () => this.tryExecuteRealTimeConfig_);
           } else {
             return this.tryExecuteRealTimeConfig_();
           }
@@ -586,7 +585,8 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(rtcResponsesPromise => {
           checkStillCurrent();
-          return /** @type {!Promise<?string>} */(this.getAdUrl(rtcResponsesPromise));
+          return /** @type {!Promise<?string>} */(
+              this.getAdUrl(rtcResponsesPromise));
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */
@@ -1547,7 +1547,7 @@ export class AmpA4A extends AMP.BaseElement {
   tryExecuteRealTimeConfig_() {
     if (!!AMP.RealTimeConfigManager) {
       this.realTimeConfigManager_ = new AMP.RealTimeConfigManager(
-          this.element, this.win, this.getAmpDoc())
+          this.element, this.win, this.getAmpDoc());
       if (this.realTimeConfigManager_.validateRtcConfig()) {
         this.realTimeConfigManager_.executeRealTimeConfig(
             this.getCustomRealTimeConfigMacros_());
