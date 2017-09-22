@@ -227,6 +227,37 @@ const BLOCK_SRA_COMBINERS_ = [
   },
 ];
 
+/**
+ * Used to manage messages for different fluid ad slots.
+ *
+ * Maps a sentinel value to an object consisting of the impl to which that
+ * sentinel value belongs and the corresponding message handler for that impl.
+ * @type{!Object<string, !{instance: !AmpAdNetworkDoubleclickImpl, connectionEstablished: boolean}>}
+ */
+const fluidListeners = {};
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+function fluidMessageListener(event) {
+  const data = tryParseJson(getData(event));
+  if (event.origin != SAFEFRAME_ORIGIN || !data || !data['sentinel']) {
+    return;
+  }
+  const listener = fluidListeners[data['sentinel']];
+  dev().assert(listener, 'postMessage listener does not exist');
+  if (data['s'] != 'creative_geometry_update') {
+    if (!listener.connectionEstablished) {
+      listener.instance.connectFluidMessagingChannel();
+      listener.connectionEstablished = true;
+    }
+    return;
+  }
+  listener.instance.receiveMessageForFluid(data);
+}
+
+
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
@@ -1175,29 +1206,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       connectionEstablished: false,
     };
     if (Object.keys(fluidListeners).length == 1) {
-      this.win.addEventListener('message', this.fluidMessageListener_, false);
+      this.win.addEventListener('message', fluidMessageListener, false);
     }
-  }
-
-  /**
-   * @param {!Event} event
-   * @private
-   */
-  fluidMessageListener_(event) {
-    const data = tryParseJson(getData(event));
-    if (event.origin != SAFEFRAME_ORIGIN || !data || !data['sentinel']) {
-      return;
-    }
-    const listener = fluidListeners[data['sentinel']];
-    dev().assert(listener, 'postMessage listener does not exist');
-    if (data['s'] != 'creative_geometry_update') {
-      if (!listener.connectionEstablished) {
-        listener.instance.connectFluidMessagingChannel();
-        listener.connectionEstablished = true;
-      }
-      return;
-    }
-    listener.instance.receiveMessageForFluid(data);
   }
 
   /** @visibleForTesting */
@@ -1207,7 +1217,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     delete fluidListeners[this.sentinel];
     if (!Object.keys(fluidListeners).length) {
-      this.win.removeEventListener('message', this.fluidMessageListener_);
+      this.win.removeEventListener('message', fluidMessageListener);
     }
   }
 }
@@ -1343,12 +1353,3 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
-
-/**
- * Used to manage messages for different fluid ad slots.
- *
- * Maps a sentinel value to an object consisting of the impl to which that
- * sentinel value belongs and the corresponding message handler for that impl.
- * @type{!Object<string, !Object>}
- */
-const fluidListeners = {};
