@@ -38,7 +38,7 @@ describe('BindExpression', () => {
       expect(evaluate('3 * 4')).to.equal(12);
       expect(evaluate('4 / 5')).to.equal(0.8);
       expect(evaluate('5 % 4')).to.equal(1);
-      expect(evaluate('1 / 0')).to.be.Infinity;
+      expect(evaluate('1 / 0')).to.equal(Infinity);
       expect(evaluate('0 / 0')).to.be.NaN;
     });
 

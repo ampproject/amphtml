@@ -52,7 +52,7 @@ describe('XHR', function() {
   ];
 
   function setupMockXhr() {
-    const mockXhr = sandbox.useFakeXMLHttpRequest().xhr;
+    const mockXhr = sandbox.useFakeXMLHttpRequest();
     requests = [];
     mockXhr.onCreate = function(xhr) {
       requests.push(xhr);
@@ -300,7 +300,7 @@ describe('XHR', function() {
           mockXhr.status = 500;
           return assertSuccess(createResponseInstance('', mockXhr))
               .catch(error => {
-                expect(error.response).to.be.defined;
+                expect(error.response).to.exist;
                 expect(error.response.status).to.equal(500);
               });
         });
@@ -450,7 +450,7 @@ describe('XHR', function() {
           'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '<html></html>');
         return promise.catch(e => {
-          expect(e.retriable).to.be.defined;
+          expect(e.retriable).to.exist;
           expect(e.retriable === true).to.be.true;
         });
       });
@@ -466,7 +466,7 @@ describe('XHR', function() {
           'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '<html></html>');
         return promise.catch(e => {
-          expect(e.retriable).to.be.defined;
+          expect(e.retriable).to.exist;
           expect(e.retriable === true).to.be.true;
         });
       });

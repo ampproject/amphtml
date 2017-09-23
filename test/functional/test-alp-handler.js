@@ -297,7 +297,7 @@ describe('alp-handler', () => {
 
   it('should warmup statically', () => {
     warmupStatic(win);
-    expect(image).to.be.defined;
+    expect(image).to.exist;
     expect(image.src).to.equal('https://cdn.ampproject.org/preconnect.gif');
     expect(win.document.head.appendChild).to.be.calledOnce;
     const link = win.document.head.appendChild.lastCall.args[0];

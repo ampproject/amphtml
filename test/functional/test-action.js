@@ -854,7 +854,7 @@ describe('Action interceptor', () => {
 
     const handler = sandbox.spy();
     action.installActionHandler(target, handler);
-    expect(getActionHandler()).to.not.be.undefined;
+    expect(getActionHandler()).to.exist;
     expect(handler).to.have.not.been.called;
 
     clock.tick(10);

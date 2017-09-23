@@ -99,7 +99,7 @@ describes.realWin('amp-ima-video', {
 
     expect(imaVideoObj.getPropertiesForTesting().playbackStarted).to.be.true;
     expect(imaVideoObj.getPropertiesForTesting().uiTicker)
-        .to.not.be.undefined;
+        .to.exist;
     expect(removeEventListenerSpy).to.be.calledWith(
         imaVideoObj.getPropertiesForTesting().interactEvent);
     expect(bigPlayDivMock.style.display).to.eql('none');

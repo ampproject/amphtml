@@ -70,6 +70,10 @@ const a4aTestPaths = [
   'ads/google/a4a/test/*.js',
 ];
 
+const chaiAsPromised = [
+  'test/chai-as-promised/chai-as-promised.js',
+];
+
 const unitTestPaths = commonTestPaths.concat([
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
@@ -88,6 +92,7 @@ module.exports = {
   basicTestPaths,
   testPaths,
   a4aTestPaths,
+  chaiAsPromised,
   unitTestPaths,
   integrationTestPaths,
   lintGlobs: [

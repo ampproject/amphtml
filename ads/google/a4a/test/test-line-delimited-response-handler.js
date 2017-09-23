@@ -123,6 +123,7 @@ describe('#line-delimited-response-handler', () => {
 
   describe('streaming', () => {
     let readStub;
+    let sandbox;
 
     function setup() {
       const responseString = generateResponseFormat();

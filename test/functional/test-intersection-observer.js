@@ -40,7 +40,7 @@ describe('getIntersectionChangeEntry', () => {
     const layoutBox = layoutRectLtwh(50, 50, 150, 200);
     const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
-    expect(change).to.be.object;
+    expect(change).to.be.an('object');
     expect(change.time).to.equal(Date.now());
 
     expect(change.rootBounds).to.deep.equal({
@@ -81,7 +81,7 @@ describe('getIntersectionChangeEntry', () => {
     const layoutBox = layoutRectLtwh(50, 200, 150, 200);
     const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
-    expect(change).to.be.object;
+    expect(change).to.be.an('object');
     expect(change.time).to.equal(Date.now());
 
     expect(change.rootBounds).to.deep.equal({
@@ -159,7 +159,7 @@ describe('getIntersectionChangeEntry', () => {
     const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
         rootBounds);
 
-    expect(change).to.be.object;
+    expect(change).to.be.an('object');
     expect(change.time).to.equal(Date.now());
 
     expect(change.rootBounds).to.deep.equal({
@@ -202,7 +202,7 @@ describe('getIntersectionChangeEntry', () => {
     const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
         rootBounds);
 
-    expect(change).to.be.object;
+    expect(change).to.be.an('object');
     expect(change.time).to.equal(Date.now());
 
     expect(change.rootBounds).to.deep.equal({
@@ -245,7 +245,7 @@ describe('getIntersectionChangeEntry', () => {
     const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
         rootBounds);
 
-    expect(change).to.be.object;
+    expect(change).to.be.an('object');
     expect(change.time).to.equal(Date.now());
 
     expect(change.rootBounds).to.deep.equal({

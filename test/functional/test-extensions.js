@@ -939,7 +939,7 @@ describes.sandboxed('Extensions', {}, () => {
       }, parentWin.AMP);
       return promise.then(() => {
         expect(fooSpy).calledOnce;
-        expect(barSpy).notCalled;
+        expect(barSpy).to.not.be.called;
       });
     });
 

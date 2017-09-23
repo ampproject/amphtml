@@ -95,8 +95,8 @@ describes.realWin('amp-audio', {
       expect(audio.tagName).to.equal('AUDIO');
       expect(a.getAttribute('width')).to.be.equal('503');
       expect(a.getAttribute('height')).to.be.equal('53');
-      expect(audio.offsetWidth).to.be.greaterThan('1');
-      expect(audio.offsetHeight).to.be.greaterThan('1');
+      expect(audio.offsetWidth).to.be.greaterThan(1);
+      expect(audio.offsetHeight).to.be.greaterThan(1);
       expect(audio.hasAttribute('controls')).to.be.true;
       expect(audio.hasAttribute('autoplay')).to.be.true;
       expect(audio.hasAttribute('muted')).to.be.true;
