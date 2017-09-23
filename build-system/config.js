@@ -70,11 +70,15 @@ const a4aTestPaths = [
   'ads/google/a4a/test/*.js',
 ];
 
-const unitTestPaths = commonTestPaths.concat([
+const chaiAsPromised = [
+  'test/chai-as-promised/chai-as-promised.js',
+];
+
+const unitTestPaths = chaiAsPromised.concat(commonTestPaths.concat([
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/*.js',
-]);
+]));
 
 const integrationTestPaths = commonTestPaths.concat([
   'test/integration/**/*.js',
