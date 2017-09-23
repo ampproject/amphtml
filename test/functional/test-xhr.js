@@ -300,7 +300,7 @@ describe('XHR', function() {
           mockXhr.status = 500;
           return assertSuccess(createResponseInstance('', mockXhr))
               .catch(error => {
-                expect(error.response).to.not.be.undefined;
+                expect(error.response).to.exist;
                 expect(error.response.status).to.equal(500);
               });
         });
@@ -450,7 +450,7 @@ describe('XHR', function() {
           'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '<html></html>');
         return promise.catch(e => {
-          expect(e.retriable).to.not.be.undefined;
+          expect(e.retriable).to.exist;
           expect(e.retriable === true).to.be.true;
         });
       });
@@ -466,7 +466,7 @@ describe('XHR', function() {
           'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '<html></html>');
         return promise.catch(e => {
-          expect(e.retriable).to.not.be.undefined;
+          expect(e.retriable).to.exist;
           expect(e.retriable === true).to.be.true;
         });
       });

@@ -953,7 +953,7 @@ describes.realWin('DOM', {
       const element = doc.createElement('amp-img');
       doc.body.appendChild(element);
       return dom.whenUpgradedToCustomElement(element).then(element => {
-        expect(element.whenBuilt).to.not.be.undefined;
+        expect(element.whenBuilt).to.exist;
       });
     });
 
@@ -967,7 +967,7 @@ describes.realWin('DOM', {
         });
       }, 100);
       return dom.whenUpgradedToCustomElement(element).then(element => {
-        expect(element.whenBuilt).to.not.be.undefined;
+        expect(element.whenBuilt).to.exist;
       });
     });
   });

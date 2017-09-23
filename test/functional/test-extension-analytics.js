@@ -169,7 +169,7 @@ describes.realWin('extension-analytics', {
         whenSignal: () => {return Promise.resolve();},
       };};
       const reporter = builder.track('test', 'fake.com').build();
-      expect(reporter.trigger).to.not.be.undefined;
+      expect(reporter.trigger).to.exist;
     });
   });
 

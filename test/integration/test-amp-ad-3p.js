@@ -42,7 +42,7 @@ function createIframeWithApis(fixture) {
       }
       iframe.onload = () => {
         expect(iframe.contentWindow.document.getElementById('c'))
-            .to.not.be.undefined;
+            .to.exist;
         resolve(iframe.contentWindow.context);
       };
     });
@@ -84,8 +84,8 @@ function createIframeWithApis(fixture) {
         .equal(layoutRectLtwh(0, platform.isIos() ? 1001 : 1000, 300, 250));
     expect(initialIntersection.intersectionRatio).to.equal(1);
     expect(initialIntersection.time).to.be.a('number');
-    expect(context.isMaster).to.not.be.undefined;
-    expect(context.computeInMasterFrame).to.not.be.undefined;
+    expect(context.isMaster).to.exist;
+    expect(context.computeInMasterFrame).to.exist;
     expect(context.location).to.deep.equal({
       hash: '',
       host: 'localhost:9876',

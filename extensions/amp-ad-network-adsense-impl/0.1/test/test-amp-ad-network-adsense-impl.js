@@ -603,7 +603,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       });
 
       const callback = impl.buildCallback();
-      expect(callback).to.not.be.undefined;
+      expect(callback).to.exist;
 
       // The returned promise fails for some reason.
       return callback.then(() => {
