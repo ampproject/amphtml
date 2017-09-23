@@ -35,7 +35,7 @@ describe('impression', () => {
     viewer = Services.viewerForDoc(window.document);
     sandbox.stub(viewer, 'getParam');
     xhr = Services.xhrFor(window);
-    expect(xhr.fetchJson).to.be.defined;
+    expect(xhr.fetchJson).to.exist;
     const stub = sandbox.stub(xhr, 'fetchJson');
     stub.returns(Promise.resolve({
       json() {
