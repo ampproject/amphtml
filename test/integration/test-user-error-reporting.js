@@ -49,7 +49,7 @@ describe.configure().run('user-error', function() {
                referrerpolicy="fail-referrer">`,
   }, env => {
     it('should ping correct host with amp-pixel user().assert err', () => {
-      return expect(withdrawRequest(env.win, randomId)).to.eventually.be.ok;
+      return expect(withdrawRequest(env.win, randomId)).to.be.ok;
     });
   });
 
@@ -80,7 +80,7 @@ describe.configure().run('user-error', function() {
     </script></amp-analytics>`,
   }, env => {
     it('should ping correct host with amp-img user().error err', () => {
-      return expect(withdrawRequest(env.win, randomId)).to.eventually.be.ok;
+      return expect(withdrawRequest(env.win, randomId)).to.be.ok;
     });
   });
 });

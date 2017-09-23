@@ -132,7 +132,7 @@ describe('chunk', () => {
   }, env => {
 
     beforeEach(() => {
-      expect(env.win.services.viewer).to.not.be.undefined;
+      expect(env.win.services.viewer).to.exist;
       env.win.document.hidden = false;
     });
 

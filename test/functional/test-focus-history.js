@@ -61,8 +61,8 @@ describe('FocusHistory', () => {
   });
 
   it('should subscribe to focus events', () => {
-    expect(eventListeners['focus']).to.not.be.undefined;
-    expect(windowEventListeners['blur']).to.not.be.undefined;
+    expect(eventListeners['focus']).to.exist;
+    expect(windowEventListeners['blur']).to.exist;
     expect(focusHistory.getLast()).to.be.null;
   });
 

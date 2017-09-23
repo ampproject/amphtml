@@ -22,8 +22,8 @@ import {
 import {toggleExperiment} from '../../../../src/experiments';
 import {AmpDoc} from '../../../../src/service/ampdoc-impl';
 
-
-describes.realWin('amp-fresh-manager', {amp: true}, env => {
+// TODO(dvoytenko): Enable after #11401 is fixed
+describes.realWin.skip('amp-fresh-manager', {amp: true}, env => {
   let win, doc;
   let requests;
   let container;
@@ -31,7 +31,7 @@ describes.realWin('amp-fresh-manager', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    const mockXhr = sandbox.useFakeXMLHttpRequest().xhr;
+    const mockXhr = sandbox.useFakeXMLHttpRequest();
     requests = [];
     toggleExperiment(win, 'amp-fresh', true);
     installAmpFreshManagerForDoc(doc);

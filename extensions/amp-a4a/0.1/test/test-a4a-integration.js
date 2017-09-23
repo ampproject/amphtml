@@ -160,7 +160,7 @@ describe('integration test: a4a', () => {
       expect(error.message).to.contain.string('Testing network error');
       expect(error.message).to.contain.string('AMP-A4A-');
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
-      expect(forceCollapseStub).to.be.notCalled;
+      expect(forceCollapseStub).to.not.be.called;
     });
   });
 

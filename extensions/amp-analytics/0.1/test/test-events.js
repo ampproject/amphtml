@@ -94,7 +94,7 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(tracker.clickObservable_.handlers_[0]).to.equal(selUnlisten);
       expect(selListenerStub).to.be.calledOnce;
       const args = selListenerStub.args[0];
-      expect(args[0]).to.be.function;
+      expect(args[0]).to.be.a('function');
       expect(args[1]).to.equal(win.document.body);  // Parent element of amp-analytics.
       expect(args[2]).to.equal('*');
       expect(args[3]).to.equal('scope');  // Default selection method.
@@ -937,7 +937,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .once();
       const res = tracker.add(analyticsElement,
           'visible', config, eventResolver);
-      expect(res).to.be.function;
+      expect(res).to.be.a('function');
       const unlistenReady = getAmpElementSpy.returnValues[0];
 
       return unlistenReady.then(() => {

@@ -176,10 +176,10 @@ describes.realWin('form-validators', {amp: true}, env => {
       sandbox.stub(form, 'dispatchEvent');
 
       validator.onBlur({target: form.elements[0]});
-      expect(form.dispatchEvent).notCalled;
+      expect(form.dispatchEvent).to.not.be.called;
 
       validator.onInput({target: form.elements[0]});
-      expect(form.dispatchEvent).notCalled;
+      expect(form.dispatchEvent).to.not.be.called;
 
       validator.report();
       expect(form.dispatchEvent).calledOnce;
@@ -238,10 +238,10 @@ describes.realWin('form-validators', {amp: true}, env => {
       sandbox.stub(form, 'dispatchEvent');
 
       validator.onBlur({target: form.elements[0]});
-      expect(form.dispatchEvent).notCalled;
+      expect(form.dispatchEvent).to.not.be.called;
 
       validator.onInput({target: form.elements[0]});
-      expect(form.dispatchEvent).notCalled;
+      expect(form.dispatchEvent).to.not.be.called;
 
       validator.report();
       expect(form.dispatchEvent).calledOnce;
@@ -317,10 +317,10 @@ describes.realWin('form-validators', {amp: true}, env => {
       sandbox.stub(form, 'dispatchEvent');
 
       validator.onBlur({target: form.elements[0]});
-      expect(form.dispatchEvent).notCalled;
+      expect(form.dispatchEvent).to.not.be.called;
 
       validator.onInput({target: form.elements[0]});
-      expect(form.dispatchEvent).notCalled;
+      expect(form.dispatchEvent).to.not.be.called;
 
       validator.report();
       expect(form.dispatchEvent).calledOnce;
@@ -403,10 +403,10 @@ describes.realWin('form-validators', {amp: true}, env => {
       sandbox.stub(form, 'dispatchEvent');
 
       validator.onBlur({target: form.elements[0]});
-      expect(form.dispatchEvent).notCalled;
+      expect(form.dispatchEvent).to.not.be.called;
 
       validator.onInput({target: form.elements[0]});
-      expect(form.dispatchEvent).notCalled;
+      expect(form.dispatchEvent).to.not.be.called;
 
       validator.report();
       expect(form.dispatchEvent).calledOnce;
@@ -465,7 +465,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       sandbox.stub(validator, 'fireValidityEventIfNecessary');
 
       validator.report();
-      expect(validator.fireValidityEventIfNecessary).notCalled;
+      expect(validator.fireValidityEventIfNecessary).to.not.be.called;
 
       validator.onBlur({target: form.elements[0]});
       expect(validator.fireValidityEventIfNecessary).calledOnce;

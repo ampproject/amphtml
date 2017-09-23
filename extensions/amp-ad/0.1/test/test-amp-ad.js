@@ -124,7 +124,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.reject(new Error('I failed!')));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.be.instanceof(AmpAd3PImpl);
@@ -160,7 +160,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.resolve(zortConstructor));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.equal(zortInstance);
@@ -187,7 +187,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.resolve(zortConstructor));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.equal(zortInstance);
@@ -212,7 +212,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.resolve(zortConstructor));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.equal(zortInstance);
@@ -232,7 +232,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.resolve(zortConstructor));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.equal(zortInstance);

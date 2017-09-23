@@ -237,6 +237,10 @@ describe('Google A4A utils', () => {
       sandbox = sinon.sandbox.create();
     });
 
+    afterEach(() => {
+      sandbox.restore();
+    });
+
     it('should set ad position', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);

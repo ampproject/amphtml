@@ -302,7 +302,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(inOb.observeEntries_).to.have.length(1);
 
     // AMP API is polyfilled.
-    expect(rootElement.getLayoutBox).to.be.function;
+    expect(rootElement.getLayoutBox).to.be.a('function');
     expect(rootElement.getOwner()).to.be.null;
 
     // Starts as invisible.
