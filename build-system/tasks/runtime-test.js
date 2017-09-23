@@ -190,14 +190,18 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
     c.mochaReporter.output = 'full';
   }
 
+  // Exclude chai-as-promised from sauce labs runs.
+  // See test/chai-as-promised/chai-as-promised.js for why this is necessary.
+  c.files = argv.saucelabs ? [] : config.chaiAsPromised;
+
   if (argv.files) {
-    c.files = [].concat(config.commonTestPaths, argv.files);
+    c.files = c.files.concat(config.commonTestPaths, argv.files);
     c.reporters = argv.saucelabs ? ['dots', 'saucelabs', 'mocha'] : ['mocha'];
     c.mochaReporter.output = argv.saucelabs ? 'minimal' : 'full';
   } else if (argv.integration) {
-    c.files = config.integrationTestPaths;
+    c.files = c.files.concat(config.integrationTestPaths);
   } else if (argv.unit) {
-    c.files = config.unitTestPaths;
+    c.files = c.files.concat(config.unitTestPaths);
   } else if (argv.randomize || argv.glob || argv.a4a) {
     const testPaths = argv.a4a ? config.a4aTestPaths : config.basicTestPaths;
 
@@ -220,9 +224,9 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
     }
 
     testFiles.splice(testFiles.indexOf('test/_init_tests.js'), 1);
-    c.files = config.commonTestPaths.concat(testFiles);
+    c.files = c.files.concat(config.commonTestPaths.concat(testFiles));
   } else {
-    c.files = config.testPaths;
+    c.files = c.files.concat(config.testPaths);
   }
 
   // c.client is available in test browser via window.parent.karma.config
