@@ -97,7 +97,7 @@ function createIframeWithApis(fixture) {
       protocol: 'http:',
       search: '',
     });
-    expect(context.pageViewId).to.be.greaterThan(0);
+    expect(parseInt(context.pageViewId, 10)).to.be.greaterThan(0);
     // In some browsers the referrer is empty. But in Chrome it works, so
     // we always check there.
     if (context.referrer !== '' || platform.isChrome()) {
