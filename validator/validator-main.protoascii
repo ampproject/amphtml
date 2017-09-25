@@ -25,9 +25,10 @@ min_validator_revision_required: 246
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 481
+spec_file_revision: 493
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
+script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 
 # Validator extensions.
 # =====================
@@ -942,6 +943,29 @@ tags: {
     cdata_regex: "\\s*body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\\s*"
   }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "STYLE"
+  spec_name: "style[amp-keyframes]"
+  unique: true
+  mandatory_parent: "BODY"
+  mandatory_last_child: true
+  attrs: {
+     name: "amp-keyframes"
+     value: ""
+     mandatory: true
+     dispatch_key: NAME_DISPATCH
+  }
+  # We'll need the cdata in the future and will get rid of this.
+  # But for now we require an empty tag.
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 
 # 4.3 Sections
@@ -3768,13 +3792,15 @@ error_specificity {
   code: BASE_TAG_MUST_PRECEED_ALL_URLS
   specificity: 75
 }
-error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 100 }
-error_specificity { code: DEPRECATED_ATTR specificity: 101 }
-error_specificity { code: DEPRECATED_TAG specificity: 102 }
+error_specificity { code: DISALLOWED_SCRIPT_TAG specificity: 100 }
+error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 101 }
+error_specificity { code: DEPRECATED_ATTR specificity: 102 }
+error_specificity { code: DEPRECATED_TAG specificity: 103 }
 error_specificity { code: DISALLOWED_MANUFACTURED_BODY specificity: 104 }
 error_specificity { code: DOCUMENT_TOO_COMPLEX specificity: 105 }
 error_specificity { code: INCORRECT_MIN_NUM_CHILD_TAGS specificity: 106 }
 error_specificity { code: TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS specificity: 107 }
+error_specificity { code: MANDATORY_LAST_CHILD_TAG specificity: 108 }
 # Error formats
 error_formats {
   code: UNKNOWN_CODE
@@ -3822,6 +3848,10 @@ error_formats {
 error_formats {
   code: GENERAL_DISALLOWED_TAG
   format: "The tag '%1' is disallowed except in specific forms."
+}
+error_formats {
+  code: DISALLOWED_SCRIPT_TAG
+  format: "Only AMP runtime 'script' tags are allowed, and only in the document head."
 }
 error_formats {
   code: DISALLOWED_ATTR
@@ -3993,6 +4023,10 @@ error_formats {
   code: TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS
   format: "Tag '%1' is not allowed to have any sibling tags ('%2' should only"
   " have 1 child)."
+}
+error_formats {
+  code: MANDATORY_LAST_CHILD_TAG
+  format: "Tag '%1', if present, must be the last child of tag '%2'."
 }
 error_formats {
   code: DISALLOWED_CHILD_TAG_NAME
