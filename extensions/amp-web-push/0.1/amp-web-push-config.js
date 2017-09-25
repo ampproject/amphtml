@@ -171,16 +171,42 @@ export class WebPushConfig extends AMP.BaseElement {
     }
   }
 
-  /** @private */
-  onSubscribe_() {
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  onSubscribe_(event) {
+    this.setWidgetDisabled(event.source, true);
     const webPushService = getServiceForDoc(this.getAmpDoc(), SERVICE_TAG);
-    webPushService.subscribe();
+    webPushService.subscribe(() => {
+      // On popup closed
+      this.setWidgetDisabled(event.source, false);
+    }).then(() => {
+      // On browser notification permission granted, denied, or dismissed
+      this.setWidgetDisabled(event.source, false);
+    });
   }
 
-  /** @private */
-  onUnsubscribe_() {
+  /**
+   *
+   * @param {!Element} widget
+   * @param {boolean} isDisabled
+   * @private
+   */
+  setWidgetDisabled(widget, isDisabled) {
+    widget.disabled = isDisabled;
+  }
+
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  onUnsubscribe_(event) {
+    this.setWidgetDisabled(event.source, true);
     const webPushService = getServiceForDoc(this.getAmpDoc(), SERVICE_TAG);
-    webPushService.unsubscribe();
+    webPushService.unsubscribe().then(() => {
+      this.setWidgetDisabled(event.source, false);
+    });
   }
 
   /**

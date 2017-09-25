@@ -15,7 +15,7 @@
  */
 
 import {getMode} from '../../../src/mode';
-import {user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {CSS} from '../../../build/amp-web-push-0.1.css';
 import {IFrameHost} from './iframehost';
 import {WindowMessenger} from './window-messenger';
@@ -27,7 +27,6 @@ import {
   NotificationPermission,
 } from './vars';
 import {WebPushWidgetVisibilities} from './amp-web-push-widget';
-import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 
 /** @typedef {{
@@ -500,11 +499,13 @@ export class WebPushService {
    * This action is exposed from this service and is called from the config
    * element.
    *
+   * @param {function()} onPopupClosed
    * @return {Promise}
    */
-  subscribe() {
+  subscribe(onPopupClosed) {
     this.registerServiceWorker();
-    this.openPopupOrRedirect();
+    const permissionDialogWindow = this.openPopupOrRedirect();
+    this.checkPermissionDialogClosedInterval(permissionDialogWindow, onPopupClosed);
 
     this.popupMessenger_ = new WindowMessenger({
       debug: this.debug_,
@@ -514,6 +515,24 @@ export class WebPushService {
     return this.onPermissionDialogInteracted().then(result => {
       return this.handlePermissionDialogInteraction(result);
     });
+  }
+
+  /**
+   * Checks whether the permission dialog is still open. When closed, a closed callback is
+   * executed.
+   *
+   * @param {?Window} permissionDialogWindow
+   * @private
+   */
+  checkPermissionDialogClosedInterval(permissionDialogWindow, onPopupClosed) {
+    if (permissionDialogWindow && !permissionDialogWindow.closed) {
+      const interval = this.ampdoc.win.setInterval(() => {
+        if (permissionDialogWindow.closed) {
+          onPopupClosed();
+          this.ampdoc.win.clearInterval(interval);
+        }
+      }, 500);
+    }
   }
 
   /**
@@ -545,7 +564,7 @@ export class WebPushService {
       case NotificationPermission.GRANTED:
         // User allowed
         reply({closeFrame: true});
-        this.subscribeForPushRemotely().then(() => {
+        return this.subscribeForPushRemotely().then(() => {
           return this.updateWidgetVisibilities();
         });
         break;
@@ -608,6 +627,7 @@ export class WebPushService {
 
   /**
    * Opens a popup or redirects the top-level frame to the permission dialog.
+   * @return {?Window}
    */
   openPopupOrRedirect() {
     // Note: Don't wait on promise chains when opening a pop up, otherwise
@@ -635,7 +655,7 @@ export class WebPushService {
     const sizing = `height=${d.h},width=${d.w},left=${d.x},top=${d.y}`;
     const options = `${sizing},resizable=yes,scrollbars=yes`;
 
-    openWindowDialog(this.ampdoc.win, openingPopupUrl, '_blank', options);
+    return openWindowDialog(this.ampdoc.win, openingPopupUrl, '_blank', options);
   }
 
   /**
