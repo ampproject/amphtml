@@ -934,6 +934,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns the layout of the element.
+     * @return {!Layout}
+     */
+    getLayout() {
+      return this.layout_;
+    }
+
+    /**
      * Instructs the element to layout its content and load its resources if
      * necessary by calling the {@link BaseElement.layoutCallback} method that
      * should be implemented by BaseElement subclasses. Must return a promise

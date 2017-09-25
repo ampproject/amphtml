@@ -33,6 +33,7 @@ describe('Layout', () => {
     expect(parseLayout('responsive')).to.equal('responsive');
     expect(parseLayout('container')).to.equal('container');
     expect(parseLayout('fill')).to.equal('fill');
+    expect(parseLayout('fluid')).to.equal('fluid');
   });
 
   it('parseLayout - failure', () => {
@@ -303,6 +304,25 @@ describe('Layout', () => {
     expect(div.style.height).to.equal('200px');
     expect(div).to.have.class('i-amphtml-layout-flex-item');
     expect(div).to.have.class('i-amphtml-layout-size-defined');
+    expect(div.children.length).to.equal(0);
+  });
+
+  it('layout=fluid - default', () => {
+    div.setAttribute('height', 'fluid');
+    const parentDiv = document.createElement('div');
+    div.parentElement = parentDiv;
+    parentDiv.appendChild(div);
+    expect(applyStaticLayout(div)).to.equal(Layout.FLUID);
+    expect(div).to.have.class('i-amphtml-layout-awaiting-size');
+    expect(div.children.length).to.equal(0);
+  });
+
+  it('layout=fluid - default with width', () => {
+    div.setAttribute('height', 'fluid');
+    div.setAttribute('width', 300);
+    expect(applyStaticLayout(div)).to.equal(Layout.FLUID);
+    expect(div).to.have.class('i-amphtml-layout-awaiting-size');
+    expect(div.style.width).to.equal('300px');
     expect(div.children.length).to.equal(0);
   });
 
