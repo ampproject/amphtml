@@ -1,0 +1,541 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Animated equalizer icon for muted autoplaying videos.
+ */
+i-amphtml-video-mask, i-amp-video-mask {
+  z-index: 1;
+}
+.amp-video-eq {
+  align-items: flex-end;
+  bottom: 7px;
+  display: flex;
+  height: 12px;
+  opacity: 0.8;
+  overflow: hidden;
+  position: absolute;
+  right: 7px;
+  width: 20px;
+  z-index: 1;
+}
+.amp-video-eq .amp-video-eq-col {
+  flex: 1;
+  height: 100%;
+  margin-right: 1px;
+  position: relative;
+}
+.amp-video-eq .amp-video-eq-col div {
+  animation-name: amp-video-eq-animation;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  background-color: #FAFAFA;
+  height: 100%;
+  position: absolute;
+  width: 100%;
+  will-change: transform;
+}
+.amp-video-eq .amp-video-eq-col div {
+  animation-play-state: paused;
+}
+.amp-video-eq[unpausable] .amp-video-eq-col div {
+  animation-name: none;
+}
+.amp-video-eq[unpausable].amp-video-eq-play .amp-video-eq-col div {
+  animation-name: amp-video-eq-animation;
+}
+.amp-video-eq.amp-video-eq-play .amp-video-eq-col div {
+  animation-play-state: running;
+}
+.amp-video-eq-1-1 {
+  animation-duration: 0.3s;
+  transform: translateY(60%);
+}
+.amp-video-eq-1-2 {
+  animation-duration: 0.45s;
+  transform: translateY(60%);
+}
+.amp-video-eq-2-1 {
+  animation-duration: 0.5s;
+  transform: translateY(30%);
+}
+.amp-video-eq-2-2 {
+  animation-duration: 0.4s;
+  transform: translateY(30%);
+}
+.amp-video-eq-3-1 {
+  animation-duration: 0.3s;
+  transform: translateY(70%);
+}
+.amp-video-eq-3-2 {
+  animation-duration: 0.35s;
+  transform: translateY(70%);
+}
+.amp-video-eq-4-1 {
+  animation-duration: 0.4s;
+  transform: translateY(50%);
+}
+.amp-video-eq-4-2 {
+  animation-duration: 0.25s;
+  transform: translateY(50%);
+}
+@keyframes amp-video-eq-animation {
+  0% {transform: translateY(100%);}
+  100% {transform: translateY(0);}
+}
+
+
+/**
+ * Video Docking
+ */
+
+.i-amphtml-dockable-video {
+  padding: 0px;
+  margin:0px;
+  transition: background-color 1s;
+}
+
+.i-amphtml-dockable-video-minimizing > video,
+.i-amphtml-dockable-video-minimizing > iframe {
+  position: fixed !important;
+  height: auto;
+  overflow: hidden;
+  z-index: 16;
+  will-change: transform;
+  transform: scale(0.6) translateX(20px) translateY(20px);
+  border-radius: 6px;
+  box-shadow: 0px 3px 9px 3px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 1s, border-radius 1s;
+  /* Override fill-content */
+  min-width: initial !important;
+  min-height: initial !important;
+  margin: initial !important;
+}
+
+.i-amphtml-dockable-video-minimizing amp-custom-controls.amp-custom-controls-minimal {
+  z-index: 17;
+  border-radius: 6px;
+  position: fixed !important;
+}
+
+/**
+ * Custom Video Controls
+ *
+ * Custom controls are composed of three layers:
+ *  - Main controls bar
+ *    |""""""""""""""|
+ *    |      (▶︎)     |
+ *    | 0:00       ⇱ | <<
+ *    | ------------ | <<
+ *    """"""""""""""""
+ *  - Minimized controls (shown when video is small or docked)
+ *    |""""""""""""""|
+ *    |              |
+ *    |   ▌︎▌︎  ▶︎  ⇱   | <<
+ *    |..........____|
+ *    """"""""""""""""
+ *  - Floating main action (usually play/pause)
+ *    |""""""""""""""|
+ *    |      (▶︎)     | <<
+ *    | 0:00       ⇱ |
+ *    | ------------ |
+ *    """"""""""""""""
+ */
+
+amp-custom-controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+
+/* Background shown behind custom controls (white/black gradient) */
+amp-custom-controls-bg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAADICAQAAABozPh9AAAAqElEQVQoz4WSSRIFIQhDk1fe/8r9F2o34PA3FjKEBPAjCf19JMmW+9dMS61bM9Dk13fJg5CXaskAO9/3bbL8wbcVFESlVgC0ALDxjTLHKFklnQtNZAlEqzAtPUZy1HYoI0odtd5wHs0/VlM+m6nRUdYRT23U5l+AQOMu2gQfesYQiTsqIzkyPU6Stfa8gDveTuV9M+/5+LqoTpIDF+W5OF9d3e9y6KnvD7s0BYLOf/xtAAAAAElFTkSuQmCC');
+  clip-path: polygon(0% 0%,0% 100%,20px 100%,20px 74px,calc(100% - 20px) 74px,calc(100% - 20px) 76px,20px 76px,20px 100%,100% 100%,100% 0%);
+  background-size: 1px 100px;
+  background-position: bottom;
+  background-repeat-y: no-repeat;
+  z-index: 1;
+}
+
+/* Main controls bar (usually contains progress time,
+ fullscreen and volume controls) */
+amp-custom-controls-bar {
+  display: flex;
+  padding: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+/* Every button/icon is wrapped in an amp-custom-controls-icon-wrapper */
+amp-custom-controls-icon-wrapper {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+amp-custom-controls-icon-wrapper,
+amp-custom-controls-progress-time,
+amp-custom-controls-scrubber {
+  user-select: none;
+  opacity: 0.85;
+}
+
+amp-custom-controls-volume, amp-custom-controls-progress-time {
+  margin-right: 15px;
+}
+
+amp-custom-controls-progress-time {
+  color: white;
+  font-family: Helvetica, Arial, sans-serif;
+  text-shadow: 0px 0px 20px rgba(0, 0, 0, .5);
+}
+
+input.amp-custom-controls-volume-indicator {
+  display: none;
+  vertical-align: middle;
+}
+
+amp-custom-controls-spacer {
+  flex-grow: 1;
+}
+
+amp-custom-controls-total-bar {
+  width: 100%;
+  height: 10px;
+  display: flex;
+  border-radius: 10px;
+  position: relative;
+  align-items: center;
+}
+
+amp-custom-controls-progress-bar {
+  display: flex;
+  z-index: 2;
+}
+
+amp-custom-controls-current-bar {
+  background-color: rgba(255, 255, 255, 0.8);
+  width: 0%;
+  height: 2px;
+  display: block;
+  border-radius: 10px;
+}
+
+amp-custom-controls-scrubber {
+  border-radius: 50%;
+  width: 13px;
+  height: 13px;
+  background: white;
+  display: block;
+  position: absolute;
+  margin-top: -2px;
+  margin-left: -6px;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, .25);
+  left: 0%;
+  top: 0px;
+}
+
+amp-custom-controls-scrubber:active {
+  width: 18px;
+  height: 18px;
+  margin-top: -4px;
+  margin-left: -8px;
+  box-shadow: 0px 0px 20px 5px rgba(0, 0, 0, .6);
+}
+
+amp-custom-controls-floating {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  top: 50%;
+  left: 50%;
+  margin-top: -40px;
+  margin-left: -40px;
+  background: rgba(0, 0, 0, .75);
+  box-shadow: 0px 0px 20px 5px rgba(0,0,0,.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+amp-custom-controls-floating amp-custom-controls-icon-wrapper {
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+amp-custom-controls-bar-wrapper {
+  position: absolute;
+  padding: 20px;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+amp-custom-controls-mini-wrapper {
+  display: none;
+}
+
+/* Custom Controls Light Theme */
+
+amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-bg {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAADICAQAAABozPh9AAAAbElEQVQoz62TwQ7AIAhDnx33/f8n7ht22C4mLkGZGC9NoQWJgfIUEIDRY0qrg4oK+oaxz/WbZf4hBwpmdrUKa1tOoVrm1ZUwtmizLz/Bnn6LOas/3sA4MjsUb1Nqw35Z7z56EF+ecYJxg3HBCwTCBp+nLpJ4AAAAAElFTkSuQmCC');
+}
+
+amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-progress-time {
+  color: #000000;
+  text-shadow: 0px 0px 20px rgba(255, 255, 255, .5);
+}
+
+amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-scrubber {
+  background: #000000;
+  box-shadow: 0px 0px 20px rgba(255, 255, 255, .25);
+}
+
+amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-scrubber:active {
+  box-shadow: 0px 0px 20px 5px rgba(255, 255, 255, .6);
+}
+
+amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-current-bar {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-floating {
+  box-shadow: 0px 0px 20px 5px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, .75);
+}
+
+/* Custom controls dark icons */
+amp-custom-controls-icon {
+  width: 100%;
+  padding-bottom: 100%;
+  display: block;
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
+
+amp-custom-controls-icon.amp-custom-controls-icon-play {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF" width="24" height="24" viewbox="0 0 24 24" style="filter:url(#i-amphtml-svg-shadow)"><path d="M8 5v14l11-7z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>');
+}
+
+amp-custom-controls-icon.amp-custom-controls-icon-pause {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
+}
+
+amp-custom-controls-icon.amp-custom-controls-icon-mute {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
+}
+
+amp-custom-controls-icon.amp-custom-controls-icon-volume-max {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
+}
+
+amp-custom-controls-icon.amp-custom-controls-icon-shadow {
+  width: 0 !important;
+  height: 0 !important;
+  visibility: hidden;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#000000" height="0" viewBox="0 0 24 24" width="0" xmlns="http://www.w3.org/2000/svg"><defs><filter id="i-amphtml-svg-shadow"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="rgba(0,0,0,0.4)" /></filter></defs></svg>')
+}
+
+amp-custom-controls-icon.amp-custom-controls-icon-fullscreen {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>')
+}
+
+/* Custom controls light icons */
+
+amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-icon.amp-custom-controls-icon-play {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="#000000" width="24" height="24" viewbox="0 0 24 24" style="filter:url(#i-amphtml-svg-shadow)"><path d="M8 5v14l11-7z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>');
+}
+
+amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-icon.amp-custom-controls-icon-pause {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
+}
+
+amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-icon.amp-custom-controls-icon-mute {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
+}
+
+amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-icon.amp-custom-controls-icon-volume-max {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
+}
+
+amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-icon.amp-custom-controls-icon-fullscreen {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>')
+}
+
+amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-icon.amp-custom-controls-icon-shadow {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="0" viewBox="0 0 24 24" width="0" xmlns="http://www.w3.org/2000/svg"><defs><filter id="i-amphtml-svg-shadow"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="rgba(0,0,0,0.4)" /></filter></defs></svg>')
+}
+
+/* Custom Controls - Minimal Controls */
+
+amp-custom-controls.amp-custom-controls-minimal {
+  padding: 0px;
+  width: 100%;
+  height: 100%;
+}
+
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-bg {
+  display: none;
+}
+
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-bar-wrapper {
+  padding: 0px;
+}
+
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-floating {
+  display: none;
+}
+
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-mini-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-mini {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-icon-wrapper,
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-volume {
+  height: auto;
+  flex-grow: 1;
+  width: 30%;
+  max-width: 80px;
+  margin-right: 0px;
+}
+
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-icon-wrapper.amp-custom-controls-mute {
+  width: 100%;
+  height: 100%;
+}
+
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-scrubber {
+  display: none;
+}
+
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-progress-bar {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+}
+
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-total-bar {
+  height: 8px;
+  border-radius: 0px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-current-bar {
+  height: 8px;
+  border-radius: 0px;
+}
+
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-scrubber {
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  margin-left: -8px;
+  box-shadow: 0px 0px 20px 5px rgba(0, 0, 0, 0.2);
+}
+
+amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-bar {
+  display: none;
+}
+
+/**
+ * Custom Controls - Hidden
+ */
+
+amp-custom-controls.amp-custom-controls-hidden amp-custom-controls-mini {
+  display: none;
+}
+
+amp-custom-controls.amp-custom-controls-hidden amp-custom-controls-bar-wrapper {
+  display: none;
+}
+
+amp-custom-controls.amp-custom-controls-hidden amp-custom-controls-bg {
+  display: none;
+}
+
+amp-custom-controls.amp-custom-controls-hidden amp-custom-controls-floating {
+  display: none;
+}
+
+/**
+ * Custom Controls - Loading spinner
+ */
+amp-custom-controls-floating.amp-custom-controls-loading::after {
+ content: '';
+ display: block;
+ font-size: 10px;
+ position: absolute;
+ border-top: 2px solid rgba(255, 255, 255, 0.2);
+ border-right: 2px solid rgba(255, 255, 255, 0.2);
+ border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+ border-left: 2px solid rgb(0, 0, 0);
+ animation: i-amp-html-custom-controls-loading 1.1s infinite linear;
+ border-radius: 50%;
+ width: 100%;
+ height: 100%;
+}
+
+amp-custom-controls.amp-custom-controls-light-skin amp-custom-controls-floating.amp-custom-controls-loading::before {
+ border-top: 2px solid rgba(0, 0, 0, 0.2);
+ border-right: 2px solid rgba(0, 0, 0, 0.2);
+ border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+ border-left: 2px solid rgb(255, 255, 255);
+}
+
+@keyframes i-amp-html-custom-controls-loading {
+ 0% {
+   -webkit-transform: rotate(0deg);
+   transform: rotate(0deg);
+ }
+ 100% {
+   -webkit-transform: rotate(360deg);
+   transform: rotate(360deg);
+ }
+}

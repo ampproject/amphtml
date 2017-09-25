@@ -43,6 +43,7 @@ import {user, dev} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
 import {isEnumValue} from '../../../src/types';
+import {CSS} from '../../../build/amp-video-0.1.css';
 
 /** @const */
 const TAG = 'amp-ima-video';
@@ -349,5 +350,5 @@ class AmpImaVideo extends AMP.BaseElement {
 
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpImaVideo);
+  AMP.registerElement(TAG, AmpImaVideo, CSS);
 });

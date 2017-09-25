@@ -37,13 +37,13 @@ export class CustomControls {
    * @param {!./service/video-manager-impl.VideoEntry} entry
    * @param {{
    *    darkSkin:(boolean|undefined),
-   *    mainCtrls:(Array<string>|undefined),
-   *    miniCtrls:(Array<string>|undefined),
+   *    mainControls:(Array<string>|undefined),
+   *    miniControls:(Array<string>|undefined),
    *    floating:(string|undefined),
    * }=} opt_options
    *      - darkSkin: whether to use dark or light theme
-   *      - mainCtrls: list of controls to add to the main bar
-   *      - miniCtrls: list of controls to add to the minimized overlay
+   *      - mainControls: list of controls to add to the main bar
+   *      - miniControls: list of controls to add to the minimized overlay
    *      - floating: single control button to use as the main action
    */
   constructor(ampdoc, entry, opt_options) {
@@ -59,31 +59,31 @@ export class CustomControls {
 
     this.options_ = opt_options || {
       darkSkin: false,
-      mainCtrls: ['time', 'spacer', 'volume', 'fullscreen'],
-      miniCtrls: ['play', 'volume', 'fullscreen'],
+      mainControls: ['time', 'spacer', 'volume', 'fullscreen'],
+      miniControls: ['play', 'volume', 'fullscreen'],
       floating: 'play',
     };
 
     /** @private {?Element} */
-    this.ctrlContainer_ = null;
+    this.controlContainer_ = null;
 
     /** @private {?Element} */
-    this.ctrlBarContainer_ = null;
+    this.controlBarContainer_ = null;
 
     /** @private {?Element} */
-    this.ctrlBarWrapper_ = null;
+    this.controlBarWrapper_ = null;
 
     /** @private {?Element} */
     this.floatingContainer_ = null;
 
     /** @private {?Element} */
-    this.miniCtrlsContainer_ = null;
+    this.miniControlsContainer_ = null;
 
     /** @private {?Element} */
-    this.miniCtrlsWrapper_ = null;
+    this.miniControlsWrapper_ = null;
 
     /** @private {?Element} */
-    this.ctrlBg_ = null;
+    this.controlsBg_ = null;
 
     /** @private {?number} */
     this.controlsTimer_ = null;
@@ -108,7 +108,7 @@ export class CustomControls {
    * @return {!Element}
    */
   getElement() {
-    return dev().assertElement(this.ctrlContainer_);
+    return dev().assertElement(this.controlContainer_);
   }
 
   /**
@@ -396,35 +396,36 @@ export class CustomControls {
    * Create the custom controls shim and insert it inside the video
    * @param {{
    *    darkSkin:(boolean|undefined),
-   *    mainCtrls:(Array<string>|undefined),
-   *    miniCtrls:(Array<string>|undefined),
+   *    mainControls:(Array<string>|undefined),
+   *    miniControls:(Array<string>|undefined),
    *    floating:(string|undefined),
    * }=} opt_options
    *      - darkSkin: whether to use dark or light theme
-   *      - mainCtrls: list of controls to add to the main bar
-   *      - miniCtrls: list of controls to add to the minimized overlay
+   *      - mainControls: list of controls to add to the main bar
+   *      - miniControls: list of controls to add to the minimized overlay
    *      - floating: single control button to use as the main action
    * @private
    */
   createCustomControls_(opt_options) {
     // Set up options
     const darkSkin = opt_options.darkSkin || false;
-    const mainCtrls = opt_options.mainCtrls
+    const mainControls = opt_options.mainControls
                       || ['time', 'spacer', 'volume', 'fullscreen'];
-    const miniCtrls = opt_options.miniCtrls
+    const miniControls = opt_options.miniControls
                       || ['play', 'volume', 'fullscreen'];
     const floating = opt_options.floating || 'play';
     // Set up controls
     const doc = this.ampdoc_.win.document;
-    this.ctrlContainer_ = doc.createElement('amp-custom-controls');
-    const ctrlClasses = this.ctrlContainer_.classList;
-    ctrlClasses.toggle('amp-custom-controls-light-skin', !darkSkin);
-    this.ctrlBg_ = doc.createElement('amp-custom-controls-bg');
-    this.ctrlBarWrapper_ = doc.createElement('amp-custom-controls-bar-wrapper');
-    this.ctrlBarContainer_ = doc.createElement('amp-custom-controls-bar');
-    this.miniCtrlsWrapper_ =
+    this.controlContainer_ = doc.createElement('amp-custom-controls');
+    const controlClasses = this.controlContainer_.classList;
+    controlClasses.toggle('amp-custom-controls-light-skin', !darkSkin);
+    this.controlsBg_ = doc.createElement('amp-custom-controls-bg');
+    this.controlBarWrapper_ =
+      doc.createElement('amp-custom-controls-bar-wrapper');
+    this.controlBarContainer_ = doc.createElement('amp-custom-controls-bar');
+    this.miniControlsWrapper_ =
       doc.createElement('amp-custom-controls-mini-wrapper');
-    this.miniCtrlsContainer_ = doc.createElement('amp-custom-controls-mini');
+    this.miniControlsContainer_ = doc.createElement('amp-custom-controls-mini');
     this.floatingContainer_ = doc.createElement('amp-custom-controls-floating');
 
     // Shadow filter
@@ -437,7 +438,7 @@ export class CustomControls {
 
     // Show controls when mouse is over
     let oldCoords = '0-0';
-    const showCtrlsIfNewPos = e => {
+    const showControlsIfNewPos = e => {
       if (e.type == 'mousemove'
       && e.clientX + '-' + e.clientY != oldCoords) {
         this.showControls();
@@ -448,24 +449,24 @@ export class CustomControls {
     };
     [this.entry_.video.element,
       this.floatingContainer_,
-      this.ctrlContainer_,
-      this.ctrlBarContainer_,
+      this.controlContainer_,
+      this.controlBarContainer_,
     ].forEach(element => {
-      listen(element, 'mousemove', showCtrlsIfNewPos.bind(this));
+      listen(element, 'mousemove', showControlsIfNewPos.bind(this));
     });
 
     // Hide controls when mouse is outside
-    const hideCtrls = () => {
+    const hideControls = () => {
       if (this.controlsTimer_) {
         clearTimeout(this.controlsTimer_);
       }
       this.hideControls();
     };
-    listen(this.ctrlContainer_, 'mouseleave', hideCtrls.bind(this));
+    listen(this.controlContainer_, 'mouseleave', hideControls.bind(this));
 
-    const toggleCtrls = e => {
-      if (e.target != this.ctrlContainer_
-          && e.target != this.miniCtrlsContainer_) {
+    const toggleControls = e => {
+      if (e.target != this.controlContainer_
+          && e.target != this.miniControlsContainer_) {
         return;
       }
       e.stopPropagation();
@@ -480,44 +481,44 @@ export class CustomControls {
     };
 
     // Toggle controls when video is clicked
-    listen(this.ctrlContainer_, 'click', toggleCtrls.bind(this));
+    listen(this.controlContainer_, 'click', toggleControls.bind(this));
 
     // Add to the element
     this.vsync_.mutate(() => {
       // Add SVG shadow
-      this.ctrlContainer_.appendChild(shadowFilter);
+      this.controlContainer_.appendChild(shadowFilter);
 
       // Add background
-      this.ctrlContainer_.appendChild(this.ctrlBg_);
+      this.controlContainer_.appendChild(this.controlsBg_);
 
       // Add main controls
-      mainCtrls.forEach(btn => {
-        this.ctrlBarContainer_.appendChild(
+      mainControls.forEach(btn => {
+        this.controlBarContainer_.appendChild(
             this.elementFromButton_(btn)
         );
       });
-      this.ctrlBarWrapper_.appendChild(this.ctrlBarContainer_);
-      this.ctrlBarWrapper_.appendChild(this.createProgressBar_());
-      this.ctrlContainer_.appendChild(this.ctrlBarWrapper_);
+      this.controlBarWrapper_.appendChild(this.controlBarContainer_);
+      this.controlBarWrapper_.appendChild(this.createProgressBar_());
+      this.controlContainer_.appendChild(this.controlBarWrapper_);
 
       // Add mini controls
-      miniCtrls.forEach(btn => {
-        this.miniCtrlsContainer_.appendChild(
+      miniControls.forEach(btn => {
+        this.miniControlsContainer_.appendChild(
             this.elementFromButton_(btn)
         );
       });
-      this.miniCtrlsWrapper_.appendChild(this.miniCtrlsContainer_);
-      this.miniCtrlsWrapper_.appendChild(this.createProgressBar_());
-      this.ctrlContainer_.appendChild(this.miniCtrlsWrapper_);
+      this.miniControlsWrapper_.appendChild(this.miniControlsContainer_);
+      this.miniControlsWrapper_.appendChild(this.createProgressBar_());
+      this.controlContainer_.appendChild(this.miniControlsWrapper_);
 
       // Floating controls
       this.floatingContainer_.appendChild(
           this.elementFromButton_(floating, this.floatingContainer_)
       );
-      this.ctrlContainer_.appendChild(this.floatingContainer_);
+      this.controlContainer_.appendChild(this.floatingContainer_);
 
       // Add main buttons container
-      this.entry_.video.element.appendChild(this.ctrlContainer_);
+      this.entry_.video.element.appendChild(this.controlContainer_);
     });
   }
 
@@ -526,8 +527,8 @@ export class CustomControls {
    */
   enableControls() {
     this.controlsDisabled_ = false;
-    if (this.ctrlContainer_) {
-      st.resetStyles(this.ctrlContainer_, ['pointer-events']);
+    if (this.controlContainer_) {
+      st.resetStyles(this.controlContainer_, ['pointer-events']);
     }
   }
 
@@ -536,8 +537,8 @@ export class CustomControls {
    */
   disableControls() {
     this.controlsDisabled_ = true;
-    if (this.ctrlContainer_) {
-      st.setStyles(this.ctrlContainer_, {
+    if (this.controlContainer_) {
+      st.setStyles(this.controlContainer_, {
         'pointer-events': 'none',
       });
     }
@@ -549,28 +550,28 @@ export class CustomControls {
    */
   hideControls(override = false) {
     this.vsync_.mutate(() => {
-      if (!this.ctrlBarWrapper_
+      if (!this.controlBarWrapper_
           || !this.floatingContainer_
-          || !this.ctrlBg_
+          || !this.controlsBg_
           || (!this.entry_.isPlaying() && !override)
           || !this.controlsShown_) {
         return;
       }
 
-      Animation.animate(dev().assertElement(this.miniCtrlsContainer_),
-          tr.setStyles(dev().assertElement(this.miniCtrlsContainer_), {
+      Animation.animate(dev().assertElement(this.miniControlsContainer_),
+          tr.setStyles(dev().assertElement(this.miniControlsContainer_), {
             'opacity': tr.numeric(1, 0),
           })
       , 200);
 
-      Animation.animate(dev().assertElement(this.ctrlBarWrapper_),
-          tr.setStyles(dev().assertElement(this.ctrlBarWrapper_), {
+      Animation.animate(dev().assertElement(this.controlBarWrapper_),
+          tr.setStyles(dev().assertElement(this.controlBarWrapper_), {
             'opacity': tr.numeric(1, 0),
           })
       , 200);
 
-      Animation.animate(dev().assertElement(this.ctrlBg_),
-          tr.setStyles(dev().assertElement(this.ctrlBg_), {
+      Animation.animate(dev().assertElement(this.controlsBg_),
+          tr.setStyles(dev().assertElement(this.controlsBg_), {
             'opacity': tr.numeric(1, 0),
           })
       , 200);
@@ -580,7 +581,7 @@ export class CustomControls {
             'opacity': tr.numeric(1, 0),
           })
       , 200).thenAlways(() => {
-        const classes = this.ctrlContainer_.classList;
+        const classes = this.controlContainer_.classList;
         classes.toggle('amp-custom-controls-hidden', true);
         this.controlsShown_ = false;
       });
@@ -592,9 +593,9 @@ export class CustomControls {
    */
   showControls() {
     this.vsync_.mutate(() => {
-      if (!this.ctrlBarWrapper_
+      if (!this.controlBarWrapper_
           || !this.floatingContainer_
-          || !this.ctrlBg_
+          || !this.controlsBg_
           || this.controlsDisabled_) {
         return;
       }
@@ -610,12 +611,14 @@ export class CustomControls {
         return;
       }
 
-      this.ctrlContainer_.classList.toggle('amp-custom-controls-hidden', false);
+      this.controlContainer_.classList.toggle(
+          'amp-custom-controls-hidden', false
+      );
       this.controlsShowing_ = true;
 
       if (this.minimal_) {
-        Animation.animate(dev().assertElement(this.miniCtrlsContainer_),
-            tr.setStyles(dev().assertElement(this.miniCtrlsContainer_), {
+        Animation.animate(dev().assertElement(this.miniControlsContainer_),
+            tr.setStyles(dev().assertElement(this.miniControlsContainer_), {
               'opacity': tr.numeric(0, 1),
             })
         , 200).thenAlways(() => {
@@ -624,14 +627,14 @@ export class CustomControls {
           this.controlsDisabled_ = false;
         });
       } else {
-        Animation.animate(dev().assertElement(this.ctrlBarWrapper_),
-            tr.setStyles(dev().assertElement(this.ctrlBarWrapper_), {
+        Animation.animate(dev().assertElement(this.controlBarWrapper_),
+            tr.setStyles(dev().assertElement(this.controlBarWrapper_), {
               'opacity': tr.numeric(0, 1),
             })
         , 200);
 
-        Animation.animate(dev().assertElement(this.ctrlBg_),
-            tr.setStyles(dev().assertElement(this.ctrlBg_), {
+        Animation.animate(dev().assertElement(this.controlsBg_),
+            tr.setStyles(dev().assertElement(this.controlsBg_), {
               'opacity': tr.numeric(0, 1),
             })
         , 200);
@@ -656,7 +659,9 @@ export class CustomControls {
    * @param {boolean} enable enable/disable minimal controls
    */
   toggleMinimalControls(enable = true) {
-    this.ctrlContainer_.classList.toggle('amp-custom-controls-minimal', enable);
+    this.controlContainer_.classList.toggle(
+        'amp-custom-controls-minimal', enable
+    );
     this.minimal_ = enable;
   }
 

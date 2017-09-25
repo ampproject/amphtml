@@ -138,7 +138,7 @@ declareExtension('amp-viewer-integration', '0.1', {
   // faster.
   loadPriority: 'high',
 });
-declareExtension('amp-video', '0.1', false);
+declareExtension('amp-video', '0.1', true);
 declareExtension('amp-vk', '0.1', false);
 declareExtension('amp-youtube', '0.1', false);
 declareExtensionVersionAlias(

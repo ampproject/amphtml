@@ -32,6 +32,7 @@ import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
+import {CSS} from '../../../build/amp-video-0.1.css';
 
 const TAG = 'amp-video';
 
@@ -388,7 +389,6 @@ class AmpVideo extends AMP.BaseElement {
   }
 }
 
-
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpVideo);
+  AMP.registerElement(TAG, AmpVideo, CSS);
 });

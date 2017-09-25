@@ -583,7 +583,8 @@ export class VideoEntry {
 
     // Public Variables
 
-    this.hasCustomCtrls = element.hasAttribute(VideoAttributes.CUSTOM_CTRLS);
+    this.hasCustomControls =
+      element.hasAttribute(VideoAttributes.CUSTOM_CONTROLS);
 
     this.hasDocking = element.hasAttribute(VideoAttributes.DOCK);
 
@@ -613,8 +614,8 @@ export class VideoEntry {
    */
   videoBuilt_() {
     this.updateVisibility();
-    if (this.hasCustomCtrls || this.hasDocking) {
-      this.customCtrlsVideoBuilt_();
+    if (this.hasCustomControls || this.hasDocking) {
+      this.customControlsVideoBuilt_();
     }
     if (this.hasAutoplay) {
       this.autoplayVideoBuilt_();
@@ -855,7 +856,7 @@ export class VideoEntry {
         // initiate playback.
         this.showControls(
             /* showToo */ true,
-            /* enableToo */ this.hasCustomCtrls
+            /* enableToo */ this.hasCustomControls
         );
         return;
       }
@@ -914,7 +915,7 @@ export class VideoEntry {
       this.userInteractedWithAutoPlay_ = true;
       this.showControls(
           /* showToo */ true,
-          /* enableToo */ this.hasCustomCtrls
+          /* enableToo */ this.hasCustomControls
       );
       this.video.unmute();
       unlisteners.forEach(unlistener => {
@@ -1653,11 +1654,11 @@ export class VideoEntry {
       this.unlistenAll_();
       this.hideControls(
           /* customToo */ true,
-          /* disableToo */ !this.hasCustomCtrls
+          /* disableToo */ !this.hasCustomControls
       );
       this.showControls(
           /* showToo */ false,
-          /* enableToo */ this.hasCustomCtrls
+          /* enableToo */ this.hasCustomControls
       );
       this.customControls_.toggleMinimalControls(/* enabled */ false);
       // Restore the video inline
@@ -1870,40 +1871,42 @@ export class VideoEntry {
    * Called when a video with custom controls is built.
    * @private
    */
-  customCtrlsVideoBuilt_() {
+  customControlsVideoBuilt_() {
     // Hide native controls
     this.hideControls(/* customToo */ false, /* disableToo */ false);
 
     const skinAttr = this.video.element.getAttribute(
-        VideoAttributes.CUSTOM_CTRLS_SKIN
+        VideoAttributes.CUSTOM_CONTROLS_SKIN
     );
     const darkSkin = skinAttr == 'dark' ? true : false;
 
     // Get main controls (in the control bar)
-    const mainCtrlsAttr = this.video.element.getAttribute(
-        VideoAttributes.CUSTOM_CTRLS_MAIN
+    const mainControlsAttr = this.video.element.getAttribute(
+        VideoAttributes.CUSTOM_CONTROLS_MAIN
     );
-    const mainCtrls = mainCtrlsAttr ? mainCtrlsAttr.split(' ') : undefined;
+    const mainControls = mainControlsAttr ?
+                         mainControlsAttr.split(' ') : undefined;
 
     // Get mini-controls (used when video is docked)
-    const miniCtrlsAttr = this.video.element.getAttribute(
-        VideoAttributes.CUSTOM_CTRLS_MINI
+    const miniControlsAttr = this.video.element.getAttribute(
+        VideoAttributes.CUSTOM_CONTROLS_MINI
     );
-    const miniCtrls = miniCtrlsAttr ? miniCtrlsAttr.split(' ') : undefined;
+    const miniControls = miniControlsAttr ?
+                         miniControlsAttr.split(' ') : undefined;
 
     // Get floating button (main action)
-    const floatingCtrlAttr = this.video.element.getAttribute(
-        VideoAttributes.CUSTOM_CTRLS_FLOATING
+    const floatingControlsAttr = this.video.element.getAttribute(
+        VideoAttributes.CUSTOM_CONTROLS_FLOATING
     );
-    const floating = floatingCtrlAttr ? floatingCtrlAttr : undefined;
+    const floating = floatingControlsAttr ? floatingControlsAttr : undefined;
 
     this.customControls_ = new CustomControls(
         this.ampdoc_,
         this,
         {
           darkSkin,
-          mainCtrls,
-          miniCtrls,
+          mainControls,
+          miniControls,
           floating,
         }
     );
@@ -1911,7 +1914,7 @@ export class VideoEntry {
     // If we only use custom controls for docked videos then we hide them
     // until the video is docked.
     this.vsync_.mutate(() => {
-      if (!this.hasCustomCtrls) {
+      if (!this.hasCustomControls) {
         this.hideControls(/* customToo */ true, /* disableToo */ true);
       }
     });
@@ -1923,7 +1926,7 @@ export class VideoEntry {
     // Hide custom controls
     if (customToo
         && this.customControls_
-        && (this.hasCustomCtrls || this.hasDocking)) {
+        && (this.hasCustomControls || this.hasDocking)) {
       if (disableToo) {
         this.customControls_.disableControls();
       }
@@ -1932,12 +1935,12 @@ export class VideoEntry {
   }
 
   showControls(showToo = false, enableToo = false) {
-    if ((this.hasCustomCtrls || this.hasDocking) && this.customControls_) {
+    if ((this.hasCustomControls || this.hasDocking) && this.customControls_) {
       // Show custom controls
       if (enableToo) {
         this.customControls_.enableControls();
       }
-      if (this.hasCustomCtrls && showToo) {
+      if (this.hasCustomControls && showToo) {
         this.customControls_.showControls();
       }
     } else {
