@@ -93,9 +93,8 @@ function getCounter(receiver, counterName) {
   if (receiver.gwdGotoCounters &&
       receiver.gwdGotoCounters.hasOwnProperty(counterName)) {
     return receiver.gwdGotoCounters[counterName];
-  } else {
-    return 0;
   }
+  return 0;
 };
 
 /**
@@ -140,9 +139,10 @@ export class AmpGwdRuntimeService {
    * @private
    */
   initialize_() {
-    // TODO: The GWD animation runtime should start out disabled, but leaving it
-    // enabled for now as the main runtime is not yet integrated to enable it.
-    // When it does so, uncomment the below code (also see associated test).
+    // TODO(#7846): The GWD animation runtime should start out disabled, but
+    // leaving it enabled for now as the main runtime is not yet integrated to
+    // enable it. When it does so, uncomment the below code (also see
+    // associated test).
     /*
     // Initially disable all animations (AMP runtime will enable when ready).
     this.setEnabled(false);

@@ -131,7 +131,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         ampdoc.getBody().innerHTML = '';
       });
 
-      // TODO: This test case verifies the GWD runtime disables itself
+      // TODO(#7846): This test case verifies the GWD runtime disables itself
       // initially. It skips doing so for now because the AMP runtime does not
       // yet invoke setEnabled. Uncomment the test case when this integration is
       // complete.
