@@ -246,7 +246,11 @@ function fluidMessageListener_(event) {
     return;
   }
   const listener = fluidListeners[data['sentinel']];
-  if (listener && data['s'] != 'creative_geometry_update') {
+  if (!listener) {
+    dev().warn(TAG, `Listener for sentinel ${data['sentinel']} not found.`);
+    return;
+  }
+  if (data['s'] != 'creative_geometry_update') {
     if (!listener.connectionEstablished) {
       listener.instance.connectFluidMessagingChannel();
       listener.connectionEstablished = true;
@@ -790,8 +794,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // We want to resize only if neither returned dimension is larger than its
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
-    if ((width != pWidth || height != pHeight)
-        && (width <= pWidth && height <= pHeight)) {
+    if (this.isFluid_ ||
+        (width != pWidth || height != pHeight) &&
+        (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
     }
   }
