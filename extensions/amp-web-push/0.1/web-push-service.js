@@ -21,6 +21,7 @@ import {IFrameHost} from './iframehost';
 import {WindowMessenger} from './window-messenger';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {openWindowDialog} from '../../../src/dom';
+import {parseUrl, parseQueryString} from '../../../src/url';
 import {
   TAG,
   WIDGET_TAG,
@@ -372,7 +373,10 @@ export class WebPushService {
           const isControllingFrame =
             serviceWorkerState.isControllingFrame === true;
           const serviceWorkerHasCorrectUrl =
-            serviceWorkerState.url === self.config_['service-worker-url'];
+            this.isUrlSimilarForQueryParams(
+              serviceWorkerState.url,
+              self.config_['service-worker-url']
+            );
           const serviceWorkerActivated =
             serviceWorkerState.state === 'activated';
 
@@ -380,6 +384,36 @@ export class WebPushService {
             serviceWorkerHasCorrectUrl &&
             serviceWorkerActivated;
         });
+  }
+
+  /**
+   * Compares if two URLs are identical except for a subset of the query parameters. The second URL
+   * (that is being tested) must have the same subset of query parameters as the first URL provided,
+   * and the second URL can have more than the first URL's query parameters. All other components
+   * like origin and pathname must be equal.
+   *
+   * @param {string} originalUrlString
+   * @param {string} urlToTestString
+   * @return {boolean}
+   */
+  isUrlSimilarForQueryParams(originalUrlString, urlToTestString) {
+    const originalUrl = parseUrl(originalUrlString);
+    const originalUrlQueryParams = parseQueryString(originalUrl.search);
+    const urlToTest = parseUrl(urlToTestString);
+    const urlToTestQueryParams = parseQueryString(urlToTest.search);
+
+    // The URL to test may have more query params than the original URL, but it must have at least
+    // the same query params as original URL
+    for (let originalKey in originalUrlQueryParams) {
+      if (urlToTestQueryParams[originalKey] !== originalUrlQueryParams[originalKey]) {
+        console.log(`URL to test (${urlToTestString}) is missing key '${originalKey}'`)
+        return false;
+      }
+    }
+
+    // The rest of the URL, excluding the query params, must be identical
+    return originalUrl.origin === urlToTest.origin &&
+      originalUrl.pathname === urlToTest.pathname;
   }
 
   /**
