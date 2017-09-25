@@ -123,9 +123,9 @@ export class AmpAnim extends AMP.BaseElement {
       return Promise.resolve();
     }
     const src = this.srcset_.select(
-      // The width should never be 0, but we fall back to the screen width
-      // just in case.
-      this.getViewport().getWidth() || this.win.screen.width).url;
+        // The width should never be 0, but we fall back to the screen width
+        // just in case.
+        this.getViewport().getWidth() || this.win.screen.width).url;
     if (src == this.img_.getAttribute('src')) {
       return Promise.resolve();
     }
