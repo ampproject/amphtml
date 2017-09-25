@@ -67,5 +67,4 @@ copying the last part of the URL. For example, in the URL `https://www.addthis.c
 
 ## Validation
 
-See [amp-addthis rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-addthis/0.1/validator-amp-addthis.protoascii) 
-in the AMP validator specification.
+See amp-addthis rules in the AMP validator specification.
