@@ -114,7 +114,7 @@ export class IframeTransport {
     const frameName = JSON.stringify(/** @type {JsonObject} */ ({
       scriptSrc,
       sentinel,
-      type: this.type_
+      type: this.type_,
     }));
     const frame = createElementWithAttributes(this.ampWin_.document, 'iframe',
         /** @type {!JsonObject} */ ({
