@@ -30,14 +30,12 @@ tags: {  # <amp-addthis>
   tag_name: "AMP-ADDTHIS"
   requires_extension: "amp-addthis"
   attrs: {
-    name: "data-pubId"
+    name: "data-pub-id"
     mandatory: true
-    value_regex: "^[\w\d\-]+$"
   }
   attrs: {
-    name: "data-widgetId"
+    name: "data-widget-id"
     mandatory: true
-    value_regex: "^[a-z\d]{4}$"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {

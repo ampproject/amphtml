@@ -45,20 +45,20 @@ Example:
 <amp-addthis
   width="320"
   height="92"
-  data-pubId="ra-59c2c366435ef478"
-  data-widgetId="0fyg">
+  data-pub-id="ra-59c2c366435ef478"
+  data-widget-id="0fyg">
 </amp-addthis>
 ```
 
 ## Attributes
 
-**data-pubId**
+**data-pub-id**
 
 The AddThis publisher ID found in the URL in the [AddThis dashboard](https://addthis.com/dashboard)
 after logging in. For example, in the URL `https://www.addthis.com/dashboard#gallery/pub/ra-55e761259a1acdc2`,
 `ra-55e761259a1acdc2` is the publisher ID.
 
-**data-widgetId**
+**data-widget-id**
 
 The AddThis widget ID for the tool to be displayed, also found on the [AddThis dashboard](https://addthis.com/dashboard).
 The widget Id for a specific tool can be found by opening that tool in the AddThis dashboard and
