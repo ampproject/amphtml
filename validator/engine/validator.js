@@ -1180,6 +1180,9 @@ let DescendantConstraints;
  *             numOfChildren: number,
  *             onlyChildTagName: string,
  *             onlyChildErrorLineCol: LineCol,
+ *             lastChildSiblingCount: number,
+ *             lastChildTagName: string,
+ *             lastChildErrorLineCol: LineCol,
  *             childTagMatcher: ?ChildTagMatcher,
  *             referencePointMatcher: ?ReferencePointMatcher }}
  */
@@ -1234,6 +1237,9 @@ class TagStack {
       numOfChildren: 0,
       onlyChildTagName: '',
       onlyChildErrorLineCol: null,
+      lastChildSiblingCount: 0,
+      lastChildTagName: '',
+      lastChildErrorLineCol: null,
       childTagMatcher: null,
       referencePointMatcher: null
     };
@@ -1381,6 +1387,17 @@ class TagStack {
   }
 
   /**
+   * The number of children that have been discovered up to now by traversing
+   * the stack.
+   * @return {number}
+   */
+  numOfChildrenForParent() {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) return parent.numOfChildren;
+    return 0;
+  }
+
+  /**
    * The number of siblings that have been discovered up to now by traversing
    * the stack.
    * @return {number}
@@ -1441,6 +1458,59 @@ class TagStack {
    */
   parentHasChildWithNoSiblingRule() {
     return this.parentOnlyChildTagName().length > 0;
+  }
+
+  /**
+   * Tells the parent of the current stack entry that its last child must be me
+   * (the current stack entry).
+   * @param {string} tagName The current stack entry's tag name.
+   * @param {amp.htmlparser.DocLocator} docLocator The line and col of where the
+   *  current stack entry appears.
+   */
+  tellParentImTheLastChild(tagName, docLocator) {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) {
+      parent.lastChildTagName = tagName;
+      parent.lastChildErrorLineCol =
+          new LineCol(docLocator.getLine(), docLocator.getCol());
+      parent.lastChildSiblingCount = parent.numOfChildren;
+    }
+  }
+
+  /**
+   * @return {number} The order in which the tag with the 'last child' rule was
+   * encountered.
+   */
+  parentLastChildSiblingCount() {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) return parent.lastChildSiblingCount;
+    return -1;
+  }
+
+  /**
+   * @return {LineCol} The LineCol of the tag that set the 'last child' rule.
+   */
+  parentLastChildErrorLineCol() {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) return parent.lastChildErrorLineCol;
+    return null;
+  }
+
+  /**
+   * @return {string} The name of the tag with the 'last child' rule.
+   */
+  parentLastChildTagName() {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) return parent.lastChildTagName;
+    return '';
+  }
+
+  /**
+   * @return {boolean} true if this tag's parent has a child with 'last child'
+   * rule. Else false.
+   */
+  parentHasChildWithLastChildRule() {
+    return this.parentLastChildTagName().length > 0;
   }
 
   /**
@@ -3163,7 +3233,7 @@ function validateDescendantTags(
 }
 
 /**
- * Validates if the 'no siblings allowed' rule if it exists.
+ * Validates if the 'no siblings allowed' rule exists.
  * @param {!ParsedTagSpec} parsedTagSpec
  * @param {!Context} context
  * @param {!amp.validator.ValidationResult} validationResult
@@ -3209,6 +3279,42 @@ function validateNoSiblingsAllowedTags(
 
   if (spec.siblingsDisallowed) {
     context.tellParentNoSiblingsAllowed(spec.tagName, context.getDocLocator());
+  }
+}
+
+/**
+ * Validates if the 'last child' rule exists.
+ * @param {!ParsedTagSpec} parsedTagSpec
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} validationResult
+ */
+function validateLastChildTags(parsedTagSpec, context, validationResult) {
+  const spec = parsedTagSpec.getSpec();
+  const tagStack = context.getTagStack();
+
+  if (tagStack.parentHasChildWithLastChildRule() &&
+      tagStack.numOfChildrenForParent() >
+          tagStack.parentLastChildSiblingCount()) {
+    if (amp.validator.LIGHT) {
+      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      return;
+    } else {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.MANDATORY_LAST_CHILD_TAG,
+          tagStack.parentLastChildErrorLineCol(),
+          /* params */
+          [
+            tagStack.parentLastChildTagName().toLowerCase(),
+            tagStack.getParent().toLowerCase()
+          ],
+          getTagSpecUrl(spec), validationResult);
+    }
+  }
+
+  if (spec.mandatoryLastChild) {
+    tagStack.tellParentImTheLastChild(
+        getTagSpecName(spec), context.getDocLocator());
   }
 }
 
@@ -4082,6 +4188,7 @@ function validateTagAgainstSpec(
   }
   validateDescendantTags(parsedSpec, context, resultForAttempt, parsedRules);
   validateNoSiblingsAllowedTags(parsedSpec, context, resultForAttempt);
+  validateLastChildTags(parsedSpec, context, resultForAttempt);
 
   // Set Descendent Constraint rules.
   const descendantTagLists = parsedRules.getDescendantTagLists();
@@ -5469,7 +5576,9 @@ amp.validator.categorizeError = function(error) {
       error.code ===
           amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT ||
       error.code ===
-          amp.validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS) {
+          amp.validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS ||
+      error.code ===
+          amp.validator.ValidationError.Code.MANDATORY_LAST_CHILD_TAG) {
     return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
   }
   // E.g. "The tag 'picture' is disallowed."
