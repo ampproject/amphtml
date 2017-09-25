@@ -76,7 +76,9 @@
       "url": "examples/visual-tests/article.amp/article.amp.html",
       "name": "AMP Article",
       "loading_complete_css": [
-        ".article-body"
+        ".article-body",
+        ".ad-one",
+        ".ad-two"
       ]
     },
     {
