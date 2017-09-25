@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays an AddThis website tools embed.</td>
+    <td>Displays an <a href="https://www.addthis.com">AddThis</a> website tools embed.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -33,13 +33,12 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
-  <tr>
-    <td width="40%"><strong>TODO: Annotated Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-addthis/">Annotated code example for amp-addthis</a></td>
-  </tr>
 </table>
 
 ## Behavior
+
+The `amp-addthis` component provides the ability to embed AddThis website tools (for example, 
+sharing buttons, follow buttons, related posts, etc.) on an AMP page.
 
 Example:
 ```html
@@ -68,7 +67,5 @@ copying the last part of the URL. For example, in the URL `https://www.addthis.c
 
 ## Validation
 
-<!---
-TODO: Restore this once validation is completed.
-See [amp-instagram rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-addthis/0.1/validator-amp-addthis.protoascii) in the AMP validator specification.
--->
+See [amp-addthis rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-addthis/0.1/validator-amp-addthis.protoascii) 
+in the AMP validator specification.
