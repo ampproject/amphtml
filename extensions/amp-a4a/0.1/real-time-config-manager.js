@@ -44,17 +44,21 @@ export class RealTimeConfigManager {
                 return res.text().then(text => {
                   // An empty text response is fine, just means
                   // we have nothing to merge.
+                  if (rtcTime > rtcTimeout) {
+                    console.log("Over timeout somehow #############################");
+                  }
                   if (!text) {
                     return {rtcTime, hostname};
                   }
                   const rtcResponse = tryParseJson(text);
-                  return {rtcResponse, rtcTime, hostname};
+                  return rtcResponse ? {rtcResponse, rtcTime, hostname} :
+                  {rtcTime, hostname, error: "Unparsable JSON"};
                 });
-              }).catch(err => {
+              })).catch(err => {
                 const hostname = parseUrl(url).hostname;
                 const rtcTime = Date.now() - rtcStartTime;
                 return {error: err, rtcTime, hostname};
-              })));
+              }));
     });
     // TODO: Catch errors thrown by promises in promise array
     return Promise.all(rtcPromiseArray);
