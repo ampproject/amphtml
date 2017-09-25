@@ -622,7 +622,7 @@ describe('amp-a4a', () => {
       });
 
       it('should use safeframe version header value', () => {
-        a4a.safeframeVersion_ = '1-2-3';
+        a4a.safeframeVersion = '1-2-3';
         return a4a.layoutCallback().then(() => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
@@ -735,7 +735,7 @@ describe('amp-a4a', () => {
           const safeChild = a4aElement.querySelector('iframe[name]');
           expect(safeChild).to.not.be.ok;
           const crossDomainChild = a4aElement.querySelector('iframe[src]');
-          expect(crossDomainChild).to.not.be.okay;
+          expect(crossDomainChild).to.not.be.ok;
           const friendlyChild = a4aElement.querySelector('iframe[srcdoc]');
           expect(friendlyChild).to.be.ok;
           expect(friendlyChild.getAttribute('srcdoc')).to.have.string(
@@ -1717,7 +1717,7 @@ describe('amp-a4a', () => {
         }).catch(reason => {
           expect(getAdUrlSpy.called, 'getAdUrl never called')
               .to.be.false;
-          expect(reason).to.deep.equal(cancellation());
+          expect(reason.message).to.equal(cancellation().message);
           expect(errorHandlerSpy).to.be.calledOnce;
         });
       });

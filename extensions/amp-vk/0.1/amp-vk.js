@@ -79,7 +79,7 @@ export class AmpVk extends AMP.BaseElement {
    */
   getIFrameSrc_() {
     // cachebusting query parameter
-    const createdTime = Number(new Date()).toString(16);
+    const createdTime = Date.now().toString(16);
     let iframeSrcPromise;
 
     if (this.embedType_ === EmbedType.POST) {
@@ -149,6 +149,8 @@ export class AmpVk extends AMP.BaseElement {
     this.embedType_ = user().assert(this.element.getAttribute('data-embedtype'),
         'The data-embedtype attribute is required for <amp-vk> %s',
         this.element);
+
+    user().assertEnumValue(EmbedType, this.embedType_, 'data-embedtype');
 
     if (this.embedType_ === EmbedType.POST) {
       this.postBuildCallback_();
