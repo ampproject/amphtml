@@ -47,7 +47,6 @@ tags: {  # <amp-video>
     name: "controls"
     value: ""
   }
-  attrs: { name: "controlslist" }
   attrs: { name: "crossorigin" }
   attrs: {
     name: "loop"
@@ -78,7 +77,6 @@ tags: {  # <amp-video>
   attrs: { name: "[artwork]" }
   attrs: { name: "[attribution]" }
   attrs: { name: "[controls]" }
-  attrs: { name: "[controlslist]" }
   attrs: { name: "[loop]" }
   attrs: { name: "[poster]" }
   attrs: { name: "[preload]" }
