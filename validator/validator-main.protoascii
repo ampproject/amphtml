@@ -25,7 +25,7 @@ min_validator_revision_required: 246
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 489
+spec_file_revision: 490
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -3478,6 +3478,20 @@ tags: {  # <amp-story>
     mandatory: true
     value: ""
   }
+  attrs: {
+    name: "related-articles"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
+  }
+  attrs: {
+    name: "background-audio"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
+  }
   siblings_disallowed: true
   child_tags: {
     mandatory_min_num_child_tags: 1
@@ -3493,6 +3507,13 @@ tags: {  # <amp-story-page>
   attrs: {
     name: "id"
     mandatory: true
+  }
+  attrs: {
+    name: "background-audio"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
   }
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
