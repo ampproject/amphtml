@@ -15,7 +15,7 @@
  */
 
 import {dev, user} from './log';
-import {getContextMetadata} from '../src/iframe-attributes';
+import {getContextMetadataBuilder} from '../src/iframe-attributes';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {dict} from './utils/object';
@@ -38,25 +38,34 @@ const TAG = '3p-frame';
  * @param {!Window} parentWindow
  * @param {!AmpElement} element
  * @param {string=} opt_type
- * @param {Object=} opt_context
+ * @param {!./iframe-attributes.OptionalIframeMetadata=} opt_metadata
  * @return {!JsonObject} Contains
- *     - type, width, height, src attributes of <amp-ad> tag. These have
- *       precedence over the data- attributes.
- *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
- *     - A _context object for internal use.
+ *     - attributes containing:
+ *        - type, width, height, src attributes of <amp-ad> tag. These have
+ *          precedence over the data- attributes.
+ *        - data-* attributes of the <amp-ad> tag with the "data-" removed.
+ *     - A context object for internal use.
+ *     - A config object for internal use.
  */
-function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
-  const type = opt_type || element.getAttribute('type');
-  user().assert(type, 'Attribute type required for <amp-ad>: %s', element);
-  const sentinel = generateSentinel(parentWindow);
-  let attributes = dict();
-  // Do these first, as the other attributes have precedence.
-  addDataAndJsonAttributes_(element, attributes);
-  attributes = getContextMetadata(parentWindow, element, sentinel,
-      attributes);
-  attributes['type'] = type;
-  Object.assign(attributes['_context'], opt_context);
-  return attributes;
+function getFrameMetadata(parentWindow, element, opt_type, opt_metadata) {
+  const type = user().assert(
+      opt_type || element.getAttribute('type'),
+      'Attribute type required for <amp-ad>: %s',
+      element);
+
+  const builder = getContextMetadataBuilder(
+      parentWindow,
+      element,
+      generateSentinel(parentWindow),
+      addDataAndJsonAttributes_(element, dict({})));
+
+  if (opt_metadata) {
+    builder.setOptional(opt_metadata);
+  }
+
+  builder.setOptional({type});
+
+  return builder.build();
 }
 
 /**
@@ -65,26 +74,29 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * @param {!Window} parentWindow
  * @param {!AmpElement} parentElement
  * @param {string=} opt_type
- * @param {Object=} opt_context
+ * @param {!./iframe-attributes.OptionalIframeMetadata=} opt_metadata
  * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  * @return {!Element} The iframe.
  */
 export function getIframe(
-    parentWindow, parentElement, opt_type, opt_context, opt_disallowCustom) {
+    parentWindow, parentElement, opt_type, opt_metadata, opt_disallowCustom) {
+
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   dev().assert(
       parentElement['isConnected'] === undefined ||
       parentElement['isConnected'] === true,
       'Parent element must be in DOM');
-  const attributes =
-      getFrameAttributes(parentWindow, parentElement, opt_type, opt_context);
+
+  const metadata = getFrameMetadata(
+      parentWindow, parentElement, opt_type, opt_metadata);
+
   const iframe = parentWindow.document.createElement('iframe');
 
-  if (!count[attributes['type']]) {
-    count[attributes['type']] = 0;
+  if (!count[metadata['type']]) {
+    count[metadata['type']] = 0;
   }
-  count[attributes['type']] += 1;
+  count[metadata['type']] += 1;
 
   const baseUrl = getBootstrapBaseUrl(
       parentWindow, undefined, opt_type, opt_disallowCustom);
@@ -95,21 +107,23 @@ export function getIframe(
   // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
   const name = JSON.stringify(dict({
     'host': host,
-    'type': attributes['type'],
+    'type': metadata['type'],
     // https://github.com/ampproject/amphtml/pull/2955
-    'count': count[attributes['type']],
-    'attributes': attributes,
+    'count': count[metadata['type']],
+    'attributes': metadata['attributes'],
+    'config': metadata['config'],
+    'context': metadata['context'],
   }));
 
   iframe.src = baseUrl;
   iframe.ampLocation = parseUrl(baseUrl);
   iframe.name = name;
   // Add the check before assigning to prevent IE throw Invalid argument error
-  if (attributes['width']) {
-    iframe.width = attributes['width'];
+  if (metadata['attributes']['width']) {
+    iframe.width = metadata['attributes']['width'];
   }
-  if (attributes['height']) {
-    iframe.height = attributes['height'];
+  if (metadata['attributes']['height']) {
+    iframe.height = metadata['attributes']['height'];
   }
   iframe.setAttribute('scrolling', 'no');
   setStyle(iframe, 'border', 'none');
@@ -118,8 +132,10 @@ export function getIframe(
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
+
   iframe.setAttribute('data-amp-3p-sentinel',
-      attributes['_context']['sentinel']);
+      metadata['context']['sentinel']);
+
   return iframe;
 }
 
@@ -130,7 +146,8 @@ export function getIframe(
  * attributes.
  * @param {!Element} element
  * @param {!JsonObject} attributes The destination.
- * visibleForTesting
+ * @return {!JsonObject}
+ * @visibleForTesting
  */
 export function addDataAndJsonAttributes_(element, attributes) {
   const dataset = element.dataset;
@@ -153,6 +170,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
       attributes[key] = obj[key];
     }
   }
+  return attributes;
 }
 
 /**

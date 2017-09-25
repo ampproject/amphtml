@@ -53,7 +53,7 @@ import {
 import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
-import {getContextMetadata} from '../../../src/iframe-attributes';
+import {getContextMetadataBuilder} from '../../../src/iframe-attributes';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
 
 /** @type {Array<string>} */
@@ -1346,7 +1346,8 @@ export class AmpA4A extends AMP.BaseElement {
     return this.iframeRenderHelper_(dict({
       'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
       'name': JSON.stringify(
-          getContextMetadata(this.win, this.element, this.sentinel)),
+          getContextMetadataBuilder(this.win, this.element, this.sentinel)
+              .build()),
     }));
   }
 
@@ -1373,7 +1374,7 @@ export class AmpA4A extends AMP.BaseElement {
     return utf8Decode(creativeBody).then(creative => {
       checkStillCurrent();
       let srcPath;
-      let name = '';
+
       switch (method) {
         case XORIGIN_MODE.SAFEFRAME:
           srcPath = this.getSafeframePath_() + '?n=0';
@@ -1391,21 +1392,32 @@ export class AmpA4A extends AMP.BaseElement {
               + ' slot %s.', method, this.element.getAttribute('id'));
           return Promise.reject('Unrecognized rendering mode request');
       }
-      // TODO(bradfrizzell): change name of function and var
-      let contextMetadata = getContextMetadata(
-          this.win, this.element, this.sentinel,
-          this.getAdditionalContextMetadata());
-      // TODO(bradfrizzell) Clean up name assigning.
-      if (method == XORIGIN_MODE.NAMEFRAME) {
-        contextMetadata['creative'] = creative;
-        name = JSON.stringify(contextMetadata);
-      } else if (method == XORIGIN_MODE.SAFEFRAME) {
-        contextMetadata = JSON.stringify(contextMetadata);
-        name = `${this.safeframeVersion};${creative.length};${creative}` +
-            `${contextMetadata}`;
-      }
-      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
+
+      return this.iframeRenderHelper_(dict({
+        'src': srcPath,
+        'name': this.getIframeName_(method, creative),
+      }));
     });
+  }
+
+  getIframeName_(method, creative) {
+    const metadataBuilder =
+        getContextMetadataBuilder(this.win, this.element, this.sentinel);
+
+    metadataBuilder.setOptional(this.getAdditionalContextMetadata());
+
+    if (method == XORIGIN_MODE.NAMEFRAME) {
+      metadataBuilder.setOptional({creative});
+    }
+
+    const serializedMetadata = JSON.stringify(metadataBuilder.build());
+
+    if (method == XORIGIN_MODE.SAFEFRAME) {
+      return `${this.safeframeVersion};${creative.length};${creative}` +
+          serializedMetadata;
+    }
+
+    return serializedMetadata;
   }
 
   /**

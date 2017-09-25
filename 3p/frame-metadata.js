@@ -35,7 +35,6 @@ import {parseUrl} from '../src/url';
  *  initialIntersection: ?IntersectionObserverEntry,
  *  initialLayoutRect:
  *      ?{left: number, top: number, width: number, height: number},
- *  mode: ?../src/mode.ModeDef,
  *  pageViewId: ?string,
  *  referrer: ?string,
  *  sentinel: ?string,
@@ -49,118 +48,108 @@ export let ContextStateDef;
 
 /** @const {!JsonObject} */
 const FALLBACK = dict({
-  'attributes': dict({
-    '_context': dict(),
-  }),
+  'attributes': dict({}),
+  'context': dict({}),
+  'config': dict({}),
 });
 
 
-/**
- * Gets metadata encoded in iframe name attribute.
- * @return {!JsonObject}
- */
-const allMetadata = once(() => {
-  const iframeName = window.name;
+const createFromWindowName = once(() => FrameMetadata.fromString(window.name));
 
+
+function parseSerialized(serializedData) {
   try {
-    // TODO(bradfrizzell@): Change the data structure of the attributes
-    //    to make it less terrible.
-    return parseJson(iframeName);
+    return parseJson(serializedData);
   } catch (err) {
     if (!getMode().test) {
       dev().info(
-          'INTEGRATION', 'Could not parse context from:', iframeName);
+          'INTEGRATION', 'Could not parse context from:', serializedData);
     }
     return FALLBACK;
   }
-});
-
-
-/**
- * @return {{mode: !Object, experimentToggles: !Object}}
- */
-export function getAmpConfig() {
-  const metadata = allMetadata();
-
-  return {
-    mode: metadata['attributes']['_context'].mode,
-    experimentToggles: metadata['attributes']['_context'].experimentToggles,
-  };
 }
 
 
-/**
- * @return {!JsonObject}
- */
-const getAttributeDataImpl_ = once(() => {
-  const data = Object.assign(dict({}), allMetadata()['attributes']);
-
-  // TODO(alanorozco): don't delete _context. refactor data object structure.
-  if ('_context' in data) {
-    delete data['_context'];
+export class FrameMetadata {
+  /** @return {!FrameMetadata} */
+  static fromWindowName() {
+    // Defined indirectly since `once()` cannot be used with `static`.
+    return createFromWindowName();
   }
 
-  return data;
-});
+  /**
+   * @param {string} serializedData
+   * @return {!FrameMetadata}
+   */
+  static fromString(serializedData) {
+    return FrameMetadata.fromObj(parseSerialized(serializedData));
+  }
 
+  /**
+   * @param {!JsonObject} obj
+   * @return {!FrameMetadata}
+   */
+  static fromObj(obj) {
+    return new FrameMetadata(obj);
+  }
 
-/**
- * @return {!JsonObject}
- */
-export function getAttributeData() {
-  // using indirect invocation to prevent no-export-side-effect issue
-  return getAttributeDataImpl_();
-}
+  /**
+   * @param {!JsonObject} obj
+   */
+  constructor(obj) {
+    /** @private @const {!JsonObject} */
+    this.obj_ = obj;
+  }
 
+  /** @return {{mode: !Object, experimentToggles: !Object}} */
+  getAmpConfig() {
+    return {
+      mode: this.obj_['config'].mode,
+      experimentToggles: this.obj_['config'].experimentToggles,
+    };
+  }
 
-/**
- * @return {!Location}
- */
-const getLocationImpl_ = once(() => {
-  return parseUrl(allMetadata()['attributes']['_context']['location']['href']);
-});
+  /** @return {!JsonObject} */
+  getAttributeData() {
+    return this.obj_['attributes'];
+  }
 
+  /** @retun {string} */
+  getLocation() {
+    return parseUrl(this.obj_['context']['location']['href']);
+  }
 
-/**
- * @return {!Location}
- */
-export function getLocation() {
-  // using indirect invocation to prevent no-export-side-effect issue
-  return getLocationImpl_();
-}
+  /** @return {!ContextStateDef} */
+  getContextState() {
+    const rawContext = this.obj_['context'];
 
+    return /** @type {!ContextStateDef} */ ({
+      ampcontextFilepath: rawContext['ampcontextFilepath'],
+      ampcontextVersion: rawContext['ampcontextVersion'],
+      canary: rawContext['canary'],
+      canonicalUrl: rawContext['canonicalUrl'],
+      clientId: rawContext['clientId'],
+      container: rawContext['container'],
+      domFingerprint: rawContext['domFingerprint'],
+      hidden: rawContext['hidden'],
+      initialIntersection: rawContext['initialIntersection'],
+      initialLayoutRect: rawContext['initialLayoutRect'],
+      pageViewId: rawContext['pageViewId'],
+      referrer: rawContext['referrer'],
+      sentinel: rawContext['sentinel'],
+      sourceUrl: rawContext['sourceUrl'],
+      startTime: rawContext['startTime'],
+      tagName: rawContext['tagName'],
+    });
+  }
 
-/**
- * @return {!ContextStateDef}
- */
-export function getContextState() {
-  const rawContext = allMetadata()['attributes']['_context'];
+  /** @return {string} */
+  getEmbedType() {
+    return this.obj_['type'];
+  }
 
-  return {
-    ampcontextFilepath: rawContext['ampcontextFilepath'],
-    ampcontextVersion: rawContext['ampcontextVersion'],
-    canary: rawContext['canary'],
-    canonicalUrl: rawContext['canonicalUrl'],
-    clientId: rawContext['clientId'],
-    container: rawContext['container'],
-    domFingerprint: rawContext['domFingerprint'],
-    hidden: rawContext['hidden'],
-    initialIntersection: rawContext['initialIntersection'],
-    initialLayoutRect: rawContext['initialLayoutRect'],
-    mode: rawContext['mode'],
-    pageViewId: rawContext['pageViewId'],
-    referrer: rawContext['referrer'],
-    sentinel: rawContext['sentinel'],
-    sourceUrl: rawContext['sourceUrl'],
-    startTime: rawContext['startTime'],
-    tagName: rawContext['tagName'],
-  };
-};
-
-
-/**
- * @return {string}
- */
-export function getEmbedType() {
-  return getAttributeData()['type'];
+  /** @return {?string} */
+  getSentinelOptional() {
+    return this.obj_['context']['sentinel'] || null;
+  }
 }

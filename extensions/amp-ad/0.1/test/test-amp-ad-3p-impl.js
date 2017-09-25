@@ -85,12 +85,12 @@ describes.realWin('amp-ad-3p-impl', {
         expect(iframe.style.display).to.equal('');
 
         expect(url).to.match(/frame(.max)?.html/);
-        const data = JSON.parse(iframe.name).attributes;
-        expect(data).to.have.property('type', '_ping_');
-        expect(data).to.have.property('src', 'https://testsrc');
-        expect(data).to.have.property('width', 300);
-        expect(data).to.have.property('height', 250);
-        expect(data._context.canonicalUrl).to.equal('https://canonical.url/');
+        const data = JSON.parse(iframe.name);
+        expect(data.attributes).to.have.property('type', '_ping_');
+        expect(data.attributes).to.have.property('src', 'https://testsrc');
+        expect(data.attributes).to.have.property('width', 300);
+        expect(data.attributes).to.have.property('height', 250);
+        expect(data.context.canonicalUrl).to.equal('https://canonical.url/');
       });
     });
 
@@ -113,10 +113,10 @@ describes.realWin('amp-ad-3p-impl', {
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
         expect(frame).to.be.ok;
-        const data = JSON.parse(frame.name).attributes;
+        const data = JSON.parse(frame.name);
         expect(data).to.be.ok;
-        expect(data._context).to.be.ok;
-        expect(data._context.clientId).to.equal('sentinel123');
+        expect(data.context).to.be.ok;
+        expect(data.context.clientId).to.equal('sentinel123');
       });
     });
 
@@ -127,10 +127,10 @@ describes.realWin('amp-ad-3p-impl', {
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
         expect(frame).to.be.ok;
-        const data = JSON.parse(frame.name).attributes;
+        const data = JSON.parse(frame.name);
         expect(data).to.be.ok;
-        expect(data._context).to.be.ok;
-        expect(data._context.clientId).to.equal(null);
+        expect(data.context).to.be.ok;
+        expect(data.context.clientId).to.not.be.ok;
       });
     });
 
@@ -172,10 +172,10 @@ describes.realWin('amp-ad-3p-impl', {
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
         expect(frame).to.be.ok;
-        const data = JSON.parse(frame.name).attributes;
+        const data = JSON.parse(frame.name);
         expect(data).to.be.ok;
-        expect(data._context).to.be.ok;
-        expect(data._context.container).to.equal('AMP-STICKY-AD');
+        expect(data.context).to.be.ok;
+        expect(data.context.container).to.equal('AMP-STICKY-AD');
       });
     });
 

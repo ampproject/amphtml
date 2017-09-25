@@ -237,22 +237,28 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     user().assert(!this.isInFixedContainer_,
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
-    this.layoutPromise_ = getAdCid(this).then(cid => {
-      const opt_context = {
-        clientId: cid || null,
-        container: this.container_,
-      };
-
+    this.layoutPromise_ = getAdCid(this).then(clientId => {
       // In this path, the request and render start events are entangled,
       // because both happen inside a cross-domain iframe.  Separating them
       // here, though, allows us to measure the impact of ad throttling via
       // incrementLoadingAds().
       this.emitLifecycleEvent('adRequestStart');
-      const iframe = getIframe(toWin(this.element.ownerDocument.defaultView),
-          this.element, this.type_, opt_context,
-          this.config.remoteHTMLDisabled);
-      this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(
-          this);
+
+      const metadata = {clientId};
+
+      if (this.container_) {
+        metadata.container = dev().assert(this.container_);
+      }
+
+      const iframe = getIframe(
+          toWin(this.element.ownerDocument.defaultView),
+          this.element,
+          this.type_,
+          metadata,
+          /* opt_disallowCustom */ this.config.remoteHTMLDisabled);
+
+      this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
+
       return this.xOriginIframeHandler_.init(iframe);
     });
     incrementLoadingAds(this.win, this.layoutPromise_);

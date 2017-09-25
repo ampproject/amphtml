@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {AbstractAmpContext} from './ampcontext';
+import {FrameMetadata} from './frame-metadata';
 import {computeInMasterFrame} from './3p';
 import {dev, user} from '../src/log';
 import {dict} from '../src/utils/object';
@@ -54,6 +55,13 @@ export function masterSelection(win, type) {
 
 
 export class IntegrationAmpContext extends AbstractAmpContext {
+  /**
+   * @param {!Window} win
+   * @return {!IntegrationAmpContext}
+   */
+  static create(win) {
+    return new IntegrationAmpContext(win, FrameMetadata.fromWindowName());
+  }
 
   /** @override */
   isAbstractImplementation_() {
