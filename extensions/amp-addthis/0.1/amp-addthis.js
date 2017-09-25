@@ -30,12 +30,12 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyles} from '../../../src/style';
-import {removeElement} from '../../../src/dom';
+import {setStyle} from '../../../src/style';
+import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 import {ConfigManager} from './ConfigManager';
-import {WIDGET_ID_PROP, ORIGIN, ICON_SIZE, ALT_TEXT} from './constants';
+import {ORIGIN, ICON_SIZE, ALT_TEXT} from './constants';
 
 // This `configManager` will be shared by all AmpAddThis elements on a page, to prevent unnecessary
 // HTTP requests, get accurate analytics, etc.
@@ -111,22 +111,27 @@ class AmpAddThis extends AMP.BaseElement {
   createPlaceholderCallback() {
     const {win} = this;
 
-    const placeholder = win.document.createElement('div');
-    placeholder.setAttribute('placeholder', '');
-    setStyles(placeholder, {
-      'background-color': '#eee',
-    });
-
-    const image = win.document.createElement('amp-img');
-    image.setAttribute(
-        'src',
-        `https://cache.addthiscdn.com/icons/v3/thumbs/${ICON_SIZE}x${ICON_SIZE}/addthis.png`
+    const placeholder = createElementWithAttributes(
+        win.document,
+        'div',
+        /** @type !JsonObject */ ({
+          placeholder: '',
+        })
     );
-    image.setAttribute('layout', 'fixed');
-    image.setAttribute('width', ICON_SIZE);
-    image.setAttribute('height', ICON_SIZE);
-    image.setAttribute('referrerpolicy', 'origin');
-    image.setAttribute('alt', ALT_TEXT);
+    setStyle(placeholder, 'background-color', '#eee');
+
+    const image = createElementWithAttributes(
+        win.document,
+        'amp-img',
+        /** @type !JsonObject */ ({
+          src: `https://cache.addthiscdn.com/icons/v3/thumbs/${ICON_SIZE}x${ICON_SIZE}/addthis.png`,
+          layout: 'fixed',
+          width: ICON_SIZE,
+          height: ICON_SIZE,
+          referrerpolicy: 'origin',
+          alt: ALT_TEXT,
+        })
+    );
 
     placeholder.appendChild(image);
     return placeholder;
@@ -142,14 +147,16 @@ class AmpAddThis extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('title', ALT_TEXT);
-    iframe.src = `${ORIGIN}/dc/amp-addthis.html`;
-    iframe[WIDGET_ID_PROP] = this.widgetId_;
-    setStyles(iframe, {
-      'margin-bottom': '-5px',
-    });
+    const iframe = createElementWithAttributes(
+        /** @type !Document */ (this.element.ownerDocument),
+        'iframe',
+        /** @type !JsonObject */ ({
+          frameborder: 0,
+          title: ALT_TEXT,
+          src: `${ORIGIN}/dc/amp-addthis.html`,
+        })
+    );
+    setStyle(iframe, 'margin-bottom', '-5px');
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
@@ -160,6 +167,7 @@ class AmpAddThis extends AMP.BaseElement {
       iframeLoadPromise: this.iframeLoadPromise_,
       element: this.element,
       pubId: this.pubId_,
+      widgetId: this.widgetId_,
       win: this.win,
     });
 
