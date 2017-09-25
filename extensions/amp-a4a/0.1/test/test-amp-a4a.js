@@ -622,7 +622,7 @@ describe('amp-a4a', () => {
       });
 
       it('should use safeframe version header value', () => {
-        a4a.safeframeVersion_ = '1-2-3';
+        a4a.safeframeVersion = '1-2-3';
         return a4a.layoutCallback().then(() => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
