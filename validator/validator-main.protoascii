@@ -25,9 +25,10 @@ min_validator_revision_required: 246
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 481
+spec_file_revision: 483
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
+script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 
 # Validator extensions.
 # =====================
@@ -3311,6 +3312,8 @@ attr_lists: {
 }
 tags: {  # <amp-img>
   tag_name: "AMP-IMG"
+  # <amp-img> is whitelisted for <amp-sidebar>, otherwise:
+  # disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
@@ -3333,6 +3336,7 @@ tags: {  # <amp-img>
 }
 tags: {  # <amp-pixel>
   tag_name: "AMP-PIXEL"
+  disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
     name: "referrerpolicy"
     value: "no-referrer"
@@ -3768,9 +3772,10 @@ error_specificity {
   code: BASE_TAG_MUST_PRECEED_ALL_URLS
   specificity: 75
 }
-error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 100 }
-error_specificity { code: DEPRECATED_ATTR specificity: 101 }
-error_specificity { code: DEPRECATED_TAG specificity: 102 }
+error_specificity { code: DISALLOWED_SCRIPT_TAG specificity: 100 }
+error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 101 }
+error_specificity { code: DEPRECATED_ATTR specificity: 102 }
+error_specificity { code: DEPRECATED_TAG specificity: 103 }
 error_specificity { code: DISALLOWED_MANUFACTURED_BODY specificity: 104 }
 error_specificity { code: DOCUMENT_TOO_COMPLEX specificity: 105 }
 error_specificity { code: INCORRECT_MIN_NUM_CHILD_TAGS specificity: 106 }
@@ -3822,6 +3827,10 @@ error_formats {
 error_formats {
   code: GENERAL_DISALLOWED_TAG
   format: "The tag '%1' is disallowed except in specific forms."
+}
+error_formats {
+  code: DISALLOWED_SCRIPT_TAG
+  format: "Only AMP runtime 'script' tags are allowed, and only in the document head."
 }
 error_formats {
   code: DISALLOWED_ATTR

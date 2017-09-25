@@ -4541,6 +4541,11 @@ class ParsedValidatorRules {
     return this.rules_.stylesSpecUrl;
   }
 
+  /** @return {?string} */
+  getScriptSpecUrl() {
+    return this.rules_.scriptSpecUrl;
+  }
+
   /**
    * @param {amp.validator.ValidationError.Code} error_code
    * @return {number}
@@ -5146,6 +5151,14 @@ amp.validator.ValidationHandler =
         if (amp.validator.LIGHT) {
           this.validationResult_.status =
               amp.validator.ValidationResult.Status.FAIL;
+        } else if (tagName === 'SCRIPT') {
+          // Special case for <script> tags to produce better error messages.
+          this.context_.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.DISALLOWED_SCRIPT_TAG,
+              this.context_.getDocLocator(),
+              /* params */[], this.rules_.getScriptSpecUrl(),
+              this.validationResult_);
         } else {
           this.context_.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -5666,6 +5679,11 @@ amp.validator.categorizeError = function(error) {
   if (error.code ===
           amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG &&
       error.params[0] === 'script') {
+    return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
+  }
+  // E.g. "Only AMP runtime 'script' tags are allowed, and only in the document
+  // head."
+  if (error.code === amp.validator.ValidationError.Code.DISALLOWED_SCRIPT_TAG) {
     return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
   }
   // E.g.: "The attribute 'type' in tag 'script type=application/ld+json'
