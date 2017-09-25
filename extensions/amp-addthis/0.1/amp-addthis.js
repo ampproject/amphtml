@@ -16,15 +16,15 @@
 
 /**
  * @fileoverview Embeds an AddThis widget.
- * The data-pubId and data-widgetId can be found easily in the AddThis dashboard at addthis.com.
+ * The data-pub-id and data-widget-id can be found easily in the AddThis dashboard at addthis.com.
  * Example:
  * <code>
  * <amp-addthis
  *   width="320"
  *   height="92"
  *   layout="responsive"
- *   data-pubId="ra-59c2c366435ef478"
- *   data-widgetId="0fyg">
+ *   data-pub-id="ra-59c2c366435ef478"
+ *   data-widget-id="0fyg">
  * </amp-addthis>
  * </code>
  */
@@ -91,19 +91,19 @@ class AmpAddThis extends AMP.BaseElement {
    */
   buildCallback() {
     const {element} = this;
-    const pubId = element.getAttribute('data-pubId') ||
-        element.getAttribute('pubId');
-    const widgetId = element.getAttribute('data-widgetId') ||
-        element.getAttribute('widgetId');
+    const pubId = element.getAttribute('data-pub-id') ||
+        element.getAttribute('pub-id');
+    const widgetId = element.getAttribute('data-widget-id') ||
+        element.getAttribute('widget-id');
 
     this.pubId_ = user().assert(
         pubId,
-        'The data-pubId attribute is required for <amp-addthis> %s',
+        'The data-pub-id attribute is required for <amp-addthis> %s',
         element
     );
     this.widgetId_ = user().assert(
         widgetId,
-        'The data-widgetId attribute is required for <amp-addthis> %s',
+        'The data-widget-id attribute is required for <amp-addthis> %s',
         element
     );
   }

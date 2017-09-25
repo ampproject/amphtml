@@ -47,8 +47,8 @@ describes.realWin('amp-addthis', {
         doc,
         'amp-addthis',
         /** @type !JsonObject */ ({
-          'data-pubId': pubId,
-          'data-widgetId': widgetId,
+          'data-pub-id': pubId,
+          'data-widget-id': widgetId,
           width: 111,
           height: 222,
         })
@@ -92,15 +92,15 @@ describes.realWin('amp-addthis', {
     });
   });
 
-  it('requires data-pubId', () => {
+  it('requires data-pub-id', () => {
     expect(getAT('', widgetId)).to.be.rejectedWith(
-        /The data\-pubId attribute is required for/
+        /The data\-pub\-id attribute is required for/
     );
   });
 
-  it('requires data-widgetId', () => {
+  it('requires data-widget-id', () => {
     expect(getAT('ra-12345', '')).to.be.rejectedWith(
-        /The data\-widgetId attribute is required for/
+        /The data\-widget\-id attribute is required for/
     );
   });
 
