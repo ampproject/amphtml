@@ -18,7 +18,6 @@ import {MessageType} from '../../../../src/3p-frame-messaging';
 import {
   IframeTransportClient,
 } from '../../../../3p/iframe-transport-client';
-import {dev, user} from '../../../../src/log';
 import {adopt} from '../../../../src/runtime';
 import * as sinon from 'sinon';
 
@@ -31,26 +30,14 @@ function createUniqueId() {
 
 describe('iframe-transport-client', () => {
   let sandbox;
-  let badAssertsCounterStub;
   let iframeTransportClient;
   let sentinel;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    badAssertsCounterStub = sandbox.stub();
     sentinel = createUniqueId();
-    window.name = '{"sentinel": "' + sentinel + '"}';
+    window.name = JSON.stringify({sentinel, type: 'some-vendor'});
     iframeTransportClient = new IframeTransportClient(window);
-    sandbox.stub(dev(), 'assert', (condition, msg) => {
-      if (!condition) {
-        badAssertsCounterStub(msg);
-      }
-    });
-    sandbox.stub(user(), 'assert', (condition, msg) => {
-      if (!condition) {
-        badAssertsCounterStub(msg);
-      }
-    });
   });
 
   afterEach(() => {
@@ -80,7 +67,27 @@ describe('iframe-transport-client', () => {
     expect(() => {
       window.name = '';
       new IframeTransportClient(window);
-    }).to.throw(/Cannot read property 'sentinel' of undefined/);
+    }).to.throw(/Cannot read property/);
+    window.name = oldWindowName;
+  });
+
+  it('fails to create iframeTransportClient if window.name is missing' +
+    ' sentinel', () => {
+    const oldWindowName = window.name;
+    expect(() => {
+      window.name = JSON.stringify({type: 'some-vendor'});
+      new IframeTransportClient(window);
+    }).to.throw(/missing sentinel/);
+    window.name = oldWindowName;
+  });
+
+  it('fails to create iframeTransportClient if window.name is missing' +
+    ' type', () => {
+    const oldWindowName = window.name;
+    expect(() => {
+      window.name = JSON.stringify({sentinel});
+      new IframeTransportClient(window);
+    }).to.throw(/must supply vendor name/);
     window.name = oldWindowName;
   });
 
