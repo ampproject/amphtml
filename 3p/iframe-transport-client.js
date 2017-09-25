@@ -17,7 +17,6 @@
 import {tryParseJson} from '../src/json';
 import {dev, user} from '../src/log';
 import {MessageType} from '../src/3p-frame-messaging';
-import {dict} from '../src/utils/object';
 import {IframeMessagingClient} from './iframe-messaging-client';
 
 /** @private @const {string} */
@@ -37,11 +36,20 @@ export class IframeTransportClient {
     /** @private {Object<string,IframeTransportContext>} */
     this.creativeIdToContext_ = {};
 
+    const parsedFrameName = tryParseJson(this.win_.name);
+
+    /** @private {string} */
+    this.vendor_ = dev().assertString(parsedFrameName['type'],
+        'Parent frame must supply vendor name as type in ' +
+        this.win_.location.href);
+    dev().assert(this.vendor_.length > 0, 'Vendor name cannot be empty in ' +
+        this.win_.location.href);
+
     /** @protected {!IframeMessagingClient} */
     this.iframeMessagingClient_ = new IframeMessagingClient(win);
     this.iframeMessagingClient_.setHostWindow(this.win_.parent);
     this.iframeMessagingClient_.setSentinel(dev().assertString(
-        tryParseJson(this.win_.name)['sentinel'],
+        parsedFrameName['sentinel'],
         'Invalid/missing sentinel on iframe name attribute' + this.win_.name));
     this.iframeMessagingClient_.makeRequest(
         MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
@@ -53,20 +61,19 @@ export class IframeTransportClient {
            *   {!Array<../src/3p-frame-messaging.IframeTransportEvent>}
            */
           (eventData['events']);
-          user().assert(events,
+          dev().assert(events,
               'Received malformed events list in ' + this.win_.location.href);
           dev().assert(events.length,
               'Received empty events list in ' + this.win_.location.href);
           events.forEach(event => {
             try {
-              user().assert(event.creativeId,
+              dev().assert(event.creativeId,
                   'Received malformed event in ' + this.win_.location.href);
-              const context = this.contextFor_(event.creativeId);
-              context.dispatch(event.message);
+              this.contextFor_(event.creativeId).dispatch(event.message);
             } catch (e) {
               user().error(TAG_,
                   'Exception in callback passed to onAnalyticsEvent: ' +
-              e.message);
+                  e);
             }
           });
         });
@@ -76,15 +83,14 @@ export class IframeTransportClient {
    * Retrieves/creates a context object to pass events pertaining to a
    * particular creative.
    * @param {string} creativeId The ID of the creative
-   * @returns {IframeTransportContext}
+   * @returns {!IframeTransportContext}
    * @private
    */
   contextFor_(creativeId) {
-    const vendor = tryParseJson(this.win_.name)['type'];
     return this.creativeIdToContext_[creativeId] ||
         (this.creativeIdToContext_[creativeId] =
             new IframeTransportContext(this.win_, this.iframeMessagingClient_,
-            creativeId, vendor));
+            creativeId, this.vendor_));
   }
 
   /**
@@ -102,23 +108,26 @@ export class IframeTransportClient {
  */
 class IframeTransportContext {
   /**
+   * @param {!Window} win
+   * @param {!IframeMessagingClient} iframeMessagingClient
    * @param {string} creativeId The ID of the creative that the event
    *     pertains to.
    * @param {string} vendor The 3p vendor name
    */
   constructor(win, iframeMessagingClient, creativeId, vendor) {
-    this.win_ = win;
+    /** @private {!IframeMessagingClient} */
     this.iframeMessagingClient_ = iframeMessagingClient;
-    this.creativeId_ = creativeId;
-    this.vendor_ = vendor;
+
+    /** @private @const {!Object} */
+    this.baseMessage_ = {creativeId, vendor};
 
     /** @private {?function(string)} */
     this.listener_ = null;
 
-    user().assert(this.win_.onNewAmpAnalyticsInstance,
+    user().assert(win['onNewAmpAnalyticsInstance'],
         'Must implement onNewAmpAnalyticsInstance in ' +
-        this.win_.location.href);
-    this.win_.onNewAmpAnalyticsInstance(this);
+        win.location.href);
+    win['onNewAmpAnalyticsInstance'](this);
   }
 
   /**
@@ -143,15 +152,12 @@ class IframeTransportContext {
 
   /**
    * Sends a response message back to the creative.
-   * @param {!Object<string,string>} response
+   * @param {!Object<string,string>} message
    */
-  sendResponseToCreative(response) {
+  sendResponseToCreative(message) {
     this.iframeMessagingClient_./*OK*/sendMessage(
         MessageType.IFRAME_TRANSPORT_RESPONSE,
-        dict({
-          'creativeId': this.creativeId_,
-          'vendor': this.vendor_,
-          'message': response,
-        }));
+        /** @type {!JsonObject} */
+        (Object.assign({}, message, this.baseMessage_)));
   }
 }
