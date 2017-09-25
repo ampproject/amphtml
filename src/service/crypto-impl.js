@@ -30,11 +30,22 @@ export class Crypto {
     /** @private {!Window} */
     this.win_ = win;
 
+    let subtle = null;
+    let isLegacyWebkit = false;
+    if (win.crypto) {
+      if (win.crypto.subtle) {
+        subtle = win.crypto.subtle;
+      } else if (win.crypto.webkitSubtle) {
+        subtle = win.crypto.webkitSubtle;
+        isLegacyWebkit = true;
+      }
+    }
+
     /** @private @const {?webCrypto.SubtleCrypto} */
-    this.subtle_ = getSubtle(win);
+    this.subtle_ = subtle;
 
     /** @private @const {boolean} */
-    this.isWebkit_ = this.subtle_ && win.crypto && 'webkitSubtle' in win.crypto;
+    this.isLegacyWebkit_ = isLegacyWebkit;
 
     /** @private {?Promise<{sha384: function((string|Uint8Array))}>} */
     this.polyfillPromise_ = null;
@@ -149,8 +160,8 @@ export class Crypto {
     return /** @type {!Promise<!webCrypto.CryptoKey>} */ (
         this.subtle_.importKey(
             'jwk',
-            this.isWebkit_ ?
-                // WebKit wants this as an ArrayBufferView.
+            this.isLegacyWebkit_ ?
+                // Safari 10 and earlier want this as an ArrayBufferView.
                 utf8EncodeSync(JSON.stringify(
                     /** @type {!JsonObject} */ (jwk))) :
                 /** @type {!webCrypto.JsonWebKey} */ (jwk),
@@ -188,13 +199,6 @@ export class Crypto {
     return /** @type {!Promise<!ArrayBuffer>} */ (
         this.subtle_.digest({name: 'SHA-1'}, input));
   }
-}
-
-function getSubtle(win) {
-  if (!win.crypto) {
-    return null;
-  }
-  return win.crypto.subtle || win.crypto.webkitSubtle || null;
 }
 
 /**
