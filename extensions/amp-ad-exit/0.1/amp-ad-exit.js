@@ -56,6 +56,8 @@ export class AmpAdExit extends AMP.BaseElement {
       image: true,
     };
 
+    this.userFilters_ = {};
+
     this.registerAction('exit', this.exit.bind(this));
   }
 
@@ -101,7 +103,8 @@ export class AmpAdExit extends AMP.BaseElement {
       for (const customVar in target.vars) {
         if (customVar[0] == '_') {
           vars[customVar] = () =>
-              args[customVar] || target.vars[customVar].defaultValue;
+              args[customVar] == undefined ?
+                target.vars[customVar].defaultValue : args[customVar];
           whitelist[customVar] = true;
         }
       }
@@ -153,7 +156,7 @@ export class AmpAdExit extends AMP.BaseElement {
     this.element.setAttribute('aria-hidden', 'true');
 
     this.defaultFilters_.push(
-        createFilter('minDelay', makeClickDelaySpec(1000)));
+        createFilter('minDelay', makeClickDelaySpec(1000), this));
 
     const children = this.element.children;
     user().assert(children.length == 1,
@@ -165,9 +168,10 @@ export class AmpAdExit extends AMP.BaseElement {
         'be inside a <script> tag with type="application/json"');
     try {
       const config = assertConfig(parseJson(child.textContent));
-      const userFilters = {};
+      // const userFilters = {};
       for (const name in config.filters) {
-        userFilters[name] = createFilter(name, config.filters[name]);
+        this.userFilters_[name] =
+            createFilter(name, config.filters[name], this);
       }
       for (const name in config.targets) {
         const target = config.targets[name];
@@ -176,13 +180,14 @@ export class AmpAdExit extends AMP.BaseElement {
           trackingUrls: target.trackingUrls || [],
           vars: target.vars || {},
           filters:
-              (target.filters || []).map(f => userFilters[f]).filter(f => f),
+              (target.filters || []).map(
+                  f => this.userFilters_[f]).filter(f => f),
         };
       }
       this.transport_.beacon = config.transport[TransportMode.BEACON] !== false;
       this.transport_.image = config.transport[TransportMode.IMAGE] !== false;
     } catch (e) {
-      user().error(TAG, 'Invalid JSON config', e);
+      this.user().error(TAG, 'Invalid JSON config', e);
       throw e;
     }
   }
@@ -191,6 +196,16 @@ export class AmpAdExit extends AMP.BaseElement {
   isLayoutSupported(unused) {
     return true;
   }
+
+  /** @override */
+  onLayoutMeasure() {
+    for (const name in this.userFilters_) {
+      this.userFilters_[name].onLayoutMeasure();
+    }
+  }
 }
 
-AMP.registerElement('amp-ad-exit', AmpAdExit);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAdExit);
+});

@@ -21,7 +21,7 @@ import {user} from '../../src/log';
 import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
-} from '../../src/custom-element';
+} from '../../src/service/custom-element-registry';
 import {cidServiceForDocForTesting} from
     '../../src/service/cid-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
@@ -39,7 +39,10 @@ import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 import * as trackPromise from '../../src/impression';
-import {stubServiceForDoc} from '../../testing/test-helper';
+import {
+  stubServiceForDoc,
+  mockWindowInterface,
+} from '../../testing/test-helper';
 
 
 describes.sandboxed('UrlReplacements', {}, () => {
@@ -200,6 +203,59 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace DOCUMENT_REFERRER', () => {
     return expandAsync('?ref=DOCUMENT_REFERRER').then(res => {
       expect(res).to.equal('?ref=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html');
+    });
+  });
+
+  it('should replace EXTERNAL_REFERRER', () => {
+    const windowInterface = mockWindowInterface(sandbox);
+    windowInterface.getHostname.returns('different.org');
+    return getReplacements().then(replacements => {
+      stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
+          .returns(Promise.resolve('http://example.org/page.html'));
+      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+    }).then(res => {
+      expect(res).to.equal('?ref=http%3A%2F%2Fexample.org%2Fpage.html');
+    });
+  });
+
+  it('should replace EXTERNAL_REFERRER to empty string ' +
+      'if referrer is of same domain', () => {
+    const windowInterface = mockWindowInterface(sandbox);
+    windowInterface.getHostname.returns('example.org');
+    return getReplacements().then(replacements => {
+      stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
+          .returns(Promise.resolve('http://example.org/page.html'));
+      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+    }).then(res => {
+      expect(res).to.equal('?ref=');
+    });
+  });
+
+  it('should replace EXTERNAL_REFERRER to empty string ' +
+      'if referrer is CDN proxy of same domain', () => {
+    const windowInterface = mockWindowInterface(sandbox);
+    windowInterface.getHostname.returns('example.org');
+    return getReplacements().then(replacements => {
+      stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
+          .returns(Promise.resolve(
+              'https://example-org.cdn.ampproject.org/v/example.org/page.html'));
+      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+    }).then(res => {
+      expect(res).to.equal('?ref=');
+    });
+  });
+
+  it('should replace EXTERNAL_REFERRER to empty string ' +
+      'if referrer is CDN proxy of same domain (before CURLS)', () => {
+    const windowInterface = mockWindowInterface(sandbox);
+    windowInterface.getHostname.returns('example.org');
+    return getReplacements().then(replacements => {
+      stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
+          .returns(Promise.resolve(
+              'https://cdn.ampproject.org/v/example.org/page.html'));
+      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+    }).then(res => {
+      expect(res).to.equal('?ref=');
     });
   });
 
@@ -369,6 +425,19 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return expandAsync('?ts=TIMESTAMP').then(res => {
       expect(res).to.match(/ts=\d+/);
     });
+  });
+
+  it('should replace TIMESTAMP_ISO', () => {
+    return expandAsync('?tsf=TIMESTAMP_ISO').then(res => {
+      expect(res).to.match(/tsf=\d+/);
+    });
+  });
+
+  it('should return correct ISO timestamp', () => {
+    const fakeTime = 1499979336612;
+    sandbox.useFakeTimers(fakeTime);
+    return expect(expandAsync('?tsf=TIMESTAMP_ISO'))
+        .to.eventually.equal('?tsf=2017-07-13T20%3A55%3A36.612Z');
   });
 
   it('should replace TIMEZONE', () => {
@@ -999,7 +1068,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
         const replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
         replacements.getVariableSource().getAccessService_ = ampdoc => {
-          expect(ampdoc.isSingleDoc).to.be.function;
+          expect(ampdoc.isSingleDoc).to.be.a('function');
           if (opt_disabled) {
             return Promise.resolve(null);
           }

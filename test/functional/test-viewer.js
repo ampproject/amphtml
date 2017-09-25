@@ -865,7 +865,7 @@ describe('Viewer', () => {
     describe('when in webview', () => {
       it('should decide trusted on connection with origin', () => {
         windowApi.parent = windowApi;
-        windowApi.location.hash = '#webview=1';
+        windowApi.location.hash = '#webview=1&origin=other';
         windowApi.location.ancestorOrigins = [];
         const viewer = new Viewer(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://google.com');
@@ -874,9 +874,21 @@ describe('Viewer', () => {
         });
       });
 
-      it('should NOT allow channel without origin', () => {
+      it('should decide non-trusted w/o origin param', () => {
+        // TODO(dvoytenko, #10991): Remove "origin" parameter check once all
+        // clients properly implement handshake.
         windowApi.parent = windowApi;
         windowApi.location.hash = '#webview=1';
+        windowApi.location.ancestorOrigins = [];
+        const viewer = new Viewer(ampdoc);
+        return viewer.isTrustedViewer().then(res => {
+          expect(res).to.be.false;
+        });
+      });
+
+      it('should NOT allow channel without origin', () => {
+        windowApi.parent = windowApi;
+        windowApi.location.hash = '#webview=1&origin=other';
         windowApi.location.ancestorOrigins = [];
         const viewer = new Viewer(ampdoc);
         expect(() => {
@@ -886,7 +898,7 @@ describe('Viewer', () => {
 
       it('should decide non-trusted on connection with wrong origin', () => {
         windowApi.parent = windowApi;
-        windowApi.location.hash = '#webview=1';
+        windowApi.location.hash = '#webview=1&origin=other';
         windowApi.location.ancestorOrigins = [];
         const viewer = new Viewer(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
@@ -897,7 +909,7 @@ describe('Viewer', () => {
 
       it('should NOT give precedence to ancestor', () => {
         windowApi.parent = windowApi;
-        windowApi.location.hash = '#webview=1';
+        windowApi.location.hash = '#webview=1&origin=other';
         windowApi.location.ancestorOrigins = ['https://google.com'];
         const viewer = new Viewer(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');

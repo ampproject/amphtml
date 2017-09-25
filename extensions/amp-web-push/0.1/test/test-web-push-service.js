@@ -18,13 +18,12 @@ import {WindowMessenger} from '../window-messenger';
 import {AmpWebPushHelperFrame} from '../amp-web-push-helper-frame';
 import {WebPushService} from '../web-push-service';
 import {WebPushWidgetVisibilities} from '../amp-web-push-widget';
-import {TAG, NotificationPermission} from '../vars';
-import {toggleExperiment} from '../../../../src/experiments';
+import {NotificationPermission} from '../vars';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
-import * as sinon from 'sinon';
 
 const FAKE_IFRAME_URL =
   '//ads.localhost:9876/test/fixtures/served/iframe-stub.html#';
+
 
 describes.realWin('web-push-service environment support', {
   amp: true,
@@ -32,12 +31,7 @@ describes.realWin('web-push-service environment support', {
   let webPush;
 
   beforeEach(() => {
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
-  });
-
-  afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
   });
 
   it('should report supported environment', () => {
@@ -73,7 +67,21 @@ describes.realWin('web-push-service environment support', {
     });
     expect(webPush.environmentSupportsWebPush()).to.eq(false);
   });
+
+  it('an unsupported environment should prevent initializing', () => {
+    // Cause push to not be supported on this environment
+    Object.defineProperty(env.win, 'PushManager', {
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value: undefined,
+    });
+    // Should not error out
+    return webPush.start().should.eventually.be
+        .rejectedWith(/Web push is not supported/);
+  });
 });
+
 
 describes.realWin('web-push-service helper frame messaging', {
   amp: true,
@@ -81,7 +89,6 @@ describes.realWin('web-push-service helper frame messaging', {
   let webPush;
   const webPushConfig = {};
   let iframeWindow = null;
-  let sandbox = null;
 
   function setDefaultConfigParams_() {
     webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] =
@@ -124,14 +131,7 @@ describes.realWin('web-push-service helper frame messaging', {
 
   beforeEach(() => {
     setDefaultConfigParams_();
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
-    sandbox.restore();
   });
 
   it('should create helper iframe on document', () => {
@@ -150,13 +150,13 @@ describes.realWin('web-push-service helper frame messaging', {
   });
 });
 
+
 describes.realWin('web-push-service widget visibilities', {
   amp: true,
 }, env => {
   let webPush;
   const webPushConfig = {};
   let iframeWindow = null;
-  let sandbox = null;
 
   function setDefaultConfigParams_() {
     webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] =
@@ -199,14 +199,7 @@ describes.realWin('web-push-service widget visibilities', {
 
   beforeEach(() => {
     setDefaultConfigParams_();
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
-    sandbox.restore();
   });
 
   it('should show blocked widget if permission query returns blocked', () => {
@@ -366,7 +359,6 @@ describes.realWin('web-push-service subscribing', {
   let webPush;
   const webPushConfig = {};
   let iframeWindow = null;
-  let sandbox = null;
 
   function setDefaultConfigParams_() {
     webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] =
@@ -409,14 +401,7 @@ describes.realWin('web-push-service subscribing', {
 
   beforeEach(() => {
     setDefaultConfigParams_();
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
-    sandbox.restore();
   });
 
   it('should register service worker', () => {
@@ -519,7 +504,6 @@ describes.realWin('web-push-service unsubscribing', {
   let webPush;
   const webPushConfig = {};
   let iframeWindow = null;
-  let sandbox = null;
 
   function setDefaultConfigParams_() {
     webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] =
@@ -562,14 +546,7 @@ describes.realWin('web-push-service unsubscribing', {
 
   beforeEach(() => {
     setDefaultConfigParams_();
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
-    sandbox.restore();
   });
 
   it('should forward amp-web-push-unsubscribe message to SW', done => {

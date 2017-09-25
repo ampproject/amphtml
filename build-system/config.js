@@ -15,7 +15,7 @@
  */
 'use strict';
 
-var commonTestPaths = [
+const commonTestPaths = [
   'test/_init_tests.js',
   'test/fixtures/*.html',
   {
@@ -48,21 +48,39 @@ var commonTestPaths = [
     nocache: false,
     watched: true,
   },
+  {
+    pattern: 'test/coverage/**/*',
+    included: false,
+    nocache: false,
+    watched: false,
+  },
 ];
 
-var testPaths = commonTestPaths.concat([
+const basicTestPaths = [
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
-]);
+];
 
-var unitTestPaths = commonTestPaths.concat([
+const testPaths = commonTestPaths.concat(basicTestPaths);
+
+const a4aTestPaths = [
+  'extensions/amp-a4a/**/test/**/*.js',
+  'extensions/amp-ad-network-*/**/test/**/*.js',
+  'ads/google/a4a/test/*.js',
+];
+
+const chaiAsPromised = [
+  'test/chai-as-promised/chai-as-promised.js',
+];
+
+const unitTestPaths = commonTestPaths.concat([
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/*.js',
 ]);
 
-var integrationTestPaths = commonTestPaths.concat([
+const integrationTestPaths = commonTestPaths.concat([
   'test/integration/**/*.js',
   'test/functional/test-error.js',
   'extensions/**/test/integration/**/*.js',
@@ -70,15 +88,19 @@ var integrationTestPaths = commonTestPaths.concat([
 
 /** @const  */
 module.exports = {
-  commonTestPaths: commonTestPaths,
-  testPaths: testPaths,
-  unitTestPaths: unitTestPaths,
-  integrationTestPaths: integrationTestPaths,
+  commonTestPaths,
+  basicTestPaths,
+  testPaths,
+  a4aTestPaths,
+  chaiAsPromised,
+  unitTestPaths,
+  integrationTestPaths,
   lintGlobs: [
     '**/*.js',
     '!**/*.extern.js',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
-        'third_party,build-system}/**/*.*',
+        'third_party}/**/*.*',
+    '!build-system/eslint-rules/**/*.*',
     '!{testing,examples}/**/*.*',
     // TODO: temporary, remove when validator is up to date
     '!validator/**/*.*',
@@ -89,6 +111,7 @@ module.exports = {
     '!extensions/amp-access/0.1/access-expr-impl.js',
     '!extensions/amp-animation/0.1/css-expr-impl.js',
     '!extensions/amp-bind/0.1/bind-expr-impl.js',
+    '!test/coverage/**/*.*',
   ],
   jsonGlobs: [
     '**/*.json',
@@ -117,6 +140,7 @@ module.exports = {
     // of the AMP runtime, so shouldn't be checked.
     '!extensions/amp-a4a/*/test/testdata/*.js',
     '!examples/*.js',
+    '!test/coverage/**/*.*',
   ],
-  changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
+  changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
 };

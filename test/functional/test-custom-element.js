@@ -14,65 +14,19 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
 import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
-import {ElementStub, setLoadingCheckForTests} from '../../src/element-stub';
+import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
-import {installDocumentStateService} from '../../src/service/document-state';
-import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
-import {poll} from '../../testing/iframe';
 import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
-import {
-  copyElementToChildWindow,
-  createAmpElementProto,
-  getElementClassForTesting,
-  registerElement,
-  resetScheduledElementForTesting,
-  stubElementIfNotKnown,
-  stubElements,
-  upgradeOrRegisterElement,
-} from '../../src/custom-element';
-
-describes.realWin('CustomElement register', {amp: 1}, env => {
-
-  class ConcreteElement extends BaseElement {}
-
-  let win;
-
-  beforeEach(() => {
-    win = env.win;
-    setLoadingCheckForTests('amp-element1');
-    installResourcesServiceForDoc(window.document);
-  });
-
-  it('should go through stub/upgrade cycle', () => {
-    registerElement(win, 'amp-element1', ElementStub);
-    expect(getElementClassForTesting(win, 'amp-element1'))
-        .to.equal(ElementStub);
-
-    // Pre-download elements are created as ElementStub.
-    const element1 = win.document.createElement('amp-element1');
-    win.document.body.appendChild(element1);
-    expect(element1.implementation_).to.be.instanceOf(ElementStub);
-
-    // Post-download, elements are upgraded.
-    upgradeOrRegisterElement(win, 'amp-element1', ConcreteElement);
-    expect(getElementClassForTesting(win, 'amp-element1'))
-        .to.equal(ConcreteElement);
-    expect(element1.implementation_).to.be.instanceOf(ConcreteElement);
-
-    // Elements created post-download and immediately upgraded.
-    const element2 = win.document.createElement('amp-element1');
-    win.document.body.appendChild(element1);
-    expect(element2.implementation_).to.be.instanceOf(ConcreteElement);
-  });
-});
+import {createAmpElementProtoForTesting} from '../../src/custom-element';
+import {poll} from '../../testing/iframe';
+import * as lolex from 'lolex';
 
 
 describes.realWin('CustomElement', {amp: true}, env => {
-  let win, doc;
+  let win, doc, ampdoc;
   let resources;
   let resourcesMock;
   let clock;
@@ -149,6 +103,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    ampdoc = env.ampdoc;
     clock = lolex.install(win);
     resources = Services.resourcesForDoc(doc);
     resources.isBuildOn_ = true;
@@ -157,11 +112,14 @@ describes.realWin('CustomElement', {amp: true}, env => {
     doc.body.appendChild(container);
 
     ElementClass = doc.registerElement('amp-test', {
-      prototype: createAmpElementProto(win, 'amp-test', TestElement),
+      prototype: createAmpElementProtoForTesting(win, 'amp-test', TestElement),
     });
     StubElementClass = doc.registerElement('amp-stub', {
-      prototype: createAmpElementProto(win, 'amp-stub', ElementStub),
+      prototype: createAmpElementProtoForTesting(win, 'amp-stub', ElementStub),
     });
+    win.ampExtendedElements['amp-test'] = TestElement;
+    win.ampExtendedElements['amp-stub'] = ElementStub;
+    ampdoc.declareExtension_('amp-stub');
 
     testElementCreatedCallback = sandbox.spy();
     testElementPreconnectCallback = sandbox.spy();
@@ -406,6 +364,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     container.appendChild(element);
     expect(element.isUpgraded()).to.equal(true);
     expect(element.implementation_).to.equal(newImpl);
+    expect(element.upgradeDelayMs_).to.equal(0);
   });
 
   it('Element - re-upgrade to new promised instance', () => {
@@ -413,19 +372,21 @@ describes.realWin('CustomElement', {amp: true}, env => {
     expect(element.isUpgraded()).to.equal(false);
     const oldImpl = element.implementation_;
     const newImpl = new TestElement(element);
-    const promise = Promise.resolve(newImpl);
+    const promise = Services.timerFor(win).promise(10).then(() => newImpl);
     oldImpl.upgradeCallback = () => promise;
 
     container.appendChild(element);
     expect(element.implementation_).to.equal(oldImpl);
     expect(element.isUpgraded()).to.equal(false);
     expect(element.upgradeState_).to.equal(/* UPGRADE_IN_PROGRESS */ 4);
+    clock.tick(10);
     return promise.then(() => {
       // Skip a microtask.
     }).then(() => {
       expect(element.implementation_).to.equal(newImpl);
       expect(element.isUpgraded()).to.equal(true);
       expect(element.upgradeState_).to.equal(/* UPGRADED */ 2);
+      expect(element.upgradeDelayMs_).to.be.equal(10);
     });
   });
 
@@ -931,26 +892,27 @@ describes.realWin('CustomElement', {amp: true}, env => {
     expect(element2.style.width).to.equal('50vw');
   });
 
-  it('should apply heights condition', () => {
+  // TODO(dvoytenko): Enable after fixing #11400.
+  it.skip('should apply heights condition', () => {
     const element1 = new ElementClass();
-    element1.sizerElement_ = doc.createElement('div');
+    element1.sizerElement = doc.createElement('div');
     element1.setAttribute('layout', 'responsive');
     element1.setAttribute('width', '200px');
     element1.setAttribute('height', '200px');
     element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
     container.appendChild(element1);
     element1.applySizesAndMediaQuery();
-    expect(element1.sizerElement_.style.paddingTop).to.equal('99%');
+    expect(element1.sizerElement.style.paddingTop).to.equal('99%');
 
     const element2 = new ElementClass();
-    element2.sizerElement_ = doc.createElement('div');
+    element2.sizerElement = doc.createElement('div');
     element2.setAttribute('layout', 'responsive');
     element2.setAttribute('width', '200px');
     element2.setAttribute('height', '200px');
     element2.setAttribute('heights', '(min-width: 1111111px) 99%, 1%');
     container.appendChild(element2);
     element2.applySizesAndMediaQuery();
-    expect(element2.sizerElement_.style.paddingTop).to.equal('1%');
+    expect(element2.sizerElement.style.paddingTop).to.equal('1%');
   });
 
   it('should rediscover sizer to apply heights in SSR', () => {
@@ -963,10 +925,10 @@ describes.realWin('CustomElement', {amp: true}, env => {
     container.appendChild(element1);
 
     const sizer = doc.createElement('i-amphtml-sizer');
-    expect(element1.sizerElement_).to.be.undefined;
+    expect(element1.sizerElement).to.be.undefined;
     element1.appendChild(sizer);
     element1.applySizesAndMediaQuery();
-    expect(element1.sizerElement_).to.equal(sizer);
+    expect(element1.sizerElement).to.equal(sizer);
     expect(sizer.style.paddingTop).to.equal('99%');
   });
 
@@ -981,9 +943,9 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     const sizer = doc.createElement('i-amphtml-sizer');
     element1.appendChild(sizer);
-    element1.sizerElement_ = null;
+    element1.sizerElement = null;
     element1.applySizesAndMediaQuery();
-    expect(element1.sizerElement_).to.be.null;
+    expect(element1.sizerElement).to.be.null;
     expect(sizer.style.paddingTop).to.equal('');
   });
 
@@ -1054,10 +1016,10 @@ describes.realWin('CustomElement', {amp: true}, env => {
   it('should change size with sizer', () => {
     const element = new ElementClass();
     const sizer = doc.createElement('div');
-    element.sizerElement_ = sizer;
+    element.sizerElement = sizer;
     element.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
     expect(parseInt(sizer.style.paddingTop, 10)).to.equal(0);
-    expect(element.sizerElement_).to.be.null;
+    expect(element.sizerElement).to.be.null;
     expect(element.style.height).to.equal('111px');
     expect(element.style.width).to.equal('222px');
     expect(element.style.marginTop).to.equal('1px');
@@ -1157,18 +1119,41 @@ describes.realWin('CustomElement', {amp: true}, env => {
   });
 
   describe('pauseCallback', () => {
-    it('should pause upgraded element', () => {
+    it('should not pause unbuilt element', () => {
       const element = new ElementClass();
+      expect(element.isPaused()).to.be.false;
 
       // Non-built element doesn't receive pauseCallback.
       element.pauseCallback();
-      expect(testElementPauseCallback).to.have.not.been.called;
+      expect(element.isPaused()).to.be.true;
+      expect(testElementPauseCallback).to.not.be.called;
+    });
 
-      // Built element receives pauseCallback.
+    it('should pause upgraded element', () => {
+      const element = new ElementClass();
+      element.viewportCallback(true);
+      container.appendChild(element);
+      return element.buildingPromise_.then(() => {
+        expect(testElementViewportCallback).to.be.calledOnce;
+        expect(testElementViewportCallback).to.be.calledWith(true);
+        element.pauseCallback();
+        expect(testElementPauseCallback).to.be.calledOnce;
+        expect(testElementViewportCallback).to.be.calledTwice;
+        expect(testElementViewportCallback).to.be.calledWith(false);
+        expect(element.isPaused()).to.be.true;
+        expect(element.isInViewport()).to.be.false;
+      });
+    });
+
+    it('should only pause once', () => {
+      const element = new ElementClass();
       container.appendChild(element);
       return element.buildingPromise_.then(() => {
         element.pauseCallback();
         expect(testElementPauseCallback).to.be.calledOnce;
+        element.pauseCallback();
+        expect(testElementPauseCallback).to.be.calledOnce;
+        expect(element.isPaused()).to.be.true;
       });
     });
 
@@ -1184,6 +1169,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
   describe('resumeCallback', () => {
     it('should resume upgraded element', () => {
       const element = new ElementClass();
+      element.pauseCallback();
 
       // Non-built element doesn't receive resumeCallback.
       element.resumeCallback();
@@ -1192,8 +1178,22 @@ describes.realWin('CustomElement', {amp: true}, env => {
       // Built element receives resumeCallback.
       container.appendChild(element);
       return element.buildingPromise_.then(() => {
+        element.pauseCallback();
         element.resumeCallback();
         expect(testElementResumeCallback).to.be.calledOnce;
+      });
+    });
+
+    it('should resume upgraded element only once', () => {
+      const element = new ElementClass();
+      container.appendChild(element);
+      return element.buildingPromise_.then(() => {
+        element.pauseCallback();
+        element.resumeCallback();
+        expect(testElementResumeCallback).to.be.calledOnce;
+        element.resumeCallback();
+        expect(testElementResumeCallback).to.be.calledOnce;
+        expect(element.isPaused()).to.be.false;
       });
     });
 
@@ -1201,6 +1201,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       const element = new StubElementClass();
 
       // Unupgraded document doesn't receive resumeCallback.
+      element.pauseCallback();
       element.resumeCallback();
       expect(testElementResumeCallback).to.have.not.been.called;
     });
@@ -1214,7 +1215,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       expect(element.isBuilt()).to.equal(false);
       element.viewportCallback(true);
-      expect(element.isInViewport_).to.equal(true);
+      expect(element.isInViewport()).to.equal(true);
       expect(testElementViewportCallback).to.have.not.been.called;
     });
 
@@ -1226,7 +1227,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.isUpgraded()).to.equal(false);
       expect(element.isBuilt()).to.equal(false);
       element.viewportCallback(true);
-      expect(element.isInViewport_).to.equal(true);
+      expect(element.isInViewport()).to.equal(true);
       expect(testElementViewportCallback).to.have.not.been.called;
 
       resourcesMock.expects('upgraded').withExactArgs(element).never();
@@ -1324,8 +1325,9 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     StubElementClass = doc.registerElement('amp-stub2', {
-      prototype: createAmpElementProto(win, 'amp-stub2', ElementStub),
+      prototype: createAmpElementProtoForTesting(win, 'amp-stub2', ElementStub),
     });
+    env.ampdoc.declareExtension_('amp-stub2');
     element = new StubElementClass();
   });
 
@@ -1500,8 +1502,10 @@ describes.realWin('CustomElement Loading Indicator', {amp: true}, env => {
     doc = win.document;
     clock = lolex.install(win);
     ElementClass = doc.registerElement('amp-test-loader', {
-      prototype: createAmpElementProto(win, 'amp-test-loader', TestElement),
+      prototype: createAmpElementProtoForTesting(
+          win, 'amp-test-loader', TestElement),
     });
+    win.ampExtendedElements['amp-test-loader'] = TestElement;
     LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
     resources = Services.resourcesForDoc(doc);
     resources.isBuildOn_ = true;
@@ -1679,9 +1683,9 @@ describes.realWin('CustomElement Loading Indicator', {amp: true}, env => {
     }).to.throw(/Must never be called in template/);
   });
 
-
   it('should turn off when exits viewport', () => {
     stubInA4A(false);
+    element.isInViewport_ = true;
     const toggle = sandbox.spy(element, 'toggleLoading_');
     element.viewportCallback(false);
     expect(toggle).to.be.calledOnce;
@@ -1834,7 +1838,8 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     ElementClass = doc.registerElement('amp-test-overflow', {
-      prototype: createAmpElementProto(win, 'amp-test-overflow', TestElement),
+      prototype: createAmpElementProtoForTesting(
+          win, 'amp-test-overflow', TestElement),
     });
     resources = Services.resourcesForDoc(doc);
     resourcesMock = sandbox.mock(resources);
@@ -1918,142 +1923,5 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
 
     expect(overflowElement.onclick).to.not.exist;
     expect(overflowElement).to.not.have.class('amp-visible');
-  });
-
-  describe('no body', () => {
-
-    let elements;
-    let doc;
-    let win;
-    let elem1;
-    let setIntervalCallback;
-
-    beforeEach(() => {
-      elements = [];
-
-      doc = {
-        registerElement: sandbox.spy(),
-        documentElement: {
-          ownerDocument: doc,
-        },
-        head: {
-          querySelectorAll: selector => {
-            if (selector == 'script[custom-element]') {
-              return elements;
-            }
-            return [];
-          },
-        },
-        body: {},
-      };
-
-      elem1 = {
-        getAttribute: name => {
-          if (name == 'custom-element') {
-            return 'amp-test1';
-          }
-        },
-        ownerDocument: doc,
-      };
-      elements.push(elem1);
-
-      win = {
-        document: doc,
-        Object: {
-          create: proto => Object.create(proto),
-        },
-        HTMLElement,
-        setInterval: callback => {
-          setIntervalCallback = callback;
-        },
-        clearInterval: () => {
-        },
-        ampExtendedElements: {},
-      };
-      doc.defaultView = win;
-
-      installDocumentStateService(win);
-    });
-
-    afterEach(() => {
-      resetScheduledElementForTesting(win, 'amp-test1');
-      resetScheduledElementForTesting(win, 'amp-test2');
-    });
-
-    it('should be stub elements when body available', () => {
-      stubElements(win);
-
-      expect(win.ampExtendedElements).to.exist;
-      expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
-      expect(win.ampExtendedElements['amp-test2']).to.be.undefined;
-      expect(doc.registerElement).to.be.calledOnce;
-      expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
-      expect(setIntervalCallback).to.be.undefined;
-    });
-
-    it('should repeat stubbing when body is not available', () => {
-      doc.body = null;  // Body not available
-
-      stubElements(win);
-
-      expect(win.ampExtendedElements).to.exist;
-      expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
-      expect(win.ampExtendedElements['amp-test2']).to.be.undefined;
-      expect(doc.registerElement).to.be.calledOnce;
-      expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
-      expect(setIntervalCallback).to.exist;
-
-      // Add more elements
-      const elem2 = {
-        getAttribute: name => {
-          if (name == 'custom-element') {
-            return 'amp-test2';
-          }
-        },
-        ownerDocument: doc,
-      };
-      elements.push(elem2);
-      doc.body = {};
-      setIntervalCallback();
-
-      expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
-      expect(win.ampExtendedElements['amp-test2']).to.equal(ElementStub);
-      expect(doc.registerElement).to.have.callCount(2);
-      expect(doc.registerElement.getCall(1).args[0]).to.equal('amp-test2');
-    });
-
-    it('should stub element when not stubbed yet', () => {
-      // First stub is allowed.
-      stubElementIfNotKnown(win, 'amp-test1');
-
-      expect(win.ampExtendedElements).to.exist;
-      expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
-      expect(doc.registerElement).to.be.calledOnce;
-      expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
-
-      // Second stub is ignored.
-      stubElementIfNotKnown(win, 'amp-test1');
-      expect(doc.registerElement).to.be.calledOnce;
-    });
-
-    it('should copy or stub element definitions in a child window', () => {
-      stubElementIfNotKnown(win, 'amp-test1');
-
-      const registerElement = sandbox.spy();
-      const childWin = {Object, HTMLElement, document: {registerElement}};
-
-      copyElementToChildWindow(win, childWin, 'amp-test1');
-      expect(childWin.ampExtendedElements['amp-test1']).to.equal(ElementStub);
-      const firstCallCount = registerElement.callCount;
-      expect(firstCallCount).to.equal(1);
-      expect(registerElement.getCall(firstCallCount - 1).args[0])
-          .to.equal('amp-test1');
-
-      copyElementToChildWindow(win, childWin, 'amp-test2');
-      expect(childWin.ampExtendedElements['amp-test1']).to.equal(ElementStub);
-      expect(registerElement.callCount > firstCallCount).to.be.true;
-      expect(registerElement.getCall(registerElement.callCount - 1).args[0])
-          .to.equal('amp-test2');
-    });
   });
 });

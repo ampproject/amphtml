@@ -237,6 +237,10 @@ describe('Google A4A utils', () => {
       sandbox = sinon.sandbox.create();
     });
 
+    afterEach(() => {
+      sandbox.restore();
+    });
+
     it('should set ad position', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
@@ -272,16 +276,15 @@ describe('Google A4A utils', () => {
         });
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
-        impl.win.AMP_CONFIG = impl.win.AMP_CONFIG || {};
-        impl.win.AMP_CONFIG.canary = true;
+        impl.win.AMP_CONFIG = {type: 'canary'};
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.match(/art=2/);
+            expect(url1).to.match(/[&?]art=2/);
           });
         });
       });
     });
-    it('should not specify that this is canary', () => {
+    it('should specify that this is control', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
@@ -293,11 +296,49 @@ describe('Google A4A utils', () => {
         });
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
-        impl.win.AMP_CONFIG = impl.win.AMP_CONFIG || {};
-        impl.win.AMP_CONFIG.canary = false;
+        impl.win.AMP_CONFIG = {type: 'control'};
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.not.match(/art=2/);
+            expect(url1).to.match(/[&?]art=1/);
+          });
+        });
+      });
+    });
+    it('should not have `art` parameter when AMP_CONFIG is undefined', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = window;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+            expect(url1).to.not.match(/[&?]art=/);
+          });
+        });
+      });
+    });
+    it('should not have `art` parameter when binary type is production', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = window;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        impl.win.AMP_CONFIG = {type: 'production'};
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+            expect(url1).to.not.match(/[&?]art=/);
           });
         });
       });

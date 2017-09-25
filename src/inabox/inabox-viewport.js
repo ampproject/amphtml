@@ -16,21 +16,24 @@
 
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {Services} from '../services';
-import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
+import {Viewport} from '../service/viewport/viewport-impl';
+import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {registerServiceBuilderForDoc} from '../service';
 import {
-  nativeIntersectionObserverSupported,
-} from '../../src/intersection-observer-polyfill';
-import {layoutRectLtwh} from '../layout-rect';
+  layoutRectLtwh,
+  moveLayoutRect,
+} from '../layout-rect';
 import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
 import {px, setImportantStyles, resetStyles} from '../../src/style';
-
+import {throttle} from '../../src/utils/rate-limit';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
 
+/** @const {number} */
+const MIN_EVENT_INTERVAL = 100;
 
 /** @visibleForTesting */
 export function prepareBodyForOverlay(win, bodyElement) {
@@ -42,7 +45,7 @@ export function prepareBodyForOverlay(win, bodyElement) {
     mutate: state => {
       // We need to override runtime-level !important rules
       setImportantStyles(bodyElement, {
-        'background': 'transparent', // TODO(alanorozco): do this early
+        'background': 'transparent',
         'left': '50%',
         'top': '50%',
         'right': 'auto',
@@ -61,8 +64,8 @@ export function prepareBodyForOverlay(win, bodyElement) {
 /** @visibleForTesting */
 export function resetBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).mutatePromise(() => {
-    // we're not resetting background here as we need to set it to
-    // transparent permanently (see TODO)
+    // We're not resetting background here as it's supposed to remain
+    // transparent.
     resetStyles(bodyElement, [
       'position',
       'left',
@@ -126,6 +129,17 @@ export class ViewportBindingInabox {
     /** @private @const {!../../3p/iframe-messaging-client.IframeMessagingClient} */
     this.iframeClient_ = iframeMessagingClientFor(win);
 
+    /** @private {?Promise<!../layout-rect.LayoutRectDef>} */
+    this.requestPositionPromise_ = null;
+
+    /** @private {!../service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.win);
+
+    /** @private {function()} */
+    this.fireScrollThrottle_ = throttle(this.win, () => {
+      this.scrollObservable_.fire();
+    }, MIN_EVENT_INTERVAL);
+
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
@@ -136,26 +150,21 @@ export class ViewportBindingInabox {
 
   /** @private */
   listenForPosition_() {
-    if (nativeIntersectionObserverSupported(this.win)) {
-      // Using native IntersectionObserver, no position data needed
-      // from host doc.
-      return;
-    }
 
     this.iframeClient_.makeRequest(
         MessageType.SEND_POSITIONS, MessageType.POSITION,
         data => {
           dev().fine(TAG, 'Position changed: ', data);
           const oldViewportRect = this.viewportRect_;
-          this.viewportRect_ = data.viewport;
+          this.viewportRect_ = data.viewportRect;
 
-          this.updateBoxRect_(data.target);
+          this.updateBoxRect_(data.targetRect);
 
           if (isResized(this.viewportRect_, oldViewportRect)) {
             this.resizeObservable_.fire();
           }
           if (isMoved(this.viewportRect_, oldViewportRect)) {
-            this.scrollObservable_.fire();
+            this.fireScrollThrottle_();
           }
         });
   }
@@ -199,13 +208,17 @@ export class ViewportBindingInabox {
   }
 
   /**
-   * @param {!../layout-rect.LayoutRectDef|undefined} boxRect
+   * @param {?../layout-rect.LayoutRectDef|undefined} positionRect
    * @private
    */
-  updateBoxRect_(boxRect) {
-    if (!boxRect) {
+  updateBoxRect_(positionRect) {
+    if (!positionRect) {
       return;
     }
+
+    const boxRect = moveLayoutRect(positionRect, this.viewportRect_.left,
+        this.viewportRect_.top);
+
     if (isChanged(boxRect, this.boxRect_)) {
       dev().fine(TAG, 'Updating viewport box rect: ', boxRect);
 
@@ -238,6 +251,24 @@ export class ViewportBindingInabox {
     }
     return this.leaveOverlayMode_();
   }
+
+  /** @override */
+  getRootClientRectAsync() {
+    if (!this.requestPositionPromise_) {
+      this.requestPositionPromise_ = new Promise(resolve => {
+        this.iframeClient_.requestOnce(
+            MessageType.SEND_POSITIONS, MessageType.POSITION,
+            data => {
+              this.requestPositionPromise_ = null;
+              dev().assert(data.targetRect, 'Host should send targetRect');
+              resolve(data.targetRect);
+            }
+        );
+      });
+    }
+    return this.requestPositionPromise_;
+  }
+
 
   /**
    * @return {!Promise}

@@ -19,6 +19,7 @@ import {
   ADSENSE_A4A_EXPERIMENT_NAME,
   ADSENSE_EXPERIMENT_FEATURE,
   URL_EXPERIMENT_MAPPING,
+  fastFetchDelayedRequestEnabled,
 } from '../adsense-a4a-config';
 import {
   isInExperiment,
@@ -121,6 +122,29 @@ describe('adsense-a4a-config', () => {
       testFixture.doc.body.appendChild(elem);
       expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.true;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal('2092615');
+    });
+  });
+
+  describe('#fastFetchDelayedRequestEnabled', () => {
+    [
+      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_CONTROL, {
+        layer: ADSENSE_A4A_EXPERIMENT_NAME,
+        result: true,
+      }],
+      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_EXTERNAL, {
+        layer: ADSENSE_A4A_EXPERIMENT_NAME,
+        result: false,
+      }],
+    ].forEach(item => {
+      it(`should return ${item[1].result} if in ${item[0]} experiment`, () => {
+        forceExperimentBranch(mockWin, item[1].layer, item[0]);
+        expect(fastFetchDelayedRequestEnabled(mockWin)).to.equal(
+            item[1].result);
+      });
+    });
+
+    it('should return true if not in any experiments', () => {
+      expect(fastFetchDelayedRequestEnabled(mockWin)).to.be.true;
     });
   });
 });

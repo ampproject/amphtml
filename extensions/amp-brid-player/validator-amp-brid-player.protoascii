@@ -29,7 +29,6 @@ tags: {  # amp-brid-player
 tags: {  # <amp-brid-player>
   html_format: AMP
   tag_name: "AMP-BRID-PLAYER"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-brid-player"
   attrs: { name: "autoplay" }
   attrs: {

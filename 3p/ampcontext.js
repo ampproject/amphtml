@@ -106,6 +106,7 @@ export class AbstractAmpContext {
     this.client_.setSentinel(dev().assertString(this.sentinel));
 
     this.listenForPageVisibility_();
+    this.report3pError_();
   }
 
   /**
@@ -239,6 +240,7 @@ export class AbstractAmpContext {
    *  @private
    */
   setupMetadata_(data) {
+    // TODO(alanorozco): Use metadata utils in 3p/frame-metadata
     const dataObject = dev().assert(
         typeof data === 'string' ? tryParseJson(data) : data,
         'Could not setup metadata.');
@@ -311,8 +313,22 @@ export class AbstractAmpContext {
       this.setupMetadata_(this.win_.name);
     }
   }
-}
 
+  /**
+   * Send 3p error to parent iframe
+   * @private
+   */
+  report3pError_() {
+    this.win_.onerror = message => {
+      if (message) {
+        this.client_.sendMessage(MessageType.USER_ERROR_IN_IFRAME, dict({
+          'message': message,
+        }));
+      }
+      return false;
+    };
+  }
+}
 
 export class AmpContext extends AbstractAmpContext {
   /** @return {boolean} */

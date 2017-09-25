@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
 import {reportError} from '../../src/error';
@@ -56,12 +55,6 @@ const EXPERIMENTS = [
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'README.md#amp-dev-channel',
-  },
-  {
-    id: 'amp-web-push',
-    name: 'Enable AMP web push',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-web-push/0.1/amp-web-push.md',
   },
   {
     id: 'ad-type-custom',
@@ -186,6 +179,11 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
   {
+    id: 'font-display-swap',
+    name: 'Use font-display: swap as the default for fonts.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
+  },
+  {
     id: 'amp-animation',
     name: 'High-performing keyframe animations in AMP.',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -266,6 +264,18 @@ const EXPERIMENTS = [
     id: 'disable-rtc',
     name: 'Disable AMP RTC',
     spec: 'https://github.com/ampproject/amphtml/issues/8551',
+  },
+  {
+    id: 'amp-position-observer',
+    name: 'Amp extension for monitoring position of an element within viewport',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/10875',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+      'amp-position-observer/amp-position-observer.md',
+  },
+  {
+    id: 'inabox-position-api',
+    name: 'Position API for foreign iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/10995',
   },
 ];
 

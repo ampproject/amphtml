@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {LegacySignatureVerifier} from '../legacy-signature-verifier';
+import {VerificationStatus} from '../signature-verifier';
 
 describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
 
@@ -32,7 +34,7 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
     fetchMock.getOnce(
         'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
         () => keysetBody, {name: 'keyset'});
-    keysetBody = `{"keys":[${validCSSAmp.publicKey}]}`;
+    keysetBody = validCSSAmp.publicKeyset;
     verifier = new LegacySignatureVerifier(env.win);
     result = verifier.keys_;
   });
@@ -51,7 +53,7 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
 
   it('should fetch a single key', () => {
     expect(result).to.be.empty;
-    verifier.loadKeyset('google', Promise.resolve());
+    verifier.loadKeyset('google');
     expect(result).to.be.instanceof(Array);
     expect(result).to.have.lengthOf(1);
     return Promise.all(result).then(serviceInfos => {
@@ -69,26 +71,13 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
     });
   });
 
-  it('should wait for promise', () => {
-    expect(result).to.be.empty;
-    let resolveWaitFor;
-    verifier.loadKeyset('google', new Promise(resolve => {
-      resolveWaitFor = resolve;
-    }));
-    expect(fetchMock.called('keyset')).to.be.false;
-    resolveWaitFor();
-    return Promise.all(result).then(() => {
-      expect(fetchMock.called('keyset')).to.be.true;
-    });
-  });
-
   it('should fetch multiple keys', () => {
     // For our purposes, re-using the same key is fine.
-    keysetBody =
-        `{"keys":[${validCSSAmp.publicKey},${
-            validCSSAmp.publicKey},${validCSSAmp.publicKey}]}`;
+    const publicKey =
+        JSON.stringify(JSON.parse(validCSSAmp.publicKeyset)['keys'][0]);
+    keysetBody = `{"keys":[${publicKey},${publicKey},${publicKey}]}`;
     expect(result).to.be.empty;
-    verifier.loadKeyset('google', Promise.resolve());
+    verifier.loadKeyset('google');
     expect(result).to.be.instanceof(Array);
     expect(result).to.have.lengthOf(1);  // Only one service.
     return Promise.all(result).then(serviceInfos => {
@@ -110,8 +99,8 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
         'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
         keysetBody, {name: 'dev-keyset'});
     expect(result).to.be.empty;
-    verifier.loadKeyset('google', Promise.resolve());
-    verifier.loadKeyset('google-dev', Promise.resolve());
+    verifier.loadKeyset('google');
+    verifier.loadKeyset('google-dev');
     expect(result).to.be.instanceof(Array);
     expect(result).to.have.lengthOf(2);  // Two services.
     return Promise.all(result).then(serviceInfos => {
@@ -134,7 +123,7 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
   it('Should gracefully handle malformed key responses', () => {
     keysetBody = '{"keys":["invalid key data"]}';
     expect(result).to.be.empty;
-    verifier.loadKeyset('google', Promise.resolve());
+    verifier.loadKeyset('google');
     expect(result).to.be.instanceof(Array);
     expect(result).to.have.lengthOf(1);  // Only one service.
     return Promise.all(result).then(serviceInfos => {
@@ -149,7 +138,7 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
   it('should gracefully handle network errors in a single service', () => {
     keysetBody = Promise.reject(networkFailure());
     expect(result).to.be.empty;
-    verifier.loadKeyset('google', Promise.resolve());
+    verifier.loadKeyset('google');
     expect(result).to.be.instanceof(Array);
     expect(result).to.have.lengthOf(1);  // Only one service.
     return result[0].then(serviceInfo => {
@@ -165,8 +154,8 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
         'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
         Promise.reject(networkFailure()), {name: 'dev-keyset'});
     expect(result).to.be.empty;
-    verifier.loadKeyset('google', Promise.resolve());
-    verifier.loadKeyset('google-dev', Promise.resolve());
+    verifier.loadKeyset('google');
+    verifier.loadKeyset('google-dev');
     expect(result).to.be.instanceof(Array);
     expect(result).to.have.lengthOf(2);  // Two services.
     return Promise.all(result.map(  // For each service...
@@ -196,7 +185,7 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
 
   it('should return valid object on invalid service name', () => {
     expect(result).to.be.empty;
-    verifier.loadKeyset('fnord', Promise.resolve());
+    verifier.loadKeyset('fnord');
     expect(fetchMock.called('keyset')).to.be.false;
     expect(result).to.be.instanceof(Array);
     expect(result).to.have.lengthOf(1);
@@ -206,6 +195,43 @@ describes.realWin('LegacySignatureVerifier', {amp: true}, env => {
       expect(serviceInfo['signingServiceName']).to.equal('fnord');
       expect(serviceInfo['keys']).to.be.an.instanceof(Array);
       expect(serviceInfo['keys']).to.be.empty;
+    });
+  });
+
+  it('should not fetch from the same service more than once', () => {
+    expect(result).to.be.empty;
+    verifier.loadKeyset('google', Promise.resolve());
+    verifier.loadKeyset('google', Promise.resolve());
+    expect(result).to.be.instanceof(Array);
+    expect(result).to.have.lengthOf(1);
+    return Promise.all(result).then(() => {
+      expect(fetchMock.called('keyset')).to.be.true;
+    });
+  });
+
+  describe('verify', () => {
+    let sandbox;
+    beforeEach(() => {
+      sandbox = sinon.sandbox;
+    });
+
+    it('should return UNVERIFIED if no signature provided', () => {
+      const headers = new Headers();
+      sandbox.stub(
+          LegacySignatureVerifier.prototype, 'isAvailable_', () => false);
+      return verifier.verify(null, headers, null).then(status => {
+        expect(status).to.equal(VerificationStatus.UNVERIFIED);
+      });
+    });
+
+    it('should return CRYPTO_UNAVAILABLE if signature + no crypto', () => {
+      const headers = new Headers();
+      headers.append('X-AmpAdSignature', 'dummy-signature');
+      sandbox.stub(
+          LegacySignatureVerifier.prototype, 'isAvailable_', () => false);
+      return verifier.verify(null, headers, null).then(status => {
+        expect(status).to.equal(VerificationStatus.CRYPTO_UNAVAILABLE);
+      });
     });
   });
 });

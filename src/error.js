@@ -326,7 +326,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
   // It stores error reports via https://cloud.google.com/error-reporting/
   // for analyzing production issues.
   let url = urls.errorReporting +
-      '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
+      '?v=' + getMode().rtvVersion +
       '&noAmp=' + (hasNonAmpJs ? 1 : 0) +
       '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
       '&a=' + (isUserError ? 1 : 0);

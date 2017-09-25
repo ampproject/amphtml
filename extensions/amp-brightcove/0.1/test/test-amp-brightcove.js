@@ -14,32 +14,34 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-brightcove';
-import {adopt} from '../../../../src/runtime';
 import {parseUrl} from '../../../../src/url';
 
-adopt(window);
 
-describe('amp-brightcove', () => {
+describes.realWin('amp-brightcove', {
+  amp: {
+    extensions: ['amp-brightcove'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getBrightcove(attributes, opt_responsive) {
-    return createIframePromise(true).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const bc = iframe.doc.createElement('amp-brightcove');
-      for (const key in attributes) {
-        bc.setAttribute(key, attributes[key]);
-      }
-      bc.setAttribute('width', '111');
-      bc.setAttribute('height', '222');
-      if (opt_responsive) {
-        bc.setAttribute('layout', 'responsive');
-      }
-      return iframe.addElement(bc);
-    });
+    const bc = doc.createElement('amp-brightcove');
+    for (const key in attributes) {
+      bc.setAttribute(key, attributes[key]);
+    }
+    bc.setAttribute('width', '111');
+    bc.setAttribute('height', '222');
+    if (opt_responsive) {
+      bc.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(bc);
+    return bc.build().then(() => bc.layoutCallback()).then(() => bc);
   }
 
   it('renders', () => {

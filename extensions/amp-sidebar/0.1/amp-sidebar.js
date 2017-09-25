@@ -20,17 +20,18 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {Toolbar} from './toolbar';
 import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
-import {removeFragment, parseUrl} from '../../../src/url';
 import {setStyles, toggle} from '../../../src/style';
+import {debounce} from '../../../src/utils/rate-limit';
+import {removeFragment, parseUrl} from '../../../src/url';
 import {toArray} from '../../../src/types';
 
 /** @const */
 const TAG = 'amp-sidebar toolbar';
 
 /** @const */
-const ANIMATION_TIMEOUT = 550;
+const ANIMATION_TIMEOUT = 350;
 
 /** @const */
 const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
@@ -40,7 +41,7 @@ export class AmpSidebar extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?../../../src/service/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
@@ -78,11 +79,12 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
 
-    /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.win);
-
     /** @private {number|string|null} */
     this.openOrCloseTimeOut_ = null;
+
+    /** @const {function()} */
+    this.boundOnAnimationEnd_ =
+        debounce(this.win, this.onAnimationEnd_.bind(this), ANIMATION_TIMEOUT);
   }
 
   /** @override */
@@ -92,6 +94,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.element.classList.add('i-amphtml-overlay');
 
     this.side_ = this.element.getAttribute('side');
 
@@ -115,7 +118,7 @@ export class AmpSidebar extends AMP.BaseElement {
           this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
             ampdoc));
         } catch (e) {
-          user().error(TAG, 'Failed to instantiate toolbar', e);
+          this.user().error(TAG, 'Failed to instantiate toolbar', e);
         }
       });
     }
@@ -182,6 +185,9 @@ export class AmpSidebar extends AMP.BaseElement {
         }
       }
     }, true);
+
+    this.element.addEventListener('transitionend', this.boundOnAnimationEnd_);
+    this.element.addEventListener('animationend', this.boundOnAnimationEnd_);
   }
 
   /** @override */
@@ -247,17 +253,8 @@ export class AmpSidebar extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         this.openMask_();
         this.element.setAttribute('open', '');
+        this.boundOnAnimationEnd_();
         this.element.setAttribute('aria-hidden', 'false');
-        if (this.openOrCloseTimeOut_) {
-          this.timer_.cancel(this.openOrCloseTimeOut_);
-        }
-        this.openOrCloseTimeOut_ = this.timer_.delay(() => {
-          const children = this.getRealChildren();
-          this.scheduleLayout(children);
-          this.scheduleResume(children);
-          // Focus on the sidebar for a11y.
-          tryFocus(this.element);
-        }, ANIMATION_TIMEOUT);
       });
     });
     this.getHistory_().push(this.close_.bind(this)).then(historyId => {
@@ -277,18 +274,8 @@ export class AmpSidebar extends AMP.BaseElement {
     this.vsync_.mutate(() => {
       this.closeMask_();
       this.element.removeAttribute('open');
+      this.boundOnAnimationEnd_();
       this.element.setAttribute('aria-hidden', 'true');
-      if (this.openOrCloseTimeOut_) {
-        this.timer_.cancel(this.openOrCloseTimeOut_);
-      }
-      this.openOrCloseTimeOut_ = this.timer_.delay(() => {
-        if (!this.isOpen_()) {
-          this.vsync_.mutate(() => {
-            toggle(this.element, /* display */false);
-            this.schedulePause(this.getRealChildren());
-          });
-        }
-      }, ANIMATION_TIMEOUT);
     });
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
@@ -366,6 +353,26 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   getHistory_() {
     return Services.historyForDoc(this.getAmpDoc());
+  }
+
+  /**
+   * Get called when animation/transition end when open/close sidebar
+   * @private
+   */
+  onAnimationEnd_() {
+    if (this.isOpen_()) {
+      // On open sidebar
+      const children = this.getRealChildren();
+      this.scheduleLayout(children);
+      this.scheduleResume(children);
+      tryFocus(this.element);
+    } else {
+      // On close sidebar
+      this.vsync_.mutate(() => {
+        toggle(this.element, /* display */false);
+        this.schedulePause(this.getRealChildren());
+      });
+    }
   }
 }
 

@@ -21,7 +21,6 @@ import {
   optOutOfCid,
   isOptedOutOfCid,
 } from '../../src/service/cid-impl';
-import {ViewerCidApi} from '../../src/service/viewer-cid-api';
 import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
@@ -38,7 +37,7 @@ import {
 import {stubServiceForDoc} from '../../testing/test-helper';
 import {macroTask} from '../../testing/yield';
 import * as url from '../../src/url';
-import {setCookie} from '../../src/cookies';
+import {setCookie, getCookie} from '../../src/cookies';
 import * as sinon from 'sinon';
 import * as lolex from 'lolex';
 
@@ -114,7 +113,7 @@ describe('cid', () => {
     installExtensionsService(fakeWin);
     const extensions = Services.extensionsFor(fakeWin);
     // stub extensions service to provide crypto-polyfill
-    sandbox.stub(extensions, 'loadExtension', extensionId => {
+    sandbox.stub(extensions, 'preloadExtension', extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(fakeWin);
       return Promise.resolve();
@@ -128,7 +127,6 @@ describe('cid', () => {
     });
     sandbox.stub(viewer, 'isTrustedViewer',
         () => Promise.resolve(trustedViewer));
-    sandbox.stub(ViewerCidApi, 'scopeOptedInForCidApi', () => null);
     viewerSendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse',
         (eventType, opt_data) => {
           if (eventType != 'cid') {
@@ -144,6 +142,7 @@ describe('cid', () => {
         });
 
     cid = cidServiceForDocForTesting(ampdoc);
+    sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn', () => null);
     installCryptoService(fakeWin);
     crypto = Services.cryptoFor(fakeWin);
   });
@@ -772,6 +771,59 @@ describes.realWin('cid', {amp: true}, env => {
     yield macroTask();
     expect(resolved).to.be.true;
     expect(scopedCid).to.be.undefined;
+  });
+
+  describe('pub origin, CID API opt in', () => {
+
+    beforeEach(() => {
+      sandbox.stub(url, 'isProxyOrigin').returns(false);
+      sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn').returns('api-key');
+      setCookie(win, '_ga', '', 0);
+    });
+
+    afterEach(() => {
+      setCookie(win, '_ga', '', 0);
+    });
+
+    it('should use cid api on pub origin if opted in', () => {
+      const getScopedCidStub = sandbox.stub(cid.cidApi_, 'getScopedCid');
+      getScopedCidStub.returns(Promise.resolve('cid-from-api'));
+      return cid.get({
+        scope: 'AMP_ECID_GOOGLE',
+        cookieName: '_ga',
+        createCookieIfNotPresent: true,
+      }, hasConsent).then(scopedCid => {
+        expect(getScopedCidStub)
+            .to.be.calledWith('api-key', 'AMP_ECID_GOOGLE');
+        expect(scopedCid).to.equal('cid-from-api');
+        expect(getCookie(win, '_ga')).to.equal('cid-from-api');
+      });
+    });
+
+    it('should fallback to cookie if cid api returns nothing', () => {
+      sandbox.stub(cid.cidApi_, 'getScopedCid').returns(Promise.resolve());
+      return cid.get({
+        scope: 'AMP_ECID_GOOGLE',
+        cookieName: '_ga',
+        createCookieIfNotPresent: true,
+      }, hasConsent).then(scopedCid => {
+        expect(scopedCid).to.contain('amp-');
+        expect(getCookie(win, '_ga')).to.equal(scopedCid);
+      });
+    });
+
+    it('should respect CID API opt out', () => {
+      sandbox.stub(cid.cidApi_, 'getScopedCid')
+          .returns(Promise.resolve('$OPT_OUT'));
+      return cid.get({
+        scope: 'AMP_ECID_GOOGLE',
+        cookieName: '_ga',
+        createCookieIfNotPresent: true,
+      }, hasConsent).then(scopedCid => {
+        expect(scopedCid).to.be.null;
+        expect(getCookie(win, '_ga')).to.be.null;
+      });
+    });
   });
 });
 

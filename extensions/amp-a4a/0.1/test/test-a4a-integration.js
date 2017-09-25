@@ -24,15 +24,20 @@ import {
 import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {adConfig} from '../../../../ads/_config';
-import {a4aRegistry} from '../../../../ads/_a4a-config';
+import {getA4ARegistry} from '../../../../ads/_a4a-config';
 import {signingServerURLs} from '../../../../ads/_a4a-config';
 import {
     resetScheduledElementForTesting,
     upgradeOrRegisterElement,
-} from '../../../../src/custom-element';
+} from '../../../../src/service/custom-element-registry';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {loadPromise} from '../../../../src/event-helper';
 import * as sinon from 'sinon';
+// Need the following side-effect import because in actual production code,
+// Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
+// always available for them. However, when we test an impl in isolation,
+// AmpAd is not loaded already, so we need to load it separately.
+import '../../../amp-ad/0.1/amp-ad';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
 // (e.g., XHR requests and interfaces to ad network-specific code), but
@@ -83,8 +88,10 @@ describe('integration test: a4a', () => {
   let fetchMock;
   let adResponse;
   let a4aElement;
+  let a4aRegistry;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    a4aRegistry = getA4ARegistry();
     adConfig['mock'] = {};
     a4aRegistry['mock'] = () => {return true;};
     return createIframePromise().then(f => {
@@ -92,8 +99,7 @@ describe('integration test: a4a', () => {
       fetchMock = new FetchMock(fixture.win);
       for (const serviceName in signingServerURLs) {
         fetchMock.getOnce(
-            signingServerURLs[serviceName],
-            `{"keys":[${validCSSAmp.publicKey}]}`);
+            signingServerURLs[serviceName], validCSSAmp.publicKeyset);
       }
       fetchMock.getOnce(
           TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
@@ -154,7 +160,7 @@ describe('integration test: a4a', () => {
       expect(error.message).to.contain.string('Testing network error');
       expect(error.message).to.contain.string('AMP-A4A-');
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
-      expect(forceCollapseStub).to.be.notCalled;
+      expect(forceCollapseStub).to.not.be.called;
     });
   });
 

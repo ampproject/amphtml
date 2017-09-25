@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import '../amp-video';
-import * as sinon from 'sinon';
 
-const TAG = 'amp-video';
 
-describe(TAG, () => {
-
-  let sandbox;
-  const timer = Services.timerFor(window);
+describes.realWin('amp-video', {
+  amp: {
+    extensions: ['amp-video'],
+  },
+}, env => {
+  let win, doc;
+  let timer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    win = env.win;
+    doc = win.document;
+    timer = Services.timerFor(win);
   });
 
   function getFooVideoSrc(mediatype) {
@@ -41,19 +39,29 @@ describe(TAG, () => {
   }
 
   function getVideo(attributes, children, opt_beforeLayoutCallback) {
-    return createIframePromise(
-        true, opt_beforeLayoutCallback).then(iframe => {
-          const v = iframe.doc.createElement(TAG);
-          for (const key in attributes) {
-            v.setAttribute(key, attributes[key]);
-          }
-          if (children != null) {
-            for (const key in children) {
-              v.appendChild(children[key]);
-            }
-          }
-          return iframe.addElement(v);
-        });
+    const v = doc.createElement('amp-video');
+    for (const key in attributes) {
+      v.setAttribute(key, attributes[key]);
+    }
+    if (children != null) {
+      for (const key in children) {
+        v.appendChild(children[key]);
+      }
+    }
+    doc.body.appendChild(v);
+    return v.build().then(() => {
+      if (opt_beforeLayoutCallback) {
+        opt_beforeLayoutCallback(v);
+      }
+      return v.layoutCallback().then(() => v);
+    }).catch(e => {
+      // Ignore failed to load errors since sources are fake.
+      if (e.toString().indexOf('Failed to load') > -1) {
+        return v;
+      } else {
+        throw e;
+      }
+    });
   }
 
   it('should load a video', () => {
@@ -64,7 +72,8 @@ describe(TAG, () => {
     }).then(v => {
       const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
+      preloadSpy.should.have.been.calledWithExactly('video.mp4',
+          undefined);
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.getAttribute('src')).to.equal('video.mp4');
@@ -84,7 +93,8 @@ describe(TAG, () => {
     }).then(v => {
       const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
+      preloadSpy.should.have.been.calledWithExactly('video.mp4',
+          undefined);
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.hasAttribute('controls')).to.be.true;
@@ -102,7 +112,7 @@ describe(TAG, () => {
     const mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
     for (let i = 0; i < mediatypes.length; i++) {
       const mediatype = mediatypes[i];
-      const source = document.createElement('source');
+      const source = doc.createElement('source');
       source.setAttribute('src', getFooVideoSrc(mediatype));
       source.setAttribute('type', mediatype);
       sources.push(source);
@@ -118,7 +128,8 @@ describe(TAG, () => {
     }, sources).then(v => {
       const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
+      preloadSpy.should.have.been.calledWithExactly('video.mp4',
+          undefined);
       const video = v.querySelector('video');
       // check that the source tags were propogated
       expect(video.children.length).to.equal(mediatypes.length);
@@ -138,7 +149,7 @@ describe(TAG, () => {
     const mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
     for (let i = 0; i < mediatypes.length; i++) {
       const mediatype = mediatypes[i];
-      const source = document.createElement('source');
+      const source = doc.createElement('source');
       source.setAttribute('src', 'http:' + getFooVideoSrc(mediatype));
       source.setAttribute('type', mediatype);
       sources.push(source);
@@ -154,13 +165,14 @@ describe(TAG, () => {
     }, sources)).to.be.rejectedWith(/start with/);
   });
 
-  it('should set poster and controls in prerender mode', () => {
+  it('should set poster, controls, controlsList in prerender mode', () => {
     return getVideo({
       src: 'video.mp4',
       width: 160,
       height: 90,
       'poster': 'img.png',
       'controls': '',
+      'controlsList': 'nofullscreen nodownload noremoteplayback',
     }, null, function(element) {
       // Should set appropriate attributes in buildCallback
       const video = element.querySelector('video');
@@ -174,6 +186,8 @@ describe(TAG, () => {
       expect(video.tagName).to.equal('VIDEO');
       expect(video.getAttribute('poster')).to.equal('img.png');
       expect(video.getAttribute('controls')).to.exist;
+      expect(video.getAttribute('controlsList')).to.equal(
+          'nofullscreen nodownload noremoteplayback');
     });
   });
 
@@ -221,7 +235,7 @@ describe(TAG, () => {
     const mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
     for (let i = 0; i < mediatypes.length; i++) {
       const mediatype = mediatypes[i];
-      const source = document.createElement('source');
+      const source = doc.createElement('source');
       source.setAttribute('src', getFooVideoSrc(mediatype));
       source.setAttribute('type', mediatype);
       sources.push(source);
@@ -341,10 +355,12 @@ describe(TAG, () => {
       width: 160,
       height: 90,
       controls: '',
+      controlsList: '',
     }).then(v => {
       const mutations = {
         src: 'bar.mp4',
         controls: null,
+        controlsList: 'nodownload nofullscreen',
       };
       Object.keys(mutations).forEach(property => {
         const value = mutations[property];
@@ -358,6 +374,8 @@ describe(TAG, () => {
       const video = v.querySelector('video');
       expect(video.getAttribute('src')).to.equal('bar.mp4');
       expect(video.controls).to.be.false;
+      expect(video.getAttribute('controlsList')).to.equal(
+          'nodownload nofullscreen');
     });
   });
 
@@ -386,13 +404,21 @@ describe(TAG, () => {
             return listenOncePromise(v, VideoEvents.UNMUTED);
           })
           .then(() => {
-        // Should not send the unmute event twice if already sent once.
+            // Should not send the unmute event twice if already sent once.
             const p = listenOncePromise(v, VideoEvents.UNMUTED).then(() => {
               assert.fail('Should not have dispatch unmute message twice');
             });
             v.querySelector('video').dispatchEvent(new Event('volumechange'));
             const successTimeout = timer.promise(10);
             return Promise.race([p, successTimeout]);
+          }).then(() => {
+            const video = v.querySelector('video');
+            video.currentTime = video.duration - 0.1;
+            impl.play();
+            // Make sure pause and end are triggered when video ends.
+            const pEnded = listenOncePromise(v, VideoEvents.ENDED);
+            const pPause = listenOncePromise(v, VideoEvents.PAUSE);
+            return Promise.all([pEnded, pPause]);
           });
     });
   });

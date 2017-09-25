@@ -25,6 +25,15 @@ const EXIT_CONFIG = {
       'finalUrl': 'http://localhost:8000/simple',
       'filters': ['twoSecond'],
     },
+    borderProtection: {
+      'finalUrl': 'http://localhost:8000/simple',
+      'filters': ['borderProtection'],
+    },
+    borderProtectionRelativeTo: {
+      'finalUrl': 'http://localhost:8000/simple',
+      'filters': ['borderProtectionRelativeTo'],
+    },
+
     tracking: {
       'finalUrl': 'http://localhost:8000/tracking-test',
       'trackingUrls': [
@@ -44,6 +53,7 @@ const EXIT_CONFIG = {
       'finalUrl': 'http://localhost:8000/vars?foo=_foo',
       'trackingUrls': [
         'http://localhost:8000/tracking?bar=_bar',
+        'http://localhost:8000/tracking?numVar=_numVar&boolVar=_boolVar',
       ],
       vars: {
         _foo: {
@@ -52,6 +62,12 @@ const EXIT_CONFIG = {
         _bar: {
           defaultValue: 'bar-default',
         },
+        _numVar: {
+          defaultValue: 3,
+        },
+        _boolVar: {
+          defaultValue: true,
+        },
       },
     },
   },
@@ -59,6 +75,19 @@ const EXIT_CONFIG = {
     'twoSecond': {
       type: 'clickDelay',
       delay: 2000,
+    },
+    'borderProtection': {
+      type: 'clickLocation',
+      top: 10,
+      right: 20,
+      bottom: 30,
+    },
+    'borderProtectionRelativeTo': {
+      type: 'clickLocation',
+      top: 10,
+      right: 20,
+      bottom: 30,
+      relativeTo: '#ad',
     },
   },
 };
@@ -93,10 +122,23 @@ describes.realWin('amp-ad-exit', {
     return el.build().then(() => el);
   }
 
+  // Ad ad div or the relativeTo element cannot be found.
+  function addAdDiv() {
+    const adDiv = win.document.createElement('div');
+    adDiv.id = 'ad';
+    adDiv.style.position = 'absolute';
+    adDiv.style.left = '100px';
+    adDiv.style.top = '200px';
+    adDiv.style.width = '200px';
+    adDiv.style.height = '200px';
+    win.document.body.appendChild(adDiv);
+  }
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create({useFakeTimers: true});
     win = env.win;
     toggleExperiment(win, 'amp-ad-exit', true);
+    addAdDiv();
     return makeElementWithConfig(EXIT_CONFIG).then(el => {
       element = el;
     });
@@ -105,6 +147,7 @@ describes.realWin('amp-ad-exit', {
   afterEach(() => {
     sandbox.restore();
     env.win.document.body.removeChild(element);
+    env.win.document.body.removeChild(env.win.document.getElementById('ad'));
     element = undefined;
   });
 
@@ -348,7 +391,8 @@ describes.realWin('amp-ad-exit', {
 
     element.implementation_.executeAction({
       method: 'exit',
-      args: {target: 'customVars', _foo: 'foo', _bar: 'bar'},
+      args: {target: 'customVars', _foo: 'foo', _bar: 'bar', _numVar: 0,
+        _boolVar: false},
       event: makeClickEvent(1001, 101, 102),
       satisfiesTrust: () => true,
     });
@@ -358,5 +402,125 @@ describes.realWin('amp-ad-exit', {
     expect(sendBeacon)
         .to.have.been.calledWith(
         'http://localhost:8000/tracking?bar=bar', '');
+    expect(sendBeacon)
+        .to.have.been.calledWith(
+        'http://localhost:8000/tracking?numVar=0&boolVar=false', '');
+  });
+
+  it('border protection', () => {
+    const open = sandbox.stub(win, 'open', () => {
+      return {name: 'fakeWin'};
+    });
+
+    win.innerWidth = 1000;
+    win.innerHeight = 2000;
+    // Replace the getVsync function so that the measure can happen at once.
+    element.implementation_.getVsync = () => {
+      return {measure: callback => callback()};
+    };
+    element.implementation_.onLayoutMeasure();
+
+    // The click is within the top border.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtection'},
+      event: makeClickEvent(1001, 500, 8),
+      satisfiesTrust: () => true,
+    });
+
+    // The click is within the right border.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtection'},
+      event: makeClickEvent(1001, 993, 500),
+      satisfiesTrust: () => true,
+    });
+
+    // The click is within the bottom border.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtection'},
+      event: makeClickEvent(1001, 500, 1992),
+      satisfiesTrust: () => true,
+    });
+
+    expect(open).to.not.have.been.called;
+
+    // The click is within the left border but left border protection is not set.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtection'},
+      event: makeClickEvent(1001, 8, 500),
+      satisfiesTrust: () => true,
+    });
+
+    // THe click is not within the border area.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtection'},
+      event: makeClickEvent(1001, 500, 500),
+      satisfiesTrust: () => true,
+    });
+    expect(open).to.have.been.calledTwice;
+    expect(open).to.have.been.calledWith(
+        EXIT_CONFIG.targets.borderProtection.finalUrl, '_blank');
+  });
+
+  it('border protection relative to div', () => {
+    const open = sandbox.stub(win, 'open', () => {
+      return {name: 'fakeWin'};
+    });
+
+    // Replace the getVsync function so that the measure can happen at once.
+    element.implementation_.getVsync = () => {
+      return {measure: callback => callback()};
+    };
+    element.implementation_.onLayoutMeasure();
+
+    // The click is within the top border.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtectionRelativeTo'},
+      event: makeClickEvent(1001, 200, 208),
+      satisfiesTrust: () => true,
+    });
+
+    // The click is within the right border.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtectionRelativeTo'},
+      event: makeClickEvent(1001, 293, 300),
+      satisfiesTrust: () => true,
+    });
+
+    // The click is within the bottom border.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtectionRelativeTo'},
+      event: makeClickEvent(1001, 200, 392),
+      satisfiesTrust: () => true,
+    });
+
+    expect(open).to.not.have.been.called;
+
+    // The click is within the left border but left border protection is not set.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtectionRelativeTo'},
+      event: makeClickEvent(1001, 103, 300),
+      satisfiesTrust: () => true,
+    });
+
+    // THe click is not within the border area.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtectionRelativeTo'},
+      event: makeClickEvent(1001, 200, 300),
+      satisfiesTrust: () => true,
+    });
+    expect(open).to.have.been.calledTwice;
+    expect(open).to.have.been.calledWith(
+        EXIT_CONFIG.targets.borderProtection.finalUrl, '_blank');
   });
 });
+

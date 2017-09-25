@@ -18,6 +18,7 @@ import {
   addDataAndJsonAttributes_,
   getIframe,
   getBootstrapBaseUrl,
+  getDefaultBootstrapBaseUrl,
   getSubDomain,
   preloadBootstrap,
   resetCountForTesting,
@@ -36,7 +37,7 @@ import {validateData} from '../../3p/3p';
 import {DomFingerprint} from '../../src/utils/dom-fingerprint';
 import * as sinon from 'sinon';
 
-describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
+describe.configure().ifNewChrome().run('3p-frame', () => {
 
   let clock;
   let sandbox;
@@ -137,7 +138,7 @@ describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
   });
 
   // TODO(bradfrizzell) break this out into a test-iframe-attributes
-  it.configure().skipSauceLabs().run('should create an iframe', () => {
+  it.skip('should create an iframe', () => {
     window.AMP_MODE = {
       localDev: true,
       development: false,
@@ -186,7 +187,7 @@ describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
         '"type":"_ping_",' +
         '"_context":{"referrer":"http://acme.org/",' +
         '"ampcontextVersion": "$internalRuntimeVersion$",' +
-        '"ampcontextFilepath": "https://cdn.ampproject.org/' +
+        '"ampcontextFilepath": "https://3p.ampproject.net/' +
         '$internalRuntimeVersion$/ampcontext-v0.js",' +
         '"canonicalUrl":"' + docInfo.canonicalUrl + '",' +
         '"sourceUrl":"' + locationHref + '",' +
@@ -270,10 +271,34 @@ describe.configure().ifChrome().skipOldChrome().run('3p-frame', () => {
         /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/);
   });
 
+  it('should return a stable URL in getBootstrapBaseUrl', () => {
+    window.AMP_MODE = {};
+    expect(getBootstrapBaseUrl(window)).to.equal(getBootstrapBaseUrl(window));
+  });
+
+  it('should return a stable URL in getDefaultBootstrapBaseUrl', () => {
+    window.AMP_MODE = {};
+    expect(getDefaultBootstrapBaseUrl(window)).to.equal(
+        getDefaultBootstrapBaseUrl(window));
+  });
+
   it('should pick the right bootstrap url (custom)', () => {
     addCustomBootstrap('https://example.com/boot/remote.html');
     expect(getBootstrapBaseUrl(window)).to.equal(
         'https://example.com/boot/remote.html?$internalRuntimeVersion$');
+  });
+
+  it('should return different values for different file names', () => {
+    window.AMP_MODE = {};
+    let match =
+        /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/
+        .exec(getDefaultBootstrapBaseUrl(window));
+    const domain = match && match[1];
+    expect(domain).to.be.ok;
+    match =
+        /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame2\.html$/
+        .exec(getDefaultBootstrapBaseUrl(window, 'frame2'));
+    expect(match && match[1]).to.equal(domain);
   });
 
   it('should pick the right bootstrap url (custom)', () => {

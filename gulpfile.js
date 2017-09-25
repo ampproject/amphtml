@@ -71,6 +71,7 @@ declareExtension('amp-brightcove', '0.1', false);
 declareExtension('amp-kaltura-player', '0.1', false);
 declareExtension('amp-call-tracking', '0.1', false);
 declareExtension('amp-carousel', '0.1', true);
+declareExtension('amp-compare-slider', '0.1', false);
 declareExtension('amp-crypto-polyfill', '0.1', false);
 declareExtension('amp-dailymotion', '0.1', false);
 declareExtension('amp-dynamic-css-classes', '0.1', false);
@@ -115,6 +116,7 @@ declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '1.0', true);
 declareExtension('amp-selector', '0.1', true);
 declareExtension('amp-web-push', '0.1', true);
+declareExtension('amp-position-observer', '0.1', false);
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -137,6 +139,7 @@ declareExtension('amp-viewer-integration', '0.1', {
   loadPriority: 'high',
 });
 declareExtension('amp-video', '0.1', false);
+declareExtension('amp-vk', '0.1', false);
 declareExtension('amp-youtube', '0.1', false);
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
@@ -323,7 +326,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           watch: watch,
           preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
           minify: shouldMinify,
-          wrapper: '<%= contents %>'
         })
       );
     }
@@ -815,8 +817,23 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
+  var browsers = [];
+  if (process.env.TRAVIS) {
+    browsers.push('last 2 versions', 'safari >= 9');
+  } else {
+    browsers.push('Last 4 Chrome versions');
+  }
+
   var bundler = browserify(srcDir + srcFilename, {debug: true})
-      .transform(babel, {loose: argv.strictBabelTransform ? undefined : 'all'});
+      .transform(babel, {
+        presets: [
+          ["env", {
+            targets: {
+              browsers: browsers,
+            },
+          }]
+        ],
+      });
   if (options.watch) {
     bundler = watchify(bundler);
   }
@@ -1059,9 +1076,17 @@ function buildLoginDoneVersion(version, options) {
 
   // Build HTML.
   var html = fs.readFileSync(htmlPath, 'utf8');
-  var minHtml = html.replace(
-      '../../../dist/v0/amp-login-done-' + version + '.max.js',
-      `https://${hostname}/v0/amp-login-done-` + version + '.js');
+  var minJs = `https://${hostname}/v0/amp-login-done-${version}.js`;
+  var minHtml = html
+      .replace(
+          `../../../dist/v0/amp-login-done-${version}.max.js`,
+          minJs)
+      .replace(
+          `../../../dist/v0/amp-login-done-${version}.js`,
+          minJs);
+  if (minHtml.indexOf(minJs) == -1) {
+    throw new Error('Failed to correctly set JS in login-done.html');
+  }
 
   mkdirSync('dist');
   mkdirSync('dist/v0');

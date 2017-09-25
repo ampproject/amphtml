@@ -30,7 +30,6 @@ tags: {  # amp-video
 }
 tags: {  # <amp-video>
   tag_name: "AMP-VIDEO"
-  disallowed_ancestor: "AMP-SIDEBAR"
   # Typically we'd require the extension j/s, but for historical reasons
   # many pages don't have it, so it ends up late loaded and we warn, instead
   # of making this a validation error.
@@ -38,6 +37,7 @@ tags: {  # <amp-video>
   attrs: { name: "album" }
   attrs: { name: "alt" }
   attrs: { name: "artist" }
+  attrs: { name: "artwork" }
   attrs: { name: "attribution" }
   attrs: {
     name: "autoplay"
@@ -47,6 +47,7 @@ tags: {  # <amp-video>
     name: "controls"
     value: ""
   }
+  attrs: { name: "controlslist" }
   attrs: { name: "crossorigin" }
   attrs: {
     name: "loop"
@@ -74,13 +75,15 @@ tags: {  # <amp-video>
   attrs: { name: "[album]" }
   attrs: { name: "[alt]" }
   attrs: { name: "[artist]" }
+  attrs: { name: "[artwork]" }
   attrs: { name: "[attribution]" }
   attrs: { name: "[controls]" }
+  attrs: { name: "[controlslist]" }
   attrs: { name: "[loop]" }
-  attrs: { name: "[title]" }
   attrs: { name: "[poster]" }
   attrs: { name: "[preload]" }
   attrs: { name: "[src]" }
+  attrs: { name: "[title]" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
   amp_layout: {

@@ -184,7 +184,7 @@ export class Resources {
     /** @private {boolean} */
     this.isCurrentlyBuildingPendingResources_ = false;
 
-    /** @private @const {!./viewport-impl.Viewport} */
+    /** @private @const {!./viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
@@ -449,7 +449,7 @@ export class Resources {
 
   /**
    * Returns the viewport instance
-   * @return {!./viewport-impl.Viewport}
+   * @return {!./viewport/viewport-impl.Viewport}
    */
   getViewport() {
     return this.viewport_;
