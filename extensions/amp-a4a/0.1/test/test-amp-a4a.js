@@ -735,7 +735,7 @@ describe('amp-a4a', () => {
           const safeChild = a4aElement.querySelector('iframe[name]');
           expect(safeChild).to.not.be.ok;
           const crossDomainChild = a4aElement.querySelector('iframe[src]');
-          expect(crossDomainChild).to.not.be.okay;
+          expect(crossDomainChild).to.not.be.ok;
           const friendlyChild = a4aElement.querySelector('iframe[srcdoc]');
           expect(friendlyChild).to.be.ok;
           expect(friendlyChild.getAttribute('srcdoc')).to.have.string(
@@ -1696,7 +1696,7 @@ describe('amp-a4a', () => {
         }).catch(reason => {
           expect(getAdUrlSpy.called, 'getAdUrl never called')
               .to.be.false;
-          expect(reason).to.deep.equal(cancellation());
+          expect(reason.message).to.equal(cancellation().message);
           expect(errorHandlerSpy).to.be.calledOnce;
         });
       });
@@ -2029,6 +2029,82 @@ describe('amp-a4a', () => {
         expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
           'forced_delta': 12345,
         })).to.be.calledOnce;
+      });
+    });
+  });
+
+  describe('canonical AMP', () => {
+    describe('preferential rendering', () => {
+      let a4aElement;
+      let a4a;
+      let fixture;
+      beforeEach(() => createIframePromise().then(f => {
+        fixture = f;
+        setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
+        a4aElement = createA4aElement(fixture.doc);
+        a4a = new MockA4AImpl(a4aElement);
+        a4a.releaseType_ = '0';
+        return fixture;
+      }));
+
+      it('by default not allowed if crypto signature present but no SSL',
+          () => {
+            sandbox.stub(Services.cryptoFor(fixture.win), 'isPkcsAvailable')
+                .returns(false);
+            a4a.buildCallback();
+            a4a.onLayoutMeasure();
+            return a4a.layoutCallback().then(() => {
+              // Force vsync system to run all queued tasks, so that DOM mutations
+              // are actually completed before testing.
+              a4a.vsync_.runScheduledTasks_();
+              expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
+              expect(a4aElement.querySelector('iframe[srcdoc]')).to.not.be.ok;
+            });
+          });
+
+      it('allowed if crypto signature present, no SSL, and overrided' +
+         ' shouldPreferentialRenderWithoutCrypto', () => {
+        sandbox.stub(Services.cryptoFor(fixture.win), 'isPkcsAvailable')
+            .returns(false);
+        sandbox.stub(AmpA4A.prototype,
+            'shouldPreferentialRenderWithoutCrypto', () => true);
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+             // Force vsync system to run all queued tasks, so that DOM mutations
+             // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          verifyA4ARender(a4aElement);
+        });
+      });
+
+      it('not allowed if no crypto signature present', () => {
+        delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+        delete adResponse.headers[AMP_SIGNATURE_HEADER];
+        sandbox.stub(AmpA4A.prototype,
+            'shouldPreferentialRenderWithoutCrypto', () => true);
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
+          expect(a4aElement.querySelector('iframe[srcdoc]')).to.not.be.ok;
+        });
+      });
+    });
+
+    it('shouldPreferentialRenderWithoutCrypto returns false by default', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        const a4a = new AmpA4A(a4aElement);
+        expect(a4a.shouldPreferentialRenderWithoutCrypto()).to.be.false;
       });
     });
   });

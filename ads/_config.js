@@ -640,6 +640,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  smi2: {
+    renderStartImplemented: true,
+  },
+
   sogouad: {
     prefetch: 'https://theta.sogoucdn.com/wap/js/aw.js',
     renderStartImplemented: true,
@@ -749,6 +753,10 @@ export const adConfig = {
 
   yandex: {
     prefetch: 'https://yastatic.net/partner-code/loaders/context_amp.js',
+    renderStartImplemented: true,
+  },
+
+  yengo: {
     renderStartImplemented: true,
   },
 

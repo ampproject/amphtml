@@ -31,6 +31,7 @@ import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
 import {
   experimentFeatureEnabled,
   DOUBLECLICK_EXPERIMENT_FEATURE,
+  DFP_CANONICAL_FF_EXPERIMENT_NAME,
 } from './doubleclick-a4a-config';
 import {
   isInManualExperiment,
@@ -40,7 +41,6 @@ import {
   truncAndTimeUrl,
   googleBlockParameters,
   googlePageParameters,
-  isGoogleAdsA4AValidEnvironment,
   isReportingEnabled,
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
@@ -82,6 +82,7 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {
+  getPublisherSpecifiedRefreshInterval,
   RefreshManager,
   DATA_ATTR_NAME,
 } from '../../amp-a4a/0.1/refresh-manager';
@@ -293,10 +294,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    return isGoogleAdsA4AValidEnvironment(this.win) &&
-      this.isAmpAdElement() &&
+    /**
+     * isValidElement used to also check that we are in a valid A4A environment,
+     * however this is not necessary as that is checked by doubleclickIsA4AEnabled,
+     * which is always called as part of the upgrade path from an amp-ad element
+     * to an amp-ad-doubleclick element. Thus, if we are an amp-ad, we can be sure
+     * that it has been verified.
+     */
+    return this.isAmpAdElement() &&
       // Ensure not within remote.html iframe.
-      !document.querySelector('meta[name=amp-3p-iframe-src]');
+      !this.win.document.querySelector('meta[name=amp-3p-iframe-src]');
   }
 
   /** @override */
@@ -357,6 +364,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         }
       }
     });
+  }
+
+  /** @override */
+  shouldPreferentialRenderWithoutCrypto() {
+    return experimentFeatureEnabled(
+        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
+        DFP_CANONICAL_FF_EXPERIMENT_NAME);
   }
 
   /**
@@ -497,6 +511,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
     this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
+
+    const refreshInterval = Number(responseHeaders.get('amp-force-refresh'));
+    if (refreshInterval && !getPublisherSpecifiedRefreshInterval(
+        this.element, this.win, 'doubleclick')) {
+      this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
+    }
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);

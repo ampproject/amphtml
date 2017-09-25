@@ -23,7 +23,6 @@ module.exports = {
     'fixture',
     'browserify',
     'mocha',
-    'chai-as-promised',
     'sinon-chai',
     'chai',
   ],
@@ -50,14 +49,14 @@ module.exports = {
 
   superDotsReporter: {
     color: {
-      success : 'green',
-      failure : 'red',
-      ignore  : 'yellow'
+      success: 'green',
+      failure: 'red',
+      ignore: 'yellow',
     },
     icon: {
-      success : '●',
-      failure : '●',
-      ignore  : '○',
+      success: '●',
+      failure: '●',
+      ignore: '○',
     },
   },
 
@@ -69,7 +68,7 @@ module.exports = {
       info: 'yellow',
     },
     symbols: {
-      success : '●',
+      success: '●',
       error: '●',
       info: '○',
     },
@@ -103,7 +102,7 @@ module.exports = {
   concurrency: 6,
 
   customLaunchers: {
-    /*eslint "google-camelcase/google-camelcase": 0*/
+    /* eslint "google-camelcase/google-camelcase": 0*/
     Chrome_travis_ci: {
       base: 'Chrome',
       flags: ['--no-sandbox', '--disable-extensions'],
@@ -204,7 +203,6 @@ module.exports = {
   plugins: [
     'karma-browserify',
     'karma-chai',
-    'karma-chai-as-promised',
     'karma-chrome-launcher',
     'karma-coverage',
     'karma-edge-launcher',

@@ -504,7 +504,7 @@ describes.realWin('amp-user-notification', {
       return impl.buildGetHref_('12345').then(href => {
         const value = href.match(/\?ord=(.*)$/)[1];
         expect(href).to.not.contain('RANDOM');
-        expect(parseInt(value, 10)).to.be.a.number;
+        expect(parseInt(value, 10)).to.be.a('number');
       });
     });
 
@@ -581,7 +581,7 @@ describes.realWin('amp-user-notification', {
     it('should be able to get before a registration of an element', () => {
       const get = service.get.bind(service, 'n4');
       expect(get).to.not.throw();
-      expect(get().then).to.be.function;
+      expect(get().then).to.be.a('function');
     });
   });
 

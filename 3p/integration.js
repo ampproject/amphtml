@@ -166,6 +166,7 @@ import {sklik} from '../ads/sklik';
 import {slimcutmedia} from '../ads/slimcutmedia';
 import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
+import {smi2} from '../ads/smi2';
 import {sortable} from '../ads/sortable';
 import {sogouad} from '../ads/sogouad';
 import {sovrn} from '../ads/sovrn';
@@ -184,6 +185,7 @@ import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
 import {yandex} from '../ads/yandex';
+import {yengo} from '../ads/yengo';
 import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
@@ -206,6 +208,7 @@ const AMP_EMBED_ALLOWED = {
   outbrain: true,
   plista: true,
   smartclip: true,
+  smi2: true,
   taboola: true,
   zergnet: true,
 };
@@ -333,6 +336,7 @@ register('sklik', sklik);
 register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
 register('smartclip', smartclip);
+register('smi2', smi2);
 register('sortable', sortable);
 register('sogouad', sogouad);
 register('sovrn', sovrn);
@@ -352,6 +356,7 @@ register('xlift' , xlift);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
 register('yandex', yandex);
+register('yengo', yengo);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);

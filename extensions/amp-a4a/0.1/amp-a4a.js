@@ -66,7 +66,7 @@ const METADATA_STRINGS = [
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-export const DEFAULT_SAFEFRAME_VERSION = '1-0-9';
+export const DEFAULT_SAFEFRAME_VERSION = '1-0-10';
 
 /** @const {string} */
 export const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
@@ -690,6 +690,9 @@ export class AmpA4A extends AMP.BaseElement {
                     return bytes;
                   case VerificationStatus.UNVERIFIED:
                     return null;
+                  case VerificationStatus.CRYPTO_UNAVAILABLE:
+                    return this.shouldPreferentialRenderWithoutCrypto() ?
+                      bytes : null;
                   // TODO(@taymonbeal, #9274): differentiate between these
                   case VerificationStatus.ERROR_KEY_NOT_FOUND:
                   case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
@@ -1538,6 +1541,15 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {!Object<string, string|number>=} opt_extraVariables
    */
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
+
+  /**
+   * Whether preferential render should still be utilized if web crypto is unavailable,
+   * and crypto signature header is present.
+   * @return {!boolean}
+   */
+  shouldPreferentialRenderWithoutCrypto() {
+    return false;
+  }
 }
 
 /**

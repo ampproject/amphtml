@@ -17,6 +17,8 @@
 
 const app = module.exports = require('express').Router();
 
+/*eslint "max-len": 0*/
+
 app.use('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
   const mode = process.env.SERVE_MODE == 'compiled' ? '' : 'max.';
