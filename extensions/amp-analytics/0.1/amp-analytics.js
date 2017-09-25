@@ -22,6 +22,7 @@ import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {IframeTransport} from './iframe-transport';
+import {getParentWindowFrameElement} from '../../../src/service';
 import {Services} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
@@ -224,17 +225,9 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.instrumentation_.createAnalyticsGroup(this.element);
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
-      let ampAdResourceId;
-      try {
-        ampAdResourceId = this.element.ownerDocument.defaultView
-            .frameElement.parentElement.getResourceId();
-      } catch (e) {
-        this.user().error(TAG, 'No friendly parent amp-ad element was found' +
-            ' for amp-analytics tag.');
-      }
       this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
         this.element.getAttribute('type'),
-        this.config_['transport'], ampAdResourceId);
+        this.config_['transport'], this.getAmpAdResourceId());
     }
 
     const promises = [];
@@ -292,6 +285,24 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     return Promise.all(promises);
+  }
+
+ /**
+  * Gets the resource ID of the amp-ad element containing this AmpAnalytics
+  * instance.
+  * If there is no containing amp-ad tag, then the resource ID of this
+  * amp-analytics tag is used instead.
+  * @return {string}
+  */
+  getAmpAdResourceId() {
+    try {
+      const frame = getParentWindowFrameElement(this.element, this.win.top);
+      return frame.parentElement.getResourceId();
+    } catch (e) {
+      this.user().error(TAG, 'No friendly parent amp-ad element was found' +
+          ' for amp-analytics tag.');
+      return this.element.getResourceId();
+    }
   }
 
   /**

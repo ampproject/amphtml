@@ -17,6 +17,7 @@
 import {tryParseJson} from '../src/json';
 import {dev, user} from '../src/log';
 import {MessageType} from '../src/3p-frame-messaging';
+import {dict} from '../src/utils/object';
 import {IframeMessagingClient} from './iframe-messaging-client';
 
 /** @private @const {string} */
@@ -33,66 +34,57 @@ export class IframeTransportClient {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {?function(string,string)} */
-    this.listener_ = null;
+    /** @private {Object<string,IframeTransportContext>} */
+    this.creativeIdToContext_ = {};
 
     /** @protected {!IframeMessagingClient} */
-    this.client_ = new IframeMessagingClient(win);
-    this.client_.setHostWindow(this.win_.parent);
-    this.client_.setSentinel(dev().assertString(
+    this.iframeMessagingClient_ = new IframeMessagingClient(win);
+    this.iframeMessagingClient_.setHostWindow(this.win_.parent);
+    this.iframeMessagingClient_.setSentinel(dev().assertString(
         tryParseJson(this.win_.name)['sentinel'],
         'Invalid/missing sentinel on iframe name attribute' + this.win_.name));
-    this.client_.makeRequest(
+    this.iframeMessagingClient_.makeRequest(
         MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
         MessageType.IFRAME_TRANSPORT_EVENTS,
         eventData => {
           const events =
-              /**
-               * @type
-               *   {!Array<../src/3p-frame-messaging.IframeTransportEvent>}
-               */
-              (eventData['events']);
+          /**
+           * @type
+           *   {!Array<../src/3p-frame-messaging.IframeTransportEvent>}
+           */
+          (eventData['events']);
           user().assert(events,
               'Received malformed events list in ' + this.win_.location.href);
           dev().assert(events.length,
               'Received empty events list in ' + this.win_.location.href);
-          user().assert(this.listener_,
-              'Must call onAnalyticsEvent in ' + this.win_.location.href);
           events.forEach(event => {
             try {
-              this.listener_ &&
-                  this.listener_(event.message, event.creativeId);
+              user().assert(event.creativeId,
+                  'Received malformed event in ' + this.win_.location.href);
+              const context = this.contextFor_(event.creativeId);
+              context.dispatch(event.message);
             } catch (e) {
               user().error(TAG_,
                   'Exception in callback passed to onAnalyticsEvent: ' +
-                  e.message);
+              e.message);
             }
           });
         });
   }
 
   /**
-   * Registers a callback function to be called when an AMP analytics event
-   * is received.
-   * Note that calling this a second time will result in the first listener
-   * being removed - the events will not be sent to both callbacks.
-   * @param {function(string,string)} callback
+   * Retrieves/creates a context object to pass events pertaining to a
+   * particular creative.
+   * @param {string} creativeId The ID of the creative
+   * @returns {IframeTransportContext}
+   * @private
    */
-  onAnalyticsEvent(callback) {
-    this.listener_ = callback;
-  }
-
-  /**
-   * Sends a message back to the creative.
-   * @param {string} vendor The name of the 3p vendor used in the
-   *   <amp-analytics> tag
-   * @param {string} creativeId An ID uniquely identifying which creative
-   * shall receive the event
-   * @param {!Object<string,string>} response
-   */
-  sendMessageToCreative(vendor, creativeId, response) {
-    this.client_./*OK*/sendMessage(MessageType.IFRAME_TRANSPORT_RESPONSE,
-        /** @type {!JsonObject} */({creativeId, vendor, message: response}));
+  contextFor_(creativeId) {
+    const vendor = tryParseJson(this.win_.name)['type'];
+    return this.creativeIdToContext_[creativeId] ||
+        (this.creativeIdToContext_[creativeId] =
+            new IframeTransportContext(this.win_, this.iframeMessagingClient_,
+            creativeId, vendor));
   }
 
   /**
@@ -100,7 +92,66 @@ export class IframeTransportClient {
    * @returns {!IframeMessagingClient}
    * @VisibleForTesting
    */
-  getClient() {
-    return this.client_;
+  getIframeMessagingClient() {
+    return this.iframeMessagingClient_;
+  }
+}
+
+/**
+ * A context object to be passed along with event data.
+ */
+class IframeTransportContext {
+  /**
+   * @param {string} creativeId The ID of the creative that the event
+   *     pertains to.
+   * @param {string} vendor The 3p vendor name
+   */
+  constructor(win, iframeMessagingClient, creativeId, vendor) {
+    this.win_ = win;
+    this.iframeMessagingClient_ = iframeMessagingClient;
+    this.creativeId_ = creativeId;
+    this.vendor_ = vendor;
+
+    /** @private {?function(string)} */
+    this.listener_ = null;
+
+    user().assert(this.win_.onNewAmpAnalyticsInstance,
+        'Must implement onNewAmpAnalyticsInstance in ' +
+        this.win_.location.href);
+    this.win_.onNewAmpAnalyticsInstance(this);
+  }
+
+  /**
+   * Registers a callback function to be called when an AMP analytics event
+   * is received.
+   * Note that calling this a second time will result in the first listener
+   * being removed - the events will not be sent to both callbacks.
+   * @param {function(string)} listener
+   */
+  onAnalyticsEvent(listener) {
+    this.listener_ = listener;
+  }
+
+  /**
+   * Receives an event from IframeTransportClient, and passes it along to
+   * the creative that this context represents.
+   * @param {string} event
+   */
+  dispatch(event) {
+    this.listener_ && this.listener_(event);
+  }
+
+  /**
+   * Sends a response message back to the creative.
+   * @param {!Object<string,string>} response
+   */
+  sendResponseToCreative(response) {
+    this.iframeMessagingClient_./*OK*/sendMessage(
+        MessageType.IFRAME_TRANSPORT_RESPONSE,
+        dict({
+          'creativeId': this.creativeId_,
+          'vendor': this.vendor_,
+          'message': response,
+        }));
   }
 }

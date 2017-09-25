@@ -85,7 +85,8 @@ describe('iframe-transport-client', () => {
   });
 
   it('sets sentinel from window.name.sentinel ', () => {
-    expect(iframeTransportClient.getClient().sentinel_).to.equal(sentinel);
+    const client = iframeTransportClient.getIframeMessagingClient();
+    expect(client.sentinel_).to.equal(sentinel);
   });
 
   it('receives an event message ', () => {

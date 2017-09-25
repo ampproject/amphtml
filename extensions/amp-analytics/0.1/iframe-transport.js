@@ -40,9 +40,12 @@ export class IframeTransport {
    * @param {!Window} ampWin The window object of the AMP document
    * @param {!string} type The value of the amp-analytics tag's type attribute
    * @param {!JsonObject} config
-   * @param {!string} ampAdResourceId The resourceID of the enclosing amp-ad tag
+   * @param {!string} id A unique ID for this instance. If (potentially) using
+   *     sendResponseToCreative(), it should be something that the recipient
+   *     can use to identify the context of the message, e.g. the resourceID
+   *     of a DOM element.
    */
-  constructor(ampWin, type, config, ampAdResourceId) {
+  constructor(ampWin, type, config, id) {
     /** @private @const {!Window} */
     this.ampWin_ = ampWin;
 
@@ -50,7 +53,7 @@ export class IframeTransport {
     this.type_ = type;
 
     /** @private @const {string} */
-    this.creativeId_ = ampAdResourceId;
+    this.creativeId_ = id;
 
     dev().assert(config && config['iframe'],
         'Must supply iframe URL to constructor!');
@@ -111,6 +114,7 @@ export class IframeTransport {
     const frameName = JSON.stringify(/** @type {JsonObject} */ ({
       scriptSrc,
       sentinel,
+      type: this.type_
     }));
     const frame = createElementWithAttributes(this.ampWin_.document, 'iframe',
         /** @type {!JsonObject} */ ({
