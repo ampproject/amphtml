@@ -942,7 +942,7 @@ describe('amp-a4a', () => {
       });
     });
     // TODO (keithwrightbos) - move into above e2e once signed creative with
-    // ampImage within creative can be regenerated.
+    // image within creative can be regenerated.
     it('should prefetch amp images', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -954,7 +954,7 @@ describe('amp-a4a', () => {
         const a4a = new MockA4AImpl(a4aElement);
         sandbox.stub(a4a, 'getAmpAdMetadata_', creative => {
           const metaData = AmpA4A.prototype.getAmpAdMetadata_(creative);
-          metaData.ampImages = ['https://prefetch.me.com?a=b', 'http://do.not.prefetch.me.com?c=d',
+          metaData.images = ['https://prefetch.me.com?a=b', 'http://do.not.prefetch.me.com?c=d',
             'https://prefetch.metoo.com?e=f'];
           return metaData;
         });
@@ -1454,7 +1454,7 @@ describe('amp-a4a', () => {
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
         ],
-        ampImages: ['https://some.image.com/a=b', 'https://other.image.com'],
+        images: ['https://some.image.com/a=b', 'https://other.image.com'],
       };
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -1512,22 +1512,29 @@ describe('amp-a4a', () => {
       expect(a4a.getAmpAdMetadata_(buildCreativeString(metaData))).to.be.null;
     });
     it('should not include amp images if not an array', () => {
-      metaData.ampImages = 'https://foo.com';
+      metaData.images = 'https://foo.com';
       const actual = a4a.getAmpAdMetadata_(buildCreativeString(metaData));
       const expected = Object.assign({
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
       }, metaData);
-      delete expected.ampImages;
+      delete expected.images;
       expect(actual).to.deep.equal(expected);
     });
-    it('should tolerate missing ampImages', () => {
-      delete metaData.ampImages;
+    it('should tolerate missing images', () => {
+      delete metaData.images;
       const actual = a4a.getAmpAdMetadata_(buildCreativeString(metaData));
       const expected = Object.assign({
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
       }, metaData);
-      delete expected.ampImages;
+      delete expected.images;
       expect(actual).to.deep.equal(expected);
+    });
+    it('should limit to 5 images', () => {
+      while (metaData.images.length < 10) {
+        metaData.images.push('https://another.image.com?abc=def');
+      }
+      expect(a4a.getAmpAdMetadata_(buildCreativeString(metaData)).images.length)
+          .to.equal(5);
     });
     // FAILURE cases here
   });

@@ -107,7 +107,7 @@ export let SizeInfoDef;
       minifiedCreative: string,
       customElementExtensions: !Array<string>,
       customStylesheets: !Array<{href: string}>,
-      ampImages: (Array<string>|undefined),
+      images: (Array<string>|undefined),
     }} */
 let CreativeMetaDataDef;
 
@@ -735,7 +735,7 @@ export class AmpA4A extends AMP.BaseElement {
           (creativeMetaDataDef.customStylesheets || []).forEach(font =>
               this.preconnect.preload(font.href));
           // Preload any AMP images.
-          (creativeMetaDataDef.ampImages || []).forEach(image =>
+          (creativeMetaDataDef.images || []).forEach(image =>
               isSecureUrl(image) && this.preconnect.preload(image));
           return creativeMetaDataDef;
         })
@@ -1481,8 +1481,9 @@ export class AmpA4A extends AMP.BaseElement {
           }
         });
       }
-      if (isArray(metaDataObj['ampImages'])) {
-        metaData.ampImages = metaDataObj['ampImages'];
+      if (isArray(metaDataObj['images'])) {
+        // Load maximum of 5 images.
+        metaData.images = metaDataObj['images'].splice(0, 5);
       }
       // TODO(keithwrightbos): OK to assume ampRuntimeUtf16CharOffsets is before
       // metadata as its in the head?
