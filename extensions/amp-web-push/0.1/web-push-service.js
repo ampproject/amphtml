@@ -15,7 +15,7 @@
  */
 
 import {getMode} from '../../../src/mode';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {CSS} from '../../../build/amp-web-push-0.1.css';
 import {IFrameHost} from './iframehost';
 import {WindowMessenger} from './window-messenger';
@@ -148,7 +148,7 @@ export class WebPushService {
 
     // Exit early if web push isn't supported
     if (!this.environmentSupportsWebPush()) {
-      dev().fine(TAG, 'Web push is not supported.');
+      user().warn(TAG, 'Web push is not supported.');
       return Promise.reject('Web push is not supported');
     }
 
@@ -750,6 +750,8 @@ export class WebPushService {
    */
   isAmpPageHttps_() {
     return this.ampdoc.win.location.protocol === 'https:' ||
+      this.ampdoc.win.location.hostname === "localhost" ||
+      this.ampdoc.win.location.hostname === "127.0.0.1" ||
       getMode().development ||
       getMode().test;
   }
