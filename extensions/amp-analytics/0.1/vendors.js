@@ -1356,6 +1356,11 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'request': 'pageview',
       },
     },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
   },
 
   'webtrekk': {
