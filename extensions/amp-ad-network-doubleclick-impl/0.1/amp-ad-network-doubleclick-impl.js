@@ -246,8 +246,7 @@ function fluidMessageListener_(event) {
     return;
   }
   const listener = fluidListeners[data['sentinel']];
-  dev().assert(listener, 'postMessage listener does not exist');
-  if (data['s'] != 'creative_geometry_update') {
+  if (listener && data['s'] != 'creative_geometry_update') {
     if (!listener.connectionEstablished) {
       listener.instance.connectFluidMessagingChannel();
       listener.connectionEstablished = true;
@@ -703,7 +702,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   onFluidResize_() {
     if (this.fluidImpressionUrl_) {
-      this.fireDelayedImpressions(this.fluidImpressionUrl_, false);
+      this.fireDelayedImpressions(this.fluidImpressionUrl_);
       this.fluidImpressionUrl_ = null;
     }
     dev().assert(this.iframe.contentWindow,
