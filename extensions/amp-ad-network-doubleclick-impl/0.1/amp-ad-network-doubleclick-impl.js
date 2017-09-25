@@ -62,6 +62,7 @@ import {
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {stringHash32} from '../../../src/string';
 import {removeElement, createElementWithAttributes} from '../../../src/dom';
+import {getData} from '../../../src/event-helper';
 import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -81,6 +82,7 @@ import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {
   getPublisherSpecifiedRefreshInterval,
   RefreshManager,
@@ -134,6 +136,9 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
  * @visibileForTesting
  */
 export const TFCD = 'tagForChildDirectedTreatment';
+
+/** @const {string} */
+export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 
 /** @private {?Promise} */
 let sraRequests = null;
@@ -221,6 +226,40 @@ const BLOCK_SRA_COMBINERS_ = [
   },
 ];
 
+/**
+ * Used to manage messages for different fluid ad slots.
+ *
+ * Maps a sentinel value to an object consisting of the impl to which that
+ * sentinel value belongs and the corresponding message handler for that impl.
+ * @type{!Object<string, !{instance: !AmpAdNetworkDoubleclickImpl, connectionEstablished: boolean}>}
+ */
+const fluidListeners = {};
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+function fluidMessageListener_(event) {
+  const data = tryParseJson(getData(event));
+  if (event.origin != SAFEFRAME_ORIGIN || !data || !data['sentinel']) {
+    return;
+  }
+  const listener = fluidListeners[data['sentinel']];
+  if (!listener) {
+    dev().warn(TAG, `Listener for sentinel ${data['sentinel']} not found.`);
+    return;
+  }
+  if (data['s'] != 'creative_geometry_update') {
+    if (!listener.connectionEstablished) {
+      listener.instance.connectFluidMessagingChannel();
+      listener.connectionEstablished = true;
+    }
+    return;
+  }
+  listener.instance.receiveMessageForFluid_(data);
+}
+
+
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
@@ -290,6 +329,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {number} */
     this.ifi_ = 0;
+
+    /** @private {boolean} */
+    this.isFluid_ = false;
+
+    /** @private {?string} */
+    this.fluidImpressionUrl_ = null;
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    this.isFluid_ = layout == Layout.FLUID;
+    return this.isFluid_ || isLayoutSizeDefined(layout);
   }
 
   /** @override */
@@ -366,6 +417,27 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
   }
 
+  /**
+   * Handles Fluid-related messages dispatched from SafeFrame.
+   * @param {!JsonObject} data
+   * @private
+   */
+  receiveMessageForFluid_(data) {
+    const payload = tryParseJson(data['p']);
+    let newHeight;
+    if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
+      // TODO(levitzky) Add actual error handling here.
+      this.forceCollapse();
+      return;
+    }
+    this.attemptChangeHeight(newHeight)
+        .then(() => this.onFluidResize_())
+        .catch(() => {
+          // TODO(levitzky) Add more error handling here
+          this.forceCollapse();
+        });
+  }
+
   /** @override */
   shouldPreferentialRenderWithoutCrypto() {
     return experimentFeatureEnabled(
@@ -399,7 +471,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getBlockParameters_() {
     dev().assert(this.initialSize_);
     dev().assert(this.jsonTargeting_);
-    let sizeStr = `${this.initialSize_.width}x${this.initialSize_.height}`;
+    let sizeStr = this.isFluid_ ?
+        '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
@@ -417,7 +490,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           multiSizeDataStr,
           this.initialSize_.width,
           this.initialSize_.height,
-          multiSizeValidation == 'true');
+          multiSizeValidation == 'true',
+          this.isFluid_);
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
           .join('|');
@@ -442,6 +516,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.jsonTargeting_['categoryExclusions']) || null),
       'ifi': this.ifi_,
       rc,
+      'fluid': this.isFluid_ ? 'height' : null,
     }, googleBlockParameters(this));
   }
 
@@ -455,10 +530,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('data-override-height')) ||
       Number(this.element.getAttribute('height'));
-    this.initialSize_ = width && height
-        ? {width, height}
-        // width/height could be 'auto' in which case we fallback to measured.
-        : this.getIntersectionElementLayoutBox();
+    this.initialSize_ = this.isFluid_ ? {width: 0, height: 0} :
+        (width && height ?
+         // width/height could be 'auto' in which case we fallback to measured.
+         {width, height} : this.getIntersectionElementLayoutBox());
     this.jsonTargeting_ =
       tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey_ = this.generateAdKey_(
@@ -509,13 +584,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-    this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
-    this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
 
     const refreshInterval = Number(responseHeaders.get('amp-force-refresh'));
     if (refreshInterval && !getPublisherSpecifiedRefreshInterval(
         this.element, this.win, 'doubleclick')) {
       this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
+    }
+
+    if (this.isFluid_) {
+      this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
+    } else {
+      this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
+      this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
     }
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
@@ -587,7 +667,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   layoutCallback() {
-    const superReturnValue = super.layoutCallback();
+    if (this.isFluid_) {
+      this.registerListenerForFluid_();
+    }
+    const frameLoadPromise = super.layoutCallback();
     if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
       user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
     }
@@ -600,7 +683,42 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               visiblePercentageMin: 50,
               continuousTimeMin: 1,
             });
-    return superReturnValue;
+    return frameLoadPromise;
+  }
+
+  /** @override  */
+  unlayoutCallback() {
+    super.unlayoutCallback();
+    this.maybeRemoveListenerForFluid();
+  }
+
+  /**
+   * Postmessages an initial message to the fluid creative.
+   * @visibleForTesting
+   */
+  connectFluidMessagingChannel() {
+    dev().assert(this.iframe.contentWindow,
+        'Frame contentWindow unavailable.');
+    this.iframe.contentWindow./*OK*/postMessage(
+        JSON.stringify(dict({'message': 'connect', 'c': 'sfchannel1'})),
+        SAFEFRAME_ORIGIN);
+  }
+
+  /**
+   * Fires a delayed impression and notifies the Fluid creative that its
+   * container has been resized.
+   * @private
+   */
+  onFluidResize_() {
+    if (this.fluidImpressionUrl_) {
+      this.fireDelayedImpressions(this.fluidImpressionUrl_);
+      this.fluidImpressionUrl_ = null;
+    }
+    dev().assert(this.iframe.contentWindow,
+        'Frame contentWindow unavailable.');
+    this.iframe.contentWindow./*OK*/postMessage(
+        JSON.stringify(dict({'message': 'resize-complete', 'c': 'sfchannel1'})),
+        SAFEFRAME_ORIGIN);
   }
 
   /** @override */
@@ -681,8 +799,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // We want to resize only if neither returned dimension is larger than its
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
-    if ((width != pWidth || height != pHeight)
-        && (width <= pWidth && height <= pHeight)) {
+    if (this.isFluid_ ||
+        (width != pWidth || height != pHeight) &&
+        (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
     }
   }
@@ -863,7 +982,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * @param {string} impressions
    * @param {boolean=} scrubReferer
-   * @visibileForTesting
+   * @visibleForTesting
    */
   fireDelayedImpressions(impressions, scrubReferer) {
     if (!impressions) {
@@ -1031,7 +1150,83 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   getPreconnectUrls() {
     return ['https://partner.googleadservices.com',
-      'https://tpc.googlesyndication.com'];
+      SAFEFRAME_ORIGIN];
+  }
+
+  /** @override */
+  getNonAmpCreativeRenderingMethod(headerValue) {
+    return this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
+        super.getNonAmpCreativeRenderingMethod(headerValue);
+  }
+
+  /** @override */
+  getAdditionalContextMetadata() {
+    const attributes = dict({});
+    if (this.isFluid_) {
+      attributes['uid'] = 1;
+      attributes['hostPeerName'] = this.win.location.origin;
+      // The initial geometry isn't used for anything important, but it is
+      // expected, so we pass this string with all zero values.
+      attributes['initialGeometry'] = JSON.stringify(
+          dict({
+            'windowCoords_t': 0,
+            'windowCoords_r': 0,
+            'windowCoords_b': 0,
+            'windowCoords_l': 0,
+            'frameCoords_t': 0,
+            'frameCoords_r': 0,
+            'frameCoords_b': 0,
+            'frameCoords_l': 0,
+            'styleZIndex': 'auto',
+            'allowedExpansion_t': 0,
+            'allowedExpansion_r': 0,
+            'allowedExpansion_b': 0,
+            'allowedExpansion_l': 0,
+            'xInView': 0,
+            'yInView': 0,
+          }));
+      attributes['permissions'] = JSON.stringify(
+          dict({
+            'expandByOverlay': false,
+            'expandByPush': false,
+            'readCookie': false,
+            'writeCookie': false,
+          }));
+      attributes['metadata'] = JSON.stringify(
+          dict({
+            'shared': {
+              'sf_ver': this.safeframeVersion,
+              'ck_on': 1,
+              'flash_ver': '26.0.0',
+            },
+          }));
+      attributes['reportCreativeGeometry'] = true;
+      attributes['isDifferentSourceWindow'] = false;
+      attributes['sentinel'] = this.sentinel;
+    }
+    return attributes;
+  }
+
+  /** @private  */
+  registerListenerForFluid_() {
+    fluidListeners[this.sentinel] = fluidListeners[this.sentinel] || {
+      instance: this,
+      connectionEstablished: false,
+    };
+    if (Object.keys(fluidListeners).length == 1) {
+      this.win.addEventListener('message', fluidMessageListener_, false);
+    }
+  }
+
+  /** @visibleForTesting */
+  maybeRemoveListenerForFluid() {
+    if (!this.isFluid_) {
+      return;
+    }
+    delete fluidListeners[this.sentinel];
+    if (!Object.keys(fluidListeners).length) {
+      this.win.removeEventListener('message', fluidMessageListener_);
+    }
   }
 }
 

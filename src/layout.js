@@ -36,6 +36,7 @@ export const Layout = {
   CONTAINER: 'container',
   FILL: 'fill',
   FLEX_ITEM: 'flex-item',
+  FLUID: 'fluid',
 };
 
 
@@ -130,7 +131,8 @@ export function isLayoutSizeDefined(layout) {
       layout == Layout.FIXED_HEIGHT ||
       layout == Layout.RESPONSIVE ||
       layout == Layout.FILL ||
-      layout == Layout.FLEX_ITEM);
+      layout == Layout.FLEX_ITEM ||
+      layout == Layout.FLUID);
 }
 
 
@@ -333,7 +335,8 @@ export function applyStaticLayout(element) {
   const inputWidth = (widthAttr && widthAttr != 'auto') ?
       parseLength(widthAttr) : widthAttr;
   user().assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
-  const inputHeight = heightAttr ? parseLength(heightAttr) : null;
+  const inputHeight = (heightAttr && heightAttr != 'fluid') ?
+      parseLength(heightAttr) : heightAttr;
   user().assert(inputHeight !== undefined, 'Invalid height value: %s',
       heightAttr);
 
@@ -362,6 +365,8 @@ export function applyStaticLayout(element) {
     layout = inputLayout;
   } else if (!width && !height) {
     layout = Layout.CONTAINER;
+  } else if (height == 'fluid') {
+    layout = Layout.FLUID;
   } else if (height && (!width || width == 'auto')) {
     layout = Layout.FIXED_HEIGHT;
   } else if (height && width && (sizesAttr || heightsAttr)) {
@@ -433,6 +438,11 @@ export function applyStaticLayout(element) {
     }
     if (height) {
       setStyle(element, 'height', height);
+    }
+  } else if (layout == Layout.FLUID) {
+    element.classList.add('i-amphtml-layout-awaiting-size');
+    if (width) {
+      setStyle(element, 'width', width);
     }
   }
   return layout;

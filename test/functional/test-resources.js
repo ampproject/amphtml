@@ -56,6 +56,7 @@ describe('Resources', () => {
     element.getPlaceholder = () => null;
     element.getPriority = () => 0;
     element.dispatchCustomEvent = () => {};
+    element.getLayout = () => 'fixed';
     return element;
   }
 
@@ -685,6 +686,7 @@ describes.realWin('getElementLayoutBox', {}, env => {
 
   it('should measure the element in a vsync measure', () => {
     const element = document.createElement('div');
+    element.getLayout = () => 'fixed';
     element.style.position = 'absolute';
     element.style.top = '5px';
     element.style.left = '10px';
@@ -703,6 +705,7 @@ describes.realWin('getElementLayoutBox', {}, env => {
 
   it('should measure the element via its resource in a vsync measure', () => {
     const element = document.createElement('div');
+    element.getLayout = () => 'fluid';
     element.style.position = 'absolute';
     element.style.top = '5px';
     element.style.left = '10px';
@@ -725,6 +728,7 @@ describes.realWin('getElementLayoutBox', {}, env => {
 
   it('should use the already measured value from the resource', () => {
     const element = document.createElement('div');
+    element.getLayout = () => 'fixed';
     element.style.position = 'absolute';
     element.style.top = '5px';
     element.style.left = '10px';
@@ -1038,6 +1042,7 @@ describe('Resources discoverWork', () => {
         marginBottom: '0px',
         marginLeft: '0px',
       },
+      getLayout: () => 'fixed',
     };
   }
 
@@ -2375,6 +2380,7 @@ describe('Resources mutateElement and collapse', () => {
       unlayoutCallback: () => {},
       getPriority: () => 0,
       signals: () => signals,
+      getLayout: () => 'fixed',
     };
   }
 

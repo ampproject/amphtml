@@ -28,13 +28,15 @@ import {user} from '../../src/log';
  * @param {boolean} multiSizeValidation A flag that if set to true will enforce
  *   the rule that ensures multi-size dimensions are no less than 2/3rds of
  *   their primary dimension's counterpart.
+ * @param {boolean=} isFluid Indicates whether this ad slot is Fluid-enabled.
  * @return {?Array<!Array<number>>} An array of dimensions.
  */
 export function getMultiSizeDimensions(
     multiSizeDataStr,
     primaryWidth,
     primaryHeight,
-    multiSizeValidation) {
+    multiSizeValidation,
+    isFluid = false) {
 
   const dimensions = [];
   const arrayOfSizeStrs = multiSizeDataStr.split(',');
@@ -64,7 +66,7 @@ export function getMultiSizeDimensions(
     }
 
     // Check that secondary size is not larger than primary size.
-    if (!validateDimensions(width, height,
+    if (!isFluid && !validateDimensions(width, height,
         w => w > primaryWidth,
         h => h > primaryHeight,
         badParams => badParams.map(badParam =>
