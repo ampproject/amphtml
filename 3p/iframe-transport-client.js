@@ -42,7 +42,10 @@ export class IframeTransportClient {
     this.vendor_ = dev().assertString(parsedFrameName['type'],
         'Parent frame must supply vendor name as type in ' +
         this.win_.location.href);
-    dev().assert(this.vendor_.length > 0, 'Vendor name cannot be empty in ' +
+    // Note: amp-ad-exit will validate the vendor name before performing
+    // variable substitution, so if the vendor name is not a valid one from
+    // vendors.js, then its response messages will have no effect.
+    dev().assert(this.vendor_.length, 'Vendor name cannot be empty in ' +
         this.win_.location.href);
 
     /** @protected {!IframeMessagingClient} */
@@ -124,9 +127,9 @@ class IframeTransportContext {
     /** @private {?function(string)} */
     this.listener_ = null;
 
-    user().assert(win['onNewAmpAnalyticsInstance'],
-        'Must implement onNewAmpAnalyticsInstance in ' +
-        win.location.href);
+    user().assert(win['onNewAmpAnalyticsInstance'] &&
+        typeof win['onNewAmpAnalyticsInstance'] == 'function',
+        'Must implement onNewAmpAnalyticsInstance in ' + win.location.href);
     win['onNewAmpAnalyticsInstance'](this);
   }
 
@@ -135,7 +138,7 @@ class IframeTransportContext {
    * is received.
    * Note that calling this a second time will result in the first listener
    * being removed - the events will not be sent to both callbacks.
-   * @param {function(string)} listener
+   * @param {!function(string)} listener
    */
   onAnalyticsEvent(listener) {
     this.listener_ = listener;
