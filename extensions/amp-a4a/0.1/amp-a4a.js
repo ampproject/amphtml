@@ -1549,13 +1549,19 @@ export class AmpA4A extends AMP.BaseElement {
 
   tryExecuteRealTimeConfig_() {
     if (!!AMP.RealTimeConfigManager) {
-      this.realTimeConfigManager_ = new AMP.RealTimeConfigManager(
-          this.element, this.win, this.getAmpDoc());
-      if (this.realTimeConfigManager_.validateRtcConfig()) {
-        return this.realTimeConfigManager_.executeRealTimeConfig(
-            this.getCustomRealTimeConfigMacros_());
-      };
+      try {
+        this.realTimeConfigManager_ = new AMP.RealTimeConfigManager(
+            this.element, this.win, this.getAmpDoc());
+        if (this.realTimeConfigManager_.validateRtcConfig()) {
+          return this.realTimeConfigManager_.executeRealTimeConfig(
+              this.getCustomRealTimeConfigMacros_());
+        };
+      } catch(err) {
+        dev().error(TAG, 'Could not perform Real Time Config');
+      }
     }
+    // If RTC can't be performed, pass null in the resolution.
+    return Promise.resolve(null);
   }
 
   /**

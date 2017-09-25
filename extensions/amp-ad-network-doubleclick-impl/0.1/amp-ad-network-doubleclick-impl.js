@@ -473,6 +473,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   mergeRtcResponses(rtcResponses) {
+    if (!rtcResponses) {
+      return null;
+    }
     let rtcParams = {};
     const artc = [];
     const ati = [];

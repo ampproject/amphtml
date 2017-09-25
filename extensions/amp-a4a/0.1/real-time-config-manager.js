@@ -60,12 +60,24 @@ export class RealTimeConfigManager {
     return Promise.all(rtcPromiseArray);
   }
 
+  /**
+   * Attempts to parse the publisher-defined RTC config off the amp-ad
+   * element, then validates that the rtcConfig exists, and contains
+   * an entry for either vendor URLs, or publisher-defined URLs.
+   * @return {!boolean}
+   */
   validateRtcConfig() {
     this.rtcConfig = tryParseJson(
         this.element.getAttribute('prerequest-callouts'));
-    return this.rtcConfig && (this.rtcConfig['vendors'] || this.rtcConfig['urls']);
+    return (!!this.rtcConfig && (this.rtcConfig['vendors'] ||
+                                 this.rtcConfig['urls'])) ? true : false;
   }
 
+  /**
+   * For every vendor specified by the publisher in the rtcConfig,
+   * check that the vendor URL actually exists, and if so call
+   * helper function to inflate URL and add to list of callouts.
+   */
   inflateVendorUrls() {
     let url;
     if (this.rtcConfig['vendors']) {
@@ -81,6 +93,10 @@ export class RealTimeConfigManager {
     }
   }
 
+  /**
+   * For each publisher-defined URL, call helper function to inflate and
+   * add the URLs to list of callouts.
+   */
   inflatePublisherUrls(macros) {
     if (this.rtcConfig['urls']) {
       this.rtcConfig['urls'].forEach(url => {
@@ -89,6 +105,13 @@ export class RealTimeConfigManager {
     }
   }
 
+  /**
+   * Substitutes macros into url, and adds the resulting URL to the list
+   * of callouts. Checks each URL to see if secure, and stops adding URLs
+   * once a total of 5 callouts are added to the list.
+   * @param {!string} url
+   * @param {!Object<string, string>}
+   */
   maybeInflateAndAddUrl(url, macros) {
     // TODO: Is there a better place to put this check?
     if (this.calloutUrls.length == 5) {
