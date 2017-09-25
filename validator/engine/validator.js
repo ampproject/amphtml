@@ -1048,7 +1048,7 @@ class ReferencePointMatcher {
           context.getDocLocator(),
           /*params*/
           [
-            context.getTagStack().getCurrent(),
+            context.getTagStack().getCurrent().toLowerCase(),
             this.parsedReferencePoints_.parentTagSpecName(),
             this.parsedValidatorRules_.getReferencePointName(
                 this.parsedReferencePoints_.iterate()[0])
@@ -5915,6 +5915,11 @@ amp.validator.categorizeError = function(error) {
           amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR &&
       (error.params[1] === 'template')) {
     return amp.validator.ErrorCategory.Code.AMP_HTML_TEMPLATE_PROBLEM;
+  }
+  if (error.code ===
+      amp.validator.ValidationError.Code
+          .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR) {
+    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
   }
   // E.g. "Missing URL for attribute 'href' in tag 'a'."
   // E.g. "Invalid URL protocol 'http:' for attribute 'src' in tag
