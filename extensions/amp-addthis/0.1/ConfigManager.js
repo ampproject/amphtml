@@ -18,11 +18,7 @@ import {isObject} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 import {getData, listen} from '../../../src/event-helper';
 
-import {
-  WIDGET_ID_PROP,
-  CONFIGURATION_EVENT,
-  ORIGIN,
-} from './constants';
+import {CONFIGURATION_EVENT, ORIGIN} from './constants';
 
 /**
  * Configuration request status enum.
@@ -105,17 +101,19 @@ export class ConfigManager {
     const pubData = this.dataForPubId_[pubId];
     pubData.config = config;
     pubData.requestStatus = RequestStatus.COMPLETED;
-    const {iframes} = pubData;
-    iframes.forEach(iframe => this.sendConfiguration_({iframe, pubId}));
+    const {iframeData} = pubData;
+    iframeData.forEach(iframeDatum => {
+      const {iframe, widgetId} = iframeDatum;
+      this.sendConfiguration_({iframe, widgetId, pubId});
+    });
   }
 
   /** @private */
-  sendConfiguration_({iframe, pubId}) {
+  sendConfiguration_({iframe, widgetId, pubId}) {
     const {location: loc, title} = this.ownerDocument_;
     const pubData = this.dataForPubId_[pubId];
     const dashboardConfig = pubData.config;
     const configRequestStatus = pubData.requestStatus;
-    const widgetId = iframe[WIDGET_ID_PROP];
     const jsonToSend = /** @type JsonObject */ ({
       event: CONFIGURATION_EVENT,
       shareConfig: {
@@ -171,9 +169,9 @@ export class ConfigManager {
   /**
    * Register relevant data with the configuration manager and prepare request/response cycle
    * between frames.
-   * @param {{pubId:!string, iframe:!Element, iframeLoadPromise:!Promise, win:!EventTarget, element:!Element}} param
+   * @param {{pubId:!string, widgetId:!string, iframe:!Element, iframeLoadPromise:!Promise, win:!EventTarget, element:!Element}} param
    */
-  register({pubId, iframe, iframeLoadPromise, win, element}) {
+  register({pubId, widgetId, iframe, iframeLoadPromise, win, element}) {
     if (!this.removeMessageListener_) {
       this.removeMessageListener_ = listen(
           win, 'message', this.handleAddThisMessage_.bind(this)
@@ -194,15 +192,16 @@ export class ConfigManager {
       pubData.requestStatus = RequestStatus.NOT_REQUESTED;
     }
 
-    if (!pubData.iframes) {
-      pubData.iframes = [];
+    if (!pubData.iframeData) {
+      pubData.iframeData = [];
     }
 
-    pubData.iframes.push(iframe);
+    pubData.iframeData.push({iframe, widgetId});
 
     iframeLoadPromise.then(() => this.sendConfiguration_({
       iframe,
       pubId,
+      widgetId,
     }));
   }
 
@@ -227,8 +226,10 @@ export class ConfigManager {
 
     const pubData = this.dataForPubId_[pubId] || {};
 
-    if (pubData.iframes) {
-      pubData.iframes = pubData.iframes.filter(frame => frame !== iframe);
+    if (pubData.iframeData) {
+      pubData.iframeData = pubData.iframeData.filter(iframeDatum => {
+        return iframeDatum.iframe !== iframe;
+      });
     }
   }
 }
@@ -237,8 +238,15 @@ export class ConfigManager {
  * @typedef {{
  *   config:(Object|undefined),
  *   requestStatus:(RequestStatus|undefined),
- *   iframes:(Array<Element>|undefined)
+ *   iframeData:(Array<ConfigManager.IframeDatum>|undefined)
  * }}
  */
 ConfigManager.PubIdData; // purely for typedef
 
+/**
+ * @typedef {{
+ *   widgetId:string,
+ *   iframe: Element
+ * }}
+ */
+ConfigManager.IframeDatum; // purely for typedef

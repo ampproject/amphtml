@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../../../../src/dom';
 import {ConfigManager} from '../ConfigManager';
 import {getConfigManager} from '../amp-addthis';
 import {
@@ -21,7 +22,6 @@ import {
   ORIGIN,
   ALT_TEXT,
   ICON_SIZE,
-  WIDGET_ID_PROP,
 } from '../constants';
 
 describes.realWin('amp-addthis', {
@@ -43,11 +43,16 @@ describes.realWin('amp-addthis', {
   });
 
   function getAT(pubId, widgetId, opt_responsive, opt_beforeLayoutCallback) {
-    const at = doc.createElement('amp-addthis');
-    at.setAttribute('data-pubId', pubId);
-    at.setAttribute('data-widgetId', widgetId);
-    at.setAttribute('width', '111');
-    at.setAttribute('height', '222');
+    const at = createElementWithAttributes(
+        doc,
+        'amp-addthis',
+        /** @type !JsonObject */ ({
+          'data-pubId': pubId,
+          'data-widgetId': widgetId,
+          width: 111,
+          height: 222,
+        })
+    );
     if (opt_responsive) {
       at.setAttribute('layout', 'responsive');
     }
@@ -62,9 +67,9 @@ describes.realWin('amp-addthis', {
 
   function testIframe(iframe) {
     expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal(`${ORIGIN}/dc/amp-addthis.html`);
+    expect(iframe.getAttribute('src'))
+        .to.equal(`${ORIGIN}/dc/amp-addthis.html`);
     expect(iframe.getAttribute('title')).to.equal(ALT_TEXT);
-    expect(iframe[WIDGET_ID_PROP]).to.equal(widgetId);
   }
 
   it('renders the iframe', () => {
@@ -117,6 +122,7 @@ describes.realWin('amp-addthis', {
       expect(registerStub.calledOnce).to.be.true;
       expect(registerStub.calledWithExactly({
         pubId,
+        widgetId,
         iframe: obj.iframe_,
         iframeLoadPromise: obj.iframeLoadPromise_,
         element: obj.element,
@@ -175,7 +181,6 @@ describes.realWin('amp-addthis', {
             }
           },
         },
-        [WIDGET_ID_PROP]: widgetId,
       };
 
       // Fake a number of registered elements.
@@ -183,6 +188,7 @@ describes.realWin('amp-addthis', {
         numPendingRequests++;
         testConfigManager.register({
           pubId,
+          widgetId,
           win: window,
           iframe: mockIframe,
           element: mockElement,
@@ -233,11 +239,11 @@ describes.realWin('amp-addthis', {
             resolve();
           },
         },
-        [WIDGET_ID_PROP]: widgetId,
       };
 
       testConfigManager.register({
         pubId: '1234',
+        widgetId,
         win: window,
         iframe: mockIframe,
         element: mockElement,
@@ -292,7 +298,6 @@ describes.realWin('amp-addthis', {
             }
           },
         },
-        [WIDGET_ID_PROP]: widgetId,
       };
 
       // Fake a number of registered elements.
@@ -300,8 +305,8 @@ describes.realWin('amp-addthis', {
       for (let i = 0; i < 6; i++) {
         numPendingRequests++;
         testConfigManager.register({
-          pubId: i === 0 ? firstPubId :
-            (i > 0 && i < 3 ? secondPubId : thirdPubId),
+          pubId: i === 0 ? firstPubId : (i < 3 ? secondPubId : thirdPubId),
+          widgetId,
           win: window,
           iframe: mockIframe,
           element: mockElement,
