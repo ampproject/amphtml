@@ -32,12 +32,12 @@ tags: {  # <amp-addthis>
   attrs: {
     name: "data-pubId"
     mandatory: true
-    value-regex: "^[\w\d\-]+$"
+    value_regex: "^[\w\d\-]+$"
   }
   attrs: {
     name: "data-widgetId"
     mandatory: true
-    value-regex: "^[a-z\d]{4}$"
+    value_regex: "^[a-z\d]{4}$"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
