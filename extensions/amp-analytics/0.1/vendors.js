@@ -1595,30 +1595,36 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   },
 
   'shinystat': {
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
     'requests': {
-      'ssurl': 'https://amp.shinystat.com/cgi-bin/shinyamp.cgi',
-      'ssparam': 'AMP=1' +
+      'base': 'https://amp.shinystat.com/cgi-bin/shinyamp.cgi',
+      'commpar': 'AMP=1&RM=${random}' +
                  '&USER=${account}' +
-                 '&AMPPAG=${page}' +
-                 '&AMPHR=${canonicalUrl}' +
-                 '&AMPREFER=${documentReferrer}' +
-                 '&AMPRES=${screenWidth}X${screenHeight}' +
-                 '&AMPCOLOR=${screenColorDepth}' +
-                 '&AMPCID=${clientId(AMP_CID)}' +
-                 '&AMPPID=${pageViewId}' +
-                 '&AMPTTL=${title}' +
-                 '&AMPRQC=${requestCount}' +
-                 '&AMPVIE=${viewer}' +
-                 '&AMPSSIDC=${queryParam(ssidc)}' +
-                 '&${ampp1}=${ampv1}' +
-                 '&${ampp2}=${ampv2}',
-      'pageview': '${ssurl}?${ssparam}',
+                 '&PAG=${page}' +
+                 '&HR=${canonicalUrl}' +
+                 '&REFER=${documentReferrer}' +
+                 '&RES=${screenWidth}X${screenHeight}' +
+                 '&COLOR=${screenColorDepth}' +
+                 '&CID=${clientId(AMP_CID)}' +
+                 '&PAGID=${pageViewId}' +
+                 '&TITL=${title}' +
+                 '&RQC=${requestCount}',
+      'pagepar': '&VIE=${viewer}' +
+                 '&PLT=${pageLoadTime}',
+      'eventpar': '&SSXL=1',
+      'linkpar': '&LINK=${outboundLink}',
+      'pageview': '${base}?${commpar}${pagepar}',
+      'event': '${base}?${commpar}${eventpar}',
+      'link': '${base}?${commpar}${linkpar}',
     },
     'triggers': {
       'pageview': {
         'on': 'visible',
         'request': 'pageview',
-        'iframePing': true,
       },
     },
   },
