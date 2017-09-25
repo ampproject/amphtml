@@ -109,6 +109,9 @@ describe('reportErrorToServer', () => {
 
   it('reportError with error object', function SHOULD_BE_IN_STACK() {
     const e = new Error('XYZ');
+    if (!e.stack || e.stack.indexOf('SHOULD_BE_IN_STACK') == -1) {
+      e.stack = 'SHOULD_BE_IN_STACK';
+    }
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
             true));
