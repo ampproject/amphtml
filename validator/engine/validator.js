@@ -3207,7 +3207,7 @@ function validateParentTag(parsedTagSpec, context, validationResult) {
 function validateDescendantTags(
     parsedTagSpec, context, validationResult, parsedRules) {
   const spec = parsedTagSpec.getSpec();
-  const tagName = parsedTagSpec.getSpec().tagName;
+  const tagName = context.getTagStack().getCurrent();
 
   for (var ii = 0; ii < context.allowedDescendantsList().length; ++ii) {
     const allowedDescendantsList = context.allowedDescendantsList()[ii];

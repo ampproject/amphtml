@@ -20,8 +20,6 @@ tags: {  # amp-story
     name: "amp-story"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
-    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
@@ -88,6 +86,7 @@ tags: {  # <amp-story-grid-layer>
   attrs: {
     name: "template"
     value_regex: "(fill|horizontal|vertical|thirds)"
+    mandatory: true
   }
   descendant_tag_lists: "amp-story-grid-layer-allowed-descendants"
   reference_points: {
