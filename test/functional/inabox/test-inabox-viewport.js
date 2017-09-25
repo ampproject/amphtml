@@ -81,7 +81,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   afterEach(() => {
-    sandbox.reset();
+    sandbox.restore();
   });
 
   it('should work for size, layoutRect and position observer', () => {
@@ -141,18 +141,20 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
     sandbox.reset();
 
-    // TODO(zhouyx): Uncomment after fixing #11397.
-    // // DOM change, target position changed
-    // positionCallback({
-    //   viewportRect: layoutRectLtwh(0, 10, 200, 100),
-    //   targetRect: layoutRectLtwh(20, 10, 50, 50),
-    // });
+    // DOM change, target position changed
+    sandbox.restore();
+    sandbox.stub(
+        Services.resourcesForDoc(win.document), 'get').returns([element]);
+    positionCallback({
+      viewportRect: layoutRectLtwh(0, 10, 200, 100),
+      targetRect: layoutRectLtwh(20, 10, 50, 50),
+    });
 
-    // expect(onScrollCallback).to.not.be.called;
-    // expect(onResizeCallback).to.not.be.called;
-    // expect(measureSpy).to.be.calledOnce;
-    // expect(binding.getLayoutRect(element))
-    //     .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
+    expect(onScrollCallback).to.not.be.called;
+    expect(onResizeCallback).to.not.be.called;
+    expect(measureSpy).to.be.calledOnce;
+    expect(binding.getLayoutRect(element))
+        .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
   });
 
   it('should center content, resize and remeasure on overlay mode', () => {
