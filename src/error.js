@@ -44,10 +44,18 @@ const CANCELLED = 'CANCELLED';
 
 
 /**
- * The threshold for throttled errors. Currently at 0.1%.
+ * The threshold for errors throttled because nothing can be done about
+ * them, but we'd still like to report the rough number.
  * @const {number}
  */
-const THROTTLED_ERROR_THRESHOLD = 1e-3;
+const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.001;
+
+/**
+ * The threshold for errors throttled because nothing can be done about
+ * them, but we'd still like to report the rough number.
+ * @const {number}
+ */
+const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
 
 
 /**
@@ -305,6 +313,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
     return;
   }
 
+  const throttleBase = Math.random();
   // We throttle load errors and generic "Script error." errors
   // that have no information and thus cannot be acted upon.
   if (isLoadErrorMessage(message) ||
@@ -313,13 +322,17 @@ export function getErrorReportUrl(message, filename, line, col, error,
     message == 'Script error.') {
     expected = true;
 
-    // Throttle load errors.
-    if (Math.random() > THROTTLED_ERROR_THRESHOLD) {
+    if (throttleBase > NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD) {
       return;
     }
   }
 
   const isUserError = isUserErrorMessage(message);
+
+  // Only report a subset of user errors.
+  if (isUserError && throttleBase > USER_ERROR_THROTTLE_THRESHOLD) {
+    return;
+  }
 
   // This is the App Engine app in
   // ../tools/errortracker
