@@ -14,6 +14,7 @@
   * limitations under the License.
   */
 
+import {assertHttpsUrl} from '../../../src/url';
 import {
   elementByTag,
   fullscreenEnter,
@@ -30,7 +31,7 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
+import {toArray} from '../../../src/types';
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {CSS} from '../../../build/amp-video-0.1.css';
 
@@ -212,8 +213,11 @@ class AmpVideo extends AMP.BaseElement {
     this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_LAYOUT, this.video_,
         /* opt_removeMissingAttrs */ true);
 
-    const children = scopedQuerySelectorAll(this.element, 'source, track');
-    Array.prototype.forEach.call(children, child => {
+    const children = toArray(scopedQuerySelectorAll(
+        this.element,
+        'source, track'
+    ));
+    children.forEach(child => {
       // Skip the video we already added to the element.
       if (this.video_ === child) {
         return;

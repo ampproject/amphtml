@@ -17,7 +17,7 @@
 /**
  * Animated equalizer icon for muted autoplaying videos.
  */
-i-amphtml-video-mask, i-amp-video-mask {
+i-amphtml-video-mask {
   z-index: 1;
 }
 .amp-video-eq {
@@ -516,7 +516,7 @@ amp-custom-controls-floating.amp-custom-controls-loading::after {
  border-right: 2px solid rgba(255, 255, 255, 0.2);
  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
  border-left: 2px solid rgb(0, 0, 0);
- animation: i-amp-html-custom-controls-loading 1.1s infinite linear;
+ animation: i-amphtml-custom-controls-loading 1.1s infinite linear;
  border-radius: 50%;
  width: 100%;
  height: 100%;
@@ -529,7 +529,7 @@ amp-custom-controls.amp-custom-controls-light-skin amp-custom-controls-floating.
  border-left: 2px solid rgb(255, 255, 255);
 }
 
-@keyframes i-amp-html-custom-controls-loading {
+@keyframes i-amphtml-custom-controls-loading {
  0% {
    -webkit-transform: rotate(0deg);
    transform: rotate(0deg);

@@ -140,16 +140,6 @@ export class CustomControls {
   createVolumeControls_() {
     const doc = this.ampdoc_.win.document;
     const volumeContainer = doc.createElement('amp-custom-controls-volume');
-    // const volumeSlider = createElementWithAttributes(
-    //     doc, 'input',
-    //     {
-    //       'type': 'range',
-    //       'min': '0',
-    //       'max': '100',
-    //       'value': '0',
-    //     }
-    // );
-    // volumeSlider.classList.add('amp-custom-controls-volume-indicator');
     const muteBtnWrap = doc.createElement('amp-custom-controls-icon-wrapper');
     muteBtnWrap.classList.add('amp-custom-controls-mute');
     const muteBtn = this.createIcon_(
@@ -157,7 +147,6 @@ export class CustomControls {
     );
     muteBtnWrap.appendChild(muteBtn);
     volumeContainer.appendChild(muteBtnWrap);
-    // volumeContainer.appendChild(volumeSlider);
     listen(muteBtnWrap, 'click', () => {
       if (this.entry_.isMuted()) {
         this.entry_.video.unmute();
@@ -242,14 +231,14 @@ export class CustomControls {
   createProgressTime_() {
     const doc = this.ampdoc_.win.document;
     const progressTime = doc.createElement('amp-custom-controls-progress-time');
-    progressTime./*OK*/innerText = '0:00 / 0:00';
+    progressTime.textContent = '0:00 / 0:00';
     // Update played time
     const updateProgress = () => {
       const current = this.entry_.video.getCurrentTime() || 0;
       const currentFormatted = secsToHHMMSS(current);
       const total = this.entry_.video.getDuration() || 0;
       const totalFormatted = secsToHHMMSS(total);
-      progressTime./*OK*/innerText = currentFormatted + ' / ' + totalFormatted;
+      progressTime.textContent = currentFormatted + ' / ' + totalFormatted;
     };
 
     this.listenMultiple_(

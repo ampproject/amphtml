@@ -326,7 +326,7 @@ export class VideoManager {
         entry.video.element,
         PositionObserverFidelity.HIGH,
         newPos => {
-          entry.onDockableVideoPositionChanged(newPos, false);
+          entry.onDockableVideoPositionChanged(newPos, /* reset */ false);
         }
     );
 
@@ -424,7 +424,7 @@ export class VideoManager {
   /**
    * Registers the provided video as docked
    *
-   * @param {VideoEntry} entry
+   * @param {!VideoEntry} entry
    */
   registerDocked(entry) {
     this.dockedVideo_ = entry;
@@ -433,7 +433,7 @@ export class VideoManager {
   /**
    * Checks whether the given video is docked or not
    *
-   * @param {VideoEntry} entry
+   * @param {!VideoEntry} entry
    * @return {boolean}
    */
   isDocked(entry) {
@@ -926,13 +926,13 @@ export class VideoEntry {
     }
 
     function adStart() {
-      setStyles(mask, {
+      st.setStyles(mask, {
         'display': 'none',
       });
     }
 
     function adEnd() {
-      setStyles(mask, {
+      st.setStyles(mask, {
         'display': 'block',
       });
     }
@@ -1186,7 +1186,7 @@ export class VideoEntry {
         // position right below the viewport
         layoutRectLtwh(
             this.inlineVidRect_.left,
-            this.viewport_.getHeight(SizeReportingFidelity.HIGH),
+            this.viewport_.getHeight(),
             this.inlineVidRect_.width,
             this.inlineVidRect_.height
         ) :
@@ -1225,7 +1225,7 @@ export class VideoEntry {
                          - spaceOnTop
                          - this.video.element./*OK*/offsetHeight;
     // Don't minimize if video can never be hidden by scrolling to top/bottom
-    const vh = this.viewport_.getHeight(SizeReportingFidelity.HIGH);
+    const vh = this.viewport_.getHeight();
     if ((isBottom && spaceOnTop < vh)
         || (isTop && spaceOnBottom < vh)) {
       this.dockPosition_ = DockPositions.INLINE;
@@ -1289,7 +1289,7 @@ export class VideoEntry {
 
     this.addListener_(
         dev().assertElement(this.customControls_.getElement()),
-        'mousedown touchstart',
+        ['mousedown', 'touchstart'],
         e => {
           this.isTouched_ = true;
           this.isDragging_ = false;
@@ -1297,29 +1297,38 @@ export class VideoEntry {
         }
     );
 
-    this.addListener_(this.ampdoc_.win.document, 'mouseup touchend', () => {
-      this.isTouched_ = false;
-      this.isDragging_ = false;
-      // Call drag one last time to see if the velocity is still not null
-      // in which case, drag would call itself again to finish the animation
-      this.drag_();
-    });
+    this.addListener_(
+        this.ampdoc_.win.document,
+        ['mouseup', 'touchend'],
+        () => {
+          this.isTouched_ = false;
+          this.isDragging_ = false;
+          // Call drag one last time to see if the velocity is still not null
+          // in which case, drag would call itself again to finish the animation
+          this.drag_();
+        }
+    );
 
-    this.addListener_(this.ampdoc_.win.document, 'mousemove touchmove', e => {
-      // TODO(@wassgha) Make this passive once the PR goes through
-      // TODO(@wassgha) Unlisten to this event as soon as we stop dragging
-      this.isDragging_ = this.isTouched_;
-      if (this.isDragging_) {
-        e.preventDefault();
-        // Start dragging
-        this.dockState_ = DockStates.DRAGGABLE;
-        this.drag_();
-      }
-      this.mouse_(e);
-    }, {
-      'capture': true,
-      'passive': false,
-    });
+    this.addListener_(
+        this.ampdoc_.win.document,
+        ['mousemove', 'touchmove'],
+        e => {
+          // TODO(@wassgha) Make this passive once the PR goes through
+          // TODO(@wassgha) Unlisten to this event as soon as we stop dragging
+          this.isDragging_ = this.isTouched_;
+          if (this.isDragging_) {
+            e.preventDefault();
+            // Start dragging
+            this.dockState_ = DockStates.DRAGGABLE;
+            this.drag_();
+          }
+          this.mouse_(e);
+        },
+        {
+          'capture': true,
+          'passive': false,
+        }
+    );
   }
 
   /**
@@ -1331,8 +1340,8 @@ export class VideoEntry {
     this.customControls_.disableControls();
 
     // Viewport width & height
-    const vw = this.viewport_.getWidth(SizeReportingFidelity.HIGH);
-    const vh = this.viewport_.getHeight(SizeReportingFidelity.HIGH);
+    const vw = this.viewport_.getWidth();
+    const vh = this.viewport_.getHeight();
 
     // Calculate offsetXLeft
     const offsetXLeft = DOCK_MARGIN;
@@ -1418,13 +1427,13 @@ export class VideoEntry {
   /**
    * Listens for the specified event on the element and records unlistener
    * @param {!EventTarget} element
-   * @param {string} eventTypes
+   * @param {Array} eventTypes
    * @param {function(!Event)} listener
    * @param {Object=} opt_evtListenerOpts
    * @private
    */
   addListener_(element, eventTypes, listener, opt_evtListenerOpts) {
-    eventTypes.split(' ').forEach(eventType => {
+    eventTypes.forEach(eventType => {
       this.dragUnlisteners_.push(
           listen(
               element,
@@ -1440,7 +1449,7 @@ export class VideoEntry {
    * Removes all listeners for touch and mouse events
    * @private
    */
-  unlistenAll_() {
+  unlistenDragListeners_() {
     let unlistener = this.dragUnlisteners_.pop();
     while (unlistener) {
       unlistener.call();
@@ -1511,9 +1520,9 @@ export class VideoEntry {
         const vidCenterX = dragCoord.position.x + minimizedWidth / 2;
         const vidCenterY = dragCoord.position.y + minimizedHeight / 2;
 
-        if (vidCenterX > this.viewport_.getWidth(SizeReportingFidelity.HIGH)
+        if (vidCenterX > this.viewport_.getWidth()
             || vidCenterX < 0
-            || vidCenterY > this.viewport_.getHeight(SizeReportingFidelity.HIGH)
+            || vidCenterY > this.viewport_.getHeight()
             || vidCenterY < 0) {
           this.video.pause();
           this.finishDocking_();
@@ -1527,10 +1536,10 @@ export class VideoEntry {
           // X/Y Coordinates for each corner
           const top = DOCK_MARGIN;
           const left = DOCK_MARGIN;
-          const right = this.viewport_.getWidth(SizeReportingFidelity.HIGH)
+          const right = this.viewport_.getWidth()
                         - this.minimizedRect_.width
                         - DOCK_MARGIN;
-          const bottom = this.viewport_.getHeight(SizeReportingFidelity.HIGH)
+          const bottom = this.viewport_.getHeight()
                          - this.minimizedRect_.height
                          - DOCK_MARGIN;
           // Determine corner and update this.dockPosition_
@@ -1619,8 +1628,8 @@ export class VideoEntry {
    * @private
    */
   calcSnapCorner_() {
-    const vw = this.viewport_.getWidth(SizeReportingFidelity.HIGH);
-    const vh = this.viewport_.getHeight(SizeReportingFidelity.HIGH);
+    const vw = this.viewport_.getWidth();
+    const vh = this.viewport_.getHeight();
     const viewportCenterX = vw / 2;
     const viewportCenterY = vh / 2;
     const minRectW = this.minimizedRect_.width;
@@ -1651,7 +1660,7 @@ export class VideoEntry {
   finishDocking_() {
     // Remove draggable mask and listeners
     this.vsync_.mutate(() => {
-      this.unlistenAll_();
+      this.unlistenDragListeners_();
       this.hideControls(
           /* customToo */ true,
           /* disableToo */ !this.hasCustomControls
