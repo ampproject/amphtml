@@ -34,6 +34,7 @@ import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {AmpAdUIHandler} from './amp-ad-ui';
+import {toWin} from '../../../src/types';
 
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
@@ -116,9 +117,22 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
+  /**
+   * @return {!../../../src/service/resource.Resource}
+   * @visibileForTesting
+   */
+  getResource() {
+    return this.element.getResources().getResourceForElement(this.element);
+  }
+
   /** @override */
   buildCallback() {
     this.type_ = this.element.getAttribute('type');
+    const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
+    dev().info(TAG_3P_IMPL, `upgradeDelay ${this.type_}: ${upgradeDelayMs}`);
+    this.emitLifecycleEvent('upgradeDelay', {
+      'forced_delta': upgradeDelayMs,
+    });
 
     this.placeholder_ = this.getPlaceholder();
     this.fallback_ = this.getFallback();
@@ -234,7 +248,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // here, though, allows us to measure the impact of ad throttling via
       // incrementLoadingAds().
       this.emitLifecycleEvent('adRequestStart');
-      const iframe = getIframe(this.element.ownerDocument.defaultView,
+      const iframe = getIframe(toWin(this.element.ownerDocument.defaultView),
           this.element, this.type_, opt_context,
           this.config.remoteHTMLDisabled);
       this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(

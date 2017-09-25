@@ -18,6 +18,7 @@ import {dev} from './log';
 import {dict} from './utils/object';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {startsWith} from './string';
+import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -37,7 +38,6 @@ export const UPGRADE_TO_CUSTOMELEMENT_PROMISE =
 export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER =
     '__AMP_UPG_RES';
 
-
 /**
  * Waits until the child element is constructed. Once the child is found, the
  * callback is executed.
@@ -51,7 +51,7 @@ export function waitForChild(parent, checkFunc, callback) {
     return;
   }
   /** @const {!Window} */
-  const win = parent.ownerDocument.defaultView;
+  const win = toWin(parent.ownerDocument.defaultView);
   if (win.MutationObserver) {
     /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
@@ -826,4 +826,16 @@ export function isFullscreenElement(element) {
     }
   }
   return false;
+}
+
+/**
+ * Returns true if node is not disabled.
+ *
+ * IE8 can return false positives, see {@link matches}.
+ * @param {!Element} element
+ * @return {boolean}
+ * @see https://www.w3.org/TR/html5/forms.html#concept-fe-disabled
+ */
+export function isEnabled(element) {
+  return !(element.disabled || matches(element, ':disabled'));
 }

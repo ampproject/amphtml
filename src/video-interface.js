@@ -105,6 +105,28 @@ export class VideoInterface {
   hideControls() {}
 
   /**
+   * Returns video's meta data (artwork, title, artist, album, etc.) for use
+   * with the Media Session API
+   * artwork (Array): URL to the poster image (preferably a 512x512 PNG)
+   * title (string): Name of the video
+   * artist (string): Name of the video's author/artist
+   * album (string): Name of the video's album if it exists
+   * @return {!./mediasession-helper.MetadataDef|undefined} metadata
+   */
+  getMetadata() {}
+
+  /**
+   * If this returns true then it will be assumed that the player implements
+   * the MediaSession API internally so that the video manager does not override
+   * it. If not, the video manager will use the metadata variable as well as
+   * inferred meta-data to update the video's Media Session notification.
+   *
+   * @return {boolean}
+   */
+  preimplementsMediaSessionAPI() {}
+
+
+  /**
    * Automatically comes from {@link ./base-element.BaseElement}
    *
    * @return {!AmpElement}
@@ -253,6 +275,17 @@ export const VideoEvents = {
   PAUSE: 'pause',
 
   /**
+   * ended
+   *
+   * Fired when the video ends.
+   *
+   * This event should be fired in addition to `pause` when video ends.
+   *
+   * @event ended
+   */
+  ENDED: 'ended',
+
+  /**
    * muted
    *
    * Fired when the video is muted.
@@ -291,13 +324,28 @@ export const VideoEvents = {
   RELOAD: 'reloaded',
 
   /**
-   * ended
+   * pre/mid/post Ad start
    *
-   * Fired when the video ends.
+   * Fired when an Ad starts playing.
    *
-   * @event ended
+   * This is used to remove any overlay shims during Ad play during autoplay
+   * or minimized-to-corner version of the player.
+   *
+   * @event ad_start
    */
-  ENDED: 'ended',
+  AD_START: 'ad_start',
+
+  /**
+   * pre/mid/post Ad ends
+   *
+   * Fired when an Ad ends playing.
+   *
+   * This is used to restore any overlay shims during Ad play during autoplay
+   * or minimized-to-corner version of the player.
+   *
+   * @event ad_end
+   */
+  AD_END: 'ad_end',
 };
 
 

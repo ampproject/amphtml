@@ -275,6 +275,16 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 
   /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
   getCurrentTime() {
     // Not supported.
     return 0;
@@ -293,4 +303,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-nexxtv-player', AmpNexxtvPlayer);
+
+AMP.extension('amp-nexxtv-player', '0.1', AMP => {
+  AMP.registerElement('amp-nexxtv-player', AmpNexxtvPlayer);
+});

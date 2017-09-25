@@ -204,6 +204,8 @@ class AmpDailymotion extends AMP.BaseElement {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
         break;
       case DailymotionEvents.END:
+        this.element.dispatchCustomEvent(VideoEvents.ENDED);
+        // Don't break, also dispatch pause
       case DailymotionEvents.PAUSE:
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
         this.playerState_ = DailymotionEvents.PAUSE;
@@ -393,6 +395,16 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
   getCurrentTime() {
     // Not supported.
     return 0;
@@ -409,6 +421,9 @@ class AmpDailymotion extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-dailymotion', AmpDailymotion);
+
+AMP.extension('amp-dailymotion', '0.1', AMP => {
+  AMP.registerElement('amp-dailymotion', AmpDailymotion);
+});

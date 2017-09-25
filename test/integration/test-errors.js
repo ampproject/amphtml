@@ -54,7 +54,7 @@ describe.configure().retryOnSaucelabs().run('error page', function() {
 
   function shouldFail(id) {
     // Skip for issue #110
-    it.configure().skipSauceLabs().run('should fail to load #' + id, () => {
+    it.configure().ifNewChrome().run('should fail to load #' + id, () => {
       const e = fixture.doc.getElementById(id);
       expect(fixture.errors.join('\n')).to.contain(
           e.getAttribute('data-expectederror'));

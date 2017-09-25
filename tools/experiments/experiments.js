@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
 import {reportError} from '../../src/error';
@@ -180,6 +179,11 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
   {
+    id: 'font-display-swap',
+    name: 'Use font-display: swap as the default for fonts.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
+  },
+  {
     id: 'amp-animation',
     name: 'High-performing keyframe animations in AMP.',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -235,12 +239,6 @@ const EXPERIMENTS = [
     name: 'Use slot width/height attribute for AdSense size format',
   },
   {
-    id: 'amp-form-verifiers',
-    name: 'Asynchronous form verifiers',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9174',
-    spec: 'https://github.com/ampproject/amphtml/issues/8736',
-  },
-  {
     id: 'input-debounced',
     name: 'A debounced input event for AMP actions',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9413',
@@ -266,6 +264,18 @@ const EXPERIMENTS = [
     id: 'disable-rtc',
     name: 'Disable AMP RTC',
     spec: 'https://github.com/ampproject/amphtml/issues/8551',
+  },
+  {
+    id: 'amp-position-observer',
+    name: 'Amp extension for monitoring position of an element within viewport',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/10875',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+      'amp-position-observer/amp-position-observer.md',
+  },
+  {
+    id: 'inabox-position-api',
+    name: 'Position API for foreign iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/10995',
   },
 ];
 

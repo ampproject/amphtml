@@ -260,6 +260,16 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 
   /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
   getCurrentTime() {
     // Not supported.
     return 0;
@@ -276,6 +286,9 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-ooyala-player', AmpOoyalaPlayer);
+
+AMP.extension('amp-ooyala-player', '0.1', AMP => {
+  AMP.registerElement('amp-ooyala-player', AmpOoyalaPlayer);
+});

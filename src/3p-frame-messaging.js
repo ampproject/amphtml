@@ -51,6 +51,9 @@ export const MessageType = {
   // For amp-analytics' iframe-transport
   SEND_IFRAME_TRANSPORT_EVENTS: 'send-iframe-transport-events',
   IFRAME_TRANSPORT_EVENTS: 'iframe-transport-events',
+
+  // For user-error-in-iframe
+  USER_ERROR_IN_IFRAME: 'user-error-in-iframe',
 };
 
 /**
@@ -58,12 +61,12 @@ export const MessageType = {
  * @param {!EventTarget} element
  * @param {string} eventType
  * @param {function(!Event)} listener
- * @param {boolean=} opt_capture
+ * @param {Object=} opt_evtListenerOpts
  * @return {!UnlistenDef}
  */
-export function listen(element, eventType, listener, opt_capture) {
+export function listen(element, eventType, listener, opt_evtListenerOpts) {
   return internalListenImplementation(
-      element, eventType, listener, opt_capture);
+      element, eventType, listener, opt_evtListenerOpts);
 }
 
 
@@ -133,4 +136,3 @@ export let IframeTransportEvent;
 //   { transportId: "2", message: "hello" }, // Another
 //   { transportId: "3", message: "goodbye" } // And another
 // ]
-

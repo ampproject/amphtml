@@ -61,7 +61,7 @@ For example:
 
 ## Attributes
 
-##### src 
+##### src
 
 Required if no `<source>` children are present. Must be HTTPS.
 
@@ -78,9 +78,45 @@ If present, the audio will automatically loop back to the start upon reaching th
 
 If present, will mute the audio by default.
 
+##### controlsList
+
+Same as [controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) attribute of HTML5 audio element. Only supported by certain browsers. Please see [https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) for details.
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+## Media Session Attributes
+
+`amp-audio` implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session) enabling developers to specify more information about the audio file that is playing to be displayed in the notification center of user's devices (along with play/pause controls).
+
+##### artwork
+
+URL to a PNG/JPG/ICO image serving as the audio's artwork. If not present, the MediaSessionAPI Helper will use either the `image` field in the `schema.org` definition, the `og:image` or the website's `favicon`.
+
+##### artist
+
+(string) indicates the author of the audio
+
+##### album
+
+(string) indicates the album the audio was taken from
+
+##### title
+
+(string) part of the [common attributes](https://www.ampproject.org/docs/reference/common_attributes), doubles as the audio's name displayed in the MediaSession notification. If not provided, the MediaSessionAPI Helper will use either the `aria-label` attribute or fall back to the page's title.
+
+Example:
+
+```html
+<amp-audio width="400" height="300"
+  src="https://yourhost.com/audios/myaudio.mp3"
+  artwork="https://yourhost.com/artworks/artwork.png"
+  title="Awesome music" artist="Awesome singer"
+  album="Amazing album">
+  <source type="audio/mpeg" src="foo.mp3">
+</amp-audio>
+```
 
 ## Validation
 

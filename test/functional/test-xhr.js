@@ -52,7 +52,7 @@ describe('XHR', function() {
   ];
 
   function setupMockXhr() {
-    const mockXhr = sandbox.useFakeXMLHttpRequest().xhr;
+    const mockXhr = sandbox.useFakeXMLHttpRequest();
     requests = [];
     mockXhr.onCreate = function(xhr) {
       requests.push(xhr);
@@ -300,7 +300,7 @@ describe('XHR', function() {
           mockXhr.status = 500;
           return assertSuccess(createResponseInstance('', mockXhr))
               .catch(error => {
-                expect(error.response).to.be.defined;
+                expect(error.response).to.exist;
                 expect(error.response.status).to.equal(500);
               });
         });
@@ -450,7 +450,7 @@ describe('XHR', function() {
           'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '<html></html>');
         return promise.catch(e => {
-          expect(e.retriable).to.be.defined;
+          expect(e.retriable).to.exist;
           expect(e.retriable === true).to.be.true;
         });
       });
@@ -466,7 +466,7 @@ describe('XHR', function() {
           'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '<html></html>');
         return promise.catch(e => {
-          expect(e.retriable).to.be.defined;
+          expect(e.retriable).to.exist;
           expect(e.retriable === true).to.be.true;
         });
       });
@@ -571,7 +571,7 @@ describe('XHR', function() {
           });
           expect(requests[0].requestHeaders).to.deep.equal({
             'Accept': 'application/json',
-            'Content-Type': 'application/json;charset=utf-8',
+            'Content-Type': 'text/plain;charset=utf-8',
             'Other': 'another',  // Not removed when other headers set.
           });
         });
@@ -582,6 +582,9 @@ describe('XHR', function() {
           method: 'POST',
           body: {
             hello: 'world',
+          },
+          headers: {
+            'Content-Type': 'application/json;charset=utf-8',
           },
         }).then(res => res.json()).then(res => {
           expect(res.json).to.jsonEqual({

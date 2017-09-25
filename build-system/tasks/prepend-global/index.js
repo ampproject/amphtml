@@ -15,26 +15,38 @@
  */
 'use strict';
 
-var BBPromise = require('bluebird');
-var argv = require('minimist')(process.argv.slice(2));
-var child_process = require('child_process');
-var exec = BBPromise.promisify(child_process.exec);
-var fs = BBPromise.promisifyAll(require('fs'));
-var gulp = require('gulp-help')(require('gulp'));
-var util = require('gulp-util');
+const BBPromise = require('bluebird');
+const argv = require('minimist')(process.argv.slice(2));
+const childProcess = require('child_process');
+const exec = BBPromise.promisify(childProcess.exec);
+const fs = BBPromise.promisifyAll(require('fs'));
+const gulp = require('gulp-help')(require('gulp'));
+const util = require('gulp-util');
 
+
+/**
+ * Returns the number of AMP_CONFIG matches in the given config string.
+ *
+ * @param {string} str
+ * @return {number}
+ */
+function numConfigs(str) {
+  const re = /\/\*AMP_CONFIG\*\//g;
+  const matches = str.match(re);
+  return matches == null ? 0 : matches.length;
+}
 
 /**
  * Checks that only 1 AMP_CONFIG should exist after append.
  *
  * @param {string} str
- * @return {boolean}
  */
 function sanityCheck(str) {
-  var re = /\/\*AMP_CONFIG\*\//g;
-  // There must be one and exactly 1 match.
-  var matches = str.match(re)
-  return matches != null && matches.length == 1;
+  const numMatches = numConfigs(str);
+  if (numMatches != 1) {
+    throw new Error(
+      'Found ' + numMatches + ' AMP_CONFIG(s) before write. Aborting!');
+  }
 }
 
 /**
@@ -46,7 +58,7 @@ function checkoutBranchConfigs(filename, opt_branch) {
   if (argv.local) {
     return Promise.resolve();
   }
-  var branch = opt_branch || 'origin/master';
+  const branch = opt_branch || 'origin/master';
   // One bad path here will fail the whole operation.
   return exec(`git checkout ${branch} ${filename}`)
       .catch(function(e) {
@@ -90,19 +102,31 @@ function writeTarget(filename, fileString, opt_dryrun) {
  * @return {string}
  */
 function valueOrDefault(value, defaultValue) {
-  if (typeof value == 'string') {
+  if (typeof value === 'string') {
     return value;
   }
   return defaultValue;
 }
 
 function main() {
-  var TESTING_HOST = process.env.AMP_TESTING_HOST;
-  var target = argv.target || TESTING_HOST;
+  const TESTING_HOST = process.env.AMP_TESTING_HOST;
+  const target = argv.target || TESTING_HOST;
 
   if (!target) {
     util.log(util.colors.red('Missing --target.'));
     return;
+  }
+
+  if (argv.remove) {
+    return fs.readFileAsync(target)
+        .then(file => {
+          let contents = file.toString();
+          sanityCheck(contents);
+          const config =
+          /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
+          contents = contents.replace(config, '');
+          return writeTarget(target, contents, argv.dryrun);
+        });
   }
 
   if (!(argv.prod || argv.canary)) {
@@ -110,9 +134,8 @@ function main() {
     return;
   }
 
-  var globs = [].concat(argv.files).filter(x => typeof x == 'string');
-  var branch = argv.branch;
-  var filename = '';
+  const branch = argv.branch;
+  let filename = '';
 
   // Prod by default.
   if (argv.canary) {
@@ -124,27 +147,24 @@ function main() {
   }
   return checkoutBranchConfigs(filename, branch)
       .then(() => {
-       return Promise.all([
-         fs.readFileAsync(filename),
-         fs.readFileAsync(target),
-       ]);
+        return Promise.all([
+          fs.readFileAsync(filename),
+          fs.readFileAsync(target),
+        ]);
       })
       .then(files => {
-        var configFile;
+        let configFile;
         try {
           configFile = JSON.stringify(JSON.parse(files[0].toString()));
         } catch (e) {
           util.log(util.colors.red(`Error parsing config file: ${filename}`));
           throw e;
         }
-        var targetFile = files[1].toString();
+        const targetFile = files[1].toString();
         return prependConfig(configFile, targetFile);
       })
       .then(fileString => {
-        if (!sanityCheck(fileString)) {
-          throw new Error('Found 0 or > 1 AMP_CONFIG(s) before write. ' +
-              'aborting');
-        }
+        sanityCheck(fileString);
         return writeTarget(target, fileString, argv.dryrun);
       });
 }
@@ -159,7 +179,9 @@ gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
     'branch': '  Switch to a git branch to get config source from. ' +
         'Uses master by default.',
     'local': '  Don\'t switch branches and use local config',
-  }
+    'remove': '  Removes previously prepended json config from the target ' +
+        'file (if present).',
+  },
 });
 
 exports.checkoutBranchConfigs = checkoutBranchConfigs;
@@ -167,3 +189,4 @@ exports.prependConfig = prependConfig;
 exports.writeTarget = writeTarget;
 exports.valueOrDefault = valueOrDefault;
 exports.sanityCheck = sanityCheck;
+exports.numConfigs = numConfigs;

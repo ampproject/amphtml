@@ -21,11 +21,17 @@ import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
 import {Services} from './services';
-import {getFixedContainer} from './full-overlay-frame-child-helper';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
-import {px, resetStyles, setStyle, setStyles} from './style';
+import {
+  px,
+  resetStyles,
+  setImportantStyles,
+  setStyle,
+  setStyles,
+} from './style';
+import {toWin} from './types';
 
 
 /** @const {string} */
@@ -119,7 +125,7 @@ export function getFriendlyIframeEmbedOptional(iframe) {
 export function installFriendlyIframeEmbed(iframe, container, spec,
     opt_preinstallCallback) {
   /** @const {!Window} */
-  const win = getTopWindow(iframe.ownerDocument.defaultView);
+  const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensions = Services.extensionsFor(win);
 
@@ -129,7 +135,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   // Pre-load extensions.
   if (spec.extensionIds) {
     spec.extensionIds.forEach(
-        extensionId => extensions.loadExtension(extensionId));
+        extensionId => extensions.preloadExtension(extensionId));
   }
 
   const html = mergeHtml(spec);
@@ -511,29 +517,22 @@ export class FriendlyIframeEmbed {
    * @return {!Promise}
    */
   enterFullOverlayMode() {
-    const iframeBody = this.getBodyElement();
-    const fixedContainer = this.getFixedContainer();
-
     return this.runVsyncOnIframe_({
       measure: state => {
         const iframeRect = this.iframe./*OK*/getBoundingClientRect();
 
-        const winWidth = this.win./*OK*/innerWidth;
-        const winHeight = this.win./*OK*/innerHeight;
-
-        state.fixedContainerStyle = {
+        state.bodyStyle = {
+          'background': 'transparent',
           'position': 'absolute',
           'top': px(iframeRect.top),
-          'right': px(winWidth - iframeRect.right),
           'left': px(iframeRect.left),
-          'bottom': px(winHeight - iframeRect.bottom),
           'width': px(iframeRect.width),
           'height': px(iframeRect.height),
+          'bottom': 'auto',
+          'right': 'auto',
         };
       },
       mutate: state => {
-        setStyle(iframeBody, 'background', 'transparent');
-
         setStyles(this.iframe, {
           'position': 'fixed',
           'left': 0,
@@ -544,7 +543,8 @@ export class FriendlyIframeEmbed {
           'height': '100vh',
         });
 
-        setStyles(fixedContainer, state.fixedContainerStyle);
+        // We need to override runtime-level !important rules
+        setImportantStyles(this.getBodyElement(), state.bodyStyle);
       },
     }, {});
   }
@@ -553,13 +553,8 @@ export class FriendlyIframeEmbed {
    * @return {!Promise}
    */
   leaveFullOverlayMode() {
-    const iframeBody = this.getBodyElement();
-    const fixedContainer = this.getFixedContainer();
-
     return this.runVsyncOnIframe_({
       mutate: () => {
-        resetStyles(iframeBody, ['background']);
-
         resetStyles(this.iframe, [
           'position',
           'left',
@@ -570,25 +565,19 @@ export class FriendlyIframeEmbed {
           'height',
         ]);
 
-        resetStyles(fixedContainer, [
+        // we're not resetting background here as we need to set it to
+        // transparent permanently (see TODO)
+        resetStyles(this.getBodyElement(), [
           'position',
           'top',
-          'right',
           'left',
-          'bottom',
           'width',
           'height',
+          'bottom',
+          'right',
         ]);
       },
     });
-  }
-
-  /**
-   * @return {!Element}
-   * @visibleForTesting
-   */
-  getFixedContainer() {
-    return getFixedContainer(this.getBodyElement());
   }
 }
 

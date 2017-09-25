@@ -21,23 +21,27 @@ import {
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import * as sinon from 'sinon';
 import {gmosspIsA4AEnabled} from '../gmossp-a4a-config';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {createIframePromise} from '../../../../testing/iframe';
 
-describe('gmossp-a4a-config', () => {
+
+describes.realWin('gmossp-a4a-config', {amp: false}, env => {
   let doc;
   let win;
   beforeEach(() => {
-    return createIframePromise().then(f => {
-      doc = f.doc;
-      win = f.win;
-    });
+    win = env.win;
+    doc = win.document;
   });
   it('should pass a4a config predicate', () => {
     const element = createElementWithAttributes(doc, 'amp-ad', {
       src: 'https://sp.gmossp-sp.jp/ads/ssp.ad?space_id=33303&is_a4a=1',
+      'data-use-a4a': 'true',
+    });
+    expect(gmosspIsA4AEnabled(win, element)).to.be.true;
+  });
+  it('should pass a4a config predicate', () => {
+    const element = createElementWithAttributes(doc, 'amp-ad', {
+      src: 'https://amp.sp.gmossp-sp.jp/_a4a/ads/ssp.ad?space_id=33303&is_a4a=1',
       'data-use-a4a': 'true',
     });
     expect(gmosspIsA4AEnabled(win, element)).to.be.true;
@@ -63,18 +67,21 @@ describe('gmossp-a4a-config', () => {
   });
 });
 
-describe('amp-ad-network-gmossp-impl', () => {
 
-  let sandbox;
+describes.realWin('amp-ad-network-gmossp-impl', {
+  amp: {
+    extensions: ['amp-ad-network-gmossp-impl'],
+  },
+}, env => {
+  let win, doc;
   let gmosspImpl;
   let gmosspImplElem;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    gmosspImplElem = document.createElement('amp-ad');
+    win = env.win;
+    doc = win.document;
+    gmosspImplElem = doc.createElement('amp-ad');
     gmosspImplElem.setAttribute('type', 'gmossp');
-    gmosspImplElem.setAttribute('src',
-        'https://sp.gmossp-sp.jp/ads/ssp.ad?space_id=33303&is_a4a=1');
     gmosspImplElem.setAttribute('data-use-a4a', 'true');
     sandbox.stub(AmpAdNetworkGmosspImpl.prototype, 'getSigningServiceNames',
         () => {
@@ -83,17 +90,19 @@ describe('amp-ad-network-gmossp-impl', () => {
     gmosspImpl = new AmpAdNetworkGmosspImpl(gmosspImplElem);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   describe('#isValidElement', () => {
     it('should be valid', () => {
+      gmosspImplElem.setAttribute('src',
+          'https://amp.sp.gmossp-sp.jp/_a4a/ads/ssp.ad?space_id=33303&is_a4a=1');
+      expect(gmosspImpl.isValidElement()).to.be.true;
+    });
+    it('should be valid', () => {
+      gmosspImplElem.setAttribute('src',
+          'https://sp.gmossp-sp.jp/ads/ssp.ad?space_id=33303&is_a4a=1');
       expect(gmosspImpl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
-      gmosspImplElem =
-document.createElement('amp-ad-network-gmossp-impl');
+      gmosspImplElem = doc.createElement('amp-ad-network-gmossp-impl');
       gmosspImplElem.setAttribute('type', 'gmossp');
       gmosspImpl = new AmpAdNetworkGmosspImpl(gmosspImplElem);
       expect(gmosspImpl.isValidElement()).to.be.false;
@@ -102,7 +111,15 @@ document.createElement('amp-ad-network-gmossp-impl');
 
   describe('#getAdUrl', () => {
     it('should be valid', () => {
-      const base = 'https://sp.gmossp-sp.jp/ads/ssp.ad?';
+      gmosspImplElem.setAttribute('src',
+          'https://amp.sp.gmossp-sp.jp/_a4a/ads/ssp.ad?space_id=33303&is_a4a=1');
+      const base = 'https://amp.sp.gmossp-sp.jp/_a4a/ads/ssp.ad?';
+      expect(gmosspImpl.getAdUrl().substring(0, base.length)).to.equal(base);
+    });
+    it('should be valid', () => {
+      gmosspImplElem.setAttribute('src',
+          'https://sp.gmossp-sp.jp/ads/ssp.ad?space_id=33303&is_a4a=1');
+      const base = 'https://amp.sp.gmossp-sp.jp/_a4a/ads/ssp.ad?';
       expect(gmosspImpl.getAdUrl().substring(0, base.length)).to.equal(base);
     });
   });

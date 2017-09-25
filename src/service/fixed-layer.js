@@ -18,6 +18,7 @@ import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {Services} from '../services';
 import {
+  setImportantStyles,
   setStyle,
   setStyles,
   computedStyle,
@@ -275,7 +276,7 @@ export class FixedLayer {
         // large value (to catch cases where sticky-tops are in a long way
         // down inside a scroller).
         for (let i = 0; i < elements.length; i++) {
-          setStyles(elements[i].element, {
+          setImportantStyles(elements[i].element, {
             top: '',
             bottom: '-9999vh',
             transition: 'none',
@@ -289,10 +290,7 @@ export class FixedLayer {
         }
         // 3. Cleanup the `style.bottom`.
         for (let i = 0; i < elements.length; i++) {
-          setStyles(elements[i].element, {
-            bottom: '',
-            transition: '',
-          });
+          setStyle(elements[i].element, 'bottom', '');
         }
 
         for (let i = 0; i < elements.length; i++) {
@@ -372,12 +370,21 @@ export class FixedLayer {
             transferLayer.className = this.ampdoc.getBody().className;
           }
         }
-        this.elements_.forEach((fe, i) => {
+        const elements = this.elements_;
+        for (let i = 0; i < elements.length; i++) {
+          const fe = elements[i];
           const feState = state[fe.id];
+
+          // Note: This MUST be done after measurements are taken.
+          // Transitions will mess up everything and, depending on when paints
+          // happen, mutates of transition and bottom at the same time may be
+          // make the transition active.
+          setStyle(fe.element, 'transition', '');
+
           if (feState) {
             this.mutateElement_(fe, i, feState);
           }
-        });
+        }
       },
     }, {}).catch(error => {
       // Fail silently.

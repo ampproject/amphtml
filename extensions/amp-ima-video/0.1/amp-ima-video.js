@@ -24,6 +24,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {
   isObject,
   toArray,
+  toWin,
 } from '../../../src/types';
 import {
   getData,
@@ -31,14 +32,17 @@ import {
 } from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {
-  removeElement,
+  childElementsByTag,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
+  isJsonScriptTag,
+  removeElement,
 } from '../../../src/dom';
 import {user, dev} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
+import {isEnumValue} from '../../../src/types';
 
 /** @const */
 const TAG = 'amp-ima-video';
@@ -80,8 +84,9 @@ class AmpImaVideo extends AMP.BaseElement {
         'The data-tag attribute is required for <amp-video-ima> and must be ' +
             'https');
 
-    const sourceElements = this.element.getElementsByTagName('source');
-    const trackElements = this.element.getElementsByTagName('track');
+    // Handle <source> and <track> children
+    const sourceElements = childElementsByTag(this.element, 'SOURCE');
+    const trackElements = childElementsByTag(this.element, 'TRACK');
     const childElements =
         toArray(sourceElements).concat(toArray(trackElements));
     if (childElements.length > 0) {
@@ -97,6 +102,13 @@ class AmpImaVideo extends AMP.BaseElement {
       });
       this.element.setAttribute(
           'data-child-elements', JSON.stringify(children));
+    }
+
+    // Handle IMASetting JSON
+    const scriptElement = childElementsByTag(this.element, 'SCRIPT')[0];
+    if (scriptElement && isJsonScriptTag(scriptElement)) {
+      this.element.setAttribute(
+          'data-ima-settings', scriptElement./*OK*/innerHTML);
     }
   }
 
@@ -125,7 +137,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.element.ownerDocument.defaultView,
+    const iframe = getIframe(toWin(this.element.ownerDocument.defaultView),
         this.element, 'ima-video');
     iframe.setAttribute('allowfullscreen', 'true');
     this.applyFillContent(iframe);
@@ -209,11 +221,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
     if (isObject(eventData)) {
       const videoEvent = eventData['event'];
-      if (videoEvent == VideoEvents.LOAD ||
-          videoEvent == VideoEvents.PLAYING ||
-          videoEvent == VideoEvents.PAUSE ||
-          videoEvent == VideoEvents.MUTED ||
-          videoEvent == VideoEvents.UNMUTED) {
+      if (isEnumValue(VideoEvents, videoEvent)) {
         if (videoEvent == VideoEvents.LOAD) {
           this.playerReadyResolver_(this.iframe_);
         }
@@ -311,6 +319,16 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
   getCurrentTime() {
     // Not supported.
     return 0;
@@ -327,6 +345,9 @@ class AmpImaVideo extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-ima-video', AmpImaVideo);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpImaVideo);
+});

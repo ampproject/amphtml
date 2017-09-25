@@ -30,6 +30,7 @@ import {
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
+import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 
 const TAG = 'amp-video';
 
@@ -41,6 +42,7 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'controls',
   'crossorigin',
   'poster',
+  'controlsList',
 ];
 
 /**
@@ -59,23 +61,26 @@ const ATTRS_TO_PROPAGATE =
  */
 class AmpVideo extends AMP.BaseElement {
 
-    /**
-     * @param {!AmpElement} element
-     */
+  /**
+   * @param {!AmpElement} element
+   */
   constructor(element) {
     super(element);
 
-      /** @private {?Element} */
+    /** @private {?Element} */
     this.video_ = null;
 
-      /** @private {?boolean}  */
+    /** @private {?boolean}  */
     this.muted_ = false;
+
+    /** @private {!../../../src/mediasession-helper.MetadataDef} */
+    this.metadata_ = EMPTY_METADATA;
   }
 
-    /**
-     * @param {boolean=} opt_onLayout
-     * @override
-     */
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
     const videoSrc = this.getVideoSource_();
     if (videoSrc) {
@@ -84,10 +89,10 @@ class AmpVideo extends AMP.BaseElement {
     }
   }
 
-    /**
-     * @private
-     * @return {string}
-     */
+  /**
+   * @private
+   * @return {string}
+   */
   getVideoSource_() {
     let videoSrc = this.element.getAttribute('src');
     if (!videoSrc) {
@@ -99,25 +104,25 @@ class AmpVideo extends AMP.BaseElement {
     return videoSrc;
   }
 
-    /** @override */
+  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
 
-    /** @override */
+  /** @override */
   buildCallback() {
     this.video_ = this.element.ownerDocument.createElement('video');
 
-    const posterAttr = this.element.getAttribute('poster');
-    if (!posterAttr && getMode().development) {
+    const poster = this.element.getAttribute('poster');
+    if (!poster && getMode().development) {
       console/*OK*/.error(
           'No "poster" attribute has been provided for amp-video.');
     }
 
-      // Enable inline play for iOS.
+    // Enable inline play for iOS.
     this.video_.setAttribute('playsinline', '');
     this.video_.setAttribute('webkit-playsinline', '');
-      // Disable video preload in prerender mode.
+    // Disable video preload in prerender mode.
     this.video_.setAttribute('preload', 'none');
     this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_BUILD, this.video_,
         /* opt_removeMissingAttrs */ true);
@@ -125,11 +130,25 @@ class AmpVideo extends AMP.BaseElement {
     this.applyFillContent(this.video_, true);
     this.element.appendChild(this.video_);
 
+    // Gather metadata
+    const artist = this.element.getAttribute('artist');
+    const title = this.element.getAttribute('title');
+    const album = this.element.getAttribute('album');
+    const artwork = this.element.getAttribute('artwork');
+    this.metadata_ = {
+      'title': title || '',
+      'artist': artist || '',
+      'album': album || '',
+      'artwork': [
+        {'src': artwork || poster || ''},
+      ],
+    };
+
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
   }
 
-    /** @override */
+  /** @override */
   mutatedAttributesCallback(mutations) {
     if (!this.video_) {
       return;
@@ -146,14 +165,36 @@ class AmpVideo extends AMP.BaseElement {
     if (mutations['src']) {
       this.element.dispatchCustomEvent(VideoEvents.RELOAD);
     }
+    if (mutations['artwork'] || mutations['poster']) {
+      const artwork = this.element.getAttribute('artwork');
+      const poster = this.element.getAttribute('poster');
+      this.metadata_['artwork'] = [
+        {'src': artwork || poster || ''},
+      ];
+    }
+    if (mutations['album']) {
+      const album = this.element.getAttribute('album');
+      this.metadata_['album'] = album || '';
+    }
+    if (mutations['title']) {
+      const title = this.element.getAttribute('title');
+      this.metadata_['title'] = title || '';
+    }
+    if (mutations['artist']) {
+      const artist = this.element.getAttribute('artist');
+      this.metadata_['artist'] = artist || '';
+    }
+    // TODO(@aghassemi, 10756) Either make metadata observable or submit
+    // an event indicating metadata changed (in case metadata changes
+    // while the video is playing).
   }
 
-    /** @override */
+  /** @override */
   viewportCallback(visible) {
     this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
-    /** @override */
+  /** @override */
   layoutCallback() {
     this.video_ = dev().assertElement(this.video_);
 
@@ -170,7 +211,7 @@ class AmpVideo extends AMP.BaseElement {
         /* opt_removeMissingAttrs */ true);
 
     this.getRealChildNodes().forEach(child => {
-        // Skip the video we already added to the element.
+      // Skip the video we already added to the element.
       if (this.video_ === child) {
         return;
       }
@@ -181,7 +222,7 @@ class AmpVideo extends AMP.BaseElement {
       this.video_.appendChild(child);
     });
 
-      // loadPromise for media elements listens to `loadstart`
+    // loadPromise for media elements listens to `loadstart`
     return this.loadPromise(this.video_).then(() => {
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
     });
@@ -192,7 +233,8 @@ class AmpVideo extends AMP.BaseElement {
    */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
-    this.forwardEvents([VideoEvents.PLAYING, VideoEvents.PAUSE], video);
+    this.forwardEvents(
+      [VideoEvents.PLAYING, VideoEvents.PAUSE, VideoEvents.ENDED], video);
     listen(video, 'volumechange', () => {
       if (this.muted_ != this.video_.muted) {
         this.muted_ = this.video_.muted;
@@ -241,11 +283,11 @@ class AmpVideo extends AMP.BaseElement {
 
     if (ret && ret.catch) {
       ret.catch(() => {
-          // Empty catch to prevent useless unhandled promise rejection logging.
-          // Play can fail for many reasons such as video getting paused before
-          // play() is finished.
-          // We use events to know the state of the video and do not care about
-          // the success or failure of the play()'s returned promise.
+        // Empty catch to prevent useless unhandled promise rejection logging.
+        // Play can fail for many reasons such as video getting paused before
+        // play() is finished.
+        // We use events to know the state of the video and do not care about
+        // the success or failure of the play()'s returned promise.
       });
     }
   }
@@ -305,6 +347,16 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /** @override */
+  getMetadata() {
+    return this.metadata_;
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
   getCurrentTime() {
     return this.video_.currentTime;
   }
@@ -327,4 +379,7 @@ class AmpVideo extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement(TAG, AmpVideo);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpVideo);
+});

@@ -92,6 +92,20 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
 
 
 /**
+ * Sets the CSS styles of the specified element with !important. The styles
+ * are specified as a map from CSS property names to their values.
+ * @param {!Element} element
+ * @param {!Object<string, *>} styles
+ */
+export function setImportantStyles(element, styles) {
+  for (const k in styles) {
+    element.style.setProperty(
+        getVendorJsPropertyName(styles, k), styles[k].toString(), 'important');
+  }
+}
+
+
+/**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
  * @param {Element} element
  * @param {string} property
@@ -103,7 +117,8 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
   const propertyName = getVendorJsPropertyName(element.style, property,
       opt_bypassCache);
   if (propertyName) {
-    element.style[propertyName] = opt_units ? value + opt_units : value;
+    element.style[propertyName] =
+        /** @type {string} */ (opt_units ? value + opt_units : value);
   }
 }
 

@@ -16,8 +16,7 @@
 
 import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
 import {dev, user} from '../../../src/log';
-import {installStyles} from '../../../src/style-installer';
-import {installStylesForShadowRoot} from '../../../src/shadow-embed';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {getMode} from '../../../src/mode';
 import {dict} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
@@ -96,7 +95,7 @@ export class LaterpayVendor {
     /** @const @private {!../../amp-access/0.1/amp-access.AccessService} */
     this.accessService_ = accessService;
 
-    /** @private @const {!../../../src/service/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @const @private {!JsonObject} For shape see LaterpayConfigDef */
@@ -151,13 +150,7 @@ export class LaterpayVendor {
     this.xhr_ = Services.xhrFor(this.ampdoc.win);
 
     // Install styles.
-    if (this.ampdoc.isSingleDoc()) {
-      const root = /** @type {!Document} */ (this.ampdoc.getRootNode());
-      installStyles(root, CSS, () => {}, false, TAG);
-    } else {
-      const root = /** @type {!ShadowRoot} */ (this.ampdoc.getRootNode());
-      installStylesForShadowRoot(root, CSS, false, TAG);
-    }
+    installStylesForDoc(this.ampdoc, CSS, () => {}, false, TAG);
   }
 
   /**

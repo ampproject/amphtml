@@ -34,21 +34,23 @@ import {
 } from '../../../src/experiments';
 import {dev} from '../../../src/log';
 
-/** @const {!string}  @private */
+/** @const {!string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 
-/** @type {string} */
-const TAG = 'amp-ad-network-adsense-impl';
-
-/** @const @enum{string} */
+/** @const @enum{string} @visibleForTesting */
 export const ADSENSE_EXPERIMENT_FEATURE = {
   HOLDBACK_EXTERNAL_CONTROL: '21060732',
   HOLDBACK_EXTERNAL: '21060733',
-  DELAYED_REQUEST_CONTROL: '21060734',
-  DELAYED_REQUEST: '21060735',
+  DELAYED_REQUEST_HOLDBACK_CONTROL: '21061056',
+  DELAYED_REQUEST_HOLDBACK_EXTERNAL: '21061057',
   HOLDBACK_INTERNAL_CONTROL: '2092615',
   HOLDBACK_INTERNAL: '2092616',
+  CACHE_EXTENSION_INJECTION_CONTROL: '21060953',
+  CACHE_EXTENSION_INJECTION_EXP: '21060954',
 };
+
+/** @type {string} */
+const TAG = 'amp-ad-network-adsense-impl';
 
 /** @const @type {!Object<string,?string>} */
 export const URL_EXPERIMENT_MAPPING = {
@@ -58,8 +60,11 @@ export const URL_EXPERIMENT_MAPPING = {
   '1': ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL_CONTROL,
   '2': ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
   // Delay Request
-  '3': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
-  '4': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST,
+  '3': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_CONTROL,
+  '4': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_EXTERNAL,
+  // AMP Cache extension injection
+  '5': ADSENSE_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_CONTROL,
+  '6': ADSENSE_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_EXP,
 };
 
 /**
@@ -85,8 +90,10 @@ export function adsenseIsA4AEnabled(win, element) {
         /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[ADSENSE_A4A_EXPERIMENT_NAME] = {
       isTrafficEligible: () => true,
-      branches: [ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
-        ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
+      branches: [
+        ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
+        ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
+      ],
     };
     // Note: Because the same experimentName is being used everywhere here,
     // randomlySelectUnsetExperiments won't add new IDs if
@@ -96,6 +103,7 @@ export function adsenseIsA4AEnabled(win, element) {
     experimentId = getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME);
     dev().info(
         TAG, `random experiment selection ${urlExperimentId}: ${experimentId}`);
+
   }
   if (experimentId) {
     addExperimentIdToElement(experimentId, element);
@@ -107,9 +115,9 @@ export function adsenseIsA4AEnabled(win, element) {
 
 /**
  * @param {!Window} win
- * @param {!ADSENSE_EXPERIMENT_FEATURE} feature
- * @return {boolean} whether feature is enabled
+ * @return {boolean} whether fast fetch delayed request experiment is enabled.
  */
-export function experimentFeatureEnabled(win, feature) {
-  return getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) == feature;
+export function fastFetchDelayedRequestEnabled(win) {
+  return getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) !=
+      ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_EXTERNAL;
 }
