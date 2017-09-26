@@ -197,7 +197,7 @@ describe('amp-a4a', () => {
     expect(rest.length > contentLength).to.be.true;
     const data = JSON.parse(rest.substr(contentLength));
     expect(data).to.be.ok;
-    verifyContext(data._context);
+    verifyContext(data.context);
   }
 
   function verifyContext(context) {
@@ -234,10 +234,10 @@ describe('amp-a4a', () => {
   }
 
   function verifyNameData(nameData) {
-    let attributes;
-    expect(() => {attributes = JSON.parse(nameData);}).not.to.throw(Error);
-    expect(attributes).to.be.ok;
-    verifyContext(attributes._context);
+    let metadata;
+    expect(() => {metadata = JSON.parse(nameData);}).not.to.throw(Error);
+    expect(metadata).to.be.ok;
+    verifyContext(metadata.context);
   }
 
   describe('ads are visible', () => {

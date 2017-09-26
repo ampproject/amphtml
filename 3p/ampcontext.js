@@ -18,17 +18,19 @@ import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {nextTick} from './3p';
-import {tryParseJson} from '../src/json';
 import {isObject} from '../src/types';
 import {AmpEvents} from '../src/amp-events';
-import {parseUrl} from '../src/url';
+import {FrameMetadata} from './frame-metadata';
+
 
 export class AbstractAmpContext {
 
   /**
    *  @param {!Window} win The window that the instance is built inside.
+   *  @param {!FrameMetadata=} opt_metadata
+   *  @param {string=} opt_sentinel
    */
-  constructor(win) {
+  constructor(win, opt_metadata, opt_sentinel) {
     dev().assert(!this.isAbstractImplementation_(),
         'Should not construct AbstractAmpContext instances directly');
 
@@ -47,7 +49,13 @@ export class AbstractAmpContext {
     // Please keep public attributes alphabetically sorted.
     // ----------------------------------------------------
 
-    /** @public {?string|undefined} */
+    /** @public {?string} */
+    this.ampcontextFilepath = null;
+
+    /** @public {?string} */
+    this.ampcontextVersion = null;
+
+    /** @public {?boolean|undefined} */
     this.canary = null;
 
     /** @type {?string} */
@@ -87,7 +95,7 @@ export class AbstractAmpContext {
     this.referrer = null;
 
     /** @type {?string} */
-    this.sentinel = null;
+    this.sentinel = opt_sentinel || null;
 
     /** @type {?string} */
     this.sourceUrl = null;
@@ -98,7 +106,9 @@ export class AbstractAmpContext {
     /** @type {?string} */
     this.tagName = null;
 
-    this.findAndSetMetadata_();
+    if (opt_metadata) {
+      this.setupMetadata_(dev().assert(opt_metadata));
+    }
 
     /** @protected {!IframeMessagingClient} */
     this.client_ = new IframeMessagingClient(win);
@@ -234,37 +244,23 @@ export class AbstractAmpContext {
   }
 
   /**
-   *  Parse the metadata attributes from the name and add them to
-   *  the class instance.
-   *  @param {!Object|string} data
+   *  Add metadata to the class instance.
+   *  @param {!FrameMetadata} metadata
    *  @private
    */
-  setupMetadata_(data) {
-    // TODO(alanorozco): Use metadata utils in 3p/frame-metadata
-    const dataObject = dev().assert(
-        typeof data === 'string' ? tryParseJson(data) : data,
-        'Could not setup metadata.');
+  setupMetadata_(metadata) {
+    const context = metadata.getContextState();
 
-    const context = dataObject._context || dataObject.attributes._context;
-
-    this.data = dataObject.attributes || dataObject;
-
-    // TODO(alanorozco, #10576): This is really ugly. Find a better structure
-    // than passing context values via data.
-    if ('_context' in this.data) {
-      delete this.data['_context'];
-    }
-
+    this.ampcontextFilepath = context.ampcontextFilepath;
+    this.ampcontextVersion = context.ampcontextVersion;
     this.canary = context.canary;
     this.canonicalUrl = context.canonicalUrl;
     this.clientId = context.clientId;
     this.container = context.container;
     this.domFingerprint = context.domFingerprint;
     this.hidden = context.hidden;
-    this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
-    this.location = parseUrl(context.location.href);
-    this.mode = context.mode;
+    this.initialLayoutRect = context.initialLayoutRect;
     this.pageViewId = context.pageViewId;
     this.referrer = context.referrer;
     this.sentinel = context.sentinel;
@@ -272,7 +268,11 @@ export class AbstractAmpContext {
     this.startTime = context.startTime;
     this.tagName = context.tagName;
 
-    this.embedType_ = dataObject.type || null;
+    this.location = metadata.getLocation();
+    this.mode = metadata.getAmpConfig().mode;
+    this.data = metadata.getAttributeData();
+
+    this.embedType_ = metadata.getEmbedType();
   }
 
   /**
@@ -289,29 +289,6 @@ export class AbstractAmpContext {
       ancestors.push(win.parent);
     }
     return ancestors[(ancestors.length - 1) - depth];
-  }
-
-  /**
-   *  Checks to see if there is a window variable assigned with the
-   *  sentinel value, sets it, and returns true if so.
-   *  @private
-   */
-  findAndSetMetadata_() {
-    // If the context data is set on window, that means we don't need
-    // to check the name attribute as it has been bypassed.
-    // TODO(alanorozco): why the heck could AMP_CONTEXT_DATA be two different
-    // types? FIX THIS.
-    if (isObject(this.win_.sf_) && this.win_.sf_.cfg) {
-      this.setupMetadata_(/** @type {!string}*/(this.win_.sf_.cfg));
-    } else if (this.win_.AMP_CONTEXT_DATA) {
-      if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
-        this.sentinel = this.win_.AMP_CONTEXT_DATA;
-      } else if (isObject(this.win_.AMP_CONTEXT_DATA)) {
-        this.setupMetadata_(this.win_.AMP_CONTEXT_DATA);
-      }
-    } else {
-      this.setupMetadata_(this.win_.name);
-    }
   }
 
   /**
@@ -334,5 +311,31 @@ export class AmpContext extends AbstractAmpContext {
   /** @return {boolean} */
   isAbstractImplementation_() {
     return false;
+  }
+
+  /**
+   * Creates an AmpContext instance based on the metadata available.
+   * @param {!Window} win
+   */
+  static create(win) {
+    // If the context data is set on window, that means we don't need
+    // to check the name attribute as it has been bypassed.
+    if (isObject(win.sf_) && win.sf_.cfg) {
+      return new AmpContext(win,
+          FrameMetadata.fromString(/** @type {!string}*/(win.sf_.cfg)));
+    }
+    if (win.AMP_CONTEXT_DATA) {
+      if (typeof win.AMP_CONTEXT_DATA == 'string') {
+        // Sentinel-only mode, with no values to read but with postMessage APIs
+        // still available.
+        return new AmpContext(win,
+          /* opt_metadata */ undefined,
+          /* opt_sentinel */ win.AMP_CONTEXT_DATA);
+      }
+      if (isObject(win.AMP_CONTEXT_DATA)) {
+        return new AmpContext(win, FrameMetadata.fromObj(win.AMP_CONTEXT_DATA));
+      }
+    }
+    return new AmpContext(win, FrameMetadata.fromWindowName());
   }
 }

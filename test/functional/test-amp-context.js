@@ -17,6 +17,7 @@ import {
   AmpContext,
 } from '../../3p/ampcontext';
 import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
+import {FrameMetadata} from '../../3p/frame-metadata';
 import * as sinon from 'sinon';
 
 const NOOP = () => {};
@@ -27,9 +28,15 @@ describe('3p ampcontext.js', () => {
   let win;
   let sandbox;
 
+  function stubSerializedMetadata(serializedMetadata) {
+    sandbox.stub(FrameMetadata, 'fromWindowName',
+        () => FrameMetadata.fromString(serializedMetadata));
+  }
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     windowPostMessageSpy = sandbox.spy();
+
     win = {
       addEventListener: (eventType, handlerFn) => {
         expect(eventType).to.equal('message');
@@ -61,8 +68,8 @@ describe('3p ampcontext.js', () => {
   });
 
   it('should send error message with report3pError_', () => {
-    win.name = generateSerializedAttributes();
-    const context = new AmpContext(win);
+    stubSerializedMetadata(generateSerializedMetadata());
+    const context = AmpContext.create(win);
     expect(context).to.be.ok;
 
     // Resetting since a message is sent on construction.
@@ -78,8 +85,8 @@ describe('3p ampcontext.js', () => {
   });
 
   it('should add metadata to window.context using name as per 3P.', () => {
-    win.name = generateSerializedAttributes();
-    const context = new AmpContext(win);
+    stubSerializedMetadata(generateSerializedMetadata());
+    const context = AmpContext.create(win);
     expect(context.location).to.deep.equal({
       'hash': '',
       'host': 'foo.com',
@@ -99,8 +106,8 @@ describe('3p ampcontext.js', () => {
   });
 
   it('should add metadata to window.context using name as per A4A.', () => {
-    win.name = generateSerializedAttributesA4A();
-    const context = new AmpContext(win);
+    stubSerializedMetadata(generateSerializedMetadataA4A());
+    const context = AmpContext.create(win);
     expect(context.location).to.deep.equal({
       'hash': '',
       'host': 'foo.com',
@@ -120,8 +127,8 @@ describe('3p ampcontext.js', () => {
   });
 
   it('should add metadata to window.context using window var.', () => {
-    win.AMP_CONTEXT_DATA = generateAttributes();
-    const context = new AmpContext(win);
+    win.AMP_CONTEXT_DATA = generateMetadata();
+    const context = AmpContext.create(win);
     expect(context.location).to.deep.equal({
       'hash': '',
       'host': 'foo.com',
@@ -143,23 +150,24 @@ describe('3p ampcontext.js', () => {
   it('should set up only sentinel if no metadata provided.', () => {
     const sentinel = '1-456';
     win.AMP_CONTEXT_DATA = sentinel;
-    const context = new AmpContext(win);
+    const context = AmpContext.create(win);
     expect(context.sentinel).to.equal(sentinel);
   });
 
   it('should throw error if sentinel invalid', () => {
-    win.name = generateSerializedAttributes('foobar');
-    expect(() => new AmpContext(win)).to.throw('Incorrect sentinel format');
+    // debugger;
+    stubSerializedMetadata(generateSerializedMetadata('foobar'));
+    expect(() => AmpContext.create(win)).to.throw('Incorrect sentinel format');
   });
 
   it('should throw error if metadata missing', () => {
-    win.name = generateIncorrectAttributes();
-    expect(() => new AmpContext(win)).to.throw(/Cannot read property/);
+    stubSerializedMetadata(generateIncorrectMetadata());
+    expect(() => AmpContext.create(win)).to.throw(/Cannot read property/);
   });
 
   it('should be able to send an intersection observer request', () => {
-    win.name = generateSerializedAttributes();
-    const context = new AmpContext(win);
+    stubSerializedMetadata(generateSerializedMetadata());
+    const context = AmpContext.create(win);
     const callbackSpy = sandbox.spy();
 
     // Resetting since a message is sent on construction.
@@ -209,8 +217,8 @@ describe('3p ampcontext.js', () => {
   });
 
   it('should send a pM and set callback when onPageVisibilityChange()', () => {
-    win.name = generateSerializedAttributes();
-    const context = new AmpContext(win);
+    stubSerializedMetadata(generateSerializedMetadata());
+    const context = AmpContext.create(win);
     const callbackSpy = sandbox.spy();
     const stopObserving = context.onPageVisibilityChange(callbackSpy);
 
@@ -250,8 +258,8 @@ describe('3p ampcontext.js', () => {
   });
 
   it('should call resize success callback on resize success', () => {
-    win.name = generateSerializedAttributes();
-    const context = new AmpContext(win);
+    stubSerializedMetadata(generateSerializedMetadata());
+    const context = AmpContext.create(win);
 
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.reset();
@@ -296,8 +304,8 @@ describe('3p ampcontext.js', () => {
   });
 
   it('should call resize denied callback on resize denied', () => {
-    win.name = generateSerializedAttributes();
-    const context = new AmpContext(win);
+    stubSerializedMetadata(generateSerializedMetadata());
+    const context = AmpContext.create(win);
 
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.reset();
@@ -341,51 +349,53 @@ describe('3p ampcontext.js', () => {
   });
 });
 
-function generateSerializedAttributes(opt_sentinel) {
-  return JSON.stringify(generateAttributes(opt_sentinel));
+function generateSerializedMetadata(opt_sentinel) {
+  return JSON.stringify(generateMetadata(opt_sentinel));
 }
 
-function generateAttributes(opt_sentinel) {
-  const name = {};
-  name.attributes = {};
-  const sentinel = opt_sentinel || '1-291921';
-  name.attributes._context = {
-    location: {
-      href: 'https://foo.com/a?b=c',
+function generateMetadata(opt_sentinel) {
+  return {
+    config: {
+      mode: {},
     },
-    canonicalUrl: 'https://bar.com',
-    pageViewId: '1',
-    sentinel,
-    startTime: 0,
-    referrer: 'baz.net',
-  };
-
-  return name;
-}
-
-function generateSerializedAttributesA4A(opt_sentinel) {
-  return JSON.stringify(generateAttributesA4A(opt_sentinel));
-}
-
-function generateAttributesA4A(opt_sentinel) {
-  const attributes = {};
-  const sentinel = opt_sentinel || '1-291921';
-  attributes._context = {
-    location: {
-      href: 'https://foo.com/a?b=c',
+    attributes: {},
+    context: {
+      location: {
+        href: 'https://foo.com/a?b=c',
+      },
+      canonicalUrl: 'https://bar.com',
+      pageViewId: '1',
+      sentinel: opt_sentinel || '1-291921',
+      startTime: 0,
+      referrer: 'baz.net',
     },
-    canonicalUrl: 'https://bar.com',
-    pageViewId: '1',
-    sentinel,
-    startTime: 0,
-    referrer: 'baz.net',
   };
+}
 
-  return attributes;
+function generateSerializedMetadataA4A(opt_sentinel) {
+  return JSON.stringify(generateMetadataA4A(opt_sentinel));
+}
+
+function generateMetadataA4A(opt_sentinel) {
+  return {
+    config: {
+      mode: {},
+    },
+    context: {
+      location: {
+        href: 'https://foo.com/a?b=c',
+      },
+      canonicalUrl: 'https://bar.com',
+      pageViewId: '1',
+      sentinel: opt_sentinel || '1-291921',
+      startTime: 0,
+      referrer: 'baz.net',
+    },
+  };
 }
 
 
-function generateIncorrectAttributes() {
+function generateIncorrectMetadata() {
   const name = {};
   name.attributes = {};
   name.attributes.wrong = {

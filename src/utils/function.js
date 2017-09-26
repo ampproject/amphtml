@@ -18,17 +18,17 @@
 /**
  * Creates a function that is evaluated only once and returns the cached result
  * subsequently.
- * @param {!function():(T|undefined)} fn
- * @return {!function():(T|undefined)}
+ * @param {!function(...?):(T|undefined)} fn
+ * @return {!function(...?):(T|undefined)}
  * @template T
  * @suppress {checkTypes} Compiler complains about "fn = null" for GC.
  */
 export function once(fn) {
   let evaluated = false;
   let retValue = null;
-  return () => {
+  return (...args) => {
     if (!evaluated) {
-      retValue = fn();
+      retValue = fn.apply(undefined, args);
       evaluated = true;
       fn = null; // GC
     }

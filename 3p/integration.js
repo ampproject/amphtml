@@ -37,13 +37,7 @@ import {
   run,
   setExperimentToggles,
 } from './3p';
-import {
-  getAmpConfig,
-  getAttributeData,
-  getContextState,
-  getEmbedType,
-  getLocation,
-} from './frame-metadata';
+import {FrameMetadata} from './frame-metadata';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseJson} from '../src/json';
@@ -384,7 +378,7 @@ const defaultAllowedTypesInCustomFrame = [
  * @param {!Window} win
  */
 function init(win) {
-  const config = getAmpConfig();
+  const config = FrameMetadata.fromWindowName().getAmpConfig();
 
   // Overriding to short-circuit src/mode#getMode()
   win.AMP_MODE = config.mode;
@@ -445,16 +439,17 @@ function isMaster() {
 window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     opt_allowedEmbeddingOrigins) {
   try {
-    const data = getAttributeData();
-    const location = getLocation();
+    const metadata = FrameMetadata.fromWindowName();
+    const data = metadata.getAttributeData();
+    const location = metadata.getLocation();
 
     ensureFramed(window);
     validateParentOrigin(window, location);
-    validateAllowedTypes(window, getEmbedType(), opt_allowed3pTypes);
+    validateAllowedTypes(window, metadata.getEmbedType(), opt_allowed3pTypes);
     if (opt_allowedEmbeddingOrigins) {
       validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
     }
-    installContext(window, data);
+    installContext(window, metadata);
     manageWin(window);
     installEmbedStateListener();
 
@@ -495,15 +490,15 @@ function isAmpContextExperimentOn() {
 /**
  * Installs window.context API.
  * @param {!Window} win
- * @param {!JsonObject} data
+  * @param {!FrameMetadata} metadata
  */
-function installContext(win, data) {
+function installContext(win, metadata) {
   if (isAmpContextExperimentOn()) {
     installContextUsingExperimentalImpl(win);
     return;
   }
 
-  installContextUsingStandardImpl(win, data);
+  installContextUsingStandardImpl(win, metadata);
 }
 
 
@@ -512,18 +507,18 @@ function installContext(win, data) {
  * @param {!Window} win
  */
 function installContextUsingExperimentalImpl(win) {
-  win.context = new IntegrationAmpContext(win);
+  win.context = IntegrationAmpContext.create(win);
 }
 
 
 /**
  * Installs window.context using standard (to be deprecated) implementation.
  * @param {!Window} win
- * @param {!JsonObject} data
+ * @param {!FrameMetadata} metadata
  */
-function installContextUsingStandardImpl(win, data) {
-  const embedType = getEmbedType();
-  const contextState = getContextState();
+function installContextUsingStandardImpl(win, metadata) {
+  const embedType = metadata.getEmbedType();
+  const contextState = metadata.getContextState();
 
   win.context = {
     // read from context state
@@ -537,7 +532,6 @@ function installContextUsingStandardImpl(win, data) {
     hidden: contextState.hidden,
     initialIntersection: contextState.initialIntersection,
     initialLayoutRect: contextState.initialLayoutRect,
-    mode: contextState.mode,
     pageViewId: contextState.pageViewId,
     referrer: contextState.referrer,
     sentinel: contextState.sentinel,
@@ -546,8 +540,9 @@ function installContextUsingStandardImpl(win, data) {
     tagName: contextState.tagName,
 
     // read from iframe name
-    data,
-    location: getLocation(),
+    data: metadata.getAttributeData(),
+    location: metadata.getLocation(),
+    mode: metadata.getAmpConfig().mode,
 
     // locally defined APIs
     addContextToIframe: iframe => { iframe.name = iframeName; },
