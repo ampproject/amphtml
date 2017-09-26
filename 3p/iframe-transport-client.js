@@ -109,7 +109,7 @@ export class IframeTransportClient {
 /**
  * A context object to be passed along with event data.
  */
-class IframeTransportContext {
+export class IframeTransportContext {
   /**
    * @param {!Window} win
    * @param {!IframeMessagingClient} iframeMessagingClient
@@ -161,6 +161,6 @@ class IframeTransportContext {
     this.iframeMessagingClient_./*OK*/sendMessage(
         MessageType.IFRAME_TRANSPORT_RESPONSE,
         /** @type {!JsonObject} */
-        (Object.assign({}, message: data, this.baseMessage_)));
+        (Object.assign({message: data}, this.baseMessage_)));
   }
 }
