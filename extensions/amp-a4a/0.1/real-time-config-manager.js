@@ -87,21 +87,22 @@ export class RealTimeConfigManager {
    * @return {!boolean}
    */
   validateRtcConfig() {
-    this.rtcConfig = tryParseJson(
+    let rtcConfig = tryParseJson(
         this.element.getAttribute('prerequest-callouts'));
-    if (!this.rtcConfig) {
+    if (!rtcConfig) {
       return false;
     }
-    if (!((this.rtcConfig['vendors'] &&
-           Object.keys(this.rtcConfig['vendors']).length) ||
-          (this.rtcConfig['urls'] && this.rtcConfig['urls'].length))) {
+    if (!((rtcConfig['vendors'] &&
+           Object.keys(rtcConfig['vendors']).length) ||
+          (rtcConfig['urls'] && rtcConfig['urls'].length))) {
       return false;
     }
-    if (this.rtcConfig['timeoutMillis'] &&
-        !Number.isInteger(this.rtcConfig['timeoutMillis'])) {
-      const timeout = Number(this.rtcConfig['timeoutMillis']);
-      this.rtcConfig['timeoutMillis'] = timeout || DEFAULT_RTC_TIMEOUT;
+    if (rtcConfig['timeoutMillis'] &&
+        !Number.isInteger(rtcConfig['timeoutMillis'])) {
+      const timeout = Number(rtcConfig['timeoutMillis']);
+      rtcConfig['timeoutMillis'] = timeout || DEFAULT_RTC_TIMEOUT;
     }
+    this.rtcConfig = rtcConfig;
     return true;
   }
 

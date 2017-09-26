@@ -67,6 +67,10 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
   });
 
   describe('#validateRtcConfig', () => {
+    afterEach(() => {
+      element.removeAttribute('prerequest-callouts');
+    });
+
     it('should return true for valid rtcConfig', () => {
       const rtcConfig = {
         'vendors': {'fakeVendor': {'SLOT_ID': '1', 'PAGE_ID': '1'},
@@ -77,12 +81,26 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
         'timeoutMillis': 500};
       setRtcConfig(rtcConfig);
       expect(realTimeConfigManager.validateRtcConfig()).to.be.true;
+      expect(realTimeConfigManager.rtcConfig).to.deep.equal(rtcConfig);
+    });
+
+    it('should return false for no rtcConfig', () => {
+      expect(realTimeConfigManager.validateRtcConfig()).to.be.false;
+      expect(realTimeConfigManager.rtcConfig).to.not.be.ok;
+    });
+
+    it('should return false for rtcConfig missing required values', () => {
+      const rtcConfig = {'timeoutMillis': 500};
+      setRtcConfig(rtcConfig);
+      expect(realTimeConfigManager.validateRtcConfig()).to.be.false;
+      expect(realTimeConfigManager.rtcConfig).to.not.be.ok;
     });
 
     it('should return false for bad JSON rtcConfig', () => {
       const rtcConfig = '{"urls" : ["https://google.com"]';
       element.setAttribute('prerequest-callouts', rtcConfig);
       expect(realTimeConfigManager.validateRtcConfig()).to.be.false;
+      expect(realTimeConfigManager.rtcConfig).to.not.be.ok;
     });
 
   });
@@ -94,9 +112,31 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
   });
 
   describe('inflatePublisherUrls', () => {
-    it('should add and inflate urls with macros', () => {});
+    beforeEach(() => {
+      const rtcConfig = {
+        'urls': ['https://www.example.biz/posts?slot_id=SLOT_ID'],
+        'timeoutMillis': 500};
+      setRtcConfig(rtcConfig);
+      realTimeConfigManager.validateRtcConfig();
+    });
+
+    it('should add and inflate urls with macros', () => {
+      let macros = {SLOT_ID: '1'};
+      realTimeConfigManager.inflatePublisherUrls(macros);
+      expect(realTimeConfigManager.calloutUrls).to.be.ok;
+      expect(realTimeConfigManager.calloutUrls.length).to.equal(1);
+      expect(realTimeConfigManager.calloutUrls[0]).to.equal(
+          'https://www.example.biz/posts?slot_id=1');
+    });
+    it('should add urls without macros', () => {
+      let macros = null;
+      realTimeConfigManager.inflatePublisherUrls(macros);
+      expect(realTimeConfigManager.calloutUrls).to.be.ok;
+      expect(realTimeConfigManager.calloutUrls.length).to.equal(1);
+      expect(realTimeConfigManager.calloutUrls[0]).to.equal(
+          'https://www.example.biz/posts?slot_id=SLOT_ID');
+    });
     it('should not add any URLs if none specified', () => {});
-    it('should add urls without macros', () => {});
     it('should add urls with and without macros', () => {});
     it('should not add URL if macros invalid', () => {});
   });
