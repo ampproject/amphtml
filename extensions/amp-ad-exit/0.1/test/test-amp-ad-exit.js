@@ -158,7 +158,7 @@ describes.realWin('amp-ad-exit', {
 
     // Ensure that getAmpAdResourceId() will return a value
     win.__AMP_TOP = win.top;
-    win.top.document.body.getResourceId = function() { return '6789'; }
+    win.top.document.body.getResourceId = function() { return '6789'; };
 
     // TEST_3P_VENDOR must be in ANALYTICS_CONFIG *before* makeElementWithConfig
     ANALYTICS_CONFIG[TEST_3P_VENDOR] = ANALYTICS_CONFIG[TEST_3P_VENDOR] || {
