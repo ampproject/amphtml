@@ -154,9 +154,6 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   const slotRect = a4a.getPageLayoutBox();
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
-  const pfx = enclosingContainers.includes(
-      ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) ||
-      enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
   let eids = adElement.getAttribute('data-experiment-id');
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
@@ -168,7 +165,6 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
     'adx': slotRect.left,
     'ady': slotRect.top,
     'oid': '2',
-    'pfx': pfx ? '1' : '0',
     'act': enclosingContainers.length ? enclosingContainers.join() : null,
   };
 }

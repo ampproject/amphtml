@@ -413,7 +413,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           /(\?|&)oid=2(&|$)/,
           /(\?|&)isw=[0-9]+(&|$)/,
           /(\?|&)ish=[0-9]+(&|$)/,
-          /(\?|&)pfx=(1|0)(&|$)/,
           /(\?|&)eid=([^&]+%2c)*12345678(%2c[^&]+)*(&|$)/,
           /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%-]+(&|$)/,
           /(\?|&)top=localhost(&|$)/,
