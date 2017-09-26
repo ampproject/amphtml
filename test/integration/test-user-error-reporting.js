@@ -98,17 +98,17 @@ describe.configure().run('user-error', function() {
     </amp-ad>
 
     <amp-analytics><script type="application/json">
-          {
-              "requests": {
-                  "error": "${depositRequestUrl(randomId)}"
-              },
-              "triggers": {
-                  "userError": {
-                      "on": "user-error",
-                      "request": "error"
-                  }
-              }
-          }
+    {
+      "requests": {
+        "error": "${depositRequestUrl(randomId)}"
+      },
+      "triggers": {
+        "userError": {
+          "on": "user-error",
+          "request": "error"
+        }
+      }
+    }
     </script></amp-analytics>`,
   }, env => {
     it('should ping correct host with 3p error message', () => {

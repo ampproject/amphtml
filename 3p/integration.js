@@ -453,6 +453,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
   try {
     const data = getAttributeData();
     const location = getLocation();
+
     ensureFramed(window);
     validateParentOrigin(window, location);
     validateAllowedTypes(window, getEmbedType(), opt_allowed3pTypes);
