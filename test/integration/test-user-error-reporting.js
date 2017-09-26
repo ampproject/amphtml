@@ -49,7 +49,7 @@ describe.configure().run('user-error', function() {
                referrerpolicy="fail-referrer">`,
   }, env => {
     it('should ping correct host with amp-pixel user().assert err', () => {
-      return expect(withdrawRequest(env.win, randomId)).to.be.ok;
+      return withdrawRequest(env.win, randomId);
     });
   });
 
@@ -80,7 +80,39 @@ describe.configure().run('user-error', function() {
     </script></amp-analytics>`,
   }, env => {
     it('should ping correct host with amp-img user().error err', () => {
-      return expect(withdrawRequest(env.win, randomId)).to.be.ok;
+      return withdrawRequest(env.win, randomId);
+    });
+  });
+
+  describes.integration('3p user-error integration test', {
+    extensions: ['amp-analytics', 'amp-ad'],
+    hash: 'log=0',
+    experiments: ['user-error-reporting'],
+
+    body: () => `
+    <amp-ad width=300 height=250
+        type="_ping_"
+        data-url='not-exist'
+        data-valid='false'
+        data-error='true'>
+    </amp-ad>
+
+    <amp-analytics><script type="application/json">
+    {
+      "requests": {
+        "error": "${depositRequestUrl(randomId)}"
+      },
+      "triggers": {
+        "userError": {
+          "on": "user-error",
+          "request": "error"
+        }
+      }
+    }
+    </script></amp-analytics>`,
+  }, env => {
+    it('should ping correct host with 3p error message', () => {
+      return withdrawRequest(env.win, randomId);
     });
   });
 });
