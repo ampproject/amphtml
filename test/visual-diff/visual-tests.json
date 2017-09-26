@@ -102,10 +102,6 @@
         ".comic-amp-font-loaded",
         ".comic-amp-bold-font-loaded"
       ]
-    },
-    {
-      "url": "examples/visual-tests/pinterest.amp/pinterest.amp.html",
-      "name": "Pinterest"
     }
   ],
 
