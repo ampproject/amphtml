@@ -42,16 +42,21 @@ describes.realWin('amp-addthis', {
     unregisterStub = env.sandbox.stub(configManager, 'unregister');
   });
 
-  function getAT(pubId, widgetId, opt_responsive, opt_beforeLayoutCallback) {
+  function getAT(configuration, opt_responsive, opt_beforeLayoutCallback) {
+    const {pubId, widgetId, shareConfig = {}} = configuration;
+    const elementAttributes = /** @type !JsonObject */ ({
+      'data-pub-id': pubId,
+      'data-widget-id': widgetId,
+      width: 111,
+      height: 222,
+    });
+    Object.keys(shareConfig).forEach(key => {
+      elementAttributes[`data-share-${key}`] = shareConfig[key];
+    });
     const at = createElementWithAttributes(
         doc,
         'amp-addthis',
-        /** @type !JsonObject */ ({
-          'data-pub-id': pubId,
-          'data-widget-id': widgetId,
-          width: 111,
-          height: 222,
-        })
+        elementAttributes
     );
     if (opt_responsive) {
       at.setAttribute('layout', 'responsive');
@@ -73,13 +78,13 @@ describes.realWin('amp-addthis', {
   }
 
   it('renders the iframe', () => {
-    return getAT(pubId, widgetId).then(at => {
+    return getAT({pubId, widgetId}).then(at => {
       testIframe(at.querySelector('iframe'));
     });
   });
 
   it('renders a placeholder with an amp-img', () => {
-    return getAT(pubId, widgetId).then(at => {
+    return getAT({pubId, widgetId}).then(at => {
       const placeholder = at.querySelector('[placeholder]');
       const ampImg = placeholder.querySelector('amp-img');
 
@@ -93,19 +98,19 @@ describes.realWin('amp-addthis', {
   });
 
   it('requires data-pub-id', () => {
-    expect(getAT('', widgetId)).to.be.rejectedWith(
+    expect(getAT({pubId: '', widgetId})).to.be.rejectedWith(
         /The data\-pub\-id attribute is required for/
     );
   });
 
   it('requires data-widget-id', () => {
-    expect(getAT('ra-12345', '')).to.be.rejectedWith(
+    expect(getAT({pubId, widgetId: ''})).to.be.rejectedWith(
         /The data\-widget\-id attribute is required for/
     );
   });
 
   it('removes the iframe after unlayoutCallback', () => {
-    return getAT(pubId, widgetId).then(at => {
+    return getAT({pubId, widgetId}).then(at => {
       const obj = at.implementation_;
       testIframe(at.querySelector('iframe'));
       obj.unlayoutCallback();
@@ -116,7 +121,7 @@ describes.realWin('amp-addthis', {
   });
 
   it('registers the frame with the configManager on layout', () => {
-    return getAT(pubId, widgetId).then(at => {
+    return getAT({pubId, widgetId}).then(at => {
       const obj = at.implementation_;
 
       expect(registerStub.calledOnce).to.be.true;
@@ -132,7 +137,7 @@ describes.realWin('amp-addthis', {
   });
 
   it('unregisters the frame with the configManager on unlayoutCallback', () => {
-    return getAT(pubId, widgetId).then(at => {
+    return getAT({pubId, widgetId}).then(at => {
       const obj = at.implementation_;
       obj.unlayoutCallback();
 
@@ -144,16 +149,35 @@ describes.realWin('amp-addthis', {
     });
   });
 
+  it('accepts and stores shareConfig data via custom attributes', () => {
+    const shareConfig = {
+      url: 'https://www.addthis.com',
+      title: 'AddThis Website Tools',
+      media: 'https://i.imgur.com/yNlQWRM.jpg',
+      description: 'This is a fake page.',
+    };
+    return getAT({pubId, widgetId, shareConfig}).then(at => {
+      const obj = at.implementation_;
+      Object.keys(shareConfig).forEach(key => {
+        expect(at.getAttribute(`data-share-${key}`)).to.equal(shareConfig[key]);
+      });
+      Object.keys(obj.shareConfig_).forEach(key => {
+        expect(obj.shareConfig_[key]).to.equal(shareConfig[key]);
+      });
+    });
+  });
+
+  it('defaults to sharing ownerDocument\'s title and url', () => {
+    return getAT({pubId, widgetId}).then(at => {
+      const obj = at.implementation_;
+      const {shareConfig_} = obj;
+      expect(shareConfig_.title).to.equal(doc.title);
+      expect(shareConfig_.url).to.equal(doc.location.href);
+    });
+  });
+
   it('registers a view at most once per "session"', () => {
     const testConfigManager = new ConfigManager();
-    const mockElement = {
-      ownerDocument: {
-        location: {
-          href: 'http://www.example.com',
-        },
-        title: 'AMP AddThis Test',
-      },
-    };
     let numPendingRequests = 0;
     let numViewsRegistered = 0;
 
@@ -191,7 +215,6 @@ describes.realWin('amp-addthis', {
           widgetId,
           win: window,
           iframe: mockIframe,
-          element: mockElement,
           iframeLoadPromise: Promise.resolve(),
         });
       }
@@ -200,20 +223,12 @@ describes.realWin('amp-addthis', {
 
   it('sends expected JSON config to the iframe after registering', () => {
     const testConfigManager = new ConfigManager();
-    const mockElement = {
-      ownerDocument: {
-        location: {
-          href: 'http://www.example.com',
-        },
-        title: 'AMP AddThis Test',
-      },
+    const shareConfig = {
+      title: 'lol',
     };
     const expectedString = JSON.stringify({
       event: CONFIGURATION_EVENT,
-      shareConfig: {
-        url: mockElement.ownerDocument.location.href,
-        title: mockElement.ownerDocument.title,
-      },
+      shareConfig,
       pubId: '1234',
       widgetId,
       configRequestStatus: 0,
@@ -244,9 +259,9 @@ describes.realWin('amp-addthis', {
       testConfigManager.register({
         pubId: '1234',
         widgetId,
+        shareConfig,
         win: window,
         iframe: mockIframe,
-        element: mockElement,
         iframeLoadPromise: Promise.resolve(),
       });
     });
@@ -254,14 +269,6 @@ describes.realWin('amp-addthis', {
 
   it('requests a config exactly once per pubId', () => {
     const testConfigManager = new ConfigManager();
-    const mockElement = {
-      ownerDocument: {
-        location: {
-          href: 'http://www.example.com',
-        },
-        title: 'AMP AddThis Test',
-      },
-    };
     const firstPubId = '111';
     const secondPubId = '222';
     const thirdPubId = '333';
@@ -309,7 +316,6 @@ describes.realWin('amp-addthis', {
           widgetId,
           win: window,
           iframe: mockIframe,
-          element: mockElement,
           iframeLoadPromise: Promise.resolve(),
         });
       }
