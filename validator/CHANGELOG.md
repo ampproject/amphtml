@@ -30,6 +30,19 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 3:15 PM, September 26, 2017 UTC
+
+Validator Version 251
+Spec Version 485
+
+Includes:
+ - Cleanup. Remove DEV/PROD_MODE.
+ - Remove SYTLESHEET_TOO_LONG_OLD_VARIANT error code.
+ - Provide a more descriptive error message for our most common AMP error.
+ - #11236 add single-result and max-items to amp-list
+ - #11070 remove amp-sidebar restrictions
+ - #10583, amp-gfycat autoplay
+
 ### 9:00 PM, September 6, 2017 UTC
 
 Validator Version 248
