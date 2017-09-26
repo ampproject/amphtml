@@ -72,7 +72,7 @@ export class IframeTransportClient {
             try {
               dev().assert(event.creativeId,
                   'Received malformed event in ' + this.win_.location.href);
-              this.contextFor_(event.creativeId).dispatch(event.message);
+              this.contextFor_(event.creativeId).dispatch(event);
             } catch (e) {
               user().error(TAG_,
                   'Exception in callback passed to onAnalyticsEvent',
@@ -124,7 +124,7 @@ export class IframeTransportContext {
     /** @private @const {!Object} */
     this.baseMessage_ = {creativeId, vendor};
 
-    /** @private {?function(string)} */
+    /** @private {?function(!Object)} */
     this.listener_ = null;
 
     user().assert(win['onNewContextInstance'] &&
@@ -138,7 +138,7 @@ export class IframeTransportContext {
    * is received.
    * Note that calling this a second time will result in the first listener
    * being removed - the events will not be sent to both callbacks.
-   * @param {!function(string)} listener
+   * @param {!function(!Object)} listener
    */
   onAnalyticsEvent(listener) {
     this.listener_ = listener;
@@ -147,7 +147,7 @@ export class IframeTransportContext {
   /**
    * Receives an event from IframeTransportClient, and passes it along to
    * the creative that this context represents.
-   * @param {string} event
+   * @param {!Object} event
    */
   dispatch(event) {
     this.listener_ && this.listener_(event);

@@ -153,7 +153,7 @@ describe('iframe-transport-client', () => {
       'my_creative', 'my_vendor');
     const listener = sandbox.spy();
     ctx.onAnalyticsEvent(listener);
-    const event = 'Something important happened';
+    const event = {message: 'Something important happened'};
     ctx.dispatch(event);
     expect(listener).to.be.calledOnce;
     expect(listener).to.be.calledWith(event);

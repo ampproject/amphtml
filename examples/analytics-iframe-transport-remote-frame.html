@@ -15,12 +15,12 @@
          * Within the window.onNewContextInstance method, you
          * must create a function which processes an event, and
          * pass that function to context.onAnalyticsEvent().
-         * @param {string} event The event message received from AMP Analytics
+         * @param {Object} event The event received from AMP Analytics
          */
         context.onAnalyticsEvent(event => {
           // Now, do something meaningful with the AMP Analytics event
           console.log('The page at: ' + window.location.href +
-              ' has received an event: ' + event);
+              ' has received an event: ' + event.message);
 
           // Optionally, you may send a response containing key/value pairs, to
           // be used by the amp-ad-exit of the creative which generated the
