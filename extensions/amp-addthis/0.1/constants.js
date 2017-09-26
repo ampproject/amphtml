@@ -18,3 +18,4 @@ export const CONFIGURATION_EVENT = 'addthis.amp.configuration';
 export const ORIGIN = 'https://s7.addthis.com';
 export const ICON_SIZE = '32';
 export const ALT_TEXT = 'AddThis Website Tools';
+export const CUSTOM_SHARE_KEYS = ['url', 'title', 'media', 'description'];

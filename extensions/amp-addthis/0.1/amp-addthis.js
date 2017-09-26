@@ -35,7 +35,7 @@ import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 import {ConfigManager} from './ConfigManager';
-import {ORIGIN, ICON_SIZE, ALT_TEXT} from './constants';
+import {CUSTOM_SHARE_KEYS, ORIGIN, ICON_SIZE, ALT_TEXT} from './constants';
 
 // This `configManager` will be shared by all AmpAddThis elements on a page, to prevent unnecessary
 // HTTP requests, get accurate analytics, etc.
@@ -62,6 +62,9 @@ class AmpAddThis extends AMP.BaseElement {
 
     /** @private {string} */
     this.widgetId_ = '';
+
+    /** @private {(?Object<string, string>|undefined)} */
+    this.shareConfig_ = null;
   }
 
   /**
@@ -106,6 +109,21 @@ class AmpAddThis extends AMP.BaseElement {
         'The data-widget-id attribute is required for <amp-addthis> %s',
         element
     );
+    this.shareConfig_ = CUSTOM_SHARE_KEYS.reduce((config, key) => {
+      const value = this.element.getAttribute(`data-share-${key}`);
+      if (value) {
+        config[key] = value;
+      }
+      return config;
+    }, {});
+
+    // Fallbacks for url and title
+    if (!this.shareConfig_.url) {
+      this.shareConfig_.url = element.ownerDocument.location.href;
+    }
+    if (!this.shareConfig_.title) {
+      this.shareConfig_.title = element.ownerDocument.title;
+    }
   }
 
   createPlaceholderCallback() {
@@ -163,11 +181,11 @@ class AmpAddThis extends AMP.BaseElement {
     this.iframeLoadPromise_ = this.loadPromise(iframe);
 
     configManager.register({
-      iframe,
-      iframeLoadPromise: this.iframeLoadPromise_,
-      element: this.element,
       pubId: this.pubId_,
       widgetId: this.widgetId_,
+      shareConfig: this.shareConfig_,
+      iframe,
+      iframeLoadPromise: this.iframeLoadPromise_,
       win: this.win,
     });
 
