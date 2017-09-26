@@ -18,6 +18,7 @@ import {makeClickDelaySpec} from './filters/click-delay';
 import {assertConfig, assertOriginMatchesVendor, TransportMode} from './config';
 import {createFilter} from './filters/factory';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
+import {getParentWindowFrameElement} from '../../../src/service';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
@@ -253,35 +254,64 @@ export class AmpAdExit extends AMP.BaseElement {
       throw e;
     }
 
+    const ampAdResourceId = this.getAmpAdResourceId();
+
     this.unlisten_ = listen(this.getAmpDoc().win, 'message', event => {
       const responseMessage = deserializeMessage(getData(event));
 
-      let ampAdResourceId;
-      try {
-        ampAdResourceId = this.element.ownerDocument.defaultView
-          .frameElement.parentElement.getResourceId();
-      } catch (e) {
-        user().error(TAG,
-            'No friendly parent amp-ad element was found for amp-ad-exit tag.');
-      }
+      this.assertValidResponseMessage(responseMessage, ampAdResourceId,
+          event.origin);
 
-      if (!responseMessage || !responseMessage['type'] ||
-        responseMessage['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE ||
-        !responseMessage['creativeId'] ||
-        responseMessage['creativeId'] != ampAdResourceId) {
-        return;
-      }
-
-      dev().assert(responseMessage && responseMessage['message'],
-          'Received empty response from 3p analytics frame');
-      dev().assert(responseMessage && responseMessage['vendor'],
-          'Received response from 3p analytics frame that does not indicate' +
-          ' vendor');
-      const vendor = responseMessage['vendor'];
-      assertOriginMatchesVendor(event.origin, vendor);
-
-      this.vendorResponses_[vendor] = responseMessage['message'];
+      this.vendorResponses_[responseMessage['vendor']] =
+          responseMessage['message'];
     });
+  }
+
+  /**
+   *
+   * @param responseMessage The response object to validate.
+   * @param expectedCreativeId The resource ID of the enclosing AMP ad (which
+   *     responseMessage['creativeId'] should match.
+   * @param expectedVendor The 3p analytics vendor, which
+   *     responseMesssage['vendor'] should match.
+   */
+  assertValidResponseMessage(responseMessage, expectedCreativeId,
+                             expectedVendor) {
+    if (!responseMessage || !responseMessage['type'] ||
+      responseMessage['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE ||
+      !responseMessage['creativeId'] ||
+      responseMessage['creativeId'] != expectedCreativeId) {
+      return;
+    }
+    dev().assert(responseMessage && responseMessage['message'],
+        'Received empty response from 3p analytics frame');
+    dev().assert(responseMessage['type'] &&
+        responseMessage['type'] == MessageType.IFRAME_TRANSPORT_RESPONSE,
+        'Received response message of invalid type from 3p analytics frame');
+    dev().assert(responseMessage['creativeId'] &&
+        responseMessage['creativeId'] == expectedCreativeId,
+        'Received malformed message from 3p analytics frame: ' +
+        'creativeId missing');
+    dev().assert(responseMessage['vendor'],
+        'Received malformed message from 3p analytics frame: ' +
+        'vendor missing');
+    assertOriginMatchesVendor(expectedVendor, responseMessage['vendor']);
+  }
+
+  /**
+   * Gets the resource ID of the amp-ad element containing this AmpAdExit
+   * instance.
+   * @return {string}
+   */
+  getAmpAdResourceId() {
+    try {
+      const frame = getParentWindowFrameElement(this.element, this.win.top);
+      return frame.parentElement.getResourceId();
+    } catch (e) {
+      this.user().error(TAG, 'No friendly parent amp-ad element was found' +
+        ' for amp-ad-exit tag.');
+      throw e;
+    }
   }
 
   /** @override */
