@@ -495,7 +495,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             rtcParams[key];
       }
     });
-    return {'artc': artc.join(), 'ati': ati.join(), 'ard': ard.join()
+    return {'artc': artc.join(), 'ati': ati.join(), 'ard': ard.join(),
     };
   }
 

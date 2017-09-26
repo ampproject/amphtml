@@ -1556,7 +1556,7 @@ export class AmpA4A extends AMP.BaseElement {
           return this.realTimeConfigManager_.executeRealTimeConfig(
               this.getCustomRealTimeConfigMacros_());
         };
-      } catch(err) {
+      } catch (err) {
         dev().error(TAG, 'Could not perform Real Time Config');
       }
     }

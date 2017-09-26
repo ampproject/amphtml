@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  AmpAdNetworkDoubleclickImpl,
-} from '../../../amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {Xhr} from '../../../../src/service/xhr-impl';
 import {AmpA4A} from '../amp-a4a';
 import {RealTimeConfigManager} from '../real-time-config-manager';
 // Need the following side-effect import because in actual production code,
@@ -28,11 +24,9 @@ import {RealTimeConfigManager} from '../real-time-config-manager';
 import '../../../amp-ad/0.1/amp-ad';
 
 describes.realWin('RealTimeConfigManager', {amp: true}, env => {
-  let impl;
   let element;
   let a4a;
   let sandbox;
-  let xhrMock;
   let realTimeConfigManager;
 
   beforeEach(() => {
@@ -55,32 +49,13 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
     });
     doc.body.appendChild(element);
     a4a = new AmpA4A(element);
-    realTimeConfigManager = new RealTimeConfigManager(element, a4a.win, a4a.getAmpDoc());
-    xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+    realTimeConfigManager = new RealTimeConfigManager(
+        element, a4a.win, a4a.getAmpDoc());
   });
 
   afterEach(() => {
     sandbox.restore();
-    impl = null;
-    xhrMock = null;
   });
-
-  function mockRtcExecution(rtcResponse, element, opt_textFunction) {
-    impl = new AmpAdNetworkDoubleclickImpl(element, env.win.document, env.win);
-    let textFunction = () => {
-      return Promise.resolve(JSON.stringify(rtcResponse));
-    };
-    textFunction = opt_textFunction || textFunction;
-    xhrMock.returns(
-        Promise.resolve({
-          redirected: false,
-          status: 200,
-          text: textFunction,
-        })
-    );
-    impl.populateAdUrlState();
-    return impl.executeRtc_(env.win.document);
-  }
 
   function setRtcConfig(rtcConfig) {
     element.setAttribute('prerequest-callouts', JSON.stringify(rtcConfig));
@@ -94,12 +69,12 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
   describe('#validateRtcConfig', () => {
     it('should return true for valid rtcConfig', () => {
       const rtcConfig = {
-        "vendors": {"fakeVendor": {"SLOT_ID": "1", "PAGE_ID": "1"},
-                    "nonexistent-vendor": {"SLOT_ID": "1"},
-                    "fakeVendor2": {"SLOT_ID": "1"}},
-        "urls": ["https://localhost:4443/posts?slot_id=SLOT_ID",
-                 "https://broken.zzzzzzz"],
-        "timeoutMillis": 500};
+        'vendors': {'fakeVendor': {'SLOT_ID': '1', 'PAGE_ID': '1'},
+          'nonexistent-vendor': {'SLOT_ID': '1'},
+          'fakeVendor2': {'SLOT_ID': '1'}},
+        'urls': ['https://localhost:4443/posts?slot_id=SLOT_ID',
+          'https://broken.zzzzzzz'],
+        'timeoutMillis': 500};
       setRtcConfig(rtcConfig);
       expect(realTimeConfigManager.validateRtcConfig()).to.be.true;
     });
