@@ -10,6 +10,9 @@ const DEFAULT_RTC_TIMEOUT = 1000;
 /** @type {string} */
 const TAG = 'real-time-config';
 
+/** @type {number} */
+const MAX_RTC_CALLOUTS = 5;
+
 export class RealTimeConfigManager {
   constructor(element, win, ampDoc) {
     this.element = element;
@@ -25,13 +28,13 @@ export class RealTimeConfigManager {
       return null;
     }
     const rtcTimeout = this.rtcConfig.timeoutMillis || DEFAULT_RTC_TIMEOUT;
-    this.inflateVendorUrls();
     this.inflatePublisherUrls(customMacros);
+    this.inflateVendorUrls();
     if (this.calloutUrls.length == 0) {
       return Promise.resolve();
     }
-    const rtcPromiseArray = [];
-    this.calloutUrls.forEach(url => {
+    let rtcTime;
+    return Promise.all(this.calloutUrls.map(url => {
       const rtcStartTime = Date.now();
       /** ISSUE: For very short timeouts, and/or for slow devices, the calculated time
        * that RTC took (rtcTime below) can be longer than the timeout without getting timed-out,
@@ -43,24 +46,22 @@ export class RealTimeConfigManager {
        * Time = 120: xhr callout returns, timeoutPromise sees total time as 95ms, so no timeout
        * Time = 125: rtcTime = 125ms, which is greater than the publisher specified timeout.
        */
-      rtcPromiseArray.push(Services.timerFor(this.win).timeoutPromise(
+      return Services.timerFor(this.win).timeoutPromise(
           rtcTimeout,
           Services.xhrFor(this.win).fetchJson(
               url, {credentials: 'include'}).then(res => {
-                const rtcTime = Date.now() - rtcStartTime;
-                const hostname = parseUrl(url).hostname;
                 // Non-200 status codes are forbidden for RTC.
                 // TODO: Add to fetchResponse the ability to
                 // check for redirects as well.
                 if (res.status != 200) {
+                  rtcTime = Date.now() - rtcStartTime;
                   return {rtcTime, error: 'Non-200 Status', hostname};
                 }
                 return res.text().then(text => {
+                  rtcTime = Date.now() - rtcStartTime;
+                  const hostname = parseUrl(url).hostname;
                   // An empty text response is fine, just means
                   // we have nothing to merge.
-                  if (rtcTime > rtcTimeout) {
-                    dev.error(TAG, 'exceeded timeout');
-                  }
                   if (!text) {
                     return {rtcTime, hostname};
                   }
@@ -72,23 +73,36 @@ export class RealTimeConfigManager {
                 const hostname = parseUrl(url).hostname;
                 const rtcTime = Date.now() - rtcStartTime;
                 return {error: err, rtcTime, hostname};
-              }));
-    });
-    // TODO: Catch errors thrown by promises in promise array
-    return Promise.all(rtcPromiseArray);
+              });
+    }));
   }
 
   /**
    * Attempts to parse the publisher-defined RTC config off the amp-ad
    * element, then validates that the rtcConfig exists, and contains
-   * an entry for either vendor URLs, or publisher-defined URLs.
+   * an entry for either vendor URLs, or publisher-defined URLs. If the
+   * config contains an entry for timeoutMillis, validates that it is a
+   * number, or converts to a number if number-like, otherwise overwrites
+   * with the default.
    * @return {!boolean}
    */
   validateRtcConfig() {
     this.rtcConfig = tryParseJson(
         this.element.getAttribute('prerequest-callouts'));
-    return (!!this.rtcConfig && (this.rtcConfig['vendors'] ||
-                                 this.rtcConfig['urls'])) ? true : false;
+    if (!this.rtcConfig) {
+      return false;
+    }
+    if (!((this.rtcConfig['vendors'] &&
+           Object.keys(this.rtcConfig['vendors']).length) ||
+          (this.rtcConfig['urls'] && this.rtcConfig['urls'].length))) {
+      return false;
+    }
+    if (this.rtcConfig['timeoutMillis'] &&
+        !Number.isInteger(this.rtcConfig['timeoutMillis'])) {
+      const timeout = Number(this.rtcConfig['timeoutMillis']);
+      this.rtcConfig['timeoutMillis'] = timeout || DEFAULT_RTC_TIMEOUT;
+    }
+    return true;
   }
 
   /**
@@ -101,9 +115,12 @@ export class RealTimeConfigManager {
     if (this.rtcConfig['vendors']) {
       let vendor;
       for (vendor in this.rtcConfig['vendors']) {
+        if (this.calloutUrls.length >= MAX_RTC_CALLOUTS) {
+          return;
+        }
         url = RTC_VENDORS[vendor];
         if (!url) {
-          dev.error(TAG, `Vendor ${vendor} invalid`);
+          dev().error(TAG, `Vendor ${vendor} invalid`);
           continue;
         }
         this.maybeInflateAndAddUrl(url, this.rtcConfig['vendors'][vendor]);
@@ -120,6 +137,9 @@ export class RealTimeConfigManager {
   inflatePublisherUrls(macros) {
     if (this.rtcConfig['urls']) {
       this.rtcConfig['urls'].forEach(url => {
+        if (this.calloutUrls.length >= MAX_RTC_CALLOUTS) {
+          return;
+        }
         this.maybeInflateAndAddUrl(url, macros);
       });
     }
@@ -127,8 +147,7 @@ export class RealTimeConfigManager {
 
   /**
    * Substitutes macros into url, and adds the resulting URL to the list
-   * of callouts. Checks each URL to see if secure, and stops adding URLs
-   * once a total of 5 callouts are added to the list. If a supplied macro
+   * of callouts. Checks each URL to see if secure. If a supplied macro
    * does not exist in the url, it is silently ignored.
    * @param {!string} url
    * @param {!Object<string, string>} macros A mapping of macro to value for
@@ -136,10 +155,6 @@ export class RealTimeConfigManager {
    *   the macro object may look like {'SLOT_ID': '1'}.
    */
   maybeInflateAndAddUrl(url, macros) {
-    // TODO: Is there a better place to put this check?
-    if (this.calloutUrls.length == 5) {
-      return;
-    }
     url = this.urlReplacements_.expandSync(url, macros);
     if (isSecureUrl(url)) {
       this.calloutUrls.push(url);
