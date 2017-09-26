@@ -37,6 +37,9 @@ export class AmpStory extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {boolean} */
+    this.isExperimentOn_ = false;
   }
 
   buildCallback() {
