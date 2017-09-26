@@ -16,7 +16,7 @@
 
 import {MessageType} from '../../../../src/3p-frame-messaging';
 import {
-  IframeTransportClient,
+  IframeTransportClient, IframeTransportContext,
 } from '../../../../3p/iframe-transport-client';
 import {adopt} from '../../../../src/runtime';
 import * as sinon from 'sinon';
@@ -105,5 +105,78 @@ describe('iframe-transport-client', () => {
       events: [
         {transportId: '101', message: 'hello, world!'},
       ]}));
+  });
+
+  it('requires onNewContextInstance', () => {
+    expect(() => {
+      new IframeTransportContext(window,
+        iframeTransportClient.iframeMessagingClient_,
+        'my_creative', 'my_vendor');
+    }).to.throw(/Must implement onNewContextInstance/);
+  });
+
+  it('calls onNewContextInstance', () => {
+    const onNewContextInstanceSpy = sinon.spy();
+    window.onNewContextInstance = ctx => onNewContextInstanceSpy(ctx);
+    const ctx = new IframeTransportContext(window,
+      iframeTransportClient.iframeMessagingClient_,
+      'my_creative', 'my_vendor');
+    expect(onNewContextInstanceSpy).to.be.calledOnce;
+    expect(onNewContextInstanceSpy).to.be.calledWith(ctx);
+    window.onNewContextInstance = undefined;
+  });
+
+  it('Sets listener and baseMessage properly', () => {
+    const onNewContextInstanceSpy = sinon.spy();
+    window.onNewContextInstance = ctx => onNewContextInstanceSpy(ctx);
+    const ctx = new IframeTransportContext(window,
+      iframeTransportClient.iframeMessagingClient_,
+      'my_creative', 'my_vendor');
+    expect(ctx.listener_).to.be.null;
+    expect(ctx.baseMessage_).to.not.be.null;
+    expect(ctx.baseMessage_.creativeId).to.equal('my_creative');
+    expect(ctx.baseMessage_.vendor).to.equal('my_vendor');
+    const listener1 = sinon.spy();
+    const listener2 = sinon.spy();
+    ctx.onAnalyticsEvent(listener1);
+    expect(ctx.listener_).to.equal(listener1);
+    ctx.onAnalyticsEvent(listener2);
+    expect(ctx.listener_).to.equal(listener2);
+    window.onNewContextInstance = undefined;
+  });
+
+  it('dispatches event', () => {
+    const onNewContextInstanceSpy = sinon.spy();
+    window.onNewContextInstance = ctx => onNewContextInstanceSpy(ctx);
+    const ctx = new IframeTransportContext(window,
+      iframeTransportClient.iframeMessagingClient_,
+      'my_creative', 'my_vendor');
+    const listener = sinon.spy();
+    ctx.onAnalyticsEvent(listener);
+    const event = 'Something important happened';
+    ctx.dispatch(event);
+    expect(listener).to.be.calledOnce;
+    expect(listener).to.be.calledWith(event);
+    window.onNewContextInstance = undefined;
+  });
+
+  it('sends response', () => {
+    const onNewContextInstanceSpy = sinon.spy();
+    window.onNewContextInstance = ctx => onNewContextInstanceSpy(ctx);
+    const ctx = new IframeTransportContext(window,
+      iframeTransportClient.iframeMessagingClient_,
+      'my_creative', 'my_vendor');
+    const response = {foo: 'bar', answer: '42'};
+    sandbox.stub(iframeTransportClient.iframeMessagingClient_, 'sendMessage',
+        (type, opt_payload) => {
+          expect(type).to.equal(MessageType.IFRAME_TRANSPORT_RESPONSE);
+          expect(opt_payload).to.not.be.null;
+          expect(opt_payload.creativeId).to.equal('my_creative');
+          expect(opt_payload.vendor).to.equal('my_vendor');
+          expect(opt_payload.message).to.not.be.null;
+          expect(opt_payload.message).to.equal(response);
+        });
+    ctx.sendResponseToCreative(response);
+    window.onNewContextInstance = undefined;
   });
 });
