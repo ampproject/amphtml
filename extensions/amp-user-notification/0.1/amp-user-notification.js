@@ -209,20 +209,36 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Promise}
    */
   postDismissEnpoint_() {
+    const enctype = this.element.getAttribute('enctype') || 'application/json';
     return Services.xhrFor(this.win).fetchJson(
         dev().assertString(this.dismissHref_),
-        {
-          method: 'POST',
-          credentials: 'include',
-          requireAmpResponseSourceOrigin: false,
-          body: /** @type {!JsonObject} */({
-            'elementId': this.elementId_,
-            'ampUserId': this.ampUserId_,
-          }),
-          headers: {
-            'Content-Type': 'application/json;charset=utf-8',
-          },
-        });
+        this.buildPostDismissRequest_(enctype, {
+          elementId: this.elementId_,
+          ampUserId: this.ampUserId_,
+        }));
+  }
+
+  buildPostDismissRequest_(enctype, {elementId, ampUserId}) {
+    const formDataEncType = 'application/x-www-form-urlencoded';
+    let body = /** @type {!JsonObject} */({elementId, ampUserId});
+    if (enctype === formDataEncType) {
+      const formBody = [];
+      for (const property in body) {
+        const encodedKey = encodeURIComponent(property);
+        const encodedValue = encodeURIComponent(body[property]);
+        formBody.push(encodedKey + '=' + encodedValue);
+      }
+      body = formBody.join('&');
+    }
+    return {
+      method: 'POST',
+      credentials: 'include',
+      requireAmpResponseSourceOrigin: false,
+      body,
+      headers: {
+        'Content-Type': enctype + ';charset=utf-8',
+      },
+    };
   }
 
   /**

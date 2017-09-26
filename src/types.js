@@ -27,6 +27,15 @@ function toString(value) {
 }
 
 /**
+ * Determines if value is actually a String.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isString(value) {
+  return typeof value === 'string';
+}
+
+/**
  * Determines if value is actually an Array.
  * @param {*} value
  * @return {boolean}
