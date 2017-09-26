@@ -2,6 +2,7 @@ import {RTC_VENDORS} from './callout-vendors.js';
 import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
+import {isArray, isObject} from '../../../src/types';
 import {isSecureUrl, parseUrl} from '../../../src/url';
 
 /** Timeout in millis */
@@ -16,11 +17,10 @@ const MAX_RTC_CALLOUTS = 5;
 export class RealTimeConfigManager {
   constructor(element, win, ampDoc) {
     this.element = element;
-    this.ampDoc = ampDoc;
     this.win = win;
     this.rtcConfig = null;
     this.calloutUrls = [];
-    this.urlReplacements_ = Services.urlReplacementsForDoc(this.ampDoc);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(ampDoc);
   }
 
   executeRealTimeConfig(customMacros) {
@@ -92,9 +92,10 @@ export class RealTimeConfigManager {
     if (!rtcConfig) {
       return false;
     }
-    if (!((rtcConfig['vendors'] &&
+    if (!((rtcConfig['vendors'] && isObject(rtcConfig['vendors']) &&
            Object.keys(rtcConfig['vendors']).length) ||
-          (rtcConfig['urls'] && rtcConfig['urls'].length))) {
+          (rtcConfig['urls'] && isArray(rtcConfig['urls']) &&
+           rtcConfig['urls'].length))) {
       return false;
     }
     if (rtcConfig['timeoutMillis'] &&

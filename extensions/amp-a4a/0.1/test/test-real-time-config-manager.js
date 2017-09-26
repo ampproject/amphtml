@@ -84,17 +84,21 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
       expect(realTimeConfigManager.rtcConfig).to.deep.equal(rtcConfig);
     });
 
-    it('should return false for no rtcConfig', () => {
+    it('should return false if prerequest-callouts not specified', () => {
       expect(realTimeConfigManager.validateRtcConfig()).to.be.false;
       expect(realTimeConfigManager.rtcConfig).to.not.be.ok;
     });
 
-    it('should return false for rtcConfig missing required values', () => {
-      const rtcConfig = {'timeoutMillis': 500};
-      setRtcConfig(rtcConfig);
-      expect(realTimeConfigManager.validateRtcConfig()).to.be.false;
-      expect(realTimeConfigManager.rtcConfig).to.not.be.ok;
-    });
+    // Test various misconfigurations that are missing vendors or urls.
+    [{'timeoutMillis': 500}, {'vendors': {}}, {'urls': []},
+     {'vendors': {}, 'urls': []},
+     {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
+       it('should return false for rtcConfig missing required values', () => {
+         setRtcConfig(rtcConfig);
+         expect(realTimeConfigManager.validateRtcConfig()).to.be.false;
+         expect(realTimeConfigManager.rtcConfig).to.not.be.ok;
+       });
+     });
 
     it('should return false for bad JSON rtcConfig', () => {
       const rtcConfig = '{"urls" : ["https://google.com"]';
@@ -136,8 +140,14 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
       expect(realTimeConfigManager.calloutUrls[0]).to.equal(
           'https://www.example.biz/posts?slot_id=SLOT_ID');
     });
-    it('should not add any URLs if none specified', () => {});
-    it('should add urls with and without macros', () => {});
-    it('should not add URL if macros invalid', () => {});
+    it('should not add any URLs if none specified', () => {
+      expect(false).to.be.true;
+    });
+    it('should add urls with and without macros', () => {
+      expect(false).to.be.true;
+    });
+    it('should not add URL if macros invalid', () => {
+      expect(false).to.be.true;
+    });
   });
 });
