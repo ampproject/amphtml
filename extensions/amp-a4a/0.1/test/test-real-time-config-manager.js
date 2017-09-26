@@ -17,6 +17,8 @@
 import {createElementWithAttributes} from '../../../../src/dom';
 import {AmpA4A} from '../amp-a4a';
 import {RealTimeConfigManager} from '../real-time-config-manager';
+import {Xhr} from '../../../../src/service/xhr-impl';
+import {parseUrl} from '../../../../src/url';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
@@ -27,7 +29,8 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
   let element;
   let a4a;
   let sandbox;
-  let realTimeConfigManager;
+  let rtcManager;
+  let fetchJsonStub;
 
   beforeEach(() => {
     sandbox = env.sandbox;
@@ -40,7 +43,6 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
     const ampStyle = doc.createElement('style');
     ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
     doc.head.appendChild(ampStyle);
-
     element = createElementWithAttributes(env.win.document, 'amp-ad', {
       'width': '200',
       'height': '50',
@@ -49,20 +51,60 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
     });
     doc.body.appendChild(element);
     a4a = new AmpA4A(element);
-    realTimeConfigManager = new RealTimeConfigManager(
+    rtcManager = new RealTimeConfigManager(
         element, a4a.win, a4a.getAmpDoc());
+    fetchJsonStub = sandbox.stub(Xhr.prototype, 'fetchJson');
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
+  function setFetchJsonStubBehavior(params, response, opt_status) {
+    const status = opt_status || 200;
+    const textFunction = () => {
+      return Promise.resolve(JSON.stringify(response));
+    };
+    fetchJsonStub.withArgs(params).returns(Promise.resolve({
+      status,
+      text: textFunction
+    }));
+  }
+
   function setRtcConfig(rtcConfig) {
     element.setAttribute('prerequest-callouts', JSON.stringify(rtcConfig));
   }
 
+  function setAndValidateRtcConfig(rtcConfig) {
+    setRtcConfig(rtcConfig);
+    rtcManager.validateRtcConfig();
+  }
+
   describe('#executeRealTimeConfig', () => {
-    it('', () => {});
+    beforeEach(() => {});
+
+    it('should send RTC callouts for all specified URLS', () => {
+      const urls = ['https://www.example.biz/'];
+      const rtcConfig = {
+        urls,
+        'timeoutMillis': 500};
+      setAndValidateRtcConfig(rtcConfig);
+      const rtcResponseValues = [{"targeting":{"food":["cheeseburger"]}}];
+      for (let i in urls) {
+        setFetchJsonStubBehavior(urls[i], rtcResponseValues[i]);
+      }
+      const rtcResponsePromiseArray = rtcManager.executeRealTimeConfig();
+      const calloutUrlHostnames = rtcManager.calloutUrls.map(
+          url => parseUrl(url).hostname);
+      return rtcResponsePromiseArray.then(rtcResponseArray => {
+        for (let i in calloutUrlHostnames) {
+          expect(rtcResponseArray[i].rtcResponse).to.deep.equal(rtcResponseValues[i]);
+          expect(rtcResponseArray[i].hostname).to.equal(calloutUrlHostnames[i]);
+          expect(rtcResponseArray[i].rtcTime).to.be.ok;
+        }
+      });
+    });
+
     it('', () => {});
   });
 
@@ -80,13 +122,13 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
           'https://broken.zzzzzzz'],
         'timeoutMillis': 500};
       setRtcConfig(rtcConfig);
-      expect(realTimeConfigManager.validateRtcConfig()).to.be.true;
-      expect(realTimeConfigManager.rtcConfig).to.deep.equal(rtcConfig);
+      expect(rtcManager.validateRtcConfig()).to.be.true;
+      expect(rtcManager.rtcConfig).to.deep.equal(rtcConfig);
     });
 
     it('should return false if prerequest-callouts not specified', () => {
-      expect(realTimeConfigManager.validateRtcConfig()).to.be.false;
-      expect(realTimeConfigManager.rtcConfig).to.not.be.ok;
+      expect(rtcManager.validateRtcConfig()).to.be.false;
+      expect(rtcManager.rtcConfig).to.not.be.ok;
     });
 
     // Test various misconfigurations that are missing vendors or urls.
@@ -95,16 +137,16 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
      {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
        it('should return false for rtcConfig missing required values', () => {
          setRtcConfig(rtcConfig);
-         expect(realTimeConfigManager.validateRtcConfig()).to.be.false;
-         expect(realTimeConfigManager.rtcConfig).to.not.be.ok;
+         expect(rtcManager.validateRtcConfig()).to.be.false;
+         expect(rtcManager.rtcConfig).to.not.be.ok;
        });
      });
 
     it('should return false for bad JSON rtcConfig', () => {
       const rtcConfig = '{"urls" : ["https://google.com"]';
       element.setAttribute('prerequest-callouts', rtcConfig);
-      expect(realTimeConfigManager.validateRtcConfig()).to.be.false;
-      expect(realTimeConfigManager.rtcConfig).to.not.be.ok;
+      expect(rtcManager.validateRtcConfig()).to.be.false;
+      expect(rtcManager.rtcConfig).to.not.be.ok;
     });
 
   });
@@ -121,23 +163,23 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
         'urls': ['https://www.example.biz/posts?slot_id=SLOT_ID'],
         'timeoutMillis': 500};
       setRtcConfig(rtcConfig);
-      realTimeConfigManager.validateRtcConfig();
+      rtcManager.validateRtcConfig();
     });
 
     it('should add and inflate urls with macros', () => {
       let macros = {SLOT_ID: '1'};
-      realTimeConfigManager.inflatePublisherUrls(macros);
-      expect(realTimeConfigManager.calloutUrls).to.be.ok;
-      expect(realTimeConfigManager.calloutUrls.length).to.equal(1);
-      expect(realTimeConfigManager.calloutUrls[0]).to.equal(
+      rtcManager.inflatePublisherUrls(macros);
+      expect(rtcManager.calloutUrls).to.be.ok;
+      expect(rtcManager.calloutUrls.length).to.equal(1);
+      expect(rtcManager.calloutUrls[0]).to.equal(
           'https://www.example.biz/posts?slot_id=1');
     });
     it('should add urls without macros', () => {
       let macros = null;
-      realTimeConfigManager.inflatePublisherUrls(macros);
-      expect(realTimeConfigManager.calloutUrls).to.be.ok;
-      expect(realTimeConfigManager.calloutUrls.length).to.equal(1);
-      expect(realTimeConfigManager.calloutUrls[0]).to.equal(
+      rtcManager.inflatePublisherUrls(macros);
+      expect(rtcManager.calloutUrls).to.be.ok;
+      expect(rtcManager.calloutUrls.length).to.equal(1);
+      expect(rtcManager.calloutUrls[0]).to.equal(
           'https://www.example.biz/posts?slot_id=SLOT_ID');
     });
     it('should not add any URLs if none specified', () => {
