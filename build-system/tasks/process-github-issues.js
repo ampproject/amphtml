@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 'use strict';
+/* eslint google-camelcase/google-camelcase: 0 */
 const BBPromise = require('bluebird');
 const argv = require('minimist')(process.argv.slice(2));
 const assert = require('assert');
@@ -24,7 +25,6 @@ const util = require('gulp-util');
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 
-const verbose = (argv.verbose || argv.v);
 const isDryrun = argv.dryrun;
 
 const issuesOptions = {
@@ -34,7 +34,7 @@ const issuesOptions = {
     'Accept': 'application/vnd.github.v3+json',
   },
   qs: {
-    'access_token': GITHUB_ACCESS_TOKEN,
+    access_token: GITHUB_ACCESS_TOKEN,
   },
 };
 
@@ -45,17 +45,13 @@ const milestoneOptions = {
     'Accept': 'application/vnd.github.v3+json',
   },
   qs: {
-    'access_token': GITHUB_ACCESS_TOKEN,
+    access_token: GITHUB_ACCESS_TOKEN,
   },
 };
 
-// 4 is the number for Milestone 'Backlog Bugs'
 const MILESTONE_BACKLOG_BUGS = 4;
-// By default we will assign 'Pending Triage' milestone, number 20
 const MILESTONE_PENDING_TRIAGE = 20;
-// 23 is the number for Milestone 'New FRs'
 const MILESTONE_NEW_FRS = 23;
-// 12 is the number for Milestone 'Docs Updates'
 const MILESTONE_DOCS_UPDATES = 12;
 
 // We start processing the issues by checking token first
@@ -83,10 +79,10 @@ function processIssues() {
 function getIssues(opt_page) {
   const options = extend({}, issuesOptions);
   options.qs = {
-    'state': 'open',
-    'page': opt_page,
-    'per_page': 100,
-    'access_token': GITHUB_ACCESS_TOKEN,
+    state: 'open',
+    page: opt_page,
+    per_page: 100,
+    access_token: GITHUB_ACCESS_TOKEN,
   };
   return request(options).then(res => {
     const issues = JSON.parse(res.body);
@@ -108,6 +104,11 @@ function updateGitHubIssues() {
     getIssues(3),
     getIssues(4),
     getIssues(5),
+    getIssues(6),
+    getIssues(7),
+    getIssues(8),
+    getIssues(9),
+    getIssues(10)
   ])
       .then(requests => [].concat.apply([], requests))
       .then(issues => {
@@ -119,34 +120,70 @@ function updateGitHubIssues() {
           let milestoneTitle;
           let milestoneState;
           let hasPriority = false;
+          let hasCategory = false;
           let issueNewMilestone = MILESTONE_PENDING_TRIAGE;
-
-          // Get the title and state of the milestone
-          if (milestone) {
-            milestoneTitle = milestone.title;
-            milestoneState = milestone.state;
+          const assignee = issue['assignee'];
+          let assigneeName = '';
+          const issueLastUpdate = issue.updated_at;
+          let biweeklyUpdate = true;
+          let quartelyUpdate = true;
+          if (getLastUpdate(issueLastUpdate) > 89) {
+            quartelyUpdate = false;
+            biweeklyUpdate = false;
           }
-          // Get the labels we want to check
-          labels.forEach(function(label) {
-            if (label) {
-              // Check if the issues has type
-              if (label.name.startsWith('Type') ||
-             label.name.startsWith('Related')) {
-                issueType = label.name;
-              }
-              // Check if the issues has Priority
-              if (label.name.startsWith('P0') ||
-                  label.name.startsWith('P1') ||
-                  label.name.startsWith('P2') ||
-                  label.name.startsWith('P3')) {
-                hasPriority = true;
-              }
-            }
-          });
+          else if (getLastUpdate(issueLastUpdate) > 14) {
+            biweeklyUpdate = false;
+          }
+      // Get the assignee
+          if (assignee) {
+            assigneeName = '@' + assignee['login'];
+          }
+      // Get the title and state of the milestone
+          if (milestone) {
+            milestoneTitle = milestone['title'];
+            milestoneState = milestone['state'];
+          }
+      // promise starts
           promise = promise.then(function() {
             util.log('Update ' + issue.number);
             const updates = [];
-            // Milestone task: move issue from closed milestone
+        // Get the labels we want to check
+            labels.forEach(function(label) {
+              if (label) {
+            // Check if the issues has type
+                if (label.name.startsWith('Type') ||
+               label.name.startsWith('Related')) {
+                  issueType = label.name;
+                }
+            // Check if the issues has Priority
+                if (label.name.startsWith('P0') || label.name.startsWith('P1')
+               || label.name.startsWith('P2') || label.name.startsWith('P3')) {
+                  hasPriority = true;
+                  if (label.name.startsWith('P0')
+                      || label.name.startsWith('P1')) {
+                    if (biweeklyUpdate == false) {
+                      biweeklyUpdate = true;
+                      updates.push(applyComment(issue, 'This is a high priority'
+                      + ' issue but it hasn\'t been updated in awhile.' +
+                      assigneeName + ' Do you have any updates?'));
+                    }
+                  }
+                  else if (label.name.startsWith('P2') &&
+                  quartelyUpdate == false) {
+                    quartelyUpdate = true;
+                    updates.push(applyComment(issue, 'This issue hasn\'t been '
+                        + ' updated in awhile.' +
+                    assigneeName + ' Do you have any updates?'));
+                  }
+                }
+                if (label.name.startsWith('Category')
+                || label.name.startsWith('Related to')
+                || label.name.startsWith('GFI')) {
+                  hasCategory = true;
+                }
+              }
+            });
+        // Milestone task: move issue from closed milestone
             if (milestone) {
               if (milestoneTitle.startsWith('Sprint') &&
              milestoneState === 'closed') {
@@ -154,52 +191,76 @@ function updateGitHubIssues() {
                 updates.push(applyMilestone(issue, issueNewMilestone));
               }
             }
-            // if issueType is not null, add correct milestones
+            if (milestoneTitle === 'Pending Triage') {
+              if (quartelyUpdate == false) {
+                quartelyUpdate = true;
+                updates.push(applyComment(issue, 'This issue seems to be in ' +
+                  ' Pending Triage for awhile.' +
+                  assigneeName + ' Please triage this to ' +
+                'an appropriate milestone.'));
+              }
+            }
+        //if issueType is not null, add correct milestones
             if (issueType != null) {
               if (milestoneTitle === 'Pending Triage' || milestone == null) {
                 if (issueType === 'Type: Feature Request') {
                   issueNewMilestone = MILESTONE_NEW_FRS;
                   updates.push(applyMilestone(issue, issueNewMilestone));
-                } else if (issueType === 'Related to: Documentation' ||
-                    issueType === 'Type: Design Review' ||
-                    issueType === 'Type: Weekly Status') {
+                }
+                else if (issueType === 'Related to: Documentation' ||
+                issueType === 'Type: Design Review' ||
+                issueType === 'Type: Weekly Status') {
                   issueNewMilestone = MILESTONE_DOCS_UPDATES;
                   updates.push(applyMilestone(issue, issueNewMilestone));
-                } else if (issueType === 'Type: Bug' ||
-                    issueType === 'Related to: Flaky Tests') {
+                }
+                else if (issueType === 'Type: Bug' ||
+                issueType === 'Related to: Flaky Tests') {
                   issueNewMilestone = MILESTONE_BACKLOG_BUGS;
                   updates.push(applyMilestone(issue, issueNewMilestone));
-                } else if (milestone == null) {
+                }
+                else if (milestone == null) {
                   updates.push(applyMilestone(issue, issueNewMilestone));
                 }
               }
-            } else if (milestone == null) {
+            }
+            else if (milestone == null) {
               updates.push(applyMilestone(issue, issueNewMilestone));
-            } else if (milestoneTitle === 'Prioritized FRs' ||
-                milestoneTitle === 'New FRs') {
+            }
+            else if (milestoneTitle === 'Prioritized FRs' ||
+          milestoneTitle === 'New FRs') {
               updates.push(applyLabel(issue, 'Type: Feature Request'));
-            } else if (milestoneTitle === 'Backlog Bugs' ||
-                milestoneTitle.startsWith('Sprint')) {
+            }
+            else if (milestoneTitle === 'Backlog Bugs' ||
+          milestoneTitle.startsWith('Sprint')) {
               updates.push(applyLabel(issue, 'Type: Bug'));
             }
-            // Apply default priority if no priority
+        // Apply default priority if no priority
             if (hasPriority == false && milestoneTitle != 'New FRs' &&
-                milestoneTitle !== '3P Implementation' &&
-                milestoneTitle !== 'Pending Triage' && milestone != null) {
+          milestoneTitle !== '3P Implementation' &&
+          milestoneTitle !== 'Pending Triage' && milestone != null) {
               updates.push(applyLabel(issue, 'P2: Soon'));
             }
-            if (isDryrun) {
-              util.log('Performing a dry run. ' +
-                  'These are the updates that would have been applied:');
-              updates.forEach(function(update) {
-                util.log(util.inspect(update, {depth: null}));
-              });
-              return Promise.resolve();
+        // Add comment with missing Category
+            if (hasCategory == false) {
+              if (milestoneTitle === 'Pending Triage'
+                  || milestoneTitle === 'Docs Updates'
+                  || milestoneTitle == null
+                  || milestoneTitle === 'Great First Issues (GFI)') {
+                if (isDryrun) {
+                  util.log(util.colors.green('No comment needed '
+                      + ' for #' + issue.number));
+                }
+              } else {
+                updates.push(applyComment(issue,
+                    'This issue doesn\'t have a category'
+                    + ' which makes it harder for us to keep track of it.' +
+                    assigneeName + ' Please add an appropriate category.'));
+              }
             }
             return Promise.all(updates);
           });
         });
-        return issues;
+        return promise;
       });
 }
 
@@ -211,22 +272,20 @@ function updateGitHubIssues() {
 function applyMilestone(issue, milestoneNumber) {
   const options = extend({}, milestoneOptions);
   options.qs = {
-    'state': 'open',
-    'per_page': 100,
-    'access_token': GITHUB_ACCESS_TOKEN,
+    state: 'open',
+    per_page: 100,
+    access_token: GITHUB_ACCESS_TOKEN,
   };
 
   issue.milestone = milestoneNumber;
-  return createGithubRequest(
-      '/issues/' + issue.number,
-      'PATCH',
-      issue.milestone, 'milestone').then(function() {
-        if (verbose) {
-          util.log(util.colors.green(
-              'Milestone applied ' + issue.milestone +
-              ' for # ' + issue.number));
-        }
-      });
+  if (isDryrun) {
+    util.log(util.colors.green('Milestone applied ' + milestoneNumber +
+        ' for #' + issue.number));
+    return;
+  } else {
+    return createGithubRequest('/issues/' + issue.number,'PATCH',
+        issue.milestone, 'milestone');
+  }
 }
 
 /**
@@ -235,21 +294,60 @@ function applyMilestone(issue, milestoneNumber) {
  * @return {!Promise<*>}
  */
 function applyLabel(issue, label) {
-  const options = extend({}, milestoneOptions);
+  const options = extend({}, issuesOptions);
   options.qs = {
-    'state': 'open',
-    'per_page': 100,
-    'access_token': GITHUB_ACCESS_TOKEN,
+    state: 'open',
+    per_page: 100,
+    access_token: GITHUB_ACCESS_TOKEN,
   };
-  return createGithubRequest(
-      '/issues/' + issue.number + '/labels',
-      'POST',
-      [label], 'label').then(function() {
-        if (verbose) {
-          util.log(util.colors.green(
-              'Label applied ' + label + ' for # ' + issue.number));
-        }
-      });
+  if (isDryrun) {
+    util.log(util.colors.green('Label applied ' +
+        label + ' for #' + issue.number));
+    return;
+  } else {
+    return createGithubRequest('/issues/' + issue.number + '/labels','POST',
+        [label], 'label');
+  }
+
+}
+
+/**
+ * @param {string} issue
+ * @param {string} comment
+ * @return {!Promise<*>}
+ */
+function applyComment(issue, comment) {
+  const options = extend({}, issuesOptions);
+  options.qs = {
+    state: 'open',
+    per_page: 100,
+    access_token: GITHUB_ACCESS_TOKEN,
+  };
+  // delay the comment request so we don't reach github rate limits requests
+  const promise = new Promise(resolve => setTimeout(resolve,120000));
+  return promise.then(function() {
+    if (isDryrun) {
+      util.log(util.colors.blue('waited 2 minutes'));
+      util.log(util.colors.green('Comment applied ' + comment +
+          ' for #' + issue.number));
+      return;
+    } else {
+      createGithubRequest('/issues/' + issue.number + '/comments','POST',
+          comment, 'comment');
+    }
+  });
+}
+// calculate number of days since the latest update
+function getLastUpdate(issueLastUpdate) {
+  const t = new Date();
+  const splits = issueLastUpdate.split('-', 3);
+  const exactDay = splits[2].split('T', 1);
+  const fullMonth = splits[1].split('0',2);
+  const firstDate = Date.UTC(splits[0],fullMonth[1],exactDay[0]);
+  const secondDate = Date.UTC(t.getFullYear(),t.getMonth() + 1,t.getDate());
+  const diff = Math.abs((firstDate.valueOf() -
+      secondDate.valueOf()) / (24 * 60 * 60 * 1000));
+  return diff;
 }
 
 /**
@@ -269,7 +367,7 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
       'Accept': 'application/vnd.github.v3+json',
     },
     qs: {
-      'access_token': GITHUB_ACCESS_TOKEN,
+      access_token: GITHUB_ACCESS_TOKEN,
     },
   };
   if (opt_method) {
@@ -278,7 +376,10 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
   if (opt_data) {
     options.json = true;
     if (typeRequest === 'milestone') {
-      options.body.milestone = opt_data;
+      options.body['milestone'] = opt_data;
+    }
+    else if (typeRequest === 'comment') {
+      options.body['body'] = opt_data;
     } else {
       options.body = opt_data;
     }
@@ -289,7 +390,7 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
 gulp.task(
     'process-github-issues',
     'Automatically updates the labels '
-      + 'and milestones of all open issues at github.com/ampproject/amphtml.',
+     + 'and milestones of all open issues at github.com/ampproject/amphtml.',
     processIssues,
     {
       options: {
