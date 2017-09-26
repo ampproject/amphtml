@@ -88,7 +88,7 @@ describe('3p integration.js', () => {
         'localhost:8000/examples/twitter.amp.html"},' +
         '"mode":{"localDev":true,"development":false,"minified":false}}}';
     const data = parseFragment(unencoded);
-    expect(data).to.be.object;
+    expect(data).to.be.an('object');
     expect(data.tweetid).to.equal('638793490521001985');
     expect(data._context.location.href).to.equal(
         'http://localhost:8000/examples/twitter.amp.html');
@@ -104,7 +104,7 @@ describe('3p integration.js', () => {
         'witter.amp.html%22},%22mode%22:{%22localDev%22:true,%22develop' +
         'ment%22:false,%22minified%22:false}}}';
     const data = parseFragment(encoded);
-    expect(data).to.be.object;
+    expect(data).to.be.an('object');
     expect(data.tweetid).to.equal('638793490521001985');
     expect(data._context.location.href).to.equal(
         'http://localhost:8000/examples/twitter.amp.html');

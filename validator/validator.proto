@@ -356,7 +356,7 @@ message ExtensionSpec {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 31
+// NEXT AVAILABLE TAG: 32
 message TagSpec {
   // The HtmlFormat field tells the validator which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is relevant for.)
@@ -459,6 +459,9 @@ message TagSpec {
   // If set to true, this tag cannot have any siblings.
   optional bool siblings_disallowed = 30;
 
+  // If set to true, this tag must be the last child of its parent.
+  optional bool mandatory_last_child = 31;
+
   // The reference_points defined by this TagSpec instance determine how
   // specific child tags are identified. Please see the comment for the
   // ReferencePoint message.
@@ -479,7 +482,7 @@ message TagSpec {
 
 // Top level message - start reading here.
 // The validator knows about a set of tag specifications.
-// NEXT AVAILABLE TAG: 17
+// NEXT AVAILABLE TAG: 18
 message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
@@ -493,6 +496,9 @@ message ValidatorRules {
 
   // Spec URL for information about styles and amp-custom stylesheet
   optional string styles_spec_url = 15;
+
+  // Spec URL for information about script tags.
+  optional string script_spec_url = 17;
 
   repeated ErrorFormat error_formats = 9;
   repeated ErrorSpecificity error_specificity = 13;
@@ -557,7 +563,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 88
+  // NEXT AVAILABLE TAG: 90
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -569,6 +575,7 @@ message ValidationError {
     ATTR_REQUIRED_BUT_MISSING = 61;
     DISALLOWED_TAG = 2;
     GENERAL_DISALLOWED_TAG = 51;
+    DISALLOWED_SCRIPT_TAG = 88;
     DISALLOWED_ATTR = 3;
     DISALLOWED_STYLE_ATTR = 81;
     INVALID_ATTR_VALUE = 4;
@@ -601,6 +608,7 @@ message ValidationError {
     TEMPLATE_IN_ATTR_NAME = 20;
     INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT = 21;
     DISALLOWED_TAG_ANCESTOR = 23;
+    MANDATORY_LAST_CHILD_TAG = 89;
     MANDATORY_TAG_ANCESTOR = 31;
     MANDATORY_TAG_ANCESTOR_WITH_HINT = 32;
     ATTR_DISALLOWED_BY_IMPLIED_LAYOUT = 33;

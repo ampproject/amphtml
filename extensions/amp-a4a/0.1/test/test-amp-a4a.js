@@ -152,7 +152,7 @@ describe('amp-a4a', () => {
 
   function buildCreativeString(opt_additionalInfo) {
     const baseTestDoc = testFragments.minimalDocOneStyle;
-    const offsets = opt_additionalInfo || {};
+    const offsets = Object.assign({}, opt_additionalInfo || {});
     offsets.ampRuntimeUtf16CharOffsets = [
       baseTestDoc.indexOf('<style amp4ads-boilerplate'),
       baseTestDoc.lastIndexOf('</script>') + '</script>'.length,
@@ -622,7 +622,7 @@ describe('amp-a4a', () => {
       });
 
       it('should use safeframe version header value', () => {
-        a4a.safeframeVersion_ = '1-2-3';
+        a4a.safeframeVersion = '1-2-3';
         return a4a.layoutCallback().then(() => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
@@ -735,7 +735,7 @@ describe('amp-a4a', () => {
           const safeChild = a4aElement.querySelector('iframe[name]');
           expect(safeChild).to.not.be.ok;
           const crossDomainChild = a4aElement.querySelector('iframe[src]');
-          expect(crossDomainChild).to.not.be.okay;
+          expect(crossDomainChild).to.not.be.ok;
           const friendlyChild = a4aElement.querySelector('iframe[srcdoc]');
           expect(friendlyChild).to.be.ok;
           expect(friendlyChild.getAttribute('srcdoc')).to.have.string(
@@ -938,6 +938,35 @@ describe('amp-a4a', () => {
                   'releaseType': '0',
                 });
           });
+        });
+      });
+    });
+    // TODO (keithwrightbos) - move into above e2e once signed creative with
+    // image within creative can be regenerated.
+    it('should prefetch amp images', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        const a4a = new MockA4AImpl(a4aElement);
+        sandbox.stub(a4a, 'getAmpAdMetadata_', creative => {
+          const metaData = AmpA4A.prototype.getAmpAdMetadata_(creative);
+          metaData.images = ['https://prefetch.me.com?a=b', 'http://do.not.prefetch.me.com?c=d',
+            'https://prefetch.metoo.com?e=f'];
+          return metaData;
+        });
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          expect(doc.querySelector('link[rel=preload]' +
+            '[href="https://prefetch.me.com?a=b"]')).to.be.ok;
+          expect(doc.querySelector('link[rel=preload]' +
+            '[href="https://prefetch.metoo.com?e=f"]')).to.be.ok;
+          expect(doc.querySelector('link[rel=preload]' +
+            '[href="http://do.not.prefetch.me.com?c=d"]')).to.not.be.ok;
         });
       });
     });
@@ -1417,7 +1446,16 @@ describe('amp-a4a', () => {
 
   describe('#getAmpAdMetadata_', () => {
     let a4a;
+    let metaData;
     beforeEach(() => {
+      metaData = {
+        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        customStylesheets: [
+          {href: 'https://fonts.googleapis.com/css?foobar'},
+          {href: 'https://fonts.com/css?helloworld'},
+        ],
+        images: ['https://some.image.com/a=b', 'https://other.image.com'],
+      };
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         a4a = new MockA4AImpl(createA4aElement(fixture.doc));
@@ -1425,53 +1463,27 @@ describe('amp-a4a', () => {
       });
     });
     it('should parse metadata', () => {
-      const actual = a4a.getAmpAdMetadata_(buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
-        customStylesheets: [
-          {href: 'https://fonts.googleapis.com/css?foobar'},
-          {href: 'https://fonts.com/css?helloworld'},
-        ],
-      }));
-      const expected = {
+      const actual = a4a.getAmpAdMetadata_(buildCreativeString(metaData));
+      const expected = Object.assign(metaData, {
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
-        customStylesheets: [
-          {href: 'https://fonts.googleapis.com/css?foobar'},
-          {href: 'https://fonts.com/css?helloworld'},
-        ],
-      };
+      });
       expect(actual).to.deep.equal(expected);
     });
     // TODO(levitzky) remove the following two tests after metadata bug is
     // fixed.
     it('should parse metadata with wrong opening tag', () => {
-      const creative = buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
-        customStylesheets: [
-          {href: 'https://fonts.googleapis.com/css?foobar'},
-          {href: 'https://fonts.com/css?helloworld'},
-        ],
-      }).replace('<script type="application/json" amp-ad-metadata>',
+      const creative = buildCreativeString(metaData).replace(
+          '<script type="application/json" amp-ad-metadata>',
           '<script type=application/json amp-ad-metadata>');
       const actual = a4a.getAmpAdMetadata_(creative);
-      const expected = {
+      const expected = Object.assign({
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
-        customStylesheets: [
-          {href: 'https://fonts.googleapis.com/css?foobar'},
-          {href: 'https://fonts.com/css?helloworld'},
-        ],
-      };
+      }, metaData);
       expect(actual).to.deep.equal(expected);
     });
     it('should return null if metadata opening tag is (truly) wrong', () => {
-      const creative = buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
-        customStylesheets: [
-          {href: 'https://fonts.googleapis.com/css?foobar'},
-          {href: 'https://fonts.com/css?helloworld'},
-        ],
-      }).replace('<script type="application/json" amp-ad-metadata>',
+      const creative = buildCreativeString(metaData).replace(
+          '<script type="application/json" amp-ad-metadata>',
           '<script type=application/json" amp-ad-metadata>');
       expect(a4a.getAmpAdMetadata_(creative)).to.be.null;
     });
@@ -1485,28 +1497,44 @@ describe('amp-a4a', () => {
         baseTestDoc.slice(splicePoint))).to.be.null;
     });
     it('should return null if invalid extensions', () => {
-      expect(a4a.getAmpAdMetadata_(buildCreativeString({
-        customElementExtensions: 'amp-vine',
-        customStylesheets: [
-          {href: 'https://fonts.googleapis.com/css?foobar'},
-          {href: 'https://fonts.com/css?helloworld'},
-        ],
-      }))).to.be.null;
+      metaData.customElementExtensions = 'amp-vine';
+      expect(a4a.getAmpAdMetadata_(buildCreativeString(metaData))).to.be.null;
     });
     it('should return null if non-array stylesheets', () => {
-      expect(a4a.getAmpAdMetadata_(buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
-        customStylesheets: 'https://fonts.googleapis.com/css?foobar',
-      }))).to.be.null;
+      metaData.customStylesheets = 'https://fonts.googleapis.com/css?foobar';
+      expect(a4a.getAmpAdMetadata_(buildCreativeString(metaData))).to.be.null;
     });
     it('should return null if invalid stylesheet object', () => {
-      expect(a4a.getAmpAdMetadata_(buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
-        customStylesheets: [
-          {href: 'https://fonts.googleapis.com/css?foobar'},
-          {foo: 'https://fonts.com/css?helloworld'},
-        ],
-      }))).to.be.null;
+      metaData.customStylesheets = [
+        {href: 'https://fonts.googleapis.com/css?foobar'},
+        {foo: 'https://fonts.com/css?helloworld'},
+      ];
+      expect(a4a.getAmpAdMetadata_(buildCreativeString(metaData))).to.be.null;
+    });
+    it('should not include amp images if not an array', () => {
+      metaData.images = 'https://foo.com';
+      const actual = a4a.getAmpAdMetadata_(buildCreativeString(metaData));
+      const expected = Object.assign({
+        minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
+      }, metaData);
+      delete expected.images;
+      expect(actual).to.deep.equal(expected);
+    });
+    it('should tolerate missing images', () => {
+      delete metaData.images;
+      const actual = a4a.getAmpAdMetadata_(buildCreativeString(metaData));
+      const expected = Object.assign({
+        minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
+      }, metaData);
+      delete expected.images;
+      expect(actual).to.deep.equal(expected);
+    });
+    it('should limit to 5 images', () => {
+      while (metaData.images.length < 10) {
+        metaData.images.push('https://another.image.com?abc=def');
+      }
+      expect(a4a.getAmpAdMetadata_(buildCreativeString(metaData)).images.length)
+          .to.equal(5);
     });
     // FAILURE cases here
   });
@@ -1696,7 +1724,7 @@ describe('amp-a4a', () => {
         }).catch(reason => {
           expect(getAdUrlSpy.called, 'getAdUrl never called')
               .to.be.false;
-          expect(reason).to.deep.equal(cancellation());
+          expect(reason.message).to.equal(cancellation().message);
           expect(errorHandlerSpy).to.be.calledOnce;
         });
       });
@@ -2029,6 +2057,82 @@ describe('amp-a4a', () => {
         expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
           'forced_delta': 12345,
         })).to.be.calledOnce;
+      });
+    });
+  });
+
+  describe('canonical AMP', () => {
+    describe('preferential rendering', () => {
+      let a4aElement;
+      let a4a;
+      let fixture;
+      beforeEach(() => createIframePromise().then(f => {
+        fixture = f;
+        setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
+        a4aElement = createA4aElement(fixture.doc);
+        a4a = new MockA4AImpl(a4aElement);
+        a4a.releaseType_ = '0';
+        return fixture;
+      }));
+
+      it('by default not allowed if crypto signature present but no SSL',
+          () => {
+            sandbox.stub(Services.cryptoFor(fixture.win), 'isPkcsAvailable')
+                .returns(false);
+            a4a.buildCallback();
+            a4a.onLayoutMeasure();
+            return a4a.layoutCallback().then(() => {
+              // Force vsync system to run all queued tasks, so that DOM mutations
+              // are actually completed before testing.
+              a4a.vsync_.runScheduledTasks_();
+              expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
+              expect(a4aElement.querySelector('iframe[srcdoc]')).to.not.be.ok;
+            });
+          });
+
+      it('allowed if crypto signature present, no SSL, and overrided' +
+         ' shouldPreferentialRenderWithoutCrypto', () => {
+        sandbox.stub(Services.cryptoFor(fixture.win), 'isPkcsAvailable')
+            .returns(false);
+        sandbox.stub(AmpA4A.prototype,
+            'shouldPreferentialRenderWithoutCrypto', () => true);
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+             // Force vsync system to run all queued tasks, so that DOM mutations
+             // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          verifyA4ARender(a4aElement);
+        });
+      });
+
+      it('not allowed if no crypto signature present', () => {
+        delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+        delete adResponse.headers[AMP_SIGNATURE_HEADER];
+        sandbox.stub(AmpA4A.prototype,
+            'shouldPreferentialRenderWithoutCrypto', () => true);
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
+          expect(a4aElement.querySelector('iframe[srcdoc]')).to.not.be.ok;
+        });
+      });
+    });
+
+    it('shouldPreferentialRenderWithoutCrypto returns false by default', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        const a4a = new AmpA4A(a4aElement);
+        expect(a4a.shouldPreferentialRenderWithoutCrypto()).to.be.false;
       });
     });
   });

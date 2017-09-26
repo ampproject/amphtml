@@ -15,37 +15,34 @@
  */
 'use strict';
 
-var gulp = require('gulp-help')(require('gulp'));
-var path = require('path');
-var srcGlobs = require('../config').presubmitGlobs;
-var util = require('gulp-util');
-var through2 = require('through2');
+const gulp = require('gulp-help')(require('gulp'));
+const path = require('path');
+const srcGlobs = require('../config').presubmitGlobs;
+const util = require('gulp-util');
+const through2 = require('through2');
 
-var dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
+const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
-var es6polyfill = 'Not available because we do not currently' +
-    ' ship with a needed ES6 polyfill.';
-
-var requiresReviewPrivacy =
+const requiresReviewPrivacy =
     'Usage of this API requires dedicated review due to ' +
     'being privacy sensitive. Please file an issue asking for permission' +
     ' to use if you have not yet done so.';
 
-var privateServiceFactory = 'This service should only be installed in ' +
+const privateServiceFactory = 'This service should only be installed in ' +
     'the whitelisted files. Other modules should use a public function ' +
     'typically called serviceNameFor.';
 
-var shouldNeverBeUsed =
+const shouldNeverBeUsed =
     'Usage of this API is not allowed - only for internal purposes.';
 
-var backwardCompat = 'This method must not be called. It is only retained ' +
+const backwardCompat = 'This method must not be called. It is only retained ' +
     'for backward compatibility during rollout.';
 
-var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
+const realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
     'DCE\'d. Use explicitly like "getMode().localDev" instead.';
 
 // Terms that must not appear in our source files.
-var forbiddenTerms = {
+const forbiddenTerms = {
   'DO NOT SUBMIT': '',
   // TODO(dvoytenko, #8464): cleanup whitelist.
   '(^-amp-|\\W-amp-)': {
@@ -422,7 +419,7 @@ var forbiddenTerms = {
   'indexedDB': {
     message: requiresReviewPrivacy,
     whitelist: [
-      // https://docs.google.com/document/d/1tH_sj93Lo8XRpLP0cDSFNrBi1K_jmx_-q1sk_ZW3Nbg/edit#heading=h.ko4gxsan9svq
+      // https://docs.google.com/document/d/1tH_sj93Lo8XRpLP0cDSFNrBi1K_jmx_-q1sk_ZW3Nbg/edit#heading=h.ko4gxsan9svq  // eslint-disable-line max-len
       'src/service-worker/core.js',
       'src/service-worker/kill.js',
     ],
@@ -485,7 +482,7 @@ var forbiddenTerms = {
       'src/log.js',
     ],
   },
-  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {
+  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {  // eslint-disable-line max-len
     message: 'Logging message require explicitly `TAG`, or an all uppercase' +
         ' string as the first parameter',
   },
@@ -496,7 +493,7 @@ var forbiddenTerms = {
     ],
   },
   '\\.requireLayout\\(': {
-    message: 'requireLayout is restricted b/c it affects non-contained elements',
+    message: 'requireLayout is restricted b/c it affects non-contained elements',  // eslint-disable-line max-len
     whitelist: [
       'extensions/amp-animation/0.1/web-animations.js',
       'src/service/resources-impl.js',
@@ -588,10 +585,10 @@ var forbiddenTerms = {
   },
 };
 
-var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
-    ' can thus not use most modern web APIs.';
+const ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded' +
+    ' and can thus not use most modern web APIs.';
 
-var forbidden3pTerms = {
+const forbidden3pTerms = {
   // We need to forbid promise usage because we don't have our own polyfill
   // available. This whitelisting of callNext is a major hack to allow one
   // usage in babel's external helpers that is in a code path that we do
@@ -599,7 +596,7 @@ var forbidden3pTerms = {
   '\\.then\\((?!callNext)': ThreePTermsMessage,
 };
 
-var bannedTermsHelpString = 'Please review viewport service for helper ' +
+const bannedTermsHelpString = 'Please review viewport service for helper ' +
     'methods or mark with `/*OK*/` or `/*REVIEW*/` and consult the AMP team. ' +
     'Most of the forbidden property/method access banned on the ' +
     '`forbiddenTermsSrcInclusive` object can be found in ' +
@@ -613,7 +610,7 @@ var bannedTermsHelpString = 'Please review viewport service for helper ' +
     'forbidden property/method or mark it with `object./*REVIEW*/property` ' +
     'if you are unsure and so that it stands out in code reviews.';
 
-var forbiddenTermsSrcInclusive = {
+const forbiddenTermsSrcInclusive = {
   '\\.innerHTML(?!_)': bannedTermsHelpString,
   '\\.outerHTML(?!_)': bannedTermsHelpString,
   '\\.offsetLeft(?!_)': bannedTermsHelpString,
@@ -695,7 +692,7 @@ var forbiddenTermsSrcInclusive = {
   // Super complicated regex that says "find any querySelector method call that
   // is passed as a variable anything that is not a string, or a string that
   // contains a space.
-  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': {
+  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': {  // eslint-disable-line max-len
     message: 'querySelector is not scoped to the element, but globally and ' +
     'filtered to just the elements inside the element. This leads to ' +
     'obscure bugs if you attempt to match a descendant of a descendant (ie ' +
@@ -716,8 +713,8 @@ var forbiddenTermsSrcInclusive = {
       'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',  // eslint-disable-line max-len
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',  // eslint-disable-line max-len
       'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
     ],
   },
@@ -843,7 +840,7 @@ var forbiddenTermsSrcInclusive = {
 };
 
 // Terms that must appear in a source file.
-var requiredTerms = {
+const requiredTerms = {
   'Copyright 20(15|16|17) The AMP HTML Authors\\.':
       dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0':
@@ -859,7 +856,7 @@ var requiredTerms = {
  * @return {boolean}
  */
 function isInTestFolder(path) {
-  var dirs = path.split('/');
+  const dirs = path.split('/');
   return dirs.indexOf('test') >= 0;
 }
 
@@ -867,8 +864,8 @@ function stripComments(contents) {
   // Multi-line comments
   contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function(match) {
     // Preserve the newlines
-    var newlines = [];
-    for (var i = 0; i < match.length; i++) {
+    const newlines = [];
+    for (let i = 0; i < match.length; i++) {
       if (match[i] === '\n') {
         newlines.push('\n');
       }
@@ -892,12 +889,12 @@ function stripComments(contents) {
  *   false otherwise
  */
 function matchTerms(file, terms) {
-  var contents = stripComments(file.contents.toString());
-  var relative = file.relative;
+  const contents = stripComments(file.contents.toString());
+  const relative = file.relative;
   return Object.keys(terms).map(function(term) {
-    var fix;
-    var whitelist = terms[term].whitelist;
-    var checkInTestFolder = terms[term].checkInTestFolder;
+    let fix;
+    const whitelist = terms[term].whitelist;
+    const checkInTestFolder = terms[term].checkInTestFolder;
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
     if (Array.isArray(whitelist) && (whitelist.indexOf(relative) != -1 ||
@@ -909,12 +906,12 @@ function matchTerms(file, terms) {
     // original term to get the possible fix value. This is ok as the
     // presubmit doesn't have to be blazing fast and this is most likely
     // negligible.
-    var regex = new RegExp(term, 'gm');
-    var index = 0;
-    var line = 1;
-    var column = 0;
-    var match;
-    var hasTerm = false;
+    const regex = new RegExp(term, 'gm');
+    let index = 0;
+    let line = 1;
+    let column = 0;
+    let match;
+    let hasTerm = false;
 
     while ((match = regex.exec(contents))) {
       hasTerm = true;
@@ -929,7 +926,7 @@ function matchTerms(file, terms) {
 
       util.log(util.colors.red('Found forbidden: "' + match[0] +
           '" in ' + relative + ':' + line + ':' + column));
-      if (typeof terms[term] == 'string') {
+      if (typeof terms[term] === 'string') {
         fix = terms[term];
       } else {
         fix = terms[term].message;
@@ -958,25 +955,25 @@ function matchTerms(file, terms) {
  *   false otherwise
  */
 function hasAnyTerms(file) {
-  var pathname = file.path;
-  var basename = path.basename(pathname);
-  var hasTerms = false;
-  var hasSrcInclusiveTerms = false;
-  var has3pTerms = false;
+  const pathname = file.path;
+  const basename = path.basename(pathname);
+  let hasTerms = false;
+  let hasSrcInclusiveTerms = false;
+  let has3pTerms = false;
 
   hasTerms = matchTerms(file, forbiddenTerms);
 
-  var isTestFile = /^test-/.test(basename) || /^_init_tests/.test(basename)
+  const isTestFile = /^test-/.test(basename) || /^_init_tests/.test(basename)
       || /_test\.js$/.test(basename);
   if (!isTestFile) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
 
-  var is3pFile = /\/(3p|ads)\//.test(pathname) ||
+  const is3pFile = /\/(3p|ads)\//.test(pathname) ||
       basename == '3p.js' ||
       basename == 'style.js';
   // Yet another reason to move ads/google/a4a somewhere else
-  var isA4A = /\/a4a\//.test(pathname);
+  const isA4A = /\/a4a\//.test(pathname);
   if (is3pFile && !isTestFile && !isA4A) {
     has3pTerms = matchTerms(file, forbidden3pTerms);
   }
@@ -993,14 +990,14 @@ function hasAnyTerms(file) {
  *  content, false otherwise
  */
 function isMissingTerms(file) {
-  var contents = file.contents.toString();
+  const contents = file.contents.toString();
   return Object.keys(requiredTerms).map(function(term) {
-    var filter = requiredTerms[term];
+    const filter = requiredTerms[term];
     if (!filter.test(file.path)) {
       return false;
     }
 
-    var matches = contents.match(new RegExp(term));
+    const matches = contents.match(new RegExp(term));
     if (!matches) {
       util.log(util.colors.red('Did not find required: "' + term +
           '" in ' + file.relative));
@@ -1018,28 +1015,28 @@ function isMissingTerms(file) {
  * any forbidden terms and log any errors found.
  */
 function checkForbiddenAndRequiredTerms() {
-  var forbiddenFound = false;
-  var missingRequirements = false;
+  let forbiddenFound = false;
+  let missingRequirements = false;
   return gulp.src(srcGlobs)
-    .pipe(through2.obj(function(file, enc, cb) {
-      forbiddenFound = hasAnyTerms(file) || forbiddenFound;
-      missingRequirements = isMissingTerms(file) || missingRequirements;
-      cb();
-    }))
-    .on('end', function() {
-      if (forbiddenFound) {
-        util.log(util.colors.blue(
-            'Please remove these usages or consult with the AMP team.'));
-      }
-      if (missingRequirements) {
-        util.log(util.colors.blue(
-            'Adding these terms (e.g. by adding a required LICENSE ' +
+      .pipe(through2.obj(function(file, enc, cb) {
+        forbiddenFound = hasAnyTerms(file) || forbiddenFound;
+        missingRequirements = isMissingTerms(file) || missingRequirements;
+        cb();
+      }))
+      .on('end', function() {
+        if (forbiddenFound) {
+          util.log(util.colors.blue(
+              'Please remove these usages or consult with the AMP team.'));
+        }
+        if (missingRequirements) {
+          util.log(util.colors.blue(
+              'Adding these terms (e.g. by adding a required LICENSE ' +
             'to the file)'));
-      }
-      if (forbiddenFound || missingRequirements) {
-        process.exit(1);
-      }
-    });
+        }
+        if (forbiddenFound || missingRequirements) {
+          process.exit(1);
+        }
+      });
 }
 
 gulp.task('presubmit', 'Run validation against files to check for forbidden ' +

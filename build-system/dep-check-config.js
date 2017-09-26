@@ -15,6 +15,8 @@
  */
 'use strict';
 
+/*eslint "max-len": 0*/
+
 /**
  * - type - Is assumed to be "forbidden" if not provided.
  * - filesMatching - Is assumed to be all files if not provided.
@@ -29,7 +31,7 @@
  *   whitelist: (string|!Array<string>|undefined),
  * }}
  */
-var RuleConfigDef;
+let RuleConfigDef;
 
 // It is often OK to add things to the whitelist, but make sure to highlight
 // this in review.

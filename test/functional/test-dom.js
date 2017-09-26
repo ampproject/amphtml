@@ -443,7 +443,7 @@ describes.sandboxed('DOM', {}, env => {
 
     const bSpy = sandbox.spy();
     dom.iterateCursor(fragment.querySelectorAll('b'), bSpy);
-    expect(bSpy).to.be.notCalled;
+    expect(bSpy).to.have.not.been.called;
   });
 
   it('iterateCursor should allow null elements in a list', () => {
@@ -953,7 +953,7 @@ describes.realWin('DOM', {
       const element = doc.createElement('amp-img');
       doc.body.appendChild(element);
       return dom.whenUpgradedToCustomElement(element).then(element => {
-        expect(element.whenBuilt).to.not.be.undefined;
+        expect(element.whenBuilt).to.exist;
       });
     });
 
@@ -967,7 +967,7 @@ describes.realWin('DOM', {
         });
       }, 100);
       return dom.whenUpgradedToCustomElement(element).then(element => {
-        expect(element.whenBuilt).to.not.be.undefined;
+        expect(element.whenBuilt).to.exist;
       });
     });
   });
