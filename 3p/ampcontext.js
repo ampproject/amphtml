@@ -319,6 +319,7 @@ export class AbstractAmpContext {
    * @private
    */
   report3pError_() {
+    //TODO: get the given error stack
     this.win_.onerror = message => {
       if (message) {
         this.client_.sendMessage(MessageType.USER_ERROR_IN_IFRAME, dict({

@@ -627,6 +627,7 @@ export function dev() {
  * @param {!Window} win
  * @param {!Element=} opt_element
  * @returns {boolean} isEmbed
+ * TODO: migrate the rest of the user error to use ampdoc, make element required
  */
 export function isFromEmbed(win, opt_element) {
   if (!opt_element) {
