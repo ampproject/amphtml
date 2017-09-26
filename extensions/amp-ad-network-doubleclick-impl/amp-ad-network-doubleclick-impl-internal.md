@@ -147,7 +147,7 @@ One important **caveat** to keep in mind when using this feature is that no flui
 An example slot might look like:
 
 ```html
-<amp-ad width=728 height=90
+<amp-ad 
     type="doubleclick"
     data-slot="/6355419/Travel"
     height="fluid">
