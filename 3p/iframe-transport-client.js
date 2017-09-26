@@ -33,7 +33,7 @@ export class IframeTransportClient {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {Object<string, IframeTransportContext>} */
+    /** @private {!Object<string, IframeTransportContext>} */
     this.creativeIdToContext_ = {};
 
     const parsedFrameName = tryParseJson(this.win_.name);
@@ -127,10 +127,10 @@ class IframeTransportContext {
     /** @private {?function(string)} */
     this.listener_ = null;
 
-    user().assert(win['onNewAmpAnalyticsInstance'] &&
-        typeof win['onNewAmpAnalyticsInstance'] == 'function',
-        'Must implement onNewAmpAnalyticsInstance in ' + win.location.href);
-    win['onNewAmpAnalyticsInstance'](this);
+    user().assert(win['onNewContextInstance'] &&
+        typeof win['onNewContextInstance'] == 'function',
+        'Must implement onNewContextInstance in ' + win.location.href);
+    win['onNewContextInstance'](this);
   }
 
   /**
@@ -155,12 +155,12 @@ class IframeTransportContext {
 
   /**
    * Sends a response message back to the creative.
-   * @param {!Object<string,string>} message
+   * @param {!Object<string, string>} data
    */
-  sendResponseToCreative(message) {
+  sendResponseToCreative(data) {
     this.iframeMessagingClient_./*OK*/sendMessage(
         MessageType.IFRAME_TRANSPORT_RESPONSE,
         /** @type {!JsonObject} */
-        (Object.assign({}, message, this.baseMessage_)));
+        (Object.assign({}, message: data, this.baseMessage_)));
   }
 }

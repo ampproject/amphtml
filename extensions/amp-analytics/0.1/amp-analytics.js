@@ -292,6 +292,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   * instance.
   * If there is no containing amp-ad tag, then an exception will be thrown,
   * although that use case may be enabled in the future.
+  * TODO(jonkeller): Investigate whether non-A4A use case is needed. Issue 11436
   * @return {string}
   */
   getAmpAdResourceId() {
