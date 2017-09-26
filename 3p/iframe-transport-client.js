@@ -33,7 +33,7 @@ export class IframeTransportClient {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {Object<string,IframeTransportContext>} */
+    /** @private {Object<string, IframeTransportContext>} */
     this.creativeIdToContext_ = {};
 
     const parsedFrameName = tryParseJson(this.win_.name);
@@ -75,7 +75,7 @@ export class IframeTransportClient {
               this.contextFor_(event.creativeId).dispatch(event.message);
             } catch (e) {
               user().error(TAG_,
-                  'Exception in callback passed to onAnalyticsEvent: ' +
+                  'Exception in callback passed to onAnalyticsEvent',
                   e);
             }
           });

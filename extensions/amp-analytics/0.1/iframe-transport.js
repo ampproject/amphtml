@@ -189,12 +189,13 @@ export class IframeTransport {
     const frameData = IframeTransport.getFrameData(this.type_);
     dev().assert(frameData, 'Trying to send message to non-existent frame');
     dev().assert(frameData.queue,
-        'Event queue is missing for ' + this.getCreativeId());
+        'Event queue is missing for messages from ' + this.type_ +
+        ' to creative ID ' + this.creativeId_);
     frameData.queue.enqueue(
         /**
          * @type {!../../../src/3p-frame-messaging.IframeTransportEvent}
          */
-        ({creativeId: this.getCreativeId(), message: event}));
+        ({creativeId: this.creativeId_, message: event}));
   }
 
   /**

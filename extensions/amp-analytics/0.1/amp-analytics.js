@@ -290,8 +290,8 @@ export class AmpAnalytics extends AMP.BaseElement {
  /**
   * Gets the resource ID of the amp-ad element containing this AmpAnalytics
   * instance.
-  * If there is no containing amp-ad tag, then the resource ID of this
-  * amp-analytics tag is used instead.
+  * If there is no containing amp-ad tag, then an exception will be thrown,
+  * although that use case may be enabled in the future.
   * @return {string}
   */
   getAmpAdResourceId() {
@@ -301,7 +301,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     } catch (e) {
       this.user().error(TAG, 'No friendly parent amp-ad element was found' +
           ' for amp-analytics tag.');
-      return this.element.getResourceId();
+      throw e;
     }
   }
 
