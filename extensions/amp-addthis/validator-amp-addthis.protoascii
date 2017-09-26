@@ -37,6 +37,30 @@ tags: {  # <amp-addthis>
     name: "data-widget-id"
     mandatory: true
   }
+  attrs: {
+    name: "data-share-title"
+  }
+  attrs: {
+    name: "data-share-url"
+    value_url: {
+      allow_empty: true
+      allow_relative: true
+      allowed_protocol: "https"
+      allowed_protocol: "http"
+    }
+  }
+  attrs: {
+    name: "data-share-media"
+    value_url: {
+      allow_empty: true
+      allow_relative: true
+      allowed_protocol: "https"
+      allowed_protocol: "http"
+    }
+  }
+  attrs: {
+    name: "data-share-description"
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL

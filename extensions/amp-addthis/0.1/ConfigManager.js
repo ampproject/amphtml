@@ -73,12 +73,6 @@ export class ConfigManager {
     this.configProviderIframes_ = [];
 
     /**
-     * @type {Document}
-     * @private
-     */
-    this.ownerDocument_ = null;
-
-    /**
      * @type {function():void|null}
      * @private
      */
@@ -103,23 +97,19 @@ export class ConfigManager {
     pubData.requestStatus = RequestStatus.COMPLETED;
     const {iframeData} = pubData;
     iframeData.forEach(iframeDatum => {
-      const {iframe, widgetId} = iframeDatum;
-      this.sendConfiguration_({iframe, widgetId, pubId});
+      const {iframe, widgetId, shareConfig} = iframeDatum;
+      this.sendConfiguration_({iframe, widgetId, pubId, shareConfig});
     });
   }
 
   /** @private */
-  sendConfiguration_({iframe, widgetId, pubId}) {
-    const {location: loc, title} = this.ownerDocument_;
+  sendConfiguration_({iframe, widgetId, pubId, shareConfig}) {
     const pubData = this.dataForPubId_[pubId];
     const dashboardConfig = pubData.config;
     const configRequestStatus = pubData.requestStatus;
     const jsonToSend = /** @type JsonObject */ ({
       event: CONFIGURATION_EVENT,
-      shareConfig: {
-        url: loc.href,
-        title,
-      },
+      shareConfig,
       pubId,
       widgetId,
       configRequestStatus,
@@ -169,17 +159,13 @@ export class ConfigManager {
   /**
    * Register relevant data with the configuration manager and prepare request/response cycle
    * between frames.
-   * @param {{pubId:!string, widgetId:!string, iframe:!Element, iframeLoadPromise:!Promise, win:!EventTarget, element:!Element}} param
+   * @param {{pubId:!string, widgetId:!string, iframe:!Element, iframeLoadPromise:!Promise, win:!EventTarget, shareConfig:(JsonObject|undefined)}} param
    */
-  register({pubId, widgetId, iframe, iframeLoadPromise, win, element}) {
+  register({pubId, widgetId, iframe, iframeLoadPromise, win, shareConfig}) {
     if (!this.removeMessageListener_) {
       this.removeMessageListener_ = listen(
           win, 'message', this.handleAddThisMessage_.bind(this)
       );
-    }
-
-    if (!this.ownerDocument_) {
-      this.ownerDocument_ = element.ownerDocument;
     }
 
     if (!this.dataForPubId_[pubId]) {
@@ -196,12 +182,13 @@ export class ConfigManager {
       pubData.iframeData = [];
     }
 
-    pubData.iframeData.push({iframe, widgetId});
+    pubData.iframeData.push({iframe, shareConfig, widgetId});
 
     iframeLoadPromise.then(() => this.sendConfiguration_({
       iframe,
       pubId,
       widgetId,
+      shareConfig,
     }));
   }
 
@@ -214,14 +201,11 @@ export class ConfigManager {
         providerFrame => providerFrame !== iframe
     );
 
-    if (this.configProviderIframes_.length === 0) {
-      // If there aren't any provider iframes left, there will be no messages to receive, and no
-      // need to send ownerDocument information anywhere.
-      if (this.removeMessageListener_) {
-        this.removeMessageListener_();
-        this.removeMessageListener_ = null;
-      }
-      this.ownerDocument_ = null;
+    if (this.configProviderIframes_.length === 0 &&
+        this.removeMessageListener_) {
+      // If there aren't any provider iframes left, there will be no messages to receive.
+      this.removeMessageListener_();
+      this.removeMessageListener_ = null;
     }
 
     const pubData = this.dataForPubId_[pubId] || {};
@@ -246,6 +230,7 @@ ConfigManager.PubIdData; // purely for typedef
 /**
  * @typedef {{
  *   widgetId:string,
+ *   shareConfig:(Object<string,string>|undefined),
  *   iframe: Element
  * }}
  */

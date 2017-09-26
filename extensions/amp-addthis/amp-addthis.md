@@ -65,6 +65,27 @@ The widget Id for a specific tool can be found by opening that tool in the AddTh
 copying the last part of the URL. For example, in the URL `https://www.addthis.com/dashboard#tool-config/pub/ra-55e761259a1acdc2/widgetId/xz1d`,
 `xz1d` is the widget Id.
 
+**data-share-title**
+
+Optional. If set, this is the title that the AddThis tool will attempt to share when sharing occurs.
+If not set, the title of the document containing the amp-addthis tag will be used.
+
+**data-share-url**
+
+Optional. If set, this is the URL that the AddThis tool will attempt to share when sharing occurs.
+If not set, the `location.href` property of the document containing the amp-addthis tag will be
+used.
+
+**data-share-media**
+
+Optional. If set, this is an URL for a piece of media (e.g., image or video) that the AddThis tool
+will attempt to share when sharing occurs. If not set, this is left undefined.
+
+**data-share-description**
+
+Optional. If set, this is the description of the page that the AddThis tool will attempt to share
+when sharing occurs. If not set, this is left undefined.
+
 ## Validation
 
 See amp-addthis rules in the AMP validator specification.
