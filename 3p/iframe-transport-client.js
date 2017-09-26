@@ -72,6 +72,7 @@ export class IframeTransportClient {
             try {
               dev().assert(event.creativeId,
                   'Received malformed event in ' + this.win_.location.href);
+              event.type = MessageType.IFRAME_TRANSPORT_EVENTS;
               this.contextFor_(event.creativeId).dispatch(event);
             } catch (e) {
               user().error(TAG_,

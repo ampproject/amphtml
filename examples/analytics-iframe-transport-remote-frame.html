@@ -18,14 +18,18 @@
          * @param {Object} event The event received from AMP Analytics
          */
         context.onAnalyticsEvent(event => {
-          // Now, do something meaningful with the AMP Analytics event
-          console.log('The page at: ' + window.location.href +
-              ' has received an event: ' + event.message);
+          if (event.type == 'iframe-transport-events') {
+            // Currently, this is the only event type, but others may exist in
+            // the future.
+            // Now, do something meaningful with the AMP Analytics event.
+            console.log('The page at: ' + window.location.href +
+                ' has received an event: ' + event.message);
 
-          // Optionally, you may send a response containing key/value pairs, to
-          // be used by the amp-ad-exit of the creative which generated the
-          // event.
-          context.sendResponseToCreative({'collected-data': 'abc'});
+            // Optionally, you may send a response containing key/value pairs,
+            // to be used by the amp-ad-exit of the creative which generated the
+            // event.
+            context.sendResponseToCreative({'collected-data': 'abc'});
+          }
         });
       };
 
