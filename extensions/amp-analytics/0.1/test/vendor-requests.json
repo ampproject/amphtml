@@ -235,14 +235,11 @@
     "event": "https://$trackDomain/$trackId/wt?p=432,$contentId,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_&ct=$actionName&ck1=$actionParameter1&ck2=$actionParameter2&ck3=$actionParameter3&ck4=$actionParameter4&ck5=$actionParameter5&pu=_source_url_"
   },
   "shinystat": {
-    "base": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi",
-    "commpar": "AMP=1&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=1",
-    "pagepar": "&VIE=_viewer_&PLT=_page_load_time_",
-    "eventpar": "&SSXL=1",
-    "linkpar": "&LINK=_outbound_link_",
-    "pageview": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=0&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=1&VIE=_viewer_&PLT=_page_load_time_",
-    "event": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=0&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=1&SSXL=1",
-    "link: "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=0&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=1&LINK=_outbound_link_"
+    "base": "//amp.shinystat.com/cgi-bin/shinyamp.cgi",
+    "commpar": "AMP=1&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_",
+    "pagepar": "&PAGID=_page_view_id_&TITL=_title_&RQC=1&VIE=_viewer_",
+    "eventpar": "&SSXL=1&PAGID=_page_view_id_&TITL=_title_&RQC=1",
+    "pageview": "//amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=0&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=1&VIE=_viewer_"
   },
   "mpulse": {
     "onvisible": "https://$beacon_url?h.d=$h.d&h.key=$h.key&h.t=$h.t&h.cr=$h.cr&rt.start=navigation&rt.si=_client_id_&rt.ss=_timestamp_&rt.end=_timestamp_&t_resp=_nav_timing_&t_page=_nav_timing_&t_done=_nav_timing_&nt_nav_type=_nav_type_&nt_red_cnt=_nav_redirect_count_&nt_nav_st=_nav_timing_&nt_red_st=_nav_timing_&nt_red_end=_nav_timing_&nt_fet_st=_nav_timing_&nt_dns_st=_nav_timing_&nt_dns_end=_nav_timing_&nt_con_st=_nav_timing_&nt_ssl_st=_nav_timing_&nt_con_end=_nav_timing_&nt_req_st=_nav_timing_&nt_res_st=_nav_timing_&nt_unload_st=_nav_timing_&nt_unload_end=_nav_timing_&nt_domloading=_nav_timing_&nt_res_end=_nav_timing_&nt_domint=_nav_timing_&nt_domcontloaded_st=_nav_timing_&nt_domcontloaded_end=_nav_timing_&nt_domcomp=_nav_timing_&nt_load_st=_nav_timing_&nt_load_end=_nav_timing_&v=1&http.initiator=amp&u=_source_url_&amp.u=_ampdoc_url_&r2=_document_referrer_&scr.xy=_screen_width_x_screen_height_",
