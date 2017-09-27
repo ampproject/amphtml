@@ -49,7 +49,7 @@ const INVALID_PROTOCOLS = [
 export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
 
 /**
- * Returns the correct origin for a given windown
+ * Returns the correct origin for a given window.
  * @param {!Window} win
  * @return {string} origin
  */
