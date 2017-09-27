@@ -51,8 +51,6 @@ export class RealTimeConfigManager {
           Services.xhrFor(this.win).fetchJson(
               url, {credentials: 'include'}).then(res => {
                 // Non-200 status codes are forbidden for RTC.
-                // TODO: Add to fetchResponse the ability to
-                // check for redirects as well.
                 if (res.status != 200) {
                   rtcTime = Date.now() - rtcStartTime;
                   return {rtcTime, error: 'Non-200 Status', hostname};

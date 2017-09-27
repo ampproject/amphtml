@@ -192,4 +192,49 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
       expect(false).to.be.true;
     });
   });
+
+  describe('#maybeInflateAndAddUrl', () => {
+    let url;
+    let expandedUrl;
+    let macros;
+    it('should add url without macros', () => {
+      url = 'https://www.example.com/biz?a=1';
+      macros = {};
+      rtcManager.maybeInflateAndAddUrl(url, macros);
+      expect(rtcManager.calloutUrls.length).to.equal(1);
+      expect(rtcManager.calloutUrls[0]).to.equal(url);
+    });
+
+    it('should inflate and add url with macros', () => {
+      url = 'https://www.example.com/a?r_id=R_ID&h_id=H_ID';
+      macros = {R_ID: '6', H_ID: '13'};
+      expandedUrl = 'https://www.example.com/a?r_id=6&h_id=13';
+      rtcManager.maybeInflateAndAddUrl(url, macros);
+      expect(rtcManager.calloutUrls.length).to.equal(1);
+      expect(rtcManager.calloutUrls[0]).to.equal(expandedUrl);
+    });
+
+    it('should not add insecure url', () => {
+      url = 'http://www.example.com/a?r_id=R_ID&h_id=H_ID';
+      macros = {R_ID: '6', H_ID: '13'};
+      rtcManager.maybeInflateAndAddUrl(url, macros);
+      expect(rtcManager.calloutUrls.length).to.equal(0);
+    });
+
+    it('should not add broken url', () => {
+      url = 'https://wa][~a.com';
+      macros = {R_ID: '6', H_ID: '13'};
+      rtcManager.maybeInflateAndAddUrl(url, macros);
+      expect(rtcManager.calloutUrls.length).to.equal(0);
+    });
+
+    it('should handle incorrect macros', () => {
+      url = 'https://www.example.com/a?r_id=R_ID&h_id=H_ID';
+      expandedUrl = 'https://www.example.com/a?r_id=2&h_id=H_ID';
+      macros = {WRONG: '6', MACRO: '13', R_ID: '2'};
+      rtcManager.maybeInflateAndAddUrl(url, macros);
+      expect(rtcManager.calloutUrls.length).to.equal(1);
+      expect(rtcManager.calloutUrls[0]).to.equal(expandedUrl);
+    });
+  });
 });
