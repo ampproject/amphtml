@@ -103,11 +103,6 @@ export class RealTimeConfigManager {
     return true;
   }
 
-  /**
-   * For every vendor specified by the publisher in the rtcConfig,
-   * check that the vendor URL actually exists, and if so call
-   * helper function to inflate URL and add to list of callouts.
-   */
   addVendorUrlsToArray() {
     if (!this.rtcConfig['vendors']) {
       return;
@@ -121,12 +116,6 @@ export class RealTimeConfigManager {
     });
   }
 
-  /**
-   * For each publisher-defined URL, call helper function to inflate and
-   * add the URLs to list of callouts.
-   * @param {!Object<string, string>} macros A mapping of macro to value for
-   *   substitution in a publisher-defined url. E.g. {'SLOT_ID': '1'}.
-   */
   addPublisherUrlsToArray(macros) {
     if (!this.rtcConfig['urls']) {
       return;
@@ -153,10 +142,6 @@ export class RealTimeConfigManager {
    * Substitutes macros into url, and adds the resulting URL to the list
    * of callouts. Checks each URL to see if secure. If a supplied macro
    * does not exist in the url, it is silently ignored.
-   * @param {!string} url
-   * @param {!Object<string, string>} macros A mapping of macro to value for
-   *   substitution. I.e. if url = 'https://www.foo.com/slot=SLOT_ID' then
-   *   the macro object may look like {'SLOT_ID': '1'}.
    */
   maybeInflateAndAddUrl(urlObject) {
     const url = this.urlReplacements_.expandSync(urlObject.url, macros);
