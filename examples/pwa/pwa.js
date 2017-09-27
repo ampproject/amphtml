@@ -223,7 +223,9 @@ class AmpViewer {
       } else if (this.win.document.querySelector('script[src*=webcomponents]')) {
         this.win.addEventListener('WebComponentsReady', resolve);
       } else {
-        reject('ShadowDOM is not supported, and an appropriate webcomponents polyfill was not found.');
+        // AMP polyfills small part of SD spec. It's functional, but some things
+        // (e.g. slots) are not available.
+        resolve();
       }
     });
 
