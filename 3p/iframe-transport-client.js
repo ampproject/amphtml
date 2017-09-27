@@ -24,7 +24,7 @@ const TAG_ = 'iframe-transport-client';
 
 /**
  * Receives event messages bound for this cross-domain iframe, from all
- * creatives
+ * creatives.
  */
 export class IframeTransportClient {
 
@@ -49,7 +49,7 @@ export class IframeTransportClient {
           const events =
               /**
                * @type
-               * {!Array<../src/3p-frame-messaging.IframeTransportEvent>}
+               *   {!Array<../src/3p-frame-messaging.IframeTransportEvent>}
                */
               (eventData['events']);
           user().assert(events,
@@ -61,7 +61,7 @@ export class IframeTransportClient {
           events.forEach(event => {
             try {
               this.listener_ &&
-                  this.listener_(event.message, event.transportId);
+                  this.listener_(event.message, event.creativeId);
             } catch (e) {
               user().error(TAG_,
                   'Exception in callback passed to onAnalyticsEvent: ' +
@@ -83,7 +83,7 @@ export class IframeTransportClient {
   }
 
   /**
-   * Gets the IframeMessagingClient
+   * Gets the IframeMessagingClient.
    * @returns {!IframeMessagingClient}
    * @VisibleForTesting
    */
