@@ -348,6 +348,24 @@ export function getParentWindowFrameElement(node, topWin) {
 
 
 /**
+ * Gets the resource ID of the amp-ad element containing the passed node.
+ * If there is no containing amp-ad tag, then null will be returned.
+ * TODO(jonkeller): Investigate whether non-A4A use case is needed. Issue 11436
+ * @return {string|null}
+ */
+export function getAmpAdResourceId(node, topWin) {
+  try {
+    const frameParent = getParentWindowFrameElement(node, topWin).parentElement;
+    if (frameParent.nodeName == 'AMP-AD') {
+      return frameParent.getResourceId();
+    }
+  } catch (e) {
+  }
+  return null;
+}
+
+
+/**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/ampdoc-impl.AmpDoc}
  */
