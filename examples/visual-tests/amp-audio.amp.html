@@ -1,0 +1,45 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Audio examples</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+      body {
+        padding: 15px;
+      }
+  </style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+
+  <h2>Audio Widgets</h2>
+
+  <h3>Explicit size</h3>
+  <amp-audio id="audio1"
+      width="400" height="80"
+      src="https://www.dl-sounds.com/wp-content/uploads/edd/2017/07/The-Horizon-preview.mp3">
+    <div fallback>Your browser doesn’t support HTML5 audio</div>
+  </amp-audio>
+
+  <h3>Automatic size</h3>
+  <amp-audio id="audio2"
+      width="400"
+      src="https://www.dl-sounds.com/wp-content/uploads/edd/2017/07/The-Horizon-preview.mp3"
+      artwork="https://images.pexels.com/photos/290101/pexels-photo-290101.jpeg?w=500&h=500&auto=compress&cs=tinysrgb">
+    <div fallback>Your browser doesn’t support HTML5 audio</div>
+  </amp-audio>
+
+  <h3>Controls</h3>
+  <amp-audio id="audio3"
+      src="https://www.dl-sounds.com/wp-content/uploads/edd/2017/07/The-Horizon-preview.mp3"
+      controlsList="nofullscreen nodownload noremoteplayback foobar">
+    <div fallback>Your browser doesn’t support HTML5 audio</div>
+  </amp-audio>
+
+</body>
+</html>
