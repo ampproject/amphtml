@@ -107,22 +107,28 @@ export class RealTimeConfigManager {
    * helper function to inflate URL and add to list of callouts.
    */
   inflateVendorUrls() {
+    if (!this.rtcConfig['vendors']) {
+      return;
+    }
     let url;
-    if (this.rtcConfig['vendors']) {
-      let vendor;
-      let macros;
-      for (vendor in this.rtcConfig['vendors']) {
-        if (this.callouts.length >= MAX_RTC_CALLOUTS) {
-          return;
-        }
-        url = RTC_VENDORS[vendor.toLowerCase()];
-        if (!url) {
-          dev().error(TAG, `Vendor ${vendor} does not exist in RTC_VENDORS`);
-          continue;
-        }
-        macros = this.rtcConfig['vendors'][vendor];
-        this.maybeInflateAndAddUrl(url, macros, vendor);
+    let vendor;
+    let macros;
+    const vendors = Object.keys(this.rtcConfig['vendors']);
+    for (let i in vendors) {
+      vendor = vendors[i];
+      if (this.callouts.length >= MAX_RTC_CALLOUTS) {
+        const remaining = vendors.slice(i);
+        dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC callouts for slot exceeded,` +
+                   ` dropping remaining: ${JSON.stringify(remaining)}`);
+        return;
       }
+      url = RTC_VENDORS[vendor.toLowerCase()];
+      if (!url) {
+        dev().error(TAG, `Vendor ${vendor} does not exist in RTC_VENDORS`);
+        continue;
+      }
+      macros = this.rtcConfig['vendors'][vendor];
+      this.maybeInflateAndAddUrl(url, macros, vendor);
     }
   }
 
@@ -133,13 +139,21 @@ export class RealTimeConfigManager {
    *   substitution in a publisher-defined url. E.g. {'SLOT_ID': '1'}.
    */
   inflatePublisherUrls(macros) {
-    if (this.rtcConfig['urls']) {
-      this.rtcConfig['urls'].forEach(url => {
-        if (this.callouts.length >= MAX_RTC_CALLOUTS) {
-          return;
+    if (!this.rtcConfig['urls']) {
+      return;
+    }
+    for (let i in this.rtcConfig['urls']) {
+      url = this.rtcConfig['urls'][i];
+      if (this.callouts.length >= MAX_RTC_CALLOUTS) {
+        let remaining = this.rtcConfig['urls'].slice(MAX_RTC_CALLOUTS);
+        if (this.rtcConfig['vendors']) {
+          remaining = remaining.concat(Object.keys(this.rtcConfig['vendors']));
         }
-        this.maybeInflateAndAddUrl(url, macros);
-      });
+        dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC callouts for slot exceeded,` +
+                   ` dropping remaining: ${JSON.stringify(remaining)}`);
+        return;
+      }
+      this.maybeInflateAndAddUrl(url, macros);
     }
   }
 
@@ -154,9 +168,15 @@ export class RealTimeConfigManager {
    */
   maybeInflateAndAddUrl(url, macros, opt_vendor) {
     url = this.urlReplacements_.expandSync(url, macros);
-    if (isSecureUrl(url)) {
-      this.callouts.push({url, vendor: opt_vendor});
+    try {
+      user().assert(isSecureUrl(url),
+                    `Dropping RTC URL: ${url}, not secure`);
+      user().assert(!this.callouts.includes(url),
+                    `Dropping duplicate calls to RTC URL: ${url}`)
+    } catch (err) {
+      return;
     }
+    this.callouts.push({url, vendor: opt_vendor});
   }
 }
 
