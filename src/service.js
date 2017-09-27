@@ -351,7 +351,7 @@ export function getParentWindowFrameElement(node, topWin) {
  * Gets the resource ID of the amp-ad element containing the passed node.
  * If there is no containing amp-ad tag, then null will be returned.
  * TODO(jonkeller): Investigate whether non-A4A use case is needed. Issue 11436
- * @return {string|null}
+ * @return {?string}
  */
 export function getAmpAdResourceId(node, topWin) {
   try {
@@ -361,6 +361,10 @@ export function getAmpAdResourceId(node, topWin) {
     }
   } catch (e) {
   }
+  // Whether we entered the catch above, or failed to enter the if further
+  // above, the node is not within a friendly amp-ad tag. So, there is no
+  // amp-ad resource ID. How to handle that is up to the caller, but
+  // see TODO above.
   return null;
 }
 

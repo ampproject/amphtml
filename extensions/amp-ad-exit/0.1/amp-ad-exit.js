@@ -280,12 +280,6 @@ export class AmpAdExit extends AMP.BaseElement {
    */
   assertValidResponseMessage(responseMessage, expectedCreativeId,
                              expectedVendor) {
-    if (!responseMessage || !responseMessage['type'] ||
-      responseMessage['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE ||
-      !responseMessage['creativeId'] ||
-      responseMessage['creativeId'] != expectedCreativeId) {
-      return;
-    }
     dev().assert(responseMessage && responseMessage['message'],
         'Received empty response from 3p analytics frame');
     dev().assert(responseMessage['type'] &&
@@ -297,7 +291,7 @@ export class AmpAdExit extends AMP.BaseElement {
         'creativeId missing');
     dev().assert(responseMessage['vendor'],
         'Received malformed message from 3p analytics frame: ' +
-      'vendor missing');
+        'vendor missing');
     assertOriginMatchesVendor(expectedVendor, responseMessage['vendor']);
   }
 

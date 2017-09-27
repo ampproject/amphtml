@@ -165,7 +165,7 @@ function assertTarget(name, target, config) {
  */
 function assertVendor(vendor) {
   user().assert(ANALYTICS_CONFIG &&
-      ANALYTICS_CONFIG[vendor] !== undefined &&
+      ANALYTICS_CONFIG[vendor] &&
       ANALYTICS_CONFIG[vendor]['transport'] !== undefined &&
       ANALYTICS_CONFIG[vendor]['transport']['iframe'] !== undefined,
       'Unknown vendor: ' + vendor);
