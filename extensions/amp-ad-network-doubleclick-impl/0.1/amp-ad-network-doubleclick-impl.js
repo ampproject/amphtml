@@ -573,7 +573,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       artc.push(rtcResponse['rtcTime']);
       ati.push(!rtcResponse['error'] ? RTC_ATI_ENUM.RTC_SUCCESS :
                RTC_ATI_ENUM.RTC_FAILURE);
-      ard.push(rtcResponse['hostname']);
+      ard.push(rtcResponse['callout']);
       rtcParams = Object.assign(rtcParams, rtcResponse['rtcResponse']);
     });
     ['targeting', 'categoryExclusions'].forEach(key => {

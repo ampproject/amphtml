@@ -5,9 +5,6 @@ import {Services} from '../../../src/services';
 import {isArray, isObject} from '../../../src/types';
 import {isSecureUrl, parseUrl} from '../../../src/url';
 
-/** Timeout in millis */
-const DEFAULT_RTC_TIMEOUT = 1000;
-
 /** @type {string} */
 const TAG = 'real-time-config';
 
@@ -19,7 +16,8 @@ export class RealTimeConfigManager {
     this.element = element;
     this.win = win;
     this.rtcConfig = null;
-    this.calloutUrls = [];
+    this.callouts = [];
+    this.timeoutMillis = 1000;
     this.urlReplacements_ = Services.urlReplacementsForDoc(ampDoc);
     this.validateRtcConfig();
     if (!this.rtcConfig) {
@@ -30,43 +28,38 @@ export class RealTimeConfigManager {
   }
 
   executeRealTimeConfig() {
-    if (!this.rtcConfig || this.calloutUrls.length == 0) {
+    if (!this.rtcConfig || !this.callouts.length) {
       return Promise.resolve();
     }
     const rtcStartTime = Date.now();
-    return Promise.all(this.calloutUrls.map(url => {
-      return this.sendRtcCallout_(url, rtcStartTime);
+    return Promise.all(this.callouts.map(urlObject => {
+      return this.sendRtcCallout_(urlObject.url, rtcStartTime, urlObject.vendor);
     }));
   }
 
-  sendRtcCallout_(url, rtcStartTime, key) {
-    const rtcTimeout = this.rtcConfig.timeoutMillis || DEFAULT_RTC_TIMEOUT;
+  sendRtcCallout_(url, rtcStartTime, opt_vendor) {
+    let callout = opt_vendor || url;
+    /**
+     * Note: Timeout is enforced by timerFor, not the value of
+     *   rtcTime. There are situations where rtcTime could thus
+     *   end up being greater than this.timeoutMillis.
+     */
     return Services.timerFor(this.win).timeoutPromise(
-        rtcTimeout,
+        this.timeoutMillis,
         Services.xhrFor(this.win).fetchJson(
-            // Need to keep reference to vendor names in here, have to change how this works
             url, {credentials: 'include'}).then(res => {
-              // Non-200 status codes are forbidden for RTC.
-              if (res.status != 200) {
-                rtcTime = Date.now() - rtcStartTime;
-                return {rtcTime, error: 'Non-200 Status', hostname};
-              }
               return res.text().then(text => {
                 rtcTime = Date.now() - rtcStartTime;
-                const hostname = parseUrl(url).hostname;
-                // An empty text response is fine, just means
-                // we have nothing to merge.
+                // An empty text response is allowed, not an error.
                 if (!text) {
-                  return {rtcTime, hostname};
+                  return {rtcTime, callout};
                 }
                 const rtcResponse = tryParseJson(text);
-                return rtcResponse ? {rtcResponse, rtcTime, hostname} :
-                {rtcTime, hostname, error: 'Unparsable JSON'};
+                return rtcResponse ? {rtcResponse, rtcTime, callout} :
+                {rtcTime, callout, error: 'Unparsable JSON'};
               });
-            })).catch(err => {
-              const hostname = parseUrl(url).hostname;
-              const rtcTime = Date.now() - rtcStartTime;
-              return {error: err, rtcTime, hostname};
+            })).catch(error => {
+              return {error, rtcTime: Date.now() - rtcStartTime, callout};
             });
   }
 
@@ -82,8 +75,10 @@ export class RealTimeConfigManager {
   validateRtcConfig() {
     const rtcConfig = tryParseJson(
         this.element.getAttribute('prerequest-callouts'));
+    if (!rtcConfig) {
+      return false;
+    }
     try {
-      user().assert(rtcConfig, 'RTC Config is undefined');
       user().assert(rtcConfig['vendors'] || rtcConfig['urls'],
                   'RTC Config must specify vendors or urls');
       user().assert(!rtcConfig['vendors'] || isObject(rtcConfig['vendors']),
@@ -93,10 +88,14 @@ export class RealTimeConfigManager {
     } catch (err) {
       return false;
     }
-    if (rtcConfig['timeoutMillis'] &&
-        !Number.isInteger(rtcConfig['timeoutMillis'])) {
-      const timeout = Number(rtcConfig['timeoutMillis']);
-      rtcConfig['timeoutMillis'] = timeout || DEFAULT_RTC_TIMEOUT;
+    const timeout = rtcConfig['timeoutMillis'];
+    if (timeout && Number.isInteger(timeout)) {
+      if (timeout < this.timeoutMillis && timeout > 0) {
+        this.timeoutMillis = Number(rtcConfig['timeoutMillis']) || this.timeoutMillis;
+      } else {
+        user().warn(TAG, `Invalid RTC timeout: ${timeout}ms, ` +
+                    `using default timeout ${this.timeoutMillis}ms`);
+      }
     }
     this.rtcConfig = rtcConfig;
     return true;
@@ -111,16 +110,18 @@ export class RealTimeConfigManager {
     let url;
     if (this.rtcConfig['vendors']) {
       let vendor;
+      let macros;
       for (vendor in this.rtcConfig['vendors']) {
-        if (this.calloutUrls.length >= MAX_RTC_CALLOUTS) {
+        if (this.callouts.length >= MAX_RTC_CALLOUTS) {
           return;
         }
-        url = RTC_VENDORS[vendor];
+        url = RTC_VENDORS[vendor.toLowerCase()];
         if (!url) {
-          dev().error(TAG, `Vendor ${vendor} invalid`);
+          dev().error(TAG, `Vendor ${vendor} does not exist in RTC_VENDORS`);
           continue;
         }
-        this.maybeInflateAndAddUrl(url, this.rtcConfig['vendors'][vendor]);
+        macros = this.rtcConfig['vendors'][vendor];
+        this.maybeInflateAndAddUrl(url, macros, vendor);
       }
     }
   }
@@ -134,7 +135,7 @@ export class RealTimeConfigManager {
   inflatePublisherUrls(macros) {
     if (this.rtcConfig['urls']) {
       this.rtcConfig['urls'].forEach(url => {
-        if (this.calloutUrls.length >= MAX_RTC_CALLOUTS) {
+        if (this.callouts.length >= MAX_RTC_CALLOUTS) {
           return;
         }
         this.maybeInflateAndAddUrl(url, macros);
@@ -151,10 +152,10 @@ export class RealTimeConfigManager {
    *   substitution. I.e. if url = 'https://www.foo.com/slot=SLOT_ID' then
    *   the macro object may look like {'SLOT_ID': '1'}.
    */
-  maybeInflateAndAddUrl(url, macros) {
+  maybeInflateAndAddUrl(url, macros, opt_vendor) {
     url = this.urlReplacements_.expandSync(url, macros);
     if (isSecureUrl(url)) {
-      this.calloutUrls.push(url);
+      this.callouts.push({url, vendor: opt_vendor});
     }
   }
 }
