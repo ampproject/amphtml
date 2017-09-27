@@ -133,7 +133,7 @@ describes.sandboxed('shadow-embed', {}, () => {
               const shadowRoot = createShadowRoot(hostElement);
               expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
               // Browserify does not support arrow functions with params.
-              // Just use old school for
+              // Using Old School for
               const shadowRootClassListArray =
                 toArray(shadowRoot.host.classList);
               let foundShadowCssClass = false;
