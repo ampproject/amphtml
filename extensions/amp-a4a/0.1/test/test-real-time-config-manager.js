@@ -16,7 +16,7 @@
 
 import {createElementWithAttributes} from '../../../../src/dom';
 import {AmpA4A} from '../amp-a4a';
-import {RealTimeConfigManager} from '../real-time-config-manager';
+import {MAX_RTC_CALLOUTS, RealTimeConfigManager} from '../real-time-config-manager';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {parseUrl} from '../../../../src/url';
 // Need the following side-effect import because in actual production code,
@@ -191,6 +191,8 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
     it('should not add URL if macros invalid', () => {
       expect(false).to.be.true;
     });
+
+    it('should not add more
   });
 
   describe('#maybeInflateAndAddUrl', () => {
@@ -228,7 +230,7 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
       expect(rtcManager.calloutUrls.length).to.equal(0);
     });
 
-    it('should handle incorrect macros', () => {
+    it('should ignore incorrect macros', () => {
       url = 'https://www.example.com/a?r_id=R_ID&h_id=H_ID';
       expandedUrl = 'https://www.example.com/a?r_id=2&h_id=H_ID';
       macros = {WRONG: '6', MACRO: '13', R_ID: '2'};

@@ -312,8 +312,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.releaseType_ = getBinaryTypeNumericalCode(getBinaryType(this.win)) ||
         '-1';
-
-    this.realTimeConfigManager_ = null;
   }
 
   /** @override */
@@ -1558,13 +1556,12 @@ export class AmpA4A extends AMP.BaseElement {
   tryExecuteRealTimeConfig_() {
     if (!!AMP.RealTimeConfigManager) {
       try {
-        this.realTimeConfigManager_ = new AMP.RealTimeConfigManager(
-            this.element, this.win, this.getAmpDoc());
-        if (this.realTimeConfigManager_.validateRtcConfig()) {
-          return this.realTimeConfigManager_.executeRealTimeConfig(
-              this.getCustomRealTimeConfigMacros_());
-        };
+        const realTimeConfigManager = new AMP.RealTimeConfigManager(
+            this.element, this.win, this.getAmpDoc(),
+            this.getCustomRealTimeConfigMacros_());
+        return realTimeConfigManager.executeRealTimeConfig();
       } catch (err) {
+        dev().error(TAG, err);
         dev().error(TAG, 'Could not perform Real Time Config');
       }
     }
