@@ -107,7 +107,7 @@ export class AmpAdExit extends AMP.BaseElement {
       for (const customVarName in target.vars) {
         if (customVarName[0] == '_') {
           const customVar =
-            /** @type {!./config.Variable} */ (target.vars[customVarName]);
+              /** @type {!./config.Variable} */ (target.vars[customVarName]);
           if (customVar) {
             /*
              Example:
@@ -128,7 +128,7 @@ export class AmpAdExit extends AMP.BaseElement {
              be any strings.
              The code below will create substitutionFunctions['_pty'],
              which in this example will return "medium".
-             */
+            */
             substitutionFunctions[customVarName] = () => {
               if ('iframeTransportSignal' in customVar) {
                 const vendorResponse = replacements./*OK*/expandStringSync(
@@ -150,7 +150,7 @@ export class AmpAdExit extends AMP.BaseElement {
               // Either it's not a 3p analytics variable, or it is one
               // but no matching response has been received yet.
               return (customVarName in args) ?
-                args[customVarName] : customVar.defaultValue;
+                  args[customVarName] : customVar.defaultValue;
             };
             whitelist[customVarName] = true;
           }

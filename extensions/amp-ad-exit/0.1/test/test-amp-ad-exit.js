@@ -79,7 +79,8 @@ const EXIT_CONFIG = {
         _foo: {
           defaultValue: 'foo-default',
           iframeTransportSignal:
-          'IFRAME_TRANSPORT_SIGNAL(' + TEST_3P_VENDOR + ',collected-data)',
+              'IFRAME_TRANSPORT_SIGNAL(' + TEST_3P_VENDOR +
+              ',collected-data)',
         },
         _bar: {
           defaultValue: 'bar-default',
