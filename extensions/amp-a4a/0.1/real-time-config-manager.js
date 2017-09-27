@@ -17,14 +17,16 @@ export class RealTimeConfigManager {
     this.win = win;
     this.rtcConfig = null;
     this.callouts = [];
+    this.urlObjects = [];
     this.timeoutMillis = 1000;
     this.urlReplacements_ = Services.urlReplacementsForDoc(ampDoc);
     this.validateRtcConfig();
     if (!this.rtcConfig) {
       return;
     }
-    this.inflatePublisherUrls(customMacros);
-    this.inflateVendorUrls();
+    this.addPublisherUrlsToArray(customMacros);
+    this.addVendorUrlsToArray();
+    this.inflateAndAddUrls();
   }
 
   executeRealTimeConfig() {
@@ -106,30 +108,17 @@ export class RealTimeConfigManager {
    * check that the vendor URL actually exists, and if so call
    * helper function to inflate URL and add to list of callouts.
    */
-  inflateVendorUrls() {
+  addVendorUrlsToArray() {
     if (!this.rtcConfig['vendors']) {
       return;
     }
     let url;
-    let vendor;
-    let macros;
-    const vendors = Object.keys(this.rtcConfig['vendors']);
-    for (let i in vendors) {
-      vendor = vendors[i];
-      if (this.callouts.length >= MAX_RTC_CALLOUTS) {
-        const remaining = vendors.slice(i);
-        dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC callouts for slot exceeded,` +
-                   ` dropping remaining: ${JSON.stringify(remaining)}`);
-        return;
-      }
+    Object.keys(this.rtcConfig['vendors']).forEach(vendor => {
       url = RTC_VENDORS[vendor.toLowerCase()];
-      if (!url) {
-        dev().error(TAG, `Vendor ${vendor} does not exist in RTC_VENDORS`);
-        continue;
+      if (url) {
+        this.urlObjects.push({url, macros: this.rtcConfig['vendors'][vendor], vendor});
       }
-      macros = this.rtcConfig['vendors'][vendor];
-      this.maybeInflateAndAddUrl(url, macros, vendor);
-    }
+    });
   }
 
   /**
@@ -138,22 +127,25 @@ export class RealTimeConfigManager {
    * @param {!Object<string, string>} macros A mapping of macro to value for
    *   substitution in a publisher-defined url. E.g. {'SLOT_ID': '1'}.
    */
-  inflatePublisherUrls(macros) {
+  addPublisherUrlsToArray(macros) {
     if (!this.rtcConfig['urls']) {
       return;
     }
-    for (let i in this.rtcConfig['urls']) {
-      url = this.rtcConfig['urls'][i];
-      if (this.callouts.length >= MAX_RTC_CALLOUTS) {
-        let remaining = this.rtcConfig['urls'].slice(MAX_RTC_CALLOUTS);
-        if (this.rtcConfig['vendors']) {
-          remaining = remaining.concat(Object.keys(this.rtcConfig['vendors']));
-        }
-        dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC callouts for slot exceeded,` +
-                   ` dropping remaining: ${JSON.stringify(remaining)}`);
+    this.rtcConfig['urls'].forEach(url => {
+      this.urlObjects.push({url, macros});
+    });
+  }
+
+  inflateAndAddUrls() {
+    for (i in this.urlObjects) {
+      if (this.callouts.length == MAX_RTC_CALLOUTS) {
+        let remaining = JSON.stringify(
+            this.urlObjects.slice(i).map(urlObject => urlObject.url));
+        dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC Callout URLS exceeded, ` +
+                   ` dropping ${remaining}`);
         return;
       }
-      this.maybeInflateAndAddUrl(url, macros);
+      this.maybeInflateAndAddUrl(this.urlObjects[i]);
     }
   }
 
@@ -166,8 +158,10 @@ export class RealTimeConfigManager {
    *   substitution. I.e. if url = 'https://www.foo.com/slot=SLOT_ID' then
    *   the macro object may look like {'SLOT_ID': '1'}.
    */
-  maybeInflateAndAddUrl(url, macros, opt_vendor) {
-    url = this.urlReplacements_.expandSync(url, macros);
+  maybeInflateAndAddUrl(urlObject) {
+    const url = this.urlReplacements_.expandSync(urlObject.url, macros);
+    const macros = urlObject.macros;
+    const vendor = urlObject.vendor || url;
     try {
       user().assert(isSecureUrl(url),
                     `Dropping RTC URL: ${url}, not secure`);
@@ -176,7 +170,7 @@ export class RealTimeConfigManager {
     } catch (err) {
       return;
     }
-    this.callouts.push({url, vendor: opt_vendor});
+    this.callouts.push({url, vendor});
   }
 }
 
