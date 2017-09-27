@@ -30,14 +30,14 @@ import {toArray} from '../../src/types';
 import {installStylesForDoc} from '../../src/style-installer';
 import {
   setShadowDomSupportedVersionForTesting,
-  setDisableShadowCssForTesting,
+  setShadowCssSupportedForTesting,
   ShadowDomVersion,
 } from '../../src/web-components';
 
 describes.sandboxed('shadow-embed', {}, () => {
   afterEach(() => {
     setShadowDomSupportedVersionForTesting(undefined);
-    setDisableShadowCssForTesting(undefined);
+    setShadowCssSupportedForTesting(undefined);
   });
 
   [ShadowDomVersion.NONE, ShadowDomVersion.V0, ShadowDomVersion.V1]
@@ -129,7 +129,7 @@ describes.sandboxed('shadow-embed', {}, () => {
             // Test scenarios where Shadow Css is not supported
             it('Should add an id and class for CSS \
               encapsulation to the shadow root', () => {
-              setDisableShadowCssForTesting(true);
+              setShadowCssSupportedForTesting(true);
               const shadowRoot = createShadowRoot(hostElement);
               expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
               // Browserify does not support arrow functions with params.
@@ -147,7 +147,7 @@ describes.sandboxed('shadow-embed', {}, () => {
             });
 
             it('Should transform CSS for the shadow root', () => {
-              setDisableShadowCssForTesting(true);
+              setShadowCssSupportedForTesting(true);
               const shadowRoot = createShadowRoot(hostElement);
               const ampdoc = new AmpDocShadow(
                   window, 'https://a.org/', shadowRoot);

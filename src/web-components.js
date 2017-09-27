@@ -35,7 +35,7 @@ let shadowDomSupportedVersion;
  * @type {boolean|undefined}
  * @visibleForTesting
  */
-let disableShadowCss;
+let shadowCssSupported;
 
 /**
  * @param {ShadowDomVersion|undefined} val
@@ -49,8 +49,8 @@ export function setShadowDomSupportedVersionForTesting(val) {
  * @param {boolean|undefined} val
  * @visibleForTesting
  */
-export function setDisableShadowCssForTesting(val) {
-  disableShadowCss = val;
+export function setShadowCssSupportedForTesting(val) {
+  shadowCssSupported = val;
 }
 
 /**
@@ -66,13 +66,13 @@ export function isShadowDomSupported() {
  * @return {boolean}
  */
 export function isShadowCssSupported() {
-  if (disableShadowCss === undefined) {
-    return isShadowDomSupported() && (
+  if (shadowCssSupported === undefined) {
+    shadowCssSupported = isShadowDomSupported() && (
       isNative(Element.prototype.attachShadow) ||
       isNative(Element.prototype.createShadowRoot)
     );
   }
-  return !disableShadowCss;
+  return shadowCssSupported;
 }
 
 /**
