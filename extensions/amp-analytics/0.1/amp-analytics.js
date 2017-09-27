@@ -22,6 +22,7 @@ import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {IframeTransport} from './iframe-transport';
+import {getParentWindowFrameElement} from '../../../src/service';
 import {Services} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
@@ -226,7 +227,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
       this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
         this.element.getAttribute('type'),
-        this.config_['transport']);
+        this.config_['transport'], this.getAmpAdResourceId());
     }
 
     const promises = [];
@@ -284,6 +285,25 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     return Promise.all(promises);
+  }
+
+ /**
+  * Gets the resource ID of the amp-ad element containing this AmpAnalytics
+  * instance.
+  * If there is no containing amp-ad tag, then an exception will be thrown,
+  * although that use case may be enabled in the future.
+  * TODO(jonkeller): Investigate whether non-A4A use case is needed. Issue 11436
+  * @return {string}
+  */
+  getAmpAdResourceId() {
+    try {
+      const frame = getParentWindowFrameElement(this.element, this.win.top);
+      return frame.parentElement.getResourceId();
+    } catch (e) {
+      this.user().error(TAG, 'No friendly parent amp-ad element was found' +
+          ' for amp-analytics tag.');
+      throw e;
+    }
   }
 
   /**
@@ -832,7 +852,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     return new ExpansionOptions(vars, opt_iterations, opt_noEncode);
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   // Register doc-service factory.
