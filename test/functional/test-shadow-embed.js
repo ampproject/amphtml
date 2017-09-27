@@ -37,7 +37,6 @@ import {
 describes.sandboxed('shadow-embed', {}, () => {
   afterEach(() => {
     setShadowDomSupportedVersionForTesting(undefined);
-    setShadowCssSupportedForTesting(undefined);
   });
 
   [ShadowDomVersion.NONE, ShadowDomVersion.V0, ShadowDomVersion.V1]
@@ -48,6 +47,7 @@ describes.sandboxed('shadow-embed', {}, () => {
           beforeEach(function() {
             hostElement = document.createElement('div');
             setShadowDomSupportedVersionForTesting(scenario);
+            setShadowCssSupportedForTesting(undefined);
 
             if (scenario == ShadowDomVersion.V0 &&
                 !Element.prototype.createShadowRoot) {
