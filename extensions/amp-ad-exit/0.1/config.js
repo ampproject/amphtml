@@ -15,6 +15,7 @@
  */
 
 import {user} from '../../../src/log';
+import {ANALYTICS_CONFIG} from '../../amp-analytics/0.1/vendors';
 import {FilterType} from './filters/filter';
 
 /**
@@ -37,7 +38,16 @@ export let AmpAdExitConfig;
 export let NavigationTargetConfig;
 
 /**
- * @typedef {!Object<string, {defaultValue: (string|number|boolean)}>}
+ * @typedef {{
+ *   defaultValue: (string|number|boolean),
+ *   vendorAnalyticsSource: (string|undefined),
+ *   vendorAnalyticsResponseKey: (string|undefined)
+ * }}
+ */
+export let Variable;
+
+/**
+ * @typedef {!Object<string, !Variable>}
  */
 export let Variables;
 
@@ -135,6 +145,28 @@ function assertTarget(name, target, config) {
       user().assert(
           pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
           variable, pattern);
+      const vendor = target.vars[variable]['vendorAnalyticsSource'];
+      if (vendor) {
+        assertVendor(vendor);
+        user().assert(
+            target.vars[variable]['vendorAnalyticsResponseKey'],
+            'Variable \'%s\': If vendorAnalyticsSource is defined then ' +
+            'vendorAnalyticsResponseKey must also be defined', variable);
+
+      }
     }
   }
+}
+
+/**
+ * Checks whether a vendor is valid (i.e. listed in vendors.js and has
+ * transport/iframe defined.
+ * @param {string} vendor The vendor name that should be listed in vendors.js
+ */
+function assertVendor(vendor) {
+  user().assert(ANALYTICS_CONFIG &&
+    ANALYTICS_CONFIG[vendor] !== undefined &&
+    ANALYTICS_CONFIG[vendor]['transport'] !== undefined &&
+    ANALYTICS_CONFIG[vendor]['transport']['iframe'] !== undefined,
+      'Unknown vendor: ' + vendor);
 }
