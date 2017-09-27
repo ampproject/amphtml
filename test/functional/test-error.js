@@ -260,6 +260,39 @@ describe('reportErrorToServer', () => {
     expect(query['vs']).to.equal('some-state');
   });
 
+  it('reportError marks binary type', () => {
+    window.AMP_CONFIG = {
+      type: 'canary',
+    };
+    const e = new Error('XYZ');
+    const url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e));
+    const query = parseQueryString(url.search);
+
+    expect(query.m).to.equal('XYZ');
+    expect(query['bt']).to.equal('canary');
+
+    window.AMP_CONFIG = {
+      type: 'control',
+    };
+    const e1 = new Error('XYZ');
+    const url1 = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e1));
+    const query1 = parseQueryString(url1.search);
+
+    expect(query1.m).to.equal('XYZ');
+    expect(query1['bt']).to.equal('control');
+
+    window.AMP_CONFIG = {};
+    const e2 = new Error('ABC');
+    const url2 = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e2));
+    const query2 = parseQueryString(url2.search);
+
+    expect(query2.m).to.equal('ABC');
+    expect(query2['bt']).to.equal('unknown');
+  });
+
   it('reportError without error object', () => {
     const url = parseUrl(
         getErrorReportUrl('foo bar', 'foo.js', '11', '22', undefined));
