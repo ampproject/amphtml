@@ -51,6 +51,7 @@ export const MessageType = {
   // For amp-analytics' iframe-transport
   SEND_IFRAME_TRANSPORT_EVENTS: 'send-iframe-transport-events',
   IFRAME_TRANSPORT_EVENTS: 'iframe-transport-events',
+  IFRAME_TRANSPORT_RESPONSE: 'iframe-transport-response',
 
   // For user-error-in-iframe
   USER_ERROR_IN_IFRAME: 'user-error-in-iframe',
@@ -122,7 +123,7 @@ export function isAmpMessage(message) {
       message.indexOf('{') != -1);
 }
 
-/** @typedef {{transportId: string, message: string}} */
+/** @typedef {{creativeId: string, message: string}} */
 export let IframeTransportEvent;
 // An event, and the transport ID of the amp-analytics tags that
 // generated it. For instance if the creative with transport
