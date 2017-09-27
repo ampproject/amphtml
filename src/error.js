@@ -28,7 +28,7 @@ import {
   dev,
 } from './log';
 import {isProxyOrigin} from './url';
-import {isCanary, experimentTogglesOrNull} from './experiments';
+import {isCanary, experimentTogglesOrNull, getBinaryType} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {startsWith} from './string';
 import {urls} from './config';
@@ -358,9 +358,14 @@ export function getErrorReportUrl(message, filename, line, col, error,
   }
   url += '&rt=' + runtime;
 
+  // TODO(erwinm): Remove ca when all systems read `bt` instead of `ca` to
+  // identify js binary type.
   if (isCanary(self)) {
     url += '&ca=1';
   }
+  // Pass binary type.
+  url += '&bt=' + getBinaryType(self);
+
   if (self.location.ancestorOrigins && self.location.ancestorOrigins[0]) {
     url += '&or=' + encodeURIComponent(self.location.ancestorOrigins[0]);
   }
