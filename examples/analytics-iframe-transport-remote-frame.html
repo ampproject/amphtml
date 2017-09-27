@@ -20,6 +20,8 @@
               console.log('The page at: ' + window.location.href +
                   ' has received an event: ' + event +
                   ' from the creative with transport ID: ' + transportId);
+              window.iframeTransportClient.sendMessageToCreative(transportId,
+                  {'collected-data': '123456789'});
             });
       });
 

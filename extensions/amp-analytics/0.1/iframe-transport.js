@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import {MessageType} from '../../../src/3p-frame-messaging';
 import {createElementWithAttributes} from '../../../src/dom';
+import {listenFor} from '../../../src/iframe-helper';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {
@@ -23,6 +25,12 @@ import {
 import {setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
+
+/** @const {string} */
+export const AMP_ANALYTICS_3P_RESPONSES = 'amp-analytics-3p-responses';
+
+/** @const {string} */
+const AMP_ANALYTICS_CREATIVE_IDS = 'amp-analytics-creative-ids';
 
 /** @typedef {{
  *    frame: Element,
@@ -37,11 +45,18 @@ export let FrameData;
  */
 export class IframeTransport {
   /**
-   * @param {!Window} win
+   * @param {!Window} ampWin The window object of the AMP document
+   * @param {!Window} win The window object of the innermost document
+   * containing the amp-analytics tag (e.g. a creative iframe)
    * @param {!string} type The value of the amp-analytics tag's type attribute
    * @param {!JsonObject} config
+   * @param {string} resourceId The result of calling
+   * element.getResourceId() on the containing AmpAnalytics instance
    */
-  constructor(win, type, config) {
+  constructor(ampWin, win, type, config, resourceId) {
+    /** @private @const {!Window} win */
+    this.ampWin_ = ampWin;
+
     /** @private @const {!Window} win */
     this.win_ = win;
 
@@ -49,11 +64,17 @@ export class IframeTransport {
     this.type_ = type;
 
     /** @private @const {string} */
-    this.id_ = IframeTransport.createUniqueId_();
+    this.resourceId_ = resourceId;
+
+    if (!this.win_[AMP_ANALYTICS_CREATIVE_IDS]) {
+      this.win_[AMP_ANALYTICS_CREATIVE_IDS] = [];
+    }
+    this.win_[AMP_ANALYTICS_CREATIVE_IDS].push(this.getId());
 
     dev().assert(config && config['iframe'],
         'Must supply iframe URL to constructor!');
     this.frameUrl_ = config['iframe'];
+
     this.processCrossDomainIframe();
   }
 
@@ -61,7 +82,8 @@ export class IframeTransport {
    * Called when a Transport instance is being removed from the DOM
    */
   detach() {
-    IframeTransport.markCrossDomainIframeAsDone(this.win_.document, this.type_);
+    IframeTransport.markCrossDomainIframeAsDone(this.ampWin_.document,
+        this.type_);
   }
 
   /**
@@ -75,40 +97,41 @@ export class IframeTransport {
       ++(frameData.usageCount);
     } else {
       frameData = this.createCrossDomainIframe();
-      this.win_.document.body.appendChild(frameData.frame);
+      this.ampWin_.document.body.appendChild(frameData.frame);
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
   }
 
   /**
-   * Create a cross-domain iframe for third-party vendor anaytlics
+   * Create a cross-domain iframe for third-party vendor analytics
    * @return {!FrameData}
    * @VisibleForTesting
    */
   createCrossDomainIframe() {
     // Explanation of IDs:
     // Each instance of IframeTransport (owned by a specific amp-analytics
-    // tag, in turn owned by a specific creative) has an ID in this._id.
+    // tag, in turn owned by a specific creative) has an ID (this.getId()).
     // Each cross-domain iframe also has an ID, stored here in sentinel.
-    // These two types of IDs are drawn from the same pool of numbers, and
-    // are thus mutually unique.
+    // These two types of IDs have different formats and are thus mutually
+    // unique.
     // There is a many-to-one relationship, in that several creatives may
-    // utilize the same analytics vendor, so perhaps creatives #1 & #2 might
-    // both use xframe #3.
+    // utilize the same analytics vendor, so perhaps two creatives might
+    // both use the same xframe.
     // Of course, a given creative may use multiple analytics vendors, but
     // in that case it would use multiple amp-analytics tags, so the
-    // iframeTransport.id_ -> sentinel relationship is *not* many-to-many.
+    // iframeTransport.getId() -> sentinel relationship is *not*
+    // many-to-many.
     const sentinel = IframeTransport.createUniqueId_();
     const useLocal = getMode().localDev || getMode().test;
     const useRtvVersion = !useLocal;
     const scriptSrc = calculateEntryPointScriptUrl(
-        this.win_.parent.location, 'iframe-transport-client-lib',
+        this.ampWin_.parent.location, 'iframe-transport-client-lib',
         useLocal, useRtvVersion);
     const frameName = JSON.stringify(/** @type {JsonObject} */ ({
       scriptSrc,
       sentinel,
     }));
-    const frame = createElementWithAttributes(this.win_.document, 'iframe',
+    const frame = createElementWithAttributes(this.ampWin_.document, 'iframe',
         /** @type {!JsonObject} */ ({
           sandbox: 'allow-scripts allow-same-origin',
           name: frameName,
@@ -122,10 +145,34 @@ export class IframeTransport {
     const frameData = /** @const {FrameData} */ ({
       frame,
       usageCount: 1,
-      queue: new IframeTransportMessageQueue(this.win_,
+      queue: new IframeTransportMessageQueue(this.ampWin_,
           /** @type {!HTMLIFrameElement} */
           (frame)),
     });
+    frameData.responseMessageUnlisten = listenFor(frameData.frame,
+        MessageType.IFRAME_TRANSPORT_RESPONSE, response => {
+          dev().assert(response && response['message'],
+              'Received empty response from 3p analytics frame');
+          /*
+           * Beware: Note that due to bug #2942, only the IframeTransport
+           * instance that creates the cross-domain iframe can call
+           * listenFor on it!
+           * So, this response is bound for the IframeTransport instance
+           * whose getId() == response['creativeId'], which is not
+           * necessarily the instance that we are currently running in.
+           * Add this response to the response map on the AMP window, for use by
+           * amp-ad-exit which is / may be in the same window as the recipient.
+           */
+          const creativeId = response['creativeId'];
+          dev().assert(creativeId, 'Unrecognized creativeId: ' + creativeId);
+          this.ampWin_[AMP_ANALYTICS_3P_RESPONSES] =
+              this.ampWin_[AMP_ANALYTICS_3P_RESPONSES] || {};
+          this.ampWin_[AMP_ANALYTICS_3P_RESPONSES][this.type_] =
+              this.ampWin_[AMP_ANALYTICS_3P_RESPONSES][this.type_] || {};
+          this.ampWin_[AMP_ANALYTICS_3P_RESPONSES][this.type_][creativeId] =
+              response['message'];
+        },
+        true);
     IframeTransport.crossDomainIframes_[this.type_] = frameData;
     return frameData;
   }
@@ -148,6 +195,7 @@ export class IframeTransport {
       return;
     }
     ampDoc.body.removeChild(frameData.frame);
+    frameData.responseMessageUnlisten();
     delete IframeTransport.crossDomainIframes_[type];
   }
 
@@ -180,12 +228,13 @@ export class IframeTransport {
   sendRequest(event) {
     const frameData = IframeTransport.getFrameData(this.type_);
     dev().assert(frameData, 'Trying to send message to non-existent frame');
-    dev().assert(frameData.queue, 'Event queue is missing for ' + this.id_);
+    dev().assert(frameData.queue,
+        'Event queue is missing for ' + this.getId());
     frameData.queue.enqueue(
         /**
          * @type {!../../../src/3p-frame-messaging.IframeTransportEvent}
          */
-        ({transportId: this.id_, message: event}));
+        ({creativeId: this.getId(), message: event}));
   }
 
   /**
@@ -212,7 +261,7 @@ export class IframeTransport {
    * @VisibleForTesting
    */
   getId() {
-    return this.id_;
+    return this.win_.document.baseURI + '-' + this.resourceId_;
   }
 
   /**

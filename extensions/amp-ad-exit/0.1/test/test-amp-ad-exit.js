@@ -16,7 +16,13 @@
 
 import '../amp-ad-exit';
 import * as sinon from 'sinon';
+import {ANALYTICS_CONFIG} from '../../../amp-analytics/0.1/vendors';
+import {
+  AMP_ANALYTICS_3P_RESPONSES,
+} from '../../../amp-analytics/0.1/iframe-transport';
 import {toggleExperiment} from '../../../../src/experiments';
+
+const TEST_3P_VENDOR = '3p-vendor';
 
 const EXIT_CONFIG = {
   targets: {
@@ -67,6 +73,19 @@ const EXIT_CONFIG = {
         },
         _boolVar: {
           defaultValue: true,
+        },
+      },
+    },
+    variableFrom3pAnalytics: {
+      'finalUrl': 'http://localhost:8000/vars?foo=_foo',
+      vars: {
+        _foo: {
+          defaultValue: 'foo-default',
+          vendorAnalyticsSource: TEST_3P_VENDOR,
+          vendorAnalyticsResponseKey: 'collected-data',
+        },
+        _bar: {
+          defaultValue: 'bar-default',
         },
       },
     },
@@ -134,11 +153,35 @@ describes.realWin('amp-ad-exit', {
     win.document.body.appendChild(adDiv);
   }
 
+  /**
+   * Add a response
+   * @param {!Window} win
+   * @param {!string} vendor The identifier for the third-party frame that
+   * responded
+   * @param {!string} creativeId A string identifying the creative being
+   * responded to
+   * @param {!Object<string,string>} response The response object sent from
+   * the third-party vendor's iframe
+   */
+  function addToResponseMap(win, vendor, creativeId, response) {
+    win[AMP_ANALYTICS_3P_RESPONSES] =
+        win[AMP_ANALYTICS_3P_RESPONSES] || {};
+    win[AMP_ANALYTICS_3P_RESPONSES][vendor] =
+        win[AMP_ANALYTICS_3P_RESPONSES][vendor] || {};
+    win[AMP_ANALYTICS_3P_RESPONSES][vendor][creativeId] = response;
+  }
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create({useFakeTimers: true});
     win = env.win;
     toggleExperiment(win, 'amp-ad-exit', true);
     addAdDiv();
+    // TEST_3P_VENDOR must be in ANALYTICS_CONFIG *before* makeElementWithConfig
+    ANALYTICS_CONFIG[TEST_3P_VENDOR] = ANALYTICS_CONFIG[TEST_3P_VENDOR] || {
+      transport: {
+        iframe: '/nowhere.html',
+      },
+    };
     return makeElementWithConfig(EXIT_CONFIG).then(el => {
       element = el;
     });
@@ -521,6 +564,54 @@ describes.realWin('amp-ad-exit', {
     expect(open).to.have.been.calledTwice;
     expect(open).to.have.been.calledWith(
         EXIT_CONFIG.targets.borderProtection.finalUrl, '_blank');
+  });
+
+  it('should replace custom URL variables with 3P Analytics defaults', () => {
+    const open = sandbox.stub(win, 'open', () => {
+      return {name: 'fakeWin'};
+    });
+
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'variableFrom3pAnalytics'},
+      event: makeClickEvent(1001, 101, 102),
+      satisfiesTrust: () => true,
+    });
+
+    expect(open).to.have.been.calledWith(
+        'http://localhost:8000/vars?foo=foo-default', '_blank');
+  });
+
+  it('should replace custom URL variables with 3P Analytics signals', () => {
+    const open = sandbox.stub(win, 'open', () => {
+      return {name: 'fakeWin'};
+    });
+
+    const creativeId = win.document.baseURI + '-' + element.getResourceId();
+    env.win['amp-analytics-creative-ids'] = [creativeId];
+    addToResponseMap(env.ampdoc.win, TEST_3P_VENDOR, creativeId, {
+      'unused': 'unused',
+      'collected-data': 'abc123',
+    });
+
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'variableFrom3pAnalytics'},
+      event: makeClickEvent(1001, 101, 102),
+      satisfiesTrust: () => true,
+    });
+
+    expect(open).to.have.been.calledWith(
+        'http://localhost:8000/vars?foo=abc123', '_blank');
+  });
+
+  it('should reject unrecognized 3P Analytics vendors', () => {
+    const unkVendor = JSON.parse(JSON.stringify(EXIT_CONFIG));
+    unkVendor.targets.variableFrom3pAnalytics.vars._foo.vendorAnalyticsSource =
+        'nonexistent_vendor';
+
+    expect(makeElementWithConfig(unkVendor))
+        .to.eventually.be.rejectedWith(/Unknown vendor/);
   });
 });
 
