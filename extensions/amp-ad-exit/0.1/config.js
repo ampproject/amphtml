@@ -174,8 +174,8 @@ function assertVendor(vendor) {
 /**
  * Ensures that a given origin matches that of an existing vendor's
  * transport/iframe URL
- * @param origin The origin to verify
- * @param vendor The vendor whose origin to check against
+ * @param {string} origin The origin to verify
+ * @param {string} vendor The vendor whose origin to check against
  */
 export function assertOriginMatchesVendor(origin, vendor) {
   assertVendor(vendor);

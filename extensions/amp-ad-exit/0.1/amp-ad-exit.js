@@ -255,11 +255,11 @@ export class AmpAdExit extends AMP.BaseElement {
     this.unlisten_ = listen(this.getAmpDoc().win, 'message', event => {
       const responseMessage = deserializeMessage(getData(event));
 
-      this.assertValidResponseMessage(responseMessage, ampAdResourceId,
-          event.origin);
+      this.assertValidResponseMessage(responseMessage,
+          /** @type {string} */ (ampAdResourceId), event.origin);
 
       this.vendorResponses_[responseMessage['vendor']] =
-        responseMessage['message'];
+          responseMessage['message'];
     });
   }
 
@@ -272,10 +272,10 @@ export class AmpAdExit extends AMP.BaseElement {
 
   /**
    *
-   * @param responseMessage The response object to validate.
-   * @param expectedCreativeId The resource ID of the enclosing AMP ad (which
+   * @param {?JsonObject|undefined} responseMessage The response object to validate.
+   * @param {string} expectedCreativeId The resource ID of the enclosing AMP ad (which
    *     responseMessage['creativeId'] should match.
-   * @param expectedVendor The 3p analytics vendor, which
+   * @param {string} expectedVendor The 3p analytics vendor, which
    *     responseMesssage['vendor'] should match.
    */
   assertValidResponseMessage(responseMessage, expectedCreativeId,
@@ -294,7 +294,7 @@ export class AmpAdExit extends AMP.BaseElement {
     dev().assert(responseMessage['creativeId'] &&
       responseMessage['creativeId'] == expectedCreativeId,
         'Received malformed message from 3p analytics frame: ' +
-      'creativeId missing');
+        'creativeId missing');
     dev().assert(responseMessage['vendor'],
         'Received malformed message from 3p analytics frame: ' +
       'vendor missing');
