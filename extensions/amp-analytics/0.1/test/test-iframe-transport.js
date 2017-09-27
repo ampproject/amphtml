@@ -24,8 +24,8 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
 
   beforeEach(() => {
     sandbox = env.sandbox;
-    iframeTransport = new IframeTransport(env.win, 'some_vendor_type',
-        {iframe: frameUrl});
+    iframeTransport = new IframeTransport(env.ampdoc.win,
+        'some_vendor_type', {iframe: frameUrl}, frameUrl + '-1');
   });
 
   afterEach(() => {
@@ -61,19 +61,21 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   });
 
   it('does not cause sentinel collisions', () => {
-    const iframeTransport2 = new IframeTransport(env.win,
-        'some_other_vendor_type', {iframe: 'https://example.com/test2'});
+    const iframeTransport2 = new IframeTransport(env.ampdoc.win,
+        'some_other_vendor_type', {iframe: 'https://example.com/test2'},
+        'https://example.com/test2-2');
 
     const frame1 = IframeTransport.getFrameData(iframeTransport.getType());
     const frame2 = IframeTransport.getFrameData(iframeTransport2.getType());
-    expectAllUnique([iframeTransport.getId(), iframeTransport2.getId(),
+    expectAllUnique([iframeTransport.getCreativeId(),
+      iframeTransport2.getCreativeId(),
       frame1.frame.sentinel, frame2.frame.sentinel]);
   });
 
   it('correctly tracks usageCount and destroys iframes', () => {
     const frameUrl2 = 'https://example.com/test2';
-    const iframeTransport2 = new IframeTransport(env.win,
-        'some_other_vendor_type', {iframe: frameUrl2});
+    const iframeTransport2 = new IframeTransport(env.ampdoc.win,
+        'some_other_vendor_type', {iframe: frameUrl2}, frameUrl2 + '-3');
 
     const frame1 = IframeTransport.getFrameData(iframeTransport.getType());
     const frame2 = IframeTransport.getFrameData(iframeTransport2.getType());

@@ -146,6 +146,11 @@ AmpViewerMessage.prototype.error;
 // AMP-Analytics Cross-domain iframes
 let IframeTransportEvent;
 
+/** @constructor @struct */
+function IframeTransportContext() {}
+IframeTransportContext.onAnalyticsEvent;
+IframeTransportContext.sendResponseToCreative;
+
 // amp-viz-vega related externs.
 /**
  * @typedef {{spec: function(!JsonObject, function())}}

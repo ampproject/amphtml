@@ -23,15 +23,11 @@ initLogConstructor();
 setReportError(() => {});
 
 /**
- *  If window.iframeTransportClient does not exist, we must instantiate and
- *  assign it to window.iframeTransportClient, to provide the creative with
+ *  Instantiate IframeTransportClient, to provide the creative with
  *  all the required functionality.
  */
 try {
-  const iframeTransportClientCreated =
-      new Event('amp-iframeTransportClientCreated');
-  window.iframeTransportClient = new IframeTransportClient(window);
-  window.dispatchEvent(iframeTransportClientCreated);
+  new IframeTransportClient(window);
 } catch (err) {
   // do nothing with error
 }
