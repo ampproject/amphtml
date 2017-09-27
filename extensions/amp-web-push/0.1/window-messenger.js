@@ -25,6 +25,8 @@ import {dev} from '../../../src/log';
  *    SERVICE_WORKER_STATE: string,
  *    SERVICE_WORKER_REGISTRATION: string,
  *    SERVICE_WORKER_QUERY: string,
+ *    STORAGE_GET: 'topic-storage-get',
+ *    STORAGE_SET: 'topic-storage-set',
  * }}
  */
 export let MessengerTopics;
@@ -303,6 +305,8 @@ export class WindowMessenger {
       SERVICE_WORKER_STATE: 'topic-service-worker-state',
       SERVICE_WORKER_REGISTRATION: 'topic-service-worker-registration',
       SERVICE_WORKER_QUERY: 'topic-service-worker-query',
+      STORAGE_GET: 'topic-storage-get',
+      STORAGE_SET: 'topic-storage-set',
     };
   }
 

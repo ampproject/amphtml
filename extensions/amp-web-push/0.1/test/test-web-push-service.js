@@ -84,7 +84,7 @@ describes.realWin('web-push-service environment support', {
 });
 
 describes.fakeWin('web-push-service environment support', {
-  amp: true
+  amp: true,
 }, env => {
   it('should not support HTTP location', () => {
     env.ampdoc.win.location.resetHref('http://site.com/');
@@ -93,7 +93,7 @@ describes.fakeWin('web-push-service environment support', {
     });
     expect(env.ampdoc.win.location.href).to.be.equal(
         'http://site.com/');
-    let webPush = new WebPushService(env.ampdoc);
+    const webPush = new WebPushService(env.ampdoc);
     sandbox./*OK*/stub(
         webPush,
         'arePushRelatedApisSupported_',
@@ -125,7 +125,7 @@ describes.fakeWin('web-push-service environment support', {
 }, env => {
   it('should support localhost HTTP location with port', () => {
     env.ampdoc.win.location.resetHref('http://localhost:8000/');
-    let webPush = new WebPushService(env.ampdoc);
+    const webPush = new WebPushService(env.ampdoc);
     sandbox./*OK*/stub(
         webPush,
         'arePushRelatedApisSupported_',
@@ -142,7 +142,7 @@ describes.fakeWin('web-push-service environment support', {
 }, env => {
   it('should support 127.0.0.1 HTTP location', () => {
     env.ampdoc.win.location.resetHref('http://127.0.0.1/');
-    let webPush = new WebPushService(env.ampdoc);
+    const webPush = new WebPushService(env.ampdoc);
     sandbox./*OK*/stub(
         webPush,
         'arePushRelatedApisSupported_',
@@ -159,7 +159,7 @@ describes.fakeWin('web-push-service environment support', {
 }, env => {
   it('should support 127.0.0.1 HTTP location with port', () => {
     env.ampdoc.win.location.resetHref('http://localhost:9000/');
-    let webPush = new WebPushService(env.ampdoc);
+    const webPush = new WebPushService(env.ampdoc);
     sandbox./*OK*/stub(
         webPush,
         'arePushRelatedApisSupported_',
@@ -409,70 +409,69 @@ describes.realWin('web-push-service widget visibilities', {
     });
   });
 
-  it('service worker URL comparison should match strictly except for query params', () => {
-    let iframeWindowControllerMock = null;
-
+  it('service worker URLs should match except for query params', () => {
     // Identical URLs
     expect(
-      webPush.isUrlSimilarForQueryParams(
-        'https://site.com/worker-a.js?a=1&b=2',
-        'https://site.com/worker-a.js?a=1&b=2'
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/worker-a.js?a=1&b=2'
       )
     ).to.eq(true);
 
-    // Identical URLs except URL to test is allowed to have more than the first's query params
+    // Identical URLs except URL to test is allowed to have more than the
+    // first's query params
     expect(
-      webPush.isUrlSimilarForQueryParams(
-        'https://site.com/worker-a.js?a=1&b=2',
-        'https://site.com/worker-a.js?a=1&b=2&c=3&d=4'
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/worker-a.js?a=1&b=2&c=3&d=4'
       )
     ).to.eq(true);
 
     // URL to test is missing one of the first URL's query params
     expect(
-      webPush.isUrlSimilarForQueryParams(
-        'https://site.com/worker-a.js?a=1&b=2',
-        'https://site.com/worker-a.js?a=1&c=3&d=4'
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/worker-a.js?a=1&c=3&d=4'
       )
     ).to.eq(false);
 
     // URL to test is missing all query params
     expect(
-      webPush.isUrlSimilarForQueryParams(
-        'https://site.com/worker-a.js?a=1&b=2',
-        'https://site.com/worker-a.js'
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/worker-a.js'
       )
     ).to.eq(false);
 
     // URL to test has the wrong scheme
     expect(
-      webPush.isUrlSimilarForQueryParams(
-        'https://site.com/worker-a.js?a=1&b=2',
-        'http://site.com/worker-a.js?a=1&b=2'
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'http://site.com/worker-a.js?a=1&b=2'
       )
     ).to.eq(false);
 
     // URL to test has the wrong hostname
     expect(
-      webPush.isUrlSimilarForQueryParams(
-        'https://site.com/worker-a.js?a=1&b=2',
-        'https://another-site.com/worker-a.js?a=1&b=2'
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://another-site.com/worker-a.js?a=1&b=2'
       )
     ).to.eq(false);
 
     // URL to test has the wrong port
     expect(
-      webPush.isUrlSimilarForQueryParams(
-        'https://site.com/worker-a.js?a=1&b=2',
-        'https://site:8000.com/worker-a.js?a=1&b=2'
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site:8000.com/worker-a.js?a=1&b=2'
       )
     ).to.eq(false);
 
     // URL to test has the wrong pathname
     expect(
-      webPush.isUrlSimilarForQueryParams(
-        'https://site.com/worker-a.js?a=1&b=2',
-        'https://site.com/another-worker-b.js?a=1&b=2'
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/another-worker-b.js?a=1&b=2'
       )
     ).to.eq(false);
   });
