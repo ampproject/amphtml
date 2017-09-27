@@ -71,9 +71,9 @@
       "url": "examples/visual-tests/amp-audio.amp.html",
       "name": "AMP Audio",
       "loading_complete_css": [
-        "#audio1 audio",
-        "#audio2 audio",
-        "#audio3 audio"
+        "#audio1",
+        "#audio2",
+        "#audio3"
       ]
     },
 
