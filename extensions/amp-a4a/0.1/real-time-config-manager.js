@@ -18,14 +18,48 @@ function realTimeConfigManager(element, win, ampDoc, customMacros) {
   }
   const promiseArray = [];
   const urlToCalloutMap = {};
-  maybeInflatePublisherUrls(rtcConfig, urlToCalloutMap, customMacros, ampDoc);
-  maybeInflateVendorUrls(rtcConfig, urlToCalloutMap, ampDoc);
+  const seenUrls = [];
   const rtcStartTime = Date.now();
-  for (let url in urlToCalloutMap) {
-    promiseArray.push(sendRtcCallout_(
-        url, rtcStartTime, win, rtcConfig['timeoutMillis'], urlToCalloutMap[url]));
-  }
+  (rtcConfig['urls'] || []).forEach(url => {
+    inflateAndSendRtc_(element, url, seenUrls, promiseArray,
+                       rtcStartTime, customMacros, win, ampDoc,
+                       rtcConfig['timeoutMillis']);
+  });
+  Object.keys(rtcConfig['vendors'] || []).forEach(vendor => {
+    const url = RTC_VENDORS[vendor.toLowerCase()];
+    if (!url) {
+      user().warn(TAG, `unknown vendor ${vendor}`);
+      return;
+    }
+    const macros = rtcConfig['vendors'][vendor];
+    inflateAndSendRtc_(element, url, seenUrls, promiseArray, rtcStartTime,
+                       macros, win, ampDoc, rtcConfig['timeoutMillis'],
+                       vendor);
+  });
   return Promise.all(promiseArray);
+}
+
+function inflateAndSendRtc_(element, url, seenUrls, promiseArray, rtcStartTime,
+                            macros, win, ampDoc, timeoutMillis, opt_vendor) {
+  if(promiseArray.length == MAX_RTC_CALLOUTS) {
+    dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC Callout URLS exceeded, ` +
+               ` dropping ${url}`);
+    return;
+  }
+  const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
+  // TODO: change to use whitelist.
+  url = urlReplacements.expandSync(url, macros);
+  const callout = opt_vendor || url;
+  try {
+    user().assert(isSecureUrl(url),
+                  `Dropping RTC URL: ${url}, not secure`);
+    user().assert(!seenUrls.includes(url),
+                  `Dropping duplicate calls to RTC URL: ${url}`)
+  } catch (err) {
+    return;
+  }
+  seenUrls.push(url);
+  promiseArray.push(sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout));
 }
 
 function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout) {
@@ -89,75 +123,6 @@ function validateRtcConfig(element) {
   }
   rtcConfig['timeoutMillis'] = timeout;
   return rtcConfig;
-}
-
-function maybeInflatePublisherUrls(rtcConfig, urlToCalloutMap, customMacros, ampDoc) {
-  if (!rtcConfig['urls']) {
-    return;
-  }
-  let url;
-  let remaining;
-  for (let i in rtcConfig['urls']) {
-    url = rtcConfig['urls'][i];
-    maybeInflateAndAddUrl(url, customMacros, ampDoc, urlToCalloutMap);
-    if (Object.keys(urlToCalloutMap).length == MAX_RTC_CALLOUTS) {
-      logRemaining(rtcConfig['urls'].slice(++i), rtcConfig['vendors'])
-      break;
-    }
-  }
-}
-
-function maybeInflateVendorUrls(rtcConfig, urlToCalloutMap, ampDoc) {
-  if (!rtcConfig['vendors'] || Object.keys(urlToCalloutMap).length == MAX_RTC_CALLOUTS) {
-    return;
-  }
-  let vendor;
-  let macros;
-  const vendors = Object.keys(rtcConfig['vendors']);
-  for (let i in vendors) {
-    vendor = vendors[i];
-    macros = rtcConfig['vendors'][vendor]
-    url = RTC_VENDORS[vendor.toLowerCase()];
-    if (url) {
-      maybeInflateAndAddUrl(url, macros, ampDoc, urlToCalloutMap, vendor);
-    }
-    if (Object.keys(urlToCalloutMap).length == MAX_RTC_CALLOUTS) {
-      log_remaining(vendors.slice(i));
-      break;
-    }
-  }
-}
-
-function logRemaining(remaining, opt_vendors) {
-  if (opt_vendors) {
-    remaining = remaining.concat(Object.keys(opt_vendors));
-  }
-  if (remaining) {
-    remaining = JSON.stringify(remaining);
-    dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC Callout URLS exceeded, ` +
-               ` dropping ${remaining}`);
-  }
-}
-
-/**
- * Substitutes macros into url, and adds the resulting URL to the list
- * of callouts. Checks each URL to see if secure. If a supplied macro
- * does not exist in the url, it is silently ignored.
- */
-function maybeInflateAndAddUrl(url, macros, ampDoc, urlToCalloutMap, opt_vendor) {
-  const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
-  // TODO: change to use whitelist.
-  url = urlReplacements.expandSync(url, macros);
-  const callout = opt_vendor || url;
-  try {
-    user().assert(isSecureUrl(url),
-                  `Dropping RTC URL: ${url}, not secure`);
-    user().assert(!urlToCalloutMap[url],
-                  `Dropping duplicate calls to RTC URL: ${url}`)
-  } catch (err) {
-    return;
-  }
-  urlToCalloutMap[url] = callout;
 }
 
 AMP.realTimeConfigManager = realTimeConfigManager;
