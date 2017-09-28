@@ -163,23 +163,10 @@ function assertTarget(name, target, config) {
  * transport/iframe defined.
  * @param {string} vendor The vendor name that should be listed in vendors.js
  */
-function assertVendor(vendor) {
+export function assertVendor(vendor) {
   user().assert(ANALYTICS_CONFIG &&
       ANALYTICS_CONFIG[vendor] &&
-      ANALYTICS_CONFIG[vendor]['transport'] !== undefined &&
-      ANALYTICS_CONFIG[vendor]['transport']['iframe'] !== undefined,
+      ANALYTICS_CONFIG[vendor]['transport'] &&
+      ANALYTICS_CONFIG[vendor]['transport']['iframe'],
       'Unknown vendor: ' + vendor);
-}
-
-/**
- * Ensures that a given origin matches that of an existing vendor's
- * transport/iframe URL
- * @param {string} origin The origin to verify
- * @param {string} vendor The vendor whose origin to check against
- */
-export function assertOriginMatchesVendor(origin, vendor) {
-  assertVendor(vendor);
-  const vendorURL = new URL(ANALYTICS_CONFIG[vendor]['transport']['iframe']);
-  user().assert(vendorURL && origin == vendorURL.origin,
-      'Invalid origin for vendor ' + vendor + ': ' + origin);
 }

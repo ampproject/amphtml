@@ -361,10 +361,10 @@ export function getAmpAdResourceId(node, topWin) {
     }
   } catch (e) {
   }
-  // Whether we entered the catch above, or failed to enter the if further
-  // above, the node is not within a friendly amp-ad tag. So, there is no
-  // amp-ad resource ID. How to handle that is up to the caller, but
-  // see TODO above.
+  // Whether we entered the catch above (e.g. due to attempt to access
+  // across xdomain boundary), or failed to enter the if further above, the
+  // node is not within a friendly amp-ad tag. So, there is no amp-ad
+  // resource ID. How to handle that is up to the caller, but see TODO above.
   return null;
 }
 

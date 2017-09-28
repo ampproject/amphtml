@@ -15,19 +15,20 @@
  */
 
 import {makeClickDelaySpec} from './filters/click-delay';
-import {assertConfig, assertOriginMatchesVendor, TransportMode} from './config';
+import {assertConfig, assertVendor, TransportMode} from './config';
+import {ANALYTICS_CONFIG} from '../../amp-analytics/0.1/vendors';
 import {createFilter} from './filters/factory';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {getAmpAdResourceId} from '../../../src/service';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
 import {
   listen,
   deserializeMessage,
+  MessageType,
 } from '../../../src/3p-frame-messaging';
 import {getData} from '../../../src/event-helper';
-import {MessageType} from '../../../src/3p-frame-messaging';
 const TAG = 'amp-ad-exit';
 
 /**
@@ -66,11 +67,14 @@ export class AmpAdExit extends AMP.BaseElement {
 
     this.registerAction('exit', this.exit.bind(this));
 
-    /** @private @const {!Object<string, Object<string, string>>} */
+    /** @private @const {!Object<string, !Object<string, string>>} */
     this.vendorResponses_ = {};
 
     /** @private {?function()} */
     this.unlisten_ = null;
+
+    /** @private {?string} */
+    this.ampAdResourceId_ = null;
   }
 
   /**
@@ -246,17 +250,14 @@ export class AmpAdExit extends AMP.BaseElement {
       throw e;
     }
 
-    const ampAdResourceId = getAmpAdResourceId(this.element, this.win.top);
-    if (!ampAdResourceId) {
-      this.user().error(TAG, 'No friendly parent amp-ad element was found' +
-          ' for amp-ad-exit tag.');
-    }
+    this.ampAdResourceId_ = user().assert(
+        getAmpAdResourceId(this.element, this.win.top),
+        `${TAG}: No friendly parent amp-ad element was found for amp-ad-exit.`);
 
     this.unlisten_ = listen(this.getAmpDoc().win, 'message', event => {
       const responseMessage = deserializeMessage(getData(event));
 
-      this.assertValidResponseMessage(responseMessage,
-          /** @type {string} */ (ampAdResourceId), event.origin);
+      this.assertValidResponseMessage_(responseMessage, event.origin);
 
       this.vendorResponses_[responseMessage['vendor']] =
           responseMessage['message'];
@@ -273,26 +274,38 @@ export class AmpAdExit extends AMP.BaseElement {
   /**
    *
    * @param {?JsonObject|undefined} responseMessage The response object to validate.
-   * @param {string} expectedCreativeId The resource ID of the enclosing AMP ad (which
-   *     responseMessage['creativeId'] should match.
    * @param {string} expectedVendor The 3p analytics vendor, which
    *     responseMesssage['vendor'] should match.
+   * @private
    */
-  assertValidResponseMessage(responseMessage, expectedCreativeId,
-                             expectedVendor) {
-    dev().assert(responseMessage && responseMessage['message'],
+  assertValidResponseMessage_(responseMessage, expectedVendor) {
+    user().assert(responseMessage && responseMessage['message'],
         'Received empty response from 3p analytics frame');
-    dev().assert(responseMessage['type'] &&
-      responseMessage['type'] == MessageType.IFRAME_TRANSPORT_RESPONSE,
+    user().assert(
+        responseMessage['type'] == MessageType.IFRAME_TRANSPORT_RESPONSE,
         'Received response message of invalid type from 3p analytics frame');
-    dev().assert(responseMessage['creativeId'] &&
-      responseMessage['creativeId'] == expectedCreativeId,
+    user().assert(
+        responseMessage['creativeId'] == this.ampAdResourceId_,
         'Received malformed message from 3p analytics frame: ' +
         'creativeId missing');
-    dev().assert(responseMessage['vendor'],
+    user().assert(responseMessage['vendor'],
         'Received malformed message from 3p analytics frame: ' +
         'vendor missing');
-    assertOriginMatchesVendor(expectedVendor, responseMessage['vendor']);
+    this.assertOriginMatchesVendor_(expectedVendor, responseMessage['vendor']);
+  }
+
+  /**
+   * Ensures that a given origin matches that of an existing vendor's
+   * transport/iframe URL
+   * @param {string} origin The origin to verify
+   * @param {string} vendor The vendor whose origin to check against
+   * @private
+   */
+  assertOriginMatchesVendor_(origin, vendor) {
+    assertVendor(vendor);
+    const vendorURL = new URL(ANALYTICS_CONFIG[vendor]['transport']['iframe']);
+    user().assert(vendorURL && origin == vendorURL.origin,
+        `Invalid origin for vendor ${vendor}: ${origin}`);
   }
 
   /** @override */

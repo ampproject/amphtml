@@ -225,11 +225,10 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.instrumentation_.createAnalyticsGroup(this.element);
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
-      const ampAdResourceId = getAmpAdResourceId(this.element, this.win.top);
-      if (!ampAdResourceId) {
-        this.user().error(TAG, 'No friendly parent amp-ad element was found' +
-          ' for amp-ad-exit tag.');
-      }
+      const ampAdResourceId = user().assert(
+          getAmpAdResourceId(this.element, this.win.top),
+          `${TAG}: No friendly parent amp-ad element was found for ` +
+          'amp-analytics.');
 
       this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
         this.element.getAttribute('type'),
