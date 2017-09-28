@@ -586,10 +586,6 @@ amp-experiment, amp-share-tracking {
   display: none;
 }
 
-amp-fresh {
-  visibility: hidden;
-}
-
 .i-amphtml-jank-meter {
   position: fixed;
   background-color: rgba(232,72,95,.5);
