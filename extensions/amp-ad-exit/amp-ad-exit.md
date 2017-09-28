@@ -24,15 +24,11 @@ limitations under the License.
     <td>Provides configurable behavior for ad exits for A4A (AMP for Ads).</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
+    <td><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-ad-exit" src="https://cdn.ampproject.org/v0/amp-ad-exit-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>All. This element is hidden.</td>
   </tr>
 </table>
@@ -119,21 +115,55 @@ There are two types of filters: location-based and time-based. Other filters (su
 
 The `clickLocation` filter type specifies the minimum distance a click must be from the edges of the creative or the edges of a specific element in the creative. The clickLocation filter may have the following properties:
 
-| Property     | Value | Meaning |
-| ------------ | ----- | ------- |
-| `top`        | `number` | Distance in px from the top edge. Default: 0 |
-| `right`      | `number` | Distance in px from the right edge. Default: 0  |
-| `bottom`     | `number` | Distance in px from the bottom edge. Default: 0  |
-| `left`       | `number` | Distance in px from the left edge. Default: 0 |
-| `relativeTo` | `string` | Selects the element to use for edge boundaries. The full creative `body` is used if this is not specified. The selected element does not need to be the element that triggers the exit. The selected element must be in a fixed position for the life of the creative (no resizing, repositioning, etc.). Selector must use CSS selector syntax. |
+<table>
+  <tr>
+    <th>Property</th>
+    <th>Value</th>
+    <th>Meaning</th>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>top</code></td>
+    <td class="col-twenty"><code>number</code></td>
+    <td>Distance in px from the top edge. Default is 0.</td>
+  </tr>
+  <tr>
+    <td><code>right</code></td>
+    <td><code>number</code></td>
+    <td>Distance in px from the right edge. Default is 0.</td>
+  </tr>
+  <tr>
+    <td><code>bottom</code></td>
+    <td><code>number</code></td>
+    <td>Distance in px from the bottom edge. Default is 0.</td>
+  </tr>
+  <tr>
+    <td><code>left</code></td>
+    <td><code>number</code></td>
+    <td>Distance in px from the left edge. Default is 0.</td>
+  </tr>
+  <tr>
+    <td><code>relativeTo</code></td>
+    <td><code>string</code></td>
+    <td>Selects the element to use for edge boundaries. The full creative <code>body</code> is used if this is not specified. The selected element does not need to be the element that triggers the exit. The selected element must be in a fixed position for the life of the creative (no resizing, repositioning, etc.). Selector must use CSS selector syntax. </td>
+  </tr>
+</table>
 
 ### clickDelay filter
 
 The `clickDelay` filter type specifies the time to wait before responding to clicks. The `amp-ad-exit` element imposes a minimum delay of 1 second on all exits. The `clickDelay` filter requires the following properties:
 
-| Property | Value | Meaning |
-| ---------| ----- | ------- |
-| `delay`  | `number` | Time in ms to reject any clicks after entering the viewport. | 
+<table>
+  <tr>
+    <th>Property</th>
+    <th>Value</th>
+    <th>Meaning</th>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>delay</code></td>
+    <td class="col-twenty"><code>number</code></td>
+    <td>Time in ms to reject any clicks after entering the viewport.</td>
+  </tr>
+</table>
 
 *Example: Using filters*
 
@@ -204,11 +234,24 @@ applies to navigation URLs and click tracking URLs.
 
 ### Platform variables
 
-| Name | Value |
-| ---- | ----- |
-| RANDOM | A random float. See [RANDOM](../../spec/amp-var-substitutions.md#random). |
-| CLICK_X | The `x` coordinate of the click in the viewport. |
-| CLICK_Y | The `y` coordinate of the click in the viewport. |
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td>RANDOM</td>
+    <td>A random float. See <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#random">RANDOM</a>.</td>
+  </tr>
+  <tr>
+    <td>CLICK_X</td>
+    <td>The <code>x</code> coordinate of the click in the viewport.</td>
+  </tr>
+  <tr>
+    <td>CLICK_Y</td>
+    <td>The <code>y</code> coordinate of the click in the viewport.</td>
+  </tr>
+</table>
 
 ### Custom variables
 Custom variables must begin with an underscore. Define variables in the
@@ -248,10 +291,23 @@ replaced. For example, if you define a custom variable named "_b" with value
 
 The `amp-ad-exit` element exposes an `exit` action that other elements reference in `on="tap:..."` attributes. The action accepts a "target" string parameter that must match a named `NavigationTarget` in the `ExitConfig`. Custom variables beginning with an underscore can also be passed in.
 
-| Parameter name      | Parameter value type      | Meaning                    |
-| ------------------- | ------------------------- | -------------------------- |
-| `target`            | `string`                  | The name of a  `NavigationTarget` in the `ExitConfig` |
-| `_[a-zA-Z0-9_-]+` | `string\|boolean\|number` | Replace the URL parameter with this name and value into the final and tracking URLs. |
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Value</th>
+    <th>Meaning</th>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>target</code></td>
+    <td class="col-thirty"><code>string</code></td>
+    <td>The name of a  <code>NavigationTarget</code> in the <code>ExitConfig</code>.</td>
+  </tr>
+  <tr>
+    <td><code>_[a-zA-Z0-9_-]+</code></td>
+    <td><code>string|boolean|number</code></td>
+    <td>Replace the URL parameter with this name and value into the final and tracking URLs.</td>
+  </tr>
+</table>
 
 ## Configuration spec
 See the `AmpAdExitConfig` typedef in [config.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/0.1/config.js).
