@@ -149,7 +149,7 @@ describes.realWin('amp-ad-exit', {
     adDiv.style.height = '200px';
     win.document.body.appendChild(adDiv);
     sandbox.stub(AmpAdExit.prototype, 'getAmpAdResourceId_',
-        () => String(Math.round(Math.random()*10000)));
+        () => String(Math.round(Math.random() * 10000)));
   }
 
   beforeEach(() => {
