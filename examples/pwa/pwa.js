@@ -166,7 +166,7 @@ class Shell {
     }
     return fetchDocument(url).then(doc => {
       log('Fetch complete: ', doc);
-      this.ampViewer_.show(doc, url);
+      return this.ampViewer_.show(doc, url);
     });
   }
 
@@ -206,12 +206,33 @@ class AmpViewer {
     this.container = container;
 
     win.AMP_SHADOW = true;
-    this.ampReadyPromise_ = new Promise(resolve => {
+    const ampReadyPromise = new Promise(resolve => {
       (window.AMP = window.AMP || []).push(resolve);
     });
-    this.ampReadyPromise_.then(AMP => {
+    ampReadyPromise.then(AMP => {
       log('AMP LOADED:', AMP);
     });
+
+    const isShadowDomSupported = (
+      Element.prototype.attachShadow ||
+      Element.prototype.createShadowRoot
+    );
+    const shadowDomReadyPromise = new Promise((resolve, reject) => {
+      if (isShadowDomSupported) {
+        resolve();
+      } else if (this.win.document.querySelector('script[src*=webcomponents]')) {
+        this.win.addEventListener('WebComponentsReady', resolve);
+      } else {
+        // AMP polyfills small part of SD spec. It's functional, but some things
+        // (e.g. slots) are not available.
+        resolve();
+      }
+    });
+
+    this.readyPromise_ = Promise.all([
+      ampReadyPromise,
+      shadowDomReadyPromise,
+    ]).then(results => results[0]);
 
     /** @private @const {string} */
     this.baseUrl_ = null;
@@ -256,7 +277,7 @@ class AmpViewer {
 
     this.container.appendChild(this.host_);
 
-    this.ampReadyPromise_.then(AMP => {
+    return this.readyPromise_.then(AMP => {
       this.amp_ = AMP.attachShadowDoc(this.host_, doc, url, {});
       this.win.document.title = this.amp_.title || '';
       this.amp_.onMessage(this.onMessage_.bind(this));
@@ -286,7 +307,7 @@ class AmpViewer {
 
     this.container.appendChild(this.host_);
 
-    return this.ampReadyPromise_.then(AMP => {
+    return this.readyPromise_.then(AMP => {
       this.amp_ = AMP.attachShadowDocAsStream(this.host_, url, {});
       this.win.document.title = this.amp_.title || '';
       this.amp_.onMessage(this.onMessage_.bind(this));
