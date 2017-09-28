@@ -20,8 +20,7 @@ function realTimeConfigManager(element, win, ampDoc, customMacros) {
   return Promise.all(inflateAndAddUrls(ampDoc, rtcConfig, customMacros, win));
 }
 
-function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, opt_vendor) {
-  let callout = opt_vendor || url;
+function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout) {
   /**
    * Note: Timeout is enforced by timerFor, not the value of
    *   rtcTime. There are situations where rtcTime could thus
@@ -85,14 +84,13 @@ function validateRtcConfig(element, timeoutMillis) {
 
 function inflateAndAddUrls(ampDoc, rtcConfig, custom_macros, win) {
   const promiseArray = [];
-  const rtcStartTime = Date.now();
-  const seenUrls = []
+  const urlToCalloutMap = {};
   let url;
   let remaining;
   if (rtcConfig['urls']) {
     for (let i in rtcConfig['urls']) {
       url = rtcConfig['urls'][i];
-      if (promiseArray.length == MAX_RTC_CALLOUTS) {
+      if (Object.keys(urlToCalloutMap).length == MAX_RTC_CALLOUTS) {
         remaining = rtcConfig['urls'].slice(i)
         if (rtcConfig['vendors']) {
           remaining = remaining.concat(Object.keys(rtcConfig['vendors']));
@@ -102,11 +100,11 @@ function inflateAndAddUrls(ampDoc, rtcConfig, custom_macros, win) {
                    ` dropping ${remaining}`);
         break;
       }
-      maybeInflateAndAddUrl(url, custom_macros, ampDoc, rtcStartTime, win, rtcConfig['timeoutMillis'], promiseArray, seenUrls);
+      maybeInflateAndAddUrl(url, custom_macros, ampDoc, urlToCalloutMap);
     }
   }
 
-  if (rtcConfig['vendors'] && promiseArray.length < MAX_RTC_CALLOUTS) {
+  if (rtcConfig['vendors'] && Object.keys(urlToCalloutMap).length < MAX_RTC_CALLOUTS) {
     let vendor;
     let macros;
     const vendors = Object.keys(rtcConfig['vendors']);
@@ -115,15 +113,20 @@ function inflateAndAddUrls(ampDoc, rtcConfig, custom_macros, win) {
       macros = rtcConfig['vendors'][vendor]
       url = RTC_VENDORS[vendor.toLowerCase()];
       if (url) {
-        maybeInflateAndAddUrl(url, macros, ampDoc, rtcStartTime, win, rtcConfig['timeoutMillis'], promiseArray, seenUrls, vendor);
+        maybeInflateAndAddUrl(url, macros, ampDoc, urlToCalloutMap, vendor);
       }
-      if (promiseArray.length == MAX_RTC_CALLOUTS) {
+      if (Object.keys(urlToCalloutMap).length == MAX_RTC_CALLOUTS) {
         remaining = JSON.stringify(vendors.slice(i));
         dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC Callout URLS exceeded, ` +
                    ` dropping ${remaining}`);
         break;
       }
     }
+  }
+
+  const rtcStartTime = Date.now();
+  for (url in urlToCalloutMap) {
+    promiseArray.push(sendRtcCallout_(url, rtcStartTime, win, rtcConfig['timeoutMillis'], urlToCalloutMap[url]));
   }
   return promiseArray;
 }
@@ -133,21 +136,20 @@ function inflateAndAddUrls(ampDoc, rtcConfig, custom_macros, win) {
  * of callouts. Checks each URL to see if secure. If a supplied macro
  * does not exist in the url, it is silently ignored.
  */
-function maybeInflateAndAddUrl(url, macros, ampDoc, rtcStartTime, win, timeoutMillis, promiseArray, seenUrls, opt_vendor) {
+function maybeInflateAndAddUrl(url, macros, ampDoc, urlToCalloutMap, opt_vendor) {
   const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
   // TODO: change to use whitelist.
   url = urlReplacements.expandSync(url, macros);
-  const vendor = opt_vendor || url;
+  const callout = opt_vendor || url;
   try {
     user().assert(isSecureUrl(url),
                   `Dropping RTC URL: ${url}, not secure`);
-    user().assert(!seenUrls.includes(url),
+    user().assert(!urlToCalloutMap[url],
                   `Dropping duplicate calls to RTC URL: ${url}`)
   } catch (err) {
     return;
   }
-  seenUrls.push(url);
-  promiseArray.push(sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, vendor));
+  urlToCalloutMap[url] = callout;
 }
 
 AMP.realTimeConfigManager = realTimeConfigManager;
