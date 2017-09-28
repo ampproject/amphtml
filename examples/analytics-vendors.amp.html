@@ -67,7 +67,11 @@
       <option>linkpulse</option>
       <option>lotame</option>
       <option>mediametrie</option>
+<<<<<<< 1151962e87682c708d5d752e8e5135045fb11eb2
       <option>mediator</option>
+=======
+      <option>mediarithmics</option>      
+>>>>>>> First version of mediarithmics amp-analytics tag
       <option>mparticle</option>
       <option>mpulse</option>
       <option>nielsen-marketing-cloud</option>
@@ -559,6 +563,26 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Mediametrie example -->
+
+<!-- mediarithmics tracking
+  serial is the account id (required)
+  level1 to 4 are page levels (optional)
+-->
+<amp-analytics type="mediarithmics" id="mediarithmics">
+  <script type="application/json">
+    {
+      "vars": {
+        "site_token": "amp-test17",
+        "event_name": "amp-test-pageview"
+      }, 
+      "extraUrlParams": {
+        "prop1": "value1",
+        "prop2": "value2"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End mediarithmics example -->
 
 <!-- Mediator.media example -->
 <amp-analytics type="mediator" id="mediator">
