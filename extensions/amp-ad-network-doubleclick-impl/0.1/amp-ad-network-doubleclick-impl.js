@@ -241,24 +241,36 @@ const fluidListeners = {};
  */
 function fluidMessageListener_(event) {
   const data = tryParseJson(getData(event));
-  if (event.origin != SAFEFRAME_ORIGIN || !data || !data['sentinel']) {
+  if (event.origin != SAFEFRAME_ORIGIN || !data) {
     return;
   }
-  const listener = fluidListeners[data['sentinel']];
-  if (!listener) {
-    dev().warn(TAG, `Listener for sentinel ${data['sentinel']} not found.`);
-    return;
-  }
-  if (data['s'] != 'creative_geometry_update') {
+  if (data['e']) {
+    // This is a request to establish a postmessaging connection.
+    const listener = fluidListeners[data['e']];
+    if (!listener) {
+      dev().warn(TAG, `Listener for sentinel ${data['e']} not found.`);
+      return;
+    }
     if (!listener.connectionEstablished) {
       listener.instance.connectFluidMessagingChannel();
       listener.connectionEstablished = true;
     }
     return;
   }
-  listener.instance.receiveMessageForFluid_(data);
+  const payload = tryParseJson(data['p']);
+  if (!payload || !payload['sentinel']) {
+    return;
+  }
+  const listener = fluidListeners[payload['sentinel']];
+  if (!listener) {
+    dev().warn(TAG, `Listener for sentinel ${payload['sentinel']} not found.`);
+    return;
+  }
+  if (data['s'] != 'creative_geometry_update') {
+    return;
+  }
+  listener.instance.receiveMessageForFluid_(payload);
 }
-
 
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
@@ -419,11 +431,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Handles Fluid-related messages dispatched from SafeFrame.
-   * @param {!JsonObject} data
+   * @param {!JsonObject} payload
    * @private
    */
-  receiveMessageForFluid_(data) {
-    const payload = tryParseJson(data['p']);
+  receiveMessageForFluid_(payload) {
     let newHeight;
     if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
       // TODO(levitzky) Add actual error handling here.
