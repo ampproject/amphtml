@@ -49,6 +49,15 @@ const INVALID_PROTOCOLS = [
 export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
 
 /**
+ * Returns the correct origin for a given window.
+ * @param {!Window} win
+ * @return {string} origin
+ */
+export function getWinOrigin(win) {
+    return win.origin || parseUrl(win.location.href).origin;
+}
+
+/**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
  * Consider the returned object immutable. This is enforced during
