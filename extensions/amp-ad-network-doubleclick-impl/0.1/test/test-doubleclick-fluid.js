@@ -167,14 +167,12 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         <script>
         parent./*OK*/postMessage(
             JSON.stringify(/** @type {!JsonObject} */ ({
-              s: 'init_done',
-              sentinel: 'sentinel',
+              e: 'sentinel',
             })), '*');
         parent./*OK*/postMessage(
             JSON.stringify(/** @type {!JsonObject} */ ({
               s: 'creative_geometry_update',
-              sentinel: 'sentinel',
-              p: '{"width":"1px","height":"1px"}',
+              p: '{"width":"1px","height":"1px","sentinel":"sentinel"}',
             })), '*');
         </script>`;
     const connectFluidMessagingChannelSpy =
