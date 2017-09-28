@@ -281,6 +281,7 @@ const EXPERIMENTS = [
     id: 'amp-story',
     name: 'Visual storytelling in AMP',
     spec: 'https://github.com/ampproject/amphtml/issues/11329',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
   },
 ];
 
