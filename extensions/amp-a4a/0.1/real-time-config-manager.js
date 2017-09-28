@@ -17,10 +17,7 @@ function realTimeConfigManager(element, win, ampDoc, customMacros) {
   if (!rtcConfig) {
     return;
   }
-  const promiseArray = [];
-  const rtcStartTime = Date.now();
-  inflateAndAddUrls(ampDoc, rtcConfig, customMacros, rtcStartTime, promiseArray, win, timeoutMillis);
-  return Promise.all(promiseArray);
+  return Promise.all(inflateAndAddUrls(ampDoc, rtcConfig, customMacros, win));
 }
 
 function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, opt_vendor) {
@@ -86,8 +83,10 @@ function validateRtcConfig(element, timeoutMillis) {
   return rtcConfig;
 }
 
-function inflateAndAddUrls(ampDoc, rtcConfig, custom_macros, rtcStartTime, promiseArray, win, timeoutMillis) {
-  let seenUrls = []
+function inflateAndAddUrls(ampDoc, rtcConfig, custom_macros, win) {
+  const promiseArray = [];
+  const rtcStartTime = Date.now();
+  const seenUrls = []
   let url;
   let remaining;
   if (rtcConfig['urls']) {
@@ -103,18 +102,20 @@ function inflateAndAddUrls(ampDoc, rtcConfig, custom_macros, rtcStartTime, promi
                    ` dropping ${remaining}`);
         break;
       }
-      maybeInflateAndAddUrl(url, custom_macros, ampDoc, rtcStartTime, win, timeoutMillis, promiseArray, seenUrls);
+      maybeInflateAndAddUrl(url, custom_macros, ampDoc, rtcStartTime, win, rtcConfig['timeoutMillis'], promiseArray, seenUrls);
     }
   }
 
   if (rtcConfig['vendors'] && promiseArray.length < MAX_RTC_CALLOUTS) {
+    let vendor;
+    let macros;
     const vendors = Object.keys(rtcConfig['vendors']);
     for (let i in vendors) {
-      let vendor = vendors[i];
-      let macros = rtcConfig['vendors'][vendor]
+      vendor = vendors[i];
+      macros = rtcConfig['vendors'][vendor]
       url = RTC_VENDORS[vendor.toLowerCase()];
       if (url) {
-        maybeInflateAndAddUrl(url, macros, ampDoc, rtcStartTime, win, timeoutMillis, promiseArray, seenUrls, vendor);
+        maybeInflateAndAddUrl(url, macros, ampDoc, rtcStartTime, win, rtcConfig['timeoutMillis'], promiseArray, seenUrls, vendor);
       }
       if (promiseArray.length == MAX_RTC_CALLOUTS) {
         remaining = JSON.stringify(vendors.slice(i));
@@ -124,6 +125,7 @@ function inflateAndAddUrls(ampDoc, rtcConfig, custom_macros, rtcStartTime, promi
       }
     }
   }
+  return promiseArray;
 }
 
 /**
