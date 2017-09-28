@@ -17,7 +17,7 @@ function realTimeConfigManager(element, win, ampDoc, customMacros) {
   if (!rtcConfig) {
     return;
   }
-  return Promise.all(inflateAndAddUrls(ampDoc, rtcConfig, customMacros, win));
+  return Promise.all(inflateAndSendCallouts(ampDoc, rtcConfig, customMacros, win));
 }
 
 function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout) {
@@ -82,28 +82,34 @@ function validateRtcConfig(element, timeoutMillis) {
   return rtcConfig;
 }
 
-function inflateAndAddUrls(ampDoc, rtcConfig, custom_macros, win) {
+function inflateAndSendCallouts(ampDoc, rtcConfig, customMacros, win) {
   const promiseArray = [];
   const urlToCalloutMap = {};
+  maybeInflatePublisherUrls(rtcConfig, urlToCalloutMap, customMacros, ampDoc);
+  maybeInflateVendorUrls(rtcConfig, urlToCalloutMap, ampDoc);
+  const rtcStartTime = Date.now();
+  for (let url in urlToCalloutMap) {
+    promiseArray.push(sendRtcCallout_(url, rtcStartTime, win, rtcConfig['timeoutMillis'], urlToCalloutMap[url]));
+  }
+  return promiseArray;
+}
+
+function maybeInflatePublisherUrls(rtcConfig, urlToCalloutMap, customMacros, ampDoc) {
   let url;
   let remaining;
   if (rtcConfig['urls']) {
     for (let i in rtcConfig['urls']) {
       url = rtcConfig['urls'][i];
+      maybeInflateAndAddUrl(url, customMacros, ampDoc, urlToCalloutMap);
       if (Object.keys(urlToCalloutMap).length == MAX_RTC_CALLOUTS) {
-        remaining = rtcConfig['urls'].slice(i)
-        if (rtcConfig['vendors']) {
-          remaining = remaining.concat(Object.keys(rtcConfig['vendors']));
-        }
-        remaining = JSON.stringify(remaining);
-        dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC Callout URLS exceeded, ` +
-                   ` dropping ${remaining}`);
+        logRemaining(rtcConfig['urls'].slice(++i), rtcConfig['vendors'])
         break;
       }
-      maybeInflateAndAddUrl(url, custom_macros, ampDoc, urlToCalloutMap);
     }
   }
+}
 
+function maybeInflateVendorUrls(rtcConfig, urlToCalloutMap, ampDoc) {
   if (rtcConfig['vendors'] && Object.keys(urlToCalloutMap).length < MAX_RTC_CALLOUTS) {
     let vendor;
     let macros;
@@ -116,19 +122,22 @@ function inflateAndAddUrls(ampDoc, rtcConfig, custom_macros, win) {
         maybeInflateAndAddUrl(url, macros, ampDoc, urlToCalloutMap, vendor);
       }
       if (Object.keys(urlToCalloutMap).length == MAX_RTC_CALLOUTS) {
-        remaining = JSON.stringify(vendors.slice(i));
-        dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC Callout URLS exceeded, ` +
-                   ` dropping ${remaining}`);
+        log_remaining(vendors.slice(i));
         break;
       }
     }
   }
+}
 
-  const rtcStartTime = Date.now();
-  for (url in urlToCalloutMap) {
-    promiseArray.push(sendRtcCallout_(url, rtcStartTime, win, rtcConfig['timeoutMillis'], urlToCalloutMap[url]));
+function logRemaining(remaining, opt_vendors) {
+  if (opt_vendors) {
+    remaining = remaining.concat(Object.keys(opt_vendors));
   }
-  return promiseArray;
+  if (remaining) {
+    remaining = JSON.stringify(remaining);
+    dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC Callout URLS exceeded, ` +
+               ` dropping ${remaining}`);
+  }
 }
 
 /**
