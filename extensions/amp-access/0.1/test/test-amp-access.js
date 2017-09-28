@@ -541,6 +541,7 @@ describes.fakeWin('AccessService authorization', {
 
     service.analyticsEvent_ = sandbox.spy();
     performanceMock = sandbox.mock(service.performance_);
+    performanceMock.expects('onload_').atLeast(0);
   });
 
   afterEach(() => {
