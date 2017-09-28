@@ -23,7 +23,7 @@ import {
   parseUrl,
 } from '../url';
 import {parseJson} from '../json';
-import {isArray, isObject, isFormData, isString} from '../types';
+import {isArray, isObject, isFormData} from '../types';
 import {utf8EncodeSync} from '../utils/bytes';
 import {getMode} from '../mode';
 
@@ -215,11 +215,7 @@ export class Xhr {
     const init = setupInit(opt_init, 'application/json');
     const headerContentType = init.headers['Content-Type'];
     if (init.method == 'POST' && !isFormData(init.body)) {
-      const isRequestBodyFormUrlEncoded =
-        (headerContentType ===
-          'application/x-www-form-urlencoded;charset=utf-8');
-      if (isRequestBodyFormUrlEncoded &&
-        isString(init.body)) {
+      if (headerContentType === 'application/x-www-form-urlencoded') {
         return this.fetch(input, init);
       }
       // Assume JSON strict mode where only objects or arrays are allowed
@@ -230,7 +226,7 @@ export class Xhr {
           init.body
       );
       // Content should be 'text/plain' to avoid CORS preflight.
-      init.headers['Content-Type'] = headerContentType ||
+      init.headers['Content-Type'] = init.headers['Content-Type'] ||
           'text/plain;charset=utf-8';
       // Cast is valid, because we checked that it is not form data above.
       init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));

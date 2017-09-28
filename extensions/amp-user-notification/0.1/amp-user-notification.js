@@ -16,17 +16,22 @@
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  addParamsToUrl,
+  serializeQueryString,
+} from '../../../src/url';
 import {dev, user, rethrowAsync} from '../../../src/log';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {setStyle} from '../../../src/style';
+import {dict} from '../../../src/utils/object';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';
-
+const FORM_DATA_ENC_TYPE = 'application/x-www-form-urlencoded';
 
 /**
  * @export
@@ -209,7 +214,8 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Promise}
    */
   postDismissEnpoint_() {
-    const enctype = this.element.getAttribute('enctype') || 'application/json';
+    const enctype = this.element.getAttribute('enctype') ||
+      'application/json;charset=utf-8';
     return Services.xhrFor(this.win).fetchJson(
         dev().assertString(this.dismissHref_),
         this.buildPostDismissRequest_(enctype, {
@@ -218,17 +224,20 @@ export class AmpUserNotification extends AMP.BaseElement {
         }));
   }
 
+  /**
+   * Creates a Request to be used for postDismiss
+   * @private
+   * @param {!string} enctype
+   * @param {!{elementId: string, ampUserId: string}} parameters
+   * @return {!Object}
+   */
   buildPostDismissRequest_(enctype, {elementId, ampUserId}) {
-    const formDataEncType = 'application/x-www-form-urlencoded';
-    let body = /** @type {!JsonObject} */({elementId, ampUserId});
-    if (enctype === formDataEncType) {
-      const formBody = [];
-      for (const property in body) {
-        const encodedKey = encodeURIComponent(property);
-        const encodedValue = encodeURIComponent(body[property]);
-        formBody.push(encodedKey + '=' + encodedValue);
-      }
-      body = formBody.join('&');
+    let body = dict({
+      'elementId': elementId,
+      'ampUserId': ampUserId,
+    });
+    if (enctype === FORM_DATA_ENC_TYPE) {
+      body = serializeQueryString(body);
     }
     return {
       method: 'POST',
@@ -236,7 +245,7 @@ export class AmpUserNotification extends AMP.BaseElement {
       requireAmpResponseSourceOrigin: false,
       body,
       headers: {
-        'Content-Type': enctype + ';charset=utf-8',
+        'Content-Type': enctype,
       },
     };
   }
