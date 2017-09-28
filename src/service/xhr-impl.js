@@ -20,6 +20,7 @@ import {registerServiceBuilder, getService} from '../service';
 import {
   getSourceOrigin,
   getCorsUrl,
+  getWinOrigin,
   parseUrl,
 } from '../url';
 import {parseJson} from '../json';
@@ -166,7 +167,7 @@ export class Xhr {
     }
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.
-    const currentOrigin = parseUrl(this.win.location.href).origin;
+    const currentOrigin = getWinOrigin(this.win);
     const targetOrigin = parseUrl(input).origin;
     if (currentOrigin == targetOrigin) {
       init['headers'] = init['headers'] || {};
