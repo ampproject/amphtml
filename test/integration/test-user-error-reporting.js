@@ -84,7 +84,7 @@ describe.configure().run('user-error', function() {
     });
   });
 
-  describes.integration.skip('3p user-error integration test', {
+  describes.integration('3p user-error integration test', {
     extensions: ['amp-analytics', 'amp-ad'],
     hash: 'log=0',
     experiments: ['user-error-reporting'],
