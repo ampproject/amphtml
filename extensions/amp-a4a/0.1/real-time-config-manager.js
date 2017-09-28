@@ -12,12 +12,20 @@ const TAG = 'real-time-config';
 export const MAX_RTC_CALLOUTS = 5;
 
 function realTimeConfigManager(element, win, ampDoc, customMacros) {
-  const timeoutMillis = 1000;
-  const rtcConfig = validateRtcConfig(element, timeoutMillis);
+  const rtcConfig = validateRtcConfig(element);
   if (!rtcConfig) {
     return;
   }
-  return Promise.all(inflateAndSendCallouts(ampDoc, rtcConfig, customMacros, win));
+  const promiseArray = [];
+  const urlToCalloutMap = {};
+  maybeInflatePublisherUrls(rtcConfig, urlToCalloutMap, customMacros, ampDoc);
+  maybeInflateVendorUrls(rtcConfig, urlToCalloutMap, ampDoc);
+  const rtcStartTime = Date.now();
+  for (let url in urlToCalloutMap) {
+    promiseArray.push(sendRtcCallout_(
+        url, rtcStartTime, win, rtcConfig['timeoutMillis'], urlToCalloutMap[url]));
+  }
+  return Promise.all(promiseArray);
 }
 
 function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout) {
@@ -54,7 +62,8 @@ function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout) {
  * with the default.
  * @return {!boolean}
  */
-function validateRtcConfig(element, timeoutMillis) {
+function validateRtcConfig(element) {
+  const defaultTimeoutMillis = 1000;
   const rtcConfig = tryParseJson(
       element.getAttribute('prerequest-callouts'));
   if (!rtcConfig) {
@@ -72,27 +81,14 @@ function validateRtcConfig(element, timeoutMillis) {
   }
   let timeout = rtcConfig['timeoutMillis'];
   if (timeout) {
-    if (!Number.isInteger(timeout) || timeout >= timeoutMillis || timeout < 0) {
-      timeout = timeoutMillis;
+    if (!Number.isInteger(timeout) || timeout >= defaultTimeoutMillis || timeout < 0) {
+      timeout = defaultTimeoutMillis;
       user().warn(TAG, `Invalid RTC timeout: ${timeout}ms, ` +
                   `using default timeout ${timeoutMillis}ms`);
     }
   }
   rtcConfig['timeoutMillis'] = timeout;
   return rtcConfig;
-}
-
-function inflateAndSendCallouts(ampDoc, rtcConfig, customMacros, win) {
-  const promiseArray = [];
-  const urlToCalloutMap = {};
-  maybeInflatePublisherUrls(rtcConfig, urlToCalloutMap, customMacros, ampDoc);
-  maybeInflateVendorUrls(rtcConfig, urlToCalloutMap, ampDoc);
-  const rtcStartTime = Date.now();
-  for (let url in urlToCalloutMap) {
-    promiseArray.push(sendRtcCallout_(
-        url, rtcStartTime, win, rtcConfig['timeoutMillis'], urlToCalloutMap[url]));
-  }
-  return promiseArray;
 }
 
 function maybeInflatePublisherUrls(rtcConfig, urlToCalloutMap, customMacros, ampDoc) {
