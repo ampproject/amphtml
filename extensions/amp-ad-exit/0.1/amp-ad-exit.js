@@ -105,56 +105,56 @@ export class AmpAdExit extends AMP.BaseElement {
     };
     if (target.vars) {
       for (const customVarName in target.vars) {
-        if (customVarName[0] == '_') {
-          const customVar =
-              /** @type {!./config.Variable} */ (target.vars[customVarName]);
-          if (customVar) {
-            /*
-             Example:
-             The amp-ad-exit target has a variable representing the
-             priority of something, which is defined as follows:
-             "vars": {
-             "_pty": {
+        let customVar;
+        if (customVarName[0] != '_' ||
+            !(customVar = /** @type {!./config.Variable} */
+            (target.vars[customVarName]))) {
+          continue;
+        }
+        /*
+         Example:
+         The amp-ad-exit target has a variable representing the priority of
+         something, which is defined as follows:
+         "vars": {
+           "_pty": {
              "defaultValue": "unknown",
              "iframeTransportSignal":
-             "IFRAME_TRANSPORT_SIGNAL(vendorXYZ,priority)"
-             },
-             ...
-             }
-             The cross-domain iframe of vendorXYZ has sent the
-             following response for the creative:
-             { priority: medium, category: W }
-             This is just example data. The keys/values in that object can
-             be any strings.
-             The code below will create substitutionFunctions['_pty'],
-             which in this example will return "medium".
-            */
-            substitutionFunctions[customVarName] = () => {
-              if ('iframeTransportSignal' in customVar) {
-                const vendorResponse = replacements./*OK*/expandStringSync(
-                    customVar.iframeTransportSignal, {
-                      'IFRAME_TRANSPORT_SIGNAL': (vendor, responseKey) => {
-                        const vendorResponses = this.vendorResponses_[vendor];
-                        if (vendorResponses && responseKey in vendorResponses) {
-                          return vendorResponses[responseKey];
-                        }
-                      },
-                    });
-                if (vendorResponse != '') {
-                  // Caveat: If the vendor's response *is* the empty string,
-                  // then this will cause the arg/default value to be returned.
-                  return vendorResponse;
-                }
-              }
-
-              // Either it's not a 3p analytics variable, or it is one
-              // but no matching response has been received yet.
-              return (customVarName in args) ?
-                  args[customVarName] : customVar.defaultValue;
-            };
-            whitelist[customVarName] = true;
+                 "IFRAME_TRANSPORT_SIGNAL(vendorXYZ,priority)"
+           },
+           ...
+         }
+         The cross-domain iframe of vendorXYZ has sent the following
+         response for the creative:
+         { priority: medium, category: W }
+         This is just example data. The keys/values in that object can be
+         any strings.
+         The code below will create substitutionFunctions['_pty'], which in
+         this example will return "medium".
+        */
+        substitutionFunctions[customVarName] = () => {
+          if ('iframeTransportSignal' in customVar) {
+            const vendorResponse = replacements./*OK*/expandStringSync(
+                customVar.iframeTransportSignal, {
+                  'IFRAME_TRANSPORT_SIGNAL': (vendor, responseKey) => {
+                    const vendorResponses = this.vendorResponses_[vendor];
+                    if (vendorResponses && responseKey in vendorResponses) {
+                      return vendorResponses[responseKey];
+                    }
+                  },
+                });
+            if (vendorResponse != '') {
+              // Caveat: If the vendor's response *is* the empty string, then
+              // this will cause the arg/default value to be returned.
+              return vendorResponse;
+            }
           }
-        }
+
+          // Either it's not a 3p analytics variable, or it is one
+          // but no matching response has been received yet.
+          return (customVarName in args) ?
+              args[customVarName] : customVar.defaultValue;
+        };
+        whitelist[customVarName] = true;
       }
     }
     return url => replacements.expandUrlSync(
