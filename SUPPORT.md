@@ -5,7 +5,6 @@ There are many ways to get help for questions and issues related to AMP:
 - If you are looking for help **getting started using AMP on your site** or are **having issues using AMP**:
     - The [ampproject.org FAQ](https://www.ampproject.org/support/faqs/) provides answers to common questions about AMP.
     - [Stack Overflow](http://stackoverflow.com/questions/tagged/amp-html) is our recommended way to find answers to questions about AMP; since members of the AMP Project community regularly monitor Stack Overflow you will probably receive the fastest response to your questions there.
-    - The [amphtml-discuss Google Group](https://groups.google.com/forum/#!forum/amphtml-discuss) is available for discussing work within the amphtml GitHub repo. Please refrain from asking implementation questions here, and use [Stack Overflow](http://stackoverflow.com/questions/tagged/amp-html) instead.
     - [AMP by Example](https://ampbyexample.com) provides hands-on samples and demos for using AMP components.
     - [AMP Start](https://ampstart.com) provides pre-styled templates and components that you can use to create styled AMP sites from scratch.
 - If you **encounter a bug in AMP or have a feature request for AMP**, see [Reporting issues with AMP](CONTRIBUTING.md#reporting-issues-with-amp) for information on filing an issue.
