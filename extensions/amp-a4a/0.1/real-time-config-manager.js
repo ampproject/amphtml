@@ -18,11 +18,8 @@ function realTimeConfigManager(element, win, ampDoc, customMacros) {
     return;
   }
   const promiseArray = [];
-  const urlObjects = [];
   const rtcStartTime = Date.now();
-  addPublisherUrlsToArray(customMacros, urlObjects, rtcConfig);
-  addVendorUrlsToArray(promiseArray, urlObjects);
-  const callouts = inflateAndAddUrls(ampDoc, urlObjects, rtcStartTime, promiseArray, win, timeoutMillis);
+  inflateAndAddUrls(ampDoc, rtcConfig, customMacros, rtcStartTime, promiseArray, win, timeoutMillis);
   return Promise.all(promiseArray);
 }
 
@@ -89,39 +86,43 @@ function validateRtcConfig(element, timeoutMillis) {
   return rtcConfig;
 }
 
-function addVendorUrlsToArray(urlObjects, rtcConfig) {
-  if (!rtcConfig['vendors']) {
-    return;
-  }
+function inflateAndAddUrls(ampDoc, rtcConfig, custom_macros, rtcStartTime, promiseArray, win, timeoutMillis) {
+  let seenUrls = []
   let url;
-  Object.keys(rtcConfig['vendors']).forEach(vendor => {
-    url = RTC_VENDORS[vendor.toLowerCase()];
-    if (url) {
-      urlObjects.push({url, macros: rtcConfig['vendors'][vendor], vendor});
+  let remaining;
+  if (rtcConfig['urls']) {
+    for (let i in rtcConfig['urls']) {
+      url = rtcConfig['urls'][i];
+      if (promiseArray.length == MAX_RTC_CALLOUTS) {
+        remaining = rtcConfig['urls'].slice(i)
+        if (rtcConfig['vendors']) {
+          remaining = remaining.concat(Object.keys(rtcConfig['vendors']));
+        }
+        remaining = JSON.stringify(remaining);
+        dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC Callout URLS exceeded, ` +
+                   ` dropping ${remaining}`);
+        break;
+      }
+      maybeInflateAndAddUrl(url, custom_macros, ampDoc, rtcStartTime, win, timeoutMillis, promiseArray, seenUrls);
     }
-  });
-}
-
-function addPublisherUrlsToArray(macros, urlObjects, rtcConfig) {
-  if (!rtcConfig['urls']) {
-    return;
   }
-  rtcConfig['urls'].forEach(url => {
-    urlObjects.push({url, macros});
-  });
-}
 
-function inflateAndAddUrls(ampDoc, urlObjects, rtcStartTime, promiseArray, win, timeoutMillis) {
-  const seenUrls = [];
-  for (i in urlObjects) {
-    if (promiseArray.length == MAX_RTC_CALLOUTS) {
-      let remaining = JSON.stringify(
-          urlObjects.slice(i).map(urlObject => urlObject.url));
-      dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC Callout URLS exceeded, ` +
-                 ` dropping ${remaining}`);
-      break;
+  if (rtcConfig['vendors'] && promiseArray.length < MAX_RTC_CALLOUTS) {
+    const vendors = Object.keys(rtcConfig['vendors']);
+    for (let i in vendors) {
+      let vendor = vendors[i];
+      let macros = rtcConfig['vendors'][vendor]
+      url = RTC_VENDORS[vendor.toLowerCase()];
+      if (url) {
+        maybeInflateAndAddUrl(url, macros, ampDoc, rtcStartTime, win, timeoutMillis, promiseArray, seenUrls, vendor);
+      }
+      if (promiseArray.length == MAX_RTC_CALLOUTS) {
+        remaining = JSON.stringify(vendors.slice(i));
+        dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC Callout URLS exceeded, ` +
+                   ` dropping ${remaining}`);
+        break;
+      }
     }
-    maybeInflateAndAddUrl(urlObjects[i], ampDoc, rtcStartTime, win, timeoutMillis, promiseArray, seenUrls);
   }
 }
 
@@ -130,11 +131,11 @@ function inflateAndAddUrls(ampDoc, urlObjects, rtcStartTime, promiseArray, win, 
  * of callouts. Checks each URL to see if secure. If a supplied macro
  * does not exist in the url, it is silently ignored.
  */
-function maybeInflateAndAddUrl(urlObject, ampDoc, rtcStartTime, win, timeoutMillis, promiseArray, seenUrls) {
+function maybeInflateAndAddUrl(url, macros, ampDoc, rtcStartTime, win, timeoutMillis, promiseArray, seenUrls, opt_vendor) {
   const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
-  const url = urlReplacements.expandSync(urlObject.url, macros);
-  const macros = urlObject.macros;
-  const vendor = urlObject.vendor || url;
+  // TODO: change to use whitelist.
+  url = urlReplacements.expandSync(url, macros);
+  const vendor = opt_vendor || url;
   try {
     user().assert(isSecureUrl(url),
                   `Dropping RTC URL: ${url}, not secure`);
