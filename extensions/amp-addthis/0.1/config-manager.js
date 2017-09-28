@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 import {isObject} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 import {getData, listen} from '../../../src/event-helper';
+import {startsWith} from '../../../src/string';
+import {dict} from '../../../src/utils/object';
 
 import {CONFIGURATION_EVENT, ORIGIN} from './constants';
 
@@ -40,11 +42,11 @@ function getMessageData(event) {
     return data;
   }
 
-  if (data['indexOf']('{') === 0) {
+  if (typeof data === 'string' && startsWith(data, '{')) {
     return tryParseJson(data);
   }
 
-  return;
+  return undefined;
 }
 
 /**
@@ -107,14 +109,14 @@ export class ConfigManager {
     const pubData = this.dataForPubId_[pubId];
     const dashboardConfig = pubData.config;
     const configRequestStatus = pubData.requestStatus;
-    const jsonToSend = /** @type JsonObject */ ({
-      event: CONFIGURATION_EVENT,
-      shareConfig,
-      pubId,
-      widgetId,
-      configRequestStatus,
-      dashboardConfig,
-      registerView: this.registerView_,
+    const jsonToSend = dict({
+      'event': CONFIGURATION_EVENT,
+      'shareConfig': shareConfig,
+      'pubId': pubId,
+      'widgetId': widgetId,
+      'configRequestStatus': configRequestStatus,
+      'dashboardConfig': dashboardConfig,
+      'registerView': this.registerView_,
     });
 
     iframe.contentWindow./*OK*/postMessage(JSON.stringify(jsonToSend), ORIGIN);
