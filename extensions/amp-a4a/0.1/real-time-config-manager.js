@@ -89,42 +89,45 @@ function inflateAndSendCallouts(ampDoc, rtcConfig, customMacros, win) {
   maybeInflateVendorUrls(rtcConfig, urlToCalloutMap, ampDoc);
   const rtcStartTime = Date.now();
   for (let url in urlToCalloutMap) {
-    promiseArray.push(sendRtcCallout_(url, rtcStartTime, win, rtcConfig['timeoutMillis'], urlToCalloutMap[url]));
+    promiseArray.push(sendRtcCallout_(
+        url, rtcStartTime, win, rtcConfig['timeoutMillis'], urlToCalloutMap[url]));
   }
   return promiseArray;
 }
 
 function maybeInflatePublisherUrls(rtcConfig, urlToCalloutMap, customMacros, ampDoc) {
+  if (!rtcConfig['urls']) {
+    return;
+  }
   let url;
   let remaining;
-  if (rtcConfig['urls']) {
-    for (let i in rtcConfig['urls']) {
-      url = rtcConfig['urls'][i];
-      maybeInflateAndAddUrl(url, customMacros, ampDoc, urlToCalloutMap);
-      if (Object.keys(urlToCalloutMap).length == MAX_RTC_CALLOUTS) {
-        logRemaining(rtcConfig['urls'].slice(++i), rtcConfig['vendors'])
-        break;
-      }
+  for (let i in rtcConfig['urls']) {
+    url = rtcConfig['urls'][i];
+    maybeInflateAndAddUrl(url, customMacros, ampDoc, urlToCalloutMap);
+    if (Object.keys(urlToCalloutMap).length == MAX_RTC_CALLOUTS) {
+      logRemaining(rtcConfig['urls'].slice(++i), rtcConfig['vendors'])
+      break;
     }
   }
 }
 
 function maybeInflateVendorUrls(rtcConfig, urlToCalloutMap, ampDoc) {
-  if (rtcConfig['vendors'] && Object.keys(urlToCalloutMap).length < MAX_RTC_CALLOUTS) {
-    let vendor;
-    let macros;
-    const vendors = Object.keys(rtcConfig['vendors']);
-    for (let i in vendors) {
-      vendor = vendors[i];
-      macros = rtcConfig['vendors'][vendor]
-      url = RTC_VENDORS[vendor.toLowerCase()];
-      if (url) {
-        maybeInflateAndAddUrl(url, macros, ampDoc, urlToCalloutMap, vendor);
-      }
-      if (Object.keys(urlToCalloutMap).length == MAX_RTC_CALLOUTS) {
-        log_remaining(vendors.slice(i));
-        break;
-      }
+  if (!rtcConfig['vendors'] || Object.keys(urlToCalloutMap).length == MAX_RTC_CALLOUTS) {
+    return;
+  }
+  let vendor;
+  let macros;
+  const vendors = Object.keys(rtcConfig['vendors']);
+  for (let i in vendors) {
+    vendor = vendors[i];
+    macros = rtcConfig['vendors'][vendor]
+    url = RTC_VENDORS[vendor.toLowerCase()];
+    if (url) {
+      maybeInflateAndAddUrl(url, macros, ampDoc, urlToCalloutMap, vendor);
+    }
+    if (Object.keys(urlToCalloutMap).length == MAX_RTC_CALLOUTS) {
+      log_remaining(vendors.slice(i));
+      break;
     }
   }
 }
