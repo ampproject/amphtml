@@ -68,6 +68,16 @@
    */
 
     {
+      "url": "examples/visual-tests/amp-audio.amp.html",
+      "name": "AMP Audio",
+      "loading_complete_css": [
+        "#audio1",
+        "#audio2",
+        "#audio3"
+      ]
+    },
+
+    {
       "url": "examples/visual-tests/amp-by-example/amp-by-example.html",
       "name": "Amp By Example"
     },
