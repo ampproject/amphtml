@@ -11,8 +11,8 @@ const TAG = 'real-time-config';
 /** @type {number} */
 export const MAX_RTC_CALLOUTS = 5;
 
-function realTimeConfigManager(element, win, ampDoc, customMacros) {
-  const rtcConfig = validateRtcConfig(element);
+function realTimeConfigManager(a4aElement, customMacros) {
+  const rtcConfig = validateRtcConfig(a4aElement.element);
   if (!rtcConfig) {
     return;
   }
@@ -21,8 +21,8 @@ function realTimeConfigManager(element, win, ampDoc, customMacros) {
   const seenUrls = [];
   const rtcStartTime = Date.now();
   (rtcConfig['urls'] || []).forEach(url => {
-    inflateAndSendRtc_(element, url, seenUrls, promiseArray,
-                       rtcStartTime, customMacros, win, ampDoc,
+    inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
+                       rtcStartTime, customMacros,
                        rtcConfig['timeoutMillis']);
   });
   Object.keys(rtcConfig['vendors'] || []).forEach(vendor => {
@@ -32,34 +32,35 @@ function realTimeConfigManager(element, win, ampDoc, customMacros) {
       return;
     }
     const macros = rtcConfig['vendors'][vendor];
-    inflateAndSendRtc_(element, url, seenUrls, promiseArray, rtcStartTime,
-                       macros, win, ampDoc, rtcConfig['timeoutMillis'],
+    inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray, rtcStartTime,
+                       macros, rtcConfig['timeoutMillis'],
                        vendor);
   });
   return Promise.all(promiseArray);
 }
 
-function inflateAndSendRtc_(element, url, seenUrls, promiseArray, rtcStartTime,
-                            macros, win, ampDoc, timeoutMillis, opt_vendor) {
+function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray, rtcStartTime,
+                            macros, timeoutMillis, opt_vendor) {
+  const win = a4aElement.win;
+  const ampDoc = a4aElement.getAmpDoc();
   if(promiseArray.length == MAX_RTC_CALLOUTS) {
     dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC Callout URLS exceeded, ` +
-               ` dropping ${url}`);
+               `dropping ${url}`);
     return;
   }
   const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
   // TODO: change to use whitelist.
   url = urlReplacements.expandSync(url, macros);
-  const callout = opt_vendor || url;
   try {
     user().assert(isSecureUrl(url),
                   `Dropping RTC URL: ${url}, not secure`);
     user().assert(!seenUrls.includes(url),
                   `Dropping duplicate calls to RTC URL: ${url}`)
-  } catch (err) {
+  } catch (unused_err) {
     return;
   }
   seenUrls.push(url);
-  promiseArray.push(sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout));
+  promiseArray.push(sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, opt_vendor || url));
 }
 
 function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout) {
@@ -110,7 +111,7 @@ function validateRtcConfig(element) {
                   'RTC invalid vendors');
     user().assert(!rtcConfig['urls'] || isArray(rtcConfig['urls']),
                   'RTC invalid urls');
-  } catch (err) {
+  } catch (unused_err) {
     return false;
   }
   let timeout = rtcConfig['timeoutMillis'];

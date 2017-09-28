@@ -111,6 +111,13 @@ export let SizeInfoDef;
     }} */
 let CreativeMetaDataDef;
 
+/** @typedef {
+      rtcResponse: ?Object<string, *>,
+      rtcTime: number,
+      callout: string,
+      error: ?Error} */
+let rtcResponseDef;
+
 /** @private */
 export const LIFECYCLE_STAGES = {
   // Note: Use strings as values here, rather than numbers, so that "0" does
@@ -362,7 +369,6 @@ export class AmpA4A extends AMP.BaseElement {
           });
         });
   }
-
 
   /** @override */
   renderOutsideViewport() {
@@ -1015,7 +1021,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
-   * @param {Array=} opt_rtcResponsesPromise
+   * @param {Array<rtcResponseDef>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
   getAdUrl(opt_rtcResponsesPromise) {
@@ -1557,15 +1563,12 @@ export class AmpA4A extends AMP.BaseElement {
     if (!!AMP.realTimeConfigManager) {
       try {
         return AMP.realTimeConfigManager(
-            this.element, this.win, this.getAmpDoc(),
-            this.getCustomRealTimeConfigMacros_());
+            this, this.getCustomRealTimeConfigMacros_());
       } catch (err) {
         dev().error(TAG, err);
         dev().error(TAG, 'Could not perform Real Time Config');
       }
     }
-    // If RTC can't be performed, pass null in the resolution.
-    return Promise.resolve(null);
   }
 
   /**
