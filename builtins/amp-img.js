@@ -114,6 +114,7 @@ export class AmpImg extends BaseElement {
     }
 
     this.img_ = new Image();
+    this.img_.setAttribute('async', '');
     if (this.element.id) {
       this.img_.setAttribute('amp-img-id', this.element.id);
     }
