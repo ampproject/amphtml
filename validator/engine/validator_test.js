@@ -209,10 +209,14 @@ describe('ValidatorOutput', () => {
         'http://google.com/foo.html#development=1');
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-        'http://google.com/foo.html:28:3 The tag \'script\' is disallowed ' +
-        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
-        'http://google.com/foo.html:29:3 The tag \'script\' is disallowed ' +
-        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]';
+        'http://google.com/foo.html:28:3 Only AMP runtime \'script\' tags ' +
+        'are allowed, and only in the document head. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#html-tags) ' +
+        '[CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
+        'http://google.com/foo.html:29:3 Only AMP runtime \'script\' tags ' +
+        'are allowed, and only in the document head. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#html-tags) ' +
+        '[CUSTOM_JAVASCRIPT_DISALLOWED]';
     test.run();
   });
 });

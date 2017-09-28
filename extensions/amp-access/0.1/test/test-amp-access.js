@@ -744,7 +744,8 @@ describes.fakeWin('AccessService authorization', {
     });
   });
 
-  it('should resolve first-authorization promise after success', () => {
+  // TODO(dvoytenko): Enable after fixing #11398.
+  it.skip('should resolve first-authorization promise after success', () => {
     expectGetReaderId('reader1');
     adapterMock.expects('authorize')
         .withExactArgs()

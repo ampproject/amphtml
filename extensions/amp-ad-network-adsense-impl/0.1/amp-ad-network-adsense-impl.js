@@ -31,12 +31,13 @@ import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {
   additionalDimensions,
   googleAdUrl,
-  isGoogleAdsA4AValidEnvironment,
   isReportingEnabled,
   extractAmpAnalyticsConfig,
   addCsiSignalsToAmpAnalyticsConfig,
   QQID_HEADER,
   maybeAppendErrorParameter,
+  getEnclosingContainerTypes,
+  ValidAdContainerTypes,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
@@ -144,8 +145,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
+    /**
+     * isValidElement used to also check that we are in a valid A4A environment,
+     * however this is not necessary as that is checked by adsenseIsA4AEnabled,
+     * which is always called as part of the upgrade path from an amp-ad element
+     * to an amp-ad-adsense element. Thus, if we are an amp-ad, we can be sure
+     * that it has been verified.
+     */
     return !!this.element.getAttribute('data-ad-client') &&
-        isGoogleAdsA4AValidEnvironment(this.win) && this.isAmpAdElement();
+        this.isAmpAdElement();
   }
 
   /** @override */
@@ -214,6 +222,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         format, this.uniqueSlotId_, adClientId);
     const viewportSize = this.getViewport().getSize();
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
+    const enclosingContainers = getEnclosingContainerTypes(this.element);
+    const pfx = enclosingContainers.includes(
+        ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) ||
+        enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
     const parameters = {
       'client': adClientId,
       format,
@@ -236,6 +248,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'ifi': this.win['ampAdGoogleIfiCounter']++,
       'rc': this.fromResumeCallback ? 1 : null,
       'rafmt': this.isResponsive_() ? 13 : null,
+      'pfx': pfx ? '1' : '0',
     };
 
     const experimentIds = [];

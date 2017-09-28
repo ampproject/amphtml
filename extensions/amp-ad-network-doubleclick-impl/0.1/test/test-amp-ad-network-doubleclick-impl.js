@@ -19,6 +19,7 @@ import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
 } from '../../../amp-a4a/0.1/amp-a4a';
+import {DATA_ATTR_NAME} from '../../../amp-a4a/0.1/refresh-manager';
 import {VerificationStatus} from '../../../amp-a4a/0.1/signature-verifier';
 import {
   AMP_SIGNATURE_HEADER,
@@ -145,6 +146,13 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl = new AmpAdNetworkDoubleclickImpl(element);
       expect(impl.isValidElement()).to.be.true;
     });
+    it('should not be valid if remote.html present', () => {
+      const meta = doc.createElement('meta');
+      meta.setAttribute('name', 'amp-3p-iframe-src');
+      doc.head.appendChild(meta);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(impl.isValidElement()).to.be.false;
+    });
   });
 
 
@@ -221,6 +229,32 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(fireDelayedImpressionsSpy.withArgs(
           'https://c.com?e=f,https://d.com?g=h', true)).to.be.calledOnce;
     });
+
+    it('should initialize refresh manager', () => {
+      impl.extractSize({
+        get(name) {
+          return name == 'amp-force-refresh' ? '30' : undefined;
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.element.getAttribute(DATA_ATTR_NAME)).to.equal('30');
+    });
+
+    it('should not override publisher\'s refresh settings', () => {
+      impl.element.setAttribute(DATA_ATTR_NAME, '45');
+      impl.extractSize({
+        get(name) {
+          return name == 'amp-force-refresh' ? '30' : undefined;
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.element.getAttribute(DATA_ATTR_NAME)).to.equal('45');
+    });
+
   });
 
   describe('#onCreativeRender', () => {
@@ -379,7 +413,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           /(\?|&)oid=2(&|$)/,
           /(\?|&)isw=[0-9]+(&|$)/,
           /(\?|&)ish=[0-9]+(&|$)/,
-          /(\?|&)pfx=(1|0)(&|$)/,
           /(\?|&)eid=([^&]+%2c)*12345678(%2c[^&]+)*(&|$)/,
           /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%-]+(&|$)/,
           /(\?|&)top=localhost(&|$)/,

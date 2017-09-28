@@ -81,7 +81,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   afterEach(() => {
-    sandbox.reset();
+    sandbox.restore();
   });
 
   it('should work for size, layoutRect and position observer', () => {
@@ -142,6 +142,9 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     sandbox.reset();
 
     // DOM change, target position changed
+    sandbox.restore();
+    sandbox.stub(
+        Services.resourcesForDoc(win.document), 'get').returns([element]);
     positionCallback({
       viewportRect: layoutRectLtwh(0, 10, 200, 100),
       targetRect: layoutRectLtwh(20, 10, 50, 50),
