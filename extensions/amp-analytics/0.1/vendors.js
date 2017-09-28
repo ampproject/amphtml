@@ -947,7 +947,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'on': 'scroll',
         'scrollSpec': {
           'verticalBoundaries': [
-            1,
+            5,
           ],
         },
         'request': 's0',
@@ -956,7 +956,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'on': 'scroll',
         'scrollSpec': {
           'verticalBoundaries': [
-            33,
+            35,
           ],
         },
         'request': 's1',
@@ -965,7 +965,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'on': 'scroll',
         'scrollSpec': {
           'verticalBoundaries': [
-            66,
+            65,
           ],
         },
         'request': 's2',
@@ -974,7 +974,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'on': 'scroll',
         'scrollSpec': {
           'verticalBoundaries': [
-            99,
+            95,
           ],
         },
         'request': 's3',
