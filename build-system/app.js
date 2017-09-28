@@ -530,21 +530,6 @@ app.use('/examples/bind/live-list.amp.html',
       next();
     });
 
-app.use('/examples/amp-fresh.amp.html', (req, res, next) => {
-  if ('amp-fresh' in req.query && req.query['amp-fresh']) {
-    res.setHeader('Content-Type', 'text/html');
-    res.end(`<!doctype html>
-        <html ⚡>
-          <body>
-            <amp-fresh id="amp-fresh-1"><span>hello</span> world!</amp-fresh>
-            <amp-fresh id="amp-fresh-2">foo bar</amp-fresh>
-          </body>
-        </html>`);
-    return;
-  }
-  next();
-});
-
 app.use('/impression-proxy/', (req, res) => {
   assertCors(req, res, ['GET']);
   // Fake response with the following optional fields:

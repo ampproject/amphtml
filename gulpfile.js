@@ -82,7 +82,6 @@ declareExtension('amp-facebook-like', '0.1', false);
 declareExtension('amp-fit-text', '0.1', true);
 declareExtension('amp-font', '0.1', false);
 declareExtension('amp-form', '0.1', true);
-declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true);
 declareExtension('amp-fx-parallax', '0.1', false);
 declareExtension('amp-gfycat', '0.1', false);
