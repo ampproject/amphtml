@@ -17,7 +17,7 @@
 import {TAG, CONFIG_TAG, SERVICE_TAG} from './vars';
 import {Layout} from '../../../src/layout';
 import {getServiceForDoc} from '../../../src/service';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 
 /** @enum {string} */
@@ -195,23 +195,25 @@ export class WebPushConfig extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Event} event
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @private
    */
-  onSubscribe_(event) {
+  onSubscribe_(invocation) {
     // Disable the widget temporarily to prevent multiple clicks The widget will
     // be re-enabled when the popup is closed, or the user interacts with the
     // prompt
-    this.setWidgetDisabled_(event.source, true);
+    const widget = dev().assertElement(invocation.event.target);
+
+    this.setWidgetDisabled_(widget, true);
     const webPushService = getServiceForDoc(this.getAmpDoc(), SERVICE_TAG);
     webPushService
         .subscribe(() => {
         // On popup closed
-          this.setWidgetDisabled_(event.source, false);
+          this.setWidgetDisabled_(widget, false);
         })
         .then(() => {
         // On browser notification permission granted, denied, or dismissed
-          this.setWidgetDisabled_(event.source, false);
+          this.setWidgetDisabled_(widget, false);
         });
   }
 
@@ -226,14 +228,16 @@ export class WebPushConfig extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Event} event
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @private
    */
-  onUnsubscribe_(event) {
-    this.setWidgetDisabled_(event.source, true);
+  onUnsubscribe_(invocation) {
+    const widget = dev().assertElement(invocation.event.target);
+
+    this.setWidgetDisabled_(widget, true);
     const webPushService = getServiceForDoc(this.getAmpDoc(), SERVICE_TAG);
     webPushService.unsubscribe().then(() => {
-      this.setWidgetDisabled_(event.source, false);
+      this.setWidgetDisabled_(widget, false);
     });
   }
 

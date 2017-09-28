@@ -297,10 +297,21 @@ describes.realWin('web-push-service widget visibilities', {
 
       sandbox./*OK*/stub(
           webPush,
-          'queryNotificationPermission',
+          'isQuerySupported_',
+          () => Promise.resolve(true)
+      );
+
+      sandbox./*OK*/stub(
+          webPush,
+          'getCanonicalFrameStorageValue_',
           () => Promise.resolve(NotificationPermission.DENIED)
       );
 
+      sandbox./*OK*/stub(
+          webPush,
+          'doesWidgetCategoryMarkupExist_',
+          () => true
+      );
       // We've mocked default notification permissions
       return webPush.updateWidgetVisibilities();
     }).then(() => {

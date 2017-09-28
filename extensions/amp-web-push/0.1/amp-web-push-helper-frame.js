@@ -59,14 +59,6 @@ export let NotificationPermissionStateMessage;
 export let StorageGetMessage;
 
 /**
- * @typedef {{
- *    key: string,
- *    value: string,
- * }}
- */
-export let StorageSetMessage;
-
-/**
   * @fileoverview
   * Loaded as an invisible iframe on the AMP page, and serving a page on the
   * canonical origin, this iframe enables same-origin access to push
@@ -188,26 +180,6 @@ export class AmpWebPushHelperFrame {
     }
 
     this.replyToFrameWithPayload_(replyToFrame, true, null, storageValue);
-  }
-
-  /**
-   * @param {StorageSetMessage} message
-   * @param {function(?, function())} replyToFrame
-   * @private
-   */
-  onAmpPageMessageReceivedStorageSet_(message, replyToFrame) {
-    try {
-      // Reply with our standard notification permission state response
-      if (message && message.key && this.window_.localStorage) {
-        this.window_.localStorage.setItem(message.key, message.value);
-      } else {
-        user().warn(TAG, 'LocalStorage insertion failed.');
-      }
-    } catch (e) {
-      // LocalStorage may not be accessible
-    }
-
-    this.replyToFrameWithPayload_(replyToFrame, true, null, null);
   }
 
   /**
@@ -427,10 +399,6 @@ export class AmpWebPushHelperFrame {
     this.ampMessenger_.on(
         WindowMessenger.Topics.STORAGE_GET,
         this.onAmpPageMessageReceivedStorageGet_.bind(this)
-    );
-    this.ampMessenger_.on(
-        WindowMessenger.Topics.STORAGE_SET,
-        this.onAmpPageMessageReceivedStorageSet_.bind(this)
     );
 
     this.waitUntilWorkerControlsPage().then(() => {

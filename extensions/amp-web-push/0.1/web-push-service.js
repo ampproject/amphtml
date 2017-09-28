@@ -492,40 +492,50 @@ export class WebPushService {
       task and returning whether a query topic was supported. This prevents an
       unexpected messenger query from delaying indefinitely.
      */
-    this.isQuerySupported_(WindowMessenger.Topics.STORAGE_GET)
-        .then(isSupported => {
+    return this.isQuerySupported_(WindowMessenger.Topics.STORAGE_GET)
+        .then(response => {
+        /*
+          Response could be "denied", "granted", or "default". This is a
+          response to the notification permission state query, and we're
+          hijacking the call to get a special return value if the user has
+          updated their helper frame.
+
+          We want to make sure response is a boolean true value, and not a
+          permission string.
+        */
+          const isSupported = response === true;
           if (isSupported) {
           /*
-          The site has v2+ of AMP web push's helper frame and supports
-          retrieving the remote storage value.
-         */
+            The site has v2+ of AMP web push's helper frame and supports
+            retrieving the remote storage value.
+          */
             return this.getCanonicalFrameStorageValue_(
                 StorageKeys.NOTIFICATION_PERMISSION
           );
           } else {
           /*
-          The site is running our initial AMP web push release and the helper
-          frame does not support retrieving the remote storage value. Assume the
-          permission is default to provide the best user experience.
-         */
+            The site is running our initial AMP web push release and the helper
+            frame does not support retrieving the remote storage value. Assume the
+            permission is default to provide the best user experience.
+          */
             return Promise.resolve(NotificationPermission.DEFAULT);
           }
         })
         .then(canonicalNotificationPermission => {
-        /*
-        If the canonical notification permission is:
-          - Blocked
-            - If the publisher has defined a blocked widget section, show it,
-              otherwise show the unsubscribed widget.
-          - Default or Granted
-            - Resume flow
-       */
+          /*
+            If the canonical notification permission is:
+              - Blocked
+                - If the publisher has defined a blocked widget section, show it,
+                  otherwise show the unsubscribed widget.
+              - Default or Granted
+                - Resume flow
+          */
           if (canonicalNotificationPermission ===
               NotificationPermission.DENIED) {
             if (
-            this.doesWidgetCategoryMarkupExist_(
-                WebPushWidgetVisibilities.BLOCKED
-            )
+              this.doesWidgetCategoryMarkupExist_(
+                  WebPushWidgetVisibilities.BLOCKED
+              )
           ) {
               this.updateWidgetVisibilitiesBlocked_();
             } else {
@@ -749,7 +759,7 @@ export class WebPushService {
    *
    * @param {string} queryType One of the topics defined in
    * WindowMessenger.Topics.
-   * @return {Promise<bool>}
+   * @return {Promise<boolean>}
    * @private
    */
   isQuerySupported_(queryType) {

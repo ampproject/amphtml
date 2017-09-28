@@ -89,12 +89,16 @@ export class AmpWebPushPermissionDialog {
    *
    * If this dialog was redirected instead of opened as a pop up, the page is
    * redirected back.
+   *
+   * A DOM section with ID preload is visible (defaults to a spinning circle)
+   * while this script is downloading and running. The preload section is then
+   * hidden and the postload section is unhidden.
    */
   run() {
-    this.addDocumentCss_('.amp-invisible { display: none; }');
     this.onCloseIconClick_();
     this.storeNotificationPermission_();
     this.showTargetPermissionSection_();
+    this.showPostloadSection_();
     if (
       this.window_.Notification.permission !== NotificationPermission.DENIED
     ) {
@@ -106,14 +110,21 @@ export class AmpWebPushPermissionDialog {
 
   /** @private */
   onCloseIconClick_() {
-    this.window_.document
-        .querySelector('#close')
-        .addEventListener('click', () => {
-          this.closeOrReturnDialog_();
-        });
+    const closeIcon = this.window_.document.querySelector('#close');
+
+    if (closeIcon) {
+      closeIcon.addEventListener('click', () => {
+        this.closeDialog();
+      });
+    }
   }
 
-  closeOrReturnDialog_() {
+  /**
+   * Closes the popup or redirects the dialog back to the AMP page.
+   *
+   * @public
+   */
+  closeDialog() {
     if (this.isCurrentDialogPopup()) {
       this.window_.close();
     } else {
@@ -152,9 +163,10 @@ export class AmpWebPushPermissionDialog {
    * @private
    */
   storeNotificationPermission_() {
-    this.window_.localStorage[
-      StorageKeys.NOTIFICATION_PERMISSION
-    ] = this.window_.Notification.permission;
+    this.window_.localStorage.setItem(
+        StorageKeys.NOTIFICATION_PERMISSION,
+        this.window_.Notification.permission
+     );
   }
 
   /** @private */
@@ -176,30 +188,23 @@ export class AmpWebPushPermissionDialog {
     }
   }
 
-  /**
-   * @param {string} css
-   * @private
-   */
-  addDocumentCss_(css) {
-    const head =
-      this.window_.document.head ||
-      this.window_.document.getElementsByTagName('head')[0];
-    const style = document.createElement('style');
+  /** @private */
+  showPostloadSection_() {
+    // Hide all permission sections first
+    const preloadSection = this.window_.document.querySelector('#preload');
+    const postloadSection = this.window_.document.querySelector('#postload');
 
-    style.type = 'text/css';
-    if (style.styleSheet) {
-      style.styleSheet.cssText = css;
-    } else {
-      style.appendChild(document.createTextNode(css));
+    if (preloadSection && postloadSection) {
+      this.setDomElementVisibility_(preloadSection, false);
+      this.setDomElementVisibility_(postloadSection, true);
     }
-
-    head.appendChild(style);
   }
 
   /**
+   * Toggles a predefined visiblity class name on the specified DOM element.
    *
    * @param {HtmlElement} domElement
-   * @param {string} url
+   * @param {boolean} isVisible
    * @private
    *
    */
@@ -208,7 +213,7 @@ export class AmpWebPushPermissionDialog {
       return;
     }
 
-    const invisibilityCssClassName = 'amp-invisible';
+    const invisibilityCssClassName = 'invisible';
 
     if (isVisible) {
       domElement.classList.remove(invisibilityCssClassName);
@@ -232,11 +237,11 @@ export class AmpWebPushPermissionDialog {
             .then(result => {
               const message = result[0];
               if (message && message.closeFrame) {
-                this.closeOrReturnDialog_();
+                this.closeDialog();
               }
             });
       } else {
-        this.closeOrReturnDialog_();
+        this.closeDialog();
       }
     });
   }
