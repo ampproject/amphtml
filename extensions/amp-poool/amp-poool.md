@@ -20,9 +20,8 @@ limitations under the License.
   <tr>
     <td width="40%"><strong>Description</strong></td>
     <td>
-      Displays any Poool paywall<br />
-      Used to lock a premium article on a publisher website.
-      See <a href="http://poool.fr">poool.fr</a>
+      Displays any Poool paywall<br />.
+      See <a href="http://poool.fr">poool.fr</a> and <a href="http://demo.poool.fr">demo.poool.fr</a> for more details.
     </td>
   </tr>
   <tr>
@@ -79,9 +78,11 @@ For more informations, check our [documentation](https://dev.poool.fr/doc/sdk).
 </amp-poool>
 ```
 
-If you decide to set your own custom configuration, you can change absolutely anything in config and style attributes.
+If you decide to set your own custom configuration, you can change absolutely all config and style attributes.
 To custom everything as you want, check our [documentation](https://dev.poool.fr/doc/sdk).
-Find the attribute you want to change. Example :
+Find the attribute you want to change.
+
+Example :
 - You read the doc and decide to change "force_widget" config variable.
 - Just set a new attribute in your amp-poool tag : force-widget="video".
 - **Notice that you have to set amp-poool tag attribute with "-" symbol instead of "_" one.**
@@ -96,21 +97,21 @@ To learn more about events, please check our [documentation](https://dev.poool.f
 
 **init**
 
-The bundle_id of your application (key given by Poool).
+Your App ID (key given by Poool).
 
 **page-view**
 
-Used to tell Poool a page has been visited by current user
+Used to tell Poool a page has been visited by current user.
 Check our [documentation](http://dev.poool.fr/doc/sdk#page_view).
 
 
 ## Optional attributes
 
-Amp-poool extension don't need more attribute to work properly on your page.
-- [Config](https://dev.poool.fr/doc/sdk#config) variables are optionnal
-- [Style](https://dev.poool.fr/doc/sdk#styles) variables are optionnal
-- [Event](https://dev.poool.fr/doc/sdk#events) configurations are optionnal
-- [Actions](https://dev.poool.fr/doc/sdk) variables are optionnal (except page-view who is required)
+Amp-poool extension does't need more attribute to work properly on your page.
+- [Config](https://dev.poool.fr/doc/sdk#configuration) variables are optional
+- [Style](https://dev.poool.fr/doc/sdk#styles) variables are optional
+- [Event](https://dev.poool.fr/doc/sdk#events) configurations are optional
+- [Actions](https://dev.poool.fr/doc/sdk) variables are optional (except page-view who is required)
 
 
 Don't forget to check our [documentation](https://dev.poool.fr/doc/sdk) before configuring amp-poool.
@@ -118,7 +119,7 @@ Don't forget to check our [documentation](https://dev.poool.fr/doc/sdk) before c
 ## Study mode
 
 If you want poool as study mode to begin, don't forget to finish your amp-poool tag with "conversion" attribute set on "true".
-"Conversion" is used to tell Poool when a normal user has been converted into a subscribed one
+"Conversion" is used to tell Poool when a normal user has been converted into a subscribed one.
 Once again, check our [documentation](https://dev.poool.fr/doc/sdk) on second tab ("I'll first do a study").
 
 ## Validation
