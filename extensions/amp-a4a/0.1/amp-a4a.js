@@ -1554,12 +1554,11 @@ export class AmpA4A extends AMP.BaseElement {
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
 
   tryExecuteRealTimeConfig_() {
-    if (!!AMP.RealTimeConfigManager) {
+    if (!!AMP.realTimeConfigManager) {
       try {
-        const realTimeConfigManager = new AMP.RealTimeConfigManager(
+        return AMP.realTimeConfigManager(
             this.element, this.win, this.getAmpDoc(),
             this.getCustomRealTimeConfigMacros_());
-        return realTimeConfigManager.executeRealTimeConfig();
       } catch (err) {
         dev().error(TAG, err);
         dev().error(TAG, 'Could not perform Real Time Config');
