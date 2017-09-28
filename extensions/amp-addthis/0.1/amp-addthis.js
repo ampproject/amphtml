@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,9 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyle} from '../../../src/style';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
-import {ConfigManager} from './ConfigManager';
+import {ConfigManager} from './config-manager';
 import {CUSTOM_SHARE_KEYS, ORIGIN, ICON_SIZE, ALT_TEXT} from './constants';
 
 // This `configManager` will be shared by all AmpAddThis elements on a page, to prevent unnecessary
@@ -54,9 +55,6 @@ class AmpAddThis extends AMP.BaseElement {
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
-    /** @private {?Promise} */
-    this.iframeLoadPromise_ = null;
-
     /** @private {string} */
     this.pubId_ = '';
 
@@ -72,11 +70,10 @@ class AmpAddThis extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    const {preconnect} = this;
-    preconnect.url(ORIGIN, opt_onLayout);
-    preconnect.url('https://m.addthis.com', opt_onLayout);
-    preconnect.url('https://m.addthisedge.com', opt_onLayout);
-    preconnect.url('https://cache.addthiscdn.com', opt_onLayout);
+    this.preconnect.url(ORIGIN, opt_onLayout);
+    this.preconnect.url('https://m.addthis.com', opt_onLayout);
+    this.preconnect.url('https://m.addthisedge.com', opt_onLayout);
+    this.preconnect.url('https://cache.addthiscdn.com', opt_onLayout);
   }
 
   /**
@@ -93,21 +90,20 @@ class AmpAddThis extends AMP.BaseElement {
    * @override
    */
   buildCallback() {
-    const {element} = this;
-    const pubId = element.getAttribute('data-pub-id') ||
-        element.getAttribute('pub-id');
-    const widgetId = element.getAttribute('data-widget-id') ||
-        element.getAttribute('widget-id');
+    const pubId = this.element.getAttribute('data-pub-id') ||
+        this.element.getAttribute('pub-id');
+    const widgetId = this.element.getAttribute('data-widget-id') ||
+        this.element.getAttribute('widget-id');
 
     this.pubId_ = user().assert(
         pubId,
         'The data-pub-id attribute is required for <amp-addthis> %s',
-        element
+        this.element
     );
     this.widgetId_ = user().assert(
         widgetId,
         'The data-widget-id attribute is required for <amp-addthis> %s',
-        element
+        this.element
     );
     this.shareConfig_ = CUSTOM_SHARE_KEYS.reduce((config, key) => {
       const value = this.element.getAttribute(`data-share-${key}`);
@@ -119,35 +115,33 @@ class AmpAddThis extends AMP.BaseElement {
 
     // Fallbacks for url and title
     if (!this.shareConfig_.url) {
-      this.shareConfig_.url = element.ownerDocument.location.href;
+      this.shareConfig_.url = this.getAmpDoc().getUrl();
     }
     if (!this.shareConfig_.title) {
-      this.shareConfig_.title = element.ownerDocument.title;
+      this.shareConfig_.title = this.getAmpDoc().win.document.title;
     }
   }
 
   createPlaceholderCallback() {
-    const {win} = this;
-
     const placeholder = createElementWithAttributes(
-        win.document,
+        this.win.document,
         'div',
-        /** @type !JsonObject */ ({
-          placeholder: '',
+        dict({
+          'placeholder': '',
         })
     );
     setStyle(placeholder, 'background-color', '#eee');
 
     const image = createElementWithAttributes(
-        win.document,
+        this.win.document,
         'amp-img',
-        /** @type !JsonObject */ ({
-          src: `https://cache.addthiscdn.com/icons/v3/thumbs/${ICON_SIZE}x${ICON_SIZE}/addthis.png`,
-          layout: 'fixed',
-          width: ICON_SIZE,
-          height: ICON_SIZE,
-          referrerpolicy: 'origin',
-          alt: ALT_TEXT,
+        dict({
+          'src': `https://cache.addthiscdn.com/icons/v3/thumbs/${ICON_SIZE}x${ICON_SIZE}/addthis.png`,
+          'layout': 'fixed',
+          'width': ICON_SIZE,
+          'height': ICON_SIZE,
+          'referrerpolicy': 'origin',
+          'alt': ALT_TEXT,
         })
     );
 
@@ -168,28 +162,28 @@ class AmpAddThis extends AMP.BaseElement {
     const iframe = createElementWithAttributes(
         /** @type !Document */ (this.element.ownerDocument),
         'iframe',
-        /** @type !JsonObject */ ({
-          frameborder: 0,
-          title: ALT_TEXT,
-          src: `${ORIGIN}/dc/amp-addthis.html`,
+        dict({
+          'frameborder': 0,
+          'title': ALT_TEXT,
+          'src': `${ORIGIN}/dc/amp-addthis.html`,
         })
     );
+    const iframeLoadPromise = this.loadPromise(iframe);
     setStyle(iframe, 'margin-bottom', '-5px');
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
-    this.iframeLoadPromise_ = this.loadPromise(iframe);
 
     configManager.register({
       pubId: this.pubId_,
       widgetId: this.widgetId_,
       shareConfig: this.shareConfig_,
       iframe,
-      iframeLoadPromise: this.iframeLoadPromise_,
+      iframeLoadPromise,
       win: this.win,
     });
 
-    return this.iframeLoadPromise_;
+    return iframeLoadPromise;
   }
 
   /**
@@ -204,7 +198,6 @@ class AmpAddThis extends AMP.BaseElement {
         iframe: this.iframe_,
       });
       this.iframe_ = null;
-      this.iframeLoadPromise_ = null;
     }
     return true;
   }

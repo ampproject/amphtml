@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,9 @@
  */
 
 import {createElementWithAttributes} from '../../../../src/dom';
-import {ConfigManager} from '../ConfigManager';
+import {dict} from '../../../../src/utils/object';
+
+import {ConfigManager} from '../config-manager';
 import {getConfigManager} from '../amp-addthis';
 import {
   CONFIGURATION_EVENT,
@@ -44,11 +46,11 @@ describes.realWin('amp-addthis', {
 
   function getAT(configuration, opt_responsive, opt_beforeLayoutCallback) {
     const {pubId, widgetId, shareConfig = {}} = configuration;
-    const elementAttributes = /** @type !JsonObject */ ({
+    const elementAttributes = dict({
       'data-pub-id': pubId,
       'data-widget-id': widgetId,
-      width: 111,
-      height: 222,
+      'width': 111,
+      'height': 222,
     });
     Object.keys(shareConfig).forEach(key => {
       elementAttributes[`data-share-${key}`] = shareConfig[key];
@@ -66,8 +68,12 @@ describes.realWin('amp-addthis', {
       if (opt_beforeLayoutCallback) {
         opt_beforeLayoutCallback(at);
       }
-      return at.layoutCallback();
-    }).then(() => at);
+      // Reference to the promise is kept here so that it can be passed on to
+      // and returned by the final callback (for the sake of tests), rather than
+      // just added to the chain.
+      const atIframeLoadPromise = at.layoutCallback();
+      return atIframeLoadPromise.then(() => ({atIframeLoadPromise}));
+    }).then(({atIframeLoadPromise}) => ({at, atIframeLoadPromise}));
   }
 
   function testIframe(iframe) {
@@ -78,13 +84,13 @@ describes.realWin('amp-addthis', {
   }
 
   it('renders the iframe', () => {
-    return getAT({pubId, widgetId}).then(at => {
+    return getAT({pubId, widgetId}).then(({at}) => {
       testIframe(at.querySelector('iframe'));
     });
   });
 
   it('renders a placeholder with an amp-img', () => {
-    return getAT({pubId, widgetId}).then(at => {
+    return getAT({pubId, widgetId}).then(({at}) => {
       const placeholder = at.querySelector('[placeholder]');
       const ampImg = placeholder.querySelector('amp-img');
 
@@ -110,18 +116,17 @@ describes.realWin('amp-addthis', {
   });
 
   it('removes the iframe after unlayoutCallback', () => {
-    return getAT({pubId, widgetId}).then(at => {
+    return getAT({pubId, widgetId}).then(({at}) => {
       const obj = at.implementation_;
       testIframe(at.querySelector('iframe'));
       obj.unlayoutCallback();
       expect(at.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
-      expect(obj.iframeLoadPromise_).to.be.null;
     });
   });
 
   it('registers the frame with the configManager on layout', () => {
-    return getAT({pubId, widgetId}).then(at => {
+    return getAT({pubId, widgetId}).then(({at, atIframeLoadPromise}) => {
       const obj = at.implementation_;
 
       expect(registerStub.calledOnce).to.be.true;
@@ -129,7 +134,7 @@ describes.realWin('amp-addthis', {
         pubId,
         widgetId,
         iframe: obj.iframe_,
-        iframeLoadPromise: obj.iframeLoadPromise_,
+        iframeLoadPromise: atIframeLoadPromise,
         element: obj.element,
         win: obj.win,
       }));
@@ -137,7 +142,7 @@ describes.realWin('amp-addthis', {
   });
 
   it('unregisters the frame with the configManager on unlayoutCallback', () => {
-    return getAT({pubId, widgetId}).then(at => {
+    return getAT({pubId, widgetId}).then(({at}) => {
       const obj = at.implementation_;
       obj.unlayoutCallback();
 
@@ -156,7 +161,8 @@ describes.realWin('amp-addthis', {
       media: 'https://i.imgur.com/yNlQWRM.jpg',
       description: 'This is a fake page.',
     };
-    return getAT({pubId, widgetId, shareConfig}).then(at => {
+
+    return getAT({pubId, widgetId, shareConfig}).then(({at}) => {
       const obj = at.implementation_;
       Object.keys(shareConfig).forEach(key => {
         expect(at.getAttribute(`data-share-${key}`)).to.equal(shareConfig[key]);
@@ -168,7 +174,7 @@ describes.realWin('amp-addthis', {
   });
 
   it('defaults to sharing ownerDocument\'s title and url', () => {
-    return getAT({pubId, widgetId}).then(at => {
+    return getAT({pubId, widgetId}).then(({at}) => {
       const obj = at.implementation_;
       const {shareConfig_} = obj;
       expect(shareConfig_.title).to.equal(doc.title);
