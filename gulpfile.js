@@ -106,6 +106,7 @@ declareExtension('amp-o2-player', '0.1', false);
 declareExtension('amp-ooyala-player', '0.1', false);
 declareExtension('amp-pinterest', '0.1', true);
 declareExtension('amp-playbuzz', '0.1', true);
+declareExtension('amp-poool', '0.1', true);
 declareExtension('amp-reach-player', '0.1', false);
 declareExtension('amp-reddit', '0.1', false);
 declareExtension('amp-share-tracking', '0.1', false);
