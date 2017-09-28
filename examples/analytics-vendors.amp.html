@@ -565,8 +565,9 @@ For complete documentation and additional examples please see: https://marketing
 <!-- End Mediametrie example -->
 
 <!-- mediarithmics tracking
-  serial is the account id (required)
-  level1 to 4 are page levels (optional)
+  site_token is the token of the website (required)
+  event_name is the name of the event (optional, default to '$page_view')
+  All custom properties should be added to the extraUrlParams object
 -->
 <amp-analytics type="mediarithmics" id="mediarithmics">
   <script type="application/json">
