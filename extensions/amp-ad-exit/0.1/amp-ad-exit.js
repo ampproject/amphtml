@@ -28,7 +28,7 @@ const TAG = 'amp-ad-exit';
  * @typedef {{
  *   finalUrl: string,
  *   trackingUrls: !Array<string>,
- *   vars: !./config.Variables,
+ *   vars: !./config.VariablesDef,
  *   filters: !Array<!./filters/filter.Filter>
  * }}
  */
@@ -107,7 +107,7 @@ export class AmpAdExit extends AMP.BaseElement {
       for (const customVarName in target.vars) {
         let customVar;
         if (customVarName[0] != '_' ||
-            !(customVar = /** @type {!./config.Variable} */
+            !(customVar = /** @type {!./config.VariableDef} */
             (target.vars[customVarName]))) {
           continue;
         }

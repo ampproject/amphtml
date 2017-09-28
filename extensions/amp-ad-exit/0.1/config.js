@@ -31,7 +31,7 @@ export let AmpAdExitConfig;
  * @typedef {{
  *   finalUrl: string,
  *   trackingUrls: (!Array<string>|undefined),
- *   vars: (Variables|undefined),
+ *   vars: (VariablesDef|undefined),
  *   filters: (!Array<string>|undefined)
  * }}
  */
@@ -44,12 +44,12 @@ export let NavigationTargetConfig;
  *   vendorAnalyticsResponseKey: (string|undefined)
  * }}
  */
-export let Variable;
+export let VariableDef;
 
 /**
- * @typedef {!Object<string, !Variable>}
+ * @typedef {!Object<string, !VariableDef>}
  */
-export let Variables;
+export let VariablesDef;
 
 /**
  * @typedef {{
