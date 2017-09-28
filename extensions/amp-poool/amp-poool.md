@@ -1,0 +1,126 @@
+<!---
+Copyright 2017 The AMP HTML Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS-IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+# <a name=”amp-poool></a> `amp-poool`
+
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>
+      Displays any Poool paywall<br />
+      Used to lock a premium article on a publisher website.
+      See <a href="http://poool.fr">poool.fr</a>
+    </td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-poool" src="https://cdn.ampproject.org/v0/amp-poool-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>responsive</td>
+  </tr>
+</table>
+
+[TOC]
+
+## Examples
+
+### Basic paywall (with poool default values)
+
+```html
+<amp-poool
+  layout="responsive"
+  width="150"
+  height="80"
+  init="Your personal key : XXXXX-XXXXX-XXXXX-XXXXX"
+  page-view="premium">
+</amp-poool>
+```
+
+If you decide to let basic configuration like above, don't forget to set on your article:
+- data-poool : (integer) Percent of text you want to be hidden/stripped.
+- data-poool-mode : (string) The method used by Poool.js to lock the content of your post.
+For more informations, check our [documentation](https://dev.poool.fr/doc/sdk).
+
+
+### Custom paywall (you can override every configs & styles)
+
+```html
+<amp-poool
+  layout="responsive"
+  width="150"
+  height="80"
+  init="Your personal key : XXXXX-XXXXX-XXXXX-XXXXX"
+  page-view="premium"
+  debug="true"
+  mode="excerpt"
+  percent="80"
+  post-container="#need-poool-custom"
+  force-widget="gift"
+  main-color="#ffc400"
+  background-color="#ffc400"
+  brand-logo="https://cdn.poool.fr/uploads/57ffab6c756a8cf24356d0c2/sudouest.jpg"
+  on-lock="function(){console.log('Locked !');}"
+  on-release="function(e){console.log('Released with widget ' + e.widget);}">
+</amp-poool>
+```
+
+If you decide to set your own custom configuration, you can change absolutely anything in config and style attributes.
+To custom everything as you want, check our [documentation](https://dev.poool.fr/doc/sdk).
+Find the attribute you want to change. Example :
+- You read the doc and decide to change "force_widget" config variable.
+- Just set a new attribute in your amp-poool tag : force-widget="video".
+- **Notice that you have to set amp-poool tag attribute with "-" symbol instead of "_" one.**
+
+To finish this, it is also possible to set action on poool event.
+You already have 2 examples on the amp-poool tag described above (on-lock & on-release).
+To learn more about events, please check our [documentation](https://dev.poool.fr/doc/sdk#events).
+
+
+## Required attributes
+### Both required:
+
+**init**
+
+The bundle_id of your application (key given by Poool).
+
+**page-view**
+
+Used to tell Poool a page has been visited by current user
+Check our [documentation](http://dev.poool.fr/doc/sdk#page_view).
+
+
+## Optional attributes
+
+Amp-poool extension don't need more attribute to work properly on your page.
+- [Config](https://dev.poool.fr/doc/sdk#config) variables are optionnal
+- [Style](https://dev.poool.fr/doc/sdk#styles) variables are optionnal
+- [Event](https://dev.poool.fr/doc/sdk#events) configurations are optionnal
+- [Actions](https://dev.poool.fr/doc/sdk) variables are optionnal (except page-view who is required)
+
+
+Don't forget to check our [documentation](https://dev.poool.fr/doc/sdk) before configuring amp-poool.
+
+## Study mode
+
+If you want poool as study mode to begin, don't forget to finish your amp-poool tag with "conversion" attribute set on "true".
+"Conversion" is used to tell Poool when a normal user has been converted into a subscribed one
+Once again, check our [documentation](https://dev.poool.fr/doc/sdk) on second tab ("I'll first do a study").
+
+## Validation
+
+See [amp-poool rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-poool/validator-amp-poool.protoascii) in the AMP validator specification.
