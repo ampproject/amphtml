@@ -26,7 +26,7 @@
 
 import {CSS} from '../../../build/amp-story-0.1.css';
 import {Layout} from '../../../src/layout';
-import {dev} from '../../../src/log';
+import {user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 
 /** @const */
@@ -37,17 +37,10 @@ export class AmpStory extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {boolean} */
-    this.isExperimentOn_ = false;
   }
 
   buildCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
-    if (!this.isExperimentOn_) {
-      dev().warn(TAG, `TAG ${TAG} disabled`);
-      return;
-    }
+    user().assert(isExperimentOn(this.win, TAG), 'enable amp-story experiment');
   }
 
   /** @override */
