@@ -251,7 +251,7 @@ export class AmpAdExit extends AMP.BaseElement {
     }
 
     this.ampAdResourceId_ = user().assert(
-        getAmpAdResourceId(this.element, this.win.top),
+        this.getAmpAdResourceId_(),
         `${TAG}: No friendly parent amp-ad element was found for amp-ad-exit.`);
 
     this.unlisten_ = listen(this.getAmpDoc().win, 'message', event => {
@@ -262,6 +262,17 @@ export class AmpAdExit extends AMP.BaseElement {
       this.vendorResponses_[responseMessage['vendor']] =
           responseMessage['message'];
     });
+  }
+
+  /**
+   * Gets the resource ID of the amp-ad element containing this amp-ad-exit tag.
+   * This is a pass-through for the version in service.js, solely because
+   * the one in service.js isn't stubbable for testing, since only object
+   * methods are stubbable.
+   * @returns {?string}
+   */
+  getAmpAdResourceId_() {
+    return getAmpAdResourceId(this.element, this.win.top);
   }
 
   /** @override */

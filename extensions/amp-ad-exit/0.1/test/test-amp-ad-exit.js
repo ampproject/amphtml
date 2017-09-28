@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-ad-exit';
+import {AmpAdExit} from '../amp-ad-exit';
 import * as sinon from 'sinon';
 import {ANALYTICS_CONFIG} from '../../../amp-analytics/0.1/vendors';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -148,6 +148,8 @@ describes.realWin('amp-ad-exit', {
     adDiv.style.width = '200px';
     adDiv.style.height = '200px';
     win.document.body.appendChild(adDiv);
+    sandbox.stub(AmpAdExit.prototype, 'getAmpAdResourceId_',
+        () => String(Math.round(Math.random()*10000)));
   }
 
   beforeEach(() => {
