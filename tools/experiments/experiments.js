@@ -150,12 +150,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
   {
-    id: 'amp-fresh',
-    name: 'Guaranteed minimum freshness on sections of a page',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
-  },
-  {
     id: 'amp-playbuzz',
     name: 'AMP extension for playbuzz items (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/6106',
@@ -276,6 +270,12 @@ const EXPERIMENTS = [
     id: 'inabox-position-api',
     name: 'Position API for foreign iframe',
     spec: 'https://github.com/ampproject/amphtml/issues/10995',
+  },
+  {
+    id: 'amp-story',
+    name: 'Visual storytelling in AMP',
+    spec: 'https://github.com/ampproject/amphtml/issues/11329',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
   },
 ];
 

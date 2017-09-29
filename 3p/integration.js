@@ -48,11 +48,17 @@ import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseJson} from '../src/json';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
-import {initLogConstructor, setReportError, user} from '../src/log';
+import {
+  initLogConstructor,
+  setReportError,
+  user,
+  isUserErrorMessage,
+} from '../src/log';
 import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
 import {startsWith} from '../src/string.js';
 import {AmpEvents} from '../src/amp-events';
+import {MessageType} from '../src/3p-frame-messaging';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -477,6 +483,14 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
       nonSensitiveDataPostMessage('bootstrap-loaded');
     }
   } catch (e) {
+    if (window.context && window.context.report3pError) {
+      // window.context has initiated yet
+      if (e.message && isUserErrorMessage(e.message)) {
+        // report user error to parent window
+        window.context.report3pError(e);
+      }
+    }
+
     const c = window.context || {mode: {test: false}};
     if (!c.mode.test) {
       lightweightErrorReport(e, c.canary);
@@ -558,6 +572,8 @@ function installContextUsingStandardImpl(win, data) {
     renderStart: triggerRenderStart,
     reportRenderedEntityIdentifier,
     requestResize: triggerResizeRequest,
+    report3pError,
+
 
     // Using quotes due to bug related to imported variables in object property
     // shorthand + object shorthand lint rule.
@@ -724,6 +740,19 @@ function reportRenderedEntityIdentifier(entityId) {
       'entityId should be a string %s', entityId);
   nonSensitiveDataPostMessage('entity-id', dict({
     'id': entityId,
+  }));
+}
+
+/**
+ * Send 3p error to parent iframe
+ * @param {!Error} e
+ */
+function report3pError(e) {
+  if (!e.message) {
+    return;
+  }
+  nonSensitiveDataPostMessage(MessageType.USER_ERROR_IN_IFRAME, dict({
+    'message': e.message,
   }));
 }
 

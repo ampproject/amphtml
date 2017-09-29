@@ -516,6 +516,24 @@ describes.realWin('Resource', {amp: true}, env => {
     });
   });
 
+  it('should complete startLayout with height == 0', () => {
+    elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
+    elementMock.expects('getLayout').returns('fluid').once();
+
+    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 0};
+    const loaded = resource.loadedOnce();
+    const promise = resource.startLayout();
+    expect(resource.layoutPromise_).to.not.equal(null);
+    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+
+    return promise.then(() => {
+      expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
+      expect(resource.layoutPromise_).to.equal(null);
+      return loaded;
+    });
+  });
+
   it('should fail startLayout', () => {
     const error = new Error('intentional');
     elementMock.expects('layoutCallback')

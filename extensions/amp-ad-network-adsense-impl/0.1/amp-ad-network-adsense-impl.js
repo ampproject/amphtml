@@ -36,6 +36,8 @@ import {
   addCsiSignalsToAmpAnalyticsConfig,
   QQID_HEADER,
   maybeAppendErrorParameter,
+  getEnclosingContainerTypes,
+  ValidAdContainerTypes,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
@@ -220,6 +222,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         format, this.uniqueSlotId_, adClientId);
     const viewportSize = this.getViewport().getSize();
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
+    const enclosingContainers = getEnclosingContainerTypes(this.element);
+    const pfx = enclosingContainers.includes(
+        ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) ||
+        enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
     const parameters = {
       'client': adClientId,
       format,
@@ -242,6 +248,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'ifi': this.win['ampAdGoogleIfiCounter']++,
       'rc': this.fromResumeCallback ? 1 : null,
       'rafmt': this.isResponsive_() ? 13 : null,
+      'pfx': pfx ? '1' : '0',
     };
 
     const experimentIds = [];
