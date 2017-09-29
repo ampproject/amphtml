@@ -1,7 +1,3 @@
-import {dev} from '../../../src/log';
-import {Services} from '../../../src/services';
-
-
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
@@ -17,6 +13,9 @@ import {Services} from '../../../src/services';
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {dev} from '../../../src/log';
+import {Services} from '../../../src/services';
 
 
 
