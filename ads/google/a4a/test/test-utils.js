@@ -115,16 +115,6 @@ describe('Google A4A utils', () => {
             continuousTimeMin: 1000,
           },
         },
-        continuousVisibleIniLoad: {
-          on: 'ini-load',
-          selector: 'amp-ad',
-          selectionMethod: 'closest',
-        },
-        continuousVisibleRenderStart: {
-          on: 'render-start',
-          selector: 'amp-ad',
-          selectionMethod: 'closest',
-        },
       },
     };
 
@@ -197,6 +187,10 @@ describe('Google A4A utils', () => {
 
       expect(newConfig.requests.iniLoadCsi).to.not.be.null;
       expect(newConfig.requests.renderStartCsi).to.not.be.null;
+      expect(newConfig.triggers.continuousVisibleIniLoad.request)
+          .to.equal('iniLoadCsi');
+      expect(newConfig.triggers.continuousVisibleRenderStart.request)
+          .to.equal('renderStartCsi');
       const getRegExps = metricName => [
         /^https:\/\/csi\.gstatic\.com\/csi\?/,
         /(\?|&)s=a4a(&|$)/,
