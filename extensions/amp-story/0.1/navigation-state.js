@@ -26,7 +26,7 @@ export const StateChangeType = {
 };
 
 
-/** typedef {{type: !StateChangeType, value: *}} */
+/** @typedef {{type: !StateChangeType, value: *}} */
 export let StateChangeEventDef;
 
 
