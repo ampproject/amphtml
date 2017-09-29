@@ -125,11 +125,13 @@ const sdReadyPromise = new Promise(resolve => {
   }
 });
 Promise.all([ampReadyPromise, sdReadyPromise]).then(() => {
-  AMP.attachShadowDocAsStream(...);
+  return AMP.attachShadowDocAsStream(...);
 });
 ```
 
 The working example can be found in [pwa.js sample](https://github.com/ampproject/amphtml/blob/f8b1e925c65ad29da288aab743b3c37da290e74e/examples/pwa/pwa.js#L216).
+
+We tested with [WebComponents.js polyfill](https://github.com/webcomponents/webcomponentsjs), but this should work transparently with any other polyfill. Let us know if you run into difficulties with other polyfills.
 
 
 ## Examples and references
