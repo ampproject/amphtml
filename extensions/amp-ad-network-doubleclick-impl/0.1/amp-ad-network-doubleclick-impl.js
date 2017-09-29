@@ -532,10 +532,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         `${this.initialSize_.width}x${this.initialSize_.height}`);
   }
 
-  /**
-   * @param {Array} opt_rtcResponsesPromise
-   * @override
-   */
+  /** @override */
   getAdUrl(opt_rtcResponsesPromise) {
     if (this.iframe && !this.isRefreshing) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);

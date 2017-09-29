@@ -111,11 +111,11 @@ export let SizeInfoDef;
     }} */
 let CreativeMetaDataDef;
 
-/** @typedef {
+/** @typedef {{
       rtcResponse: ?Object<string, *>,
       rtcTime: number,
       callout: string,
-      error: ?Error} */
+      error: ?Error}} */
 let rtcResponseDef;
 
 /** @private */
