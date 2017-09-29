@@ -41,7 +41,8 @@ function realTimeConfigManager(a4aElement, customMacros) {
       user().warn(TAG, `unknown vendor ${vendor}`);
       return;
     }
-    const macros = rtcConfig['vendors'][vendor];
+    // The ad network defined macros override vendor defined/pub specifed.
+    const macros = Object.assign(rtcConfig['vendors'][vendor], customMacros);
     inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray, rtcStartTime,
         macros, rtcConfig['timeoutMillis'],
         vendor);
@@ -70,8 +71,10 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     return;
   }
   const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
-  // TODO: change to use whitelist.
-  url = urlReplacements.expandSync(url, macros);
+  const whitelist = {};
+  Object.keys(macros || {}).forEach(key => whitelist[key] = true);
+  url = urlReplacements.expandSync(
+      url, macros, undefined, whitelist);
   try {
     user().assert(isSecureUrl(url),
         `Dropping RTC URL: ${url}, not secure`);
