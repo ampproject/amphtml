@@ -24,27 +24,6 @@ const Events = {
 };
 
 
-let triggerAnalyticsEventImpl = triggerAnalyticsEvent;
-
-
-/**
- * @param {!Function} fn
- * @visibleForTesting
- */
-export function setTriggerAnalyticsEventImplForTesting(fn) {
-  triggerAnalyticsEventImpl = fn;
-  return fn;
-}
-
-
-/**
- * @visibleForTesting
- */
-export function resetTriggerAnalyticsEventImplForTesting() {
-  triggerAnalyticsEventImpl = triggerAnalyticsEvent;
-}
-
-
 /**
  * Intermediate handler for amp-story specific analytics.
  */
@@ -101,6 +80,6 @@ export class AnalyticsTrigger {
    * @private
    */
   triggerEvent_(eventType, opt_vars) {
-    triggerAnalyticsEventImpl(this.element_, eventType, opt_vars);
+    triggerAnalyticsEvent(this.element_, eventType, opt_vars);
   }
 }

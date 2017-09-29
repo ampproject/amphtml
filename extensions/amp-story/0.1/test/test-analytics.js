@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 import {StateChangeType} from '../navigation-state';
-import {
-  AnalyticsTrigger,
-  setTriggerAnalyticsEventImplForTesting,
-} from '../analytics';
+import {AnalyticsTrigger} from '../analytics';
 
 
 describes.fakeWin('amp-story analytics', {}, env => {
@@ -29,12 +26,8 @@ describes.fakeWin('amp-story analytics', {}, env => {
     analyticsTrigger = new AnalyticsTrigger(rootEl);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('should trigger `story-page-visible` on change', () => {
-    const trigger = setTriggerAnalyticsEventImplForTesting(sandbox.spy());
+    const trigger = sandbox.stub(analyticsTrigger, 'triggerEvent_');
 
     analyticsTrigger.onStateChange({
       type: StateChangeType.ACTIVE_PAGE,
@@ -44,14 +37,14 @@ describes.fakeWin('amp-story analytics', {}, env => {
       },
     });
 
-    expect(trigger).to.have.been.calledWith(rootEl, 'story-page-visible',
+    expect(trigger).to.have.been.calledWith('story-page-visible',
         sandbox.match(vars =>
             vars.pageIndex === '123' &&
             vars.pageId == 'my-page-id'));
   });
 
   it('should trigger `story-page-visible` only once per page', () => {
-    const trigger = setTriggerAnalyticsEventImplForTesting(sandbox.spy());
+    const trigger = sandbox.stub(analyticsTrigger, 'triggerEvent_');
 
     for (let i = 0; i < 10; i++) {
       analyticsTrigger.onStateChange({
@@ -64,7 +57,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
     }
 
     expect(trigger).to.have.been.calledOnce;
-    expect(trigger).to.have.been.calledWith(rootEl, 'story-page-visible',
+    expect(trigger).to.have.been.calledWith('story-page-visible',
         sandbox.match(vars =>
             vars.pageIndex === '123' &&
             vars.pageId == 'my-page-id'));
@@ -80,7 +73,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
     }
 
     expect(trigger).to.have.been.calledTwice;
-    expect(trigger).to.have.been.calledWith(rootEl, 'story-page-visible',
+    expect(trigger).to.have.been.calledWith('story-page-visible',
         sandbox.match(vars =>
             vars.pageIndex === '6' &&
             vars.pageId == 'foo-page-id'));
