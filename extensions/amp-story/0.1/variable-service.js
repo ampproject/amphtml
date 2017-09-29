@@ -35,11 +35,11 @@ export class VariableService {
    * @param {!./navigation-state.StateChangeEvent} stateChangeEvent
    */
   onStateChange(stateChangeEvent) {
-    switch(stateChangeEvent.type) {
+    switch (stateChangeEvent.type) {
       case StateChangeType.ACTIVE_PAGE:
         this.pageIndex_ = stateChangeEvent.value.pageIndex;
         this.pageId_ = stateChangeEvent.value.pageId;
-      break;
+        break;
     }
   }
 

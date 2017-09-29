@@ -21,7 +21,6 @@ import {
 
 
 describes.fakeWin('amp-story analytics', {}, env => {
-  let win;
   let analyticsTrigger;
   let rootEl;
 

@@ -16,8 +16,7 @@
 import {NavigationState, StateChangeType} from '../navigation-state';
 
 
-describes.fakeWin('amp-story navigation state', {}, env => {
-  let win;
+describes.fakeWin('amp-story navigation state', {}, () => {
   let navigationState;
 
   function createConsumer() {

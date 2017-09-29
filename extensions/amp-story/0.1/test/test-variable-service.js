@@ -17,8 +17,7 @@ import {StateChangeType} from '../navigation-state';
 import {VariableService} from '../variable-service';
 
 
-describes.fakeWin('amp-story variable service', {}, env => {
-  let win;
+describes.fakeWin('amp-story variable service', {}, () => {
   let variableService;
 
   beforeEach(() => {

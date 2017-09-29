@@ -64,12 +64,12 @@ export class AnalyticsTrigger {
    * @param {!./navigation-state.StateChangeEvent} stateChangeEvent
    */
   onStateChange(stateChangeEvent) {
-    switch(stateChangeEvent.type) {
+    switch (stateChangeEvent.type) {
       case StateChangeType.ACTIVE_PAGE:
         this.onActivePageChange_(
             dev().assertNumber(stateChangeEvent.value.pageIndex),
             dev().assertString(stateChangeEvent.value.pageId));
-      break;
+        break;
     }
   }
 
