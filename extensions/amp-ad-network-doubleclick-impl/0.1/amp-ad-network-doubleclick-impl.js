@@ -507,9 +507,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           .map(dimension => dimension.join('x'))
           .join('|');
     }
-    const rc = (this.refreshCount_ && this.fromResumeCallback)
-        ? this.refreshCount_ + 1
-        : (this.fromResumeCallback ? 1 : this.refreshCount_ || null);
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     this.ifi_ = (this.isRefreshing && this.ifi_) ||
         this.win['ampAdGoogleIfiCounter']++;
@@ -526,7 +523,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (this.jsonTargeting_ &&
             this.jsonTargeting_['categoryExclusions']) || null),
       'ifi': this.ifi_,
-      rc,
+      'rc': this.refreshCount_ ? this.refreshCount_ : null,
+      'frc': this.fromResumeCallback ? '1' : null,
       'fluid': this.isFluid_ ? 'height' : null,
     }, googleBlockParameters(this));
   }
