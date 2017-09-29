@@ -504,11 +504,15 @@ export class GlobalVariableSource extends VariableSource {
           .then(details => details ? details[property] : '');
     });
 
-    this.setAsync('STORY_PAGE_INDEX',
-        () => this.getStoryValue_(storyVariables => storyVariables.pageIndex));
+    this.setAsync('STORY_PAGE_INDEX', () => {
+      return this.getStoryValue_(storyVariables => storyVariables.pageIndex,
+          'STORY_PAGE_INDEX');
+    });
 
-    this.setAsync('STORY_PAGE_ID',
-        () => this.getStoryValue_(storyVariables => storyVariables.pageId));
+    this.setAsync('STORY_PAGE_ID', () => {
+      return this.getStoryValue_(storyVariables => storyVariables.pageId,
+          'STORY_PAGE_ID');
+    });
   }
 
   /**
