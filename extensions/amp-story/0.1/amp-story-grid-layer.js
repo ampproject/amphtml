@@ -57,10 +57,10 @@ const TEMPLATE_ATTRIBUTE_NAME = 'template';
  * @private @const {!Object<string, string>}
  */
 const TEMPLATE_CLASS_NAMES = {
-  'fill': 'i-amp-story-grid-template-fill',
-  'vertical': 'i-amp-story-grid-template-vertical',
-  'horizontal': 'i-amp-story-grid-template-horizontal',
-  'thirds': 'i-amp-story-grid-template-thirds',
+  'fill': 'i-amphtml-story-grid-template-fill',
+  'vertical': 'i-amphtml-story-grid-template-vertical',
+  'horizontal': 'i-amphtml-story-grid-template-horizontal',
+  'thirds': 'i-amphtml-story-grid-template-thirds',
 };
 
 export class AmpStoryGridLayer extends AMP.BaseElement {
@@ -103,9 +103,9 @@ export class AmpStoryGridLayer extends AMP.BaseElement {
     const elementsToUpgradeStyles = this.element
         .querySelectorAll(SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR);
 
-    for (const element of elementsToUpgradeStyles) {
+    Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
       this.setCssGridStyles_(element);
-    }
+    });
   }
 
 
