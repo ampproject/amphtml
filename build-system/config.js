@@ -56,6 +56,10 @@ const commonTestPaths = [
   },
 ];
 
+const simpleTestPath = [
+  'test/simple-test.js',
+];
+
 const basicTestPaths = [
   'test/**/*.js',
   'ads/**/test/test-*.js',
@@ -89,6 +93,7 @@ const integrationTestPaths = commonTestPaths.concat([
 /** @const  */
 module.exports = {
   commonTestPaths,
+  simpleTestPath,
   basicTestPaths,
   testPaths,
   a4aTestPaths,
