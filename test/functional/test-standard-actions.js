@@ -254,14 +254,14 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(goBackStub).to.be.calledOnce;
     });
 
-    it('should implement setState() and pushState()', () => {
-      const setStateSpy = sandbox.spy();
-      const pushStateSpy = sandbox.spy();
+    it('should implement setState()', () => {
+      const setStateWithExpression = sandbox.stub();
+      // Bind.setStateWithExpression() doesn't resolve with a value,
+      // but add one here to check that the promise is chained.
+      setStateWithExpression.returns(Promise.resolve('set-state-complete'));
+
       window.services.bind = {
-        obj: {
-          setStateWithExpression: setStateSpy,
-          pushStateWithExpression: pushStateSpy,
-        },
+        obj: {setStateWithExpression},
       };
 
       const args = {
@@ -270,17 +270,35 @@ describes.sandboxed('StandardActions', {}, () => {
       const target = ampdoc;
       const satisfiesTrust = () => true;
       const setState = {method: 'setState', args, target, satisfiesTrust};
+
+      return standardActions.handleAmpTarget(setState, 0, []).then(result => {
+        expect(result).to.equal('set-state-complete');
+        expect(setStateWithExpression).to.be.calledOnce;
+        expect(setStateWithExpression).to.be.calledWith('{foo: 123}');
+      });
+    });
+
+    it('should implement pushState()', () => {
+      const pushStateWithExpression = sandbox.stub();
+      // Bind.pushStateWithExpression() doesn't resolve with a value,
+      // but add one here to check that the promise is chained.
+      pushStateWithExpression.returns(Promise.resolve('push-state-complete'));
+
+      window.services.bind = {
+        obj: {pushStateWithExpression},
+      };
+
+      const args = {
+        [OBJECT_STRING_ARGS_KEY]: '{foo: 123}',
+      };
+      const target = ampdoc;
+      const satisfiesTrust = () => true;
       const pushState = {method: 'pushState', args, target, satisfiesTrust};
 
-      standardActions.handleAmpTarget(setState, 0, []);
-      standardActions.handleAmpTarget(pushState, 0, []);
-
-      return Services.bindForDocOrNull(ampdoc).then(() => {
-        expect(setStateSpy).to.be.calledOnce;
-        expect(setStateSpy).to.be.calledWith('{foo: 123}');
-
-        expect(pushStateSpy).to.be.calledOnce;
-        expect(pushStateSpy).to.be.calledWith('{foo: 123}');
+      return standardActions.handleAmpTarget(pushState, 0, []).then(result => {
+        expect(result).to.equal('push-state-complete');
+        expect(pushStateWithExpression).to.be.calledOnce;
+        expect(pushStateWithExpression).to.be.calledWith('{foo: 123}');
       });
     });
 
