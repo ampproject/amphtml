@@ -30,4 +30,4 @@ export function triggerAnalyticsEvent(target, eventType, opt_vars) {
     }
     analytics.triggerEventForTarget(target, eventType, opt_vars);
   });
-} 
+}
