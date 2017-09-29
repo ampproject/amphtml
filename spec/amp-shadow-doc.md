@@ -98,11 +98,11 @@ Both `AMP.attachShadowDoc` and `AMP.attachShadowDocAsStream` return a `ShadowDoc
 
 ## Shadow DOM API and polyfills
 
-AMP Shadow Docs rely heavily on [Shadow DOM API](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Shadow_DOM). This is a powerful and elegant API, part of Web Components family. It allows natural isolation between major parts of the page and, as such, an ideal tool for PWAs and AMP Shadow Docs.
+AMP Shadow Docs rely heavily on the [Shadow DOM API](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Shadow_DOM). This is a powerful and elegant API, part of the Web Components family. It allows for natural isolation between major parts of the page and, as such, is an ideal tool for PWAs and AMP Shadow Docs.
 
-Shadow DOM is currently implemented in Chrome and newer Safari, so it has a solid modern support and definitely not ubiquitous. AMP Shadow Docs API polyfills the necessary parts of Shadow DOM.
+Shadow DOM is currently only implemented in Chrome and newer Safari. AMP Shadow Docs API internally polyfills the necessary parts of Shadow DOM.
 
-However, not all advanced Shadow DOM features are polyfilled by AMP Shadow Docs. In particular, [shadow slots](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Slot) are not polyfilled. If you'd like to use slots and similar advanced features, please use one of the Shadow DOM polyfill, such as [WebComponents.js](https://github.com/webcomponents/webcomponentsjs). If you do, we recommend the following code structure (using Web Components polyfill as an example):
+However, not all advanced Shadow DOM features are polyfilled by AMP Shadow Docs. In particular, [shadow slots](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Slot) are not polyfilled. If you'd like to use slots and similar advanced features, please use one of the Shadow DOM polyfill, such as [WebComponents.js](https://github.com/webcomponents/webcomponentsjs). If you do, we recommend the following code structure (using Web Components polyfills as an example):
 
 HTML:
 ```html
