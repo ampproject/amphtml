@@ -265,9 +265,8 @@ export class Services {
    */
   static webAnimationServiceFor(nodeOrDoc) {
     return (/** @type {
-        !Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>} */ (
-           getElementServiceForDoc(
-              nodeOrDoc, 'web-animation', 'amp-animation')));
+        !Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>} */
+        (getElementServiceForDoc(nodeOrDoc, 'web-animation', 'amp-animation')));
   }
 
   /**
