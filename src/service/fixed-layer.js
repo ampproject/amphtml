@@ -375,6 +375,10 @@ export class FixedLayer {
           const fe = elements[i];
           const feState = state[fe.id];
 
+          // Fix a bug with Safari. For some reason, you cannot unset
+          // transition when it's important. You can, however, set it to a valid
+          // non-important value, then unset it.
+          setStyle(fe.element, 'transition', 'none');
           // Note: This MUST be done after measurements are taken.
           // Transitions will mess up everything and, depending on when paints
           // happen, mutates of transition and bottom at the same time may be
