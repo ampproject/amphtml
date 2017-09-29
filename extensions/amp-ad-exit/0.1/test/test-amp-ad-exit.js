@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpAdExit} from '../amp-ad-exit';
+import '../amp-ad-exit';
 import * as sinon from 'sinon';
 import {ANALYTICS_CONFIG} from '../../../amp-analytics/0.1/vendors';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -79,7 +79,7 @@ const EXIT_CONFIG = {
         _foo: {
           defaultValue: 'foo-default',
           iframeTransportSignal:
-              `IFRAME_TRANSPORT_SIGNAL(${TEST_3P_VENDOR}, collected-data)`,
+              `IFRAME_TRANSPORT_SIGNAL(${TEST_3P_VENDOR},collected-data)`,
         },
         _bar: {
           defaultValue: 'bar-default',
@@ -147,10 +147,6 @@ describes.realWin('amp-ad-exit', {
     adDiv.style.top = '200px';
     adDiv.style.width = '200px';
     adDiv.style.height = '200px';
-    // TODO(jonkeller): Long-term, test with amp-ad-exit enclosed inside amp-ad,
-    // so we don't have to do this hack.
-    sandbox.stub(AmpAdExit.prototype, 'getAmpAdResourceId_',
-        () => String(Math.round(Math.random() * 10000)));
     win.document.body.appendChild(adDiv);
   }
 
@@ -159,6 +155,8 @@ describes.realWin('amp-ad-exit', {
     win = env.win;
     toggleExperiment(win, 'amp-ad-exit', true);
     addAdDiv();
+    // TODO(jonkeller): Remove after rebase
+    win.top.document.body.getResourceId = () => '6789';
     // TEST_3P_VENDOR must be in ANALYTICS_CONFIG *before* makeElementWithConfig
     ANALYTICS_CONFIG[TEST_3P_VENDOR] = ANALYTICS_CONFIG[TEST_3P_VENDOR] || {
       transport: {
