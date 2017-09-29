@@ -11,6 +11,35 @@ const TAG = 'real-time-config';
 /** @type {number} */
 export const MAX_RTC_CALLOUTS = 5;
 
+/** @enum {string} */
+export const RTC_ERROR_ENUM = {
+  BAD_JSON_RESPONSE: 'bad_json_response',
+  DUPLICATE_URL: 'duplicate_url',
+  INSECURE_URL: 'insecure_url',
+  MAX_CALLOUTS_EXCEEDED: 'max_callouts_exceeded',
+  NETWORK_FAILURE: 'network_failure',
+  UNKNOWN_VENDOR: 'unknown_vendor',
+};
+
+/**
+ * @param {!Array<Promise>} promiseArray
+ * @param {!string} error
+ * @param {!string} callout
+ */
+function logAndAddErrorResponse(promiseArray, error, callout) {
+  dev().warn(TAG, `Dropping RTC Callout to ${callout} due to ${error}`);
+  promiseArray.push(buildErrorResponse(error, callout));
+}
+
+/**
+ * @param {!string} error
+ * @param {!string} callout
+ * @param {number=} opt_rtcTime
+ */
+function buildErrorResponse(error, callout, opt_rtcTime) {
+  return {error, callout, rtcTime: opt_rtcTime || 0};
+}
+
 /**
  * For a given A4A Element, sends out Real Time Config requests to
  * any urls or vendors specified by the publisher.
@@ -31,21 +60,20 @@ function realTimeConfigManager(a4aElement, customMacros) {
   (rtcConfig['urls'] || []).forEach(url => {
     inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
         rtcStartTime, customMacros,
-        rtcConfig['timeoutMillis']);
+                       rtcConfig['timeoutMillis']);
   });
   // For each vendor the publisher has specified, inflate the vendor
   // url if it exists, and send the RTC request.
   Object.keys(rtcConfig['vendors'] || []).forEach(vendor => {
     const url = RTC_VENDORS[vendor.toLowerCase()];
     if (!url) {
-      user().warn(TAG, `unknown vendor ${vendor}`);
-      return;
+      return logAndAddErrorResponse(promiseArray, RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor);
     }
     // The ad network defined macros override vendor defined/pub specifed.
     const macros = Object.assign(rtcConfig['vendors'][vendor], customMacros);
     inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray, rtcStartTime,
-        macros, rtcConfig['timeoutMillis'],
-        vendor);
+                       macros, rtcConfig['timeoutMillis'],
+                       vendor);
   });
   return Promise.all(promiseArray);
 }
@@ -65,23 +93,22 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
                             opt_vendor) {
   const win = a4aElement.win;
   const ampDoc = a4aElement.getAmpDoc();
-  if (promiseArray.length == MAX_RTC_CALLOUTS) {
-    dev().warn(TAG, `${MAX_RTC_CALLOUTS} RTC Callout URLS exceeded, ` +
-               `dropping ${url}`);
-    return;
+  if (seenUrls.length == MAX_RTC_CALLOUTS) {
+    return logAndAddErrorResponse(promiseArray, RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
+                     opt_vendor || url);
   }
   const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
   const whitelist = {};
   Object.keys(macros || {}).forEach(key => whitelist[key] = true);
   url = urlReplacements.expandSync(
       url, macros, undefined, whitelist);
-  try {
-    user().assert(isSecureUrl(url),
-        `Dropping RTC URL: ${url}, not secure`);
-    user().assert(!seenUrls[url],
-        `Dropping duplicate calls to RTC URL: ${url}`);
-  } catch (unusedErr) {
-    return;
+  if (!isSecureUrl(url)) {
+    return logAndAddErrorResponse(promiseArray, RTC_ERROR_ENUM.INSECURE_URL,
+                     opt_vendor || url);
+  }
+  if (!!seenUrls[url]) {
+    return logAndAddErrorResponse(promiseArray, RTC_ERROR_ENUM.DUPLICATE_URL,
+                     opt_vendor || url);
   }
   seenUrls[url] = true;
   promiseArray.push(sendRtcCallout_(
@@ -115,9 +142,13 @@ function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout) {
               const rtcResponse = tryParseJson(text);
               return rtcResponse ? {rtcResponse, rtcTime, callout} :
               {rtcTime, callout, error: 'Unparsable JSON'};
+            }).catch(unusedError => {
+              return buildErrorResponse(RTC_ERROR_ENUM.BAD_JSON_RESPONSE,
+                                        callout, Date.now() - rtcStartTime);
             });
-          })).catch(error => {
-            return {error, rtcTime: Date.now() - rtcStartTime, callout};
+          })).catch(unusedError => {
+            return buildErrorResponse(RTC_ERROR_ENUM.NETWORK_FAILURE,
+                                      callout, Date.now() - rtcStartTime);
           });
 }
 
@@ -128,6 +159,8 @@ function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout) {
  * config contains an entry for timeoutMillis, validates that it is a
  * number, or converts to a number if number-like, otherwise overwrites
  * with the default.
+ * IMPORTANT: If the rtcConfig is invalid, RTC is aborted, and the ad
+ *   request continues without RTC.
  * @param {!Element} element
  * @return {!boolean|Object}
  */
