@@ -611,7 +611,8 @@ export class GlobalVariableSource extends VariableSource {
    */
   getStoryValue_(getter, expr) {
     if (!this.storyVariables_) {
-      this.storyVariables_ = storyVariableServiceForOrNull(this.ampdoc.win);
+      this.storyVariables_ =
+          Services.storyVariableServiceForOrNull(this.ampdoc.win);
     }
     return this.storyVariables_.then(storyVariables => {
       user().assert(storyVariables,
