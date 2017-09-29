@@ -541,6 +541,7 @@ describes.fakeWin('AccessService authorization', {
 
     service.analyticsEvent_ = sandbox.spy();
     performanceMock = sandbox.mock(service.performance_);
+    performanceMock.expects('onload_').atLeast(0);
   });
 
   afterEach(() => {
@@ -744,8 +745,7 @@ describes.fakeWin('AccessService authorization', {
     });
   });
 
-  // TODO(dvoytenko): Enable after fixing #11398.
-  it.skip('should resolve first-authorization promise after success', () => {
+  it('should resolve first-authorization promise after success', () => {
     expectGetReaderId('reader1');
     adapterMock.expects('authorize')
         .withExactArgs()
