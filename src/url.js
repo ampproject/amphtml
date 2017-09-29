@@ -54,7 +54,10 @@ export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
  * @return {string} origin
  */
 export function getWinOrigin(win) {
-    return win.origin || parseUrl(win.location.href).origin;
+  if (win.origin && win.origin !== 'null') {
+    return win.origin;
+  }
+  return parseUrl(win.location.href).origin;
 }
 
 /**
