@@ -19,23 +19,23 @@ import {NavigationState, StateChangeType} from '../navigation-state';
 describes.fakeWin('amp-story navigation state', {}, () => {
   let navigationState;
 
-  function createConsumer() {
-    return {onStateChange: sandbox.spy()};
+  function createObserver() {
+    return sandbox.spy();
   }
 
   beforeEach(() => {
     navigationState = new NavigationState();
   });
 
-  it('should dispatch active page changes to all consumers', () => {
-    const consumers = Array(5).fill(undefined).map(createConsumer);
+  it('should dispatch active page changes to all observers', () => {
+    const observers = Array(5).fill(undefined).map(createObserver);
 
-    consumers.forEach(consumer => navigationState.installConsumer(consumer));
+    observers.forEach(observer => navigationState.observe(observer));
 
     navigationState.updateActivePage(0, 'my-page-id-1');
 
-    consumers.forEach(consumer => {
-      expect(consumer.onStateChange).to.have.been.calledWith(sandbox.match(e =>
+    observers.forEach(observer => {
+      expect(observer).to.have.been.calledWith(sandbox.match(e =>
           e.type == StateChangeType.ACTIVE_PAGE
               && e.value.pageIndex === 0
               && e.value.pageId == 'my-page-id-1'));
@@ -43,8 +43,8 @@ describes.fakeWin('amp-story navigation state', {}, () => {
 
     navigationState.updateActivePage(5);
 
-    consumers.forEach(consumer => {
-      expect(consumer.onStateChange).to.have.been.calledWith(sandbox.match(e =>
+    observers.forEach(observer => {
+      expect(observer).to.have.been.calledWith(sandbox.match(e =>
           e.type == StateChangeType.ACTIVE_PAGE
               && e.value.pageIndex === 5
               && !('pageId' in e.value)));
@@ -52,8 +52,8 @@ describes.fakeWin('amp-story navigation state', {}, () => {
 
     navigationState.updateActivePage(2, 'one-two-three');
 
-    consumers.forEach(consumer => {
-      expect(consumer.onStateChange).to.have.been.calledWith(sandbox.match(e =>
+    observers.forEach(observer => {
+      expect(observer).to.have.been.calledWith(sandbox.match(e =>
           e.type == StateChangeType.ACTIVE_PAGE
               && e.value.pageIndex === 2
               && e.value.pageId == 'one-two-three'));
