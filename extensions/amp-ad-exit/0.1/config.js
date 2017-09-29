@@ -169,4 +169,5 @@ export function assertVendor(vendor) {
       ANALYTICS_CONFIG[vendor]['transport'] &&
       ANALYTICS_CONFIG[vendor]['transport']['iframe'],
       'Unknown vendor: ' + vendor);
+  return ANALYTICS_CONFIG[vendor];
 }

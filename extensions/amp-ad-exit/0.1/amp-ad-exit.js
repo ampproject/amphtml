@@ -16,7 +16,6 @@
 
 import {makeClickDelaySpec} from './filters/click-delay';
 import {assertConfig, assertVendor, TransportMode} from './config';
-import {ANALYTICS_CONFIG} from '../../amp-analytics/0.1/vendors';
 import {createFilter} from './filters/factory';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {getAmpAdResourceId} from '../../../src/service';
@@ -256,9 +255,7 @@ export class AmpAdExit extends AMP.BaseElement {
 
     this.unlisten_ = listen(this.getAmpDoc().win, 'message', event => {
       const responseMessage = deserializeMessage(getData(event));
-
       this.assertValidResponseMessage_(responseMessage, event.origin);
-
       this.vendorResponses_[responseMessage['vendor']] =
           responseMessage['message'];
     });
@@ -270,6 +267,8 @@ export class AmpAdExit extends AMP.BaseElement {
    * the one in service.js isn't stubbable for testing, since only object
    * methods are stubbable.
    * @returns {?string}
+   * @private
+   * @VisibleForTesting
    */
   getAmpAdResourceId_() {
     return getAmpAdResourceId(this.element, this.win.top);
@@ -313,8 +312,8 @@ export class AmpAdExit extends AMP.BaseElement {
    * @private
    */
   assertOriginMatchesVendor_(origin, vendor) {
-    assertVendor(vendor);
-    const vendorURL = new URL(ANALYTICS_CONFIG[vendor]['transport']['iframe']);
+    const vendorConfig = assertVendor(vendor);
+    const vendorURL = new URL(vendorConfig['transport']['iframe']);
     user().assert(vendorURL && origin == vendorURL.origin,
         `Invalid origin for vendor ${vendor}: ${origin}`);
   }
