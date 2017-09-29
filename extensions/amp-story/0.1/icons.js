@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+ /* eslint-disable max-len */
 export const ICONS = {
   mail:
       `<svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 24 24">

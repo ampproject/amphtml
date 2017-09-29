@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AmpStory} from '../amp-story';
 import {
   exitFullScreen,
   isFullScreenSupported,
@@ -22,7 +21,7 @@ import {
 
 
 describes.fakeWin('amp-story fullscreen', {
-}, env => {
+}, () => {
   afterEach(() => {
     sandbox.restore();
   });
