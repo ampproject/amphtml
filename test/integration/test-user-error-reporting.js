@@ -19,7 +19,7 @@ import {
     depositRequestUrl,
 } from '../../testing/test-helper';
 
-describe.configure().run('user-error', function() {
+describe.configure().skipSafari().run('user-error', function() {
 
   let randomId;
   beforeEach(() => {
