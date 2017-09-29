@@ -22,10 +22,10 @@ import {dict} from './../../../src/utils/object';
 
 
 const LINK_SHARE_TEMPLATE =
-    `<div class="i-amp-story-share-icon">
+    `<div class="i-amphtml-story-share-icon">
       ${ICONS.link}
     </div>
-    <span class="i-amp-story-share-name">Get link</span>`;
+    <span class="i-amphtml-story-share-name">Get link</span>`;
 
 
 /**
@@ -66,11 +66,11 @@ function shareProviderHtml(type, opt_params) {
           type="${type}"
           width="48"
           height="48"
-          class="i-amp-story-share-icon"
+          class="i-amphtml-story-share-icon"
           ${params}>
           ${icon}
       </amp-social-share>
-      <span class="i-amp-story-share-name">${name}</span>`
+      <span class="i-amphtml-story-share-name">${name}</span>`
   );
 }
 
@@ -95,7 +95,7 @@ export class BookendShareWidget {
     dev().assert(!this.root_, 'Already built.');
 
     this.root_ = createElementWithAttributes(this.win_.document, 'ul', {
-      'class': 'i-amp-story-share-list',
+      'class': 'i-amphtml-story-share-list',
     });
 
     this.add_(this.buildItem_(LINK_SHARE_TEMPLATE));
