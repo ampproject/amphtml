@@ -229,9 +229,15 @@ describe('FixedLayer', () => {
             elem.style[privProp] = `${value} !${priority}`;
           } else if (elem.style[privProp] ||
               !endsWith(elem.computedStyle[prop], '!important')) {
-            // If element style is already set, we can override
-            // Or, if computed style is not important priority
-            elem.style[privProp] = value;
+            if (prop === 'transition' && !value &&
+                endsWith(elem.style[privProp] || '', '!important')) {
+              // Emulate a stupid Safari bug.
+              // noop.
+            } else {
+              // If element style is already set, we can override
+              // Or, if computed style is not important priority
+              elem.style[privProp] = value;
+            }
           }
         },
       },
