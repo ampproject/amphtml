@@ -162,6 +162,7 @@ function assertTarget(name, target, config) {
  * Checks whether a vendor is valid (i.e. listed in vendors.js and has
  * transport/iframe defined.
  * @param {string} vendor The vendor name that should be listed in vendors.js
+ * @return {string} The vendor's iframe URL
  */
 export function assertVendor(vendor) {
   user().assert(ANALYTICS_CONFIG &&
@@ -169,5 +170,5 @@ export function assertVendor(vendor) {
       ANALYTICS_CONFIG[vendor]['transport'] &&
       ANALYTICS_CONFIG[vendor]['transport']['iframe'],
       'Unknown vendor: ' + vendor);
-  return ANALYTICS_CONFIG[vendor];
+  return ANALYTICS_CONFIG[vendor]['transport']['iframe'];
 }

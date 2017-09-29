@@ -228,7 +228,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       const ampAdResourceId = user().assertString(
           getAmpAdResourceId(this.element, this.win.top),
           `${TAG}: No friendly parent amp-ad element was found for ` +
-          'amp-analytics.');
+          'amp-analytics tag with iframe transport.');
 
       this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
         this.element.getAttribute('type'),

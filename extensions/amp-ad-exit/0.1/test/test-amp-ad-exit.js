@@ -148,6 +148,8 @@ describes.realWin('amp-ad-exit', {
     adDiv.style.width = '200px';
     adDiv.style.height = '200px';
     win.document.body.appendChild(adDiv);
+    // TODO(jonkeller): Long-term, test with amp-ad-exit enclosed inside amp-ad,
+    // so we don't have to do this hack.
     sandbox.stub(AmpAdExit.prototype, 'getAmpAdResourceId_',
         () => String(Math.round(Math.random() * 10000)));
   }

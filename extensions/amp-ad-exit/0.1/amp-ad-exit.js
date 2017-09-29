@@ -38,7 +38,7 @@ const TAG = 'amp-ad-exit';
  *   filters: !Array<!./filters/filter.Filter>
  * }}
  */
-let NavigationTarget;  // eslint-disable-line no-unused-vars
+let NavigationTargetDef;
 
 export class AmpAdExit extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -46,7 +46,7 @@ export class AmpAdExit extends AMP.BaseElement {
     super(element);
 
     /**
-     * @private @const {!Object<string, !NavigationTarget>}
+     * @private @const {!Object<string, !NavigationTargetDef>}
      */
     this.targets_ = {};
 
@@ -101,7 +101,7 @@ export class AmpAdExit extends AMP.BaseElement {
   /**
    * @param {!Object<string, string|number|boolean>} args
    * @param {!../../../src/service/action-impl.ActionEventDef} event
-   * @param {!NavigationTarget} target
+   * @param {!NavigationTargetDef} target
    * @return {function(string): string}
    */
   getUrlVariableRewriter_(args, event, target) {
@@ -255,6 +255,10 @@ export class AmpAdExit extends AMP.BaseElement {
 
     this.unlisten_ = listen(this.getAmpDoc().win, 'message', event => {
       const responseMessage = deserializeMessage(getData(event));
+      if (!responseMessage ||
+          responseMessage['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE) {
+        return;
+      }
       this.assertValidResponseMessage_(responseMessage, event.origin);
       this.vendorResponses_[responseMessage['vendor']] =
           responseMessage['message'];
@@ -283,17 +287,15 @@ export class AmpAdExit extends AMP.BaseElement {
 
   /**
    *
-   * @param {?JsonObject|undefined} responseMessage The response object to validate.
-   * @param {string} expectedVendor The 3p analytics vendor, which
-   *     responseMesssage['vendor'] should match.
+   * @param {JsonObject} responseMessage The response object to
+   *     validate.
+   * @param {string} responseOrigin The origin of the message, which should
+   *     match the expected origin of messages from responseMessage['vendor']
    * @private
    */
-  assertValidResponseMessage_(responseMessage, expectedVendor) {
-    user().assert(responseMessage && responseMessage['message'],
+  assertValidResponseMessage_(responseMessage, responseOrigin) {
+    user().assert(responseMessage['message'],
         'Received empty response from 3p analytics frame');
-    user().assert(
-        responseMessage['type'] == MessageType.IFRAME_TRANSPORT_RESPONSE,
-        'Received response message of invalid type from 3p analytics frame');
     user().assert(
         responseMessage['creativeId'] == this.ampAdResourceId_,
         'Received malformed message from 3p analytics frame: ' +
@@ -301,7 +303,7 @@ export class AmpAdExit extends AMP.BaseElement {
     user().assert(responseMessage['vendor'],
         'Received malformed message from 3p analytics frame: ' +
         'vendor missing');
-    this.assertOriginMatchesVendor_(expectedVendor, responseMessage['vendor']);
+    this.assertOriginMatchesVendor_(responseOrigin, responseMessage['vendor']);
   }
 
   /**
@@ -312,8 +314,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * @private
    */
   assertOriginMatchesVendor_(origin, vendor) {
-    const vendorConfig = assertVendor(vendor);
-    const vendorURL = new URL(vendorConfig['transport']['iframe']);
+    const vendorURL = new URL(assertVendor(vendor));
     user().assert(vendorURL && origin == vendorURL.origin,
         `Invalid origin for vendor ${vendor}: ${origin}`);
   }
