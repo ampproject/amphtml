@@ -17,7 +17,7 @@
 import {BaseElement} from '../src/base-element';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
-import {srcsetFromElement} from '../src/srcset';
+import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -47,12 +47,21 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    if (mutations['src'] !== undefined || mutations['srcset'] !== undefined) {
+    let mutated = false;
+    if (mutations['srcset'] !== undefined) {
+      // `srcset` mutations take precedence over `src` mutations.
       this.srcset_ = srcsetFromElement(this.element);
-      // This element may not have been laid out yet.
-      if (this.img_) {
-        this.updateImageSrc_();
-      }
+      mutated = true;
+    } else if (mutations['src'] !== undefined) {
+      // If only `src` is mutated, then ignore the existing `srcset` attribute
+      // value (may be set automatically as cache optimization).
+      this.srcset_ = srcsetFromSrc(this.element.getAttribute('src'));
+      mutated = true;
+    }
+
+    // This element may not have been laid out yet.
+    if (mutated && this.img_) {
+      this.updateImageSrc_();
     }
 
     if (this.img_) {
