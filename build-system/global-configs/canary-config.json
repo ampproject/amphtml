@@ -5,7 +5,7 @@
   "canary": 1,
   "expAdsenseA4A": 0.01,
   "expDoubleclickA4A": 0.01,
-  "expDfpCanonicalFf": 0,
+  "expDfpCanonicalFf": 0.01,
   "a4aProfilingRate": 1,
   "dbclk_a4a_viz_change": 0.02,
   "ad-type-custom": 1,
