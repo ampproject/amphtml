@@ -192,7 +192,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'requests': {
         'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
             `&c=${correlator}` +
-            '&firstVisibleTime.${firstVisibleTime}',
+            '&met.a4a=firstVisibleTime.${firstVisibleTime}',
       },
       'transport': {
         'beacon': false,
@@ -202,7 +202,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         'iniLoad': {
           'on': 'visible',
           'request': 'fvt',
-          'selector': 'amp-ad',
+          'selector': 'body',
           'selectionMethod': 'closest',
         },
       },
@@ -211,15 +211,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // 'met.a4a=makeBodyVisible.${MBV_VALUE}~' +
     // 'firstContentfulPaint.${FCP_VALUE}~' +
     // 'firstViewportReady.${FVR_VALUE}',
-    if (this.ampAnalyticsPageLoadMetricsConfig_) {
-      // Load amp-analytics extensions
-      this.extensions_./*OK*/installExtensionForDoc(
-          this.getAmpDoc(), 'amp-analytics');
-      dev().assert(!this.ampAnalyticsPageLoadMetricsElement_);
-      this.ampAnalyticsPageLoadMetricsElement_ =
-        insertAnalyticsElement(this.element,
-            this.ampAnalyticsPageLoadMetricsConfig_, true);
-    }
+    // Load amp-analytics extensions
+    dev().assert(!this.ampAnalyticsPageLoadMetricsElement_);
+    this.ampAnalyticsPageLoadMetricsElement_ =
+      insertAnalyticsElement(this.element,
+          this.ampAnalyticsPageLoadMetricsConfig_, true);
 
     if (this.isResponsive_()) {
       // Attempt to resize to the correct height. The width should already be
