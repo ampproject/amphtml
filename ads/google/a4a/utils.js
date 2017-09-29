@@ -530,7 +530,7 @@ export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
     'selector': 'amp-ad',
     'selectionMethod': 'closest',
     'request': 'renderStartCsi',
-  },
+  };
   config['requests']['iniLoadCsi'] = baseCsiUrl +
       `&met.a4a.${slotId}=iniLoadCsi${isAmpSuffix}.${deltaTime}`;
   config['requests']['renderStartCsi'] = baseCsiUrl +
