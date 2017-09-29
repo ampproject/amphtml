@@ -47,7 +47,7 @@ describe('getWinOrigin', () => {
   });
 
 
-  it('should return origin from href when win.origing is not available', () => {
+  it('should return origin from href when win.origin is not available', () => {
     expect(getWinOrigin({
       'location': {
         'href': 'https://foo1.com/abc?123#foo',
@@ -56,7 +56,7 @@ describe('getWinOrigin', () => {
   });
 
 
-  it('should return origin from href when win.origing is empty', () => {
+  it('should return origin from href when win.origin is empty', () => {
     expect(getWinOrigin({
       'location': {
         'origin': '',
@@ -65,10 +65,19 @@ describe('getWinOrigin', () => {
     })).to.equal('https://foo1.com');
   });
 
-  it('should return origin from href when win.origing is null', () => {
+  it('should return origin from href when win.origin is null', () => {
     expect(getWinOrigin({
       'location': {
         'origin': null,
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('https://foo1.com');
+  });
+
+  it('should return origin from href when win.origin is \"null\"', () => {
+    expect(getWinOrigin({
+      'location': {
+        'origin': 'null',
         'href': 'https://foo1.com/abc?123#foo',
       },
     })).to.equal('https://foo1.com');
