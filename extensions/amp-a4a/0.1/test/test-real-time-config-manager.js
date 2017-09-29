@@ -66,7 +66,7 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
     };
     fetchJsonStub.withArgs(params).returns(Promise.resolve({
       status,
-      text: textFunction
+      text: textFunction,
     }));
   }
 
@@ -83,13 +83,13 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
         urls,
         'timeoutMillis': 500};
       setRtcConfig(rtcConfig);
-      const rtcResponseValues = [{"targeting":{"food":["cheeseburger"]}}];
-      for (let i in urls) {
+      const rtcResponseValues = [{'targeting': {'food': ['cheeseburger']}}];
+      for (const i in urls) {
         setFetchJsonStubBehavior(urls[i], rtcResponseValues[i]);
       }
       const rtcResponsePromiseArray = realTimeConfigManager(a4aElement);
       return rtcResponsePromiseArray.then(rtcResponseArray => {
-          console.log(JSON.stringify(rtcResponseArray));
+        console.log(JSON.stringify(rtcResponseArray));
       });
     });
 
@@ -154,7 +154,7 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
     });
 
     it('should add and inflate urls with macros', () => {
-      let macros = {SLOT_ID: '1'};
+      const macros = {SLOT_ID: '1'};
       rtcManager.inflatePublisherUrls(macros);
       expect(rtcManager.calloutUrls).to.be.ok;
       expect(rtcManager.calloutUrls.length).to.equal(1);
@@ -162,7 +162,7 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
           'https://www.example.biz/posts?slot_id=1');
     });
     it('should add urls without macros', () => {
-      let macros = null;
+      const macros = null;
       rtcManager.inflatePublisherUrls(macros);
       expect(rtcManager.calloutUrls).to.be.ok;
       expect(rtcManager.calloutUrls.length).to.equal(1);

@@ -1021,7 +1021,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
-   * @param {Array<rtcResponseDef>=} opt_rtcResponsesPromise
+   * @param {Array<!rtcResponseDef>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
   getAdUrl(opt_rtcResponsesPromise) {
@@ -1560,13 +1560,12 @@ export class AmpA4A extends AMP.BaseElement {
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
 
   tryExecuteRealTimeConfig_() {
-    if (!!AMP.realTimeConfigManager) {
+    if (!!AMP.maybeExecuteRealTimeConfig) {
       try {
-        return AMP.realTimeConfigManager(
+        return AMP.maybeExecuteRealTimeConfig(
             this, this.getCustomRealTimeConfigMacros_());
       } catch (err) {
-        dev().error(TAG, err);
-        dev().error(TAG, 'Could not perform Real Time Config');
+        dev().error(TAG, `Could not perform Real Time Config. Error: ${err}`);
       }
     }
   }
@@ -1574,6 +1573,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * To be overriden by network impl. Should return a mapping of macro keys
    * to values for substitution in publisher-specified URLs for RTC.
+   * @return
    */
   getCustomRealTimeConfigMacros_() {
     return null;
