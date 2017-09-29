@@ -134,7 +134,7 @@ export class BookendShareWidget {
         return;
       }
 
-      user().warn(
+      user().warn('AMP-STORY',
           'Invalid amp-story bookend share configuration for %s. ' +
           'Value must be `true` or a params object.',
           type);
