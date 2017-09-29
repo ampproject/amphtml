@@ -267,14 +267,14 @@ describe('Srcset srcsetFromElement', () => {
 
 
 describe('Srcset srcsetFromSrc', () => {
-  it('should construct with undefined with and 1 dpi', () => {
+  it('should construct with undefined width and 1 dpr', () => {
     const srcset = srcsetFromSrc('image-0.png');
-    expect(srcset.sources.length).to.equal(1);
+    expect(srcset.getSources().length).to.equal(1);
 
-    const source = srcset.sources[0];
+    const source = srcset.getSources()[0];
     expect(source.url).to.equal('image-0.png');
-    expect(source.width).to.not.be.defined;
-    expect(source.dpi).to.equal(1);
+    expect(source.width).to.be.undefined;
+    expect(source.dpr).to.equal(1);
   });
 });
 
