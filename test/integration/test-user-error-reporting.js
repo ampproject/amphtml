@@ -20,7 +20,7 @@ import {
 } from '../../testing/test-helper';
 
 describe.configure().skipSafari().run('user-error', function() {
-
+  //TODO(zhouyx, #11459): Unskip the test on safari.
   let randomId;
   beforeEach(() => {
     randomId = Math.random();
