@@ -47,7 +47,6 @@ export function resetTriggerAnalyticsEventImplForTesting() {
 
 /**
  * Intermediate handler for amp-story specific analytics.
- * @implements {./navigation-state.ConsumerDef}
  */
 export class AnalyticsTrigger {
   /**
@@ -61,7 +60,7 @@ export class AnalyticsTrigger {
   }
 
   /**
-   * @param {!./navigation-state.StateChangeEvent} stateChangeEvent
+   * @param {!./navigation-state.StateChangeEventDef} stateChangeEvent
    */
   onStateChange(stateChangeEvent) {
     switch (stateChangeEvent.type) {

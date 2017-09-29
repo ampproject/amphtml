@@ -20,7 +20,6 @@ import {dev} from '../../../src/log';
 /**
  * Variable service for amp-story.
  * Used for URL replacement service. See usage in src/url-replacements-impl.
- * @implements {./navigation-state.ConsumerDef}
  */
 export class VariableService {
   constructor() {

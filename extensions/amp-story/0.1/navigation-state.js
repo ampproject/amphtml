@@ -31,33 +31,17 @@ export let StateChangeEventDef;
 
 
 /**
- * Interface for navigation state consumers.
- * @interface
- */
-export class ConsumerDef {
-
-  /**
-   * @param {!StateChangeEventDef} unusedEvent
-   */
-  onStateChange(unusedEvent) {}
-}
-
-
-/**
  * State store to decouple navigation changes from consumers.
  */
 export class NavigationState {
   constructor() {
     /** @private {!Observable<StateChangeEventDef>} */
-    this.consumerObservable_ = new Observable();
+    this.observable_ = new Observable();
   }
 
-  /**
-   * @param {!ConsumerDef} consumer
-   */
-  installConsumer(consumer) {
-    this.consumerObservable_.add(changeEvent =>
-        consumer.onStateChange(changeEvent));
+  /** @param {!function(!StateChangeEventDef):void} stateChangeFn */
+  observe(stateChangeFn) {
+    this.observable_.add(stateChangeFn);
   }
 
   /**
@@ -78,11 +62,11 @@ export class NavigationState {
   }
 
   /**
-   * @param {!StateChangeType}
+   * @param {!StateChangeType} changeType
    * @param {*} changeValue
    */
   fire_(changeType, changeValue) {
-    this.consumerObservable_.fire({
+    this.observable_.fire({
       type: changeType,
       value: changeValue,
     });
