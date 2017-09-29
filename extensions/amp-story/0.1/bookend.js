@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import {BookendShareWidget} from './bookend-share';
-import {EventType, dispatch} from './events';
 import {createElementWithAttributes, escapeHtml} from '../../../src/dom';
 import {dev} from '../../../src/log';
 
