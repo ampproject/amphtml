@@ -586,10 +586,6 @@ amp-experiment, amp-share-tracking {
   display: none;
 }
 
-amp-fresh {
-  visibility: hidden;
-}
-
 .i-amphtml-jank-meter {
   position: fixed;
   background-color: rgba(232,72,95,.5);
@@ -758,4 +754,20 @@ amp-accordion > section > :last-child {
 /* Expand content when needed. */
 amp-accordion > section[expanded] > :last-child {
   display: block !important;
+}
+
+/**
+ * amp-story
+ */
+ amp-story, amp-story-page {
+  display: block;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+amp-story-page {
+  background-color: #757575;
 }

@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PWA</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto">
+
+  <!-- pwa.html should run at `/pwa` -->
+  <script>
+    if (window.location.pathname.indexOf('/examples') == 0) {
+      window.location.assign('/pwa');
+    }
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Roboto, Arial;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: rgba(0, 0, 0, 0.9);
+      color: #eee;
+      display: flex;
+      align-content: center;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .container {
+      min-height: 100vh;
+      background: #eee;
+      overflow: hidden;
+    }
+
+    .stream {
+      margin: 64px 8px;
+    }
+
+    .card {
+      background: #fff;
+      box-shadow: 0 1px 4px 0 rgba(0,0,0,0.14);
+      padding: 8px;
+      margin: 8px 0;
+    }
+
+    .card a {
+      text-decoration: none;
+    }
+
+    .card h4 {
+      margin: 8px 0;
+      font-size: 16px;
+      color: rgba(0,0,0,0.95);
+    }
+
+    .card .detail {
+      margin: 8px 0;
+      font-size: 14px;
+      color: rgba(0,0,0,0.87);
+    }
+
+    .amp-slot {
+      padding: 16px;
+      font-size: larger;
+      background: cyan;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    PWA Chronicles
+  </header>
+  <div class="container">
+    <section id="stream" class="stream">
+      <article class="card">
+        <a href="/pwa/examples/article.amp.html">
+          <h4>Article</h4>
+          <div class="detail">Fusce pretium tempor justo, vitae consequat dolor maximus eget.</div>
+        </a>
+      </article>
+      <article class="card">
+        <a href="/pwa/examples/youtube.amp.html">
+          <h4>YouTube</h4>
+          <div class="detail">Fusce pretium tempor justo, vitae consequat dolor maximus eget.</div>
+        </a>
+      </article>
+      <article class="card">
+        <a href="/pwa/examples/analytics.amp.html">
+          <h4>Analytics</h4>
+          <div class="detail">Fusce pretium tempor justo, vitae consequat dolor maximus eget.</div>
+        </a>
+      </article>
+      <article class="card">
+        <a href="/pwa/examples/a4a.amp.html">
+          <h4>A4A</h4>
+          <div class="detail">Fusce pretium tempor justo, vitae consequat dolor maximus eget.</div>
+        </a>
+      </article>
+      <article class="card">
+        <a href="/pwa/examples/bind/basic.amp.html">
+          <h4>amp-bind</h4>
+          <div class="detail">Fusce pretium tempor justo, vitae consequat dolor maximus eget.</div>
+        </a>
+      </article>
+    </section>
+
+    <div id="doc-container" class="doc-container">
+      Document will appear here
+    </div>
+    <template id="amp-slot-template">
+      <div class="amp-slot" slot="slot1" onclick="alert('This is not allowed and I don\'t care!');">
+        This content comes from parent shell! Including forbidden elements, styles, etc.
+        <img src="/examples/img/hero@1x.jpg" style="width: 40px; height: 40px;">
+      </div>
+    </template>
+  </div>
+
+  <!-- Must be in the very end. -->
+  <script async src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.3/webcomponents-sd-ce.js"></script>
+  <script src="/pwa/pwa.js"></script>
+</body>
+</html>
