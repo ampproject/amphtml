@@ -17,19 +17,19 @@ import {user} from '../../../src/log';
 
 
 /**
- * @typedef {{title: string, url: string, image: string|undefined}}
+ * @typedef {{title: string, url: string, image: (string|undefined)}}
  */
 export let RelatedArticle;
 
 
 /**
- * @typedef {{heading: string|undefined, articles: !Array<!RelatedArticle>}}
+ * @typedef {{heading: (string|undefined), articles: !Array<!RelatedArticle>}}
  */
 export let RelatedArticleSet;
 
 
 /**
- * @param {!JsonObject}
+ * @param {!JsonObject} articleJson
  * @return {!RelatedArticle}
  */
 function buildArticleFromJson_(articleJson) {

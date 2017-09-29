@@ -20,7 +20,7 @@ import {dev} from '../../../src/log';
 
 /**
  * @typedef {{
- *   shareProviders: !JsonObject|undefined,
+ *   shareProviders: (!JsonObject|undefined),
  *   relatedArticles: !Array<!./related-articles.RelatedArticleSet>
  * }}
  */
