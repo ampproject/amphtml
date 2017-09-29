@@ -82,6 +82,9 @@ export class GlobalVariableSource extends VariableSource {
 
     /** @private {?Promise<?ShareTrackingFragmentsDef>} */
     this.shareTrackingFragments_ = null;
+
+    /** @private {?Promise<?{pageIndex: number, pageId: string}>} */
+    this.storyVariables_ = null;
   }
 
   /**
@@ -622,7 +625,8 @@ export class GlobalVariableSource extends VariableSource {
       user().assert(storyVariables,
           'To use variable %s amp-story should be configured',
           expr);
-      return getter(/** @type {{pageIndex: number}} */ (storyVariables));
+      return getter(
+          /** @type {{pageIndex: number, pageId: string}} */ (storyVariables));
     });
   }
 }
