@@ -37,6 +37,7 @@ require('./release-tagging');
 require('./runtime-test');
 require('./serve');
 require('./size');
+require('./splittable');
 require('./todos');
 require('./validator');
 require('./visual-diff');
