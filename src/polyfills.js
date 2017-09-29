@@ -26,6 +26,9 @@ import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installPromise} from './polyfills/promise';
 import {install as installArrayIncludes} from './polyfills/array-includes';
+import {
+  install as installFormDataEntryArray,
+} from './polyfills/formdata-entryarray';
 import {getMode} from './mode';
 
 /**
@@ -44,3 +47,4 @@ installObjectAssign(self);
 installPromise(self);
 installDocContains(self);
 installArrayIncludes(self);
+installFormDataEntryArray(self);
