@@ -66,20 +66,9 @@
    *   ]
    * },
    */
-
     {
       "url": "examples/visual-tests/amp-by-example/amp-by-example.html",
       "name": "Amp By Example"
-    },
-
-    {
-      "url": "examples/visual-tests/article.amp/article.amp.html",
-      "name": "AMP Article",
-      "loading_complete_css": [
-        ".article-body",
-        ".ad-one",
-        ".ad-two"
-      ]
     },
     {
       "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
@@ -127,6 +116,18 @@
       "loading_complete_css": [
         ".comic-amp-font-missing",
         ".comic-amp-bold-font-missing"
+      ]
+    },
+    /**
+      * Fails due to https://github.com/ampproject/amphtml/issues/11496
+      */
+    {
+      "url": "examples/visual-tests/article.amp/article.amp.html",
+      "name": "AMP Article",
+      "loading_complete_css": [
+        ".article-body",
+        ".ad-one",
+        ".ad-two"
       ]
     }
   ]
