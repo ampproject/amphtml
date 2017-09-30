@@ -169,6 +169,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         adtest: 'on',
         tfcd: 'some_tfcd',
         eid: MANUAL_EXPERIMENT_ID,
+        output: 'ldjh',
+        impl: 'fifs',
       });
     });
   });
