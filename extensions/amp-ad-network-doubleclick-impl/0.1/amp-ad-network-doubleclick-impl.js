@@ -1117,7 +1117,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               .then(sraUrlIn => {
                 checkStillCurrent();
                 sraUrl = sraUrlIn;
-                console.log(sraUrl);
                 return Services.xhrFor(this.win).fetch(sraUrl, {
                   mode: 'cors',
                   method: 'GET',
