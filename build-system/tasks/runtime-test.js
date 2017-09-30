@@ -312,6 +312,20 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
     } else {
       done();
     }
+  }).on('browser_complete', function(browser) {
+    if (argv.saucelabs) {
+      const result = browser.lastResult;
+      let message = '\n' + browser.name + ': ';
+      message += 'Executed ' + (result.success + result.failed) +
+          ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
+      if (result.failed === 0) {
+        message += util.colors.green('SUCCESS');
+      } else {
+        message += util.colors.red(result.failed + ' FAILED');
+      }
+      message += '\n';
+      console./* OK*/log(message);
+    }
   }).start();
 }, {
   options: {
