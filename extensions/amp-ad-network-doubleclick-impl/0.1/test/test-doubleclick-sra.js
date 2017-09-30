@@ -207,7 +207,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
       const xhrWithArgs = xhrMock.withArgs(
           sinon.match(
               new RegExp('^https:\/\/securepubads\\.g\\.doubleclick\\.net' +
-            `\/gampad\/ads\\?iu_parts=${iuParts}&enc_prev_ius=`)),
+            '\/gampad\/ads\\?output=ldjh&impl=fifs&iu_parts=' +
+            `${iuParts}&enc_prev_ius=`)),
           {
             mode: 'cors',
             method: 'GET',
