@@ -18,7 +18,7 @@ import {makeClickDelaySpec} from './filters/click-delay';
 import {assertConfig, assertVendor, TransportMode} from './config';
 import {createFilter} from './filters/factory';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
-import {getAmpAdResourceId} from '../../../src/service';
+import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
