@@ -70,6 +70,16 @@
       "url": "examples/visual-tests/amp-by-example/amp-by-example.html",
       "name": "Amp By Example"
     },
+
+    {
+      "url": "examples/visual-tests/amp-list/amp-list.amp.html",
+      "name": "AMP List and Mustache",
+      "loading_complete_css": [
+        ".list1",
+        ".list2"
+      ]
+    },
+
     {
       "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
       "name": "AMP Article Access",
