@@ -14,19 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Engageya
+# Postquare
 
-## Example of Engageya's widget implementation
+## Example of Postquare's widget implementation
 
 ### Basic
 
 ```html
-  <amp-embed width=200 height=200
-             type=engageya
-             layout=responsive
-             data-widgetIds="WID_1,WID_2"
-			 data-websiteId="WEBID_1"
-			 data-publisherId="PUBID_1">
+  <amp-embed width="200" height="200"
+      type="postquare"
+      layout="responsive"
+      data-widgetIds="112264"
+      data-websiteId="115219"
+      data-publisherId="157552">
   </amp-embed>
 ```
 
