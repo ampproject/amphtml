@@ -81,16 +81,6 @@
     },
 
     {
-      "url": "examples/visual-tests/article.amp/article.amp.html",
-      "name": "AMP Article",
-      "loading_complete_css": [
-        ".article-body",
-        ".ad-one",
-        ".ad-two"
-      ]
-    },
-
-    {
       "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
       "name": "AMP Article Access",
       "loading_complete_css": [
