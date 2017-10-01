@@ -193,11 +193,9 @@ export function groupAmpAdsByType(win, type, groupFn) {
  * @param {!Window} win
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {number} startTime
- * @param {string=} output default is 'html'
  * @return {!Promise<!Object<string,null|number|string>>}
  */
-export function googlePageParameters(
-    win, nodeOrDoc, startTime, output = 'html') {
+export function googlePageParameters(win, nodeOrDoc, startTime) {
   const referrerPromise = Services.viewerForDoc(nodeOrDoc).getReferrerUrl();
   return getOrCreateAdCid(nodeOrDoc, 'AMP_ECID_GOOGLE', '_ga')
       .then(clientId => referrerPromise.then(referrer => {
@@ -218,7 +216,6 @@ export function googlePageParameters(
           'd_imp': '1',
           'c': getCorrelator(win, clientId, nodeOrDoc),
           'dt': startTime,
-          output,
           'biw': viewportRect.width,
           'bih': viewportRect.height,
           'u_aw': screen ? screen.availWidth : null,

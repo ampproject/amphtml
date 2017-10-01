@@ -234,6 +234,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'iu': this.element.getAttribute('data-ad-slot'),
       'adtest': adTestOn ? 'on' : null,
       adk,
+      'output': 'html',
       'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
       'ctypes': this.getCtypes_(),
       'host': this.element.getAttribute('data-ad-host'),

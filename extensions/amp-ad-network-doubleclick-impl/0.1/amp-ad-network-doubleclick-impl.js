@@ -143,9 +143,6 @@ export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 /** @private {?Promise} */
 let sraRequests = null;
 
-/** @private {?Promise<!Object<string,string|number|boolean>>} */
-let pageLevelParameters_ = null;
-
 /**
  * Array of functions used to combine block level request parameters for SRA
  * request.
@@ -519,6 +516,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.jsonTargeting_['cookieOptOut'] ? '1' : null,
       'adk': this.adKey_,
       'sz': sizeStr,
+      'output': 'html',
+      'impl': 'ifr',
       'tfcd': tfcd == undefined ? null : tfcd,
       'adtest': isInManualExperiment(this.element) ? 'on' : null,
       'scp': serializeTargeting_(
@@ -564,19 +563,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
-
-    const pageLevelParametersPromise = getPageLevelParameters_(
-        this.win, this.getAmpDoc(), startTime);
     const rtcRequestPromise = isExperimentOn(this.win, 'disable-rtc') ?
     Promise.resolve({}) : this.executeRtc_();
-    return Promise.all(
-      [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
-        return googleAdUrl(
-            this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
-                this.getBlockParameters_(),
-                /* RTC Parameters */ values[1],
-                /* pageLevelParameters */ values[0]));
-      });
+    return rtcRequestPromise.then(rtcResult => {
+      return googleAdUrl(
+          this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
+              this.getBlockParameters_(), rtcResult, PAGE_LEVEL_PARAMS_));
+    });
   }
 
   /** @override */
@@ -1278,11 +1271,13 @@ export function getNetworkId(element) {
  */
 function constructSRARequest_(win, doc, instances) {
   const startTime = Date.now();
-  return getPageLevelParameters_(win, doc, startTime, true)
+  return googlePageParameters(win, doc, startTime)
       .then(pageLevelParameters => {
         const blockParameters = constructSRABlockParameters(instances);
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
-            Object.assign(blockParameters, pageLevelParameters), startTime);
+            Object.assign(
+                blockParameters, pageLevelParameters, PAGE_LEVEL_PARAMS_),
+            startTime);
       });
 }
 
@@ -1304,27 +1299,10 @@ function verifyRtcConfigMember(member, expectedType) {
  * @visibileForTesting
  */
 export function constructSRABlockParameters(instances) {
-  const parameters = {};
+  const parameters = {'output': 'ldjh', 'impl': 'fifs'};
   BLOCK_SRA_COMBINERS_.forEach(
       combiner => Object.assign(parameters, combiner(instances)));
   return parameters;
-}
-
-/**
- * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} doc
- * @param {number} startTime
- * @param {boolean=} isSra
- * @return {!Promise<!Object<string,string|number|boolean>>}
- */
-function getPageLevelParameters_(win, doc, startTime, isSra) {
-  pageLevelParameters_ = pageLevelParameters_ || googlePageParameters(
-      win, doc, startTime, 'ldjh').then(pageLevelParameters => {
-        const parameters = Object.assign({}, PAGE_LEVEL_PARAMS_);
-        parameters['impl'] = isSra ? 'fifs' : 'ifr';
-        return Object.assign(parameters, pageLevelParameters);
-      });
-  return pageLevelParameters_;
 }
 
 /**
