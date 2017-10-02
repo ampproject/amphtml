@@ -261,6 +261,16 @@ export class Services {
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>}
+   */
+  static webAnimationServiceFor(nodeOrDoc) {
+    return (/** @type {
+        !Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>} */
+        (getElementServiceForDoc(nodeOrDoc, 'web-animation', 'amp-animation')));
+  }
+
+  /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<!./service/storage-impl.Storage>}
    */
   static storageForDoc(nodeOrDoc) {

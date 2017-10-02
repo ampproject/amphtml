@@ -145,6 +145,8 @@ function compile(entryModuleFilenames, outputDir,
       // Currently needed for crypto.js and visibility.js.
       // Should consider refactoring.
       'extensions/amp-analytics/**/*.js',
+      // Needed for WebAnimationService
+      'extensions/amp-animation/**/*.js',
       // For amp-bind in the web worker (ww.js).
       'extensions/amp-bind/**/*.js',
       // Needed to access form impl from other extensions
