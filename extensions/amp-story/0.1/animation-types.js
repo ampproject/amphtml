@@ -15,11 +15,11 @@
  */
 
 /** @typedef {!Array<!Object<string, *>>} */
-export let Keyframes;
+export let KeyframesDef;
 
 
 /** @typedef {(function(StoryAnimationTargetDims):!Keyframes)|!Keyframes} */
-export let KeyframesOrFilterFn;
+export let KeyframesOrFilterFnDef;
 
 
 /**
@@ -32,7 +32,7 @@ export let KeyframesOrFilterFn;
  *   targetY: number,
  * }}
  */
-export let StoryAnimationDims;
+export let StoryAnimationDimsDef;
 
 
 /**

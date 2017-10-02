@@ -20,16 +20,22 @@ import {
   WebAnimationPlayState,
 } from '../../amp-animation/0.1/web-animation-types';
 import {dev, user} from '../../../src/log';
+import {map} from '../../../src/utils/object';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {setStyle, resetStyles} from '../../../src/style';
 
 
+/** const {string} */
 const ANIMATE_IN_ATTRIBUTE_NAME = 'animate-in';
+/** const {string} */
 const ANIMATE_IN_DURATION_ATTRIBUTE_NAME = 'animate-in-duration';
+/** const {string} */
 const ANIMATE_IN_DELAY_ATTRIBUTE_NAME = 'animate-in-delay';
+/** const {string} */
 const ANIMATE_IN_AFTER_ATTRIBUTE_NAME = 'animate-in-after';
 
 
+/** const {string} */
 const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
 
 
@@ -164,7 +170,7 @@ class AnimationRunner {
   }
 
   /**
-   * @return {!Promise<!./animation-types.StoryAnimationTargetDims>}
+   * @return {!Promise<!./animation-types.StoryAnimationDimsDef>}
    * @visibleForTesting
    */
   getDims() {
@@ -172,7 +178,7 @@ class AnimationRunner {
       const targetBoundingRect = this.target_./*OK*/getBoundingClientRect();
       const pageBoundingRect = this.page_./*OK*/getBoundingClientRect();
 
-      return /** @type {!./animation-types.StoryAnimationTargetDims} */ ({
+      return /** @type {!./animation-types.StoryAnimationDimsDef} */ ({
         pageWidth: pageBoundingRect.width,
         pageHeight: pageBoundingRect.height,
         targetWidth: targetBoundingRect.width,
@@ -184,8 +190,8 @@ class AnimationRunner {
   }
 
   /**
-   * @param {!./animation-types.KeyframesOrFilterFn} keyframesArrayOrFn
-   * @return {!Promise<!./animation-types.Keyframes>}
+   * @param {!./animation-types.KeyframesOrFilterFnDef} keyframesArrayOrFn
+   * @return {!Promise<!./animation-types.KeyframesDef>}
    * @private
    */
   filterKeyframes_(keyframesArrayOrFn) {
@@ -332,6 +338,7 @@ class AnimationRunner {
   /**
    * @param {!PlaybackActivity} activity
    * @param {!Promise=} opt_wait
+   * @private
    */
   playback_(activity, opt_wait) {
     const wait = opt_wait || null;
@@ -348,6 +355,7 @@ class AnimationRunner {
    * Executes playback activity if runner is ready.
    * @param {!PlaybackActivity} activity
    * @param {?Promise} wait
+   * @private
    */
   playbackWhenReady_(activity, wait) {
     const runner = dev().assert(
@@ -394,6 +402,7 @@ class AnimationRunner {
   /**
    * @param {!PlaybackActivity=} opt_activity
    * @return {boolean}
+   * @private
    */
   isActivityScheduled_(opt_activity) {
     if (!opt_activity) {
@@ -571,7 +580,7 @@ export class AnimationManager {
   }
 
   /**
-   * @param {string} name
+   * @param {!Element} el
    * @return {?./animation-types.StoryAnimationPresetDef}
    */
   getPreset_(el) {
@@ -590,8 +599,11 @@ export class AnimationManager {
 /** Bus for animation sequencing. */
 class AnimationSequence {
   constructor() {
-    this.subscriptionPromises_ = {};
-    this.subscriptionResolvers_ = {};
+    /** @private @const {!Object<string, !Promise>} */
+    this.subscriptionPromises_ = map();
+
+    /** @private @const {!Object<string, !Function>} */
+    this.subscriptionResolvers_ = map();
   }
 
   /** Decouples constructor for testing. */
@@ -605,7 +617,7 @@ class AnimationSequence {
    */
   notifyFinish(id) {
     if (id in this.subscriptionPromises_) {
-      dev().assert(this.subscriptionResolvers_)[id]();
+      dev().assert(this.subscriptionResolvers_[id])();
 
       delete this.subscriptionPromises_[id];
     }
