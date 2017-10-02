@@ -42,7 +42,7 @@ export let rtcResponseDef;
  * @param {!string} callout
  * @private
  */
-function logAndAddErrorResponse_(promiseArray, error, callout) {
+export function logAndAddErrorResponse_(promiseArray, error, callout) {
   dev().warn(TAG, `Dropping RTC Callout to ${callout} due to ${error}`);
   promiseArray.push(buildErrorResponse_(error, callout));
 }
@@ -54,7 +54,7 @@ function logAndAddErrorResponse_(promiseArray, error, callout) {
  * @return !Promise<!rtcResponseDef>
  * @private
  */
-function buildErrorResponse_(error, callout, opt_rtcTime) {
+export function buildErrorResponse_(error, callout, opt_rtcTime) {
   return Promise.resolve({error, callout, rtcTime: opt_rtcTime || 0});
 }
 
@@ -67,7 +67,7 @@ function buildErrorResponse_(error, callout, opt_rtcTime) {
  * @return {Promise<!Array<!rtcResponseDef>>|undefined}
  * @private
  */
-function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
+export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
   const rtcConfig = validateRtcConfig_(a4aElement.element);
   if (!rtcConfig) {
     return;
@@ -111,7 +111,7 @@ function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
  * @param {string=} opt_vendor
  * @private
  */
-function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
+export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
                             rtcStartTime, macros, timeoutMillis,
                             opt_vendor) {
   const win = a4aElement.win;
@@ -150,7 +150,7 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */
-function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout) {
+export function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout) {
   /**
    * Note: Timeout is enforced by timerFor, not the value of
    *   rtcTime. There are situations where rtcTime could thus
@@ -193,20 +193,24 @@ function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout) {
  * @return {?Object}
  * @private
  */
-function validateRtcConfig_(element) {
+export function validateRtcConfig_(element) {
   const defaultTimeoutMillis = 1000;
   const rtcConfig = tryParseJson(
       element.getAttribute('prerequest-callouts'));
   if (!rtcConfig) {
     return null;
   }
+  //TODO: Add check that all keys in the object are valid
   try {
     user().assert(rtcConfig['vendors'] || rtcConfig['urls'],
-        'RTC Config must specify vendors or urls');
+                  'RTC Config must specify vendors or urls');
     user().assert(!rtcConfig['vendors'] || isObject(rtcConfig['vendors']),
         'RTC invalid vendors');
     user().assert(!rtcConfig['urls'] || isArray(rtcConfig['urls']),
-        'RTC invalid urls');
+                  'RTC invalid urls');
+    user().assert(Object.keys(
+        rtcConfig['vendors'] || {}).length || (rtcConfig['urls'] || []).length,
+                  'RTC empty vendors and urls');
   } catch (unusedErr) {
     return null;
   }

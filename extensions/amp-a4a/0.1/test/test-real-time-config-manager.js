@@ -16,7 +16,11 @@
 
 import {createElementWithAttributes} from '../../../../src/dom';
 import {AmpA4A} from '../amp-a4a';
-import {MAX_RTC_CALLOUTS, realTimeConfigManager} from '../real-time-config-manager';
+import {
+  validateRtcConfig_,
+  RTC_ERROR_ENUM,
+  MAX_RTC_CALLOUTS,
+} from '../real-time-config-manager';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {parseUrl} from '../../../../src/url';
 // Need the following side-effect import because in actual production code,
@@ -97,11 +101,12 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
   });
 
   describe('#validateRtcConfig', () => {
+    let validatedRtcConfig;
     afterEach(() => {
       element.removeAttribute('prerequest-callouts');
     });
 
-    it('should return true for valid rtcConfig', () => {
+    it('should return parsed rtcConfig for valid rtcConfig', () => {
       const rtcConfig = {
         'vendors': {'fakeVendor': {'SLOT_ID': '1', 'PAGE_ID': '1'},
           'nonexistent-vendor': {'SLOT_ID': '1'},
@@ -110,31 +115,32 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
           'https://broken.zzzzzzz'],
         'timeoutMillis': 500};
       setRtcConfig(rtcConfig);
-      expect(rtcManager.validateRtcConfig()).to.be.true;
-      expect(rtcManager.rtcConfig).to.deep.equal(rtcConfig);
+      validatedRtcConfig = validateRtcConfig_(element);
+      expect(validatedRtcConfig).to.be.ok;
+      expect(validatedRtcConfig).to.deep.equal(rtcConfig);
     });
 
-    it('should return false if prerequest-callouts not specified', () => {
-      expect(rtcManager.validateRtcConfig()).to.be.false;
-      expect(rtcManager.rtcConfig).to.not.be.ok;
+    it('should return null if prerequest-callouts not specified', () => {
+      validatedRtcConfig = validateRtcConfig_(element);
+      expect(validatedRtcConfig).to.be.null;
     });
 
     // Test various misconfigurations that are missing vendors or urls.
     [{'timeoutMillis': 500}, {'vendors': {}}, {'urls': []},
      {'vendors': {}, 'urls': []},
      {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
-       it('should return false for rtcConfig missing required values', () => {
+       it('should return null for rtcConfig missing required values', () => {
          setRtcConfig(rtcConfig);
-         expect(rtcManager.validateRtcConfig()).to.be.false;
-         expect(rtcManager.rtcConfig).to.not.be.ok;
+         validatedRtcConfig = validateRtcConfig_(element);
+         expect(validatedRtcConfig).to.be.null;
        });
      });
 
     it('should return false for bad JSON rtcConfig', () => {
       const rtcConfig = '{"urls" : ["https://google.com"]';
       element.setAttribute('prerequest-callouts', rtcConfig);
-      expect(rtcManager.validateRtcConfig()).to.be.false;
-      expect(rtcManager.rtcConfig).to.not.be.ok;
+      validatedRtcConfig = validateRtcConfig_(element);
+      expect(validatedRtcConfig).to.be.null;
     });
 
   });
