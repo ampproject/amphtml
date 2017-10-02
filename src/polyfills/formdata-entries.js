@@ -67,42 +67,31 @@ function appendPolyfill(name, value, filename) {
   return this['appendNative_'](name, value, filename);
 }
 
-// TODO(zhangsu): investigate whether we can whitelist `Array.from` for
-// supported browsers so that we can simply return using native calls here
-// (e.g., `return Array.from(this.entries())`) here for better performance.
 /**
- * Returns an array of all key/value pairs contained in this object.
- *
- * By specification, `entries` returns an iterator instead of an array. However,
- * returning an iterator requires writing an ES6 generator, which is not
- * supported with the current Babel configuration (need the regenerator
- * runtime). Polyfilling `entries` to return an array won't work either, because
- * it would create an inconsistent API return value across browsers. Callers
- * cannot use `Array.from` to unify the return value either, because
- * `Array.from` is not supported by IE and it's super hard to polyfill.
- *
- * As a workaround, instead of trying to fully polyfill `entries`, a new method
- * called `entryArray` is defined, which behaves exactly like `entries` except
- * it returns an array. Callers are expected to call `formData.entryArray()`
- * instead of `formData.entries()` so that an array can be obtained on all
- * browsers supported by AMP.
+ * Returns an iterator of all key/value pairs contained in this object.
  *
  * For more details on this, see http://mdn.io/FormData/entries.
  *
- * @return {!Array<!Array<string>>}
+ * @return {!Iterator<!Array<string>>}
  * @this {FormData}
  */
-function entryArray() {
-  if (!this.fieldValues_) {
-    return [];
-  }
-
+function entriesPolyfill() {
   const fieldEntries = [];
   Object.keys(this.fieldValues_).forEach(name => {
     const values = this.fieldValues_[name];
     values.forEach(value => fieldEntries.push([name, value]));
   });
-  return fieldEntries;
+
+  // Generator functions are not supported by the current Babel configuration,
+  // so we must manually implement the iterator interface.
+  let nextIndex = 0;
+  return /** @type {!Iterator<!Array<string>>} */ ({
+    next: () => {
+      return nextIndex < fieldEntries.length ?
+          {value: fieldEntries[nextIndex++], done: false} :
+          {done: true};
+    },
+  });
 }
 
 /**
@@ -110,7 +99,7 @@ function entryArray() {
  * @param {!Window} win
  */
 export function install(win) {
-  if (win.FormData.prototype.entryArray) {
+  if (win.FormData.prototype.entries) {
     return;
   }
 
@@ -127,11 +116,11 @@ export function install(win) {
     value: appendPolyfill,
   });
 
-  win.Object.defineProperty(win.FormData.prototype, 'entryArray', {
+  win.Object.defineProperty(win.FormData.prototype, 'entries', {
     enumerable: false,
     configurable: false,
     writable: false,
-    value: entryArray,
+    value: entriesPolyfill,
   });
 
   if (!FormDataPolyfill['FormDataNative_']) {
@@ -154,5 +143,4 @@ export function install(win) {
     writable: false,
     value: FormDataPolyfill,
   });
-
 }
