@@ -87,6 +87,10 @@ const TAG = 'amp-story-page';
 
 
 
+/**
+ * The <amp-story-page> custom element, which represents a single page of
+ * an <amp-story>.
+ */
 export class AmpStoryPage extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -122,6 +126,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /*
    * @return {?./animation.AnimationManager}
+   * @private
    */
   maybeCreateAnimationManager_() {
     if (!this.animationManager_) {
@@ -146,6 +151,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Marks any AMP elements that represent media elements with preload="auto".
+   * @private
    */
   markMediaElementsWithPreload_() {
     const mediaSet = this.element.querySelectorAll('amp-audio, amp-video');
@@ -158,6 +164,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Initializes the loading screen for this amp-story-page, and the listeners
    * to remove it once loaded.
+   * @private
    */
   initializeLoading_() {
     // Add the loading screen into the DOM.
@@ -311,7 +318,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
   }
 
-  /** */
+  /**
+   * Starts playing animations, if the animation manager is available.
+   */
   maybeStartAnimations() {
     if (!this.animationManager_) {
       return;
@@ -321,26 +330,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /**
-   * @return {boolean} True if animations were stopped.
-   */
-  maybeFinishEnterAnimations() {
-    if (!this.animationManager_) {
-      return false;
-    }
-
-    if (!this.animationManager_.hasAnimationStarted()) {
-      return false;
-    }
-
-    this.animationManager_.finishAll();
-
-    return true;
-  }
-
-
-  /**
    * @return {!Promise}
-   * @private
    */
   maybeApplyFirstAnimationFrame() {
     if (!this.animationManager_) {
@@ -352,7 +342,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * @param {boolean} isActive
-   * @public
    */
   setActive(isActive) {
     if (isActive) {
@@ -407,7 +396,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * @return {boolean} Whether this page is currently active.
-   * @public
    */
   isActive() {
     return this.element.hasAttribute('active');
@@ -461,7 +449,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    * advance.
    * @param {?Element} el
    * @param {!function()} callback
-   * @return {!Element}
    * @private
    */
   onMediaElementComplete_(el, callback) {
@@ -531,7 +518,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Returns all of the pages that are one hop from this page.
    * @return {!Array<string>}
-   * @public
    */
   getAdjacentPageIds() {
     const adjacentPageIds = [];
@@ -603,7 +589,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Navigates to the previous page in the story.
-   * @public
    */
   previous() {
     this.switchTo_(this.getPreviousPageId_());
@@ -614,7 +599,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Navigates to the next page in the story.
    * @param {*} opt_isAutomaticAdvance Whether this navigation was caused by an
    *     automatic advancement after a timeout.
-   * @public
    */
   next(opt_isAutomaticAdvance) {
     this.switchTo_(
@@ -625,6 +609,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * @param {?string} targetPageIdOrNull
    * @param {string=} opt_fallbackPageId
+   * @private
    */
   switchTo_(targetPageIdOrNull, opt_fallbackPageId) {
     const targetPageId = targetPageIdOrNull || opt_fallbackPageId;
