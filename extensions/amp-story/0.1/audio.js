@@ -397,7 +397,7 @@ class MediaElementPlayable extends Playable {
   }
 
   /** @override */
-  setVolume(volume, durationMs, unusedEasingFn) {
+  setVolume(volume, unusedDurationMs, unusedEasingFn) {
     // TODO(newmuis): Fade to volume over durationMs following easingFn.
     if (volume === this.element_.volume) {
       return;
