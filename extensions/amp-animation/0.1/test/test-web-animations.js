@@ -1659,6 +1659,18 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     anim2Mock.expects('play').once();
     runner.resume();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1.onfinish();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim2.onfinish();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.FINISHED);
+
+    expect(playStateSpy.callCount).to.equal(4);
+    expect(playStateSpy.args[0][0]).to.equal(WebAnimationPlayState.RUNNING);
+    expect(playStateSpy.args[1][0]).to.equal(WebAnimationPlayState.PAUSED);
+    expect(playStateSpy.args[2][0]).to.equal(WebAnimationPlayState.RUNNING);
+    expect(playStateSpy.args[3][0]).to.equal(WebAnimationPlayState.FINISHED);
   });
 
   it('should only allow resume when started', () => {
