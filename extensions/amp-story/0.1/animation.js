@@ -20,6 +20,7 @@ import {
   WebAnimationPlayState,
 } from '../../amp-animation/0.1/web-animation-types';
 import {dev, user} from '../../../src/log';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {setStyle, resetStyles} from '../../../src/style';
 
 
@@ -70,7 +71,7 @@ function getCssProps(frameDef) {
  */
 // TODO(alanorozco): maybe memoize?
 export function hasAnimations(element) {
-  return !!element.querySelector(ANIMATABLE_ELEMENTS_SELECTOR);
+  return !!scopedQuerySelector(element, ANIMATABLE_ELEMENTS_SELECTOR);
 }
 
 
@@ -168,8 +169,8 @@ class AnimationRunner {
    */
   getDims() {
     return this.vsync_.measurePromise(() => {
-      const targetBoundingRect = this.target_.getBoundingClientRect();
-      const pageBoundingRect = this.page_.getBoundingClientRect();
+      const targetBoundingRect = this.target_./*OK*/getBoundingClientRect();
+      const pageBoundingRect = this.page_./*OK*/getBoundingClientRect();
 
       return /** @type {!./animation-types.StoryAnimationTargetDims} */ ({
         pageWidth: pageBoundingRect.width,
@@ -500,7 +501,7 @@ export class AnimationManager {
   getOrCreateRunners_() {
     if (!this.runners_) {
       this.runners_ = Array.prototype.map.call(
-          this.root_.querySelectorAll(ANIMATABLE_ELEMENTS_SELECTOR),
+          scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
           el => this.createRunner_(el));
     }
     return dev().assert(this.runners_);
@@ -545,7 +546,7 @@ export class AnimationManager {
       const dependencyId = el.getAttribute(ANIMATE_IN_AFTER_ATTRIBUTE_NAME);
 
       user().assertElement(
-          this.root_.querySelector(`#${dependencyId}`),
+          scopedQuerySelector(this.root_, `#${dependencyId}`),
           `The attribute '${ANIMATE_IN_AFTER_ATTRIBUTE_NAME}' in tag ` +
               `'${el.tagName}' is set to the invalid value ` +
               `'${dependencyId}'. No children of parenting 'amp-story-page' ` +
