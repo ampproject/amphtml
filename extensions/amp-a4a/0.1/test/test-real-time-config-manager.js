@@ -193,9 +193,7 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
         PAGE_ID: () => 2,
         FOO_ID: () => 3
       };
-      const rtcConfig = {
-        urls,
-        'timeoutMillis': 500};
+      const rtcConfig = {urls};
       setRtcConfig(rtcConfig);
       for (const i in urls) {
         setFetchJsonStubBehavior(inflatedUrls[i], rtcCalloutResponses[i]);
@@ -210,7 +208,33 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
         });
       });
     });
-    it('should send RTC callouts to inflated vendor URLs', () => {});
+    it('should send RTC callouts to inflated vendor URLs', () => {
+      const vendors = {
+        'fAkeVeNdOR': {SLOT_ID: 1, PAGE_ID: 2}
+      };
+      const inflatedVendorUrls = [
+        'https://www.fake.qqq/slot_id=1&page_id=3&foo_id=4'
+      ];
+      const rtcCalloutResponses = [
+        {'response1': {'fooArray': ['foo']}},
+      ];
+      const customMacros = {
+        PAGE_ID: () => 3,
+        FOO_ID: () => 4
+      };
+      const rtcConfig = {vendors};
+      setRtcConfig(rtcConfig);
+      setFetchJsonStubBehavior(inflatedVendorUrls[0], rtcCalloutResponses[0]);
+      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(a4aElement, customMacros);
+      return rtcResponsePromiseArray.then(rtcResponseArray => {
+        expect(fetchJsonStub.callCount).to.equal(1);
+        rtcResponseArray.forEach((rtcResponse, i) => {
+          expect(fetchJsonStub.calledWith(inflatedVendorUrls[i])).to.be.true;
+          expect(rtcResponse.rtcResponse).to.deep.equal(rtcCalloutResponses[i]);
+          expect(rtcResponse.callout).to.equal(Object.keys(vendors)[0].toLowerCase());
+        });
+      });
+    });
     it('should send RTC callouts to inflated publisher and vendor URLs', () => {});
     it('should favor publisher URLs over vendor URLs', () => {});
     it('should not send more than one RTC callout to the same url', () => {

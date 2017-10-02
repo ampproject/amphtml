@@ -95,7 +95,7 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
         rtcConfig['vendors'][vendor] || {}, customMacros);
     inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray, rtcStartTime,
         macros, rtcConfig['timeoutMillis'],
-        vendor);
+                       vendor.toLowerCase());
   });
   return Promise.all(promiseArray);
 }
