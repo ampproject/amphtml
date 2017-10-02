@@ -91,14 +91,10 @@ export class Xhr {
     /** @const {!Window} */
     this.win = win;
 
+    const ampdocService = Services.ampdocServiceFor(win);
     /** @private {?./ampdoc-impl.AmpDoc} */
-    this.ampdocSingle_ = null;
-    if (!getMode().test) {
-      const ampdocService = Services.ampdocServiceFor(win);
-      this.ampdocSingle_ = ampdocService.isSingleDoc() ?
-          ampdocService.getAmpDoc() :
-          null;
-    }
+    this.ampdocSingle_ =
+        ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
   }
 
   /**
@@ -111,7 +107,8 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
-    if (this.ampdocSingle_ &&
+    if (!getMode().test &&
+        this.ampdocSingle_ &&
         Math.random() < 0.01 &&
         parseUrl(input).origin != this.win.location.origin &&
         !Services.viewerForDoc(this.ampdocSingle_).hasBeenVisible()) {

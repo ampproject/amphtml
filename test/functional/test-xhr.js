@@ -23,6 +23,7 @@ import {
   assertSuccess,
 } from '../../src/service/xhr-impl';
 import {getCookie} from '../../src/cookies';
+import {Services} from '../../src/services';
 
 describe('XHR', function() {
   let sandbox;
@@ -43,10 +44,10 @@ describe('XHR', function() {
 
   const scenarios = [
     {
-      xhr: xhrServiceForTesting(nativeWin),
+      win: nativeWin,
       desc: 'Native',
     }, {
-      xhr: xhrServiceForTesting(polyfillWin),
+      win: polyfillWin,
       desc: 'Polyfill',
     },
   ];
@@ -70,6 +71,9 @@ describe('XHR', function() {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    sandbox.stub(Services, 'ampdocServiceFor').returns({
+      isSingleDoc: () => false,
+    });
     location.href = 'https://acme.com/path';
   });
 
@@ -78,15 +82,17 @@ describe('XHR', function() {
   });
 
   scenarios.forEach(test => {
-    const xhr = test.xhr;
+    let xhr;
 
     // Since if it's the Native fetch, it won't use the XHR object so
     // mocking and testing the request becomes not doable.
     if (test.desc != 'Native') {
 
       describe('#XHR', () => {
-
-        beforeEach(setupMockXhr);
+        beforeEach(() => {
+          xhr = xhrServiceForTesting(test.win);
+          setupMockXhr();
+        });
 
         it('should allow GET and POST methods', () => {
           const get = xhr.fetchJson.bind(xhr, '/get?k=v1');
@@ -230,6 +236,8 @@ describe('XHR', function() {
     }
 
     describe('AMP-Same-Origin', () => {
+      beforeEach(() => xhr = xhrServiceForTesting(test.win));
+
       it('should not be set for cross origin requests', () => {
         const init = {};
         xhr.fetchJson('/whatever', init);
@@ -264,6 +272,7 @@ describe('XHR', function() {
     });
 
     describe(test.desc, () => {
+      beforeEach(() => xhr = xhrServiceForTesting(test.win));
 
       describe('assertSuccess', () => {
         function createResponseInstance(body, init) {
@@ -409,6 +418,8 @@ describe('XHR', function() {
     });
 
     describe('#fetchDocument', () => {
+      beforeEach(() => xhr = xhrServiceForTesting(test.win));
+
       it('should be able to fetch a document', () => {
         setupMockXhr();
         expect(requests[0]).to.be.undefined;
@@ -493,6 +504,7 @@ describe('XHR', function() {
       let fetchStub;
 
       beforeEach(() => {
+        xhr = xhrServiceForTesting(test.win);
         const mockXhr = {
           status: 200,
           responseText: TEST_TEXT,
@@ -517,6 +529,8 @@ describe('XHR', function() {
 
     describe('#fetch ' + test.desc, () => {
       const creative = '<html><body>This is a creative简</body></html>';
+
+      beforeEach(() => xhr = xhrServiceForTesting(test.win));
 
       // Using the Native fetch, we can't mock the XHR request, so an actual
       // HTTP request would be sent to the server.  Only execute this test
@@ -555,7 +569,9 @@ describe('XHR', function() {
     const url = 'http://localhost:31862/post';
 
     describe(test.desc + ' POST', () => {
-      const xhr = test.xhr;
+      let xhr;
+
+      beforeEach(() => xhr = xhrServiceForTesting(test.win));
 
       if (test.desc != 'Native') {
         it('should have required json POST headers by default', () => {
@@ -681,10 +697,16 @@ describe('XHR', function() {
       if (test.desc === 'Polyfill') {
         // FetchRequest is only returned by the Polyfill version of Xhr.
         describe('#text', () => {
-          beforeEach(setupMockXhr);
+          let xhr;
+
+          beforeEach(() => {
+            xhr = xhrServiceForTesting(test.win);
+            setupMockXhr();
+          });
+
           it('should return text from a full XHR request', () => {
             expect(requests[0]).to.be.undefined;
-            const promise = test.xhr.fetchAmpCors_('http://nowhere.org').then(
+            const promise = xhr.fetchAmpCors_('http://nowhere.org').then(
                 response => {
                   expect(response).to.be.instanceof(FetchResponse);
                   return response.text().then(result => {
