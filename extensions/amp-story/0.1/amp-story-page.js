@@ -313,7 +313,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     const mediaSet = this.getAllMedia_();
     Array.prototype.forEach.call(mediaSet, mediaItem => {
       mediaItem.play().catch(() => {
-        dev().error(`Failed to play media element with src ${mediaItem.src}.`);
+        dev().error('AMP-STORY', `Failed to play media element with src ${mediaItem.src}.`);
       });
     });
   }
