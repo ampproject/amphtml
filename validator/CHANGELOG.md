@@ -39,7 +39,7 @@ Includes:
  - Cleanup. Remove DEV/PROD_MODE.
  - Remove SYTLESHEET_TOO_LONG_OLD_VARIANT error code.
  - Provide a more descriptive error message for our most common AMP error.
- - #11236 add single-result and max-items to amp-list
+ - #11236 add single-item and max-items to amp-list
  - #11070 remove amp-sidebar restrictions
  - #10583, amp-gfycat autoplay
 
@@ -50,7 +50,7 @@ Spec Version 474
 
 Includes:
  - #11087
- 
+
 ### 11:00 PM, August 30, 2017 UTC
 
 Validator Version 246
@@ -107,7 +107,7 @@ Includes:
  - Disallow duplicate `<body>` tags.
  - Allow `<amp-animation>` in AMP4ADS documents #10093
  - amp-bind extension rules to no longer require `<amp-state>` #10159
- 
+
 ### 9:00 PM, June 26, 2017 UTC
 
 Validator Version 239
@@ -158,7 +158,7 @@ Spec Version 427
 Includes:
 
  - Disallow amp-embed as child of amp-app-banner
- 
+
 ### 6:00 PM, June 7, 2017 UTC
 
 Validator Version 232
@@ -187,7 +187,7 @@ Includes:
  - style attributes in SVG tags
  - #8782 amp-ima-video
 
- 
+
 ### 10:00 PM, May 8, 2017 UTC
 
 First Release in Changelog. No release notes.
