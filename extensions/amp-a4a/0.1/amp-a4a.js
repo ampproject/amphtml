@@ -111,13 +111,6 @@ export let SizeInfoDef;
     }} */
 let CreativeMetaDataDef;
 
-/** @typedef {{
-      rtcResponse: ?Object<string, *>,
-      rtcTime: number,
-      callout: string,
-      error: ?Error}} */
-let rtcResponseDef;
-
 /** @private */
 export const LIFECYCLE_STAGES = {
   // Note: Use strings as values here, rather than numbers, so that "0" does
@@ -1021,7 +1014,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
-   * @param {Array<!rtcResponseDef>=} opt_rtcResponsesPromise
+   * @param {Array<!./real-time-config-manager.rtcResponseDef>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
   getAdUrl(opt_rtcResponsesPromise) {
@@ -1565,7 +1558,7 @@ export class AmpA4A extends AMP.BaseElement {
         return AMP.maybeExecuteRealTimeConfig(
             this, this.getCustomRealTimeConfigMacros_());
       } catch (err) {
-        dev().error(TAG, `Could not perform Real Time Config. Error: ${err}`);
+        user().error(TAG, 'Could not perform Real Time Config.', err);
       }
     }
   }
@@ -1573,7 +1566,8 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * To be overriden by network impl. Should return a mapping of macro keys
    * to values for substitution in publisher-specified URLs for RTC.
-   * @return
+   * @return {!Object<string,
+   *   !../../../src/service/variable-source.SyncResolverDef>|null}
    */
   getCustomRealTimeConfigMacros_() {
     return null;

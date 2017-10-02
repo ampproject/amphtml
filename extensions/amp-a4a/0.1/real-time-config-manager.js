@@ -2,7 +2,6 @@ import {RTC_VENDORS} from './callout-vendors.js';
 import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {Services} from '../../../src/services';
-import {SyncResolverDef} from '../../../src/service/variable-source';
 import {isArray, isObject} from '../../../src/types';
 import {isSecureUrl} from '../../../src/url';
 
@@ -21,6 +20,13 @@ export const RTC_ERROR_ENUM = {
   NETWORK_FAILURE: 'network_failure',
   UNKNOWN_VENDOR: 'unknown_vendor',
 };
+
+/** @typedef {{
+      rtcResponse: ?Object<string, *>,
+      rtcTime: number,
+      callout: string,
+      error: (RTC_ERROR_ENUM | undefined)}} */
+export let rtcResponseDef;
 
 /**
  * @param {!Array<Promise>} promiseArray
@@ -48,7 +54,7 @@ function buildErrorResponse(error, callout, opt_rtcTime) {
  * For a given A4A Element, sends out Real Time Config requests to
  * any urls or vendors specified by the publisher.
  * @param {!AMP.BaseElement} a4aElement
- * @param {!Object<string,!SyncResolverDef>} customMacros The ad-network specified macro
+ * @param {!Object<string, !../../../src/service/variable-source.SyncResolverDef>} customMacros The ad-network specified macro
  *   substitutions available to use.
  * @return {Promise<!Array>|undefined}
  * @private
