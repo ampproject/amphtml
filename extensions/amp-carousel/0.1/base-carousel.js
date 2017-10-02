@@ -166,12 +166,10 @@ export class BaseCarousel extends AMP.BaseElement {
    * Sets the previous and next button visual states.
    */
   setControlsState() {
-    const hasPrev = this.hasPrev();
-    const hasNext = this.hasNext();
-    this.prevButton_.classList.toggle('amp-disabled', !hasPrev);
-    this.prevButton_.setAttribute('aria-disabled', !hasPrev);
-    this.nextButton_.classList.toggle('amp-disabled', !hasNext);
-    this.nextButton_.setAttribute('aria-disabled', !hasNext);
+    this.prevButton_.classList.toggle('amp-disabled', !this.hasPrev());
+    this.prevButton_.setAttribute('aria-disabled', !this.hasPrev());
+    this.nextButton_.classList.toggle('amp-disabled', !this.hasNext());
+    this.nextButton_.setAttribute('aria-disabled', !this.hasNext());
   }
 
   /**

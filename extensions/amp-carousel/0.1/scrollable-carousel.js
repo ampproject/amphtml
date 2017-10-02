@@ -33,6 +33,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
     /** @private {number} */
     this.pos_ = 0;
 
+    /** @private {number} */
+    this.oldPos_ = 0;
+
     /** @private {?Array<!Element>} */
     this.cells_ = null;
 
@@ -57,17 +60,29 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.element.appendChild(this.container_);
 
     this.cells_.forEach(cell => {
+      this.setAsOwner(cell);
       cell.classList.add('amp-carousel-slide');
       cell.classList.add('amp-scrollable-carousel-slide');
       this.container_.appendChild(cell);
     });
-    this.declareLayer(this.container_);
+
+    this.cancelTouchEvents_();
+
+    this.container_.addEventListener(
+        'scroll', this.scrollHandler_.bind(this));
   }
 
   /** @override */
   layoutCallback() {
+    this.doLayout_(this.pos_);
+    this.preloadNext_(this.pos_, 1);
     this.setControlsState();
     return Promise.resolve();
+  }
+
+  /** @override */
+  onViewportCallback(unusedInViewport) {
+    this.updateInViewport_(this.pos_, this.pos_);
   }
 
   /** @override */
@@ -135,6 +150,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   commitSwitch_(pos) {
+    this.updateInViewport_(pos, this.oldPos_);
+    this.doLayout_(pos);
+    this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
+    this.oldPos_ = pos;
     this.pos_ = pos;
     this.setControlsState();
   }
@@ -160,6 +179,67 @@ export class AmpScrollableCarousel extends BaseCarousel {
     return newPos;
   }
 
+  /**
+   * @param {number} pos
+   * @param {function(!Element)} callback
+   * @private
+   */
+  withinWindow_(pos, callback) {
+    const containerWidth = this.getLayoutWidth();
+    for (let i = 0; i < this.cells_.length; i++) {
+      const cell = this.cells_[i];
+      if (cell./*OK*/offsetLeft + cell./*OK*/offsetWidth >= pos &&
+            cell./*OK*/offsetLeft <= pos + containerWidth) {
+        callback(cell);
+      }
+    }
+  }
+
+  /**
+   * @param {number} pos
+   * @private
+   */
+  doLayout_(pos) {
+    this.withinWindow_(pos, cell => {
+      this.scheduleLayout(cell);
+    });
+  }
+
+  /**
+   * @param {number} pos
+   * @param {number} dir
+   * @private
+   */
+  preloadNext_(pos, dir) {
+    const nextPos = this.nextPos_(pos, dir);
+    if (nextPos != pos) {
+      this.withinWindow_(nextPos, cell => {
+        this.schedulePreload(cell);
+      });
+    }
+  }
+
+  /**
+   * @param {number} newPos
+   * @param {number} oldPos
+   * @private
+   */
+  updateInViewport_(newPos, oldPos) {
+    const seen = [];
+    this.withinWindow_(newPos, cell => {
+      seen.push(cell);
+      this.updateInViewport(cell, true);
+    });
+    if (oldPos != newPos) {
+      this.withinWindow_(oldPos, cell => {
+        if (!seen.includes(cell)) {
+          this.updateInViewport(cell, false);
+          this.schedulePause(cell);
+        }
+      });
+    }
+  }
+
   /** @override */
   hasPrev() {
     return this.pos_ != 0;
@@ -174,12 +254,12 @@ export class AmpScrollableCarousel extends BaseCarousel {
     return this.pos_ != maxPos;
   }
 
-  /** @override */
-  setupGestures() {
-    this.container_.addEventListener('scroll', this.scrollHandler_.bind(this));
-
-    // Cancels the touchmove events for the element so that viewer does not
-    // consider the swipes in the carousel as swipes for changing AMP documents.
+  /**
+   * Cancels the touchmove events for the element so that viewer does not
+   * consider the swipes in the carousel as swipes for changing AMP documents.
+   * @private
+   */
+  cancelTouchEvents_() {
     // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
     // touchmove events.
     this.element.addEventListener('touchmove', event => {
