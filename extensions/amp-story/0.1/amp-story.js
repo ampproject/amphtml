@@ -331,7 +331,7 @@ export class AmpStory extends AMP.BaseElement {
    * @param {string} targetPageId
    * @return {!Promise}
    */
-  // TODO: Update history state
+  // TODO(newmuis): Update history state
   switchTo_(targetPageId) {
     if (this.isBookendActive_) {
       // Disallow switching pages while the bookend is active.
