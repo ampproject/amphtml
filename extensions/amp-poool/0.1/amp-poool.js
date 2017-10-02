@@ -95,18 +95,24 @@ export class AmpPoool extends AMP.BaseElement {
         updatePoool("style", "brand_logo", this.element.getAttribute("brand-logo"), script);
         updatePoool("style", "brand_cover", this.element.getAttribute("brand-cover"), script);
 
+
         // Add event values
-        updatePoool("event", "onlock", this.element.getAttribute("on-lock"), script, true);
-        updatePoool("event", "onrelease", this.element.getAttribute("on-release"), script, true);
-        updatePoool("event", "onHidden", this.element.getAttribute("on-hidden"), script, true);
-        updatePoool("event", "onDisabled", this.element.getAttribute("on-disabled"), script, true);
-        updatePoool("event", "onregister", this.element.getAttribute("on-register"), script, true);
-        updatePoool("event", "onsubscribeclick", this.element.getAttribute("on-subscribeclick"), script, true);
-        updatePoool("event", "onerror", this.element.getAttribute("on-error"), script, true);
-        updatePoool("event", "onadblock", this.element.getAttribute("on-adblock"), script, true);
-        updatePoool("event", "onoutdatedbrowser", this.element.getAttribute("on-outdatedbrowser"), script, true);
-        updatePoool("event", "onUserOutsideCohort", this.element.getAttribute("on_useroutsidecohort"), script, true);
-        updatePoool("event", "onIdentityAvailable", this.element.getAttribute("on-identityavailable"), script, true);
+        var events = this.win.document.getElementById(this.element.getAttribute("events"));
+
+        // Only if publisher want to set events
+        if(events) {
+            updatePoool("event", "onlock", JSON.parse(events.innerHTML).on_lock, script, true);
+            updatePoool("event", "onrelease", JSON.parse(events.innerHTML).on_release, script, true);
+            updatePoool("event", "onHidden", JSON.parse(events.innerHTML).on_hidden, script, true);
+            updatePoool("event", "onDisabled", JSON.parse(events.innerHTML).on_disabled, script, true);
+            updatePoool("event", "onregister", JSON.parse(events.innerHTML).on_register, script, true);
+            updatePoool("event", "onsubscribeclick", JSON.parse(events.innerHTML).on_subscribeclick, script, true);
+            updatePoool("event", "onerror", JSON.parse(events.innerHTML).on_error, script, true);
+            updatePoool("event", "onadblock",JSON.parse(events.innerHTML).on_adblock, script, true);
+            updatePoool("event", "onoutdatedbrowser", JSON.parse(events.innerHTML).on_outdatedbrowser, script, true);
+            updatePoool("event", "onUserOutsideCohort", JSON.parse(events.innerHTML).on_useroutsidecohort, script, true);
+            updatePoool("event", "onIdentityAvailable", JSON.parse(events.innerHTML).on_identityavailable, script, true);
+        }
 
         // End poool tag with action values
         updatePoool("send", "email", this.element.getAttribute("email"), script);
