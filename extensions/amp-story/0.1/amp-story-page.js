@@ -36,6 +36,7 @@ import {PageElement} from './page-element';
 import {isFiniteNumber} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
 import {listenOnce} from '../../../src/event-helper';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 
 const LOADING_SCREEN_CONTENTS_TEMPLATE =
     `<ul class="i-amphtml-story-page-loading-dots">
@@ -154,7 +155,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   markMediaElementsWithPreload_() {
-    const mediaSet = this.element.querySelectorAll('amp-audio, amp-video');
+    const mediaSet = scopedQuerySelectorAll(this.element, 'amp-audio, amp-video');
     Array.prototype.forEach.call(mediaSet, mediaItem => {
       mediaItem.setAttribute('preload', 'auto');
     });
@@ -288,7 +289,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   getAllMedia_() {
-    return this.element.querySelectorAll('audio, video');
+    return scopedQuerySelectorAll(this.element, 'audio, video');
   }
 
 
@@ -415,9 +416,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       return el;
     } else if (el.hasAttribute('background-audio') &&
         (tagName === 'amp-story' || tagName === 'amp-story-page')) {
-      return el.querySelector('.i-amphtml-story-background-audio');
+      return scopedQuerySelector(el, '.i-amphtml-story-background-audio');
     } else if (tagName === 'amp-audio') {
-      return el.querySelector('audio');
+      return scopedQuerySelector(el, 'audio');
     }
 
     return null;
@@ -501,7 +502,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     } else {
       let mediaElement;
       try {
-        mediaElement = this.element.querySelector(`#${autoAdvanceAfter}`);
+        mediaElement = scopedQuerySelector(this.element, `#${autoAdvanceAfter}`);
       } catch (e) {
         user().error(TAG, `Malformed ID '${autoAdvanceAfter}' for automatic ` +
             `advance on page '${this.element.id}'.`);
