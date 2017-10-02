@@ -15,12 +15,6 @@
  */
 
 import {dev} from '../../../src/log';
-import {Services} from '../../../src/services';
-
-
-
-/** @typedef {{ source: AudioBufferSourceNode, gainNode: GainNode }} */
-let AudioSource;
 
 /**
  * The volume to which audio should be reduced when other audio sources are
@@ -98,7 +92,7 @@ export class AudioManager {
    */
   createPlayable_(sourceElement) {
     if (!(sourceElement instanceof Element)) {
-      dev().error('amp-story', 'Played item must be element.');
+      dev().error('AMP-STORY', 'Played item must be element.');
     }
 
     if (sourceElement instanceof HTMLMediaElement) {
@@ -136,7 +130,7 @@ export class AudioManager {
 
   /** @private */
   getMediaElementChildren_(element) {
-    return element.querySelectorAll('audio, video');
+    return element.querySelectorAll('audio,video');
   }
 
   /**
@@ -403,7 +397,7 @@ class MediaElementPlayable extends Playable {
   }
 
   /** @override */
-  setVolume(volume, durationMs, easingFn) {
+  setVolume(volume, durationMs, unusedEasingFn) {
     // TODO(newmuis): Fade to volume over durationMs following easingFn.
     if (volume === this.element_.volume) {
       return;
