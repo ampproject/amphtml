@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 import {StateChangeType} from '../navigation-state';
-import {VariableService} from '../variable-service';
+import {AmpStoryVariableService} from '../variable-service';
 
 
 describes.fakeWin('amp-story variable service', {}, () => {
   let variableService;
 
   beforeEach(() => {
-    variableService = new VariableService();
+    variableService = new AmpStoryVariableService();
   });
 
   it('should update pageIndex and pageId on change', () => {

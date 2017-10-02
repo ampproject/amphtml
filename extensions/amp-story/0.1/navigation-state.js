@@ -55,7 +55,7 @@ export class NavigationState {
     };
 
     if (opt_pageId) {
-      changeValue.pageId = dev().assertString(opt_pageId);
+      changeValue.pageId = opt_pageId;
     }
 
     this.fire_(StateChangeType.ACTIVE_PAGE, changeValue);

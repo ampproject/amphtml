@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 import {StateChangeType} from '../navigation-state';
-import {AnalyticsTrigger} from '../analytics';
+import {AmpStoryAnalytics} from '../analytics';
 
 
 describes.fakeWin('amp-story analytics', {}, env => {
-  let analyticsTrigger;
+  let analytics;
   let rootEl;
 
   beforeEach(() => {
     rootEl = env.win.document.createElement('div');
-    analyticsTrigger = new AnalyticsTrigger(rootEl);
+    analytics = new AmpStoryAnalytics(rootEl);
   });
 
   it('should trigger `story-page-visible` on change', () => {
-    const trigger = sandbox.stub(analyticsTrigger, 'triggerEvent_');
+    const trigger = sandbox.stub(analytics, 'triggerEvent_');
 
-    analyticsTrigger.onStateChange({
+    analytics.onStateChange({
       type: StateChangeType.ACTIVE_PAGE,
       value: {
         pageIndex: 123,
@@ -44,10 +44,10 @@ describes.fakeWin('amp-story analytics', {}, env => {
   });
 
   it('should trigger `story-page-visible` only once per page', () => {
-    const trigger = sandbox.stub(analyticsTrigger, 'triggerEvent_');
+    const trigger = sandbox.stub(analytics, 'triggerEvent_');
 
     for (let i = 0; i < 10; i++) {
-      analyticsTrigger.onStateChange({
+      analytics.onStateChange({
         type: StateChangeType.ACTIVE_PAGE,
         value: {
           pageIndex: 123,
@@ -63,7 +63,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
             vars.pageId == 'my-page-id'));
 
     for (let i = 0; i < 10; i++) {
-      analyticsTrigger.onStateChange({
+      analytics.onStateChange({
         type: StateChangeType.ACTIVE_PAGE,
         value: {
           pageIndex: 6,

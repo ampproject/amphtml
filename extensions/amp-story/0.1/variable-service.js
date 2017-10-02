@@ -21,7 +21,7 @@ import {dev} from '../../../src/log';
  * Variable service for amp-story.
  * Used for URL replacement service. See usage in src/url-replacements-impl.
  */
-export class VariableService {
+export class AmpStoryVariableService {
   constructor() {
     /** @private {?string} */
     this.pageIndex_ = null;

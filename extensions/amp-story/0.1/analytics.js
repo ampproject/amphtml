@@ -27,7 +27,7 @@ const Events = {
 /**
  * Intermediate handler for amp-story specific analytics.
  */
-export class AnalyticsTrigger {
+export class AmpStoryAnalytics {
   /**
    * @param {!Element} element
    */
@@ -35,7 +35,7 @@ export class AnalyticsTrigger {
     this.element_ = element;
 
     /** @private @const {!Object<string, boolean>} */
-    this.pagesSeen_ = map();
+    this.seenPagesIndices_ = map();
   }
 
   /**
@@ -44,9 +44,10 @@ export class AnalyticsTrigger {
   onStateChange(stateChangeEvent) {
     switch (stateChangeEvent.type) {
       case StateChangeType.ACTIVE_PAGE:
+        const {pageIndex, pageId} = stateChangeEvent.value;
         this.onActivePageChange_(
-            dev().assertNumber(stateChangeEvent.value.pageIndex),
-            dev().assertString(stateChangeEvent.value.pageId));
+            dev().assertNumber(pageIndex),
+            dev().assertString(pageId));
         break;
     }
   }
@@ -56,22 +57,14 @@ export class AnalyticsTrigger {
    * @param {string} pageId
    */
   onActivePageChange_(pageIndex, pageId) {
-    if (this.shouldTriggerPageVisible_(pageIndex)) {
+    if (!this.seenPagesIndices_[pageIndex]) {
       this.triggerEvent_(Events.PAGE_VISIBLE, {
         'pageIndex': pageIndex.toString(),
         'pageId': pageId,
       });
 
-      this.pagesSeen_[pageIndex] = true;
+      this.seenPagesIndices_[pageIndex] = true;
     }
-  }
-
-  /**
-   * @param {number} pageIndex
-   * @return {boolean}
-   */
-  shouldTriggerPageVisible_(pageIndex) {
-    return !hasOwn(this.pagesSeen_, pageIndex);
   }
 
   /**
