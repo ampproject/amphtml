@@ -31,9 +31,9 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
 <html amp lang="en">
   <head>
     <meta charset="utf-8">
-    <script async src="https://stamp-prototype.appspot.com/v0.js"></script>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story"
-        src="https://stamp-prototype.appspot.com/v0/amp-story-0.1.js"></script>
+        src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
     <title>Hello, amp-story</title>
     <link rel="canonical" href="http://example.ampproject.org/my-story.html" />
     <meta name="viewport"
@@ -44,7 +44,7 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
     <amp-story standalone>
       <amp-story-page id="my-first-page">
         <amp-story-grid-layer template="fill">
-          <amp-img src="https://stamp-prototype.appspot.com/helloworld/bg1.jpg"
+          <amp-img src="https://example.ampproject.org/helloworld/bg1.jpg"
               width="900" height="1600">
           </amp-img>
         </amp-story-grid-layer>
@@ -54,7 +54,7 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
       </amp-story-page>
       <amp-story-page id="my-second-page">
         <amp-story-grid-layer template="fill">
-          <amp-img src="https://stamp-prototype.appspot.com/helloworld/bg2.gif"
+          <amp-img src="https://example.ampproject.org/helloworld/bg2.gif"
               width="900" height="1600">
           </amp-img>
         </amp-story-grid-layer>
@@ -81,8 +81,8 @@ AMP HTML documents with `amp-story` MUST:
 | Contain a top-level `<html ⚡>` tag (`<html amp>` is accepted as well). | Identifies the page as AMP content. |
 | Contain `<head>` and `<body>` tags. | Optional in HTML but not in AMP. |
 | Contain a `<meta charset="utf-8">` tag as the first child of their `<head>` tag. | Identifies the encoding for the page. |
-| Contain a `<script async src="https://stamp-prototype.appspot.com/v0.js"></script>` tag as the second child of their `<head>` tag. | Includes and loads the AMP JS library.  This is a forked version specific to amp-story; when the feature is generally available, the normal v0.js hosted from cdn.ampproject.org must be used. |
-| Contain a `<script async src="https://stamp-prototype.appspot.com/v0/amp-story-0.1.js" custom-element="amp-story"></script>` tag as the third child of their `<head>` tag. | Includes and loads the amp-story JS library. |
+| Contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag as the second child of their `<head>` tag. | Includes and loads the AMP JS library.  This is a forked version specific to amp-story; when the feature is generally available, the normal v0.js hosted from cdn.ampproject.org must be used. |
+| Contain a `<script async src="https://cdn.ampproject.org/v0/amp-story-0.1.js" custom-element="amp-story"></script>` tag as the third child of their `<head>` tag. | Includes and loads the amp-story JS library. |
 | Contain a `<link rel="canonical" href="$STORY_URL" />` tag inside their `<head>`. | Points to itself. Learn more in [Make Your Page Discoverable](https://www.ampproject.org/docs/guides/discovery.html). |
 | Contain a `<meta name="viewport" content="width=device-width,minimum-scale=1">` tag inside their `<head>` tag. It's also recommended to include `initial-scale=1`. | Specifies a responsive viewport. Learn more in [Create Responsive AMP Pages](https://www.ampproject.org/docs/guides/responsive/responsive_design.html). |
 | Contain the [AMP boilerplate code](https://www.ampproject.org/docs/reference/spec/amp-boilerplate.html) in their `<head>` tag. | CSS boilerplate to initially hide the content until AMP JS is loaded. |
