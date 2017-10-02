@@ -260,6 +260,16 @@ export class Services {
   }
 
   /**
+   * @param {!Window} win
+   * @return {?Promise<?{pageIndex: number, pageId: string}>}
+   */
+  static storyVariableServiceForOrNull(win) {
+    return (/** @type {!Promise<?{pageIndex: number, pageId: string}>} */ (
+        getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
+            true)));
+  }
+
+  /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>}
    */

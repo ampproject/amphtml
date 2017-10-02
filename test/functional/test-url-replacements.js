@@ -99,6 +99,15 @@ describes.sandboxed('UrlReplacements', {}, () => {
             });
           });
         }
+        if (opt_options.withStoryVariableService) {
+          markElementScheduledForTesting(iframe.win, 'amp-story');
+          registerServiceBuilder(iframe.win, 'story-variable', function() {
+            return Promise.resolve({
+              pageIndex: 546,
+              pageId: 'id-123',
+            });
+          });
+        }
       }
       viewerService = Services.viewerForDoc(iframe.ampdoc);
       replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
@@ -419,6 +428,20 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return expect(
         expandAsync('?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING'))
         .to.eventually.equal('?in=&out=');
+  });
+
+  it('should replace STORY_PAGE_INDEX and STORY_PAGE_ID', () => {
+    return expect(
+        expandAsync('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID',
+            /*opt_bindings*/ undefined, {withStoryVariableService: true}))
+        .to.eventually.equal('?index=546&id=id-123');
+  });
+
+  it('should replace STORY_PAGE_INDEX and STORY_PAGE_ID' +
+      ' with empty string if amp-story is not configured', () => {
+    return expect(
+        expandAsync('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID'))
+        .to.eventually.equal('?index=&id=');
   });
 
   it('should replace TIMESTAMP', () => {
