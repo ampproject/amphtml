@@ -176,7 +176,7 @@ export class Bookend {
     const headingEl = createElementWithAttributes(this.win_.document, 'h3', {
       'class': 'i-amphtml-story-bookend-heading',
     });
-    headingEl.innerText = escapeHtml(heading);
+    headingEl./*OK*/innerText = escapeHtml(heading);
     return headingEl;
   }
 
