@@ -72,9 +72,7 @@ For more informations, check our [documentation](https://dev.poool.fr/doc/sdk).
   force-widget="gift"
   main-color="#ffc400"
   background-color="#ffc400"
-  brand-logo="https://cdn.poool.fr/uploads/57ffab6c756a8cf24356d0c2/sudouest.jpg"
-  on-lock="function(){console.log('Locked !');}"
-  on-release="function(e){console.log('Released with widget ' + e.widget);}">
+  brand-logo="https://cdn.poool.fr/uploads/57ffab6c756a8cf24356d0c2/sudouest.jpg">
 </amp-poool>
 ```
 
@@ -87,9 +85,41 @@ Example :
 - Just set a new attribute in your amp-poool tag : force-widget="video".
 - **Notice that you have to set amp-poool tag attribute with "-" symbol instead of "_" one.**
 
-To finish this, it is also possible to set action on poool event.
-You already have 2 examples on the amp-poool tag described above (on-lock & on-release).
+
+### Custom paywall : Configure events
 To learn more about events, please check our [documentation](https://dev.poool.fr/doc/sdk#events).
+
+First, add an attribute named "events" to your amp-poool tag. His value has to be a json script id.
+Check the following example :
+
+Update your amp-poool tag with "events" attribute. "poool-custom-events" is the json script id.
+
+```html
+<amp-poool
+  layout="responsive"
+  width="150"
+  height="80"
+  init="Your personal key : XXXXX-XXXXX-XXXXX-XXXXX"
+  page-view="premium"
+  debug="true"
+  mode="excerpt"
+  percent="80"
+  post-container="#need-poool-custom"
+  events="poool-custom-events">
+</amp-poool>
+```
+
+Then create your json script and set your events :
+
+```html
+<script id="poool-custom-events" type="application/ld+json">
+    {
+        "on_lock": "function() { console.log('Content Locked !'); }",
+        "on_release": "function(e) { console.log('Released with widget ' + e.widget + ' !'); console.log('Enjoy your premium article !'); }",
+        "on_adblock": "function() { console.log('An adblocker has been detected !');}"
+    }
+</script>
+```
 
 
 ## Required attributes
