@@ -23,6 +23,8 @@ import {
   mergeExperimentIds,
   maybeAppendErrorParameter,
   TRUNCATION_PARAM,
+  getEnclosingContainerTypes,
+  ValidAdContainerTypes,
 } from '../utils';
 import {buildUrl} from '../url-builder';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -401,6 +403,37 @@ describe('Google A4A utils', () => {
           'https://foo.com/bar', {hello: 'world'}, 15, TRUNCATION_PARAM);
       expect(truncUrl.indexOf(TRUNCATION_PARAM.name) != -1);
       expect(maybeAppendErrorParameter(truncUrl, 'n')).to.not.be.ok;
+    });
+  });
+
+  describes.realWin('#getEnclosingContainerTypes', {}, env => {
+    it('should return empty if no containers', () => {
+      expect(getEnclosingContainerTypes(
+          env.win.document.createElement('amp-ad')).length).to.equal(0);
+    });
+
+    Object.keys(ValidAdContainerTypes).forEach(container => {
+      it(`should return container: ${container}`, () => {
+        const containerElem = env.win.document.createElement(container);
+        env.win.document.body.appendChild(containerElem);
+        const ampAdElem = env.win.document.createElement('amp-ad');
+        containerElem.appendChild(ampAdElem);
+        expect(getEnclosingContainerTypes(ampAdElem))
+            .to.deep.equal([ValidAdContainerTypes[container]]);
+      });
+    });
+
+    it('should include ALL containers', () => {
+      let prevContainer;
+      Object.keys(ValidAdContainerTypes).forEach(container => {
+        const containerElem = env.win.document.createElement(container);
+        (prevContainer || env.win.document.body).appendChild(containerElem);
+        prevContainer = containerElem;
+      });
+      const ampAdElem = env.win.document.createElement('amp-ad');
+      prevContainer.appendChild(ampAdElem);
+      expect(getEnclosingContainerTypes(ampAdElem).sort())
+          .to.deep.equal(Object.values(ValidAdContainerTypes).sort());
     });
   });
 });

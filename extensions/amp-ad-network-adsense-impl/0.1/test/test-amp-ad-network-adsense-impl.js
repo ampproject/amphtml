@@ -427,6 +427,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
           /(\?|&)client=ca-adsense(&|$)/,
           /(\?|&)format=\d+x\d+(&|$)/,
           /(\?|&)iu=some_slot(&|$)/,
+          /(\?|&)output=html(&|$)/,
           /(\?|&)w=\d+(&|$)/,
           /(\?|&)h=\d+(&|$)/,
           /(\?|&)d_imp=1(&|$)/,

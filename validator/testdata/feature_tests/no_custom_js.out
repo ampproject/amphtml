@@ -1,3 +1,3 @@
 FAIL
-feature_tests/no_custom_js.html:28:3 The tag 'script' is disallowed except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]
-feature_tests/no_custom_js.html:29:3 The tag 'script' is disallowed except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/no_custom_js.html:28:3 Only AMP runtime 'script' tags are allowed, and only in the document head. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/no_custom_js.html:29:3 Only AMP runtime 'script' tags are allowed, and only in the document head. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]

@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {Srcset, parseSrcset, srcsetFromElement} from '../../src/srcset';
+import {
+  Srcset,
+  parseSrcset,
+  srcsetFromElement,
+  srcsetFromSrc,
+} from '../../src/srcset';
 
 
 describe('Srcset parseSrcset', () => {
@@ -257,6 +262,19 @@ describe('Srcset srcsetFromElement', () => {
       srcsetFromElement(document.createElement('div'));
     }).to.throw(
         /Either non-empty "srcset" or "src" attribute must be specified/);
+  });
+});
+
+
+describe('Srcset srcsetFromSrc', () => {
+  it('should construct with undefined width and 1 dpr', () => {
+    const srcset = srcsetFromSrc('image-0.png');
+    expect(srcset.getSources().length).to.equal(1);
+
+    const source = srcset.getSources()[0];
+    expect(source.url).to.equal('image-0.png');
+    expect(source.width).to.be.undefined;
+    expect(source.dpr).to.equal(1);
   });
 });
 

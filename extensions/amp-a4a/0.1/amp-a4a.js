@@ -31,7 +31,7 @@ import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
 } from '../../../src/friendly-iframe-embed';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -40,7 +40,7 @@ import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {getBinaryType, isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
-import {assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl, isSecureUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {handleClick} from '../../../ads/alp/handler';
 import {
@@ -106,7 +106,8 @@ export let SizeInfoDef;
 /** @typedef {{
       minifiedCreative: string,
       customElementExtensions: !Array<string>,
-      customStylesheets: !Array<{href: string}>
+      customStylesheets: !Array<{href: string}>,
+      images: (Array<string>|undefined),
     }} */
 let CreativeMetaDataDef;
 
@@ -248,7 +249,7 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?XORIGIN_MODE}
      */
     this.experimentalNonAmpCreativeRenderMethod_ =
-      Services.platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
+        this.getNonAmpCreativeRenderingMethod();
 
     /**
      * Gets a notion of current time, in ms.  The value is not necessarily
@@ -293,8 +294,8 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.fromResumeCallback = false;
 
-    /** @private {string} */
-    this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
+    /** @protected {string} */
+    this.safeframeVersion = DEFAULT_SAFEFRAME_VERSION;
 
     /**
      * @protected {boolean} Indicates whether the ad is currently in the
@@ -492,7 +493,8 @@ export class AmpA4A extends AMP.BaseElement {
    */
   shouldInitializePromiseChain_() {
     const slotRect = this.getIntersectionElementLayoutBox();
-    if (slotRect.height == 0 || slotRect.width == 0) {
+    if (this.getLayout() != Layout.FLUID &&
+        (slotRect.height == 0 || slotRect.width == 0)) {
       dev().fine(
           TAG, 'onLayoutMeasure canceled due height/width 0', this.element);
       return false;
@@ -613,17 +615,14 @@ export class AmpA4A extends AMP.BaseElement {
           // an acceptable solution to the 'Safari on iOS doesn't fetch
           // iframe src from cache' issue.  See
           // https://github.com/ampproject/amphtml/issues/5614
-          const method = fetchResponse.headers.get(RENDERING_TYPE_HEADER) ||
-              this.experimentalNonAmpCreativeRenderMethod_;
+          const method = this.getNonAmpCreativeRenderingMethod(
+              fetchResponse.headers.get(RENDERING_TYPE_HEADER));
           this.experimentalNonAmpCreativeRenderMethod_ = method;
-          if (method && !isEnumValue(XORIGIN_MODE, method)) {
-            dev().error('AMP-A4A', `cross-origin render mode header ${method}`);
-          }
           const safeframeVersionHeader =
             fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
           if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
               safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
-            this.safeframeVersion_ = safeframeVersionHeader;
+            this.safeframeVersion = safeframeVersionHeader;
             this.preconnect.preload(this.getSafeframePath_());
           }
           // Note: Resolving a .then inside a .then because we need to capture
@@ -709,9 +708,6 @@ export class AmpA4A extends AMP.BaseElement {
           // viewport but cannot wait on promise.  Sadly, need a state a
           // variable.
           this.isVerifiedAmpCreative_ = !!creative;
-          // TODO(levitzky) If creative comes back null, we should consider re-
-          // fetching the signing server public keys and try the verification
-          // step again.
           return creative && utf8Decode(creative);
         })
         // This block returns CreativeMetaDataDef iff the creative was verified
@@ -738,6 +734,9 @@ export class AmpA4A extends AMP.BaseElement {
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach(font =>
               this.preconnect.preload(font.href));
+          // Preload any AMP images.
+          (creativeMetaDataDef.images || []).forEach(image =>
+              isSecureUrl(image) && this.preconnect.preload(image));
           return creativeMetaDataDef;
         })
         .catch(error => {
@@ -962,7 +961,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.isVerifiedAmpCreative_ = false;
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
-        Services.platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
+        this.getNonAmpCreativeRenderingMethod();
   }
 
   /**
@@ -1361,6 +1360,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaNameAttrOfXOriginIframe_(creativeBody) {
+    /** @type {string} */
     const method = this.experimentalNonAmpCreativeRenderMethod_;
     dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
         method == XORIGIN_MODE.NAMEFRAME,
@@ -1393,14 +1393,15 @@ export class AmpA4A extends AMP.BaseElement {
       }
       // TODO(bradfrizzell): change name of function and var
       let contextMetadata = getContextMetadata(
-          this.win, this.element, this.sentinel);
+          this.win, this.element, this.sentinel,
+          this.getAdditionalContextMetadata());
       // TODO(bradfrizzell) Clean up name assigning.
       if (method == XORIGIN_MODE.NAMEFRAME) {
         contextMetadata['creative'] = creative;
         name = JSON.stringify(contextMetadata);
       } else if (method == XORIGIN_MODE.SAFEFRAME) {
         contextMetadata = JSON.stringify(contextMetadata);
-        name = `${this.safeframeVersion_};${creative.length};${creative}` +
+        name = `${this.safeframeVersion};${creative.length};${creative}` +
             `${contextMetadata}`;
       }
       return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
@@ -1475,10 +1476,14 @@ export class AmpA4A extends AMP.BaseElement {
         metaData.customStylesheets.forEach(stylesheet => {
           if (!isObject(stylesheet) || !stylesheet['href'] ||
               typeof stylesheet['href'] !== 'string' ||
-              !/^https:\/\//i.test(stylesheet['href'])) {
+              !isSecureUrl(stylesheet['href'])) {
             throw new Error(errorMsg);
           }
         });
+      }
+      if (isArray(metaDataObj['images'])) {
+        // Load maximum of 5 images.
+        metaData.images = metaDataObj['images'].splice(0, 5);
       }
       // TODO(keithwrightbos): OK to assume ampRuntimeUtf16CharOffsets is before
       // metadata as its in the head?
@@ -1517,7 +1522,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getSafeframePath_() {
     return 'https://tpc.googlesyndication.com/safeframe/' +
-      `${this.safeframeVersion_}/html/container.html`;
+      `${this.safeframeVersion}/html/container.html`;
   }
 
   /**
@@ -1549,6 +1554,31 @@ export class AmpA4A extends AMP.BaseElement {
    */
   shouldPreferentialRenderWithoutCrypto() {
     return false;
+  }
+
+  /**
+   * @param {string=} headerValue Method as given in header.
+   */
+  getNonAmpCreativeRenderingMethod(headerValue) {
+    if (headerValue) {
+      if (!isEnumValue(XORIGIN_MODE, headerValue)) {
+        dev().error(
+            'AMP-A4A', `cross-origin render mode header ${headerValue}`);
+      } else {
+        return headerValue;
+      }
+    }
+    return Services.platformFor(this.win).isIos() ?
+        XORIGIN_MODE.SAFEFRAME : null;
+  }
+
+  /**
+   * Returns base object that will be written to cross-domain iframe name
+   * attribute.
+   * @return {!JsonObject}
+   */
+  getAdditionalContextMetadata() {
+    return /** @type {!JsonObject} */ ({});
   }
 }
 

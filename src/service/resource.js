@@ -24,6 +24,7 @@ import {startsWith} from '../string';
 import {toggle, computedStyle} from '../style';
 import {AmpEvents} from '../amp-events';
 import {toWin} from '../types';
+import {Layout} from '../layout';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -556,9 +557,12 @@ export class Resource {
    * @return {boolean}
    */
   isDisplayed() {
-    return (this.layoutBox_.height > 0 && this.layoutBox_.width > 0 &&
+    const isFluid = this.element.getLayout() == Layout.FLUID;
+    const hasNonZeroSize = this.layoutBox_.height > 0 &&
+        this.layoutBox_.width > 0;
+    return (isFluid || hasNonZeroSize) &&
         !!this.element.ownerDocument &&
-        !!this.element.ownerDocument.defaultView);
+        !!this.element.ownerDocument.defaultView;
   }
 
   /**

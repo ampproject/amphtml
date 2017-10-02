@@ -152,9 +152,9 @@ export class StandardActions {
           scope['event'] = event.detail;
         }
         if (isPushState) {
-          bind.pushStateWithExpression(objectString, scope);
+          return bind.pushStateWithExpression(objectString, scope);
         } else {
-          bind.setStateWithExpression(objectString, scope);
+          return bind.setStateWithExpression(objectString, scope);
         }
       } else {
         user().error('AMP-BIND', 'Please use the object-literal syntax, '

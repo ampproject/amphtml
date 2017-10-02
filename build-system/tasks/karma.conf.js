@@ -45,7 +45,7 @@ module.exports = {
     bundleDelay: 900,
   },
 
-  reporters: process.env.TRAVIS ? ['super-dots', 'mocha'] : ['dots', 'mocha'],
+  reporters: ['super-dots', 'karmaSimpleReporter'],
 
   superDotsReporter: {
     color: {
@@ -60,8 +60,16 @@ module.exports = {
     },
   },
 
+  specReporter: {
+    suppressPassed: true,
+    suppressSkipped: true,
+    suppressFailed: false,
+    suppressErrorSummary: true,
+    maxLogLines: 10,
+  },
+
   mochaReporter: {
-    output: 'minimal',
+    output: 'full',
     colors: {
       success: 'green',
       error: 'red',
@@ -214,6 +222,7 @@ module.exports = {
     'karma-mocha-reporter',
     'karma-safari-launcher',
     'karma-sauce-launcher',
+    'karma-simple-reporter',
     'karma-sinon-chai',
     'karma-super-dots-reporter',
     {
