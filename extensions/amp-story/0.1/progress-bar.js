@@ -15,6 +15,7 @@
  */
 import {dev} from '../../../src/log';
 import {scale, setStyles} from '../../../src/style';
+import {scopedQuerySelector} from '../../../src/dom';
 import {Services} from '../../../src/services';
 
 
@@ -128,7 +129,7 @@ export class ProgressBar {
     // Offset the index by 1, since nth-child indices start at 1 while
     // JavaScript indices start at 0.
     const nthChildIndex = pageIndex + 1;
-    const progressEl = this.root_.querySelector(
+    const progressEl = scopedQuerySelector(this.root_,
         `.i-amphtml-story-page-progress-bar:nth-child(${nthChildIndex}) ` +
         '.i-amphtml-story-page-progress-value');
     this.vsync_.mutate(() => {
