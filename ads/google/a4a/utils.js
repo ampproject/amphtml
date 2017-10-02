@@ -443,16 +443,6 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
             'continuousTimeMin': 1000,
           },
         },
-        'continuousVisibleIniLoad': {
-          'on': 'ini-load',
-          'selector': 'amp-ad',
-          'selectionMethod': 'closest',
-        },
-        'continuousVisibleRenderStart': {
-          'on': 'render-start',
-          'selector': 'amp-ad',
-          'selectionMethod': 'closest',
-        },
       },
     });
 
@@ -526,14 +516,22 @@ export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
       `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
   deltaTime = Math.round(deltaTime);
   const isAmpSuffix = isVerifiedAmpCreative ? 'Friendly' : 'CrossDomain';
+  config['triggers']['continuousVisibleIniLoad'] = {
+    'on': 'ini-load',
+    'selector': 'amp-ad',
+    'selectionMethod': 'closest',
+    'request': 'iniLoadCsi',
+  };
+  config['triggers']['continuousVisibleRenderStart'] = {
+    'on': 'render-start',
+    'selector': 'amp-ad',
+    'selectionMethod': 'closest',
+    'request': 'renderStartCsi',
+  };
   config['requests']['iniLoadCsi'] = baseCsiUrl +
       `&met.a4a.${slotId}=iniLoadCsi${isAmpSuffix}.${deltaTime}`;
   config['requests']['renderStartCsi'] = baseCsiUrl +
       `&met.a4a.${slotId}=renderStartCsi${isAmpSuffix}.${deltaTime}`;
-  config['triggers']['continuousVisibleIniLoad']['request'] =
-      'iniLoadCsi';
-  config['triggers']['continuousVisibleRenderStart']['request'] =
-      'renderStartCsi';
 
   // Add CSI ping for visibility.
   config['requests']['visibilityCsi'] = baseCsiUrl +
