@@ -432,7 +432,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   isVideoInterfaceVideo_(el) {
-    // TODO(newmuis): Check whether the element has the
+    // TODO(#11533): Check whether the element has the
     // i-amphtml-video-interface class, after #11015 from amphtml is merged
     // into amphtml-story.
     const tagName = el.tagName.toLowerCase();
