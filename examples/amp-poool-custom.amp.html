@@ -85,10 +85,16 @@
       main-color="#ffc400"
       background-color="#ffc400"
       brand-logo="https://cdn.poool.fr/uploads/57ffab6c756a8cf24356d0c2/sudouest.jpg"
-      on-lock="function(){console.log('Locked !');}"
-      on-release="function(e){console.log('Released with widget ' + e.widget);}">
+      events="poool-custom-events">
     </amp-poool>
   </div>
 
+    <script id="poool-custom-events" type="application/ld+json">
+        {
+            "on_lock": "function() { console.log('Content Locked !'); }",
+            "on_release": "function(e) { console.log('Released with widget ' + e.widget + ' !'); console.log('Enjoy your premium article !'); }",
+            "on_adblock": "function() { console.log('An adblocker has been detected !');}"
+        }
+    </script>
 </body>
 </html>
