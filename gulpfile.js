@@ -612,12 +612,12 @@ function build() {
   printConfigHelp('gulp build', 'dist/amp.js')
   return compileCss().then(() => {
     return Promise.all([
-      // polyfillsForTests(),
-      // buildAlp(),
-      // buildExaminer(),
-      // buildSw(),
-      // buildWebWorker(),
-      // buildExtensions({bundleOnlyIfListedInFiles: true}),
+      polyfillsForTests(),
+      buildAlp(),
+      buildExaminer(),
+      buildSw(),
+      buildWebWorker(),
+      buildExtensions({bundleOnlyIfListedInFiles: true}),
       compile(),
     ]);
   }).then(() => {
