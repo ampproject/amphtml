@@ -166,9 +166,20 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
+  }
+
+  /** @override */
+  resumeCallback() {
+    this.initIframeTransport_();
+  }
+
+  /** @override */
+  unlayoutCallback() {
     if (this.iframeTransport_) {
       this.iframeTransport_.detach();
+      this.iframeTransport_ = null;
     }
+    return super.unlayoutCallback();
   }
 
   /**
@@ -225,14 +236,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.instrumentation_.createAnalyticsGroup(this.element);
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
-      const ampAdResourceId = user().assertString(
-          getAmpAdResourceId(this.element, this.win.top),
-          `${TAG}: No friendly parent amp-ad element was found for ` +
-          'amp-analytics tag with iframe transport.');
-
-      this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
-        this.element.getAttribute('type'),
-        this.config_['transport'], ampAdResourceId);
+      this.initIframeTransport_();
     }
 
     const promises = [];
@@ -290,6 +294,29 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     return Promise.all(promises);
+  }
+
+  /**
+   * amp-analytics will create an iframe for vendors in
+   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
+   * This is limited to MRC-accreddited vendors. The frame is removed if the
+   * user navigates/swipes away from the page, and is recreated if the user
+   * navigates back to the page.
+   * @private
+   */
+  initIframeTransport_() {
+    if (this.iframeTransport_) {
+      return;
+    }
+    const TAG = this.getName_();
+    const ampAdResourceId = user().assertString(
+        getAmpAdResourceId(this.element, this.win.top),
+        `${TAG}: No friendly parent amp-ad element was found for ` +
+        'amp-analytics tag with iframe transport.');
+
+    this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
+        this.element.getAttribute('type'),
+        this.config_['transport'], ampAdResourceId);
   }
 
   /**

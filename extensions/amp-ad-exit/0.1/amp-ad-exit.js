@@ -74,6 +74,9 @@ export class AmpAdExit extends AMP.BaseElement {
 
     /** @private {?string} */
     this.ampAdResourceId_ = null;
+
+    /** @private @const {!Object<string,string>} */
+    this.vendorOrigins_ = {};
   }
 
   /**
@@ -253,16 +256,7 @@ export class AmpAdExit extends AMP.BaseElement {
         this.getAmpAdResourceId_(),
         `${TAG}: No friendly parent amp-ad element was found for amp-ad-exit.`);
 
-    this.unlisten_ = listen(this.getAmpDoc().win, 'message', event => {
-      const responseMessage = deserializeMessage(getData(event));
-      if (!responseMessage ||
-          responseMessage['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE) {
-        return;
-      }
-      this.assertValidResponseMessage_(responseMessage, event.origin);
-      this.vendorResponses_[responseMessage['vendor']] =
-          responseMessage['message'];
-    });
+    this.init3pResponseListener_();
   }
 
   /**
@@ -279,10 +273,39 @@ export class AmpAdExit extends AMP.BaseElement {
   }
 
   /** @override */
-  detachedCallback() {
+  resumeCallback() {
+    this.init3pResponseListener_();
+  }
+
+  /** @override */
+  unlayoutCallback() {
     if (this.unlisten_) {
       this.unlisten_();
+      this.unlisten_ = null;
     }
+    return super.unlayoutCallback();
+  }
+
+  /**
+   * amp-analytics will create an iframe for vendors in
+   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
+   * This is limited to MRC-accreddited vendors. The frame is removed in
+   * amp-analytics, and the listener is destroyed here, if the user
+   * navigates/swipes away from the page. Both are recreated if the user
+   * navigates back to the page.
+   * @private
+   */
+  init3pResponseListener_() {
+    this.unlisten_ = this.unlisten_ || listen(this.getAmpDoc().win, 'message',
+        event => {
+          const responseMsg = deserializeMessage(getData(event));
+          if (!responseMsg ||
+              responseMsg['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE) {
+            return;
+          }
+          this.assertValidResponseMessage_(responseMsg, event.origin);
+          this.vendorResponses_[responseMsg['vendor']] = responseMsg['message'];
+        });
   }
 
   /**
@@ -299,7 +322,7 @@ export class AmpAdExit extends AMP.BaseElement {
     user().assert(
         responseMessage['creativeId'] == this.ampAdResourceId_,
         'Received malformed message from 3p analytics frame: ' +
-        'creativeId missing');
+        'creativeId missing or invalid');
     user().assert(responseMessage['vendor'],
         'Received malformed message from 3p analytics frame: ' +
         'vendor missing');
@@ -315,8 +338,14 @@ export class AmpAdExit extends AMP.BaseElement {
    */
   assertOriginMatchesVendor_(origin, vendor) {
     const vendorURL = new URL(assertVendor(vendor));
-    user().assert(vendorURL && origin == vendorURL.origin,
+    if (this.vendorOrigins_[vendor]) {
+      user().assert(this.vendorOrigins_[vendor] == origin,
+          `Invalid origin for vendor ${vendor}: ${origin}`);
+      return;
+    }
+    user().assert(vendorURL && vendorURL.origin == origin,
         `Invalid origin for vendor ${vendor}: ${origin}`);
+    this.vendorOrigins_[vendor] = vendorURL.origin; // Cache for faster access
   }
 
   /** @override */
