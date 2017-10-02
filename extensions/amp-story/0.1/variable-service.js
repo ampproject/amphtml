@@ -36,8 +36,9 @@ export class AmpStoryVariableService {
   onStateChange(stateChangeEvent) {
     switch (stateChangeEvent.type) {
       case StateChangeType.ACTIVE_PAGE:
-        this.pageIndex_ = stateChangeEvent.value.pageIndex;
-        this.pageId_ = stateChangeEvent.value.pageId;
+        const {pageIndex, pageId} = stateChangeEvent.value;
+        this.pageIndex_ = pageIndex;
+        this.pageId_ = pageId;
         break;
     }
   }

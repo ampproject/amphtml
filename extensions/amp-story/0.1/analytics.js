@@ -15,7 +15,7 @@
  */
 import {StateChangeType} from './navigation-state';
 import {dev} from '../../../src/log';
-import {hasOwn, map} from '../../../src/utils/object';
+import {map} from '../../../src/utils/object';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 
