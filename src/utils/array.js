@@ -25,14 +25,23 @@
  */
 export function filterSplice(array, filter) {
   const splice = [];
+  let index = 0;
   for (let i = 0; i < array.length; i++) {
     const item = array[i];
-    if (!filter(item, i, array)) {
+    if (filter(item, i, array)) {
+      if (index < i) {
+        array[index] = item;
+      }
+      index++;
+    } else {
       splice.push(item);
-      array.splice(i, 1);
-      i--;
     }
   }
+
+  if (index < array.length) {
+    array.length = index;
+  }
+
   return splice;
 }
 
