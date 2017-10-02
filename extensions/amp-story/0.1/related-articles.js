@@ -19,18 +19,21 @@ import {user} from '../../../src/log';
 /**
  * @typedef {{title: string, url: string, image: (string|undefined)}}
  */
-export let RelatedArticle;
+export let RelatedArticleDef;
 
 
 /**
- * @typedef {{heading: (string|undefined), articles: !Array<!RelatedArticle>}}
+ * @typedef {{
+ *   heading: (string|undefined),
+ *   articles: !Array<!RelatedArticleDef>,
+ * }}
  */
-export let RelatedArticleSet;
+export let RelatedArticleSetDef;
 
 
 /**
  * @param {!JsonObject} articleJson
- * @return {!RelatedArticle}
+ * @return {!RelatedArticleDef}
  */
 function buildArticleFromJson_(articleJson) {
   const article = {
@@ -42,18 +45,18 @@ function buildArticleFromJson_(articleJson) {
     article.image = articleJson.image;
   }
 
-  return /** @type {!RelatedArticle} */ (article);
+  return /** @type {!RelatedArticleDef} */ (article);
 }
 
 
 /**
  * @param {!JsonObject} articleSetsResponse
- * @return {!Array<!RelatedArticleSet>}
+ * @return {!Array<!RelatedArticleSetDef>}
  */
 // TODO(alanorozco): tighten externs
 // TODO(alanorozco): domain name
 export function buildFromJson(articleSetsResponse) {
-  return /** @type {!Array<!RelatedArticleSet>} */ (
+  return /** @type {!Array<!RelatedArticleSetDef>} */ (
       Object.keys(articleSetsResponse).map(headingKey => {
         const articleSet = {
           articles: articleSetsResponse[headingKey].map(buildArticleFromJson_),
@@ -63,6 +66,6 @@ export function buildFromJson(articleSetsResponse) {
           articleSet.heading = headingKey;
         }
 
-        return /** @type {!RelatedArticleSet} */ (articleSet);
+        return /** @type {!RelatedArticleSetDef} */ (articleSet);
       }));
 }

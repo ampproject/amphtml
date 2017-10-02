@@ -21,39 +21,56 @@ import {dev} from '../../../src/log';
 /**
  * @typedef {{
  *   shareProviders: (!JsonObject|undefined),
- *   relatedArticles: !Array<!./related-articles.RelatedArticleSet>
+ *   relatedArticles: !Array<!./related-articles.RelatedArticleSetDef>
  * }}
  */
-export let BookendConfig;
+export let BookendConfigDef;
 
 
 /**
- * @param {!./related-articles.RelatedArticle} articleData
- * @return {!string}
+ * @param {!./related-articles.RelatedArticleDef} articleData
+ * @return {!DocumentFragment}
  */
 // TODO(alanorozco): link
 // TODO(alanorozco): reading time
 // TODO(alanorozco): domain name
-function articleHtml(articleData) {
-  // TODO(alanorozco): Consider using amp-img and what we need to get it working
-  const imgHtml = articleData.image ? (
-      `<div class="i-amphtml-story-bookend-article-image">
-        <img src="${articleData.image}"
-            width="116"
-            height="116">
-        </img>
-      </div>`
-  ) : '';
+function buildArticle(doc, articleData) {
+  const root = doc.createElement('article');
+  const fragment = doc.createDocumentFragment();
 
-  return (
-      `${imgHtml}
-      <h2 class="i-amphtml-story-bookend-article-heading">
-        ${articleData.title}
-      </h2>
-      <div class="i-amphtml-story-bookend-article-meta">
-        example.com - 10 mins
-      </div>`
-  );
+  if (articleData.image) {
+    const imageContainer = createElementWithAttributes(doc, 'div', {
+      class: 'i-amphtml-story-bookend-article-image',
+    });
+
+    // TODO(alanorozco): Figure out how to use amp-img here
+    imageContainer.appendChild(createElementWithAttributes(doc, 'img', {
+      src: articleData.image,
+      width: 116,
+      height: 116,
+    }));
+
+    fragment.appendChild(imageContainer);
+  }
+
+  const title = createElementWithAttributes(doc, 'h2', {
+    class: 'i-amphtml-story-bookend-article-heading',
+  });
+
+  title.textContent = articleData.title;
+
+  const metaContainer = createElementWithAttributes(doc, 'div', {
+    class: 'i-amphtml-story-bookend-article-meta',
+  });
+
+  metaContainer.textContent = 'example.com - 10 mins';
+
+  root.appendChild(title);
+  root.appendChild(metaContainer);
+
+  fragment.appendChild(root);
+
+  return fragment;
 }
 
 
@@ -109,7 +126,7 @@ export class Bookend {
   }
 
   /**
-   * @param {!BookendConfig} bookendConfig
+   * @param {!BookendConfigDef} bookendConfig
    */
   setConfig(bookendConfig) {
     this.assertBuilt_();
@@ -123,7 +140,7 @@ export class Bookend {
   }
 
   /**
-   * @param {!Array<!./related-articles.RelatedArticleSet>} articleSets
+   * @param {!Array<!./related-articles.RelatedArticleSetDef>} articleSets
    * @private
    */
   setRelatedArticles_(articleSets) {
@@ -136,7 +153,7 @@ export class Bookend {
   }
 
   /**
-   * @param {!./related-articles.RelatedArticleSet} articleSet
+   * @param {!./related-articles.RelatedArticleSetDef} articleSet
    * @return {!DocumentFragment}
    */
   // TODO(alanorozco): typing and format
@@ -154,7 +171,7 @@ export class Bookend {
   }
 
   /**
-   * @param {!Array<!./related-articles.RelatedArticle>} articleList
+   * @param {!Array<!./related-articles.RelatedArticleDef>} articleList
    * @return {!Element}
    * @private
    */
@@ -163,7 +180,7 @@ export class Bookend {
       'class': 'i-amphtml-story-bookend-article-set',
     });
     articleList.forEach(article =>
-        container.appendChild(this.buildArticle_(article)));
+        container.appendChild(buildArticle(this.win_.document, article)));
     return container;
   }
 
@@ -178,17 +195,6 @@ export class Bookend {
     });
     headingEl./*OK*/innerText = escapeHtml(heading);
     return headingEl;
-  }
-
-  /**
-   * @param {!./related-articles.RelatedArticle} article
-   * @return {!Element}
-   * @private
-   */
-  buildArticle_(article) {
-    const el = this.win_.document.createElement('article');
-    el./*OK*/innerHTML = articleHtml(article);
-    return el;
   }
 
   /** @return {!Element} */
