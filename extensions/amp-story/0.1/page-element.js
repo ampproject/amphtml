@@ -79,6 +79,10 @@ const MINIMUM_MEDIA_BUFFER_SECONDS_FROM_BEGINNING = 3;
 
 
 
+/**
+ * Represents a single element on an <amp-story-page> that can affect the system
+ * layer (e.g. by blocking loading or requiring an audio indicator).
+ */
 export class PageElement {
   /**
    * @param {!Element} element The element on the page.
@@ -127,7 +131,7 @@ export class PageElement {
   }
 
   /**
-   * @public
+   * Updates the isLoaded, canBeShown, and hasFailed boolean states.
    */
   updateState() {
     if (!this.isLoaded && !this.hasFailed) {
@@ -151,13 +155,11 @@ export class PageElement {
 
   /**
    * Called when the page the element is on becomes active.
-   * @public
    */
   resumeCallback() {}
 
   /**
    * Called when the page the element is on is no longer active.
-   * @public
    */
   pauseCallback() {}
 
@@ -171,7 +173,6 @@ export class PageElement {
   /**
    * @param {!AmpStoryPage}
    * @return {!Array<!PageElement>}
-   * @public
    */
   static getElementsFromPage(page) {
     const pageElements = [];
@@ -340,10 +341,6 @@ class ImageElement extends PageElement {
 }
 
 class VideoInterfaceElement extends PageElement {
-  constructor(element, page) {
-    super(element, page);
-  }
-
   /** @private */
   isLaidOut_() {
     return this.element.hasAttribute('i-amphtml-layout');
