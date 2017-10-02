@@ -155,9 +155,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   markMediaElementsWithPreload_() {
     const mediaSet = this.element.querySelectorAll('amp-audio, amp-video');
-    for (const mediaItem of mediaSet) {
+    Array.prototype.forEach.call(mediaSet, mediaItem => {
       mediaItem.setAttribute('preload', 'auto');
-    }
+    });
   }
 
 
@@ -298,10 +298,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   pauseAllMedia_() {
     const mediaSet = this.getAllMedia_();
-    for (const mediaItem of mediaSet) {
+    Array.prototype.forEach.call(mediaSet, mediaItem => {
       mediaItem.pause();
       mediaItem.currentTime = 0;
-    }
+    });
   }
 
 
@@ -311,11 +311,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   playAllMedia_() {
     const mediaSet = this.getAllMedia_();
-    for (const mediaItem of mediaSet) {
+    Array.prototype.forEach.call(mediaSet, mediaItem => {
       mediaItem.play().catch(() => {
-        user().error(`Failed to play media element with src ${mediaItem.src}.`);
+        dev().error(`Failed to play media element with src ${mediaItem.src}.`);
       });
-    }
+    });
   }
 
   /**
