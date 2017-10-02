@@ -234,7 +234,7 @@ amp-story-page[active] .i-amphtml-story-page-loading-screen {
 }
 
 .i-amphtml-story-page-loading-dot {
-  animation: 1s linear infinite alternate grow;
+  animation: 1s linear infinite alternate i-amphtml-page-dot-grow;
 }
 
 .i-amphtml-story-page-loading-dot:nth-child(1) {
@@ -249,7 +249,7 @@ amp-story-page[active] .i-amphtml-story-page-loading-screen {
   animation-delay: 1.0s;
 }
 
-@keyframes grow {
+@keyframes i-amphtml-page-dot-grow {
   from { transform: scale(1); }
   to { transform: scale(2); }
 }
