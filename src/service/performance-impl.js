@@ -172,18 +172,32 @@ export class Performance {
     if (!this.win.PerformancePaintTiming) {
       return;
     }
+    // Chrome doesn't implement the buffered flag for PerformanceObserver.
+    // That means we need to read existing entries and maintain state
+    // as to whether we have reported a value yet, since in the future it may
+    // be reported twice.
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+    let recordedFirstPaint = false;
+    let recordedFirstContentfulPaint = false;
+    const processEntry = entry => {
+      if (entry.name == 'first-paint' && !recordedFirstPaint) {
+        this.tickDelta('fp', entry.startTime + entry.duration);
+        recordedFirstPaint = true;
+      }
+      else if (entry.name == 'first-contentful-paint'
+          && !recordedFirstContentfulPaint) {
+        this.tickDelta('fcp', entry.startTime + entry.duration);
+        recordedFirstContentfulPaint = true;
+      }
+    };
     const observer = new this.win.PerformanceObserver(list => {
-      list.getEntries().forEach(entry => {
-        if (entry.name == 'first-paint') {
-          this.tickDelta('fp', entry.startTime + entry.duration);
-          this.flush();
-        }
-        else if (entry.name == 'first-contentful-paint') {
-          this.tickDelta('fcp', entry.startTime + entry.duration);
-          this.flush();
-        }
-      });
+      list.getEntries().forEach(processEntry);
+      this.flush();
     });
+    // Programmatically read once as currently PerformanceObserver does not
+    // report past entries as of Chrome 61.
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+    this.win.performance.getEntriesByType('paint').forEach(processEntry);
 
     observer.observe({entryTypes: ['paint']});
   }
