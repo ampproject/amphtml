@@ -22,6 +22,7 @@ import {Services} from '../../services';
 import {px, setStyle} from '../../style';
 import {waitForBody} from '../../dom';
 import {ViewportBindingDef} from './viewport-binding-def';
+import {isExperimentOn} from '../../experiments';
 
 const TAG_ = 'Viewport';
 
@@ -65,6 +66,9 @@ export class ViewportBindingIosEmbedWrapper_ {
 
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
+
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.win, 'layers');
 
     // Setup UI.
     /** @private {boolean} */
@@ -233,7 +237,7 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
     const b = el./*OK*/getBoundingClientRect();
-    if (true) {
+    if (this.useLayers_) {
       return layoutRectLtwh(b.left, b.top, b.width, b.height);
     }
 

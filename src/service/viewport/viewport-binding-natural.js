@@ -20,6 +20,7 @@ import {dev} from '../../log';
 import {Services} from '../../services';
 import {px, setStyle} from '../../style';
 import {ViewportBindingDef} from './viewport-binding-def';
+import {isExperimentOn} from '../../experiments';
 
 
 const TAG_ = 'Viewport';
@@ -69,6 +70,9 @@ export class ViewportBindingNatural_ {
 
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
+
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.win, 'layers');
 
     dev().fine(TAG_, 'initialized natural viewport');
   }
@@ -204,7 +208,7 @@ export class ViewportBindingNatural_ {
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
     const b = el./*OK*/getBoundingClientRect();
-    if (true) {
+    if (this.useLayers_) {
       return layoutRectLtwh(b.left, b.top, b.width, b.height);
     }
 

@@ -26,6 +26,7 @@ import {AmpEvents} from '../amp-events';
 import {toWin} from '../types';
 import {Layout} from '../layout';
 import {Services} from '../services';
+import {isExperimentOn} from '../experiments';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -201,6 +202,9 @@ export class Resource {
     this.loadPromise_ = new Promise(resolve => {
       this.loadPromiseResolve_ = resolve;
     });
+
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.hostWin, 'layers');
   }
 
   /**
@@ -417,7 +421,7 @@ export class Resource {
     this.isMeasureRequested_ = false;
 
     const oldBox = this.getPageLayoutBox();
-    if (true) {
+    if (this.useLayers_) {
       this.measureViaLayers_();
     } else {
       this.measureViaResources_();
@@ -489,7 +493,7 @@ export class Resource {
    */
   completeCollapse() {
     toggle(this.element, false);
-    if (true) {
+    if (this.useLayers_) {
       this.layoutBox_ = layoutRectLtwh(0, 0, 0, 0);
     } else {
       this.layoutBox_ = layoutRectLtwh(
@@ -544,7 +548,7 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
-    if (true) {
+    if (this.useLayers_) {
       // TODO(jridgewell): transition all callers to position and/or size calls
       // directly.
       const {element} = this;
@@ -565,7 +569,7 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getPageLayoutBox() {
-    if (true) {
+    if (this.useLayers_) {
       const {element} = this;
       const layers = Services.layersForDoc(element);
       const pos = layers.getOffsetPosition(element);
@@ -676,7 +680,7 @@ export class Resource {
     let scrollPenalty = 1;
     let distance;
 
-    if (true) {
+    if (this.useLayers_) {
       distance += Math.max(0,
           layoutBox.left - viewportBox.right,
           viewportBox.left - layoutBox.right);

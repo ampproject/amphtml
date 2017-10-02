@@ -20,6 +20,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {numeric} from '../../../src/transition';
 import {dev} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
@@ -62,7 +63,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');
     this.element.appendChild(this.container_);
 
-    this.useLayers_ = true;
+    this.useLayers_ = isExperimentOn(this.win, 'layers');
 
     this.cells_.forEach(cell => {
       if (!this.useLayers_) {

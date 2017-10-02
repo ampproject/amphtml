@@ -41,6 +41,7 @@ import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {
   ViewportBindingIosEmbedWrapper_,
 } from './viewport-binding-ios-embed-wrapper';
+import {isExperimentOn} from '../../experiments';
 
 
 const TAG_ = 'Viewport';
@@ -155,6 +156,9 @@ export class Viewport {
 
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
+
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.ampdoc.win, 'layers');
 
     /** @private @const {!FixedLayer} */
     this.fixedLayer_ = new FixedLayer(
@@ -423,7 +427,7 @@ export class Viewport {
    * @return {!Promise<!../../layout-rect.LayoutRectDef>}
    */
   getClientRectAsync(el) {
-    if (true) {
+    if (this.useLayers_) {
       return this.vsync_.measurePromise(() => {
         return this.getLayoutRect(el);
       });
@@ -469,7 +473,7 @@ export class Viewport {
   scrollIntoView(element) {
     const elementTop = this.binding_.getLayoutRect(element).top;
     let newScrollTop;
-    if (true) {
+    if (this.useLayers_) {
       newScrollTop = elementTop + this.getScrollTop();
     } else {
       newScrollTop = Math.max(0, elementTop - this.paddingTop_);
@@ -508,7 +512,7 @@ export class Viewport {
     let newScrollTop;
     let curScrollTop;
 
-    if (true) {
+    if (this.useLayers_) {
       const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
       newScrollTop = Math.max(0, calculatedScrollTop);
       curScrollTop = this.getScrollTop();

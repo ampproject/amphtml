@@ -36,6 +36,7 @@ import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
 import {computedStyle} from '../style';
+import {isExperimentOn} from '../experiments';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -201,6 +202,9 @@ export class Resources {
 
     /** @private {boolean} */
     this.maybeChangeHeight_ = false;
+
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.win, 'layers');
 
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
@@ -1104,7 +1108,7 @@ export class Resources {
    * @private
    */
   mutateWork_() {
-    if (true) {
+    if (this.useLayers_) {
       this.mutateWorkViaLayers_();
     } else {
       this.mutateWorkViaResources_();
@@ -1312,7 +1316,7 @@ export class Resources {
    * @private
    */
   setRelayoutTop_(relayoutTop) {
-    if (true) {
+    if (this.useLayers_) {
       this.relayoutAll_ = true;
     } else if (this.relayoutTop_ == -1) {
       this.relayoutTop_ = relayoutTop;

@@ -22,6 +22,7 @@ import {preconnectForElement} from './preconnect';
 import {isArray, toWin} from './types';
 import {Services} from './services';
 import {user, dev} from './log';
+import {isExperimentOn} from './experiments';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -981,6 +982,8 @@ export class BaseElement {
    * @param {!Element=} opt_element
    */
   declareLayer(opt_element) {
+    dev().assert(isExperimentOn(this.win, 'layers'), 'Layers must be enabled' +
+        ' to declare layer.');
     if (opt_element) {
       dev().assert(this.element.contains(opt_element));
     }
