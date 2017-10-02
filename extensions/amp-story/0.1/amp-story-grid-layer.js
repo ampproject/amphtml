@@ -15,11 +15,13 @@
  */
 
 /**
- * @fileoverview Embeds a story
+ * @fileoverview This is a layer that lays its children out into a grid. Its
+ * implementation is based off of the CSS Grid Spec.
  *
  * Example:
  * <code>
- * <amp-story-grid-layer>
+ * <amp-story-grid-layer template="fill">
+ *   ...
  * </amp-story-grid-layer>
  * </code>
  */
