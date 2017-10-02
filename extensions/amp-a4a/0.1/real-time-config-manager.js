@@ -100,7 +100,6 @@ function maybeExecuteRealTimeConfig(a4aElement, customMacros) {
  * @param {!Object} macros
  * @param {!number} timeoutMillis
  * @param {string=} opt_vendor
- * @return
  * @private
  */
 function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
