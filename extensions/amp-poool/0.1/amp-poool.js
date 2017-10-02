@@ -25,64 +25,21 @@ export class AmpPoool extends AMP.BaseElement {
         /** @private {!Element} */
         this.container_ = this.win.document.createElement('div');
 
-        /** @private {!Element} */
-        this.pooolUrl_ = 'https://assets.poool.fr/poool.min.js';
     }
 
     /** @override */
     buildCallback() {
-        // Alert if some amp-poool main attribute are missing
+        // Check if required parameter init (bundle-id) isn't missing
         const bundle_id = user().assert(this.element.getAttribute('init'),
             'The init attribute is required for <amp-poool> %s',
             this.element);
 
+        // Check if required parameter page-view (page-type) isn't missing
         const page_type = user().assert(this.element.getAttribute('page-view'),
             'The page_view attribute is required for <amp-poool> %s',
             this.element);
 
-        // Assign poool configs
-        const debug = this.element.getAttribute('debug');
-        const force_widget = this.element.getAttribute('force-widget');
-        const mode = this.element.getAttribute('mode');
-        const percent = this.element.getAttribute('percent');
-        const post_container = this.element.getAttribute('post-container');
-        const widget_container = this.element.getAttribute('widget-container');
-        const subscription_url = this.element.getAttribute('subscription-url');
-        const newsletter_name = this.element.getAttribute('newsletter-name');
-        const newsletter_id = this.element.getAttribute('newsletter-id');
-        const login_url = this.element.getAttribute('login-url');
-        const user_is_premium = this.element.getAttribute('user-is-premium');
-        const video_primary_mode = this.element.getAttribute('video-primary-mode');
-        const video_client = this.element.getAttribute('video-client');
-        const popover_enabled = this.element.getAttribute('popover-enabled');
-        const alternative_enabled = this.element.getAttribute('alternative-enabled');
-        const alternative_widget = this.element.getAttribute('alternative-widget');
-        const adblock_enabled = this.element.getAttribute('adblock-enabled');
-        const vast = this.element.getAttribute('vast');
-        const mobile_vast = this.element.getAttribute('mobile-vast');
-        const custom_segment = this.element.getAttribute('custom-segment');
-
-        // Assign poool styles
-        const main_color = this.element.getAttribute("main-color");
-        const background_color = this.element.getAttribute("background-color");
-        const brand_logo = this.element.getAttribute("brand-logo");
-        const brand_cover = this.element.getAttribute("brand-cover");
-
-        // Assign poool events
-        const on_lock = this.element.getAttribute("on-lock");
-        const on_release = this.element.getAttribute("on-release");
-        const on_hidden = this.element.getAttribute("on-hidden");
-        const on_disabled = this.element.getAttribute("on-disabled");
-        const on_register = this.element.getAttribute("on-register");
-        const on_subscribeclick = this.element.getAttribute("on-subscribeclick");
-        const on_error = this.element.getAttribute("on-error");
-        const on_adblock = this.element.getAttribute("on-adblock");
-        const on_outdatedbrowser = this.element.getAttribute("on-outdatedbrowser");
-        const on_useroutsidecohort = this.element.getAttribute("on_useroutsidecohort");
-        const on_identityavailable = this.element.getAttribute("on-identityavailable");
-
-        // Assign poool actions
-        const email = this.element.getAttribute("email");
+        // Assign poool conversion variable
         const conversion = this.element.getAttribute("conversion");
 
         // Create a div with "poool-widget" id to display it
@@ -92,7 +49,7 @@ export class AmpPoool extends AMP.BaseElement {
         var head = this.win.document.head;
         var script = document.createElement("script");
 
-        var addThingsToTag = function (type, name, value, script, no_string) {
+        var updatePoool = function (type, name, value, script, no_string) {
             if(value != null){
                 if(no_string){script.innerHTML += "poool('"+type+"', '"+name+"', "+value+");\n";}
                 else{script.innerHTML += "poool('"+type+"', '"+name+"', '"+value+"');\n";}
@@ -111,52 +68,52 @@ export class AmpPoool extends AMP.BaseElement {
         `;
 
         // Add config values
-        addThingsToTag("config", "debug", debug, script, true);
-        addThingsToTag("config", "mode", mode, script);
-        addThingsToTag("config", "percent", percent, script, true);
-        addThingsToTag("config", "post_container", post_container, script);
-        addThingsToTag("config", "widget_container", widget_container, script);
-        addThingsToTag("config", "force_widget", force_widget, script);
-        addThingsToTag("config", "subscription_url", subscription_url, script);
-        addThingsToTag("config", "newsletter_name", newsletter_name, script);
-        addThingsToTag("config", "newsletter_id", newsletter_id, script, true);
-        addThingsToTag("config", "login_url", login_url, script);
-        addThingsToTag("config", "user_is_premium", user_is_premium, script, true);
-        addThingsToTag("config", "video_primary_mode", video_primary_mode, script);
-        addThingsToTag("config", "video_client", video_client, script);
-        addThingsToTag("config", "popover_enabled", popover_enabled, script, true);
-        addThingsToTag("config", "alternative_enabled", alternative_enabled, script, true);
-        addThingsToTag("config", "alternative_widget", alternative_widget, script);
-        addThingsToTag("config", "adblock_enabled", adblock_enabled, script, true);
-        addThingsToTag("config", "vast", vast, script);
-        addThingsToTag("config", "mobile_vast", mobile_vast, script);
-        addThingsToTag("config", "custom_segment", custom_segment, script);
+        updatePoool("config", "debug", this.element.getAttribute('debug'), script, true);
+        updatePoool("config", "mode", this.element.getAttribute('mode'), script);
+        updatePoool("config", "percent", this.element.getAttribute('percent'), script, true);
+        updatePoool("config", "post_container", this.element.getAttribute('post-container'), script);
+        updatePoool("config", "widget_container", this.element.getAttribute('widget-container'), script);
+        updatePoool("config", "force_widget", this.element.getAttribute('force-widget'), script);
+        updatePoool("config", "subscription_url", this.element.getAttribute('subscription-url'), script);
+        updatePoool("config", "newsletter_name", this.element.getAttribute('newsletter-name'), script);
+        updatePoool("config", "newsletter_id", this.element.getAttribute('newsletter-id'), script, true);
+        updatePoool("config", "login_url", this.element.getAttribute('login-url'), script);
+        updatePoool("config", "user_is_premium", this.element.getAttribute('user-is-premium'), script, true);
+        updatePoool("config", "video_primary_mode", this.element.getAttribute('video-primary-mode'), script);
+        updatePoool("config", "video_client", this.element.getAttribute('video-client'), script);
+        updatePoool("config", "popover_enabled", this.element.getAttribute('popover-enabled'), script, true);
+        updatePoool("config", "alternative_enabled", this.element.getAttribute('alternative-enabled'), script, true);
+        updatePoool("config", "alternative_widget", this.element.getAttribute('alternative-widget'), script);
+        updatePoool("config", "adblock_enabled", this.element.getAttribute('adblock-enabled'), script, true);
+        updatePoool("config", "vast", this.element.getAttribute('vast'), script);
+        updatePoool("config", "mobile_vast", this.element.getAttribute('mobile-vast'), script);
+        updatePoool("config", "custom_segment", this.element.getAttribute('custom-segment'), script);
 
         // Add style values
-        addThingsToTag("style", "main_color", main_color, script);
-        addThingsToTag("style", "background_color", background_color, script);
-        addThingsToTag("style", "brand_logo", brand_logo, script);
-        addThingsToTag("style", "brand_cover", brand_cover, script);
+        updatePoool("style", "main_color", this.element.getAttribute("main-color"), script);
+        updatePoool("style", "background_color", this.element.getAttribute("background-color"), script);
+        updatePoool("style", "brand_logo", this.element.getAttribute("brand-logo"), script);
+        updatePoool("style", "brand_cover", this.element.getAttribute("brand-cover"), script);
 
         // Add event values
-        addThingsToTag("event", "onlock", on_lock, script, true);
-        addThingsToTag("event", "onrelease", on_release, script, true);
-        addThingsToTag("event", "onHidden", on_hidden, script, true);
-        addThingsToTag("event", "onDisabled", on_disabled, script, true);
-        addThingsToTag("event", "onregister", on_register, script, true);
-        addThingsToTag("event", "onsubscribeclick", on_subscribeclick, script, true);
-        addThingsToTag("event", "onerror", on_error, script, true);
-        addThingsToTag("event", "onadblock", on_adblock, script, true);
-        addThingsToTag("event", "onoutdatedbrowser", on_outdatedbrowser, script, true);
-        addThingsToTag("event", "onUserOutsideCohort", on_useroutsidecohort, script, true);
-        addThingsToTag("event", "onIdentityAvailable", on_identityavailable, script, true);
+        updatePoool("event", "onlock", this.element.getAttribute("on-lock"), script, true);
+        updatePoool("event", "onrelease", this.element.getAttribute("on-release"), script, true);
+        updatePoool("event", "onHidden", this.element.getAttribute("on-hidden"), script, true);
+        updatePoool("event", "onDisabled", this.element.getAttribute("on-disabled"), script, true);
+        updatePoool("event", "onregister", this.element.getAttribute("on-register"), script, true);
+        updatePoool("event", "onsubscribeclick", this.element.getAttribute("on-subscribeclick"), script, true);
+        updatePoool("event", "onerror", this.element.getAttribute("on-error"), script, true);
+        updatePoool("event", "onadblock", this.element.getAttribute("on-adblock"), script, true);
+        updatePoool("event", "onoutdatedbrowser", this.element.getAttribute("on-outdatedbrowser"), script, true);
+        updatePoool("event", "onUserOutsideCohort", this.element.getAttribute("on_useroutsidecohort"), script, true);
+        updatePoool("event", "onIdentityAvailable", this.element.getAttribute("on-identityavailable"), script, true);
 
         // End poool tag with action values
-        addThingsToTag("send", "email", email, script);
+        updatePoool("send", "email", this.element.getAttribute("email"), script);
         if(conversion){
             script.innerHTML += "poool('send', 'conversion');\n"
         }
-        addThingsToTag("send", "page-view", page_type, script);
+        updatePoool("send", "page-view", page_type, script);
 
         // Append script to head tag
         head.appendChild(script);
