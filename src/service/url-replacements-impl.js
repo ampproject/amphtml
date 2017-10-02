@@ -84,7 +84,7 @@ export class GlobalVariableSource extends VariableSource {
     this.shareTrackingFragments_ = null;
 
     /** @private {?Promise<?{pageIndex: number, pageId: string}>} */
-    this.storyVariables_ = null;
+    this.storyVariablesPromise_ = null;
   }
 
   /**
@@ -617,11 +617,11 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getStoryValue_(getter, expr) {
-    if (!this.storyVariables_) {
-      this.storyVariables_ =
+    if (!this.storyVariablesPromise_) {
+      this.storyVariablesPromise_ =
           Services.storyVariableServiceForOrNull(this.ampdoc.win);
     }
-    return this.storyVariables_.then(storyVariables => {
+    return this.storyVariablesPromise_.then(storyVariables => {
       user().assert(storyVariables,
           'To use variable %s amp-story should be configured',
           expr);
