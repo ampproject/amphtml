@@ -592,7 +592,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         });
       });
     });
-    it ('has correct frc value', () => {
+    it('has correct frc value', () => {
       impl.fromResumeCallback = true;
       impl.getAdUrl().then(url => {
         expect(url).to.match(/(\?|&)frc=1(&|$)/);
