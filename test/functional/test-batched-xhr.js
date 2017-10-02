@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-import {FetchResponse, fetchPolyfill} from '../../src/service/xhr-impl';
+import {FetchResponse} from '../../src/service/xhr-impl';
+import {Services} from '../../src/services';
 import {batchedXhrServiceForTesting} from '../../src/service/batched-xhr-impl';
 
+describes.sandboxed('BatchedXhr', {}, env => {
+  beforeEach(() => {
+    env.sandbox.stub(Services, 'ampdocServiceFor').returns({
+      isSingleDoc: () => false,
+    });
+  });
 
-describes.sandboxed('BatchedXhr', {}, () => {
-  // Since if it's the Native fetch, it won't use the XHR object so
-  // mocking and testing the request becomes not doable.
-  function getPolyfillWin() {
-    return {
-      location: {href: 'https://acme.com/path'},
-      fetch: fetchPolyfill,
-    };
-  }
-
-  describes.fakeWin('#fetch', getPolyfillWin(), env => {
+  describes.fakeWin('#fetch', {}, env => {
     const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
     const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
     const mockXhr = {
@@ -87,7 +84,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
     });
   });
 
-  describes.fakeWin('#fetchJson', getPolyfillWin(), env => {
+  describes.fakeWin('#fetchJson', {}, env => {
     const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
     const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
     const mockXhr = {
@@ -136,7 +133,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
     });
   });
 
-  describes.realWin('#fetchDocument', getPolyfillWin(), env => {
+  describes.realWin('#fetchDocument', {}, env => {
     const TEST_CONTENT = '<b>Hello, world';
     const TEST_RESPONSE_TEXT = '<!doctype html><html><body>' + TEST_CONTENT;
     let xhr;
@@ -181,7 +178,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
     });
   });
 
-  describes.fakeWin('#fetchText', getPolyfillWin(), env => {
+  describes.fakeWin('#fetchText', {}, env => {
     const TEST_RESPONSE = 'Hello, world!';
     const mockXhr = {
       status: 200,

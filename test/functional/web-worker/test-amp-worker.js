@@ -34,6 +34,9 @@ describe('invokeWebWorker', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    sandbox.stub(Services, 'ampdocServiceFor').returns({
+      isSingleDoc: () => false,
+    });
 
     postMessageStub = sandbox.stub();
 
