@@ -44,6 +44,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     /** @private {?number} */
     this.scrollTimerId_ = null;
+
+    /** @private {boolean} */
+    this.useLayers_ = false;
   }
 
   /** @override */
@@ -59,8 +62,12 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');
     this.element.appendChild(this.container_);
 
+    this.useLayers_ = true;
+
     this.cells_.forEach(cell => {
-      this.setAsOwner(cell);
+      if (!this.useLayers_) {
+        this.setAsOwner(cell);
+      }
       cell.classList.add('amp-carousel-slide');
       cell.classList.add('amp-scrollable-carousel-slide');
       this.container_.appendChild(cell);
@@ -70,19 +77,27 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     this.container_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
+
+    if (this.useLayers_) {
+      this.declareLayer(this.container_);
+    }
   }
 
   /** @override */
   layoutCallback() {
-    this.doLayout_(this.pos_);
-    this.preloadNext_(this.pos_, 1);
+    if (!this.useLayers_) {
+      this.doLayout_(this.pos_);
+      this.preloadNext_(this.pos_, 1);
+    }
     this.setControlsState();
     return Promise.resolve();
   }
 
   /** @override */
   onViewportCallback(unusedInViewport) {
-    this.updateInViewport_(this.pos_, this.pos_);
+    if (!this.useLayers_) {
+      this.updateInViewport_(this.pos_, this.pos_);
+    }
   }
 
   /** @override */
@@ -150,10 +165,12 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   commitSwitch_(pos) {
-    this.updateInViewport_(pos, this.oldPos_);
-    this.doLayout_(pos);
-    this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
-    this.oldPos_ = pos;
+    if (!this.useLayers_) {
+      this.updateInViewport_(pos, this.oldPos_);
+      this.doLayout_(pos);
+      this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
+      this.oldPos_ = pos;
+    }
     this.pos_ = pos;
     this.setControlsState();
   }
