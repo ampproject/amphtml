@@ -121,7 +121,7 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
         promiseArray, RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
         opt_vendor || url);
   }
-  if (Object.keys(macros)) {
+  if (macros && Object.keys(macros)) {
     const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
     const whitelist = {};
     Object.keys(macros || {}).forEach(key => whitelist[key] = true);
