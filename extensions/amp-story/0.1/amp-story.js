@@ -64,7 +64,7 @@ import {VariableService} from './variable-service';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {buildFromJson} from './related-articles';
-import {closest, fullscreenEnter, fullscreenExit, isFullscreenElement} from '../../../src/dom';
+import {closest, fullscreenEnter, fullscreenExit, isFullscreenElement, scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {once} from '../../../src/utils/function';
 import {map} from '../../../src/utils/object';
@@ -243,7 +243,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const firstPageEl = user().assertElement(
-        this.element.querySelector('amp-story-page'),
+        scopedQuerySelector(this.element, 'amp-story-page'),
         'Story must have at least one page.');
 
     return this.initializePages_()
@@ -276,7 +276,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @private */
   initializePages_() {
     const pageImplPromises = Array.prototype.map.call(
-        this.element.querySelectorAll('amp-story-page'),
+        querySelectorAll(this.element, 'amp-story-page'),
         (pageEl, index) => {
           return pageEl.getImpl().then(pageImpl => {
             this.pages_[index] = pageImpl;
