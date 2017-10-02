@@ -29,10 +29,10 @@ export const RTC_ERROR_ENUM = {
 export let rtcResponseDef;
 
 /**
- * @param {!Array<Promise>} promiseArray
+ * @param {!Array<Promise<!rtcResponseDef>>} promiseArray
  * @param {!string} error
  * @param {!string} callout
- * @return
+ * @private
  */
 function logAndAddErrorResponse(promiseArray, error, callout) {
   dev().warn(TAG, `Dropping RTC Callout to ${callout} due to ${error}`);
@@ -56,7 +56,7 @@ function buildErrorResponse(error, callout, opt_rtcTime) {
  * @param {!AMP.BaseElement} a4aElement
  * @param {!Object<string, !../../../src/service/variable-source.SyncResolverDef>} customMacros The ad-network specified macro
  *   substitutions available to use.
- * @return {Promise<!Array>|undefined}
+ * @return {Promise<!Array<!rtcResponseDef>>|undefined}
  * @private
  */
 function maybeExecuteRealTimeConfig(a4aElement, customMacros) {
@@ -95,7 +95,7 @@ function maybeExecuteRealTimeConfig(a4aElement, customMacros) {
  * @param {!AMP.BaseElement} a4aElement
  * @param {!string} url
  * @param {!Object<string, boolean>} seenUrls
- * @param {!Array<Promise>} promiseArray
+ * @param {!Array<Promise<!rtcResponseDef>>} promiseArray
  * @param {!number} rtcStartTime
  * @param {!Object} macros
  * @param {!number} timeoutMillis
@@ -137,7 +137,7 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
  * @param {!Window} win
  * @param {!number} timeoutMillis
  * @param {!string} callout
- * @return {Promise}
+ * @return {Promise<!rtcResponseDef>}
  * @private
  */
 function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout) {
