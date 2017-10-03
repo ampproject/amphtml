@@ -22,6 +22,7 @@ import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {Services} from '../../../src/services';
 import {user, dev} from '../../../src/log';
 import {parseJson} from '../../../src/json';
+import {parseUrl} from '../../../src/url';
 import {
   listen,
   deserializeMessage,
@@ -120,10 +121,12 @@ export class AmpAdExit extends AMP.BaseElement {
     };
     if (target.vars) {
       for (const customVarName in target.vars) {
-        let customVar;
-        if (customVarName[0] != '_' ||
-            !(customVar = /** @type {!./config.VariableDef} */
-            (target.vars[customVarName]))) {
+        if (customVarName[0] != '_') {
+          continue;
+        }
+        const customVar =
+            /** @type {!./config.VariableDef} */ (target.vars[customVarName]);
+        if (!customVar) {
           continue;
         }
         /*
@@ -347,7 +350,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * @private
    */
   assertOriginMatchesVendor_(origin, vendor) {
-    const vendorURL = new URL(assertVendor(vendor));
+    const vendorURL = parseUrl(assertVendor(vendor));
     if (this.vendorOrigins_[vendor]) {
       user().assert(this.vendorOrigins_[vendor] == origin,
           `Invalid origin for vendor ${vendor}: ${origin}`);
