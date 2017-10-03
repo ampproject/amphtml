@@ -25,7 +25,7 @@ const NOOP = () => {};
 describes.realWin('amp-story', {
   amp: {
     extensions: ['amp-story'],
-  }
+  },
 }, env => {
 
   let win;
