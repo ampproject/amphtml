@@ -29,15 +29,14 @@ const REDUCED_VOLUME = 0.5;
 const VOLUME_CHANGE_DURATION_MS = 500;
 
 /**
- * @const {!function(number): number}
+ * @const {function(number): number}
  */
 const VOLUME_EASING_FN = input => input;
 
 /**
  * @const {string}
  */
-const PLAYABLE_ID_PREFIX = 'i-amphtml-playable-';
-
+const PLAYABLE_ID_PREFIX = 'i-amphtml-playable-audio-';
 
 /**
  * @const {string}
@@ -58,6 +57,7 @@ export function upgradeBackgroundAudio(element) {
     audioEl.setAttribute('preload', 'auto');
     audioEl.setAttribute('loop', '');
     audioEl.setAttribute('autoplay', '');
+    audioEl.setAttribute('muted', '');
     audioEl.classList.add(BACKGROUND_AUDIO_ELEMENT_CLASS_NAME);
     element.appendChild(audioEl);
   }
@@ -65,6 +65,10 @@ export function upgradeBackgroundAudio(element) {
 
 
 export class AudioManager {
+  /**
+   * @param {!Window} win
+   * @param {!Element} rootElement The element for which audio should be managed.
+   */
   constructor(win, rootElement) {
     /** @private @const {!Object<!Element, !Playable>} */
     this.playables_ = {};
@@ -91,9 +95,7 @@ export class AudioManager {
    *     represented by the specified sourceElement.
    */
   createPlayable_(sourceElement) {
-    if (!(sourceElement instanceof Element)) {
-      dev().error('AMP-STORY', 'Played item must be element.');
-    }
+    dev().assertElement('AMP-STORY', 'Played item must be element.');
 
     if (sourceElement instanceof HTMLMediaElement) {
       return new MediaElementPlayable(this.win_, sourceElement);
@@ -111,6 +113,8 @@ export class AudioManager {
   /**
    * Loads the audio for the specified.
    * @param {!Element} sourceElement The element whose audio should be loaded.
+   * @return {!Promise<undefined>} A promise that is resolved when the audio for
+   *     the specified element has finished loading.
    */
   load(sourceElement) {
     const playable = this.getPlayable_(sourceElement) ||
@@ -126,11 +130,6 @@ export class AudioManager {
 
     this.playables_[sourceElement.id] = playable;
     return playable.load();
-  }
-
-  /** @private */
-  getMediaElementChildren_(element) {
-    return element.querySelectorAll('audio,video');
   }
 
   /**
@@ -189,8 +188,7 @@ export class AudioManager {
    * @private
    */
   addToNowPlaying_(playable) {
-    const index = this.nowPlaying_.indexOf(playable);
-    if (index >= 0) {
+    if (this.nowPlaying_.includes(playable)) {
       return;
     }
 
@@ -220,7 +218,10 @@ export class AudioManager {
     this.nowPlayingChanged_();
   }
 
-
+  /**
+   * Updates the state of the AudioManager and its Playables when the list of
+   * currently-playing Playables has changed.
+   */
   nowPlayingChanged_() {
     // Populate a sparse array where the indices of the array represent the
     // tree depths at which there is audio currently playing.
@@ -256,6 +257,10 @@ export class AudioManager {
 
 
 class Playable {
+  /**
+   * @param {!Window} win
+   * @param {!Element} sourceElement The element causing audio to be played
+   */
   constructor(win, sourceElement) {
     /**
      * @protected @const {!Window}
@@ -264,10 +269,14 @@ class Playable {
 
     /**
      * The element that is causing audio to be played.
-     * @private @const {!Element}
+     * @protected @const {!Element}
      */
-    this.sourceElement_ = sourceElement;
+    this.sourceElement = sourceElement;
 
+    /**
+     * The depth of this Playable in the DOM tree.
+     * @private @const {number}
+     */
     this.depth_ = Playable.calculateDepthForElement(sourceElement);
   }
 
@@ -291,13 +300,6 @@ class Playable {
     }
 
     return depth;
-  }
-
-  /**
-   * @return {!Element} The element causing audio to be played.
-   */
-  getSourceElement() {
-    return this.sourceElement_;
   }
 
   /**
@@ -376,54 +378,49 @@ class Playable {
  * An HTMLMediaElement that potentially has audio.
  */
 class MediaElementPlayable extends Playable {
-  constructor(win, element) {
-    super(win, element);
-    this.element_ = element;
-  }
-
   /** @override */
   isLoaded() {
-    return !!this.element_;
+    return !!this.sourceElement;
   }
 
   /** @override */
   isPlaying() {
-    return !this.element_.paused;
+    return !this.sourceElement.paused;
   }
 
   /** @override */
   play() {
-    this.element_.play();
+    this.sourceElement.play();
   }
 
   /** @override */
   setVolume(volume, unusedDurationMs, unusedEasingFn) {
     // TODO(newmuis): Fade to volume over durationMs following easingFn.
-    if (volume === this.element_.volume) {
+    if (volume === this.sourceElement.volume) {
       return;
     }
 
-    this.element_.volume = volume;
+    this.sourceElement.volume = volume;
   }
 
   /** @override */
   stop() {
-    this.element_.pause();
-    this.element_.currentTime = 0;
+    this.sourceElement.pause();
+    this.sourceElement.currentTime = 0;
   }
 
   /** @override */
   mute() {
-    this.element_.muted = true;
+    this.sourceElement.muted = true;
   }
 
   /** @override */
   unmute() {
-    this.element_.muted = false;
+    this.sourceElement.muted = false;
   }
 
   /** @override */
   isMuted() {
-    return this.element_.muted;
+    return this.sourceElement.muted;
   }
 }
