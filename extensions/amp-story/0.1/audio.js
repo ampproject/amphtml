@@ -95,20 +95,15 @@ export class AudioManager {
    * @return {!Playable} The {@link Playable} instance to play the audio
    *     represented by the specified sourceElement.
    */
-  createPlayable_(sourceElement) {
-    dev().assertElement('AMP-STORY', 'Played item must be element.');
-
-    if (sourceElement instanceof HTMLMediaElement) {
-      return new MediaElementPlayable(this.win_, sourceElement);
+  getOrCreatePlayable_(sourceElement) {
+    dev().assert(sourceElement instanceof HTMLMediaElement)
+    
+    if (this.playables_[sourceElement.id]) {
+      return this.playables_[sourceElement.id];
     }
-  }
 
-  /**
-   * @param {!Element} sourceElement
-   * @return {?Playable}
-   */
-  getPlayable_(sourceElement) {
-    return this.playables_[sourceElement.id];
+    const playable = new MediaElementPlayable(this.win_, sourceElement);
+    
   }
 
   /**
@@ -118,12 +113,7 @@ export class AudioManager {
    *     the specified element has finished loading.
    */
   load(sourceElement) {
-    const playable = this.getPlayable_(sourceElement) ||
-        this.createPlayable_(sourceElement);
-
-    if (!playable) {
-      return Promise.resolve();
-    }
+    const playable = this.getOrCreatePlayable_(sourceElement);
 
     if (!sourceElement.id) {
       sourceElement.id = `${PLAYABLE_ID_PREFIX}${this.nextId_++}`;
