@@ -185,7 +185,7 @@ function updateGitHubIssues() {
                       assigneeName + ' Do you have any updates?'));
                     }
                   } else if (label.name.startsWith('P2') &&
-                  quartelyUpdate == false) {
+                      quartelyUpdate == false) {
                     quartelyUpdate = true;
                     updates.push(applyComment(issue, 'This issue hasn\'t been '
                         + ' updated in awhile.' +
@@ -193,9 +193,9 @@ function updateGitHubIssues() {
                   }
                 }
                 if (label.name.startsWith('Category')
-                || label.name.startsWith('Related to')
-                || label.name.startsWith('GFI')
-                || label.name.startsWith('Great First Issue')) {
+                    || label.name.startsWith('Related to')
+                    || label.name.startsWith('GFI')
+                    || label.name.startsWith('Great First Issue')) {
                   hasCategory = true;
                 }
               }
@@ -211,9 +211,9 @@ function updateGitHubIssues() {
               if (quartelyUpdate == false) {
                 quartelyUpdate = true;
                 updates.push(applyComment(issue, 'This issue seems to be in ' +
-                  ' Pending Triage for awhile.' +
-                  assigneeName + ' Please triage this to ' +
-                  'an appropriate milestone.'));
+                    ' Pending Triage for awhile.' +
+                    assigneeName + ' Please triage this to ' +
+                    'an appropriate milestone.'));
               }
             }
             //if issueType is not null, add correct milestones
@@ -224,12 +224,12 @@ function updateGitHubIssues() {
                   issueNewMilestone = MILESTONE_NEW_FRS;
                   updates.push(applyMilestone(issue, issueNewMilestone));
                 } else if (issueType === 'Related to: Documentation' ||
-                issueType === 'Type: Design Review' ||
-                issueType === 'Type: Weekly Status') {
+                    issueType === 'Type: Design Review' ||
+                    issueType === 'Type: Weekly Status') {
                   issueNewMilestone = MILESTONE_DOCS_UPDATES;
                   updates.push(applyMilestone(issue, issueNewMilestone));
                 } else if (issueType === 'Type: Bug' ||
-                issueType === 'Related to: Flaky Tests') {
+                    issueType === 'Related to: Flaky Tests') {
                   issueNewMilestone = MILESTONE_BACKLOG_BUGS;
                   updates.push(applyMilestone(issue, issueNewMilestone));
                 } else if (milestone == null) {
@@ -239,7 +239,7 @@ function updateGitHubIssues() {
             } else if (milestone == null) {
               updates.push(applyMilestone(issue, issueNewMilestone));
             } else if (issueNewMilestone === MILESTONE_PRIORITIZED_FRS ||
-          issueNewMilestone === MILESTONE_NEW_FRS) {
+                issueNewMilestone === MILESTONE_NEW_FRS) {
               updates.push(applyLabel(issue, 'Type: Feature Request'));
             } else if (issueNewMilestone === MILESTONE_BACKLOG_BUGS ||
                 milestoneTitle.startsWith('Sprint')) {
@@ -285,9 +285,9 @@ function updateGitHubIssues() {
 function applyMilestone(issue, milestoneNumber) {
   const options = extend({}, milestoneOptions);
   options.qs = {
-    state: 'open',
-    per_page: 100,
-    access_token: GITHUB_ACCESS_TOKEN,
+    'state': 'open',
+    'per_page': 100,
+    'access_token': GITHUB_ACCESS_TOKEN,
   };
 
   issue.milestone = milestoneNumber;
@@ -309,9 +309,9 @@ function applyMilestone(issue, milestoneNumber) {
 function applyLabel(issue, label) {
   const options = extend({}, issuesOptions);
   options.qs = {
-    state: 'open',
-    per_page: 100,
-    access_token: GITHUB_ACCESS_TOKEN,
+    'state': 'open',
+    'per_page': 100,
+    'access_token': GITHUB_ACCESS_TOKEN,
   };
   if (isDryrun) {
     util.log(util.colors.green('Label applied ' +
@@ -332,9 +332,9 @@ function applyLabel(issue, label) {
 function applyComment(issue, comment) {
   const options = extend({}, issuesOptions);
   options.qs = {
-    state: 'open',
-    per_page: 100,
-    access_token: GITHUB_ACCESS_TOKEN,
+    'state': 'open',
+    'per_page': 100,
+    'access_token': GITHUB_ACCESS_TOKEN,
   };
   // delay the comment request so we don't reach github rate limits requests
   const promise = new Promise(resolve => setTimeout(resolve,120000));
@@ -379,7 +379,7 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
       'Accept': 'application/vnd.github.v3+json',
     },
     qs: {
-      access_token: GITHUB_ACCESS_TOKEN,
+      'access_token': GITHUB_ACCESS_TOKEN,
     },
   };
   if (opt_method) {
@@ -401,7 +401,7 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
 gulp.task(
     'process-github-issues',
     'Automatically updates the labels '
-     + 'and milestones of all open issues at github.com/ampproject/amphtml.',
+    + 'and milestones of all open issues at github.com/ampproject/amphtml.',
     processIssues,
     {
       options: {
