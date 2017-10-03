@@ -218,22 +218,19 @@ export class AmpUserNotification extends AMP.BaseElement {
       'application/json;charset=utf-8';
     return Services.xhrFor(this.win).fetchJson(
         dev().assertString(this.dismissHref_),
-        this.buildPostDismissRequest_(enctype, {
-          elementId: this.elementId_,
-          ampUserId: this.ampUserId_,
-        }));
+        this.buildPostDismissRequest_(enctype, this.elementId_,
+            this.ampUserId_));
   }
 
   /**
    * Creates a Request to be used for postDismiss
    * @private
-   * @param {!string} enctype
-   * @param {!Object} parameters
-   * @param {!string} parameters.elementId
-   * @param {string} parameters.ampUserId
+   * @param {string} enctype
+   * @param {string} elementId
+   * @param {string} ampUserId
    * @return {!Object}
    */
-  buildPostDismissRequest_(enctype, {elementId, ampUserId}) {
+  buildPostDismissRequest_(enctype, elementId, ampUserId) {
     let body = dict({
       'elementId': elementId,
       'ampUserId': ampUserId,

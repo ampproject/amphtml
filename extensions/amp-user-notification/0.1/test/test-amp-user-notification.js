@@ -501,10 +501,8 @@ describes.realWin('amp-user-notification', {
       const impl = el.implementation_;
       const elementId = 'elementId';
       const ampUserId = '1';
-      const request = impl.buildPostDismissRequest_('application/json', {
-        elementId,
-        ampUserId,
-      });
+      const request = impl.buildPostDismissRequest_('application/json',
+          elementId, ampUserId);
       expect(request.method).to.equal('POST');
       expect(request.body.elementId).to.equal(elementId);
       expect(request.body.ampUserId).to.equal(ampUserId);
@@ -518,10 +516,8 @@ describes.realWin('amp-user-notification', {
       const elementId = 'elementId';
       const ampUserId = '1';
       const resultString = 'elementId=elementId&ampUserId=1';
-      const request = impl.buildPostDismissRequest_(formDataEncType, {
-        elementId,
-        ampUserId,
-      });
+      const request = impl.buildPostDismissRequest_(formDataEncType,
+          elementId, ampUserId);
       expect(request.method).to.equal('POST');
       expect(request.body).to.be.a('string');
       expect(request.body).to.equal(resultString);
