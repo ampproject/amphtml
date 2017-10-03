@@ -81,7 +81,7 @@ function hasTapAction(el) {
   // There are better ways to determine this, but they're all bound to action
   // service race conditions. This is good enough for our use case.
   return el.hasAttribute('on') &&
-      el.getAttribute('on').match(/(^|;)\s*tap\s*:/);
+      !!el.getAttribute('on').match(/(^|;)\s*tap\s*:/);
 }
 
 
@@ -292,18 +292,16 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * @param {!./amp-story-page.AmpStoryPage} page
-   * @return {!Promise}
    */
   maybeApplyFirstAnimationFrame_(page) {
-    return page.maybeApplyFirstAnimationFrame();
+    page.maybeApplyFirstAnimationFrame();
   }
 
   /**
    * @param {!./amp-story-page.AmpStoryPage} page
-   * @return {!Promise}
    */
   maybeStartAnimations_(page) {
-    return page.maybeStartAnimations();
+    page.maybeStartAnimations();
   }
 
   /**
@@ -315,7 +313,7 @@ export class AmpStory extends AMP.BaseElement {
   switchTo_(targetPageId) {
     if (this.isBookendActive_) {
       // Disallow switching pages while the bookend is active.
-      return;
+      return Promise.resolve();
     }
 
     const targetPage = this.getPageById_(targetPageId);
@@ -433,7 +431,7 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
-   * @param {boolean} opt_explicitUserAction
+   * @param {boolean=} opt_explicitUserAction
    * @private
    */
   exitFullScreen_(opt_explicitUserAction) {
@@ -688,7 +686,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isNavigationalClick_(e) {
-    return !closest(e.target, el => {
+    return !closest(dev().assertElement(e.target), el => {
       return el === this.systemLayer_.getRoot() ||
           this.isBookend_(el) ||
           hasTapAction(el);

@@ -307,7 +307,7 @@ class AnimationRunner {
     runner.resume();
   }
 
-  /** @return {!Promise<boolean>} */
+  /** @return {boolean} */
   hasStarted() {
     return this.isActivityScheduled_(PlaybackActivity.START) ||
         this.runner_ && dev().assert(this.runner_)
@@ -387,7 +387,6 @@ class AnimationRunner {
   /**
    * Marks runner as ready and executes playback activity if needed.
    * @param {!../../amp-animation/0.1/web-animations.WebAnimationRunner} runner
-   * @return {boolean} True if modifies runner state
    * @private
    */
   onRunnerReady_(runner) {
@@ -403,7 +402,10 @@ class AnimationRunner {
       return;
     }
 
-    this.playbackWhenReady_(this.scheduledActivity_, this.scheduledWait_);
+    this.playbackWhenReady_(
+        dev().assert(this.scheduledActivity_,
+            'Expected activity to be scheduled'),
+        this.scheduledWait_);
   }
 
   /**
@@ -466,10 +468,11 @@ export class AnimationManager {
    * Decouples constructor so it can be stubbed in tests.
    * @param {!Element} root
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} unusedBaseUrl
    * @return {!AnimationManager}
    */
-  static create(root, ampdoc, baseUrl) {
-    return new AnimationManager(root, ampdoc, baseUrl);
+  static create(root, ampdoc, unusedBaseUrl) {
+    return new AnimationManager(root, ampdoc);
   }
 
   /**
@@ -511,7 +514,7 @@ export class AnimationManager {
   }
 
   /**
-   * @return {!Array<!Promise<!AnimationRunner>>}
+   * @return {!Array<!AnimationRunner>}
    * @private
    */
   getOrCreateRunners_() {
@@ -525,7 +528,7 @@ export class AnimationManager {
 
   /**
    * @param {!Element} el
-   * @return {!Promise<!AnimationRunner>}
+   * @return {!AnimationRunner}
    */
   createRunner_(el) {
     const preset = this.getPreset_(el);
@@ -588,7 +591,7 @@ export class AnimationManager {
 
   /**
    * @param {!Element} el
-   * @return {?StoryAnimationPresetDef}
+   * @return {!StoryAnimationPresetDef}
    */
   getPreset_(el) {
     const name = el.getAttribute(ANIMATE_IN_ATTRIBUTE_NAME);
