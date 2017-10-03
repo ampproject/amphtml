@@ -93,27 +93,26 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
   }
 
   describe('#maybeExecuteRealTimeConfig_', () => {
-    function executeTest(urls, vendors, timeoutMillis, customMacros, inflatedUrls,
-                         rtcCalloutResponses, calloutCount, expectedCalloutUrls,
-                         expectedRtcArray) {
+    function executeTest(args) {
       const rtcConfig = {
-        urls, vendors,
-        timeoutMillis};
+        urls: args.urls,
+        vendors: args.vendors,
+        timeoutMillis: args.timeoutMillis};
       setRtcConfig(rtcConfig);
-      inflatedUrls.forEach((inflatedUrl, i) => {
-        setFetchJsonStubBehavior(inflatedUrl, rtcCalloutResponses[i]);
+      (args.inflatedUrls || []).forEach((inflatedUrl, i) => {
+        setFetchJsonStubBehavior(inflatedUrl, args.rtcCalloutResponses[i]);
       });
-      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(a4aElement, customMacros);
+      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(a4aElement, args.customMacros);
       return rtcResponsePromiseArray.then(rtcResponseArray => {
-        expect(fetchJsonStub.callCount).to.equal(calloutCount);
-        expectedCalloutUrls.forEach(url => {
+        expect(fetchJsonStub.callCount).to.equal(args.calloutCount);
+        (args.expectedCalloutUrls || []).forEach(url => {
           expect(fetchJsonStub.calledWith(url));
         });
         rtcResponseArray.forEach((rtcResponse, i) => {
-          expect(rtcResponse.rtcResponse).to.deep.equal(expectedRtcArray[i].rtcResponse);
-          expect(rtcResponse.callout).to.equal(expectedRtcArray[i].callout);
-          expect(rtcResponse.error).to.equal(expectedRtcArray[i].error);
-          expect(Object.keys(rtcResponse).sort()).to.deep.equal(Object.keys(expectedRtcArray[i]).sort());
+          expect(rtcResponse.rtcResponse).to.deep.equal(args.expectedRtcArray[i].rtcResponse);
+          expect(rtcResponse.callout).to.equal(args.expectedRtcArray[i].callout);
+          expect(rtcResponse.error).to.equal(args.expectedRtcArray[i].error);
+          expect(Object.keys(rtcResponse).sort()).to.deep.equal(Object.keys(args.expectedRtcArray[i]).sort());
           expect(Number.isInteger(rtcResponse.rtcTime)).to.be.true;
         });
       });
@@ -175,8 +174,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         expectedRtcArray.push({
           callout: url, rtcTime: 10, rtcResponse: rtcCalloutResponses[i]});
       });
-      return executeTest(urls, null, null, null, urls, rtcCalloutResponses, calloutCount,
-                         urls, expectedRtcArray);
+      return executeTest({urls, inflatedUrls: urls, rtcCalloutResponses, calloutCount,
+                          expectedCalloutUrls: urls, expectedRtcArray});
     });
 
     it('should send only 5 RTC callouts for all specified URLS without macros', () => {
@@ -192,8 +191,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
                                      RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED));
       expectedRtcArray.push(rtcEntry(null, urls[6],
                                      RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED));
-      return executeTest(urls, null, null, null, urls, rtcCalloutResponses, calloutCount,
-                         expectedCalloutUrls, expectedRtcArray);
+      return executeTest({urls, inflatedUrls: urls, rtcCalloutResponses, calloutCount,
+                          expectedCalloutUrls, expectedRtcArray});
     });
 
     it('should send RTC callouts to inflated publisher URLs', () => {
@@ -214,8 +213,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         expectedRtcArray.push(rtcEntry(rtcResponse, inflatedUrls[i]));
       });
       const calloutCount = 3;
-      return executeTest(urls, null, null, customMacros, inflatedUrls, rtcCalloutResponses,
-                         calloutCount, inflatedUrls, expectedRtcArray);
+      return executeTest({urls, customMacros, inflatedUrls, rtcCalloutResponses,
+                          calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
     });
     it('should send RTC callouts to inflated vendor URLs', () => {
       const vendors = {
@@ -235,8 +234,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       const expectedRtcArray = [];
       expectedRtcArray.push(rtcEntry(rtcCalloutResponses[0],
                                      Object.keys(vendors)[0].toLowerCase()));
-      return executeTest(null, vendors, null, customMacros, inflatedUrls, rtcCalloutResponses,
-                         calloutCount, inflatedUrls, expectedRtcArray);
+      return executeTest({vendors, customMacros, inflatedUrls, rtcCalloutResponses,
+                          calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
     });
     it('should send RTC callouts to inflated publisher and vendor URLs', () => {});
     it('should favor publisher URLs over vendor URLs', () => {});
@@ -257,8 +256,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         {rtcResponse: rtcCalloutResponses[0], callout: urls[0], rtcTime: 10},
         {callout: urls[1], error:RTC_ERROR_ENUM.DUPLICATE_URL, rtcTime: 10},
       ];
-      return executeTest(urls, null, null, null, urls, rtcCalloutResponses, calloutCount,
-                         expectedCalloutUrls, expectedRtcArray);
+      return executeTest({urls, inflatedUrls: urls, rtcCalloutResponses, calloutCount,
+                          expectedCalloutUrls, expectedRtcArray});
     });
 
     it('should not send an RTC callout to an insecure url', () => {
@@ -282,11 +281,20 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         {callout: urls[1], error:RTC_ERROR_ENUM.INSECURE_URL, rtcTime: 10},
         {rtcResponse: rtcCalloutResponses[2], callout: urls[2], rtcTime: 10},
       ];
-      return executeTest(urls, null, null, null, urls, rtcCalloutResponses, calloutCount,
-                         expectedCalloutUrls, expectedRtcArray);
+      return executeTest({urls, inflatedUrls: urls, rtcCalloutResponses, calloutCount,
+                          expectedCalloutUrls, expectedRtcArray});
     });
     it('should catch errors due to network failure', () => {});
-    it('should not send RTC callout to unknown vendor', () => {});
+    it('should not send RTC callout to unknown vendor', () => {
+      const vendors = {
+        'unknownvendor': {SLOT_ID: 1, PAGE_ID: 2}
+      };
+      const calloutCount = 0;
+      const expectedRtcArray = [];
+      expectedRtcArray.push(rtcEntry(null, Object.keys(vendors)[0].toLowerCase(),
+                                    RTC_ERROR_ENUM.UNKNOWN_VENDOR));
+      return executeTest({vendors, calloutCount, expectedRtcArray});
+    });
   });
 
   describe('#validateRtcConfig', () => {
