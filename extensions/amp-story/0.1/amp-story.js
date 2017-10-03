@@ -26,7 +26,6 @@
  */
 import './amp-story-grid-layer';
 import './amp-story-page';
-import {AnalyticsTrigger} from './analytics';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './bookend';
