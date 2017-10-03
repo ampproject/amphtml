@@ -113,7 +113,7 @@ function buildProvider(doc, type, opt_params) {
 export class BookendShareWidget {
   /** @param {!Window} win */
   constructor(win) {
-    /** @private {?!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = null;
 
     /** @private @const {!Window} */
@@ -129,7 +129,7 @@ export class BookendShareWidget {
   }
 
   /**
-   * @param {!!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {!Element}
    */
   build(ampdoc) {
