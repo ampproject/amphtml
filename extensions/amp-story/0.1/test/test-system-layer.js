@@ -74,10 +74,6 @@ describes.fakeWin('amp-story system layer', {}, env => {
     });
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('should build UI', () => {
     const addEventHandlers =
         sandbox.stub(systemLayer, 'addEventHandlers_', NOOP);
