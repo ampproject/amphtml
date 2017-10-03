@@ -129,7 +129,7 @@ export class AudioManager {
   play(sourceElement) {
     this.load(sourceElement)
         .then(() => {
-          const playable = this.getPlayable_(sourceElement);
+          const playable = this.getOrCreatePlayable_(sourceElement);
           if (!playable) {
             return;
           }
@@ -144,7 +144,7 @@ export class AudioManager {
    * @param {!Element} sourceElement The element to be stopped.
    */
   stop(sourceElement) {
-    const playable = this.getPlayable_(sourceElement);
+    const playable = this.getOrCreatePlayable_(sourceElement);
     if (!playable) {
       return;
     }

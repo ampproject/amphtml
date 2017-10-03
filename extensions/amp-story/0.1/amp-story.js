@@ -27,6 +27,8 @@
 import './amp-story-grid-layer';
 import './amp-story-page';
 import {AnalyticsTrigger} from './analytics';
+import {AmpStoryAnalytics} from './analytics';
+import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
 import {EventType} from './events';
@@ -34,9 +36,8 @@ import {KeyCodes} from '../../../src/utils/key-codes';
 import {NavigationState} from './navigation-state';
 import {SystemLayer} from './system-layer';
 import {Layout} from '../../../src/layout';
-import {VariableService} from './variable-service';
 import {Services} from '../../../src/services';
-import {buildFromJson} from './related-articles';
+import {relatedArticlesFromJson} from './related-articles';
 import {
   closest,
   fullscreenEnter,
@@ -117,8 +118,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!Array<!AmpStoryPage>} */
     this.pages_ = [];
 
-    /** @const @private {!VariableService} */
-    this.variableService_ = new VariableService();
+    /** @const @private {!AmpStoryVariableService} */
+    this.variableService_ = new AmpStoryVariableService();
 
     /** @const @private {!AudioManager} */
     this.audioManager_ = new AudioManager(this.win, this.element);
@@ -144,8 +145,11 @@ export class AmpStory extends AMP.BaseElement {
 
     this.initializeListeners_();
 
-    this.navigationState_.installConsumer(new AnalyticsTrigger(this.element));
-    this.navigationState_.installConsumer(this.variableService_);
+    this.navigationState_.observe(stateChangeEvent =>
+        (new AmpStoryAnalytics(this.element)).onStateChange(stateChangeEvent));
+
+    this.navigationState_.observe(stateChangeEvent =>
+        this.variableService_.onStateChange(stateChangeEvent));
 
     upgradeBackgroundAudio(this.element);
 
@@ -194,11 +198,15 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener('play', e => {
-      this.audioManager_.play(e.target);
+      if (e.target instanceof HTMLMediaElement) {
+        this.audioManager_.play(e.target);
+      }
     }, true);
 
     this.element.addEventListener('pause', e => {
-      this.audioManager_.stop(e.target);
+      if (e.target instanceof HTMLMediaElement) {
+        this.audioManager_.stop(e.target);
+      }
     }, true);
 
     this.win.document.addEventListener('keydown', e => {
@@ -595,7 +603,7 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    this.element.appendChild(this.bookend_.build());
+    this.element.appendChild(this.bookend_.build(this.getAmpDoc()));
 
     this.setAsOwner(this.bookend_.getRoot());
 
@@ -615,8 +623,13 @@ export class AmpStory extends AMP.BaseElement {
   loadBookendConfigImpl_() {
     // two-tiered implementation for backwards-compatibility with
     // related-articles attribute
-    return this.loadBookendConfigInternal_().then(bookendConfig =>
-        bookendConfig || this.loadRelatedArticlesAsBookendConfig_());
+    return this.loadBookendConfigInternal_()
+        .then(bookendConfig =>
+              bookendConfig || this.loadRelatedArticlesAsBookendConfig_())
+        .catch(e => {
+          user().error(TAG, 'Error fetching bookend configuration', e.message);
+          return null;
+        });
   }
 
 
@@ -629,7 +642,7 @@ export class AmpStory extends AMP.BaseElement {
         .then(response => response && {
           shareProviders: response['share-providers'],
           relatedArticles: response['related-articles'] ?
-              buildFromJson(response['related-articles']) : [],
+              relatedArticlesFromJson(response['related-articles']) : [],
         });
   }
 
@@ -641,7 +654,7 @@ export class AmpStory extends AMP.BaseElement {
   loadRelatedArticlesAsBookendConfig_() {
     return this.loadJsonFromAttribute_(RELATED_ARTICLES_ATTRIBUTE_NAME)
         .then(response => response && {
-          relatedArticles: buildFromJson(response),
+          relatedArticles: relatedArticlesFromJson(response),
         });
   }
 

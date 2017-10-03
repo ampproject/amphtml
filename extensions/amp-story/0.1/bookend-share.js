@@ -111,26 +111,31 @@ function buildProvider(doc, type, opt_params) {
  * Social share widget for story bookend.
  */
 export class BookendShareWidget {
-  /** @param {!AmpDoc} ampdoc */
-  constructor(ampdoc) {
-    /** @private @const {!AmpDoc} */
-    this.ampdoc_ = ampdoc;
+  /** @param {!Window} win */
+  constructor(win) {
+    /** @private {?AmpDoc} */
+    this.ampdoc_ = null;
 
     /** @private @const {!Window} */
-    this.win_ = ampdoc.win;
+    this.win_ = win;
 
     /** @private {?Element} */
     this.root_ = null;
   }
 
-  /** @param {!AmpDoc} ampdoc */
-  static create(ampdoc) {
-    return new BookendShareWidget(ampdoc);
+  /** @param {!Window} win */
+  static create(win) {
+    return new BookendShareWidget(win);
   }
 
-  /** @return {!Element} */
-  build() {
+  /**
+   * @param {!AmpDoc} ampdoc
+   * @return {!Element}
+   */
+  build(ampdoc) {
     dev().assert(!this.root_, 'Already built.');
+
+    this.ampdoc_ = ampdoc;
 
     this.root_ = createElementWithAttributes(this.win_.document, 'ul', {
       'class': 'i-amphtml-story-share-list',
@@ -183,7 +188,7 @@ export class BookendShareWidget {
   /** @private */
   loadRequiredExtensions_() {
     Services.extensionsFor(this.win_)
-        .installExtensionForDoc(this.ampdoc_, 'amp-social-share');
+        .installExtensionForDoc(dev().assert(this.ampdoc_), 'amp-social-share');
   }
 
   /**

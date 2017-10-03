@@ -50,7 +50,7 @@ function buildArticle(doc, articleData) {
       height: 116,
     }));
 
-    fragment.appendChild(imageContainer);
+    root.appendChild(imageContainer);
   }
 
   const title = createElementWithAttributes(doc, 'h2', {
@@ -79,14 +79,11 @@ function buildArticle(doc, articleData) {
  */
 export class Bookend {
   /**
-   * @param {!AmpDoc} ampdoc
+   * @param {!Window} win
    */
-  constructor(ampdoc) {
-    /** @private @const {!AmpDoc} */
-    this.ampdoc_ = ampdoc;
-
+  constructor(win) {
     /** @private @const {!Window} */
-    this.win_ = ampdoc.win;
+    this.win_ = win;
 
     /** @private {boolean} */
     this.isBuilt_ = false;
@@ -95,13 +92,14 @@ export class Bookend {
     this.root_ = null;
 
     /** @private {!BookendShareWidget} */
-    this.shareWidget_ = BookendShareWidget.create(ampdoc);
+    this.shareWidget_ = BookendShareWidget.create(win);
   }
 
   /**
+   * @param {!AmpDoc} ampdoc
    * @return {!Element}
    */
-  build() {
+  build(ampdoc) {
     if (this.isBuilt_) {
       return this.getRoot();
     }
@@ -111,7 +109,7 @@ export class Bookend {
     this.root_ = this.win_.document.createElement('section');
     this.root_.classList.add('i-amphtml-story-bookend');
 
-    this.root_.appendChild(this.shareWidget_.build());
+    this.root_.appendChild(this.shareWidget_.build(ampdoc));
 
     return this.getRoot();
   }
