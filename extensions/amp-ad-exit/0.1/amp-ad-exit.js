@@ -20,7 +20,7 @@ import {createFilter} from './filters/factory';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {Services} from '../../../src/services';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {parseJson} from '../../../src/json';
 import {
   listen,
@@ -151,13 +151,23 @@ export class AmpAdExit extends AMP.BaseElement {
             const vendorResponse = replacements./*OK*/expandStringSync(
                 customVar.iframeTransportSignal, {
                   'IFRAME_TRANSPORT_SIGNAL': (vendor, responseKey) => {
+                    if (!(vendor && responseKey)) {
+                      return '';
+                    }
                     const vendorResponses = this.vendorResponses_[vendor];
                     if (vendorResponses && responseKey in vendorResponses) {
                       return vendorResponses[responseKey];
                     }
                   },
                 });
-            if (vendorResponse != '') {
+            if (customVar.iframeTransportSignal ==
+                `IFRAME_TRANSPORT_SIGNAL${vendorResponse}`) {
+              // No substitution occurred, so format string in amp-ad-exit
+              // config was invalid
+              dev().error('Invalid IFRAME_TRANSPORT_SIGNAL format:' +
+                  vendorResponse +
+                  ' (perhaps there is a space after a comma?)');
+            } else if (vendorResponse != '') {
               // Caveat: If the vendor's response *is* the empty string, then
               // this will cause the arg/default value to be returned.
               return vendorResponse;

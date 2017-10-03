@@ -103,7 +103,7 @@ export function getAmpAdResourceId(node, topWin) {
   try {
     const frameParent = getParentWindowFrameElement(node, topWin).parentElement;
     if (frameParent.nodeName == 'AMP-AD') {
-      return frameParent.getResourceId();
+      return String(frameParent.getResourceId());
     }
   } catch (e) {
   }
