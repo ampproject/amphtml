@@ -34,6 +34,10 @@ const SHARE_PROVIDER_NAME = dict({
 });
 
 
+/**
+ * @param {!Document} doc
+ * @return {!DocumentFragment}
+ */
 function buildLinkShareItem(doc) {
   const fragment = doc.createDocumentFragment();
   const root = doc.createElement('li');
@@ -61,6 +65,12 @@ function buildLinkShareItem(doc) {
 }
 
 
+/**
+ * @param {!Document} doc
+ * @param {string} type
+ * @param {!JsonObject} opt_params
+ * @return {!DocumentFragment}
+ */
 function buildProvider(doc, type, opt_params) {
   const fragment = doc.createDocumentFragment();
   const root = doc.createElement('li');
@@ -97,19 +107,25 @@ function buildProvider(doc, type, opt_params) {
 }
 
 
+/**
+ * Social share widget for story bookend.
+ */
 export class BookendShareWidget {
-  /** @param {!Window} win */
-  constructor(win) {
-    /** @private {!Window} */
-    this.win_ = win;
+  /** @param {!AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    /** @private @const {!AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
+    /** @private @const {!Window} */
+    this.win_ = ampdoc.win;
 
     /** @private {?Element} */
     this.root_ = null;
   }
 
-  /** @param {!Window} win */
-  static create(win) {
-    return new BookendShareWidget(win);
+  /** @param {!AmpDoc} ampdoc */
+  static create(ampdoc) {
+    return new BookendShareWidget(ampdoc);
   }
 
   /** @return {!Element} */
@@ -166,7 +182,8 @@ export class BookendShareWidget {
 
   /** @private */
   loadRequiredExtensions_() {
-    Services.extensionsFor(this.win_).loadExtension('amp-social-share');
+    Services.extensionsFor(this.win_)
+        .installExtensionForDoc(this.ampdoc_, 'amp-social-share');
   }
 
   /**

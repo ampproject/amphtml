@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {BookendShareWidget} from './bookend-share';
-import {createElementWithAttributes, escapeHtml} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
 
 
@@ -79,11 +79,14 @@ function buildArticle(doc, articleData) {
  */
 export class Bookend {
   /**
-   * @param {!Window} win
+   * @param {!AmpDoc} ampdoc
    */
-  constructor(win) {
-    /** @private {!Window} */
-    this.win_ = win;
+  constructor(ampdoc) {
+    /** @private @const {!AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
+    /** @private @const {!Window} */
+    this.win_ = ampdoc.win;
 
     /** @private {boolean} */
     this.isBuilt_ = false;
@@ -92,7 +95,7 @@ export class Bookend {
     this.root_ = null;
 
     /** @private {!BookendShareWidget} */
-    this.shareWidget_ = BookendShareWidget.create(win);
+    this.shareWidget_ = BookendShareWidget.create(ampdoc);
   }
 
   /**
@@ -193,7 +196,7 @@ export class Bookend {
     const headingEl = createElementWithAttributes(this.win_.document, 'h3', {
       'class': 'i-amphtml-story-bookend-heading',
     });
-    headingEl./*OK*/innerText = escapeHtml(heading);
+    headingEl.textContet = heading;
     return headingEl;
   }
 

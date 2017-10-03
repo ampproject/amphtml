@@ -36,6 +36,7 @@ export let RelatedArticleSetDef;
  * @return {!RelatedArticleDef}
  */
 function buildArticleFromJson_(articleJson) {
+  // TODO(alanorozco): Graceful errors.
   const article = {
     title: user().assert(articleJson.title),
     url: user().assert(articleJson.url),
@@ -53,16 +54,16 @@ function buildArticleFromJson_(articleJson) {
  * @param {!JsonObject} articleSetsResponse
  * @return {!Array<!RelatedArticleSetDef>}
  */
-// TODO(alanorozco): tighten externs
 // TODO(alanorozco): domain name
-export function buildFromJson(articleSetsResponse) {
+// TODO(alanorozco): Graceful errors.
+export function relatedArticlesFromJson(articleSetsResponse) {
   return /** @type {!Array<!RelatedArticleSetDef>} */ (
       Object.keys(articleSetsResponse).map(headingKey => {
         const articleSet = {
           articles: articleSetsResponse[headingKey].map(buildArticleFromJson_),
         };
 
-        if (!!headingKey.trim().length) {
+        if (headingKey.trim().length) {
           articleSet.heading = headingKey;
         }
 
