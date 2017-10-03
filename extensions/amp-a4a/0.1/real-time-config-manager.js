@@ -196,11 +196,10 @@ export function sendRtcCallout_(url, rtcStartTime, win, timeoutMillis, callout) 
 export function validateRtcConfig_(element) {
   const defaultTimeoutMillis = 1000;
   const rtcConfig = tryParseJson(
-      element.getAttribute('prerequest-callouts'));
+      element.getAttribute('rtc-config'));
   if (!rtcConfig) {
     return null;
   }
-  //TODO: Add check that all keys in the object are valid
   try {
     user().assert(rtcConfig['vendors'] || rtcConfig['urls'],
                   'RTC Config must specify vendors or urls');
@@ -214,6 +213,16 @@ export function validateRtcConfig_(element) {
   } catch (unusedErr) {
     return null;
   }
+  const rtcConfigKeyWhitelist = {
+    urls: true,
+    vendors: true,
+    timeoutMillis: true
+  };
+  Object.keys(rtcConfig).forEach(key => {
+    if (!rtcConfigKeyWhitelist[key]) {
+      user().warn(TAG, `Unknown RTC Config key: ${key}`);
+    }
+  });
   let timeout = parseInt(rtcConfig['timeoutMillis'], 10);
   if (!isNaN(timeout)) {
     if (timeout >= defaultTimeoutMillis || timeout < 0) {
