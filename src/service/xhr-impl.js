@@ -20,6 +20,7 @@ import {registerServiceBuilder, getService} from '../service';
 import {
   getSourceOrigin,
   getCorsUrl,
+  getWinOrigin,
   parseUrl,
 } from '../url';
 import {parseJson} from '../json';
@@ -90,14 +91,10 @@ export class Xhr {
     /** @const {!Window} */
     this.win = win;
 
+    const ampdocService = Services.ampdocServiceFor(win);
     /** @private {?./ampdoc-impl.AmpDoc} */
-    this.ampdocSingle_ = null;
-    if (!getMode().test) {
-      const ampdocService = Services.ampdocServiceFor(win);
-      this.ampdocSingle_ = ampdocService.isSingleDoc() ?
-          ampdocService.getAmpDoc() :
-          null;
-    }
+    this.ampdocSingle_ =
+        ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
   }
 
   /**
@@ -110,7 +107,8 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
-    if (this.ampdocSingle_ &&
+    if (!getMode().test &&
+        this.ampdocSingle_ &&
         Math.random() < 0.01 &&
         parseUrl(input).origin != this.win.location.origin &&
         !Services.viewerForDoc(this.ampdocSingle_).hasBeenVisible()) {
@@ -166,7 +164,7 @@ export class Xhr {
     }
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.
-    const currentOrigin = parseUrl(this.win.location.href).origin;
+    const currentOrigin = getWinOrigin(this.win);
     const targetOrigin = parseUrl(input).origin;
     if (currentOrigin == targetOrigin) {
       init['headers'] = init['headers'] || {};

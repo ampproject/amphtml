@@ -143,9 +143,6 @@ export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 /** @private {?Promise} */
 let sraRequests = null;
 
-/** @private {?Promise<!Object<string,string|number|boolean>>} */
-let pageLevelParameters_ = null;
-
 /**
  * Array of functions used to combine block level request parameters for SRA
  * request.
@@ -241,24 +238,36 @@ const fluidListeners = {};
  */
 function fluidMessageListener_(event) {
   const data = tryParseJson(getData(event));
-  if (event.origin != SAFEFRAME_ORIGIN || !data || !data['sentinel']) {
+  if (event.origin != SAFEFRAME_ORIGIN || !data) {
     return;
   }
-  const listener = fluidListeners[data['sentinel']];
-  if (!listener) {
-    dev().warn(TAG, `Listener for sentinel ${data['sentinel']} not found.`);
-    return;
-  }
-  if (data['s'] != 'creative_geometry_update') {
+  if (data['e']) {
+    // This is a request to establish a postmessaging connection.
+    const listener = fluidListeners[data['e']];
+    if (!listener) {
+      dev().warn(TAG, `Listener for sentinel ${data['e']} not found.`);
+      return;
+    }
     if (!listener.connectionEstablished) {
       listener.instance.connectFluidMessagingChannel();
       listener.connectionEstablished = true;
     }
     return;
   }
-  listener.instance.receiveMessageForFluid_(data);
+  const payload = tryParseJson(data['p']);
+  if (!payload || !payload['sentinel']) {
+    return;
+  }
+  const listener = fluidListeners[payload['sentinel']];
+  if (!listener) {
+    dev().warn(TAG, `Listener for sentinel ${payload['sentinel']} not found.`);
+    return;
+  }
+  if (data['s'] != 'creative_geometry_update') {
+    return;
+  }
+  listener.instance.receiveMessageForFluid_(payload);
 }
-
 
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
@@ -419,11 +428,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Handles Fluid-related messages dispatched from SafeFrame.
-   * @param {!JsonObject} data
+   * @param {!JsonObject} payload
    * @private
    */
-  receiveMessageForFluid_(data) {
-    const payload = tryParseJson(data['p']);
+  receiveMessageForFluid_(payload) {
     let newHeight;
     if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
       // TODO(levitzky) Add actual error handling here.
@@ -508,6 +516,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.jsonTargeting_['cookieOptOut'] ? '1' : null,
       'adk': this.adKey_,
       'sz': sizeStr,
+      'output': 'html',
+      'impl': 'ifr',
       'tfcd': tfcd == undefined ? null : tfcd,
       'adtest': isInManualExperiment(this.element) ? 'on' : null,
       'scp': serializeTargeting_(
@@ -553,19 +563,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
-
-    const pageLevelParametersPromise = getPageLevelParameters_(
-        this.win, this.getAmpDoc(), startTime);
     const rtcRequestPromise = isExperimentOn(this.win, 'disable-rtc') ?
     Promise.resolve({}) : this.executeRtc_();
-    return Promise.all(
-      [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
-        return googleAdUrl(
-            this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
-                this.getBlockParameters_(),
-                /* RTC Parameters */ values[1],
-                /* pageLevelParameters */ values[0]));
-      });
+    return rtcRequestPromise.then(rtcResult => {
+      return googleAdUrl(
+          this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
+              this.getBlockParameters_(), rtcResult, PAGE_LEVEL_PARAMS_));
+    });
   }
 
   /** @override */
@@ -1267,11 +1271,13 @@ export function getNetworkId(element) {
  */
 function constructSRARequest_(win, doc, instances) {
   const startTime = Date.now();
-  return getPageLevelParameters_(win, doc, startTime, true)
+  return googlePageParameters(win, doc, startTime)
       .then(pageLevelParameters => {
         const blockParameters = constructSRABlockParameters(instances);
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
-            Object.assign(blockParameters, pageLevelParameters), startTime);
+            Object.assign(
+                blockParameters, pageLevelParameters, PAGE_LEVEL_PARAMS_),
+            startTime);
       });
 }
 
@@ -1293,27 +1299,10 @@ function verifyRtcConfigMember(member, expectedType) {
  * @visibileForTesting
  */
 export function constructSRABlockParameters(instances) {
-  const parameters = {};
+  const parameters = {'output': 'ldjh', 'impl': 'fifs'};
   BLOCK_SRA_COMBINERS_.forEach(
       combiner => Object.assign(parameters, combiner(instances)));
   return parameters;
-}
-
-/**
- * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} doc
- * @param {number} startTime
- * @param {boolean=} isSra
- * @return {!Promise<!Object<string,string|number|boolean>>}
- */
-function getPageLevelParameters_(win, doc, startTime, isSra) {
-  pageLevelParameters_ = pageLevelParameters_ || googlePageParameters(
-      win, doc, startTime, 'ldjh').then(pageLevelParameters => {
-        const parameters = Object.assign({}, PAGE_LEVEL_PARAMS_);
-        parameters['impl'] = isSra ? 'fifs' : 'ifr';
-        return Object.assign(parameters, pageLevelParameters);
-      });
-  return pageLevelParameters_;
 }
 
 /**
