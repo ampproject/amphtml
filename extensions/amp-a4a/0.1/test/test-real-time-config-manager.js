@@ -30,7 +30,7 @@ import {parseUrl} from '../../../../src/url';
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 
-describes.realWin('RealTimeConfigManager', {amp: true}, env => {
+describes.realWin('real-time-config-manager', {amp: true}, env => {
   let element;
   let a4aElement;
   let sandbox;
@@ -89,10 +89,35 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
   }
 
   function setRtcConfig(rtcConfig) {
-    element.setAttribute('prerequest-callouts', JSON.stringify(rtcConfig));
+    element.setAttribute('rtc-config', JSON.stringify(rtcConfig));
   }
 
   describe('#maybeExecuteRealTimeConfig_', () => {
+    function executeTest(urls, vendors, timeoutMillis, customMacros, inflatedUrls,
+                         rtcCalloutResponses, calloutCount, expectedCalloutUrls,
+                         expectedRtcArray) {
+      const rtcConfig = {
+        urls, vendors,
+        timeoutMillis};
+      setRtcConfig(rtcConfig);
+      inflatedUrls.forEach((inflatedUrl, i) => {
+        setFetchJsonStubBehavior(inflatedUrl, rtcCalloutResponses[i]);
+      });
+      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(a4aElement);
+      return rtcResponsePromiseArray.then(rtcResponseArray => {
+        expect(fetchJsonStub.callCount).to.equal(calloutCount);
+        expectedCalloutUrls.forEach(url => {
+          expect(fetchJsonStub.calledWith(url));
+        });
+        rtcResponseArray.forEach((rtcResponse, i) => {
+          expect(rtcResponse.rtcResponse).to.deep.equal(expectedRtcArray[i].rtcResponse);
+          expect(rtcResponse.callout).to.equal(expectedRtcArray[i].callout);
+          expect(rtcResponse.error).to.equal(expectedRtcArray[i].error);
+          expect(Object.keys(rtcResponse).sort()).to.deep.equal(Object.keys(expectedRtcArray[i]).sort());
+          expect(Number.isInteger(rtcResponse.rtcTime)).to.be.true;
+        });
+      });
+    }
     beforeEach(() => {});
 
     it('should send RTC callouts for all specified URLS without macros', () => {
@@ -246,22 +271,42 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
         {'response1': {'fooArray': ['foo']}},
         {'response1': {'fooArray': ['foo']}},
       ];
-      const rtcConfig = {
-        urls,
-        'timeoutMillis': 500};
-      setRtcConfig(rtcConfig);
-      for (const i in urls) {
-        setFetchJsonStubBehavior(urls[i], rtcCalloutResponses[i]);
-      }
-      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(a4aElement);
-      return rtcResponsePromiseArray.then(rtcResponseArray => {
-        expect(fetchJsonStub.callCount).to.equal(1);
-        expect(fetchJsonStub.calledWith(urls[0]));
-        testGoodRtcResponse(rtcResponseArray[0], urls[0], rtcCalloutResponses[0]);
-        testBadRtcResponse(rtcResponseArray[1], urls[1], RTC_ERROR_ENUM.DUPLICATE_URL);
-      });
+      const calloutCount = 1;
+      const expectedCalloutUrls = [
+        'https://www.1.com/',
+      ];
+      const expectedRtcArray = [
+        {rtcResponse: rtcCalloutResponses[0], callout: urls[0], rtcTime: 10},
+        {callout: urls[1], error:RTC_ERROR_ENUM.DUPLICATE_URL, rtcTime: 10},
+      ];
+      return executeTest(urls, null, null, null, urls, rtcCalloutResponses, calloutCount,
+                         expectedCalloutUrls, expectedRtcArray);
     });
-    it('should not send an RTC callout to an insecure url', () => {});
+
+    it('should not send an RTC callout to an insecure url', () => {
+      const urls = [
+        'https://www.1.com/',
+        'http://www.insecure.biz/',
+        'https://www.2.com'
+      ];
+      const rtcCalloutResponses = [
+        {'response1': {'fooArray': ['foo']}},
+        {'response2': {'insecure': ['virus']}},
+        {'response3': {'barArray': ['bar']}},
+      ];
+      const calloutCount = 2;
+      const expectedCalloutUrls = [
+        'https://www.1.com/',
+        'https://www.2.com'
+      ];
+      const expectedRtcArray = [
+        {rtcResponse: rtcCalloutResponses[0], callout: urls[0], rtcTime: 10},
+        {callout: urls[1], error:RTC_ERROR_ENUM.INSECURE_URL, rtcTime: 10},
+        {rtcResponse: rtcCalloutResponses[2], callout: urls[2], rtcTime: 10},
+      ];
+      return executeTest(urls, null, null, null, urls, rtcCalloutResponses, calloutCount,
+                         expectedCalloutUrls, expectedRtcArray);
+    });
     it('should catch errors due to network failure', () => {});
     it('should not send RTC callout to unknown vendor', () => {});
   });
@@ -269,7 +314,7 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
   describe('#validateRtcConfig', () => {
     let validatedRtcConfig;
     afterEach(() => {
-      element.removeAttribute('prerequest-callouts');
+      element.removeAttribute('rtc-config');
     });
 
     it('should return parsed rtcConfig for valid rtcConfig', () => {
@@ -286,7 +331,7 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
       expect(validatedRtcConfig).to.deep.equal(rtcConfig);
     });
 
-    it('should return null if prerequest-callouts not specified', () => {
+    it('should return null if rtc-config not specified', () => {
       validatedRtcConfig = validateRtcConfig_(element);
       expect(validatedRtcConfig).to.be.null;
     });
@@ -304,7 +349,7 @@ describes.realWin('RealTimeConfigManager', {amp: true}, env => {
 
     it('should return false for bad JSON rtcConfig', () => {
       const rtcConfig = '{"urls" : ["https://google.com"]';
-      element.setAttribute('prerequest-callouts', rtcConfig);
+      element.setAttribute('rtc-config', rtcConfig);
       validatedRtcConfig = validateRtcConfig_(element);
       expect(validatedRtcConfig).to.be.null;
     });
