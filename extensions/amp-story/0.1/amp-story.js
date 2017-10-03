@@ -69,11 +69,10 @@ import {
   fullscreenExit,
   isFullscreenElement,
   scopedQuerySelector,
-  scopedQuerySelectorAll
+  scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {once} from '../../../src/utils/function';
-import {map} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {AudioManager, upgradeBackgroundAudio} from './audio';
@@ -428,7 +427,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onKeyDown_(e) {
-    switch(e.keyCode) {
+    switch (e.keyCode) {
       // TODO(newmuis): This will need to be flipped for RTL.
       case KeyCodes.LEFT_ARROW:
         this.previous_();
