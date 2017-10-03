@@ -286,7 +286,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /**
-   * Gets all media on this page.
+   * Gets all media elements on this page.
+   * @return {!NodeList<!Element>}
    * @private
    */
   getAllMedia_() {
