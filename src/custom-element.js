@@ -717,7 +717,7 @@ function createBaseCustomElementClass(win) {
         this.layers_ = Services.layersForDoc(this.ampdoc_);
       }
       this.getResources().add(this);
-      if (isExperimentOn(this.win, 'layers')) {
+      if (isExperimentOn(this.ampdoc_.win, 'layers')) {
         new LayoutElement(this);
       }
 
