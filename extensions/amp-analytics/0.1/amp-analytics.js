@@ -170,7 +170,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    this.initIframeTransport_();
+    if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      this.initIframeTransport_();
+    }
   }
 
   /** @override */
