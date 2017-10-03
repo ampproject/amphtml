@@ -523,8 +523,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (this.jsonTargeting_ &&
             this.jsonTargeting_['categoryExclusions']) || null),
       'ifi': this.ifi_,
-      'rc': this.refreshCount_ ? this.refreshCount_ : null,
-      'frc': this.fromResumeCallback ? '1' : null,
+      'rc': this.refreshCount_ || null,
+      'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluid_ ? 'height' : null,
     }, googleBlockParameters(this));
   }
