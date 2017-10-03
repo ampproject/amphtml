@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 
 /**
  * A map of elements to delay showing the page.  The key is a DOM query to find
@@ -178,7 +179,7 @@ export class PageElement {
     const pageElements = [];
 
     Object.keys(PAGE_ELEMENT_FACTORIES).forEach(query => {
-      const elements = page.element.querySelectorAll(query);
+      const elements = scopedQuerySelectorAll(page.element, query);
       const factory = PAGE_ELEMENT_FACTORIES[query];
       Array.prototype.forEach.call(elements, element => {
         const pageElement = factory(element, page);
@@ -209,7 +210,7 @@ class MediaElement extends PageElement {
     if (this.element instanceof HTMLMediaElement) {
       this.mediaElement_ = this.element;
     } else if (!this.mediaElement_) {
-      this.mediaElement_ = this.element.querySelector('audio, video');
+      this.mediaElement_ = scopedQuerySelector(this.element, 'audio, video');
     }
     return this.mediaElement_;
   }
