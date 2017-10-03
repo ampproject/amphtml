@@ -92,7 +92,7 @@ const PlaybackActivity = {
 class AnimationRunner {
   /**
    * @param {!Element} page
-   * @param {!StoryAnimationDef} animationDef
+   * @param {!./animation-types.StoryAnimationDef} animationDef
    * @param {!Promise<
    *    !../../amp-animation/0.1/web-animations.Builder
    * >} webAnimationBuilderPromise

@@ -96,7 +96,7 @@ export class Bookend {
   }
 
   /**
-   * @param {!AmpDoc} ampdoc
+   * @param {!!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {!Element}
    */
   build(ampdoc) {

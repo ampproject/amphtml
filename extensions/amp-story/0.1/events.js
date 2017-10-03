@@ -60,7 +60,8 @@ export function dispatch(source, eventName, opt_bubbles) {
  * @param {!Window} win
  * @param {!Element} source
  * @param {string} eventName
- * @param {!CustomEventInit} eventInit
+ * @param {!Object} payload
+ * @param {!CustomEventInit=} opt_eventInit
  */
 export function dispatchCustom(win, source, eventName, payload, opt_eventInit) {
   const event = createCustomEvent(win, eventName, payload, opt_eventInit);

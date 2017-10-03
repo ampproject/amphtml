@@ -21,7 +21,8 @@ import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
  * method that will return a PageElement to define rendering and loading
  * strategies.
  *
- * @const {!Object<string, !function(!Element, !AmpStoryPage): !PageElement>}
+ * @const {!Object<string,
+ *     !function(!Element, !./amp-story-page.AmpStoryPage): !PageElement>}
  */
 const PAGE_ELEMENT_FACTORIES = {
   'amp-audio, amp-video, .i-amphtml-story-background-audio':
@@ -87,14 +88,14 @@ const MINIMUM_MEDIA_BUFFER_SECONDS_FROM_BEGINNING = 3;
 export class PageElement {
   /**
    * @param {!Element} element The element on the page.
-   * @param {!AmpStoryPage} page The page that the element is on.
+   * @param {!./amp-story-page.AmpStoryPage} page The page that the element is on.
    */
   constructor(element, page) {
     /** @protected @const {!Element} */
     this.element = element;
     this.element.classList.add(ELEMENT_CLASS_NAME);
 
-    /** @protected @const {!AmpStoryPage} */
+    /** @protected @const {!./amp-story-page.AmpStoryPage} */
     this.page = page;
 
     /** @public {boolean} */
@@ -172,7 +173,7 @@ export class PageElement {
   }
 
   /**
-   * @param {!AmpStoryPage} page
+   * @param {!./amp-story-page.AmpStoryPage} page
    * @return {!Array<!PageElement>}
    */
   static getElementsFromPage(page) {

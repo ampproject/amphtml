@@ -114,7 +114,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!Array<string>} */
     this.pageHistoryStack_ = [];
 
-    /** @private @const {!Array<!AmpStoryPage>} */
+    /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.pages_ = [];
 
     /** @const @private {!AmpStoryVariableService} */
@@ -123,10 +123,10 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!AudioManager} */
     this.audioManager_ = new AudioManager(this.win, this.element);
 
-    /** @private @const {!function():!Promise<?./bookend.BookendConfig>} */
+    /** @private @const {!function():!Promise<?./bookend.BookendConfigDef>} */
     this.loadBookendConfig_ = once(() => this.loadBookendConfigImpl_());
 
-    /** @private {?AmpStoryPage} */
+    /** @private {?./amp-story-page.AmpStoryPage} */
     this.activePage_ = null;
   }
 
@@ -291,7 +291,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @param {!AmpStoryPage} page
+   * @param {!./amp-story-page.AmpStoryPage} page
    * @return {!Promise}
    */
   maybeApplyFirstAnimationFrame_(page) {
@@ -299,7 +299,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @param {!AmpStoryPage} page
+   * @param {!./amp-story-page.AmpStoryPage} page
    * @return {!Promise}
    */
   maybeStartAnimations_(page) {
@@ -616,7 +616,7 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
-   * @return {!Promise<?./bookend.BookendConfig>}
+   * @return {!Promise<?./bookend.BookendConfigDef>}
    * @private
    */
   loadBookendConfigImpl_() {
@@ -633,7 +633,7 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
-   * @return {!Promise<?./bookend.BookendConfig>}
+   * @return {!Promise<?./bookend.BookendConfigDef>}
    * @private
    */
   loadBookendConfigInternal_() {
@@ -647,7 +647,7 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
-   * @return {!Promise<?./bookend.BookendConfig>}
+   * @return {!Promise<?./bookend.BookendConfigDef>}
    * @private
    */
   loadRelatedArticlesAsBookendConfig_() {
@@ -708,7 +708,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * @param {string} id The ID of the page to be retrieved.
-   * @return {!AmpStoryPage} Retrieves the page with the specified ID.
+   * @return {!./amp-story-page.AmpStoryPage} Retrieves the page with the specified ID.
    * @private
    */
   getPageById_(id) {
@@ -726,7 +726,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @param {!AmpStoryPage} desiredPage
+   * @param {!./amp-story-page.AmpStoryPage} desiredPage
    * @return {number} The index of the page.
    */
   getPageIndex(desiredPage) {
