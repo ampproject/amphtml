@@ -129,10 +129,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       }
       let url;
       let macros;
-      for (let i = numUrls; i < numMacroUrls + numUrls; i++) {
-        url = `https://www.${i}.com/`;
+      for (let i = 0; i < numMacroUrls; i++) {
+        url = `https://www.${i + numUrls}.com/`;
         macros = [];
-        for (let macroIndex = 0; macroIndex < i; macroIndex++) {
+        for (let macroIndex = 0; macroIndex < i + 1; macroIndex++) {
           macros.push(`${urlMacros[macroIndex].toLowerCase()}=${urlMacros[macroIndex]}`);
         }
         url += macros.join('&');
@@ -237,8 +237,63 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       return executeTest({vendors, customMacros, inflatedUrls, rtcCalloutResponses,
                           calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
     });
-    it('should send RTC callouts to inflated publisher and vendor URLs', () => {});
-    it('should favor publisher URLs over vendor URLs', () => {});
+    it('should send RTC callouts to inflated publisher and vendor URLs', () => {
+      const urls = generateUrls(2,2);
+      const vendors = {
+        'fAkeVeNdOR': {SLOT_ID: 0, PAGE_ID: 1}
+      };
+      const inflatedUrls = [
+        'https://www.0.com/',
+        'https://www.1.com/',
+        'https://www.2.com/slot_id=1',
+        'https://www.3.com/slot_id=1&page_id=2',
+        'https://www.fake.qqq/slot_id=1&page_id=2&foo_id=3'
+      ];
+      const rtcCalloutResponses = generateCalloutResponses(5);
+      const customMacros = {
+        SLOT_ID: 1,
+        PAGE_ID: () => 2,
+        FOO_ID: () => 3
+      };
+      const expectedRtcArray = [];
+      for (let i=0; i<4; i++) {
+        expectedRtcArray.push(rtcEntry(rtcCalloutResponses[i], inflatedUrls[i]));
+      }
+      expectedRtcArray.push(rtcEntry(rtcCalloutResponses[4],
+                                     Object.keys(vendors)[0].toLowerCase()));
+      const calloutCount = 5;
+      return executeTest({urls, vendors, customMacros, inflatedUrls, rtcCalloutResponses,
+                          calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
+    });
+    it('should favor publisher URLs over vendor URLs', () => {
+      const urls = generateUrls(3,2);
+      const vendors = {
+        'fAkeVeNdOR': {SLOT_ID: 0, PAGE_ID: 1}
+      };
+      const inflatedUrls = [
+        'https://www.0.com/',
+        'https://www.1.com/',
+        'https://www.2.com/',
+        'https://www.3.com/slot_id=1',
+        'https://www.4.com/slot_id=1&page_id=2',
+        'https://www.fake.qqq/slot_id=1&page_id=2&foo_id=3'
+      ];
+      const rtcCalloutResponses = generateCalloutResponses(6);
+      const customMacros = {
+        SLOT_ID: 1,
+        PAGE_ID: () => 2,
+        FOO_ID: () => 3
+      };
+      const expectedRtcArray = [];
+      for (let i=0; i<5; i++) {
+        expectedRtcArray.push(rtcEntry(rtcCalloutResponses[i], inflatedUrls[i]));
+      }
+      expectedRtcArray.push(rtcEntry(null, Object.keys(vendors)[0].toLowerCase(),
+                                     RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED))
+      const calloutCount = 5;
+      return executeTest({urls, vendors, customMacros, inflatedUrls, rtcCalloutResponses,
+                          calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
+    });
     it('should not send more than one RTC callout to the same url', () => {
       const urls = [
         'https://www.1.com/',
@@ -284,7 +339,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       return executeTest({urls, inflatedUrls: urls, rtcCalloutResponses, calloutCount,
                           expectedCalloutUrls, expectedRtcArray});
     });
-    it('should catch errors due to network failure', () => {});
     it('should not send RTC callout to unknown vendor', () => {
       const vendors = {
         'unknownvendor': {SLOT_ID: 1, PAGE_ID: 2}
@@ -295,6 +349,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
                                     RTC_ERROR_ENUM.UNKNOWN_VENDOR));
       return executeTest({vendors, calloutCount, expectedRtcArray});
     });
+    it('should catch errors due to network failure', () => {});
   });
 
   describe('#validateRtcConfig', () => {
