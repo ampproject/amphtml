@@ -23,6 +23,13 @@ import {dev, user} from '../../../src/log';
 import {map} from '../../../src/utils/object';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {setStyle, resetStyles} from '../../../src/style';
+import {
+  StoryAnimationDef,
+  StoryAnimationDimsDef,
+  KeyframesOrFilterFnDef,
+  KeyframesDef,
+  StoryAnimationPresetDef,
+} from './animation-types';
 
 
 /** const {string} */
@@ -92,7 +99,7 @@ const PlaybackActivity = {
 class AnimationRunner {
   /**
    * @param {!Element} page
-   * @param {!./animation-types.StoryAnimationDef} animationDef
+   * @param {!StoryAnimationDef} animationDef
    * @param {!Promise<
    *    !../../amp-animation/0.1/web-animations.Builder
    * >} webAnimationBuilderPromise
@@ -170,7 +177,7 @@ class AnimationRunner {
   }
 
   /**
-   * @return {!Promise<!./animation-types.StoryAnimationDimsDef>}
+   * @return {!Promise<!StoryAnimationDimsDef>}
    * @visibleForTesting
    */
   getDims() {
@@ -178,7 +185,7 @@ class AnimationRunner {
       const targetBoundingRect = this.target_./*OK*/getBoundingClientRect();
       const pageBoundingRect = this.page_./*OK*/getBoundingClientRect();
 
-      return /** @type {!./animation-types.StoryAnimationDimsDef} */ ({
+      return /** @type {!StoryAnimationDimsDef} */ ({
         pageWidth: pageBoundingRect.width,
         pageHeight: pageBoundingRect.height,
         targetWidth: targetBoundingRect.width,
@@ -190,8 +197,8 @@ class AnimationRunner {
   }
 
   /**
-   * @param {!./animation-types.KeyframesOrFilterFnDef} keyframesArrayOrFn
-   * @return {!Promise<!./animation-types.KeyframesDef>}
+   * @param {!KeyframesOrFilterFnDef} keyframesArrayOrFn
+   * @return {!Promise<!KeyframesDef>}
    * @private
    */
   filterKeyframes_(keyframesArrayOrFn) {
@@ -535,8 +542,8 @@ export class AnimationManager {
 
   /**
    * @param {!Element} el
-   * @param {!./animation-types.StoryAnimationPresetDef} preset
-   * @return {!./animation-types.StoryAnimationDef}
+   * @param {!StoryAnimationPresetDef} preset
+   * @return {!StoryAnimationDef}
    */
   createAnimationDef(el, preset) {
     const animationDef = {target: el, preset};
@@ -581,7 +588,7 @@ export class AnimationManager {
 
   /**
    * @param {!Element} el
-   * @return {?./animation-types.StoryAnimationPresetDef}
+   * @return {?StoryAnimationPresetDef}
    */
   getPreset_(el) {
     const name = el.getAttribute(ANIMATE_IN_ATTRIBUTE_NAME);
