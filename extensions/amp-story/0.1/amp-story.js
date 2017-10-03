@@ -50,8 +50,8 @@ export class AmpStory extends AMP.BaseElement {
  * </amp-story>
  * </code>
  */
-import {AmpStoryGridLayer} from './amp-story-grid-layer';
-import {AmpStoryPage} from './amp-story-page';
+import './amp-story-grid-layer';
+import './amp-story-page';
 import {AnalyticsTrigger} from './analytics';
 import {Bookend} from './bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
@@ -62,26 +62,26 @@ import {SystemLayer} from './system-layer';
 import {Layout} from '../../../src/layout';
 import {VariableService} from './variable-service';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
 import {buildFromJson} from './related-articles';
-import {closest, fullscreenEnter, fullscreenExit, isFullscreenElement, scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {
+  closest,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+  scopedQuerySelector,
+  scopedQuerySelectorAll
+} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {once} from '../../../src/utils/function';
 import {map} from '../../../src/utils/object';
-import {
-  toggleExperiment,
-} from '../../../src/experiments';
+import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {AudioManager, upgradeBackgroundAudio} from './audio';
 import {setStyles} from '../../../src/style';
-import {ProgressBar} from './progress-bar';
 
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;
-
-/** @private @const {string} */
-const ACTIVE_PAGE_ATTRIBUTE_NAME = 'active';
 
 /** @private @const {string} */
 const RELATED_ARTICLES_ATTRIBUTE_NAME = 'related-articles';
@@ -158,6 +158,8 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    user().assert(isExperimentOn(this.win, TAG), 'enable amp-story experiment');
+
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
       this.getAmpDoc().win.document.documentElement.classList
           .add('i-amphtml-story-standalone');
@@ -276,11 +278,11 @@ export class AmpStory extends AMP.BaseElement {
   /** @private */
   initializePages_() {
     const pageImplPromises = Array.prototype.map.call(
-        querySelectorAll(this.element, 'amp-story-page'),
+        scopedQuerySelectorAll(this.element, 'amp-story-page'),
         (pageEl, index) => {
           return pageEl.getImpl().then(pageImpl => {
             this.pages_[index] = pageImpl;
-          })
+          });
         });
 
     return Promise.all(pageImplPromises);
@@ -306,7 +308,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   previous_() {
     const activePage = dev().assert(this.activePage_,
-      'No active page set when navigating to next page.');
+        'No active page set when navigating to next page.');
     activePage.previous();
   }
 
@@ -360,14 +362,14 @@ export class AmpStory extends AMP.BaseElement {
       this.triggerActiveEventForPage_();
       this.maybeStartAnimations_(targetPage);
     })
-    .then(() => {
-      if (oldPage) {
-        oldPage.setActive(false);
-      }
-      targetPage.setActive(true);
-    })
-    .then(() => this.preloadPagesByDistance_())
-    .then(() => this.forceRepaintForSafari_());
+        .then(() => {
+          if (oldPage) {
+            oldPage.setActive(false);
+          }
+          targetPage.setActive(true);
+        })
+        .then(() => this.preloadPagesByDistance_())
+        .then(() => this.forceRepaintForSafari_());
   }
 
 
