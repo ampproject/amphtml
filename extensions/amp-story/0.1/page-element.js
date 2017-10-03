@@ -172,7 +172,7 @@ export class PageElement {
   }
 
   /**
-   * @param {!AmpStoryPage}
+   * @param {!AmpStoryPage} page
    * @return {!Array<!PageElement>}
    */
   static getElementsFromPage(page) {
