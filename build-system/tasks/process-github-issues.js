@@ -34,7 +34,7 @@ const issuesOptions = {
     'Accept': 'application/vnd.github.v3+json',
   },
   qs: {
-    access_token: GITHUB_ACCESS_TOKEN,
+    'access_token': GITHUB_ACCESS_TOKEN,
   },
 };
 
@@ -45,12 +45,15 @@ const milestoneOptions = {
     'Accept': 'application/vnd.github.v3+json',
   },
   qs: {
-    access_token: GITHUB_ACCESS_TOKEN,
+    'access_token': GITHUB_ACCESS_TOKEN,
   },
 };
 
+// 4 is the number for Milestone 'Backlog Bugs'
 const MILESTONE_BACKLOG_BUGS = 4;
+// By default we will assign 'Pending Triage' milestone, number 20
 const MILESTONE_PENDING_TRIAGE = 20;
+// 23 is the number for Milestone 'New FRs'
 const MILESTONE_NEW_FRS = 23;
 // 22 is the number for Milestone 'Prioritized FRs'
 const MILESTONE_PRIORITIZED_FRS = 22;
