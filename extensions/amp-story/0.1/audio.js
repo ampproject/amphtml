@@ -96,14 +96,13 @@ export class AudioManager {
    *     represented by the specified sourceElement.
    */
   getOrCreatePlayable_(sourceElement) {
-    dev().assert(sourceElement instanceof HTMLMediaElement)
-    
+    dev().assert(sourceElement instanceof HTMLMediaElement);
+
     if (this.playables_[sourceElement.id]) {
       return this.playables_[sourceElement.id];
     }
 
-    const playable = new MediaElementPlayable(this.win_, sourceElement);
-    
+    return new MediaElementPlayable(this.win_, sourceElement);
   }
 
   /**
