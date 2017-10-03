@@ -16,6 +16,7 @@
 import {SystemLayer} from '../system-layer';
 import {EventType} from '../events';
 import {ProgressBar} from '../progress-bar';
+import {Services} from '../../../../src/services';
 
 
 const NOOP = () => {};
@@ -68,7 +69,7 @@ describes.fakeWin('amp-story system layer', {}, env => {
 
     systemLayer = new SystemLayer(win);
 
-    sandbox.stub(systemLayer, 'getVsync_').returns({
+    sandbox.stub(Services, 'vsyncFor').returns({
       mutate: fn => fn(),
     });
   });
