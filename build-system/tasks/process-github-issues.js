@@ -93,10 +93,10 @@ function processIssues() {
 function getIssues(opt_page) {
   const options = extend({}, issuesOptions);
   options.qs = {
-    state: 'open',
-    page: opt_page,
-    per_page: 100,
-    access_token: GITHUB_ACCESS_TOKEN,
+    'state': 'open',
+    'page': opt_page,
+    'per_page': 100,
+    'access_token': GITHUB_ACCESS_TOKEN,
   };
   return request(options).then(res => {
     const issues = JSON.parse(res.body);
@@ -184,8 +184,7 @@ function updateGitHubIssues() {
                       + ' issue but it hasn\'t been updated in awhile.' +
                       assigneeName + ' Do you have any updates?'));
                     }
-                  }
-                  else if (label.name.startsWith('P2') &&
+                  } else if (label.name.startsWith('P2') &&
                   quartelyUpdate == false) {
                     quartelyUpdate = true;
                     updates.push(applyComment(issue, 'This issue hasn\'t been '
@@ -224,32 +223,26 @@ function updateGitHubIssues() {
                 if (issueType === 'Type: Feature Request') {
                   issueNewMilestone = MILESTONE_NEW_FRS;
                   updates.push(applyMilestone(issue, issueNewMilestone));
-                }
-                else if (issueType === 'Related to: Documentation' ||
+                } else if (issueType === 'Related to: Documentation' ||
                 issueType === 'Type: Design Review' ||
                 issueType === 'Type: Weekly Status') {
                   issueNewMilestone = MILESTONE_DOCS_UPDATES;
                   updates.push(applyMilestone(issue, issueNewMilestone));
-                }
-                else if (issueType === 'Type: Bug' ||
+                } else if (issueType === 'Type: Bug' ||
                 issueType === 'Related to: Flaky Tests') {
                   issueNewMilestone = MILESTONE_BACKLOG_BUGS;
                   updates.push(applyMilestone(issue, issueNewMilestone));
-                }
-                else if (milestone == null) {
+                } else if (milestone == null) {
                   updates.push(applyMilestone(issue, issueNewMilestone));
                 }
               }
-            }
-            else if (milestone == null) {
+            } else if (milestone == null) {
               updates.push(applyMilestone(issue, issueNewMilestone));
-            }
-            else if (issueNewMilestone === MILESTONE_PRIORITIZED_FRS ||
+            } else if (issueNewMilestone === MILESTONE_PRIORITIZED_FRS ||
           issueNewMilestone === MILESTONE_NEW_FRS) {
               updates.push(applyLabel(issue, 'Type: Feature Request'));
-            }
-            else if (issueNewMilestone === MILESTONE_BACKLOG_BUGS ||
-          milestoneTitle.startsWith('Sprint')) {
+            } else if (issueNewMilestone === MILESTONE_BACKLOG_BUGS ||
+                milestoneTitle.startsWith('Sprint')) {
               updates.push(applyLabel(issue, 'Type: Bug'));
             }
             // Apply default priority if no priority
@@ -396,8 +389,7 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
     options.json = true;
     if (typeRequest === 'milestone') {
       options.body['milestone'] = opt_data;
-    }
-    else if (typeRequest === 'comment') {
+    } else if (typeRequest === 'comment') {
       options.body['body'] = opt_data;
     } else {
       options.body = opt_data;
