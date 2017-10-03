@@ -77,6 +77,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {AudioManager, upgradeBackgroundAudio} from './audio';
 import {setStyle, setStyles} from '../../../src/style';
+import {findIndex} from '../../../src/utils/array.js';
 
 
 /** @private @const {number} */
@@ -529,15 +530,15 @@ export class AmpStory extends AMP.BaseElement {
     event.stopPropagation();
 
     // TODO(newmuis): This will need to be flipped for RTL.
-    const nextScreenAreaMin = this.element./*OK*/offsetLeft +
-        ((1 - NEXT_SCREEN_AREA_RATIO) * this.element./*OK*/offsetWidth);
-    const nextScreenAreaMax = this.element./*OK*/offsetLeft +
-        this.element./*OK*/offsetWidth;
+    const offsetLeft = this.element./*OK*/offsetLeft;
+    const offsetWidth = this.element./*OK*/offsetWidth;
+    const nextScreenAreaMin = offsetLeft +
+        ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
+    const nextScreenAreaMax = offsetLeft + offsetWidth;
 
     if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
       this.next_();
-    } else if (event.pageX >= this.element./*OK*/offsetLeft &&
-        event.pageX < nextScreenAreaMin) {
+    } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
       this.previous_();
     }
   }
@@ -577,21 +578,23 @@ export class AmpStory extends AMP.BaseElement {
    * @param {string} pageId The page to be added to the map.
    * @return {!Object<string, number>} A mapping from page ID to the priority of
    *     that page.
+   * @private
    */
-  getPageDistanceMapHelper_(priority, map, pageId) {
-    if (map[pageId] !== undefined && map[pageId] <= priority) {
+  getPageDistanceMapHelper_(distance, map, pageId) {
+    if (map[pageId] !== undefined && map[pageId] <= distance) {
       return map;
     }
 
-    map[pageId] = priority;
+    map[pageId] = distance;
     const page = this.getPageById_(pageId);
     page.getAdjacentPageIds().forEach(adjacentPageId => {
       if (map[adjacentPageId] !== undefined
-          && map[adjacentPageId] <= priority) {
+          && map[adjacentPageId] <= distance) {
         return;
       }
 
-      map = this.getPageDistanceMapHelper_(priority + 1, map, adjacentPageId);
+      // TODO(newmuis): Remove the assignment and return, as they're unnecessary.
+      map = this.getPageDistanceMapHelper_(distance + 1, map, adjacentPageId);
     });
 
     return map;
@@ -648,6 +651,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * @return {!Promise<?./bookend.BookendConfig>}
+   * @private
    */
   loadBookendConfigInternal_() {
     return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME)
@@ -687,7 +691,7 @@ export class AmpStory extends AMP.BaseElement {
         .expandAsync(user().assertString(rawUrl))
         .then(url => Services.xhrFor(this.win).fetchJson(url))
         .then(response => {
-          user().assert(response.ok, 'Invalid HTTP response');
+          user().assert(response.ok, 'Invalid HTTP response for bookend JSON');
           return response.json();
         });
   }
@@ -712,6 +716,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * @param {!Element} el
    * @return {boolean}
+   * @private
    */
   isBookend_(el) {
     return this.bookend_.isBuilt() && el === this.bookend_.getRoot();
@@ -721,9 +726,11 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * @param {string} id The ID of the page to be retrieved.
    * @return {!AmpStoryPage} Retrieves the page with the specified ID.
+   * @private
    */
   getPageById_(id) {
-    return user().assert(this.pages_.find(page => page.element.id === id),
+    const pageIndex = findIndex(this.pages_, page => page.element.id === id);
+    return user().assert(this.pages_[pageIndex],
         `Story refers to page "${id}", but no such page exists.`);
   }
 
