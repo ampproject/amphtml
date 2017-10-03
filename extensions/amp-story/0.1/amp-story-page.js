@@ -155,7 +155,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   markMediaElementsWithPreload_() {
-    const mediaSet = scopedQuerySelectorAll(this.element, 'amp-audio, amp-video');
+    const mediaSet = scopedQuerySelectorAll(
+        this.element, 'amp-audio, amp-video');
     Array.prototype.forEach.call(mediaSet, mediaItem => {
       mediaItem.setAttribute('preload', 'auto');
     });
@@ -314,7 +315,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     const mediaSet = this.getAllMedia_();
     Array.prototype.forEach.call(mediaSet, mediaItem => {
       mediaItem.play().catch(() => {
-        dev().error('AMP-STORY', `Failed to play media element with src ${mediaItem.src}.`);
+        dev().error('AMP-STORY',
+            `Failed to play media element with src ${mediaItem.src}.`);
       });
     });
   }
@@ -502,7 +504,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     } else {
       let mediaElement;
       try {
-        mediaElement = scopedQuerySelector(this.element, `#${autoAdvanceAfter}`);
+        mediaElement = scopedQuerySelector(
+            this.element, `#${autoAdvanceAfter}`);
       } catch (e) {
         user().error(TAG, `Malformed ID '${autoAdvanceAfter}' for automatic ` +
             `advance on page '${this.element.id}'.`);
