@@ -425,6 +425,27 @@ describe('ActionService parseAction', () => {
   });
 });
 
+describe('ActionService setActions', () => {
+  it('should set actions', () => {
+    const action = actionService();
+    const element = document.createElement('div');
+    element.setAttribute('on', 'event1:action1');
+
+    // Invoke findAction_ once at the start to cache the actions.
+    action.findAction_(element, 'event1');
+
+    // Reset the actions with a new actions string.
+    action.setActions(element, 'event2:action2');
+
+    // `on` attribute should reflect the new action defs.
+    expect(element.getAttribute('on')).to.equal('event2:action2');
+
+    // Action cache should have been cleared.
+    expect(action.findAction_(element, 'event1')).to.be.null;
+    expect(action.findAction_(element, 'event2')).to.be.not.null;
+  });
+});
+
 describe('Action parseActionMap', () => {
 
   it('should parse with a single action', () => {
