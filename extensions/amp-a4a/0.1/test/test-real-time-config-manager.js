@@ -103,7 +103,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       inflatedUrls.forEach((inflatedUrl, i) => {
         setFetchJsonStubBehavior(inflatedUrl, rtcCalloutResponses[i]);
       });
-      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(a4aElement);
+      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(a4aElement, customMacros);
       return rtcResponsePromiseArray.then(rtcResponseArray => {
         expect(fetchJsonStub.callCount).to.equal(calloutCount);
         expectedCalloutUrls.forEach(url => {
@@ -118,16 +118,50 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         });
       });
     }
-    beforeEach(() => {});
+
+    const urlMacros = [
+      "SLOT_ID", "PAGE_ID", "ADX", "ADY", "WIDTH", "HEIGHT"
+    ];
+
+    function generateUrls(numUrls, numMacroUrls) {
+      const urls = [];
+      for (let i = 0; i < numUrls; i++) {
+        urls.push(`https://www.${i}.com/`);
+      }
+      let url;
+      let macros;
+      for (let i = numUrls; i < numMacroUrls + numUrls; i++) {
+        url = `https://www.${i}.com/`;
+        macros = [];
+        for (let macroIndex = 0; macroIndex < i; macroIndex++) {
+          macros.push(`${urlMacros[macroIndex].toLowerCase()}=${urlMacros[macroIndex]}`);
+        }
+        url += macros.join('&');
+        urls.push(url);
+      }
+      return urls;
+    }
+
+    function rtcEntry(rtcResponse, callout, error) {
+      return rtcResponse ? {rtcResponse, callout, rtcTime: 10} :
+      {callout, error, rtcTime: 10};
+    }
+
+    function generateCalloutResponses(numGoodResponses, numBadResponses) {
+      const rtcCalloutResponses = [];
+      let response;
+      for (let i = 0; i<numGoodResponses; i++) {
+        response = {};
+        response[`response${i}`] = {};
+        response[`response${i}`][`foo${i}`] = [`a${i}`,`b${i}`,`c${i}`];
+        rtcCalloutResponses.push(response);
+      }
+      return rtcCalloutResponses;
+    }
 
     it('should send RTC callouts for all specified URLS without macros', () => {
-      const urls = [
-        'https://www.1.com/',
-        'https://www.2.com/',
-        'https://www.3.com/',
-        'https://www.4.com/',
-        'https://www.5.com/',
-      ];
+      const calloutCount = 5;
+      const urls = generateUrls(5);
       const rtcCalloutResponses = [
         {'response1': {'fooArray': ['foo']}},
         {'response2': {'test': 'test2'}},
@@ -136,108 +170,58 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
                        'foodObject': {'apple': true, 'car': false}}},
         {'response5': [1, 2, 3]}
       ];
-      const rtcConfig = {
-        urls,
-        'timeoutMillis': 500};
-      setRtcConfig(rtcConfig);
-      for (const i in urls) {
-        setFetchJsonStubBehavior(urls[i], rtcCalloutResponses[i]);
-      }
-      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(a4aElement);
-      return rtcResponsePromiseArray.then(rtcResponseArray => {
-        expect(fetchJsonStub.callCount).to.equal(5);
-        rtcResponseArray.forEach((rtcResponse, i) => {
-          expect(fetchJsonStub.calledWith(urls[i]));
-          expect(rtcResponse.rtcResponse).to.deep.equal(rtcCalloutResponses[i]);
-          expect(rtcResponse.callout).to.equal(urls[i]);
-        });
+      const expectedRtcArray = [];
+      urls.forEach((url, i) => {
+        expectedRtcArray.push({
+          callout: url, rtcTime: 10, rtcResponse: rtcCalloutResponses[i]});
       });
+      return executeTest(urls, null, null, null, urls, rtcCalloutResponses, calloutCount,
+                         urls, expectedRtcArray);
     });
 
     it('should send only 5 RTC callouts for all specified URLS without macros', () => {
-      const urls = [
-        'https://www.1.com/',
-        'https://www.2.com/',
-        'https://www.3.com/',
-        'https://www.4.com/',
-        'https://www.5.com/',
-        'https://www.6.com/',
-        'https://www.7.com/',
-      ];
-      const rtcCalloutResponses = [
-        {'response1': {'fooArray': ['foo']}},
-        {'response2': {'test': 'test2'}},
-        {'response3': {'apple': 'banana'}},
-        {'response4': {'animalArray': ['cat', 'dog'],
-                       'foodObject': {'apple': true, 'car': false}}},
-        {'response5': [1, 2, 3]},
-        {'response6': "WILL NEVER SEE"},
-        {'response5': "WILL NEVER SEE"}
-      ];
-      const rtcConfig = {
-        urls,
-        'timeoutMillis': 500};
-      setRtcConfig(rtcConfig);
-      for (const i in urls) {
-        setFetchJsonStubBehavior(urls[i], rtcCalloutResponses[i]);
+      const urls = generateUrls(7);
+      const expectedCalloutUrls = generateUrls(5);
+      const rtcCalloutResponses = generateCalloutResponses(7);
+      const calloutCount = 5;
+      const expectedRtcArray = [];
+      for (let i=0; i < 5; i++) {
+        expectedRtcArray.push(rtcEntry(rtcCalloutResponses[i], urls[i]));
       }
-      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(a4aElement);
-      return rtcResponsePromiseArray.then(rtcResponseArray => {
-        expect(fetchJsonStub.callCount).to.equal(5);
-        for (let i = 0; i < 5; i++) {
-          expect(fetchJsonStub.calledWith(urls[i])).to.be.true;
-          testGoodRtcResponse(rtcResponseArray[i], urls[i], rtcCalloutResponses[i]);
-        }
-        expect(fetchJsonStub.neverCalledWith(urls[5])).to.be.true;
-        testBadRtcResponse(rtcResponseArray[5], urls[5],
-                           RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED);
-        expect(fetchJsonStub.neverCalledWith(urls[6])).to.be.true;
-        testBadRtcResponse(rtcResponseArray[6], urls[6],
-                           RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED);
-      });
+      expectedRtcArray.push(rtcEntry(null, urls[5],
+                                     RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED));
+      expectedRtcArray.push(rtcEntry(null, urls[6],
+                                     RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED));
+      return executeTest(urls, null, null, null, urls, rtcCalloutResponses, calloutCount,
+                         expectedCalloutUrls, expectedRtcArray);
     });
 
     it('should send RTC callouts to inflated publisher URLs', () => {
-      const urls = [
-        'https://www.1.com/',
-        'https://www.2.com/?slot_id=SLOT_ID&page_id=PAGE_ID',
-        'https://www.3.com/?slot_id=SLOT_ID&foo_id=FOO_ID'
-      ];
+      const urls = generateUrls(1,2);
       const inflatedUrls = [
-        'https://www.1.com/',
-        'https://www.2.com/?slot_id=1&page_id=2',
-        'https://www.3.com/?slot_id=1&foo_id=3'
+        'https://www.0.com/',
+        'https://www.1.com/slot_id=1',
+        'https://www.2.com/slot_id=1&page_id=2'
       ];
-      const rtcCalloutResponses = [
-        {'response1': {'fooArray': ['foo']}},
-        {'response2': {'test': 'test2'}},
-        {'response3': {'apple': 'banana'}},
-      ];
+      const rtcCalloutResponses = generateCalloutResponses(3);
       const customMacros = {
         SLOT_ID: 1,
         PAGE_ID: () => 2,
         FOO_ID: () => 3
       };
-      const rtcConfig = {urls};
-      setRtcConfig(rtcConfig);
-      for (const i in urls) {
-        setFetchJsonStubBehavior(inflatedUrls[i], rtcCalloutResponses[i]);
-      }
-      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(a4aElement, customMacros);
-      return rtcResponsePromiseArray.then(rtcResponseArray => {
-        expect(fetchJsonStub.callCount).to.equal(3);
-        rtcResponseArray.forEach((rtcResponse, i) => {
-          expect(fetchJsonStub.calledWith(inflatedUrls[i])).to.be.true;
-          expect(rtcResponse.rtcResponse).to.deep.equal(rtcCalloutResponses[i]);
-          expect(rtcResponse.callout).to.equal(inflatedUrls[i]);
-        });
+      const expectedRtcArray = [];
+      rtcCalloutResponses.forEach((rtcResponse, i) => {
+        expectedRtcArray.push(rtcEntry(rtcResponse, inflatedUrls[i]));
       });
+      const calloutCount = 3;
+      return executeTest(urls, null, null, customMacros, inflatedUrls, rtcCalloutResponses,
+                         calloutCount, inflatedUrls, expectedRtcArray);
     });
     it('should send RTC callouts to inflated vendor URLs', () => {
       const vendors = {
         'fAkeVeNdOR': {SLOT_ID: 1, PAGE_ID: 2}
       };
-      const inflatedVendorUrls = [
+      const inflatedUrls = [
         'https://www.fake.qqq/slot_id=1&page_id=3&foo_id=4'
       ];
       const rtcCalloutResponses = [
@@ -247,18 +231,12 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         PAGE_ID: () => 3,
         FOO_ID: () => 4
       };
-      const rtcConfig = {vendors};
-      setRtcConfig(rtcConfig);
-      setFetchJsonStubBehavior(inflatedVendorUrls[0], rtcCalloutResponses[0]);
-      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(a4aElement, customMacros);
-      return rtcResponsePromiseArray.then(rtcResponseArray => {
-        expect(fetchJsonStub.callCount).to.equal(1);
-        rtcResponseArray.forEach((rtcResponse, i) => {
-          expect(fetchJsonStub.calledWith(inflatedVendorUrls[i])).to.be.true;
-          expect(rtcResponse.rtcResponse).to.deep.equal(rtcCalloutResponses[i]);
-          expect(rtcResponse.callout).to.equal(Object.keys(vendors)[0].toLowerCase());
-        });
-      });
+      const calloutCount = 1;
+      const expectedRtcArray = [];
+      expectedRtcArray.push(rtcEntry(rtcCalloutResponses[0],
+                                     Object.keys(vendors)[0].toLowerCase()));
+      return executeTest(null, vendors, null, customMacros, inflatedUrls, rtcCalloutResponses,
+                         calloutCount, inflatedUrls, expectedRtcArray);
     });
     it('should send RTC callouts to inflated publisher and vendor URLs', () => {});
     it('should favor publisher URLs over vendor URLs', () => {});
