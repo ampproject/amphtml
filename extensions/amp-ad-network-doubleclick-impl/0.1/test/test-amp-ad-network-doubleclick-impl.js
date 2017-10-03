@@ -587,8 +587,15 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           return impl.getAdUrl().then(url2 => {
             expect(url2).to.match(/(\?|&)rc=1(&|$)/);
             expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
+            expect(url2).to.not.match(/(\?|&)frc=1(&|$)/);
           });
         });
+      });
+    });
+    it('has correct frc value', () => {
+      impl.fromResumeCallback = true;
+      impl.getAdUrl().then(url => {
+        expect(url).to.match(/(\?|&)frc=1(&|$)/);
       });
     });
   });
