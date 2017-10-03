@@ -228,7 +228,9 @@ export class AmpUserNotification extends AMP.BaseElement {
    * Creates a Request to be used for postDismiss
    * @private
    * @param {!string} enctype
-   * @param {!{elementId: string, ampUserId: string}} parameters
+   * @param {!Object} parameters
+   * @param {!string} parameters.elementId
+   * @param {string} parameters.ampUserId
    * @return {!Object}
    */
   buildPostDismissRequest_(enctype, {elementId, ampUserId}) {
