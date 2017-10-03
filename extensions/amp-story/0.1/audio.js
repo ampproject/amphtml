@@ -15,6 +15,7 @@
  */
 
 import {dev} from '../../../src/log';
+import {assertHttpsUrl} from '../../../src/url';
 
 /**
  * The volume to which audio should be reduced when other audio sources are
@@ -52,7 +53,7 @@ const BACKGROUND_AUDIO_ELEMENT_CLASS_NAME = 'i-amphtml-story-background-audio';
 export function upgradeBackgroundAudio(element) {
   if (element.hasAttribute('background-audio')) {
     const audioEl = element.ownerDocument.createElement('audio');
-    const audioSrc = element.getAttribute('background-audio');
+    const audioSrc = assertHttpsUrl(element.getAttribute('background-audio'));
     audioEl.setAttribute('src', audioSrc);
     audioEl.setAttribute('preload', 'auto');
     audioEl.setAttribute('loop', '');
