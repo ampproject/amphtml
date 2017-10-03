@@ -19,32 +19,6 @@
  *
  * Example:
  * <code>
-<<<<<<< HEAD
- * <amp-story>
- * </amp-story>
- * </code>
- */
-
-import {CSS} from '../../../build/amp-story-0.1.css';
-import {Layout} from '../../../src/layout';
-import {user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
-
-/** @const */
-const TAG = 'amp-story';
-
-export class AmpStory extends AMP.BaseElement {
-
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-  }
-
-  buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG), 'enable amp-story experiment');
-  }
-
-=======
  * <amp-story related-articles="related.json">
  *   [...]
  * </amp-story>
@@ -128,16 +102,16 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
-    /** @private {!Bookend} */
+    /** @private @const {!Bookend} */
     this.bookend_ = new Bookend(this.win);
 
-    /** @private {!SystemLayer} */
+    /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win);
 
     /** @private {boolean} */
     this.isBookendActive_ = false;
 
-    /** @private {!Array<string>} */
+    /** @private @const {!Array<string>} */
     this.pageHistoryStack_ = [];
 
     /** @private @const {!Array<!AmpStoryPage>} */
@@ -260,13 +234,10 @@ export class AmpStory extends AMP.BaseElement {
   }
 
 
->>>>>>> Add the core amp-story component
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
   }
-<<<<<<< HEAD
-=======
 
 
   /** @override */
@@ -783,7 +754,6 @@ export class AmpStory extends AMP.BaseElement {
   audioStopped_() {
     this.element.classList.remove('audio-playing');
   }
->>>>>>> Add the core amp-story component
 }
 
 AMP.registerElement('amp-story', AmpStory, CSS);
