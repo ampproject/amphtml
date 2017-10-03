@@ -79,7 +79,9 @@ export class AmpAnimation extends AMP.BaseElement {
         `Experiment "${TAG}" is disabled.`);
 
     // TODO(dvoytenko): Remove once we support direct parent visibility.
-    user().assert(this.element.parentNode == ampdoc.getBody(),
+    user().assert(
+        this.element.parentNode == this.element.ownerDocument.body ||
+        this.element.parentNode == ampdoc.getBody(),
         `${TAG} is only allowed as a direct child of <body> element.` +
         ' This restriction will be removed soon.');
 
