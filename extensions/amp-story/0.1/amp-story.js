@@ -76,7 +76,7 @@ import {once} from '../../../src/utils/function';
 import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {AudioManager, upgradeBackgroundAudio} from './audio';
-import {setStyles} from '../../../src/style';
+import {setStyle, setStyles} from '../../../src/style';
 
 
 /** @private @const {number} */
@@ -392,15 +392,15 @@ export class AmpStory extends AMP.BaseElement {
     const platform = Services.platformFor(this.win);
     if (platform.isSafari() || platform.isIos()) {
       this.mutateElement(() => {
-        this.element.style.display = 'none';
+        setStyle(this.element, 'display', 'none');
 
         // Reading the height is what forces the repaint.  The conditional exists
         // only to workaround the fact that the closure compiler would otherwise
         // think that only reading the height has no effect.  Since the height is
         // always >= 0, this conditional will always be executed.
-        const height = this.element.offsetHeight;
+        const height = this.element./*OK*/offsetHeight;
         if (height >= 0) {
-          this.element.style.display = '';
+          setStyle(this.element, 'display', '');
         }
       });
     }
@@ -529,14 +529,14 @@ export class AmpStory extends AMP.BaseElement {
     event.stopPropagation();
 
     // TODO(newmuis): This will need to be flipped for RTL.
-    const nextScreenAreaMin = this.element.offsetLeft +
-        ((1 - NEXT_SCREEN_AREA_RATIO) * this.element.offsetWidth);
-    const nextScreenAreaMax = this.element.offsetLeft +
-        this.element.offsetWidth;
+    const nextScreenAreaMin = this.element./*OK*/offsetLeft +
+        ((1 - NEXT_SCREEN_AREA_RATIO) * this.element./*OK*/offsetWidth);
+    const nextScreenAreaMax = this.element./*OK*/offsetLeft +
+        this.element./*OK*/offsetWidth;
 
     if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
       this.next_();
-    } else if (event.pageX >= this.element.offsetLeft &&
+    } else if (event.pageX >= this.element./*OK*/offsetLeft &&
         event.pageX < nextScreenAreaMin) {
       this.previous_();
     }
