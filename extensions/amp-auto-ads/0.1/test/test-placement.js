@@ -298,9 +298,7 @@ describes.realWin('placement', {
           });
     });
 
-    // TODO(dvoytenko): Enable after fixing #11399.
-    it.skip('should place an ad with ' +
-        'i-amphtml-layout-awaiting-size class', () => {
+    it('should place an ad with i-amphtml-layout-awaiting-size class.', () => {
       const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
@@ -327,6 +325,12 @@ describes.realWin('placement', {
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
+
+      const resources = Services.resourcesForDoc(anchor);
+      sandbox.stub(resources, 'attemptChangeSize', () => {
+        return Promise.reject();
+      });
+
       return placements[0].placeAd(baseAttributes, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
