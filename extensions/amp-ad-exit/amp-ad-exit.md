@@ -255,19 +255,27 @@ applies to navigation URLs and click tracking URLs.
 
 ### Custom variables
 Custom variables must begin with an underscore. Define variables in the
-config alongside the navigation target. The default value can be overridden
-in the `exit` action invocation:
+config alongside the navigation target. Variables should have a `"defaultValue"`
+property. The default value can be overridden in the `exit` action invocation:
 
+Variable values can also come from 3P analytics.
+
+Example:
 ```html
 <amp-ad-exit id="exit-api"><script type="application/json">
 {
   "targets": {
     "product": {
-      "finalUrl": "http://example.com/?page=_productCategory",
+      "finalUrl": "http://example.com/?page=_productCategory&verification=_3pAnalytics",
       "vars": {
         "_productCategory": {
           "defaultValue": "none"
-        }
+        },
+        "_3pAnalytics": {
+          "defaultValue": "no_response",
+          "vendorAnalyticsSource": "VendorXYZ",
+          "vendorAnalyticsResponseKey": "findings"
+         }
       }
     }
   }
