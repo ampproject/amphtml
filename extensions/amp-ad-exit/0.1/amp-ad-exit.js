@@ -164,7 +164,7 @@ export class AmpAdExit extends AMP.BaseElement {
                 `IFRAME_TRANSPORT_SIGNAL${vendorResponse}`) {
               // No substitution occurred, so format string in amp-ad-exit
               // config was invalid
-              dev().error('Invalid IFRAME_TRANSPORT_SIGNAL format:' +
+              dev().error(TAG, 'Invalid IFRAME_TRANSPORT_SIGNAL format:' +
                   vendorResponse +
                   ' (perhaps there is a space after a comma?)');
             } else if (vendorResponse != '') {
