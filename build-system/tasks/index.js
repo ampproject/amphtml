@@ -33,6 +33,7 @@ require('./json-check');
 require('./lint');
 require('./prepend-global');
 require('./presubmit-checks');
+require('./process-github-issues');
 require('./release-tagging');
 require('./runtime-test');
 require('./serve');
