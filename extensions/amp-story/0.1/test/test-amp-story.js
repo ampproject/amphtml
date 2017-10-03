@@ -1,4 +1,18 @@
-import {AmpStory} from '../amp-story';
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import {AnalyticsTrigger} from '../analytics';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
@@ -25,10 +39,6 @@ describes.realWin('amp-story', {
     }
     container.appendChild(page);
     return page;
-  }
-
-  function stubBookend(bookend) {
-    sandbox./*OK*/stub(element.implementation_, 'bookend_', bookend);
   }
 
   function createPages(container, count, opt_ids) {
@@ -74,10 +84,6 @@ describes.realWin('amp-story', {
 
     const systemLayerRootMock = {};
 
-    const systemLayerBuild =
-        sandbox.stub(element.implementation_.systemLayer_, 'build')
-            .returns(systemLayerRootMock);
-
     const updateActivePageState =
         sandbox.stub(element.implementation_.navigationState_,
             'updateActivePage',
@@ -101,8 +107,9 @@ describes.realWin('amp-story', {
         sandbox.match(consumer => consumer instanceof AnalyticsTrigger));
   });
 
-  // TODO(amphtml-story#187): Re-enable this test.
+  // TODO(newmuis/amphtml-story#187): Re-enable this test.
   it.skip('should enter fullscreen when switching pages', () => {
+    /* eslint-disable no-unused-vars no-undef */
     const requestFullScreen = sandbox.spy();
     const systemLayerSetInFullScreen = sandbox.stub(
         element.implementation_.systemLayer_, 'setInFullScreen', NOOP);
@@ -118,8 +125,10 @@ describes.realWin('amp-story', {
         .to.have.been.calledWith(/* inFullScreen */ true);
   });
 
-  // TODO(amphtml-story#187): Re-enable this test.
-  it.skip('should not enter fullscreen when switching if auto is disabled', () => {
+  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  it.skip('should not enter fullscreen when switching if auto is disabled',
+      () => {
+    /* eslint-disable no-unused-vars no-undef */
     const requestFullScreen = sandbox.spy();
 
     const enterFullScreen = sandbox.stub(
@@ -134,8 +143,9 @@ describes.realWin('amp-story', {
     expect(enterFullScreen).to.not.have.been.called;
   });
 
-  // TODO(amphtml-story#187): Re-enable this test.
+  // TODO(newmuis/amphtml-story#187): Re-enable this test.
   it.skip('should not enter fullscreen when switching if on "desktop"', () => {
+    /* eslint-disable no-unused-vars no-undef */
     const requestFullScreen = sandbox.spy();
 
     const enterFullScreen = sandbox.stub(
@@ -149,13 +159,12 @@ describes.realWin('amp-story', {
     expect(enterFullScreen).to.not.have.been.called;
   });
 
-  // TODO(amphtml-story#187): Re-enable this test.
+  // TODO(newmuis/amphtml-story#187): Re-enable this test.
   it.skip('should exit fullscreen when switching to the bookend page', () => {
+    /* eslint-disable no-unused-vars no-undef */
     const exitFullScreen = sandbox.spy();
     const systemLayerSetInFullScreen = sandbox.stub(
         element.implementation_.systemLayer_, 'setInFullScreen', NOOP);
-
-    const bookend = win.document.createElement('section');
 
     appendEmptyPage(element);
     stubFullScreenForTesting(/* isSupported */ true, NOOP, exitFullScreen);
@@ -169,8 +178,9 @@ describes.realWin('amp-story', {
         .to.have.been.calledWith(/* inFullScreen */ false);
   });
 
-  // TODO(amphtml-story#187): Re-enable this test.
+  // TODO(newmuis/amphtml-story#187): Re-enable this test.
   it.skip('should disable auto fullscreen when exiting explicitly', () => {
+    /* eslint-disable no-unused-vars no-undef */
     const setAutoFullScreenSpy = sandbox.spy(
         element.implementation_, 'setAutoFullScreen');
 
@@ -182,8 +192,9 @@ describes.realWin('amp-story', {
         .to.have.been.calledWith(/* isEnabled */ false);
   });
 
-  // TODO(amphtml-story#187): Re-enable this test.
+  // TODO(newmuis/amphtml-story#187): Re-enable this test.
   it.skip('should exit fullscreen when EXIT_FULLSCREEN is triggered', () => {
+    /* eslint-disable no-unused-vars no-undef */
     const exitFullScreenStub = sandbox.stub(
         element.implementation_, 'exitFullScreen_', NOOP);
 
@@ -234,13 +245,11 @@ describes.realWin('amp-story', {
 
     expect(result.length).to.equal(pages.length);
 
-    pages.forEach((page, i) =>
+    pages.forEach(page =>
         expect(Array.prototype.includes.call(result, page)).to.be.true);
   });
 
   it('should update progress bar when switching pages', () => {
-    const impl = element.implementation_;
-
     const count = 10;
     const index = 2;
 
