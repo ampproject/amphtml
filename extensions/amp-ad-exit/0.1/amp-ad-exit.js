@@ -28,7 +28,7 @@ const TAG = 'amp-ad-exit';
  * @typedef {{
  *   finalUrl: string,
  *   trackingUrls: !Array<string>,
- *   vars: !./config.Variables,
+ *   vars: !./config.VariablesDef,
  *   filters: !Array<!./filters/filter.Filter>
  * }}
  */
@@ -59,6 +59,9 @@ export class AmpAdExit extends AMP.BaseElement {
     this.userFilters_ = {};
 
     this.registerAction('exit', this.exit.bind(this));
+
+    /** @private @const {!Object<string, Object<string, string>>} */
+    this.vendorResponses_ = {};
   }
 
   /**
@@ -90,28 +93,72 @@ export class AmpAdExit extends AMP.BaseElement {
    * @return {function(string): string}
    */
   getUrlVariableRewriter_(args, event, target) {
-    const vars = {
+    const substitutionFunctions = {
       'CLICK_X': () => event.clientX,
       'CLICK_Y': () => event.clientY,
     };
+    const replacements = Services.urlReplacementsForDoc(this.getAmpDoc());
     const whitelist = {
       'RANDOM': true,
       'CLICK_X': true,
       'CLICK_Y': true,
     };
     if (target.vars) {
-      for (const customVar in target.vars) {
-        if (customVar[0] == '_') {
-          vars[customVar] = () =>
-              args[customVar] == undefined ?
-                target.vars[customVar].defaultValue : args[customVar];
-          whitelist[customVar] = true;
+      for (const customVarName in target.vars) {
+        let customVar;
+        if (customVarName[0] != '_' ||
+            !(customVar = /** @type {!./config.VariableDef} */
+            (target.vars[customVarName]))) {
+          continue;
         }
+        /*
+         Example:
+         The amp-ad-exit target has a variable representing the priority of
+         something, which is defined as follows:
+         "vars": {
+           "_pty": {
+             "defaultValue": "unknown",
+             "iframeTransportSignal":
+                 "IFRAME_TRANSPORT_SIGNAL(vendorXYZ,priority)"
+           },
+           ...
+         }
+         The cross-domain iframe of vendorXYZ has sent the following
+         response for the creative:
+         { priority: medium, category: W }
+         This is just example data. The keys/values in that object can be
+         any strings.
+         The code below will create substitutionFunctions['_pty'], which in
+         this example will return "medium".
+        */
+        substitutionFunctions[customVarName] = () => {
+          if ('iframeTransportSignal' in customVar) {
+            const vendorResponse = replacements./*OK*/expandStringSync(
+                customVar.iframeTransportSignal, {
+                  'IFRAME_TRANSPORT_SIGNAL': (vendor, responseKey) => {
+                    const vendorResponses = this.vendorResponses_[vendor];
+                    if (vendorResponses && responseKey in vendorResponses) {
+                      return vendorResponses[responseKey];
+                    }
+                  },
+                });
+            if (vendorResponse != '') {
+              // Caveat: If the vendor's response *is* the empty string, then
+              // this will cause the arg/default value to be returned.
+              return vendorResponse;
+            }
+          }
+
+          // Either it's not a 3p analytics variable, or it is one
+          // but no matching response has been received yet.
+          return (customVarName in args) ?
+              args[customVarName] : customVar.defaultValue;
+        };
+        whitelist[customVarName] = true;
       }
     }
-    const replacements = Services.urlReplacementsForDoc(this.getAmpDoc());
     return url => replacements.expandUrlSync(
-        url, vars, undefined /* opt_collectVars */, whitelist);
+        url, substitutionFunctions, undefined /* opt_collectVars */, whitelist);
   }
 
   /**
