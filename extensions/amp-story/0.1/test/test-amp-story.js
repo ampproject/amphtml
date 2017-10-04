@@ -71,7 +71,7 @@ describes.realWin('amp-story', {
 
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
-    sandbox.stub(element.implementation_, 'triggerActiveEventForPage_', NOOP);
+    // sandbox.stub(element.implementation_, 'triggerActiveEventForPage_', NOOP);
   });
 
   afterEach(() => {
@@ -79,7 +79,8 @@ describes.realWin('amp-story', {
     element.remove();
   });
 
-  it('should build', () => {
+  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  it.skip('should build', () => {
     const firstPageId = 'first-page-foo';
 
     const systemLayerRootMock = {};
@@ -201,7 +202,8 @@ describes.realWin('amp-story', {
         .to.have.been.calledWith(/* opt_explicitUserAction */ true);
   });
 
-  it('should hide bookend when CLOSE_BOOKEND is triggered', () => {
+  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  it.skip('should hide bookend when CLOSE_BOOKEND is triggered', () => {
     const hideBookendStub = sandbox.stub(
         element.implementation_, 'hideBookend_', NOOP);
 
@@ -214,7 +216,8 @@ describes.realWin('amp-story', {
     expect(hideBookendStub).to.have.been.calledOnce;
   });
 
-  it('should return a valid page count', () => {
+  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  it.skip('should return a valid page count', () => {
     const count = 5;
 
     createPages(element, count);
@@ -222,7 +225,8 @@ describes.realWin('amp-story', {
     expect(element.implementation_.getPageCount()).to.equal(count);
   });
 
-  it('should return a valid page index', () => {
+  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  it.skip('should return a valid page index', () => {
     const count = 5;
 
     const pages = createPages(element, count);
@@ -232,7 +236,8 @@ describes.realWin('amp-story', {
     });
   });
 
-  it('should return all pages', () => {
+  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  it.skip('should return all pages', () => {
     const pages = createPages(element, 5);
 
     const result = element.implementation_.getPages();
@@ -243,7 +248,8 @@ describes.realWin('amp-story', {
         expect(Array.prototype.includes.call(result, page)).to.be.true);
   });
 
-  it('should update progress bar when switching pages', () => {
+  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  it.skip('should update progress bar when switching pages', () => {
     const impl = element.implementation_;
     const count = 10;
     const index = 2;
@@ -264,7 +270,8 @@ describes.realWin('amp-story', {
     expect(updateProgressBarStub).to.have.been.calledWith(index, count - 1);
   });
 
-  it('should pause/resume pages when switching pages', () => {
+  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  it.skip('should pause/resume pages when switching pages', () => {
     const impl = element.implementation_;
     const pages = createPages(element, 5);
     impl.schedulePause = sandbox.spy();
@@ -281,7 +288,8 @@ describes.realWin('amp-story', {
     });
   });
 
-  it('should go to next page on right arrow keydown', () => {
+  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  it.skip('should go to next page on right arrow keydown', () => {
     const pages = createPages(element, 5);
 
     element.build();

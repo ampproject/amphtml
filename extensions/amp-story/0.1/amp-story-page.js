@@ -215,6 +215,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   markPageAsLoaded_() {
     this.isLoaded_ = true;
     this.element.classList.add(PAGE_LOADED_CLASS_NAME);
+    this.markPageAsShown_();
     this.resolveLoadPromise_();
   }
 
@@ -248,7 +249,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @public
    */
   calculateLoadStatus() {
-    if (this.isLoaded_) {
+    if (this.isLoaded_ || this.pageElements_.length == 0) {
       return true;
     }
 
