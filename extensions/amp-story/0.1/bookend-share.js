@@ -42,13 +42,15 @@ function buildLinkShareItem(doc) {
   const fragment = doc.createDocumentFragment();
   const root = doc.createElement('li');
 
-  const iconEl = createElementWithAttributes(doc, 'div', {
-    class: 'i-amphtml-story-share-icon',
-  });
+  const iconEl = createElementWithAttributes(doc, 'div',
+      /** @type {!JsonObject} */({
+      class: 'i-amphtml-story-share-icon',
+    }));
 
-  const nameEl = createElementWithAttributes(doc, 'span', {
-    class: 'i-amphtml-story-share-name',
-  });
+  const nameEl = createElementWithAttributes(doc, 'span',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-share-name',
+      }));
 
   // constant value, no XSS risk
   iconEl./*OK*/innerHTML = ICONS.link;
@@ -68,19 +70,20 @@ function buildLinkShareItem(doc) {
 /**
  * @param {!Document} doc
  * @param {string} type
- * @param {!JsonObject} opt_params
+ * @param {!JsonObject=} opt_params
  * @return {!DocumentFragment}
  */
 function buildProvider(doc, type, opt_params) {
   const fragment = doc.createDocumentFragment();
   const root = doc.createElement('li');
 
-  const shareEl = createElementWithAttributes(doc, 'amp-social-share', {
-    type,
-    width: 48,
-    height: 48,
-    class: 'i-amphtml-story-share-icon',
-  });
+  const shareEl = createElementWithAttributes(doc, 'amp-social-share',
+      /** @type {!JsonObject} */({
+        type,
+        width: 48,
+        height: 48,
+        class: 'i-amphtml-story-share-icon',
+      }));
 
   if (opt_params) {
     Object.keys(opt_params).forEach(field =>
@@ -92,9 +95,10 @@ function buildProvider(doc, type, opt_params) {
     shareEl./*OK*/innerHTML = ICONS.mail;
   }
 
-  const nameEl = createElementWithAttributes(doc, 'span', {
-    class: 'i-amphtml-story-share-name',
-  });
+  const nameEl = createElementWithAttributes(doc, 'span',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-share-name',
+      }));
 
   nameEl.textContent = SHARE_PROVIDER_NAME[type] || type;
 
@@ -137,9 +141,10 @@ export class BookendShareWidget {
 
     this.ampdoc_ = ampdoc;
 
-    this.root_ = createElementWithAttributes(this.win_.document, 'ul', {
-      'class': 'i-amphtml-story-share-list',
-    });
+    this.root_ = createElementWithAttributes(this.win_.document, 'ul',
+        /** @type {!JsonObject} */({
+          'class': 'i-amphtml-story-share-list',
+        }));
 
     this.add_(buildLinkShareItem(this.win_.document));
 
@@ -154,7 +159,7 @@ export class BookendShareWidget {
   }
 
   /**
-   * @param {!Array<!JsonObject>} providers
+   * @param {!Object<string, (!JsonObject|boolean)>} providers
    * @public
    */
   // TODO(alanorozco): Set story metadata in share config

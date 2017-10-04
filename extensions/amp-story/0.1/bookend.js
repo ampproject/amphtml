@@ -39,29 +39,33 @@ function buildArticle(doc, articleData) {
   const fragment = doc.createDocumentFragment();
 
   if (articleData.image) {
-    const imageContainer = createElementWithAttributes(doc, 'div', {
-      class: 'i-amphtml-story-bookend-article-image',
-    });
+    const imageContainer = createElementWithAttributes(doc, 'div',
+        /** @type {!JsonObject} */({
+          class: 'i-amphtml-story-bookend-article-image',
+        }));
 
     // TODO(alanorozco): Figure out how to use amp-img here
-    imageContainer.appendChild(createElementWithAttributes(doc, 'img', {
-      src: articleData.image,
-      width: 116,
-      height: 116,
-    }));
+    imageContainer.appendChild(createElementWithAttributes(doc, 'img',
+        /** @type {!JsonObject} */({
+          src: articleData.image,
+          width: 116,
+          height: 116,
+        })));
 
     root.appendChild(imageContainer);
   }
 
-  const title = createElementWithAttributes(doc, 'h2', {
-    class: 'i-amphtml-story-bookend-article-heading',
-  });
+  const title = createElementWithAttributes(doc, 'h2',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-bookend-article-heading',
+      }));
 
   title.textContent = articleData.title;
 
-  const metaContainer = createElementWithAttributes(doc, 'div', {
-    class: 'i-amphtml-story-bookend-article-meta',
-  });
+  const metaContainer = createElementWithAttributes(doc, 'div',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-bookend-article-meta',
+      }));
 
   metaContainer.textContent = 'example.com - 10 mins';
 
@@ -177,9 +181,10 @@ export class Bookend {
    * @private
    */
   buildArticleList_(articleList) {
-    const container = createElementWithAttributes(this.win_.document, 'div', {
-      'class': 'i-amphtml-story-bookend-article-set',
-    });
+    const container = createElementWithAttributes(this.win_.document, 'div',
+        /** @type {!JsonObject} */({
+          'class': 'i-amphtml-story-bookend-article-set',
+        }));
     articleList.forEach(article =>
         container.appendChild(buildArticle(this.win_.document, article)));
     return container;
@@ -191,9 +196,10 @@ export class Bookend {
    * @private
    */
   buildArticleSetHeading_(heading) {
-    const headingEl = createElementWithAttributes(this.win_.document, 'h3', {
-      'class': 'i-amphtml-story-bookend-heading',
-    });
+    const headingEl = createElementWithAttributes(this.win_.document, 'h3',
+        /** @type {!JsonObject} */({
+          'class': 'i-amphtml-story-bookend-heading',
+        });
     headingEl.textContet = heading;
     return headingEl;
   }

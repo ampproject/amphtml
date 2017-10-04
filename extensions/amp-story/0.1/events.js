@@ -50,7 +50,8 @@ export const EventType = {
 export function dispatch(source, eventName, opt_bubbles) {
   const event = new Event(eventName, {bubbles: !!opt_bubbles});
   if (event.initEvent) {
-    event.initEvent(eventName, /* bubbles */ !!opt_bubbles);
+    event.initEvent(eventName, /* bubbles */ !!opt_bubbles,
+        /* cancelable */ false);
   }
   source.dispatchEvent(event);
 }
