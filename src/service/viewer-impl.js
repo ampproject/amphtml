@@ -486,6 +486,14 @@ export class Viewer {
   }
 
   /**
+   * Whether the document is embedded in a webview.
+   * @return {boolean}
+   */
+  isWebviewEmbedded() {
+    return this.isWebviewEmbedded_;
+  }
+
+  /**
    * @return {boolean}
    */
   isRuntimeOn() {
