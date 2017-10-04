@@ -1,4 +1,4 @@
-max   |         min   |        gzip   |   file
+      max   |         min   |        gzip   |   file
       ---   |         ---   |         ---   |   ---
 <<<<<<< HEAD
    290 kB   |    31.63 kB   |    12.49 kB   |   alp.js / alp.max.js
