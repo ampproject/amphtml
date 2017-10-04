@@ -16,11 +16,7 @@
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {Services} from '../../../src/services';
-import {
-  assertHttpsUrl,
-  addParamsToUrl,
-  serializeQueryString,
-} from '../../../src/url';
+import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {dev, user, rethrowAsync} from '../../../src/log';
 import {
   getServicePromiseForDoc,
@@ -31,7 +27,6 @@ import {dict} from '../../../src/utils/object';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';
-const FORM_DATA_ENC_TYPE = 'application/x-www-form-urlencoded';
 
 /**
  * @export
@@ -226,18 +221,15 @@ export class AmpUserNotification extends AMP.BaseElement {
    * Creates a Request to be used for postDismiss
    * @private
    * @param {string} enctype
-   * @param {string} elementId
-   * @param {string} ampUserId
+   * @param {?string} elementId
+   * @param {?string} ampUserId
    * @return {!Object}
    */
   buildPostDismissRequest_(enctype, elementId, ampUserId) {
-    let body = dict({
+    const body = dict({
       'elementId': elementId,
       'ampUserId': ampUserId,
     });
-    if (enctype === FORM_DATA_ENC_TYPE) {
-      body = serializeQueryString(body);
-    }
     return {
       method: 'POST',
       credentials: 'include',

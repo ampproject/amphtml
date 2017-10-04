@@ -22,6 +22,7 @@ import {
   getCorsUrl,
   getWinOrigin,
   parseUrl,
+  serializeQueryString,
 } from '../url';
 import {parseJson} from '../json';
 import {isArray, isObject, isFormData} from '../types';
@@ -214,6 +215,7 @@ export class Xhr {
     const headerContentType = init.headers['Content-Type'];
     if (init.method == 'POST' && !isFormData(init.body)) {
       if (headerContentType === 'application/x-www-form-urlencoded') {
+        init.body = serializeQueryString(/** @type {!JsonObject} */ init.body);
         return this.fetch(input, init);
       }
       // Assume JSON strict mode where only objects or arrays are allowed

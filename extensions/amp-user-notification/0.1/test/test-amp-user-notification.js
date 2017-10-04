@@ -495,8 +495,7 @@ describes.realWin('amp-user-notification', {
   });
 
   describe('buildPostDismissRequest_', () => {
-    it('should return JSON request body,'
-      + 'if enctype is `application/json`', () => {
+    it('should return JSON request body', () => {
       const el = getUserNotification(dftAttrs);
       const impl = el.implementation_;
       const elementId = 'elementId';
@@ -506,21 +505,6 @@ describes.realWin('amp-user-notification', {
       expect(request.method).to.equal('POST');
       expect(request.body.elementId).to.equal(elementId);
       expect(request.body.ampUserId).to.equal(ampUserId);
-    });
-
-    it('should return FORM request body,'
-      + 'if enctype is `application/x-www-form-urlencoded`', () => {
-      const formDataEncType = 'application/x-www-form-urlencoded';
-      const el = getUserNotification(dftAttrs);
-      const impl = el.implementation_;
-      const elementId = 'elementId';
-      const ampUserId = '1';
-      const resultString = 'elementId=elementId&ampUserId=1';
-      const request = impl.buildPostDismissRequest_(formDataEncType,
-          elementId, ampUserId);
-      expect(request.method).to.equal('POST');
-      expect(request.body).to.be.a('string');
-      expect(request.body).to.equal(resultString);
     });
   });
 
