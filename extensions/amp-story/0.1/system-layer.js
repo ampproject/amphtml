@@ -138,9 +138,6 @@ export class SystemLayer {
     this.unmuteAudioBtn_ =
         this.root_.querySelector('.i-amphtml-story-unmute-audio-control');
 
-    this.progressEl_ =
-        this.root_.querySelector('.i-amphtml-story-progress-value');
-
     this.addEventHandlers_();
 
     return this.getRoot();

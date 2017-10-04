@@ -18,7 +18,7 @@
 export let KeyframesDef;
 
 
-/** @typedef {(function(StoryAnimationTargetDims):!Keyframes)|!Keyframes} */
+/** @typedef {(function(StoryAnimationDimsDef):!KeyframesDef)|!KeyframesDef} */
 export let KeyframesOrFilterFnDef;
 
 
@@ -39,7 +39,7 @@ export let StoryAnimationDimsDef;
  * @typedef {{
  *   duration: number,
  *   easing: (string|undefined),
- *   keyframes: !KeyframesOrFilterFn,
+ *   keyframes: !KeyframesOrFilterFnDef,
  * }}
  */
 export let StoryAnimationPresetDef;

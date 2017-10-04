@@ -97,10 +97,10 @@ export class AmpStoryPage extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @const {?AnimationManager} */
+    /** @private {?AnimationManager} */
     this.animationManager_ = null;
 
-    /** @private @const {!Array<!PageElement>} */
+    /** @private {!Array<!PageElement>} */
     this.pageElements_ = [];
 
     /** @private {?function()} */
@@ -215,6 +215,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   markPageAsLoaded_() {
     this.isLoaded_ = true;
     this.element.classList.add(PAGE_LOADED_CLASS_NAME);
+    this.markPageAsShown_();
     this.resolveLoadPromise_();
   }
 
@@ -248,7 +249,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @public
    */
   calculateLoadStatus() {
-    if (this.isLoaded_) {
+    if (this.isLoaded_ || this.pageElements_.length == 0) {
       return true;
     }
 
@@ -451,13 +452,14 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Determines whether the specified element is a valid media element for auto-
    * advance.
-   * @param {?Element} el
+   * @param {?Element} elOrNull
    * @param {!function()} callback
    * @private
    */
-  onMediaElementComplete_(el, callback) {
-    user().assertElement(el, 'ID specified for automatic advance ' +
-        `does not refer to any element on page '${this.element.id}'.`);
+  onMediaElementComplete_(elOrNull, callback) {
+    const el = user().assertElement(elOrNull,
+        'ID specified for automatic advance does not refer to any element' +
+        `on page '${this.element.id}'.`);
 
     const mediaElement = this.getMediaElement_(el);
     if (mediaElement) {
@@ -465,7 +467,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           listenOnce(mediaElement, 'ended', callback);
     } else if (this.isVideoInterfaceVideo_(el)) {
       this.autoAdvanceUnlistenDef_ =
-          listenOnce(el, VideoEvents.ENDED, callback, /* opt_capture */ true);
+          listenOnce(el, VideoEvents.ENDED, callback, {capture: true});
     } else {
       user().error(TAG, `Element with ID ${el.id} is not a media element ` +
           'supported for automatic advancement.');
@@ -602,8 +604,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Navigates to the next page in the story.
-   * @param {*} opt_isAutomaticAdvance Whether this navigation was caused by an
-   *     automatic advancement after a timeout.
+   * @param {boolean} opt_isAutomaticAdvance Whether this navigation was caused
+   *     by an automatic advancement after a timeout.
    */
   next(opt_isAutomaticAdvance) {
     this.switchTo_(
