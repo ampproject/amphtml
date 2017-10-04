@@ -23,6 +23,13 @@ import {dev, user} from '../../../src/log';
 import {map} from '../../../src/utils/object';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {setStyle, resetStyles} from '../../../src/style';
+import {
+  StoryAnimationDef,
+  StoryAnimationDimsDef,
+  KeyframesOrFilterFnDef,
+  KeyframesDef,
+  StoryAnimationPresetDef,
+} from './animation-types';
 
 
 /** const {string} */
@@ -124,9 +131,6 @@ class AnimationRunner {
     this.presetDef_ = animationDef.preset;
 
     /** @private @const */
-    this.target_ = dev().assertElement(animationDef.target);
-
-    /** @private @const */
     this.keyframes_ = this.filterKeyframes_(animationDef.preset.keyframes);
 
     /** @private @const */
@@ -170,7 +174,7 @@ class AnimationRunner {
   }
 
   /**
-   * @return {!Promise<!./animation-types.StoryAnimationDimsDef>}
+   * @return {!Promise<!StoryAnimationDimsDef>}
    * @visibleForTesting
    */
   getDims() {
@@ -178,7 +182,7 @@ class AnimationRunner {
       const targetBoundingRect = this.target_./*OK*/getBoundingClientRect();
       const pageBoundingRect = this.page_./*OK*/getBoundingClientRect();
 
-      return /** @type {!./animation-types.StoryAnimationDimsDef} */ ({
+      return /** @type {!StoryAnimationDimsDef} */ ({
         pageWidth: pageBoundingRect.width,
         pageHeight: pageBoundingRect.height,
         targetWidth: targetBoundingRect.width,
@@ -190,8 +194,8 @@ class AnimationRunner {
   }
 
   /**
-   * @param {!./animation-types.KeyframesOrFilterFnDef} keyframesArrayOrFn
-   * @return {!Promise<!./animation-types.KeyframesDef>}
+   * @param {!KeyframesOrFilterFnDef} keyframesArrayOrFn
+   * @return {!Promise<!KeyframesDef>}
    * @private
    */
   filterKeyframes_(keyframesArrayOrFn) {
@@ -300,10 +304,10 @@ class AnimationRunner {
     runner.resume();
   }
 
-  /** @return {!Promise<boolean>} */
+  /** @return {boolean} */
   hasStarted() {
     return this.isActivityScheduled_(PlaybackActivity.START) ||
-        this.runner_ && dev().assert(this.runner_)
+        !!this.runner_ && dev().assert(this.runner_)
             .getPlayState() == WebAnimationPlayState.RUNNING;
   }
 
@@ -358,9 +362,13 @@ class AnimationRunner {
    * @private
    */
   playbackWhenReady_(activity, wait) {
-    const runner = dev().assert(
-        this.runner_,
-        'Tried to execute playbackWhenReady_ before runner was resolved.');
+    const runner =
+        /**
+         * @type {!../../amp-animation/0.1/web-animations.WebAnimationRunner}
+         */
+        (dev().assert(
+            this.runner_,
+            'Tried to execute playbackWhenReady_ before runner was resolved.'));
 
     (wait || Promise.resolve()).then(() => {
       if (!this.isActivityScheduled_(activity)) {
@@ -380,7 +388,6 @@ class AnimationRunner {
   /**
    * Marks runner as ready and executes playback activity if needed.
    * @param {!../../amp-animation/0.1/web-animations.WebAnimationRunner} runner
-   * @return {boolean} True if modifies runner state
    * @private
    */
   onRunnerReady_(runner) {
@@ -396,7 +403,9 @@ class AnimationRunner {
       return;
     }
 
-    this.playbackWhenReady_(this.scheduledActivity_, this.scheduledWait_);
+    this.playbackWhenReady_(
+        /** @type {!PlaybackActivity} */ (this.scheduledActivity_),
+        this.scheduledWait_);
   }
 
   /**
@@ -459,10 +468,11 @@ export class AnimationManager {
    * Decouples constructor so it can be stubbed in tests.
    * @param {!Element} root
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} unusedBaseUrl
    * @return {!AnimationManager}
    */
-  static create(root, ampdoc, baseUrl) {
-    return new AnimationManager(root, ampdoc, baseUrl);
+  static create(root, ampdoc, unusedBaseUrl) {
+    return new AnimationManager(root, ampdoc);
   }
 
   /**
@@ -504,7 +514,7 @@ export class AnimationManager {
   }
 
   /**
-   * @return {!Array<!Promise<!AnimationRunner>>}
+   * @return {!Array<!AnimationRunner>}
    * @private
    */
   getOrCreateRunners_() {
@@ -518,7 +528,7 @@ export class AnimationManager {
 
   /**
    * @param {!Element} el
-   * @return {!Promise<!AnimationRunner>}
+   * @return {!AnimationRunner}
    */
   createRunner_(el) {
     const preset = this.getPreset_(el);
@@ -535,8 +545,8 @@ export class AnimationManager {
 
   /**
    * @param {!Element} el
-   * @param {!./animation-types.StoryAnimationPresetDef} preset
-   * @return {!./animation-types.StoryAnimationDef}
+   * @param {!StoryAnimationPresetDef} preset
+   * @return {!StoryAnimationDef}
    */
   createAnimationDef(el, preset) {
     const animationDef = {target: el, preset};
@@ -581,7 +591,7 @@ export class AnimationManager {
 
   /**
    * @param {!Element} el
-   * @return {?./animation-types.StoryAnimationPresetDef}
+   * @return {!StoryAnimationPresetDef}
    */
   getPreset_(el) {
     const name = el.getAttribute(ANIMATE_IN_ATTRIBUTE_NAME);

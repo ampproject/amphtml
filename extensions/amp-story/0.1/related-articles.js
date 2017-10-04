@@ -38,12 +38,12 @@ export let RelatedArticleSetDef;
 function buildArticleFromJson_(articleJson) {
   // TODO(alanorozco): Graceful errors.
   const article = {
-    title: user().assert(articleJson.title),
-    url: user().assert(articleJson.url),
+    title: user().assert(articleJson['title']),
+    url: user().assert(articleJson['url']),
   };
 
-  if (articleJson.image) {
-    article.image = articleJson.image;
+  if (articleJson['image']) {
+    article.image = articleJson['image'];
   }
 
   return /** @type {!RelatedArticleDef} */ (article);

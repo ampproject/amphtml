@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {dev} from '../../../src/log';
 
 /**
  * A map of elements to delay showing the page.  The key is a DOM query to find
@@ -21,7 +22,8 @@ import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
  * method that will return a PageElement to define rendering and loading
  * strategies.
  *
- * @const {!Object<string, !function(!Element, !AmpStoryPage): !PageElement>}
+ * @const {!Object<string,
+ *     !function(!Element, !./amp-story-page.AmpStoryPage): !PageElement>}
  */
 const PAGE_ELEMENT_FACTORIES = {
   'amp-audio, amp-video, .i-amphtml-story-background-audio':
@@ -87,14 +89,14 @@ const MINIMUM_MEDIA_BUFFER_SECONDS_FROM_BEGINNING = 3;
 export class PageElement {
   /**
    * @param {!Element} element The element on the page.
-   * @param {!AmpStoryPage} page The page that the element is on.
+   * @param {!./amp-story-page.AmpStoryPage} page The page that the element is on.
    */
   constructor(element, page) {
     /** @protected @const {!Element} */
     this.element = element;
     this.element.classList.add(ELEMENT_CLASS_NAME);
 
-    /** @protected @const {!AmpStoryPage} */
+    /** @protected @const {!./amp-story-page.AmpStoryPage} */
     this.page = page;
 
     /** @public {boolean} */
@@ -104,7 +106,7 @@ export class PageElement {
     this.canBeShown = false;
 
     /** @public {boolean} */
-    this.failed = false;
+    this.hasFailed = false;
   }
 
   /**
@@ -172,7 +174,7 @@ export class PageElement {
   }
 
   /**
-   * @param {!AmpStoryPage} page
+   * @param {!./amp-story-page.AmpStoryPage} page
    * @return {!Array<!PageElement>}
    */
   static getElementsFromPage(page) {
@@ -203,14 +205,17 @@ class MediaElement extends PageElement {
   }
 
   /**
-   * @return {!HTMLMediaElement}
+   * @return {?HTMLMediaElement}
    * @private
    */
   getMediaElement_() {
     if (this.element instanceof HTMLMediaElement) {
       this.mediaElement_ = this.element;
     } else if (!this.mediaElement_) {
-      this.mediaElement_ = scopedQuerySelector(this.element, 'audio, video');
+      const el = scopedQuerySelector(this.element, 'audio, video');
+      if (el instanceof HTMLMediaElement) {
+        this.mediaElement_ = /** @type {!HTMLMediaElement} */ (el);
+      }
     }
     return this.mediaElement_;
   }
@@ -244,7 +249,7 @@ class MediaElement extends PageElement {
   /** @override */
   isLoaded_() {
     const mediaElement = this.getMediaElement_();
-    const firstTimeRange = this.getFirstTimeRange_();
+    const firstTimeRangeOrNull = this.getFirstTimeRange_();
 
     if (!mediaElement) {
       return false;
@@ -258,6 +263,8 @@ class MediaElement extends PageElement {
       return false;
     }
 
+    const firstTimeRange = dev().assertNumber(firstTimeRangeOrNull,
+        'No first time range was found, despite media element existing.');
     const bufferedSeconds = mediaElement.buffered.end(firstTimeRange);
     const bufferedPercentage =
         (mediaElement.buffered.end(firstTimeRange) / mediaElement.duration);
@@ -293,7 +300,7 @@ class MediaElement extends PageElement {
   hasAudio() {
     const mediaElement = this.getMediaElement_();
     return mediaElement.mozHasAudio ||
-        Boolean(mediaElement.webkitAudioDecodedByteCount) ||
+        Boolean(mediaElement['webkitAudioDecodedByteCount']) ||
         Boolean(mediaElement.audioTracks && mediaElement.audioTracks.length);
   }
 }
@@ -309,14 +316,17 @@ class ImageElement extends PageElement {
   }
 
   /**
-   * @return {!HTMLImageElement}
+   * @return {?HTMLImageElement}
    * @private
    */
   getImageElement_() {
     if (this.element instanceof HTMLImageElement) {
       this.imageElement_ = this.element;
     } else if (!this.imageElement_) {
-      this.imageElement_ = this.element.querySelector('img');
+      const el = scopedQuerySelector(this.element, 'img');
+      if (el instanceof HTMLImageElement) {
+        this.imageElement_ = /** @type {!HTMLImageElement} */ (el);
+      }
     }
     return this.imageElement_;
   }
