@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 'use strict';
-/* eslint google-camelcase/google-camelcase: 0 */
 const BBPromise = require('bluebird');
 const argv = require('minimist')(process.argv.slice(2));
 const assert = require('assert');
@@ -51,18 +50,18 @@ const milestoneOptions = {
 
 // 4 is the number for Milestone 'Backlog Bugs'
 const MILESTONE_BACKLOG_BUGS = 4;
-// By default we will assign 'Pending Triage' milestone, number 20
-const MILESTONE_PENDING_TRIAGE = 20;
-// 23 is the number for Milestone 'New FRs'
-const MILESTONE_NEW_FRS = 23;
-// 22 is the number for Milestone 'Prioritized FRs'
-const MILESTONE_PRIORITIZED_FRS = 22;
-// 12 is the number for Milestone 'Docs Updates'
-const MILESTONE_DOCS_UPDATES = 12;
-// 25 is the number for Milestone 'Great First Issues (GFI)'
-const MILESTONE_GREAT_ISSUES = 25;
 // 11 is the number for Milestone '3P Implementation'
 const MILESTONE_3P_IMPLEMENTATION = 11;
+// 12 is the number for Milestone 'Docs Updates'
+const MILESTONE_DOCS_UPDATES = 12;
+// By default we will assign 'Pending Triage' milestone, number 20
+const MILESTONE_PENDING_TRIAGE = 20;
+// 22 is the number for Milestone 'Prioritized FRs'
+const MILESTONE_PRIORITIZED_FRS = 22;
+// 23 is the number for Milestone 'New FRs'
+const MILESTONE_NEW_FRS = 23;
+// 25 is the number for Milestone 'Great First Issues (GFI)'
+const MILESTONE_GREAT_ISSUES = 25;
 // days for biweekly updates
 const BIWEEKLY_DAYS = 14;
 // days for quarterly updates
@@ -112,19 +111,12 @@ function getIssues(opt_page) {
  */
 function updateGitHubIssues() {
   let promise = Promise.resolve();
-  return BBPromise.all([
-    // we need to pull issues in batches
-    getIssues(1),
-    getIssues(2),
-    getIssues(3),
-    getIssues(4),
-    getIssues(5),
-    getIssues(6),
-    getIssues(7),
-    getIssues(8),
-    getIssues(9),
-    getIssues(10),
-  ])
+  let arrayPromises;
+  // we need to pull issues in batches
+  for (let batch = 1; batch < 11; batch++) {
+    arrayPromises.push(getIssues(batch));
+  }
+  return BBPromise.all(arrayPromises)
       .then(requests => [].concat.apply([], requests))
       .then(issues => {
         const allIssues = issues;
@@ -165,7 +157,7 @@ function updateGitHubIssues() {
             // Get the labels we want to check
             labels.forEach(function(label) {
               if (label) {
-              // Check if the issues has type
+                // Check if the issues has type
                 if (label.name.startsWith('Type') ||
                label.name.startsWith('Related')) {
                   issueType = label.name;
@@ -176,8 +168,8 @@ function updateGitHubIssues() {
                     label.name.startsWith('P2') ||
                     label.name.startsWith('P3')) {
                   hasPriority = true;
-                  if (label.name.startsWith('P0')
-                      || label.name.startsWith('P1')) {
+                  if (label.name.startsWith('P0') ||
+                      label.name.startsWith('P1')) {
                     if (biweeklyUpdate == false) {
                       biweeklyUpdate = true;
                       updates.push(applyComment(issue, 'This is a high priority'
@@ -192,10 +184,10 @@ function updateGitHubIssues() {
                     assigneeName + ' Do you have any updates?'));
                   }
                 }
-                if (label.name.startsWith('Category')
-                    || label.name.startsWith('Related to')
-                    || label.name.startsWith('GFI')
-                    || label.name.startsWith('Great First Issue')) {
+                if (label.name.startsWith('Category') ||
+                    label.name.startsWith('Related to') ||
+                    label.name.startsWith('GFI') ||
+                    label.name.startsWith('Great First Issue')) {
                   hasCategory = true;
                 }
               }
@@ -216,7 +208,7 @@ function updateGitHubIssues() {
                     'an appropriate milestone.'));
               }
             }
-            //if issueType is not null, add correct milestones
+            // if issueType is not null, add correct milestones
             if (issueType != null) {
               if (issueNewMilestone === MILESTONE_PENDING_TRIAGE ||
                   milestone == null) {
@@ -255,10 +247,10 @@ function updateGitHubIssues() {
             }
             // Add comment with missing Category
             if (hasCategory == false) {
-              if (issueNewMilestone === MILESTONE_PENDING_TRIAGE
-                  || issueNewMilestone === MILESTONE_DOCS_UPDATES
-                  || issueNewMilestone == null
-                  || issueNewMilestone === MILESTONE_GREAT_ISSUES) {
+              if (issueNewMilestone === MILESTONE_PENDING_TRIAGE ||
+                  issueNewMilestone === MILESTONE_DOCS_UPDATES ||
+                  issueNewMilestone == null ||
+                  issueNewMilestone === MILESTONE_GREAT_ISSUES) {
                 if (isDryrun) {
                   util.log(util.colors.green('No comment needed '
                       + ' for #' + issue.number));
@@ -337,11 +329,12 @@ function applyComment(issue, comment) {
     'access_token': GITHUB_ACCESS_TOKEN,
   };
   // delay the comment request so we don't reach github rate limits requests
-  const promise = new Promise(resolve => setTimeout(resolve,120000));
+  const promise = new Promise(resolve => setTimeout(resolve, 120000));
   return promise.then(function() {
     if (isDryrun) {
-      util.log(util.colors.blue('waited 2 minutes'));
-      util.log(util.colors.green('Comment applied ' + comment +
+      util.log(util.colors.blue('waited 2 minutes to avoid gh rate limits'));
+      util.log(util.colors.green('Comment applied after ' +
+          'waiting 2 minutes to avoid github rate limits' + comment +
           ' for #' + issue.number));
       return;
     } else {
