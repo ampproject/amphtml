@@ -97,10 +97,10 @@ export class AmpStoryPage extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @const {?AnimationManager} */
+    /** @private {?AnimationManager} */
     this.animationManager_ = null;
 
-    /** @private @const {!Array<!PageElement>} */
+    /** @private {!Array<!PageElement>} */
     this.pageElements_ = [];
 
     /** @private {?function()} */

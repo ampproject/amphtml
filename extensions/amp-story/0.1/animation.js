@@ -131,9 +131,6 @@ class AnimationRunner {
     this.presetDef_ = animationDef.preset;
 
     /** @private @const */
-    this.target_ = dev().assertElement(animationDef.target);
-
-    /** @private @const */
     this.keyframes_ = this.filterKeyframes_(animationDef.preset.keyframes);
 
     /** @private @const */
@@ -310,7 +307,7 @@ class AnimationRunner {
   /** @return {boolean} */
   hasStarted() {
     return this.isActivityScheduled_(PlaybackActivity.START) ||
-        this.runner_ && dev().assert(this.runner_)
+        !!this.runner_ && dev().assert(this.runner_)
             .getPlayState() == WebAnimationPlayState.RUNNING;
   }
 
@@ -365,9 +362,13 @@ class AnimationRunner {
    * @private
    */
   playbackWhenReady_(activity, wait) {
-    const runner = dev().assert(
-        this.runner_,
-        'Tried to execute playbackWhenReady_ before runner was resolved.');
+    const runner =
+        /**
+         * @type {!../../amp-animation/0.1/web-animations.WebAnimationRunner}
+         */
+        (dev().assert(
+            this.runner_,
+            'Tried to execute playbackWhenReady_ before runner was resolved.'));
 
     (wait || Promise.resolve()).then(() => {
       if (!this.isActivityScheduled_(activity)) {
@@ -403,8 +404,7 @@ class AnimationRunner {
     }
 
     this.playbackWhenReady_(
-        dev().assert(this.scheduledActivity_,
-            'Expected activity to be scheduled'),
+        /** @type {!PlaybackActivity} */ (this.scheduledActivity_),
         this.scheduledWait_);
   }
 

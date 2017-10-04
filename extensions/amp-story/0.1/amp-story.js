@@ -660,7 +660,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * @param {string} attributeName
-   * @return {!Promise<?JsonObject>}
+   * @return {(!Promise<!JsonObject>|!Promise<null>)}
    * @private
    */
   loadJsonFromAttribute_(attributeName) {
@@ -730,7 +730,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {number} The index of the page.
    */
   getPageIndex(desiredPage) {
-    return this.pages_.findIndex(page => page === desiredPage);
+    return findIndex(this.pages_, page => page === desiredPage);
   }
 
   /**

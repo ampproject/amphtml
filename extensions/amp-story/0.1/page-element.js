@@ -213,8 +213,9 @@ class MediaElement extends PageElement {
       this.mediaElement_ = this.element;
     } else if (!this.mediaElement_) {
       const el = scopedQuerySelector(this.element, 'audio, video');
-      this.mediaElement_ = dev().assert(el instanceof HTMLMediaElement,
-          'Media page element did not extend HTMLMediaElement.');
+      if (el instanceof HTMLMediaElement) {
+        this.mediaElement_ = /** @type {!HTMLMediaElement} */ (el);
+      }
     }
     return this.mediaElement_;
   }
@@ -322,7 +323,10 @@ class ImageElement extends PageElement {
     if (this.element instanceof HTMLImageElement) {
       this.imageElement_ = this.element;
     } else if (!this.imageElement_) {
-      this.imageElement_ = scopedQuerySelector(this.element, 'img');
+      const el = scopedQuerySelector(this.element, 'img');
+      if (el instanceof HTMLImageElement) {
+        this.imageElement_ = /** @type {!HTMLImageElement} */ (el);
+      }
     }
     return this.imageElement_;
   }

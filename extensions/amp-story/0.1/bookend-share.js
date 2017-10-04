@@ -192,8 +192,10 @@ export class BookendShareWidget {
 
   /** @private */
   loadRequiredExtensions_() {
+    const ampdoc = /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
+      dev().assert(this.ampdoc_));
     Services.extensionsFor(this.win_)
-        .installExtensionForDoc(dev().assert(this.ampdoc_), 'amp-social-share');
+        .installExtensionForDoc(ampdoc, 'amp-social-share');
   }
 
   /**
