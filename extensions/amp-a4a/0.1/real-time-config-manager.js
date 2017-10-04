@@ -124,7 +124,7 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
   if (macros && Object.keys(macros)) {
     const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
     const whitelist = {};
-    Object.keys(macros || {}).forEach(key => whitelist[key] = true);
+    Object.keys(macros).forEach(key => whitelist[key] = true);
     url = urlReplacements.expandSync(
         url, macros, undefined, whitelist);
   }
@@ -201,6 +201,16 @@ function validateRtcConfig_(element) {
   if (!rtcConfig) {
     return null;
   }
+  const rtcConfigKeyWhitelist = {
+    urls: true,
+    vendors: true,
+    timeoutMillis: true,
+  };
+  Object.keys(rtcConfig).forEach(key => {
+    if (!rtcConfigKeyWhitelist[key]) {
+      user().warn(TAG, `Unknown RTC Config key: ${key}`);
+    }
+  });
   try {
     user().assert(rtcConfig['vendors'] || rtcConfig['urls'],
         'RTC Config must specify vendors or urls');
@@ -214,16 +224,6 @@ function validateRtcConfig_(element) {
   } catch (unusedErr) {
     return null;
   }
-  const rtcConfigKeyWhitelist = {
-    urls: true,
-    vendors: true,
-    timeoutMillis: true,
-  };
-  Object.keys(rtcConfig).forEach(key => {
-    if (!rtcConfigKeyWhitelist[key]) {
-      user().warn(TAG, `Unknown RTC Config key: ${key}`);
-    }
-  });
   let timeout = parseInt(rtcConfig['timeoutMillis'], 10);
   if (!isNaN(timeout)) {
     if (timeout >= defaultTimeoutMillis || timeout < 0) {
