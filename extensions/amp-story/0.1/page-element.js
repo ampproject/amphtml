@@ -105,7 +105,7 @@ export class PageElement {
     this.canBeShown = false;
 
     /** @public {boolean} */
-    this.failed = false;
+    this.hasFailed = false;
   }
 
   /**
@@ -204,14 +204,16 @@ class MediaElement extends PageElement {
   }
 
   /**
-   * @return {!HTMLMediaElement}
+   * @return {?HTMLMediaElement}
    * @private
    */
   getMediaElement_() {
     if (this.element instanceof HTMLMediaElement) {
       this.mediaElement_ = this.element;
     } else if (!this.mediaElement_) {
-      this.mediaElement_ = scopedQuerySelector(this.element, 'audio, video');
+      const el = scopedQuerySelector(this.element, 'audio, video');
+      this.mediaElement_ = dev().assert(el instanceof HTMLMediaElement,
+          'Media page element did not extend HTMLMediaElement.');
     }
     return this.mediaElement_;
   }
@@ -245,7 +247,7 @@ class MediaElement extends PageElement {
   /** @override */
   isLoaded_() {
     const mediaElement = this.getMediaElement_();
-    const firstTimeRange = this.getFirstTimeRange_();
+    const firstTimeRangeOrNull = this.getFirstTimeRange_();
 
     if (!mediaElement) {
       return false;
@@ -259,6 +261,8 @@ class MediaElement extends PageElement {
       return false;
     }
 
+    const firstTimeRange = dev().assertNumber(firstTimeRangeOrNull,
+        'No first time range was found, despite media element existing.');
     const bufferedSeconds = mediaElement.buffered.end(firstTimeRange);
     const bufferedPercentage =
         (mediaElement.buffered.end(firstTimeRange) / mediaElement.duration);
@@ -294,7 +298,7 @@ class MediaElement extends PageElement {
   hasAudio() {
     const mediaElement = this.getMediaElement_();
     return mediaElement.mozHasAudio ||
-        Boolean(mediaElement.webkitAudioDecodedByteCount) ||
+        Boolean(mediaElement['webkitAudioDecodedByteCount']) ||
         Boolean(mediaElement.audioTracks && mediaElement.audioTracks.length);
   }
 }
@@ -310,14 +314,14 @@ class ImageElement extends PageElement {
   }
 
   /**
-   * @return {!HTMLImageElement}
+   * @return {?HTMLImageElement}
    * @private
    */
   getImageElement_() {
     if (this.element instanceof HTMLImageElement) {
       this.imageElement_ = this.element;
     } else if (!this.imageElement_) {
-      this.imageElement_ = this.element.querySelector('img');
+      this.imageElement_ = querySelector(this.element, 'img');
     }
     return this.imageElement_;
   }
