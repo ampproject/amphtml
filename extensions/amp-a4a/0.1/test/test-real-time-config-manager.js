@@ -39,13 +39,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     sandbox = env.sandbox;
     env.win.AMP_MODE.test = true;
     const doc = env.win.document;
-    // TODO(a4a-cam@): This is necessary in the short term, until A4A is
-    // smarter about host document styling.  The issue is that it needs to
-    // inherit the AMP runtime style element in order for shadow DOM-enclosed
-    // elements to behave properly.  So we have to set up a minimal one here.
-    const ampStyle = doc.createElement('style');
-    ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
-    doc.head.appendChild(ampStyle);
     element = createElementWithAttributes(env.win.document, 'amp-ad', {
       'width': '200',
       'height': '50',
@@ -63,13 +56,13 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
   });
 
   function setFetchJsonStubBehavior(params, response, isString, shouldFail) {
-    const textFunction = () => {
-      return !isString ? Promise.resolve(JSON.stringify(response)) :
-          Promise.resolve(response);
-    };
     if (shouldFail) {
       fetchJsonStub.withArgs(params).returns(Promise.reject());
     } else {
+      const textFunction = () => {
+        return !isString ? Promise.resolve(JSON.stringify(response)) :
+            Promise.resolve(response);
+      };
       fetchJsonStub.withArgs(params).returns(Promise.resolve({
         status: 200,
         text: textFunction,
@@ -83,37 +76,37 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
   describe('#maybeExecuteRealTimeConfig_', () => {
     function executeTest(args) {
-      const rtcConfig = {
-        urls: args.urls,
-        vendors: args.vendors,
-        timeoutMillis: args.timeoutMillis};
-      setRtcConfig(rtcConfig);
-      (args.expectedCalloutUrls || []).forEach((expectedUrl, i) => {
-        setFetchJsonStubBehavior(expectedUrl, args.rtcCalloutResponses[i],
-            args.responseIsString, args.failXhr);
+      let {urls, vendors, timeoutMillis, rtcCalloutResponses,
+           expectedCalloutUrls, responseIsString, failXhr,
+           customMacros, expectedRtcArray, calloutCount} = args;
+      setRtcConfig({urls, vendors, timeoutMillis});
+      (expectedCalloutUrls || []).forEach((expectedUrl, i) => {
+        setFetchJsonStubBehavior(expectedUrl, rtcCalloutResponses[i],
+            responseIsString, failXhr);
       });
       const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(
-          a4aElement, args.customMacros);
+          a4aElement, customMacros);
       return rtcResponsePromiseArray.then(rtcResponseArray => {
-        expect(fetchJsonStub.callCount).to.equal(args.calloutCount);
-        (args.expectedCalloutUrls || []).forEach(url => {
+        expect(rtcResponseArray.length).to.equal(expectedRtcArray.length);
+        expect(fetchJsonStub.callCount).to.equal(calloutCount);
+        (expectedCalloutUrls || []).forEach(url => {
           expect(fetchJsonStub.calledWith(url));
         });
-        rtcResponseArray.forEach((rtcResponse, i) => {
-          expect(rtcResponse.rtcResponse).to.deep.equal(
-              args.expectedRtcArray[i].rtcResponse);
-          expect(rtcResponse.callout).to.equal(
-              args.expectedRtcArray[i].callout);
-          expect(rtcResponse.error).to.equal(args.expectedRtcArray[i].error);
-          expect(Object.keys(rtcResponse).sort()).to.deep.equal(
-              Object.keys(args.expectedRtcArray[i]).sort());
-          expect(isFiniteNumber(rtcResponse.rtcTime)).to.be.true;
+        rtcResponseArray.forEach((rtcResponseObject, i) => {
+          expect(rtcResponseObject.rtcResponse).to.deep.equal(
+              expectedRtcArray[i].rtcResponse);
+          expect(rtcResponseObject.callout).to.equal(
+              expectedRtcArray[i].callout);
+          expect(rtcResponseObject.error).to.equal(expectedRtcArray[i].error);
+          expect(Object.keys(rtcResponseObject).sort()).to.deep.equal(
+              Object.keys(expectedRtcArray[i]).sort());
+          expect(isFiniteNumber(rtcResponseObject.rtcTime)).to.be.true;
         });
       });
     }
 
     const urlMacros = [
-      'slot_id=SLOT_ID', 'page_id=PAGE_ID', 'adx=ADX', 'ady=ADY', 'WIDTH', 'HEIGHT',
+      'slot_id=SLOT_ID', 'page_id=PAGE_ID', 'adx=ADX', 'ady=ADY'
     ];
 
     function generateUrls(numUrls, numMacroUrls) {
@@ -121,10 +114,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       for (let i = 0; i < numUrls; i++) {
         urls.push(`https://www.${i}.com/`);
       }
-      let url;
-      let macros;
       for (let i = 0; i < numMacroUrls; i++) {
-        urls.push(`https://www.${i}.com/${urlMacros.slice(0,i).join('&')}`);
+        urls.push(`https://www.${i+numUrls}.com/?${urlMacros.slice(0,i+1).join('&')}`);
       }
       return urls;
     }
@@ -189,8 +180,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       const urls = generateUrls(1,2);
       const inflatedUrls = [
         'https://www.0.com/',
-        'https://www.1.com/slot_id=1',
-        'https://www.2.com/slot_id=1&page_id=2',
+        'https://www.1.com/?slot_id=1',
+        'https://www.2.com/?slot_id=1&page_id=2',
       ];
       const rtcCalloutResponses = generateCalloutResponses(3);
       const customMacros = {
@@ -211,7 +202,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'fAkeVeNdOR': {SLOT_ID: 1, PAGE_ID: 2},
       };
       const inflatedUrls = [
-        'https://www.fake.qqq/slot_id=1&page_id=3&foo_id=4',
+        'https://www.fake.qqq/?slot_id=1&page_id=3&foo_id=4',
       ];
       const rtcCalloutResponses = [
         {'response1': {'fooArray': ['foo']}},
@@ -236,9 +227,9 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       const inflatedUrls = [
         'https://www.0.com/',
         'https://www.1.com/',
-        'https://www.2.com/slot_id=1',
-        'https://www.3.com/slot_id=1&page_id=2',
-        'https://www.fake.qqq/slot_id=1&page_id=2&foo_id=3',
+        'https://www.2.com/?slot_id=1',
+        'https://www.3.com/?slot_id=1&page_id=2',
+        'https://www.fake.qqq/?slot_id=1&page_id=2&foo_id=3',
       ];
       const rtcCalloutResponses = generateCalloutResponses(5);
       const customMacros = {
@@ -267,9 +258,9 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'https://www.0.com/',
         'https://www.1.com/',
         'https://www.2.com/',
-        'https://www.3.com/slot_id=1',
-        'https://www.4.com/slot_id=1&page_id=2',
-        'https://www.fake.qqq/slot_id=1&page_id=2&foo_id=3',
+        'https://www.3.com/?slot_id=1',
+        'https://www.4.com/?slot_id=1&page_id=2',
+        'https://www.fake.qqq/?slot_id=1&page_id=2&foo_id=3',
       ];
       const rtcCalloutResponses = generateCalloutResponses(6);
       const customMacros = {

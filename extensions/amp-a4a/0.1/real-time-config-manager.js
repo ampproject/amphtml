@@ -67,7 +67,7 @@ function buildErrorResponse_(error, callout, opt_rtcTime) {
  * @return {Promise<!Array<!rtcResponseDef>>|undefined}
  * @visibleForTesting
  */
-function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
+export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
   const rtcConfig = validateRtcConfig_(a4aElement.element);
   if (!rtcConfig) {
     return;
@@ -194,7 +194,7 @@ function sendRtcCallout_(
  * @return {?Object}
  * @visibleForTesting
  */
-function validateRtcConfig_(element) {
+export function validateRtcConfig_(element) {
   const defaultTimeoutMillis = 1000;
   const rtcConfig = tryParseJson(
       element.getAttribute('rtc-config'));
