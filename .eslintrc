@@ -53,7 +53,7 @@
     "max-len": [2, 80, 4, {
       "ignoreComments": true,
       "ignoreUrls": true,
-      "ignorePattern": ""
+      "ignorePattern": "^\\s*import\\s+{[^}]+}\\s+from\\s+'[^']+'\\s*;$"
     }],
     "no-alert": 2,
     "no-array-destructuring": 2,
