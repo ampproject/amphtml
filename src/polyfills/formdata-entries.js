@@ -104,22 +104,12 @@ export function install(win) {
   }
 
   win.Object.defineProperty(win.FormData.prototype, 'appendNative_', {
-    enumerable: false,
-    configurable: false,
-    writable: false,
     value: win.FormData.prototype.append,
   });
   win.Object.defineProperty(win.FormData.prototype, 'append', {
-    enumerable: false,
-    configurable: false,
-    writable: false,
     value: appendPolyfill,
   });
-
   win.Object.defineProperty(win.FormData.prototype, 'entries', {
-    enumerable: false,
-    configurable: false,
-    writable: false,
     value: entriesPolyfill,
   });
 
@@ -127,9 +117,6 @@ export function install(win) {
     // Store the native FormData constructor as a property of the polyfill
     // constructor so that it can be referenced from the polyfill constructor.
     win.Object.defineProperty(FormDataPolyfill, 'FormDataNative_', {
-      enumerable: false,
-      configurable: false,
-      writable: false,
       value: win.FormData,
     });
   }
@@ -137,10 +124,5 @@ export function install(win) {
 
   // This needs to come last so that code above can simply operate on the
   // native FormData by referencing `win.FormData`.
-  win.Object.defineProperty(win, 'FormData', {
-    enumerable: false,
-    configurable: false,
-    writable: false,
-    value: FormDataPolyfill,
-  });
+  win.Object.defineProperty(win, 'FormData', {value: FormDataPolyfill});
 }
