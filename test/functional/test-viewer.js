@@ -780,6 +780,32 @@ describe('Viewer', () => {
     });
   });
 
+  describe('isWebviewEmbedded', () => {
+    it('should be webview w/ "webview=1"', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.hash = '#webview=1';
+      expect(new Viewer(ampdoc).isWebviewEmbedded()).to.be.true;
+    });
+
+    it('should NOT be webview w/o "webview=1"', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.hash = '#foo=1';
+      expect(new Viewer(ampdoc).isWebviewEmbedded()).to.be.false;
+    });
+
+    it('should NOT be webview w/ "webview=0"', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.hash = '#webview=0';
+      expect(new Viewer(ampdoc).isWebviewEmbedded()).to.be.false;
+    });
+
+    it('should NOT be webview if iframed regardless of "webview=1"', () => {
+      windowApi.parent = {};
+      windowApi.location.hash = '#webview=1';
+      expect(new Viewer(ampdoc).isEmbedded()).to.be.false;
+    });
+  });
+
   describe('isTrustedViewer', () => {
 
     it('should consider non-trusted when not iframed', () => {

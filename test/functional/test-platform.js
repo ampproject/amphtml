@@ -198,6 +198,18 @@ describe('Platform', () => {
     testStandalone(userAgent, isStandalone);
   });
 
+  it('Pixel Chrome 61', () => {
+    isAndroid = true;
+    isChrome = true;
+    isWebKit = true;
+    majorVersion = 61;
+    userAgent = 'Mozilla/5.0 (Linux; Android 8.0.0; Pixel XL Build/OPR6.' +
+        '170623.011) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163' +
+        '.98 Mobile Safari/537.36';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
+  });
+
   it('Firefox', () => {
     isFirefox = true;
     majorVersion = 40;
