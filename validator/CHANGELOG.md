@@ -30,6 +30,17 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 8:00 PM, October 4, 2017 UTC
+
+Validator version 252
+Rules version 491
+
+Inclues:
+ - Initial `<amp-story>` rules
+ - Update to descendant whitelist for `<amp-story-grid-layer>`
+ - #11299 amp-vk extension to embed vk.com Poll and Post
+ - #11333 Propagate controlsList from amp-video to video
+
 ### 3:15 PM, September 26, 2017 UTC
 
 Validator Version 251
