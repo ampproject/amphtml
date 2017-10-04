@@ -28,8 +28,8 @@ describes.realWin('FormData.entries', {}, env => {
       install(env.win);
 
       expect(env.win.FormData).to.not.equal(nativeConstructor);
-      expect(env.win.FormData.prototype.append).to.not.equal(nativeAppend);
-      expect(env.win.FormData.prototype.entries).to.not.be.undefined;
+      expect(nativeConstructor.prototype.append).to.not.equal(nativeAppend);
+      expect(nativeConstructor.prototype.entries).to.not.be.undefined;
     });
 
     it('does not polyfill if FormData.prototype.entries is available', () => {
@@ -39,17 +39,34 @@ describes.realWin('FormData.entries', {}, env => {
       // fake one to enter the intended test state.
       const entries = () => {};
       env.win.FormData.prototype.entries = entries;
+      env.win.FormDataNative_ = undefined;
 
       install(env.win);
 
       expect(env.win.FormData).to.equal(nativeConstructor);
-      expect(env.win.FormData.prototype.append).to.equal(nativeAppend);
-      expect(env.win.FormData.prototype.entries).to.equal(entries);
+      expect(nativeConstructor.prototype.append).to.equal(nativeAppend);
+      expect(nativeConstructor.prototype.entries).to.equal(entries);
+    });
+
+    it('does not re-install polyfill', () => {
+      const nativeConstructor = env.win.FormData;
+      const nativeAppend = env.win.FormData.prototype.append;
+      env.win.FormData.prototype.entries = undefined;
+
+      install(env.win);
+      install(env.win);
+
+      expect(env.win.FormData).to.not.equal(nativeConstructor);
+      expect(nativeConstructor.prototype.append).to.not.equal(nativeAppend);
+      expect(nativeConstructor.prototype.entries).to.not.be.undefined;
+      expect(env.win.FormData.prototype).to.be.undefined;
     });
   });
 
   describe('polyfill', () => {
     beforeEach(() => {
+      // Remove native entries in case the browser running the tests already
+      // have it to force installation of polyfill.
       env.win.FormData.prototype.entries = undefined;
       install(env.win);
     });

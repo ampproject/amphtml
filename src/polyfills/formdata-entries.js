@@ -23,19 +23,27 @@ import {map} from '../utils/object';
  * This patches the native constructor so that the polyfill can capture the
  * fields in the form passed to the constructor. If `FormData#entries` needs a
  * polyfill, chances are there are no methods to read the content of the
- * `FormData` after construction, so the only way to partially polyfill
- * `entries` is to patch the constructor (and the `append` method).
+ * `FormData` after construction, so the only way to polyfill `entries` is to
+ * patch the constructor (and the `append` method).
  *
  * For more details on this, see http://mdn.io/FormData.
  *
- * @param {!HTMLFormElement=} form An HTML `<form>` element — when specified,
- *     the FormData object will be populated with the form's current keys/values
- *     using the name property of each element for the keys and their submitted
- *     value for the values. It will also encode file input content.
+ * @param {Window} win The window with `FormData` being polyfilled. This will be
+ *     bound to the window where the polyfill is installed so that callers can't
+ *     supply this argument and would simply use `new FormData(form)`.
+ * @param {!HTMLFormElement=} opt_form An HTML `<form>` element — when
+ *     specified, the FormData object will be populated with the form's current
+ *     keys/values using the name property of each element for the keys and
+ *     their submitted value for the values. It will also encode file input
+ *     content.
  */
-function FormDataPolyfill(form) {
-  const instance = new FormDataPolyfill['FormDataNative_'](form);
-  instance.fieldValues_ = form ? getFormAsObject(form) : map();
+function FormDataPolyfill(win, opt_form = undefined) {
+  // Returning the instance constructed by the native constructor is required
+  // here, as APIs such as `XMLHttpRequest` and `fetch` may depend on internal
+  // states maintained by native code which wouldn't be available on an instance
+  // returned by non-native constructor.
+  const instance = new win['FormDataNative_'](opt_form);
+  instance.fieldValues_ = opt_form ? getFormAsObject(opt_form) : map();
   return instance;
 }
 
@@ -46,8 +54,8 @@ function FormDataPolyfill(form) {
  * This patches the native `append` method so that the polyfill can capture the
  * field passed to the method. If `FormData#entries` needs a polyfill, chances
  * are there are no methods to read the content of the `FormData` after
- * construction, so the only way to partially polyfill `entries` is to patch
- * this method (and the constructor).
+ * construction, so the only way to polyfill `entries` is to patch this method
+ * (and the constructor).
  *
  * Since AMP doesn't support `<input type="file">`, appending a `File` object
  * is not supported and the `filename` parameter is ignored for this polyfill.
@@ -99,7 +107,12 @@ function entriesPolyfill() {
  * @param {!Window} win
  */
 export function install(win) {
-  if (win.FormData.prototype.entries) {
+  // After patching the native constructor, `win.FormData` becomes the polyfill
+  // constructor function which always doesn't have an `entries` method in the
+  // prototype. Checking if `win.FormDataNative_` has been patched onto the
+  // window is necessary to prevent re-installation of this polyfill on, well,
+  // the prototype of the polyfill constructor itself!
+  if (win.FormDataNative_ || win.FormData.prototype.entries) {
     return;
   }
 
@@ -112,17 +125,13 @@ export function install(win) {
   win.Object.defineProperty(win.FormData.prototype, 'entries', {
     value: entriesPolyfill,
   });
-
-  if (!FormDataPolyfill['FormDataNative_']) {
-    // Store the native FormData constructor as a property of the polyfill
-    // constructor so that it can be referenced from the polyfill constructor.
-    win.Object.defineProperty(FormDataPolyfill, 'FormDataNative_', {
-      value: win.FormData,
-    });
-  }
-  FormDataPolyfill.prototype = win.FormData.prototype;
+  win.Object.defineProperty(win, 'FormDataNative_', {value: win.FormData});
 
   // This needs to come last so that code above can simply operate on the
   // native FormData by referencing `win.FormData`.
-  win.Object.defineProperty(win, 'FormData', {value: FormDataPolyfill});
+  win.Object.defineProperty(win, 'FormData', {
+    // Pass `null` to `this`as it's ignored when the bound function is used as
+    // constructor.
+    value: FormDataPolyfill.bind(null, win),
+  });
 }
