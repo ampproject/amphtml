@@ -113,15 +113,15 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     src += encodeURIComponent(mediaId);
     src += `?dataMode=${encodeURIComponent(mode)}&platform=amp`;
 
-    if (disableAds === '1') {
-      src += '&disableAds=1';
-    }
-
     if(delay > 0){
         src += `&delay=${encodeURIComponent(delay)}`;
     }
 
-    if(streamingFilter.length > 0){
+    if (disableAds === '1') {
+      src += '&disableAds=1';
+    }
+
+    if(streamingFilter !== null && streamingFilter.length > 0){
         src += `&streamingFilter=${encodeURIComponent(streamingFilter)}`;
     }
 
