@@ -94,10 +94,10 @@ function entriesPolyfill() {
   // so we must manually implement the iterator interface.
   let nextIndex = 0;
   return /** @type {!Iterator<!Array<string>>} */ ({
-    next: () => {
+    next() {
       return nextIndex < fieldEntries.length ?
           {value: fieldEntries[nextIndex++], done: false} :
-          {done: true};
+          {value: undefined, done: true};
     },
   });
 }
