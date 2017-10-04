@@ -354,7 +354,8 @@ export class AmpStory extends AMP.BaseElement {
     // TODO(alanorozco): pass event priority once amphtml-story repo is merged
     // with upstream.
     Services.actionServiceForDoc(this.element)
-        .trigger(this.activePage_.element, 'active', /* event */ null);
+        .trigger(this.activePage_.element, 'active', /* event */ null,
+            ActionTrust.HIGH);
   }
 
 

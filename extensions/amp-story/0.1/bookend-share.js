@@ -44,8 +44,8 @@ function buildLinkShareItem(doc) {
 
   const iconEl = createElementWithAttributes(doc, 'div',
       /** @type {!JsonObject} */({
-      class: 'i-amphtml-story-share-icon',
-    }));
+        class: 'i-amphtml-story-share-icon',
+      }));
 
   const nameEl = createElementWithAttributes(doc, 'span',
       /** @type {!JsonObject} */({

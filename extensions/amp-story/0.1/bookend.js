@@ -199,7 +199,7 @@ export class Bookend {
     const headingEl = createElementWithAttributes(this.win_.document, 'h3',
         /** @type {!JsonObject} */({
           'class': 'i-amphtml-story-bookend-heading',
-        });
+        }));
     headingEl.textContet = heading;
     return headingEl;
   }
