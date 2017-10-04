@@ -466,7 +466,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           listenOnce(mediaElement, 'ended', callback);
     } else if (this.isVideoInterfaceVideo_(el)) {
       this.autoAdvanceUnlistenDef_ =
-          listenOnce(el, VideoEvents.ENDED, callback, { capture: true });
+          listenOnce(el, VideoEvents.ENDED, callback, {capture: true});
     } else {
       user().error(TAG, `Element with ID ${el.id} is not a media element ` +
           'supported for automatic advancement.');
