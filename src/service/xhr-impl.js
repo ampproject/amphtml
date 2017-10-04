@@ -212,12 +212,7 @@ export class Xhr {
    */
   fetchJson(input, opt_init, opt_allowFailure) {
     const init = setupInit(opt_init, 'application/json');
-    const headerContentType = init.headers['Content-Type'];
     if (init.method == 'POST' && !isFormData(init.body)) {
-      if (headerContentType === 'application/x-www-form-urlencoded') {
-        init.body = serializeQueryString(/** @type {!JsonObject} */ init.body);
-        return this.fetch(input, init);
-      }
       // Assume JSON strict mode where only objects or arrays are allowed
       // as body.
       dev().assert(
@@ -225,11 +220,18 @@ export class Xhr {
           'body must be of type object or array. %s',
           init.body
       );
+
       // Content should be 'text/plain' to avoid CORS preflight.
       init.headers['Content-Type'] = init.headers['Content-Type'] ||
           'text/plain;charset=utf-8';
+      const headerContentType = init.headers['Content-Type'];
       // Cast is valid, because we checked that it is not form data above.
-      init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
+      if (headerContentType === 'application/x-www-form-urlencoded') {
+        init.body =
+          serializeQueryString(/** @type {!JsonObject} */ (init.body));
+      } else {
+        init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
+      }
     }
     return this.fetch(input, init);
   }
