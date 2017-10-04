@@ -34,7 +34,7 @@ export class AmpStoryAnalytics {
   constructor(element) {
     this.element_ = element;
 
-    /** @private @const {!Object<string, boolean>} */
+    /** @private @const {!Object<number, boolean>} */
     this.seenPagesIndices_ = map();
   }
 

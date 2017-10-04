@@ -42,13 +42,15 @@ function buildLinkShareItem(doc) {
   const fragment = doc.createDocumentFragment();
   const root = doc.createElement('li');
 
-  const iconEl = createElementWithAttributes(doc, 'div', {
-    class: 'i-amphtml-story-share-icon',
-  });
+  const iconEl = createElementWithAttributes(doc, 'div',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-share-icon',
+      }));
 
-  const nameEl = createElementWithAttributes(doc, 'span', {
-    class: 'i-amphtml-story-share-name',
-  });
+  const nameEl = createElementWithAttributes(doc, 'span',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-share-name',
+      }));
 
   // constant value, no XSS risk
   iconEl./*OK*/innerHTML = ICONS.link;
@@ -68,19 +70,20 @@ function buildLinkShareItem(doc) {
 /**
  * @param {!Document} doc
  * @param {string} type
- * @param {!JsonObject} opt_params
+ * @param {!JsonObject=} opt_params
  * @return {!DocumentFragment}
  */
 function buildProvider(doc, type, opt_params) {
   const fragment = doc.createDocumentFragment();
   const root = doc.createElement('li');
 
-  const shareEl = createElementWithAttributes(doc, 'amp-social-share', {
-    type,
-    width: 48,
-    height: 48,
-    class: 'i-amphtml-story-share-icon',
-  });
+  const shareEl = createElementWithAttributes(doc, 'amp-social-share',
+      /** @type {!JsonObject} */({
+        type,
+        width: 48,
+        height: 48,
+        class: 'i-amphtml-story-share-icon',
+      }));
 
   if (opt_params) {
     Object.keys(opt_params).forEach(field =>
@@ -92,9 +95,10 @@ function buildProvider(doc, type, opt_params) {
     shareEl./*OK*/innerHTML = ICONS.mail;
   }
 
-  const nameEl = createElementWithAttributes(doc, 'span', {
-    class: 'i-amphtml-story-share-name',
-  });
+  const nameEl = createElementWithAttributes(doc, 'span',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-share-name',
+      }));
 
   nameEl.textContent = SHARE_PROVIDER_NAME[type] || type;
 
@@ -111,30 +115,36 @@ function buildProvider(doc, type, opt_params) {
  * Social share widget for story bookend.
  */
 export class BookendShareWidget {
-  /** @param {!AmpDoc} ampdoc */
-  constructor(ampdoc) {
-    /** @private @const {!AmpDoc} */
-    this.ampdoc_ = ampdoc;
+  /** @param {!Window} win */
+  constructor(win) {
+    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = null;
 
     /** @private @const {!Window} */
-    this.win_ = ampdoc.win;
+    this.win_ = win;
 
     /** @private {?Element} */
     this.root_ = null;
   }
 
-  /** @param {!AmpDoc} ampdoc */
-  static create(ampdoc) {
-    return new BookendShareWidget(ampdoc);
+  /** @param {!Window} win */
+  static create(win) {
+    return new BookendShareWidget(win);
   }
 
-  /** @return {!Element} */
-  build() {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {!Element}
+   */
+  build(ampdoc) {
     dev().assert(!this.root_, 'Already built.');
 
-    this.root_ = createElementWithAttributes(this.win_.document, 'ul', {
-      'class': 'i-amphtml-story-share-list',
-    });
+    this.ampdoc_ = ampdoc;
+
+    this.root_ = createElementWithAttributes(this.win_.document, 'ul',
+        /** @type {!JsonObject} */({
+          'class': 'i-amphtml-story-share-list',
+        }));
 
     this.add_(buildLinkShareItem(this.win_.document));
 
@@ -149,7 +159,7 @@ export class BookendShareWidget {
   }
 
   /**
-   * @param {!Array<!JsonObject>} providers
+   * @param {!Object<string, (!JsonObject|boolean)>} providers
    * @public
    */
   // TODO(alanorozco): Set story metadata in share config
@@ -182,8 +192,10 @@ export class BookendShareWidget {
 
   /** @private */
   loadRequiredExtensions_() {
+    const ampdoc = /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
+      dev().assert(this.ampdoc_));
     Services.extensionsFor(this.win_)
-        .installExtensionForDoc(this.ampdoc_, 'amp-social-share');
+        .installExtensionForDoc(ampdoc, 'amp-social-share');
   }
 
   /**

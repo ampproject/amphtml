@@ -39,29 +39,33 @@ function buildArticle(doc, articleData) {
   const fragment = doc.createDocumentFragment();
 
   if (articleData.image) {
-    const imageContainer = createElementWithAttributes(doc, 'div', {
-      class: 'i-amphtml-story-bookend-article-image',
-    });
+    const imageContainer = createElementWithAttributes(doc, 'div',
+        /** @type {!JsonObject} */({
+          class: 'i-amphtml-story-bookend-article-image',
+        }));
 
     // TODO(alanorozco): Figure out how to use amp-img here
-    imageContainer.appendChild(createElementWithAttributes(doc, 'img', {
-      src: articleData.image,
-      width: 116,
-      height: 116,
-    }));
+    imageContainer.appendChild(createElementWithAttributes(doc, 'img',
+        /** @type {!JsonObject} */({
+          src: articleData.image,
+          width: 116,
+          height: 116,
+        })));
 
-    fragment.appendChild(imageContainer);
+    root.appendChild(imageContainer);
   }
 
-  const title = createElementWithAttributes(doc, 'h2', {
-    class: 'i-amphtml-story-bookend-article-heading',
-  });
+  const title = createElementWithAttributes(doc, 'h2',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-bookend-article-heading',
+      }));
 
   title.textContent = articleData.title;
 
-  const metaContainer = createElementWithAttributes(doc, 'div', {
-    class: 'i-amphtml-story-bookend-article-meta',
-  });
+  const metaContainer = createElementWithAttributes(doc, 'div',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-bookend-article-meta',
+      }));
 
   metaContainer.textContent = 'example.com - 10 mins';
 
@@ -79,14 +83,11 @@ function buildArticle(doc, articleData) {
  */
 export class Bookend {
   /**
-   * @param {!AmpDoc} ampdoc
+   * @param {!Window} win
    */
-  constructor(ampdoc) {
-    /** @private @const {!AmpDoc} */
-    this.ampdoc_ = ampdoc;
-
+  constructor(win) {
     /** @private @const {!Window} */
-    this.win_ = ampdoc.win;
+    this.win_ = win;
 
     /** @private {boolean} */
     this.isBuilt_ = false;
@@ -95,13 +96,14 @@ export class Bookend {
     this.root_ = null;
 
     /** @private {!BookendShareWidget} */
-    this.shareWidget_ = BookendShareWidget.create(ampdoc);
+    this.shareWidget_ = BookendShareWidget.create(win);
   }
 
   /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {!Element}
    */
-  build() {
+  build(ampdoc) {
     if (this.isBuilt_) {
       return this.getRoot();
     }
@@ -111,7 +113,7 @@ export class Bookend {
     this.root_ = this.win_.document.createElement('section');
     this.root_.classList.add('i-amphtml-story-bookend');
 
-    this.root_.appendChild(this.shareWidget_.build());
+    this.root_.appendChild(this.shareWidget_.build(ampdoc));
 
     return this.getRoot();
   }
@@ -179,9 +181,10 @@ export class Bookend {
    * @private
    */
   buildArticleList_(articleList) {
-    const container = createElementWithAttributes(this.win_.document, 'div', {
-      'class': 'i-amphtml-story-bookend-article-set',
-    });
+    const container = createElementWithAttributes(this.win_.document, 'div',
+        /** @type {!JsonObject} */({
+          'class': 'i-amphtml-story-bookend-article-set',
+        }));
     articleList.forEach(article =>
         container.appendChild(buildArticle(this.win_.document, article)));
     return container;
@@ -193,9 +196,10 @@ export class Bookend {
    * @private
    */
   buildArticleSetHeading_(heading) {
-    const headingEl = createElementWithAttributes(this.win_.document, 'h3', {
-      'class': 'i-amphtml-story-bookend-heading',
-    });
+    const headingEl = createElementWithAttributes(this.win_.document, 'h3',
+        /** @type {!JsonObject} */({
+          'class': 'i-amphtml-story-bookend-heading',
+        }));
     headingEl.textContet = heading;
     return headingEl;
   }
