@@ -37,6 +37,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
   beforeEach(() => {
     sandbox = env.sandbox;
+    // ensures window location == AMP cache passes
     env.win.AMP_MODE.test = true;
     const doc = env.win.document;
     element = createElementWithAttributes(env.win.document, 'amp-ad', {
@@ -76,7 +77,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
   describe('#maybeExecuteRealTimeConfig_', () => {
     function executeTest(args) {
-      let {urls, vendors, timeoutMillis, rtcCalloutResponses,
+      const {urls, vendors, timeoutMillis, rtcCalloutResponses,
            expectedCalloutUrls, responseIsString, failXhr,
            customMacros, expectedRtcArray, calloutCount} = args;
       setRtcConfig({urls, vendors, timeoutMillis});
@@ -106,7 +107,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     }
 
     const urlMacros = [
-      'slot_id=SLOT_ID', 'page_id=PAGE_ID', 'adx=ADX', 'ady=ADY'
+      'slot_id=SLOT_ID', 'page_id=PAGE_ID', 'adx=ADX', 'ady=ADY',
     ];
 
     function generateUrls(numUrls, numMacroUrls) {
@@ -115,7 +116,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         urls.push(`https://www.${i}.com/`);
       }
       for (let i = 0; i < numMacroUrls; i++) {
-        urls.push(`https://www.${i+numUrls}.com/?${urlMacros.slice(0,i+1).join('&')}`);
+        urls.push(`https://www.${i + numUrls}.com/?${urlMacros.slice(0,i + 1).join('&')}`);
       }
       return urls;
     }
