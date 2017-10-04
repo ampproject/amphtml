@@ -51,7 +51,8 @@ import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {AudioManager, upgradeBackgroundAudio} from './audio';
 import {setStyle, setStyles} from '../../../src/style';
-import {findIndex} from '../../../src/utils/array.js';
+import {findIndex} from '../../../src/utils/array';
+import {ActionTrust} from '../../../src/action-trust';
 
 
 /** @private @const {number} */
@@ -355,7 +356,7 @@ export class AmpStory extends AMP.BaseElement {
     // with upstream.
     Services.actionServiceForDoc(this.element)
         .trigger(this.activePage_.element, 'active', /* event */ null,
-            ActionTrust.HIGH);
+        ActionTrust.HIGH);
   }
 
 
