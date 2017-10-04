@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {dev} from '../../../src/log';
 
 /**
  * A map of elements to delay showing the page.  The key is a DOM query to find
@@ -321,7 +322,7 @@ class ImageElement extends PageElement {
     if (this.element instanceof HTMLImageElement) {
       this.imageElement_ = this.element;
     } else if (!this.imageElement_) {
-      this.imageElement_ = querySelector(this.element, 'img');
+      this.imageElement_ = scopedQuerySelector(this.element, 'img');
     }
     return this.imageElement_;
   }
