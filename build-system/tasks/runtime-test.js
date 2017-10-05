@@ -312,6 +312,11 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
     } else {
       done();
     }
+  }).on('run_start', function() {
+    if (argv.saucelabs) {
+      console./* OK*/log(green(
+          'Running tests in parallel on', c.browsers.length, 'browsers...'));
+    }
   }).on('browser_complete', function(browser) {
     if (argv.saucelabs) {
       const result = browser.lastResult;
