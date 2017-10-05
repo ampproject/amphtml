@@ -698,7 +698,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   connectFluidMessagingChannel() {
     dev().assert(this.iframe.contentWindow,
-                 'Frame contentWindow unavailable.');
+        'Frame contentWindow unavailable.');
     this.iframe.contentWindow./*OK*/postMessage(
         JSON.stringify(dict({'message': 'connect', 'c': 'sfchannel1'})),
         SAFEFRAME_ORIGIN);
@@ -715,7 +715,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.fluidImpressionUrl_ = null;
     }
     dev().assert(this.iframe.contentWindow,
-                 'Frame contentWindow unavailable.');
+        'Frame contentWindow unavailable.');
     this.iframe.contentWindow./*OK*/postMessage(
         JSON.stringify(dict({'message': 'resize-complete', 'c': 'sfchannel1'})),
         SAFEFRAME_ORIGIN);
