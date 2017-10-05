@@ -411,10 +411,10 @@ export class LayoutLayer {
   remeasure() {
     this.updateScrollPosition();
 
-    const position = this.getScrolledPosition();
     const layouts = this.layouts_;
+    const relative = relativeScrolledPositionForChildren(this);
     for (let i = 0; i < layouts.length; i++) {
-      layouts[i].remeasure(position);
+      layouts[i].remeasure(relative);
     }
 
     const layers = this.layers_;
@@ -565,8 +565,7 @@ export class LayoutElement {
       return layout.getSize();
     }
 
-    const box = element.getBoundingClientRect();
-    return SizeWh(box.width, box.height);
+    return SizeWh(box.clientWidth, box.clientHeight);
   }
 
   static getOffsetFromParent(element) {
@@ -672,7 +671,9 @@ export class LayoutElement {
     let relative = opt_relativeTo;
     if (!relative) {
       const parent = this.getParentLayer();
-      relative = parent ? parent.getScrolledPosition() : PositionLt(0, 0);
+      relative = parent ?
+          relativeScrolledPositionForChildren(parent) :
+          PositionLt(0, 0);
     }
     const box = this.element_.getBoundingClientRect();
     this.size_ = SizeWh(box.width, box.height);
@@ -681,6 +682,18 @@ export class LayoutElement {
         box.top - relative.top
     );
   }
+}
+
+/**
+ * @param {!LayoutLayer} layer
+ * @return {!PositionLt}
+ */
+function relativeScrolledPositionForChildren(layer) {
+  const position = layer.getScrolledPosition();
+  return PositionLt(
+    position.left - layer.getScrollLeft(),
+    position.top - layer.getScrollTop()
+  );
 }
 
 /**
