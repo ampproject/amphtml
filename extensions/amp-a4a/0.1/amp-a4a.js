@@ -1567,7 +1567,7 @@ export class AmpA4A extends AMP.BaseElement {
         user().error(TAG, 'Could not perform Real Time Config.', err);
       }
     } else if (this.element.getAttribute('rtc-config')) {
-      user().error(TAG, 'RTC not supported for ad network' +
+      user().error(TAG, 'RTC not supported for ad network ' +
                    `${this.element.getAttribute('type')}`);
     }
   }

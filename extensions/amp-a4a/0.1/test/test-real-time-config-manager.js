@@ -49,7 +49,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     doc.body.appendChild(element);
     fetchJsonStub = sandbox.stub(Xhr.prototype, 'fetchJson');
     a4aElement = new AmpA4A(element);
-
   });
 
   afterEach(() => {

@@ -126,7 +126,7 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     const whitelist = {};
     Object.keys(macros).forEach(key => whitelist[key] = true);
     url = urlReplacements.expandSync(
-        url, macros, undefined, whitelist);
+        url, macros, /** opt_collectVars */undefined, whitelist);
   }
   if (!isSecureUrl(url)) {
     return logAndAddErrorResponse_(promiseArray, RTC_ERROR_ENUM.INSECURE_URL,
@@ -201,40 +201,43 @@ export function validateRtcConfig_(element) {
   if (!rtcConfig) {
     return null;
   }
-  const rtcConfigKeyWhitelist = {
-    urls: true,
-    vendors: true,
-    timeoutMillis: true,
-  };
-  Object.keys(rtcConfig).forEach(key => {
-    if (!rtcConfigKeyWhitelist[key]) {
-      user().warn(TAG, `Unknown RTC Config key: ${key}`);
-    }
-  });
+  let timeout;
   try {
     user().assert(rtcConfig['vendors'] || rtcConfig['urls'],
-        'RTC Config must specify vendors or urls');
-    user().assert(!rtcConfig['vendors'] || isObject(rtcConfig['vendors']),
-        'RTC invalid vendors');
-    user().assert(!rtcConfig['urls'] || isArray(rtcConfig['urls']),
-        'RTC invalid urls');
+                  'RTC Config must specify vendors or urls');
     user().assert(Object.keys(
         rtcConfig['vendors'] || {}).length || (rtcConfig['urls'] || []).length,
-        'RTC empty vendors and urls');
+                  'RTC empty vendors and urls');
+    Object.keys(rtcConfig).forEach(key => {
+      switch (key) {
+        case 'vendors':
+          user().assert(isObject(rtcConfig[key]), 'RTC invalid vendors');
+          break;
+        case 'urls':
+          user().assert(isArray(rtcConfig[key]), 'RTC invalid urls');
+          break;
+        case 'timeoutMillis':
+          timeout = parseInt(rtcConfig[key], 10);
+          if (!isNaN(timeout)) {
+            if (timeout >= defaultTimeoutMillis || timeout < 0) {
+              timeout = null;
+              user().warn(TAG, `Invalid RTC timeout: ${timeout}ms, ` +
+                          `using default timeout ${defaultTimeoutMillis}ms`);
+            }
+          } else {
+            user().warn(TAG, 'Invalid RTC timeout is NaN, ' +
+                        `using default timeout ${defaultTimeoutMillis}ms`);
+          }
+          break;
+        default:
+          user().warn(TAG, `Unknown RTC Config key: ${key}`);
+          break;
+      }
+    });
   } catch (unusedErr) {
     return null;
   }
-  let timeout = parseInt(rtcConfig['timeoutMillis'], 10);
-  if (!isNaN(timeout)) {
-    if (timeout >= defaultTimeoutMillis || timeout < 0) {
-      timeout = undefined;
-      user().warn(TAG, `Invalid RTC timeout: ${timeout}ms, ` +
-                  `using default timeout ${defaultTimeoutMillis}ms`);
-    }
-  } else {
-    user().warn(TAG, 'Invalid RTC timeout is NaN, ' +
-                `using default timeout ${defaultTimeoutMillis}ms`);
-  }
+
   rtcConfig['timeoutMillis'] = timeout || defaultTimeoutMillis;
   return rtcConfig;
 }

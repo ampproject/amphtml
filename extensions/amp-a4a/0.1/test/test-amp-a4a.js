@@ -2148,3 +2148,73 @@ describe('amp-a4a', () => {
   // Other cases to handle for body reformatting:
   //   - All
 });
+
+
+describes.realWin('AmpA4a-RTC', {amp: true}, env => {
+  let element;
+  let a4a;
+  let sandbox;
+  let errorSpy;
+
+  beforeEach(() => {
+    sandbox = env.sandbox;
+    // ensures window location == AMP cache passes
+    env.win.AMP_MODE.test = true;
+    const doc = env.win.document;
+    element = createElementWithAttributes(env.win.document, 'amp-ad', {
+      'width': '200',
+      'height': '50',
+      'type': 'doubleclick',
+      'layout': 'fixed',
+    });
+    doc.body.appendChild(element);
+    a4a = new AmpA4A(element);
+    errorSpy = sandbox.spy(user(), 'error');
+  });
+
+  beforeEach(() => {
+      expect(AMP.maybeExecuteRealTimeConfig).to.be.undefined;
+  });
+
+  afterEach(() => {
+    AMP.maybeExecuteRealTimeConfig = undefined;
+  });
+
+  describe('#tryExecuteRealTimeConfig', () => {
+    it ('should not execute if RTC never imported', () => {
+      expect(a4a.tryExecuteRealTimeConfig_()).to.be.undefined;
+    });
+    it ('should log user error if RTC Config set but RTC not supported', () => {
+      element.setAttribute('rtc-config',
+                           JSON.stringify({"urls": ["https://a.com"]}));
+      expect(a4a.tryExecuteRealTimeConfig_()).to.be.undefined;
+      expect(errorSpy.calledOnce).to.be.true;
+      expect(errorSpy.calledWith(
+          'amp-a4a',
+          'RTC not supported for ad network doubleclick')).to.be.true;
+    });
+    it ('should call maybeExecuteRealTimeConfig properly', () => {
+      const macros = {'SLOT_ID': 2};
+      AMP.maybeExecuteRealTimeConfig = sandbox.stub();
+      sandbox.stub(a4a, 'getCustomRealTimeConfigMacros_').returns(macros);
+      a4a.tryExecuteRealTimeConfig_();
+      expect(AMP.maybeExecuteRealTimeConfig.called).to.be.true;
+      expect(AMP.maybeExecuteRealTimeConfig.calledWith(a4a, macros)).to.be.true;
+    });
+    it ('should catch error in maybeExecuteRealTimeConfig', () => {
+      const err = new Error('Test');
+      AMP.maybeExecuteRealTimeConfig = sandbox.stub().throws(err);
+      a4a.tryExecuteRealTimeConfig_();
+      expect(errorSpy.calledOnce).to.be.true;
+      expect(errorSpy.calledWith(
+          'amp-a4a', 'Could not perform Real Time Config.', err)).to.be.true;
+    });
+  });
+
+  describe('#getCustomRealTimeConfigMacros_', () => {
+    it ('should return null', () => {
+      expect(a4a.getCustomRealTimeConfigMacros_()).to.be.null;
+    });
+  });
+
+});
