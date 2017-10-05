@@ -111,7 +111,7 @@ function getIssues(opt_page) {
  */
 function updateGitHubIssues() {
   let promise = Promise.resolve();
-  let arrayPromises = [];
+  const arrayPromises = [];
   // we need to pull issues in batches
   for (let batch = 1; batch < 11; batch++) {
     arrayPromises.push(getIssues(batch));
