@@ -24,7 +24,6 @@ const util = require('gulp-util');
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 
-const verbose = (argv.verbose || argv.v);
 const isDryrun = argv.dryrun;
 
 const issuesOptions = {
@@ -51,12 +50,24 @@ const milestoneOptions = {
 
 // 4 is the number for Milestone 'Backlog Bugs'
 const MILESTONE_BACKLOG_BUGS = 4;
-// By default we will assign 'Pending Triage' milestone, number 20
-const MILESTONE_PENDING_TRIAGE = 20;
-// 23 is the number for Milestone 'New FRs'
-const MILESTONE_NEW_FRS = 23;
+// 11 is the number for Milestone '3P Implementation'
+const MILESTONE_3P_IMPLEMENTATION = 11;
 // 12 is the number for Milestone 'Docs Updates'
 const MILESTONE_DOCS_UPDATES = 12;
+// By default we will assign 'Pending Triage' milestone, number 20
+const MILESTONE_PENDING_TRIAGE = 20;
+// 22 is the number for Milestone 'Prioritized FRs'
+const MILESTONE_PRIORITIZED_FRS = 22;
+// 23 is the number for Milestone 'New FRs'
+const MILESTONE_NEW_FRS = 23;
+// 25 is the number for Milestone 'Great First Issues (GFI)'
+const MILESTONE_GREAT_ISSUES = 25;
+// days for biweekly updates
+const BIWEEKLY_DAYS = 14;
+// days for quarterly updates
+const QUARTERLY_DAYS = 89;
+// we need around 10 batches to get 1k issues
+const NUM_BATCHES = 11;
 
 // We start processing the issues by checking token first
 function processIssues() {
@@ -102,13 +113,12 @@ function getIssues(opt_page) {
  */
 function updateGitHubIssues() {
   let promise = Promise.resolve();
-  return BBPromise.all([
-    getIssues(1),
-    getIssues(2),
-    getIssues(3),
-    getIssues(4),
-    getIssues(5),
-  ])
+  const arrayPromises = [];
+  // we need to pull issues in batches
+  for (let batch = 1; batch < NUM_BATCHES; batch++) {
+    arrayPromises.push(getIssues(batch));
+  }
+  return BBPromise.all(arrayPromises)
       .then(requests => [].concat.apply([], requests))
       .then(issues => {
         const allIssues = issues;
@@ -119,44 +129,91 @@ function updateGitHubIssues() {
           let milestoneTitle;
           let milestoneState;
           let hasPriority = false;
+          let hasCategory = false;
           let issueNewMilestone = MILESTONE_PENDING_TRIAGE;
-
+          const assignee = issue.assignee;
+          let assigneeName = '';
+          const issueLastUpdate = issue.updated_at;
+          let biweeklyUpdate = true;
+          let quartelyUpdate = true;
+          if (getLastUpdate(issueLastUpdate) > QUARTERLY_DAYS) {
+            quartelyUpdate = false;
+            biweeklyUpdate = false;
+          } else if (getLastUpdate(issueLastUpdate) > BIWEEKLY_DAYS) {
+            biweeklyUpdate = false;
+          }
+          // Get the assignee
+          if (assignee) {
+            assigneeName = '@' + assignee.login;
+          }
           // Get the title and state of the milestone
           if (milestone) {
             milestoneTitle = milestone.title;
             milestoneState = milestone.state;
+            issueNewMilestone = milestone.number;
           }
-          // Get the labels we want to check
-          labels.forEach(function(label) {
-            if (label) {
-              // Check if the issues has type
-              if (label.name.startsWith('Type') ||
-             label.name.startsWith('Related')) {
-                issueType = label.name;
-              }
-              // Check if the issues has Priority
-              if (label.name.startsWith('P0') ||
-                  label.name.startsWith('P1') ||
-                  label.name.startsWith('P2') ||
-                  label.name.startsWith('P3')) {
-                hasPriority = true;
-              }
-            }
-          });
+          // promise starts
           promise = promise.then(function() {
             util.log('Update ' + issue.number);
             const updates = [];
-            // Milestone task: move issue from closed milestone
+            // Get the labels we want to check
+            labels.forEach(function(label) {
+              if (label) {
+                // Check if the issues has type
+                if (label.name.startsWith('Type') ||
+                    label.name.startsWith('Related')) {
+                  issueType = label.name;
+                }
+                // Check if the issues has Priority
+                if (label.name.startsWith('P0') ||
+                    label.name.startsWith('P1') ||
+                    label.name.startsWith('P2') ||
+                    label.name.startsWith('P3')) {
+                  hasPriority = true;
+                  if (label.name.startsWith('P0') ||
+                      label.name.startsWith('P1')) {
+                    if (biweeklyUpdate == false) {
+                      biweeklyUpdate = true;
+                      updates.push(applyComment(issue, 'This is a high priority'
+                          + ' issue but it hasn\'t been updated in awhile. ' +
+                          assigneeName + ' Do you have any updates?'));
+                    }
+                  } else if (label.name.startsWith('P2') &&
+                      quartelyUpdate == false) {
+                    quartelyUpdate = true;
+                    updates.push(applyComment(issue, 'This issue hasn\'t been '
+                        + ' updated in awhile. ' +
+                    assigneeName + ' Do you have any updates?'));
+                  }
+                }
+                if (label.name.startsWith('Category') ||
+                    label.name.startsWith('Related to') ||
+                    label.name.startsWith('GFI') ||
+                    label.name.startsWith('Great First Issue')) {
+                  hasCategory = true;
+                }
+              }
+            });
+            // Milestone task: move issues from closed milestone
             if (milestone) {
-              if (milestoneTitle.startsWith('Sprint') &&
-             milestoneState === 'closed') {
+              if (milestoneState === 'closed') {
                 issueNewMilestone = MILESTONE_BACKLOG_BUGS;
                 updates.push(applyMilestone(issue, issueNewMilestone));
               }
             }
+            if (issueNewMilestone === MILESTONE_PENDING_TRIAGE) {
+              if (quartelyUpdate == false) {
+                quartelyUpdate = true;
+                updates.push(applyComment(issue, 'This issue seems to be in ' +
+                    ' Pending Triage for awhile. ' +
+                    assigneeName + ' Please triage this to ' +
+                    'an appropriate milestone.'));
+              }
+            }
             // if issueType is not null, add correct milestones
             if (issueType != null) {
-              if (milestoneTitle === 'Pending Triage' || milestone == null) {
+              if (issueNewMilestone === MILESTONE_PENDING_TRIAGE ||
+                  milestone == null) {
                 if (issueType === 'Type: Feature Request') {
                   issueNewMilestone = MILESTONE_NEW_FRS;
                   updates.push(applyMilestone(issue, issueNewMilestone));
@@ -175,31 +232,42 @@ function updateGitHubIssues() {
               }
             } else if (milestone == null) {
               updates.push(applyMilestone(issue, issueNewMilestone));
-            } else if (milestoneTitle === 'Prioritized FRs' ||
-                milestoneTitle === 'New FRs') {
+            } else if (issueNewMilestone === MILESTONE_PRIORITIZED_FRS ||
+                issueNewMilestone === MILESTONE_NEW_FRS) {
               updates.push(applyLabel(issue, 'Type: Feature Request'));
-            } else if (milestoneTitle === 'Backlog Bugs' ||
+            } else if (issueNewMilestone === MILESTONE_BACKLOG_BUGS ||
                 milestoneTitle.startsWith('Sprint')) {
               updates.push(applyLabel(issue, 'Type: Bug'));
             }
             // Apply default priority if no priority
-            if (hasPriority == false && milestoneTitle != 'New FRs' &&
-                milestoneTitle !== '3P Implementation' &&
-                milestoneTitle !== 'Pending Triage' && milestone != null) {
+            if (hasPriority == false &&
+                issueNewMilestone != MILESTONE_NEW_FRS &&
+                issueNewMilestone !== MILESTONE_3P_IMPLEMENTATION &&
+                issueNewMilestone !== MILESTONE_PENDING_TRIAGE &&
+                milestone != null) {
               updates.push(applyLabel(issue, 'P2: Soon'));
             }
-            if (isDryrun) {
-              util.log('Performing a dry run. ' +
-                  'These are the updates that would have been applied:');
-              updates.forEach(function(update) {
-                util.log(util.inspect(update, {depth: null}));
-              });
-              return Promise.resolve();
+            // Add comment with missing Category
+            if (hasCategory == false) {
+              if (issueNewMilestone === MILESTONE_PENDING_TRIAGE ||
+                  issueNewMilestone === MILESTONE_DOCS_UPDATES ||
+                  issueNewMilestone == null ||
+                  issueNewMilestone === MILESTONE_GREAT_ISSUES) {
+                if (isDryrun) {
+                  util.log(util.colors.green('No comment needed '
+                      + ' for #' + issue.number));
+                }
+              } else {
+                updates.push(applyComment(issue,
+                    'This issue doesn\'t have a category'
+                    + ' which makes it harder for us to keep track of it. ' +
+                    assigneeName + ' Please add an appropriate category.'));
+              }
             }
             return Promise.all(updates);
           });
         });
-        return issues;
+        return promise;
       });
 }
 
@@ -217,16 +285,14 @@ function applyMilestone(issue, milestoneNumber) {
   };
 
   issue.milestone = milestoneNumber;
-  return createGithubRequest(
-      '/issues/' + issue.number,
-      'PATCH',
-      issue.milestone, 'milestone').then(function() {
-        if (verbose) {
-          util.log(util.colors.green(
-              'Milestone applied ' + issue.milestone +
-              ' for # ' + issue.number));
-        }
-      });
+  if (isDryrun) {
+    util.log(util.colors.green('Milestone applied ' + milestoneNumber +
+        ' for #' + issue.number));
+    return;
+  } else {
+    return createGithubRequest('/issues/' + issue.number,'PATCH',
+        issue.milestone, 'milestone');
+  }
 }
 
 /**
@@ -235,21 +301,60 @@ function applyMilestone(issue, milestoneNumber) {
  * @return {!Promise<*>}
  */
 function applyLabel(issue, label) {
-  const options = extend({}, milestoneOptions);
+  const options = extend({}, issuesOptions);
   options.qs = {
     'state': 'open',
     'per_page': 100,
     'access_token': GITHUB_ACCESS_TOKEN,
   };
-  return createGithubRequest(
-      '/issues/' + issue.number + '/labels',
-      'POST',
-      [label], 'label').then(function() {
-        if (verbose) {
-          util.log(util.colors.green(
-              'Label applied ' + label + ' for # ' + issue.number));
-        }
-      });
+  if (isDryrun) {
+    util.log(util.colors.green('Label applied ' +
+        label + ' for #' + issue.number));
+    return;
+  } else {
+    return createGithubRequest('/issues/' + issue.number + '/labels','POST',
+        [label], 'label');
+  }
+
+}
+
+/**
+ * @param {string} issue
+ * @param {string} comment
+ * @return {!Promise<*>}
+ */
+function applyComment(issue, comment) {
+  const options = extend({}, issuesOptions);
+  options.qs = {
+    'state': 'open',
+    'per_page': 100,
+    'access_token': GITHUB_ACCESS_TOKEN,
+  };
+  // delay the comment request so we don't reach github rate limits requests
+  const promise = new Promise(resolve => setTimeout(resolve, 120000));
+  return promise.then(function() {
+    if (isDryrun) {
+      util.log(util.colors.blue('waited 2 minutes to avoid gh rate limits'));
+      util.log(util.colors.green('Comment applied after ' +
+          'waiting 2 minutes to avoid github rate limits: ' + comment +
+          ' for #' + issue.number));
+      return;
+    } else {
+      createGithubRequest('/issues/' + issue.number + '/comments','POST',
+          comment, 'comment');
+    }
+  });
+}
+// calculate number of days since the latest update
+function getLastUpdate(issueLastUpdate) {
+  const t = new Date();
+  const splits = issueLastUpdate.split('-', 3);
+  const exactDay = splits[2].split('T', 1);
+  const firstDate = Date.UTC(splits[0],splits[1],exactDay[0]);
+  const secondDate = Date.UTC(t.getFullYear(),t.getMonth() + 1,t.getDate());
+  const diff = Math.abs((firstDate.valueOf() -
+      secondDate.valueOf()) / (24 * 60 * 60 * 1000));
+  return diff;
 }
 
 /**
@@ -279,6 +384,8 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
     options.json = true;
     if (typeRequest === 'milestone') {
       options.body.milestone = opt_data;
+    } else if (typeRequest === 'comment') {
+      options.body.body = opt_data;
     } else {
       options.body = opt_data;
     }
@@ -289,7 +396,7 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
 gulp.task(
     'process-github-issues',
     'Automatically updates the labels '
-      + 'and milestones of all open issues at github.com/ampproject/amphtml.',
+    + 'and milestones of all open issues at github.com/ampproject/amphtml.',
     processIssues,
     {
       options: {
