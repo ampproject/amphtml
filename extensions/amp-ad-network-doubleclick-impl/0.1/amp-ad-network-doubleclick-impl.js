@@ -683,7 +683,42 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               visiblePercentageMin: 50,
               continuousTimeMin: 1,
             });
-    return superReturnValue;
+    return frameLoadPromise;
+  }
+
+  /** @override  */
+  unlayoutCallback() {
+    super.unlayoutCallback();
+    this.maybeRemoveListenerForFluid();
+  }
+
+  /**
+   * Postmessages an initial message to the fluid creative.
+   * @visibleForTesting
+   */
+  connectFluidMessagingChannel() {
+    dev().assert(this.iframe.contentWindow,
+                 'Frame contentWindow unavailable.');
+    this.iframe.contentWindow./*OK*/postMessage(
+        JSON.stringify(dict({'message': 'connect', 'c': 'sfchannel1'})),
+        SAFEFRAME_ORIGIN);
+  }
+
+  /**
+   * Fires a delayed impression and notifies the Fluid creative that its
+   * container has been resized.
+   * @private
+   */
+  onFluidResize_() {
+    if (this.fluidImpressionUrl_) {
+      this.fireDelayedImpressions(this.fluidImpressionUrl_);
+      this.fluidImpressionUrl_ = null;
+    }
+    dev().assert(this.iframe.contentWindow,
+                 'Frame contentWindow unavailable.');
+    this.iframe.contentWindow./*OK*/postMessage(
+        JSON.stringify(dict({'message': 'resize-complete', 'c': 'sfchannel1'})),
+        SAFEFRAME_ORIGIN);
   }
 
   /** @override */
@@ -764,8 +799,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // We want to resize only if neither returned dimension is larger than its
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
-    if ((width != pWidth || height != pHeight)
-        && (width <= pWidth && height <= pHeight)) {
+    if (this.isFluid_ ||
+        (width != pWidth || height != pHeight) &&
+        (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
     }
   }
