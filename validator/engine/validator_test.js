@@ -566,6 +566,7 @@ describe('ValidatorRulesMakeSense', () => {
         'AMP-FIT-TEXT': 0,
         'AMP-FONT': 0,
         'AMP-FORM': 0,
+        'AMP-GWD-ANIMATION': 0,
         'AMP-IMG': 0,
         'AMP-PIXEL': 0,
         'AMP-SOCIAL-SHARE': 0,
