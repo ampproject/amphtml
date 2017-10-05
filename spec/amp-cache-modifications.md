@@ -288,6 +288,7 @@ Any `<link>` tag present with attribute `rel` equal to any of the following:
 
 *Condition*:
 Remove any `<meta>` tags except for those that:
+ - have attribute `charset`
  - do not have attributes `content`, `itemprop`, `name` and `property`
  - have attribute `http-equiv`
  - have attribute `name` with case-insensitive prefix `amp-`
