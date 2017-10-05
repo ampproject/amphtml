@@ -54,5 +54,6 @@ tags: {  # <amp-user-notification>
   }
   attrs: {
     name: "enctype"
+    value: "application/x-www-form-urlencoded"
   }
 }
