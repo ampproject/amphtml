@@ -58,8 +58,8 @@
     "pageview": "https://scomcluster.cxense.com/Repo/rep.gif?ver=1&typ=pgv&sid=$siteId&ckp=_client_id_&loc=_source_url_&rnd=_random_&ref=_document_referrer_&ltm=_timestamp_&wsz=_screen_width_x_screen_height_&bln=_browser_language_&chs=_document_charset_&col=_screen_color_depth_&tzo=_timezone_&cp_cx_channel=amp"
   },
   "dynatrace": {
-   "endpoint": "https://$tenant.live.dynatrace.com:443/ampbf",
-   "pageview": "https://$tenant.live.dynatrace.com:443/ampbf?type=js&flavor=amp&v=1&a=1%7C1%7C_load_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0%2C2%7C2%7C_onload_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0&fId=_page_view_id_&vID=_client_id_&referer=_source_url_&title=_title_&sw=_screen_width_&sh=_screen_height_&w=_viewport_width_&h=_viewport_height_&nt=a_nav_type_b_nav_timing_c_nav_timing_d_nav_timing_e_nav_timing_f_nav_timing_g_nav_timing_h_nav_timing_i_nav_timing_j_nav_timing_k_nav_timing_l_nav_timing_m_nav_timing_n_nav_timing_o_nav_timing_p_nav_timing_q_nav_timing_r_nav_timing_s_nav_timing_t_nav_timing_&app=ampapp&time=_timestamp_",
+   "endpoint": "https://$tenant.live.dynatrace.com:443/ampbf/$tenantpath",
+   "pageview": "https://$tenant.live.dynatrace.com:443/ampbf/$tenantpath?type=js&flavor=amp&v=1&a=1%7C1%7C_load_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0%2C2%7C2%7C_onload_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0&fId=_page_view_id_&vID=_client_id_&referer=_source_url_&title=_title_&sw=_screen_width_&sh=_screen_height_&w=_viewport_width_&h=_viewport_height_&nt=a_nav_type_b_nav_timing_c_nav_timing_d_nav_timing_e_nav_timing_f_nav_timing_g_nav_timing_h_nav_timing_i_nav_timing_j_nav_timing_k_nav_timing_l_nav_timing_m_nav_timing_n_nav_timing_o_nav_timing_p_nav_timing_q_nav_timing_r_nav_timing_s_nav_timing_t_nav_timing_&app=ampapp&time=_timestamp_",
   },
   "euleriananalytics": {
     "base": "https://$analyticsHost",
