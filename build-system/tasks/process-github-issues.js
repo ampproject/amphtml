@@ -66,6 +66,7 @@ const MILESTONE_GREAT_ISSUES = 25;
 const BIWEEKLY_DAYS = 14;
 // days for quarterly updates
 const QUARTERLY_DAYS = 89;
+const NUM_BATCHES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 // We start processing the issues by checking token first
 function processIssues() {
@@ -113,9 +114,9 @@ function updateGitHubIssues() {
   let promise = Promise.resolve();
   const arrayPromises = [];
   // we need to pull issues in batches
-  for (let batch = 1; batch < 11; batch++) {
+  NUM_BATCHES.forEach(function(batch) {
     arrayPromises.push(getIssues(batch));
-  }
+  });
   return BBPromise.all(arrayPromises)
       .then(requests => [].concat.apply([], requests))
       .then(issues => {
@@ -142,7 +143,7 @@ function updateGitHubIssues() {
           }
           // Get the assignee
           if (assignee) {
-            assigneeName = '@' + assignee['login'];
+            assigneeName = '@' + assignee.login;
           }
           // Get the title and state of the milestone
           if (milestone) {
@@ -173,14 +174,14 @@ function updateGitHubIssues() {
                     if (biweeklyUpdate == false) {
                       biweeklyUpdate = true;
                       updates.push(applyComment(issue, 'This is a high priority'
-                          + ' issue but it hasn\'t been updated in awhile.' +
+                          + ' issue but it hasn\'t been updated in awhile. ' +
                           assigneeName + ' Do you have any updates?'));
                     }
                   } else if (label.name.startsWith('P2') &&
                       quartelyUpdate == false) {
                     quartelyUpdate = true;
                     updates.push(applyComment(issue, 'This issue hasn\'t been '
-                        + ' updated in awhile.' +
+                        + ' updated in awhile. ' +
                     assigneeName + ' Do you have any updates?'));
                   }
                 }
@@ -203,7 +204,7 @@ function updateGitHubIssues() {
               if (quartelyUpdate == false) {
                 quartelyUpdate = true;
                 updates.push(applyComment(issue, 'This issue seems to be in ' +
-                    ' Pending Triage for awhile.' +
+                    ' Pending Triage for awhile. ' +
                     assigneeName + ' Please triage this to ' +
                     'an appropriate milestone.'));
               }
@@ -258,7 +259,7 @@ function updateGitHubIssues() {
               } else {
                 updates.push(applyComment(issue,
                     'This issue doesn\'t have a category'
-                    + ' which makes it harder for us to keep track of it.' +
+                    + ' which makes it harder for us to keep track of it. ' +
                     assigneeName + ' Please add an appropriate category.'));
               }
             }
@@ -383,7 +384,7 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
     if (typeRequest === 'milestone') {
       options.body.milestone = opt_data;
     } else if (typeRequest === 'comment') {
-      options.body['body'] = opt_data;
+      options.body.body = opt_data;
     } else {
       options.body = opt_data;
     }
