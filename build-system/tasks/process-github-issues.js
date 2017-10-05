@@ -111,7 +111,7 @@ function getIssues(opt_page) {
  */
 function updateGitHubIssues() {
   let promise = Promise.resolve();
-  let arrayPromises;
+  let arrayPromises = [];
   // we need to pull issues in batches
   for (let batch = 1; batch < 11; batch++) {
     arrayPromises.push(getIssues(batch));
@@ -129,7 +129,7 @@ function updateGitHubIssues() {
           let hasPriority = false;
           let hasCategory = false;
           let issueNewMilestone = MILESTONE_PENDING_TRIAGE;
-          const assignee = issue['assignee'];
+          const assignee = issue.assignee;
           let assigneeName = '';
           const issueLastUpdate = issue.updated_at;
           let biweeklyUpdate = true;
@@ -146,9 +146,9 @@ function updateGitHubIssues() {
           }
           // Get the title and state of the milestone
           if (milestone) {
-            milestoneTitle = milestone['title'];
-            milestoneState = milestone['state'];
-            issueNewMilestone = milestone['number'];
+            milestoneTitle = milestone.title;
+            milestoneState = milestone.state;
+            issueNewMilestone = milestone.number;
           }
           // promise starts
           promise = promise.then(function() {
@@ -159,7 +159,7 @@ function updateGitHubIssues() {
               if (label) {
                 // Check if the issues has type
                 if (label.name.startsWith('Type') ||
-               label.name.startsWith('Related')) {
+                    label.name.startsWith('Related')) {
                   issueType = label.name;
                 }
                 // Check if the issues has Priority
@@ -173,8 +173,8 @@ function updateGitHubIssues() {
                     if (biweeklyUpdate == false) {
                       biweeklyUpdate = true;
                       updates.push(applyComment(issue, 'This is a high priority'
-                      + ' issue but it hasn\'t been updated in awhile.' +
-                      assigneeName + ' Do you have any updates?'));
+                          + ' issue but it hasn\'t been updated in awhile.' +
+                          assigneeName + ' Do you have any updates?'));
                     }
                   } else if (label.name.startsWith('P2') &&
                       quartelyUpdate == false) {
@@ -334,7 +334,7 @@ function applyComment(issue, comment) {
     if (isDryrun) {
       util.log(util.colors.blue('waited 2 minutes to avoid gh rate limits'));
       util.log(util.colors.green('Comment applied after ' +
-          'waiting 2 minutes to avoid github rate limits' + comment +
+          'waiting 2 minutes to avoid github rate limits: ' + comment +
           ' for #' + issue.number));
       return;
     } else {
@@ -381,7 +381,7 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
   if (opt_data) {
     options.json = true;
     if (typeRequest === 'milestone') {
-      options.body['milestone'] = opt_data;
+      options.body.milestone = opt_data;
     } else if (typeRequest === 'comment') {
       options.body['body'] = opt_data;
     } else {
