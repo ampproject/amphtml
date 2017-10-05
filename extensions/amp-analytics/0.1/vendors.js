@@ -476,7 +476,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'tenant': '',
       'environment': 'live.dynatrace.com',
       'port': '443',
-	  'separator': '.',
+      'separator': '.',
     },
   },
 
