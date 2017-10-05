@@ -341,3 +341,5 @@ SomeBaseElementLikeClass.prototype.inViewport_;
 SomeBaseElementLikeClass.prototype.actionMap_;
 
 AMP.BaseTemplate;
+
+AMP.maybeExecuteRealTimeConfig = false;

@@ -1015,7 +1015,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
-   * @param {Array<!./real-time-config-manager.rtcResponseDef>=} opt_rtcResponsesPromise
+   * @param {Array<./real-time-config-manager.rtcResponseDef>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
   getAdUrl(opt_rtcResponsesPromise) {

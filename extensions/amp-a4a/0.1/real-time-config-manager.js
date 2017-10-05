@@ -204,10 +204,10 @@ export function validateRtcConfig_(element) {
   let timeout;
   try {
     user().assert(rtcConfig['vendors'] || rtcConfig['urls'],
-                  'RTC Config must specify vendors or urls');
+        'RTC Config must specify vendors or urls');
     user().assert(Object.keys(
         rtcConfig['vendors'] || {}).length || (rtcConfig['urls'] || []).length,
-                  'RTC empty vendors and urls');
+        'RTC empty vendors and urls');
     Object.keys(rtcConfig).forEach(key => {
       switch (key) {
         case 'vendors':
