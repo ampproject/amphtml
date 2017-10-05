@@ -21,7 +21,7 @@ const extend = require('util')._extend;
 const gulp = require('gulp-help')(require('gulp'));
 const request = BBPromise.promisify(require('request'));
 const util = require('gulp-util');
-// do not submit
+
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 
 const isDryrun = argv.dryrun;
@@ -66,6 +66,7 @@ const MILESTONE_GREAT_ISSUES = 25;
 const BIWEEKLY_DAYS = 14;
 // days for quarterly updates
 const QUARTERLY_DAYS = 89;
+// we need around 10 batches to get 1k issues
 const NUM_BATCHES = 11;
 
 // We start processing the issues by checking token first
