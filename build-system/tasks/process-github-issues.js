@@ -21,7 +21,7 @@ const extend = require('util')._extend;
 const gulp = require('gulp-help')(require('gulp'));
 const request = BBPromise.promisify(require('request'));
 const util = require('gulp-util');
-
+// do not submit
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 
 const isDryrun = argv.dryrun;
@@ -66,7 +66,7 @@ const MILESTONE_GREAT_ISSUES = 25;
 const BIWEEKLY_DAYS = 14;
 // days for quarterly updates
 const QUARTERLY_DAYS = 89;
-const NUM_BATCHES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const NUM_BATCHES = 11;
 
 // We start processing the issues by checking token first
 function processIssues() {
@@ -114,9 +114,9 @@ function updateGitHubIssues() {
   let promise = Promise.resolve();
   const arrayPromises = [];
   // we need to pull issues in batches
-  NUM_BATCHES.forEach(function(batch) {
+  for (let batch = 1; batch < NUM_BATCHES; batch++) {
     arrayPromises.push(getIssues(batch));
-  });
+  }
   return BBPromise.all(arrayPromises)
       .then(requests => [].concat.apply([], requests))
       .then(issues => {
