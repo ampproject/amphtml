@@ -121,11 +121,17 @@ function main() {
     return fs.readFileAsync(target)
         .then(file => {
           let contents = file.toString();
+          if (numConfigs(contents) == 0) {
+            util.log('No configs found in', util.colors.cyan(target));
+            return Promise.resolve();
+          }
           sanityCheck(contents);
           const config =
           /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
           contents = contents.replace(config, '');
-          return writeTarget(target, contents, argv.dryrun);
+          return writeTarget(target, contents, argv.dryrun).then(() => {
+            util.log('Removed config from', util.colors.cyan(target));
+          });
         });
   }
 
@@ -166,6 +172,13 @@ function main() {
       .then(fileString => {
         sanityCheck(fileString);
         return writeTarget(target, fileString, argv.dryrun);
+      })
+      .then(() => {
+        util.log(
+            'Wrote',
+            util.colors.cyan(argv.canary ? 'canary' : 'prod'),
+            'config to',
+            util.colors.cyan(target));
       });
 }
 
