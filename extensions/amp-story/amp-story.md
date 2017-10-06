@@ -101,7 +101,7 @@ This component represents an entire Story.  The component itself will implement 
 #### Attributes
 
   * **standalone** [required]: Identifies that the document is a story.
-  * **related-articles** [optional]: A URL endpoint that accepts GET requests and returns a JSON response with links to related and trending stories, to be shown on a screen at the end of the story.  If omitted, the amp-story component will render a default UI for the end screen.  See the [related-articles endpoint section](#related-articles-json-endpoint) for the JSON response format.
+  * **bookend-config-src** [optional]: A URL endpoint that accepts GET requests and returns a JSON response with links to related and trending stories, to be shown on a screen at the end of the story.  If omitted, the amp-story component will render a default UI for the end screen.  See the [bookend endpoint section](#bookend-json-endpoint) for the JSON response format.
   * **background-audio** [optional]: A URI to an audio file that should be played throughout the story.
 
 #### Children
@@ -118,13 +118,13 @@ One or more [`<amp-story-page>`](#amp-story-page-component) components, containi
 </amp-story>
 ```
 
-### Related Articles JSON endpoint
+### Bookend JSON endpoint
 
-<img src="img/related-articles.gif" alt="related article example" width="300">
+<img src="img/related-articles.gif" alt="bookend example" width="300">
 
 #### Description
 
-This is a URL endpoint that returns the data for the end screen of the story, containing related links, etc.  The system is responsible for fetching the data necessary to render related and trending articles.  This can be served from a static JSON file, or dynamically-generated (e.g. to calculate what is currently trending).
+This is a URL endpoint that returns the data for the end screen of the story, containing sharing options, related links, etc.  The system is responsible for fetching the data necessary to render related and trending articles.  This can be served from a static JSON file, or dynamically-generated (e.g. to calculate what is currently trending).
 
 Each section uses the string key provided the publisher as a heading/name for the section in the UI then the array of articles as the articles to be shown in that section.  The domain and favicon of each linked article are automatically parsed/fetched from the specified URL for each piece of content.
 
