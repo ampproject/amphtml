@@ -154,6 +154,11 @@ module.exports = {
       browserName: 'iphone',
       version: '10.0',
     },
+    SL_iOS_11_0: {
+      base: 'SauceLabs',
+      browserName: 'iphone',
+      version: '11.0',
+    },
     SL_Firefox_latest: {
       base: 'SauceLabs',
       browserName: 'firefox',
