@@ -95,7 +95,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
   /** @private */
   scheduleIframeLoad_() {
     Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
-      // If the user is longer than 20 seconds on this page, load
+      // If the user is longer than 10 seconds on this page, load
       // the external iframe to install the ServiceWorker. The wait is
       // introduced to avoid installing SWs for content that the user
       // only engaged with superficially.
