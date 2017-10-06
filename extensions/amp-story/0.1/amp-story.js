@@ -70,6 +70,9 @@ const AMP_STORY_STANDALONE_ATTRIBUTE = 'standalone';
 /** @private @const {number} */
 const FULLSCREEN_THRESHOLD = 1024;
 
+/** @private @const {string} */
+const AMP_EXPERIMENTS_PAGE_URL = 'https://cdn.ampproject.org/experiments.html';
+
 /** @type {string} */
 const TAG = 'amp-story';
 
@@ -133,7 +136,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG), 'enable amp-story experiment');
+    this.assertAmpStoryExperiment_();
 
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
       this.getAmpDoc().win.document.documentElement.classList
@@ -251,6 +254,32 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   prerenderAllowed() {
     return true;
+  }
+
+
+  /** @private */
+  assertAmpStoryExperiment_() {
+    if (!isExperimentOn(this.win, TAG)) {
+      const errorIconEl = this.win.document.createElement('div');
+      errorIconEl.classList.add('i-amphtml-story-experiment-error-icon');
+
+      const errorMsgEl = this.win.document.createElement('p');
+      errorMsgEl.textContent = 'You must enable the amp-story experiment to ' +
+          'view this content. Enable or disable your AMP experiments:';
+
+      const experimentsLinkEl = this.win.document.createElement('a');
+      experimentsLinkEl.href = AMP_EXPERIMENTS_PAGE_URL;
+      experimentsLinkEl.textContent = 'AMP Experiments Dashboard';
+
+      const errorEl = this.win.document.createElement('div');
+      errorEl.classList.add('i-amphtml-story-experiment-error');
+      errorEl.appendChild(errorIconEl);
+      errorEl.appendChild(errorMsgEl);
+      errorEl.appendChild(experimentsLinkEl);
+      this.element.appendChild(errorEl);
+
+      user().error(TAG, 'enable amp-story experiment');
+    }
   }
 
 
