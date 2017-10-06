@@ -74,6 +74,7 @@ function getConfig() {
             // 'SL_iOS_8_4', // Disabled due to flakiness and low market share
             'SL_iOS_9_1',
             'SL_iOS_10_0',
+            'SL_iOS_11_0',
             'SL_IE_11',
           ],
     });
