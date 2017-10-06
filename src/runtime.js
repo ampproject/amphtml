@@ -901,7 +901,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
  * @param {function()} cb Callback that should run after a frame was
  *     pumped.
  */
-function maybePumpEarlyFrame(win, cb) {
+export function maybePumpEarlyFrame(win, cb) {
   if (!isExperimentOn(win, 'pump-early-frame')) {
     cb();
     return;
@@ -912,9 +912,21 @@ function maybePumpEarlyFrame(win, cb) {
     cb();
     return;
   }
-  if (hasRenderDelayingServices(win)) {
+  if (win.pumpedEarlyFrame_) {
     cb();
     return;
   }
+  const isSsrWithBoilerplateRemoval =
+      document.documentElement.hasAttribute('i-amphtml-no-boilerplate');
+  // We don't wait to paint a frame if
+  // - the doc was not SSRed with boilerplate removal
+  // - or there are render delaying services.
+  if (!isSsrWithBoilerplateRemoval
+      || hasRenderDelayingServices(win)) {
+    cb();
+    return;
+  }
+  // We only ever want to do this once per window.
+  win.pumpedEarlyFrame_ = true;
   Services.timerFor(win).delay(cb, 1);
 }

@@ -33,6 +33,7 @@ import {
   installAmpdocServices,
   installBuiltins,
   installRuntimeServices,
+  maybePumpEarlyFrame,
   adopt,
 } from './runtime';
 import {cssText} from '../build/css';
@@ -53,59 +54,70 @@ let ampdocService;
 try {
   // Should happen first.
   installErrorReporting(self);  // Also calls makeBodyVisible on errors.
-
-  // Declare that this runtime will support a single root doc. Should happen
-  // as early as possible.
-  installDocService(self,  /* isSingleDoc */ true);
-  ampdocService = Services.ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.
   makeBodyVisible(self.document);
   throw e;
 }
-startupChunk(self.document, function initial() {
-  /** @const {!./service/ampdoc-impl.AmpDoc} */
-  const ampdoc = ampdocService.getAmpDoc(self.document);
-  installPerformanceService(self);
-  /** @const {!./service/performance-impl.Performance} */
-  const perf = Services.performanceFor(self);
-  fontStylesheetTimeout(self);
-  perf.tick('is');
-  installStylesForDoc(ampdoc, cssText, () => {
-    startupChunk(self.document, function services() {
-      // Core services.
-      installRuntimeServices(self);
-      installAmpdocServices(ampdoc);
-      // We need the core services (viewer/resources) to start instrumenting
-      perf.coreServicesAvailable();
-      maybeTrackImpression(self);
-    });
-    startupChunk(self.document, function builtins() {
-      // Builtins.
-      installBuiltins(self);
-    });
-    startupChunk(self.document, function adoptWindow() {
-      adopt(self);
-    });
-    startupChunk(self.document, function stub() {
-      // Pre-stub already known elements.
-      stubElementsForDoc(ampdoc);
-    });
-    startupChunk(self.document, function final() {
-      installPullToRefreshBlocker(self);
+// If the document was SSRed with boilerplate removal we might want to
+// yield at this point and allow the browser to paint a frame.
+// The improves time to First Contentful Paint, because otherwise
+// AMP's JS execution way be in the way of painting.
+maybePumpEarlyFrame(self, () => {
+  try {
+    // Declare that this runtime will support a single root doc. Should happen
+    // as early as possible.
+    installDocService(self,  /* isSingleDoc */ true);
+    ampdocService = Services.ampdocServiceFor(self);
+  } catch (e) {
+    // In case of an error call this.
+    makeBodyVisible(self.document);
+    throw e;
 
-      maybeValidate(self);
-      makeBodyVisible(self.document, /* waitForServices */ true);
-      installCacheServiceWorker(self);
-    });
-    startupChunk(self.document, function finalTick() {
-      perf.tick('e_is');
-      Services.resourcesForDoc(ampdoc).ampInitComplete();
-      // TODO(erwinm): move invocation of the `flush` method when we have the
-      // new ticks in place to batch the ticks properly.
-      perf.flush();
-    });
-  }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+  startupChunk(self.document, function initial() {
+    /** @const {!./service/ampdoc-impl.AmpDoc} */
+    const ampdoc = ampdocService.getAmpDoc(self.document);
+    installPerformanceService(self);
+    /** @const {!./service/performance-impl.Performance} */
+    const perf = Services.performanceFor(self);
+    fontStylesheetTimeout(self);
+    perf.tick('is');
+    installStylesForDoc(ampdoc, cssText, () => {
+      startupChunk(self.document, function services() {
+        // Core services.
+        installRuntimeServices(self);
+        installAmpdocServices(ampdoc);
+        // We need the core services (viewer/resources) to start instrumenting
+        perf.coreServicesAvailable();
+        maybeTrackImpression(self);
+      });
+      startupChunk(self.document, function builtins() {
+        // Builtins.
+        installBuiltins(self);
+      });
+      startupChunk(self.document, function adoptWindow() {
+        adopt(self);
+      });
+      startupChunk(self.document, function stub() {
+        // Pre-stub already known elements.
+        stubElementsForDoc(ampdoc);
+      });
+      startupChunk(self.document, function final() {
+        installPullToRefreshBlocker(self);
+
+        maybeValidate(self);
+        makeBodyVisible(self.document, /* waitForServices */ true);
+        installCacheServiceWorker(self);
+      });
+      startupChunk(self.document, function finalTick() {
+        perf.tick('e_is');
+        Services.resourcesForDoc(ampdoc).ampInitComplete();
+        // TODO(erwinm): move invocation of the `flush` method when we have the
+        // new ticks in place to batch the ticks properly.
+        perf.flush();
+      });
+    }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+  });
 });
 
 // Output a message to the console and add an attribute to the <html>
