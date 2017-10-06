@@ -52,4 +52,8 @@ tags: {  # <amp-user-notification>
       allow_empty: false
     }
   }
+  attrs: {
+    name: "enctype"
+    value: "application/x-www-form-urlencoded"
+  }
 }
