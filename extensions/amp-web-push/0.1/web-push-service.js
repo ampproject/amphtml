@@ -15,19 +15,15 @@
  */
 
 import {getMode} from '../../../src/mode';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {CSS} from '../../../build/amp-web-push-0.1.css';
 import {IFrameHost} from './iframehost';
 import {WindowMessenger} from './window-messenger';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {openWindowDialog} from '../../../src/dom';
-import {
-  TAG,
-  WIDGET_TAG,
-  NotificationPermission,
-} from './vars';
+import {parseUrl, parseQueryString} from '../../../src/url';
+import {TAG, WIDGET_TAG, NotificationPermission, StorageKeys} from './vars';
 import {WebPushWidgetVisibilities} from './amp-web-push-widget';
-import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 
 /** @typedef {{
@@ -64,7 +60,6 @@ export let AmpWebPushConfig;
  * whether the user is subscribed or unsubscribed.
  */
 export class WebPushService {
-
   /**
     * Describes the URL query parameter appended to the URL when the permission
     * dialog redirects back to the AMP page to continue subscribing.
@@ -82,7 +77,7 @@ export class WebPushService {
    */
   static get PERMISSION_POPUP_URL_FRAGMENT() {
     return 'amp-web-push-subscribing=yes';
-  };
+  }
 
   /**
    * Describes the extension's version a remote service worker supports.
@@ -126,6 +121,9 @@ export class WebPushService {
     /** @private {./iframehost.IFrameHost} */
     this.iframe_ = null;
 
+    /** @private {?NotificationPermission}} */
+    this.lastKnownPermission_ = null;
+
     /**
      * Create a postMessage() helper to listen for messages
      *
@@ -149,7 +147,7 @@ export class WebPushService {
 
     // Exit early if web push isn't supported
     if (!this.environmentSupportsWebPush()) {
-      dev().fine(TAG, 'Web push is not supported.');
+      user().warn(TAG, 'Web push is not supported.');
       return Promise.reject('Web push is not supported');
     }
 
@@ -158,19 +156,25 @@ export class WebPushService {
     // Add the IFrame
     const iframeLoadPromise = this.installHelperFrame();
 
-    iframeLoadPromise.then(() => {
-      dev().fine(TAG, `Helper frame ${this.config_['helper-iframe-url']} ` +
-        'DOM loaded. Connecting to the frame via postMessage()...');
-      return this.frameMessenger_.connect(
-          this.iframe_.getDomElement().contentWindow,
-          new URL(this.config_['helper-iframe-url']).origin);
-    }).then(() => {
-      if (this.isContinuingSubscriptionFromRedirect()) {
-        this.resumeSubscribingForPushNotifications_();
-      } else {
-        return this.updateWidgetVisibilities();
-      }
-    });
+    iframeLoadPromise
+        .then(() => {
+          dev().fine(
+              TAG,
+              `Helper frame ${this.config_['helper-iframe-url']} ` +
+            'DOM loaded. Connecting to the frame via postMessage()...'
+        );
+          return this.frameMessenger_.connect(
+              this.iframe_.getDomElement().contentWindow,
+              parseUrl(this.config_['helper-iframe-url']).origin
+        );
+        })
+        .then(() => {
+          if (this.isContinuingSubscriptionFromRedirect()) {
+            this.resumeSubscribingForPushNotifications_();
+          } else {
+            return this.updateWidgetVisibilities();
+          }
+        });
 
     return iframeLoadPromise;
   }
@@ -220,8 +224,10 @@ export class WebPushService {
    */
   isContinuingSubscriptionFromRedirect() {
     const location = this.ampdoc.win.testLocation || this.ampdoc.win.location;
-    return location.search.indexOf(
-        WebPushService.PERMISSION_POPUP_URL_FRAGMENT) !== -1;
+    return (
+      location.search.indexOf(WebPushService.PERMISSION_POPUP_URL_FRAGMENT) !==
+      -1
+    );
   }
 
   /**
@@ -230,17 +236,20 @@ export class WebPushService {
    * @param {string} url
    */
   removePermissionPopupUrlFragmentFromUrl(url) {
-    let urlWithoutFragment =
-      url.replace(`?${WebPushService.PERMISSION_POPUP_URL_FRAGMENT}`, '');
-    urlWithoutFragment =
-      urlWithoutFragment.replace(
-          `&${WebPushService.PERMISSION_POPUP_URL_FRAGMENT}`, '');
+    let urlWithoutFragment = url.replace(
+        `?${WebPushService.PERMISSION_POPUP_URL_FRAGMENT}`,
+        ''
+    );
+    urlWithoutFragment = urlWithoutFragment.replace(
+        `&${WebPushService.PERMISSION_POPUP_URL_FRAGMENT}`,
+        ''
+    );
     return urlWithoutFragment;
   }
 
   /**
-   * Waits until the helper iframe has loaded, and then sends the message to
-   * the helper iframe and awaits a reply. Errors that are returned are thrown,
+   * Waits until the helper iframe has loaded, and then sends the message to the
+   * helper iframe and awaits a reply. Errors that are returned are thrown,
    * otherwise the message is returned as a Promise.
    *
    * This is used by all of our AMP page <-> helper iframe communications.
@@ -251,17 +260,22 @@ export class WebPushService {
    * @private
    */
   queryHelperFrame_(messageTopic, message) {
-    return this.iframe_.whenReady().then(() => {
-      return this.frameMessenger_.send(messageTopic, message);
-    }).then(result => {
-      const replyPayload = result[0];
-      if (replyPayload.success) {
-        return replyPayload.result;
-      } else {
-        throw new Error(`AMP page helper iframe query topic ${messageTopic} ` +
-          `and message ${message} failed with: ${replyPayload.error}`);
-      }
-    });
+    return this.iframe_
+        .whenReady()
+        .then(() => {
+          return this.frameMessenger_.send(messageTopic, message);
+        })
+        .then(result => {
+          const replyPayload = result[0];
+          if (replyPayload.success) {
+            return replyPayload.result;
+          } else {
+            throw new Error(
+            `AMP page helper iframe query topic ${messageTopic} ` +
+              `and message ${message} failed with: ${replyPayload.error}`
+          );
+          }
+        });
   }
 
   /**
@@ -277,13 +291,10 @@ export class WebPushService {
    * @private
    */
   queryServiceWorker_(messageTopic, message) {
-    return this.queryHelperFrame_(
-        WindowMessenger.Topics.SERVICE_WORKER_QUERY,
-        {
-          topic: messageTopic,
-          payload: message,
-        }
-    );
+    return this.queryHelperFrame_(WindowMessenger.Topics.SERVICE_WORKER_QUERY, {
+      topic: messageTopic,
+      payload: message,
+    });
   }
 
   /**
@@ -322,7 +333,9 @@ export class WebPushService {
         {
           workerUrl: this.config_['service-worker-url'],
           registrationOptions: this.config_.serviceWorkerRegistrationOptions ||
-          {scope: '/'},
+            {
+              scope: '/',
+            },
         }
     );
   }
@@ -332,10 +345,7 @@ export class WebPushService {
    * @return {Promise<ServiceWorkerState>}
    */
   querySubscriptionStateRemotely() {
-    return this.queryServiceWorker_(
-        'amp-web-push-subscription-state',
-        null
-    );
+    return this.queryServiceWorker_('amp-web-push-subscription-state', null);
   }
 
   /**
@@ -343,10 +353,7 @@ export class WebPushService {
    * @return {Promise}
    */
   subscribeForPushRemotely() {
-    return this.queryServiceWorker_(
-        'amp-web-push-subscribe',
-        null
-    );
+    return this.queryServiceWorker_('amp-web-push-subscribe', null);
   }
 
   /**
@@ -354,10 +361,7 @@ export class WebPushService {
    * @return {Promise<ServiceWorkerState>}
    */
   unsubscribeFromPushRemotely() {
-    return this.queryServiceWorker_(
-        'amp-web-push-unsubscribe',
-        null
-    );
+    return this.queryServiceWorker_('amp-web-push-unsubscribe', null);
   }
 
   /**
@@ -368,19 +372,55 @@ export class WebPushService {
    */
   isServiceWorkerActivated() {
     const self = this;
-    return this.queryServiceWorkerState_().then(
-        function(serviceWorkerState) {
-          const isControllingFrame =
-            serviceWorkerState.isControllingFrame === true;
-          const serviceWorkerHasCorrectUrl =
-            serviceWorkerState.url === self.config_['service-worker-url'];
-          const serviceWorkerActivated =
-            serviceWorkerState.state === 'activated';
+    return this.queryServiceWorkerState_().then(serviceWorkerState => {
+      const isControllingFrame = serviceWorkerState.isControllingFrame === true;
+      const serviceWorkerHasCorrectUrl = this.isUrlSimilarForQueryParams(
+          serviceWorkerState.url,
+          self.config_['service-worker-url']
+      );
+      const serviceWorkerActivated = serviceWorkerState.state === 'activated';
 
-          return isControllingFrame &&
-            serviceWorkerHasCorrectUrl &&
-            serviceWorkerActivated;
-        });
+      return (
+        isControllingFrame &&
+        serviceWorkerHasCorrectUrl &&
+        serviceWorkerActivated
+      );
+    });
+  }
+
+  /**
+   * Compares if two URLs are identical except for a subset of the query
+   * parameters. The second URL (that is being tested) must have the same subset
+   * of query parameters as the first URL provided, and the second URL can have
+   * more than the first URL's query parameters. All other components like
+   * origin and pathname must be equal.
+   *
+   * @param {string} originalUrlString
+   * @param {string} urlToTestString
+   * @return {boolean}
+   */
+  isUrlSimilarForQueryParams(originalUrlString, urlToTestString) {
+    const originalUrl = parseUrl(originalUrlString);
+    const originalUrlQueryParams = parseQueryString(originalUrl.search);
+    const urlToTest = parseUrl(urlToTestString);
+    const urlToTestQueryParams = parseQueryString(urlToTest.search);
+
+    // The URL to test may have more query params than the original URL, but it
+    // must have at least the same query params as original URL
+    for (const originalKey in originalUrlQueryParams) {
+      if (
+        urlToTestQueryParams[originalKey] !==
+        originalUrlQueryParams[originalKey]
+      ) {
+        return false;
+      }
+    }
+
+    // The rest of the URL, excluding the query params, must be identical
+    return (
+      originalUrl.origin === urlToTest.origin &&
+      originalUrl.pathname === urlToTest.pathname
+    );
   }
 
   /**
@@ -395,18 +435,35 @@ export class WebPushService {
    * @param {boolean} isVisible
    */
   setWidgetVisibilities(widgetCategoryName, isVisible) {
-    const widgetDomElements = this.ampdoc.getRootNode()
+    const widgetDomElements = this.ampdoc
+      .getRootNode()
       .querySelectorAll(`${WIDGET_TAG}[visibility=${widgetCategoryName}]`);
-    const visibilityCssClassName = 'amp-invisible';
+    const invisibilityCssClassName = 'amp-invisible';
 
     for (let i = 0; i < widgetDomElements.length; i++) {
       const widgetDomElement = widgetDomElements[i];
       if (isVisible) {
-        widgetDomElement.classList.remove(visibilityCssClassName);
+        widgetDomElement.classList.remove(invisibilityCssClassName);
       } else {
-        widgetDomElement.classList.add(visibilityCssClassName);
+        widgetDomElement.classList.add(invisibilityCssClassName);
       }
     }
+  }
+
+  /**
+   * Returns true if the publisher defined some markup on the page with the
+   * widget visibility section (e.g. <tag visiblity=widgetCategoryName>).
+   *
+   * @param {string} widgetCategoryName
+   * @return {boolean}
+   * @private
+   */
+  doesWidgetCategoryMarkupExist_(widgetCategoryName) {
+    const widgetDomElements = this.ampdoc
+      .getRootNode()
+      .querySelectorAll(`${WIDGET_TAG}[visibility=${widgetCategoryName}]`);
+
+    return widgetDomElements.length > 0;
   }
 
   /**
@@ -420,6 +477,30 @@ export class WebPushService {
   }
 
   /**
+   * @private
+   * @return {Promise}
+   *
+   * Store the notification permission before the user clicks the Subscribe
+   * button, because the permission may currently be granted, and we can avoid
+   * opening the popup in the future if the permission is granted.
+   *
+   * The user might have previously subscribed and then cleared their browser
+   * data without resetting their permission, and in this case we don't have to
+   * open a popup when resubscribing.
+   *
+   * We can't check the notification permission when the user clicks Subscribe
+   * because waiting on promises after clicking buttons triggers the browser's
+   * popup blocker. So we have to check and store the permission before the user
+   * clicks Subscribe and use the stored result when the user finally clicks
+   * Subscribe.
+   */
+  storeLastKnownPermission_() {
+    return this.queryNotificationPermission().then(permission => {
+      this.lastKnownPermission_ = permission;
+    });
+  }
+
+  /**
    * Queries the helper frame for notification permissions and service worker
    * registration state to compute visibility for subscription and
    * unsubscription widgets.
@@ -427,20 +508,79 @@ export class WebPushService {
    * @return {Promise}
    */
   updateWidgetVisibilities() {
-    return this.queryNotificationPermission().then(notificationPermission => {
-      if (notificationPermission === NotificationPermission.DENIED) {
-        this.updateWidgetVisibilitiesNotificationPermissionsBlocked_();
-      } else {
-        return this.isServiceWorkerActivated().then(
-            isServiceWorkerActivated => {
-              if (isServiceWorkerActivated) {
-                this.updateWidgetVisibilitiesServiceWorkerActivated_();
-              } else {
-                this.updateWidgetVisibilitiesUnsubscribed_();
-              }
-            });
-      }
-    });
+    /*
+      In Chrome 62+, notification permission returned by a cross-origin iframe
+      is ambiguous for the default/denied state. We have to rely on stored
+      permission values. We assume the permission state is default (e.g. new
+      user case) unless we see a different stored value.
+
+      The initial release of AMP web push does not support the STORAGE_GET
+      query. An existing query topic was hijacked to support both its existing
+      task and returning whether a query topic was supported. This prevents an
+      unexpected messenger query from delaying indefinitely.
+     */
+    return this.storeLastKnownPermission_()
+        .then(() => this.isQuerySupported_(WindowMessenger.Topics.STORAGE_GET))
+        .then(response => {
+        /*
+          Response could be "denied", "granted", or "default". This is a
+          response to the notification permission state query, and we're
+          hijacking the call to get a special return value if the user has
+          updated their helper frame.
+
+          We want to make sure response is a boolean true value, and not a
+          permission string.
+        */
+          const isSupported = response === true;
+          if (isSupported) {
+          /*
+            The site has v2+ of AMP web push's helper frame and supports
+            retrieving the remote storage value.
+          */
+            return this.getCanonicalFrameStorageValue_(
+                StorageKeys.NOTIFICATION_PERMISSION
+          );
+          } else {
+          /*
+            The site is running our initial AMP web push release and the helper
+            frame does not support retrieving the remote storage value. Assume the
+            permission is default to provide the best user experience.
+          */
+            return Promise.resolve(NotificationPermission.DEFAULT);
+          }
+        })
+        .then(canonicalNotificationPermission => {
+          /*
+            If the canonical notification permission is:
+              - Blocked
+                - If the publisher has defined a blocked widget section, show it,
+                  otherwise show the unsubscribed widget.
+              - Default or Granted
+                - Resume flow
+          */
+          if (canonicalNotificationPermission ===
+              NotificationPermission.DENIED) {
+            if (
+              this.doesWidgetCategoryMarkupExist_(
+                  WebPushWidgetVisibilities.BLOCKED
+              )
+          ) {
+              this.updateWidgetVisibilitiesBlocked_();
+            } else {
+              this.updateWidgetVisibilitiesUnsubscribed_();
+            }
+          } else {
+            return this.isServiceWorkerActivated().then(
+                isServiceWorkerActivated => {
+                  if (isServiceWorkerActivated) {
+                    this.updateWidgetVisibilitiesServiceWorkerActivated_();
+                  } else {
+                    this.updateWidgetVisibilitiesUnsubscribed_();
+                  }
+                }
+          );
+          }
+        });
   }
 
   /** @private */
@@ -464,23 +604,30 @@ export class WebPushService {
               const isSubscribed = reply;
               if (isSubscribed) {
                 this.setWidgetVisibilities(
-                    WebPushWidgetVisibilities.UNSUBSCRIBED, false);
+                    WebPushWidgetVisibilities.UNSUBSCRIBED,
+                    false
+              );
                 this.setWidgetVisibilities(
-                    WebPushWidgetVisibilities.SUBSCRIBED, true);
+                    WebPushWidgetVisibilities.SUBSCRIBED,
+                    true
+              );
                 this.setWidgetVisibilities(
-                    WebPushWidgetVisibilities.BLOCKED, false);
+                    WebPushWidgetVisibilities.BLOCKED,
+                    false
+              );
               } else {
                 this.updateWidgetVisibilitiesUnsubscribed_();
               }
               break;
             default:
             /*
-              Service worker returned incorrect amp-web-push reply
-              (amp-web-push not supported); widgets will stay hidden.
+              Service worker returned incorrect amp-web-push reply (amp-web-push
+              not supported); widgets will stay hidden.
              */
               throw user().createError(
                   'The controlling service worker replied to amp-web-push ' +
-                'with an unexpected value.');
+                'with an unexpected value.'
+            );
           }
         }),
         'The controlling service worker does not support amp-web-push.'
@@ -494,26 +641,93 @@ export class WebPushService {
     this.setWidgetVisibilities(WebPushWidgetVisibilities.BLOCKED, false);
   }
 
+  /** @private */
+  updateWidgetVisibilitiesBlocked_() {
+    this.setWidgetVisibilities(WebPushWidgetVisibilities.UNSUBSCRIBED, false);
+    this.setWidgetVisibilities(WebPushWidgetVisibilities.SUBSCRIBED, false);
+    this.setWidgetVisibilities(WebPushWidgetVisibilities.BLOCKED, true);
+  }
+
   /**
    * Subscribes the user to web push notifications.
    *
    * This action is exposed from this service and is called from the config
    * element.
    *
+   * @param {function()} onPopupClosed
    * @return {Promise}
    */
-  subscribe() {
-    this.registerServiceWorker();
-    this.openPopupOrRedirect();
+  subscribe(onPopupClosed) {
+    const promises = [];
+    // Register the service worker in the background in parallel for a headstart
+    promises.push(this.registerServiceWorker());
+    promises.push(
+        new Promise(resolve => {
+          /*
+            In most environments, the canonical notification permission returned
+            is accurate. On Chrome 62+, the permission is non-ambiguous only if
+            it is granted. If the permission is anything other than granted, we
+            can't trust it.
+          */
+          switch (this.lastKnownPermission_) {
+            /*
+              Because notification permissions are already granted, we do not
+              need to open a popup to ask for permissions. Subscribe in the
+              background using the helper frame.
+            */
+            case NotificationPermission.GRANTED:
+              return this.onPermissionGrantedSubscribe_().then(() => {
+                resolve();
+              });
+            default:
+              /*
+                Because notification permissions are not granted, we need to
+                open a popup asking the user to grant permissions.
 
-    this.popupMessenger_ = new WindowMessenger({
-      debug: this.debug_,
-    });
-    this.popupMessenger_.listen([this.config_['permission-dialog-url']]);
+                The last known permission can be unknown, in which case we open
+                a popup anyways.
+              */
+              const permissionDialogWindow = this.openPopupOrRedirect();
+              this.checkPermissionDialogClosedInterval_(
+                  permissionDialogWindow,
+                  onPopupClosed
+              );
 
-    return this.onPermissionDialogInteracted().then(result => {
-      return this.handlePermissionDialogInteraction(result);
-    });
+              this.popupMessenger_ = new WindowMessenger({
+                debug: this.debug_,
+              });
+              this.popupMessenger_.listen([
+                this.config_['permission-dialog-url'],
+              ]);
+
+              this.onPermissionDialogInteracted().then(result => {
+                return this.handlePermissionDialogInteraction(result);
+              }).then(() => {
+                resolve();
+              });
+          }
+        })
+    );
+
+    return Promise.all(promises);
+  }
+
+  /**
+   * Checks whether the permission dialog is still open. When closed, a closed
+   * callback is executed.
+   *
+   * @param {?Window} permissionDialogWindow
+   * @private
+   */
+  checkPermissionDialogClosedInterval_(permissionDialogWindow, onPopupClosed) {
+    if (permissionDialogWindow && !permissionDialogWindow.closed) {
+      const interval = this.ampdoc.win.setInterval(() => {
+        if (permissionDialogWindow.closed) {
+          onPopupClosed();
+          this.ampdoc.win.clearInterval(interval);
+        }
+      }, 500);
+    }
   }
 
   /**
@@ -535,23 +749,25 @@ export class WebPushService {
     const reply = result[1];
     switch (permission) {
       case NotificationPermission.DENIED:
-        // User blocked
-        reply({closeFrame: true});
-        return this.updateWidgetVisibilities();
       case NotificationPermission.DEFAULT:
-        // User clicked X
+        // User clicked X or blocked
         reply({closeFrame: true});
         return this.updateWidgetVisibilities();
       case NotificationPermission.GRANTED:
         // User allowed
         reply({closeFrame: true});
-        this.subscribeForPushRemotely().then(() => {
-          return this.updateWidgetVisibilities();
-        });
+        this.onPermissionGrantedSubscribe_();
         break;
       default:
         throw new Error('Unexpected permission value:', permission);
     }
+  }
+
+  /** @private */
+  onPermissionGrantedSubscribe_() {
+    return this.subscribeForPushRemotely().then(() => {
+      return this.updateWidgetVisibilities();
+    });
   }
 
   /**
@@ -569,6 +785,43 @@ export class WebPushService {
   }
 
   /**
+   * Returns a Promise that resolves when the helper iframe responds with
+   * whether the messenger query is supported.
+   *
+   * This special query is not supported with the initial helper frame release
+   * of AMP web push, and is only supported on the 2nd release of AMP web push
+   * and onwards.
+   *
+   * @param {string} queryType One of the topics defined in
+   * WindowMessenger.Topics.
+   * @return {Promise<boolean>}
+   * @private
+   */
+  isQuerySupported_(queryType) {
+    return this.queryHelperFrame_(
+        WindowMessenger.Topics.NOTIFICATION_PERMISSION_STATE,
+        {
+          isQueryTopicSupported: queryType,
+        }
+    );
+  }
+
+  /**
+   * Returns a Promise that resolves when the helper iframe responds with the
+   * value of the LocalStorage key.
+   *
+   * @param {string} storageKey The LocalStorage item key name in the canonical
+   * helper frame.
+   * @return {Promise<NotificationPermission>}
+   * @private
+   */
+  getCanonicalFrameStorageValue_(storageKey) {
+    return this.queryHelperFrame_(WindowMessenger.Topics.STORAGE_GET, {
+      key: storageKey,
+    });
+  }
+
+  /**
    * Returns a Promise that resolves when the user dismisses, grants, or denies
    * notification permissions when subscribing.
    *
@@ -580,7 +833,8 @@ export class WebPushService {
           WindowMessenger.Topics.NOTIFICATION_PERMISSION_STATE,
           (message, replyToFrame) => {
             resolve([message, replyToFrame]);
-          });
+          }
+      );
     });
   }
 
@@ -608,6 +862,7 @@ export class WebPushService {
 
   /**
    * Opens a popup or redirects the top-level frame to the permission dialog.
+   * @return {?Window}
    */
   openPopupOrRedirect() {
     // Note: Don't wait on promise chains when opening a pop up, otherwise
@@ -617,25 +872,34 @@ export class WebPushService {
       this.ampdoc.win.location.href.indexOf('?') !== -1;
     const pageUrlQueryParamPrefix = pageUrlHasQueryParams ? '&' : '?';
     // The URL to return to after the permission dialog closes
-    const returningPopupUrl = this.ampdoc.win.location.href +
-      pageUrlQueryParamPrefix + WebPushService.PERMISSION_POPUP_URL_FRAGMENT;
+    const returningPopupUrl =
+      this.ampdoc.win.location.href +
+      pageUrlQueryParamPrefix +
+      WebPushService.PERMISSION_POPUP_URL_FRAGMENT;
 
     const permissionDialogUrlHasQueryParams =
       this.config_['permission-dialog-url'].indexOf('?') !== -1;
     const permissionDialogUrlQueryParamPrefix =
-      permissionDialogUrlHasQueryParams ? '&' : '?';
+      permissionDialogUrlHasQueryParams
+        ? '&'
+        : '?';
     // The permission dialog URL, containing the return URL above embedded in a
     // query parameter
     const openingPopupUrl =
       this.config_['permission-dialog-url'] +
       permissionDialogUrlQueryParamPrefix +
-      `return=${encodeURIComponent(returningPopupUrl) }`;
+      `return=${encodeURIComponent(returningPopupUrl)}`;
 
     const d = WebPushService.getPopupDimensions_();
     const sizing = `height=${d.h},width=${d.w},left=${d.x},top=${d.y}`;
     const options = `${sizing},resizable=yes,scrollbars=yes`;
 
-    openWindowDialog(this.ampdoc.win, openingPopupUrl, '_blank', options);
+    return openWindowDialog(
+        this.ampdoc.win,
+        openingPopupUrl,
+        '_blank',
+        options
+    );
   }
 
   /**
@@ -652,29 +916,24 @@ export class WebPushService {
         null,
         '',
         this.removePermissionPopupUrlFragmentFromUrl(
-            this.ampdoc.win.location.href)
+            this.ampdoc.win.location.href
+      )
     );
 
-    this.queryNotificationPermission()
-        .then(permission => {
-          switch (permission) {
-            case NotificationPermission.DENIED:
-            // User blocked
-              return this.updateWidgetVisibilities();
-            case NotificationPermission.DEFAULT:
-            // User clicked X
-              return this.updateWidgetVisibilities();
-            case NotificationPermission.GRANTED:
-            // User allowed
-              this.subscribeForPushRemotely()
-                  .then(() => {
-                    return this.updateWidgetVisibilities();
-                  });
-              break;
-            default:
-              throw new Error('Unexpected permission value', permission);
-          }
-        });
+    this.queryNotificationPermission().then(permission => {
+      switch (permission) {
+        case NotificationPermission.DENIED:
+        case NotificationPermission.DEFAULT:
+          // User blocked or clicked X
+          return this.updateWidgetVisibilities();
+        case NotificationPermission.GRANTED:
+          // User allowed
+          this.onPermissionGrantedSubscribe_();
+          break;
+        default:
+          throw new Error('Unexpected permission value', permission);
+      }
+    });
   }
 
   /**
@@ -701,9 +960,11 @@ export class WebPushService {
    * @private
    */
   arePushRelatedApisSupported_() {
-    return this.ampdoc.win.Notification !== undefined &&
+    return (
+      this.ampdoc.win.Notification !== undefined &&
       this.ampdoc.win.navigator.serviceWorker !== undefined &&
-      this.ampdoc.win.PushManager !== undefined;
+      this.ampdoc.win.PushManager !== undefined
+    );
   }
 
   /**
@@ -729,8 +990,12 @@ export class WebPushService {
    * @private
    */
   isAmpPageHttps_() {
-    return this.ampdoc.win.location.protocol === 'https:' ||
+    return (
+      this.ampdoc.win.location.protocol === 'https:' ||
+      this.ampdoc.win.location.hostname === 'localhost' ||
+      this.ampdoc.win.location.hostname === '127.0.0.1' ||
       getMode().development ||
-      getMode().test;
+      getMode().test
+    );
   }
 }

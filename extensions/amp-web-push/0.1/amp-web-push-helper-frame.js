@@ -17,6 +17,8 @@
 import {parseQueryString} from '../../../src/url.js';
 import {WindowMessenger} from './window-messenger';
 import {getMode} from '../../../src/mode';
+import {user} from '../../../src/log';
+import {TAG} from './vars';
 
 /**
  * @typedef {{
@@ -42,7 +44,21 @@ export let ServiceWorkerMessage;
  */
 export let ServiceWorkerRegistrationMessage;
 
- /**
+/**
+ * @typedef {{
+ *    isQueryTopicSupported: null,
+ * }}
+ */
+export let NotificationPermissionStateMessage;
+
+/**
+ * @typedef {{
+ *    key: string,
+ * }}
+ */
+export let StorageGetMessage;
+
+/**
   * @fileoverview
   * Loaded as an invisible iframe on the AMP page, and serving a page on the
   * canonical origin, this iframe enables same-origin access to push
@@ -51,7 +67,6 @@ export let ServiceWorkerRegistrationMessage;
   * workers, and enable communication with the registered service worker.
   */
 export class AmpWebPushHelperFrame {
-
   /** @param {!HelperFrameOptions} options */
   constructor(options) {
     /**
@@ -103,7 +118,8 @@ export class AmpWebPushHelperFrame {
     replyToFrameFunction,
     wasSuccessful,
     errorPayload,
-    successPayload) {
+    successPayload
+  ) {
     replyToFrameFunction({
       success: wasSuccessful,
       error: wasSuccessful ? undefined : errorPayload,
@@ -112,17 +128,58 @@ export class AmpWebPushHelperFrame {
   }
 
   /**
-   * @param {?} _
+   * @param {NotificationPermissionStateMessage} message
    * @param {function(?, function())} replyToFrame
    * @private
    */
-  onAmpPageMessageReceivedNotificationPermissionState_(_, replyToFrame) {
-    this.replyToFrameWithPayload_(
-        replyToFrame,
-        true,
-        null,
-        Notification.permission
-    );
+  onAmpPageMessageReceivedNotificationPermissionState_(message, replyToFrame) {
+    /*
+      Due to an API design mistake, we need to hijack one of our helper frame's
+      existing expected messages to return a special response indicating it
+      supports receiving another kind of query.
+     */
+    if (message && message.isQueryTopicSupported) {
+      let foundTopicValue = false;
+      for (const topicName in WindowMessenger.Topics) {
+        if (
+          message.isQueryTopicSupported === WindowMessenger.Topics[topicName]
+        ) {
+          foundTopicValue = true;
+        }
+      }
+      this.replyToFrameWithPayload_(replyToFrame, true, null, foundTopicValue);
+    } else {
+      // Reply with our standard notification permission state response
+      this.replyToFrameWithPayload_(
+          replyToFrame,
+          true,
+          null,
+          Notification.permission
+      );
+    }
+  }
+
+  /**
+   * @param {StorageGetMessage} message
+   * @param {function(?, function())} replyToFrame
+   * @private
+   */
+  onAmpPageMessageReceivedStorageGet_(message, replyToFrame) {
+    let storageValue = null;
+
+    try {
+      // Reply with our standard notification permission state response
+      if (message && message.key && this.window_.localStorage) {
+        storageValue = this.window_.localStorage.getItem(message.key);
+      } else {
+        user().warn(TAG, 'LocalStorage retrieval failed.');
+      }
+    } catch (e) {
+      // LocalStorage may not be accessible
+      // The value will remain null
+    }
+
+    this.replyToFrameWithPayload_(replyToFrame, true, null, storageValue);
   }
 
   /**
@@ -145,16 +202,16 @@ export class AmpWebPushHelperFrame {
       /*
         The URL to the service worker script.
        */
-      url: this.window_.navigator.serviceWorker.controller ?
-        this.window_.navigator.serviceWorker.controller.scriptURL :
-        null,
+      url: this.window_.navigator.serviceWorker.controller
+        ? this.window_.navigator.serviceWorker.controller.scriptURL
+        : null,
       /*
         The state of the service worker, one of "installing, waiting,
         activating, activated".
        */
-      state: this.window_.navigator.serviceWorker.controller ?
-        this.window_.navigator.serviceWorker.controller.state :
-        null,
+      state: this.window_.navigator.serviceWorker.controller
+        ? this.window_.navigator.serviceWorker.controller.state
+        : null,
     };
 
     this.replyToFrameWithPayload_(replyToFrame, true, null, serviceWorkerState);
@@ -167,21 +224,25 @@ export class AmpWebPushHelperFrame {
    */
   onAmpPageMessageReceivedServiceWorkerRegistration_(message, replyToFrame) {
     if (!message || !message.workerUrl || !message.registrationOptions) {
-      throw new Error('Expected arguments workerUrl and registrationOptions ' +
-        'in message, got:', message);
+      throw new Error(
+        'Expected arguments workerUrl and registrationOptions ' +
+          'in message, got:',
+        message
+      );
     }
 
-    this.window_.navigator.serviceWorker.register(
-        message.workerUrl,
-        message.registrationOptions
-    ).then(() => {
-      this.replyToFrameWithPayload_(replyToFrame, true, null, null);
-    })
+    this.window_.navigator.serviceWorker
+        .register(message.workerUrl, message.registrationOptions)
+        .then(() => {
+          this.replyToFrameWithPayload_(replyToFrame, true, null, null);
+        })
         .catch(error => {
-          this.replyToFrameWithPayload_(replyToFrame, true, null, error ?
-        (error.message || error.toString()) :
-        null
-      );
+          this.replyToFrameWithPayload_(
+              replyToFrame,
+              true,
+              null,
+              error ? error.message || error.toString() : null
+        );
         });
   }
 
@@ -189,7 +250,7 @@ export class AmpWebPushHelperFrame {
    * @param {ServiceWorkerMessage} message
   */
   messageServiceWorker(message) {
-    this.window_.navigator.serviceWorker.controller./*OK*/postMessage({
+    this.window_.navigator.serviceWorker.controller./*OK*/ postMessage({
       command: message.topic,
       payload: message.payload,
     });
@@ -269,9 +330,11 @@ export class AmpWebPushHelperFrame {
     * @private
     */
   isWorkerControllingPage_() {
-    return this.window_.navigator.serviceWorker &&
+    return (
+      this.window_.navigator.serviceWorker &&
       this.window_.navigator.serviceWorker.controller &&
-      this.window_.navigator.serviceWorker.controller.state === 'activated';
+      this.window_.navigator.serviceWorker.controller.state === 'activated'
+    );
   }
 
   /**
@@ -286,22 +349,25 @@ export class AmpWebPushHelperFrame {
         resolve();
       } else {
         this.window_.navigator.serviceWorker.addEventListener(
-            'controllerchange', () => {
-          // Service worker has been claimed
+            'controllerchange',
+            () => {
+            // Service worker has been claimed
               if (this.isWorkerControllingPage_()) {
                 resolve();
               } else {
-                this.window_.navigator.serviceWorker.controller
-                    .addEventListener(
+                this.window_.navigator.serviceWorker
+                    .controller.addEventListener(
                     'statechange',
                     () => {
                       if (this.isWorkerControllingPage_()) {
-                        // Service worker has been activated
+                    // Service worker has been activated
                         resolve();
                       }
-                    });
+                    }
+              );
               }
-            });
+            }
+        );
       }
     });
   }
@@ -330,10 +396,16 @@ export class AmpWebPushHelperFrame {
         WindowMessenger.Topics.SERVICE_WORKER_QUERY,
         this.onAmpPageMessageReceivedServiceWorkerQuery_.bind(this)
     );
+    this.ampMessenger_.on(
+        WindowMessenger.Topics.STORAGE_GET,
+        this.onAmpPageMessageReceivedStorageGet_.bind(this)
+    );
 
     this.waitUntilWorkerControlsPage().then(() => {
-      this.window_.navigator.serviceWorker.addEventListener('message',
-          this.onPageMessageReceivedFromServiceWorker_.bind(this));
+      this.window_.navigator.serviceWorker.addEventListener(
+          'message',
+          this.onPageMessageReceivedFromServiceWorker_.bind(this)
+      );
     });
     this.ampMessenger_.listen([allowedOrigin || this.getParentOrigin_()]);
   }
