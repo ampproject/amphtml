@@ -121,6 +121,9 @@ export class WebPushService {
     /** @private {./iframehost.IFrameHost} */
     this.iframe_ = null;
 
+    /** @private {?NotificationPermission}} */
+    this.lastKnownPermission_ = null;
+
     /**
      * Create a postMessage() helper to listen for messages
      *
@@ -474,6 +477,30 @@ export class WebPushService {
   }
 
   /**
+   * @private
+   * @return {Promise}
+   *
+   * Store the notification permission before the user clicks the Subscribe
+   * button, because the permission may currently be granted, and we can avoid
+   * opening the popup in the future if the permission is granted.
+   *
+   * The user might have previously subscribed and then cleared their browser
+   * data without resetting their permission, and in this case we don't have to
+   * open a popup when resubscribing.
+   *
+   * We can't check the notification permission when the user clicks Subscribe
+   * because waiting on promises after clicking buttons triggers the browser's
+   * popup blocker. So we have to check and store the permission before the user
+   * clicks Subscribe and use the stored result when the user finally clicks
+   * Subscribe.
+   */
+  storeLastKnownPermission_() {
+    return this.queryNotificationPermission().then(permission => {
+      this.lastKnownPermission_ = permission;
+    });
+  }
+
+  /**
    * Queries the helper frame for notification permissions and service worker
    * registration state to compute visibility for subscription and
    * unsubscription widgets.
@@ -492,7 +519,8 @@ export class WebPushService {
       task and returning whether a query topic was supported. This prevents an
       unexpected messenger query from delaying indefinitely.
      */
-    return this.isQuerySupported_(WindowMessenger.Topics.STORAGE_GET)
+    return this.storeLastKnownPermission_()
+        .then(() => this.isQuerySupported_(WindowMessenger.Topics.STORAGE_GET))
         .then(response => {
         /*
           Response could be "denied", "granted", or "default". This is a
@@ -634,25 +662,30 @@ export class WebPushService {
     // Register the service worker in the background in parallel for a headstart
     promises.push(this.registerServiceWorker());
     promises.push(
-        this.queryNotificationPermission().then(permission => {
+        new Promise(resolve => {
           /*
-            In most environments, the canonical notification permission returned is
-            accurate. On Chrome 62+, the permission is non-ambiguous only if it is
-            granted. If the permission is anything other than granted, we can't
-            trust it.
+            In most environments, the canonical notification permission returned
+            is accurate. On Chrome 62+, the permission is non-ambiguous only if
+            it is granted. If the permission is anything other than granted, we
+            can't trust it.
           */
-          switch (permission) {
+          switch (this.lastKnownPermission_) {
             /*
-              Because notification permissions are already granted, we do not need
-              to open a popup to ask for permissions. Subscribe in the background
-              using the helper frame.
+              Because notification permissions are already granted, we do not
+              need to open a popup to ask for permissions. Subscribe in the
+              background using the helper frame.
             */
             case NotificationPermission.GRANTED:
-              return this.onPermissionGrantedSubscribe_();
+              return this.onPermissionGrantedSubscribe_().then(() => {
+                resolve();
+              });
             default:
               /*
-                Because notification permissions are not granted, we need to open a
-                popup asking the user to grant permissions.
+                Because notification permissions are not granted, we need to
+                open a popup asking the user to grant permissions.
+
+                The last known permission can be unknown, in which case we open
+                a popup anyways.
               */
               const permissionDialogWindow = this.openPopupOrRedirect();
               this.checkPermissionDialogClosedInterval_(
@@ -667,8 +700,10 @@ export class WebPushService {
                 this.config_['permission-dialog-url'],
               ]);
 
-              return this.onPermissionDialogInteracted().then(result => {
+              this.onPermissionDialogInteracted().then(result => {
                 return this.handlePermissionDialogInteraction(result);
+              }).then(() => {
+                resolve();
               });
           }
         })

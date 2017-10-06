@@ -226,6 +226,7 @@ export class AmpWebPushPermissionDialog {
   onPermissionDefaultOrGranted_() {
     // Prompt for permissions
     return this.requestNotificationPermission().then(permission => {
+      this.storeNotificationPermission_();
       if (this.isCurrentDialogPopup()) {
         this.ampMessenger_.connect(opener, '*');
 
