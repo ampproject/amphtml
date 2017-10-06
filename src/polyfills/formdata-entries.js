@@ -22,7 +22,7 @@ import {map} from '../utils/object';
  *
  * This patches the native constructor so that the polyfill can capture the
  * fields in the form passed to the constructor. If `FormData#entries` needs a
- * polyfill, chances are there are no methods to read the content of the
+ * polyfill, chances are there are no native methods to read the content of the
  * `FormData` after construction, so the only way to polyfill `entries` is to
  * patch the constructor (and the `append` method).
  *
@@ -36,13 +36,17 @@ import {map} from '../utils/object';
  *     keys/values using the name property of each element for the keys and
  *     their submitted value for the values. It will also encode file input
  *     content.
+ * @note Subclassing `FormData` doesn't work in this case as the transpiler
+ *     generates code that calls the super constructor directly using
+ *     `Function.prototype.call`. WebKit (Safari) doesn't allow this and
+ *     enforces that constructors be called with the `new` operator.
  */
-function FormDataPolyfill(win, opt_form = undefined) {
+function FormDataConstructorWrapper(win, opt_form = undefined) {
   // Returning the instance constructed by the native constructor is required
   // here, as APIs such as `XMLHttpRequest` and `fetch` may depend on internal
   // states maintained by native code which wouldn't be available on an instance
   // returned by non-native constructor.
-  const instance = new win['FormDataNative_'](opt_form);
+  const instance = new win['FormDataConstructorNative_'](opt_form);
   instance.fieldValues_ = opt_form ? getFormAsObject(opt_form) : map();
   return instance;
 }
@@ -67,12 +71,12 @@ function FormDataPolyfill(win, opt_form = undefined) {
  * @param {string} value The field's value.
  * @this {FormData}
  */
-function appendPolyfill(name, value, filename) {
+function appendWrapper(name, value) {
   const nameString = String(name);
   this.fieldValues_[nameString] = this.fieldValues_[nameString] || [];
   this.fieldValues_[name].push(String(value));
 
-  return this['appendNative_'](name, value, filename);
+  return this['appendNative_'](name, value);
 }
 
 /**
@@ -107,12 +111,12 @@ function entriesPolyfill() {
  * @param {!Window} win
  */
 export function install(win) {
-  // After patching the native constructor, `win.FormData` becomes the polyfill
-  // constructor function which always doesn't have an `entries` method in the
-  // prototype. Checking if `win.FormDataNative_` has been patched onto the
-  // window is necessary to prevent re-installation of this polyfill on, well,
-  // the prototype of the polyfill constructor itself!
-  if (win.FormDataNative_ || win.FormData.prototype.entries) {
+  // After patching the native constructor, `win.FormData` becomes the bound
+  // `FormDataConstructorWrapper`, which always doesn't have an `entries` method
+  // in its prototype. Checking if `win.FormDataConstructorNative_` has been
+  // patched onto the window is therefore necessary to prevent re-installation
+  // of this polyfill on, well, the prototype of the constructor wrapper!
+  if (win.FormDataConstructorNative_ || win.FormData.prototype.entries) {
     return;
   }
 
@@ -120,18 +124,19 @@ export function install(win) {
     value: win.FormData.prototype.append,
   });
   win.Object.defineProperty(win.FormData.prototype, 'append', {
-    value: appendPolyfill,
+    value: appendWrapper,
   });
   win.Object.defineProperty(win.FormData.prototype, 'entries', {
     value: entriesPolyfill,
   });
-  win.Object.defineProperty(win, 'FormDataNative_', {value: win.FormData});
+  win.Object.defineProperty(
+      win, 'FormDataConstructorNative_', {value: win.FormData});
 
   // This needs to come last so that code above can simply operate on the
   // native FormData by referencing `win.FormData`.
   win.Object.defineProperty(win, 'FormData', {
-    // Pass `null` to `this`as it's ignored when the bound function is used as
+    // Pass `null` to `this` as it's ignored when the bound function is used as
     // constructor.
-    value: FormDataPolyfill.bind(null, win),
+    value: FormDataConstructorWrapper.bind(null, win),
   });
 }
