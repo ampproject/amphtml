@@ -559,16 +559,20 @@ function buildExtensionJs(path, name, version, options) {
 }
 
 /**
- * Writes the AMP config to file if AMP_TESTING_HOST is set.
+ * Writes the prod AMP config to file if argv.fortesting is true.
  */
 function writeAmpConfig() {
-  var TESTING_HOST = process.env.AMP_TESTING_HOST;
-  if (argv.fortesting && typeof TESTING_HOST == 'string') {
+  if (argv.fortesting) {
     var AMP_CONFIG = {
-      thirdPartyFrameHost: TESTING_HOST,
-      thirdPartyFrameRegex: TESTING_HOST,
       localDev: true,
     };
+    var TESTING_HOST = process.env.AMP_TESTING_HOST;
+    if (typeof TESTING_HOST == 'string') {
+      AMP_CONFIG = Object.assign(AMP_CONFIG, {
+        thirdPartyFrameHost: TESTING_HOST,
+        thirdPartyFrameRegex: TESTING_HOST,
+      });
+    }
     AMP_CONFIG = Object.assign(AMP_CONFIG, JSON.parse(fs.readFileSync(
         'build-system/global-configs/prod-config.json').toString()));
     $$.util.log($$.util.colors.green('trying to write AMP_CONFIG.'));
