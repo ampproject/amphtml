@@ -25,7 +25,7 @@ const gulp = require('gulp-help')(require('gulp'));
  * Simple wrapper around the ruby based visual diff tests.
  */
 function visualDiff() {
-  if (!argv.master) {
+  if (!argv.master || !process.env['TRAVIS']) {
     const userName = getStdout(
         'git log -1 --pretty=format:"%ae"').trim();
     const branchName = process.env['TRAVIS'] ?
