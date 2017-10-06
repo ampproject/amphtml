@@ -53,6 +53,7 @@ import {AudioManager, upgradeBackgroundAudio} from './audio';
 import {setStyle, setStyles} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
+import {urls} from '../../../src/config';
 
 
 /** @private @const {number} */
@@ -69,9 +70,6 @@ const AMP_STORY_STANDALONE_ATTRIBUTE = 'standalone';
 
 /** @private @const {number} */
 const FULLSCREEN_THRESHOLD = 1024;
-
-/** @private @const {string} */
-const AMP_EXPERIMENTS_PAGE_URL = 'https://cdn.ampproject.org/experiments.html';
 
 /** @type {string} */
 const TAG = 'amp-story';
@@ -268,7 +266,7 @@ export class AmpStory extends AMP.BaseElement {
           'view this content. Enable or disable your AMP experiments:';
 
       const experimentsLinkEl = this.win.document.createElement('a');
-      experimentsLinkEl.href = AMP_EXPERIMENTS_PAGE_URL;
+      experimentsLinkEl.href = `${urls.cdn}/experiments.html`;
       experimentsLinkEl.textContent = 'AMP Experiments Dashboard';
 
       const errorEl = this.win.document.createElement('div');
