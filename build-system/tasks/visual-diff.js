@@ -26,10 +26,9 @@ const gulp = require('gulp-help')(require('gulp'));
  */
 function visualDiff() {
   if (!argv.master) {
-    let userName = getStdout(
-        'git config user.email').trim().split('\n');
-    let branchName = getStdout(
-        'git rev-parse --abbrev-ref HEAD').trim().split('\n');
+    const userName = getStdout(
+        'git log -1 --pretty=format:"%ae"').trim();
+    const branchName = process.env['TRAVIS_PULL_REQUEST_BRANCH'];
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
   }
 
