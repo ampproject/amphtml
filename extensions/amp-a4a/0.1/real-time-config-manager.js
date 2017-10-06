@@ -29,13 +29,6 @@ export const RTC_ERROR_ENUM = {
   UNKNOWN_VENDOR: 'unknown_vendor',
 };
 
-/** @typedef {{
-      rtcResponse: (?Object<string>|undefined),
-      rtcTime: number,
-      callout: string,
-      error: (RTC_ERROR_ENUM|undefined)}} */
-export let rtcResponseDef;
-
 /**
  * @param {!Array<Promise<!rtcResponseDef>>} promiseArray
  * @param {!string} error

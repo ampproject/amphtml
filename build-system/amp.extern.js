@@ -343,3 +343,28 @@ SomeBaseElementLikeClass.prototype.actionMap_;
 AMP.BaseTemplate;
 
 AMP.maybeExecuteRealTimeConfig = false;
+
+/** @enum {string} */
+const RTC_ERROR_ENUM = {
+  // Occurs when response is unparseable as JSON
+  MALFORMED_JSON_RESPONSE: 'malformed_json_response',
+  // Occurs when a publisher has specified the same url
+  // or vendor url (after macros are substituted) to call out to more than once.
+  DUPLICATE_URL: 'duplicate_url',
+  // Occurs when a URL fails isSecureUrl check.
+  INSECURE_URL: 'insecure_url',
+  // Occurs when 5 valid callout urls have already been built, and additional
+  // urls are still specified.
+  MAX_CALLOUTS_EXCEEDED: 'max_callouts_exceeded',
+  // Occurs due to XHR failure.
+  NETWORK_FAILURE: 'network_failure',
+  // Occurs when a specified vendor does not exist in RTC_VENDORS.
+  UNKNOWN_VENDOR: 'unknown_vendor',
+};
+
+/** @typedef {{
+      rtcResponse: (?Object<string>|undefined),
+      rtcTime: number,
+      callout: string,
+      error: (RTC_ERROR_ENUM|undefined)}} */
+var rtcResponseDef;

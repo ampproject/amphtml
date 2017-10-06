@@ -568,7 +568,7 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
     this.adPromise_ = Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
-        /** @return {?Promise<./real-time-config-manager.rtcResponseDef>} */
+        /** @return {Promise<!Array<!rtcResponseDef>>|undefined} */
         .then(() => {
           checkStillCurrent();
           // See if experiment that delays request until slot is within
@@ -1015,7 +1015,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
-   * @param {Array<./real-time-config-manager.rtcResponseDef>=} opt_rtcResponsesPromise
+   * @param {Array<rtcResponseDef>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
   getAdUrl(opt_rtcResponsesPromise) {
@@ -1557,6 +1557,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Attempts to execute Real Time Config, if the ad network has enabled it.
    * If it is not supported by the network, but the publisher has included
    * the rtc-config attribute on the amp-ad element, warn.
+   * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_() {
     if (!!AMP.maybeExecuteRealTimeConfig) {
