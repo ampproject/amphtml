@@ -162,7 +162,7 @@ export class WebPushService {
         );
           return this.frameMessenger_.connect(
               this.iframe_.getDomElement().contentWindow,
-              new URL(this.config_['helper-iframe-url']).origin
+              parseUrl(this.config_['helper-iframe-url']).origin
         );
         })
         .then(() => {
@@ -635,30 +635,30 @@ export class WebPushService {
     promises.push(this.registerServiceWorker());
     promises.push(
         this.queryNotificationPermission().then(permission => {
-        /*
-        In most environments, the canonical notification permission returned is
-        accurate. On Chrome 62+, the permission is non-ambiguous only if it is
-        granted. If the permission is anything other than granted, we can't
-        trust it.
-       */
-          switch (permission) {
           /*
-          Because notification permissions are already granted, we do not need
-          to open a popup to ask for permissions. Subscribe in the background
-          using the helper frame.
-         */
+            In most environments, the canonical notification permission returned is
+            accurate. On Chrome 62+, the permission is non-ambiguous only if it is
+            granted. If the permission is anything other than granted, we can't
+            trust it.
+          */
+          switch (permission) {
+            /*
+              Because notification permissions are already granted, we do not need
+              to open a popup to ask for permissions. Subscribe in the background
+              using the helper frame.
+            */
             case NotificationPermission.GRANTED:
               return this.onPermissionGrantedSubscribe_();
             default:
-            /*
-            Because notification permissions are not granted, we need to open a
-            popup asking the user to grant permissions.
-           */
+              /*
+                Because notification permissions are not granted, we need to open a
+                popup asking the user to grant permissions.
+              */
               const permissionDialogWindow = this.openPopupOrRedirect();
               this.checkPermissionDialogClosedInterval_(
                   permissionDialogWindow,
                   onPopupClosed
-            );
+              );
 
               this.popupMessenger_ = new WindowMessenger({
                 debug: this.debug_,
