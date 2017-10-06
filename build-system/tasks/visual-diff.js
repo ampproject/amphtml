@@ -17,6 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const execOrDie = require('../exec').execOrDie;
+const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
 
 
@@ -24,6 +25,14 @@ const gulp = require('gulp-help')(require('gulp'));
  * Simple wrapper around the ruby based visual diff tests.
  */
 function visualDiff() {
+  if (!argv.master) {
+    let userName = getStdout(
+        'git config user.email').trim().split('\n');
+    let branchName = getStdout(
+        'git rev-parse --abbrev-ref HEAD').trim().split('\n');
+    process.env['PERCY_BRANCH'] = userName + '-' + branchName;
+  }
+
   let cmd = 'ruby build-system/tasks/visual-diff.rb';
   for (const arg in argv) {
     if (arg !== '_') {
