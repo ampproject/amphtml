@@ -58,8 +58,8 @@ describe('getWinOrigin', () => {
 
   it('should return origin from href when win.origin is empty', () => {
     expect(getWinOrigin({
+      'origin': '',
       'location': {
-        'origin': '',
         'href': 'https://foo1.com/abc?123#foo',
       },
     })).to.equal('https://foo1.com');
@@ -67,20 +67,20 @@ describe('getWinOrigin', () => {
 
   it('should return origin from href when win.origin is null', () => {
     expect(getWinOrigin({
+      'origin': null,
       'location': {
-        'origin': null,
         'href': 'https://foo1.com/abc?123#foo',
       },
     })).to.equal('https://foo1.com');
   });
 
-  it('should return origin from href when win.origin is \"null\"', () => {
+  it('should return \"null\" when win.origin is \"null\"', () => {
     expect(getWinOrigin({
+      'origin': 'null',
       'location': {
-        'origin': 'null',
         'href': 'https://foo1.com/abc?123#foo',
       },
-    })).to.equal('https://foo1.com');
+    })).to.equal('null');
   });
 
 
