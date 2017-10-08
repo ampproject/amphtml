@@ -77,7 +77,7 @@ export class AmpAdExit extends AMP.BaseElement {
     this.ampAdResourceId_ = null;
 
     /** @private @const {!Object<string,string>} */
-    this.vendorOrigins_ = {};
+    this.expectedOriginToVendor_ = {};
   }
 
   /**
@@ -150,7 +150,7 @@ export class AmpAdExit extends AMP.BaseElement {
          this example will return "medium".
         */
         substitutionFunctions[customVarName] = () => {
-          if ('iframeTransportSignal' in customVar) {
+          if (customVar.iframeTransportSignal) {
             const vendorResponse = replacements./*OK*/expandStringSync(
                 customVar.iframeTransportSignal, {
                   'IFRAME_TRANSPORT_SIGNAL': (vendor, responseKey) => {
@@ -257,6 +257,21 @@ export class AmpAdExit extends AMP.BaseElement {
               (target.filters || []).map(
                   f => this.userFilters_[f]).filter(f => f),
         };
+        // Build a map of {vendor, origin} for 3p custom variables in the config
+        for (const customVar in target.vars) {
+          if (!target.vars[customVar].iframeTransportSignal) {
+            continue;
+          }
+          const matches = target.vars[customVar].iframeTransportSignal.match(
+              /IFRAME_TRANSPORT_SIGNAL\(([^,]*)/);
+          if (!matches || matches.length < 2) {
+            continue;
+          }
+          const vendor = matches[1];
+          const origin = parseUrl(assertVendor(vendor)).origin;
+          this.expectedOriginToVendor_[origin] =
+              this.expectedOriginToVendor_[origin] || vendor;
+        }
       }
       this.transport_.beacon = config.transport[TransportMode.BEACON] !== false;
       this.transport_.image = config.transport[TransportMode.IMAGE] !== false;
@@ -309,8 +324,14 @@ export class AmpAdExit extends AMP.BaseElement {
    * @private
    */
   init3pResponseListener_() {
-    this.unlisten_ = this.unlisten_ || listen(this.getAmpDoc().win, 'message',
+    dev().assert(!this.unlisten_, 'Unlistener should not already exist.');
+    this.unlisten_ = listen(this.getAmpDoc().win, 'message',
         event => {
+          // We shouldn't deserialize just any message...it would be too
+          // expensive to parse ones that aren't for amp-ad-exit.
+          if (!this.expectedOriginToVendor_[event.origin]) {
+            return;
+          }
           const responseMsg = deserializeMessage(getData(event));
           if (!responseMsg ||
               responseMsg['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE) {
@@ -325,11 +346,11 @@ export class AmpAdExit extends AMP.BaseElement {
    *
    * @param {JsonObject} responseMessage The response object to
    *     validate.
-   * @param {string} responseOrigin The origin of the message, which should
+   * @param {string} eventOrigin The origin of the message, which should
    *     match the expected origin of messages from responseMessage['vendor']
    * @private
    */
-  assertValidResponseMessage_(responseMessage, responseOrigin) {
+  assertValidResponseMessage_(responseMessage, eventOrigin) {
     user().assert(responseMessage['message'],
         'Received empty response from 3p analytics frame');
     user().assert(
@@ -339,26 +360,10 @@ export class AmpAdExit extends AMP.BaseElement {
     user().assert(responseMessage['vendor'],
         'Received malformed message from 3p analytics frame: ' +
         'vendor missing');
-    this.assertOriginMatchesVendor_(responseOrigin, responseMessage['vendor']);
-  }
-
-  /**
-   * Ensures that a given origin matches that of an existing vendor's
-   * transport/iframe URL
-   * @param {string} origin The origin to verify
-   * @param {string} vendor The vendor whose origin to check against
-   * @private
-   */
-  assertOriginMatchesVendor_(origin, vendor) {
-    const vendorURL = parseUrl(assertVendor(vendor));
-    if (this.vendorOrigins_[vendor]) {
-      user().assert(this.vendorOrigins_[vendor] == origin,
-          `Invalid origin for vendor ${vendor}: ${origin}`);
-      return;
-    }
-    user().assert(vendorURL && vendorURL.origin == origin,
-        `Invalid origin for vendor ${vendor}: ${origin}`);
-    this.vendorOrigins_[vendor] = vendorURL.origin; // Cache for faster access
+    const vendorURL = parseUrl(assertVendor(responseMessage['vendor']));
+    user().assert(vendorURL && vendorURL.origin == eventOrigin,
+        'Invalid origin for vendor ' +
+        `${responseMessage['vendor']}: ${eventOrigin}`);
   }
 
   /** @override */

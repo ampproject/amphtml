@@ -40,8 +40,7 @@ export let NavigationTargetConfig;
 /**
  * @typedef {{
  *   defaultValue: (string|number|boolean),
- *   vendorAnalyticsSource: (string|undefined),
- *   vendorAnalyticsResponseKey: (string|undefined)
+ *   iframeTransportSignal: (string|undefined)
  * }}
  */
 export let VariableDef;
@@ -145,15 +144,6 @@ function assertTarget(name, target, config) {
       user().assert(
           pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
           variable, pattern);
-      const vendor = target.vars[variable]['vendorAnalyticsSource'];
-      if (vendor) {
-        assertVendor(vendor);
-        user().assert(
-            target.vars[variable]['vendorAnalyticsResponseKey'],
-            'Variable \'%s\': If vendorAnalyticsSource is defined then ' +
-            'vendorAnalyticsResponseKey must also be defined', variable);
-
-      }
     }
   }
 }
