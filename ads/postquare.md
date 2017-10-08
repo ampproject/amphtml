@@ -24,9 +24,9 @@ limitations under the License.
   <amp-embed width="200" height="200"
       type="postquare"
       layout="responsive"
-      data-widgetIds="112264"
-      data-websiteId="115219"
-      data-publisherId="157552">
+      data-widgetIds="WID_1,WID_2"
+      data-websiteId="WEBID_1"
+      data-publisherId="PUBID_1">
   </amp-embed>
 ```
 
