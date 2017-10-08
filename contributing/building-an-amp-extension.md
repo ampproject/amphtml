@@ -119,7 +119,7 @@ create your DOM structure and append it to the element. You can also
 read the attributes (e.g. width, height…) the user provided on your
 element in this callback.
 - **Warning**: Don't load remote resources during the buildCallback. This
-only circumvents the AMP resources manager, but it will also lead to
+not only circumvents the AMP resources manager, but it will also lead to
 higher data charges for users because all these resources will be loaded
 before layouting needs to happen.
 - **Warning 2**: Do the least needed work here, and don't build DOM that
@@ -131,8 +131,8 @@ is not needed at this point.
 - **Vsync Context**: None (Neither mutate nor measure)
 - **Override**: Sometimes, if your element will be loading remote
 resources.
-- **Usage**: Use to instruct AMP which hosts to preconnect to and which
-resources to preload/prefetch this allows AMP to delegate to the browser
+- **Usage**: Use to instruct AMP which hosts to preconnect to, and which
+resources to preload/prefetch; this allows AMP to delegate to the browser
 to get a performance boost by preconnecting, preloading and prefetching
 resources via preconnect service.
 - **Example Usage**: [Instagram uses this to
