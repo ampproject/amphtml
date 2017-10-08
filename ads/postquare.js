@@ -35,13 +35,13 @@ export function postquare(global, data) {
     style: data['stylecss'] || '',
     referrer: global.context.referrer,
   });
-	
-	if (data['mode'] == 100)
-	{
-		loadScript(global, 'https://widget.engageya.com/pos_amp_loader.js');
-	}
-	else
-	{
-		loadScript(global, 'https://widget.postquare.com/postquare_amp_loader.js');
-	}
+
+  if (data['mode'] == 100)
+  {
+    loadScript(global, 'https://widget.engageya.com/pos_amp_loader.js');
+  }
+  else
+  {
+    loadScript(global, 'https://widget.postquare.com/postquare_amp_loader.js');
+  }
 }
