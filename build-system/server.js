@@ -52,9 +52,9 @@ setInterval(function() {
   }
 }, 1000);
 
-const middleware = [app];
+const middleware = [];
 if (!quiet) {
-  middleware.unshift(morgan('dev'));
+  middleware.push(morgan('dev'), app);
 }
 if (sendCachingHeaders) {
   middleware.push(header({
