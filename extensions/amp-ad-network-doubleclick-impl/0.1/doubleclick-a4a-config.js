@@ -121,9 +121,10 @@ export class DoubleclickA4aEligibility {
   /** Whether Fast Fetch is enabled
    * @param {!Window} win
    * @param {!Element} element
+   * @param {!boolean} useRemoteHtml
    * @return {boolean}
    */
-  isA4aEnabled(win, element) {
+  isA4aEnabled(win, element, useRemoteHtml) {
     let experimentId;
     if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
         element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
@@ -213,8 +214,8 @@ const singleton = new DoubleclickA4aEligibility();
  * @param {!Element} element
  * @returns {boolean}
  */
-export function doubleclickIsA4AEnabled(win, element) {
-  return singleton.isA4aEnabled(win, element);
+export function doubleclickIsA4AEnabled(win, element, useRemoteHtml) {
+  return singleton.isA4aEnabled(win, element, useRemoteHtml);
 }
 
 /**
