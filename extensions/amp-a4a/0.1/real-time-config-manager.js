@@ -27,7 +27,7 @@ const TAG = 'real-time-config';
 export const MAX_RTC_CALLOUTS = 5;
 
 /** @enum {string} */
-export const RTC_ERROR_ENUM = {
+const RTC_ERROR_ENUM = {
   // Occurs when response is unparseable as JSON
   MALFORMED_JSON_RESPONSE: 'malformed_json_response',
   // Occurs when a publisher has specified the same url
@@ -45,7 +45,7 @@ export const RTC_ERROR_ENUM = {
 };
 
 /**
- * @param {!Array<Promise<!rtcResponseDef>>} promiseArray
+ * @param {!Array<!Promise<!rtcResponseDef>>} promiseArray
  * @param {!string} error
  * @param {!string} callout
  * @private
@@ -59,7 +59,7 @@ function logAndAddErrorResponse_(promiseArray, error, callout) {
  * @param {!string} error
  * @param {!string} callout
  * @param {number=} opt_rtcTime
- * @return !Promise<!rtcResponseDef>
+ * @return {!Promise<!rtcResponseDef>}
  * @private
  */
 function buildErrorResponse_(error, callout, opt_rtcTime) {
@@ -213,9 +213,10 @@ export function validateRtcConfig_(element) {
   try {
     user().assert(rtcConfig['vendors'] || rtcConfig['urls'],
         'RTC Config must specify vendors or urls');
-    user().assert(Object.keys(
-        rtcConfig['vendors'] || {}).length || (rtcConfig['urls'] || []).length,
-        'RTC empty vendors and urls');
+    if (!Object.keys(rtcConfig['vendors'] || {}).length
+       && !(rtcConfig['urls'] || []).length) {
+      return null;
+    }
     Object.keys(rtcConfig).forEach(key => {
       switch (key) {
         case 'vendors':
@@ -226,14 +227,12 @@ export function validateRtcConfig_(element) {
           break;
         case 'timeoutMillis':
           timeout = parseInt(rtcConfig[key], 10);
-          if (!isNaN(timeout)) {
-            if (timeout >= defaultTimeoutMillis || timeout < 0) {
-              timeout = null;
-              user().warn(TAG, `Invalid RTC timeout: ${timeout}ms, ` +
-                          `using default timeout ${defaultTimeoutMillis}ms`);
-            }
-          } else {
+          if (isNaN(timeout)) {
             user().warn(TAG, 'Invalid RTC timeout is NaN, ' +
+                        `using default timeout ${defaultTimeoutMillis}ms`);
+          } else if (timeout >= defaultTimeoutMillis || timeout < 0) {
+            timeout = null;
+            user().warn(TAG, `Invalid RTC timeout: ${timeout}ms, ` +
                         `using default timeout ${defaultTimeoutMillis}ms`);
           }
           break;
@@ -243,6 +242,7 @@ export function validateRtcConfig_(element) {
       }
     });
   } catch (unusedErr) {
+    // This error would be due to the asserts above.
     return null;
   }
 

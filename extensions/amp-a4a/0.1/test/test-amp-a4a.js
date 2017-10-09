@@ -881,9 +881,10 @@ describe('amp-a4a', () => {
         const a4a = new MockA4AImpl(a4aElement);
         a4a.releaseType_ = '0';
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
-        const rtcResponse = [{response: 'a', rtcTime: 1, callout: 'https://a.com'}];
+        const rtcResponse = Promise.resolve(
+            [{response: 'a', rtcTime: 1, callout: 'https://a.com'}]);
         AMP.maybeExecuteRealTimeConfig = sandbox.stub().returns(
-            Promise.resolve(rtcResponse));
+            rtcResponse);
         const tryExecuteRealTimeConfigSpy =
               sandbox.spy(a4a, 'tryExecuteRealTimeConfig_');
         const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
@@ -2183,6 +2184,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
   });
 
   beforeEach(() => {
+    AMP.maybeExecuteRealTimeConfig = undefined;
     expect(AMP.maybeExecuteRealTimeConfig).to.be.undefined;
   });
 
@@ -2192,6 +2194,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
 
   describe('#tryExecuteRealTimeConfig', () => {
     it('should not execute if RTC never imported', () => {
+      expect(AMP.maybeExecuteRealTimeConfig).to.be.undefined;
       expect(a4a.tryExecuteRealTimeConfig_()).to.be.undefined;
     });
     it('should log user error if RTC Config set but RTC not supported', () => {
