@@ -412,7 +412,7 @@ function compileCss() {
   })
   .then(() => {
     return buildExtensions({
-      bundleOnlyIfListedInFiles: true,
+      bundleOnlyIfListedInFiles: false,
       compileOnlyCss: true
     });
   });
