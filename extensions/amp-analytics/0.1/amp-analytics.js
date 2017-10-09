@@ -790,7 +790,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       sendRequestUsingIframe(this.win, request);
     } else if (this.config_['transport'] &&
         this.config_['transport']['iframe']) {
-      this.iframeTransport_.sendRequest(request);
+      this.iframeTransport_ && this.iframeTransport_.sendRequest(request);
     } else {
       sendRequest(this.win, request, this.config_['transport'] || {});
     }
