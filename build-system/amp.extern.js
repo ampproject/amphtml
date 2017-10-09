@@ -346,3 +346,19 @@ SomeBaseElementLikeClass.prototype.inViewport_;
 SomeBaseElementLikeClass.prototype.actionMap_;
 
 AMP.BaseTemplate;
+
+AMP.maybeExecuteRealTimeConfig = false;
+
+/**
+ * Actual filled values for this exists in
+ * extensions/amp-a4a/0.1/real-time-config-manager.js
+ * @enum {string}
+ */
+const RTC_ERROR_ENUM = {};
+
+/** @typedef {{
+      response: (?Object<string>|undefined),
+      rtcTime: number,
+      callout: string,
+      error: (RTC_ERROR_ENUM|undefined)}} */
+var rtcResponseDef;

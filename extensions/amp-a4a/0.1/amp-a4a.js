@@ -583,7 +583,8 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent();
-          return /** @type {!Promise<?string>} */(this.getAdUrl());
+          return /** @type {!Promise<?string>} */(
+              this.getAdUrl(this.tryExecuteRealTimeConfig_()));
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */
@@ -1010,9 +1011,10 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
+   * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
-  getAdUrl() {
+  getAdUrl(opt_rtcResponsesPromise) {
     throw new Error('getAdUrl not implemented!');
   }
 
@@ -1546,6 +1548,36 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {!Object<string, string|number>=} opt_extraVariables
    */
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
+
+  /**
+   * Attempts to execute Real Time Config, if the ad network has enabled it.
+   * If it is not supported by the network, but the publisher has included
+   * the rtc-config attribute on the amp-ad element, warn.
+   * @return {Promise<!Array<!rtcResponseDef>>|undefined}
+   */
+  tryExecuteRealTimeConfig_() {
+    if (!!AMP.maybeExecuteRealTimeConfig) {
+      try {
+        return AMP.maybeExecuteRealTimeConfig(
+            this, this.getCustomRealTimeConfigMacros_());
+      } catch (err) {
+        user().error(TAG, 'Could not perform Real Time Config.', err);
+      }
+    } else if (this.element.getAttribute('rtc-config')) {
+      user().error(TAG, 'RTC not supported for ad network ' +
+                   `${this.element.getAttribute('type')}`);
+    }
+  }
+
+  /**
+   * To be overriden by network impl. Should return a mapping of macro keys
+   * to values for substitution in publisher-specified URLs for RTC.
+   * @return {?Object<string,
+   *   !../../../src/service/variable-source.SyncResolverDef>}
+   */
+  getCustomRealTimeConfigMacros_() {
+    return null;
+  }
 
   /**
    * Whether preferential render should still be utilized if web crypto is unavailable,
