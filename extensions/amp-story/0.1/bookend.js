@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ICONS} from './icons';
 import {BookendShareWidget} from './bookend-share';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
@@ -97,16 +96,16 @@ function buildReplayButton(doc, title, domainName, opt_imageUrl) {
         class: 'i-amphtml-story-bookend-replay',
       }));
 
+  const iconContainer = createElementWithAttributes(doc, 'div',
+        /** @type {!JsonObject} */({
+          class: 'i-amphtml-story-bookend-replay-icon',
+        }));
+
   if (opt_imageUrl) {
     const container = createElementWithAttributes(doc, 'div',
         /** @type {!JsonObject} */({
           class: 'i-amphtml-story-bookend-replay-image',
         }));
-
-    const iconContainer = doc.createElement('div');
-
-    // Value is constant, so it's OK to use innerHTML here.
-    iconContainer./*OK*/innerHTML = ICONS.refresh;
 
     // TODO(alanorozco): Figure out how to use amp-img here
     container.appendChild(createElementWithAttributes(doc, 'img',
@@ -120,15 +119,7 @@ function buildReplayButton(doc, title, domainName, opt_imageUrl) {
 
     root.appendChild(container);
   } else {
-    const container = createElementWithAttributes(doc, 'div',
-        /** @type {!JsonObject} */({
-          class: 'i-amphtml-story-bookend-replay-icon',
-        }));
-
-    // Value is constant, so it's OK to use innerHTML here.
-    container./*OK*/innerHTML = ICONS.refresh;
-
-    root.appendChild(container);
+    root.appendChild(iconContainer);
   }
 
   const h2El = createElementWithAttributes(doc, 'h2',
