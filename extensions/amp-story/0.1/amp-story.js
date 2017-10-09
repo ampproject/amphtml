@@ -312,12 +312,11 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Switches to a particular page.
    * @param {string} targetPageId
-   * @param {boolean=} opt_hideBookend
    * @return {!Promise}
    */
   // TODO(newmuis): Update history state
-  switchTo_(targetPageId, opt_hideBookend) {
-    if (this.isBookendActive_ && !opt_hideBookend) {
+  switchTo_(targetPageId) {
+    if (this.isBookendActive_) {
       // Disallow switching pages while the bookend is active.
       return Promise.resolve();
     }
@@ -338,10 +337,6 @@ export class AmpStory extends AMP.BaseElement {
     const oldPage = this.activePage_;
 
     this.maybeApplyFirstAnimationFrame_(targetPage);
-
-    if (opt_hideBookend) {
-      this.hideBookend_();
-    }
 
     return this.mutateElement(() => {
       this.activePage_ = targetPage;
@@ -778,9 +773,8 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   replay_() {
-    this.switchTo_(
-        dev().assertElement(this.element.querySelector('amp-story-page')).id,
-        /* opt_hideBookend */ true);
+    this.hideBookend_();
+    this.switchTo_(dev().assertElement(this.pages_[0].element).id);
   }
 }
 

@@ -92,14 +92,16 @@ function buildArticle(doc, articleData) {
  * @return {!Element}
  */
 function buildReplayButton(doc, title, domainName, opt_imageUrl) {
-  const root = createElementWithAttributes(doc, 'div', {
-    class: 'i-amphtml-story-bookend-replay',
-  });
+  const root = createElementWithAttributes(doc, 'div',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-bookend-replay',
+      }));
 
   if (opt_imageUrl) {
-    const container = createElementWithAttributes(doc, 'div', {
-      class: 'i-amphtml-story-bookend-replay-image',
-    });
+    const container = createElementWithAttributes(doc, 'div',
+        /** @type {!JsonObject} */({
+          class: 'i-amphtml-story-bookend-replay-image',
+        }));
 
     const iconContainer = doc.createElement('div');
 
@@ -107,19 +109,21 @@ function buildReplayButton(doc, title, domainName, opt_imageUrl) {
     iconContainer./*OK*/innerHTML = ICONS.refresh;
 
     // TODO(alanorozco): Figure out how to use amp-img here
-    container.appendChild(createElementWithAttributes(doc, 'img', {
-      width: 80,
-      height: 80,
-      src: opt_imageUrl,
-    }));
+    container.appendChild(createElementWithAttributes(doc, 'img',
+        /** @type {!JsonObject} */({
+          width: 80,
+          height: 80,
+          src: opt_imageUrl,
+        })));
 
     container.appendChild(iconContainer);
 
     root.appendChild(container);
   } else {
-    const container = createElementWithAttributes(doc, 'div', {
-      class: 'i-amphtml-story-bookend-replay-icon',
-    });
+    const container = createElementWithAttributes(doc, 'div',
+        /** @type {!JsonObject} */({
+          class: 'i-amphtml-story-bookend-replay-icon',
+        }));
 
     // Value is constant, so it's OK to use innerHTML here.
     container./*OK*/innerHTML = ICONS.refresh;
@@ -127,15 +131,17 @@ function buildReplayButton(doc, title, domainName, opt_imageUrl) {
     root.appendChild(container);
   }
 
-  const h2El = createElementWithAttributes(doc, 'h2', {
-    class: 'i-amphtml-story-bookend-article-heading',
-  });
+  const h2El = createElementWithAttributes(doc, 'h2',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-bookend-article-heading',
+      }));
 
   h2El.textContent = title;
 
-  const metaEl = createElementWithAttributes(doc, 'div', {
-    class: 'i-amphtml-story-bookend-article-meta',
-  });
+  const metaEl = createElementWithAttributes(doc, 'div',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-bookend-article-meta',
+      }));
 
   metaEl.textContent = domainName;
 
@@ -303,7 +309,7 @@ export class Bookend {
   }
 
   /**
-   * @param {!AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {{
    *   title: string,
    *   domainName: string,
@@ -312,7 +318,7 @@ export class Bookend {
    * @private
    */
   getStoryMetadata_(ampdoc) {
-    const jsonLd = getJsonLd(this.win_.document);
+    const jsonLd = getJsonLd(ampdoc.getRootNode());
 
     const metadata = {
       title: jsonLd && jsonLd['heading'] ?
@@ -333,7 +339,7 @@ export class Bookend {
   }
 
   /**
-   * @param {!AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {!Element}
    * @private
    */

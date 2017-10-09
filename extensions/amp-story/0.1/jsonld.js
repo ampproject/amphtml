@@ -20,14 +20,18 @@ import {user} from '../../../src/log';
 
 const TAG = 'getJsonLd';
 
+/**
+ * @param {!Node} root
+ * @return {?JsonObject}
+ */
 export function getJsonLd(root) {
   const scriptTag = root.querySelector('script[type="application/ld+json"]');
 
   if (!scriptTag || !isJsonLdScriptTag(scriptTag)) {
-    return;
+    return null;
   }
 
   return tryParseJson(scriptTag.textContent, e => {
     user().error(TAG, 'Failed to parse ld+json. Is it valid JSON?', e);
-  });
+  }) || null;
 }
