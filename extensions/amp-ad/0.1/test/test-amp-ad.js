@@ -145,13 +145,12 @@ describes.realWin('Ad loader', {amp: true}, env => {
       });
 
       it('uses Fast Fetch if just RTC is used', () => {
-        const rtcConfig = doc.createElement('script');
-        rtcConfig.setAttribute('id', 'amp-rtc');
-        doc.head.appendChild(rtcConfig);
         a4aRegistry['zort'] = function() {
           return true;
         };
         ampAdElement.setAttribute('type', 'zort');
+        ampAdElement.setAttribute('type', 'zort');
+        ampAdElement.setAttribute('rtc-config', '{"urls": ["https://a.qqq"]}');
         const zortInstance = {};
         const zortConstructor = function() { return zortInstance; };
         const extensions = Services.extensionsFor(win);
@@ -172,13 +171,11 @@ describes.realWin('Ad loader', {amp: true}, env => {
         meta.setAttribute('name', 'amp-3p-iframe-src');
         meta.setAttribute('content', 'https://example.com/remote.html');
         doc.head.appendChild(meta);
-        const rtcConfig = doc.createElement('script');
-        rtcConfig.setAttribute('id', 'amp-rtc');
-        doc.head.appendChild(rtcConfig);
         a4aRegistry['zort'] = function() {
           return true;
         };
         ampAdElement.setAttribute('type', 'zort');
+        ampAdElement.setAttribute('rtc-config', '{"urls": ["https://a.qqq"]}');
         const zortInstance = {};
         const zortConstructor = function() { return zortInstance; };
         const extensions = Services.extensionsFor(win);
