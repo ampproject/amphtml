@@ -92,15 +92,15 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         (expectedCalloutUrls || []).forEach(url => {
           expect(fetchJsonStub.calledWith(url));
         });
-        rtcResponseArray.forEach((rtcResponseObject, i) => {
-          expect(rtcResponseObject.rtcResponse).to.deep.equal(
-              expectedRtcArray[i].rtcResponse);
-          expect(rtcResponseObject.callout).to.equal(
+        rtcResponseArray.forEach((rtcResponse, i) => {
+          expect(rtcResponse.response).to.deep.equal(
+              expectedRtcArray[i].response);
+          expect(rtcResponse.callout).to.equal(
               expectedRtcArray[i].callout);
-          expect(rtcResponseObject.error).to.equal(expectedRtcArray[i].error);
-          expect(Object.keys(rtcResponseObject).sort()).to.deep.equal(
+          expect(rtcResponse.error).to.equal(expectedRtcArray[i].error);
+          expect(Object.keys(rtcResponse).sort()).to.deep.equal(
               Object.keys(expectedRtcArray[i]).sort());
-          expect(isFiniteNumber(rtcResponseObject.rtcTime)).to.be.true;
+          expect(isFiniteNumber(rtcResponse.rtcTime)).to.be.true;
         });
       });
     }
@@ -120,8 +120,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       return urls;
     }
 
-    function rtcEntry(rtcResponse, callout, error) {
-      return rtcResponse ? {rtcResponse, callout, rtcTime: 10} :
+    function rtcEntry(response, callout, error) {
+      return response ? {response, callout, rtcTime: 10} :
       {callout, error, rtcTime: 10};
     }
 
@@ -151,7 +151,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       const expectedRtcArray = [];
       urls.forEach((url, i) => {
         expectedRtcArray.push({
-          callout: url, rtcTime: 10, rtcResponse: rtcCalloutResponses[i]});
+          callout: url, rtcTime: 10, response: rtcCalloutResponses[i]});
       });
       return executeTest({
         urls, inflatedUrls: urls, rtcCalloutResponses, calloutCount,
@@ -292,7 +292,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'https://www.0.com/',
       ];
       const expectedRtcArray = [
-        {rtcResponse: rtcCalloutResponses[0], callout: urls[0], rtcTime: 10},
+        {response: rtcCalloutResponses[0], callout: urls[0], rtcTime: 10},
         {callout: urls[1], error: RTC_ERROR_ENUM.DUPLICATE_URL, rtcTime: 10},
       ];
       return executeTest({
@@ -316,8 +316,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'https://www.2.com',
       ];
       const expectedRtcArray = [
-        {rtcResponse: rtcCalloutResponses[0], callout: urls[0], rtcTime: 10},
-        {rtcResponse: rtcCalloutResponses[1], callout: urls[1], rtcTime: 10},
+        {response: rtcCalloutResponses[0], callout: urls[0], rtcTime: 10},
+        {response: rtcCalloutResponses[1], callout: urls[1], rtcTime: 10},
         {callout: urls[2], error: RTC_ERROR_ENUM.INSECURE_URL, rtcTime: 10},
       ];
       return executeTest({

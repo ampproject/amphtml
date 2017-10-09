@@ -881,7 +881,7 @@ describe('amp-a4a', () => {
         const a4a = new MockA4AImpl(a4aElement);
         a4a.releaseType_ = '0';
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
-        const rtcResponse = [{rtcResponse: 'a', rtcTime: 1, callout: 'https://a.com'}];
+        const rtcResponse = [{response: 'a', rtcTime: 1, callout: 'https://a.com'}];
         AMP.maybeExecuteRealTimeConfig = sandbox.stub().returns(
             Promise.resolve(rtcResponse));
         const tryExecuteRealTimeConfigSpy =

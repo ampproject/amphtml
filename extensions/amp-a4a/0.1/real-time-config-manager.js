@@ -163,8 +163,8 @@ function sendRtcCallout_(
               if (!text) {
                 return {rtcTime, callout};
               }
-              const rtcResponse = tryParseJson(text);
-              return rtcResponse ? {rtcResponse, rtcTime, callout} :
+              const response = tryParseJson(text);
+              return response ? {response, rtcTime, callout} :
               buildErrorResponse_(
                   RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE, callout, rtcTime);
             });

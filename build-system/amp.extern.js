@@ -363,7 +363,7 @@ const RTC_ERROR_ENUM = {
 };
 
 /** @typedef {{
-      rtcResponse: (?Object<string>|undefined),
+      response: (?Object<string>|undefined),
       rtcTime: number,
       callout: string,
       error: (RTC_ERROR_ENUM|undefined)}} */
