@@ -100,16 +100,6 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
 
-/** milliseconds */
-/** @const {number} */
-const RTC_TIMEOUT = 1000;
-
-/** @private {?Promise<?Object>} */
-const rtcPromise = null;
-
-/** @private {?JsonObject|undefined} */
-const rtcConfig = null;
-
 /** @private @enum {number} */
 const RTC_ATI_ENUM = {
   RTC_SUCCESS: 2,
