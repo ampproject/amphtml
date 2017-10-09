@@ -82,6 +82,9 @@ export class GlobalVariableSource extends VariableSource {
 
     /** @private {?Promise<?ShareTrackingFragmentsDef>} */
     this.shareTrackingFragments_ = null;
+
+    /** @private {?Promise<?{pageIndex: number, pageId: string}>} */
+    this.storyVariablesPromise_ = null;
   }
 
   /**
@@ -503,6 +506,16 @@ export class GlobalVariableSource extends VariableSource {
           .getVideoAnalyticsDetails(video)
           .then(details => details ? details[property] : '');
     });
+
+    this.setAsync('STORY_PAGE_INDEX', () => {
+      return this.getStoryValue_(storyVariables => storyVariables.pageIndex,
+          'STORY_PAGE_INDEX');
+    });
+
+    this.setAsync('STORY_PAGE_ID', () => {
+      return this.getStoryValue_(storyVariables => storyVariables.pageId,
+          'STORY_PAGE_ID');
+    });
   }
 
   /**
@@ -592,6 +605,28 @@ export class GlobalVariableSource extends VariableSource {
           'amp-share-tracking should be configured',
           expr);
       return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
+    });
+  }
+
+  /**
+   * Resolves the value via amp-story's service.
+   * @param {function(!{pageIndex: number, pageId: string}):T} getter
+   * @param {string} expr
+   * @return {!Promise<T>}
+   * @template T
+   * @private
+   */
+  getStoryValue_(getter, expr) {
+    if (!this.storyVariablesPromise_) {
+      this.storyVariablesPromise_ =
+          Services.storyVariableServiceForOrNull(this.ampdoc.win);
+    }
+    return this.storyVariablesPromise_.then(storyVariables => {
+      user().assert(storyVariables,
+          'To use variable %s amp-story should be configured',
+          expr);
+      return getter(
+          /** @type {{pageIndex: number, pageId: string}} */ (storyVariables));
     });
   }
 }

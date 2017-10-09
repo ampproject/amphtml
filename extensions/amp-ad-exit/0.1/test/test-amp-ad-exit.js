@@ -16,7 +16,10 @@
 
 import '../amp-ad-exit';
 import * as sinon from 'sinon';
+import {ANALYTICS_CONFIG} from '../../../amp-analytics/0.1/vendors';
 import {toggleExperiment} from '../../../../src/experiments';
+
+const TEST_3P_VENDOR = '3p-vendor';
 
 const EXIT_CONFIG = {
   targets: {
@@ -67,6 +70,19 @@ const EXIT_CONFIG = {
         },
         _boolVar: {
           defaultValue: true,
+        },
+      },
+    },
+    variableFrom3pAnalytics: {
+      'finalUrl': 'http://localhost:8000/vars?foo=_foo',
+      vars: {
+        _foo: {
+          defaultValue: 'foo-default',
+          iframeTransportSignal:
+              `IFRAME_TRANSPORT_SIGNAL(${TEST_3P_VENDOR},collected-data)`,
+        },
+        _bar: {
+          defaultValue: 'bar-default',
         },
       },
     },
@@ -139,6 +155,14 @@ describes.realWin('amp-ad-exit', {
     win = env.win;
     toggleExperiment(win, 'amp-ad-exit', true);
     addAdDiv();
+    // TODO(jonkeller): Remove after rebase
+    win.top.document.body.getResourceId = () => '6789';
+    // TEST_3P_VENDOR must be in ANALYTICS_CONFIG *before* makeElementWithConfig
+    ANALYTICS_CONFIG[TEST_3P_VENDOR] = ANALYTICS_CONFIG[TEST_3P_VENDOR] || {
+      transport: {
+        iframe: '/nowhere.html',
+      },
+    };
     return makeElementWithConfig(EXIT_CONFIG).then(el => {
       element = el;
     });
@@ -358,8 +382,7 @@ describes.realWin('amp-ad-exit', {
     if (!win.navigator) {
       win.navigator = {sendBeacon: () => false};
     }
-    const sendBeacon =
-        sandbox.stub(win.navigator, 'sendBeacon', () => true);
+    const sendBeacon = sandbox.stub(win.navigator, 'sendBeacon', () => true);
 
     element.implementation_.executeAction({
       method: 'exit',
@@ -378,7 +401,7 @@ describes.realWin('amp-ad-exit', {
     expect(sendBeacon).to.have.been.calledWith(trackingMatcher, '');
   });
 
-  it('should replace custom URL variables', () => {
+  it('should replace custom URL variables with vars', () => {
     const open = sandbox.stub(win, 'open', () => {
       return {name: 'fakeWin'};
     });
@@ -386,8 +409,7 @@ describes.realWin('amp-ad-exit', {
     if (!win.navigator) {
       win.navigator = {sendBeacon: () => false};
     }
-    const sendBeacon =
-        sandbox.stub(win.navigator, 'sendBeacon', () => true);
+    const sendBeacon = sandbox.stub(win.navigator, 'sendBeacon', () => true);
 
     element.implementation_.executeAction({
       method: 'exit',
@@ -521,6 +543,50 @@ describes.realWin('amp-ad-exit', {
     expect(open).to.have.been.calledTwice;
     expect(open).to.have.been.calledWith(
         EXIT_CONFIG.targets.borderProtection.finalUrl, '_blank');
+  });
+
+  it('should replace custom URL variables with 3P Analytics defaults', () => {
+    const open = sandbox.stub(win, 'open').returns({name: 'fakeWin'});
+
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'variableFrom3pAnalytics'},
+      event: makeClickEvent(1004),
+      satisfiesTrust: () => true,
+    });
+
+    expect(open).to.have.been.calledWith(
+        'http://localhost:8000/vars?foo=foo-default', '_blank');
+  });
+
+  it('should replace custom URL variables with 3P Analytics signals', () => {
+    const open = sandbox.stub(win, 'open', () => {
+      return {name: 'fakeWin'};
+    });
+
+    element.implementation_.vendorResponses_[TEST_3P_VENDOR] = {
+      'unused': 'unused',
+      'collected-data': 'abc123',
+    };
+
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'variableFrom3pAnalytics'},
+      event: makeClickEvent(1005),
+      satisfiesTrust: () => true,
+    });
+
+    expect(open).to.have.been.calledWith(
+        'http://localhost:8000/vars?foo=abc123', '_blank');
+  });
+
+  it('should reject unrecognized 3P Analytics vendors', () => {
+    const unkVendor = JSON.parse(JSON.stringify(EXIT_CONFIG));
+    unkVendor.targets.variableFrom3pAnalytics.vars._foo.vendorAnalyticsSource =
+        'nonexistent_vendor';
+
+    expect(makeElementWithConfig(unkVendor))
+        .to.eventually.be.rejectedWith(/Unknown vendor/);
   });
 });
 

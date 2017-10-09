@@ -22,6 +22,7 @@ import {
   getCorsUrl,
   getWinOrigin,
   parseUrl,
+  serializeQueryString,
 } from '../url';
 import {parseJson} from '../json';
 import {isArray, isObject, isFormData} from '../types';
@@ -91,14 +92,10 @@ export class Xhr {
     /** @const {!Window} */
     this.win = win;
 
+    const ampdocService = Services.ampdocServiceFor(win);
     /** @private {?./ampdoc-impl.AmpDoc} */
-    this.ampdocSingle_ = null;
-    if (!getMode().test) {
-      const ampdocService = Services.ampdocServiceFor(win);
-      this.ampdocSingle_ = ampdocService.isSingleDoc() ?
-          ampdocService.getAmpDoc() :
-          null;
-    }
+    this.ampdocSingle_ =
+        ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
   }
 
   /**
@@ -111,7 +108,8 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
-    if (this.ampdocSingle_ &&
+    if (!getMode().test &&
+        this.ampdocSingle_ &&
         Math.random() < 0.01 &&
         parseUrl(input).origin != this.win.location.origin &&
         !Services.viewerForDoc(this.ampdocSingle_).hasBeenVisible()) {
@@ -222,11 +220,18 @@ export class Xhr {
           'body must be of type object or array. %s',
           init.body
       );
+
       // Content should be 'text/plain' to avoid CORS preflight.
       init.headers['Content-Type'] = init.headers['Content-Type'] ||
           'text/plain;charset=utf-8';
+      const headerContentType = init.headers['Content-Type'];
       // Cast is valid, because we checked that it is not form data above.
-      init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
+      if (headerContentType === 'application/x-www-form-urlencoded') {
+        init.body =
+          serializeQueryString(/** @type {!JsonObject} */ (init.body));
+      } else {
+        init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
+      }
     }
     return this.fetch(input, init);
   }

@@ -24,10 +24,12 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
         1. "requests": {} for requests that your service will use.
         1. "optout": if needed.  We currently don't have a great opt-out system, so please reach out to help us design one that works well for you.
     1. An example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
-    1. A line for your analytics service in the 'type' attribute section of the [amp-analytics](amp-analytics.md) usage reference.
+reference.
 1. Test the new example you put in [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html) to ensure the hits from the example are working as expected. For example, the data needed is being collected and displayed in your analytics dashboard.
 1. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue.
+1. Add your analytics service to the [list of supported Analytics Vendors](https://github.com/ampproject/docs/blob/master/content/docs/guides/analytics_amp/analytics-vendors.md) by submitting a Pull Request to the [ampproject/docs](https://github.com/ampproject/docs) repo. Include the type, description, and link to your usage documentation.
 1. Update your service's usage documentation and inform your customers.
+
 
 
 ## Tag Managers

@@ -174,6 +174,7 @@ export class WebAnimationRunner {
       return;
     }
     this.setPlayState_(WebAnimationPlayState.RUNNING);
+    this.runningCount_ = this.players_.length;
     this.players_.forEach(player => {
       player.play();
     });

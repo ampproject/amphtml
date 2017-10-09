@@ -91,12 +91,12 @@ describes.realWin('amp-list component', {
     });
   });
 
-  it('should load and render non-array if single-result is set', () => {
+  it('should load and render non-array if single-item is set', () => {
     const items = {title: 'Title1'};
     const newHeight = 127;
     const itemElement = doc.createElement('div');
     itemElement.style.height = newHeight + 'px';
-    element.setAttribute('single-result', 'true');
+    element.setAttribute('single-item', 'true');
     const fetchPromise = Promise.resolve(items);
     const renderPromise = Promise.resolve([itemElement]);
     listMock.expects('fetch_').withExactArgs('items')
@@ -243,8 +243,8 @@ describes.realWin('amp-list component', {
         .rejectedWith(/Response must contain an array/);
   });
 
-  it('should fail to load b/c data single-result object is absent', () => {
-    element.setAttribute('single-result', 'true');
+  it('should fail to load b/c data single-item object is absent', () => {
+    element.setAttribute('single-item', 'true');
     listMock.expects('fetch_')
         .returns(Promise.resolve()).once();
     templatesMock.expects('findAndRenderTemplateArray').never();
