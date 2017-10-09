@@ -81,9 +81,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     const getLayout = () => 'fluid';
     impl.getLayout = getLayout;
     impl.isLayoutSupported('fluid');
+    impl.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
     multiSizeImpl.getLayout = getLayout;
     multiSizeImpl.isLayoutSupported('fluid');
-    impl.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
     multiSizeImpl.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
   });
 
@@ -153,6 +153,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         const slotStyleString = multiSizeImpl.element.getAttribute('style');
         expect(slotStyleString).to.match(/width: 250px/);
         expect(iframeStyleString).to.match(/position: relative/);
+        expect(multiSizeImpl.getAttribute('height')).to.be.null;
       });
     });
   });
