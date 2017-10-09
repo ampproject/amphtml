@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 import {BookendShareWidget} from './bookend-share';
+import {EventType, dispatch} from './events';
+import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {getJsonLd} from './jsonld';
+import {isArray} from '../../../src/types';
+import {parseUrl} from '../../../src/url';
 
 
 /**
@@ -79,6 +84,66 @@ function buildArticle(doc, articleData) {
 
 
 /**
+ * @param {!Document} doc
+ * @param {string} title
+ * @param {string} domainName
+ * @param {string=} opt_imageUrl
+ * @return {!Element}
+ */
+function buildReplayButton(doc, title, domainName, opt_imageUrl) {
+  const root = createElementWithAttributes(doc, 'div',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-bookend-replay',
+      }));
+
+  const iconContainer = createElementWithAttributes(doc, 'div',
+        /** @type {!JsonObject} */({
+          class: 'i-amphtml-story-bookend-replay-icon',
+        }));
+
+  if (opt_imageUrl) {
+    const container = createElementWithAttributes(doc, 'div',
+        /** @type {!JsonObject} */({
+          class: 'i-amphtml-story-bookend-replay-image',
+        }));
+
+    // TODO(alanorozco): Figure out how to use amp-img here
+    container.appendChild(createElementWithAttributes(doc, 'img',
+        /** @type {!JsonObject} */({
+          width: 80,
+          height: 80,
+          src: opt_imageUrl,
+        })));
+
+    container.appendChild(iconContainer);
+
+    root.appendChild(container);
+  } else {
+    root.appendChild(iconContainer);
+  }
+
+  const h2El = createElementWithAttributes(doc, 'h2',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-bookend-article-heading',
+      }));
+
+  h2El.textContent = title;
+
+  const metaEl = createElementWithAttributes(doc, 'div',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-bookend-article-meta',
+      }));
+
+  metaEl.textContent = domainName;
+
+  root.appendChild(h2El);
+  root.appendChild(metaEl);
+
+  return root;
+}
+
+
+/**
  * Bookend component for <amp-story>.
  */
 export class Bookend {
@@ -94,6 +159,9 @@ export class Bookend {
 
     /** @private {?Element} */
     this.root_ = null;
+
+    /** @private {?Element} */
+    this.replayBtn_ = null;
 
     /** @private {!BookendShareWidget} */
     this.shareWidget_ = BookendShareWidget.create(win);
@@ -113,9 +181,30 @@ export class Bookend {
     this.root_ = this.win_.document.createElement('section');
     this.root_.classList.add('i-amphtml-story-bookend');
 
+    // TOOD(alanorozco): Domain name
+    this.replayBtn_ = this.buildReplayButton_(ampdoc);
+
+    this.root_.appendChild(this.replayBtn_);
     this.root_.appendChild(this.shareWidget_.build(ampdoc));
 
+    this.attachEvents_();
+
     return this.getRoot();
+  }
+
+  /** @private */
+  attachEvents_() {
+    // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
+    this.replayBtn_.addEventListener('click', e => this.onReplayBtnClick_(e));
+  }
+
+  /**
+   * @param {!Event} e
+   * @private
+   */
+  onReplayBtnClick_(e) {
+    e.stopPropagation();
+    dispatch(this.getRoot(), EventType.REPLAY, /* opt_bubbles */ true);
   }
 
   /**
@@ -209,5 +298,48 @@ export class Bookend {
     this.assertBuilt_();
     return dev().assertElement(this.root_);
   }
-}
 
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {{
+   *   title: string,
+   *   domainName: string,
+   *   imageUrl: (string|undefined),
+   * }}
+   * @private
+   */
+  getStoryMetadata_(ampdoc) {
+    const jsonLd = getJsonLd(ampdoc.getRootNode());
+
+    const metadata = {
+      title: jsonLd && jsonLd['heading'] ?
+          jsonLd['heading'] :
+          user().assertElement(
+              this.win_.document.head.querySelector('title'),
+              'Please set <title> or structured data (JSON-LD).').textContent,
+
+      domainName:
+          parseUrl(Services.documentInfoForDoc(ampdoc).canonicalUrl).hostname,
+    };
+
+    if (jsonLd && isArray(jsonLd['image']) && jsonLd['image'].length) {
+      metadata.imageUrl = jsonLd['image'][0];
+    }
+
+    return metadata;
+  }
+
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {!Element}
+   * @private
+   */
+  buildReplayButton_(ampdoc) {
+    const metadata = this.getStoryMetadata_(ampdoc);
+    return buildReplayButton(
+        this.win_.document,
+        metadata.title,
+        metadata.domainName,
+        metadata.imageUrl);
+  }
+}
