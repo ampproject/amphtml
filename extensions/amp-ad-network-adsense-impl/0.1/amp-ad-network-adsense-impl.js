@@ -90,7 +90,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
      */
     this.lifecycleReporter_ = this.lifecycleReporter_ ||
-      this.initLifecycleReporter();
+        this.initLifecycleReporter();
 
     /**
      * A unique identifier for this slot.
@@ -107,18 +107,18 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      */
     this.ampAnalyticsConfig_ = null;
 
+    /** @private {!../../../src/service/extensions-impl.Extensions} */
+    this.extensions_ = Services.extensionsFor(this.win);
+
+    /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
+    this.size_ = null;
+
     /**
      * amp-analytics element generated based on this.ampAnalyticsConfig_
      * @type {?Element}
      * @private
      */
     this.ampAnalyticsElement_ = null;
-
-    /** @private {!../../../src/service/extensions-impl.Extensions} */
-    this.extensions_ = Services.extensionsFor(this.win);
-
-    /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
-    this.size_ = null;
 
     /** @private {?string} */
     this.qqid_ = null;
