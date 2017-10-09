@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ICONS} from './icons';
 import {Services} from '../../../src/services';
 import {isObject} from '../../../src/types';
 import {createElementWithAttributes} from '../../../src/dom';
@@ -44,16 +43,13 @@ function buildLinkShareItem(doc) {
 
   const iconEl = createElementWithAttributes(doc, 'div',
       /** @type {!JsonObject} */({
-        class: 'i-amphtml-story-share-icon',
+        class: 'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
       }));
 
   const nameEl = createElementWithAttributes(doc, 'span',
       /** @type {!JsonObject} */({
         class: 'i-amphtml-story-share-name',
       }));
-
-  // constant value, no XSS risk
-  iconEl./*OK*/innerHTML = ICONS.link;
 
   // TODO(alanorozco): i18n
   nameEl.textContent = 'Get Link';
@@ -88,11 +84,6 @@ function buildProvider(doc, type, opt_params) {
   if (opt_params) {
     Object.keys(opt_params).forEach(field =>
         shareEl.setAttribute(`data-param-${field}`, opt_params[field]));
-  }
-
-  if (type == 'email') {
-    // constant value, no XSS risk
-    shareEl./*OK*/innerHTML = ICONS.mail;
   }
 
   const nameEl = createElementWithAttributes(doc, 'span',
