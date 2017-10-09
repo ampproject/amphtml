@@ -30,7 +30,6 @@ import {
 import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {
   additionalDimensions,
-  getCorrelator,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
   isReportingEnabled,
@@ -50,7 +49,6 @@ import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {clamp} from '../../../src/utils/math';
-import {dict} from '../../../src/utils/object';
 import {
   computedStyle,
   setStyle,
@@ -92,7 +90,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
      */
     this.lifecycleReporter_ = this.lifecycleReporter_ ||
-        this.initLifecycleReporter();
+      this.initLifecycleReporter();
 
     /**
      * A unique identifier for this slot.
@@ -115,22 +113,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * @private
      */
     this.ampAnalyticsElement_ = null;
-
-    /**
-     * Config to generate amp-analytics element for reporting on page load
-     * metrics
-     * @type {?JsonObject}
-     * @private
-     */
-    this.ampAnalyticsPageLoadMetricsConfig_ = null;
-
-    /**
-     * amp-analytics element generated based on
-     * this.ampAnalyticsPageLoadMetricsConfig_
-     * @type {?Element}
-     * @private
-     */
-    this.ampAnalyticsPageLoadMetricsElement_ = null;
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = Services.extensionsFor(this.win);
@@ -186,36 +168,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (verifierEid) {
       addExperimentIdToElement(verifierEid, this.element);
     }
-
-    const correlator = getCorrelator(this.win);
-    this.ampAnalyticsPageLoadMetricsConfig_ = dict({
-      'requests': {
-        'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
-            `&c=${correlator}` +
-            '&met.a4a=firstVisibleTime.${firstVisibleTime}',
-      },
-      'transport': {
-        'beacon': false,
-        'xhrpost': false,
-      },
-      'triggers': {
-        'iniLoad': {
-          'on': 'visible',
-          'request': 'fvt',
-          'selector': 'body',
-          'selectionMethod': 'closest',
-        },
-      },
-    });
-    // TODO(jonkeller): Add remaining metrics commented below to config
-    // 'met.a4a=makeBodyVisible.${MBV_VALUE}~' +
-    // 'firstContentfulPaint.${FCP_VALUE}~' +
-    // 'firstViewportReady.${FVR_VALUE}',
-    // Load amp-analytics extensions
-    dev().assert(!this.ampAnalyticsPageLoadMetricsElement_);
-    this.ampAnalyticsPageLoadMetricsElement_ =
-      insertAnalyticsElement(this.element,
-          this.ampAnalyticsPageLoadMetricsConfig_, true);
 
     if (this.isResponsive_()) {
       // Attempt to resize to the correct height. The width should already be
@@ -403,12 +355,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       removeElement(this.ampAnalyticsElement_);
       this.ampAnalyticsElement_ = null;
     }
-    if (this.ampAnalyticsPageLoadMetricsElement_) {
-      removeElement(this.ampAnalyticsPageLoadMetricsElement_);
-      this.ampAnalyticsPageLoadMetricsElement_ = null;
-    }
     this.ampAnalyticsConfig_ = null;
-    this.ampAnalyticsPageLoadMetricsConfig_ = null;
     this.qqid_ = null;
   }
 
