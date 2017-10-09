@@ -91,6 +91,7 @@ import {
 import {
   addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
+import '../../amp-a4a/0.1/real-time-config-manager';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -572,22 +573,23 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Merges all of the rtcResponses into the JSON targeting and
    * category exclusions.
+   * @param {?Array<rtcResponseDef>} rtcResponseArray
    * @private
    */
-  mergeRtcResponses_(rtcResponses) {
-    if (!rtcResponses) {
+  mergeRtcResponses_(rtcResponseArray) {
+    if (!rtcResponseArray) {
       return null;
     }
     let rtcParams = {};
     const artc = [];
     const ati = [];
     const ard = [];
-    rtcResponses.forEach(rtcResponse => {
-      artc.push(rtcResponse['rtcTime']);
-      ati.push(!rtcResponse['error'] ? RTC_ATI_ENUM.RTC_SUCCESS :
+    rtcResponseArray.forEach(rtcResponse => {
+      artc.push(rtcResponse.rtcTime);
+      ati.push(!rtcResponse.error ? RTC_ATI_ENUM.RTC_SUCCESS :
                RTC_ATI_ENUM.RTC_FAILURE);
-      ard.push(rtcResponse['callout']);
-      rtcParams = Object.assign(rtcParams, rtcResponse['rtcResponse']);
+      ard.push(rtcResponse.callout);
+      rtcParams = Object.assign(rtcParams, rtcResponse.rtcResponse);
     });
     ['targeting', 'categoryExclusions'].forEach(key => {
       if (rtcParams[key]) {
