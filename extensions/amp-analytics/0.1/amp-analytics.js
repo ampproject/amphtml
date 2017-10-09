@@ -166,6 +166,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
+    this.iframeTransport_ = null;
   }
 
   /**
