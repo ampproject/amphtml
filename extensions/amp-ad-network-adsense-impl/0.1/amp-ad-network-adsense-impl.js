@@ -115,8 +115,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /**
      * amp-analytics element generated based on this.ampAnalyticsConfig_
-     * @type {?Element}
-     * @private
+     * @private {?Element}
      */
     this.ampAnalyticsElement_ = null;
 
