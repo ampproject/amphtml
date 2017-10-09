@@ -43,6 +43,8 @@ The following adservers support serving AMP Ads at the moment:
 4. Adzerk
 5. Google AdSense
 
+### Real Time Config
+Fast Fetch supports Real Time Config: publisher-specified, multiple, simultaneous callouts in order to augment targeting information included on the ad request. In order for a publisher to use Real Time Config on their ads, the Fast Fetch Ad Network in use must also support RTC. Please refer to the [Intent to Implement](https://github.com/ampproject/amphtml/issues/11321) for details. 
 
 ## Creative Agencies
 

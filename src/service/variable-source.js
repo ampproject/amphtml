@@ -21,7 +21,7 @@ import {isFiniteNumber} from '../types';
 let ResolverReturnDef;
 
 /** @typedef {function(...*):ResolverReturnDef} */
-let SyncResolverDef;
+export let SyncResolverDef;
 
 /** @typedef {function(...*):!Promise<ResolverReturnDef>} */
 let AsyncResolverDef;
