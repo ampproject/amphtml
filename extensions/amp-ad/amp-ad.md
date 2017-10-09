@@ -225,6 +225,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Content.ad](../../ads/contentad.md)
 - [Criteo](../../ads/criteo.md)
 - [CSA](../../ads/google/csa.md)
+- [Connatix](../../ads/connatix.md)
 - [CxenseDisplay](../../ads/eas.md)
 - [Dianomi](../../ads/dianomi.md)
 - [Directadvert](../../ads/directadvert.md)

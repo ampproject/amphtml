@@ -258,6 +258,8 @@ export const adConfig = {
     prefetch: 'https://www.google.com/adsense/search/ads.js',
   },
 
+  connatix: {},
+
   dable: {
     preconnect: [
       'https://static.dable.io',
