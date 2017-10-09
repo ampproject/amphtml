@@ -263,7 +263,7 @@ export class AmpAdExit extends AMP.BaseElement {
             continue;
           }
           const matches = target.vars[customVar].iframeTransportSignal.match(
-              /IFRAME_TRANSPORT_SIGNAL\(([^,]*)/);
+              /IFRAME_TRANSPORT_SIGNAL\(([^,]+)/);
           if (!matches || matches.length < 2) {
             continue;
           }
