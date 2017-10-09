@@ -562,14 +562,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
     return opt_rtcResponsesPromise.then(rtcResponseArray => {
-      let rtcParams = this.mergeRtcResponses(rtcResponseArray);
+      let rtcParams = this.mergeRtcResponses_(rtcResponseArray);
       return googleAdUrl(
           this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
               this.getBlockParameters_(), rtcParams, PAGE_LEVEL_PARAMS_));
     });
   }
 
-  mergeRtcResponses(rtcResponses) {
+  /**
+   * Merges all of the rtcResponses into the JSON targeting and
+   * category exclusions.
+   * @private
+   */
+  mergeRtcResponses_(rtcResponses) {
     if (!rtcResponses) {
       return null;
     }
@@ -585,14 +590,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       rtcParams = Object.assign(rtcParams, rtcResponse['rtcResponse']);
     });
     ['targeting', 'categoryExclusions'].forEach(key => {
-      if (!!rtcParams[key]) {
+      if (rtcParams[key]) {
         this.jsonTargeting_[key] =
             !!this.jsonTargeting_[key] ?
             deepMerge(this.jsonTargeting_[key], rtcParams[key]) :
             rtcParams[key];
       }
     });
-    return {'artc': artc.join(), 'ati': ati.join(), 'ard': ard.join(),
+    return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join(),
     };
   }
 
