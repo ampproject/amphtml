@@ -105,10 +105,10 @@ const DOUBLECLICK_BASE_URL =
 const RTC_TIMEOUT = 1000;
 
 /** @private {?Promise<?Object>} */
-let rtcPromise = null;
+const rtcPromise = null;
 
 /** @private {?JsonObject|undefined} */
-let rtcConfig = null;
+const rtcConfig = null;
 
 /** @private @enum {number} */
 const RTC_ATI_ENUM = {
@@ -563,7 +563,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
     return opt_rtcResponsesPromise.then(rtcResponseArray => {
-      let rtcParams = this.mergeRtcResponses_(rtcResponseArray);
+      const rtcParams = this.mergeRtcResponses_(rtcResponseArray);
       return googleAdUrl(
           this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
               this.getBlockParameters_(), rtcParams, PAGE_LEVEL_PARAMS_));
@@ -589,7 +589,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       ati.push(!rtcResponse.error ? RTC_ATI_ENUM.RTC_SUCCESS :
                RTC_ATI_ENUM.RTC_FAILURE);
       ard.push(rtcResponse.callout);
-      rtcParams = Object.assign(rtcParams, rtcResponse.rtcResponse);
+      rtcParams = Object.assign(rtcParams, rtcResponse.response);
     });
     ['targeting', 'categoryExclusions'].forEach(key => {
       if (rtcParams[key]) {
