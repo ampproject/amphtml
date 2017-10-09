@@ -63,7 +63,7 @@ function logAndAddErrorResponse_(promiseArray, error, callout) {
  * @private
  */
 function buildErrorResponse_(error, callout, opt_rtcTime) {
-  return Promise.resolve({error, callout, rtcTime: opt_rtcTime || 0});
+  return Promise.resolve(/**@type {rtcResponseDef} */({error, callout, rtcTime: opt_rtcTime || 0}));
 }
 
 /**
