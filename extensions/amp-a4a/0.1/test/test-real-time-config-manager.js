@@ -383,6 +383,41 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       expect(validatedRtcConfig).to.deep.equal(rtcConfig);
     });
 
+    it('should allow timeout of 0', () => {
+      const rtcConfig = {
+        'vendors': {'fakeVendor': {'SLOT_ID': '1', 'PAGE_ID': '1'},
+          'nonexistent-vendor': {'SLOT_ID': '1'},
+          'fakeVendor2': {'SLOT_ID': '1'}},
+        'urls': ['https://localhost:4443/posts?slot_id=SLOT_ID',
+          'https://broken.zzzzzzz'],
+        'timeoutMillis': 0};
+      setRtcConfig(rtcConfig);
+      validatedRtcConfig = validateRtcConfig_(element);
+      expect(validatedRtcConfig).to.be.ok;
+      expect(validatedRtcConfig).to.deep.equal(rtcConfig);
+    });
+
+    it('should not allow timeout greater than default', () => {
+      const rtcConfig = {
+        'vendors': {'fakeVendor': {'SLOT_ID': '1', 'PAGE_ID': '1'},
+          'nonexistent-vendor': {'SLOT_ID': '1'},
+          'fakeVendor2': {'SLOT_ID': '1'}},
+        'urls': ['https://localhost:4443/posts?slot_id=SLOT_ID',
+          'https://broken.zzzzzzz'],
+        'timeoutMillis': 1000000};
+      const expectedRtcConfig = {
+        'vendors': {'fakeVendor': {'SLOT_ID': '1', 'PAGE_ID': '1'},
+          'nonexistent-vendor': {'SLOT_ID': '1'},
+          'fakeVendor2': {'SLOT_ID': '1'}},
+        'urls': ['https://localhost:4443/posts?slot_id=SLOT_ID',
+          'https://broken.zzzzzzz'],
+        'timeoutMillis': 1000};
+      setRtcConfig(rtcConfig);
+      validatedRtcConfig = validateRtcConfig_(element);
+      expect(validatedRtcConfig).to.be.ok;
+      expect(validatedRtcConfig).to.deep.equal(expectedRtcConfig);
+    });
+
     it('should return null if rtc-config not specified', () => {
       validatedRtcConfig = validateRtcConfig_(element);
       expect(validatedRtcConfig).to.be.null;

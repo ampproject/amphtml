@@ -344,7 +344,11 @@ AMP.BaseTemplate;
 
 AMP.maybeExecuteRealTimeConfig = false;
 
-/** @enum {string} */
+/**
+ * Actual filled values for this exists in
+ * extensions/amp-a4a/0.1/real-time-config-manager.js
+ * @enum {string}
+ */
 const RTC_ERROR_ENUM = {};
 
 /** @typedef {{

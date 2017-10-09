@@ -24,10 +24,10 @@ import {isSecureUrl} from '../../../src/url';
 const TAG = 'real-time-config';
 
 /** @type {number} */
-export const MAX_RTC_CALLOUTS = 5;
+const MAX_RTC_CALLOUTS = 5;
 
 /** @enum {string} */
-const RTC_ERROR_ENUM = {
+export const RTC_ERROR_ENUM = {
   // Occurs when response is unparseable as JSON
   MALFORMED_JSON_RESPONSE: 'malformed_json_response',
   // Occurs when a publisher has specified the same url
@@ -129,11 +129,11 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
         promiseArray, RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
         opt_vendor || url);
   }
-  if (macros && Object.keys(macros)) {
+  if (macros && Object.keys(macros).length) {
     const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
     const whitelist = {};
     Object.keys(macros).forEach(key => whitelist[key] = true);
-    url = urlReplacements.expandSync(
+    url = urlReplacements.expandUrlSync(
         url, macros, /** opt_collectVars */undefined, whitelist);
   }
   if (!isSecureUrl(url)) {
@@ -213,10 +213,6 @@ export function validateRtcConfig_(element) {
   try {
     user().assert(rtcConfig['vendors'] || rtcConfig['urls'],
         'RTC Config must specify vendors or urls');
-    if (!Object.keys(rtcConfig['vendors'] || {}).length
-       && !(rtcConfig['urls'] || []).length) {
-      return null;
-    }
     Object.keys(rtcConfig).forEach(key => {
       switch (key) {
         case 'vendors':
@@ -231,7 +227,7 @@ export function validateRtcConfig_(element) {
             user().warn(TAG, 'Invalid RTC timeout is NaN, ' +
                         `using default timeout ${defaultTimeoutMillis}ms`);
           } else if (timeout >= defaultTimeoutMillis || timeout < 0) {
-            timeout = null;
+            timeout = undefined;
             user().warn(TAG, `Invalid RTC timeout: ${timeout}ms, ` +
                         `using default timeout ${defaultTimeoutMillis}ms`);
           }
@@ -241,12 +237,17 @@ export function validateRtcConfig_(element) {
           break;
       }
     });
+    if (!Object.keys(rtcConfig['vendors'] || {}).length
+       && !(rtcConfig['urls'] || []).length) {
+      return null;
+    }
   } catch (unusedErr) {
     // This error would be due to the asserts above.
     return null;
   }
 
-  rtcConfig['timeoutMillis'] = timeout || defaultTimeoutMillis;
+  rtcConfig['timeoutMillis'] = timeout !== undefined ?
+      timeout : defaultTimeoutMillis;
   return rtcConfig;
 }
 
