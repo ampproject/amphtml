@@ -568,7 +568,6 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
     this.adPromise_ = Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
-        /** @return {Promise<!Array<!rtcResponseDef>>|undefined} */
         .then(() => {
           checkStillCurrent();
           // See if experiment that delays request until slot is within
@@ -577,18 +576,15 @@ export class AmpA4A extends AMP.BaseElement {
           // meeting the definition as opposed to waiting on the promise.
           if (this.delayAdRequestEnabled() &&
               !this.getResource().renderOutsideViewport()) {
-            return this.getResource().whenWithinRenderOutsideViewport().then(
-                () => this.tryExecuteRealTimeConfig_);
-          } else {
-            return this.tryExecuteRealTimeConfig_();
+            return this.getResource().whenWithinRenderOutsideViewport();
           }
         })
         // This block returns the ad URL, if one is available.
         /** @return {!Promise<?string>} */
-        .then(rtcResponsesPromise => {
+        .then(() => {
           checkStillCurrent();
           return /** @type {!Promise<?string>} */(
-              this.getAdUrl(rtcResponsesPromise));
+              this.getAdUrl(this.tryExecuteRealTimeConfig_()));
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */
@@ -1015,7 +1011,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
-   * @param {Array<rtcResponseDef>=} opt_rtcResponsesPromise
+   * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
   getAdUrl(opt_rtcResponsesPromise) {
