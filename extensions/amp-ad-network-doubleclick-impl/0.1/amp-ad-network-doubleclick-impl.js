@@ -91,6 +91,7 @@ import {
 import {
   addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
 import '../../amp-a4a/0.1/real-time-config-manager';
 
 /** @type {string} */
@@ -545,6 +546,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
       return '';
     }
+    opt_rtcResponsesPromise = opt_rtcResponsesPromise || Promise.resolve();
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
     // fallback to non-SRA if single block.
@@ -575,11 +577,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const ati = [];
     const ard = [];
     rtcResponseArray.forEach(rtcResponse => {
+      // Only want to send errors for requests we actually sent.
+      if (rtcResponse.error &&
+          rtcResponse.error != RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE &&
+          rtcResponse.error != RTC_ERROR_ENUM.NETWORK_FAILURE
+         ) {
+        return;
+      }
       artc.push(rtcResponse.rtcTime);
       ati.push(!rtcResponse.error ? RTC_ATI_ENUM.RTC_SUCCESS :
                RTC_ATI_ENUM.RTC_FAILURE);
       ard.push(rtcResponse.callout);
-      rtcParams = Object.assign(rtcParams, rtcResponse.response);
+      rtcParams = rtcResponse.response ?
+          deepMerge(rtcParams, rtcResponse.response) : rtcParams;
     });
     ['targeting', 'categoryExclusions'].forEach(key => {
       if (rtcParams[key]) {
