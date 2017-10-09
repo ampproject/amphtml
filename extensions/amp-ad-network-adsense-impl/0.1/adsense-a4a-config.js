@@ -75,9 +75,13 @@ export const URL_EXPERIMENT_MAPPING = {
 /**
  * @param {!Window} win
  * @param {!Element} element
+ * @param {!boolean} useRemoteHtml
  * @returns {boolean}
  */
-export function adsenseIsA4AEnabled(win, element) {
+export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
+  if (useRemoteHtml) {
+    return false;
+  }
   if (!isGoogleAdsA4AValidEnvironment(win) ||
       !element.getAttribute('data-ad-client')) {
     return false;
