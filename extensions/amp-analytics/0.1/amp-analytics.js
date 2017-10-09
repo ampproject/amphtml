@@ -168,22 +168,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  resumeCallback() {
-    if (this.config_['transport'] && this.config_['transport']['iframe']) {
-      this.initIframeTransport_();
-    }
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    if (this.iframeTransport_) {
-      this.iframeTransport_.detach();
-      this.iframeTransport_ = null;
-    }
-    return super.unlayoutCallback();
-  }
-
   /**
    * @return {!Promise}
    * @private
