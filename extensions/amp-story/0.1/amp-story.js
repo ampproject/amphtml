@@ -197,6 +197,10 @@ export class AmpStory extends AMP.BaseElement {
       }
     });
 
+    this.element.addEventListener(EventType.REPLAY, () => {
+      this.replay_();
+    });
+
     this.element.addEventListener('play', e => {
       if (e.target instanceof HTMLMediaElement) {
         this.audioManager_.play(e.target);
@@ -765,6 +769,12 @@ export class AmpStory extends AMP.BaseElement {
    */
   audioStopped_() {
     this.element.classList.remove('audio-playing');
+  }
+
+  /** @private */
+  replay_() {
+    this.hideBookend_();
+    this.switchTo_(dev().assertElement(this.pages_[0].element).id);
   }
 }
 

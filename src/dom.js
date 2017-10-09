@@ -640,6 +640,16 @@ export function isJsonScriptTag(element) {
 }
 
 /**
+ * Whether the element is a script tag with application/json type.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isJsonLdScriptTag(element) {
+  return element.tagName == 'SCRIPT' &&
+      element.getAttribute('type').toUpperCase() == 'APPLICATION/LD+JSON';
+}
+
+/**
  * Whether the page's direction is right to left or not.
  * @param {!Document} doc
  * @return {boolean}
