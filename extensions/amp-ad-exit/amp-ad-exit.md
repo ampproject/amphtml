@@ -261,7 +261,10 @@ property. The default value can be overridden in the `exit` action invocation:
 Variable values can also come from 3P analytics. Use
 `<amp-analytics type='example-3p-vendor'>` to install a 3P analytics
 vendor iframe and reference it in the variable definition with the
-`"iframeTransportSignal"` property.
+`"iframeTransportSignal"` property. The format of `"iframeTransportSignal"` is
+`"IFRAME_TRANSPORT_SIGNAL(example-3p-vendor,collected-data)"`, where `example-3p-vendor`
+is the name of the vendor and `collected-data` is a key in the message from the 
+vendor iframe. There must not be a space after the comma.
 
 Example:
 ```html
