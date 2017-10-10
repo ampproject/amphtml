@@ -62,3 +62,18 @@ export function findIndex(array, predicate) {
   }
   return -1;
 }
+
+/**
+ * Converts the given iterator to an array.
+ *
+ * @param {!Iterator<T>} iterator
+ * @return {Array<T>}
+ * @template T
+ */
+export function fromIterator(iterator) {
+  const array = [];
+  for (let e = iterator.next(); !e.done; e = iterator.next()) {
+    array.push(e.value);
+  }
+  return array;
+}

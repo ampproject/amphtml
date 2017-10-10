@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {ancestorElementsByTag} from './dom';
+
  /** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';
 
@@ -31,4 +33,52 @@ export function formOrNullForElement(element) {
  */
 export function setFormForElement(element, form) {
   element[FORM_PROP_] = form;
+}
+
+/**
+ * Returns form data in the passed-in form as an object.
+ * @param {!HTMLFormElement} form
+ * @return {!JsonObject}
+ */
+export function getFormAsObject(form) {
+  const data = /** @type {!JsonObject} */ ({});
+  const inputs = form.elements;
+  const submittableTagsRegex = /^(?:input|select|textarea)$/i;
+  const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
+  const checkableType = /^(?:checkbox|radio)$/i;
+  for (let i = 0; i < inputs.length; i++) {
+    const input = inputs[i];
+    if (!input.name || isDisabled(input) ||
+        !submittableTagsRegex.test(input.tagName) ||
+        unsubmittableTypesRegex.test(input.type) ||
+        (checkableType.test(input.type) && !input.checked)) {
+      continue;
+    }
+
+    if (data[input.name] === undefined) {
+      data[input.name] = [];
+    }
+    data[input.name].push(input.value);
+  }
+
+  return data;
+}
+
+/**
+ * Checks if a field is disabled.
+ * @param {!Element} element
+ * @private
+ */
+function isDisabled(element) {
+  if (element.disabled) {
+    return true;
+  }
+
+  const ancestors = ancestorElementsByTag(element, 'fieldset');
+  for (let i = 0; i < ancestors.length; i++) {
+    if (ancestors[i].disabled) {
+      return true;
+    }
+  }
+  return false;
 }

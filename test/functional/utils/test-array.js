@@ -17,6 +17,7 @@
 import {
   filterSplice,
   findIndex,
+  fromIterator,
 } from '../../../src/utils/array';
 
 describe('filterSplice', function() {
@@ -70,5 +71,30 @@ describe('findIndex', function() {
     findIndex([1, 2, 3], (element, i, array) => {
       expect(array).to.deep.equal([1, 2, 3]);
     });
+  });
+});
+
+describe('fromIterator', function() {
+  it('should return empty array for empty iterator', () => {
+    const iterator = {
+      next() {
+        return {value: undefined, done: true};
+      },
+    };
+
+    expect(fromIterator(iterator)).to.be.an('array').that.is.empty;
+  });
+
+  it('should return non-empty array for non-empty iterator', () => {
+    let index = 0;
+    const iterator = {
+      next() {
+        return index < 3 ?
+            {value: (index++) * 2, done: false} :
+            {value: undefined, done: true};
+      },
+    };
+
+    expect(fromIterator(iterator)).to.deep.equal([0, 2, 4]);
   });
 });
