@@ -196,9 +196,6 @@ export class DevelopmentModeLog {
 
     /** @private {?Element} */
     this.contextStringEl_ = null;
-
-    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win_);
   }
 
 
