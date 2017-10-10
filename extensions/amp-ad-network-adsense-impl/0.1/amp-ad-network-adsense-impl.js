@@ -22,7 +22,10 @@
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
-import {fastFetchDelayedRequestEnabled} from './adsense-a4a-config';
+import {
+  fastFetchDelayedRequestEnabled,
+  identityEnabled,
+} from './adsense-a4a-config';
 import {
   addExperimentIdToElement,
   isInManualExperiment,
@@ -38,6 +41,7 @@ import {
   maybeAppendErrorParameter,
   getEnclosingContainerTypes,
   ValidAdContainerTypes,
+  getIdentityToken,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
@@ -133,6 +137,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * @private {?string}
      */
     this.autoFormat_ = null;
+
+    /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
+    this.identityTokenPromise_ = null;
   }
 
   /**
@@ -164,10 +171,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
-
+    this.identityTokenPromise_ = identityEnabled(this.win) ?
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+        .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
+        Promise.resolve(
+          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
     this.autoFormat_ =
         this.element.getAttribute('data-auto-format') || '';
-
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
       addExperimentIdToElement(verifierEid, this.element);
@@ -257,9 +267,23 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (ampAutoAdsBranch) {
       experimentIds.push(ampAutoAdsBranch);
     }
-
-    return googleAdUrl(
-        this, ADSENSE_BASE_URL, startTime, parameters, experimentIds);
+    const identityPromise = Services.timerFor(this.win)
+        .timeoutPromise(1000, this.identityTokenPromise_)
+        .catch(unusedErr => {
+          // On error/timeout, proceed.
+          return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/(
+            {});
+        });
+    return identityPromise.then(identity => {
+      return googleAdUrl(
+          this, ADSENSE_BASE_URL, startTime, Object.assign(
+              {
+                adsid: identity.token || null,
+                jar: identity.jar || null,
+                pucrd: identity.pucrd || null,
+              },
+              parameters), experimentIds);
+    });
   }
 
   /** @override */
