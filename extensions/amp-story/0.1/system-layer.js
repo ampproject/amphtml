@@ -433,7 +433,9 @@ export class SystemLayer {
       return;
     }
 
-    logEntries.forEach(entry => this.logInternal_(entry));
+    Services.vsyncFor(this.win_).mutate(() => {
+      logEntries.forEach(entry => this.logInternal_(entry));
+    });
   }
 
   /**
@@ -458,7 +460,9 @@ export class SystemLayer {
     this.errorButton_.setAttribute('data-count', 0);
     this.warningButton_.setAttribute('data-count', 0);
     this.successButton_.setAttribute('data-count', 0);
-    removeChildren(this.developerLogEntryListEl_);
+    Services.vsyncFor(this.win_).mutate(() => {
+      removeChildren(this.developerLogEntryListEl_);
+    }
   }
 
   /**
