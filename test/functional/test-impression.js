@@ -21,6 +21,7 @@ import {
 } from '../../src/impression';
 import {toggleExperiment} from '../../src/experiments';
 import {Services} from '../../src/services';
+import {macroTask} from '../../testing/yield';
 import * as sinon from 'sinon';
 
 describe('impression', () => {
@@ -77,39 +78,41 @@ describe('impression', () => {
     return getTrackImpressionPromise().should.be.fulfilled;
   });
 
-  it('should invoke URL with experiment on', () => {
+  it('should invoke URL with experiment on', function* () {
+    sandbox.spy(viewer, 'sendMessageAwaitResponse');
     toggleExperiment(window, 'alp', true);
     isTrustedViewer = false;
     viewer.getParam.withArgs('click').returns('https://www.example.com');
     maybeTrackImpression(window);
     expect(xhr.fetchJson).to.have.not.been.called;
-    return getTrackImpressionPromise().then(() => {
-      expect(xhr.fetchJson).to.be.calledOnce;
-      const url = xhr.fetchJson.lastCall.args[0];
-      const params = xhr.fetchJson.lastCall.args[1];
-      expect(url).to.equal('https://www.example.com');
-      expect(params).to.jsonEqual({
-        credentials: 'include',
-        requireAmpResponseSourceOrigin: false,
-      });
+    yield macroTask();
+    expect(viewer.sendMessageAwaitResponse).to.be.calledWith('getReplaceUrl');
+    expect(xhr.fetchJson).to.be.calledOnce;
+    const url = xhr.fetchJson.lastCall.args[0];
+    const params = xhr.fetchJson.lastCall.args[1];
+    expect(url).to.equal('https://www.example.com');
+    expect(params).to.jsonEqual({
+      credentials: 'include',
+      requireAmpResponseSourceOrigin: false,
     });
   });
 
-  it('should invoke URL in trusted viewer', () => {
+  it('should invoke URL in trusted viewer', function* () {
+    sandbox.spy(viewer, 'sendMessageAwaitResponse');
     toggleExperiment(window, 'alp', false);
     isTrustedViewer = true;
     viewer.getParam.withArgs('click').returns('https://www.example.com');
     maybeTrackImpression(window);
     expect(xhr.fetchJson).to.have.not.been.called;
-    return getTrackImpressionPromise().then(() => {
-      expect(xhr.fetchJson).to.be.calledOnce;
-      const url = xhr.fetchJson.lastCall.args[0];
-      const params = xhr.fetchJson.lastCall.args[1];
-      expect(url).to.equal('https://www.example.com');
-      expect(params).to.jsonEqual({
-        credentials: 'include',
-        requireAmpResponseSourceOrigin: false,
-      });
+    yield macroTask();
+    expect(viewer.sendMessageAwaitResponse).to.be.calledWith('getReplaceUrl');
+    expect(xhr.fetchJson).to.be.calledOnce;
+    const url = xhr.fetchJson.lastCall.args[0];
+    const params = xhr.fetchJson.lastCall.args[1];
+    expect(url).to.equal('https://www.example.com');
+    expect(params).to.jsonEqual({
+      credentials: 'include',
+      requireAmpResponseSourceOrigin: false,
     });
   });
 
@@ -122,13 +125,9 @@ describe('impression', () => {
     const href = window.location.href;
     const clock = sandbox.useFakeTimers();
     maybeTrackImpression(window);
-    return Promise.resolve().then(() => {
-      Promise.resolve().then(() => {
-        clock.tick(8001);
-        return getTrackImpressionPromise().then(() => {
-          expect(window.location.href).to.equal(href);
-        });
-      });
+    clock.tick(8001);
+    return getTrackImpressionPromise().then(() => {
+      expect(window.location.href).to.equal(href);
     });
   });
 
@@ -140,19 +139,19 @@ describe('impression', () => {
         return Promise.resolve(null);
       },
     }));
+    const clock = sandbox.useFakeTimers();
     maybeTrackImpression(window);
+    clock.tick(8001);
     return getTrackImpressionPromise();
   });
 
-  it('should do nothing if get empty response', () => {
+  it('should do nothing if get empty response', function* () {
     toggleExperiment(window, 'alp', true);
     viewer.getParam.withArgs('click').returns('https://www.example.com');
     const prevHref = window.location.href;
     maybeTrackImpression(window);
-    return getTrackImpressionPromise().then(() => {
-      expect(window.location.href).to.equal(prevHref);
-      return getTrackImpressionPromise().should.be.fulfilled;
-    });
+    yield macroTask();
+    expect(window.location.href).to.equal(prevHref);
   });
 
   it('should replace location href only with query params', () => {
@@ -173,7 +172,40 @@ describe('impression', () => {
       expect(window.location.href).to.equal('http://localhost:9876/context.html'
           + '?bar=foo&test=4321&gclid=123456&foo=bar&example=123');
       window.history.replaceState(null, '', prevHref);
-      return getTrackImpressionPromise().should.be.fulfilled;
+    });
+  });
+
+  it('should replace location href with replaceUrl from viewer', () => {
+    toggleExperiment(window, 'alp', true);
+    viewer.getParam.withArgs('click').returns('https://www.example.com');
+    sandbox.stub(viewer, 'sendMessageAwaitResponse').callsFake(message => {
+      if (message == 'getReplaceUrl') {
+        return Promise.resolve('test_location?gclid=1234&foo=bar&example=123');
+      }
+    });
+    const prevHref = window.location.href;
+    window.history.replaceState(null, '', prevHref + '?bar=foo&test=4321');
+    maybeTrackImpression(window);
+    return getTrackImpressionPromise().then(() => {
+      console.log(window.location.href);
+      expect(window.location.href).to.equal('http://localhost:9876/context.html'
+          + '?bar=foo&test=4321&gclid=1234&foo=bar&example=123');
+      window.history.replaceState(null, '', prevHref);
+    });
+  });
+
+  it('should resolve trackImpressionPromise if receive viewer response', () => {
+    toggleExperiment(window, 'alp', true);
+    viewer.getParam.withArgs('click').returns('https://www.example.com');
+    sandbox.stub(viewer, 'sendMessageAwaitResponse').callsFake(message => {
+      if (message == 'getReplaceUrl') {
+        return Promise.resolve();
+      }
+    });
+    const href = window.location.href;
+    maybeTrackImpression(window);
+    return getTrackImpressionPromise().then(() => {
+      expect(window.location.href).to.equal(href);
     });
   });
 });

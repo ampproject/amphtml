@@ -55,6 +55,8 @@ export function maybeTrackImpression(win) {
 
   trackImpressionPromise = new Promise(resolve => {
     resolveImpression = resolve;
+    // Resolve trackImpressionPromise after timeout.
+    Services.timerFor(win).delay(resolveImpression, TIMEOUT_VALUE);
   });
 
   const viewer = Services.viewerForDoc(win.document);
@@ -102,14 +104,21 @@ function trackImpressionFromClickParam(win, viewer, resolveImpression) {
   }
 
   viewer.whenFirstVisible().then(() => {
-    // TODO(@zhouyx) need test with a real response.
-    const promise = invoke(win, dev().assertString(clickUrl)).then(response => {
-      applyResponse(win, viewer, response);
-    });
+    viewer.sendMessageAwaitResponse('getReplaceUrl').then(response => {
+      if (response) {
+        replaceUrl(win, response);
+      }
+      resolveImpression();
+    }, () => {});
 
-    // Timeout invoke promise after 8s and resolve trackImpressionPromise.
-    resolveImpression(Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
-        promise, 'timeout waiting for ad server response').catch(() => {}));
+    // TODO(@zhouyx) need test with a real response.
+    invoke(win, dev().assertString(clickUrl)).then(response => {
+      applyResponse(win, response);
+      if (response['location']) {
+        // If replace the location href, resolve impression.
+        resolveImpression();
+      }
+    });
   });
 }
 
@@ -143,7 +152,7 @@ function invoke(win, clickUrl) {
  * @param {!Window} win
  * @param {!JsonObject} response
  */
-function applyResponse(win, viewer, response) {
+function applyResponse(win, response) {
   const adLocation = response['location'];
   const adTracking = response['tracking_url'];
 
@@ -156,15 +165,25 @@ function applyResponse(win, viewer, response) {
     new Image().src = trackUrl;
   }
 
-  // Replace the location href params with new location params we get.
+  // Replace the location href params with new location params we get (if any).
   if (adLocation) {
-    if (!win.history.replaceState) {
-      return;
-    }
-    const currentHref = win.location.href;
-    const url = parseUrl(adLocation);
-    const params = parseQueryString(url.search);
-    const newHref = addParamsToUrl(currentHref, params);
-    win.history.replaceState(null, '', newHref);
+    replaceUrl(win, adLocation);
   }
+}
+
+/**
+ * Function to replace the location href params
+ * @param {!Window} win
+ * @param {string} replaceUrl
+ */
+function replaceUrl(win, replaceUrl) {
+  if (!win.history.replaceState) {
+    return;
+  }
+
+  const currentHref = win.location.href;
+  const url = parseUrl(replaceUrl);
+  const params = parseQueryString(url.search);
+  const newHref = addParamsToUrl(currentHref, params);
+  win.history.replaceState(null, '', newHref);
 }
