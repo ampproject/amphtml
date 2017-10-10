@@ -143,7 +143,7 @@ export class Cid {
       if (optedOut) {
         return '';
       }
-      return viewer.nextVisiblePromise().then(() => {
+      return viewer.whenNextVisible().then(() => {
         const cidPromise = this.getExternalCid_(
             getCidStruct, opt_persistenceConsent || consent);
         // Getting the CID might involve an HTTP request. We timeout after 10s.

@@ -173,12 +173,12 @@ describe('Viewer', () => {
   it('should return promise that resolve on visible', function* () {
     const viewer = new Viewer(ampdoc);
     expect(viewer.isVisible()).to.be.true;
-    let promise = viewer.nextVisiblePromise();
+    let promise = viewer.whenNextVisible();
     yield promise;
     viewer.receiveMessage('visibilitychange', {
       state: 'hidden',
     });
-    promise = viewer.nextVisiblePromise();
+    promise = viewer.whenNextVisible();
     expect(viewer.isVisible()).to.be.false;
     viewer.receiveMessage('visibilitychange', {
       state: 'visible',

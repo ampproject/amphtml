@@ -432,10 +432,7 @@ export class Viewer {
       this.lastVisibleTime_ = now;
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
-      if (this.nextVisibleResolve_) {
-        this.nextVisibleResolve_();
-        this.nextVisibleResolve_ = null;
-      }
+      this.whenNextVisibleResolve_();
     }
     this.visibilityObservable_.fire();
   }
@@ -621,10 +618,11 @@ export class Viewer {
   }
 
   /**
-   * Returns a Promise that resolve when current doc becomes visible
+   * Returns a Promise that resolve when current doc becomes visible.
+   * The promise resolves immediately if doc is already visible.
    * @return {!Promise}
    */
-  nextVisiblePromise() {
+  whenNextVisible() {
     if (this.isVisible()) {
       return Promise.resolve();
     }
@@ -636,6 +634,18 @@ export class Viewer {
     return this.nextVisiblePromise_ = new Promise(resolve => {
       this.nextVisibleResolve_ = resolve;
     });
+  }
+
+  /**
+   * Helper method to be called on visiblity change
+   * @private
+   */
+  whenNextVisibleResolve_() {
+    if (this.nextVisibleResolve_) {
+      this.nextVisibleResolve_();
+      this.nextVisibleResolve_ = null;
+      this.nextVisiblePromise_ = null;
+    }
   }
 
   /**
