@@ -74,7 +74,7 @@ export function relatedArticlesFromJson(opt_articleSetsResponse) {
       Object.keys(opt_articleSetsResponse || {}).map(headingKey => {
         const articleSet = {
           articles:
-              articleSetsResponse[headingKey]
+              opt_articleSetsResponse[headingKey]
                   .map(buildArticleFromJson_)
                   .filter(a => !!a),
         };
