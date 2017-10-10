@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 import {EventType, dispatch} from './events';
-import {dev, LogLevel} from '../../../src/log';
-import {removeChildren} from '../../../src/dom';
+import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {ProgressBar} from './progress-bar';
 import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
-import {LogStatus} from './logging';
-import {reportError} from '../../../src/error';
+import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
 
 
 /*eslint-disable max-len */
@@ -111,26 +108,14 @@ export class SystemLayer {
     /** @private {?Element} */
     this.leftButtonTray_ = null;
 
-    /** @private {?Element} */
-    this.errorButton_ = null;
-
-    /** @private {?Element} */
-    this.warningButton_ = null;
-
-    /** @private {?Element} */
-    this.successButton_ = null;
-
-    /** @private {?Element} */
-    this.developerLog_ = null;
-
-    /** @private {?Element} */
-    this.developerLogEntryListEl_ = null;
-
-    /** @private {?Element} */
-    this.developerLogContextStringEl_ = null;
-
     /** @private @const {!ProgressBar} */
     this.progressBar_ = ProgressBar.create(win);
+
+    /** @private {!DevelopmentModeLog} */
+    this.developerLog_ = DevelopmentModeLog.create(win);
+
+    /** @private {!DevelopmentModeLog} */
+    this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
   }
 
   /**
@@ -182,49 +167,9 @@ export class SystemLayer {
    * @private
    */
   buildForDevelopmentMode_() {
-    this.errorButton_ = this.createButton_(
-        ['i-amphtml-story-error-button', 'i-amphtml-story-dev-logs-button'],
-        () => this.toggleDeveloperLog_());
-
-    this.warningButton_ = this.createButton_(
-        ['i-amphtml-story-warning-button', 'i-amphtml-story-dev-logs-button'],
-        () => this.toggleDeveloperLog_());
-
-    this.successButton_ = this.createButton_(
-        ['i-amphtml-story-success-button', 'i-amphtml-story-dev-logs-button'],
-        () => this.toggleDeveloperLog_());
-
-    this.developerLogContextStringEl_ = document.createElement('span');
-    this.developerLogContextStringEl_.classList
-        .add('i-amphtml-story-developer-log-context');
-    const titleEl = document.createElement('div');
-    titleEl.textContent = 'Developer logs for page ';
-    titleEl.appendChild(this.developerLogContextStringEl_);
-
-    const closeDeveloperLogEl = this.createButton_(
-        'i-amphtml-story-developer-log-close',
-        () => this.hideDeveloperLog());
-
-    const headerEl = document.createElement('div');
-    headerEl.classList.add('i-amphtml-story-developer-log-header');
-    headerEl.appendChild(titleEl);
-    headerEl.appendChild(closeDeveloperLogEl);
-
-    this.developerLogEntryListEl_ = document.createElement('ul');
-    this.developerLogEntryListEl_.classList
-        .add('i-amphtml-story-developer-log-entries');
-
-    this.developerLog_ = document.createElement('div');
-    this.developerLog_.classList.add('i-amphtml-story-developer-log');
-    this.developerLog_.setAttribute('hidden', '');
-    this.developerLog_.appendChild(headerEl);
-    this.developerLog_.appendChild(this.developerLogEntryListEl_);
-
-    this.resetDeveloperLogs();
-    this.root_.appendChild(this.developerLog_);
-    this.leftButtonTray_.appendChild(this.errorButton_);
-    this.leftButtonTray_.appendChild(this.warningButton_);
-    this.leftButtonTray_.appendChild(this.successButton_);
+    this.leftButtonTray_.appendChild(this.developerButtons_.build(
+        this.developerLog_.toggle.bind(this.developerLog_)));
+    this.root_.appendChild(this.developerLog_.build());
   }
 
   /**
@@ -243,26 +188,6 @@ export class SystemLayer {
 
     this.unmuteAudioBtn_.addEventListener(
         'click', e => this.onUnmuteAudioClick_(e));
-  }
-
-  /**
-   * @param {string|!Array<string>} classNameOrList
-   * @param {function(Event)} handler
-   * @return {!Element}
-   * @private
-   */
-  createButton_(classNameOrList, handler) {
-    const button = document.createElement('div');
-    button.setAttribute('role', 'button');
-
-    if (isArray(classNameOrList)) {
-      classNameOrList.forEach(className => button.classList.add(className));
-    } else {
-      button.classList.add(/** @type {string} */ (classNameOrList));
-    }
-    button.classList.add('i-amphtml-story-button');
-    button.addEventListener('click', handler);
-    return button;
   }
 
 
@@ -356,75 +281,16 @@ export class SystemLayer {
 
 
   /**
-   * @param {!LogStatus} logStatus 
-   */
-  setDeveloperLogStatus(logStatus) {
-    if (!getMode().development) {
-      return;
-    }
-  }
-
-
-  /**
-   * 
-   * @param {!./logging.AmpStoryLogEntryDef} logEntry 
-   * @return {?Element}
-   * @private
-   */
-  getButtonForLogEntry_(logEntry) {
-    if (logEntry.conforms) {
-      return this.successButton_;
-    }
-
-    switch (logEntry.level) {
-      case LogLevel.ERROR:
-        return this.errorButton_;
-      case LogLevel.WARN:
-        return this.warningButton_;
-      default:
-        return null;
-    }
-  }
-
-  /**
    * @param {!./logging.AmpStoryLogEntryDef} logEntry
    * @private
    */
   logInternal_(logEntry) {
-    const button = this.getButtonForLogEntry_(logEntry);
-    if (button) {
-      const oldCount = parseInt(button.getAttribute('data-count') || 0, 10);
-      button.setAttribute('data-count', oldCount + 1);
-    }
-
-    const getCssLogLevelClass = logLevel => {
-      switch (logLevel) {
-        case LogLevel.WARN:
-          return 'i-amphtml-story-developer-log-entry-warning';
-        case LogLevel.ERROR:
-          return 'i-amphtml-story-developer-log-entry-error';
-        default:
-          return null;
-      }
-    };
-
-    const getCssConformanceClass = conforms => {
-      if (conforms) {
-        return 'i-amphtml-story-developer-log-entry-success';
-      }
-
-      return null;
-    }
-
-    const logEntryUi = document.createElement('li');
-    logEntryUi.classList.add('i-amphtml-story-developer-log-entry');
-    logEntryUi.classList.add(getCssLogLevelClass(logEntry.level));
-    logEntryUi.classList.add(getCssConformanceClass(logEntry.conforms));
-    logEntryUi.textContent = logEntry.message;
-    this.developerLogEntryListEl_.appendChild(logEntryUi);
+    this.developerButtons_.log(logEntry);
+    this.developerLog_.log(logEntry);
   }
 
   /**
+   * Logs an array of entries to the developer logs.
    * @param {!Array<!./logging.AmpStoryLogEntryDef>} logEntries
    */
   logAll(logEntries) {
@@ -433,11 +299,12 @@ export class SystemLayer {
     }
 
     Services.vsyncFor(this.win_).mutate(() => {
-      logEntries.forEach(entry => this.logInternal_(entry));
+      logEntries.forEach(logEntry => this.logInternal_(logEntry));
     });
   }
 
   /**
+   * Logs a single entry to the developer logs.
    * @param {!./logging.AmpStoryLogEntryDef} logEntry
    */
   log(logEntry) {
@@ -449,32 +316,15 @@ export class SystemLayer {
   }
 
   /**
-   * 
+   * Clears any state held by the developer log or buttons.
    */
   resetDeveloperLogs() {
     if (!getMode().development) {
       return;
     }
 
-    this.errorButton_.setAttribute('data-count', 0);
-    this.warningButton_.setAttribute('data-count', 0);
-    this.successButton_.setAttribute('data-count', 0);
-    Services.vsyncFor(this.win_).mutate(() => {
-      removeChildren(dev().assertElement(this.developerLogEntryListEl_));
-    });
-  }
-
-  /**
-   * @private
-   */
-  toggleDeveloperLog_() {
-    if (!getMode().development) {
-      return;
-    }
-    const newHiddenState = !this.developerLog_.hasAttribute('hidden');
-    toggleHiddenAttribute(
-        Services.vsyncFor(this.win_), dev().assertElement(this.developerLog_),
-        newHiddenState);
+    this.developerButtons_.clear();
+    this.developerLog_.clear();
   }
 
   /**
@@ -483,15 +333,24 @@ export class SystemLayer {
    * @param {string} contextString
    */
   setDeveloperLogContextString(contextString) {
-    this.developerLogContextStringEl_.textContent = contextString;
+    this.developerLog_.setContextString(contextString);
   }
 
   /**
-   * 
+   * Toggles the visibility of the developer log.
+   * @private
+   */
+  toggleDeveloperLog_() {
+    if (!getMode().development) {
+      return;
+    }
+    this.developerLog_.toggle();
+  }
+
+  /**
+   * Hides the developer log in the UI.
    */
   hideDeveloperLog() {
-    toggleHiddenAttribute(
-        Services.vsyncFor(this.win_), dev().assertElement(this.developerLog_),
-        /* isHidden */ true);
+    this.developerLog_.hide();
   }
 }

@@ -233,7 +233,6 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.element.addEventListener(EventType.DEV_LOG_ENTRIES_AVAILABLE, e => {
-      this.systemLayer_.setDeveloperLogStatus(LogStatus.AVAILABLE);
       this.systemLayer_.logAll(e.detail);
     });
   }
