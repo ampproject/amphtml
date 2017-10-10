@@ -47,6 +47,8 @@ export const ADSENSE_EXPERIMENT_FEATURE = {
   HOLDBACK_INTERNAL: '2092616',
   CACHE_EXTENSION_INJECTION_CONTROL: '21060953',
   CACHE_EXTENSION_INJECTION_EXP: '21060954',
+  IDENTITY_CONTROL: '21060939',
+  IDENTITY_EXPERIMENT: '21060940',
 };
 
 /** @type {string} */
@@ -65,6 +67,9 @@ export const URL_EXPERIMENT_MAPPING = {
   // AMP Cache extension injection
   '5': ADSENSE_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_CONTROL,
   '6': ADSENSE_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_EXP,
+  // Identity
+  '7': ADSENSE_EXPERIMENT_FEATURE.IDENTITY_CONTROL,
+  '8': ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT,
 };
 
 /**
@@ -120,4 +125,13 @@ export function adsenseIsA4AEnabled(win, element) {
 export function fastFetchDelayedRequestEnabled(win) {
   return getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) !=
       ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_EXTERNAL;
+}
+
+/**
++ * @param {!Window} win
++ * @return {boolean} whether identity enabled.
++ */
+export function identityEnabled(win) {
+  return getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) ==
+    ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT;
 }

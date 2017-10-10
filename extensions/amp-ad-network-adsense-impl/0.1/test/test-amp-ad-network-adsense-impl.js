@@ -521,6 +521,23 @@ describes.realWin('amp-ad-network-adsense-impl', {
         });
       });
     });
+
+    it('should include identity', () => {
+      forceExperimentBranch(impl.win, ADSENSE_A4A_EXPERIMENT_NAME,
+          ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT);
+      // Force get identity result by overloading window variable.
+      const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
+        token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
+      });
+      impl.win['goog_identity_prom'] = Promise.resolve(token);
+      impl.buildCallback();
+      return impl.getAdUrl().then(url => {
+        [/(\?|&)adsid=abcdef(&|$)/,
+          /(\?|&)jar=some_jar(&|$)/,
+          /(\?|&)pucrd=some_pucrd(&|$)/].forEach(
+            regexp => expect(url).to.match(regexp));
+      });
+    });
   });
 
   describe('#unlayoutCallback', () => {
