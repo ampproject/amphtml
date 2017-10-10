@@ -23,18 +23,6 @@ amp-story[desktop] {
  display: block;
 }
 
-[desktop] .i-amphtml-story-progress-bar {
- height: 4px;
- width: calc(100vw/3);
- margin: auto;
-}
-
-[desktop] .i-amphtml-story-system-layer {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.35), transparent);
-  top: auto;
-  bottom: 0;
-}
-
 .i-amphtml-story-background-container {
  opacity: .8;
  position: absolute;
@@ -217,7 +205,7 @@ amp-story-page.i-amphtml-story-page-shown {
   display: flex;
   position: absolute;
   top: 0;
-  right: 15px;
+  right: 40px;
   bottom: 0;
   margin: auto;
   height: 40px;
@@ -329,6 +317,21 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 /* system layer changes */
+[desktop] .i-amphtml-story-system-layer {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.35), transparent);
+  top: auto;
+  bottom: 0;
+  height: 72px;
+}
+
+[desktop] .i-amphtml-story-progress-bar {
+ height: 4px;
+ width: calc(100vw/3);
+ margin: auto;
+ top: 0;
+ bottom: 0;
+}
+
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-mute-audio-control,
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-unmute-audio-control {
   display: none;
@@ -341,5 +344,8 @@ amp-story-page.i-amphtml-story-page-shown {
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-left {
   display: block;
   float: left;
-  margin: 0 8px;
+  margin: 16px 40px;
+}
+[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right {
+  margin: 16px 40px;
 }
