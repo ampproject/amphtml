@@ -139,7 +139,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
       element1.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
       sandbox.stub(impl1, 'generateAdKey_').withArgs('50x320').returns('13579');
       impl1.populateAdUrlState();
-      impl1.identityToken_ =
+      impl1.identityToken =
           /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
             token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
           });
