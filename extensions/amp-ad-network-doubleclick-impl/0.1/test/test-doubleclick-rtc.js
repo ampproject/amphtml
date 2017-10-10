@@ -107,6 +107,41 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
           rtcResponseArray, expectedParams, expectedJsonTargeting);
     });
 
+    it('should properly merge mix of success and errors', () => {
+      impl.jsonTargeting_ = {targeting:
+                            {'abc': [1,2,3], 'b': {n: 'm'}, 'a': 'TEST'},
+        categoryExclusions: {loc: 'USA'}};
+      const rtcResponseArray = [
+        {error: RTC_ERROR_ENUM.TIMEOUT,
+          callout: 'www.exampleA.com', rtcTime: 1500},
+        {response: {targeting: {'a': 'foo', 'b': {e: 'f'}},
+          categoryExclusions: {sport: 'baseball'}},
+          callout: 'VendorFoo', rtcTime: 500},
+        {response: {targeting: {'a': [1,2,3], 'b': {c: 'd'}}},
+          callout: 'www.exampleB.com', rtcTime: 100},
+        {response: {targeting: {'a': [4,5,6], 'b': {x: [1,2]}}},
+          callout: 'VendCom', rtcTime: 500},
+        {error: RTC_ERROR_ENUM.DUPLICATE_URL,
+          callout: 'www.exampleB.com', rtcTime: 0},
+        {error: RTC_ERROR_ENUM.NETWORK_FAILURE,
+          callout: '3PVend', rtcTime: 100},
+      ];
+      const expectedParams = {
+        ati: '3,2,2,2,3',
+        artc: '1500,500,100,500,100',
+        ard: 'www.exampleA.com,VendorFoo,www.exampleB.com,' +
+            'VendCom,3PVend',
+      };
+      const expectedJsonTargeting = {
+        targeting: {
+          'a': [4,5,6], 'b': {n: 'm', e: 'f', c: 'd', x: [1,2]},
+          abc: [1,2,3]},
+        categoryExclusions: {loc: 'USA', sport: 'baseball'},
+      };
+      testMergeRtcResponses(
+          rtcResponseArray, expectedParams, expectedJsonTargeting);
+    });
+
     it('should return null for empty array', () => {
       expect(impl.mergeRtcResponses_()).to.be.null;
     });

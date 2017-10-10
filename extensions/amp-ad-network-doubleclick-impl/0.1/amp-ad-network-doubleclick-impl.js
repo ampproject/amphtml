@@ -565,14 +565,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Merges all of the rtcResponses into the JSON targeting and
    * category exclusions.
-   * @param {?Array<rtcResponseDef>} rtcResponseArray
+   * @param {?Array<!rtcResponseDef>} rtcResponseArray
    * @private
    */
   mergeRtcResponses_(rtcResponseArray) {
     if (!rtcResponseArray) {
       return null;
     }
-    let rtcParams = {};
+    const rtcParams = {};
     const artc = [];
     const ati = [];
     const ard = [];
@@ -580,27 +580,26 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Only want to send errors for requests we actually sent.
       if (rtcResponse.error &&
           rtcResponse.error != RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE &&
-          rtcResponse.error != RTC_ERROR_ENUM.NETWORK_FAILURE
-         ) {
+          rtcResponse.error != RTC_ERROR_ENUM.NETWORK_FAILURE &&
+          rtcResponse.error != RTC_ERROR_ENUM.TIMEOUT) {
         return;
       }
       artc.push(rtcResponse.rtcTime);
       ati.push(!rtcResponse.error ? RTC_ATI_ENUM.RTC_SUCCESS :
                RTC_ATI_ENUM.RTC_FAILURE);
       ard.push(rtcResponse.callout);
-      rtcParams = rtcResponse.response ?
-          deepMerge(rtcParams, rtcResponse.response) : rtcParams;
-    });
-    ['targeting', 'categoryExclusions'].forEach(key => {
-      if (rtcParams[key]) {
-        this.jsonTargeting_[key] =
-            !!this.jsonTargeting_[key] ?
-            deepMerge(this.jsonTargeting_[key], rtcParams[key]) :
-            rtcParams[key];
+      if (rtcResponse.response) {
+        ['targeting', 'categoryExclusions'].forEach(key => {
+          if (rtcResponse.response[key]) {
+            this.jsonTargeting_[key] =
+                !!this.jsonTargeting_[key] ?
+                deepMerge(this.jsonTargeting_[key], rtcResponse.response[key]) :
+                rtcResponse.response[key];
+          }
+        });
       }
     });
-    return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join(),
-    };
+    return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
   }
 
 
@@ -1137,6 +1136,7 @@ export function getNetworkId(element) {
  * @return {!Promise<string>} SRA request URL
  */
 function constructSRARequest_(win, doc, instances) {
+  // TODO(bradfrizzell): Need to add support for RTC.
   const startTime = Date.now();
   return googlePageParameters(win, doc, startTime)
       .then(pageLevelParameters => {

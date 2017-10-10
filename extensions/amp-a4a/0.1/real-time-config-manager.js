@@ -42,6 +42,8 @@ export const RTC_ERROR_ENUM = {
   NETWORK_FAILURE: 'network_failure',
   // Occurs when a specified vendor does not exist in RTC_VENDORS.
   UNKNOWN_VENDOR: 'unknown_vendor',
+  // Occurs when request took longer than timeout
+  TIMEOUT: 'timeout',
 };
 
 /**
@@ -184,8 +186,10 @@ function sendRtcCallout_(
               buildErrorResponse_(
                   RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE, callout, rtcTime);
             });
-          })).catch(unusedError => {
-            return buildErrorResponse_(RTC_ERROR_ENUM.NETWORK_FAILURE,
+          })).catch(error => {
+            return buildErrorResponse_(
+                error.message.match(/timeout/) ?
+                  RTC_ERROR_ENUM.TIMEOUT : RTC_ERROR_ENUM.NETWORK_FAILURE,
                 callout, Date.now() - rtcStartTime);
           });
 }
@@ -205,9 +209,13 @@ function sendRtcCallout_(
  */
 export function validateRtcConfig_(element) {
   const defaultTimeoutMillis = 1000;
-  const rtcConfig = tryParseJson(
-      element.getAttribute('rtc-config'));
+  const unparsedRtcConfig = element.getAttribute('rtc-config');
+  if (!unparsedRtcConfig) {
+    return null;
+  }
+  const rtcConfig = tryParseJson(unparsedRtcConfig);
   if (!rtcConfig) {
+    user().warn(TAG, 'Could not parse rtc-config attribute');
     return null;
   }
   let timeout;
