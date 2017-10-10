@@ -37,7 +37,7 @@ Required parameters:
 - `data-key`
 
 Optional parameters:
-- `plc`
+- `data-plc`
 - `data-opts`
 - `data-params`
 
