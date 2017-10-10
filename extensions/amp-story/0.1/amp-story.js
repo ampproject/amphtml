@@ -53,6 +53,7 @@ import {AudioManager, upgradeBackgroundAudio} from './audio';
 import {setStyle, setStyles} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
+import {getMode} from '../../../src/mode';
 import {urls} from '../../../src/config';
 
 
@@ -142,6 +143,7 @@ export class AmpStory extends AMP.BaseElement {
         this.systemLayer_.build(this.getRealChildren().length));
 
     this.initializeListeners_();
+    this.initializeListenersForDev_();
 
     this.navigationState_.observe(stateChangeEvent =>
         (new AmpStoryAnalytics(this.element)).onStateChange(stateChangeEvent));
@@ -225,6 +227,17 @@ export class AmpStory extends AMP.BaseElement {
         () => { this.onFullscreenChanged_(); });
   }
 
+  /** @private */
+  initializeListenersForDev_() {
+    if (!getMode().development) {
+      return;
+    }
+
+    this.element.addEventListener(EventType.DEV_LOG_ENTRIES_AVAILABLE, e => {
+      this.systemLayer_.logAll(e.detail);
+    });
+  }
+
 
   /** @override */
   layoutCallback() {
@@ -233,14 +246,13 @@ export class AmpStory extends AMP.BaseElement {
         'Story must have at least one page.');
 
     return this.initializePages_()
-        .then(() => this.switchTo_(firstPageEl.id))
-        .then(() => this.preloadPagesByDistance_())
         .then(() => {
           this.pages_.forEach(page => {
             page.setActive(false);
           });
-          this.activePage_.setActive(true);
-        });
+        })
+        .then(() => this.switchTo_(firstPageEl.id))
+        .then(() => this.preloadPagesByDistance_());
   }
 
 
@@ -366,6 +378,9 @@ export class AmpStory extends AMP.BaseElement {
     return this.mutateElement(() => {
       this.activePage_ = targetPage;
       this.triggerActiveEventForPage_();
+      this.systemLayer_.resetDeveloperLogs();
+      this.systemLayer_.setDeveloperLogContextString(
+          this.activePage_.element.id);
       this.maybeStartAnimations_(targetPage);
     })
         .then(() => {
@@ -495,6 +510,8 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.buildBookend_().then(() => {
+      this.systemLayer_.hideDeveloperLog();
+
       this.exitFullScreen_();
       this.systemLayer_.toggleCloseBookendButton(true);
       this.isBookendActive_ = true;
