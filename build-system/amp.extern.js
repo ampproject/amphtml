@@ -357,7 +357,7 @@ AMP.maybeExecuteRealTimeConfig = false;
 const RTC_ERROR_ENUM = {};
 
 /** @typedef {{
-      response: (?Object<string>|undefined),
+      response: (Object|undefined),
       rtcTime: number,
       callout: string,
       error: (RTC_ERROR_ENUM|undefined)}} */
