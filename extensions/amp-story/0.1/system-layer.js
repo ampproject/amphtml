@@ -14,10 +14,59 @@
  * limitations under the License.
  */
 import {EventType, dispatch} from './events';
+import {renderAsElement} from './simple-template';
+import {dict} from '../../../src/utils/object';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {ProgressBar} from './progress-bar';
+
+
+/** @private @const {!Array<!./simple-template.ElementDef>} */
+const TEMPLATE = {
+  tag: 'aside',
+  attrs: dict({class: 'i-amphtml-story-system-layer'}),
+  children: [
+    {
+      tag: 'div',
+      attrs: dict({class: 'i-amphtml-story-ui-right'}),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            role: 'button',
+            class: 'i-amphtml-story-unmute-audio-control ' +
+                'i-amphtml-story-button',
+          }),
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            role: 'button',
+            class: 'i-amphtml-story-mute-audio-control ' +
+                'i-amphtml-story-button',
+          }),
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            role: 'button',
+            class: 'i-amphtml-story-exit-fullscreen i-amphtml-story-button',
+            hidden: true,
+          }),
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            role: 'button',
+            class: 'i-amphtml-story-bookend-close i-amphtml-story-button',
+            hidden: true,
+          }),
+        },
+      ],
+    },
+  ]
+};
 
 
 /**
@@ -33,27 +82,6 @@ function toggleHiddenAttribute(vsync, el, isHidden) {
       el.removeAttribute('hidden');
     }
   });
-}
-
-
-/**
- * @param {!Document} doc
- * @param {string} className
- * @param {boolean=} opt_hidden
- * @return {!Element}
- */
-function buildButton(doc, className, opt_hidden) {
-  const button = createElementWithAttributes(doc, 'div',
-      /** @type {!JsonObject} */ ({
-        class: `i-amphtml-story-button ${className}`,
-        role: `button`,
-      }));
-
-  if (opt_hidden) {
-    button.setAttribute('hidden', true);
-  }
-
-  return button;
 }
 
 
@@ -104,42 +132,24 @@ export class SystemLayer {
       return this.getRoot();
     }
 
-    const fragment = this.win_.document.createDocumentFragment();
-
-    const rightSectionButtons =
-        createElementWithAttributes(this.win_.document, 'div',
-            /** @type {!JsonObject} */ ({
-              class: 'i-amphtml-story-ui-right',
-            }));
-
     this.isBuilt_ = true;
 
-    this.unmuteAudioBtn_ = buildButton(this.win_.document,
-        'i-amphtml-story-unmute-audio-control');
+    this.root_ = renderAsElement(this.win_.document, TEMPLATE);
 
-    this.muteAudioBtn_ = buildButton(this.win_.document,
-        'i-amphtml-story-mute-audio-control');
+    this.root_.insertBefore(
+        this.progressBar_.build(pageCount), this.root_.firstChild);
 
-    this.exitFullScreenBtn_ = buildButton(this.win_.document,
-        'i-amphtml-story-exit-fullscreen',
-        /* opt_hidden */ true);
+    this.exitFullScreenBtn_ =
+        this.root_.querySelector('.i-amphtml-story-exit-fullscreen');
 
-    this.closeBookendBtn_ = buildButton(this.win_.document,
-        'i-amphtml-story-bookend-close',
-        /* opt_hidden */ true);
+    this.closeBookendBtn_ =
+        this.root_.querySelector('.i-amphtml-story-bookend-close');
 
-    rightSectionButtons.appendChild(this.unmuteAudioBtn_);
-    rightSectionButtons.appendChild(this.muteAudioBtn_);
-    rightSectionButtons.appendChild(this.exitFullScreenBtn_);
-    rightSectionButtons.appendChild(this.closeBookendBtn_);
+    this.muteAudioBtn_ =
+        this.root_.querySelector('.i-amphtml-story-mute-audio-control');
 
-    fragment.appendChild(this.progressBar_.build(pageCount));
-    fragment.appendChild(rightSectionButtons);
-
-    this.root_ = this.win_.document.createElement('aside');
-    this.root_.classList.add('i-amphtml-story-system-layer');
-
-    this.root_.appendChild(fragment);
+    this.unmuteAudioBtn_ =
+        this.root_.querySelector('.i-amphtml-story-unmute-audio-control');
 
     this.addEventHandlers_();
 

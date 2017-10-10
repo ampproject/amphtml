@@ -30,14 +30,49 @@ import {
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {upgradeBackgroundAudio} from './audio';
-import {createElementWithAttributes} from '../../../src/dom';
+import {renderSimpleTemplate} from './simple-template';
 import {dev, user} from '../../../src/log';
 import {EventType, dispatch, dispatchCustom} from './events';
 import {PageElement} from './page-element';
 import {isFiniteNumber} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
 import {listenOnce} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+
+
+/** @private @const {!Array<!./simple-template.ElementDef>} */
+const LOADING_SCREEN_TEMPLATE = [
+  {
+    tag: 'div',
+    attrs: dict({class: 'i-amphtml-story-page-loading-screen'}),
+    children: [
+      {
+        tag: 'ul',
+        attrs: dict({class: 'i-amphtml-story-page-loading-dots'}),
+        children: [
+          {
+            tag: 'li',
+            attrs: dict({class: 'i-amphtml-story-page-loading-dot'}),
+          },
+          {
+            tag: 'li',
+            attrs: dict({class: 'i-amphtml-story-page-loading-dot'}),
+          },
+          {
+            tag: 'li',
+            attrs: dict({class: 'i-amphtml-story-page-loading-dot'}),
+          },
+        ]
+      },
+      {
+        tag: 'p',
+        attrs: dict({class: 'i-amphtml-story-page-loading-text'}),
+        text: 'Loading', // TODO(alanorozco): i18n
+      },
+    ],
+  },
+];
 
 
 /**
@@ -78,53 +113,6 @@ const TIME_REGEX = {
 
 /** @private @const {string} */
 const TAG = 'amp-story-page';
-
-
-/**
- * @param {!Document} doc
- * @return {!Element}
- */
-function buildLoadingScreen(doc) {
-  const fragment = doc.createDocumentFragment();
-  const root = createElementWithAttributes(doc, 'div',
-      /** @type {!JsonObject} */ ({
-        class: 'i-amphtml-story-page-loading-screen',
-      }));
-
-  const indicatorsContainer = createElementWithAttributes(doc, 'ul',
-      /** @type {!JsonObject} */ ({
-        class: 'i-amphtml-story-page-loading-dots',
-      }));
-
-  indicatorsContainer.appendChild(createElementWithAttributes(doc, 'li',
-      /** @type {!JsonObject} */ ({
-        class: 'i-amphtml-story-page-loading-dot',
-      })));
-
-  indicatorsContainer.appendChild(createElementWithAttributes(doc, 'li',
-      /** @type {!JsonObject} */ ({
-        class: 'i-amphtml-story-page-loading-dot',
-      })));
-
-  indicatorsContainer.appendChild(createElementWithAttributes(doc, 'li',
-      /** @type {!JsonObject} */ ({
-        class: 'i-amphtml-story-page-loading-dot',
-      })));
-
-  const loadingTextContainer = createElementWithAttributes(doc, 'p',
-      /** @type {!JsonObject} */ ({
-        class: 'i-amphtml-story-page-loading-text',
-      }));
-
-  // TODO(alanorozco): i18n
-  loadingTextContainer.textContent = 'Loading';
-
-  fragment.appendChild(indicatorsContainer);
-  fragment.appendChild(loadingTextContainer);
-
-  root.appendChild(fragment);
-  return root;
-}
 
 
 /**
@@ -208,7 +196,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   initializeLoading_() {
-    this.element.appendChild(buildLoadingScreen(this.win.document));
+    this.element.appendChild(
+        renderSimpleTemplate(this.win.document, LOADING_SCREEN_TEMPLATE));
 
     // Build a list of page elements and poll until they are all loaded.
     this.pageElements_ = PageElement.getElementsFromPage(this);
