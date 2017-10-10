@@ -184,15 +184,15 @@ export class SystemLayer {
   buildForDevelopmentMode_() {
     this.errorButton_ = this.createButton_(
         ['i-amphtml-story-error-button', 'i-amphtml-story-dev-logs-button'],
-        e => this.toggleDeveloperLog_(e));
+        () => this.toggleDeveloperLog_());
 
     this.warningButton_ = this.createButton_(
         ['i-amphtml-story-warning-button', 'i-amphtml-story-dev-logs-button'],
-        e => this.toggleDeveloperLog_(e));
+        () => this.toggleDeveloperLog_());
 
     this.successButton_ = this.createButton_(
         ['i-amphtml-story-success-button', 'i-amphtml-story-dev-logs-button'],
-        e => this.toggleDeveloperLog_(e));
+        () => this.toggleDeveloperLog_());
 
     this.developerLogContextStringEl_ = document.createElement('span');
     this.developerLogContextStringEl_.classList
@@ -203,7 +203,7 @@ export class SystemLayer {
 
     const closeDeveloperLogEl = this.createButton_(
         'i-amphtml-story-developer-log-close',
-        e => this.hideDeveloperLog());
+        () => this.hideDeveloperLog());
 
     const headerEl = document.createElement('div');
     headerEl.classList.add('i-amphtml-story-developer-log-header');
@@ -425,8 +425,7 @@ export class SystemLayer {
   }
 
   /**
-   * 
-   * @param {!Array<!./logging.AmpStoryLogEntryDef>} logEntry
+   * @param {!Array<!./logging.AmpStoryLogEntryDef>} logEntries
    */
   logAll(logEntries) {
     if (!getMode().development) {
@@ -461,12 +460,12 @@ export class SystemLayer {
     this.warningButton_.setAttribute('data-count', 0);
     this.successButton_.setAttribute('data-count', 0);
     Services.vsyncFor(this.win_).mutate(() => {
-      removeChildren(this.developerLogEntryListEl_);
-    }
+      removeChildren(dev().assertElement(this.developerLogEntryListEl_));
+    });
   }
 
   /**
-   * 
+   * @private
    */
   toggleDeveloperLog_() {
     if (!getMode().development) {
@@ -474,19 +473,25 @@ export class SystemLayer {
     }
     const newHiddenState = !this.developerLog_.hasAttribute('hidden');
     toggleHiddenAttribute(
-        Services.vsyncFor(this.win_), this.developerLog_, newHiddenState);
+        Services.vsyncFor(this.win_), dev().assertElement(this.developerLog_),
+        newHiddenState);
   }
 
   /**
-   * 
-   * @param {string} opt_rootElementName
+   * Sets the string providing context for the developer logs window.  This is
+   * often the name or ID of the element that all logs are for (e.g. the page).
+   * @param {string} contextString
    */
   setDeveloperLogContextString(contextString) {
     this.developerLogContextStringEl_.textContent = contextString;
   }
 
+  /**
+   * 
+   */
   hideDeveloperLog() {
     toggleHiddenAttribute(
-        Services.vsyncFor(this.win_), this.developerLog_, /* isHidden */ true);
+        Services.vsyncFor(this.win_), dev().assertElement(this.developerLog_),
+        /* isHidden */ true);
   }
 }
