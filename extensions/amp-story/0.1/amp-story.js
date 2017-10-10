@@ -19,7 +19,7 @@
  *
  * Example:
  * <code>
- * <amp-story related-articles="related.json">
+ * <amp-story standalone bookend-config-src="bookend.json">
  *   [...]
  * </amp-story>
  * </code>
@@ -54,13 +54,11 @@ import {setStyle, setStyles} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
+import {urls} from '../../../src/config';
 
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;
-
-/** @private @const {string} */
-const RELATED_ARTICLES_ATTRIBUTE_NAME = 'related-articles';
 
 /** @private @const {string} */
 const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
@@ -134,7 +132,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG), 'enable amp-story experiment');
+    this.assertAmpStoryExperiment_();
 
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
       this.getAmpDoc().win.document.documentElement.classList
@@ -197,6 +195,10 @@ export class AmpStory extends AMP.BaseElement {
       } else {
         this.switchTo_(targetPageId);
       }
+    });
+
+    this.element.addEventListener(EventType.REPLAY, () => {
+      this.replay_();
     });
 
     this.element.addEventListener('play', e => {
@@ -263,6 +265,33 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   prerenderAllowed() {
     return true;
+  }
+
+
+  /** @private */
+  assertAmpStoryExperiment_() {
+    if (!isExperimentOn(this.win, TAG)) {
+      const errorIconEl = this.win.document.createElement('div');
+      errorIconEl.classList.add('i-amphtml-story-experiment-error-icon');
+
+      const errorMsgEl = this.win.document.createElement('span');
+      errorMsgEl.textContent = 'You must enable the amp-story experiment to ' +
+          'view this content.';
+
+      const experimentsLinkEl = this.win.document.createElement('a');
+      experimentsLinkEl.href = `${urls.cdn}/experiments.html`;
+      experimentsLinkEl.textContent = 'Enable or disable your experiments on ' +
+          'the experiments dashboard.';
+
+      const errorEl = this.win.document.createElement('div');
+      errorEl.classList.add('i-amphtml-story-experiment-error');
+      errorEl.appendChild(errorIconEl);
+      errorEl.appendChild(errorMsgEl);
+      errorEl.appendChild(experimentsLinkEl);
+      this.element.appendChild(errorEl);
+
+      user().error(TAG, 'enable amp-story experiment');
+    }
   }
 
 
@@ -637,40 +666,15 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   loadBookendConfigImpl_() {
-    // two-tiered implementation for backwards-compatibility with
-    // related-articles attribute
-    return this.loadBookendConfigInternal_()
-        .then(bookendConfig =>
-              bookendConfig || this.loadRelatedArticlesAsBookendConfig_())
-        .catch(e => {
-          user().error(TAG, 'Error fetching bookend configuration', e.message);
-          return null;
-        });
-  }
-
-
-  /**
-   * @return {!Promise<?./bookend.BookendConfigDef>}
-   * @private
-   */
-  loadBookendConfigInternal_() {
     return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME)
         .then(response => response && {
           shareProviders: response['share-providers'],
           relatedArticles: response['related-articles'] ?
               relatedArticlesFromJson(response['related-articles']) : [],
-        });
-  }
-
-
-  /**
-   * @return {!Promise<?./bookend.BookendConfigDef>}
-   * @private
-   */
-  loadRelatedArticlesAsBookendConfig_() {
-    return this.loadJsonFromAttribute_(RELATED_ARTICLES_ATTRIBUTE_NAME)
-        .then(response => response && {
-          relatedArticles: relatedArticlesFromJson(response),
+        })
+        .catch(e => {
+          user().error(TAG, 'Error fetching bookend configuration', e.message);
+          return null;
         });
   }
 
@@ -782,6 +786,12 @@ export class AmpStory extends AMP.BaseElement {
    */
   audioStopped_() {
     this.element.classList.remove('audio-playing');
+  }
+
+  /** @private */
+  replay_() {
+    this.hideBookend_();
+    this.switchTo_(dev().assertElement(this.pages_[0].element).id);
   }
 }
 

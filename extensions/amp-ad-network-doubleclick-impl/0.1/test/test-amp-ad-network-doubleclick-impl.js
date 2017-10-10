@@ -49,7 +49,6 @@ import {
   toggleExperiment,
   forceExperimentBranch,
 } from '../../../../src/experiments';
-import {Xhr} from '../../../../src/service/xhr-impl';
 import {VisibilityState} from '../../../../src/visibility-state';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
@@ -461,54 +460,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
              // Ensure that "auto" doesn't appear anywhere here:
              expect(url).to.match(/sz=[0-9]+x[0-9]+/));
         });
-    it('should add RTC params if RTC is used', () => {
-      const rtcConf = createElementWithAttributes(
-          doc, 'script',
-          {type: 'application/json', id: 'amp-rtc'});
-      rtcConf.innerHTML = `{
-          "endpoint": "https://example-publisher.com/rtc/",
-          "sendAdRequestOnFailure": false
-          }`;
-      doc.head.appendChild(rtcConf);
-      const rtcResponse = {targeting: {age: '18-24'}};
-      const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
-      xhrMock.returns(
-          Promise.resolve({
-            redirected: false,
-            status: 200,
-            text: () => {
-              return Promise.resolve(JSON.stringify(rtcResponse));
-            },
-          })
-          );
-      new AmpAd(element).upgradeCallback();
-      return impl.getAdUrl().then(url => {
-        expect(url).to.match(/(\?|&)artc=[0-9]+(&|$)/);
-        expect(url).to.match(
-            /(\?|&)ard=example-publisher.com/);
-        expect(url).to.match(/(\?|&)ati=2(&|$)/);
-      });
-
-    });
-    it('should add param artc=-1 if RTC request times out', () => {
-      const rtcConf = createElementWithAttributes(
-          doc, 'script',
-          {type: 'application/json', id: 'amp-rtc'});
-      rtcConf.innerHTML = `{
-          "endpoint": "https://example-publisher.com/rtc/",
-          "sendAdRequestOnFailure": false
-          }`;
-      doc.head.appendChild(rtcConf);
-      const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
-      // never resolve this promise
-      const xhrResponse = new Promise(() => {});
-      xhrMock.returns(xhrResponse);
-      new AmpAd(element).upgradeCallback();
-      return impl.getAdUrl().catch(err => {
-        expect(err.message.match(/^timeout.*/)).to.be.ok;
-      });
-
-    });
     it('has correct format with height/width override',
         () => {
           element.setAttribute('data-override-width', '123');
@@ -596,6 +547,22 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.fromResumeCallback = true;
       impl.getAdUrl().then(url => {
         expect(url).to.match(/(\?|&)frc=1(&|$)/);
+      });
+    });
+    it('should include identity', () => {
+      forceExperimentBranch(impl.win, DOUBLECLICK_A4A_EXPERIMENT_NAME,
+          DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT);
+      // Force get identity result by overloading window variable.
+      const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
+        token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
+      });
+      impl.win['goog_identity_prom'] = Promise.resolve(token);
+      impl.buildCallback();
+      return impl.getAdUrl().then(url => {
+        [/(\?|&)adsid=abcdef(&|$)/,
+          /(\?|&)jar=some_jar(&|$)/,
+          /(\?|&)pucrd=some_pucrd(&|$)/].forEach(
+            regexp => expect(url).to.match(regexp));
       });
     });
   });

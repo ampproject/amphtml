@@ -187,9 +187,9 @@ describe('doubleclick-a4a-config', () => {
             String(expFlagValue));
         const elem = testFixture.doc.createElement('div');
         testFixture.doc.body.appendChild(elem);
-        // Enabled for all but holdback & sfg.
+        // Enabled for all but holdback
         expect(doubleclickIsA4AEnabled(mockWin, elem)).to.equal(
-            !['2', '5', '6'].includes(expFlagValue));
+            !['2'].includes(expFlagValue));
         if (expFlagValue == 0) {
           expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
         } else {
