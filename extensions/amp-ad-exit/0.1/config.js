@@ -40,8 +40,7 @@ export let NavigationTargetConfig;
 /**
  * @typedef {{
  *   defaultValue: (string|number|boolean),
- *   vendorAnalyticsSource: (string|undefined),
- *   vendorAnalyticsResponseKey: (string|undefined)
+ *   iframeTransportSignal: (string|undefined)
  * }}
  */
 export let VariableDef;
@@ -145,15 +144,6 @@ function assertTarget(name, target, config) {
       user().assert(
           pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
           variable, pattern);
-      const vendor = target.vars[variable]['vendorAnalyticsSource'];
-      if (vendor) {
-        assertVendor(vendor);
-        user().assert(
-            target.vars[variable]['vendorAnalyticsResponseKey'],
-            'Variable \'%s\': If vendorAnalyticsSource is defined then ' +
-            'vendorAnalyticsResponseKey must also be defined', variable);
-
-      }
     }
   }
 }
@@ -162,11 +152,13 @@ function assertTarget(name, target, config) {
  * Checks whether a vendor is valid (i.e. listed in vendors.js and has
  * transport/iframe defined.
  * @param {string} vendor The vendor name that should be listed in vendors.js
+ * @return {string} The vendor's iframe URL
  */
-function assertVendor(vendor) {
+export function assertVendor(vendor) {
   user().assert(ANALYTICS_CONFIG &&
-      ANALYTICS_CONFIG[vendor] !== undefined &&
-      ANALYTICS_CONFIG[vendor]['transport'] !== undefined &&
-      ANALYTICS_CONFIG[vendor]['transport']['iframe'] !== undefined,
+      ANALYTICS_CONFIG[vendor] &&
+      ANALYTICS_CONFIG[vendor]['transport'] &&
+      ANALYTICS_CONFIG[vendor]['transport']['iframe'],
       'Unknown vendor: ' + vendor);
+  return ANALYTICS_CONFIG[vendor]['transport']['iframe'];
 }

@@ -15,13 +15,20 @@
  */
 
 import {makeClickDelaySpec} from './filters/click-delay';
-import {assertConfig, TransportMode} from './config';
+import {assertConfig, assertVendor, TransportMode} from './config';
 import {createFilter} from './filters/factory';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
+import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {Services} from '../../../src/services';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {parseJson} from '../../../src/json';
-
+import {parseUrl} from '../../../src/url';
+import {
+  listen,
+  deserializeMessage,
+  MessageType,
+} from '../../../src/3p-frame-messaging';
+import {getData} from '../../../src/event-helper';
 const TAG = 'amp-ad-exit';
 
 /**
@@ -32,7 +39,7 @@ const TAG = 'amp-ad-exit';
  *   filters: !Array<!./filters/filter.Filter>
  * }}
  */
-let NavigationTarget;  // eslint-disable-line no-unused-vars
+let NavigationTargetDef;
 
 export class AmpAdExit extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -40,7 +47,7 @@ export class AmpAdExit extends AMP.BaseElement {
     super(element);
 
     /**
-     * @private @const {!Object<string, !NavigationTarget>}
+     * @private @const {!Object<string, !NavigationTargetDef>}
      */
     this.targets_ = {};
 
@@ -60,8 +67,17 @@ export class AmpAdExit extends AMP.BaseElement {
 
     this.registerAction('exit', this.exit.bind(this));
 
-    /** @private @const {!Object<string, Object<string, string>>} */
+    /** @private @const {!Object<string, !Object<string, string>>} */
     this.vendorResponses_ = {};
+
+    /** @private {?function()} */
+    this.unlisten_ = null;
+
+    /** @private {?string} */
+    this.ampAdResourceId_ = null;
+
+    /** @private @const {!Object<string,string>} */
+    this.expectedOriginToVendor_ = {};
   }
 
   /**
@@ -89,7 +105,7 @@ export class AmpAdExit extends AMP.BaseElement {
   /**
    * @param {!Object<string, string|number|boolean>} args
    * @param {!../../../src/service/action-impl.ActionEventDef} event
-   * @param {!NavigationTarget} target
+   * @param {!NavigationTargetDef} target
    * @return {function(string): string}
    */
   getUrlVariableRewriter_(args, event, target) {
@@ -105,10 +121,12 @@ export class AmpAdExit extends AMP.BaseElement {
     };
     if (target.vars) {
       for (const customVarName in target.vars) {
-        let customVar;
-        if (customVarName[0] != '_' ||
-            !(customVar = /** @type {!./config.VariableDef} */
-            (target.vars[customVarName]))) {
+        if (customVarName[0] != '_') {
+          continue;
+        }
+        const customVar =
+            /** @type {!./config.VariableDef} */ (target.vars[customVarName]);
+        if (!customVar) {
           continue;
         }
         /*
@@ -132,17 +150,27 @@ export class AmpAdExit extends AMP.BaseElement {
          this example will return "medium".
         */
         substitutionFunctions[customVarName] = () => {
-          if ('iframeTransportSignal' in customVar) {
+          if (customVar.iframeTransportSignal) {
             const vendorResponse = replacements./*OK*/expandStringSync(
                 customVar.iframeTransportSignal, {
                   'IFRAME_TRANSPORT_SIGNAL': (vendor, responseKey) => {
+                    if (!(vendor && responseKey)) {
+                      return '';
+                    }
                     const vendorResponses = this.vendorResponses_[vendor];
                     if (vendorResponses && responseKey in vendorResponses) {
                       return vendorResponses[responseKey];
                     }
                   },
                 });
-            if (vendorResponse != '') {
+            if (customVar.iframeTransportSignal ==
+                `IFRAME_TRANSPORT_SIGNAL${vendorResponse}`) {
+              // No substitution occurred, so format string in amp-ad-exit
+              // config was invalid
+              dev().error(TAG, 'Invalid IFRAME_TRANSPORT_SIGNAL format:' +
+                  vendorResponse +
+                  ' (perhaps there is a space after a comma?)');
+            } else if (vendorResponse != '') {
               // Caveat: If the vendor's response *is* the empty string, then
               // this will cause the arg/default value to be returned.
               return vendorResponse;
@@ -215,7 +243,6 @@ export class AmpAdExit extends AMP.BaseElement {
         'be inside a <script> tag with type="application/json"');
     try {
       const config = assertConfig(parseJson(child.textContent));
-      // const userFilters = {};
       for (const name in config.filters) {
         this.userFilters_[name] =
             createFilter(name, config.filters[name], this);
@@ -230,6 +257,21 @@ export class AmpAdExit extends AMP.BaseElement {
               (target.filters || []).map(
                   f => this.userFilters_[f]).filter(f => f),
         };
+        // Build a map of {vendor, origin} for 3p custom variables in the config
+        for (const customVar in target.vars) {
+          if (!target.vars[customVar].iframeTransportSignal) {
+            continue;
+          }
+          const matches = target.vars[customVar].iframeTransportSignal.match(
+              /IFRAME_TRANSPORT_SIGNAL\(([^,]+)/);
+          if (!matches || matches.length < 2) {
+            continue;
+          }
+          const vendor = matches[1];
+          const origin = parseUrl(assertVendor(vendor)).origin;
+          this.expectedOriginToVendor_[origin] =
+              this.expectedOriginToVendor_[origin] || vendor;
+        }
       }
       this.transport_.beacon = config.transport[TransportMode.BEACON] !== false;
       this.transport_.image = config.transport[TransportMode.IMAGE] !== false;
@@ -237,6 +279,91 @@ export class AmpAdExit extends AMP.BaseElement {
       this.user().error(TAG, 'Invalid JSON config', e);
       throw e;
     }
+
+    this.ampAdResourceId_ = user().assert(
+        this.getAmpAdResourceId_(),
+        `${TAG}: No friendly parent amp-ad element was found for amp-ad-exit.`);
+
+    this.init3pResponseListener_();
+  }
+
+  /**
+   * Gets the resource ID of the amp-ad element containing this amp-ad-exit tag.
+   * This is a pass-through for the version in service.js, solely because
+   * the one in service.js isn't stubbable for testing, since only object
+   * methods are stubbable.
+   * @returns {?string}
+   * @private
+   * @VisibleForTesting
+   */
+  getAmpAdResourceId_() {
+    return getAmpAdResourceId(this.element, this.win.top);
+  }
+
+  /** @override */
+  resumeCallback() {
+    this.init3pResponseListener_();
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.unlisten_) {
+      this.unlisten_();
+      this.unlisten_ = null;
+    }
+    return super.unlayoutCallback();
+  }
+
+  /**
+   * amp-analytics will create an iframe for vendors in
+   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
+   * This is limited to MRC-accreddited vendors. The frame is removed in
+   * amp-analytics, and the listener is destroyed here, if the user
+   * navigates/swipes away from the page. Both are recreated if the user
+   * navigates back to the page.
+   * @private
+   */
+  init3pResponseListener_() {
+    dev().assert(!this.unlisten_, 'Unlistener should not already exist.');
+    this.unlisten_ = listen(this.getAmpDoc().win, 'message',
+        event => {
+          // We shouldn't deserialize just any message...it would be too
+          // expensive to parse ones that aren't for amp-ad-exit.
+          if (!this.expectedOriginToVendor_[event.origin]) {
+            return;
+          }
+          const responseMsg = deserializeMessage(getData(event));
+          if (!responseMsg ||
+              responseMsg['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE) {
+            return;
+          }
+          this.assertValidResponseMessage_(responseMsg, event.origin);
+          this.vendorResponses_[responseMsg['vendor']] = responseMsg['message'];
+        });
+  }
+
+  /**
+   *
+   * @param {JsonObject} responseMessage The response object to
+   *     validate.
+   * @param {string} eventOrigin The origin of the message, which should
+   *     match the expected origin of messages from responseMessage['vendor']
+   * @private
+   */
+  assertValidResponseMessage_(responseMessage, eventOrigin) {
+    user().assert(responseMessage['message'],
+        'Received empty response from 3p analytics frame');
+    user().assert(
+        responseMessage['creativeId'] == this.ampAdResourceId_,
+        'Received malformed message from 3p analytics frame: ' +
+        'creativeId missing or invalid');
+    user().assert(responseMessage['vendor'],
+        'Received malformed message from 3p analytics frame: ' +
+        'vendor missing');
+    const vendorURL = parseUrl(assertVendor(responseMessage['vendor']));
+    user().assert(vendorURL && vendorURL.origin == eventOrigin,
+        'Invalid origin for vendor ' +
+        `${responseMessage['vendor']}: ${eventOrigin}`);
   }
 
   /** @override */
@@ -251,7 +378,6 @@ export class AmpAdExit extends AMP.BaseElement {
     }
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAdExit);
