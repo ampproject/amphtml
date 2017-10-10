@@ -246,14 +246,13 @@ export class AmpStory extends AMP.BaseElement {
         'Story must have at least one page.');
 
     return this.initializePages_()
-        .then(() => this.switchTo_(firstPageEl.id))
-        .then(() => this.preloadPagesByDistance_())
         .then(() => {
           this.pages_.forEach(page => {
             page.setActive(false);
           });
-          this.activePage_.setActive(true);
-        });
+        })
+        .then(() => this.switchTo_(firstPageEl.id))
+        .then(() => this.preloadPagesByDistance_());
   }
 
 
@@ -353,6 +352,8 @@ export class AmpStory extends AMP.BaseElement {
       this.activePage_ = targetPage;
       this.triggerActiveEventForPage_();
       this.systemLayer_.resetDeveloperLogs();
+      this.systemLayer_.setDeveloperLogContextString(
+          this.activePage_.element.id);
       this.maybeStartAnimations_(targetPage);
     })
         .then(() => {
@@ -482,6 +483,8 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.buildBookend_().then(() => {
+      this.systemLayer_.hideDeveloperLog();
+
       this.exitFullScreen_();
       this.systemLayer_.toggleCloseBookendButton(true);
       this.isBookendActive_ = true;

@@ -117,8 +117,17 @@ export class SystemLayer {
     /** @private {?Element} */
     this.warningButton_ = null;
 
-    /** @private {?Array<!./logging.AmpStoryLogEntryDef>} */
-    this.logEntries_ = null;
+    /** @private {?Element} */
+    this.successButton_ = null;
+
+    /** @private {?Element} */
+    this.developerLog_ = null;
+
+    /** @private {?Element} */
+    this.developerLogEntryListEl_ = null;
+
+    /** @private {?Element} */
+    this.developerLogContextStringEl_ = null;
 
     /** @private @const {!ProgressBar} */
     this.progressBar_ = ProgressBar.create(win);
@@ -173,20 +182,49 @@ export class SystemLayer {
    * @private
    */
   buildForDevelopmentMode_() {
-    this.errorButton_ = this.createButton_('i-amphtml-story-error-button',
-        e => this.openDeveloperLog_(e));
+    this.errorButton_ = this.createButton_(
+        ['i-amphtml-story-error-button', 'i-amphtml-story-dev-logs-button'],
+        e => this.toggleDeveloperLog_(e));
 
-    this.warningButton_ = this.createButton_('i-amphtml-story-warning-button',
-        e => this.openDeveloperLog_(e));
+    this.warningButton_ = this.createButton_(
+        ['i-amphtml-story-warning-button', 'i-amphtml-story-dev-logs-button'],
+        e => this.toggleDeveloperLog_(e));
 
-    this.developerLog_ = document.createElement('ul');
+    this.successButton_ = this.createButton_(
+        ['i-amphtml-story-success-button', 'i-amphtml-story-dev-logs-button'],
+        e => this.toggleDeveloperLog_(e));
+
+    this.developerLogContextStringEl_ = document.createElement('span');
+    this.developerLogContextStringEl_.classList
+        .add('i-amphtml-story-developer-log-context');
+    const titleEl = document.createElement('div');
+    titleEl.textContent = 'Developer logs for page ';
+    titleEl.appendChild(this.developerLogContextStringEl_);
+
+    const closeDeveloperLogEl = this.createButton_(
+        'i-amphtml-story-developer-log-close',
+        e => this.hideDeveloperLog());
+
+    const headerEl = document.createElement('div');
+    headerEl.classList.add('i-amphtml-story-developer-log-header');
+    headerEl.appendChild(titleEl);
+    headerEl.appendChild(closeDeveloperLogEl);
+
+    this.developerLogEntryListEl_ = document.createElement('ul');
+    this.developerLogEntryListEl_.classList
+        .add('i-amphtml-story-developer-log-entries');
+
+    this.developerLog_ = document.createElement('div');
     this.developerLog_.classList.add('i-amphtml-story-developer-log');
     this.developerLog_.setAttribute('hidden', '');
+    this.developerLog_.appendChild(headerEl);
+    this.developerLog_.appendChild(this.developerLogEntryListEl_);
 
     this.resetDeveloperLogs();
+    this.root_.appendChild(this.developerLog_);
     this.leftButtonTray_.appendChild(this.errorButton_);
     this.leftButtonTray_.appendChild(this.warningButton_);
-    this.root_.appendChild(this.developerLog_);
+    this.leftButtonTray_.appendChild(this.successButton_);
   }
 
   /**
@@ -208,15 +246,20 @@ export class SystemLayer {
   }
 
   /**
-   * @param {string} className
+   * @param {string|!Array<string>} classNameOrList
    * @param {function(Event)} handler
    * @return {!Element}
    * @private
    */
-  createButton_(className, handler) {
+  createButton_(classNameOrList, handler) {
     const button = document.createElement('div');
     button.setAttribute('role', 'button');
-    button.classList.add(className);
+
+    if (isArray(classNameOrList)) {
+      classNameOrList.forEach(className => button.classList.add(className));
+    } else {
+      button.classList.add(/** @type {string} */ (classNameOrList));
+    }
     button.classList.add('i-amphtml-story-button');
     button.addEventListener('click', handler);
     return button;
@@ -324,12 +367,16 @@ export class SystemLayer {
 
   /**
    * 
-   * @param {!LogLevel} logLevel 
+   * @param {!./logging.AmpStoryLogEntryDef} logEntry 
    * @return {?Element}
    * @private
    */
-  getButtonForLogLevel_(logLevel) {
-    switch (logLevel) {
+  getButtonForLogEntry_(logEntry) {
+    if (logEntry.conforms) {
+      return this.successButton_;
+    }
+
+    switch (logEntry.level) {
       case LogLevel.ERROR:
         return this.errorButton_;
       case LogLevel.WARN:
@@ -344,28 +391,37 @@ export class SystemLayer {
    * @private
    */
   logInternal_(logEntry) {
-    if (!logEntry.conforms) {
-      const button = this.getButtonForLogLevel_(logEntry.level);
-      if (button) {
-        const oldCount = parseInt(button.getAttribute('data-count') || 0, 10);
-        button.setAttribute('data-count', oldCount + 1);
-      }
+    const button = this.getButtonForLogEntry_(logEntry);
+    if (button) {
+      const oldCount = parseInt(button.getAttribute('data-count') || 0, 10);
+      button.setAttribute('data-count', oldCount + 1);
     }
 
-    const devNull = () => {};
-    const logFn = devNull; // logEntry.conforms ? console.info : console.warn;
+    const getCssLogLevelClass = logLevel => {
+      switch (logLevel) {
+        case LogLevel.WARN:
+          return 'i-amphtml-story-developer-log-entry-warning';
+        case LogLevel.ERROR:
+          return 'i-amphtml-story-developer-log-entry-error';
+        default:
+          return null;
+      }
+    };
 
-    /* this.logEntries_.push(logEntry);
+    const getCssConformanceClass = conforms => {
+      if (conforms) {
+        return 'i-amphtml-story-developer-log-entry-success';
+      }
+
+      return null;
+    }
 
     const logEntryUi = document.createElement('li');
     logEntryUi.classList.add('i-amphtml-story-developer-log-entry');
-    logEntryUi.textContent =
-        `${logEntry.conforms ? '✔' : '✘'} ${logEntry.message}`;
-    this.developerLog_.appendChild(logEntryUi); */
-
-    if (!logEntry.conforms) {
-      reportError(logEntry, logEntry.element);
-    }
+    logEntryUi.classList.add(getCssLogLevelClass(logEntry.level));
+    logEntryUi.classList.add(getCssConformanceClass(logEntry.conforms));
+    logEntryUi.textContent = logEntry.message;
+    this.developerLogEntryListEl_.appendChild(logEntryUi);
   }
 
   /**
@@ -401,18 +457,32 @@ export class SystemLayer {
 
     this.errorButton_.setAttribute('data-count', 0);
     this.warningButton_.setAttribute('data-count', 0);
-    this.logEntries_ = [];
-    removeChildren(this.developerLog_);
+    this.successButton_.setAttribute('data-count', 0);
+    removeChildren(this.developerLogEntryListEl_);
   }
 
   /**
    * 
    */
-  openDeveloperLog_() {
+  toggleDeveloperLog_() {
     if (!getMode().development) {
       return;
     }
-    this.developerLog_.removeAttribute('hidden');
-    this.toggleCloseBookendButton(true);
+    const newHiddenState = !this.developerLog_.hasAttribute('hidden');
+    toggleHiddenAttribute(
+        Services.vsyncFor(this.win_), this.developerLog_, newHiddenState);
+  }
+
+  /**
+   * 
+   * @param {string} opt_rootElementName
+   */
+  setDeveloperLogContextString(contextString) {
+    this.developerLogContextStringEl_.textContent = contextString;
+  }
+
+  hideDeveloperLog() {
+    toggleHiddenAttribute(
+        Services.vsyncFor(this.win_), this.developerLog_, /* isHidden */ true);
   }
 }
