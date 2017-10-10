@@ -222,10 +222,8 @@ const BLOCK_SRA_COMBINERS_ = [
     });
     return Object.keys(eids).length ? {'eid': Object.keys(eids).join()} : null;
   },
-  instances => getFirstInstanceValue_(instances, instance => {
-    return instance.identityToken ?
-      instance.buildIdentityParams_(instance.identityToken) : null;
-  }),
+  instances => getFirstInstanceValue_(instances,
+      instance => instance.buildIdentityParams_()),
 ];
 
 /**
@@ -354,7 +352,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.identityTokenPromise_ = null;
 
     /** @type {?../../../ads/google/a4a/utils.IdentityToken} */
-    this.IdentityToken = null;
+    this.identityToken = null;
   }
 
   /** @override */
@@ -592,21 +590,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                   this.getBlockParameters_(), results[0],
-                  this.buildIdentityParams_(results[1]), PAGE_LEVEL_PARAMS_));
+                  this.buildIdentityParams_(), PAGE_LEVEL_PARAMS_));
         });
   }
 
   /**
-   * @param {!../../../ads/google/a4a/utils.IdentityToken} identityToken
    * @return {!Object<string,string>}
    * @private
    */
-  buildIdentityParams_(identityToken) {
-    return {
-      adsid: identityToken.token || null,
-      jar: identityToken.jar || null,
-      pucrd: identityToken.pucrd || null,
-    };
+  buildIdentityParams_() {
+    return this.identityToken ? {
+      adsid: this.identityToken.token || null,
+      jar: this.identityToken.jar || null,
+      pucrd: this.identityToken.pucrd || null,
+    } : {};
   }
 
   /** @override */
