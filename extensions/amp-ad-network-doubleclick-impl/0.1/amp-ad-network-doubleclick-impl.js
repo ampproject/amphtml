@@ -223,8 +223,8 @@ const BLOCK_SRA_COMBINERS_ = [
     return Object.keys(eids).length ? {'eid': Object.keys(eids).join()} : null;
   },
   instances => getFirstInstanceValue_(instances, instance => {
-    return instance.identityToken_ ?
-      instance.buildIdentityParams_(instance.identityToken_) : null;
+    return instance.identityToken ?
+      instance.buildIdentityParams_(instance.identityToken) : null;
   }),
 ];
 
@@ -353,8 +353,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
     this.identityTokenPromise_ = null;
 
-    /** @private {!../../../ads/google/a4a/utils.IdentityToken} */
-    this.IdentityToken_ = null;
+    /** @type {!../../../ads/google/a4a/utils.IdentityToken} */
+    this.IdentityToken = null;
   }
 
   /** @override */
@@ -588,7 +588,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         });
     return Promise.all([rtcRequestPromise, identityPromise])
         .then(results => {
-          this.identityToken_ = results[1];
+          this.identityToken = results[1];
           return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                   this.getBlockParameters_(), results[0],
