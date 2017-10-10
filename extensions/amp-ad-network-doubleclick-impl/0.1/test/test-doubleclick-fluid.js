@@ -81,9 +81,10 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     const getLayout = () => 'fluid';
     impl.getLayout = getLayout;
     impl.isLayoutSupported('fluid');
+    impl.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
     multiSizeImpl.getLayout = getLayout;
     multiSizeImpl.isLayoutSupported('fluid');
-    impl.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
+    multiSizeImpl.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
   });
 
   afterEach(() => {
@@ -137,6 +138,23 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
       expect(multiSizeImpl.adUrl_).to.be.ok;
       expect(multiSizeImpl.adUrl_).to.match(
           /[&?]sz=320x50%7C300x200%7C150x50/);
+    });
+  });
+
+  it('should style iframe/slot correctly on multi-size creative', () => {
+    multiSizeImpl.buildCallback();
+    return utf8Encode('foo').then(creative => {
+      multiSizeImpl.sentinel = 'sentinel';
+      multiSizeImpl.adPromise_ = Promise.resolve();
+      multiSizeImpl.creativeBody_ = creative;
+      multiSizeImpl.returnedSize_ = {width: 250, height: 100};
+      return multiSizeImpl.layoutCallback().then(() => {
+        const iframeStyleString = multiSizeImpl.iframe.getAttribute('style');
+        const slotStyleString = multiSizeImpl.element.getAttribute('style');
+        expect(slotStyleString).to.match(/width: 250px/);
+        expect(iframeStyleString).to.match(/position: relative/);
+        expect(multiSizeImpl.element.getAttribute('height')).to.be.null;
+      });
     });
   });
 

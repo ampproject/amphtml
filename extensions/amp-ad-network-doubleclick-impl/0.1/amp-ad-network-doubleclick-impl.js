@@ -766,12 +766,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // Force size of frame to match creative or, if creative size is unknown,
     // the slot. This ensures that the creative is centered in the former case,
     // and not truncated in the latter.
-    // TODO(levitzky) Figure out the behavior of responsive + multi-size.
     const size = this.returnedSize_ || this.getSlotSize();
+    const isMultiSizeFluid = this.isFluid_ && this.returnedSize_ &&
+        // TODO(@glevitzky, 11583) Remove this clause once we stop sending back
+        // the size header for fluid ads. Fluid size headers always come back as
+        // 0x0.
+        !(size.width == 0 && size.height == 0);
     setStyles(dev().assertElement(this.iframe), {
       width: `${size.width}px`,
       height: `${size.height}px`,
+      position: isMultiSizeFluid ? 'relative' : null,
     });
+    if (isMultiSizeFluid) {
+      // This is a fluid + multi-size request, where the returned creative is
+      // multi-size. The slot needs to not be styled with width: 100%, or the
+      // creative will be centered instead of left-aligned.
+      this.element.removeAttribute('height');
+      setStyles(this.element, {width: `${size.width}px`});
+    }
   }
 
   /**
@@ -1348,3 +1360,4 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
+
