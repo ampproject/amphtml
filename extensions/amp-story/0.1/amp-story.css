@@ -373,12 +373,16 @@ amp-story-grid-layer * {
   color: rgba(255, 255, 255, 0.54);
 }
 
-.i-amphtml-story-bookend-article-set > article {
+.i-amphtml-story-bookend-article {
+  display: block;
+  text-decoration: none;
+  color: inherit;
   margin: 24px 0;
   overflow: hidden;
 }
 
-.i-amphtml-story-bookend-article-set:last-child > article:last-child {
+.i-amphtml-story-bookend-article-set:last-child >
+    .i-amphtml-story-bookend-article:last-child {
   margin-bottom: 0; /* bottom of bookend has padding > article margin */
 }
 

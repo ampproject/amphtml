@@ -13,11 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {parseUrl} from '../../../src/url';
 import {user} from '../../../src/log';
 
 
 /**
- * @typedef {{title: string, url: string, image: (string|undefined)}}
+ * @typedef {{
+ *   title: string,
+ *   url: string,
+ *   domainName: string,
+ *   image: (string|undefined),
+ * }}
  */
 export let RelatedArticleDef;
 
@@ -40,6 +46,7 @@ function buildArticleFromJson_(articleJson) {
   const article = {
     title: user().assert(articleJson['title']),
     url: user().assert(articleJson['url']),
+    domainName: parseUrl(user().assert(articleJson['url'])).hostname,
   };
 
   if (articleJson['image']) {
