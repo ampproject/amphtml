@@ -81,7 +81,7 @@ function getPosterFromVideo(el) {
     poster.onload = () => resolve(poster);
     poster.onerror = reject;
     poster.src = el.getAttribute('poster');
-  })
+  });
 }
 
 /** @enum {!AmpStoryLogTypeDef} */
@@ -129,7 +129,9 @@ const LogType = {
     message: 'Video poster images should not be larger than 720p.',
     selector: 'video[poster]',
     predicate: el => getPosterFromVideo(el)
-        .then(poster => poster.naturalWidth <= 720 && poster.naturalHeight <= 1280),
+        .then(poster => {
+          return poster.naturalWidth <= 720 && poster.naturalHeight <= 1280;
+        }),
     level: LogLevel.WARN,
   },
 
@@ -141,12 +143,13 @@ const LogType = {
     predicate: el => getPosterFromVideo(el)
         .then(poster => poster.naturalWidth < poster.naturalHeight),
     level: LogLevel.WARN,
-  }
-}
+  },
+};
 
 
 /**
- * @param {string} logTypeKey 
+ * Gets the log type associated with the specified key.
+ * @param {string} logTypeKey
  * @return {!AmpStoryLogTypeDef}
  */
 function getLogType(logTypeKey) {
@@ -162,40 +165,39 @@ function getLogType(logTypeKey) {
 
 
 /**
- * @param {!Element} rootElement 
- * @param {!AmpStoryLogTypeDef} logType 
- * @param {!Element} element 
+ * @param {!Element} rootElement
+ * @param {!AmpStoryLogTypeDef} logType
+ * @param {!Element} element
  * @return {!Promise<!AmpStoryLogEntryDef>}
  */
 function getLogEntry(rootElement, logType, element) {
-  const predicate = logType.predicate || (el => false);
+  const predicate = logType.predicate || (unusedEl => false);
 
   return Promise.resolve(predicate(element))
       .then(conforms => {
-          return new Promise(resolve => {
-            resolve({
-              rootElement,
-              element,
-              conforms,
-              level: logType.level,
-              message: logType.message,
-              moreInfo: logType.moreInfo,
-            });
+        return new Promise(resolve => {
+          resolve({
+            rootElement,
+            element,
+            conforms,
+            level: logType.level,
+            message: logType.message,
+            moreInfo: logType.moreInfo,
+          });
         });
       });
 }
 
 
 /**
- * 
- * @param {!Element} rootElement 
- * @param {!AmpStoryLogTypeDef} logType 
+ * @param {!Element} rootElement
+ * @param {!AmpStoryLogTypeDef} logType
  * @return {!Array<!Promise<!AmpStoryLogEntryDef>>}
  */
 function getLogEntriesForType(rootElement, logType) {
-  const precondition = logType.precondition || (el => true);
+  const precondition = logType.precondition || (unusedEl => true);
 
-  let elements = logType.selector ?
+  const elements = logType.selector ?
       [].slice.call(scopedQuerySelectorAll(rootElement, logType.selector)) :
       [rootElement];
 
@@ -205,9 +207,8 @@ function getLogEntriesForType(rootElement, logType) {
 }
 
 /**
- * 
- * @param {!AmpStoryLogEntryDef} logEntryA 
- * @param {!AmpStoryLogEntryDef} logEntryB 
+ * @param {!AmpStoryLogEntryDef} logEntryA
+ * @param {!AmpStoryLogEntryDef} logEntryB
  * @return {number}
  */
 function logEntryCompareFn(logEntryA, logEntryB) {
@@ -223,8 +224,8 @@ function logEntryCompareFn(logEntryA, logEntryB) {
 
 
 /**
- * 
- * @param {!Element} rootElement 
+ * Gets a promise which yields a list of log entries for the specified element.
+ * @param {!Element} rootElement
  * @return {!Promise<!Array<!AmpStoryLogEntryDef>>}
  */
 export function getLogEntries(rootElement) {
@@ -239,7 +240,3 @@ export function getLogEntries(rootElement) {
         return logEntries.sort(logEntryCompareFn);
       });
 }
-
-
-
-// export class AmpStoryLogEntryUi

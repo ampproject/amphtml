@@ -36,12 +36,13 @@ function toggleHiddenAttribute(vsync, el, isHidden) {
 
 
 /**
+ * @param {!Window} win
  * @param {string|!Array<string>} classNameOrList
  * @param {function(Event)} handler
  * @return {!Element}
  */
-function createButton(classNameOrList, handler) {
-  const button = document.createElement('div');
+function createButton(win, classNameOrList, handler) {
+  const button = win.document.createElement('div');
   button.setAttribute('role', 'button');
 
   if (isArray(classNameOrList)) {
@@ -60,6 +61,9 @@ export class DevelopmentModeLogButtonSet {
    * @param {!Window} win
    */
   constructor(win) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+
     /** @private {?Element} */
     this.root_ = null;
 
@@ -84,25 +88,25 @@ export class DevelopmentModeLogButtonSet {
 
   /**
    * Builds the developer log button set element.
-   * @param {function} logButtonActionFn A callback function to be invoked when
+   * @param {function()} logButtonActionFn A callback function to be invoked when
    *     the log buttons are clicked.
    * @return {?Element}
    */
   build(logButtonActionFn) {
-    this.errorButton_ = createButton(
+    this.errorButton_ = createButton(this.win_,
         ['i-amphtml-story-error-button', 'i-amphtml-story-dev-logs-button'],
         () => logButtonActionFn());
 
-    this.warningButton_ = createButton(
+    this.warningButton_ = createButton(this.win_,
         ['i-amphtml-story-warning-button', 'i-amphtml-story-dev-logs-button'],
         () => logButtonActionFn());
 
-    this.successButton_ = createButton(
+    this.successButton_ = createButton(this.win_,
         ['i-amphtml-story-success-button', 'i-amphtml-story-dev-logs-button'],
         () => logButtonActionFn());
 
 
-    this.root_ = document.createElement('div');
+    this.root_ = this.win_.document.createElement('div');
     this.root_.appendChild(this.errorButton_);
     this.root_.appendChild(this.warningButton_);
     this.root_.appendChild(this.successButton_);
@@ -218,7 +222,7 @@ export class DevelopmentModeLog {
     titleEl.textContent = 'Developer logs for page ';
     titleEl.appendChild(this.contextStringEl_);
 
-    const closeDeveloperLogEl = createButton(
+    const closeDeveloperLogEl = createButton(this.win_,
         'i-amphtml-story-developer-log-close',
         () => this.hide());
 

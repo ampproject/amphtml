@@ -18,7 +18,7 @@ import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {ProgressBar} from './progress-bar';
 import {getMode} from '../../../src/mode';
-import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
+import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui'; // eslint-disable-line max-len
 
 
 /*eslint-disable max-len */
@@ -114,7 +114,7 @@ export class SystemLayer {
     /** @private {!DevelopmentModeLog} */
     this.developerLog_ = DevelopmentModeLog.create(win);
 
-    /** @private {!DevelopmentModeLog} */
+    /** @private {!DevelopmentModeLogButtonSet} */
     this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
   }
 

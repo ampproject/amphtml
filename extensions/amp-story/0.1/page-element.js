@@ -174,13 +174,6 @@ export class PageElement {
   }
 
   /**
-   * @return {!Array<!Promise<!Object>>}
-   */
-  getErrors() {
-    return [];
-  }
-
-  /**
    * @param {!./amp-story-page.AmpStoryPage} page
    * @return {!Array<!PageElement>}
    */
@@ -310,53 +303,6 @@ class MediaElement extends PageElement {
         Boolean(mediaElement['webkitAudioDecodedByteCount']) ||
         Boolean(mediaElement.audioTracks && mediaElement.audioTracks.length);
   }
-
-  /** @override */
-  getErrors() {
-    const mediaElement = this.getMediaElement_();
-
-    if (mediaElement instanceof HTMLVideoElement) {
-      return this.getVideoElementErrors_(
-          /** @type {!HTMLVideoElement} */ (mediaElement));
-    }
-
-    return [];
-  }
-
-  /**
-   * @param {!HTMLVideoElement} videoEl
-   * @return {!Array<!Promise<!Object>>}
-   * @private
-   */
-  getVideoElementErrors_(videoEl) {
-    const errors = [];
-
-    if (videoEl.videoWidth * videoEl.videoHeight > 720 * 1280) {
-      errors.push(
-          Promise.resolve({message: 'We recommend 720p videos or smaller'}));
-    }
-
-    if (!videoEl.poster) {
-      errors.push(
-          Promise.resolve({message: 'We recommend setting a poster image on all videos'}));
-    } else {
-      errors.push(new Promise((resolve, reject) => {
-        const posterImage = new Image();
-        posterImage.onload = () => {
-          if (posterImage.naturalWidth * posterImage.naturalHeight >
-              720 * 1280) {
-            resolve({message:'We recommend 720p poster images or smaller'});
-          } else {
-            resolve();
-          }
-        };
-        posterImage.onerror = reject;
-        posterImage.src = videoEl.poster;
-      }));
-    }
-
-    return errors;
-  }
 }
 
 class ImageElement extends PageElement {
@@ -402,20 +348,6 @@ class ImageElement extends PageElement {
   /** @override */
   hasAudio() {
     return false;
-  }
-
-  /** @override */
-  getErrors() {
-    const imageElement = this.getImageElement_();
-    const errors = [];
-
-    if (imageElement.naturalWidth * imageElement.naturalHeight >
-        720 * 1280) {
-      errors.push(
-          Promise.resolve({message: 'We recommend 720p images or smaller'}));
-    }
-
-    return errors;
   }
 }
 

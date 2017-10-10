@@ -54,7 +54,6 @@ import {setStyle, setStyles} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
-import {LogStatus} from './logging';
 
 
 /** @private @const {number} */
