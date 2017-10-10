@@ -22,6 +22,7 @@ import {
   installVariableService,
   variableServiceFor,
 } from './variables';
+<<<<<<< HEAD
 import {IframeTransport, getIframeTransportScriptUrl} from './iframe-transport';
 import {
   InstrumentationService,
@@ -46,6 +47,14 @@ import {parseJson} from '../../../src/json';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {serializeResourceTiming} from './resource-timing';
 import {toggle} from '../../../src/style';
+=======
+import {
+  expandConfigRequest,
+  RequestHandler,
+} from './requests';
+import {ANALYTICS_CONFIG} from './vendors';
+import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
+>>>>>>> wip
 
 const TAG = 'amp-analytics';
 
@@ -88,7 +97,12 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.isSandbox_ = false;
 
     /**
+<<<<<<< HEAD
      * @private {Object<string, RequestHandler>} A map of request handler with requests
+=======
+     * @private {Object<string, RequestHandler>} A map of request names to the request
+     * format string used by the tag to send data
+>>>>>>> wip
      */
     this.requests_ = {};
 
@@ -120,8 +134,12 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {?IframeTransport} */
     this.iframeTransport_ = null;
 
+<<<<<<< HEAD
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
+=======
+    this.requestObjects_ = {};
+>>>>>>> wip
   }
 
   /** @override */
@@ -174,9 +192,15 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
+<<<<<<< HEAD
     for (let i = 0; i < this.requests_.length; i++) {
       this.requests_[i].dispose();
       delete this.requests_[i];
+=======
+    for (let i = 0; i < this.requests_.size(); i++) {
+      this.requests_[i].dispose();
+      this.requests_[i] = null;
+>>>>>>> wip
     }
   }
 
@@ -453,12 +477,33 @@ export class AmpAnalytics extends AMP.BaseElement {
         })
         .then(res => res.json())
         .then(jsonValue => {
-          this.remoteConfig_ = jsonValue;
+          this.remoteConfig_ = expandConfigRequest(jsonValue);
           dev().fine(TAG, 'Remote config loaded', remoteConfigUrl);
         }, err => {
           this.user().error(TAG,
               'Error loading remote config: ', remoteConfigUrl, err);
         });
+  }
+
+  expandRequest(config) {
+    const requests = config['requests'];
+    console.log(requests);
+    if (!config['requests']) {
+      return;
+    }
+
+    for (const key in requests) {
+      console.log('request is ', key);
+      if (isObject(requests[key])) {
+        continue;
+      }
+      config['requests'][key] = {
+        'baseUrl': requests[key],
+        'maxDelay': 0,
+      };
+    }
+    console.log('config is ', config);
+    return config;
   }
 
   /**
@@ -474,7 +519,13 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!JsonObject}
    */
   mergeConfigs_() {
+<<<<<<< HEAD
     const inlineConfig = expandConfigRequest(this.getInlineConfigNoInline());
+=======
+    // Need to make request an object at this time?
+    const inlineConfig = expandConfigRequest(this.getInlineConfigNoInline());
+    console.log('inline config is ', inlineConfig);
+>>>>>>> wip
     // Initialize config with analytics related vars.
     const config = dict({
       'vars': {
@@ -492,8 +543,14 @@ export class AmpAnalytics extends AMP.BaseElement {
           'amp-analytics config attribute unless you plan to migrate before ' +
           'deprecation');
     }
+<<<<<<< HEAD
     const typeConfig = expandConfigRequest(this.predefinedConfig_[type] || {});
     if (this.predefinedConfig_[type]) {
+=======
+    const typeConfig = expandConfigRequest(this.predefinedConfig_[type]);
+    console.log('typeConfig is ', typeConfig);
+    if (typeConfig) {
+>>>>>>> wip
       // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport overwriting
       if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
         const TAG = this.getName_();
@@ -543,6 +600,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       if (children.length == 1) {
         const child = children[0];
         if (isJsonScriptTag(child)) {
+          console.log(children[0].textContent);
           inlineConfig = parseJson(children[0].textContent);
         } else {
           this.user().error(TAG, 'The analytics config should ' +
@@ -596,6 +654,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           'data will not be sent from this page.');
       return;
     }
+<<<<<<< HEAD
 
     if (this.config_['requests']) {
       for (const k in this.config_['requests']) {
@@ -631,6 +690,21 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
       this.requests_ = requests;
     }
+=======
+    for (const k in this.config_['requests']) {
+      if (hasOwn(this.config_['requests'], k)) {
+        if (!this.config_['requests'][k]['baseUrl']) {
+          //TODO: error
+          continue;
+        }
+        requests[k] = new RequestHandler(
+            this.win, this.config_['requests'][k], this.element, this.sendRequest_.bind(this),
+            this.isSandbox_);
+      }
+    }
+    this.requests_ = requests;
+    console.log('list of requests are ', this.requests_);
+>>>>>>> wip
   }
 
   /**
@@ -659,7 +733,12 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {!Object} event Object with details about the event.
    * @private
    */
+<<<<<<< HEAD
   handleRequestForEvent_(requestName, trigger, event) {
+=======
+  handleRequestForEvent_(request, trigger, event) {
+    console.log('handle request for event request is ', request);
+>>>>>>> wip
     if (!this.element.ownerDocument.defaultView) {
       const TAG = this.getName_();
       dev().warn(TAG, 'request against destroyed embed: ', trigger['on']);
@@ -688,6 +767,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!Object<string, (string|!Promise<string>|function(): string)>}
    * @private
    */
+<<<<<<< HEAD
   getDynamicVariableBindings_(trigger, expansionOptions) {
     const dynamicBindings = {};
     const resourceTimingSpec = trigger['resourceTimingSpec'];
@@ -726,6 +806,40 @@ export class AmpAnalytics extends AMP.BaseElement {
     request.send(
         this.config_['extraUrlParams'], trigger, expansionOptions,
         dynamicBindings);
+=======
+  expandAndSendRequest_(request, trigger, event) {
+    const expansionOptions = this.expansionOptions_(event, trigger);
+    this.config_['vars']['requestCount']++;
+    request.send(this.config_['extraUrlParams'], trigger, expansionOptions);
+    // TODO: Keep current requestCount, Add realRequestCount;
+
+    // return request.expandExtraUrlParams_(this.config_['extraUrlParams'],
+    //     trigger['extraUrlParams'], expansionOptions)//this.expandExtraUrlParams_(trigger, event)
+    //     .then(params => {
+    //       console.log('params are ', params);
+    //       request = this.addParamsToUrl_(requestUrl, params);
+    //       this.config_['vars']['requestCount']++;
+    //       const expansionOptions = this.expansionOptions_(event, trigger);
+    //       return this.variableService_
+    //           .expandTemplate(request, expansionOptions);
+    //     })
+    //     .then(request => {
+    //       const whiteList =
+    //           this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
+    //       // Since client id expansion is often async, preconnect
+    //       // to destination before expanding.
+    //       this.preconnect.url(request,
+    //           /* We are about to make a real request. */ true);
+    //       // For consistency with amp-pixel we also expand any url
+    //       // replacements.
+    //       return Services.urlReplacementsForDoc(this.element).expandAsync(
+    //           request, undefined, whiteList);
+    //     })
+    //     .then(request => {
+    //       this.sendRequest_(request, trigger);
+    //       return request;
+    //     });
+>>>>>>> wip
   }
 
   /**
@@ -815,6 +929,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
+<<<<<<< HEAD
    * Adds parameters to URL. Similar to the function defined in url.js but with
    * a different encoding method.
    * @param {string} request
@@ -843,21 +958,18 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
+=======
+>>>>>>> wip
    * @param {string} request The full request string to send.
-   * @param {!JsonObject} trigger
    * @private
    */
-  sendRequest_(request, trigger) {
+  sendRequest_(request) {
     if (!request) {
       const TAG = this.getName_();
       this.user().error(TAG, 'Request not sent. Contents empty.');
       return;
     }
-    if (trigger['iframePing']) {
-      user().assert(trigger['on'] == 'visible',
-          'iframePing is only available on page view requests.');
-      sendRequestUsingIframe(this.win, request);
-    } else if (this.config_['transport'] &&
+    if (this.config_['transport'] &&
         this.config_['transport']['iframe']) {
       user().assert(this.iframeTransport_,
           'iframe transport was inadvertently deleted');
