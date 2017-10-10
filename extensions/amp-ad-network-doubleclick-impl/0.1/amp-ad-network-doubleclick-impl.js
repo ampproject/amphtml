@@ -393,7 +393,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.win['dbclk_a4a_viz_change'] = true;
     addExperimentIdToElement(
         isExperimentOn(this.win, 'a4a-safeframe-preloading-off') ?
-        21061136 : 21061135);
+        '21061136' : '21061135', this.element);
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.onVisibilityChanged(() => {
       if (viewer.getVisibilityState() != VisibilityState.PAUSED ||
