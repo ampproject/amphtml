@@ -180,16 +180,18 @@ describe('impression', () => {
     viewer.getParam.withArgs('click').returns('https://www.example.com');
     sandbox.stub(viewer, 'sendMessageAwaitResponse').callsFake(message => {
       if (message == 'getReplaceUrl') {
-        return Promise.resolve('test_location?gclid=1234&foo=bar&example=123');
+        return Promise.resolve({
+          'replaceUrl':
+              'https://f.cdn.ampproject.org/v/s/f.com/?gclid=1234&amp_js_v=1',
+        });
       }
     });
     const prevHref = window.location.href;
     window.history.replaceState(null, '', prevHref + '?bar=foo&test=4321');
     maybeTrackImpression(window);
     return getTrackImpressionPromise().then(() => {
-      console.log(window.location.href);
       expect(window.location.href).to.equal('http://localhost:9876/context.html'
-          + '?bar=foo&test=4321&gclid=1234&foo=bar&example=123');
+          + '?bar=foo&test=4321&gclid=1234&amp_js_v=1');
       window.history.replaceState(null, '', prevHref);
     });
   });
@@ -199,7 +201,7 @@ describe('impression', () => {
     viewer.getParam.withArgs('click').returns('https://www.example.com');
     sandbox.stub(viewer, 'sendMessageAwaitResponse').callsFake(message => {
       if (message == 'getReplaceUrl') {
-        return Promise.resolve();
+        return Promise.resolve({'replaceUrl': undefined});
       }
     });
     const href = window.location.href;

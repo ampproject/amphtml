@@ -104,12 +104,15 @@ function trackImpressionFromClickParam(win, viewer, resolveImpression) {
   }
 
   viewer.whenFirstVisible().then(() => {
-    viewer.sendMessageAwaitResponse('getReplaceUrl').then(response => {
-      if (response) {
-        replaceUrl(win, response);
-      }
-      resolveImpression();
-    }, () => {});
+    viewer.sendMessageAwaitResponse('getReplaceUrl', undefined).then(
+        response => {
+          dev().assert(response && typeof response == 'object',
+              'getReplaceUrl expect JsonObject response');
+          if (response['replaceUrl']) {
+            replaceUrl(win, response['replaceUrl']);
+          }
+          resolveImpression();
+        }, () => {});
 
     // TODO(@zhouyx) need test with a real response.
     invoke(win, dev().assertString(clickUrl)).then(response => {
