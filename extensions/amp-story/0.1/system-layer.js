@@ -142,9 +142,7 @@ export class SystemLayer {
     this.leftButtonTray_ =
         this.root_.querySelector('.i-amphtml-story-ui-left');
 
-    if (getMode().development) {
-      this.buildForDevelopmentMode_();
-    }
+    this.buildForDevelopmentMode_();
 
     this.exitFullScreenBtn_ =
         this.root_.querySelector('.i-amphtml-story-exit-fullscreen');
@@ -167,6 +165,10 @@ export class SystemLayer {
    * @private
    */
   buildForDevelopmentMode_() {
+    if (!getMode().development) {
+      return;
+    }
+
     this.leftButtonTray_.appendChild(this.developerButtons_.build(
         this.developerLog_.toggle.bind(this.developerLog_)));
     this.root_.appendChild(this.developerLog_.build());
@@ -333,6 +335,10 @@ export class SystemLayer {
    * @param {string} contextString
    */
   setDeveloperLogContextString(contextString) {
+    if (!getMode().development) {
+      return;
+    }
+
     this.developerLog_.setContextString(contextString);
   }
 
@@ -344,6 +350,7 @@ export class SystemLayer {
     if (!getMode().development) {
       return;
     }
+
     this.developerLog_.toggle();
   }
 
@@ -351,6 +358,10 @@ export class SystemLayer {
    * Hides the developer log in the UI.
    */
   hideDeveloperLog() {
+    if (!getMode().development) {
+      return;
+    }
+
     this.developerLog_.hide();
   }
 }
