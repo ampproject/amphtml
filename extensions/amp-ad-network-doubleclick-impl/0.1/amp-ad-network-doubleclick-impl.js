@@ -50,6 +50,7 @@ import {
   getEnclosingContainerTypes,
   ValidAdContainerTypes,
   maybeAppendErrorParameter,
+  getIdentityToken,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -221,6 +222,8 @@ const BLOCK_SRA_COMBINERS_ = [
     });
     return Object.keys(eids).length ? {'eid': Object.keys(eids).join()} : null;
   },
+  instances => getFirstInstanceValue_(instances,
+      instance => instance.buildIdentityParams_()),
 ];
 
 /**
@@ -344,6 +347,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {?string} */
     this.fluidImpressionUrl_ = null;
+
+    /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
+    this.identityTokenPromise_ = null;
+
+    /** @type {?../../../ads/google/a4a/utils.IdentityToken} */
+    this.identityToken = null;
   }
 
   /** @override */
@@ -375,6 +384,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
+    this.identityTokenPromise_ = experimentFeatureEnabled(
+        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) ?
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+        .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
+        Promise.resolve(
+            /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
       addExperimentIdToElement(verifierEid, this.element);
@@ -562,12 +577,33 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
     const rtcRequestPromise = isExperimentOn(this.win, 'disable-rtc') ?
-    Promise.resolve({}) : this.executeRtc_();
-    return rtcRequestPromise.then(rtcResult => {
-      return googleAdUrl(
-          this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
-              this.getBlockParameters_(), rtcResult, PAGE_LEVEL_PARAMS_));
-    });
+      Promise.resolve({}) : this.executeRtc_();
+    const identityPromise = Services.timerFor(this.win)
+        .timeoutPromise(1000, this.identityTokenPromise_)
+        .catch(err => {
+          // On error/timeout, proceed.
+          return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({});
+        });
+    return Promise.all([rtcRequestPromise, identityPromise])
+        .then(results => {
+          this.identityToken = results[1];
+          return googleAdUrl(
+              this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
+                  this.getBlockParameters_(), results[0],
+                  this.buildIdentityParams_(), PAGE_LEVEL_PARAMS_));
+        });
+  }
+
+  /**
+   * @return {!Object<string,string>}
+   * @private
+   */
+  buildIdentityParams_() {
+    return this.identityToken ? {
+      adsid: this.identityToken.token || null,
+      jar: this.identityToken.jar || null,
+      pucrd: this.identityToken.pucrd || null,
+    } : {};
   }
 
   /** @override */
@@ -766,12 +802,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // Force size of frame to match creative or, if creative size is unknown,
     // the slot. This ensures that the creative is centered in the former case,
     // and not truncated in the latter.
-    // TODO(levitzky) Figure out the behavior of responsive + multi-size.
     const size = this.returnedSize_ || this.getSlotSize();
+    const isMultiSizeFluid = this.isFluid_ && this.returnedSize_ &&
+        // TODO(@glevitzky, 11583) Remove this clause once we stop sending back
+        // the size header for fluid ads. Fluid size headers always come back as
+        // 0x0.
+        !(size.width == 0 && size.height == 0);
     setStyles(dev().assertElement(this.iframe), {
       width: `${size.width}px`,
       height: `${size.height}px`,
+      position: isMultiSizeFluid ? 'relative' : null,
     });
+    if (isMultiSizeFluid) {
+      // This is a fluid + multi-size request, where the returned creative is
+      // multi-size. The slot needs to not be styled with width: 100%, or the
+      // creative will be centered instead of left-aligned.
+      this.element.removeAttribute('height');
+      setStyles(this.element, {width: `${size.width}px`});
+    }
   }
 
   /**
@@ -1348,3 +1396,4 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
+

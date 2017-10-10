@@ -22,7 +22,7 @@ import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {IframeTransport} from './iframe-transport';
-import {getParentWindowFrameElement} from '../../../src/service';
+import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {Services} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
@@ -166,9 +166,22 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
+  }
+
+  /** @override */
+  resumeCallback() {
+    if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      this.initIframeTransport_();
+    }
+  }
+
+  /** @override */
+  unlayoutCallback() {
     if (this.iframeTransport_) {
       this.iframeTransport_.detach();
+      this.iframeTransport_ = null;
     }
+    return super.unlayoutCallback();
   }
 
   /**
@@ -225,9 +238,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.instrumentation_.createAnalyticsGroup(this.element);
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
-      this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
-        this.element.getAttribute('type'),
-        this.config_['transport'], this.getAmpAdResourceId());
+      this.initIframeTransport_();
     }
 
     const promises = [];
@@ -287,23 +298,27 @@ export class AmpAnalytics extends AMP.BaseElement {
     return Promise.all(promises);
   }
 
- /**
-  * Gets the resource ID of the amp-ad element containing this AmpAnalytics
-  * instance.
-  * If there is no containing amp-ad tag, then an exception will be thrown,
-  * although that use case may be enabled in the future.
-  * TODO(jonkeller): Investigate whether non-A4A use case is needed. Issue 11436
-  * @return {string}
-  */
-  getAmpAdResourceId() {
-    try {
-      const frame = getParentWindowFrameElement(this.element, this.win.top);
-      return frame.parentElement.getResourceId();
-    } catch (e) {
-      this.user().error(TAG, 'No friendly parent amp-ad element was found' +
-          ' for amp-analytics tag.');
-      throw e;
+  /**
+   * amp-analytics will create an iframe for vendors in
+   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
+   * This is limited to MRC-accreddited vendors. The frame is removed if the
+   * user navigates/swipes away from the page, and is recreated if the user
+   * navigates back to the page.
+   * @private
+   */
+  initIframeTransport_() {
+    if (this.iframeTransport_) {
+      return;
     }
+    const TAG = this.getName_();
+    const ampAdResourceId = user().assertString(
+        getAmpAdResourceId(this.element, this.win.top),
+        `${TAG}: No friendly parent amp-ad element was found for ` +
+        'amp-analytics tag with iframe transport.');
+
+    this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
+        this.element.getAttribute('type'),
+        this.config_['transport'], ampAdResourceId);
   }
 
   /**
@@ -775,6 +790,8 @@ export class AmpAnalytics extends AMP.BaseElement {
       sendRequestUsingIframe(this.win, request);
     } else if (this.config_['transport'] &&
         this.config_['transport']['iframe']) {
+      user().assert(this.iframeTransport_,
+          'iframe transport was inadvertently deleted');
       this.iframeTransport_.sendRequest(request);
     } else {
       sendRequest(this.win, request, this.config_['transport'] || {});
