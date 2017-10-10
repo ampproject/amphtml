@@ -1,5 +1,5 @@
 {
-  "allow-doc-opt-in": ["visibility-v3", "amp-animation", "ampdoc-shell"],
+  "allow-doc-opt-in": ["visibility-v3", "amp-animation", "ampdoc-shell", "amp-ima-video"],
   "allow-url-opt-in": ["pump-early-frame"],
 
   "canary": 0,
