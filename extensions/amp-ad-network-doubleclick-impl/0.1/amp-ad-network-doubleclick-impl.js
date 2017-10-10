@@ -569,14 +569,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
-    return opt_rtcResponsesPromise.then(rtcResponseArray => {
-      const rtcParams = this.mergeRtcResponses_(rtcResponseArray);
-      this.identityToken = results[1];
-      return googleAdUrl(
+    const identityPromise = Services.timerFor(this.win)
+        .timeoutPromise(1000, this.identityTokenPromise_)
+        .catch(err => {
+          // On error/timeout, proceed.
+          return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({});
+        });
+    return Promise.all([opt_rtcResponsesPromise, identityPromise]).then(
+        results => {
+          const rtcParams = this.mergeRtcResponses_(results[0]);
+          this.identityToken = results[1];
+          return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                   this.getBlockParameters_(), rtcParams,
                   this.buildIdentityParams_(), PAGE_LEVEL_PARAMS_));
-    });
+        });
+  }
 
   /**
    * @return {!Object<string,string>}
@@ -1243,4 +1251,3 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
-
