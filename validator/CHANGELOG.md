@@ -30,6 +30,15 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 9:00 PM, October 10, 2017 UTC
+
+Validator version 253
+Rules version 493
+
+Includes:
+ - Amp-Story required extension
+ - amp-story-grid-layer template attribute is mandatory
+
 ### 8:00 PM, October 4, 2017 UTC
 
 Validator version 252
