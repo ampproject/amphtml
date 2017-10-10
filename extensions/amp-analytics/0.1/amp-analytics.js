@@ -166,7 +166,22 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
-    this.iframeTransport_ = null;
+  }
+
+  /** @override */
+  resumeCallback() {
+    if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      this.initIframeTransport_();
+    }
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframeTransport_) {
+      this.iframeTransport_.detach();
+      this.iframeTransport_ = null;
+    }
+    return super.unlayoutCallback();
   }
 
   /**
@@ -775,7 +790,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       sendRequestUsingIframe(this.win, request);
     } else if (this.config_['transport'] &&
         this.config_['transport']['iframe']) {
-      this.iframeTransport_ && this.iframeTransport_.sendRequest(request);
+      user().assert(this.iframeTransport_,
+          'iframe transport was inadvertently deleted');
+      this.iframeTransport_.sendRequest(request);
     } else {
       sendRequest(this.win, request, this.config_['transport'] || {});
     }
