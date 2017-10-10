@@ -36,11 +36,13 @@ export let BookendConfigDef;
  * @param {!./related-articles.RelatedArticleDef} articleData
  * @return {!DocumentFragment}
  */
-// TODO(alanorozco): link
-// TODO(alanorozco): reading time
-// TODO(alanorozco): domain name
 function buildArticle(doc, articleData) {
-  const root = doc.createElement('article');
+  const root = createElementWithAttributes(doc, 'a',
+      /** @type {!JsonObject} */({
+        class: 'i-amphtml-story-bookend-article',
+        href: articleData.url,
+      }));
+
   const fragment = doc.createDocumentFragment();
 
   if (articleData.image) {
@@ -72,7 +74,7 @@ function buildArticle(doc, articleData) {
         class: 'i-amphtml-story-bookend-article-meta',
       }));
 
-  metaContainer.textContent = 'example.com - 10 mins';
+  metaContainer.textContent = articleData.domainName;
 
   root.appendChild(title);
   root.appendChild(metaContainer);
@@ -250,7 +252,6 @@ export class Bookend {
    * @param {!./related-articles.RelatedArticleSetDef} articleSet
    * @return {!DocumentFragment}
    */
-  // TODO(alanorozco): typing and format
   buildArticleSet_(articleSet) {
     const fragment = this.win_.document.createDocumentFragment();
 
