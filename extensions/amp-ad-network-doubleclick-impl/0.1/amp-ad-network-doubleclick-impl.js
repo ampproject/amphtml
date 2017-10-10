@@ -353,7 +353,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
     this.identityTokenPromise_ = null;
 
-    /** @type {!../../../ads/google/a4a/utils.IdentityToken} */
+    /** @type {?../../../ads/google/a4a/utils.IdentityToken} */
     this.IdentityToken = null;
   }
 
