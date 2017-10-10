@@ -495,7 +495,7 @@ amp-social-share.i-amphtml-story-share-icon[type=email] {
   background-repeat: no-repeat;
   background-size: cover;
   height: 64px;
-  margin: 0 auto;
+  margin: 0 auto 16px;
   width: 64px;
 }
 

@@ -261,13 +261,14 @@ export class AmpStory extends AMP.BaseElement {
       const errorIconEl = this.win.document.createElement('div');
       errorIconEl.classList.add('i-amphtml-story-experiment-error-icon');
 
-      const errorMsgEl = this.win.document.createElement('p');
+      const errorMsgEl = this.win.document.createElement('span');
       errorMsgEl.textContent = 'You must enable the amp-story experiment to ' +
-          'view this content. Enable or disable your AMP experiments:';
+          'view this content.';
 
       const experimentsLinkEl = this.win.document.createElement('a');
       experimentsLinkEl.href = `${urls.cdn}/experiments.html`;
-      experimentsLinkEl.textContent = 'AMP Experiments Dashboard';
+      experimentsLinkEl.textContent = 'Enable or disable your experiments on ' +
+          'the experiments dashboard.';
 
       const errorEl = this.win.document.createElement('div');
       errorEl.classList.add('i-amphtml-story-experiment-error');
