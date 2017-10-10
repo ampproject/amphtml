@@ -62,6 +62,8 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   CANONICAL_HTTP_EXPERIMENT: '21061031',
   CACHE_EXTENSION_INJECTION_CONTROL: '21060955',
   CACHE_EXTENSION_INJECTION_EXP: '21060956',
+  UNCONDITIONED_FF_CONTROL: 'foo',
+  UNCONDITIONED_FF_EXPERIMENT: 'bar'
 };
 
 /** @const @type {!Object<string,?string>} */
@@ -118,6 +120,18 @@ export class DoubleclickA4aEligibility {
     return googleCdnProxyRegex.test(win.location.origin);
   }
 
+  /**
+   * Attempts to select into Fast Fetch
+   */
+  unconditionedSelection_() {
+    const experimentId = this.maybeSelectExperiment(win, element, [
+      DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
+    ], DFP_CANONICAL_FF_EXPERIMENT_NAME)
+    addExperimentIdToElement(experimentId, element);
+      forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
+  }
+
   /** Whether Fast Fetch is enabled
    * @param {!Window} win
    * @param {!Element} element
@@ -125,6 +139,9 @@ export class DoubleclickA4aEligibility {
    * @return {boolean}
    */
   isA4aEnabled(win, element, useRemoteHtml) {
+    if (this.unconditionedSelection_()) {
+      return true;
+    }
     let experimentId;
     if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
         element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
@@ -212,6 +229,7 @@ const singleton = new DoubleclickA4aEligibility();
 /**
  * @param {!Window} win
  * @param {!Element} element
+ * @param {!boolean} useRemoteHtml
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element, useRemoteHtml) {
