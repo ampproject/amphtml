@@ -153,7 +153,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         const slotStyleString = multiSizeImpl.element.getAttribute('style');
         expect(slotStyleString).to.match(/width: 250px/);
         expect(iframeStyleString).to.match(/position: relative/);
-        expect(multiSizeImpl.element.getAttribute('height')).to.equal.('');
+        expect(multiSizeImpl.element.getAttribute('height')).to.be.null;
       });
     });
   });

@@ -781,7 +781,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // This is a fluid + multi-size request, where the returned creative is
       // multi-size. The slot needs to not be styled with width: 100%, or the
       // creative will be centered instead of left-aligned.
-      this.element.setAttribute('height', '');
+      this.element.removeAttribute('height');
       setStyles(this.element, {width: `${size.width}px`});
     }
   }
