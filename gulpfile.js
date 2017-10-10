@@ -23,6 +23,8 @@ var buffer = require('vinyl-buffer');
 var closureCompile = require('./build-system/tasks/compile').closureCompile;
 var cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
 var jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
+var applyConfig = require('./build-system/tasks/prepend-global/index.js').applyConfig;
+var removeConfig = require('./build-system/tasks/prepend-global/index.js').removeConfig;
 var fs = require('fs-extra');
 var gulp = $$.help(require('gulp'));
 var lazypipe = require('lazypipe');
@@ -559,27 +561,35 @@ function buildExtensionJs(path, name, version, options) {
 }
 
 /**
- * Writes the prod AMP config to file if argv.fortesting is true.
+ * Enables runtime to be used for local testing. Called when fortesting is true.
  */
-function writeAmpConfig() {
-  if (argv.fortesting) {
-    var AMP_CONFIG = {
-      localDev: true,
-    };
-    var TESTING_HOST = process.env.AMP_TESTING_HOST;
+function enableLocalTesting() {
+  let config = (argv.config === 'canary') ? 'canary' : 'prod';
+  let configFile = 'build-system/global-configs/' + config + '-config.json';
+  let targetFile = 'dist/v0.js';
+
+  return Promise.resolve().then(() => {
+    return removeConfig(targetFile);
+  }).then(() => {
+    return applyConfig(config, targetFile, configFile);
+  }).then(() => {
+    let AMP_CONFIG = {localDev: true};
+    let herokuConfigFile = 'node_modules/AMP_CONFIG.json';
+    let TESTING_HOST = process.env.AMP_TESTING_HOST;
     if (typeof TESTING_HOST == 'string') {
       AMP_CONFIG = Object.assign(AMP_CONFIG, {
         thirdPartyFrameHost: TESTING_HOST,
         thirdPartyFrameRegex: TESTING_HOST,
       });
     }
-    AMP_CONFIG = Object.assign(AMP_CONFIG, JSON.parse(fs.readFileSync(
-        'build-system/global-configs/prod-config.json').toString()));
-    $$.util.log($$.util.colors.green('trying to write AMP_CONFIG.'));
-    fs.writeFileSync('node_modules/AMP_CONFIG.json',
-        JSON.stringify(AMP_CONFIG));
-    $$.util.log($$.util.colors.green('AMP_CONFIG written successfully.'));
-  }
+    AMP_CONFIG = Object.assign(
+        AMP_CONFIG, JSON.parse(fs.readFileSync(configFile).toString()));
+    fs.writeFileSync(herokuConfigFile, JSON.stringify(AMP_CONFIG));
+    if (!process.env.TRAVIS) {
+      $$.util.log('Wrote', $$.util.colors.cyan(config), 'AMP config to',
+          $$.util.colors.cyan(herokuConfigFile), 'for use with Heroku');
+    }
+  });
 }
 
 /**
@@ -588,7 +598,6 @@ function writeAmpConfig() {
  */
 function build() {
   process.env.NODE_ENV = 'development';
-  writeAmpConfig();
   return compileCss().then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -608,8 +617,20 @@ function build() {
  */
 function dist() {
   process.env.NODE_ENV = 'production';
-  writeAmpConfig();
   cleanupBuildDir();
+  if (argv.fortesting) {
+    $$.util.log(
+        $$.util.colors.green('Building the runtime for local testing with the'),
+        $$.util.colors.cyan((argv.config === 'canary') ? 'canary' : 'prod'),
+        $$.util.colors.green('AMP config'));
+    $$.util.log(
+        $$.util.colors.green('You can specify which config to use by passing'),
+        $$.util.colors.cyan('--config=canary'),
+        $$.util.colors.green('or'),
+        $$.util.colors.cyan('--config=prod'),
+        $$.util.colors.green('to'),
+        $$.util.colors.cyan('gulp dist --fortesting'));
+  }
   return compileCss().then(() => {
     return Promise.all([
       compile(false, true, true),
@@ -628,6 +649,10 @@ function dist() {
     ]);
   }).then(() => {
     copyAliasExtensions();
+  }).then(() => {
+    if (argv.fortesting) {
+      return enableLocalTesting();
+    }
   });
 }
 
@@ -1263,7 +1288,8 @@ gulp.task('dist', 'Build production binaries', dist, {
   options: {
     pseudo_names: 'Compiles with readable names. ' +
         'Great for profiling and debugging production code.',
-    fortesting: 'Compiles with `getMode().test` set to true',
+    fortesting: 'Compiles production binaries for local testing',
+    config: 'Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary" (used with "fortesting", defaults to "prod")',
     minimal_set: 'Only compile files needed to load article.amp.html',
   }
 });
