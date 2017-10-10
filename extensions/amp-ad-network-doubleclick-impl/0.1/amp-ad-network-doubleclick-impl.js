@@ -392,7 +392,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     this.win['dbclk_a4a_viz_change'] = true;
     addExperimentIdToElement(
-        isExperimentOn('a4a-safeframe-preloading-off') ? 21061136 : 21061135);
+        isExperimentOn(this.win, 'a4a-safeframe-preloading-off') ?
+        21061136 : 21061135);
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.onVisibilityChanged(() => {
       if (viewer.getVisibilityState() != VisibilityState.PAUSED ||
@@ -1154,7 +1155,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   getPreconnectUrls() {
     const urls = ['https://partner.googleadservices.com'];
-    if (!isExperimentOn('a4a-safeframe-preloading-off')) {
+    if (!isExperimentOn(this.win, 'a4a-safeframe-preloading-off')) {
       urls.push(SAFEFRAME_ORIGIN);
     }
     return urls;
