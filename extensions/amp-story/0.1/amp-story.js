@@ -63,15 +63,12 @@ import {urls} from '../../../src/config';
 const NEXT_SCREEN_AREA_RATIO = 0.75;
 
 /** @private @const {string} */
-<<<<<<< HEAD
-=======
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
 
 /** @private @const {string} */
 const RELATED_ARTICLES_ATTRIBUTE_NAME = 'related-articles';
 
 /** @private @const {string} */
->>>>>>> Initial amphtml pass at amp-story desktop view
 const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
 
 /** @private @const {string} */
@@ -266,7 +263,6 @@ export class AmpStory extends AMP.BaseElement {
     this.onResize();
   }
 
-<<<<<<< HEAD
   /** @private */
   initializeListenersForDev_() {
     if (!getMode().development) {
@@ -278,7 +274,7 @@ export class AmpStory extends AMP.BaseElement {
     });
   }
 
-=======
+  /** @private */
   buildButtons_() {
     const doc = this.element.ownerDocument;
     const nextButton = doc.createElement('button');
@@ -297,6 +293,7 @@ export class AmpStory extends AMP.BaseElement {
     this.prevButton_ = previousButton;
   }
 
+  /** @private */
   buildTopBar_() {
     const doc = this.element.ownerDocument;
     this.topBar_ = doc.createElement('div');
@@ -317,7 +314,6 @@ export class AmpStory extends AMP.BaseElement {
     this.topBar_.appendChild(share);
     this.element.insertBefore(this.topBar_, this.element.firstChild);
   }
->>>>>>> Initial amphtml pass at amp-story desktop view
 
   /** @override */
   layoutCallback() {

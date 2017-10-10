@@ -327,3 +327,19 @@ amp-story-page.i-amphtml-story-page-shown {
 .i-amphtml-story-share .i-amphtml-story-share-name {
   display: none;
 }
+
+/* system layer changes */
+[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-mute-audio-control,
+[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-unmute-audio-control {
+  display: none;
+}
+
+.i-amphtml-story-ui-left {
+  display: none;
+}
+
+[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-left {
+  display: block;
+  float: left;
+  margin: 0 8px;
+}
