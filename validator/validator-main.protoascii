@@ -25,7 +25,7 @@ min_validator_revision_required: 246
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 493
+spec_file_revision: 500
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -336,6 +336,7 @@ tags: {
       properties: { name: "maximum-scale" }
       properties: { name: "shrink-to-fit" }
       properties: { name: "user-scalable" }
+      properties: { name: "viewport-fit" }
     }
   }
   attrs: {
@@ -961,9 +962,44 @@ tags: {
   # We'll need the cdata in the future and will get rid of this.
   # But for now we require an empty tag.
   cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
+    max_bytes: 200000
+    # TODO(chenshay): This should be an ampproject url that explains the
+    # situation more fully.
+    max_bytes_spec_url: "https://github.com/ampproject/amphtml/issues/9625"
+    css_spec: {
+      at_rule_spec: {
+        name: 'keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'media'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'supports'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-moz-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-o-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-webkit-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '$DEFAULT'  # matches if none of the above match
+        type: PARSE_AS_ERROR
+      }
+      validate_keyframes: true
+      allowed_declarations: "offset-distance"
+      allowed_declarations: "opacity"
+      allowed_declarations: "transform"
+      allowed_declarations: "visibility"
     }
   }
 }
@@ -3810,6 +3846,22 @@ error_specificity { code: DOCUMENT_TOO_COMPLEX specificity: 105 }
 error_specificity { code: INCORRECT_MIN_NUM_CHILD_TAGS specificity: 106 }
 error_specificity { code: TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS specificity: 107 }
 error_specificity { code: MANDATORY_LAST_CHILD_TAG specificity: 108 }
+error_specificity {
+  code: CSS_SYNTAX_INVALID_PROPERTY
+  specificity: 109
+}
+error_specificity {
+  code: CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS
+  specificity: 110
+}
+error_specificity {
+  code: CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME
+  specificity: 111
+}
+error_specificity {
+  code: CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME
+  specificity: 112
+}
 # Error formats
 error_formats {
   code: UNKNOWN_CODE
@@ -4120,6 +4172,26 @@ error_formats {
   code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE
   format: "CSS syntax error in tag '%1' - end of stylesheet encountered "
           "in prelude of a qualified rule."
+}
+error_formats {
+  code: CSS_SYNTAX_INVALID_PROPERTY
+  format: "CSS syntax error in tag '%1' - invalid property '%2'. The only "
+          "allowed properties are '%3'."
+}
+error_formats {
+  code: CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS
+  format: "CSS syntax error in tag '%1' - qualified rule '%2' has no "
+          "declarations."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME
+  format: "CSS syntax error in tag '%1' - qualified rule '%2' must be located "
+          "inside of a keyframe."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME
+  format: "CSS syntax error in tag '%1' - keyframe inside keyframe is not "
+          "allowed."
 }
 error_formats {
   code: CSS_SYNTAX_INVALID_DECLARATION
