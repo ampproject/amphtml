@@ -188,7 +188,11 @@ function sendRtcCallout_(
             });
           })).catch(error => {
             return buildErrorResponse_(
-                error.message.match(/timeout/) ?
+                // The relevant error message for timeout looks like it is
+                // just 'message' but is in fact 'messageXXX' where the
+                // X's are hidden special characters. That's why we use
+                // match here.
+                (error.message && error.message.match(/^timeout/)) ?
                   RTC_ERROR_ENUM.TIMEOUT : RTC_ERROR_ENUM.NETWORK_FAILURE,
                 callout, Date.now() - rtcStartTime);
           });

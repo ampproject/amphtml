@@ -57,7 +57,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
   function setFetchJsonStubBehavior(params, response, isString, shouldFail) {
     if (shouldFail) {
-      fetchJsonStub.withArgs(params).returns(Promise.reject());
+      fetchJsonStub.withArgs(params).returns(Promise.reject('FAIL'));
     } else {
       const textFunction = () => {
         return !isString ? Promise.resolve(JSON.stringify(response)) :
