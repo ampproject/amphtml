@@ -19,7 +19,7 @@
  *
  * Example:
  * <code>
- * <amp-story related-articles="related.json">
+ * <amp-story standalone bookend-config-src="bookend.json">
  *   [...]
  * </amp-story>
  * </code>
@@ -58,9 +58,6 @@ import {urls} from '../../../src/config';
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;
-
-/** @private @const {string} */
-const RELATED_ARTICLES_ATTRIBUTE_NAME = 'related-articles';
 
 /** @private @const {string} */
 const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
@@ -652,40 +649,15 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   loadBookendConfigImpl_() {
-    // two-tiered implementation for backwards-compatibility with
-    // related-articles attribute
-    return this.loadBookendConfigInternal_()
-        .then(bookendConfig =>
-              bookendConfig || this.loadRelatedArticlesAsBookendConfig_())
-        .catch(e => {
-          user().error(TAG, 'Error fetching bookend configuration', e.message);
-          return null;
-        });
-  }
-
-
-  /**
-   * @return {!Promise<?./bookend.BookendConfigDef>}
-   * @private
-   */
-  loadBookendConfigInternal_() {
     return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME)
         .then(response => response && {
           shareProviders: response['share-providers'],
           relatedArticles: response['related-articles'] ?
               relatedArticlesFromJson(response['related-articles']) : [],
-        });
-  }
-
-
-  /**
-   * @return {!Promise<?./bookend.BookendConfigDef>}
-   * @private
-   */
-  loadRelatedArticlesAsBookendConfig_() {
-    return this.loadJsonFromAttribute_(RELATED_ARTICLES_ATTRIBUTE_NAME)
-        .then(response => response && {
-          relatedArticles: relatedArticlesFromJson(response),
+        })
+        .catch(e => {
+          user().error(TAG, 'Error fetching bookend configuration', e.message);
+          return null;
         });
   }
 

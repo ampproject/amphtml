@@ -30,26 +30,18 @@ amp-story {
 }
 
 html.i-amphtml-story-standalone,
-html[amp-story],
-html[📖],
-html.i-amphtml-story-standalone body,
-html[amp-story] body,
-html[📖] body {
+html.i-amphtml-story-standalone body {
   height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
   width: 100% !important;
 }
 
-html.i-amphtml-story-standalone body,
-html[amp-story] body,
-html[📖] body  {
+html.i-amphtml-story-standalone body {
   display: grid !important;
 }
 
-amp-story[standalone],
-html[amp-story] body > amp-story,
-html[📖] body > amp-story {
+amp-story[standalone] {
   align-self: center;
   box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.5);
   height: 100% !important;
@@ -58,33 +50,25 @@ html[📖] body > amp-story {
   max-width: 414px;
 }
 
-amp-story[standalone]:-webkit-full-screen,
-html[amp-story] body > amp-story:-webkit-full-screen,
-html[📖] body > amp-story:-webkit-full-screen {
+amp-story[standalone]:-webkit-full-screen {
   height: 100vh !important;
   max-height: none;
   max-width: none;
 }
 
-amp-story[standalone]:-moz-full-screen,
-html[amp-story] body > amp-story:-moz-full-screen,
-html[📖] body > amp-story:-moz-full-screen {
+amp-story[standalone]:-moz-full-screen {
   height: 100vh !important;
   max-height: none;
   max-width: none;
 }
 
-amp-story[standalone]:-ms-fullscreen,
-html[amp-story] body > amp-story:-ms-fullscreen,
-html[📖] body > amp-story:-ms-fullscreen {
+amp-story[standalone]:-ms-fullscreen {
   height: 100vh !important;
   max-height: none;
   max-width: none;
 }
 
-amp-story[standalone]:fullscreen,
-html[amp-story] body > amp-story:fullscreen,
-html[📖] body > amp-story:fullscreen {
+amp-story[standalone]:fullscreen {
   height: 100vh !important;
   max-height: none;
   max-width: none;

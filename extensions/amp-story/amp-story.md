@@ -143,7 +143,7 @@ The `amp-story` component represents an entire story.  The component itself  imp
 ### Example 
 
 ```html
-<amp-story standalone related-articles="./related.json" background-audio="my.mp3">
+<amp-story standalone bookend-config-src="./related.json" background-audio="my.mp3">
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
@@ -156,9 +156,9 @@ The `amp-story` component represents an entire story.  The component itself  imp
 
 Identifies that the AMP document is a story.
 
-##### related-articles [optional]
+##### bookend-config-src [optional]
 
-A URL endpoint that accepts GET requests and returns a JSON response with links to related and trending stories, to be shown on a screen at the end of the story.  If omitted, the amp-story component renders a default UI for the end screen.  See the [related-articles endpoint](#related-articles-json-endpoint) section below for the JSON response format.
+A URL endpoint that accepts GET requests and returns a JSON response with links to related and trending stories, to be shown on a screen at the end of the story.  If omitted, the amp-story component renders a default UI for the end screen.  See the [bookend endpoint](#bookend-json-endpoint) section below for the JSON response format.
 
 ##### background-audio [optional]
 
@@ -168,9 +168,9 @@ A URI to an audio file that plays throughout the story.
 
 The `<amp-story>` component contains one or more [`<amp-story-page>`](#pages:-amp-story-page) components, containing each of the individual screens of the story.  The first page specified in the document order is the first page shown in the story.
 
-### Related articles JSON endpoint
+### Bookend JSON endpoint
 
-The `related-articles` value is a URL endpoint that returns data for the end screen of the story, containing related links, etc.  The system is responsible for fetching the data necessary to render related and trending articles.  This can be served from a static JSON file, or dynamically-generated (e.g., to calculate what is currently trending).
+The `bookend-config-src` value is a URL endpoint that returns data for the end screen of the story, containing related links, etc.  The system is responsible for fetching the data necessary to render related and trending articles.  This can be served from a static JSON file, or dynamically-generated (e.g., to calculate what is currently trending).
 
 <figure class="centered-fig">
   <amp-anim alt="related article example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/related-articles.gif">
