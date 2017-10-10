@@ -53,6 +53,7 @@ import {AudioManager, upgradeBackgroundAudio} from './audio';
 import {setStyle, setStyles} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
+import {urls} from '../../../src/config';
 
 
 /** @private @const {number} */
@@ -133,7 +134,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG), 'enable amp-story experiment');
+    this.assertAmpStoryExperiment_();
 
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
       this.getAmpDoc().win.document.documentElement.classList
@@ -255,6 +256,33 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   prerenderAllowed() {
     return true;
+  }
+
+
+  /** @private */
+  assertAmpStoryExperiment_() {
+    if (!isExperimentOn(this.win, TAG)) {
+      const errorIconEl = this.win.document.createElement('div');
+      errorIconEl.classList.add('i-amphtml-story-experiment-error-icon');
+
+      const errorMsgEl = this.win.document.createElement('span');
+      errorMsgEl.textContent = 'You must enable the amp-story experiment to ' +
+          'view this content.';
+
+      const experimentsLinkEl = this.win.document.createElement('a');
+      experimentsLinkEl.href = `${urls.cdn}/experiments.html`;
+      experimentsLinkEl.textContent = 'Enable or disable your experiments on ' +
+          'the experiments dashboard.';
+
+      const errorEl = this.win.document.createElement('div');
+      errorEl.classList.add('i-amphtml-story-experiment-error');
+      errorEl.appendChild(errorIconEl);
+      errorEl.appendChild(errorMsgEl);
+      errorEl.appendChild(experimentsLinkEl);
+      this.element.appendChild(errorEl);
+
+      user().error(TAG, 'enable amp-story experiment');
+    }
   }
 
 
