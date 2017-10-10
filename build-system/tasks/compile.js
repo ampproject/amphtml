@@ -24,6 +24,7 @@ const replace = require('gulp-replace');
 const util = require('gulp-util');
 const internalRuntimeVersion = require('../internal-version').VERSION;
 const internalRuntimeToken = require('../internal-version').TOKEN;
+const shortenLicense = require('../shorten-license');
 const rimraf = require('rimraf');
 
 const isProdBuild = !!argv.type;
@@ -343,6 +344,7 @@ function compile(entryModuleFilenames, outputDir,
         .pipe(rename(outputFilename))
         .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
         .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
+        .pipe(shortenLicense())
         .pipe(gulp.dest(outputDir))
         .on('end', function() {
           gulp.src(intermediateFilename + '.map')
