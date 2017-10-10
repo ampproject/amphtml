@@ -41,6 +41,10 @@ export const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 /** @const {string} */
 export const DFP_CANONICAL_FF_EXPERIMENT_NAME = 'expDfpCanonicalFf';
 
+/** @const {string} */
+export const DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME =
+    'expUnconditionedDoubleclick';
+
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
 
@@ -60,8 +64,8 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   CACHE_EXTENSION_INJECTION_EXP: '21060956',
   IDENTITY_CONTROL: '21060937',
   IDENTITY_EXPERIMENT: '21060938',
-  UNCONDITIONED_FF_CONTROL: 'foo',
-  UNCONDITIONED_FF_EXPERIMENT: 'bar'
+  UNCONDITIONED_FF_CONTROL: '21061145',
+  UNCONDITIONED_FF_EXPERIMENT: '21061146',
 };
 
 /** @const @type {!Object<string,?string>} */
@@ -120,14 +124,22 @@ export class DoubleclickA4aEligibility {
 
   /**
    * Attempts to select into Fast Fetch
+   * @param {!Window} win
+   * @param {!Element} element
+   * @private
+   * @return {?string}
    */
-  unconditionedSelection_() {
+  unconditionedSelection_(win, element) {
     const experimentId = this.maybeSelectExperiment(win, element, [
-      DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
-      DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
-    ], DFP_CANONICAL_FF_EXPERIMENT_NAME)
-    addExperimentIdToElement(experimentId, element);
-      forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
+      DOUBLECLICK_EXPERIMENT_FEATURE.UNCONDITIONED_FF_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.UNCONDITIONED_FF_EXPERIMENT,
+    ], DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME);
+    if (experimentId) {
+      addExperimentIdToElement(experimentId, element);
+      forceExperimentBranch(
+          win, DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME, experimentId);
+    }
+    return experimentId;
   }
 
   /** Whether Fast Fetch is enabled
@@ -137,10 +149,11 @@ export class DoubleclickA4aEligibility {
    * @return {boolean}
    */
   isA4aEnabled(win, element, useRemoteHtml) {
-    if (this.unconditionedSelection_()) {
-      return true;
+    let experimentId = this.unconditionedSelection_(win, element);
+    if (experimentId != null) {
+      return experimentId ==
+          DOUBLECLICK_EXPERIMENT_FEATURE.UNCONDITIONED_FF_EXPERIMENT;
     }
-    let experimentId;
     if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
         element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
       return false;
@@ -199,7 +212,7 @@ export class DoubleclickA4aEligibility {
    * @param {!Array<string>} selectionBranches
    * @param {!string} experimentName}
    * @return {?string} Experiment branch ID or null if not selected.
-   * @visibileForTesting
+   * @visibleForTesting
    */
   maybeSelectExperiment(win, element, selectionBranches, experimentName) {
     const experimentInfoMap =
