@@ -16,6 +16,7 @@
 
 import {dev} from './log';
 import {computedStyle} from './style';
+import {getParentWindowFrameElement} from './service';
 
 const AD_CONTAINER_PROP = '__AMP__AD_CONTAINER';
 
@@ -91,3 +92,25 @@ export function getAdContainer(element) {
   }
   return element[AD_CONTAINER_PROP];
 }
+
+/**
+ * Gets the resource ID of the amp-ad element containing the passed node.
+ * If there is no containing amp-ad tag, then null will be returned.
+ * TODO(jonkeller): Investigate whether non-A4A use case is needed. Issue 11436
+ * @return {?string}
+ */
+export function getAmpAdResourceId(node, topWin) {
+  try {
+    const frameParent = getParentWindowFrameElement(node, topWin).parentElement;
+    if (frameParent.nodeName == 'AMP-AD') {
+      return String(frameParent.getResourceId());
+    }
+  } catch (e) {
+  }
+  // Whether we entered the catch above (e.g. due to attempt to access
+  // across xdomain boundary), or failed to enter the if further above, the
+  // node is not within a friendly amp-ad tag. So, there is no amp-ad
+  // resource ID. How to handle that is up to the caller, but see TODO above.
+  return null;
+}
+
