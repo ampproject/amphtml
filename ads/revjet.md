@@ -40,4 +40,3 @@ Optional parameters:
 - `data-plc`
 - `data-opts`
 - `data-params`
-
