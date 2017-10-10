@@ -170,6 +170,22 @@ describe('Viewer', () => {
     expect(viewer.getLastVisibleTime()).to.equal(0);
   });
 
+  it('should return promise that resolve on visible', function* () {
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.isVisible()).to.be.true;
+    let promise = viewer.whenNextVisible();
+    yield promise;
+    viewer.receiveMessage('visibilitychange', {
+      state: 'hidden',
+    });
+    promise = viewer.whenNextVisible();
+    expect(viewer.isVisible()).to.be.false;
+    viewer.receiveMessage('visibilitychange', {
+      state: 'visible',
+    });
+    return promise;
+  });
+
   it('should initialize firstVisibleTime for initially visible doc', () => {
     clock.tick(1);
     const viewer = new Viewer(ampdoc);
