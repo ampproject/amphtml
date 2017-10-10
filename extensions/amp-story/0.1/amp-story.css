@@ -505,3 +505,35 @@ amp-story-grid-layer * {
   font-size: 10px;
   padding: 8px 0 0;
 }
+
+/** Experiment disabled  */
+.i-amphtml-story-experiment-error {
+  align-content: center;
+  background-color: #222 !important;
+  bottom: 0 !important;
+  color: #f0f0f0 !important;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 20px;
+  justify-content: center;
+  left: 0 !important;
+  padding: 32px;
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  z-index: 999999;
+}
+
+.i-amphtml-story-experiment-error-icon {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>');
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 64px;
+  margin: 0 auto 16px;
+  width: 64px;
+}
+
+.i-amphtml-story-experiment-error a {
+  color: #f0f0f0 !important;
+}
