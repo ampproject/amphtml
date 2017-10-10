@@ -92,6 +92,8 @@ import {
 import {
   addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
+import '../../amp-a4a/0.1/real-time-config-manager';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -99,16 +101,6 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
-
-/** milliseconds */
-/** @const {number} */
-const RTC_TIMEOUT = 1000;
-
-/** @private {?Promise<?Object>} */
-let rtcPromise = null;
-
-/** @private {?JsonObject|undefined} */
-let rtcConfig = null;
 
 /** @private @enum {number} */
 const RTC_ATI_ENUM = {
@@ -567,11 +559,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl() {
+  getAdUrl(opt_rtcResponsesPromise) {
     if (this.iframe && !this.isRefreshing) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
       return '';
     }
+    opt_rtcResponsesPromise = opt_rtcResponsesPromise || Promise.resolve();
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
     // fallback to non-SRA if single block.
@@ -579,20 +572,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
-    const rtcRequestPromise = isExperimentOn(this.win, 'disable-rtc') ?
-      Promise.resolve({}) : this.executeRtc_();
     const identityPromise = Services.timerFor(this.win)
         .timeoutPromise(1000, this.identityTokenPromise_)
         .catch(err => {
           // On error/timeout, proceed.
           return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({});
         });
-    return Promise.all([rtcRequestPromise, identityPromise])
-        .then(results => {
+    return Promise.all([opt_rtcResponsesPromise, identityPromise]).then(
+        results => {
+          const rtcParams = this.mergeRtcResponses_(results[0]);
           this.identityToken = results[1];
           return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
-                  this.getBlockParameters_(), results[0],
+                  this.getBlockParameters_(), rtcParams,
                   this.buildIdentityParams_(), PAGE_LEVEL_PARAMS_));
         });
   }
@@ -608,6 +600,46 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       pucrd: this.identityToken.pucrd || null,
     } : {};
   }
+
+  /**
+   * Merges all of the rtcResponses into the JSON targeting and
+   * category exclusions.
+   * @param {?Array<!rtcResponseDef>} rtcResponseArray
+   * @private
+   */
+  mergeRtcResponses_(rtcResponseArray) {
+    if (!rtcResponseArray) {
+      return null;
+    }
+    const artc = [];
+    const ati = [];
+    const ard = [];
+    rtcResponseArray.forEach(rtcResponse => {
+      // Only want to send errors for requests we actually sent.
+      if (rtcResponse.error &&
+          rtcResponse.error != RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE &&
+          rtcResponse.error != RTC_ERROR_ENUM.NETWORK_FAILURE &&
+          rtcResponse.error != RTC_ERROR_ENUM.TIMEOUT) {
+        return;
+      }
+      artc.push(rtcResponse.rtcTime);
+      ati.push(!rtcResponse.error ? RTC_ATI_ENUM.RTC_SUCCESS :
+               RTC_ATI_ENUM.RTC_FAILURE);
+      ard.push(rtcResponse.callout);
+      if (rtcResponse.response) {
+        ['targeting', 'categoryExclusions'].forEach(key => {
+          if (rtcResponse.response[key]) {
+            this.jsonTargeting_[key] =
+                !!this.jsonTargeting_[key] ?
+                deepMerge(this.jsonTargeting_[key], rtcResponse.response[key]) :
+                rtcResponse.response[key];
+          }
+        });
+      }
+    });
+    return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
+  }
+
 
   /** @override */
   onNetworkFailure(error, adUrl) {
@@ -858,166 +890,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.attemptChangeSize(height, width).catch(() => {});
     }
   }
-
-  /**
-   * Sends RTC request as specified by rtcConfig. Returns promise which
-   * resolves to the time that the RTC callout took to complete.
-   * If disableStalewhilerevalidate == true, then we will only
-   * send one RTC request per page. If it's !== true, then we always
-   * send two requests. The first will try
-   * to hit browser cache, and the second request will always bypass.
-   * This is a way for us to implement a simple stale-while-revalidate
-   * model.
-   * The targeting info from the RTC updates the targeting info on
-   * this object within mergeRtc.
-   * @param {Document=} opt_doc Optional document for testing.
-   * @return {!Promise<?Object>} An object of parameters to add to
-   *   the ad request url.
-   * @private
-   */
-  executeRtc_(opt_doc) {
-    const doc = opt_doc || this.element.ownerDocument;
-    if (rtcPromise) {
-      return this.mergeRtc();
-    }
-    const ampRtcPageElement = doc.getElementById('amp-rtc');
-    if (!ampRtcPageElement) {
-      return Promise.resolve();
-    }
-    let endpoint;
-    rtcConfig = tryParseJson(ampRtcPageElement.textContent);
-    if (!isObject(rtcConfig) || !(endpoint = rtcConfig['endpoint']) ||
-        typeof endpoint != 'string' || !isSecureUrl(endpoint)) {
-      user().warn(TAG, 'Sending ad request without RTC callout,' +
-          `invalid RTC config: ${ampRtcPageElement.textContent}`);
-      return Promise.resolve();
-    }
-    let rtcTotalTime;
-    const startTime = Date.now();
-    // Because we are wrapping the RTC request in the timeout,
-    // we are guaranteeing that if the RTC is slow to return and
-    // times out for the first slot, it won't be used for any
-    // other slots either. This is in opposition to the other way
-    // we could potentially do it, in which we only still make one
-    // rtc callout, but there is a 1 second timeout from the
-    // perspective of each slot. I.e. if the top slot on the page
-    // calls out for the RTC, which returns after 5 seconds, and
-    // then a slot way down on the page asks for it later.
-    rtcPromise = Services.timerFor(window).timeoutPromise(
-        RTC_TIMEOUT,
-        Services.xhrFor(this.win).fetchJson(
-            endpoint, {credentials: 'include'}).then(res => {
-              rtcTotalTime = Date.now() - startTime;
-              /*
-              *  disableSWR should be set to true if the endpoint is not
-              *  returning cache headers.
-              */
-              verifyRtcConfigMember('disableStaleWhileRevalidate', 'boolean');
-              if (rtcConfig['disableStaleWhileRevalidate'] !== true) {
-                const headers = new Headers();
-                headers.append('Cache-Control', 'max-age=0');
-                // Repopulate the cache.
-                Services.xhrFor(this.win).fetchJson(endpoint, {
-                  credentials: 'include',
-                  headers,
-                }).catch(err => {
-                  this.user().error(TAG, err.message);
-                });
-              }
-              // Non-200 status codes are forbidden for RTC.
-              // TODO: Add to fetchResponse the ability to
-              // check for redirects as well.
-              if (res.status != 200) {
-                return {rtcTotalTime};
-              }
-              return res.text().then(text => {
-                // An empty text response is fine, just means
-                // we have nothing to merge.
-                if (!text) {
-                  return {rtcTotalTime, success: true};
-                }
-                const rtcResponse = tryParseJson(text);
-                return {rtcResponse, rtcTotalTime};
-              });
-            }));
-
-    return this.mergeRtc();
-  }
-
-  /**
-   * Merges the RTC response into the jsonTargeting of this.
-   * If it can't merge, or there is no response, potentially
-   * rejects.
-   * @return {!Promise<?Object>} Resolves if ad request is
-   *     to be sent, with object of params to add to request,
-   *     otherwise rejects with a reject message if we have one.
-   */
-  mergeRtc() {
-    // add reasons for promise.reject
-    return rtcPromise.then(
-        r => {
-          // Don't try to merge if we're sending without RTC.
-          if (!r || (!r.rtcResponse && !r.success)) {
-            return this.shouldSendRequestWithoutRtc(
-                'Bad response');
-          } else if (!r.rtcResponse && r.success) {
-            // Empty response, no need to merge
-            return Promise.resolve({
-              artc: r.rtcTotalTime,
-              ati: RTC_ATI_ENUM.RTC_SUCCESS,
-              ard: parseUrl(rtcConfig['endpoint']).hostname,
-            });
-          }
-
-          const rtcResponse = r.rtcResponse;
-          ['targeting', 'categoryExclusions'].forEach(key => {
-            if (!!rtcResponse[key]) {
-              this.jsonTargeting_[key] =
-                  !!this.jsonTargeting_[key] ?
-                  deepMerge(this.jsonTargeting_[key],
-                      rtcResponse[key]) :
-                                rtcResponse[key];
-            }
-          });
-          // rtcTotalTime is only the time that the rtc callout took,
-          // does not include the time to merge.
-          return Promise.resolve({
-            artc: r.rtcTotalTime,
-            ati: RTC_ATI_ENUM.RTC_SUCCESS,
-            ard: parseUrl(rtcConfig['endpoint']).hostname,
-          });
-        }).catch(err => {
-          const errMessage = (!!err && !!err.message) ?
-              err.message : 'Unknown error';
-          return this.shouldSendRequestWithoutRtc(errMessage);
-        });
-  }
-
-  /**
-   * Checks whether the pub has specified if we should still send
-   * the ad request on RTC failure. If yes, we return a resolve,
-   * if not, we return a reject.
-   * @param {string} errMessage
-   * @return {!Promise<?Object>}
-   */
-  shouldSendRequestWithoutRtc(errMessage) {
-    this.user().error(TAG, errMessage);
-    let rtcTotalTime;
-    // Have to use match instead of == because AMP
-    // custom messages automatically append three
-    // 0-width blank space characters to the ends
-    // of error messages.
-    if (errMessage.match(/^timeout/)) {
-      rtcTotalTime = -1;
-    }
-    verifyRtcConfigMember('sendAdRequestOnFailure', 'boolean');
-    return rtcConfig['sendAdRequestOnFailure'] !== false ?
-        Promise.resolve({
-          artc: rtcTotalTime,
-          ati: RTC_ATI_ENUM.RTC_FAILURE,
-          ard: parseUrl(rtcConfig['endpoint']).hostname,
-        }) : Promise.reject(errMessage);
-  };
 
   /** @override */
   sendXhrRequest(adUrl) {
@@ -1297,11 +1169,6 @@ export function resetSraStateForTesting() {
   sraRequests = null;
 }
 
-/** @visibileForTesting */
-export function resetRtcStateForTesting() {
-  rtcPromise = null;
-}
-
 /**
  * @param {!Element} element
  * @return {string} networkId from data-ad-slot attribute.
@@ -1322,6 +1189,7 @@ export function getNetworkId(element) {
  * @return {!Promise<string>} SRA request URL
  */
 function constructSRARequest_(win, doc, instances) {
+  // TODO(bradfrizzell): Need to add support for RTC.
   const startTime = Date.now();
   return googlePageParameters(win, doc, startTime)
       .then(pageLevelParameters => {
@@ -1331,19 +1199,6 @@ function constructSRARequest_(win, doc, instances) {
                 blockParameters, pageLevelParameters, PAGE_LEVEL_PARAMS_),
             startTime);
       });
-}
-
-/**
- * @param {string} member
- * @param {string} expectedType
- */
-function verifyRtcConfigMember(member, expectedType) {
-  if (rtcConfig[member] != undefined &&
-    typeof rtcConfig[member] != expectedType) {
-    const type = typeof rtcConfig[member];
-    user().warn(
-        TAG, `RTC ${member} must be a ${expectedType}, instead was ${type}`);
-  }
 }
 
 /**
@@ -1402,4 +1257,3 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
-

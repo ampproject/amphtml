@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {Services} from '../../../../src/services';
+import {RTC_ERROR_ENUM} from '../../../amp-a4a/0.1/real-time-config-manager';
 import {
   AmpAdNetworkDoubleclickImpl,
-  resetRtcStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {Xhr} from '../../../../src/service/xhr-impl';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
@@ -31,12 +28,10 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
   let impl;
   let element;
   let sandbox;
-  let xhrMock;
 
   beforeEach(() => {
     sandbox = env.sandbox;
     env.win.AMP_MODE.test = true;
-    resetRtcStateForTesting();
     const doc = env.win.document;
     // TODO(a4a-cam@): This is necessary in the short term, until A4A is
     // smarter about host document styling.  The issue is that it needs to
@@ -51,303 +46,105 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       'type': 'doubleclick',
       'layout': 'fixed',
     });
-    const rtcConf = createElementWithAttributes(
-        env.win.document, 'script',
-        {type: 'application/json', id: 'amp-rtc'});
-    rtcConf.innerHTML = JSON.stringify({
-      endpoint: 'https://example-publisher.com/rtc/',
-    });
-    env.win.document.head.appendChild(rtcConf);
-    xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+    impl = new AmpAdNetworkDoubleclickImpl(element, env.win.document, env.win);
+    impl.populateAdUrlState();
   });
 
   afterEach(() => {
     sandbox.restore();
     impl = null;
-    xhrMock = null;
-    resetRtcStateForTesting();
-    const rtcConf = env.win.document.getElementById('amp-rtc');
-    env.win.document.head.removeChild(rtcConf);
   });
 
-  function mockRtcExecution(rtcResponse, element, opt_textFunction) {
-    impl = new AmpAdNetworkDoubleclickImpl(element, env.win.document, env.win);
-    let textFunction = () => {
-      return Promise.resolve(JSON.stringify(rtcResponse));
-    };
-    textFunction = opt_textFunction || textFunction;
-    xhrMock.returns(
-        Promise.resolve({
-          redirected: false,
-          status: 200,
-          text: textFunction,
-        })
-    );
-    impl.populateAdUrlState();
-    return impl.executeRtc_(env.win.document);
-  }
-
-  function setRtcConfig(rtcConfigJson) {
-    const rtcConf = env.win.document.getElementById('amp-rtc');
-    rtcConf.innerText = JSON.stringify(rtcConfigJson);
-  }
-
-  it('should add just targeting to impl', () => {
-    const targeting = {'sport': 'baseball'};
-    const jsonTargeting = {
-      targeting,
-    };
-    return mockRtcExecution({
-      targeting,
-    }, element).then(() => {
-      expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
-    });
-  });
-
-  it('should add just categoryExclusions to impl', () => {
-    const categoryExclusions = {'sport': 'baseball'};
-    const jsonTargeting = {
-      categoryExclusions,
-    };
-    return mockRtcExecution({
-      categoryExclusions,
-    }, element).then(() => {
-      expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
-    });
-  });
-
-  it('should add targeting and categoryExclusions to impl', () => {
-    const targeting = {'sport': 'baseball'};
-    const categoryExclusions = {'age': '18-25'};
-    const jsonTargeting = {
-      targeting,
-      categoryExclusions,
-    };
-    return mockRtcExecution({
-      targeting,
-      categoryExclusions,
-    }, element).then(() => {
-      expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
-    });
-  });
-
-  it('should deep merge targeting and categoryExclusions from amp-ad', () => {
-    const rtcResponse = {
-      targeting: {'food': {
-        'kids': ['chicken fingers', 'pizza']},
-        'sports': 'baseball'},
-      categoryExclusions: {'age': '18-25'}};
-    const contextualTargeting =
-    '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
-    const jsonTargeting = {
-      targeting: {
-        'food': {
-          'kids': ['chicken fingers', 'pizza'],
-          'adults': 'cheese',
-        },
-        'sports': 'baseball'},
-      categoryExclusions: {'age': '18-25'}};
-    element = createElementWithAttributes(env.win.document, 'amp-ad', {
-      'width': '200',
-      'height': '50',
-      'type': 'doubleclick',
-      'layout': 'fixed',
-      'json': contextualTargeting,
-    });
-    return mockRtcExecution(rtcResponse, element).then(() => {
-      expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
-    });
-  });
-
-  it('should send two RTC callouts per page with SWR', () => {
-    const rtcResponse = {
-      targeting: {'food': {
-        'kids': ['chicken fingers', 'pizza']},
-        'sports': 'baseball'},
-      categoryExclusions: {'age': '18-25'}};
-    let contextualTargeting =
-    '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
-    element = createElementWithAttributes(env.win.document, 'amp-ad', {
-      'width': '200',
-      'height': '50',
-      'type': 'doubleclick',
-      'layout': 'fixed',
-      'json': contextualTargeting,
-    });
-    mockRtcExecution(rtcResponse, element);
-
-    contextualTargeting =
-    '{"targeting": {"food": {"adults": "wine"}}}';
-    const secondElement = createElementWithAttributes(
-        env.win.document, 'amp-ad', {
-          'width': '200',
-          'height': '50',
-          'type': 'doubleclick',
-          'layout': 'fixed',
-          'json': contextualTargeting,
-        });
-    return mockRtcExecution(rtcResponse, secondElement).then(() => {
-      expect(xhrMock).to.be.calledTwice;
-    });
-  });
-
-  it('should send one RTC callout per page with SWR disabled', () => {
-    setRtcConfig({
-      'endpoint': 'https://example-publisher.com/rtc/',
-      'disableStaleWhileRevalidate': true,
-    });
-    const rtcResponse = {
-      targeting: {'food': {
-        'kids': ['chicken fingers', 'pizza']},
-        'sports': 'baseball'},
-      categoryExclusions: {'age': '18-25'}};
-    let contextualTargeting =
-    '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
-    element = createElementWithAttributes(env.win.document, 'amp-ad', {
-      'width': '200',
-      'height': '50',
-      'type': 'doubleclick',
-      'layout': 'fixed',
-      'json': contextualTargeting,
-    });
-    mockRtcExecution(rtcResponse, element);
-
-    contextualTargeting =
-    '{"targeting": {"food": {"adults": "wine"}}}';
-    const secondElement = createElementWithAttributes(
-        env.win.document, 'amp-ad', {
-          'width': '200',
-          'height': '50',
-          'type': 'doubleclick',
-          'layout': 'fixed',
-          'json': contextualTargeting,
-        });
-    return mockRtcExecution(rtcResponse, secondElement).then(() => {
-      expect(xhrMock).to.be.calledOnce;
-    });
-  });
-
-  it('should not send RTC if url invalid', () => {
-    const rtcConf = env.win.document.getElementById('amp-rtc');
-    rtcConf.innerText = '{'
-        + '"endpoint": "http://example-publisher.com/rtc/",'
-        + '"sendAdRequestOnFailure": false'
-        + '}';
-
-    const targeting = {'sport': 'baseball'};
-    return mockRtcExecution({
-      targeting,
-    }, element).then(() => {
-      expect(xhrMock).to.not.be.called;
-    });
-  });
-
-  it('should resolve on empty RTC response', () => {
-    return mockRtcExecution('', element).then(() => {
-      // All that we are expecting here is that a Promise.reject doesn't
-      // bubble up
-    }).catch(() => {
-      expect(false).to.be.true;
-    });
-  });
-
-  it('should resolve on RTC failure if specified', () => {
-    const badRtcResponse = 'wrong: "unparseable}';
-    const jsonFunc = () => {
-      return Promise.resolve(JSON.parse(badRtcResponse));
-    };
-    return mockRtcExecution(badRtcResponse, element, jsonFunc).then(() => {
-      // All that we are expecting here is that a Promise.reject doesn't
-      // bubble up
-    }).catch(() => {
-      expect(false).to.be.true;
-    });
-  });
-
-  it('should reject on RTC failure if specified', () => {
-    setRtcConfig({
-      'endpoint': 'https://example-publisher.com/rtc/',
-      'sendAdRequestOnFailure': false,
-    });
-    const badRtcResponse = 'wrong: "unparseable}';
-    const jsonFunc = () => {
-      return Promise.resolve(JSON.parse(badRtcResponse));
-    };
-    return mockRtcExecution(badRtcResponse, element, jsonFunc).then(() => {
-      expect(false).to.be.true;
-    }).catch(err => {
-      expect(err.match(/Unexpected token/)).to.be.ok;
-    });
-  });
-
-  it('should bypass caching if specified', () => {
-    setRtcConfig({
-      'endpoint': 'https://example-publisher.com/rtc/',
-      'sendAdRequestOnFailure': true,
-      'disableStaleWhileRevalidate': true,
+  describe('#mergeRtcResponses_', () => {
+    function testMergeRtcResponses(
+        rtcResponseArray, expectedParams, expectedJsonTargeting) {
+      const rtcUrlParams = impl.mergeRtcResponses_(rtcResponseArray);
+      expect(rtcUrlParams).to.deep.equal(expectedParams);
+      expect(impl.jsonTargeting_).to.deep.equal(expectedJsonTargeting);
+    }
+    it('should properly merge RTC responses into jsonTargeting on impl', () => {
+      const rtcResponseArray = [
+        {response: {targeting: {'a': [1,2,3], 'b': {c: 'd'}}},
+          callout: 'www.exampleA.com', rtcTime: 100},
+        {response: {targeting: {'a': 'foo', 'b': {e: 'f'}}},
+          callout: 'www.exampleB.com', rtcTime: 500},
+        {response: {targeting: {'z': [{a: 'b'}, {c: 'd'}], 'b': {c: 'd'}}},
+          callout: 'www.exampleC.com', rtcTime: 100},
+      ];
+      const expectedParams = {
+        ati: '2,2,2',
+        artc: '100,500,100',
+        ard: 'www.exampleA.com,www.exampleB.com,www.exampleC.com',
+      };
+      const expectedJsonTargeting = {
+        targeting: {
+          'a': 'foo', 'b': {c: 'd', e: 'f'}, 'z': [{a: 'b'}, {c: 'd'}]},
+      };
+      testMergeRtcResponses(
+          rtcResponseArray, expectedParams, expectedJsonTargeting);
     });
 
-    const targeting = {'sport': 'baseball'};
-    return mockRtcExecution({targeting}, element).then(() => {
-      expect(xhrMock).to.be.calledOnce;
+    it('should only add params for callouts that were actually sent', () => {
+      const rtcResponseArray = [
+        {error: RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE,
+          callout: 'www.exampleA.com', rtcTime: 100},
+        {response: {targeting: {'a': 'foo', 'b': {e: 'f'}}},
+          callout: 'www.exampleB.com', rtcTime: 500},
+        {error: RTC_ERROR_ENUM.DUPLICATE_URL,
+          callout: 'www.exampleB.com', rtcTime: 0},
+        {error: RTC_ERROR_ENUM.NETWORK_FAILURE,
+          callout: 'www.exampleC.com', rtcTime: 100},
+      ];
+      const expectedParams = {
+        ati: '3,2,3',
+        artc: '100,500,100',
+        ard: 'www.exampleA.com,www.exampleB.com,www.exampleC.com',
+      };
+      const expectedJsonTargeting = {
+        targeting: {'a': 'foo', 'b': {e: 'f'}},
+      };
+      testMergeRtcResponses(
+          rtcResponseArray, expectedParams, expectedJsonTargeting);
     });
-  });
 
-  it('should timeout slow response, then do not send without RTC', () => {
-    setRtcConfig({
-      'endpoint': 'https://example-publisher.com/rtc/',
-      'sendAdRequestOnFailure': false,
+    it('should properly merge mix of success and errors', () => {
+      impl.jsonTargeting_ = {targeting:
+                            {'abc': [1,2,3], 'b': {n: 'm'}, 'a': 'TEST'},
+        categoryExclusions: {loc: 'USA'}};
+      const rtcResponseArray = [
+        {error: RTC_ERROR_ENUM.TIMEOUT,
+          callout: 'www.exampleA.com', rtcTime: 1500},
+        {response: {targeting: {'a': 'foo', 'b': {e: 'f'}},
+          categoryExclusions: {sport: 'baseball'}},
+          callout: 'VendorFoo', rtcTime: 500},
+        {response: {targeting: {'a': [1,2,3], 'b': {c: 'd'}}},
+          callout: 'www.exampleB.com', rtcTime: 100},
+        {response: {targeting: {'a': [4,5,6], 'b': {x: [1,2]}}},
+          callout: 'VendCom', rtcTime: 500},
+        {error: RTC_ERROR_ENUM.DUPLICATE_URL,
+          callout: 'www.exampleB.com', rtcTime: 0},
+        {error: RTC_ERROR_ENUM.NETWORK_FAILURE,
+          callout: '3PVend', rtcTime: 100},
+      ];
+      const expectedParams = {
+        ati: '3,2,2,2,3',
+        artc: '1500,500,100,500,100',
+        ard: 'www.exampleA.com,VendorFoo,www.exampleB.com,' +
+            'VendCom,3PVend',
+      };
+      const expectedJsonTargeting = {
+        targeting: {
+          'a': [4,5,6], 'b': {n: 'm', e: 'f', c: 'd', x: [1,2]},
+          abc: [1,2,3]},
+        categoryExclusions: {loc: 'USA', sport: 'baseball'},
+      };
+      testMergeRtcResponses(
+          rtcResponseArray, expectedParams, expectedJsonTargeting);
     });
-    const targeting = {'sport': 'baseball'};
-    impl = new AmpAdNetworkDoubleclickImpl(element, env.win.document, env.win);
 
-    xhrMock.returns(
-        Services.timerFor(env.win).promise(1200).then(() => {
-          return Promise.resolve({
-            redirected: false,
-            status: 200,
-            json: () => {
-              return Promise.resolve({targeting});
-            },
-          });
-        }));
-    impl.populateAdUrlState();
-    return impl.executeRtc_(env.win.document).then(() => {
-      // this then block should never run.
-      expect(true).to.be.false;
-    }).catch(err => {
-      // Have to get substring, because the error message has
-      // three 0 width blank space characters added to it
-      // automatically by the log constructor.
-      expect(err.substring(0, 7)).to.equal('timeout');
+    it('should return null for empty array', () => {
+      expect(impl.mergeRtcResponses_()).to.be.null;
     });
-  });
 
-  it('should timeout slow response, then send without RTC', () => {
-    setRtcConfig({
-      'endpoint': 'https://example-publisher.com/rtc/',
-    });
-    const targeting = {'sport': 'baseball'};
-
-    impl = new AmpAdNetworkDoubleclickImpl(element, env.win.document, env.win);
-
-    xhrMock.returns(
-        Services.timerFor(env.win).promise(1200).then(() => {
-          return Promise.resolve({
-            redirected: false,
-            status: 200,
-            json: () => {
-              return Promise.resolve({targeting});
-            },
-          });
-        }));
-    impl.populateAdUrlState();
-    return impl.executeRtc_(env.win.document).then(result => {
-      expect(result.artc).to.equal(-1);
-      expect(result.ati).to.equal(3);
-    }).catch(() => {
-      // Should not error.
-      expect(true).to.be.false;
-    });
   });
 });
