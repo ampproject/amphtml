@@ -20,7 +20,11 @@ import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
 import {iterateCursor} from '../../../src/dom';
-import {formOrNullForElement, setFormForElement} from '../../../src/form';
+import {
+  formOrNullForElement,
+  setFormForElement,
+  getFormAsObject,
+} from '../../../src/form';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -635,27 +639,7 @@ export class AmpForm {
    * @private
    */
   getFormAsObject_() {
-    const data = /** @type {!JsonObject} */ ({});
-    const inputs = this.form_.elements;
-    const submittableTagsRegex = /^(?:input|select|textarea)$/i;
-    const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
-    const checkableType = /^(?:checkbox|radio)$/i;
-    for (let i = 0; i < inputs.length; i++) {
-      const input = inputs[i];
-      if (!input.name || isDisabled_(input) ||
-          !submittableTagsRegex.test(input.tagName) ||
-          unsubmittableTypesRegex.test(input.type) ||
-          (checkableType.test(input.type) && !input.checked)) {
-        continue;
-      }
-
-      if (data[input.name] === undefined) {
-        data[input.name] = [];
-      }
-      data[input.name].push(input.value);
-    }
-
-    return data;
+    return getFormAsObject(this.form_);
   }
 
   /**
@@ -875,26 +859,6 @@ function checkUserValidity(element, propagate = false) {
  */
 export function checkUserValidityAfterInteraction_(input) {
   checkUserValidity(input, /* propagate */ true);
-}
-
-
-/**
- * Checks if a field is disabled.
- * @param {!Element} element
- * @private
- */
-function isDisabled_(element) {
-  if (element.disabled) {
-    return true;
-  }
-
-  const ancestors = ancestorElementsByTag(element, 'fieldset');
-  for (let i = 0; i < ancestors.length; i++) {
-    if (ancestors[i].disabled) {
-      return true;
-    }
-  }
-  return false;
 }
 
 
