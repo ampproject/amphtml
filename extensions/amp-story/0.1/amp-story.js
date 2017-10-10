@@ -53,6 +53,8 @@ import {AudioManager, upgradeBackgroundAudio} from './audio';
 import {setStyle, setStyles} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
+import {getMode} from '../../../src/mode';
+import {LogStatus} from './logging';
 
 
 /** @private @const {number} */
@@ -144,6 +146,7 @@ export class AmpStory extends AMP.BaseElement {
         this.systemLayer_.build(this.getRealChildren().length));
 
     this.initializeListeners_();
+    this.initializeListenersForDev_();
 
     this.navigationState_.observe(stateChangeEvent =>
         (new AmpStoryAnalytics(this.element)).onStateChange(stateChangeEvent));
@@ -221,6 +224,18 @@ export class AmpStory extends AMP.BaseElement {
 
     this.win.document.addEventListener('mozfullscreenchange',
         () => { this.onFullscreenChanged_(); });
+  }
+
+  /** @private */
+  initializeListenersForDev_() {
+    if (!getMode().development) {
+      return;
+    }
+
+    this.element.addEventListener(EventType.DEV_LOG_ENTRIES_AVAILABLE, e => {
+      this.systemLayer_.setDeveloperLogStatus(LogStatus.AVAILABLE);
+      this.systemLayer_.logAll(e.detail);
+    });
   }
 
 
@@ -337,6 +352,7 @@ export class AmpStory extends AMP.BaseElement {
     return this.mutateElement(() => {
       this.activePage_ = targetPage;
       this.triggerActiveEventForPage_();
+      this.systemLayer_.resetDeveloperLogs();
       this.maybeStartAnimations_(targetPage);
     })
         .then(() => {

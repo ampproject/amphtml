@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 import {EventType, dispatch} from './events';
-import {dev} from '../../../src/log';
+import {dev, LogLevel} from '../../../src/log';
+import {removeChildren} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {ProgressBar} from './progress-bar';
+import {getMode} from '../../../src/mode';
+import {isArray} from '../../../src/types';
+import {LogStatus} from './logging';
+import {reportError} from '../../../src/error';
 
 
 /*eslint-disable max-len */
 /** @private @const {string} */
 const TEMPLATE =
+    '<div class="i-amphtml-story-ui-left">' +
+    '</div>' +
     '<div class="i-amphtml-story-ui-right">' +
       '<div role="button" class="i-amphtml-story-unmute-audio-control i-amphtml-story-button">' +
         '<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF">' +
@@ -101,6 +108,18 @@ export class SystemLayer {
     /** @private {?Element} */
     this.unmuteAudioBtn_ = null;
 
+    /** @private {?Element} */
+    this.leftButtonTray_ = null;
+
+    /** @private {?Element} */
+    this.errorButton_ = null;
+
+    /** @private {?Element} */
+    this.warningButton_ = null;
+
+    /** @private {?Array<!./logging.AmpStoryLogEntryDef>} */
+    this.logEntries_ = null;
+
     /** @private @const {!ProgressBar} */
     this.progressBar_ = ProgressBar.create(win);
   }
@@ -126,6 +145,13 @@ export class SystemLayer {
     this.root_.insertBefore(
         this.progressBar_.build(pageCount), this.root_.firstChild);
 
+    this.leftButtonTray_ =
+        this.root_.querySelector('.i-amphtml-story-ui-left');
+
+    if (getMode().development) {
+      this.buildForDevelopmentMode_();
+    }
+
     this.exitFullScreenBtn_ =
         this.root_.querySelector('.i-amphtml-story-exit-fullscreen');
 
@@ -146,6 +172,26 @@ export class SystemLayer {
   /**
    * @private
    */
+  buildForDevelopmentMode_() {
+    this.errorButton_ = this.createButton_('i-amphtml-story-error-button',
+        e => this.openDeveloperLog_(e));
+
+    this.warningButton_ = this.createButton_('i-amphtml-story-warning-button',
+        e => this.openDeveloperLog_(e));
+
+    this.developerLog_ = document.createElement('ul');
+    this.developerLog_.classList.add('i-amphtml-story-developer-log');
+    this.developerLog_.setAttribute('hidden', '');
+
+    this.resetDeveloperLogs();
+    this.leftButtonTray_.appendChild(this.errorButton_);
+    this.leftButtonTray_.appendChild(this.warningButton_);
+    this.root_.appendChild(this.developerLog_);
+  }
+
+  /**
+   * @private
+   */
   addEventHandlers_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
     this.exitFullScreenBtn_.addEventListener(
@@ -160,6 +206,22 @@ export class SystemLayer {
     this.unmuteAudioBtn_.addEventListener(
         'click', e => this.onUnmuteAudioClick_(e));
   }
+
+  /**
+   * @param {string} className
+   * @param {function(Event)} handler
+   * @return {!Element}
+   * @private
+   */
+  createButton_(className, handler) {
+    const button = document.createElement('div');
+    button.setAttribute('role', 'button');
+    button.classList.add(className);
+    button.classList.add('i-amphtml-story-button');
+    button.addEventListener('click', handler);
+    return button;
+  }
+
 
   /**
    * @return {!Element}
@@ -247,5 +309,110 @@ export class SystemLayer {
    */
   setActivePageIndex(pageIndex) {
     this.progressBar_.setActivePageIndex(pageIndex);
+  }
+
+
+  /**
+   * @param {!LogStatus} logStatus 
+   */
+  setDeveloperLogStatus(logStatus) {
+    if (!getMode().development) {
+      return;
+    }
+  }
+
+
+  /**
+   * 
+   * @param {!LogLevel} logLevel 
+   * @return {?Element}
+   * @private
+   */
+  getButtonForLogLevel_(logLevel) {
+    switch (logLevel) {
+      case LogLevel.ERROR:
+        return this.errorButton_;
+      case LogLevel.WARN:
+        return this.warningButton_;
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * @param {!./logging.AmpStoryLogEntryDef} logEntry
+   * @private
+   */
+  logInternal_(logEntry) {
+    if (!logEntry.conforms) {
+      const button = this.getButtonForLogLevel_(logEntry.level);
+      if (button) {
+        const oldCount = parseInt(button.getAttribute('data-count') || 0, 10);
+        button.setAttribute('data-count', oldCount + 1);
+      }
+    }
+
+    const devNull = () => {};
+    const logFn = devNull; // logEntry.conforms ? console.info : console.warn;
+
+    /* this.logEntries_.push(logEntry);
+
+    const logEntryUi = document.createElement('li');
+    logEntryUi.classList.add('i-amphtml-story-developer-log-entry');
+    logEntryUi.textContent =
+        `${logEntry.conforms ? '✔' : '✘'} ${logEntry.message}`;
+    this.developerLog_.appendChild(logEntryUi); */
+
+    if (!logEntry.conforms) {
+      reportError(logEntry, logEntry.element);
+    }
+  }
+
+  /**
+   * 
+   * @param {!Array<!./logging.AmpStoryLogEntryDef>} logEntry
+   */
+  logAll(logEntries) {
+    if (!getMode().development) {
+      return;
+    }
+
+    logEntries.forEach(entry => this.logInternal_(entry));
+  }
+
+  /**
+   * @param {!./logging.AmpStoryLogEntryDef} logEntry
+   */
+  log(logEntry) {
+    if (!getMode().development) {
+      return;
+    }
+
+    this.logInternal_(logEntry);
+  }
+
+  /**
+   * 
+   */
+  resetDeveloperLogs() {
+    if (!getMode().development) {
+      return;
+    }
+
+    this.errorButton_.setAttribute('data-count', 0);
+    this.warningButton_.setAttribute('data-count', 0);
+    this.logEntries_ = [];
+    removeChildren(this.developerLog_);
+  }
+
+  /**
+   * 
+   */
+  openDeveloperLog_() {
+    if (!getMode().development) {
+      return;
+    }
+    this.developerLog_.removeAttribute('hidden');
+    this.toggleCloseBookendButton(true);
   }
 }
