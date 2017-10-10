@@ -211,10 +211,10 @@ export class DevelopmentModeLog {
    * @return {?Element}
    */
   build() {
-    this.contextStringEl_ = document.createElement('span');
+    this.contextStringEl_ = this.win_.document.createElement('span');
     this.contextStringEl_.classList
         .add('i-amphtml-story-developer-log-context');
-    const titleEl = document.createElement('div');
+    const titleEl = this.win_.document.createElement('div');
     titleEl.textContent = 'Developer logs for page ';
     titleEl.appendChild(this.contextStringEl_);
 
@@ -222,16 +222,16 @@ export class DevelopmentModeLog {
         'i-amphtml-story-developer-log-close',
         () => this.hide());
 
-    const headerEl = document.createElement('div');
+    const headerEl = this.win_.document.createElement('div');
     headerEl.classList.add('i-amphtml-story-developer-log-header');
     headerEl.appendChild(titleEl);
     headerEl.appendChild(closeDeveloperLogEl);
 
-    this.entriesEl_ = document.createElement('ul');
+    this.entriesEl_ = this.win_.document.createElement('ul');
     this.entriesEl_.classList
         .add('i-amphtml-story-developer-log-entries');
 
-    this.root_ = document.createElement('div');
+    this.root_ = this.win_.document.createElement('div');
     this.root_.classList.add('i-amphtml-story-developer-log');
     this.root_.setAttribute('hidden', '');
     this.root_.appendChild(headerEl);
@@ -284,7 +284,7 @@ export class DevelopmentModeLog {
     const logLevelClass = this.getCssLogLevelClass_(logEntry.level);
     const conformanceClass = this.getCssConformanceClass_(logEntry.conforms);
 
-    const logEntryUi = document.createElement('li');
+    const logEntryUi = this.win_.document.createElement('li');
     logEntryUi.classList.add('i-amphtml-story-developer-log-entry');
 
     if (logLevelClass) {
