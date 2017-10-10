@@ -28,5 +28,6 @@
   "3p-use-ampcontext": 0,
   "amp-animation": 1,
   "amp-sidebar toolbar": 1,
-  "amp-position-observer": 1
+  "amp-position-observer": 1,
+  "a4a-safeframe-preloading-off": 0.01
 }
