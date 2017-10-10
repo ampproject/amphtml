@@ -621,24 +621,15 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   loadBookendConfigImpl_() {
-    return this.loadBookendConfigInternal_()
-        .catch(e => {
-          user().error(TAG, 'Error fetching bookend configuration', e.message);
-          return null;
-        });
-  }
-
-
-  /**
-   * @return {!Promise<?./bookend.BookendConfigDef>}
-   * @private
-   */
-  loadBookendConfigInternal_() {
     return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME)
         .then(response => response && {
           shareProviders: response['share-providers'],
           relatedArticles: response['related-articles'] ?
               relatedArticlesFromJson(response['related-articles']) : [],
+        })
+        .catch(e => {
+          user().error(TAG, 'Error fetching bookend configuration', e.message);
+          return null;
         });
   }
 
