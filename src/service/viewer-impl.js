@@ -149,6 +149,12 @@ export class Viewer {
     /** @private {?function()} */
     this.whenFirstVisibleResolve_ = null;
 
+    /** @private {?Promise} */
+    this.nextVisiblePromise_ = null;
+
+    /** @private {?function()} */
+    this.nextVisibleResolve_ = null;
+
     /** @private {?time} */
     this.firstVisibleTime_ = null;
 
@@ -426,6 +432,10 @@ export class Viewer {
       this.lastVisibleTime_ = now;
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
+      if (this.nextVisibleResolve_) {
+        this.nextVisibleResolve_();
+        this.nextVisibleResolve_ = null;
+      }
     }
     this.visibilityObservable_.fire();
   }
@@ -603,11 +613,29 @@ export class Viewer {
 
   /**
    * Returns a Promise that only ever resolved when the current
-   * AMP document becomes visible.
+   * AMP document first becomes visible.
    * @return {!Promise}
    */
   whenFirstVisible() {
     return this.whenFirstVisiblePromise_;
+  }
+
+  /**
+   * Returns a Promise that resolve when current doc becomes visible
+   * @return {!Promise}
+   */
+  nextVisiblePromise() {
+    if (this.isVisible()) {
+      return Promise.resolve();
+    }
+
+    if (this.nextVisiblePromise_) {
+      return this.nextVisiblePromise_;
+    }
+
+    return this.nextVisiblePromise_ = new Promise(resolve => {
+      this.nextVisibleResolve_ = resolve;
+    });
   }
 
   /**
