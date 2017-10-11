@@ -53,11 +53,14 @@ export function resetTrackImpressionPromiseForTesting() {
 export function maybeTrackImpression(win) {
   let resolveImpression;
 
-  trackImpressionPromise = new Promise(resolve => {
+  const promise = new Promise(resolve => {
     resolveImpression = resolve;
-    // Resolve trackImpressionPromise after timeout.
-    Services.timerFor(win).delay(resolveImpression, TIMEOUT_VALUE);
   });
+
+  trackImpressionPromise = Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
+      promise, 'TrackImpressionPromise timeout').catch(error => {
+        dev().warn('IMPRESSION', error);
+      });
 
   Services.viewerForDoc(win.document).isTrustedViewer().then(isTrusted => {
     // Currently this feature is launched for trusted viewer, but still
@@ -99,8 +102,10 @@ function handleReplaceUrl(win) {
   return viewer.whenFirstVisible().then(() => {
     viewer.sendMessageAwaitResponse('getReplaceUrl', undefined).then(
         response => {
-          dev().assert(response && typeof response == 'object',
-              'getReplaceUrl expect JsonObject response');
+          if (!response || typeof response != 'object') {
+            dev().warn('IMPRESSION', 'get invalid replaceUrl response');
+            return;
+          }
           if (response['replaceUrl']) {
             viewer.replaceUrl(response['replaceUrl']);
           }
