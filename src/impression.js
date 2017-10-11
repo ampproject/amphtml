@@ -59,8 +59,7 @@ export function maybeTrackImpression(win) {
     Services.timerFor(win).delay(resolveImpression, TIMEOUT_VALUE);
   });
 
-  const viewer = Services.viewerForDoc(win.document);
-  viewer.isTrustedViewer().then(isTrusted => {
+  Services.viewerForDoc(win.document).isTrustedViewer().then(isTrusted => {
     // Currently this feature is launched for trusted viewer, but still
     // experiment guarded for all AMP docs.
     if (!isTrusted && !isExperimentOn(win, 'alp')) {
@@ -68,60 +67,12 @@ export function maybeTrackImpression(win) {
       return;
     }
 
-    trackImpressionFromClickParam(win, viewer, resolveImpression);
-  });
-}
+    const replaceUrlPromise = handleReplaceUrl(win);
+    const clickUrlPromise = handleClickUrl(win);
 
-
-/**
- * Actually perform the impression request if it has been provided via
- * the click param in the viewer arguments.
- * @param {!Window} win
- * @param {!./service/viewer-impl.Viewer} viewer
- * @param {!Function} resolveImpression Call when the impression has been
- *     tracked.
- */
-function trackImpressionFromClickParam(win, viewer, resolveImpression) {
-  /** @const {string|undefined} */
-  const clickUrl = viewer.getParam('click');
-
-  if (!clickUrl) {
-    resolveImpression();
-    return;
-  }
-  if (clickUrl.indexOf('https://') != 0) {
-    user().warn('IMPRESSION',
-        'click fragment param should start with https://. Found ',
-        clickUrl);
-    resolveImpression();
-    return;
-  }
-  if (win.location.hash) {
-    // This is typically done using replaceState inside the viewer.
-    // If for some reason it failed, get rid of the fragment here to
-    // avoid duplicate tracking.
-    win.location.hash = '';
-  }
-
-  viewer.whenFirstVisible().then(() => {
-    viewer.sendMessageAwaitResponse('getReplaceUrl', undefined).then(
-        response => {
-          dev().assert(response && typeof response == 'object',
-              'getReplaceUrl expect JsonObject response');
-          if (response['replaceUrl']) {
-            replaceUrl(win, response['replaceUrl']);
-          }
-          resolveImpression();
-        }, () => {});
-
-    // TODO(@zhouyx) need test with a real response.
-    invoke(win, dev().assertString(clickUrl)).then(response => {
-      applyResponse(win, response);
-      if (response['location']) {
-        // If replace the location href, resolve impression.
-        resolveImpression();
-      }
-    });
+    Promise.all([replaceUrlPromise, clickUrlPromise]).then(() => {
+      resolveImpression();
+    }, () => {});
   });
 }
 
@@ -130,6 +81,65 @@ function trackImpressionFromClickParam(win, viewer, resolveImpression) {
  */
 export function doNotTrackImpression() {
   trackImpressionPromise = Promise.resolve();
+}
+
+/**
+ * Handle the getReplaceUrl and return a promise when url is replaced
+ * @param {!Window} win
+ * @return {!Promise}
+ */
+function handleReplaceUrl(win) {
+  const viewer = Services.viewerForDoc(win.document);
+  if (!viewer.getParam('replaceUrl') || !viewer.hasCapability('replaceUrl')) {
+    // Right now we use the legacy replaceUrl init param as a signal to request
+    // replaceUrl from viewer.
+    // Viewer's capability to support getting replaceUrl is also required.
+    return Promise.resolve();
+  }
+  return viewer.whenFirstVisible().then(() => {
+    viewer.sendMessageAwaitResponse('getReplaceUrl', undefined).then(
+        response => {
+          dev().assert(response && typeof response == 'object',
+              'getReplaceUrl expect JsonObject response');
+          if (response['replaceUrl']) {
+            viewer.replaceUrl(response['replaceUrl']);
+          }
+        }, () => {});
+  });
+}
+
+
+/**
+ * Perform the impression request if it has been provided via
+ * the click param in the viewer arguments. Returns a promise
+ * @param {!Window} win
+ * @return {!Promise}
+ */
+function handleClickUrl(win) {
+  const viewer = Services.viewerForDoc(win.document);
+  /** @const {string|undefined} */
+  const clickUrl = viewer.getParam('click');
+
+  if (!clickUrl) {
+    return Promise.resolve();
+  }
+  if (clickUrl.indexOf('https://') != 0) {
+    user().warn('IMPRESSION',
+        'click fragment param should start with https://. Found ',
+        clickUrl);
+    return Promise.resolve();
+  }
+  if (win.location.hash) {
+    // This is typically done using replaceState inside the viewer.
+    // If for some reason it failed, get rid of the fragment here to
+    // avoid duplicate tracking.
+    win.location.hash = '';
+  }
+
+    // TODO(@zhouyx) need test with a real response.
+  return invoke(win, dev().assertString(clickUrl)).then(response => {
+    applyResponse(win, response);
+  });
 }
 
 /**
@@ -170,23 +180,14 @@ function applyResponse(win, response) {
 
   // Replace the location href params with new location params we get (if any).
   if (adLocation) {
-    replaceUrl(win, adLocation);
-  }
-}
+    if (!win.history.replaceState) {
+      return;
+    }
 
-/**
- * Function to replace the location href params
- * @param {!Window} win
- * @param {string} replaceUrl
- */
-function replaceUrl(win, replaceUrl) {
-  if (!win.history.replaceState) {
-    return;
+    const currentHref = win.location.href;
+    const url = parseUrl(adLocation);
+    const params = parseQueryString(url.search);
+    const newHref = addParamsToUrl(currentHref, params);
+    win.history.replaceState(null, '', newHref);
   }
-
-  const currentHref = win.location.href;
-  const url = parseUrl(replaceUrl);
-  const params = parseQueryString(url.search);
-  const newHref = addParamsToUrl(currentHref, params);
-  win.history.replaceState(null, '', newHref);
 }

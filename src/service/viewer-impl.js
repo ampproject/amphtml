@@ -377,16 +377,7 @@ export class Viewer {
         replaceUrlParam &&
         this.win.history.replaceState) {
       try {
-        // The origin and source origin must match.
-        const url = parseUrl(this.win.location.href);
-        const replaceUrl = parseUrl(
-            removeFragment(replaceUrlParam) + this.win.location.hash);
-        if (url.origin == replaceUrl.origin &&
-            getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
-          this.win.history.replaceState({}, '', replaceUrl.href);
-          this.win.location.originalHref = url.href;
-          dev().fine(TAG_, 'replace url:' + replaceUrl.href);
-        }
+        this.replaceUrl(replaceUrlParam);
       } catch (e) {
         dev().error(TAG_, 'replaceUrl failed', e);
       }
@@ -950,6 +941,19 @@ export class Viewer {
    */
   whenMessagingReady() {
     return this.messagingMaybePromise_;
+  }
+
+  replaceUrl(newUrl) {
+    // The origin and source origin must match.
+    const url = parseUrl(this.win.location.href);
+    const replaceUrl = parseUrl(
+        removeFragment(newUrl) + this.win.location.hash);
+    if (url.origin == replaceUrl.origin &&
+        getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
+      this.win.history.replaceState({}, '', replaceUrl.href);
+      this.win.location.originalHref = url.href;
+      dev().fine(TAG_, 'replace url:' + replaceUrl.href);
+    }
   }
 }
 
