@@ -29,14 +29,18 @@
   <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
 </head>
 <body>
-  <amp-story standalone related-articles="./related.json" background-audio="path/to/my.mp3">
+  <amp-story standalone bookend-config-src="./bookend-config-src.json" background-audio="path/to/my.mp3">
     <amp-story-page id="1" background-audio="path/to/my.mp3" auto-advance-after="any-value">
       <amp-story-grid-layer template="horizontal">
-        <h5>
-          <h1></h1>
+        <h5 animate-in="drop">
+          <h1>
+            <h4 animate-in-delay="anything"></h4>
+          </h1>
           <h2></h2>
         </h5>
-        <h3 grid-area="any value"></h3>
+        <h3 grid-area="any value">
+          <h6 animate-in-after="whatever-value"></h6>
+        </h3>
       </amp-story-grid-layer>
       <amp-story-grid-layer template="horizontal">
         <h1></h1>
