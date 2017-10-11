@@ -163,4 +163,20 @@ export class IframeTransportContext {
         /** @type {!JsonObject} */
         (Object.assign({message: data}, this.baseMessage_)));
   }
+
+  /**
+   * Requests IntersectionObserver data to be sent.
+   * @param {!function(!IntersectionObserverEntry) callback The function to
+   *     which the IntersectionObserver data should be passed.
+   */
+  observeIntersection(callback) {
+    // Send message to amp-analytics
+    this.iframeMessagingClient_.makeRequest(
+        MessageType.SEND_INTERSECTION_OBSERVER_EVENTS,
+        MessageType.INTERSECTION_OBSERVER_EVENTS,
+        eventData => {
+          callback(eventData);
+        });
+    // TODO(jonkeller): Batching
+  }
 }

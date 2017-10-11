@@ -26,6 +26,11 @@
           // be used by the amp-ad-exit of the creative which generated the
           // event.
           context.sendResponseToCreative({'collected-data': 'abc'});
+
+          context.observeIntersection(entry => {
+            console.log('Got an IntersectionObserver entry:');
+            console.dir(entry);
+          });
         });
       };
 
