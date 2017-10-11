@@ -158,6 +158,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?ShareWidget} */
     this.shareWidget_ = null;
+
+    /** @private {?function()} */
+    this.boundOnResize_ = null;
   }
 
   /** @override */
@@ -641,7 +644,8 @@ export class AmpStory extends AMP.BaseElement {
    * @return {string} The URL of the background resource
    */
   getBackgroundUrl_(pageElement) {
-    const fillElement = scopedQuerySelector(pageElement, '[template="fill"]');
+    const fillElement = dev().assertElement(
+        scopedQuerySelector(pageElement, '[template="fill"]'));
     const fillPosterElement = scopedQuerySelector(fillElement, '[poster]');
     const srcElement = scopedQuerySelector(fillElement, '[src]');
 
@@ -901,7 +905,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isTopBar_(el) {
-    return this.topBar_ && this.topBar_.contains(el);
+    return !!this.topBar_ && this.topBar_.contains(el);
   }
 
 
