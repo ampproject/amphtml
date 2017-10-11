@@ -32,8 +32,9 @@
     <amp-story-page> <!-- error because the 'id' attribute isn't set -->
       <amp-story-grid-layer> <!-- error because one of 'fill', 'horizontal', 'vertical', 'thirds' should be set. -->
         <h5>
-          <h1></h1>
-          <h2></h2>
+          <h1>
+            <h4 height="50px"></h4> <!-- error because 'height' is not an allowed attribute. -->
+          </h1>
         </h5>
       </amp-story-grid-layer>
     </amp-story-page>

@@ -15,8 +15,11 @@
  * limitations under the license.
  */
 goog.provide('amp.validator.ValidatorTest');
+
 goog.require('amp.validator.CssLength');
 goog.require('amp.validator.TagSpec');
+goog.require('amp.validator.ValidationError');
+goog.require('amp.validator.annotateWithErrorCategories');
 goog.require('amp.validator.createRules');
 goog.require('amp.validator.renderValidationResult');
 goog.require('amp.validator.validateString');
@@ -132,6 +135,8 @@ function findHtmlFilesRelativeToTestdata() {
  * An AMP Validator test case. This constructor will load the AMP HTML file
  * and also find the adjacent .out file.
  * @constructor
+ * @param {string} ampHtmlFile
+ * @param {string=} opt_ampUrl
  */
 const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
   /** @type {string} */
@@ -188,6 +193,8 @@ ValidatorTestCase.prototype.run = function() {
  * it truncates the provided arguments (and it's not configurable) and
  * with the Closure compiler, it requires a message argument to which
  * we'd always have to pass undefined. Too messy, so we roll our own.
+ * @param {*} expected
+ * @param {*} saw
  */
 function assertStrictEqual(expected, saw) {
   assert.ok(expected === saw, 'expected: ' + expected + ' saw: ' + saw);
@@ -746,9 +753,9 @@ describe('ValidatorRulesMakeSense', () => {
           expect(
               (tagSpec.cdata.blacklistedCdataRegex.length > 0) ||
               tagSpec.cdata.cdataRegex !== null ||
-              tagSpec.cdata.mandatoryCdata !== null)
+              tagSpec.cdata.mandatoryCdata !== null ||
+              tagSpec.cdata.cssSpec.validateKeyframes)
               .toBe(true);
-
         });
       }
       // cdata_regex and mandatory_cdata

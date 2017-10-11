@@ -56,6 +56,7 @@ goog.require('parse_css.extractUrls');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.tokenize');
 goog.require('parse_css.validateAmp4AdsCss');
+goog.require('parse_css.validateKeyframesCss');
 goog.require('parse_srcset.SrcsetParsingResult');
 goog.require('parse_srcset.parseSrcset');
 goog.require('parse_url.URL');
@@ -1591,8 +1592,29 @@ function isAtRuleValid(cssSpec, atRuleName) {
   return defaultType !== amp.validator.AtRuleSpec.BlockType.PARSE_AS_ERROR;
 }
 
+/**
+ * Returns true if the given Declaration is considered valid.
+ * @param {!amp.validator.CssSpec} cssSpec
+ * @param {string} declarationName
+ * @return {boolean}
+ */
+function IsDeclarationValid(cssSpec, declarationName) {
+  if (cssSpec.allowedDeclarations.length === 0) return true;
+  return cssSpec.allowedDeclarations.indexOf(declarationName.toLowerCase()) >
+      -1;
+}
+
+/**
+ * Returns a string of the allowed Declarations.
+ * @param {!amp.validator.CssSpec} cssSpec
+ * @return {string}
+ */
+function AllowedDeclarationsString(cssSpec) {
+  return '[\'' + cssSpec.allowedDeclarations.join('\', \'') + '\']';
+}
+
 /** @private */
-class InvalidAtRuleVisitor extends parse_css.RuleVisitor {
+class InvalidRuleVisitor extends parse_css.RuleVisitor {
   /**
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.CssSpec} cssSpec
@@ -1622,6 +1644,26 @@ class InvalidAtRuleVisitor extends parse_css.RuleVisitor {
             amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
             new LineCol(atRule.line, atRule.col),
             /* params */[getTagSpecName(this.tagSpec), atRule.name],
+            /* url */ '', this.result);
+      }
+    }
+  }
+
+  /** @inheritDoc */
+  visitDeclaration(declaration) {
+    if (!IsDeclarationValid(this.cssSpec, declaration.name)) {
+      if (amp.validator.LIGHT) {
+        this.result.status = amp.validator.ValidationResult.Status.FAIL;
+      } else {
+        this.context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY,
+            new LineCol(declaration.line, declaration.col),
+            /* params */
+            [
+              getTagSpecName(this.tagSpec), declaration.name,
+              AllowedDeclarationsString(this.cssSpec)
+            ],
             /* url */ '', this.result);
       }
     }
@@ -1869,6 +1911,10 @@ class CdataMatcher {
       parse_css.validateAmp4AdsCss(sheet, cssErrors);
     }
 
+    if (cssSpec.validateKeyframes) {
+      parse_css.validateKeyframesCss(sheet, cssErrors);
+    }
+
     if (amp.validator.LIGHT) {
       if (cssErrors.length > 0) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
@@ -1897,7 +1943,7 @@ class CdataMatcher {
                                                parsedImageUrlSpec),
           adapter, context, url.utf8Url, this.tagSpec_, validationResult);
     }
-    const visitor = new InvalidAtRuleVisitor(
+    const visitor = new InvalidRuleVisitor(
         this.tagSpec_, cssSpec, context, validationResult);
     sheet.accept(visitor);
   }
@@ -2639,7 +2685,7 @@ function validateAttrValueUrl(
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
       } else {
-        // DUPLICATE_DIMENSION only needs two paramters, it does not report
+        // DUPLICATE_DIMENSION only needs two parameters, it does not report
         // on the attribute value.
         if (parseResult.errorCode ===
             amp.validator.ValidationError.Code.DUPLICATE_DIMENSION) {
@@ -5939,6 +5985,24 @@ amp.validator.categorizeError = function(error) {
   // E.g. "The dimension '1x' in attribute 'srcset' appears more than once."
   if (error.code === amp.validator.ValidationError.Code.DUPLICATE_DIMENSION) {
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+
+  // E.g. "CSS syntax error in tag style[amp-keyframes]- invalid property
+  // opacityyyy. The only allowed properties are [opacity, transform].
+  if (error.code ===
+          amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY ||
+      error.code ===
+          amp.validator.ValidationError.Code
+              .CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS ||
+      error.code ===
+          amp.validator.ValidationError.Code
+              .CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME ||
+      error.code ===
+          amp.validator.ValidationError.Code
+              .CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME ||
+      error.code ===
+          amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE) {
+    return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
   }
   return amp.validator.ErrorCategory.Code.GENERIC;
 };
