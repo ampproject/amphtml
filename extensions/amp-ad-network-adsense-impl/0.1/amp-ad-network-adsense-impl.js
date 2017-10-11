@@ -118,7 +118,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
 
-    /** @private {?Element} */
+    /**
+     * amp-analytics element generated based on this.ampAnalyticsConfig_
+     * @private {?Element}
+     */
     this.ampAnalyticsElement_ = null;
 
     /** @private {?string} */
