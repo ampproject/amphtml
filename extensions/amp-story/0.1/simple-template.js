@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
 import {isArray} from '../../../src/types';
 
 

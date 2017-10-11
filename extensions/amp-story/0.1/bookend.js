@@ -16,11 +16,12 @@
 import {BookendShareWidget} from './bookend-share';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {dict} from './../../../src/utils/object';
 import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
 import {parseUrl} from '../../../src/url';
+import {renderAsElement, renderSimpleTemplate} from './simple-template';
 
 
 /**
@@ -32,56 +33,91 @@ import {parseUrl} from '../../../src/url';
 export let BookendConfigDef;
 
 
+/** @private @const {!./simple-template.ElementDef} */
+const ROOT_TEMPLATE = {
+  tag: 'section',
+  attrs: dict({'class': 'i-amphtml-story-bookend'}),
+};
+
+
+/** @private @const {!./simple-template.ElementDef} */
+const REPLAY_ICON_TEMPLATE = {
+  tag: 'div',
+  attrs: dict({'class': 'i-amphtml-story-bookend-replay-icon'}),
+};
+
+
 /**
  * @param {!./related-articles.RelatedArticleDef} articleData
- * @return {!DocumentFragment}
+ * @return {!./simple-template.ElementDef}
  */
-function buildArticle(doc, articleData) {
-  const root = createElementWithAttributes(doc, 'a',
-      /** @type {!JsonObject} */({
-        class: 'i-amphtml-story-bookend-article',
-        href: articleData.url,
-      }));
-
-  const fragment = doc.createDocumentFragment();
+function buildArticleTemplate(articleData) {
+  const template = /** @type {!./simple-template.ElementDef} */ ({
+    tag: 'a',
+    attrs: dict({
+      'class': 'i-amphtml-story-bookend-article',
+      'href': articleData.url,
+    }),
+    children: [
+      {
+        tag: 'h2',
+        attrs: dict({'class': 'i-amphtml-story-bookend-article-heading'}),
+        text: articleData.title,
+      },
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-story-bookend-article-meta'}),
+        text: articleData.domainName,
+      },
+    ],
+  });
 
   if (articleData.image) {
-    const imageContainer = createElementWithAttributes(doc, 'div',
-        /** @type {!JsonObject} */({
-          class: 'i-amphtml-story-bookend-article-image',
-        }));
-
-    // TODO(alanorozco): Figure out how to use amp-img here
-    imageContainer.appendChild(createElementWithAttributes(doc, 'img',
-        /** @type {!JsonObject} */({
-          src: articleData.image,
-          width: 116,
-          height: 116,
-        })));
-
-    root.appendChild(imageContainer);
+    template.children.unshift(/** @type {!./simple-template.ElementDef} */ ({
+      tag: 'div',
+      attrs: dict({'class': 'i-amphtml-story-bookend-article-image'}),
+      children: [
+        // TODO(alanorozco): Figure out how to use amp-img here
+        {
+          tag: 'img',
+          attrs: dict({
+            'src': articleData.image,
+            'width': 116,
+            'height': 116,
+          }),
+        },
+      ],
+    }));
   }
 
-  const title = createElementWithAttributes(doc, 'h2',
-      /** @type {!JsonObject} */({
-        class: 'i-amphtml-story-bookend-article-heading',
-      }));
+  return template;
+}
 
-  title.textContent = articleData.title;
 
-  const metaContainer = createElementWithAttributes(doc, 'div',
-      /** @type {!JsonObject} */({
-        class: 'i-amphtml-story-bookend-article-meta',
-      }));
+/**
+ * @param {!Array<!./related-articles.RelatedArticleSetDef>} articleSets
+ * @return {!Array<!./simple-template.ElementDef>}
+ */
+function buildArticlesContainerTemplate(articleSets) {
+  const template = [];
 
-  metaContainer.textContent = articleData.domainName;
+  articleSets.forEach(articleSet => {
+    if (articleSet.heading) {
+      template.push({
+        tag: 'h3',
+        attrs: dict({'class': 'i-amphtml-story-bookend-heading'}),
+        text: articleSet.heading,
+      });
+    }
+    template.push({
+      tag: 'div',
+      attrs: dict({'class': 'i-amphtml-story-bookend-article-set'}),
+      children: articleSet.articles.map(article =>
+          buildArticleTemplate(article)),
+    });
+  });
 
-  root.appendChild(title);
-  root.appendChild(metaContainer);
-
-  fragment.appendChild(root);
-
-  return fragment;
+  return template;
 }
 
 
@@ -90,58 +126,41 @@ function buildArticle(doc, articleData) {
  * @param {string} title
  * @param {string} domainName
  * @param {string=} opt_imageUrl
- * @return {!Element}
+ * @return {!./simple-template.ElementDef}
  */
-function buildReplayButton(doc, title, domainName, opt_imageUrl) {
-  const root = createElementWithAttributes(doc, 'div',
-      /** @type {!JsonObject} */({
-        class: 'i-amphtml-story-bookend-replay',
-      }));
-
-  const iconContainer = createElementWithAttributes(doc, 'div',
-        /** @type {!JsonObject} */({
-          class: 'i-amphtml-story-bookend-replay-icon',
-        }));
-
-  if (opt_imageUrl) {
-    const container = createElementWithAttributes(doc, 'div',
-        /** @type {!JsonObject} */({
-          class: 'i-amphtml-story-bookend-replay-image',
-        }));
-
-    // TODO(alanorozco): Figure out how to use amp-img here
-    container.appendChild(createElementWithAttributes(doc, 'img',
-        /** @type {!JsonObject} */({
-          width: 80,
-          height: 80,
-          src: opt_imageUrl,
-        })));
-
-    container.appendChild(iconContainer);
-
-    root.appendChild(container);
-  } else {
-    root.appendChild(iconContainer);
-  }
-
-  const h2El = createElementWithAttributes(doc, 'h2',
-      /** @type {!JsonObject} */({
-        class: 'i-amphtml-story-bookend-article-heading',
-      }));
-
-  h2El.textContent = title;
-
-  const metaEl = createElementWithAttributes(doc, 'div',
-      /** @type {!JsonObject} */({
-        class: 'i-amphtml-story-bookend-article-meta',
-      }));
-
-  metaEl.textContent = domainName;
-
-  root.appendChild(h2El);
-  root.appendChild(metaEl);
-
-  return root;
+function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
+  return /** @type {!./simple-template.ElementDef} */ ({
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-bookend-replay'}),
+    children: [
+      !opt_imageUrl ? REPLAY_ICON_TEMPLATE : {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-story-bookend-replay-image'}),
+        children: [
+          // TODO(alanorozco): Figure out how to use amp-img here
+          {
+            tag: 'img',
+            attrs: dict({
+              'src': opt_imageUrl,
+              'width': 80,
+              'height': 80,
+            }),
+          },
+          REPLAY_ICON_TEMPLATE,
+        ],
+      },
+      {
+        tag: 'h2',
+        attrs: dict({'class': 'i-amphtml-story-bookend-article-heading'}),
+        text: title,
+      },
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-story-bookend-article-meta'}),
+        text: domainName,
+      },
+    ],
+  });
 }
 
 
@@ -180,10 +199,8 @@ export class Bookend {
 
     this.isBuilt_ = true;
 
-    this.root_ = this.win_.document.createElement('section');
-    this.root_.classList.add('i-amphtml-story-bookend');
+    this.root_ = renderAsElement(this.win_.document, ROOT_TEMPLATE);
 
-    // TOOD(alanorozco): Domain name
     this.replayBtn_ = this.buildReplayButton_(ampdoc);
 
     this.root_.appendChild(this.replayBtn_);
@@ -240,58 +257,9 @@ export class Bookend {
    * @private
    */
   setRelatedArticles_(articleSets) {
-    const fragment = this.win_.document.createDocumentFragment();
-
-    articleSets.forEach(articleSet =>
-        fragment.appendChild(this.buildArticleSet_(articleSet)));
-
-    this.getRoot().appendChild(fragment);
-  }
-
-  /**
-   * @param {!./related-articles.RelatedArticleSetDef} articleSet
-   * @return {!DocumentFragment}
-   */
-  buildArticleSet_(articleSet) {
-    const fragment = this.win_.document.createDocumentFragment();
-
-    if (articleSet.heading) {
-      fragment.appendChild(
-          this.buildArticleSetHeading_(articleSet.heading));
-    }
-
-    fragment.appendChild(this.buildArticleList_(articleSet.articles));
-
-    return fragment;
-  }
-
-  /**
-   * @param {!Array<!./related-articles.RelatedArticleDef>} articleList
-   * @return {!Element}
-   * @private
-   */
-  buildArticleList_(articleList) {
-    const container = createElementWithAttributes(this.win_.document, 'div',
-        /** @type {!JsonObject} */({
-          'class': 'i-amphtml-story-bookend-article-set',
-        }));
-    articleList.forEach(article =>
-        container.appendChild(buildArticle(this.win_.document, article)));
-    return container;
-  }
-
-  /**
-   * @param {!string} heading
-   * @return {!Element}
-   * @private
-   */
-  buildArticleSetHeading_(heading) {
-    const headingEl = createElementWithAttributes(this.win_.document, 'h3',
-        /** @type {!JsonObject} */({
-          'class': 'i-amphtml-story-bookend-heading',
-        }));
-    headingEl.textContet = heading;
-    return headingEl;
+    this.getRoot().appendChild(
+        renderSimpleTemplate(this.win_.document,
+            buildArticlesContainerTemplate(articleSets)));
   }
 
   /** @return {!Element} */
@@ -337,10 +305,10 @@ export class Bookend {
    */
   buildReplayButton_(ampdoc) {
     const metadata = this.getStoryMetadata_(ampdoc);
-    return buildReplayButton(
+    return renderAsElement(this.win_.document, buildReplayButtonTemplate(
         this.win_.document,
         metadata.title,
         metadata.domainName,
-        metadata.imageUrl);
+        metadata.imageUrl));
   }
 }

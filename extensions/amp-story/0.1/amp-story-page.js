@@ -45,29 +45,29 @@ import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 const LOADING_SCREEN_TEMPLATE = [
   {
     tag: 'div',
-    attrs: dict({class: 'i-amphtml-story-page-loading-screen'}),
+    attrs: dict({'class': 'i-amphtml-story-page-loading-screen'}),
     children: [
       {
         tag: 'ul',
-        attrs: dict({class: 'i-amphtml-story-page-loading-dots'}),
+        attrs: dict({'class': 'i-amphtml-story-page-loading-dots'}),
         children: [
           {
             tag: 'li',
-            attrs: dict({class: 'i-amphtml-story-page-loading-dot'}),
+            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
           },
           {
             tag: 'li',
-            attrs: dict({class: 'i-amphtml-story-page-loading-dot'}),
+            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
           },
           {
             tag: 'li',
-            attrs: dict({class: 'i-amphtml-story-page-loading-dot'}),
+            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
           },
-        ]
+        ],
       },
       {
         tag: 'p',
-        attrs: dict({class: 'i-amphtml-story-page-loading-text'}),
+        attrs: dict({'class': 'i-amphtml-story-page-loading-text'}),
         text: 'Loading', // TODO(alanorozco): i18n
       },
     ],

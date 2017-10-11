@@ -16,56 +16,55 @@
 import {EventType, dispatch} from './events';
 import {renderAsElement} from './simple-template';
 import {dict} from '../../../src/utils/object';
-import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {ProgressBar} from './progress-bar';
 
 
-/** @private @const {!Array<!./simple-template.ElementDef>} */
+/** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
-  attrs: dict({class: 'i-amphtml-story-system-layer'}),
+  attrs: dict({'class': 'i-amphtml-story-system-layer'}),
   children: [
     {
       tag: 'div',
-      attrs: dict({class: 'i-amphtml-story-ui-right'}),
+      attrs: dict({'class': 'i-amphtml-story-ui-right'}),
       children: [
         {
           tag: 'div',
           attrs: dict({
-            role: 'button',
-            class: 'i-amphtml-story-unmute-audio-control ' +
+            'role': 'button',
+            'class': 'i-amphtml-story-unmute-audio-control ' +
                 'i-amphtml-story-button',
           }),
         },
         {
           tag: 'div',
           attrs: dict({
-            role: 'button',
-            class: 'i-amphtml-story-mute-audio-control ' +
+            'role': 'button',
+            'class': 'i-amphtml-story-mute-audio-control ' +
                 'i-amphtml-story-button',
           }),
         },
         {
           tag: 'div',
           attrs: dict({
-            role: 'button',
-            class: 'i-amphtml-story-exit-fullscreen i-amphtml-story-button',
-            hidden: true,
+            'role': 'button',
+            'class': 'i-amphtml-story-exit-fullscreen i-amphtml-story-button',
+            'hidden': true,
           }),
         },
         {
           tag: 'div',
           attrs: dict({
-            role: 'button',
-            class: 'i-amphtml-story-bookend-close i-amphtml-story-button',
-            hidden: true,
+            'role': 'button',
+            'class': 'i-amphtml-story-bookend-close i-amphtml-story-button',
+            'hidden': true,
           }),
         },
       ],
     },
-  ]
+  ],
 };
 
 
