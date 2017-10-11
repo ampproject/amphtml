@@ -35,7 +35,7 @@ describe('impression', () => {
     viewer = Services.viewerForDoc(window.document);
     sandbox.stub(viewer, 'getParam');
     xhr = Services.xhrFor(window);
-    expect(xhr.fetchJson).to.be.defined;
+    expect(xhr.fetchJson).to.exist;
     const stub = sandbox.stub(xhr, 'fetchJson');
     stub.returns(Promise.resolve({
       json() {
@@ -90,6 +90,7 @@ describe('impression', () => {
       expect(url).to.equal('https://www.example.com');
       expect(params).to.jsonEqual({
         credentials: 'include',
+        requireAmpResponseSourceOrigin: false,
       });
     });
   });
@@ -107,6 +108,7 @@ describe('impression', () => {
       expect(url).to.equal('https://www.example.com');
       expect(params).to.jsonEqual({
         credentials: 'include',
+        requireAmpResponseSourceOrigin: false,
       });
     });
   });

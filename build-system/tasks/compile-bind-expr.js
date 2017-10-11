@@ -15,30 +15,30 @@
  */
 'use strict';
 
-var jison = require('jison');
-var gulp = require('gulp');
-var fs = require('fs-extra');
+const jison = require('jison');
+const gulp = require('gulp');
+const fs = require('fs-extra');
 
 gulp.task('compile-bind-expr', function() {
-  var path = 'extensions/amp-bind/0.1/';
+  const path = 'extensions/amp-bind/0.1/';
 
-  var bnf = fs.readFileSync(path + 'bind-expr-impl.jison', 'utf8');
-  var settings = {type: 'lalr', debug: false, moduleType: 'js'};
-  var generator = new jison.Generator(bnf, settings);
-  var jsModule = generator.generate(settings);
+  const bnf = fs.readFileSync(path + 'bind-expr-impl.jison', 'utf8');
+  const settings = {type: 'lalr', debug: false, moduleType: 'js'};
+  const generator = new jison.Generator(bnf, settings);
+  const jsModule = generator.generate(settings);
 
-  var license = fs.readFileSync(
+  const license = fs.readFileSync(
       'build-system/tasks/js-license.txt', 'utf8');
-  var suppressCheckTypes = '/** @fileoverview ' +
+  const suppressCheckTypes = '/** @fileoverview ' +
       '@suppress {checkTypes, suspiciousCode, uselessCode} */';
-  var imports = 'import {AstNode, AstNodeType} from \'./bind-expr-defines\';';
-  var jsExports = 'exports.parser = parser;';
+  const imports = 'import {AstNode, AstNodeType} from \'./bind-expr-defines\';';
+  const jsExports = 'exports.parser = parser;';
 
-  var out = [
-      license,
-      suppressCheckTypes,
-      imports,
-      jsModule,
-      jsExports].join('\n\n') + '\n';
+  const out = [
+    license,
+    suppressCheckTypes,
+    imports,
+    jsModule,
+    jsExports].join('\n\n') + '\n';
   fs.writeFileSync(path + 'bind-expr-impl.js', out);
 });

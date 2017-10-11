@@ -82,11 +82,11 @@ declareExtension('amp-facebook-like', '0.1', false);
 declareExtension('amp-fit-text', '0.1', true);
 declareExtension('amp-font', '0.1', false);
 declareExtension('amp-form', '0.1', true);
-declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true);
 declareExtension('amp-fx-parallax', '0.1', false);
 declareExtension('amp-gfycat', '0.1', false);
 declareExtension('amp-gist', '0.1', false);
+declareExtension('amp-gwd-animation', '0.1', true);
 declareExtension('amp-hulu', '0.1', false);
 declareExtension('amp-iframe', '0.1', false);
 declareExtension('amp-ima-video', '0.1', false);
@@ -114,6 +114,7 @@ declareExtension('amp-sidebar', '1.0', true);
 declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '1.0', true);
+declareExtension('amp-story', '0.1', true);
 declareExtension('amp-selector', '0.1', true);
 declareExtension('amp-web-push', '0.1', true);
 declareExtension('amp-position-observer', '0.1', false);
@@ -139,6 +140,7 @@ declareExtension('amp-viewer-integration', '0.1', {
   loadPriority: 'high',
 });
 declareExtension('amp-video', '0.1', false);
+declareExtension('amp-vk', '0.1', false);
 declareExtension('amp-youtube', '0.1', false);
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
@@ -410,7 +412,7 @@ function compileCss() {
   })
   .then(() => {
     return buildExtensions({
-      bundleOnlyIfListedInFiles: true,
+      bundleOnlyIfListedInFiles: false,
       compileOnlyCss: true
     });
   });
@@ -1075,9 +1077,17 @@ function buildLoginDoneVersion(version, options) {
 
   // Build HTML.
   var html = fs.readFileSync(htmlPath, 'utf8');
-  var minHtml = html.replace(
-      '../../../dist/v0/amp-login-done-' + version + '.max.js',
-      `https://${hostname}/v0/amp-login-done-` + version + '.js');
+  var minJs = `https://${hostname}/v0/amp-login-done-${version}.js`;
+  var minHtml = html
+      .replace(
+          `../../../dist/v0/amp-login-done-${version}.max.js`,
+          minJs)
+      .replace(
+          `../../../dist/v0/amp-login-done-${version}.js`,
+          minJs);
+  if (minHtml.indexOf(minJs) == -1) {
+    throw new Error('Failed to correctly set JS in login-done.html');
+  }
 
   mkdirSync('dist');
   mkdirSync('dist/v0');

@@ -48,11 +48,17 @@ import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseJson} from '../src/json';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
-import {initLogConstructor, setReportError, user} from '../src/log';
+import {
+  initLogConstructor,
+  setReportError,
+  user,
+  isUserErrorMessage,
+} from '../src/log';
 import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
 import {startsWith} from '../src/string.js';
 import {AmpEvents} from '../src/amp-events';
+import {MessageType} from '../src/3p-frame-messaging';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -166,6 +172,7 @@ import {sklik} from '../ads/sklik';
 import {slimcutmedia} from '../ads/slimcutmedia';
 import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
+import {smi2} from '../ads/smi2';
 import {sortable} from '../ads/sortable';
 import {sogouad} from '../ads/sogouad';
 import {sovrn} from '../ads/sovrn';
@@ -184,6 +191,7 @@ import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
 import {yandex} from '../ads/yandex';
+import {yengo} from '../ads/yengo';
 import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
@@ -206,6 +214,7 @@ const AMP_EMBED_ALLOWED = {
   outbrain: true,
   plista: true,
   smartclip: true,
+  smi2: true,
   taboola: true,
   zergnet: true,
 };
@@ -333,6 +342,7 @@ register('sklik', sklik);
 register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
 register('smartclip', smartclip);
+register('smi2', smi2);
 register('sortable', sortable);
 register('sogouad', sogouad);
 register('sovrn', sovrn);
@@ -352,6 +362,7 @@ register('xlift' , xlift);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
 register('yandex', yandex);
+register('yengo', yengo);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
@@ -472,6 +483,14 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
       nonSensitiveDataPostMessage('bootstrap-loaded');
     }
   } catch (e) {
+    if (window.context && window.context.report3pError) {
+      // window.context has initiated yet
+      if (e.message && isUserErrorMessage(e.message)) {
+        // report user error to parent window
+        window.context.report3pError(e);
+      }
+    }
+
     const c = window.context || {mode: {test: false}};
     if (!c.mode.test) {
       lightweightErrorReport(e, c.canary);
@@ -553,6 +572,8 @@ function installContextUsingStandardImpl(win, data) {
     renderStart: triggerRenderStart,
     reportRenderedEntityIdentifier,
     requestResize: triggerResizeRequest,
+    report3pError,
+
 
     // Using quotes due to bug related to imported variables in object property
     // shorthand + object shorthand lint rule.
@@ -719,6 +740,19 @@ function reportRenderedEntityIdentifier(entityId) {
       'entityId should be a string %s', entityId);
   nonSensitiveDataPostMessage('entity-id', dict({
     'id': entityId,
+  }));
+}
+
+/**
+ * Send 3p error to parent iframe
+ * @param {!Error} e
+ */
+function report3pError(e) {
+  if (!e.message) {
+    return;
+  }
+  nonSensitiveDataPostMessage(MessageType.USER_ERROR_IN_IFRAME, dict({
+    'message': e.message,
   }));
 }
 

@@ -1102,7 +1102,7 @@ describes.realWin('runtime multidoc', {
     it('should expose visibility method', () => {
       const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       const viewer = getServiceForDoc(ampdoc, 'viewer');
-      expect(amp.setVisibilityState).to.be.function;
+      expect(amp.setVisibilityState).to.be.a('function');
       expect(viewer.getVisibilityState()).to.equal('visible');
 
       amp.setVisibilityState('inactive');
@@ -1112,7 +1112,7 @@ describes.realWin('runtime multidoc', {
     it('should expose close method and dispose services', () => {
       const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       const viewer = getServiceForDoc(ampdoc, 'viewer');
-      expect(amp.close).to.be.function;
+      expect(amp.close).to.be.a('function');
       expect(viewer.getVisibilityState()).to.equal('visible');
 
       viewer.dispose = sandbox.spy();
@@ -1442,7 +1442,7 @@ describes.realWin('runtime multidoc', {
       writer.write('<body>');
       return ampdoc.whenBodyAvailable().then(() => {
         const viewer = getServiceForDoc(ampdoc, 'viewer');
-        expect(shadowDoc.setVisibilityState).to.be.function;
+        expect(shadowDoc.setVisibilityState).to.be.a('function');
         expect(viewer.getVisibilityState()).to.equal('visible');
 
         shadowDoc.setVisibilityState('inactive');
@@ -1456,7 +1456,7 @@ describes.realWin('runtime multidoc', {
       writer.write('<body>');
       return ampdoc.whenBodyAvailable().then(() => {
         const viewer = getServiceForDoc(ampdoc, 'viewer');
-        expect(shadowDoc.close).to.be.function;
+        expect(shadowDoc.close).to.be.a('function');
         expect(viewer.getVisibilityState()).to.equal('visible');
 
         viewer.dispose = sandbox.spy();

@@ -15,17 +15,35 @@
  */
 'use strict';
 
-var argv = require('minimist')(process.argv.slice(2));
-var execOrDie = require('../exec.js').execOrDie;
-var gulp = require('gulp-help')(require('gulp'));
+const argv = require('minimist')(process.argv.slice(2));
+const execOrDie = require('../exec').execOrDie;
+const getStdout = require('../exec').getStdout;
+const gulp = require('gulp-help')(require('gulp'));
 
+
+/**
+ * Disambiguates branch names by decorating them with the commit author name.
+ * We do this for all non-push builds in order to prevent them from being used
+ * as baselines for future builds.
+ */
+function setPercyBranch() {
+  if (!argv.master || !process.env['TRAVIS']) {
+    const userName = getStdout(
+        'git log -1 --pretty=format:"%ae"').trim();
+    const branchName = process.env['TRAVIS'] ?
+        process.env['TRAVIS_PULL_REQUEST_BRANCH'] :
+        getStdout('git rev-parse --abbrev-ref HEAD').trim();
+    process.env['PERCY_BRANCH'] = userName + '-' + branchName;
+  }
+}
 
 /**
  * Simple wrapper around the ruby based visual diff tests.
  */
 function visualDiff() {
-  var cmd = 'ruby build-system/tasks/visual-diff.rb';
-  for (var arg in argv) {
+  setPercyBranch();
+  let cmd = 'ruby build-system/tasks/visual-diff.rb';
+  for (const arg in argv) {
     if (arg !== '_') {
       cmd = cmd + ' --' + arg;
     }
@@ -46,6 +64,6 @@ gulp.task(
         'phantomjs_debug': '  Prints debug info from PhantomJS libraries',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
         'debug': '  Prints all the above debug info',
-      }
+      },
     }
 );

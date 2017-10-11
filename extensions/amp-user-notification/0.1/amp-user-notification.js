@@ -23,10 +23,10 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {setStyle} from '../../../src/style';
+import {dict} from '../../../src/utils/object';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';
-
 
 /**
  * @export
@@ -209,20 +209,36 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Promise}
    */
   postDismissEnpoint_() {
+    const enctype = this.element.getAttribute('enctype') ||
+      'application/json;charset=utf-8';
     return Services.xhrFor(this.win).fetchJson(
         dev().assertString(this.dismissHref_),
-        {
-          method: 'POST',
-          credentials: 'include',
-          requireAmpResponseSourceOrigin: false,
-          body: /** @type {!JsonObject} */({
-            'elementId': this.elementId_,
-            'ampUserId': this.ampUserId_,
-          }),
-          headers: {
-            'Content-Type': 'application/json;charset=utf-8',
-          },
-        });
+        this.buildPostDismissRequest_(enctype, this.elementId_,
+            this.ampUserId_));
+  }
+
+  /**
+   * Creates a Request to be used for postDismiss
+   * @private
+   * @param {string} enctype
+   * @param {?string} elementId
+   * @param {?string} ampUserId
+   * @return {!Object}
+   */
+  buildPostDismissRequest_(enctype, elementId, ampUserId) {
+    const body = dict({
+      'elementId': elementId,
+      'ampUserId': ampUserId,
+    });
+    return {
+      method: 'POST',
+      credentials: 'include',
+      requireAmpResponseSourceOrigin: false,
+      body,
+      headers: {
+        'Content-Type': enctype,
+      },
+    };
   }
 
   /**

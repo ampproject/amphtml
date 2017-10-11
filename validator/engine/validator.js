@@ -56,6 +56,7 @@ goog.require('parse_css.extractUrls');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.tokenize');
 goog.require('parse_css.validateAmp4AdsCss');
+goog.require('parse_css.validateKeyframesCss');
 goog.require('parse_srcset.SrcsetParsingResult');
 goog.require('parse_srcset.parseSrcset');
 goog.require('parse_url.URL');
@@ -1048,7 +1049,7 @@ class ReferencePointMatcher {
           context.getDocLocator(),
           /*params*/
           [
-            context.getTagStack().getCurrent(),
+            context.getTagStack().getCurrent().toLowerCase(),
             this.parsedReferencePoints_.parentTagSpecName(),
             this.parsedValidatorRules_.getReferencePointName(
                 this.parsedReferencePoints_.iterate()[0])
@@ -1180,6 +1181,9 @@ let DescendantConstraints;
  *             numOfChildren: number,
  *             onlyChildTagName: string,
  *             onlyChildErrorLineCol: LineCol,
+ *             lastChildSiblingCount: number,
+ *             lastChildTagName: string,
+ *             lastChildErrorLineCol: LineCol,
  *             childTagMatcher: ?ChildTagMatcher,
  *             referencePointMatcher: ?ReferencePointMatcher }}
  */
@@ -1234,6 +1238,9 @@ class TagStack {
       numOfChildren: 0,
       onlyChildTagName: '',
       onlyChildErrorLineCol: null,
+      lastChildSiblingCount: 0,
+      lastChildTagName: '',
+      lastChildErrorLineCol: null,
       childTagMatcher: null,
       referencePointMatcher: null
     };
@@ -1381,6 +1388,17 @@ class TagStack {
   }
 
   /**
+   * The number of children that have been discovered up to now by traversing
+   * the stack.
+   * @return {number}
+   */
+  numOfChildrenForParent() {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) return parent.numOfChildren;
+    return 0;
+  }
+
+  /**
    * The number of siblings that have been discovered up to now by traversing
    * the stack.
    * @return {number}
@@ -1441,6 +1459,59 @@ class TagStack {
    */
   parentHasChildWithNoSiblingRule() {
     return this.parentOnlyChildTagName().length > 0;
+  }
+
+  /**
+   * Tells the parent of the current stack entry that its last child must be me
+   * (the current stack entry).
+   * @param {string} tagName The current stack entry's tag name.
+   * @param {amp.htmlparser.DocLocator} docLocator The line and col of where the
+   *  current stack entry appears.
+   */
+  tellParentImTheLastChild(tagName, docLocator) {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) {
+      parent.lastChildTagName = tagName;
+      parent.lastChildErrorLineCol =
+          new LineCol(docLocator.getLine(), docLocator.getCol());
+      parent.lastChildSiblingCount = parent.numOfChildren;
+    }
+  }
+
+  /**
+   * @return {number} The order in which the tag with the 'last child' rule was
+   * encountered.
+   */
+  parentLastChildSiblingCount() {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) return parent.lastChildSiblingCount;
+    return -1;
+  }
+
+  /**
+   * @return {LineCol} The LineCol of the tag that set the 'last child' rule.
+   */
+  parentLastChildErrorLineCol() {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) return parent.lastChildErrorLineCol;
+    return null;
+  }
+
+  /**
+   * @return {string} The name of the tag with the 'last child' rule.
+   */
+  parentLastChildTagName() {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) return parent.lastChildTagName;
+    return '';
+  }
+
+  /**
+   * @return {boolean} true if this tag's parent has a child with 'last child'
+   * rule. Else false.
+   */
+  parentHasChildWithLastChildRule() {
+    return this.parentLastChildTagName().length > 0;
   }
 
   /**
@@ -1521,8 +1592,29 @@ function isAtRuleValid(cssSpec, atRuleName) {
   return defaultType !== amp.validator.AtRuleSpec.BlockType.PARSE_AS_ERROR;
 }
 
+/**
+ * Returns true if the given Declaration is considered valid.
+ * @param {!amp.validator.CssSpec} cssSpec
+ * @param {string} declarationName
+ * @return {boolean}
+ */
+function IsDeclarationValid(cssSpec, declarationName) {
+  if (cssSpec.allowedDeclarations.length === 0) return true;
+  return cssSpec.allowedDeclarations.indexOf(declarationName.toLowerCase()) >
+      -1;
+}
+
+/**
+ * Returns a string of the allowed Declarations.
+ * @param {!amp.validator.CssSpec} cssSpec
+ * @return {string}
+ */
+function AllowedDeclarationsString(cssSpec) {
+  return '[\'' + cssSpec.allowedDeclarations.join('\', \'') + '\']';
+}
+
 /** @private */
-class InvalidAtRuleVisitor extends parse_css.RuleVisitor {
+class InvalidRuleVisitor extends parse_css.RuleVisitor {
   /**
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.CssSpec} cssSpec
@@ -1552,6 +1644,26 @@ class InvalidAtRuleVisitor extends parse_css.RuleVisitor {
             amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
             new LineCol(atRule.line, atRule.col),
             /* params */[getTagSpecName(this.tagSpec), atRule.name],
+            /* url */ '', this.result);
+      }
+    }
+  }
+
+  /** @inheritDoc */
+  visitDeclaration(declaration) {
+    if (!IsDeclarationValid(this.cssSpec, declaration.name)) {
+      if (amp.validator.LIGHT) {
+        this.result.status = amp.validator.ValidationResult.Status.FAIL;
+      } else {
+        this.context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY,
+            new LineCol(declaration.line, declaration.col),
+            /* params */
+            [
+              getTagSpecName(this.tagSpec), declaration.name,
+              AllowedDeclarationsString(this.cssSpec)
+            ],
             /* url */ '', this.result);
       }
     }
@@ -1799,6 +1911,10 @@ class CdataMatcher {
       parse_css.validateAmp4AdsCss(sheet, cssErrors);
     }
 
+    if (cssSpec.validateKeyframes) {
+      parse_css.validateKeyframesCss(sheet, cssErrors);
+    }
+
     if (amp.validator.LIGHT) {
       if (cssErrors.length > 0) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
@@ -1827,7 +1943,7 @@ class CdataMatcher {
                                                parsedImageUrlSpec),
           adapter, context, url.utf8Url, this.tagSpec_, validationResult);
     }
-    const visitor = new InvalidAtRuleVisitor(
+    const visitor = new InvalidRuleVisitor(
         this.tagSpec_, cssSpec, context, validationResult);
     sheet.accept(visitor);
   }
@@ -2569,7 +2685,7 @@ function validateAttrValueUrl(
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
       } else {
-        // DUPLICATE_DIMENSION only needs two paramters, it does not report
+        // DUPLICATE_DIMENSION only needs two parameters, it does not report
         // on the attribute value.
         if (parseResult.errorCode ===
             amp.validator.ValidationError.Code.DUPLICATE_DIMENSION) {
@@ -3137,7 +3253,7 @@ function validateParentTag(parsedTagSpec, context, validationResult) {
 function validateDescendantTags(
     parsedTagSpec, context, validationResult, parsedRules) {
   const spec = parsedTagSpec.getSpec();
-  const tagName = parsedTagSpec.getSpec().tagName;
+  const tagName = context.getTagStack().getCurrent();
 
   for (var ii = 0; ii < context.allowedDescendantsList().length; ++ii) {
     const allowedDescendantsList = context.allowedDescendantsList()[ii];
@@ -3163,7 +3279,7 @@ function validateDescendantTags(
 }
 
 /**
- * Validates if the 'no siblings allowed' rule if it exists.
+ * Validates if the 'no siblings allowed' rule exists.
  * @param {!ParsedTagSpec} parsedTagSpec
  * @param {!Context} context
  * @param {!amp.validator.ValidationResult} validationResult
@@ -3209,6 +3325,42 @@ function validateNoSiblingsAllowedTags(
 
   if (spec.siblingsDisallowed) {
     context.tellParentNoSiblingsAllowed(spec.tagName, context.getDocLocator());
+  }
+}
+
+/**
+ * Validates if the 'last child' rule exists.
+ * @param {!ParsedTagSpec} parsedTagSpec
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} validationResult
+ */
+function validateLastChildTags(parsedTagSpec, context, validationResult) {
+  const spec = parsedTagSpec.getSpec();
+  const tagStack = context.getTagStack();
+
+  if (tagStack.parentHasChildWithLastChildRule() &&
+      tagStack.numOfChildrenForParent() >
+          tagStack.parentLastChildSiblingCount()) {
+    if (amp.validator.LIGHT) {
+      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      return;
+    } else {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.MANDATORY_LAST_CHILD_TAG,
+          tagStack.parentLastChildErrorLineCol(),
+          /* params */
+          [
+            tagStack.parentLastChildTagName().toLowerCase(),
+            tagStack.getParent().toLowerCase()
+          ],
+          getTagSpecUrl(spec), validationResult);
+    }
+  }
+
+  if (spec.mandatoryLastChild) {
+    tagStack.tellParentImTheLastChild(
+        getTagSpecName(spec), context.getDocLocator());
   }
 }
 
@@ -4082,6 +4234,7 @@ function validateTagAgainstSpec(
   }
   validateDescendantTags(parsedSpec, context, resultForAttempt, parsedRules);
   validateNoSiblingsAllowedTags(parsedSpec, context, resultForAttempt);
+  validateLastChildTags(parsedSpec, context, resultForAttempt);
 
   // Set Descendent Constraint rules.
   const descendantTagLists = parsedRules.getDescendantTagLists();
@@ -4539,6 +4692,11 @@ class ParsedValidatorRules {
   /** @return {?string} */
   getStylesSpecUrl() {
     return this.rules_.stylesSpecUrl;
+  }
+
+  /** @return {?string} */
+  getScriptSpecUrl() {
+    return this.rules_.scriptSpecUrl;
   }
 
   /**
@@ -5146,6 +5304,14 @@ amp.validator.ValidationHandler =
         if (amp.validator.LIGHT) {
           this.validationResult_.status =
               amp.validator.ValidationResult.Status.FAIL;
+        } else if (tagName === 'SCRIPT') {
+          // Special case for <script> tags to produce better error messages.
+          this.context_.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.DISALLOWED_SCRIPT_TAG,
+              this.context_.getDocLocator(),
+              /* params */[], this.rules_.getScriptSpecUrl(),
+              this.validationResult_);
         } else {
           this.context_.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -5456,7 +5622,9 @@ amp.validator.categorizeError = function(error) {
       error.code ===
           amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT ||
       error.code ===
-          amp.validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS) {
+          amp.validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS ||
+      error.code ===
+          amp.validator.ValidationError.Code.MANDATORY_LAST_CHILD_TAG) {
     return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
   }
   // E.g. "The tag 'picture' is disallowed."
@@ -5668,6 +5836,11 @@ amp.validator.categorizeError = function(error) {
       error.params[0] === 'script') {
     return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
   }
+  // E.g. "Only AMP runtime 'script' tags are allowed, and only in the document
+  // head."
+  if (error.code === amp.validator.ValidationError.Code.DISALLOWED_SCRIPT_TAG) {
+    return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
+  }
   // E.g.: "The attribute 'type' in tag 'script type=application/ld+json'
   // is set to the invalid value 'text/javascript'."
   if (error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE &&
@@ -5789,6 +5962,11 @@ amp.validator.categorizeError = function(error) {
       (error.params[1] === 'template')) {
     return amp.validator.ErrorCategory.Code.AMP_HTML_TEMPLATE_PROBLEM;
   }
+  if (error.code ===
+      amp.validator.ValidationError.Code
+          .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR) {
+    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  }
   // E.g. "Missing URL for attribute 'href' in tag 'a'."
   // E.g. "Invalid URL protocol 'http:' for attribute 'src' in tag
   // 'amp-iframe'." Note: Parameters in the format strings appear out
@@ -5807,6 +5985,24 @@ amp.validator.categorizeError = function(error) {
   // E.g. "The dimension '1x' in attribute 'srcset' appears more than once."
   if (error.code === amp.validator.ValidationError.Code.DUPLICATE_DIMENSION) {
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+
+  // E.g. "CSS syntax error in tag style[amp-keyframes]- invalid property
+  // opacityyyy. The only allowed properties are [opacity, transform].
+  if (error.code ===
+          amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY ||
+      error.code ===
+          amp.validator.ValidationError.Code
+              .CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS ||
+      error.code ===
+          amp.validator.ValidationError.Code
+              .CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME ||
+      error.code ===
+          amp.validator.ValidationError.Code
+              .CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME ||
+      error.code ===
+          amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE) {
+    return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
   }
   return amp.validator.ErrorCategory.Code.GENERIC;
 };

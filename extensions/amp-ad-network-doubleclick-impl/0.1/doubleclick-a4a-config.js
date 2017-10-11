@@ -50,16 +50,18 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   HOLDBACK_EXTERNAL: '21060727',
   DELAYED_REQUEST_CONTROL: '21060728',
   DELAYED_REQUEST: '21060729',
-  SFG_CONTROL_ID: '21060730',
-  SFG_EXP_ID: '21060731',
   SRA_CONTROL: '117152666',
   SRA: '117152667',
   HOLDBACK_INTERNAL_CONTROL: '2092613',
   HOLDBACK_INTERNAL: '2092614',
   CANONICAL_CONTROL: '21060932',
   CANONICAL_EXPERIMENT: '21060933',
+  CANONICAL_HTTP_CONTROL: '21061030',
+  CANONICAL_HTTP_EXPERIMENT: '21061031',
   CACHE_EXTENSION_INJECTION_CONTROL: '21060955',
   CACHE_EXTENSION_INJECTION_EXP: '21060956',
+  IDENTITY_CONTROL: '21060937',
+  IDENTITY_EXPERIMENT: '21060938',
 };
 
 /** @const @type {!Object<string,?string>} */
@@ -72,9 +74,9 @@ export const URL_EXPERIMENT_MAPPING = {
   // Delay Request
   '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
   '4': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
-  // SFG
-  '5': DOUBLECLICK_EXPERIMENT_FEATURE.SFG_CONTROL_ID,
-  '6': DOUBLECLICK_EXPERIMENT_FEATURE.SFG_EXP_ID,
+  // Identity
+  '5': DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_CONTROL,
+  '6': DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT,
   // SRA
   '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
   '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
@@ -124,21 +126,28 @@ export class DoubleclickA4aEligibility {
   isA4aEnabled(win, element) {
     let experimentId;
     if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
-        element.hasAttribute('useSameDomainRenderingUntilDeprecated') ||
-        !this.supportsCrypto(win)) {
+        element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
       return false;
     }
     const urlExperimentId = extractUrlExperimentId(win, element);
     let experimentName = DFP_CANONICAL_FF_EXPERIMENT_NAME;
+
     if (!this.isCdnProxy(win)) {
       // Ensure that forcing FF via url is applied if test/localDev.
-      experimentId = (urlExperimentId == -1 &&
-          (getMode(win).localDev ||	getMode(win).test)) ?
-          MANUAL_EXPERIMENT_ID :
-          this.maybeSelectExperiment(win, element, [
-            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
-            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
-          ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
+      if (urlExperimentId == -1 &&
+          (getMode(win).localDev || getMode(win).test)) {
+        experimentId = MANUAL_EXPERIMENT_ID;
+      } else if (!this.supportsCrypto(win)) {
+        experimentId = this.maybeSelectExperiment(win, element, [
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_CONTROL,
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
+        ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
+      } else {
+        experimentId = this.maybeSelectExperiment(win, element, [
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
+        ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
+      }
       // If no experiment selected, return false.
       if (!experimentId) {
         return false;
@@ -169,9 +178,8 @@ export class DoubleclickA4aEligibility {
     }
     return ![DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
       DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
-      DOUBLECLICK_EXPERIMENT_FEATURE.SFG_CONTROL_ID,
-      DOUBLECLICK_EXPERIMENT_FEATURE.SFG_EXP_ID,
       DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_CONTROL,
     ].includes(experimentId);
   }
 
@@ -210,8 +218,10 @@ export function doubleclickIsA4AEnabled(win, element) {
 /**
  * @param {!Window} win
  * @param {!DOUBLECLICK_EXPERIMENT_FEATURE} feature
+ * @param {string=} opt_experimentName
  * @return {boolean} whether feature is enabled
  */
-export function experimentFeatureEnabled(win, feature) {
-  return getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) == feature;
+export function experimentFeatureEnabled(win, feature, opt_experimentName) {
+  const experimentName = opt_experimentName || DOUBLECLICK_A4A_EXPERIMENT_NAME;
+  return getExperimentBranch(win, experimentName) == feature;
 }

@@ -170,6 +170,22 @@ describe('Viewer', () => {
     expect(viewer.getLastVisibleTime()).to.equal(0);
   });
 
+  it('should return promise that resolve on visible', function* () {
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.isVisible()).to.be.true;
+    let promise = viewer.whenNextVisible();
+    yield promise;
+    viewer.receiveMessage('visibilitychange', {
+      state: 'hidden',
+    });
+    promise = viewer.whenNextVisible();
+    expect(viewer.isVisible()).to.be.false;
+    viewer.receiveMessage('visibilitychange', {
+      state: 'visible',
+    });
+    return promise;
+  });
+
   it('should initialize firstVisibleTime for initially visible doc', () => {
     clock.tick(1);
     const viewer = new Viewer(ampdoc);
@@ -777,6 +793,32 @@ describe('Viewer', () => {
       windowApi.parent = {};
       windowApi.location.search = '?amp_js_v=1';
       expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
+    });
+  });
+
+  describe('isWebviewEmbedded', () => {
+    it('should be webview w/ "webview=1"', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.hash = '#webview=1';
+      expect(new Viewer(ampdoc).isWebviewEmbedded()).to.be.true;
+    });
+
+    it('should NOT be webview w/o "webview=1"', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.hash = '#foo=1';
+      expect(new Viewer(ampdoc).isWebviewEmbedded()).to.be.false;
+    });
+
+    it('should NOT be webview w/ "webview=0"', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.hash = '#webview=0';
+      expect(new Viewer(ampdoc).isWebviewEmbedded()).to.be.false;
+    });
+
+    it('should NOT be webview if iframed regardless of "webview=1"', () => {
+      windowApi.parent = {};
+      windowApi.location.hash = '#webview=1';
+      expect(new Viewer(ampdoc).isEmbedded()).to.be.false;
     });
   });
 

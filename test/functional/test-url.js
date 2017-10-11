@@ -32,7 +32,61 @@ import {
   resolveRelativeUrlFallback_,
   serializeQueryString,
   getCorsUrl,
+  getWinOrigin,
 } from '../../src/url';
+
+describe('getWinOrigin', () => {
+
+  it('should return origin if available', () => {
+    expect(getWinOrigin({
+      'origin': 'https://foo.com',
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('https://foo.com');
+  });
+
+
+  it('should return origin from href when win.origin is not available', () => {
+    expect(getWinOrigin({
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('https://foo1.com');
+  });
+
+
+  it('should return origin from href when win.origin is empty', () => {
+    expect(getWinOrigin({
+      'origin': '',
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('https://foo1.com');
+  });
+
+  it('should return origin from href when win.origin is null', () => {
+    expect(getWinOrigin({
+      'origin': null,
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('https://foo1.com');
+  });
+
+  it('should return \"null\" when win.origin is \"null\"', () => {
+    expect(getWinOrigin({
+      'origin': 'null',
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('null');
+  });
+
+
+
+});
+
 
 describe('parseUrl', () => {
 

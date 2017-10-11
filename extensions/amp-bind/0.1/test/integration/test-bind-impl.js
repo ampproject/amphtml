@@ -464,7 +464,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
         expect(element.textContent.length).to.not.equal(0);
         expect(element.classList.length).to.not.equal(0);
         expect(element.attributes.length).to.not.equal(0);
-        expect(element.mutatedAttributesCallback).to.be.called.once;
+        expect(element.mutatedAttributesCallback).to.be.calledOnce;
 
         element.textContent = '';
         element.className = '';
@@ -479,7 +479,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
         expect(element.textContent).to.equal('');
         expect(element.className).to.equal('');
         expect(element.attributes.length).to.equal(0);
-        expect(element.mutatedAttributesCallback).to.be.called.once;
+        expect(element.mutatedAttributesCallback).to.be.calledOnce;
       });
     });
 

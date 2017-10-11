@@ -15,24 +15,24 @@
  */
 'use strict';
 
-var argv = require('minimist')(process.argv.slice(2));
-var gulp = require('gulp-help')(require('gulp'));
-var glob = require('glob');
-var Karma = require('karma').Server;
-var config = require('../config');
-var read = require('file-reader');
-var fs = require('fs');
-var path = require('path');
-var util = require('gulp-util');
-var webserver = require('gulp-webserver');
-var app = require('../test-server').app;
-var karmaDefault = require('./karma.conf');
-var shuffleSeed = require('shuffle-seed');
+const argv = require('minimist')(process.argv.slice(2));
+const gulp = require('gulp-help')(require('gulp'));
+const glob = require('glob');
+const Karma = require('karma').Server;
+const config = require('../config');
+const fs = require('fs');
+const path = require('path');
+const util = require('gulp-util');
+const webserver = require('gulp-webserver');
+const app = require('../test-server').app;
+const karmaDefault = require('./karma.conf');
+const shuffleSeed = require('shuffle-seed');
 
 
 const green = util.colors.green;
 const yellow = util.colors.yellow;
 const cyan = util.colors.cyan;
+const preTestTasks = argv.nobuild ? [] : (argv.unit ? ['css'] : ['build']);
 
 
 /**
@@ -60,7 +60,7 @@ function getConfig() {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
     return Object.assign({}, karmaDefault, {
-      reporters: ['dots', 'saucelabs', 'mocha'],
+      reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
       browsers: argv.oldchrome
           ? ['SL_Chrome_45']
           : [
@@ -68,12 +68,13 @@ function getConfig() {
             'SL_Chrome_latest',
             'SL_Chrome_45',
             'SL_Firefox_latest',
-            //'SL_Safari_8' // Disabled due to flakiness and low market share
+            // 'SL_Safari_8' // Disabled due to flakiness and low market share
             'SL_Safari_9',
             'SL_Edge_latest',
-            //'SL_iOS_8_4', // Disabled due to flakiness and low market share
+            // 'SL_iOS_8_4', // Disabled due to flakiness and low market share
             'SL_iOS_9_1',
             'SL_iOS_10_0',
+            'SL_iOS_11_0',
             'SL_IE_11',
           ],
     });
@@ -96,13 +97,13 @@ function getAdTypes() {
 
   // Add all other ad types
   const files = fs.readdirSync('./ads/');
-  for (var i = 0; i < files.length; i++) {
+  for (let i = 0; i < files.length; i++) {
     if (path.extname(files[i]) == '.js'
         && files[i][0] != '_' && files[i] != 'ads.extern.js') {
       const adType = path.basename(files[i], '.js');
       const expanded = namingExceptions[adType];
       if (expanded) {
-        for (var j = 0; j < expanded.length; j++) {
+        for (let j = 0; j < expanded.length; j++) {
           adTypes.push(expanded[j]);
         }
       } else {
@@ -131,15 +132,15 @@ function printArgvMessages() {
     testnames: 'Listing the names of all tests being run.',
     files: 'Running tests in the file(s): ' + cyan(argv.files),
     integration: 'Running only the integration tests. Requires ' +
-        cyan('gulp build') +  ' to have been run first.',
+        cyan('gulp build') + ' to have been run first.',
     unit: 'Running only the unit tests. Requires ' +
-        cyan('gulp css') +  ' to have been run first.',
+        cyan('gulp css') + ' to have been run first.',
     randomize: 'Randomizing the order in which tests are run.',
     a4a: 'Running only A4A tests.',
     seed: 'Randomizing test order with seed ' + cyan(argv.seed) + '.',
-    compiled:  'Running tests against minified code.',
+    compiled: 'Running tests against minified code.',
     grep: 'Only running tests that match the pattern "' +
-        cyan(argv.grep) + '".'
+        cyan(argv.grep) + '".',
   };
   if (!process.env.TRAVIS) {
     util.log(green('Run', cyan('gulp help'),
@@ -166,17 +167,16 @@ function printArgvMessages() {
 /**
  * Run tests.
  */
-gulp.task('test', 'Runs tests',
-    argv.nobuild ? [] : (argv.unit ? ['css'] : ['build']), function(done) {
+gulp.task('test', 'Runs tests', preTestTasks, function(done) {
   if (!argv.nohelp) {
     printArgvMessages();
   }
 
   if (!argv.integration && process.env.AMPSAUCE_REPO) {
-    console./*OK*/info('Deactivated for ampsauce repo')
+    console./* OK*/info('Deactivated for ampsauce repo');
   }
 
-  var c = getConfig();
+  const c = getConfig();
 
   if (argv.watch || argv.w) {
     c.singleRun = false;
@@ -188,22 +188,26 @@ gulp.task('test', 'Runs tests',
 
   if (argv.testnames) {
     c.reporters = ['mocha'];
-    c.mochaReporter.output = 'full';
   }
 
+  // Exclude chai-as-promised from sauce labs runs.
+  // See test/chai-as-promised/chai-as-promised.js for why this is necessary.
+  c.files = argv.saucelabs ? [] : config.chaiAsPromised;
+
   if (argv.files) {
-    c.files = [].concat(config.commonTestPaths, argv.files);
-    c.reporters = argv.saucelabs ? ['dots', 'saucelabs', 'mocha'] : ['mocha'];
-    c.mochaReporter.output = argv.saucelabs ? 'minimal' : 'full';
+    c.files = c.files.concat(config.commonTestPaths, argv.files);
+    if (!argv.saucelabs) {
+      c.reporters = ['mocha'];
+    }
   } else if (argv.integration) {
-    c.files = config.integrationTestPaths;
+    c.files = c.files.concat(config.integrationTestPaths);
   } else if (argv.unit) {
-    c.files = config.unitTestPaths;
+    c.files = c.files.concat(config.unitTestPaths);
   } else if (argv.randomize || argv.glob || argv.a4a) {
     const testPaths = argv.a4a ? config.a4aTestPaths : config.basicTestPaths;
 
-    var testFiles = [];
-    for (var index in testPaths) {
+    let testFiles = [];
+    for (const index in testPaths) {
       testFiles = testFiles.concat(glob.sync(testPaths[index]));
     }
 
@@ -221,9 +225,15 @@ gulp.task('test', 'Runs tests',
     }
 
     testFiles.splice(testFiles.indexOf('test/_init_tests.js'), 1);
-    c.files = config.commonTestPaths.concat(testFiles);
+    c.files = c.files.concat(config.commonTestPaths.concat(testFiles));
   } else {
-    c.files = config.testPaths;
+    c.files = c.files.concat(config.testPaths);
+  }
+
+  // Include a simple passing test for sauce labs runs. This is done because
+  // running zero tests on a sauce labs browser throws an error. See #11494.
+  if (argv.saucelabs) {
+    c.files = c.files.concat(config.simpleTestPath);
   }
 
   // c.client is available in test browser via window.parent.karma.config
@@ -249,7 +259,7 @@ gulp.task('test', 'Runs tests',
   if (argv.coverage) {
     util.log(util.colors.blue('Including code coverage tests'));
     c.browserify.transform.push(
-        ['browserify-istanbul', { instrumenterConfig: { embedSource: true }}]);
+        ['browserify-istanbul', {instrumenterConfig: {embedSource: true}}]);
     c.reporters = c.reporters.concat(['progress', 'coverage']);
     if (c.preprocessors['src/**/*.js']) {
       c.preprocessors['src/**/*.js'].push('coverage');
@@ -259,31 +269,31 @@ gulp.task('test', 'Runs tests',
     c.coverageReporter = {
       dir: 'test/coverage',
       reporters: [
-        { type: 'html', subdir: 'report-html' },
-        { type: 'lcov', subdir: 'report-lcov' },
-        { type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt' },
-        { type: 'text', subdir: '.', file: 'text.txt' },
-        { type: 'text-summary', subdir: '.', file: 'text-summary.txt' },
+        {type: 'html', subdir: 'report-html'},
+        {type: 'lcov', subdir: 'report-lcov'},
+        {type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt'},
+        {type: 'text', subdir: '.', file: 'text.txt'},
+        {type: 'text-summary', subdir: '.', file: 'text-summary.txt'},
       ],
       instrumenterOptions: {
         istanbul: {
           noCompact: true,
-        }
-      }
+        },
+      },
     };
     // TODO(jonkeller): Add c.coverageReporter.check as shown in
     // https://github.com/karma-runner/karma-coverage/blob/master/docs/configuration.md
   }
 
   // Run fake-server to test XHR responses.
-  var server = gulp.src(process.cwd())
+  const server = gulp.src(process.cwd())
       .pipe(webserver({
         port: 31862,
         host: 'localhost',
         directoryListing: true,
         middleware: [app],
       })
-      .on('kill', function () {
+      .on('kill', function() {
         util.log(yellow(
             'Shutting down test responses server on localhost:31862'));
         process.nextTick(function() {
@@ -302,6 +312,25 @@ gulp.task('test', 'Runs tests',
       process.exit(exitCode);
     } else {
       done();
+    }
+  }).on('run_start', function() {
+    if (argv.saucelabs) {
+      console./* OK*/log(green(
+          'Running tests in parallel on', c.browsers.length, 'browsers...'));
+    }
+  }).on('browser_complete', function(browser) {
+    if (argv.saucelabs) {
+      const result = browser.lastResult;
+      let message = '\n' + browser.name + ': ';
+      message += 'Executed ' + (result.success + result.failed) +
+          ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
+      if (result.failed === 0) {
+        message += util.colors.green('SUCCESS');
+      } else {
+        message += util.colors.red(result.failed + ' FAILED');
+      }
+      message += '\n';
+      console./* OK*/log(message);
     }
   }).start();
 }, {
@@ -328,5 +357,5 @@ gulp.task('test', 'Runs tests',
         'to Karma',
     'nohelp': '  Silence help messages that are printed prior to test run',
     'a4a': '  Runs all A4A tests',
-  }
+  },
 });

@@ -31,6 +31,7 @@ import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
 import {
   experimentFeatureEnabled,
   DOUBLECLICK_EXPERIMENT_FEATURE,
+  DFP_CANONICAL_FF_EXPERIMENT_NAME,
 } from './doubleclick-a4a-config';
 import {
   isInManualExperiment,
@@ -40,7 +41,6 @@ import {
   truncAndTimeUrl,
   googleBlockParameters,
   googlePageParameters,
-  isGoogleAdsA4AValidEnvironment,
   isReportingEnabled,
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
@@ -50,6 +50,7 @@ import {
   getEnclosingContainerTypes,
   ValidAdContainerTypes,
   maybeAppendErrorParameter,
+  getIdentityToken,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -62,6 +63,7 @@ import {
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {stringHash32} from '../../../src/string';
 import {removeElement, createElementWithAttributes} from '../../../src/dom';
+import {getData} from '../../../src/event-helper';
 import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -81,13 +83,17 @@ import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {
+  getPublisherSpecifiedRefreshInterval,
   RefreshManager,
   DATA_ATTR_NAME,
 } from '../../amp-a4a/0.1/refresh-manager';
 import {
   addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
+import '../../amp-a4a/0.1/real-time-config-manager';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -95,16 +101,6 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
-
-/** milliseconds */
-/** @const {number} */
-const RTC_TIMEOUT = 1000;
-
-/** @private {?Promise<?Object>} */
-let rtcPromise = null;
-
-/** @private {?JsonObject|undefined} */
-let rtcConfig = null;
 
 /** @private @enum {number} */
 const RTC_ATI_ENUM = {
@@ -134,11 +130,11 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
  */
 export const TFCD = 'tagForChildDirectedTreatment';
 
+/** @const {string} */
+export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
+
 /** @private {?Promise} */
 let sraRequests = null;
-
-/** @private {?Promise<!Object<string,string|number|boolean>>} */
-let pageLevelParameters_ = null;
 
 /**
  * Array of functions used to combine block level request parameters for SRA
@@ -218,7 +214,55 @@ const BLOCK_SRA_COMBINERS_ = [
     });
     return Object.keys(eids).length ? {'eid': Object.keys(eids).join()} : null;
   },
+  instances => getFirstInstanceValue_(instances,
+      instance => instance.buildIdentityParams_()),
 ];
+
+/**
+ * Used to manage messages for different fluid ad slots.
+ *
+ * Maps a sentinel value to an object consisting of the impl to which that
+ * sentinel value belongs and the corresponding message handler for that impl.
+ * @type{!Object<string, !{instance: !AmpAdNetworkDoubleclickImpl, connectionEstablished: boolean}>}
+ */
+const fluidListeners = {};
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+function fluidMessageListener_(event) {
+  const data = tryParseJson(getData(event));
+  if (event.origin != SAFEFRAME_ORIGIN || !data) {
+    return;
+  }
+  if (data['e']) {
+    // This is a request to establish a postmessaging connection.
+    const listener = fluidListeners[data['e']];
+    if (!listener) {
+      dev().warn(TAG, `Listener for sentinel ${data['e']} not found.`);
+      return;
+    }
+    if (!listener.connectionEstablished) {
+      listener.instance.connectFluidMessagingChannel();
+      listener.connectionEstablished = true;
+    }
+    return;
+  }
+  const payload = tryParseJson(data['p']);
+  if (!payload || !payload['sentinel']) {
+    return;
+  }
+  const listener = fluidListeners[payload['sentinel']];
+  if (!listener) {
+    dev().warn(TAG, `Listener for sentinel ${payload['sentinel']} not found.`);
+    return;
+  }
+  if (data['s'] != 'creative_geometry_update') {
+    return;
+  }
+  listener.instance.receiveMessageForFluid_(payload);
+}
 
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
@@ -289,14 +333,38 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {number} */
     this.ifi_ = 0;
+
+    /** @private {boolean} */
+    this.isFluid_ = false;
+
+    /** @private {?string} */
+    this.fluidImpressionUrl_ = null;
+
+    /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
+    this.identityTokenPromise_ = null;
+
+    /** @type {?../../../ads/google/a4a/utils.IdentityToken} */
+    this.identityToken = null;
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    this.isFluid_ = layout == Layout.FLUID;
+    return this.isFluid_ || isLayoutSizeDefined(layout);
   }
 
   /** @override */
   isValidElement() {
-    return isGoogleAdsA4AValidEnvironment(this.win) &&
-      this.isAmpAdElement() &&
+    /**
+     * isValidElement used to also check that we are in a valid A4A environment,
+     * however this is not necessary as that is checked by doubleclickIsA4AEnabled,
+     * which is always called as part of the upgrade path from an amp-ad element
+     * to an amp-ad-doubleclick element. Thus, if we are an amp-ad, we can be sure
+     * that it has been verified.
+     */
+    return this.isAmpAdElement() &&
       // Ensure not within remote.html iframe.
-      !document.querySelector('meta[name=amp-3p-iframe-src]');
+      !this.win.document.querySelector('meta[name=amp-3p-iframe-src]');
   }
 
   /** @override */
@@ -308,6 +376,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
+    this.identityTokenPromise_ = experimentFeatureEnabled(
+        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) ?
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+        .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
+        Promise.resolve(
+            /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
       addExperimentIdToElement(verifierEid, this.element);
@@ -324,6 +398,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return;
     }
     this.win['dbclk_a4a_viz_change'] = true;
+    addExperimentIdToElement(
+        isExperimentOn(this.win, 'a4a-safeframe-preloading-off') ?
+        '21061136' : '21061135', this.element);
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.onVisibilityChanged(() => {
       if (viewer.getVisibilityState() != VisibilityState.PAUSED ||
@@ -360,6 +437,33 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
+   * Handles Fluid-related messages dispatched from SafeFrame.
+   * @param {!JsonObject} payload
+   * @private
+   */
+  receiveMessageForFluid_(payload) {
+    let newHeight;
+    if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
+      // TODO(levitzky) Add actual error handling here.
+      this.forceCollapse();
+      return;
+    }
+    this.attemptChangeHeight(newHeight)
+        .then(() => this.onFluidResize_())
+        .catch(() => {
+          // TODO(levitzky) Add more error handling here
+          this.forceCollapse();
+        });
+  }
+
+  /** @override */
+  shouldPreferentialRenderWithoutCrypto() {
+    return experimentFeatureEnabled(
+        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
+        DFP_CANONICAL_FF_EXPERIMENT_NAME);
+  }
+
+  /**
    * @return {!{
    *  resolver: ?function(?../../../src/service/xhr-impl.FetchResponse),
    *  rejector: ?function(*),
@@ -385,7 +489,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getBlockParameters_() {
     dev().assert(this.initialSize_);
     dev().assert(this.jsonTargeting_);
-    let sizeStr = `${this.initialSize_.width}x${this.initialSize_.height}`;
+    let sizeStr = this.isFluid_ ?
+        '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
@@ -403,14 +508,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           multiSizeDataStr,
           this.initialSize_.width,
           this.initialSize_.height,
-          multiSizeValidation == 'true');
+          multiSizeValidation == 'true',
+          this.isFluid_);
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
           .join('|');
     }
-    const rc = (this.refreshCount_ && this.fromResumeCallback)
-        ? this.refreshCount_ + 1
-        : (this.fromResumeCallback ? 1 : this.refreshCount_ || null);
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     this.ifi_ = (this.isRefreshing && this.ifi_) ||
         this.win['ampAdGoogleIfiCounter']++;
@@ -420,6 +523,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.jsonTargeting_['cookieOptOut'] ? '1' : null,
       'adk': this.adKey_,
       'sz': sizeStr,
+      'output': 'html',
+      'impl': 'ifr',
       'tfcd': tfcd == undefined ? null : tfcd,
       'adtest': isInManualExperiment(this.element) ? 'on' : null,
       'scp': serializeTargeting_(
@@ -427,7 +532,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (this.jsonTargeting_ &&
             this.jsonTargeting_['categoryExclusions']) || null),
       'ifi': this.ifi_,
-      rc,
+      'rc': this.refreshCount_ || null,
+      'frc': Number(this.fromResumeCallback) || null,
+      'fluid': this.isFluid_ ? 'height' : null,
     }, googleBlockParameters(this));
   }
 
@@ -441,10 +548,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('data-override-height')) ||
       Number(this.element.getAttribute('height'));
-    this.initialSize_ = width && height
-        ? {width, height}
-        // width/height could be 'auto' in which case we fallback to measured.
-        : this.getIntersectionElementLayoutBox();
+    this.initialSize_ = this.isFluid_ ? {width: 0, height: 0} :
+        (width && height ?
+         // width/height could be 'auto' in which case we fallback to measured.
+         {width, height} : this.getIntersectionElementLayoutBox());
     this.jsonTargeting_ =
       tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey_ = this.generateAdKey_(
@@ -452,11 +559,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl() {
+  getAdUrl(opt_rtcResponsesPromise) {
     if (this.iframe && !this.isRefreshing) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
       return '';
     }
+    opt_rtcResponsesPromise = opt_rtcResponsesPromise || Promise.resolve();
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
     // fallback to non-SRA if single block.
@@ -464,20 +572,74 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
-
-    const pageLevelParametersPromise = getPageLevelParameters_(
-        this.win, this.getAmpDoc(), startTime);
-    const rtcRequestPromise = isExperimentOn(this.win, 'disable-rtc') ?
-    Promise.resolve({}) : this.executeRtc_();
-    return Promise.all(
-      [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
-        return googleAdUrl(
-            this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
-                this.getBlockParameters_(),
-                /* RTC Parameters */ values[1],
-                /* pageLevelParameters */ values[0]));
-      });
+    const identityPromise = Services.timerFor(this.win)
+        .timeoutPromise(1000, this.identityTokenPromise_)
+        .catch(err => {
+          // On error/timeout, proceed.
+          return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({});
+        });
+    return Promise.all([opt_rtcResponsesPromise, identityPromise]).then(
+        results => {
+          const rtcParams = this.mergeRtcResponses_(results[0]);
+          this.identityToken = results[1];
+          return googleAdUrl(
+              this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
+                  this.getBlockParameters_(), rtcParams,
+                  this.buildIdentityParams_(), PAGE_LEVEL_PARAMS_));
+        });
   }
+
+  /**
+   * @return {!Object<string,string>}
+   * @private
+   */
+  buildIdentityParams_() {
+    return this.identityToken ? {
+      adsid: this.identityToken.token || null,
+      jar: this.identityToken.jar || null,
+      pucrd: this.identityToken.pucrd || null,
+    } : {};
+  }
+
+  /**
+   * Merges all of the rtcResponses into the JSON targeting and
+   * category exclusions.
+   * @param {?Array<!rtcResponseDef>} rtcResponseArray
+   * @private
+   */
+  mergeRtcResponses_(rtcResponseArray) {
+    if (!rtcResponseArray) {
+      return null;
+    }
+    const artc = [];
+    const ati = [];
+    const ard = [];
+    rtcResponseArray.forEach(rtcResponse => {
+      // Only want to send errors for requests we actually sent.
+      if (rtcResponse.error &&
+          rtcResponse.error != RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE &&
+          rtcResponse.error != RTC_ERROR_ENUM.NETWORK_FAILURE &&
+          rtcResponse.error != RTC_ERROR_ENUM.TIMEOUT) {
+        return;
+      }
+      artc.push(rtcResponse.rtcTime);
+      ati.push(!rtcResponse.error ? RTC_ATI_ENUM.RTC_SUCCESS :
+               RTC_ATI_ENUM.RTC_FAILURE);
+      ard.push(rtcResponse.callout);
+      if (rtcResponse.response) {
+        ['targeting', 'categoryExclusions'].forEach(key => {
+          if (rtcResponse.response[key]) {
+            this.jsonTargeting_[key] =
+                !!this.jsonTargeting_[key] ?
+                deepMerge(this.jsonTargeting_[key], rtcResponse.response[key]) :
+                rtcResponse.response[key];
+          }
+        });
+      }
+    });
+    return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
+  }
+
 
   /** @override */
   onNetworkFailure(error, adUrl) {
@@ -495,8 +657,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-    this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
-    this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
+
+    const refreshInterval = Number(responseHeaders.get('amp-force-refresh'));
+    if (refreshInterval && !getPublisherSpecifiedRefreshInterval(
+        this.element, this.win, 'doubleclick')) {
+      this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
+    }
+
+    if (this.isFluid_) {
+      this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
+    } else {
+      this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
+      this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
+    }
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);
@@ -567,7 +740,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   layoutCallback() {
-    const superReturnValue = super.layoutCallback();
+    if (this.isFluid_) {
+      this.registerListenerForFluid_();
+    }
+    const frameLoadPromise = super.layoutCallback();
     if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
       user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
     }
@@ -580,7 +756,42 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               visiblePercentageMin: 50,
               continuousTimeMin: 1,
             });
-    return superReturnValue;
+    return frameLoadPromise;
+  }
+
+  /** @override  */
+  unlayoutCallback() {
+    super.unlayoutCallback();
+    this.maybeRemoveListenerForFluid();
+  }
+
+  /**
+   * Postmessages an initial message to the fluid creative.
+   * @visibleForTesting
+   */
+  connectFluidMessagingChannel() {
+    dev().assert(this.iframe.contentWindow,
+        'Frame contentWindow unavailable.');
+    this.iframe.contentWindow./*OK*/postMessage(
+        JSON.stringify(dict({'message': 'connect', 'c': 'sfchannel1'})),
+        SAFEFRAME_ORIGIN);
+  }
+
+  /**
+   * Fires a delayed impression and notifies the Fluid creative that its
+   * container has been resized.
+   * @private
+   */
+  onFluidResize_() {
+    if (this.fluidImpressionUrl_) {
+      this.fireDelayedImpressions(this.fluidImpressionUrl_);
+      this.fluidImpressionUrl_ = null;
+    }
+    dev().assert(this.iframe.contentWindow,
+        'Frame contentWindow unavailable.');
+    this.iframe.contentWindow./*OK*/postMessage(
+        JSON.stringify(dict({'message': 'resize-complete', 'c': 'sfchannel1'})),
+        SAFEFRAME_ORIGIN);
   }
 
   /** @override */
@@ -626,12 +837,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // Force size of frame to match creative or, if creative size is unknown,
     // the slot. This ensures that the creative is centered in the former case,
     // and not truncated in the latter.
-    // TODO(levitzky) Figure out the behavior of responsive + multi-size.
     const size = this.returnedSize_ || this.getSlotSize();
+    const isMultiSizeFluid = this.isFluid_ && this.returnedSize_ &&
+        // TODO(@glevitzky, 11583) Remove this clause once we stop sending back
+        // the size header for fluid ads. Fluid size headers always come back as
+        // 0x0.
+        !(size.width == 0 && size.height == 0);
     setStyles(dev().assertElement(this.iframe), {
       width: `${size.width}px`,
       height: `${size.height}px`,
+      position: isMultiSizeFluid ? 'relative' : null,
     });
+    if (isMultiSizeFluid) {
+      // This is a fluid + multi-size request, where the returned creative is
+      // multi-size. The slot needs to not be styled with width: 100%, or the
+      // creative will be centered instead of left-aligned.
+      this.element.removeAttribute('height');
+      setStyles(this.element, {width: `${size.width}px`});
+    }
   }
 
   /**
@@ -661,171 +884,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // We want to resize only if neither returned dimension is larger than its
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
-    if ((width != pWidth || height != pHeight)
-        && (width <= pWidth && height <= pHeight)) {
+    if (this.isFluid_ ||
+        (width != pWidth || height != pHeight) &&
+        (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
     }
   }
-
-  /**
-   * Sends RTC request as specified by rtcConfig. Returns promise which
-   * resolves to the time that the RTC callout took to complete.
-   * If disableStalewhilerevalidate == true, then we will only
-   * send one RTC request per page. If it's !== true, then we always
-   * send two requests. The first will try
-   * to hit browser cache, and the second request will always bypass.
-   * This is a way for us to implement a simple stale-while-revalidate
-   * model.
-   * The targeting info from the RTC updates the targeting info on
-   * this object within mergeRtc.
-   * @param {Document=} opt_doc Optional document for testing.
-   * @return {!Promise<?Object>} An object of parameters to add to
-   *   the ad request url.
-   * @private
-   */
-  executeRtc_(opt_doc) {
-    const doc = opt_doc || this.element.ownerDocument;
-    if (rtcPromise) {
-      return this.mergeRtc();
-    }
-    const ampRtcPageElement = doc.getElementById('amp-rtc');
-    if (!ampRtcPageElement) {
-      return Promise.resolve();
-    }
-    let endpoint;
-    rtcConfig = tryParseJson(ampRtcPageElement.textContent);
-    if (!isObject(rtcConfig) || !(endpoint = rtcConfig['endpoint']) ||
-        typeof endpoint != 'string' || !isSecureUrl(endpoint)) {
-      user().warn(TAG, 'Sending ad request without RTC callout,' +
-          `invalid RTC config: ${ampRtcPageElement.textContent}`);
-      return Promise.resolve();
-    }
-    let rtcTotalTime;
-    const startTime = Date.now();
-    // Because we are wrapping the RTC request in the timeout,
-    // we are guaranteeing that if the RTC is slow to return and
-    // times out for the first slot, it won't be used for any
-    // other slots either. This is in opposition to the other way
-    // we could potentially do it, in which we only still make one
-    // rtc callout, but there is a 1 second timeout from the
-    // perspective of each slot. I.e. if the top slot on the page
-    // calls out for the RTC, which returns after 5 seconds, and
-    // then a slot way down on the page asks for it later.
-    rtcPromise = Services.timerFor(window).timeoutPromise(
-        RTC_TIMEOUT,
-        Services.xhrFor(this.win).fetchJson(
-            endpoint, {credentials: 'include'}).then(res => {
-              rtcTotalTime = Date.now() - startTime;
-              /*
-              *  disableSWR should be set to true if the endpoint is not
-              *  returning cache headers.
-              */
-              verifyRtcConfigMember('disableStaleWhileRevalidate', 'boolean');
-              if (rtcConfig['disableStaleWhileRevalidate'] !== true) {
-                const headers = new Headers();
-                headers.append('Cache-Control', 'max-age=0');
-                // Repopulate the cache.
-                Services.xhrFor(this.win).fetchJson(endpoint, {
-                  credentials: 'include',
-                  headers,
-                }).catch(err => {
-                  this.user().error(TAG, err.message);
-                });
-              }
-              // Non-200 status codes are forbidden for RTC.
-              // TODO: Add to fetchResponse the ability to
-              // check for redirects as well.
-              if (res.status != 200) {
-                return {rtcTotalTime};
-              }
-              return res.text().then(text => {
-                // An empty text response is fine, just means
-                // we have nothing to merge.
-                if (!text) {
-                  return {rtcTotalTime, success: true};
-                }
-                const rtcResponse = tryParseJson(text);
-                return {rtcResponse, rtcTotalTime};
-              });
-            }));
-
-    return this.mergeRtc();
-  }
-
-  /**
-   * Merges the RTC response into the jsonTargeting of this.
-   * If it can't merge, or there is no response, potentially
-   * rejects.
-   * @return {!Promise<?Object>} Resolves if ad request is
-   *     to be sent, with object of params to add to request,
-   *     otherwise rejects with a reject message if we have one.
-   */
-  mergeRtc() {
-    // add reasons for promise.reject
-    return rtcPromise.then(
-        r => {
-          // Don't try to merge if we're sending without RTC.
-          if (!r || (!r.rtcResponse && !r.success)) {
-            return this.shouldSendRequestWithoutRtc(
-                'Bad response');
-          } else if (!r.rtcResponse && r.success) {
-            // Empty response, no need to merge
-            return Promise.resolve({
-              artc: r.rtcTotalTime,
-              ati: RTC_ATI_ENUM.RTC_SUCCESS,
-              ard: parseUrl(rtcConfig['endpoint']).hostname,
-            });
-          }
-
-          const rtcResponse = r.rtcResponse;
-          ['targeting', 'categoryExclusions'].forEach(key => {
-            if (!!rtcResponse[key]) {
-              this.jsonTargeting_[key] =
-                  !!this.jsonTargeting_[key] ?
-                  deepMerge(this.jsonTargeting_[key],
-                      rtcResponse[key]) :
-                                rtcResponse[key];
-            }
-          });
-          // rtcTotalTime is only the time that the rtc callout took,
-          // does not include the time to merge.
-          return Promise.resolve({
-            artc: r.rtcTotalTime,
-            ati: RTC_ATI_ENUM.RTC_SUCCESS,
-            ard: parseUrl(rtcConfig['endpoint']).hostname,
-          });
-        }).catch(err => {
-          const errMessage = (!!err && !!err.message) ?
-              err.message : 'Unknown error';
-          return this.shouldSendRequestWithoutRtc(errMessage);
-        });
-  }
-
-  /**
-   * Checks whether the pub has specified if we should still send
-   * the ad request on RTC failure. If yes, we return a resolve,
-   * if not, we return a reject.
-   * @param {string} errMessage
-   * @return {!Promise<?Object>}
-   */
-  shouldSendRequestWithoutRtc(errMessage) {
-    this.user().error(TAG, errMessage);
-    let rtcTotalTime;
-    // Have to use match instead of == because AMP
-    // custom messages automatically append three
-    // 0-width blank space characters to the ends
-    // of error messages.
-    if (errMessage.match(/^timeout/)) {
-      rtcTotalTime = -1;
-    }
-    verifyRtcConfigMember('sendAdRequestOnFailure', 'boolean');
-    return rtcConfig['sendAdRequestOnFailure'] !== false ?
-        Promise.resolve({
-          artc: rtcTotalTime,
-          ati: RTC_ATI_ENUM.RTC_FAILURE,
-          ard: parseUrl(rtcConfig['endpoint']).hostname,
-        }) : Promise.reject(errMessage);
-  };
 
   /** @override */
   sendXhrRequest(adUrl) {
@@ -843,7 +907,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * @param {string} impressions
    * @param {boolean=} scrubReferer
-   * @visibileForTesting
+   * @visibleForTesting
    */
   fireDelayedImpressions(impressions, scrubReferer) {
     if (!impressions) {
@@ -1010,8 +1074,87 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   getPreconnectUrls() {
-    return ['https://partner.googleadservices.com',
-      'https://tpc.googlesyndication.com'];
+    const urls = ['https://partner.googleadservices.com'];
+    if (!isExperimentOn(this.win, 'a4a-safeframe-preloading-off')) {
+      urls.push(SAFEFRAME_ORIGIN);
+    }
+    return urls;
+  }
+
+  /** @override */
+  getNonAmpCreativeRenderingMethod(headerValue) {
+    return this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
+        super.getNonAmpCreativeRenderingMethod(headerValue);
+  }
+
+  /** @override */
+  getAdditionalContextMetadata() {
+    const attributes = dict({});
+    if (this.isFluid_) {
+      attributes['uid'] = 1;
+      attributes['hostPeerName'] = this.win.location.origin;
+      // The initial geometry isn't used for anything important, but it is
+      // expected, so we pass this string with all zero values.
+      attributes['initialGeometry'] = JSON.stringify(
+          dict({
+            'windowCoords_t': 0,
+            'windowCoords_r': 0,
+            'windowCoords_b': 0,
+            'windowCoords_l': 0,
+            'frameCoords_t': 0,
+            'frameCoords_r': 0,
+            'frameCoords_b': 0,
+            'frameCoords_l': 0,
+            'styleZIndex': 'auto',
+            'allowedExpansion_t': 0,
+            'allowedExpansion_r': 0,
+            'allowedExpansion_b': 0,
+            'allowedExpansion_l': 0,
+            'xInView': 0,
+            'yInView': 0,
+          }));
+      attributes['permissions'] = JSON.stringify(
+          dict({
+            'expandByOverlay': false,
+            'expandByPush': false,
+            'readCookie': false,
+            'writeCookie': false,
+          }));
+      attributes['metadata'] = JSON.stringify(
+          dict({
+            'shared': {
+              'sf_ver': this.safeframeVersion,
+              'ck_on': 1,
+              'flash_ver': '26.0.0',
+            },
+          }));
+      attributes['reportCreativeGeometry'] = true;
+      attributes['isDifferentSourceWindow'] = false;
+      attributes['sentinel'] = this.sentinel;
+    }
+    return attributes;
+  }
+
+  /** @private  */
+  registerListenerForFluid_() {
+    fluidListeners[this.sentinel] = fluidListeners[this.sentinel] || {
+      instance: this,
+      connectionEstablished: false,
+    };
+    if (Object.keys(fluidListeners).length == 1) {
+      this.win.addEventListener('message', fluidMessageListener_, false);
+    }
+  }
+
+  /** @visibleForTesting */
+  maybeRemoveListenerForFluid() {
+    if (!this.isFluid_) {
+      return;
+    }
+    delete fluidListeners[this.sentinel];
+    if (!Object.keys(fluidListeners).length) {
+      this.win.removeEventListener('message', fluidMessageListener_);
+    }
   }
 }
 
@@ -1024,11 +1167,6 @@ AMP.extension(TAG, '0.1', AMP => {
 /** @visibileForTesting */
 export function resetSraStateForTesting() {
   sraRequests = null;
-}
-
-/** @visibileForTesting */
-export function resetRtcStateForTesting() {
-  rtcPromise = null;
 }
 
 /**
@@ -1051,26 +1189,16 @@ export function getNetworkId(element) {
  * @return {!Promise<string>} SRA request URL
  */
 function constructSRARequest_(win, doc, instances) {
+  // TODO(bradfrizzell): Need to add support for RTC.
   const startTime = Date.now();
-  return getPageLevelParameters_(win, doc, startTime, true)
+  return googlePageParameters(win, doc, startTime)
       .then(pageLevelParameters => {
         const blockParameters = constructSRABlockParameters(instances);
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
-            Object.assign(blockParameters, pageLevelParameters), startTime);
+            Object.assign(
+                blockParameters, pageLevelParameters, PAGE_LEVEL_PARAMS_),
+            startTime);
       });
-}
-
-/**
- * @param {string} member
- * @param {string} expectedType
- */
-function verifyRtcConfigMember(member, expectedType) {
-  if (rtcConfig[member] != undefined &&
-    typeof rtcConfig[member] != expectedType) {
-    const type = typeof rtcConfig[member];
-    user().warn(
-        TAG, `RTC ${member} must be a ${expectedType}, instead was ${type}`);
-  }
 }
 
 /**
@@ -1078,27 +1206,10 @@ function verifyRtcConfigMember(member, expectedType) {
  * @visibileForTesting
  */
 export function constructSRABlockParameters(instances) {
-  const parameters = {};
+  const parameters = {'output': 'ldjh', 'impl': 'fifs'};
   BLOCK_SRA_COMBINERS_.forEach(
       combiner => Object.assign(parameters, combiner(instances)));
   return parameters;
-}
-
-/**
- * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} doc
- * @param {number} startTime
- * @param {boolean=} isSra
- * @return {!Promise<!Object<string,string|number|boolean>>}
- */
-function getPageLevelParameters_(win, doc, startTime, isSra) {
-  pageLevelParameters_ = pageLevelParameters_ || googlePageParameters(
-      win, doc, startTime, 'ldjh').then(pageLevelParameters => {
-        const parameters = Object.assign({}, PAGE_LEVEL_PARAMS_);
-        parameters['impl'] = isSra ? 'fifs' : 'ifr';
-        return Object.assign(parameters, pageLevelParameters);
-      });
-  return pageLevelParameters_;
 }
 
 /**

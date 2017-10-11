@@ -124,7 +124,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.reject(new Error('I failed!')));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.be.instanceof(AmpAd3PImpl);
@@ -145,13 +145,12 @@ describes.realWin('Ad loader', {amp: true}, env => {
       });
 
       it('uses Fast Fetch if just RTC is used', () => {
-        const rtcConfig = doc.createElement('script');
-        rtcConfig.setAttribute('id', 'amp-rtc');
-        doc.head.appendChild(rtcConfig);
         a4aRegistry['zort'] = function() {
           return true;
         };
         ampAdElement.setAttribute('type', 'zort');
+        ampAdElement.setAttribute('type', 'zort');
+        ampAdElement.setAttribute('rtc-config', '{"urls": ["https://a.qqq"]}');
         const zortInstance = {};
         const zortConstructor = function() { return zortInstance; };
         const extensions = Services.extensionsFor(win);
@@ -160,7 +159,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.resolve(zortConstructor));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.equal(zortInstance);
@@ -172,13 +171,11 @@ describes.realWin('Ad loader', {amp: true}, env => {
         meta.setAttribute('name', 'amp-3p-iframe-src');
         meta.setAttribute('content', 'https://example.com/remote.html');
         doc.head.appendChild(meta);
-        const rtcConfig = doc.createElement('script');
-        rtcConfig.setAttribute('id', 'amp-rtc');
-        doc.head.appendChild(rtcConfig);
         a4aRegistry['zort'] = function() {
           return true;
         };
         ampAdElement.setAttribute('type', 'zort');
+        ampAdElement.setAttribute('rtc-config', '{"urls": ["https://a.qqq"]}');
         const zortInstance = {};
         const zortConstructor = function() { return zortInstance; };
         const extensions = Services.extensionsFor(win);
@@ -187,7 +184,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.resolve(zortConstructor));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.equal(zortInstance);
@@ -212,7 +209,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.resolve(zortConstructor));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.equal(zortInstance);
@@ -232,7 +229,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.resolve(zortConstructor));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.equal(zortInstance);

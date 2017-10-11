@@ -21,9 +21,7 @@ import {
 } from '../amp-ad-network-adsense-impl';
 import {
   ADSENSE_A4A_EXPERIMENT_NAME,
-  FF_DR_EXP_NAME,
   ADSENSE_EXPERIMENT_FEATURE,
-  INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP,
 } from '../adsense-a4a-config';
 import {Services} from '../../../../src/services';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
@@ -429,6 +427,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
           /(\?|&)client=ca-adsense(&|$)/,
           /(\?|&)format=\d+x\d+(&|$)/,
           /(\?|&)iu=some_slot(&|$)/,
+          /(\?|&)output=html(&|$)/,
           /(\?|&)w=\d+(&|$)/,
           /(\?|&)h=\d+(&|$)/,
           /(\?|&)d_imp=1(&|$)/,
@@ -522,6 +521,23 @@ describes.realWin('amp-ad-network-adsense-impl', {
         });
       });
     });
+
+    it('should include identity', () => {
+      forceExperimentBranch(impl.win, ADSENSE_A4A_EXPERIMENT_NAME,
+          ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT);
+      // Force get identity result by overloading window variable.
+      const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
+        token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
+      });
+      impl.win['goog_identity_prom'] = Promise.resolve(token);
+      impl.buildCallback();
+      return impl.getAdUrl().then(url => {
+        [/(\?|&)adsid=abcdef(&|$)/,
+          /(\?|&)jar=some_jar(&|$)/,
+          /(\?|&)pucrd=some_pucrd(&|$)/].forEach(
+            regexp => expect(url).to.match(regexp));
+      });
+    });
   });
 
   describe('#unlayoutCallback', () => {
@@ -605,7 +621,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       });
 
       const callback = impl.buildCallback();
-      expect(callback).to.not.be.undefined;
+      expect(callback).to.exist;
 
       // The returned promise fails for some reason.
       return callback.then(() => {
@@ -745,21 +761,13 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
 
     [
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL_CONTROL, {
-        layer: ADSENSE_A4A_EXPERIMENT_NAME,
-        result: false,
-      }],
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL, {
+      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_CONTROL, {
         layer: ADSENSE_A4A_EXPERIMENT_NAME,
         result: true,
       }],
-      [INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.CONTROL, {
-        layer: FF_DR_EXP_NAME,
+      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_EXTERNAL, {
+        layer: ADSENSE_A4A_EXPERIMENT_NAME,
         result: false,
-      }],
-      [INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.EXPERIMENT, {
-        layer: FF_DR_EXP_NAME,
-        result: true,
       }],
     ].forEach(item => {
       it(`should return ${item[1].result} if in ${item[0]} experiment`, () => {
@@ -768,8 +776,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
       });
     });
 
-    it('should return false if not in any experiments', () => {
-      expect(impl.delayAdRequestEnabled()).to.be.false;
+    it('should return true if not in any experiments', () => {
+      expect(impl.delayAdRequestEnabled()).to.be.true;
     });
   });
 });

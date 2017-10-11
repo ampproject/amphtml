@@ -22,7 +22,10 @@
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
-import {fastFetchDelayedRequestEnabled} from './adsense-a4a-config';
+import {
+  fastFetchDelayedRequestEnabled,
+  identityEnabled,
+} from './adsense-a4a-config';
 import {
   addExperimentIdToElement,
   isInManualExperiment,
@@ -31,12 +34,14 @@ import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {
   additionalDimensions,
   googleAdUrl,
-  isGoogleAdsA4AValidEnvironment,
   isReportingEnabled,
   extractAmpAnalyticsConfig,
   addCsiSignalsToAmpAnalyticsConfig,
   QQID_HEADER,
   maybeAppendErrorParameter,
+  getEnclosingContainerTypes,
+  ValidAdContainerTypes,
+  getIdentityToken,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
@@ -132,6 +137,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * @private {?string}
      */
     this.autoFormat_ = null;
+
+    /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
+    this.identityTokenPromise_ = null;
   }
 
   /**
@@ -144,8 +152,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
+    /**
+     * isValidElement used to also check that we are in a valid A4A environment,
+     * however this is not necessary as that is checked by adsenseIsA4AEnabled,
+     * which is always called as part of the upgrade path from an amp-ad element
+     * to an amp-ad-adsense element. Thus, if we are an amp-ad, we can be sure
+     * that it has been verified.
+     */
     return !!this.element.getAttribute('data-ad-client') &&
-        isGoogleAdsA4AValidEnvironment(this.win) && this.isAmpAdElement();
+        this.isAmpAdElement();
   }
 
   /** @override */
@@ -156,10 +171,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
-
+    this.identityTokenPromise_ = identityEnabled(this.win) ?
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+        .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
+        Promise.resolve(
+          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
     this.autoFormat_ =
         this.element.getAttribute('data-auto-format') || '';
-
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
       addExperimentIdToElement(verifierEid, this.element);
@@ -214,6 +232,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         format, this.uniqueSlotId_, adClientId);
     const viewportSize = this.getViewport().getSize();
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
+    const enclosingContainers = getEnclosingContainerTypes(this.element);
+    const pfx = enclosingContainers.includes(
+        ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) ||
+        enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
     const parameters = {
       'client': adClientId,
       format,
@@ -222,6 +244,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'iu': this.element.getAttribute('data-ad-slot'),
       'adtest': adTestOn ? 'on' : null,
       adk,
+      'output': 'html',
       'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
       'ctypes': this.getCtypes_(),
       'host': this.element.getAttribute('data-ad-host'),
@@ -236,6 +259,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'ifi': this.win['ampAdGoogleIfiCounter']++,
       'rc': this.fromResumeCallback ? 1 : null,
       'rafmt': this.isResponsive_() ? 13 : null,
+      'pfx': pfx ? '1' : '0',
     };
 
     const experimentIds = [];
@@ -243,9 +267,23 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (ampAutoAdsBranch) {
       experimentIds.push(ampAutoAdsBranch);
     }
-
-    return googleAdUrl(
-        this, ADSENSE_BASE_URL, startTime, parameters, experimentIds);
+    const identityPromise = Services.timerFor(this.win)
+        .timeoutPromise(1000, this.identityTokenPromise_)
+        .catch(unusedErr => {
+          // On error/timeout, proceed.
+          return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/(
+            {});
+        });
+    return identityPromise.then(identity => {
+      return googleAdUrl(
+          this, ADSENSE_BASE_URL, startTime, Object.assign(
+              {
+                adsid: identity.token || null,
+                jar: identity.jar || null,
+                pucrd: identity.pucrd || null,
+              },
+              parameters), experimentIds);
+    });
   }
 
   /** @override */
