@@ -52,6 +52,8 @@ export const MessageType = {
   SEND_IFRAME_TRANSPORT_EVENTS: 'send-iframe-transport-events',
   IFRAME_TRANSPORT_EVENTS: 'iframe-transport-events',
   IFRAME_TRANSPORT_RESPONSE: 'iframe-transport-response',
+  SEND_INTERSECTION_OBSERVER_EVENTS: 'send-intersection-observer-events',
+  INTERSECTION_OBSERVER_EVENTS: 'intersection-observer-events',
 
   // For user-error-in-iframe
   USER_ERROR_IN_IFRAME: 'user-error-in-iframe',
