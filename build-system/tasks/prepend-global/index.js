@@ -192,7 +192,7 @@ function main() {
   let filename = '';
 
   // Prod by default.
-  let config = argv.canary ? 'canary' : 'prod'; 
+  const config = argv.canary ? 'canary' : 'prod';
   if (argv.canary) {
     filename = valueOrDefault(argv.canary,
         'build-system/global-configs/canary-config.json');
