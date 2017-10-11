@@ -1,5 +1,4 @@
 FAIL
-amp-story/0.1/test/validator-amp-story-reference-point.html:35:8 The tag 'img', a child tag of 'amp-story-grid-layer', does not satisfy the reference point 'AMP-STORY-GRID-LAYER grid-area'. [AMP_TAG_PROBLEM]
-amp-story/0.1/test/validator-amp-story-reference-point.html:35:8 The tag 'img' may not appear as a descendant of tag 'amp-story-grid-layer'. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
+amp-story/0.1/test/validator-amp-story-reference-point.html:35:8 The tag 'IMG', a child tag of 'amp-story-grid-layer', does not satisfy one of the acceptable reference points: AMP-STORY-GRID-LAYER grid-area, AMP-STORY-GRID-LAYER animate-in. [AMP_TAG_PROBLEM]
 amp-story/0.1/test/validator-amp-story-reference-point.html:35:8 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
 amp-story/0.1/test/validator-amp-story-reference-point.html:35:8 The tag 'img' may not appear as a descendant of tag 'amp-story-grid-layer'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_TAG_PROBLEM]

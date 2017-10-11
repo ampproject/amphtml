@@ -273,6 +273,17 @@ if (!amp.validator.LIGHT) {
     json['declarations'] = arrayToJSON(this.declarations);
     return json;
   };
+
+  /** @return {string} The concatenation of the qualified rule name. */
+  parse_css.QualifiedRule.prototype.ruleName = function() {
+    let ruleName = '';
+    for (let i = 0; i < this.prelude.length; ++i) {
+      const prelude =
+          /** @type {!parse_css.IdentToken} */ (this.prelude[i]);
+      if (prelude.value) ruleName += prelude.value;
+    }
+    return ruleName;
+  };
 }
 
 parse_css.Declaration = class extends parse_css.Rule {

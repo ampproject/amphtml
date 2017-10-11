@@ -172,7 +172,7 @@ message AtRuleSpec {
   optional BlockType type = 2 [default=PARSE_AS_ERROR];
 }
 
-// NEXT AVAILABLE TAG: 6
+// NEXT AVAILABLE TAG: 8
 message CssSpec {
   // Spec for how to parse CSS AT rules, one per AT rule. Must not contain
   // duplicate names, and must contain at least one entry for the default.
@@ -184,6 +184,12 @@ message CssSpec {
   // Enables checks specific to the draft A4A specification.
   // TODO(powdercloud): Make this more generic.
   optional bool validate_amp4ads = 5;
+
+  // Enables checks specific to the style[keyframes] specification.
+  // TODO(chenshay): Make this more generic.
+  optional bool validate_keyframes = 6;
+
+  repeated string allowed_declarations = 7;
 }
 
 // NEXT AVAILABLE TAG: 9
@@ -563,7 +569,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 90
+  // NEXT AVAILABLE TAG: 94
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -647,6 +653,10 @@ message ValidationError {
     CSS_SYNTAX_DISALLOWED_DOMAIN = 63;
     CSS_SYNTAX_DISALLOWED_RELATIVE_URL = 55;
     CSS_SYNTAX_INVALID_ATTR_SELECTOR = 59;
+    CSS_SYNTAX_INVALID_PROPERTY = 90;
+    CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS = 91;
+    CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME = 92;
+    CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME = 93;
 
     // The following codes are currently used only by A4A CSS validation.
     CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE = 71;
