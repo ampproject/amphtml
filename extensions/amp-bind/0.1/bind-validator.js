@@ -183,7 +183,7 @@ export class BindValidator {
    */
   rulesForTagAndProperty_(tag, property) {
     // Allow binding to all ARIA attributes.
-    if (property.startsWith('aria-')) {
+    if (startsWith(property, 'aria-')) {
       return null;
     }
     const globalRules = ownProperty(GLOBAL_PROPERTY_RULES, property);
