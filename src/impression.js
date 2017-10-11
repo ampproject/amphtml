@@ -88,6 +88,12 @@ export function doNotTrackImpression() {
 
 /**
  * Handle the getReplaceUrl and return a promise when url is replaced
+ * Only handles replaceUrl when viewer indicates AMP to do so. Viewer should indicate
+ * by setting the legacy replaceUrl init param and add `replaceUrl` to its capability param.
+ * Future plan is to change the type of legacy init replaceUrl param from url string
+ * to boolean value.
+ * Please NOTE replaceUrl and adLocation will never arrive at same time,
+ * so there is no race condition on the order of handling url replacement.
  * @param {!Window} win
  * @return {!Promise}
  */
@@ -116,7 +122,7 @@ function handleReplaceUrl(win) {
 
 /**
  * Perform the impression request if it has been provided via
- * the click param in the viewer arguments. Returns a promise
+ * the click param in the viewer arguments. Returns a promise.
  * @param {!Window} win
  * @return {!Promise}
  */
@@ -128,12 +134,14 @@ function handleClickUrl(win) {
   if (!clickUrl) {
     return Promise.resolve();
   }
+
   if (clickUrl.indexOf('https://') != 0) {
     user().warn('IMPRESSION',
         'click fragment param should start with https://. Found ',
         clickUrl);
     return Promise.resolve();
   }
+
   if (win.location.hash) {
     // This is typically done using replaceState inside the viewer.
     // If for some reason it failed, get rid of the fragment here to
