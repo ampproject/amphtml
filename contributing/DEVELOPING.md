@@ -92,11 +92,11 @@ The content in the `examples` directory can be reached at: http://localhost:8000
 
 AMP ships with a local proxy for testing production AMP documents with the local JS version.
 
-For any public AMP document like: http://output.jsbin.com/pegizoq/quiet,
+For any public AMP document like: `http://output.jsbin.com/pegizoq/quiet`,
 
 You can access it with the local JS at
 
-http://localhost:8000/proxy/output.jsbin.com/pegizoq/quiet.
+`http://localhost:8000/proxy/output.jsbin.com/pegizoq/quiet`.
 
 **Note** The local proxy will serve minified or unminified JS based on the current serve mode. When serve mode is `cdn`, the local proxy will serve remote JS.
 When accessing minified JS make sure you run `gulp dist` with the `--fortesting`
