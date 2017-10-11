@@ -630,6 +630,11 @@ function dist() {
         $$.util.colors.cyan('--config=prod'),
         $$.util.colors.green('to'),
         $$.util.colors.cyan('gulp dist --fortesting'));
+    $$.util.log(
+        $$.util.colors.green('After the build, you can switch configs with'),
+        $$.util.colors.cyan('gulp prepend-global --canary --target dist/v0.js'),
+        $$.util.colors.green('or'),
+        $$.util.colors.cyan('gulp prepend-global --prod --target dist/v0.js'));
   }
   return compileCss().then(() => {
     return Promise.all([
