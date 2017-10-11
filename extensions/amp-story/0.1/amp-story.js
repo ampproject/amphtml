@@ -669,8 +669,8 @@ export class AmpStory extends AMP.BaseElement {
     return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME)
         .then(response => response && {
           shareProviders: response['share-providers'],
-          relatedArticles: response['related-articles'] ?
-              relatedArticlesFromJson(response['related-articles']) : [],
+          relatedArticles:
+              relatedArticlesFromJson(response['related-articles']),
         })
         .catch(e => {
           user().error(TAG, 'Error fetching bookend configuration', e.message);
