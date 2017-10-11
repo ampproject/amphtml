@@ -66,9 +66,6 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
 
 /** @private @const {string} */
-const RELATED_ARTICLES_ATTRIBUTE_NAME = 'related-articles';
-
-/** @private @const {string} */
 const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
 
 /** @private @const {string} */
