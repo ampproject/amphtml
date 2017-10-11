@@ -144,19 +144,19 @@ export class AmpStory extends AMP.BaseElement {
     this.desktopMedia_ = this.win.matchMedia(
         `(min-width: ${DESKTOP_THRESHOLD}px)`);
 
-    /** @private @const */
-    this.background_ = new AmpStoryBackground(this.element);
+    /** @private {?AmpStoryBackground} */
+    this.background_ = null;
 
-    /** @private {!Element} */
+    /** @private {?Element} */
     this.nextButton_ = null;
 
-    /** @private {!Element} */
+    /** @private {?Element} */
     this.prevButton_ = null;
 
-    /** @private {!Element} */
+    /** @private {?Element} */
     this.topBar_ = null;
 
-    /** @private {!ShareWidget} */
+    /** @private {?ShareWidget} */
     this.shareWidget_ = null;
   }
 
@@ -185,8 +185,6 @@ export class AmpStory extends AMP.BaseElement {
 
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_);
-
-    this.background_.attach();
   }
 
 
@@ -477,7 +475,8 @@ export class AmpStory extends AMP.BaseElement {
           }
           targetPage.setActive(true);
 
-          if (activePriorSibling.matches('amp-story-page')) {
+          if (activePriorSibling &&
+              activePriorSibling.matches('amp-story-page')) {
             activePriorSibling.setAttribute(PRE_ACTIVE_PAGE_ATTRIBUTE_NAME, '');
           }
           if (previousActivePriorSibling) {
@@ -531,6 +530,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   shouldEnterFullScreenOnSwitch_() {
+    if (this.isDesktop_()) {
+      return false;
+    }
+
     const {width, height} = this.getViewport().getSize();
 
     const inFullScreenThreshold =
@@ -613,6 +616,13 @@ export class AmpStory extends AMP.BaseElement {
       if (!this.topBar_) {
         this.buildTopBar_();
       }
+      if (!this.background_) {
+        this.background_ = new AmpStoryBackground(this.element);
+        this.background_.attach();
+      }
+      if (this.activePage_) {
+        this.updateBackground_(this.activePage_.element);
+      }
     } else {
       this.element.removeAttribute('desktop');
     }
@@ -635,12 +645,11 @@ export class AmpStory extends AMP.BaseElement {
     const fillPosterElement = scopedQuerySelector(fillElement, '[poster]');
     const srcElement = scopedQuerySelector(fillElement, '[src]');
 
-    const pagePoster = pageElement ? pageElement.getAttribute('poster') : '';
     const fillPoster = fillPosterElement ?
         fillPosterElement.getAttribute('poster') : '';
     const src = srcElement ? srcElement.getAttribute('src') : '';
 
-    return pagePoster || fillPoster || src;
+    return fillPoster || src;
   }
 
   /**
@@ -648,6 +657,9 @@ export class AmpStory extends AMP.BaseElement {
    * @param {!Element} pageElement
    */
   updateBackground_(pageElement) {
+    if (!this.background_) {
+      return;
+    }
     this.background_.setBackground(this.getBackgroundUrl_(pageElement));
   }
 

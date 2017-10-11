@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {setStyle} from '../../../src/style';
+
 const BACKGROUND_CLASS = 'i-amphtml-story-background';
 
 const BACKGROUND_CONTAINER_CLASS = 'i-amphtml-story-background-container';
@@ -59,13 +61,15 @@ export class AmpStoryBackground {
    * @param {string} newUrl
    */
   setBackground(newUrl) {
-    if (newUrl) {
-      this.hidden_.style.backgroundImage = `url(${newUrl})`;
-
-      const newHidden = this.active_;
-      this.active_ = this.hidden_;
-      this.hidden_ = newHidden;
-      this.container_.appendChild(this.active_);
+    if (!newUrl) {
+      return;
     }
+
+    setStyle(this.hidden_, 'background-image', `url(${newUrl})`);
+
+    const newHidden = this.active_;
+    this.active_ = this.hidden_;
+    this.hidden_ = newHidden;
+    this.container_.appendChild(this.active_);
   }
 }
