@@ -66,15 +66,15 @@ function buildArticleFromJson_(articleJson) {
 
 
 /**
- * @param {!JsonObject} articleSetsResponse
+ * @param {!JsonObject=} opt_articleSetsResponse
  * @return {!Array<!RelatedArticleSetDef>}
  */
-export function relatedArticlesFromJson(articleSetsResponse) {
+export function relatedArticlesFromJson(opt_articleSetsResponse) {
   return /** @type {!Array<!RelatedArticleSetDef>} */ (
-      Object.keys(articleSetsResponse).map(headingKey => {
+      Object.keys(opt_articleSetsResponse || {}).map(headingKey => {
         const articleSet = {
           articles:
-              articleSetsResponse[headingKey]
+              opt_articleSetsResponse[headingKey]
                   .map(buildArticleFromJson_)
                   .filter(a => !!a),
         };
