@@ -154,6 +154,9 @@ export class DoubleclickA4aEligibility {
       return experimentId ==
           DOUBLECLICK_EXPERIMENT_FEATURE.UNCONDITIONED_FF_EXPERIMENT;
     }
+    if (useRemoteHtml && !element.getAttribute('rtc-config')) {
+      return false;
+    }
     if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
         element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
       return false;

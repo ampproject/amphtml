@@ -79,11 +79,9 @@ export const URL_EXPERIMENT_MAPPING = {
  * @returns {boolean}
  */
 export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
-  if (useRemoteHtml) {
-    return false;
-  }
+  dev().assert(!useRemoteHtml, 'Adsense should never use remote.html');
   if (!isGoogleAdsA4AValidEnvironment(win) ||
-      !element.getAttribute('data-ad-client')) {
+      !element.getAttribute('data-ad-client') || useRemoteHtml) {
     return false;
   }
   // See if in holdback control/experiment.
