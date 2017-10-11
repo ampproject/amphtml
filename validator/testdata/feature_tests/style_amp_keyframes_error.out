@@ -9,4 +9,4 @@ feature_tests/style_amp_keyframes_error.html:54:6 CSS syntax error in tag 'style
 feature_tests/style_amp_keyframes_error.html:60:6 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule '100' has no declarations. [AUTHOR_STYLESHEET_PROBLEM]
 feature_tests/style_amp_keyframes_error.html:63:6 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule 'a' has no declarations. [AUTHOR_STYLESHEET_PROBLEM]
 feature_tests/style_amp_keyframes_error.html:35:4 CSS syntax error in tag 'style[amp-keyframes]' - saw invalid at rule '@font-face'. [AUTHOR_STYLESHEET_PROBLEM]
-feature_tests/style_amp_keyframes_error.html:51:12 CSS syntax error in tag 'style[amp-keyframes]' - invalid property 'thisshouldfail'. The only allowed properties are '['offset-distance', 'opacity', 'transform', 'visibility']' [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/style_amp_keyframes_error.html:51:12 CSS syntax error in tag 'style[amp-keyframes]' - invalid property 'thisshouldfail'. The only allowed properties are '['offset-distance', 'opacity', 'transform', 'visibility']'. [AUTHOR_STYLESHEET_PROBLEM]
