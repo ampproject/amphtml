@@ -317,8 +317,8 @@ export class AmpAnalytics extends AMP.BaseElement {
         'amp-analytics tag with iframe transport.');
 
     this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
-        this.element.getAttribute('type'),
-        this.config_['transport'], ampAdResourceId);
+        this.element.getAttribute('type'), this.config_['transport'],
+        ampAdResourceId, this.element.parent);
   }
 
   /**
