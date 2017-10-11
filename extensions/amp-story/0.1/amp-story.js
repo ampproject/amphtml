@@ -635,7 +635,8 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean} True if the screen size matches the desktop media query.
    */
   isDesktop_() {
-    return this.desktopMedia_.matches;
+    return isExperimentOn(this.win, 'amp-story-desktop') &&
+        this.desktopMedia_.matches;
   }
 
   /**
