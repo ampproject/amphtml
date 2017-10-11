@@ -18,12 +18,15 @@ import {
   EXPERIMENT_ATTRIBUTE,
   QQID_HEADER,
   isReportingEnabled,
+  getCorrelator,
 } from './utils';
 import {BaseLifecycleReporter, GoogleAdLifecycleReporter} from './performance';
 import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {dict} from '../../../src/utils/object';
 import {
     ADSENSE_A4A_EXPERIMENT_NAME,
 } from '../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
@@ -64,6 +67,7 @@ export function getLifecycleReporter(ampElement, slotId) {
   if (isReportingEnabled(ampElement) &&
       (!!getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) ||
        !!getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME))) {
+    setupPageLoadMetricsReporter_(ampElement);
     return new GoogleAdLifecycleReporter(
       win, ampElement.element, Number(slotId));
   } else {
@@ -106,7 +110,6 @@ export function googleLifecycleReporterFactory(baseInstance) {
   return reporter;
 }
 
-
 /**
  * Sets reportable variables from ad response headers.
  *
@@ -126,4 +129,42 @@ export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
   pingParameters[qqidKey] = headers.get(QQID_HEADER);
   pingParameters[renderingMethodKey] = headers.get(renderingMethodHeader);
   reporter.setPingParameters(pingParameters);
+}
+
+function setupPageLoadMetricsReporter_(ampElement) {
+  const win = ampElement.win;
+  const correlator = getCorrelator(win);
+  win.ampAnalyticsPageLoadMetricsConfig =
+      win.ampAnalyticsPageLoadMetricsConfig || dict({
+        'requests': {
+          'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
+          `&c=${correlator}&met.a4a=` +
+          /* TODO(jonkeller): Add remaining metrics commented-out below to cfg
+          'makeBodyVisible.${MBV_VALUE}~' +
+          */
+          'firstVisibleTime.${firstVisibleTime}'
+          /*
+          + 'firstContentfulPaint.${FCP_VALUE}~' +
+          'firstViewportReady.${FVR_VALUE}'
+          */
+          ,
+        },
+        'transport': {
+          'beacon': false,
+          'xhrpost': false,
+        },
+        'triggers': {
+          'iniLoad': {
+            'on': 'visible',
+            'request': 'fvt',
+            'selector': 'body',
+          },
+        },
+      });
+
+  // Load amp-analytics extensions
+  win.ampAnalyticsPageLoadMetricsElement =
+      win.ampAnalyticsPageLoadMetricsElement ||
+      insertAnalyticsElement(ampElement.element,
+          win.ampAnalyticsPageLoadMetricsConfig, true);
 }
