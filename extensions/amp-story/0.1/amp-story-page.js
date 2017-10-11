@@ -30,21 +30,52 @@ import {
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {upgradeBackgroundAudio} from './audio';
+import {renderSimpleTemplate} from './simple-template';
 import {dev, user} from '../../../src/log';
 import {EventType, dispatch, dispatchCustom} from './events';
 import {PageElement} from './page-element';
 import {isFiniteNumber} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
 import {listenOnce} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {getLogEntries} from './logging';
+import {getMode} from '../../../src/mode';
 
-const LOADING_SCREEN_CONTENTS_TEMPLATE =
-    `<ul class="i-amphtml-story-page-loading-dots">
-      <li class="i-amphtml-story-page-loading-dot"></li>
-      <li class="i-amphtml-story-page-loading-dot"></li>
-      <li class="i-amphtml-story-page-loading-dot"></li>
-    </ul>
-    <p class="i-amphtml-story-page-loading-text">Loading</p>`;
+
+
+/** @private @const {!Array<!./simple-template.ElementDef>} */
+const LOADING_SCREEN_TEMPLATE = [
+  {
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-page-loading-screen'}),
+    children: [
+      {
+        tag: 'ul',
+        attrs: dict({'class': 'i-amphtml-story-page-loading-dots'}),
+        children: [
+          {
+            tag: 'li',
+            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
+          },
+          {
+            tag: 'li',
+            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
+          },
+          {
+            tag: 'li',
+            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
+          },
+        ],
+      },
+      {
+        tag: 'p',
+        attrs: dict({'class': 'i-amphtml-story-page-loading-text'}),
+        text: 'Loading', // TODO(alanorozco): i18n
+      },
+    ],
+  },
+];
 
 
 /**
@@ -87,7 +118,6 @@ const TIME_REGEX = {
 const TAG = 'amp-story-page';
 
 
-
 /**
  * The <amp-story-page> custom element, which represents a single page of
  * an <amp-story>.
@@ -97,10 +127,10 @@ export class AmpStoryPage extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @const {?AnimationManager} */
+    /** @private {?AnimationManager} */
     this.animationManager_ = null;
 
-    /** @private @const {!Array<!PageElement>} */
+    /** @private {!Array<!PageElement>} */
     this.pageElements_ = [];
 
     /** @private {?function()} */
@@ -169,11 +199,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   initializeLoading_() {
-    // Add the loading screen into the DOM.
-    const loadingScreen = this.win.document.createElement('div');
-    loadingScreen.classList.add('i-amphtml-story-page-loading-screen');
-    loadingScreen./*OK*/innerHTML = LOADING_SCREEN_CONTENTS_TEMPLATE;
-    this.element.appendChild(loadingScreen);
+    this.element.appendChild(
+        renderSimpleTemplate(this.win.document, LOADING_SCREEN_TEMPLATE));
 
     // Build a list of page elements and poll until they are all loaded.
     this.pageElements_ = PageElement.getElementsFromPage(this);
@@ -208,6 +235,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.maybeScheduleAutoAdvance_();
     this.updateAudioIcon_();
     this.playAllMedia_();
+    this.reportDevModeErrors_();
   }
 
 
@@ -215,6 +243,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   markPageAsLoaded_() {
     this.isLoaded_ = true;
     this.element.classList.add(PAGE_LOADED_CLASS_NAME);
+    this.markPageAsShown_();
     this.resolveLoadPromise_();
   }
 
@@ -248,7 +277,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @public
    */
   calculateLoadStatus() {
-    if (this.isLoaded_) {
+    if (this.isLoaded_ || this.pageElements_.length == 0) {
       return true;
     }
 
@@ -297,13 +326,18 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Pauses all media on this page.
+   * @param {boolean} opt_rewindToBeginning Whether to rewind the currentTime
+   *     of media items to the beginning.
    * @private
    */
-  pauseAllMedia_() {
+  pauseAllMedia_(opt_rewindToBeginning) {
     const mediaSet = this.getAllMedia_();
     Array.prototype.forEach.call(mediaSet, mediaItem => {
       mediaItem.pause();
-      mediaItem.currentTime = 0;
+
+      if (opt_rewindToBeginning) {
+        mediaItem.currentTime = 0;
+      }
     });
   }
 
@@ -382,7 +416,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   pageInactiveCallback_() {
     this.element.removeAttribute('active');
 
-    this.pauseAllMedia_();
+    this.pauseAllMedia_(/* opt_rewindToBeginning */ true);
     this.pageElements_.forEach(pageElement => {
       pageElement.pauseCallback();
     });
@@ -451,13 +485,14 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Determines whether the specified element is a valid media element for auto-
    * advance.
-   * @param {?Element} el
+   * @param {?Element} elOrNull
    * @param {!function()} callback
    * @private
    */
-  onMediaElementComplete_(el, callback) {
-    user().assertElement(el, 'ID specified for automatic advance ' +
-        `does not refer to any element on page '${this.element.id}'.`);
+  onMediaElementComplete_(elOrNull, callback) {
+    const el = user().assertElement(elOrNull,
+        'ID specified for automatic advance does not refer to any element' +
+        `on page '${this.element.id}'.`);
 
     const mediaElement = this.getMediaElement_(el);
     if (mediaElement) {
@@ -465,7 +500,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           listenOnce(mediaElement, 'ended', callback);
     } else if (this.isVideoInterfaceVideo_(el)) {
       this.autoAdvanceUnlistenDef_ =
-          listenOnce(el, VideoEvents.ENDED, callback, /* opt_capture */ true);
+          listenOnce(el, VideoEvents.ENDED, callback, {capture: true});
     } else {
       user().error(TAG, `Element with ID ${el.id} is not a media element ` +
           'supported for automatic advancement.');
@@ -602,8 +637,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Navigates to the next page in the story.
-   * @param {*} opt_isAutomaticAdvance Whether this navigation was caused by an
-   *     automatic advancement after a timeout.
+   * @param {boolean} opt_isAutomaticAdvance Whether this navigation was caused
+   *     by an automatic advancement after a timeout.
    */
   next(opt_isAutomaticAdvance) {
     this.switchTo_(
@@ -626,6 +661,21 @@ export class AmpStoryPage extends AMP.BaseElement {
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);
+  }
+
+
+  /**
+   * @private
+   */
+  reportDevModeErrors_() {
+    if (!getMode().development) {
+      return;
+    }
+
+    getLogEntries(this.element).then(logEntries => {
+      dispatchCustom(this.win, this.element,
+          EventType.DEV_LOG_ENTRIES_AVAILABLE, logEntries, {bubbles: true});
+    });
   }
 }
 

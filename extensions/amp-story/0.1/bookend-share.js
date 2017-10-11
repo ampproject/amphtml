@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ICONS} from './icons';
 import {Services} from '../../../src/services';
 import {isObject} from '../../../src/types';
-import {createElementWithAttributes} from '../../../src/dom';
+import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 
@@ -34,76 +33,83 @@ const SHARE_PROVIDER_NAME = dict({
 });
 
 
+/** @private @const {!./simple-template.ElementDef} */
+const SHARE_LIST_TEMPLATE = {
+  tag: 'ul',
+  attrs: dict({'class': 'i-amphtml-story-share-list'}),
+  children: [
+    {
+      tag: 'li',
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'class':
+                'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
+          }),
+        },
+        {
+          tag: 'span',
+          text: 'Get Link', // TODO(alanorozco): i18n
+          attrs: dict({
+            'class': 'i-amphtml-story-share-name',
+          }),
+        },
+      ],
+    },
+  ],
+};
+
+
+/** @private @const {!./simple-template.ElementDef} */
+const SHARE_ITEM_TEMPLATE = {tag: 'li'};
+
+
 /**
- * @param {!Document} doc
- * @return {!DocumentFragment}
+ * @param {!JsonObject=} opt_params
+ * @return {!JsonObject}
  */
-function buildLinkShareItem(doc) {
-  const fragment = doc.createDocumentFragment();
-  const root = doc.createElement('li');
+function buildProviderParams(opt_params) {
+  const attrs = dict();
 
-  const iconEl = createElementWithAttributes(doc, 'div', {
-    class: 'i-amphtml-story-share-icon',
-  });
+  if (opt_params) {
+    Object.keys(opt_params || {}).forEach(field => {
+      attrs[`data-param-${field}`] = opt_params[field];
+    });
+  }
 
-  const nameEl = createElementWithAttributes(doc, 'span', {
-    class: 'i-amphtml-story-share-name',
-  });
-
-  // constant value, no XSS risk
-  iconEl./*OK*/innerHTML = ICONS.link;
-
-  // TODO(alanorozco): i18n
-  nameEl.textContent = 'Get Link';
-
-  root.appendChild(iconEl);
-  root.appendChild(nameEl);
-
-  fragment.appendChild(root);
-
-  return fragment;
+  return attrs;
 }
 
 
 /**
  * @param {!Document} doc
- * @param {string} type
- * @param {!JsonObject} opt_params
- * @return {!DocumentFragment}
+ * @param {string} shareType
+ * @param {!JsonObject=} opt_params
+ * @return {!Node}
  */
-function buildProvider(doc, type, opt_params) {
-  const fragment = doc.createDocumentFragment();
-  const root = doc.createElement('li');
-
-  const shareEl = createElementWithAttributes(doc, 'amp-social-share', {
-    type,
-    width: 48,
-    height: 48,
-    class: 'i-amphtml-story-share-icon',
-  });
-
-  if (opt_params) {
-    Object.keys(opt_params).forEach(field =>
-        shareEl.setAttribute(`data-param-${field}`, opt_params[field]));
-  }
-
-  if (type == 'email') {
-    // constant value, no XSS risk
-    shareEl./*OK*/innerHTML = ICONS.mail;
-  }
-
-  const nameEl = createElementWithAttributes(doc, 'span', {
-    class: 'i-amphtml-story-share-name',
-  });
-
-  nameEl.textContent = SHARE_PROVIDER_NAME[type] || type;
-
-  root.appendChild(shareEl);
-  root.appendChild(nameEl);
-
-  fragment.appendChild(root);
-
-  return fragment;
+function buildProvider(doc, shareType, opt_params) {
+  return renderSimpleTemplate(doc,
+      /** @type {!Array<!./simple-template.ElementDef>} */ ([
+        {
+          tag: 'amp-social-share',
+          attrs: /** @type {!JsonObject} */ (Object.assign(
+              dict({
+                'width': 48,
+                'height': 48,
+                'class': 'i-amphtml-story-share-icon',
+                'type': shareType,
+              }),
+              buildProviderParams(opt_params))),
+        },
+        {
+          tag: 'span',
+          text: SHARE_PROVIDER_NAME[shareType] || shareType,
+          attrs: dict({
+            'class': 'i-amphtml-story-share-name',
+          }),
+        },
+      ]));
 }
 
 
@@ -111,32 +117,33 @@ function buildProvider(doc, type, opt_params) {
  * Social share widget for story bookend.
  */
 export class BookendShareWidget {
-  /** @param {!AmpDoc} ampdoc */
-  constructor(ampdoc) {
-    /** @private @const {!AmpDoc} */
-    this.ampdoc_ = ampdoc;
+  /** @param {!Window} win */
+  constructor(win) {
+    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = null;
 
     /** @private @const {!Window} */
-    this.win_ = ampdoc.win;
+    this.win_ = win;
 
     /** @private {?Element} */
     this.root_ = null;
   }
 
-  /** @param {!AmpDoc} ampdoc */
-  static create(ampdoc) {
-    return new BookendShareWidget(ampdoc);
+  /** @param {!Window} win */
+  static create(win) {
+    return new BookendShareWidget(win);
   }
 
-  /** @return {!Element} */
-  build() {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {!Element}
+   */
+  build(ampdoc) {
     dev().assert(!this.root_, 'Already built.');
 
-    this.root_ = createElementWithAttributes(this.win_.document, 'ul', {
-      'class': 'i-amphtml-story-share-list',
-    });
+    this.ampdoc_ = ampdoc;
 
-    this.add_(buildLinkShareItem(this.win_.document));
+    this.root_ = renderAsElement(this.win_.document, SHARE_LIST_TEMPLATE);
 
     this.maybeAddNativeShare_();
 
@@ -149,25 +156,23 @@ export class BookendShareWidget {
   }
 
   /**
-   * @param {!Array<!JsonObject>} providers
+   * @param {!Object<string, (!JsonObject|boolean)>} providers
    * @public
    */
   // TODO(alanorozco): Set story metadata in share config
   setProviders(providers) {
-    const fragment = this.win_.document.createDocumentFragment();
-
     this.loadRequiredExtensions_();
 
     Object.keys(providers).forEach(type => {
       if (isObject(providers[type])) {
-        fragment.appendChild(buildProvider(this.win_.document, type,
+        this.add_(buildProvider(this.win_.document, type,
             /** @type {!JsonObject} */ (providers[type])));
         return;
       }
 
       // Bookend config API requires real boolean, not just truthy
       if (providers[type] === true) {
-        fragment.appendChild(buildProvider(this.win_.document, type));
+        this.add_(buildProvider(this.win_.document, type));
         return;
       }
 
@@ -176,14 +181,15 @@ export class BookendShareWidget {
           'Value must be `true` or a params object.',
           type);
     });
-
-    this.add_(fragment);
   }
 
   /** @private */
   loadRequiredExtensions_() {
+    const ampdoc = /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
+        dev().assert(this.ampdoc_));
+
     Services.extensionsFor(this.win_)
-        .installExtensionForDoc(this.ampdoc_, 'amp-social-share');
+        .installExtensionForDoc(ampdoc, 'amp-social-share');
   }
 
   /**
@@ -191,6 +197,8 @@ export class BookendShareWidget {
    * @private
    */
   add_(node) {
-    dev().assert(this.root_).appendChild(node);
+    const item = renderAsElement(this.win_.document, SHARE_ITEM_TEMPLATE);
+    item.appendChild(node);
+    dev().assert(this.root_).appendChild(item);
   }
 }

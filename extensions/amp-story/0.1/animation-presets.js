@@ -15,9 +15,10 @@
  */
 
 import {px} from '../../../src/style';
+import {StoryAnimationPresetDef} from './animation-types';
 
 
-/** @const {!Object<string, ./animation-types.AnimationPresetDef>} */
+/** @const {!Object<string, !StoryAnimationPresetDef>} */
 // First keyframe will always be considered offset: 0 and will be applied to the
 // element as the first frame before animation starts.
 export const PRESETS = {
@@ -127,7 +128,7 @@ export const PRESETS = {
       },
     ],
   },
-  'drop-in': {
+  'drop': {
     duration: 1600,
     keyframes(dimensions) {
       const maxBounceHeight =

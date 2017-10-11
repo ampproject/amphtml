@@ -13,11 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {parseUrl} from '../../../src/url';
+
+
+const TAG = 'amp-story';
 
 
 /**
- * @typedef {{title: string, url: string, image: (string|undefined)}}
+ * @typedef {{
+ *   title: string,
+ *   url: string,
+ *   domainName: string,
+ *   image: (string|undefined),
+ * }}
  */
 export let RelatedArticleDef;
 
@@ -33,17 +42,23 @@ export let RelatedArticleSetDef;
 
 /**
  * @param {!JsonObject} articleJson
- * @return {!RelatedArticleDef}
+ * @return {?RelatedArticleDef}
  */
 function buildArticleFromJson_(articleJson) {
-  // TODO(alanorozco): Graceful errors.
+  if (!articleJson['title'] || !articleJson['url']) {
+    user().error(TAG,
+        'Articles must contain `title` and `url` fields, skipping invalid.');
+    return null;
+  }
+
   const article = {
-    title: user().assert(articleJson.title),
-    url: user().assert(articleJson.url),
+    title: dev().assert(articleJson['title']),
+    url: dev().assert(articleJson['url']),
+    domainName: parseUrl(dev().assert(articleJson['url'])).hostname,
   };
 
-  if (articleJson.image) {
-    article.image = articleJson.image;
+  if (articleJson['image']) {
+    article.image = articleJson['image'];
   }
 
   return /** @type {!RelatedArticleDef} */ (article);
@@ -51,16 +66,17 @@ function buildArticleFromJson_(articleJson) {
 
 
 /**
- * @param {!JsonObject} articleSetsResponse
+ * @param {!JsonObject=} opt_articleSetsResponse
  * @return {!Array<!RelatedArticleSetDef>}
  */
-// TODO(alanorozco): domain name
-// TODO(alanorozco): Graceful errors.
-export function relatedArticlesFromJson(articleSetsResponse) {
+export function relatedArticlesFromJson(opt_articleSetsResponse) {
   return /** @type {!Array<!RelatedArticleSetDef>} */ (
-      Object.keys(articleSetsResponse).map(headingKey => {
+      Object.keys(opt_articleSetsResponse || {}).map(headingKey => {
         const articleSet = {
-          articles: articleSetsResponse[headingKey].map(buildArticleFromJson_),
+          articles:
+              opt_articleSetsResponse[headingKey]
+                  .map(buildArticleFromJson_)
+                  .filter(a => !!a),
         };
 
         if (headingKey.trim().length) {

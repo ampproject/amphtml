@@ -74,6 +74,7 @@ function getConfig() {
             // 'SL_iOS_8_4', // Disabled due to flakiness and low market share
             'SL_iOS_9_1',
             'SL_iOS_10_0',
+            'SL_iOS_11_0',
             'SL_IE_11',
           ],
     });
@@ -311,6 +312,11 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
       process.exit(exitCode);
     } else {
       done();
+    }
+  }).on('run_start', function() {
+    if (argv.saucelabs) {
+      console./* OK*/log(green(
+          'Running tests in parallel on', c.browsers.length, 'browsers...'));
     }
   }).on('browser_complete', function(browser) {
     if (argv.saucelabs) {

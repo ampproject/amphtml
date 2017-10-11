@@ -53,7 +53,8 @@ const BACKGROUND_AUDIO_ELEMENT_CLASS_NAME = 'i-amphtml-story-background-audio';
 export function upgradeBackgroundAudio(element) {
   if (element.hasAttribute('background-audio')) {
     const audioEl = element.ownerDocument.createElement('audio');
-    const audioSrc = assertHttpsUrl(element.getAttribute('background-audio'));
+    const audioSrc =
+        assertHttpsUrl(element.getAttribute('background-audio'), element);
     audioEl.setAttribute('src', audioSrc);
     audioEl.setAttribute('preload', 'auto');
     audioEl.setAttribute('loop', '');
@@ -71,7 +72,7 @@ export class AudioManager {
    * @param {!Element} rootElement The element for which audio should be managed.
    */
   constructor(win, rootElement) {
-    /** @private @const {!Object<!Element, !Playable>} */
+    /** @private @const {!Object<string, !Playable>} */
     this.playables_ = {};
 
     /** @private @const {!Array<!Playable>} */
@@ -129,7 +130,7 @@ export class AudioManager {
   play(sourceElement) {
     this.load(sourceElement)
         .then(() => {
-          const playable = this.getPlayable_(sourceElement);
+          const playable = this.getOrCreatePlayable_(sourceElement);
           if (!playable) {
             return;
           }
@@ -144,7 +145,7 @@ export class AudioManager {
    * @param {!Element} sourceElement The element to be stopped.
    */
   stop(sourceElement) {
-    const playable = this.getPlayable_(sourceElement);
+    const playable = this.getOrCreatePlayable_(sourceElement);
     if (!playable) {
       return;
     }
@@ -293,7 +294,7 @@ class Playable {
   }
 
   /**
-   * @return {!Element}
+   * @return {number}
    */
   getDepth() {
     return this.depth_;
@@ -371,11 +372,6 @@ class MediaElementPlayable extends Playable {
   /** @override */
   isLoaded() {
     return !!this.sourceElement;
-  }
-
-  /** @override */
-  isPlaying() {
-    return !this.sourceElement.paused;
   }
 
   /** @override */
