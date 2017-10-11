@@ -30,24 +30,52 @@ import {
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {upgradeBackgroundAudio} from './audio';
+import {renderSimpleTemplate} from './simple-template';
 import {dev, user} from '../../../src/log';
 import {EventType, dispatch, dispatchCustom} from './events';
 import {PageElement} from './page-element';
 import {isFiniteNumber} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
 import {listenOnce} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 
 
-const LOADING_SCREEN_CONTENTS_TEMPLATE =
-    `<ul class="i-amphtml-story-page-loading-dots">
-      <li class="i-amphtml-story-page-loading-dot"></li>
-      <li class="i-amphtml-story-page-loading-dot"></li>
-      <li class="i-amphtml-story-page-loading-dot"></li>
-    </ul>
-    <p class="i-amphtml-story-page-loading-text">Loading</p>`;
+
+/** @private @const {!Array<!./simple-template.ElementDef>} */
+const LOADING_SCREEN_TEMPLATE = [
+  {
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-page-loading-screen'}),
+    children: [
+      {
+        tag: 'ul',
+        attrs: dict({'class': 'i-amphtml-story-page-loading-dots'}),
+        children: [
+          {
+            tag: 'li',
+            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
+          },
+          {
+            tag: 'li',
+            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
+          },
+          {
+            tag: 'li',
+            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
+          },
+        ],
+      },
+      {
+        tag: 'p',
+        attrs: dict({'class': 'i-amphtml-story-page-loading-text'}),
+        text: 'Loading', // TODO(alanorozco): i18n
+      },
+    ],
+  },
+];
 
 
 /**
@@ -88,7 +116,6 @@ const TIME_REGEX = {
 
 /** @private @const {string} */
 const TAG = 'amp-story-page';
-
 
 
 /**
@@ -172,11 +199,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   initializeLoading_() {
-    // Add the loading screen into the DOM.
-    const loadingScreen = this.win.document.createElement('div');
-    loadingScreen.classList.add('i-amphtml-story-page-loading-screen');
-    loadingScreen./*OK*/innerHTML = LOADING_SCREEN_CONTENTS_TEMPLATE;
-    this.element.appendChild(loadingScreen);
+    this.element.appendChild(
+        renderSimpleTemplate(this.win.document, LOADING_SCREEN_TEMPLATE));
 
     // Build a list of page elements and poll until they are all loaded.
     this.pageElements_ = PageElement.getElementsFromPage(this);
