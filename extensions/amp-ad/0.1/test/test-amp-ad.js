@@ -136,9 +136,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
         meta.setAttribute('name', 'amp-3p-iframe-src');
         meta.setAttribute('content', 'https://example.com/remote.html');
         doc.head.appendChild(meta);
-        a4aRegistry['zort'] = (win, element, useRemoteHtml) => {
-          return !useRemoteHtml;
-        };
+        a4aRegistry['zort'] = (win, element, useRemoteHtml) => !useRemoteHtml;
         ampAdElement.setAttribute('type', 'zort');
         const upgraded = new AmpAd(ampAdElement).upgradeCallback();
         return expect(upgraded).to.eventually.be.instanceof(AmpAd3PImpl);
