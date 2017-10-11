@@ -3724,6 +3724,41 @@ attr_lists: {
     }
   }
   # <amp-bind>
+  attrs: { name: "[aria-activedescendant]" }
+  attrs: { name: "[aria-atomic]" }
+  attrs: { name: "[aria-autocomplete]" }
+  attrs: { name: "[aria-busy]" }
+  attrs: { name: "[aria-checked]" }
+  attrs: { name: "[aria-controls]" }
+  attrs: { name: "[aria-describedby]" }
+  attrs: { name: "[aria-disabled]" }
+  attrs: { name: "[aria-dropeffect]" }
+  attrs: { name: "[aria-expanded]" }
+  attrs: { name: "[aria-flowto]" }
+  attrs: { name: "[aria-grabbed]" }
+  attrs: { name: "[aria-haspopup]" }
+  attrs: { name: "[aria-hidden]" }
+  attrs: { name: "[aria-invalid]" }
+  attrs: { name: "[aria-label]" }
+  attrs: { name: "[aria-labelledby]" }
+  attrs: { name: "[aria-level]" }
+  attrs: { name: "[aria-live]" }
+  attrs: { name: "[aria-multiline]" }
+  attrs: { name: "[aria-multiselectable]" }
+  attrs: { name: "[aria-orientation]" }
+  attrs: { name: "[aria-owns]" }
+  attrs: { name: "[aria-posinset]" }
+  attrs: { name: "[aria-pressed]" }
+  attrs: { name: "[aria-readonly]" }
+  attrs: { name: "[aria-relevant]" }
+  attrs: { name: "[aria-required]" }
+  attrs: { name: "[aria-selected]" }
+  attrs: { name: "[aria-setsize]" }
+  attrs: { name: "[aria-sort]" }
+  attrs: { name: "[aria-valuemax]" }
+  attrs: { name: "[aria-valuemin]" }
+  attrs: { name: "[aria-valuenow]" }
+  attrs: { name: "[aria-valuetext]" }
   attrs: { name: "[class]" }
   attrs: { name: "[hidden]" }
   attrs: { name: "[text]" }
