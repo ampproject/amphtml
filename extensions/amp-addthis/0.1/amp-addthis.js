@@ -34,9 +34,20 @@ import {setStyle} from '../../../src/style';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {Services} from '../../../src/services';
+import {parseUrl} from '../../../src/url';
 
 import {ConfigManager} from './config-manager';
-import {CUSTOM_SHARE_KEYS, ORIGIN, ICON_SIZE, ALT_TEXT} from './constants';
+import {
+  AT_CONFIG_KEYS,
+  SHARE_CONFIG_KEYS,
+  ORIGIN,
+  API_SERVER,
+  COOKIELESS_API_SERVER,
+  ICON_SIZE,
+  ALT_TEXT,
+} from './constants';
+import {callLojson} from './addthis-utils/lojson';
 
 // This `configManager` will be shared by all AmpAddThis elements on a page, to prevent unnecessary
 // HTTP requests, get accurate analytics, etc.
@@ -61,8 +72,17 @@ class AmpAddThis extends AMP.BaseElement {
     /** @private {string} */
     this.widgetId_ = '';
 
-    /** @private {(?Object<string, string>|undefined)} */
+    /** @private {string} */
+    this.canonicalUrl_ = '';
+
+    /** @private {string} */
+    this.canonicalTitle_ = '';
+
+    /** @private {(?Object<string, string>|null)} */
     this.shareConfig_ = null;
+
+    /** @private {(?Object<string, string>|null)} */
+    this.atConfig_ = null;
   }
 
   /**
@@ -71,30 +91,21 @@ class AmpAddThis extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     this.preconnect.url(ORIGIN, opt_onLayout);
-    this.preconnect.url('https://m.addthis.com', opt_onLayout);
-    this.preconnect.url('https://m.addthisedge.com', opt_onLayout);
+    this.preconnect.url(API_SERVER, opt_onLayout);
+    this.preconnect.url(COOKIELESS_API_SERVER, opt_onLayout);
     this.preconnect.url('https://cache.addthiscdn.com', opt_onLayout);
   }
 
   /**
-   * @return {boolean}
-   * @override
-   */
-  renderOutsideViewport() {
-    return true;
-  }
-
-  /**
    * Note: Does no actual building (building is deferred until layout). Simply checks for/sets
-   * required attributes (pudId/widgetId).
+   * required attributes.
    * @override
    */
   buildCallback() {
-    const pubId = this.element.getAttribute('data-pub-id') ||
-        this.element.getAttribute('pub-id');
-    const widgetId = this.element.getAttribute('data-widget-id') ||
-        this.element.getAttribute('widget-id');
+    const pubId = this.element.getAttribute('data-pub-id');
+    const widgetId = this.element.getAttribute('data-widget-id');
 
+    // Required attributes
     this.pubId_ = user().assert(
         pubId,
         'The data-pub-id attribute is required for <amp-addthis> %s',
@@ -105,21 +116,26 @@ class AmpAddThis extends AMP.BaseElement {
         'The data-widget-id attribute is required for <amp-addthis> %s',
         this.element
     );
-    this.shareConfig_ = CUSTOM_SHARE_KEYS.reduce((config, key) => {
-      const value = this.element.getAttribute(`data-share-${key}`);
-      if (value) {
-        config[key] = value;
-      }
-      return config;
-    }, {});
 
-    // Fallbacks for url and title
-    if (!this.shareConfig_.url) {
-      this.shareConfig_.url = this.getAmpDoc().getUrl();
-    }
-    if (!this.shareConfig_.title) {
-      this.shareConfig_.title = this.getAmpDoc().win.document.title;
-    }
+    // Optional attributes
+    const ampDoc = this.getAmpDoc();
+    this.canonicalUrl_ = this.element.getAttribute('data-canonical-url') ||
+        ampDoc.getUrl();
+    this.canonicalTitle_ = this.element.getAttribute('data-canonical-title') ||
+        ampDoc.win.document.title;
+    this.shareConfig_ = this.getShareConfig_();
+    this.atConfig_ = this.getATConfig_(ampDoc);
+
+    // Register pageview
+    const viewer = Services.viewerForDoc(ampDoc);
+    viewer.whenFirstVisible().then(() => callLojson({
+      loc: parseUrl(this.canonicalUrl_),
+      title: this.canonicalTitle_,
+      pubId: this.pubId_,
+      atConfig: this.atConfig_,
+      referrer: viewer.getReferrerUrl(),
+      ampDoc,
+    }));
   }
 
   createPlaceholderCallback() {
@@ -202,6 +218,49 @@ class AmpAddThis extends AMP.BaseElement {
     return true;
   }
 
+  /**
+   * @private
+   * @return {Object<string, string>}
+   */
+  getShareConfig_() {
+    return SHARE_CONFIG_KEYS.reduce((config, key) => {
+      const value = this.element.getAttribute(`data-${key}`);
+      if (value) {
+        config[key] = value;
+      } else {
+        // Fallbacks for values that should always be defined.
+        if (key === 'url') {
+          config[key] = this.getAmpDoc().getUrl();
+        } else if (key === 'title') {
+          config[key] = this.getAmpDoc().win.document.title;
+        }
+      }
+      return config;
+    }, {});
+  }
+
+  /**
+   * @private
+   * @return {Object<string, string>}
+   */
+  getATConfig_(ampDoc) {
+    return AT_CONFIG_KEYS.reduce((config, key) => {
+      const value = this.element.getAttribute(`data-${key}`);
+      if (value) {
+        config[key] = value;
+      } else {
+        // Fallbacks for values that should always be defined.
+        const {win} = ampDoc;
+        if (key === 'ui_language') {
+          config[key] = win.document.documentElement.lang ||
+              win.navigator.language ||
+              win.navigator.userLanguage ||
+              'en';
+        }
+      }
+      return config;
+    }, {});
+  }
 }
 
 AMP.extension('amp-addthis', '0.1', AMP => {
