@@ -34,7 +34,7 @@ tags: {  # <amp-story>
     value: ""
   }
   attrs: {
-    name: "related-articles"
+    name: "bookend-config-src"
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
@@ -92,12 +92,65 @@ tags: {  # <amp-story-grid-layer>
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER grid-area"
   }
+  reference_points: {
+    tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
+  }
 }
 tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-STORY-GRID-LAYER grid-area"
   attrs: { name: "grid-area" }
+  attrs: {
+    name: "animate-in"
+    value_regex: "(drop|"
+        "fade-in|"
+        "fly-in-bottom|"
+        "fly-in-left|"
+        "fly-in-right|"
+        "fly-in-top|"
+        "pulse|"
+        "rotate-in-left|"
+        "rotate-in-right|"
+        "twirl-in|"
+        "whoosh-in-left|"
+        "whoosh-in-right)"
+  }
+  attrs: { name: "animate-in-delay" }
+  attrs: { name: "animate-in-duration" }
+  attrs: { name: "animate-in-after" }
+  reference_points: {
+    tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-STORY-GRID-LAYER animate-in"
+  # Attribute grid-area is not allowed in this tag. That's what makes this
+  # reference point different than the grid-area reference point.
+  attrs: {
+    name: "animate-in"
+    value_regex: "(drop|"
+        "fade-in|"
+        "fly-in-bottom|"
+        "fly-in-left|"
+        "fly-in-right|"
+        "fly-in-top|"
+        "pulse|"
+        "rotate-in-left|"
+        "rotate-in-right|"
+        "twirl-in|"
+        "whoosh-in-left|"
+        "whoosh-in-right)"
+  }
+  attrs: { name: "animate-in-delay" }
+  attrs: { name: "animate-in-duration" }
+  attrs: { name: "animate-in-after" }
+  reference_points: {
+    tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
+  }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
 }
 descendant_tag_lists: {

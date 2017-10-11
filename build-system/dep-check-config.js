@@ -123,6 +123,7 @@ exports.rules = [
       'ads/alp/handler.js->src/config.js',
       // Some ads need to depend on json.js
       'ads/**->src/json.js',
+      'ads/google/a4a/google-data-reporter.js->src/extension-analytics.js',
     ],
   },
   {

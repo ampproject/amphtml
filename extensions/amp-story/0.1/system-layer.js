@@ -19,6 +19,8 @@ import {dict} from '../../../src/utils/object';
 import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {ProgressBar} from './progress-bar';
+import {getMode} from '../../../src/mode';
+import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui'; // eslint-disable-line max-len
 
 
 /** @private @const {!./simple-template.ElementDef} */
@@ -26,6 +28,10 @@ const TEMPLATE = {
   tag: 'aside',
   attrs: dict({'class': 'i-amphtml-story-system-layer'}),
   children: [
+    {
+      tag: 'div',
+      attrs: dict({'class': 'i-amphtml-story-ui-left'}),
+    },
     {
       tag: 'div',
       attrs: dict({'class': 'i-amphtml-story-ui-right'}),
@@ -118,8 +124,17 @@ export class SystemLayer {
     /** @private {?Element} */
     this.unmuteAudioBtn_ = null;
 
+    /** @private {?Element} */
+    this.leftButtonTray_ = null;
+
     /** @private @const {!ProgressBar} */
     this.progressBar_ = ProgressBar.create(win);
+
+    /** @private {!DevelopmentModeLog} */
+    this.developerLog_ = DevelopmentModeLog.create(win);
+
+    /** @private {!DevelopmentModeLogButtonSet} */
+    this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
   }
 
   /**
@@ -137,6 +152,11 @@ export class SystemLayer {
 
     this.root_.insertBefore(
         this.progressBar_.build(pageCount), this.root_.firstChild);
+
+    this.leftButtonTray_ =
+        this.root_.querySelector('.i-amphtml-story-ui-left');
+
+    this.buildForDevelopmentMode_();
 
     this.exitFullScreenBtn_ =
         this.root_.querySelector('.i-amphtml-story-exit-fullscreen');
@@ -158,6 +178,19 @@ export class SystemLayer {
   /**
    * @private
    */
+  buildForDevelopmentMode_() {
+    if (!getMode().development) {
+      return;
+    }
+
+    this.leftButtonTray_.appendChild(this.developerButtons_.build(
+        this.developerLog_.toggle.bind(this.developerLog_)));
+    this.root_.appendChild(this.developerLog_.build());
+  }
+
+  /**
+   * @private
+   */
   addEventHandlers_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
     this.exitFullScreenBtn_.addEventListener(
@@ -172,6 +205,7 @@ export class SystemLayer {
     this.unmuteAudioBtn_.addEventListener(
         'click', e => this.onUnmuteAudioClick_(e));
   }
+
 
   /**
    * @return {!Element}
@@ -259,5 +293,89 @@ export class SystemLayer {
    */
   setActivePageIndex(pageIndex) {
     this.progressBar_.setActivePageIndex(pageIndex);
+  }
+
+
+  /**
+   * @param {!./logging.AmpStoryLogEntryDef} logEntry
+   * @private
+   */
+  logInternal_(logEntry) {
+    this.developerButtons_.log(logEntry);
+    this.developerLog_.log(logEntry);
+  }
+
+  /**
+   * Logs an array of entries to the developer logs.
+   * @param {!Array<!./logging.AmpStoryLogEntryDef>} logEntries
+   */
+  logAll(logEntries) {
+    if (!getMode().development) {
+      return;
+    }
+
+    Services.vsyncFor(this.win_).mutate(() => {
+      logEntries.forEach(logEntry => this.logInternal_(logEntry));
+    });
+  }
+
+  /**
+   * Logs a single entry to the developer logs.
+   * @param {!./logging.AmpStoryLogEntryDef} logEntry
+   */
+  log(logEntry) {
+    if (!getMode().development) {
+      return;
+    }
+
+    this.logInternal_(logEntry);
+  }
+
+  /**
+   * Clears any state held by the developer log or buttons.
+   */
+  resetDeveloperLogs() {
+    if (!getMode().development) {
+      return;
+    }
+
+    this.developerButtons_.clear();
+    this.developerLog_.clear();
+  }
+
+  /**
+   * Sets the string providing context for the developer logs window.  This is
+   * often the name or ID of the element that all logs are for (e.g. the page).
+   * @param {string} contextString
+   */
+  setDeveloperLogContextString(contextString) {
+    if (!getMode().development) {
+      return;
+    }
+
+    this.developerLog_.setContextString(contextString);
+  }
+
+  /**
+   * Toggles the visibility of the developer log.
+   * @private
+   */
+  toggleDeveloperLog_() {
+    if (!getMode().development) {
+      return;
+    }
+
+    this.developerLog_.toggle();
+  }
+
+  /**
+   * Hides the developer log in the UI.
+   */
+  hideDeveloperLog() {
+    if (!getMode().development) {
+      return;
+    }
+
+    this.developerLog_.hide();
   }
 }

@@ -39,6 +39,9 @@ import {VideoEvents} from '../../../src/video-interface';
 import {listenOnce} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {getLogEntries} from './logging';
+import {getMode} from '../../../src/mode';
+
 
 
 /** @private @const {!Array<!./simple-template.ElementDef>} */
@@ -232,6 +235,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.maybeScheduleAutoAdvance_();
     this.updateAudioIcon_();
     this.playAllMedia_();
+    this.reportDevModeErrors_();
   }
 
 
@@ -322,13 +326,18 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Pauses all media on this page.
+   * @param {boolean} opt_rewindToBeginning Whether to rewind the currentTime
+   *     of media items to the beginning.
    * @private
    */
-  pauseAllMedia_() {
+  pauseAllMedia_(opt_rewindToBeginning) {
     const mediaSet = this.getAllMedia_();
     Array.prototype.forEach.call(mediaSet, mediaItem => {
       mediaItem.pause();
-      mediaItem.currentTime = 0;
+
+      if (opt_rewindToBeginning) {
+        mediaItem.currentTime = 0;
+      }
     });
   }
 
@@ -407,7 +416,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   pageInactiveCallback_() {
     this.element.removeAttribute('active');
 
-    this.pauseAllMedia_();
+    this.pauseAllMedia_(/* opt_rewindToBeginning */ true);
     this.pageElements_.forEach(pageElement => {
       pageElement.pauseCallback();
     });
@@ -652,6 +661,21 @@ export class AmpStoryPage extends AMP.BaseElement {
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);
+  }
+
+
+  /**
+   * @private
+   */
+  reportDevModeErrors_() {
+    if (!getMode().development) {
+      return;
+    }
+
+    getLogEntries(this.element).then(logEntries => {
+      dispatchCustom(this.win, this.element,
+          EventType.DEV_LOG_ENTRIES_AVAILABLE, logEntries, {bubbles: true});
+    });
   }
 }
 
