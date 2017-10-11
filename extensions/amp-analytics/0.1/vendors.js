@@ -982,9 +982,9 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'pageTimer': {
         'on': 'timer',
         'timerSpec': {
-          'immediate': false,
           'interval': 5,
           'maxTimerLength': 600,
+          'immediate': false,
         },
         'request': 'timer',
       },
