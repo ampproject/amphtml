@@ -168,13 +168,13 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 .i-amphtml-story-button-next {
-  background-image: url('data:image/svg+xml;charset=utf8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M.3 3l9.5 9.5L.3 22l3 3 12.4-12.5L3.2 0"/></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M.3 3l9.5 9.5L.3 22l3 3 12.4-12.5L3.2 0"/></svg>');
   background-position: 55% 50%;
   right: 0;
 }
 
 .i-amphtml-story-button-prev {
-  background-image: url('data:image/svg+xml;charset=utf8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M15.7 22l-9.5-9.5L15.7 3l-3-3L.4 12.6 12.8 25"/></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M15.7 22l-9.5-9.5L15.7 3l-3-3L.4 12.6 12.8 25"/></svg>');
   background-position: 45% 50%;
   left: 0;
 }
