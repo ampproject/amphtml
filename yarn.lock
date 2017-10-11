@@ -2290,7 +2290,7 @@ configstore@^3.0.0:
     write-file-atomic "^2.0.0"
     xdg-basedir "^3.0.0"
 
-connect-header@^0.0.5:
+connect-header@0.0.5:
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/connect-header/-/connect-header-0.0.5.tgz#168b70a1770d6625ceaf35549f02fd0d7f14535b"
 
