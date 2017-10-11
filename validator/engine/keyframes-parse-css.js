@@ -87,11 +87,15 @@ class KeyframesVisitor extends parse_css.RuleVisitor {
       case '-o-keyframes':
       case '-webkit-keyframes':
         if (this.parentIsKeyframesAtRule) {
-          this.errors.push(createErrorTokenAt(
-              atRule,
-              amp.validator.ValidationError.Code
-                  .CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME,
-              ['style']));
+          if (amp.validator.LIGHT) {
+            this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+          } else {
+            this.errors.push(createErrorTokenAt(
+                atRule,
+                amp.validator.ValidationError.Code
+                    .CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME,
+                ['style']));
+          }
         }
         this.parentIsKeyframesAtRule = true;
         return;
