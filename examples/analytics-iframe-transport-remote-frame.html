@@ -27,9 +27,13 @@
           // event.
           context.sendResponseToCreative({'collected-data': 'abc'});
 
-          context.observeIntersection(entry => {
-            console.log('Got an IntersectionObserver entry:');
-            console.dir(entry);
+          // Optionally, you may request IntersectionObserver by calling
+          // context.observerIntersection().
+          context.observeIntersection(entries => {
+            entries.forEach(entry => {
+              console.log(`Intersection ratio ${entry.intersectionRatio} ` +
+                  `at time ${entry.time}`);
+            });
           });
         });
       };

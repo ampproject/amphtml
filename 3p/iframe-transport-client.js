@@ -166,7 +166,7 @@ export class IframeTransportContext {
 
   /**
    * Requests IntersectionObserver data to be sent.
-   * @param {!function(!IntersectionObserverEntry) callback The function to
+   * @param {!function(!JsonObject)} callback The function to
    *     which the IntersectionObserver data should be passed.
    */
   observeIntersection(callback) {
@@ -175,7 +175,7 @@ export class IframeTransportContext {
         MessageType.SEND_INTERSECTION_OBSERVER_EVENTS,
         MessageType.INTERSECTION_OBSERVER_EVENTS,
         eventData => {
-          callback(eventData);
+          callback(/** @type {!JsonObject} */ (eventData['entries']));
         });
     // TODO(jonkeller): Batching
   }
