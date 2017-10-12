@@ -47,7 +47,7 @@ export class IframeTransport {
    *     sendResponseToCreative(), it should be something that the recipient
    *     can use to identify the context of the message, e.g. the resourceID
    *     of a DOM element.
-   * @param {!HTMLElement} parent The HTML DOM node we're collecting metrics
+   * @param {!Element} parent The HTML DOM node we're collecting metrics
    *     on. Only used for IntersectionObserver.
    */
   constructor(ampWin, type, config, id, parent) {
@@ -60,7 +60,7 @@ export class IframeTransport {
     /** @private @const {string} */
     this.creativeId_ = id;
 
-    /** @private @const {!HTMLElement} */
+    /** @private @const {!Element} */
     this.parent_ = parent;
 
     dev().assert(config && config['iframe'],
@@ -91,12 +91,14 @@ export class IframeTransport {
       ++(frameData.usageCount);
     } else {
       frameData = this.createCrossDomainIframe();
+      // This must be done before attaching to the DOM.
+      // TODO(jonkeller): Need to handle/test case where requestor != frame
+      // creator
+      this.intersectionObserver_ = new IframeTransportIntersectionObserver(
+          this.ampWin_, this.parent_, frameData.frame);
       this.ampWin_.document.body.appendChild(frameData.frame);
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
-
-    this.intersectionObserver_ = new IframeTransportIntersectionObserver(
-        this.ampWin_, this.parent_, frameData.frame);
   }
 
   /**

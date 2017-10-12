@@ -23,6 +23,7 @@ import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {IframeTransport} from './iframe-transport';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getParentWindowFrameElement} from '../../../src/service';
 import {Services} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
@@ -311,6 +312,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       return;
     }
     const TAG = this.getName_();
+    const parentFrame = getParentWindowFrameElement(this.element, this.win.top);
     const ampAdResourceId = user().assertString(
         getAmpAdResourceId(this.element, this.win.top),
         `${TAG}: No friendly parent amp-ad element was found for ` +
@@ -318,7 +320,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
         this.element.getAttribute('type'), this.config_['transport'],
-        ampAdResourceId, this.element.parent);
+        ampAdResourceId, user().assertElement(parentFrame));
   }
 
   /**
