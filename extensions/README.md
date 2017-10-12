@@ -13,9 +13,9 @@ include the following script in the `<head>`:
 <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
 ```
 
-## Current list of Extended components
+## Current list of components
 
-See https://www.ampproject.org/docs/reference/components.
+See the [Components](https://www.ampproject.org/docs/reference/components) list.
 
 
 ## AMP HTML Extended Templates
