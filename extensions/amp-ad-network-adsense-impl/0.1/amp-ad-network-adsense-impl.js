@@ -367,7 +367,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           this.getAmpDoc(), this.iframe.contentWindow);
     }
     if (this.ampAnalyticsConfig_) {
-      dev().assertElement(!this.ampAnalyticsElement_);
+      dev().assert(!this.ampAnalyticsElement_);
       if (isReportingEnabled(this)) {
         addCsiSignalsToAmpAnalyticsConfig(
             this.win,
@@ -384,7 +384,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
 
-    setStyles(dev().assert(this.iframe), {
+    setStyles(dev().assertElement(this.iframe), {
       width: `${this.size_.width}px`,
       height: `${this.size_.height}px`,
     });

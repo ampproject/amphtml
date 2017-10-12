@@ -822,7 +822,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.getAmpDoc(), this.iframe.contentWindow);
     }
     if (this.ampAnalyticsConfig_) {
-      dev().assertElement(!this.ampAnalyticsElement_);
+      dev().assert(!this.ampAnalyticsElement_);
       if (isReportingEnabled(this)) {
         addCsiSignalsToAmpAnalyticsConfig(
             this.win,
@@ -854,7 +854,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // the size header for fluid ads. Fluid size headers always come back as
         // 0x0.
         !(size.width == 0 && size.height == 0);
-    setStyles(dev().assert(this.iframe), {
+    setStyles(dev().assertElement(this.iframe), {
       width: `${size.width}px`,
       height: `${size.height}px`,
       position: isMultiSizeFluid ? 'relative' : null,
