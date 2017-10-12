@@ -33,7 +33,6 @@ var touch = require('touch');
 var watchify = require('watchify');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
-var gulpInstall = require('gulp-install');
 
 var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
 
@@ -45,8 +44,6 @@ var hostname3p = argv.hostname3p || '3p.ampproject.net';
 // All declared extensions.
 var extensions = {};
 var extensionAliasFilePath = {};
-
-gulp.src(['./package.json']).pipe(gulpInstall());
 
 // Each extension and version must be listed individually here.
 declareExtension('amp-3q-player', '0.1', false);

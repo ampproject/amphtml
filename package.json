@@ -68,7 +68,6 @@
     "gulp-git": "^2.3.2",
     "gulp-help": "^1.6.1",
     "gulp-if": "^2.0.0",
-    "gulp-install": "^1.1.0",
     "gulp-intercept": "^0.1.0",
     "gulp-load-plugins": "^1.2.0",
     "gulp-rename": "^1.2.2",
