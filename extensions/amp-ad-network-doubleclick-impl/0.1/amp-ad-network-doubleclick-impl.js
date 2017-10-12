@@ -61,6 +61,9 @@ import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
+import {
+  installAnchorClickInterceptor,
+} from '../../../src/anchor-click-interceptor';
 import {stringHash32} from '../../../src/string';
 import {removeElement, createElementWithAttributes} from '../../../src/dom';
 import {getData} from '../../../src/event-helper';
@@ -808,8 +811,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  onCreativeRender(isVerifiedAmpCreative) {
-    super.onCreativeRender(isVerifiedAmpCreative);
+  onCreativeRender(creativeMetaData) {
+    super.onCreativeRender(creativeMetaData);
+    if (creativeMetaData &&
+        !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
+      // Capture phase click handlers on the ad if amp-ad-exit not present
+      // (assume it will handle capture).
+      dev().assert(this.iframe);
+      installAnchorClickInterceptor(
+          this.getAmpDoc(), this.iframe.contentWindow);
+    }
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
       if (isReportingEnabled(this)) {
@@ -818,7 +829,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.element,
             this.ampAnalyticsConfig_,
             this.qqid_,
-            isVerifiedAmpCreative,
+            !!creativeMetaData,
             this.lifecycleReporter_.getDeltaTime(),
             this.lifecycleReporter_.getInitTime());
       }
@@ -843,7 +854,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // the size header for fluid ads. Fluid size headers always come back as
         // 0x0.
         !(size.width == 0 && size.height == 0);
-    setStyles(dev().assertElement(this.iframe), {
+    setStyles(dev().assert(this.iframe), {
       width: `${size.width}px`,
       height: `${size.height}px`,
       position: isMultiSizeFluid ? 'relative' : null,

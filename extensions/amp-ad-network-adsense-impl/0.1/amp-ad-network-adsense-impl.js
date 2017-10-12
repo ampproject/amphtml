@@ -47,6 +47,9 @@ import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
+import {
+  installAnchorClickInterceptor,
+} from '../../../src/anchor-click-interceptor';
 import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/string';
@@ -353,8 +356,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  onCreativeRender(isVerifiedAmpCreative) {
-    super.onCreativeRender(isVerifiedAmpCreative);
+  onCreativeRender(creativeMetaData) {
+    super.onCreativeRender(creativeMetaData);
+    if (creativeMetaData &&
+        !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
+      // Capture phase click handlers on the ad if amp-ad-exit not present
+      // (assume it will handle capture).
+      dev().assert(this.iframe);
+      installAnchorClickInterceptor(
+          this.getAmpDoc(), this.iframe.contentWindow);
+    }
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
       if (isReportingEnabled(this)) {
@@ -363,7 +374,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
             this.element,
             this.ampAnalyticsConfig_,
             this.qqid_,
-            isVerifiedAmpCreative,
+            !!creativeMetaData,
             this.lifecycleReporter_.getDeltaTime(),
             this.lifecycleReporter_.getInitTime());
       }
@@ -373,7 +384,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
 
-    setStyles(dev().assertElement(this.iframe), {
+    setStyles(dev().assert(this.iframe), {
       width: `${this.size_.width}px`,
       height: `${this.size_.height}px`,
     });
