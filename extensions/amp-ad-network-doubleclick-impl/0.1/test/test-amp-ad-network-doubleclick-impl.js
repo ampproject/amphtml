@@ -357,7 +357,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       const ev1 = new Event('click', {bubbles: true});
       ev1.pageX = 10;
       ev1.pageY = 20;
-      sinon.stub(impl, 'getResource').returns(
+      sandbox.stub(impl, 'getResource').returns(
           {
             getUpgradeDelayMs: () => 1,
           });
@@ -388,7 +388,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       const ev1 = new Event('click', {bubbles: true});
       ev1.pageX = 10;
       ev1.pageY = 20;
-      sinon.stub(impl, 'getResource').returns(
+      sandbox.stub(impl, 'getResource').returns(
           {
             getUpgradeDelayMs: () => 1,
           });
