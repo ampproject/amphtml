@@ -99,23 +99,32 @@ export function doNotTrackImpression() {
  */
 function handleReplaceUrl(win) {
   const viewer = Services.viewerForDoc(win.document);
-  if (!viewer.getParam('replaceUrl') || !viewer.hasCapability('replaceUrl')) {
-    // Right now we use the legacy replaceUrl init param as a signal to request
-    // replaceUrl from viewer.
-    // Viewer's capability to support getting replaceUrl is also required.
+
+  // ReplaceUrl substitution doesn't have to wait until the document is visible
+  if (!viewer.getParam('replaceUrl')) {
+    // The init replaceUrl param serve as a signal on whether replaceUrl is
+    // required for this doc.
     return Promise.resolve();
   }
 
-  // ReplaceUrl substitution doesn't have to wait until the document is visible
-  viewer.sendMessageAwaitResponse('getReplaceUrl', undefined).then(response => {
-    if (!response || typeof response != 'object') {
-      dev().warn('IMPRESSION', 'get invalid replaceUrl response');
-      return;
-    }
-    if (response['replaceUrl']) {
-      viewer.replaceUrl(response['replaceUrl']);
-    }
-  }, () => {});
+  if (!viewer.hasCapability('replaceUrl')) {
+    // If Viewer is not capability of providing async replaceUrl, use the legacy
+    // init replaceUrl param.
+    viewer.replaceUrl(/** @type {string} */ (viewer.getParam('replaceUrl')));
+    return Promise.resolve();
+  }
+
+  // request async replaceUrl is viewer support getReplaceUrl.
+  return viewer.sendMessageAwaitResponse('getReplaceUrl', undefined)
+      .then(response => {
+        if (!response || typeof response != 'object') {
+          dev().warn('IMPRESSION', 'get invalid replaceUrl response');
+          return;
+        }
+        if (response['replaceUrl']) {
+          viewer.replaceUrl(response['replaceUrl']);
+        }
+      }, () => {});
 }
 
 

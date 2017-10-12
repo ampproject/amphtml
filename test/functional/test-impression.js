@@ -218,21 +218,28 @@ describe('impression', () => {
   });
 
   describe('replaceUrl', () => {
-    it('should do nothing if viewer has no capability of replaceUrl', () => {
-      toggleExperiment(window, 'alp', true);
-      viewer.getParam.withArgs('replaceUrl').returns('http://www.example.com');
-      maybeTrackImpression(window);
-      expect(viewer.whenFirstVisible).to.have.not.been.called;
-      return getTrackImpressionPromise().should.be.fulfilled;
-    });
-
     it('do nothing if no init replaceUrl param', function * () {
       toggleExperiment(window, 'alp', true);
+      sandbox.spy(viewer, 'replaceUrl');
       viewer.hasCapability.withArgs('replaceUrl').returns(true);
       maybeTrackImpression(window);
       yield macroTask();
-      expect(viewer.whenFirstVisible).to.have.not.been.called;
+      expect(viewer.replaceUrl).to.have.not.been.called;
       return getTrackImpressionPromise().should.be.fulfilled;
+    });
+
+    it('should use init replaceUrl parm if viewer has no capability', () => {
+      toggleExperiment(window, 'alp', true);
+      viewer.hasCapability.withArgs('replaceUrl').returns(false);
+      viewer.getParam.withArgs('replaceUrl').returns(
+          'http://localhost:9876/v/s/f.com/?gclid=1234&amp_js_v=1&init');
+      const prevHref = window.location.href;
+      maybeTrackImpression(window);
+      return getTrackImpressionPromise().then(() => {
+        expect(window.location.href).to.equal(
+            'http://localhost:9876/v/s/f.com/?gclid=1234&amp_js_v=1&init');
+        window.history.replaceState(null, '', prevHref);
+      });
     });
 
 
