@@ -56,8 +56,6 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   HOLDBACK_INTERNAL: '2092614',
   CANONICAL_CONTROL: '21060932',
   CANONICAL_EXPERIMENT: '21060933',
-  CANONICAL_HTTP_CONTROL: '21061030',
-  CANONICAL_HTTP_EXPERIMENT: '21061031',
   CACHE_EXTENSION_INJECTION_CONTROL: '21060955',
   CACHE_EXTENSION_INJECTION_EXP: '21060956',
   IDENTITY_CONTROL: '21060937',
@@ -137,11 +135,6 @@ export class DoubleclickA4aEligibility {
       if (urlExperimentId == -1 &&
           (getMode(win).localDev || getMode(win).test)) {
         experimentId = MANUAL_EXPERIMENT_ID;
-      } else if (!this.supportsCrypto(win)) {
-        experimentId = this.maybeSelectExperiment(win, element, [
-          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_CONTROL,
-          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
-        ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
       } else {
         experimentId = this.maybeSelectExperiment(win, element, [
           DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
@@ -179,7 +172,6 @@ export class DoubleclickA4aEligibility {
     return ![DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
       DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
       DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
-      DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_CONTROL,
     ].includes(experimentId);
   }
 

@@ -25,9 +25,6 @@ import {
 import {createElementWithAttributes} from '../../../src/dom';
 import {cancellation, isCancellation} from '../../../src/error';
 import {
-  installAnchorClickInterceptor,
-} from '../../../src/anchor-click-interceptor';
-import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
 } from '../../../src/friendly-iframe-embed';
@@ -1088,11 +1085,11 @@ export class AmpA4A extends AMP.BaseElement {
    * publisher page but prior to load (or ini-load for friendly frame AMP
    * creative render).  To be overridden by network implementations as needed.
    *
-   * @param {boolean} isVerifiedAmpCreative whether or not the creative was
-   *    verified as AMP and therefore given preferential treatment.
+   * @param {?CreativeMetaDataDef} creativeMetaData metadata if AMP creative,
+   *    null otherwise.
    */
-  onCreativeRender(isVerifiedAmpCreative) {
-    if (isVerifiedAmpCreative) {
+  onCreativeRender(creativeMetaData) {
+    if (creativeMetaData) {
       this.protectedEmitLifecycleEvent_('renderFriendlyEnd');
     }
   }
@@ -1260,9 +1257,6 @@ export class AmpA4A extends AMP.BaseElement {
           const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
               friendlyIframeEmbed.win.document;
           setStyle(frameDoc.body, 'visibility', 'visible');
-          // Capture phase click handlers on the ad.
-          installAnchorClickInterceptor(
-              this.getAmpDoc(), friendlyIframeEmbed.win);
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
           // Capture timing info for friendly iframe load completion.
@@ -1280,7 +1274,7 @@ export class AmpA4A extends AMP.BaseElement {
           protectFunctionWrapper(this.onCreativeRender, this, err => {
             dev().error(TAG, this.element.getAttribute('type'),
                 'Error executing onCreativeRender', err);
-          })(true);
+          })(creativeMetaData);
           // It's enough to wait for "ini-load" signal because in a FIE case
           // we know that the embed no longer consumes significant resources
           // after the initial load.
@@ -1321,7 +1315,7 @@ export class AmpA4A extends AMP.BaseElement {
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(TAG, this.element.getAttribute('type'),
           'Error executing onCreativeRender', err);
-    })(false);
+    })(null);
     return frameLoadPromise;
   }
 

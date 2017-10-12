@@ -263,6 +263,68 @@ describes.realWin('amp-ad-network-adsense-impl', {
       // test/functional/test-analytics.js.
       // Just ensure extensions is loaded, and analytics element appended.
     });
+
+    it('should register click listener', () => {
+      impl.iframe = impl.win.document.createElement('iframe');
+      impl.win.document.body.appendChild(impl.iframe);
+      const adBody = impl.iframe.contentDocument.body;
+      let clickHandlerCalled = 0;
+
+      adBody.onclick = function(e) {
+        expect(e.defaultPrevented).to.be.false;
+        e.preventDefault();  // Make the test not actually navigate.
+        clickHandlerCalled++;
+      };
+      adBody.innerHTML = '<a ' +
+          'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
+          '<button id="target"><button></div>';
+      const button = adBody.querySelector('#target');
+      const a = adBody.querySelector('a');
+      const ev1 = new Event('click', {bubbles: true});
+      ev1.pageX = 10;
+      ev1.pageY = 20;
+      sandbox.stub(impl, 'getResource').returns(
+          {
+            getUpgradeDelayMs: () => 1,
+          });
+      impl.buildCallback();
+      impl.size_ = {width: 123, height: 456};
+      impl.onCreativeRender({customElementExtensions: []});
+      button.dispatchEvent(ev1);
+      expect(a.href).to.equal('https://f.co/?10,20,RANDOM');
+      expect(clickHandlerCalled).to.equal(1);
+    });
+
+    it('should not register click listener is amp-ad-exit', () => {
+      impl.iframe = impl.win.document.createElement('iframe');
+      impl.win.document.body.appendChild(impl.iframe);
+      const adBody = impl.iframe.contentDocument.body;
+      let clickHandlerCalled = 0;
+
+      adBody.onclick = function(e) {
+        expect(e.defaultPrevented).to.be.false;
+        e.preventDefault();  // Make the test not actually navigate.
+        clickHandlerCalled++;
+      };
+      adBody.innerHTML = '<a ' +
+          'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
+          '<button id="target"><button></div>';
+      const button = adBody.querySelector('#target');
+      const a = adBody.querySelector('a');
+      const ev1 = new Event('click', {bubbles: true});
+      ev1.pageX = 10;
+      ev1.pageY = 20;
+      sandbox.stub(impl, 'getResource').returns(
+          {
+            getUpgradeDelayMs: () => 1,
+          });
+      impl.buildCallback();
+      impl.size_ = {width: 123, height: 456};
+      impl.onCreativeRender({customElementExtensions: ['amp-ad-exit']});
+      button.dispatchEvent(ev1);
+      expect(a.href).to.equal('https://f.co/?CLICK_X,CLICK_Y,RANDOM');
+      expect(clickHandlerCalled).to.equal(1);
+    });
   });
 
   describe('centering', () => {
