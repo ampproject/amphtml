@@ -220,6 +220,16 @@
     "page": "https://api.segment.io/v1/pixel/page?writeKey=$writeKey&context.library.name=amp&anonymousId=_client_id_&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&name=$name",
     "track": "https://api.segment.io/v1/pixel/track?writeKey=$writeKey&context.library.name=amp&anonymousId=_client_id_&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&event=$event"
   },
+  "shinystat": {
+    "base": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi",
+    "commpar": "AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2",
+    "pagepar": "&VIE=_viewer_&PLT=_page_load_time_",
+    "eventpar": "&SSXL=1",
+    "linkpar": "&LINK=$outboundLink",
+    "pageview": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2&VIE=_viewer_&PLT=_page_load_time_",
+    "event": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2&SSXL=1",
+    "link": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2&LINK=$outboundLink"
+  },
   "snowplow": {
     "aaVersion": "amp-0.2",
     "basePrefix": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_",
