@@ -334,11 +334,13 @@ export class AmpAdExit extends AMP.BaseElement {
           }
           const responseMsg = deserializeMessage(getData(event));
           if (!responseMsg ||
-              responseMsg['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE ||
-              responseMsg['creativeId'] != this.ampAdResourceId_) {
+              responseMsg['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE) {
             return;
           }
           this.assertValidResponseMessage_(responseMsg, event.origin);
+          if (responseMsg['creativeId'] != this.ampAdResourceId_) {
+            return; // Valid message, but for different amp-ad-exit instance
+          }
           this.vendorResponses_[responseMsg['vendor']] = responseMsg['message'];
         });
   }
