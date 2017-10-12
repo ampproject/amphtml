@@ -420,7 +420,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
 
   'dynatrace': {
     'requests': {
-      'endpoint': '${protocol}://${tenant}.${environment}:${port}/ampbf',
+      'endpoint': '${protocol}://${tenant}${separator}${environment}:${port}/ampbf/${tenantpath}',
       'pageview': '${endpoint}?type=js&' +
         'flavor=amp&' +
         'v=1&' +
@@ -476,6 +476,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'tenant': '',
       'environment': 'live.dynatrace.com',
       'port': '443',
+      'separator': '.',
     },
   },
 
