@@ -483,8 +483,9 @@ export class Resource {
   }
 
   measureViaLayers_() {
-    const layers = Services.layersForDoc(this.element);
-    layers.remeasure(this.element);
+    const {element} = this;
+    const layers = element.getLayers();
+    layers.remeasure(element);
   }
 
   /**
@@ -552,7 +553,10 @@ export class Resource {
       // TODO(jridgewell): transition all callers to position and/or size calls
       // directly.
       const {element} = this;
-      return Services.layersForDoc(element).getScrolledBox(element);
+      const layers = element.getLayers();
+      const pos = layers.getOffsetPosition(element);
+      const size = layers.getSize(element);
+      return layoutRectLtwh(pos.left, pos.top, size.width, size.height);
     }
 
     if (!this.isFixed_) {
@@ -571,7 +575,7 @@ export class Resource {
   getPageLayoutBox() {
     if (this.useLayers_) {
       const {element} = this;
-      const layers = Services.layersForDoc(element);
+      const layers = element.getLayers();
       const pos = layers.getOffsetPosition(element);
       const size = layers.getSize(element);
       return layoutRectLtwh(pos.left, pos.top, size.width, size.height);

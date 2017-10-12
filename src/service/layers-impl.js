@@ -83,9 +83,6 @@ export class LayoutLayers {
     /** @const {!Document} */
     this.document_ = win.document;
 
-    /** @const {!Array<!LayoutLayer>} */
-    this.layers_ = [];
-
     // TODO: figure out fixed layer
 
     this.document_.addEventListener('scroll', event => {
@@ -98,6 +95,26 @@ export class LayoutLayers {
     win.addEventListener('resize', () => this.onResize_());
 
     this.declareLayer(this.getScrollingElement());
+  }
+
+  add(element) {
+    if (LayoutElement.forOptional(element)) {
+      return;
+    }
+
+    const layout = new LayoutElement(element);
+    const parent = layout.getParentLayer();
+    if (parent) {
+      parent.add(element);
+    }
+  }
+
+  remove(element) {
+    const layout = LayoutElement.for(element);
+    const parent = layout.getParentLayer();
+    dev().assert(parent);
+
+    parent.remove(element);
   }
 
   /**
@@ -124,10 +141,12 @@ export class LayoutLayers {
   calcIntersectionWithParent(element, parent, opt_expand) {
     const {left, top} = LayoutElement.getScrolledPosition(element, parent);
     const size = LayoutElement.getSize(element);
-    const parentSize = LayoutElement.getSize(parent);
+
+    let {width: parentWidth, height: parentHeight} =
+        LayoutElement.getSize(parent);
     if (opt_expand) {
-      parentSize.width *= 1 + (opt_expand.dw || 0) * 2;
-      parentSize.height *= 1 + (opt_expand.dh || 0) * 2;
+      parentWidth *= 1 + (opt_expand.dw || 0) * 2;
+      parentHeight *= 1 + (opt_expand.dh || 0) * 2;
     }
 
     return layoutRectLtwh(
@@ -136,12 +155,6 @@ export class LayoutLayers {
         Math.max(Math.min(left + size.width, parentSize.width) - left, 0),
         Math.max(Math.min(top + size.height, parentSize.height) - top, 0)
     );
-  }
-
-  getScrolledBox(element) {
-    const { left, top } = LayoutElement.getScrolledPosition(element);
-    const { width, height } = LayoutElement.getSize(element);
-    return layoutRectLtwh(left, top, width, height);
   }
 
   getScrolledPosition(element, opt_parent) {
@@ -197,24 +210,16 @@ export class LayoutLayers {
    * @return {!LayoutLayer}
    */
   declareLayer_(element) {
-    dev().assert(!LayoutLayer.forOptional(element));
-    const layer = new LayoutLayer(element);
-    this.layers_.push(layer);
+    let layer = LayoutLayer.forOptional(element);
+    if (!layer) {
+      layer = new LayoutLayer(element);
+    }
     return layer;
   }
 
   onResize_() {
-    const scroll = LayoutLayer.for(this.getScrollingElement());
-
-    const layers = this.layers_;
-    for (let i = 0; i < layers; i++) {
-      const layer = layers[i];
-      if (layer !== scroll) {
-        layers[i].dispose();
-      }
-    }
-
-    scroll.remeasure();
+    const scroller = this.getScrollingElement();
+    LayoutLayer.for(scroller).dispose();
   }
 
   scrolled_(element) {
@@ -257,6 +262,7 @@ export class LayoutLayers {
 export class LayoutLayer {
   constructor(element) {
     /** @private @const {!Element} */
+    // TODO Should create the LayoutElement for this.
     this.root_ = element;
 
     /**
@@ -337,6 +343,28 @@ export class LayoutLayer {
     return null;
   }
 
+  add(element) {
+    dev().assert(this.contains(element));
+
+    const layout = LayoutElement.for(element);
+    this.layouts_.push(layout);
+  }
+
+  remove(element) {
+    const layout = LayoutElement.for(element);
+    dev().assert(layout.getParentLayer() === this);
+    const i = this.layouts_.indexOf(layout);
+    this.layouts_.splice(i, 1);
+
+    const layer = LayoutLayer.forOptional(element);
+    if (layer) {
+      dev().assert(layer.getParentLayer() === this);
+      layer.dispose();
+      const i = this.layers_.indexOf(layer);
+      this.layers_.splice(i, 1);
+    }
+  }
+
   /**
    * The layer's cached parent layer.
    * @return {?LayoutLayer}
@@ -354,11 +382,12 @@ export class LayoutLayer {
    * lazily after this happens.
    */
   dispose() {
-    this.root_[LAYOUT_LAYER_PROP] = null;
     const parent = this.getParentLayer();
     if (parent) {
+      this.root_[LAYOUT_LAYER_PROP] = null;
       this.transfer_(parent);
     }
+    // TODO dispose children layers
   }
 
   contains(element) {
@@ -436,20 +465,20 @@ export class LayoutLayer {
    * If this layer is not in viewport, skip it.
    * If child layer is not in viewport, skip it.
    */
-  getElements(opt_collected) {
-    const collected = opt_collected || [];
-    const layouts = this.layouts_;
-    for (let i = 0; i < layouts.length; i++) {
-      collected.push(layouts[i].element_);
-    }
+  // getElements(opt_collected) {
+    // const collected = opt_collected || [];
+    // const layouts = this.layouts_;
+    // for (let i = 0; i < layouts.length; i++) {
+      // collected.push(layouts[i].element_);
+    // }
 
-    const layers = this.layers_;
-    for (let i = 0; i < layouts.length; i++) {
-      layouts[i].getElements(collected);
-    }
+    // const layers = this.layers_;
+    // for (let i = 0; i < layouts.length; i++) {
+      // layouts[i].getElements(collected);
+    // }
 
-    return collected;
-  }
+    // return collected;
+  // }
 }
 
 export class LayoutElement {
@@ -459,11 +488,7 @@ export class LayoutElement {
      */
     this.element_ = element;
 
-    const parent = LayoutLayer.getParentLayer(element);
-    this.parentLayer_ = parent;
-    if (parent) {
-      parent.layouts_.push(this);
-    }
+    this.parentLayer_ = LayoutLayer.getParentLayer(element);
 
     this.size_ = SizeWh(0, 0);
     this.position_ = PositionLt(0, 0);
@@ -539,18 +564,15 @@ export class LayoutElement {
       return layout.getOffsetPosition(opt_parent);
     }
 
-    const box = element.getBoundingClientRect();
-    const parent = LayoutLayer.getParentLayer(element);
-
-    if (!parent) {
-      return PositionLt(box.left, box.top);
+    // There's no equivalent DOM method, so it has to be a for-loop.
+    let x = 0;
+    let y = 0;
+    for (let el = element; opt_parent ? opt_parent.contains(el) : el;
+        el = el.offsetParent) {
+      x += el.offsetLeft;
+      y += el.offsetTop;
     }
-
-    const relative = parent.getOffsetPosition(opt_parent);
-    return PositionLt(
-      box.left - relative.left,
-      box.top - relative.top
-    );
+    return PositionLt(x, y);
   }
 
   /**
@@ -575,16 +597,8 @@ export class LayoutElement {
     }
 
     const parent = LayoutLayer.getParentLayer(element);
-    if (!parent) {
-      return PositionLt(0, 0);
-    }
-
-    const box = element.getBoundingClientRect();
-    const relative = parent.getScrolledPosition();
-    return PositionLt(
-        box.left - relative.left,
-        box.top - relative.top
-    );
+    return LayoutElement.getOffsetPosition(element,
+        parent ? parent.root_ : undefined);
   }
 
   /**

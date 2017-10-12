@@ -718,7 +718,7 @@ function createBaseCustomElementClass(win) {
       }
       this.getResources().add(this);
       if (isExperimentOn(this.ampdoc_.win, 'layers')) {
-        new LayoutElement(this);
+        this.getLayers().add(this);
       }
 
       if (this.everAttached) {
