@@ -270,7 +270,7 @@ describe('amp-a4a', () => {
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
-        expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+        expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
         expect(lifecycleEventStub).to.be.calledWith('renderSafeFrameStart',
             {'isAmpCreative': false, 'releaseType': '0'});
       });
@@ -296,7 +296,7 @@ describe('amp-a4a', () => {
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
-        expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+        expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
       });
     });
 
@@ -310,7 +310,7 @@ describe('amp-a4a', () => {
         const child = a4aElement.querySelector('iframe[src]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
-        expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+        expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
       });
     });
 
@@ -429,7 +429,7 @@ describe('amp-a4a', () => {
         const child = a4aElement.querySelector('iframe[src]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
-        expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+        expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
       });
     });
   });
@@ -940,7 +940,8 @@ describe('amp-a4a', () => {
                 'link[href="https://fonts.googleapis.com/css?family=Questrial"]'))
                 .to.be.ok;
             expect(doc.querySelector('script[src*="amp-font-0.1"]')).to.be.ok;
-            expect(onCreativeRenderSpy).to.be.calledOnce;
+            expect(onCreativeRenderSpy.withArgs(sinon.match.object))
+                .to.be.calledOnce;
             expect(updatePriorityStub).to.be.calledOnce;
             expect(updatePriorityStub.args[0][0]).to.equal(0);
             expect(lifecycleEventStub).to.be.calledWith(
@@ -1062,7 +1063,8 @@ describe('amp-a4a', () => {
             const iframe = a4aElement.getElementsByTagName('iframe')[0];
             if (isValidCreative && !opt_failAmpRender) {
               expect(iframe.getAttribute('src')).to.be.null;
-              expect(onCreativeRenderSpy.withArgs(true)).to.be.calledOnce;
+              expect(onCreativeRenderSpy.withArgs(sinon.match.object))
+                  .to.be.calledOnce;
               expect(updatePriorityStub).to.be.calledOnce;
               expect(updatePriorityStub.args[0][0]).to.equal(0);
             } else {
@@ -1070,7 +1072,7 @@ describe('amp-a4a', () => {
               expect(iframe.src, 'verify iframe src w/ origin').to
                   .equal(TEST_URL +
                          '&__amp_source_origin=about%3Asrcdoc');
-              expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+              expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
               if (!opt_failAmpRender) {
                 expect(updatePriorityStub).to.not.be.called;
               }
@@ -1113,7 +1115,7 @@ describe('amp-a4a', () => {
           expect(iframe).to.be.ok;
           expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
           expect(iframe).to.be.visible;
-          expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+          expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
           expect(lifecycleEventStub).to.be.calledWith('networkError');
         });
       });
@@ -1146,7 +1148,7 @@ describe('amp-a4a', () => {
           expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
           expect(/&err=true/.test(iframe.src), iframe.src).to.be.true;
           expect(iframe).to.be.visible;
-          expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+          expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
           expect(lifecycleEventStub).to.be.calledWith('networkError');
         });
       });
@@ -1192,7 +1194,7 @@ describe('amp-a4a', () => {
           const iframe = a4aElement.querySelectorAll('iframe')[0];
           expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
           expect(iframe).to.be.visible;
-          expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+          expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
         }));
       });
     });
@@ -1219,7 +1221,7 @@ describe('amp-a4a', () => {
           const iframe = a4aElement.querySelectorAll('iframe')[0];
           expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
           expect(iframe).to.be.visible;
-          expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
+          expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
         });
       });
     });
@@ -1615,47 +1617,6 @@ describe('amp-a4a', () => {
         expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
         expect(Services.urlReplacementsForDoc(frameDoc))
             .to.not.equal(Services.urlReplacementsForDoc(a4aElement));
-      });
-    });
-
-    it('should handle click expansion correctly', () => {
-      return a4a.renderAmpCreative_(metaData).then(() => {
-        const adBody = a4aElement.querySelector('iframe')
-            .contentDocument.querySelector('body');
-        let clickHandlerCalled = 0;
-
-        adBody.onclick = function(e) {
-          expect(e.defaultPrevented).to.be.false;
-          e.preventDefault();  // Make the test not actually navigate.
-          clickHandlerCalled++;
-        };
-        adBody.innerHTML = '<a ' +
-            'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
-            '<button id="target"><button></div>';
-        const button = adBody.querySelector('#target');
-        const a = adBody.querySelector('a');
-        const ev1 = new Event('click', {bubbles: true});
-        ev1.pageX = 10;
-        ev1.pageY = 20;
-        button.dispatchEvent(ev1);
-        expect(a.href).to.equal('https://f.co/?10,20,RANDOM');
-        expect(clickHandlerCalled).to.equal(1);
-
-        const ev2 = new Event('click', {bubbles: true});
-        ev2.pageX = 111;
-        ev2.pageY = 222;
-        a.dispatchEvent(ev2);
-        expect(a.href).to.equal('https://f.co/?111,222,RANDOM');
-        expect(clickHandlerCalled).to.equal(2);
-
-        const ev3 = new Event('click', {bubbles: true});
-        ev3.pageX = 666;
-        ev3.pageY = 666;
-        // Click parent of a tag.
-        a.parentElement.dispatchEvent(ev3);
-        // Had no effect, because actual link wasn't clicked.
-        expect(a.href).to.equal('https://f.co/?111,222,RANDOM');
-        expect(clickHandlerCalled).to.equal(3);
       });
     });
   });
