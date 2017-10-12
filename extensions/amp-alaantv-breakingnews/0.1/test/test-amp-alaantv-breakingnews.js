@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../../src/amp-events';
 import {AmpAlaantvBreakingnews} from '../amp-alaantv-breakingnews';
+import {Services} from '../../../../src/services';
 
 describes.realWin('amp-alaantv-breakingnews', {
     amp: {
@@ -22,17 +24,52 @@ describes.realWin('amp-alaantv-breakingnews', {
     }
 }, env => {
 
-    let win;
+    let win, doc, ampdoc;
+    let templatesMock;
     let element;
+    let breakingnews;
+    let listMock;
+    let bindStub;
+    let container;
+    let lstContainer;
 
     beforeEach(() => {
         win = env.win;
-        element = win.document.createElement('amp-alaantv-breakingnews');
+        doc = win.document;
+        ampdoc = env.ampdoc;
+
+        bindStub = sandbox.stub(Services, 'bindForDocOrNull')
+            .returns(Promise.resolve(null));
+        const templates = Services.templatesFor(win);
+        templatesMock = sandbox.mock(templates);
+
+        win = env.win;
+        element = win.document.createElement('div');
+        container = win.document.createElement('div');
+        container.setAttribute('container', '');
+        element.appendChild(container);
+        lstContainer = win.document.createElement('div');
+        lstContainer.setAttribute('items', '');
+        element.appendChild(lstContainer);
+        element.setAttribute('layout', 'fixed-height');
+        element.setAttribute('height', '3em');
+        element.setAttribute('data-poll-interval', '3000');
+        element.setAttribute('items', 'items');
+        element.setAttribute('src', 'https://www.akhbaralaan.net/api/breakingnews');
+        element.getAmpDoc = () => ampdoc;
+        element.getFallback = () => null;
+
+
+        breakingnews = new AmpAlaantvBreakingnews(element);
         win.document.body.appendChild(element);
+        breakingnews.buildCallback();
     });
 
-    it('should have hello world when built', () => {
-        element.build();
-        expect(element.querySelector('div').textContent).to.equal('hello world');
+    it('should play news', () => {
+        return breakingnews.layoutCallback()
+            .then( ()=> breakingnews.play() )
+            .then(() => {
+                expect(element.querySelector('[items] > *')).to.exist;
+            });
     });
 });
