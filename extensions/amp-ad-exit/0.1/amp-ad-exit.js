@@ -336,7 +336,6 @@ export class AmpAdExit extends AMP.BaseElement {
           if (!responseMsg ||
               responseMsg['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE ||
               responseMsg['creativeId'] != this.ampAdResourceId_) {
-
             return;
           }
           this.assertValidResponseMessage_(responseMsg, event.origin);
