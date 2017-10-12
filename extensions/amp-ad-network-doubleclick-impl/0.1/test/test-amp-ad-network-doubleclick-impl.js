@@ -1008,7 +1008,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should return true when in canonical non-SSL experiment', () => {
       forceExperimentBranch(impl.win, DFP_CANONICAL_FF_EXPERIMENT_NAME,
-          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT);
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT);
       expect(impl.shouldPreferentialRenderWithoutCrypto()).to.be.true;
     });
   });
