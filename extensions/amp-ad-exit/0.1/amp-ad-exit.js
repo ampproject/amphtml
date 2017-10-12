@@ -354,6 +354,10 @@ export class AmpAdExit extends AMP.BaseElement {
   assertValidResponseMessage_(responseMessage, eventOrigin) {
     user().assert(responseMessage['message'],
         'Received empty response from 3p analytics frame');
+    user().assert(
+        responseMessage['creativeId'],
+        'Received malformed message from 3p analytics frame: ' +
+        'creativeId missing');
     user().assert(responseMessage['vendor'],
         'Received malformed message from 3p analytics frame: ' +
         'vendor missing');
