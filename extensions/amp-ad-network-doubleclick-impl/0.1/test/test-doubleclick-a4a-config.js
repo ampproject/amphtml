@@ -103,24 +103,6 @@ describe('doubleclick-a4a-config', () => {
 
     });
 
-    it('should select into non-SSL canonical AMP experiment when not on CDN',
-        () => {
-          sandbox.stub(DoubleclickA4aEligibility.prototype,
-              'isCdnProxy', () => false);
-          sandbox.stub(DoubleclickA4aEligibility.prototype,
-              'supportsCrypto', () => false);
-          const maybeSelectExperimentSpy = sandbox.spy(
-              DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment');
-          const elem = testFixture.doc.createElement('div');
-          testFixture.doc.body.appendChild(elem);
-          doubleclickIsA4AEnabled(mockWin, elem);
-          expect(maybeSelectExperimentSpy).to.be.calledWith(mockWin, elem, [
-            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_CONTROL,
-            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
-          ], DFP_CANONICAL_FF_EXPERIMENT_NAME) ;
-          expect(maybeSelectExperimentSpy.callCount).to.equal(1);
-        });
-
     it('should return false if no canonical AMP experiment branch', () => {
       forceExperimentBranch(mockWin, DFP_CANONICAL_FF_EXPERIMENT_NAME, null);
       sandbox.stub(DoubleclickA4aEligibility.prototype,
