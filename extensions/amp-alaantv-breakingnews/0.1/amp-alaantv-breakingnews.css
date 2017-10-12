@@ -1,0 +1,53 @@
+amp-alaantv-breakingnews {
+    background: rgba(255,0,0,0.5);
+    text-shadow: 0px 0px 2px black;
+    color: white;
+}
+amp-alaantv-breakingnews.i-amphtml-breakingnews-not-empty{
+}
+amp-alaantv-breakingnews h3{
+    color: #e8c543;
+    padding: 0;
+    margin: 0;
+    font-size: 1.5em;
+}
+amp-alaantv-breakingnews *[container]{
+    display: grid;
+    grid-template-columns: auto 1fr auto auto auto auto;
+    align-items: center;
+}
+
+amp-alaantv-breakingnews *[items]{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    height: 1.5em;
+    line-height: 1.5em;
+    overflow: hidden;
+    position: relative;
+}
+
+amp-alaantv-breakingnews *[items] > *{
+    white-space: nowrap;
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    opacity: 0;
+    left: 0;
+    overflow: hidden;
+    transform: rotateX(90deg);
+    transition: transform 500ms, opacity 50ms;
+    will-change: transform;
+}
+
+amp-alaantv-breakingnews *[items] > *.i-amphtml-breakingnews-active{
+    opacity: 1;
+    transform: rotateX(0deg);
+}
+amp-alaantv-breakingnews.i-amphtml-rtl-animation{
+    direction: rtl;
+}
+amp-alaantv-breakingnews.i-amphtml-rtl-animation *[items] > *{
+    right: 0;
+    left: auto;
+}
