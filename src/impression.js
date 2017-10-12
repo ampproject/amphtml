@@ -105,18 +105,17 @@ function handleReplaceUrl(win) {
     // Viewer's capability to support getting replaceUrl is also required.
     return Promise.resolve();
   }
-  return viewer.whenFirstVisible().then(() => {
-    viewer.sendMessageAwaitResponse('getReplaceUrl', undefined).then(
-        response => {
-          if (!response || typeof response != 'object') {
-            dev().warn('IMPRESSION', 'get invalid replaceUrl response');
-            return;
-          }
-          if (response['replaceUrl']) {
-            viewer.replaceUrl(response['replaceUrl']);
-          }
-        }, () => {});
-  });
+
+  // ReplaceUrl substitution doesn't have to wait until the document is visible
+  viewer.sendMessageAwaitResponse('getReplaceUrl', undefined).then(response => {
+    if (!response || typeof response != 'object') {
+      dev().warn('IMPRESSION', 'get invalid replaceUrl response');
+      return;
+    }
+    if (response['replaceUrl']) {
+      viewer.replaceUrl(response['replaceUrl']);
+    }
+  }, () => {});
 }
 
 
@@ -150,7 +149,9 @@ function handleClickUrl(win) {
   }
 
     // TODO(@zhouyx) need test with a real response.
-  return invoke(win, dev().assertString(clickUrl)).then(response => {
+  return viewer.whenFirstVisible().then(() => {
+    return invoke(win, dev().assertString(clickUrl));
+  }).then(response => {
     applyResponse(win, response);
   });
 }
