@@ -104,13 +104,13 @@ For example, the following is possible in AMP.
   </tr>
   <!-- change -->
   <tr>
-    <td rowspan=2><code>change</code></td>
-    <td rowspan=2>
+    <td rowspan=3><code>change</code></td>
+    <td rowspan=3>
       Fired when the value of the element is changed and committed.
       <br><br>
       Data properties mirror those in <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties">HTMLInputElement</a> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLSelectElement#Properties">HTMLSelectElement</a>.
     </td>
-    <td><code>input</code>, <code>select</code></td>
+    <td><code>input</code></td>
     <td>
       <pre>event.min
 event.max
@@ -122,6 +122,14 @@ event.valueAsNumber</pre>
     <td><code>input[type="radio"]</code>, <code>input[type="checkbox"]</code></td>
     <td>
       <code>event.checked</code>
+    </td>
+  </tr>
+  <tr>
+    <td><code>select</code></td>
+    <td>
+      <pre>event.min
+event.max
+event.value</pre>
     </td>
   </tr>
   <!-- input-debounced -->
