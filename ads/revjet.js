@@ -25,7 +25,11 @@ export function revjet(global, data) {
 
   global._revjetData = Object.assign({}, data);
 
-  loadScript(global, 'https://cdn.revjet.com/~cdn/JS/03/amp.js', undefined, () => {
-    global.context.noContentAvailable();
-  });
+  loadScript(
+      global,
+      'https://cdn.revjet.com/~cdn/JS/03/amp.js',
+      /* opt_cb */ undefined,
+      () => {
+        global.context.noContentAvailable();
+      });
 }
