@@ -2,7 +2,7 @@
 
 The AMP Project welcomes new contributors and we want to make it as easy as possible for them to contribute.  For many new contributors (who may not have open source/Git/AMP/etc. experience) it can be difficult to figure out how to get started.
 
-To help these new contributors get oriented we curate [good first issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue).  A Good First Issue is a starter issue that a new contributor can use to get comfortable contributing to the AMP Project.
+To help these new contributors get oriented we curate [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue).  A Good First Issue is a starter issue that a new contributor can use to get comfortable contributing to the AMP Project.
 
 We depend on experienced members of the community to identify bugs/features that would provide this orientation and to then create a well-documented Good First Issue for them.
 
