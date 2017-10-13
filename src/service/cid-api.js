@@ -92,9 +92,20 @@ export class GoogleCidApi {
       if (!token || this.isStatusToken_(token)) {
         this.persistToken_(TokenStatus.RETRIEVING, TIMEOUT);
       }
+
       const url = GOOGLE_API_URL + apiKey;
       return this.fetchCid_(dev().assertString(url), scope, token)
-          .then(this.handleResponse_.bind(this))
+          .then(response => {
+            const cid = this.handleResponse_(response);
+            if (!cid && response['alternateUrl']) {
+              // If an alternate url is provided, try again with the alternate url
+              // The client is still responsible for appending API keys to the URL.
+              const altUrl = `${response['alternateUrl']}?key=${apiKey}`;
+              return this.fetchCid_(dev().assertString(altUrl), scope, token)
+                  .then(this.handleResponse_.bind(this));
+            }
+            return cid;
+          })
           .catch(e => {
             this.persistToken_(TokenStatus.ERROR, TIMEOUT);
             dev().error(TAG, e);
@@ -139,10 +150,12 @@ export class GoogleCidApi {
     if (res['clientId']) {
       this.persistToken_(res['securityToken'], YEAR);
       return res['clientId'];
-    } else {
-      this.persistToken_(TokenStatus.NOT_FOUND, HOUR);
+    }
+    if (res['alternateUrl']) {
       return null;
     }
+    this.persistToken_(TokenStatus.NOT_FOUND, HOUR);
+    return null;
   }
 
   /**
