@@ -184,7 +184,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     const placeholder = this.win.document.createElement('amp-img');
     const partnerID = this.partnerID_;
     const feedID = this.feedID_;
-
+    
     if (this.element.hasAttribute('data-video') ||
     		this.element.hasAttribute('data-playlist')) {
 
