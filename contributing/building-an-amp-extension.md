@@ -244,14 +244,14 @@ and when it goes out of it for finer control.
 ## Element styling
 
 You can write a stylesheet to style your element to provide a minimal
-visual appeal, your element structure should account for whether you
+visual appeal. Your element structure should account for whether you
 want users (publishers and developers using your element) to customize
 the default styling you're providing and allow for easy CSS classes
 and/or well-structure DOM elements.
 
 Element styles are loaded when the element script itself is included in
 an AMP doc. You tell AMP which CSS belongs to this element when
-registering the element, see next.
+registering the element (see below).
 
 Class names prefixed with `-amp-` are considered private and
 publishers are not allowed to use to customize (enforced by AMP
@@ -260,7 +260,7 @@ validator).
 ## Register element with AMP
 
 Once you have implemented your AMP element, you need to register it with
-AMP, all AMP extensions are prefixed with `amp-`. This is where you
+AMP; all AMP extensions are prefixed with `amp-`. This is where you
 tell AMP which class to use for this tag name and which CSS to load.
 
 ```javascript
