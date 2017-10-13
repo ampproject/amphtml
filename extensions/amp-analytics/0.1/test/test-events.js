@@ -612,6 +612,16 @@ describes.realWin('Events', {amp: 1}, env => {
         tracker.add(analyticsElement, 'timer',
             {timerSpec: {interval: 1}}, handler);
       }).to.not.throw();
+
+       expect(() => {
+         tracker.add(analyticsElement, 'timer',
+             {
+	       timerSpec: {
+	         onSpec: {on: 'click'},
+	         offSpec: {on: 'click'},
+	         interval:1}
+	     }, handler);
+       }).to.not.throw();
     });
 
     it('only fires when the timer interval exceeds the minimum', () => {

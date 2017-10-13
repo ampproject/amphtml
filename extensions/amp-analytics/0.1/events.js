@@ -419,15 +419,17 @@ export class TimerEventTracker extends EventTracker {
    */
   constructor(root) {
     super(root);
-    /** @const @private {!Array<number>} */
-    this.trackers_ = [];
+    /** @const @private {!Object<number, number>} */
+    this.trackers_ = {};
   }
 
   /** @override */
   dispose() {
     const win = this.root.ampdoc.win;
-    this.trackers_.forEach(intervalId => {
-      win.clearInterval(intervalId);
+    Object.keys(this.trackers_).forEach(timerId => {
+      if (this.trackers_[timerId] > 0) {
+        win.clearInterval(this.trackers_[timerId]);
+      }
     });
   }
 
@@ -447,21 +449,42 @@ export class TimerEventTracker extends EventTracker {
         'Bad maxTimerLength specification');
     const callImmediate = 'immediate' in timerSpec ?
         Boolean(timerSpec['immediate']) : true;
+    const timerStart = 'startSpec' in timerSpec ? timerSpec['startSpec'] : null;
+    user().assert(!timerStart || typeof timerStart == 'object');
+    const timerStop = 'stopSpec' in timerSpec ? timerSpec['stopSpec'] : null;
+    user().assert((!timerStart && !timerStop) || typeof timerStop == 'object');
 
+    const timerId = Object.keys(this.trackers_).length;
+    this.trackers_.put(timerId, -1);
+    if (!timerStart) {
+      this.startTimer_(timerId, eventType, interval);
+    } else {
+      // TODO: track on event
+    }
+    return () => {
+      this.removeTracker_(timerId);
+    };
+  }
+
+  /**
+   * @param {string} timerId
+   * @param {string} eventType
+   * @param {number} interval
+   * @return {string}
+   * @private
+   */
+  startTimer_(timerId, eventType, interval) {
     const win = this.root.ampdoc.win;
     const intervalId = win.setInterval(() => {
       listener(this.createEvent_(eventType));
     }, interval * 1000);
-    this.trackers_.push(intervalId);
+    this.trackers_[timerId] = intervalId;
     win.setTimeout(() => {
-      this.removeTracker_(intervalId);
+      this.removeTracker_(timerId);
     }, maxTimerLength * 1000);
     if (callImmediate) {
       listener(this.createEvent_(eventType));
     }
-    return () => {
-      this.removeTracker_(intervalId);
-    };
   }
 
   /**
@@ -474,16 +497,15 @@ export class TimerEventTracker extends EventTracker {
   }
 
   /**
-   * @param {number} intervalId
+   * @param {number} timerId
    * @private
    */
-  removeTracker_(intervalId) {
+  removeTracker_(timerId) {
     const win = this.root.ampdoc.win;
-    win.clearInterval(intervalId);
-    const index = this.trackers_.indexOf(intervalId);
-    if (index != -1) {
-      this.trackers_.splice(index, 1);
+    if (this.trackers_[timerId] > 0) {
+      win.clearInterval(this.trackers_[timerId]);
     }
+    delete this.trackers_[timerId];
   }
 }
 
