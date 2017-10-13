@@ -13,7 +13,7 @@ Here are some ways you can help make the AMP Project even more welcoming.  **The
 - Don't let people feel ignored.
   - Keep an eye out for issues/comments/PRs on GitHub or comments on Slack that aren't being responded to and either respond yourself or find an appropriate person to do so.  If you aren't sure who can help, ping [mrjoro](https://amphtml.slack.com/threads/team/mrjoro) on Slack.
   - If you can't immediately respond in detail to something in a PR/issue let the contributor know that with an estimate of when you'll be able to get to it (e.g. "I won't have time to get to this today, but plan on reviewing it on Friday").
-  - Pay particular attention to [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20ossue) since the people working on them are generally brand new to the community.
+  - Pay particular attention to [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue) since the people working on them are generally brand new to the community.
 - Understand the motivations of contributors to AMP.
   - There are a lot of different reasons someone may be contributing to AMP.  Understanding the motivations of contributors you're working with can help you point them in the right direction.
   - Some of the many reasons people contribute to AMP:
