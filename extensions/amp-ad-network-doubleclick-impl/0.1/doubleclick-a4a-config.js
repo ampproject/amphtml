@@ -147,8 +147,8 @@ export class DoubleclickA4aEligibility {
       addExperimentIdToElement(experimentId, element);
       forceExperimentBranch(
           win, DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME, experimentId);
+      this.activeExperiments_[experimentId] = true;
     }
-    this.activeExperiments_[experimentId] = true;
   }
 
   selectA4aExperiments(win, element, useRemoteHtml) {
@@ -213,7 +213,7 @@ export class DoubleclickA4aEligibility {
       if (experiment.diversionCriteria()) {
         experimentId = experiment.forceExperimentId || this.maybeSelectExperiment(
             win, element, experiment.experimentBranchIds, experiment.experimentName)
-        if (experimentId) {
+        if (!!experimentId) {
           addExperimentIdToElement(experimentId, element);
           forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
           this.activeExperiments_[experimentId] = true;
@@ -247,6 +247,7 @@ export class DoubleclickA4aEligibility {
         return false;
       }
     });
+    console.log(this.activeExperiments_);
     return isFastFetchEligible;
   }
 
