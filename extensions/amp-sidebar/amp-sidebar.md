@@ -240,6 +240,16 @@ The `amp-sidebar` component can be styled with standard CSS.
 -  The `width` of the `amp-sidebar` may be set to adjust the width between the pre-set min(45px) and max(80vw) values.
 - The height of the `amp-sidebar` may be set to adjust the height of the sidebar, if required. If the height exceeds 100vw, the sidebar will have a vertical scrollbar. The preset height of the sidebar is 100vw and can be overridden in CSS to make it shorter.
 - The current state of the sidebar is exposed via the `open` attribute that is set on the `amp-sidebar` tag when the side bar is open on the page.
+- You can style the mask using the amp-sidebar-mask class in css. The 'opacity' and 'background-color' of 'amp-sidebar-mask' may be set to adjust the opacity and background color of the mask.
+
+Example:
+
+```html
+.amp-sidebar-mask {
+  opacity: 0.7;
+  background-color: #C29873;
+}
+```
 
 {% call callout('Tip', type='success') %}
 Visit [AMP Start](https://ampstart.com/components#navigation) for responsive, pre-styled navigation menus that you can use in your AMP pages.
