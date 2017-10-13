@@ -24,6 +24,7 @@ import {sendRequest, sendRequestUsingIframe} from './transport';
 import {IframeTransport} from './iframe-transport';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {Services} from '../../../src/services';
+import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {Activity} from './activity-impl';
@@ -201,7 +202,13 @@ export class AmpAnalytics extends AMP.BaseElement {
             .then(instrumentation => {
               this.instrumentation_ = instrumentation;
             })
-            .then(this.onFetchRemoteConfigSuccess_.bind(this));
+            .then(this.onFetchRemoteConfigSuccess_.bind(this))
+            .then(() => {
+              if (!this.config_['transport'] ||
+                  !this.config_['transport']['iframe']) {
+                toggle(this.element, false);
+              }
+            });
     return this.iniPromise_;
   }
 
