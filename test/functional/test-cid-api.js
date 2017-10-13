@@ -130,7 +130,7 @@ describes.realWin('test-cid-api', {}, env => {
     fetchJsonStub.onCall(0).returns(Promise.resolve({
       json: () => {
         return {
-          alternateUrl: 'https://ampcid.google.uk/v1/publisher:getClientId',
+          alternateUrl: 'https://ampcid.google.co.uk/v1/publisher:getClientId',
         };
       },
     }));
@@ -144,7 +144,7 @@ describes.realWin('test-cid-api', {}, env => {
     return api.getScopedCid('api-key', 'scope-a').then(cid => {
       expect(cid).to.equal('amp-alt-12345');
       expect(fetchJsonStub.getCall(1).args[0]).to.equal(
-          'https://ampcid.google.uk/v1/publisher:getClientId?key=api-key');
+          'https://ampcid.google.co.uk/v1/publisher:getClientId?key=api-key');
     });
   });
 
