@@ -120,7 +120,7 @@
       "name": "amp-story bookend",
       "loading_complete_css": [
         ".i-amphtml-story-standalone",
-        "i-amphtml-story-bookend-active"
+        ".i-amphtml-story-bookend-active"
       ]
     }
   ],
