@@ -126,6 +126,28 @@ describes.realWin('test-cid-api', {}, env => {
     });
   });
 
+  it('should try alternative url if API provides', () => {
+    fetchJsonStub.onCall(0).returns(Promise.resolve({
+      json: () => {
+        return {
+          alternateUrl: 'https://ampcid.google.co.uk/v1/publisher:getClientId',
+        };
+      },
+    }));
+    fetchJsonStub.onCall(1).returns(Promise.resolve({
+      json: () => {
+        return {
+          clientId: 'amp-alt-12345',
+        };
+      },
+    }));
+    return api.getScopedCid('api-key', 'scope-a').then(cid => {
+      expect(cid).to.equal('amp-alt-12345');
+      expect(fetchJsonStub.getCall(1).args[0]).to.equal(
+          'https://ampcid.google.co.uk/v1/publisher:getClientId?key=api-key');
+    });
+  });
+
   it('should return null if API rejects', () => {
     fetchJsonStub.returns(Promise.reject());
     return api.getScopedCid('api-key', 'scope-a').then(cid => {
