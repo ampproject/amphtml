@@ -68,6 +68,11 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   UNCONDITIONED_FF_EXPERIMENT: '21061146',
 };
 
+export const DOUBLECLICK_UNCONDITIONED_EXPERIMENTS = {
+  FF_CANONICAL_CTL: '21061145',
+  FF_CANONICAL_EXP: '21061146',
+}
+
 /** @const @type {!Object<string,?string>} */
 export const URL_EXPERIMENT_MAPPING = {
   '-1': MANUAL_EXPERIMENT_ID,
@@ -101,6 +106,10 @@ export const BETA_EXPERIMENT_ID = '2077831';
  * @visibleForTesting
  */
 export class DoubleclickA4aEligibility {
+
+  constructor() {
+    this.activeExperiments_ = {};
+  }
   /**
    * Returns whether win supports native crypto. Is just a wrapper around
    * supportsNativeCrypto, but this way we can mock out for testing.
@@ -131,15 +140,107 @@ export class DoubleclickA4aEligibility {
    */
   unconditionedSelection_(win, element) {
     const experimentId = this.maybeSelectExperiment(win, element, [
-      DOUBLECLICK_EXPERIMENT_FEATURE.UNCONDITIONED_FF_CONTROL,
-      DOUBLECLICK_EXPERIMENT_FEATURE.UNCONDITIONED_FF_EXPERIMENT,
+      DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+      DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP,
     ], DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME);
     if (experimentId) {
       addExperimentIdToElement(experimentId, element);
       forceExperimentBranch(
           win, DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME, experimentId);
     }
-    return experimentId;
+    this.activeExperiments_[experimentId] = true;
+  }
+
+  selectA4aExperiments() {
+    this.unconditionedSelection_(win, element);
+    const urlExperimentId = extractUrlExperimentId(win, element);
+    const isFastFetchEligible =
+          !((useRemoteHtml && !element.getAttribute('rtc-config')) ||
+            'useSameDomainRenderingUntilDeprecated' in element.dataset ||
+            element.hasAttribute('useSameDomainRenderingUntilDeprecated'));
+    const isCdnProxy = this.isCdnProxy(win);
+    const isDevMode = (getMode(win).localDev || getMode(win).test);
+    /**
+     * Definition of A4A experiments. For each experiment, if forceExperimentBranch is
+     * provided, then if the diversion criteria passes, we force on that experiment.
+     * If experimentBranchIds is provided, then if the diversionCriteria passes, we
+     * attempt to randomly select into one of the provided experiment branch IDs.
+     */
+    const experiments = [
+      /************************** MANUAL EXPERIMENT ***************************/
+      {forceExperimentId: MANUAL_EXPERIMENT_ID,
+       experimentName: DFP_CANONICAL_FF_EXPERIMENT_NAME,
+       diversionCriteria: () => {
+         return isFastFetchEligible && !isCdnProxy && urlExperimentId == -1
+             && isDevMode;
+       }},
+      /****************** CANONICAL FAST FETCH EXPERIMENT *********************/
+      {experimentBranchIds: [DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
+                             DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT],
+       experimentName: DFP_CANONICAL_FF_EXPERIMENT_NAME,
+       diversionCriteria: () => {
+         return isFastFetchEligible && !isCdnProxy && !urlExperimentId == -1
+             || !isDevMode;
+       }},
+      /******************* HOLDBACK INTERNAL EXPERIMENT ***********************/
+      {experimentBranchIds: [DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
+                             DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
+       experimentName: DOUBLECLICK_A4A_EXPERIMENT_NAME,
+       diversionCriteria: () => {
+         return isFastFetchEligible && isCdnProxy && urlExperimentId == undefined;
+       }
+      },
+      /****************** URL EXPERIMENT SELECTION ****************************/
+      {forceExperimentId: urlExperimentId ? URL_EXPERIMENT_MAPPING[urlExperimentId] : null,
+       experimentName: DOUBLECLICK_A4A_EXPERIMENT_NAME,
+       diversionCriteria: () => {
+         return isFastFetchEligible && isCdnProxy && urlExperimentId != undefined;
+       }
+      },
+      /***************** BETA EXPERIMENT SELECTION ****************************/
+      {forceExperimentId: BETA_EXPERIMENT_ID,
+       experimentName: DOUBLECLICK_A4A_EXPERIMENT_NAME,
+       diversionCriteria: () => {
+         return isFastFetchEligible && isCdnProxy && element.hasAttribute(BETA_ATTRIBUTE);
+       }
+      },
+    ];
+
+    // Now select into conditioned where if unconditioned was set, it takes precedence.
+    let experimentId;
+    experiments.forEach(experiment => {
+      if (experiment.diversionCriteria()) {
+        experimentId = experiment.forceExperimentId || this.maybeSelectExperiment(
+            win, element, experiment.experimentBranchIds, experimentName)
+        if (experimentId) {
+          addExperimentIdToElement(experimentId, element);
+          forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
+          this.activeExperiments_[experimentId] = true;
+        }
+      }
+    });
+  }
+
+  shouldUseFastFetch(win) {
+    const fastFetchExperimentPredicates = {
+      DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL: () => false,
+      DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL: () => false,
+      DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL: () => false,
+      DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_CONTROL: () => false,
+      DOUBLECLICK_EXPERIMENT_FEATURE.UNCONDITIONED_FF_CANONICAL_CTL: () => false,
+      DOUBLECLICK_EXPERIMENT_FEATURE.UNCONDITIONED_FF_CANONICAL_EXP: () => {
+        return defaultFastFetchCondition() && !this.isCdnProxy(win) &&
+            !(urlExperimentId == -1 && (getMode(win).localDev || getMode(win).test))
+            && !this.supportsCrypto(win);
+      },
+    };
+    activeExperiments.forEach(experimentId => {
+      if (fastFetchExperimentPredicates[experimentId] &&
+          !fastFetchExperimentPredicates[experimentId]()) {
+        return false;
+      }
+    });
+    return this.defaultFastFetchCondition();
   }
 
   /** Whether Fast Fetch is enabled
