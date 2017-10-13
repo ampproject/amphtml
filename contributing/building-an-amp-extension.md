@@ -325,16 +325,16 @@ exposes.
 
 AMP elements are usually discovered and scheduled by the AMP runtime
 automatically and managed through Resources. In some cases an AMP
-element might want to control and own when its sub-elements gets
+element might want to control and own when its sub-elements get
 scheduled and not leave that to the AMP runtime. An example to this is
-the &lt;amp-carousel&gt;, where it wants to schedule
+the &lt;amp-carousel&gt; component, where it wants to schedule
 preloading/pre-rendering or layouting of its cells based on the window
 the user is in.
 
 AMP provides a way for an element to control this by setting the owner
-on the element you want to control. For carousel example, carousel loops
+on the element you want to control. In the carousel example, the component loops
 over all its elements and sets itself as the owner of these elements.
-AMP runtime will not manage scheduling layouting for elements that have
+The AMP runtime will not manage scheduling layouting for elements that have
 owners.
 
 ```javascript
