@@ -100,7 +100,7 @@ export class GoogleCidApi {
             if (!cid && response['alternateUrl']) {
               // If an alternate url is provided, try again with the alternate url
               // The client is still responsible for appending API keys to the URL.
-              const altUrl = response['alternateUrl'] + apiKey;
+              const altUrl = `${response['alternateUrl']}?key=${apiKey}`;
               return this.fetchCid_(dev().assertString(altUrl), scope, token)
                   .then(this.handleResponse_.bind(this));
             }
