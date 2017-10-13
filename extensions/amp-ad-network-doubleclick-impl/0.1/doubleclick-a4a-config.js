@@ -180,8 +180,8 @@ export class DoubleclickA4aEligibility {
                              DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT],
        experimentName: DFP_CANONICAL_FF_EXPERIMENT_NAME,
        diversionCriteria: () => {
-         return isFastFetchEligible && !isCdnProxy && !urlExperimentId == -1
-             || !isDevMode;
+         return isFastFetchEligible && !isCdnProxy && (urlExperimentId != -1
+                                                       || !isDevMode);
        }},
       /******************* HOLDBACK INTERNAL EXPERIMENT ***********************/
       {experimentBranchIds: [DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
@@ -248,7 +248,7 @@ export class DoubleclickA4aEligibility {
       }
     });
     console.log(this.activeExperiments_);
-    return isFastFetchEligible;
+    return isFastFetchEligible && this.isCdnProxy(win);
   }
 
   /** Whether Fast Fetch is enabled
