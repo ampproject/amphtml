@@ -60,7 +60,7 @@ const MILESTONE_PENDING_TRIAGE = 20;
 const MILESTONE_PRIORITIZED_FRS = 22;
 // 23 is the number for Milestone 'New FRs'
 const MILESTONE_NEW_FRS = 23;
-// 25 is the number for Milestone 'Great First Issues (GFI)'
+// 25 is the number for Milestone 'Good First Issues (GFI)'
 const MILESTONE_GREAT_ISSUES = 25;
 // days for biweekly updates
 const BIWEEKLY_DAYS = 14;
@@ -189,7 +189,7 @@ function updateGitHubIssues() {
                 if (label.name.startsWith('Category') ||
                     label.name.startsWith('Related to') ||
                     label.name.startsWith('GFI') ||
-                    label.name.startsWith('Great First Issue')) {
+                    label.name.startsWith('good first issue')) {
                   hasCategory = true;
                 }
               }

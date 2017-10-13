@@ -22,7 +22,7 @@ This guide is intended for people who don't know much about Git/GitHub and the t
 
 If you're already familiar with Git/GitHub/etc. or you just want to know what commands to type in instead of what they're doing take a look at the much shorter [Quick Start Guide](getting-started-quick.md).
 
-If you do not yet have a specific code contribution project in mind as you go through this guide, consider grabbing one of the [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) we have created for new contributors.
+If you do not yet have a specific code contribution project in mind as you go through this guide, consider grabbing one of the [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue) we have created for new contributors.
 
 - [How to get help](#how-to-get-help)
 - [Intro to Git and GitHub](#intro-to-git-and-github)
@@ -50,7 +50,7 @@ If you do not yet have a specific code contribution project in mind as you go th
 
 If you have a question or are unsure about something while following this end-to-end guide, you can get help from the AMP Project community in many ways:
 
-* If you are tackling a [Great First Issue](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) or other GitHub issue you can ask a question as a comment on the issue directly.  This works particularly well if the question is about how to make progress on that specific issue.
+* If you are tackling a [Good First Issue](https://github.com/ampproject/amphtml/labels/good%20first%20issue) or other GitHub issue you can ask a question as a comment on the issue directly.  This works particularly well if the question is about how to make progress on that specific issue.
 
 * The [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack is a place for new contributors getting up to speed in the AMP Project to find help.  You should feel comfortable asking any question in there no matter how basic it may seem to you (e.g. problems getting Git set up, errors during a build, etc.).  We'll send you an [invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) if you're not already on the AMP Slack.
 
