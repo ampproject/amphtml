@@ -95,10 +95,12 @@ export class EventTracker {
    * @param {string} unusedEventType
    * @param {!JsonObject} unusedConfig
    * @param {function(!AnalyticsEvent)} unusedListener
+   * @param {function(!JsonObject): EventTracker} unusedTrackerProvider
    * @return {!UnlistenDef}
    * @abstract
    */
-  add(unusedContext, unusedEventType, unusedConfig, unusedListener) {}
+  add(unusedContext, unusedEventType, unusedConfig, unusedListener,
+      unusedTrackerProvider) {}
 }
 
 
@@ -147,7 +149,7 @@ export class CustomEventTracker extends EventTracker {
   }
 
   /** @override */
-  add(context, eventType, config, listener) {
+  add(context, eventType, config, listener, trackerProvider) {
     let selector = config['selector'];
     if (!selector) {
       selector = ':root';
@@ -259,7 +261,7 @@ export class ClickEventTracker extends EventTracker {
   }
 
   /** @override */
-  add(context, eventType, config, listener) {
+  add(context, eventType, config, listener, trackerProvider) {
     const selector = user().assert(config['selector'],
         'Missing required selector on click trigger');
     const selectionMethod = config['selectionMethod'] || null;
@@ -303,7 +305,7 @@ export class SignalTracker extends EventTracker {
   }
 
   /** @override */
-  add(context, eventType, config, listener) {
+  add(context, eventType, config, listener, trackerProvider) {
     let target;
     let signalsPromise;
     const selector = config['selector'] || ':root';
@@ -363,7 +365,7 @@ export class IniLoadTracker extends EventTracker {
   }
 
   /** @override */
-  add(context, eventType, config, listener) {
+  add(context, eventType, config, listener, trackerProvider) {
     let target;
     let promise;
     const selector = config['selector'] || ':root';
@@ -419,22 +421,35 @@ export class TimerEventTracker extends EventTracker {
    */
   constructor(root) {
     super(root);
-    /** @const @private {!Object<number, number>} */
+    /** @const @private {!Object<number, Object>} */
     this.trackers_ = {};
   }
+
+  /**
+   * Timer event param names.
+   * @const
+   * @enum {number}
+   * @private
+   */
+  const TIMER_PARAMS {
+     INTERVAL_ID: 1,
+     INTERVAL_LENGTH: 2
+     MAX_TIMER_LENGTH: 3,
+     CALL_IMMEDIATE: 4,
+     UNLISTEN_START: 5,
+     UNLISTEN_STOP: 6
+   }
 
   /** @override */
   dispose() {
     const win = this.root.ampdoc.win;
     Object.keys(this.trackers_).forEach(timerId => {
-      if (this.trackers_[timerId] > 0) {
-        win.clearInterval(this.trackers_[timerId]);
-      }
+      this.removeTracker_(timerId);
     });
   }
 
   /** @override */
-  add(context, eventType, config, listener) {
+  add(context, eventType, config, listener, trackerProvider) {
     const timerSpec = config['timerSpec'];
     user().assert(timerSpec && typeof timerSpec == 'object',
         'Bad timer specification');
@@ -450,16 +465,33 @@ export class TimerEventTracker extends EventTracker {
     const callImmediate = 'immediate' in timerSpec ?
         Boolean(timerSpec['immediate']) : true;
     const timerStart = 'startSpec' in timerSpec ? timerSpec['startSpec'] : null;
-    user().assert(!timerStart || typeof timerStart == 'object');
+    user().assert(!timerStart || typeof timerStart == 'object',
+        'Bad timer start specification');
     const timerStop = 'stopSpec' in timerSpec ? timerSpec['stopSpec'] : null;
-    user().assert((!timerStart && !timerStop) || typeof timerStop == 'object');
+    user().assert((!timerStart && !timerStop) || typeof timerStop == 'object',
+        'Bad timer stop specification');
 
     const timerId = Object.keys(this.trackers_).length;
-    this.trackers_.put(timerId, -1);
+    this.trackers_.put(timerId, {
+      TIMER_PARAMS.INTERVAL_LENGTH: interval
+      TIMER_PARAMS.MAX_TIMER_LENGTH: maxTimerLength,
+      TIMER_PARAMS.CALL_IMMEDIATE: callImmediate
+    });
     if (!timerStart) {
-      this.startTimer_(timerId, eventType, interval);
+      this.startTimer_(timerId, eventType, listener);
     } else {
-      // TODO: track on event
+      const startTracker = trackerProvider(timerStart);
+      user().assert(startTracker, 'Cannot track timer start');
+      const unlistenStart = startTracker.add(context, timerStart['on'],
+          timerStart, this.startTimer_.bind(this, timerId, eventType, listener),
+          trackerProvider);
+      this.trackers_[timerId][TIMER_PARAMS.UNLISTEN_START] = unlistenStart;
+      const stopTracker = timerStop ? trackerProvider(timerStop) : null;
+      if (stopTracker) {
+        const unlistenStop = stopTracker.add(context, timerStop['on'],
+            timerStop, this.stopTimer_.bind(this, timerId), trackerProvider);
+        this.trackers_[timerId][TIMER_PARAMS.UNLISTEN_STOP] = unlistenStop;
+      }
     }
     return () => {
       this.removeTracker_(timerId);
@@ -469,22 +501,39 @@ export class TimerEventTracker extends EventTracker {
   /**
    * @param {string} timerId
    * @param {string} eventType
-   * @param {number} interval
+   * @param {function(!AnalyticsEvent)} listener
    * @return {string}
    * @private
    */
-  startTimer_(timerId, eventType, interval) {
+  startTimer_(timerId, eventType, listener) {
+    const timerSpec = this.trackers_[timerId];
+    if (timerSpec[TIMER_PARAMS.INTERVAL_ID]) {
+      return; // Timer already running.
+    }
     const win = this.root.ampdoc.win;
     const intervalId = win.setInterval(() => {
       listener(this.createEvent_(eventType));
-    }, interval * 1000);
-    this.trackers_[timerId] = intervalId;
+    }, timerSpec[TIMER_PARAMS.INTERVAL_LENGTH] * 1000);
+    this.trackers_[timerId][TIMER_PARAMS.INTERVAL_ID] = intervalId;
     win.setTimeout(() => {
-      this.removeTracker_(timerId);
-    }, maxTimerLength * 1000);
-    if (callImmediate) {
+      this.stopTimer_(timerId);
+    }, timerSpec[TIMER_PARAMS.MAX_TIMER_LENGTH] * 1000);
+    if (timerSpec[TIMER_PARAMS.CALL_IMMEDIATE]) {
       listener(this.createEvent_(eventType));
     }
+  }
+
+  /**
+   * @param {string} timerId
+   * @private
+   */
+  stopTimer_(timerId) {
+    if (!this.trackers_[timerId][TIMER_PARAMS.INTERVAL_ID]) {
+      return; // Timer not running.
+    }
+    const win = this.root.ampdoc.win;
+    win.clearInterval(this.trackers_[timerId][TIMER_PARAMS.INTERVAL_ID]);
+    delete this.trackers_[timerId][TIMER_PARAMS.INTERVAL_ID];
   }
 
   /**
@@ -501,11 +550,16 @@ export class TimerEventTracker extends EventTracker {
    * @private
    */
   removeTracker_(timerId) {
-    const win = this.root.ampdoc.win;
-    if (this.trackers_[timerId] > 0) {
-      win.clearInterval(this.trackers_[timerId]);
+    if (this.trackers_[timerId]) {
+      this.stopTimer_(timerId);
+      if (this.trackers_[timerId][TIMER_PARAMS.UNLISTEN_START]) {
+        this.trackers_[timerId][TIMER_PARAMS.UNLISTEN_START]();
+      }
+      if (this.trackers_[timerId][TIMER_PARAMS.UNLISTEN_STOP]) {
+        this.trackers_[timerId][TIMER_PARAMS.UNLISTEN_STOP]();
+      }
+      delete this.trackers_[timerId];
     }
-    delete this.trackers_[timerId];
   }
 }
 
@@ -545,7 +599,7 @@ export class VideoEventTracker extends EventTracker {
   }
 
   /** @override */
-  add(context, eventType, config, listener) {
+  add(context, eventType, config, listener, trackerProvider) {
     const videoSpec = config['videoSpec'] || {};
     const selector = config['selector'] || videoSpec['selector'];
     const selectionMethod = config['selectionMethod'] || null;
@@ -622,7 +676,7 @@ export class VisibilityTracker extends EventTracker {
   }
 
   /** @override */
-  add(context, eventType, config, listener) {
+  add(context, eventType, config, listener, trackerProvider) {
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];

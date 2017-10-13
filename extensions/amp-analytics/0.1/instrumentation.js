@@ -443,6 +443,26 @@ export class AnalyticsGroup {
    * @param {function(!AnalyticsEvent)} handler
    */
   addTrigger(config, handler) {
+    const tracker = this.getTracker_(config);
+    if (tracker) {
+      const unlisten = tracker.add(this.analyticsElement_, eventType, config,
+          handler, this.getTracker_.bind(this));
+      this.listeners_.push(unlisten);
+    } else {
+      // TODO(dvoytenko): remove this use and `addListenerDepr_` once all
+      // triggers have been migrated..
+      this.service_.addListenerDepr_(config, handler, this.analyticsElement_);
+    }
+  }
+
+  /**
+   * Provides the tracker for the given config.
+   *
+   * @param {!JsonObject} config
+   * @return {EventTracker} tracker
+   * @private
+   */
+  getTracker_(config) {
     const eventType = dev().assertString(config['on']);
     const trackerKey = startsWith(eventType, 'video-') ? 'video' : eventType;
 
@@ -457,14 +477,9 @@ export class AnalyticsGroup {
           eventType, this.root_.getType());
       const tracker = this.root_.getTracker(
           trackerProfile.name, trackerProfile.klass);
-      const unlisten = tracker.add(
-          this.analyticsElement_, eventType, config, handler);
-      this.listeners_.push(unlisten);
-    } else {
-      // TODO(dvoytenko): remove this use and `addListenerDepr_` once all
-      // triggers have been migrated..
-      this.service_.addListenerDepr_(config, handler, this.analyticsElement_);
+      return tracker;
     }
+    return null; // Make non-null when all trackers are migrated.
   }
 }
 
