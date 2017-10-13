@@ -264,9 +264,12 @@ export class Services {
    * @return {?Promise<?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService>}
    */
   static storyVariableServiceForOrNull(win) {
-    return (/** @type {!Promise<?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService>} */ (
-        getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
-            true)));
+    return (
+        /** @type {!Promise<
+         * ?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService
+         * >} */ (
+            getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
+                true)));
   }
 
   /**
