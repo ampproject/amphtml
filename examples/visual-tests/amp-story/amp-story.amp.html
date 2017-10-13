@@ -2,8 +2,8 @@
 <html amp lang="en">
   <head>
     <meta charset="utf-8">
-    <script async src="https://cdn.ampproject.org/v0.js"></script>
-    <script async custom-element="amp-story"
+    <script src="https://cdn.ampproject.org/v0.js"></script>
+    <script custom-element="amp-story"
         src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
     <title>My Story</title>
     <meta name="viewport"
@@ -26,6 +26,10 @@
   </head>
 
   <body>
+
+    <script>
+      AMP.toggleExperiment('amp-story');
+    </script>
 
     <amp-story standalone id="story-helloworld">
       <amp-story-page id="cover">
