@@ -79,7 +79,11 @@ The Brid.tv video ID.
 
 ##### data-playlist
 
-The Brid.tv playlist ID. Embed must either have video or playlist attribute.
+The Brid.tv playlist ID. Embed must either have video or playlist or outstream attribute.
+
+##### data-outstream
+
+The Brid.tv outstream unit ID.
 
 ##### common attributes
 
