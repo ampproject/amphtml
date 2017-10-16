@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {BookendShareWidget} from './bookend-share';
+import {ShareWidget} from './share';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
@@ -184,8 +184,8 @@ export class Bookend {
     /** @private {?Element} */
     this.replayBtn_ = null;
 
-    /** @private {!BookendShareWidget} */
-    this.shareWidget_ = BookendShareWidget.create(win);
+    /** @private {!ShareWidget} */
+    this.shareWidget_ = ShareWidget.create(win);
   }
 
   /**
