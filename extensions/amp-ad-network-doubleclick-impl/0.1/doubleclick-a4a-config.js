@@ -130,11 +130,12 @@ export class DoubleclickA4aEligibility {
   isA4aEnabled(win, element, useRemoteHtml) {
     let experimentId = this.maybeSelectExperiment(
         win, element,[DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
-                      DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
         DFP_CANONICAL_FF_EXPERIMENT_NAME);
     if (!!experimentId) {
       addExperimentIdToElement(experimentId, element);
-      forceExperimentBranch(win, DFP_CANONICAL_FF_EXPERIMENT_NAME, experimentId);
+      forceExperimentBranch(
+          win, DFP_CANONICAL_FF_EXPERIMENT_NAME, experimentId);
     }
 
     if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
@@ -151,9 +152,10 @@ export class DoubleclickA4aEligibility {
         experimentId = MANUAL_EXPERIMENT_ID;
       } else {
         if ([DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
-             DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP
-            ].includes(experimentId)) {
-          return experimentId == DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP;
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP,
+        ].includes(experimentId)) {
+          return experimentId ==
+              DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP;
         }
         experimentId = this.maybeSelectExperiment(win, element, [
           DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
