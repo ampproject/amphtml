@@ -459,7 +459,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   shouldPreferentialRenderWithoutCrypto() {
     return experimentFeatureEnabled(
-        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
+        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
         DFP_CANONICAL_FF_EXPERIMENT_NAME);
   }
 
@@ -825,8 +825,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  onCreativeRender(isVerifiedAmpCreative) {
-    super.onCreativeRender(isVerifiedAmpCreative);
+  onCreativeRender(creativeMetaData) {
+    super.onCreativeRender(creativeMetaData);
+    if (creativeMetaData &&
+        !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
+      // Capture phase click handlers on the ad if amp-ad-exit not present
+      // (assume it will handle capture).
+      dev().assert(this.iframe);
+      installAnchorClickInterceptor(
+          this.getAmpDoc(), this.iframe.contentWindow);
+    }
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
       if (isReportingEnabled(this)) {
@@ -835,7 +843,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.element,
             this.ampAnalyticsConfig_,
             this.qqid_,
-            isVerifiedAmpCreative,
+            !!creativeMetaData,
             this.lifecycleReporter_.getDeltaTime(),
             this.lifecycleReporter_.getInitTime());
       }
