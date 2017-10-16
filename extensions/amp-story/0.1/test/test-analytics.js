@@ -39,8 +39,8 @@ describes.fakeWin('amp-story analytics', {}, env => {
 
     expect(trigger).to.have.been.calledWith('story-page-visible',
         sandbox.match(vars =>
-            vars.pageIndex === '123' &&
-            vars.pageId == 'my-page-id'));
+            vars.storyPageIndex === '123' &&
+            vars.storyPageId == 'my-page-id'));
   });
 
   it('should trigger `story-page-visible` only once per page', () => {
@@ -59,8 +59,8 @@ describes.fakeWin('amp-story analytics', {}, env => {
     expect(trigger).to.have.been.calledOnce;
     expect(trigger).to.have.been.calledWith('story-page-visible',
         sandbox.match(vars =>
-            vars.pageIndex === '123' &&
-            vars.pageId == 'my-page-id'));
+            vars.storyPageIndex === '123' &&
+            vars.storyPageId == 'my-page-id'));
 
     for (let i = 0; i < 10; i++) {
       analytics.onStateChange({
@@ -75,7 +75,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
     expect(trigger).to.have.been.calledTwice;
     expect(trigger).to.have.been.calledWith('story-page-visible',
         sandbox.match(vars =>
-            vars.pageIndex === '6' &&
-            vars.pageId == 'foo-page-id'));
+            vars.storyPageIndex === '6' &&
+            vars.storyPageId == 'foo-page-id'));
   });
 });
