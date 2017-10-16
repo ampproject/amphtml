@@ -1052,6 +1052,14 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Returns the last URL used for an ad request.
+   * @return {?string}
+   */
+  getCachedAdUrl() {
+    return this.adUrl_;
+  }
+
+  /**
    * Resets ad url state to null, used to prevent frame get fallback if error
    * is thrown after url construction but prior to layoutCallback.
    */

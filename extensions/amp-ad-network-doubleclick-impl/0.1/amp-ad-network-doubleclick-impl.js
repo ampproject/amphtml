@@ -353,6 +353,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {boolean} */
     this.preloadSafeframe_ = true;
+
+    /** @private {?string} */
+    this.creativeId_ = null;
+
+    /** @private {?string} */
+    this.lineitemId_ = null;
   }
 
   /** @override */
@@ -695,6 +701,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
+    this.creativeId_ = responseHeaders.get('google-creative-id');
+    this.lineitemId_ = responseHeaders.get('google-lineitem-id');
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/installExtensionForDoc(
@@ -908,6 +916,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           }
           return true;
         });
+
+    this.postTroubleshootMessage_();
   }
 
   /**
