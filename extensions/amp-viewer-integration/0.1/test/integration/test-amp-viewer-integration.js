@@ -21,6 +21,7 @@ import {
   parseMessage,
 } from '../../messaging/messaging';
 import {ViewerForTesting} from '../viewer-for-testing';
+import {Services} from '../../../../../src/services';
 import {getSourceUrl} from '../../../../../src/url';
 
 
@@ -136,6 +137,49 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
                 expect(initTouchHandlerStub).to.be.called;
               });
         });
+
+        it('should listen for disableScroll requests', () => {
+          sandbox.stub(messaging, 'sendRequest', () => {
+            return Promise.resolve();
+          });
+          const registerHandlerSpy = sandbox.stub(messaging, 'registerHandler');
+
+          return ampViewerIntegration.openChannelAndStart_(
+              viewer, env.ampdoc, origin, messaging).then(() => {
+                expect(registerHandlerSpy).to.have.been.calledWith('disableScroll');
+              });
+        });
+      });
+    });
+  });
+
+  describe('Unit Tests for supported viewer requests', () => {
+    let win;
+    let ampViewerIntegration;
+
+    beforeEach(() => {
+      win = document.createElement('div');
+      win.document = document.createElement('div');
+      ampViewerIntegration = new AmpViewerIntegration(win);
+    });
+    
+    describe('disableScroll', () => {
+      it('disables and resets scrolling on the Viewport', () => {
+        class Viewport {
+          constructor() {}
+          disableScroll() {}
+          resetScroll() {}
+        }
+        const viewport = new Viewport();
+        const disableScrollSpy = sandbox.stub(viewport, 'disableScroll');
+        const resetScrollSpy = sandbox.stub(viewport, 'resetScroll');
+        sandbox.stub(Services, 'viewportForDoc').returns(viewport);
+
+        ampViewerIntegration.disableScrollHandler_('some type', /*disable*/true, false)
+        expect(disableScrollSpy).to.have.been.called;
+
+        ampViewerIntegration.disableScrollHandler_('some type', /*disable*/false, false);
+        expect(resetScrollSpy).to.have.been.called;
       });
     });
   });
