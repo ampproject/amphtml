@@ -55,6 +55,8 @@ import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
 import {urls} from '../../../src/config';
+import {getWinOrigin, parseUrl} from '../../../src/url';
+import {stringHash32} from '../../../src/string';
 
 
 /** @private @const {number} */
@@ -71,6 +73,12 @@ const FULLSCREEN_THRESHOLD = 1024;
 
 /** @type {string} */
 const TAG = 'amp-story';
+
+/** @type {!Array<string>} */
+const WHITELISTED_ORIGINS = [
+  '3210828456', '3451824873', '834917366', '4273375831', '750731789',
+  '3322156041', '878041739', '2199838184', '708478954', '142793127',
+];
 
 
 /**
@@ -129,6 +137,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.activePage_ = null;
   }
+
 
   /** @override */
   buildCallback() {
@@ -269,8 +278,26 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /** @private */
+  isAmpStoryEnabled_() {
+    if (isExperimentOn(this.win, TAG)) {
+      return true;
+    }
+
+    const origin = getWinOrigin(this.win);
+    const hostName = parseUrl(origin).hostname;
+    const domains = hostName.split('.');
+
+    return domains.some((unusedDomain, index) => {
+      const domain = domains.slice(0, index + 1).join('.');
+      const domainHash = stringHash32(domain.toLowerCase());
+      return WHITELISTED_ORIGINS.includes(domainHash);
+    });
+  }
+
+
+  /** @private */
   assertAmpStoryExperiment_() {
-    if (!isExperimentOn(this.win, TAG)) {
+    if (!this.isAmpStoryEnabled_()) {
       const errorIconEl = this.win.document.createElement('div');
       errorIconEl.classList.add('i-amphtml-story-experiment-error-icon');
 
