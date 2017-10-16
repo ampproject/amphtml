@@ -126,7 +126,7 @@ i-amphtml-video-mask {
   margin: initial !important;
 }
 
-.i-amphtml-dockable-video-minimizing amp-custom-controls.amp-custom-controls-minimal {
+.i-amphtml-dockable-video-minimizing .amp-media-custom-controls.amp-media-custom-controls-minimal {
   z-index: 17;
   border-radius: 6px;
   position: fixed !important;
@@ -156,7 +156,7 @@ i-amphtml-video-mask {
  *    """"""""""""""""
  */
 
-amp-custom-controls {
+.amp-media-custom-controls {
   position: absolute;
   top: 0;
   left: 0;
@@ -166,7 +166,7 @@ amp-custom-controls {
 }
 
 /* Background shown behind custom controls (white/black gradient) */
-amp-custom-controls-bg {
+.amp-media-custom-controls-bg {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -182,7 +182,7 @@ amp-custom-controls-bg {
 
 /* Main controls bar (usually contains progress time,
  fullscreen and volume controls) */
-amp-custom-controls-bar {
+.amp-media-custom-controls-bar {
   display: flex;
   padding: 10px;
   box-sizing: border-box;
@@ -193,8 +193,8 @@ amp-custom-controls-bar {
   z-index: 2;
 }
 
-/* Every button/icon is wrapped in an amp-custom-controls-icon-wrapper */
-amp-custom-controls-icon-wrapper {
+/* Every button/icon is wrapped in an .amp-media-custom-controls-icon-wrapper */
+.amp-media-custom-controls-icon-wrapper {
   width: 24px;
   height: 24px;
   display: inline-block;
@@ -202,33 +202,33 @@ amp-custom-controls-icon-wrapper {
   cursor: pointer;
 }
 
-amp-custom-controls-icon-wrapper,
-amp-custom-controls-progress-time,
-amp-custom-controls-scrubber {
+.amp-media-custom-controls-icon-wrapper,
+.amp-media-custom-controls-progress-time,
+.amp-media-custom-controls-scrubber {
   user-select: none;
   opacity: 0.85;
 }
 
-amp-custom-controls-volume, amp-custom-controls-progress-time {
+.amp-media-custom-controls-volume, .amp-media-custom-controls-progress-time {
   margin-right: 15px;
 }
 
-amp-custom-controls-progress-time {
+.amp-media-custom-controls-progress-time {
   color: white;
   font-family: Helvetica, Arial, sans-serif;
   text-shadow: 0px 0px 20px rgba(0, 0, 0, .5);
 }
 
-input.amp-custom-controls-volume-indicator {
+input.amp-media-custom-controls-volume-indicator {
   display: none;
   vertical-align: middle;
 }
 
-amp-custom-controls-spacer {
+.amp-media-custom-controls-spacer {
   flex-grow: 1;
 }
 
-amp-custom-controls-total-bar {
+.amp-media-custom-controls-total-bar {
   width: 100%;
   height: 10px;
   display: flex;
@@ -237,12 +237,12 @@ amp-custom-controls-total-bar {
   align-items: center;
 }
 
-amp-custom-controls-progress-bar {
+.amp-media-custom-controls-progress-bar {
   display: flex;
   z-index: 2;
 }
 
-amp-custom-controls-current-bar {
+.amp-media-custom-controls-current-bar {
   background-color: rgba(255, 255, 255, 0.8);
   width: 0%;
   height: 2px;
@@ -250,7 +250,7 @@ amp-custom-controls-current-bar {
   border-radius: 10px;
 }
 
-amp-custom-controls-scrubber {
+.amp-media-custom-controls-scrubber {
   border-radius: 50%;
   width: 13px;
   height: 13px;
@@ -264,7 +264,7 @@ amp-custom-controls-scrubber {
   top: 0px;
 }
 
-amp-custom-controls-scrubber:active {
+.amp-media-custom-controls-scrubber:active {
   width: 18px;
   height: 18px;
   margin-top: -4px;
@@ -272,7 +272,7 @@ amp-custom-controls-scrubber:active {
   box-shadow: 0px 0px 20px 5px rgba(0, 0, 0, .6);
 }
 
-amp-custom-controls-floating {
+.amp-media-custom-controls-floating {
   position: absolute;
   width: 80px;
   height: 80px;
@@ -289,14 +289,14 @@ amp-custom-controls-floating {
   z-index: 1;
 }
 
-amp-custom-controls-floating amp-custom-controls-icon-wrapper {
+.amp-media-custom-controls-floating .amp-media-custom-controls-icon-wrapper {
   width: 100%;
   height: 100%;
   padding: 15px;
   box-sizing: border-box;
 }
 
-amp-custom-controls-bar-wrapper {
+.amp-media-custom-controls-bar-wrapper {
   position: absolute;
   padding: 20px;
   width: 100%;
@@ -307,41 +307,41 @@ amp-custom-controls-bar-wrapper {
   box-sizing: border-box;
 }
 
-amp-custom-controls-mini-wrapper {
+.amp-media-custom-controls-mini-wrapper {
   display: none;
 }
 
 /* Custom Controls Light Theme */
 
-amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-bg {
+.amp-media-custom-controls.amp-media-custom-controls-light-skin:not(.amp-media-custom-controls-minimal) .amp-media-custom-controls-bg {
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAADICAQAAABozPh9AAAAbElEQVQoz62TwQ7AIAhDnx33/f8n7ht22C4mLkGZGC9NoQWJgfIUEIDRY0qrg4oK+oaxz/WbZf4hBwpmdrUKa1tOoVrm1ZUwtmizLz/Bnn6LOas/3sA4MjsUb1Nqw35Z7z56EF+ecYJxg3HBCwTCBp+nLpJ4AAAAAElFTkSuQmCC');
 }
 
-amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-progress-time {
+.amp-media-custom-controls.amp-media-custom-controls-light-skin:not(.amp-media-custom-controls-minimal) .amp-media-custom-controls-progress-time {
   color: #000000;
   text-shadow: 0px 0px 20px rgba(255, 255, 255, .5);
 }
 
-amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-scrubber {
+.amp-media-custom-controls.amp-media-custom-controls-light-skin:not(.amp-media-custom-controls-minimal) .amp-media-custom-controls-scrubber {
   background: #000000;
   box-shadow: 0px 0px 20px rgba(255, 255, 255, .25);
 }
 
-amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-scrubber:active {
+.amp-media-custom-controls.amp-media-custom-controls-light-skin:not(.amp-media-custom-controls-minimal) .amp-media-custom-controls-scrubber:active {
   box-shadow: 0px 0px 20px 5px rgba(255, 255, 255, .6);
 }
 
-amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-current-bar {
+.amp-media-custom-controls.amp-media-custom-controls-light-skin:not(.amp-media-custom-controls-minimal) .amp-media-custom-controls-current-bar {
   background-color: rgba(0, 0, 0, 0.8);
 }
 
-amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-floating {
+.amp-media-custom-controls.amp-media-custom-controls-light-skin:not(.amp-media-custom-controls-minimal) .amp-media-custom-controls-floating {
   box-shadow: 0px 0px 20px 5px rgba(0, 0, 0, 0.1);
   background: rgba(255, 255, 255, .75);
 }
 
 /* Custom controls dark icons */
-amp-custom-controls-icon {
+.amp-media-custom-controls-icon {
   width: 100%;
   padding-bottom: 100%;
   display: block;
@@ -349,86 +349,86 @@ amp-custom-controls-icon {
   background-repeat: no-repeat;
 }
 
-amp-custom-controls-icon.amp-custom-controls-icon-play {
+.amp-media-custom-controls-icon.amp-media-custom-controls-icon-play {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF" width="24" height="24" viewbox="0 0 24 24" style="filter:url(#i-amphtml-svg-shadow)"><path d="M8 5v14l11-7z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>');
 }
 
-amp-custom-controls-icon.amp-custom-controls-icon-pause {
+.amp-media-custom-controls-icon.amp-media-custom-controls-icon-pause {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
 }
 
-amp-custom-controls-icon.amp-custom-controls-icon-mute {
+.amp-media-custom-controls-icon.amp-media-custom-controls-icon-mute {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
 }
 
-amp-custom-controls-icon.amp-custom-controls-icon-volume-max {
+.amp-media-custom-controls-icon.amp-media-custom-controls-icon-volume-max {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
 }
 
-amp-custom-controls-icon.amp-custom-controls-icon-shadow {
+.amp-media-custom-controls-icon.amp-media-custom-controls-icon-shadow {
   width: 0 !important;
   height: 0 !important;
   visibility: hidden;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#000000" height="0" viewBox="0 0 24 24" width="0" xmlns="http://www.w3.org/2000/svg"><defs><filter id="i-amphtml-svg-shadow"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="rgba(0,0,0,0.4)" /></filter></defs></svg>')
 }
 
-amp-custom-controls-icon.amp-custom-controls-icon-fullscreen {
+.amp-media-custom-controls-icon.amp-media-custom-controls-icon-fullscreen {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>')
 }
 
 /* Custom controls light icons */
 
-amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-icon.amp-custom-controls-icon-play {
+.amp-media-custom-controls.amp-media-custom-controls-light-skin:not(.amp-media-custom-controls-minimal) .amp-media-custom-controls-icon.amp-media-custom-controls-icon-play {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="#000000" width="24" height="24" viewbox="0 0 24 24" style="filter:url(#i-amphtml-svg-shadow)"><path d="M8 5v14l11-7z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>');
 }
 
-amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-icon.amp-custom-controls-icon-pause {
+.amp-media-custom-controls.amp-media-custom-controls-light-skin:not(.amp-media-custom-controls-minimal) .amp-media-custom-controls-icon.amp-media-custom-controls-icon-pause {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
 }
 
-amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-icon.amp-custom-controls-icon-mute {
+.amp-media-custom-controls.amp-media-custom-controls-light-skin:not(.amp-media-custom-controls-minimal) .amp-media-custom-controls-icon.amp-media-custom-controls-icon-mute {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
 }
 
-amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-icon.amp-custom-controls-icon-volume-max {
+.amp-media-custom-controls.amp-media-custom-controls-light-skin:not(.amp-media-custom-controls-minimal) .amp-media-custom-controls-icon.amp-media-custom-controls-icon-volume-max {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>')
 }
 
-amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-icon.amp-custom-controls-icon-fullscreen {
+.amp-media-custom-controls.amp-media-custom-controls-light-skin:not(.amp-media-custom-controls-minimal) .amp-media-custom-controls-icon.amp-media-custom-controls-icon-fullscreen {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>')
 }
 
-amp-custom-controls.amp-custom-controls-light-skin:not(.amp-custom-controls-minimal) amp-custom-controls-icon.amp-custom-controls-icon-shadow {
+.amp-media-custom-controls.amp-media-custom-controls-light-skin:not(.amp-media-custom-controls-minimal) .amp-media-custom-controls-icon.amp-media-custom-controls-icon-shadow {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="0" viewBox="0 0 24 24" width="0" xmlns="http://www.w3.org/2000/svg"><defs><filter id="i-amphtml-svg-shadow"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="rgba(0,0,0,0.4)" /></filter></defs></svg>')
 }
 
 /* Custom Controls - Minimal Controls */
 
-amp-custom-controls.amp-custom-controls-minimal {
+.amp-media-custom-controls.amp-media-custom-controls-minimal {
   padding: 0px;
   width: 100%;
   height: 100%;
 }
 
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-bg {
+.amp-media-custom-controls.amp-media-custom-controls-minimal .amp-media-custom-controls-bg {
   display: none;
 }
 
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-bar-wrapper {
+.amp-media-custom-controls.amp-media-custom-controls-minimal .amp-media-custom-controls-bar-wrapper {
   padding: 0px;
 }
 
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-floating {
+.amp-media-custom-controls.amp-media-custom-controls-minimal .amp-media-custom-controls-floating {
   display: none;
 }
 
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-mini-wrapper {
+.amp-media-custom-controls.amp-media-custom-controls-minimal .amp-media-custom-controls-mini-wrapper {
   width: 100%;
   height: 100%;
   display: flex;
 }
 
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-mini {
+.amp-media-custom-controls.amp-media-custom-controls-minimal .amp-media-custom-controls-mini {
   width: 100%;
   height: 100%;
   display: flex;
@@ -437,8 +437,8 @@ amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-mini {
   background: rgba(0, 0, 0, 0.3);
 }
 
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-icon-wrapper,
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-volume {
+.amp-media-custom-controls.amp-media-custom-controls-minimal .amp-media-custom-controls-icon-wrapper,
+.amp-media-custom-controls.amp-media-custom-controls-minimal .amp-media-custom-controls-volume {
   height: auto;
   flex-grow: 1;
   width: 30%;
@@ -446,33 +446,33 @@ amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-volume {
   margin-right: 0px;
 }
 
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-icon-wrapper.amp-custom-controls-mute {
+.amp-media-custom-controls.amp-media-custom-controls-minimal .amp-media-custom-controls-icon-wrapper.amp-media-custom-controls-mute {
   width: 100%;
   height: 100%;
 }
 
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-scrubber {
+.amp-media-custom-controls.amp-media-custom-controls-minimal .amp-media-custom-controls-scrubber {
   display: none;
 }
 
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-progress-bar {
+.amp-media-custom-controls.amp-media-custom-controls-minimal .amp-media-custom-controls-progress-bar {
   width: 100%;
   position: absolute;
   bottom: 0;
 }
 
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-total-bar {
+.amp-media-custom-controls.amp-media-custom-controls-minimal .amp-media-custom-controls-total-bar {
   height: 8px;
   border-radius: 0px;
   background: rgba(255, 255, 255, 0.6);
 }
 
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-current-bar {
+.amp-media-custom-controls.amp-media-custom-controls-minimal .amp-media-custom-controls-current-bar {
   height: 8px;
   border-radius: 0px;
 }
 
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-scrubber {
+.amp-media-custom-controls.amp-media-custom-controls-minimal .amp-media-custom-controls-scrubber {
   width: 16px;
   height: 16px;
   margin-top: -5px;
@@ -480,7 +480,7 @@ amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-scrubber {
   box-shadow: 0px 0px 20px 5px rgba(0, 0, 0, 0.2);
 }
 
-amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-bar {
+.amp-media-custom-controls.amp-media-custom-controls-minimal .amp-media-custom-controls-bar {
   display: none;
 }
 
@@ -488,26 +488,26 @@ amp-custom-controls.amp-custom-controls-minimal amp-custom-controls-bar {
  * Custom Controls - Hidden
  */
 
-amp-custom-controls.amp-custom-controls-hidden amp-custom-controls-mini {
+.amp-media-custom-controls.amp-media-custom-controls-hidden .amp-media-custom-controls-mini {
   display: none;
 }
 
-amp-custom-controls.amp-custom-controls-hidden amp-custom-controls-bar-wrapper {
+.amp-media-custom-controls.amp-media-custom-controls-hidden .amp-media-custom-controls-bar-wrapper {
   display: none;
 }
 
-amp-custom-controls.amp-custom-controls-hidden amp-custom-controls-bg {
+.amp-media-custom-controls.amp-media-custom-controls-hidden .amp-media-custom-controls-bg {
   display: none;
 }
 
-amp-custom-controls.amp-custom-controls-hidden amp-custom-controls-floating {
+.amp-media-custom-controls.amp-media-custom-controls-hidden .amp-media-custom-controls-floating {
   display: none;
 }
 
 /**
  * Custom Controls - Loading spinner
  */
-amp-custom-controls-floating.amp-custom-controls-loading::after {
+.amp-media-custom-controls-floating.amp-media-custom-controls-loading::after {
  content: '';
  display: block;
  font-size: 10px;
@@ -522,7 +522,7 @@ amp-custom-controls-floating.amp-custom-controls-loading::after {
  height: 100%;
 }
 
-amp-custom-controls.amp-custom-controls-light-skin amp-custom-controls-floating.amp-custom-controls-loading::before {
+.amp-media-custom-controls.amp-media-custom-controls-light-skin .amp-media-custom-controls-floating.amp-media-custom-controls-loading::before {
  border-top: 2px solid rgba(0, 0, 0, 0.2);
  border-right: 2px solid rgba(0, 0, 0, 0.2);
  border-bottom: 2px solid rgba(0, 0, 0, 0.2);

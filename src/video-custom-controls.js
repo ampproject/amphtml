@@ -118,8 +118,9 @@ export class CustomControls {
    */
   createFullscreenBtn_() {
     const doc = this.ampdoc_.win.document;
-    const fsBtnWrap = doc.createElement('amp-custom-controls-icon-wrapper');
-    fsBtnWrap.classList.add('amp-custom-controls-fullscreen');
+    const fsBtnWrap = doc.createElement('div');
+    fsBtnWrap.classList.add('amp-media-custom-controls-icon-wrapper');
+    fsBtnWrap.classList.add('amp-media-custom-controls-fullscreen');
     const fsBtn = this.createIcon_('fullscreen');
     fsBtnWrap.appendChild(fsBtn);
     listen(fsBtnWrap, 'click', () => {
@@ -139,9 +140,11 @@ export class CustomControls {
    */
   createVolumeControls_() {
     const doc = this.ampdoc_.win.document;
-    const volumeContainer = doc.createElement('amp-custom-controls-volume');
-    const muteBtnWrap = doc.createElement('amp-custom-controls-icon-wrapper');
-    muteBtnWrap.classList.add('amp-custom-controls-mute');
+    const volumeContainer = doc.createElement('div');
+    volumeContainer.classList.add('amp-media-custom-controls-volume');
+    const muteBtnWrap = doc.createElement('div');
+    muteBtnWrap.classList.add('amp-media-custom-controls-icon-wrapper');
+    muteBtnWrap.classList.add('amp-media-custom-controls-mute');
     const muteBtn = this.createIcon_(
         this.entry_.isMuted() ? 'mute' : 'volume-max'
     );
@@ -175,7 +178,8 @@ export class CustomControls {
    */
   createSpacer_() {
     const doc = this.ampdoc_.win.document;
-    const spacer = doc.createElement('amp-custom-controls-spacer');
+    const spacer = doc.createElement('div');
+    spacer.classList.add('amp-media-custom-controls-spacer');
     return spacer;
   }
 
@@ -187,9 +191,9 @@ export class CustomControls {
    */
   createPlayPauseBtn_(loadingElement) {
     const doc = this.ampdoc_.win.document;
-    const playpauseBtnWrap =
-      doc.createElement('amp-custom-controls-icon-wrapper');
-    playpauseBtnWrap.classList.add('amp-custom-controls-playpause');
+    const playpauseBtnWrap = doc.createElement('div');
+    playpauseBtnWrap.classList.add('amp-media-custom-controls-icon-wrapper');
+    playpauseBtnWrap.classList.add('amp-media-custom-controls-playpause');
     const playpauseBtn = this.createIcon_('play');
     playpauseBtnWrap.appendChild(playpauseBtn);
     if (loadingElement == 'self') {
@@ -202,13 +206,17 @@ export class CustomControls {
       } else {
         this.changeIcon_(playpauseBtn, 'pause');
         this.entry_.video.play(/*autoplay*/ false);
-        loadingElement.classList.toggle('amp-custom-controls-loading', true);
+        loadingElement.classList.toggle(
+            'amp-media-custom-controls-loading', true
+        );
       }
     });
     this.listenMultiple_(this.entry_.video.element,
         [VideoEvents.PLAYING, VideoEvents.PAUSE],
         e => {
-          loadingElement.classList.toggle('amp-custom-controls-loading', false);
+          loadingElement.classList.toggle(
+              'amp-media-custom-controls-loading', false
+          );
           if (e.type == VideoEvents.PAUSE) {
             this.changeIcon_(playpauseBtn, 'play');
             this.showControls();
@@ -230,7 +238,8 @@ export class CustomControls {
    */
   createProgressTime_() {
     const doc = this.ampdoc_.win.document;
-    const progressTime = doc.createElement('amp-custom-controls-progress-time');
+    const progressTime = doc.createElement('div');
+    progressTime.classList.add('amp-media-custom-controls-progress-time');
     progressTime.textContent = '0:00 / 0:00';
     // Update played time
     const updateProgress = () => {
@@ -257,10 +266,14 @@ export class CustomControls {
    */
   createProgressBar_() {
     const doc = this.ampdoc_.win.document;
-    const progressBar = doc.createElement('amp-custom-controls-progress-bar');
-    const totalBar = doc.createElement('amp-custom-controls-total-bar');
-    const currentBar = doc.createElement('amp-custom-controls-current-bar');
-    const scrubber = doc.createElement('amp-custom-controls-scrubber');
+    const progressBar = doc.createElement('div');
+    progressBar.classList.add('amp-media-custom-controls-progress-bar');
+    const totalBar = doc.createElement('div');
+    totalBar.classList.add('amp-media-custom-controls-total-bar');
+    const currentBar = doc.createElement('div');
+    currentBar.classList.add('amp-media-custom-controls-current-bar');
+    const scrubber = doc.createElement('div');
+    scrubber.classList.add('amp-media-custom-controls-scrubber');
     let scrubberTouched = false;
     let scrubberDragging = false;
     totalBar.appendChild(currentBar);
@@ -347,13 +360,16 @@ export class CustomControls {
 
   createIcon_(name) {
     const doc = this.ampdoc_.win.document;
-    const icon = doc.createElement('amp-custom-controls-icon');
-    icon.className = 'amp-custom-controls-icon-' + name;
+    const icon = doc.createElement('div');
+    icon.classList.add('amp-media-custom-controls-icon');
+    icon.classList.add('amp-media-custom-controls-icon-' + name);
     return icon;
   }
 
   changeIcon_(icon, name) {
-    icon.className = 'amp-custom-controls-icon-' + name;
+    icon.className = '';
+    icon.classList.add('amp-media-custom-controls-icon');
+    icon.classList.add('amp-media-custom-controls-icon-' + name);
   }
 
   /**
@@ -405,17 +421,31 @@ export class CustomControls {
     const floating = opt_options.floating || 'play';
     // Set up controls
     const doc = this.ampdoc_.win.document;
-    this.controlContainer_ = doc.createElement('amp-custom-controls');
+    this.controlContainer_ = doc.createElement('div');
     const controlClasses = this.controlContainer_.classList;
-    controlClasses.toggle('amp-custom-controls-light-skin', !darkSkin);
-    this.controlsBg_ = doc.createElement('amp-custom-controls-bg');
-    this.controlBarWrapper_ =
-      doc.createElement('amp-custom-controls-bar-wrapper');
-    this.controlBarContainer_ = doc.createElement('amp-custom-controls-bar');
-    this.miniControlsWrapper_ =
-      doc.createElement('amp-custom-controls-mini-wrapper');
-    this.miniControlsContainer_ = doc.createElement('amp-custom-controls-mini');
-    this.floatingContainer_ = doc.createElement('amp-custom-controls-floating');
+    controlClasses.add('amp-media-custom-controls');
+    controlClasses.toggle('amp-media-custom-controls-light-skin', !darkSkin);
+    // Controls background
+    this.controlsBg_ = doc.createElement('div');
+    this.controlsBg_.classList.add('amp-media-custom-controls-bg');
+    // Control bar wrapper
+    this.controlBarWrapper_ = doc.createElement('div');
+    this.controlBarWrapper_.classList
+        .add('amp-media-custom-controls-bar-wrapper');
+    // Control bar container
+    this.controlBarContainer_ = doc.createElement('div');
+    this.controlBarContainer_.classList.add('amp-media-custom-controls-bar');
+    // Mini-controls wrapper
+    this.miniControlsWrapper_ = doc.createElement('div');
+    this.miniControlsWrapper_.classList
+        .add('amp-media-custom-controls-mini-wrapper');
+    // Mini-controls container
+    this.miniControlsContainer_ = doc.createElement('div');
+    this.miniControlsContainer_.classList.add('amp-media-custom-controls-mini');
+    // Floating controls container
+    this.floatingContainer_ = doc.createElement('div');
+    this.floatingContainer_.classList.add('amp-media-custom-controls-floating');
+
 
     // Shadow filter
     const shadowFilter = this.createIcon_('shadow');
@@ -571,7 +601,7 @@ export class CustomControls {
           })
       , 200).thenAlways(() => {
         const classes = this.controlContainer_.classList;
-        classes.toggle('amp-custom-controls-hidden', true);
+        classes.toggle('amp-media-custom-controls-hidden', true);
         this.controlsShown_ = false;
       });
     });
@@ -601,7 +631,7 @@ export class CustomControls {
       }
 
       this.controlContainer_.classList.toggle(
-          'amp-custom-controls-hidden', false
+          'amp-media-custom-controls-hidden', false
       );
       this.controlsShowing_ = true;
 
@@ -649,7 +679,7 @@ export class CustomControls {
    */
   toggleMinimalControls(enable = true) {
     this.controlContainer_.classList.toggle(
-        'amp-custom-controls-minimal', enable
+        'amp-media-custom-controls-minimal', enable
     );
     this.minimal_ = enable;
   }
