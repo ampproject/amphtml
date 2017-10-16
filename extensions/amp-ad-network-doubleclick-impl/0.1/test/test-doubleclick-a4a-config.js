@@ -208,12 +208,13 @@ describe('doubleclick-a4a-config', () => {
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
       const maybeSelectExperimentStub = sandbox.stub(
-          DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment').withArgs(
-              mockWin, elem, [
-                DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
-                DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
-              DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME)
-          .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
+          DoubleclickA4aEligibility.prototype,
+          'maybeSelectExperiment').withArgs(
+          mockWin, elem, [
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME)
+            .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
@@ -225,12 +226,13 @@ describe('doubleclick-a4a-config', () => {
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
       const maybeSelectExperimentStub = sandbox.stub(
-          DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment').withArgs(
-              mockWin, elem, [
-                DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
-                DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
-              DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME)
-          .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL);
+          DoubleclickA4aEligibility.prototype,
+          'maybeSelectExperiment').withArgs(
+          mockWin, elem, [
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME)
+            .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL);
