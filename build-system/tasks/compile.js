@@ -154,6 +154,8 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-form/**/*.js',
       // Needed for AccessService
       'extensions/amp-access/**/*.js',
+      // Needed for AmpStoryVariableService
+      'extensions/amp-story/**/*.js',
       // Needed to access UserNotificationManager from other extensions
       'extensions/amp-user-notification/**/*.js',
       'src/*.js',
