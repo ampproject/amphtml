@@ -282,6 +282,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Rambler&Co](../../ads/capirs.md)
 - [Relap](../../ads/relap.md)
 - [Revcontent](../../ads/revcontent.md)
+- [RevJet](../../ads/revjet.md)
 - [Rubicon Project](../../ads/rubicon.md)
 - [Sharethrough](../../ads/sharethrough.md)
 - [Sklik](../../ads/sklik.md)
