@@ -23,6 +23,14 @@ import {getMode} from '../../../src/mode';
 import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui'; // eslint-disable-line max-len
 
 
+const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
+
+const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
+
+const FULLSCREEN_CLASS = 'i-amphtml-story-exit-fullscreen';
+
+const CLOSE_CLASS = 'i-amphtml-story-bookend-close';
+
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
@@ -31,6 +39,22 @@ const TEMPLATE = {
     {
       tag: 'div',
       attrs: dict({'class': 'i-amphtml-story-ui-left'}),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': UNMUTE_CLASS + ' i-amphtml-story-button',
+          }),
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': MUTE_CLASS + ' i-amphtml-story-button',
+          }),
+        },
+      ],
     },
     {
       tag: 'div',
@@ -40,23 +64,21 @@ const TEMPLATE = {
           tag: 'div',
           attrs: dict({
             'role': 'button',
-            'class': 'i-amphtml-story-unmute-audio-control ' +
-                'i-amphtml-story-button',
+            'class': UNMUTE_CLASS + ' i-amphtml-story-button',
           }),
         },
         {
           tag: 'div',
           attrs: dict({
             'role': 'button',
-            'class': 'i-amphtml-story-mute-audio-control ' +
-                'i-amphtml-story-button',
+            'class': MUTE_CLASS + ' i-amphtml-story-button',
           }),
         },
         {
           tag: 'div',
           attrs: dict({
             'role': 'button',
-            'class': 'i-amphtml-story-exit-fullscreen i-amphtml-story-button',
+            'class': FULLSCREEN_CLASS + ' i-amphtml-story-button',
             'hidden': true,
           }),
         },
@@ -64,7 +86,7 @@ const TEMPLATE = {
           tag: 'div',
           attrs: dict({
             'role': 'button',
-            'class': 'i-amphtml-story-bookend-close i-amphtml-story-button',
+            'class': CLOSE_CLASS + ' i-amphtml-story-button',
             'hidden': true,
           }),
         },
@@ -164,12 +186,6 @@ export class SystemLayer {
     this.closeBookendBtn_ =
         this.root_.querySelector('.i-amphtml-story-bookend-close');
 
-    this.muteAudioBtn_ =
-        this.root_.querySelector('.i-amphtml-story-mute-audio-control');
-
-    this.unmuteAudioBtn_ =
-        this.root_.querySelector('.i-amphtml-story-unmute-audio-control');
-
     this.addEventHandlers_();
 
     return this.getRoot();
@@ -193,17 +209,19 @@ export class SystemLayer {
    */
   addEventHandlers_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
-    this.exitFullScreenBtn_.addEventListener(
-        'click', e => this.onExitFullScreenClick_(e));
+    this.root_.addEventListener('click', e => {
+      const target = dev().assertElement(e.target);
 
-    this.closeBookendBtn_.addEventListener(
-        'click', e => this.onCloseBookendClick_(e));
-
-    this.muteAudioBtn_.addEventListener(
-        'click', e => this.onMuteAudioClick_(e));
-
-    this.unmuteAudioBtn_.addEventListener(
-        'click', e => this.onUnmuteAudioClick_(e));
+      if (target.matches(`.${FULLSCREEN_CLASS}, .${FULLSCREEN_CLASS} *`)) {
+        this.onExitFullScreenClick_(e);
+      } else if (target.matches(`.${CLOSE_CLASS}, .${CLOSE_CLASS} *`)) {
+        this.onCloseBookendClick_(e);
+      } else if (target.matches(`.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
+        this.onMuteAudioClick_(e);
+      } else if (target.matches(`.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
+        this.onUnmuteAudioClick_(e);
+      }
+    });
   }
 
 
