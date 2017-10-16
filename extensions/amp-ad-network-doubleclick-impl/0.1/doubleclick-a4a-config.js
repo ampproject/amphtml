@@ -64,8 +64,6 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   CACHE_EXTENSION_INJECTION_EXP: '21060956',
   IDENTITY_CONTROL: '21060937',
   IDENTITY_EXPERIMENT: '21060938',
-  UNCONDITIONED_FF_CONTROL: '21061145',
-  UNCONDITIONED_FF_EXPERIMENT: '21061146',
 };
 
 export const DOUBLECLICK_UNCONDITIONED_EXPERIMENTS = {
@@ -108,7 +106,7 @@ export const BETA_EXPERIMENT_ID = '2077831';
 export class DoubleclickA4aEligibility {
 
   constructor() {
-    this.activeExperiments_ = {};
+    this.unconditionedExperiments_ = {};
     this.experiment;
   }
   /**
@@ -140,21 +138,25 @@ export class DoubleclickA4aEligibility {
    * @return {?string}
    */
   unconditionedSelection_(win, element) {
-    const experimentId = this.maybeSelectExperiment(win, element, [
-      DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
-      DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP,
-    ], DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME);
-    if (experimentId) {
-      addExperimentIdToElement(experimentId, element);
-      forceExperimentBranch(
-          win, DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME, experimentId);
-      this.activeExperiments_[experimentId] = true;
-      this.experiment = experimentId;
-    }
+    const unconditionedExperiments = [
+      {branches: [DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+                  DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
+       name: DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME},
+    ];
+    let experimentId;
+    unconditionedExperiments.forEach(experiment => {
+      experimentId = this.maybeSelectExperiment(
+          win, element, experiment.branches, experiment.name);
+      if (experimentId) {
+        addExperimentIdToElement(experimentId, element);
+        forceExperimentBranch(
+            win, DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME, experimentId);
+        this.unconditionedExperiments_[experimentId] = true;
+      }
+    });
   }
 
   selectA4aExperiments(win, element, useRemoteHtml) {
-    //this.unconditionedSelection_(win, element);
     const urlExperimentId = extractUrlExperimentId(win, element);
     const isFastFetchEligible =
           !((useRemoteHtml && !element.getAttribute('rtc-config')) ||
@@ -169,7 +171,7 @@ export class DoubleclickA4aEligibility {
      * If experimentBranchIds is provided, then if the diversionCriteria passes, we
      * attempt to randomly select into one of the provided experiment branch IDs.
      */
-    const experiments = [
+    const conditionedExperiments = [
       /************************** MANUAL EXPERIMENT ***************************/
       {forceExperimentId: MANUAL_EXPERIMENT_ID,
        experimentName: DOUBLECLICK_A4A_EXPERIMENT_NAME,
@@ -182,22 +184,28 @@ export class DoubleclickA4aEligibility {
                              DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT],
        experimentName: DFP_CANONICAL_FF_EXPERIMENT_NAME,
        diversionCriteria: () => {
-         return isFastFetchEligible && !isCdnProxy && (urlExperimentId != -1
-                                                       || !isDevMode);
+         return isFastFetchEligible && !isCdnProxy &&
+             (urlExperimentId != -1 || !isDevMode) &&
+             !this.unconditionedExperiments_[
+               DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_CONTROL] &&
+             !this.unconditionedExperiments_[
+               DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_EXPERIMENT];
        }},
       /******************* HOLDBACK INTERNAL EXPERIMENT ***********************/
       {experimentBranchIds: [DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
                              DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
        experimentName: DOUBLECLICK_A4A_EXPERIMENT_NAME,
        diversionCriteria: () => {
-         return isFastFetchEligible && isCdnProxy && urlExperimentId == undefined && !hasBetaAttribute;
+         return isFastFetchEligible && isCdnProxy && urlExperimentId == undefined &&
+             !hasBetaAttribute;
        }
       },
       /****************** URL EXPERIMENT SELECTION ****************************/
       {forceExperimentId: urlExperimentId ? URL_EXPERIMENT_MAPPING[urlExperimentId] : null,
        experimentName: DOUBLECLICK_A4A_EXPERIMENT_NAME,
        diversionCriteria: () => {
-         return isFastFetchEligible && isCdnProxy && urlExperimentId != undefined && !hasBetaAttribute;
+         return isFastFetchEligible && isCdnProxy && urlExperimentId != undefined &&
+             !hasBetaAttribute;
        }
       },
       /***************** BETA EXPERIMENT SELECTION ****************************/
@@ -208,8 +216,12 @@ export class DoubleclickA4aEligibility {
        }
       },
     ];
-
+    this.unconditionedSelection_(win, element);
     /********** Conditioned Experiment Selection *******************************/
+    this.conditionedExperimentSelection(win, element, conditionedExperiments);
+  }
+
+  conditionedExperimentSelection(win, element, experiments) {
     let experimentId;
     experiments.forEach(experiment => {
       if (experiment.diversionCriteria()) {
@@ -225,23 +237,17 @@ export class DoubleclickA4aEligibility {
   }
 
   shouldUseFastFetch(win, element, useRemoteHtml) {
+    const urlExperimentId = extractUrlExperimentId(win, element);
     /************ FF Selection Criteria for Unconditioned Exp *************/
     const fastFetchExperimentConditions = {};
     fastFetchExperimentConditions[
-      DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_CONTROL] = () => {
+      DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP] = () => {
       return !((useRemoteHtml && !element.getAttribute('rtc-config')) ||
                'useSameDomainRenderingUntilDeprecated' in element.dataset ||
                element.hasAttribute('useSameDomainRenderingUntilDeprecated')) &&
-          isFastFetchEligible && !isCdnProxy && (urlExperimentId != -1 || !isDevMode);
+            !this.isCdnProxy(win) && (urlExperimentId != -1 || !isDevMode);
       };
-    fastFetchExperimentConditions[
-      DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_EXPERIMENT] = () => {
-      return !((useRemoteHtml && !element.getAttribute('rtc-config')) ||
-               'useSameDomainRenderingUntilDeprecated' in element.dataset ||
-               element.hasAttribute('useSameDomainRenderingUntilDeprecated')) &&
-          isFastFetchEligible && !isCdnProxy && (urlExperimentId != -1 || !isDevMode);
-      };
-    /*********           Fast Fetch Experiment Branches *******************/
+    /******************* Fast Fetch Experiment Branches *******************/
     const exp = DOUBLECLICK_EXPERIMENT_FEATURE;
     const fastFetchBranches = [
       exp.HOLDBACK_EXTERNAL_CONTROL,
@@ -255,22 +261,26 @@ export class DoubleclickA4aEligibility {
       exp.CACHE_EXTENSION_INJECTION_CONTROL,
       exp.IDENTITY_EXPERIMENT,
       exp.IDENTITY_CONTROL,
-      MANUAL_EXPERIMENT_ID
+      MANUAL_EXPERIMENT_ID,
     ];
-    /*********         Delayed Fetch Experiment Branches ******************/
+    /***************** Delayed Fetch Experiment Branches ******************/
     const delayedFetchBranches = [
       exp.HOLDBACK_EXTERNAL,
       exp.HOLDBACK_INTERNAL,
-      exp.CANONICAL_CONTROL
+      exp.CANONICAL_CONTROL,
+      DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL
     ];
 
     /***************** Attempt to select into Fast Fetch *******************/
-    if (this.unconditionedExperiment &&
-        fastFetchExperimentConditions[this.unconditionedExperiment]) {
-      return fastFetchExperimentConditions[this.unconditionedExperiment];
+    const unconditionedExpIds = Object.keys(this.unconditionedExperiments_);
+    for (let i in unconditionedExpIds) {
+      let expId = unconditionedExpIds[i];
+      if (fastFetchExperimentConditions[expId]) {
+        return fastFetchExperimentConditions[expId]();
+      }
     }
     /************** If in FF/DF experiment, select accordingly  ************/
-    else if (this.experiment && (fastFetchBranches.includes(this.experiment) ||
+    if (this.experiment && (fastFetchBranches.includes(this.experiment) ||
                             delayedFetchBranches.includes(this.experiment))) {
       return fastFetchBranches.includes(this.experiment);
     }
@@ -279,10 +289,6 @@ export class DoubleclickA4aEligibility {
         !('useSameDomainRenderingUntilDeprecated' in element.dataset) &&
         !element.hasAttribute('useSameDomainRenderingUntilDeprecated') &&
         this.isCdnProxy(win);
-  }
-
-  defaultFastFetchBehavior(win, urlExperimentId, ifFastFetchEligible) {
-    return this.isCdnProxy(win) && urlExperimentId == undefined && isFastFetchEligible;
   }
 
   /** Whether Fast Fetch is enabled

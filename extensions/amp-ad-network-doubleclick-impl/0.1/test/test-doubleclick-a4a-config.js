@@ -21,6 +21,8 @@ import {
   DFP_CANONICAL_FF_EXPERIMENT_NAME,
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
   DOUBLECLICK_EXPERIMENT_FEATURE,
+  DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME,
+  DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
   URL_EXPERIMENT_MAPPING,
   DoubleclickA4aEligibility,
   resetForTesting,
@@ -93,7 +95,7 @@ describe('doubleclick-a4a-config', () => {
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
       ], DFP_CANONICAL_FF_EXPERIMENT_NAME) ;
-      expect(maybeSelectExperimentSpy.callCount).to.equal(1);
+      expect(maybeSelectExperimentSpy.callCount).to.equal(2);
     });
 
     it('should return false if no canonical AMP experiment branch', () => {
@@ -131,7 +133,7 @@ describe('doubleclick-a4a-config', () => {
       testFixture.doc.body.appendChild(elem);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-      expect(maybeSelectExperimentStub).to.be.calledOnce;
+      expect(maybeSelectExperimentStub).to.be.calledTwice;
     });
 
     it('should not enable if data-use-same-domain-rendering-until-deprecated',
@@ -201,25 +203,37 @@ describe('doubleclick-a4a-config', () => {
     });
 
     it('should only select once if put into unconditioned exp', () => {
-      const maybeSelectExperimentStub = sandbox.stub(
-          DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
-          .returns(DOUBLECLICK_EXPERIMENT_FEATURE.UNCONDITIONED_FF_EXPERIMENT);
+      sandbox.stub(DoubleclickA4aEligibility.prototype,
+          'isCdnProxy', () => false);
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
+      const maybeSelectExperimentStub = sandbox.stub(
+          DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment').withArgs(
+              mockWin, elem, [
+                DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+                DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
+              DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME)
+          .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_EXPERIMENT_FEATURE.UNCONDITIONED_FF_EXPERIMENT);
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
       expect(maybeSelectExperimentStub).to.be.calledOnce;
     });
     it('should only select once if put into unconditioned control', () => {
-      const maybeSelectExperimentStub = sandbox.stub(
-          DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
-          .returns(DOUBLECLICK_EXPERIMENT_FEATURE.UNCONDITIONED_FF_CONTROL);
+      sandbox.stub(DoubleclickA4aEligibility.prototype,
+          'isCdnProxy', () => false);
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
+      const maybeSelectExperimentStub = sandbox.stub(
+          DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment').withArgs(
+              mockWin, elem, [
+                DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+                DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
+              DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME)
+          .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_EXPERIMENT_FEATURE.UNCONDITIONED_FF_CONTROL);
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL);
       expect(maybeSelectExperimentStub).to.be.calledOnce;
     });
   });
