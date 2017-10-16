@@ -61,6 +61,9 @@ import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
+import {
+  installAnchorClickInterceptor,
+} from '../../../src/anchor-click-interceptor';
 import {stringHash32} from '../../../src/string';
 import {removeElement, createElementWithAttributes} from '../../../src/dom';
 import {getData} from '../../../src/event-helper';
