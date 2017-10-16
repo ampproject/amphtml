@@ -15,41 +15,46 @@
 #
 
 tags: {  # amp-alaantv-breakingnews
-  html_format: AMP
-  tag_name: "SCRIPT"
-  spec_name: "amp-alaantv-breakingnews extension .js script"
-  satisfies: "amp-alaantv-breakingnews extension .js script"
-  requires: "amp-alaantv-breakingnews"
-  mandatory_parent: "HEAD"
-  unique: true
-  extension_unused_unless_tag_present: "amp-alaantv-breakingnews"
-  attrs: {
-      name: "src"
-      mandatory: true
-      value_url: {
-        allowed_protocol: "https"
-        allow_relative: true  # Will be set to false at a future date.
-      }
-      blacklisted_value_regex: "__amp_source_origin"
-  }
-  attrs: {name: "items"}
-  attrs: {name: "animation"}
-  attrs: { name: "template"}
-  attrs: {name: "data-poll-interval"}
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-alaantv-breakingnews"
+    html_format: AMP
+    tag_name: "SCRIPT"
+    extension_spec: {
+        name: "amp-alaantv-breakingnews"
+        allowed_versions: "0.1"
+        allowed_versions: "latest"
+        requires_usage: DEPRECATED_WARNING
+        deprecated_allow_duplicates: true
+    }
+    attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-alaantv-breakingnews>
-  html_format: AMP
-  tag_name: "AMP-ALAANTV-BREAKINGNEWS"
-  satisfies: "amp-alaantv-breakingnews"
-  requires: "amp-alaantv-breakingnews extension .js script"
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-hello-world"
-  amp_layout: {
+    html_format: AMP
+    tag_name: "AMP-ALAANTV-BREAKINGNEWS"
+    requires_extension: "amp-alaantv-breakingnews"
+    attrs: { name: "credentials" }
+    attrs: { name: "items" }
+    attrs: { name: "max-items" }
+    attrs: { name: "single-item" }
+    attrs: { name: "data-poll-interval" }
+    attrs: {
+        name: "animation"
+        value_regex: "(rtl|ltr)"
+    }
+    attrs: {
+        name: "src"
+        mandatory: true
+        value_url: {
+            allowed_protocol: "https"
+            allow_relative: true
+        }
+        blacklisted_value_regex: "__amp_source_origin"
+    }
+    attrs: { name: "template" }
+    attr_lists: "extended-amp-global"
+    amp_layout: {
         supported_layouts: FILL
         supported_layouts: FIXED
         supported_layouts: FIXED_HEIGHT
         supported_layouts: FLEX_ITEM
         supported_layouts: RESPONSIVE
-  }
+    }
 }

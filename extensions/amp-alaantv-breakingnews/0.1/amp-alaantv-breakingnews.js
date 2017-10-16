@@ -131,7 +131,6 @@ export class AmpAlaantvBreakingnews extends AMP.BaseElement {
             this.element.classList.add('i-amphtml-rtl-animation');
 
         this.viewer_.whenFirstVisible().then(() => {
-            console.log('AMPDocument firstVisible event catched');
             this.fetchAndRender().catch( this.catchCallback.bind(this) );
             this.inViewportAction = (inViewport) => {
                 return inViewport ? this.resultPromise.then( this.play.bind(this)).catch( this.catchCallback.bind(this) ) : this.pause()
@@ -182,18 +181,11 @@ export class AmpAlaantvBreakingnews extends AMP.BaseElement {
     }
 
     /** @override */
-    firstLayoutCompleted() {
-        console.log('firstLayoutCompleted');
-    }
-
-    /** @override */
     viewportCallback(inViewport) {
-        console.log('viewportCallback', inViewport);
         this.inViewportAction(inViewport);
     }
 
     play(unused){
-        console.log('play');
         this.inViewportAction = (inViewport) => {
             return inViewport ? this.resume() : this.pause()
         };
@@ -240,17 +232,12 @@ export class AmpAlaantvBreakingnews extends AMP.BaseElement {
     }
 
     resume(){
-        console.log('resume');
         return this.resumeAnimation_()
-            .then( ()=>{
-                console.log('resuming action is done!');
-            })
             .then(this.next.bind(this))
             .catch( this.catchCallback.bind(this) );
     }
 
     pause(){
-        console.log('pause');
         this.stopAnimation_();
     }
 
@@ -291,15 +278,12 @@ export class AmpAlaantvBreakingnews extends AMP.BaseElement {
     }
 
     switchForward(){
-        console.log('Switch to next item');
         return this.getActiveItemPromise().then( (activeItem)=>{
             return this.switchToElement( activeItem.nextElementSibling ? activeItem.nextElementSibling : this.itemsContainer_.firstElementChild );
         });
     }
 
     switchBackward(){
-        console.log('Switch to previous item');
-        console.log('Switch to next item');
         return this.getActiveItemPromise().then( (activeItem)=>{
             return this.switchToElement( activeItem.previousElementSibling ? activeItem.previousElementSibling : this.itemsContainer_.lastElementChild );
         });
@@ -519,7 +503,6 @@ export class AmpAlaantvBreakingnews extends AMP.BaseElement {
      * @private
      */
     renderItems_(items) {
-        console.log('render items:', items);
         return this.templates_.findAndRenderTemplateArray(this.element, items)
             .then( (elements)=>{
                 this.element.classList.add('i-amphtml-breakingnews-not-empty');
@@ -570,7 +553,6 @@ export class AmpAlaantvBreakingnews extends AMP.BaseElement {
      * @private
      */
     fetch(itemsExpr) {
-        console.log('fetching from URL:', this.element.getAttribute('src'));
         this.resultPromise = fetchBatchedJsonFor(this.getAmpDoc(), this.element, itemsExpr);
         return this.resultPromise;
     }
