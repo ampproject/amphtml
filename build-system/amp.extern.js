@@ -202,6 +202,8 @@ UserNotificationManager.prototype.get;
 var Cid = function() {};
 /** @constructor @struct */
 var Activity = function() {};
+/** @constructor */
+var AmpStoryVariableService = function() {};
 
 // data
 var data;
@@ -275,6 +277,10 @@ var GetCidDef;
  */
 Cid.prototype.get = function(
     externalCidScope, consent, opt_persistenceConsent) {}
+
+AmpStoryVariableService.prototype.onStateChange = function(event) {};
+AmpStoryVariableService.pageIndex;
+AmpStoryVariableService.pageId;
 
 var AMP = {};
 window.AMP;
