@@ -933,10 +933,12 @@ export class Viewer {
 
   /**
    * Replace the
-   * @param {string} newUrl
+   * @param {?string} newUrl
    */
   replaceUrl(newUrl) {
-    if (!this.ampdoc.isSingleDoc() || !this.win.history.replaceState) {
+    if (!newUrl ||
+        !this.ampdoc.isSingleDoc() ||
+        !this.win.history.replaceState) {
       return;
     }
 

@@ -110,7 +110,7 @@ function handleReplaceUrl(win) {
   if (!viewer.hasCapability('replaceUrl')) {
     // If Viewer is not capability of providing async replaceUrl, use the legacy
     // init replaceUrl param.
-    viewer.replaceUrl(/** @type {string} */ (viewer.getParam('replaceUrl')));
+    viewer.replaceUrl(viewer.getParam('replaceUrl') || null);
     return Promise.resolve();
   }
 
@@ -121,10 +121,10 @@ function handleReplaceUrl(win) {
           dev().warn('IMPRESSION', 'get invalid replaceUrl response');
           return;
         }
-        if (response['replaceUrl']) {
-          viewer.replaceUrl(response['replaceUrl']);
-        }
-      }, () => {});
+        viewer.replaceUrl(response['replaceUrl'] || null);
+      }, err => {
+        dev().warn('IMPRESSION', 'Error request replaceUrl from viewer', err);
+      });
 }
 
 
