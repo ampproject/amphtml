@@ -55,7 +55,7 @@ describe('refresh-manager', () => {
     sandbox.restore();
   });
 
-  it('should get null from slot', () => {
+  it('should get null refreshInterval', () => {
     mockA4a.element.removeAttribute(DATA_ATTR_NAME);
     expect(getPublisherSpecifiedRefreshInterval(
         mockA4a.element, window, 'doubleclick')).to.be.null;
@@ -153,6 +153,3 @@ describe('refresh-manager', () => {
     });
   });
 });
-
-
-
