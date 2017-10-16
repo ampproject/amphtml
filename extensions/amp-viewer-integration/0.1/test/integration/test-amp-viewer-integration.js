@@ -146,7 +146,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
 
           return ampViewerIntegration.openChannelAndStart_(
               viewer, env.ampdoc, origin, messaging).then(() => {
-                expect(registerHandlerSpy).to.have.been.calledWith('disableScroll');
+                expect(registerHandlerSpy).to.have.been.calledWith(
+                    'disableScroll');
               });
         });
       });
@@ -162,7 +163,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       win.document = document.createElement('div');
       ampViewerIntegration = new AmpViewerIntegration(win);
     });
-    
+
     describe('disableScroll', () => {
       it('disables and resets scrolling on the Viewport', () => {
         class Viewport {
@@ -175,10 +176,12 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         const resetScrollSpy = sandbox.stub(viewport, 'resetScroll');
         sandbox.stub(Services, 'viewportForDoc').returns(viewport);
 
-        ampViewerIntegration.disableScrollHandler_('some type', /*disable*/true, false)
+        ampViewerIntegration.disableScrollHandler_(
+            'some type', /*disable*/true, false);
         expect(disableScrollSpy).to.have.been.called;
 
-        ampViewerIntegration.disableScrollHandler_('some type', /*disable*/false, false);
+        ampViewerIntegration.disableScrollHandler_(
+            'some type', /*disable*/false, false);
         expect(resetScrollSpy).to.have.been.called;
       });
     });
