@@ -3,6 +3,9 @@
   <head>
     <meta charset="utf-8">
     <script src="https://cdn.ampproject.org/v0.js"></script>
+    <script>
+      AMP.toggleExperiment('amp-story', true);
+    </script>
     <script custom-element="amp-story"
         src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
     <title>My Story</title>
@@ -26,10 +29,6 @@
   </head>
 
   <body>
-
-    <script>
-      AMP.toggleExperiment('amp-story');
-    </script>
 
     <amp-story standalone id="story-helloworld">
       <amp-story-page id="cover">
