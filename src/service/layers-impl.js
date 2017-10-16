@@ -72,6 +72,33 @@ function PositionLt(left, top) {
   };
 }
 
+/**
+ * @type {?Element}
+ */
+let scrollingElement;
+
+/**
+ * @param {!Node|!Document} nodeOrDoc
+ */
+function getScrollingElement(nodeOrDoc) {
+  if (scrollingElement) {
+    return scrollingElement;
+  }
+
+  const doc = nodeOrDoc.ownerDocument || nodeOrDoc;
+  let s = doc./*OK*/scrollingElement;
+
+  if (!s) {
+    if (doc.body && Services.platformFor(doc.defaultView).isWebKit()) {
+      s = doc.body;
+    } else {
+      s = doc.documentElement;
+    }
+  }
+
+  return this.scrollingElement_ = s;
+}
+
 export class LayoutLayers {
   constructor(ampdoc) {
     const {win} = ampdoc;
@@ -90,12 +117,13 @@ export class LayoutLayers {
       const {target} = event;
       const scrolled = target.nodeType == Node.ELEMENT_NODE
           ? target
-          : this.getScrollingElement();
+          : getScrollingElement(this.document_);
       this.scrolled_(scrolled);
     }, /* TODO */{capture: true, passive: true});
     win.addEventListener('resize', () => this.onResize_());
 
-    this.declareLayer(this.getScrollingElement());
+    this.declareLayer_(this.document_.documentElement, /* opt_root */ true);
+    // this.declareLayer_(this.getScrollingElement(), [> opt_root <] true);
   }
 
   add(element) {
@@ -126,7 +154,7 @@ export class LayoutLayers {
    */
   calcIntersectionWithViewport(element) {
     return this.calcIntersectionWithParent(element,
-        this.getScrollingElement());
+        getScrollingElement(this.document_));
   }
 
   /**
@@ -208,18 +236,19 @@ export class LayoutLayers {
   /**
    * Eagerly creates a LayoutLayer for the element.
    * @param {!Element} element
+   * @param {boolean=} opt_root
    * @return {!LayoutLayer}
    */
-  declareLayer_(element) {
+  declareLayer_(element, opt_root) {
     let layer = LayoutLayer.forOptional(element);
     if (!layer) {
-      layer = new LayoutLayer(element);
+      layer = new LayoutLayer(element, opt_root);
     }
     return layer;
   }
 
   onResize_() {
-    const scroller = this.getScrollingElement();
+    const scroller = getScrollingElement(this.document_);
     LayoutLayer.for(scroller).dispose(/* opt_deep */ true);
   }
 
@@ -239,32 +268,16 @@ export class LayoutLayers {
   onScroll(handler) {
     this.onScroll_ = handler;
   }
-
-  getScrollingElement() {
-    if (this.scrollingElement_) {
-      return this.scrollingElement_;
-    }
-
-    const doc = this.document_;
-    let s = doc./*OK*/scrollingElement;
-
-    if (!s) {
-      if (doc.body && Services.platformFor(this.win_).isWebKit()) {
-        s = doc.body;
-      } else {
-        s = doc.documentElement;
-      }
-    }
-
-    return this.scrollingElement_ = s;
-  }
 }
 
 export class LayoutLayer {
-  constructor(element) {
+  constructor(element, opt_root) {
     /** @private @const {!Element} */
     // TODO Should create the LayoutElement for this.
     this.root_ = element;
+
+    /** @private const {boolean} */
+    this.isRoot_ = !!opt_root;
 
     /**
      * Holds all children AMP Elements, so we can quickly remeasure.
@@ -387,10 +400,9 @@ export class LayoutLayer {
     // Done before transferring this layer to avoid a recursive iteration issue.
     const layers = opt_deep ? this.layers_.slice() : EMPTY;
 
-    const parent = this.getParentLayer();
-    if (parent) {
+    if (!this.isRoot_) {
       this.root_[LAYOUT_LAYER_PROP] = null;
-      this.transfer_(parent);
+      this.transfer_(this.getParentLayer());
     }
 
     for (let i = 0; i < layers.length; i++) {
@@ -713,6 +725,10 @@ export class LayoutElement {
  */
 function relativeScrolledPositionForChildren(layer) {
   const position = layer.getScrolledPosition();
+  const root = layer.root_;
+  if (root === getScrollingElement(root)) {
+    return position;
+  }
   return PositionLt(
     position.left - layer.getScrollLeft(),
     position.top - layer.getScrollTop()
