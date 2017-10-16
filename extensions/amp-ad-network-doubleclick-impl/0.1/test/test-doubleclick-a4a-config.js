@@ -23,6 +23,7 @@ import {
   DOUBLECLICK_EXPERIMENT_FEATURE,
   URL_EXPERIMENT_MAPPING,
   DoubleclickA4aEligibility,
+  resetForTesting,
 } from '../doubleclick-a4a-config';
 import {
   isInExperiment,
@@ -41,6 +42,7 @@ describe('doubleclick-a4a-config', () => {
   let testFixture;
 
   beforeEach(() => {
+    resetForTesting();
     sandbox = sinon.sandbox.create();
     mockWin = {
       location: parseUrl('https://nowhere.org/a/place/page.html?s=foo&q=bar'),
@@ -91,8 +93,7 @@ describe('doubleclick-a4a-config', () => {
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
       ], DFP_CANONICAL_FF_EXPERIMENT_NAME) ;
-      expect(maybeSelectExperimentSpy.callCount).to.equal(2);
-
+      expect(maybeSelectExperimentSpy.callCount).to.equal(1);
     });
 
     it('should return false if no canonical AMP experiment branch', () => {
@@ -130,14 +131,14 @@ describe('doubleclick-a4a-config', () => {
       testFixture.doc.body.appendChild(elem);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-      expect(maybeSelectExperimentStub).to.be.calledTwice;
+      expect(maybeSelectExperimentStub).to.be.calledOnce;
     });
 
     it('should not enable if data-use-same-domain-rendering-until-deprecated',
         () => {
           const elem = testFixture.doc.createElement('div');
           elem.setAttribute(
-              'data-use-same-domain-rendering-until-deprecated', '');
+              'useSameDomainRenderingUntilDeprecated', '');
           testFixture.doc.body.appendChild(elem);
           expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
           expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;

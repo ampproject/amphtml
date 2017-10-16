@@ -109,6 +109,7 @@ export class DoubleclickA4aEligibility {
 
   constructor() {
     this.activeExperiments_ = {};
+    this.experiment;
   }
   /**
    * Returns whether win supports native crypto. Is just a wrapper around
@@ -148,11 +149,12 @@ export class DoubleclickA4aEligibility {
       forceExperimentBranch(
           win, DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME, experimentId);
       this.activeExperiments_[experimentId] = true;
+      this.experiment = experimentId;
     }
   }
 
   selectA4aExperiments(win, element, useRemoteHtml) {
-    this.unconditionedSelection_(win, element);
+    //this.unconditionedSelection_(win, element);
     const urlExperimentId = extractUrlExperimentId(win, element);
     const isFastFetchEligible =
           !((useRemoteHtml && !element.getAttribute('rtc-config')) ||
@@ -170,7 +172,7 @@ export class DoubleclickA4aEligibility {
     const experiments = [
       /************************** MANUAL EXPERIMENT ***************************/
       {forceExperimentId: MANUAL_EXPERIMENT_ID,
-       experimentName: DFP_CANONICAL_FF_EXPERIMENT_NAME,
+       experimentName: DOUBLECLICK_A4A_EXPERIMENT_NAME,
        diversionCriteria: () => {
          return isFastFetchEligible && !isCdnProxy && urlExperimentId == -1
              && isDevMode;
@@ -207,7 +209,7 @@ export class DoubleclickA4aEligibility {
       },
     ];
 
-    // Now select into conditioned where if unconditioned was set, it takes precedence.
+    /********** Conditioned Experiment Selection *******************************/
     let experimentId;
     experiments.forEach(experiment => {
       if (experiment.diversionCriteria()) {
@@ -216,39 +218,71 @@ export class DoubleclickA4aEligibility {
         if (!!experimentId) {
           addExperimentIdToElement(experimentId, element);
           forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
-          this.activeExperiments_[experimentId] = true;
+          this.experiment = experimentId;
         }
       }
     });
   }
 
   shouldUseFastFetch(win, element, useRemoteHtml) {
-    const isFastFetchEligible =
-          !((useRemoteHtml && !element.getAttribute('rtc-config')) ||
-            'useSameDomainRenderingUntilDeprecated' in element.dataset ||
-            element.hasAttribute('useSameDomainRenderingUntilDeprecated'));
-    const fastFetchIneligibleExperiments = [
-      DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
-      DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
-      DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
-      DOUBLECLICK_EXPERIMENT_FEATURE.UNCONDITIONED_FF_CANONICAL_CTL
-    ];
-    const urlExperimentId = extractUrlExperimentId(win, element);
-    const fastFetchPredicates = {};
-    fastFetchPredicates[
-      DOUBLECLICK_EXPERIMENT_FEATURE.UNCONDITIONED_FF_CANONICAL_EXP] = () => {
-        return isFastFetchEligible && !this.isCdnProxy(win) &&
-            !(urlExperimentId == -1 && (getMode(win).localDev || getMode(win).test))
-            && !this.supportsCrypto(win);
+    /************ FF Selection Criteria for Unconditioned Exp *************/
+    const fastFetchExperimentConditions = {};
+    fastFetchExperimentConditions[
+      DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_CONTROL] = () => {
+      return !((useRemoteHtml && !element.getAttribute('rtc-config')) ||
+               'useSameDomainRenderingUntilDeprecated' in element.dataset ||
+               element.hasAttribute('useSameDomainRenderingUntilDeprecated')) &&
+          isFastFetchEligible && !isCdnProxy && (urlExperimentId != -1 || !isDevMode);
       };
-    Object.keys(this.activeExperiments_).forEach(experimentId => {
-      if (fastFetchIneligibleExperiments.includes(experimentId) ||
-          (fastFetchPredicates[experimentId] && !fastFetchPredicates[experimentId]())) {
-        return false;
-      }
-    });
-    console.log(this.activeExperiments_);
-    return isFastFetchEligible && this.isCdnProxy(win);
+    fastFetchExperimentConditions[
+      DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_EXPERIMENT] = () => {
+      return !((useRemoteHtml && !element.getAttribute('rtc-config')) ||
+               'useSameDomainRenderingUntilDeprecated' in element.dataset ||
+               element.hasAttribute('useSameDomainRenderingUntilDeprecated')) &&
+          isFastFetchEligible && !isCdnProxy && (urlExperimentId != -1 || !isDevMode);
+      };
+    /*********           Fast Fetch Experiment Branches *******************/
+    const exp = DOUBLECLICK_EXPERIMENT_FEATURE;
+    const fastFetchBranches = [
+      exp.HOLDBACK_EXTERNAL_CONTROL,
+      exp.DELAYED_REQUEST,
+      exp.DELAYED_REQUEST_CONTROL,
+      exp.SRA_CONTROL,
+      exp.SRA,
+      exp.HOLDBACK_INTERNAL_CONTROL,
+      exp.CANONICAL_EXPERIMENT,
+      exp.CACHE_EXTENSION_INJECTION_EXP,
+      exp.CACHE_EXTENSION_INJECTION_CONTROL,
+      exp.IDENTITY_EXPERIMENT,
+      exp.IDENTITY_CONTROL,
+      MANUAL_EXPERIMENT_ID
+    ];
+    /*********         Delayed Fetch Experiment Branches ******************/
+    const delayedFetchBranches = [
+      exp.HOLDBACK_EXTERNAL,
+      exp.HOLDBACK_INTERNAL,
+      exp.CANONICAL_CONTROL
+    ];
+
+    /***************** Attempt to select into Fast Fetch *******************/
+    if (this.unconditionedExperiment &&
+        fastFetchExperimentConditions[this.unconditionedExperiment]) {
+      return fastFetchExperimentConditions[this.unconditionedExperiment];
+    }
+    /************** If in FF/DF experiment, select accordingly  ************/
+    else if (this.experiment && (fastFetchBranches.includes(this.experiment) ||
+                            delayedFetchBranches.includes(this.experiment))) {
+      return fastFetchBranches.includes(this.experiment);
+    }
+    /************** Default Fast Fetch Selection ***************************/
+    return !(useRemoteHtml && !element.getAttribute('rtc-config')) &&
+        !('useSameDomainRenderingUntilDeprecated' in element.dataset) &&
+        !element.hasAttribute('useSameDomainRenderingUntilDeprecated') &&
+        this.isCdnProxy(win);
+  }
+
+  defaultFastFetchBehavior(win, urlExperimentId, ifFastFetchEligible) {
+    return this.isCdnProxy(win) && urlExperimentId == undefined && isFastFetchEligible;
   }
 
   /** Whether Fast Fetch is enabled
@@ -283,7 +317,7 @@ export class DoubleclickA4aEligibility {
 }
 
 /** @const {!DoubleclickA4aEligibility} */
-const singleton = new DoubleclickA4aEligibility();
+let singleton = new DoubleclickA4aEligibility();
 
 /**
  * @param {!Window} win
@@ -293,6 +327,10 @@ const singleton = new DoubleclickA4aEligibility();
  */
 export function doubleclickIsA4AEnabled(win, element, useRemoteHtml) {
   return singleton.isA4aEnabled(win, element, useRemoteHtml);
+}
+
+export function resetForTesting() {
+  singleton = new DoubleclickA4aEligibility();
 }
 
 /**
