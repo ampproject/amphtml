@@ -193,7 +193,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.iniPromise_) {
       return this.iniPromise_;
     }
-    toggle(this.element, false);
     this.iniPromise_ =
         Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
             // Rudimentary "idle" signal.
@@ -204,7 +203,13 @@ export class AmpAnalytics extends AMP.BaseElement {
             .then(instrumentation => {
               this.instrumentation_ = instrumentation;
             })
-            .then(this.onFetchRemoteConfigSuccess_.bind(this));
+            .then(this.onFetchRemoteConfigSuccess_.bind(this))
+            .then(() => {
+              if (!this.config_['transport'] ||
+                  !this.config_['transport']['iframe']) {
+                toggle(this.element, false);
+              }
+            });
     return this.iniPromise_;
   }
 
