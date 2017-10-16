@@ -47,6 +47,11 @@ var hostname3p = argv.hostname3p || '3p.ampproject.net';
 var extensions = {};
 var extensionAliasFilePath = {};
 
+var green = $$.util.colors.green;
+var yellow = $$.util.colors.yellow;
+var red = $$.util.colors.red;
+var cyan = $$.util.colors.cyan;
+
 // Each extension and version must be listed individually here.
 declareExtension('amp-3q-player', '0.1', false);
 declareExtension('amp-access', '0.1', true);
@@ -205,10 +210,7 @@ function endBuildStep(stepName, targetName, startTime) {
     timeString += secs + '.' + ms + ' s)';
   }
   if (!process.env.TRAVIS) {
-    $$.util.log(
-        stepName,
-        $$.util.colors.cyan(targetName),
-        $$.util.colors.green(timeString));
+    $$.util.log(stepName, cyan(targetName), green(timeString));
   }
 }
 
@@ -392,9 +394,8 @@ function compileCss() {
   // Print a message that could help speed up local development.
   if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
     $$.util.log(
-        $$.util.colors.green('To skip building during future test runs, use',
-            $$.util.colors.cyan('--nobuild'), 'with your',
-            $$.util.colors.cyan('gulp test'), 'command.'));
+        green('To skip building during future test runs, use',
+        cyan('--nobuild'), 'with your', cyan('gulp test'), 'command.'));
   }
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
@@ -586,8 +587,8 @@ function enableLocalTesting() {
         AMP_CONFIG, JSON.parse(fs.readFileSync(configFile).toString()));
     fs.writeFileSync(herokuConfigFile, JSON.stringify(AMP_CONFIG));
     if (!process.env.TRAVIS) {
-      $$.util.log('Wrote', $$.util.colors.cyan(config), 'AMP config to',
-          $$.util.colors.cyan(herokuConfigFile), 'for use with Heroku');
+      $$.util.log('Wrote', cyan(config), 'AMP config to',
+          cyan(herokuConfigFile), 'for use with Heroku');
     }
   });
 }
@@ -620,21 +621,17 @@ function dist() {
   cleanupBuildDir();
   if (argv.fortesting) {
     $$.util.log(
-        $$.util.colors.green('Building the runtime for local testing with the'),
-        $$.util.colors.cyan((argv.config === 'canary') ? 'canary' : 'prod'),
-        $$.util.colors.green('AMP config'));
+        green('Building the runtime for local testing with the'),
+        cyan((argv.config === 'canary') ? 'canary' : 'prod'),
+        green('AMP config'));
     $$.util.log(
-        $$.util.colors.green('You can specify which config to use by passing'),
-        $$.util.colors.cyan('--config=canary'),
-        $$.util.colors.green('or'),
-        $$.util.colors.cyan('--config=prod'),
-        $$.util.colors.green('to'),
-        $$.util.colors.cyan('gulp dist --fortesting'));
+        green('You can specify which config to use by passing'),
+        cyan('--config=canary'), green('or'), cyan('--config=prod'),
+        green('to'), cyan('gulp dist --fortesting'));
     $$.util.log(
-        $$.util.colors.green('After the build, you can switch configs with'),
-        $$.util.colors.cyan('gulp prepend-global --canary --target dist/v0.js'),
-        $$.util.colors.green('or'),
-        $$.util.colors.cyan('gulp prepend-global --prod --target dist/v0.js'));
+        green('After the build, you can switch configs with'),
+        cyan('gulp prepend-global --canary --target dist/v0.js'),
+        green('or'), cyan('gulp prepend-global --prod --target dist/v0.js'));
   }
   return compileCss().then(() => {
     return Promise.all([
@@ -830,9 +827,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         && !(/integration|babel|amp-ad|lightbox|sidebar|analytics|app-banner/
             .test(srcFilename))) {
       $$.util.log(
-          'Skipping',
-          $$.util.colors.cyan(srcFilename),
-          'because of --minimal_set');
+          'Skipping', cyan(srcFilename), 'because of --minimal_set');
       return Promise.resolve();
     }
     const startTime = Date.now();
@@ -893,9 +888,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return toPromise(bundler.bundle()
       .on('error', function(err) {
         if (err instanceof SyntaxError) {
-          console.error($$.util.colors.red('Syntax error:', err.message));
+          console.error(red('Syntax error:', err.message));
         } else {
-          console.error($$.util.colors.red(err.message));
+          console.error(red(err.message));
         }
       })
       .pipe(lazybuild())
