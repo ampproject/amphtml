@@ -24,9 +24,13 @@
  *
  * @param {!Window} win
  * @param {!Element} element
+ * @param {!boolean} useRemoteHtml
  * @returns {boolean}
  */
-export function fakeIsA4AEnabled(win, element) {
+export function fakeIsA4AEnabled(win, element, useRemoteHtml) {
+  if (useRemoteHtml) {
+    return false;
+  }
   const a4aRequested = element.getAttribute('data-use-a4a');
   return !!a4aRequested;
 }
