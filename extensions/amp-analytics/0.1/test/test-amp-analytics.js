@@ -1614,4 +1614,31 @@ describes.realWin('amp-analytics', {
       });
     });
   });
+
+  describe('getPriority', () => {
+    function getConfig() {
+      return {
+        'requests': {
+          'pageview1': '/test1=${requestCount}',
+        },
+        'triggers': {
+          'conditional': {
+            'on': 'visible',
+            'request': 'pageview1',
+            'vars': {},
+          },
+        },
+        'vars': {},
+      };
+    }
+
+    it('is 1 for non-inabox', () => {
+      expect(getAnalyticsTag(getConfig()).getPriority()).to.equal(1);
+    });
+
+    it('is 0 for inabox', () => {
+      env.win.AMP_MODE = 'inabox';
+      expect(getAnalyticsTag(getConfig()).getPriority()).to.equal(1);
+    });
+  });
 });

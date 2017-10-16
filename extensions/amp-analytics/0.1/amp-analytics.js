@@ -27,6 +27,7 @@ import {Services} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {parseJson} from '../../../src/json';
+import {getMode} from '../../../src/mode';
 import {Activity} from './activity-impl';
 import {
     InstrumentationService,
@@ -118,8 +119,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   getPriority() {
-    // Loads after other content.
-    return 1;
+    // Load immediately if inabox, otherwise after other content.
+    return getMode().runtime == 'inabox' ? 0 : 1;
   }
 
   /** @override */
