@@ -554,7 +554,7 @@ export class Resource {
       // directly.
       const {element} = this;
       const layers = element.getLayers();
-      const pos = layers.getOffsetPosition(element);
+      const pos = layers.getScrolledPosition(element);
       const size = layers.getSize(element);
       return layoutRectLtwh(pos.left, pos.top, size.width, size.height);
     }

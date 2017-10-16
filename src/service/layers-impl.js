@@ -22,6 +22,7 @@ import {registerServiceBuilderForDoc} from '../service';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
 const LAYOUT_LAYER_PROP = '__AMP_LAYER';
+const EMPTY = [];
 
 /**
  * The Size of an element.
@@ -162,7 +163,7 @@ export class LayoutLayers {
   }
 
   getOffsetPosition(element, opt_parent) {
-    return LayoutElement.getScrolledPosition(element, opt_parent);
+    return LayoutElement.getOffsetPosition(element, opt_parent);
   }
 
   getSize(element) {
@@ -219,7 +220,7 @@ export class LayoutLayers {
 
   onResize_() {
     const scroller = this.getScrollingElement();
-    LayoutLayer.for(scroller).dispose();
+    LayoutLayer.for(scroller).dispose(/* opt_deep */ true);
   }
 
   scrolled_(element) {
@@ -284,6 +285,7 @@ export class LayoutLayer {
     /** @private {?LayoutLayer} */
     this.parentLayer_ = parent;
     if (parent) {
+      parent.layers_.push(this);
       parent.transfer_(this);
     }
 
@@ -354,14 +356,14 @@ export class LayoutLayer {
     const layout = LayoutElement.for(element);
     dev().assert(layout.getParentLayer() === this);
     const i = this.layouts_.indexOf(layout);
-    this.layouts_.splice(i, 1);
+    if (i > -1) {
+      this.layouts_.splice(i, 1);
+    }
 
     const layer = LayoutLayer.forOptional(element);
     if (layer) {
       dev().assert(layer.getParentLayer() === this);
       layer.dispose();
-      const i = this.layers_.indexOf(layer);
-      this.layers_.splice(i, 1);
     }
   }
 
@@ -381,17 +383,24 @@ export class LayoutLayer {
    * happen), because CSS styles may change. We'll need to recompute layers
    * lazily after this happens.
    */
-  dispose() {
+  dispose(opt_deep) {
+    // Done before transferring this layer to avoid a recursive iteration issue.
+    const layers = opt_deep ? this.layers_.slice() : EMPTY;
+
     const parent = this.getParentLayer();
     if (parent) {
       this.root_[LAYOUT_LAYER_PROP] = null;
       this.transfer_(parent);
     }
-    // TODO dispose children layers
+
+    for (let i = 0; i < layers.length; i++) {
+      layers[i].dispose(opt_deep);
+    }
   }
 
   contains(element) {
-    return this.root_.contains(element);
+    const root = this.root_;
+    return root !== element && root.contains(element);
   }
 
   getOffsetFromParent() {
@@ -407,11 +416,11 @@ export class LayoutLayer {
   }
 
   transfer_(layer) {
-    // Basically, are we removing this layer.
-    const contained = layer === this.getParentLayer();
+    // An optimization if we know that the new layer definitely contains
+    // everything in this layer.
+    const contained = layer.contains(this.root_);
 
     filterSplice(this.layouts_, layout => {
-      // TODO
       if (contained || layer.contains(layout.element_)) {
         layout.parentLayer_ = layer;
         layer.layouts_.push(layout);
