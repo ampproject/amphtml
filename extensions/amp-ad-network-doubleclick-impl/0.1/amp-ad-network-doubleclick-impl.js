@@ -348,6 +348,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @type {?../../../ads/google/a4a/utils.IdentityToken} */
     this.identityToken = null;
+
+    /** @private {boolean} */
+    this.preloadSafeframe_ = true;
   }
 
   /** @override */
@@ -401,9 +404,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return;
     }
     this.win['dbclk_a4a_viz_change'] = true;
-    addExperimentIdToElement(
-        isExperimentOn(this.win, 'a4a-safeframe-preloading-off') ?
-        '21061136' : '21061135', this.element);
+    if (isExperimentOn(this.win, 'a4a-safeframe-preloading-off')) {
+      if (Math.random() < 0.5) {
+        this.preloadSafeframe_ = false;
+        addExperimentIdToElement('21061136', this.element);
+      } else {
+        addExperimentIdToElement('21061135', this.element);
+      }
+    }
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.onVisibilityChanged(() => {
       if (viewer.getVisibilityState() != VisibilityState.PAUSED ||
@@ -1086,7 +1094,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   getPreconnectUrls() {
     const urls = ['https://partner.googleadservices.com'];
-    if (!isExperimentOn(this.win, 'a4a-safeframe-preloading-off')) {
+    if (this.preloadSafeframe_) {
       urls.push(SAFEFRAME_ORIGIN);
     }
     return urls;
