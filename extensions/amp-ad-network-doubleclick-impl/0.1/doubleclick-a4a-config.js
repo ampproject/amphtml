@@ -62,6 +62,11 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   IDENTITY_EXPERIMENT: '21060938',
 };
 
+export const DOUBLECLICK_UNCONDITIONED_EXPERIMENTS = {
+  FF_CANONICAL_CTL: '21061145',
+  FF_CANONICAL_EXP: '21061146',
+};
+
 /** @const @type {!Object<string,?string>} */
 export const URL_EXPERIMENT_MAPPING = {
   '-1': MANUAL_EXPERIMENT_ID,
@@ -119,10 +124,19 @@ export class DoubleclickA4aEligibility {
   /** Whether Fast Fetch is enabled
    * @param {!Window} win
    * @param {!Element} element
+   * @param {!boolean} useRemoteHtml
    * @return {boolean}
    */
-  isA4aEnabled(win, element) {
-    let experimentId;
+  isA4aEnabled(win, element, useRemoteHtml) {
+    let experimentId = this.maybeSelectExperiment(
+        win, element,[DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+                      DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
+        DFP_CANONICAL_FF_EXPERIMENT_NAME);
+    if (!!experimentId) {
+      addExperimentIdToElement(experimentId, element);
+      forceExperimentBranch(win, DFP_CANONICAL_FF_EXPERIMENT_NAME, experimentId);
+    }
+
     if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
         element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
       return false;
@@ -136,6 +150,11 @@ export class DoubleclickA4aEligibility {
           (getMode(win).localDev || getMode(win).test)) {
         experimentId = MANUAL_EXPERIMENT_ID;
       } else {
+        if ([DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+             DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP
+            ].includes(experimentId)) {
+          return experimentId == DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP;
+        }
         experimentId = this.maybeSelectExperiment(win, element, [
           DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
           DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
