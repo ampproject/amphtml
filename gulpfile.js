@@ -74,6 +74,7 @@ declareExtension('amp-carousel', '0.1', true);
 declareExtension('amp-compare-slider', '0.1', false);
 declareExtension('amp-crypto-polyfill', '0.1', false);
 declareExtension('amp-dailymotion', '0.1', false);
+declareExtension('amp-date-countdown', '0.1', false);
 declareExtension('amp-dynamic-css-classes', '0.1', false);
 declareExtension('amp-experiment', '0.1', false);
 declareExtension('amp-facebook', '0.1', false);
