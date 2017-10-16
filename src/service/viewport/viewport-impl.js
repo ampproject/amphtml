@@ -382,7 +382,7 @@ export class Viewport {
     if (this.rect_ == null) {
       let scrollTop = 0;
       let scrollLeft = 0;
-      if (!true) {
+      if (!this.useLayers_) {
         scrollTop = this.getScrollTop();
         scrollLeft = this.getScrollLeft();
       }
