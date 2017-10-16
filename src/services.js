@@ -261,12 +261,15 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {?Promise<?{pageIndex: number, pageId: string}>}
+   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService>}
    */
   static storyVariableServiceForOrNull(win) {
-    return (/** @type {!Promise<?{pageIndex: number, pageId: string}>} */ (
-        getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
-            true)));
+    return (
+        /** @type {!Promise<
+         * ?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService
+         * >} */ (
+            getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
+                true)));
   }
 
   /**
