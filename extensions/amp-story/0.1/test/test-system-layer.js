@@ -28,13 +28,6 @@ describes.fakeWin('amp-story system layer', {}, env => {
   let progressBarStub;
   let progressBarRoot;
 
-  function matchEventHandlerThatExecutes(spy) {
-    return sandbox.match(handler => {
-      handler(new Event('covfefe'));
-      return spy.called;
-    });
-  }
-
   function matchEvent(name, bubbles) {
     return sandbox.match.has('type', name)
         .and(sandbox.match.has('bubbles', bubbles));
@@ -87,36 +80,13 @@ describes.fakeWin('amp-story system layer', {}, env => {
   });
 
   it('should attach event handlers', () => {
-    const onExitFullScreenClick =
-        sandbox.stub(systemLayer, 'onExitFullScreenClick_');
-    const onCloseBookendClick =
-        sandbox.stub(systemLayer, 'onCloseBookendClick_');
-    const onMuteAudioClick = sandbox.stub(systemLayer, 'onMuteAudioClick_');
-    const onUnmuteAudioClick = sandbox.stub(systemLayer, 'onUnmuteAudioClick_');
+    const rootMock = {addEventListener: sandbox.spy()};
 
-    const exitFullScreenBtnMock = {addEventListener: sandbox.spy()};
-    const closeBookendBtnMock = {addEventListener: sandbox.spy()};
-    const muteAudioBtnMock = {addEventListener: sandbox.spy()};
-    const unmuteAudioBtnMock = {addEventListener: sandbox.spy()};
-
-    sandbox.stub(systemLayer, 'exitFullScreenBtn_', exitFullScreenBtnMock);
-    sandbox.stub(systemLayer, 'closeBookendBtn_', closeBookendBtnMock);
-    sandbox.stub(systemLayer, 'muteAudioBtn_', muteAudioBtnMock);
-    sandbox.stub(systemLayer, 'unmuteAudioBtn_', unmuteAudioBtnMock);
+    sandbox.stub(systemLayer, 'root_', rootMock);
 
     systemLayer.addEventHandlers_();
 
-    expect(exitFullScreenBtnMock.addEventListener).to.have.been.calledWith(
-        'click', matchEventHandlerThatExecutes(onExitFullScreenClick));
-
-    expect(closeBookendBtnMock.addEventListener).to.have.been.calledWith(
-        'click', matchEventHandlerThatExecutes(onCloseBookendClick));
-
-    expect(muteAudioBtnMock.addEventListener).to.have.been.calledWith(
-        'click', matchEventHandlerThatExecutes(onMuteAudioClick));
-
-    expect(unmuteAudioBtnMock.addEventListener).to.have.been.calledWith(
-        'click', matchEventHandlerThatExecutes(onUnmuteAudioClick));
+    expect(rootMock.addEventListener).to.have.been.calledWith('click');
   });
 
   it('should dispatch EXIT_FULLSCREEN when button is clicked', () => {

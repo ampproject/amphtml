@@ -116,7 +116,7 @@ function buildProvider(doc, shareType, opt_params) {
 /**
  * Social share widget for story bookend.
  */
-export class BookendShareWidget {
+export class ShareWidget {
   /** @param {!Window} win */
   constructor(win) {
     /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
@@ -131,7 +131,7 @@ export class BookendShareWidget {
 
   /** @param {!Window} win */
   static create(win) {
-    return new BookendShareWidget(win);
+    return new ShareWidget(win);
   }
 
   /**

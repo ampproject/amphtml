@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+@import './amp-story-desktop.css';
+
+
 /** Common */
 amp-story, amp-story-page, amp-story-grid-layer {
   contain: strict !important;
@@ -178,6 +181,7 @@ amp-story-page {
   position: absolute !important;
   right: 0 !important;
   top: 0 !important;
+  transition: none;
 }
 
 amp-story-page.i-amphtml-layout-container {
@@ -275,6 +279,11 @@ amp-story-grid-layer * {
   display: none !important;
 }
 
+.i-amphtml-story-logo {
+  display: none;
+  margin: 15px;
+}
+
 .i-amphtml-story-grid-template-fill > :first-child {
   bottom: 0 !important;
   display: block !important;
@@ -336,6 +345,7 @@ amp-story-grid-layer * {
   top: 0 !important;
   padding: 44px 32px 32px;
   overflow: auto;
+  z-index: 10;
 }
 
 .i-amphtml-story-bookend-active .i-amphtml-story-bookend {
