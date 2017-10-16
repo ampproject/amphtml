@@ -61,9 +61,6 @@ import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
-import {
-  installAnchorClickInterceptor,
-} from '../../../src/anchor-click-interceptor';
 import {stringHash32} from '../../../src/string';
 import {removeElement, createElementWithAttributes} from '../../../src/dom';
 import {getData} from '../../../src/event-helper';
@@ -462,7 +459,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   shouldPreferentialRenderWithoutCrypto() {
     return experimentFeatureEnabled(
-        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
+        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
         DFP_CANONICAL_FF_EXPERIMENT_NAME);
   }
 
@@ -660,11 +657,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-
     const refreshInterval = Number(responseHeaders.get('amp-force-refresh'));
-    if (refreshInterval && !getPublisherSpecifiedRefreshInterval(
-        this.element, this.win, 'doubleclick')) {
+    if (refreshInterval) {
       this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
+      this.initRefreshManagerIfEligible_();
     }
 
     if (this.isFluid_) {
@@ -750,15 +746,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
       user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
     }
-    this.refreshManager_ = this.useSra ||
-        getEnclosingContainerTypes(this.element).filter(container =>
-            container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
-            container != ValidAdContainerTypes['AMP-STICKY-AD']).length
-            ? null
-            : this.refreshManager_ || new RefreshManager(this, {
-              visiblePercentageMin: 50,
-              continuousTimeMin: 1,
-            });
+    this.initRefreshManagerIfEligible_();
     return frameLoadPromise;
   }
 
@@ -766,6 +754,32 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   unlayoutCallback() {
     super.unlayoutCallback();
     this.maybeRemoveListenerForFluid();
+  }
+
+  /**
+   * Initializes a RefreshManager under the following conditions:
+   *   1. One has not already been initialized.
+   *   2. SRA is not enabled.
+   *   3. The slot is not inside an ad container (with the exception of
+   *      carousel and sticky ad).
+   *   4. The publisher has provided an appropriate refresh interval (>= 30s).
+   */
+  initRefreshManagerIfEligible_() {
+    let refreshInterval = 0;
+    this.refreshManager_ = this.refreshManager_ ||
+        // Not compatible with SRA
+        (!this.useSra &&
+         // Not compatible with container types except carousel and sticky-ad
+         !getEnclosingContainerTypes(this.element).filter(container =>
+           container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
+           container != ValidAdContainerTypes['AMP-STICKY-AD']).length &&
+         // Publisher must supply a refresh interval >= 30s
+         (refreshInterval = getPublisherSpecifiedRefreshInterval(
+             this.element, this.win, 'doubleclick')) &&
+         new RefreshManager(this, {
+           visiblePercentageMin: 50,
+           continuousTimeMin: 1,
+         }, refreshInterval)) || null;
   }
 
   /**
@@ -811,16 +825,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  onCreativeRender(creativeMetaData) {
-    super.onCreativeRender(creativeMetaData);
-    if (creativeMetaData &&
-        !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
-      // Capture phase click handlers on the ad if amp-ad-exit not present
-      // (assume it will handle capture).
-      dev().assert(this.iframe);
-      installAnchorClickInterceptor(
-          this.getAmpDoc(), this.iframe.contentWindow);
-    }
+  onCreativeRender(isVerifiedAmpCreative) {
+    super.onCreativeRender(isVerifiedAmpCreative);
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
       if (isReportingEnabled(this)) {
@@ -829,7 +835,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.element,
             this.ampAnalyticsConfig_,
             this.qqid_,
-            !!creativeMetaData,
+            isVerifiedAmpCreative,
             this.lifecycleReporter_.getDeltaTime(),
             this.lifecycleReporter_.getInitTime());
       }
@@ -1268,3 +1274,4 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
+
