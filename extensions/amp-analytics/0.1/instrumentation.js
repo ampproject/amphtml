@@ -445,6 +445,7 @@ export class AnalyticsGroup {
   addTrigger(config, handler) {
     const tracker = this.getTracker_(config);
     if (tracker) {
+      const eventType = this.getEventType_(config);
       const unlisten = tracker.add(this.analyticsElement_, eventType, config,
           handler, this.getTracker_.bind(this));
       this.listeners_.push(unlisten);
@@ -456,6 +457,17 @@ export class AnalyticsGroup {
   }
 
   /**
+   * Parses the correct event type out of the config.
+   *
+   * @param {!JsonObject} config
+   * @return {string}
+   * @private
+   */
+  getEventType_(config) {
+    return dev().assertString(config['on']);
+  }
+
+  /**
    * Provides the tracker for the given config.
    *
    * @param {!JsonObject} config
@@ -463,7 +475,7 @@ export class AnalyticsGroup {
    * @private
    */
   getTracker_(config) {
-    const eventType = dev().assertString(config['on']);
+    const eventType = this.getEventType_(config);
     const trackerKey = startsWith(eventType, 'video-') ? 'video' : eventType;
 
     let trackerProfile = EVENT_TRACKERS[trackerKey];

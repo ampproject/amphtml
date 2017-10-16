@@ -557,10 +557,10 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('should initalize, add listeners and dispose', () => {
       expect(tracker.root).to.equal(root);
-      expect(tracker.trackers_).to.have.length(0);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(0);
 
       tracker.dispose();
-      expect(tracker.trackers_).to.have.length(0);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(0);
     });
 
     it('should validate timerSpec', () => {
@@ -714,29 +714,29 @@ describes.realWin('Events', {amp: 1}, env => {
       }}, fn3);
       expect(fn3).to.be.calledOnce;
 
-      expect(tracker.trackers_).to.have.length(3);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(3);
 
       clock.tick(10 * 1000); // 10 seconds
       expect(fn1).to.have.callCount(2);
       expect(fn2).to.have.callCount(2);
-      expect(tracker.trackers_).to.have.length(3);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(3);
 
       clock.tick(10 * 1000); // 20 seconds
       expect(fn1).to.have.callCount(2);
       expect(fn2).to.have.callCount(3);
-      expect(tracker.trackers_).to.have.length(1);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(1);
 
       clock.tick(10 * 1000); // 30 seconds
       expect(fn1).to.have.callCount(2);
       expect(fn2).to.have.callCount(3);
-      expect(tracker.trackers_).to.have.length(1);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(1);
 
       // Default maxTimerLength is 2 hours
       clock.tick(3 * 3600 * 1000); // 3 hours
       expect(fn3).to.have.callCount(3);
 
       // All timers removed.
-      expect(tracker.trackers_).to.have.length(0);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(0);
     });
 
     it('should unlisten tracker', () => {
@@ -754,15 +754,15 @@ describes.realWin('Events', {amp: 1}, env => {
       }}, fn2);
       expect(fn2).to.be.calledOnce;
 
-      expect(tracker.trackers_).to.have.length(2);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(2);
       expect(countIntervals()).to.equal(2);
 
       u1();
-      expect(tracker.trackers_).to.have.length(1);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(1);
       expect(countIntervals()).to.equal(1);
 
       u2();
-      expect(tracker.trackers_).to.have.length(0);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(0);
       expect(countIntervals()).to.equal(0);
     });
 
