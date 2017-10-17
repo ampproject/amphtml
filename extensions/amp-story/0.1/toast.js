@@ -35,7 +35,7 @@ export class Toast {
    */
   static show(win, childNodeOrText) {
     const toast = createElementWithAttributes(win.document, 'div',
-        /** @type {!JsonObject} */ {'class': TOAST_CLASSNAME});
+        /** @type {!JsonObject} */ ({'class': TOAST_CLASSNAME}));
 
     if (typeof childNodeOrText == 'string') {
       toast.textContent = childNodeOrText;

@@ -51,23 +51,15 @@ const SHARE_LIST_TEMPLATE = {
 const SHARE_ITEM_TEMPLATE = {tag: 'li'};
 
 
-/** @private @const {!Array<!./simple-template.ElementDef>} */
-const LINK_SHARE_ITEM_TEMPLATE = [
-  {
-    tag: 'div',
-    attrs: dict({
-      'class':
-          'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
-    }),
-  },
-  {
-    tag: 'span',
-    text: 'Get Link', // TODO(alanorozco): i18n
-    attrs: dict({
-      'class': 'i-amphtml-story-share-name',
-    }),
-  },
-];
+/** @private @const {!./simple-template.ElementDef} */
+const LINK_SHARE_ITEM_TEMPLATE = {
+  tag: 'div',
+  attrs: dict({
+    'class':
+        'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
+  }),
+  text: 'Get Link', // TODO(alanorozco): i18n
+};
 
 
 
@@ -153,9 +145,9 @@ export class ShareWidget {
     this.root_ = null;
   }
 
-  /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
-  static create(ampdoc) {
-    return new ShareWidget(ampdoc);
+  /** @param {!Window} win */
+  static create(win) {
+    return new ShareWidget(win);
   }
 
   /**
@@ -181,26 +173,25 @@ export class ShareWidget {
       return;
     }
 
-    this.add_(
-        renderSimpleTemplate(this.win_.document, LINK_SHARE_ITEM_TEMPLATE));
+    const linkShareButton =
+        renderAsElement(this.win_.document, LINK_SHARE_ITEM_TEMPLATE);
+
+    this.add_(linkShareButton);
 
     // TODO(alanorozco): Listen for proper tap event (i.e. fastclick)
-    listen(
-        dev().assertElement(
-            scopedQuerySelector(
-                this.root_, '.i-amphtml-story-share-icon-link')),
-        'click',
-        e => {
-          e.preventDefault();
-          this.copyUrlToClipboard_();
-        });
+    listen(linkShareButton, 'click', e => {
+      e.preventDefault();
+      this.copyUrlToClipboard_();
+    });
   }
 
 
   /** @private */
   // TODO(alanorozco): i18n for toast.
   copyUrlToClipboard_() {
-    const url = Services.documentInfoForDoc(this.ampdoc_).canonicalUrl;
+    const url = Services.documentInfoForDoc(
+        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
+            dev().assert(this.ampdoc_))).canonicalUrl;
 
     if (!copyTextToClipboard(this.win_.document, url)) {
       Toast.show(this.win_, 'Could not copy link to clipboard :(');
