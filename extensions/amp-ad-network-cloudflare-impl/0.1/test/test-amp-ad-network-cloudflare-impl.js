@@ -51,7 +51,7 @@ describes.realWin('cloudflare-a4a-config', {
       'data-cf-a4a': 'true',
     });
     const useRemoteHtml = true;
-    expect(cloudflareIsA4AEnabled(win, el, useRemoteHtml)).to.be.true;
+    expect(cloudflareIsA4AEnabled(win, el, useRemoteHtml)).to.be.false;
   });
 });
 
