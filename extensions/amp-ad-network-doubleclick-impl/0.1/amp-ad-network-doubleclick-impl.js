@@ -404,14 +404,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return;
     }
     this.win['dbclk_a4a_viz_change'] = true;
-    if (isExperimentOn(this.win, 'a4a-safeframe-preloading-off')) {
-      if (Math.random() < 0.5) {
-        this.preloadSafeframe_ = false;
-        addExperimentIdToElement('21061136', this.element);
-      } else {
-        addExperimentIdToElement('21061135', this.element);
-      }
+
+    const sfPreloadExpName = 'a4a-safeframe-preloading-off';
+    const experimentInfoMap =
+        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+    experimentInfoMap[sfPreloadExpName] = {
+      isTrafficEligible: () => true,
+      branches: ['21061135', '21061136'],
+    };
+    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    const sfPreloadExpId = getExperimentBranch(this.win, sfPreloadExpName);
+    if (sfPreloadExpId) {
+      addExperimentIdToElement(sfPreloadExpId, this.element);
+      this.preloadSafeframe_ = sfPreloadExpId == '21061135';
     }
+
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.onVisibilityChanged(() => {
       if (viewer.getVisibilityState() != VisibilityState.PAUSED ||
