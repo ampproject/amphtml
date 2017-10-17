@@ -744,11 +744,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.isFluid_) {
       this.registerListenerForFluid_();
     }
-    const frameLoadPromise = super.layoutCallback();
-    if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
-      user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
-    }
-    return frameLoadPromise;
+    return super.layoutCallback();
   }
 
   /** @override  */
