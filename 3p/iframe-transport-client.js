@@ -164,9 +164,11 @@ export class IframeTransportContext {
   sendResponseToCreative(data) {
     this.iframeMessagingClient_./*OK*/sendMessage(
         MessageType.IFRAME_TRANSPORT_RESPONSE,
-        /** @type {!JsonObject} */
-        (Object.assign({message: data},
-            {creativeId: this.creativeId_, vendor: this.vendor_})));
+        dict({
+          'message': data,
+          'creativeId': this.creativeId_,
+          'vendor': this.vendor_,
+        }));
   }
 
   /**
