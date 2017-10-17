@@ -55,7 +55,7 @@ import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
 import {urls} from '../../../src/config';
-import {getWinOrigin, parseUrl} from '../../../src/url';
+import {getSourceOrigin, parseUrl} from '../../../src/url';
 import {stringHash32} from '../../../src/string';
 
 
@@ -284,7 +284,7 @@ export class AmpStory extends AMP.BaseElement {
       return true;
     }
 
-    const origin = getWinOrigin(this.win);
+    const origin = getSourceOrigin(this.win);
     const hostName = parseUrl(origin).hostname;
     const domains = hostName.split('.');
 
