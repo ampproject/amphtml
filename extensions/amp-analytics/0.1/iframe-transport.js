@@ -95,7 +95,7 @@ export class IframeTransport {
       this.ampWin_.document.body.appendChild(frameData.frame);
     }
     user().assert(frameData.intersectionObserver,
-      'IntersectionObserver should exist');
+        'IntersectionObserver should exist');
     frameData.intersectionObserver.addTarget(this.creativeId_, this.parent_);
     dev().assert(frameData, 'Trying to use non-existent frame');
   }

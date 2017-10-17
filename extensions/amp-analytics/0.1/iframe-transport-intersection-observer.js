@@ -50,18 +50,22 @@ export class IframeTransportIntersectionObserver {
 
     /** @private {!../../../src/iframe-helper.SubscriptionApi} */
     this.postMessageApi_ = new SubscriptionApi(this.frame_,
-        MessageType.SEND_INTERSECTION_OBSERVER_EVENTS, true, (req) => {
-        if (req && req.creativeId &&
-            this.creativeIdToTarget_[req.creativeId] &&
-            !this.creativeIdToIntersectionObserver_[req.creativeId]) {
-          this.creativeIdToIntersectionObserver_[req.creativeId] =
+        MessageType.SEND_INTERSECTION_OBSERVER_EVENTS, true, req => {
+          if (!req) {
+            return;
+          }
+          const reqCreativeId = req['creativeId'];
+          if (reqCreativeId &&
+            this.creativeIdToTarget_[reqCreativeId] &&
+            !this.creativeIdToIntersectionObserver_[reqCreativeId]) {
+            this.creativeIdToIntersectionObserver_[reqCreativeId] =
               new IntersectionObserver(
-                  this.onIntersectionObserverEvent_.bind(this, req.creativeId),
+                  this.onIntersectionObserverEvent_.bind(this, reqCreativeId),
                   this.intersectionObserverOptions_);
-          this.creativeIdToIntersectionObserver_[req.creativeId].observe(
-              this.creativeIdToTarget_[req.creativeId]);
-        }
-      });
+            this.creativeIdToIntersectionObserver_[reqCreativeId].observe(
+                this.creativeIdToTarget_[reqCreativeId]);
+          }
+        });
   }
 
   /**
@@ -92,7 +96,7 @@ export class IframeTransportIntersectionObserver {
    */
   onIntersectionObserverEvent_(creativeId, entries, unused) {
     /** @type {!JsonObject} */
-    const payload = dict({'entries': [], creativeId});
+    const payload = dict({'entries': [], 'creativeId': creativeId});
     entries.forEach(entry => {
       payload['entries'].push(
           this.intersectionObserverEntryToJsonObject(entry));

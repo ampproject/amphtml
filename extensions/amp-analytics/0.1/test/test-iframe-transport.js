@@ -25,7 +25,6 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   beforeEach(() => {
     sandbox = env.sandbox;
     const dummyElement = env.ampdoc.win.document.createElement('div');
-    // TODO(jonkeller): Add tests for intersection observer
     iframeTransport = new IframeTransport(env.ampdoc.win,
         'some_vendor_type', {iframe: frameUrl}, frameUrl + '-1', dummyElement);
   });
