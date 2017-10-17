@@ -31,6 +31,7 @@ import {
   getNetworkId,
   CORRELATOR_CLEAR_EXP_BRANCHES,
   CORRELATOR_CLEAR_EXP_NAME,
+  SAFEFRAME_ORIGIN,
 } from '../amp-ad-network-doubleclick-impl';
 import {
   DFP_CANONICAL_FF_EXPERIMENT_NAME,
@@ -1010,6 +1011,39 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       forceExperimentBranch(impl.win, DFP_CANONICAL_FF_EXPERIMENT_NAME,
           DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT);
       expect(impl.shouldPreferentialRenderWithoutCrypto()).to.be.true;
+    });
+  });
+
+  describe('#disable safeframe preload experiment', () => {
+
+    const sfPreloadExpName = 'a4a-safeframe-preloading-off';
+
+    beforeEach(() => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        type: 'doubleclick',
+        height: '250',
+        width: '320',
+      });
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+    });
+
+    it('should not preload SafeFrame', () => {
+      forceExperimentBranch(impl.win, sfPreloadExpName, '21061136');
+      impl.buildCallback();
+      expect(isInExperiment(element, '21061135')).to.be.false;
+      expect(isInExperiment(element, '21061136')).to.be.true;
+      expect(impl.getPreconnectUrls()).to.deep.equal(
+          ['https://partner.googleadservices.com']);
+    });
+
+    it('should preload SafeFrame', () => {
+      forceExperimentBranch(impl.win, sfPreloadExpName, '21061135');
+      impl.buildCallback();
+      expect(isInExperiment(element, '21061135')).to.be.true;
+      expect(isInExperiment(element, '21061136')).to.be.false;
+      expect(impl.getPreconnectUrls()).to.deep.equal(
+          ['https://partner.googleadservices.com', SAFEFRAME_ORIGIN]);
     });
   });
 });
