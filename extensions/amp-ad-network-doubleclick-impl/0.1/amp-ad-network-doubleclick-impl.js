@@ -1219,6 +1219,34 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.win.removeEventListener('message', fluidMessageListener_);
     }
   }
+
+  postTroubleshootMessage_() {
+    if (!this.win.opener || !/\?.*dfpdeb/.test(this.win.location.href)) {
+      return;
+    }
+    const payload = dict({
+      'gutData': JSON.stringify(dict({
+        'events': [{
+          'timestamp': new Date().getTime(),
+          'slotId': this.element.getAttribute('data-slot'),
+          'messageId': 4,
+        }],
+        'slots': [{
+          'contentUrl': this.getCachedAdUrl() || '',
+          'id': this.element.getAttribute('data-slot'),
+          'leafAdUnitName': this.element.getAttribute('data-slot'),
+          'domId': '',
+          'lineItemId': this.lineitemId_ || '102158080',
+          'creativeId': this.creativeId_ || '88085470120',
+        }],
+      })),
+      'userAgent': navigator.userAgent,
+      'referrer': this.win.location.href,
+      'messageType': 'LOAD',
+    });
+    console.log(payload);
+    this.win.opener.postMessage(payload, '*');
+  }
 }
 
 
