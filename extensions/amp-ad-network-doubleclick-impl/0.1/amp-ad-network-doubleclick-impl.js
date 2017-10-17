@@ -348,6 +348,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @type {?../../../ads/google/a4a/utils.IdentityToken} */
     this.identityToken = null;
+
+    /** @private {boolean} */
+    this.preloadSafeframe_ = true;
   }
 
   /** @override */
@@ -401,9 +404,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return;
     }
     this.win['dbclk_a4a_viz_change'] = true;
-    addExperimentIdToElement(
-        isExperimentOn(this.win, 'a4a-safeframe-preloading-off') ?
-        '21061136' : '21061135', this.element);
+
+    const sfPreloadExpName = 'a4a-safeframe-preloading-off';
+    const experimentInfoMap =
+        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+    experimentInfoMap[sfPreloadExpName] = {
+      isTrafficEligible: () => true,
+      branches: ['21061135', '21061136'],
+    };
+    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    const sfPreloadExpId = getExperimentBranch(this.win, sfPreloadExpName);
+    if (sfPreloadExpId) {
+      addExperimentIdToElement(sfPreloadExpId, this.element);
+      this.preloadSafeframe_ = sfPreloadExpId == '21061135';
+    }
+
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.onVisibilityChanged(() => {
       if (viewer.getVisibilityState() != VisibilityState.PAUSED ||
@@ -1086,7 +1101,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   getPreconnectUrls() {
     const urls = ['https://partner.googleadservices.com'];
-    if (!isExperimentOn(this.win, 'a4a-safeframe-preloading-off')) {
+    if (this.preloadSafeframe_) {
       urls.push(SAFEFRAME_ORIGIN);
     }
     return urls;
