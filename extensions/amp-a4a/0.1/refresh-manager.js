@@ -49,12 +49,10 @@ const TAG = 'AMP-AD';
  * metadata tags, preferring whichever it finds first.
  * @param {!Element} element
  * @param {!Window} win
- * @param {string} adType
  * @return {?number}
- *
  * @visibleForTesting
  */
-export function getPublisherSpecifiedRefreshInterval(element, win, adType) {
+export function getPublisherSpecifiedRefreshInterval(element, win) {
   const refreshInterval = element.getAttribute(DATA_ATTR_NAME);
   if (refreshInterval) {
     return checkAndSanitizeRefreshInterval(refreshInterval);
@@ -72,7 +70,7 @@ export function getPublisherSpecifiedRefreshInterval(element, win, adType) {
     const pair = networkIntervalPairs[i].split('=');
     user().assert(pair.length == 2, 'refresh metadata config must be of ' +
         'the form `network_type=refresh_interval`');
-    if (pair[0].toLowerCase() == adType) {
+    if (pair[0].toLowerCase() == element.getAttribute('type').toLowerCase()) {
       return checkAndSanitizeRefreshInterval(pair[1]);
     }
   }
@@ -98,7 +96,6 @@ function checkAndSanitizeRefreshInterval(refreshInterval) {
   }
   return refreshIntervalNum * 1000;
 }
-
 
 /**
  * Defines the DFA states for the refresh cycle.
@@ -158,7 +155,6 @@ const managers = {};
  */
 let refreshManagerIdCounter = 0;
 
-
 /**
  * Initializes a RefreshManager under the following conditions:
  *   2. SRA is not enabled.
@@ -166,29 +162,21 @@ let refreshManagerIdCounter = 0;
  *      carousel and sticky ad).
  *   4. The publisher has provided an appropriate refresh interval (>= 30s).
  *
+ * If any one of the conditions is not met, null will be returned.
+ *
  * @param {!./amp-a4a.AmpA4A} a4a
- * @param {boolean} useSra
+ * @param {function():boolean=}
  * @return {?RefreshManager}
  */
-export function getRefreshManagerForDoubleclickIfEligible(a4a, useSra) {
+export function getRefreshManager(a4a, opt_predicate) {
   const refreshInterval = getPublisherSpecifiedRefreshInterval(
-      a4a.element, a4a.win, 'doubleclick');
+      a4a.element, a4a.win, a4a.element.getAttribute('type'));
   if (!refreshInterval) {
     return null;
   }
-
-  if (useSra) {
-    user().warn(TAG, 'Refresh not compatible with SRA.');
+  if (opt_predicate && !opt_predicate()) {
     return null;
   }
-  if (getEnclosingContainerTypes(a4a.element).filter(container =>
-        container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
-        container != ValidAdContainerTypes['AMP-STICKY-AD']).length) {
-    user().warn(TAG, 'Refresh not compatible with ad-containers, except for ' +
-        'AMP-CAROUSEL and AMP-STICKY-AD');
-    return null;
-  }
-
   return new RefreshManager(a4a, {
     visiblePercentageMin: 50,
     continuousTimeMin: 1,

@@ -88,7 +88,7 @@ import {
 } from '../../../src/experiments';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {
-  getRefreshManagerForDoubleclickIfEligible,
+  getRefreshManager,
   RefreshManager,
   DATA_ATTR_NAME,
 } from '../../amp-a4a/0.1/refresh-manager';
@@ -853,7 +853,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 
     this.refreshManager_ = this.refreshManager_ ||
-        getRefreshManagerForDoubleclickIfEligible(this, this.useSra);
+        getRefreshManager(this, this.useSra, () => {
+          if (this.useSra) {
+            user().warn(TAG, 'Refresh not compatible with SRA.');
+            return false;
+          }
+          if (getEnclosingContainerTypes(a4a.element).filter(container =>
+                container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
+                container != ValidAdContainerTypes['AMP-STICKY-AD']).length) {
+            user().warn(TAG, 'Refresh not compatible with ad-containers, except for ' +
+                'AMP-CAROUSEL and AMP-STICKY-AD');
+            return false;
+          }
+          return true;
+        });
   }
 
   /**
