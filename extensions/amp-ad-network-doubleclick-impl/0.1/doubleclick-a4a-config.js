@@ -41,6 +41,10 @@ export const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 /** @const {string} */
 export const DFP_CANONICAL_FF_EXPERIMENT_NAME = 'expDfpCanonicalFf';
 
+/** @const {string} */
+export const DFP_UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME =
+    'expUnconditionedCanonical';
+
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
 
@@ -62,6 +66,7 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   IDENTITY_EXPERIMENT: '21060938',
 };
 
+/** @const @enum{string} */
 export const DOUBLECLICK_UNCONDITIONED_EXPERIMENTS = {
   FF_CANONICAL_CTL: '21061145',
   FF_CANONICAL_EXP: '21061146',
@@ -131,7 +136,7 @@ export class DoubleclickA4aEligibility {
     let experimentId = this.maybeSelectExperiment(
         win, element,[DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
-        DFP_CANONICAL_FF_EXPERIMENT_NAME);
+        DFP_UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME);
     if (!!experimentId) {
       addExperimentIdToElement(experimentId, element);
       forceExperimentBranch(
