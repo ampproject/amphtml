@@ -178,6 +178,12 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    if (Services.viewerForDoc(this.getAmpDoc()).isVisible()) {
+      // amp-analytics tag was just set to display:none. Page is still loaded.
+      return false;
+    }
+
+    // Page was unloaded - free up owned resources.
     if (this.iframeTransport_) {
       this.iframeTransport_.detach();
       this.iframeTransport_ = null;
