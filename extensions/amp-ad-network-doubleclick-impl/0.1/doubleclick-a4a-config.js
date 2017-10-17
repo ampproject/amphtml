@@ -156,6 +156,8 @@ export class DoubleclickA4aEligibility {
           (getMode(win).localDev || getMode(win).test)) {
         experimentId = MANUAL_EXPERIMENT_ID;
       } else {
+        // For unconditioned canonical experiment, in the experiment branch
+        // we allow Fast Fetch on non-CDN pages, but in the control we do not.
         if ([DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP,
         ].includes(experimentId)) {
