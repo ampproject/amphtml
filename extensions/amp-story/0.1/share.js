@@ -179,7 +179,9 @@ export class ShareWidget {
   // NOTE(alanorozco): This is a duplicate of the logic in the
   // `amp-social-share` component.
   isSystemShareSupported_() {
-    const viewer = Services.viewerForDoc(dev().assert(this.ampdoc_));
+    const viewer = Services.viewerForDoc(
+        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
+            dev().assert(this.ampdoc_)));
     const platform = Services.platformFor(this.win_);
 
     // Chrome exports navigator.share in WebView but does not implement it.
