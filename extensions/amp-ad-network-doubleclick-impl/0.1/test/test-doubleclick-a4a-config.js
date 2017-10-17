@@ -208,7 +208,7 @@ describe('doubleclick-a4a-config', () => {
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal('2092613');
     });
 
-    it('should only select once if put into unconditioned exp', () => {
+    it('should properly select into unconditioned canonical exp', () => {
       sandbox.stub(DoubleclickA4aEligibility.prototype,
           'isCdnProxy', () => false);
       const elem = testFixture.doc.createElement('div');
@@ -226,7 +226,7 @@ describe('doubleclick-a4a-config', () => {
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
       expect(maybeSelectExperimentStub).to.be.calledOnce;
     });
-    it('should only select once if put into unconditioned control', () => {
+    it('should properly select into unconditioned canonical control', () => {
       sandbox.stub(DoubleclickA4aEligibility.prototype,
           'isCdnProxy', () => false);
       const elem = testFixture.doc.createElement('div');
@@ -243,6 +243,36 @@ describe('doubleclick-a4a-config', () => {
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL);
       expect(maybeSelectExperimentStub).to.be.calledOnce;
+    });
+    it('should not select into canonical exp if in unconditioned', () => {
+      sandbox.stub(DoubleclickA4aEligibility.prototype,
+          'isCdnProxy', () => false);
+      const elem = testFixture.doc.createElement('div');
+      testFixture.doc.body.appendChild(elem);
+      const maybeSelectExperimentStub = sandbox.stub(
+          DoubleclickA4aEligibility.prototype,
+          'maybeSelectExperiment');
+      maybeSelectExperimentStub.withArgs(
+          mockWin, elem, [
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
+          DFP_CANONICAL_FF_EXPERIMENT_NAME)
+          .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
+      maybeSelectExperimentStub.withArgs(
+          mockWin, elem, [
+            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
+            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
+          ], DFP_CANONICAL_FF_EXPERIMENT_NAME)
+            .returns(DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT);
+      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
+      expect(maybeSelectExperimentStub).to.be.calledOnce;
+      expect(maybeSelectExperimentStub).to.be.calledWith(
+          mockWin, elem, [
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
+          DFP_CANONICAL_FF_EXPERIMENT_NAME);
     });
   });
 });
