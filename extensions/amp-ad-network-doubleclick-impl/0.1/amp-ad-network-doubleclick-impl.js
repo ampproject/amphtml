@@ -858,10 +858,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             user().warn(TAG, 'Refresh not compatible with SRA.');
             return false;
           }
-          if (getEnclosingContainerTypes(a4a.element).filter(container =>
+          if (getEnclosingContainerTypes(this.element).filter(container =>
                 container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
                 container != ValidAdContainerTypes['AMP-STICKY-AD']).length) {
-            user().warn(TAG, 'Refresh not compatible with ad-containers, except for ' +
+            user().warn(TAG,
+                'Refresh not compatible with ad-containers, except for ' +
                 'AMP-CAROUSEL and AMP-STICKY-AD');
             return false;
           }

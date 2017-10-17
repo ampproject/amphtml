@@ -17,11 +17,6 @@
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill'; // eslint-disable-line max-len
-import {
-  getEnclosingContainerTypes,
-  ValidAdContainerTypes,
-} from '../../../ads/google/a4a/utils';
-
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen
