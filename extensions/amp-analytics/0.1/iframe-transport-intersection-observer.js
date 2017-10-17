@@ -71,7 +71,7 @@ export class IframeTransportIntersectionObserver {
   /**
    * Adds a creativeId to the list of ids we are listening to
    * IntersectionObserver events for.
-   * @param {!string} creativeId The creativeId used to identify <the
+   * @param {string} creativeId The creativeId used to identify <the
    *     creative that is being observed, the IframeTransport object that sends
    *     the observations>.
    * @param {!Element} target The element (e.g. an ad) to observe.
@@ -85,7 +85,7 @@ export class IframeTransportIntersectionObserver {
   /**
    * Called when an IntersectionObserver event is received. Posts a message
    * to interested vendor frame.
-   * @param {!string} creativeId The creativeId used to identify <the
+   * @param {string} creativeId The creativeId used to identify <the
    *     creative that is being observed, the IframeTransport object that sends
    *     the observations>.
    * @param {!Array<!IntersectionObserverEntry>} entries A list of

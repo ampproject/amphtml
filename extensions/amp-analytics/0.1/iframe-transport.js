@@ -21,7 +21,7 @@ import {
   calculateEntryPointScriptUrl,
 } from '../../../src/service/extension-location';
 import {setStyles} from '../../../src/style';
-import {hasOwn} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 import {
   IframeTransportIntersectionObserver,
@@ -132,12 +132,11 @@ export class IframeTransport {
     }));
 
     const frame = /** @type {!HTMLIFrameElement} */
-        (createElementWithAttributes(this.ampWin_.document, 'iframe',
-            /** @type {!JsonObject} */ ({
-              sandbox: 'allow-scripts allow-same-origin',
-              name: frameName,
-              'data-amp-3p-sentinel': sentinel,
-            })));
+        (createElementWithAttributes(this.ampWin_.document, 'iframe', dict({
+          'sandbox': 'allow-scripts allow-same-origin',
+          'name': frameName,
+          'data-amp-3p-sentinel': sentinel,
+        })));
     frame.sentinel = sentinel;
     setStyles(frame, {
       display: 'none',
