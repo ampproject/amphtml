@@ -283,7 +283,7 @@ export class AmpStory extends AMP.BaseElement {
       return true;
     }
 
-    const origin = getSourceOrigin(this.win);
+    const origin = getSourceOrigin(this.win.location);
     const hostName = parseUrl(origin).hostname;
     const domains = hostName.split('.');
 
