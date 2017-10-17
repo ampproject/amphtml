@@ -89,6 +89,7 @@ import {
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {
   getPublisherSpecifiedRefreshInterval,
+  getRefreshManagerIfEligible,
   RefreshManager,
   DATA_ATTR_NAME,
 } from '../../amp-a4a/0.1/refresh-manager';
@@ -663,7 +664,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const refreshInterval = Number(responseHeaders.get('amp-force-refresh'));
     if (refreshInterval) {
       this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
-      this.initRefreshManagerIfEligible_();
     }
 
     if (this.isFluid_) {
@@ -749,7 +749,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
       user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
     }
-    this.initRefreshManagerIfEligible_();
     return frameLoadPromise;
   }
 
@@ -757,32 +756,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   unlayoutCallback() {
     super.unlayoutCallback();
     this.maybeRemoveListenerForFluid();
-  }
-
-  /**
-   * Initializes a RefreshManager under the following conditions:
-   *   1. One has not already been initialized.
-   *   2. SRA is not enabled.
-   *   3. The slot is not inside an ad container (with the exception of
-   *      carousel and sticky ad).
-   *   4. The publisher has provided an appropriate refresh interval (>= 30s).
-   */
-  initRefreshManagerIfEligible_() {
-    let refreshInterval = 0;
-    this.refreshManager_ = this.refreshManager_ ||
-        // Not compatible with SRA
-        (!this.useSra &&
-         // Not compatible with container types except carousel and sticky-ad
-         !getEnclosingContainerTypes(this.element).filter(container =>
-           container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
-           container != ValidAdContainerTypes['AMP-STICKY-AD']).length &&
-         // Publisher must supply a refresh interval >= 30s
-         (refreshInterval = getPublisherSpecifiedRefreshInterval(
-             this.element, this.win, 'doubleclick')) &&
-         new RefreshManager(this, {
-           visiblePercentageMin: 50,
-           continuousTimeMin: 1,
-         }, refreshInterval)) || null;
   }
 
   /**
@@ -883,6 +856,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.element.removeAttribute('height');
       setStyles(this.element, {width: `${size.width}px`});
     }
+
+    this.refreshManager_ = getRefreshManagerIfEligible();
   }
 
   /**

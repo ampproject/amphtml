@@ -46,6 +46,8 @@ const TAG = 'AMP-AD';
  * @param {!Window} win
  * @param {string} adType
  * @return {?number}
+ *
+ * @visibleForTesting
  */
 export function getPublisherSpecifiedRefreshInterval(element, win, adType) {
   const refreshInterval = element.getAttribute(DATA_ATTR_NAME);
@@ -150,6 +152,37 @@ const managers = {};
  * @type {number}
  */
 let refreshManagerIdCounter = 0;
+
+
+/**
+ * Initializes a RefreshManager under the following conditions:
+ *   2. SRA is not enabled.
+ *   3. The slot is not inside an ad container (with the exception of
+ *      carousel and sticky ad).
+ *   4. The publisher has provided an appropriate refresh interval (>= 30s).
+ *
+ * @param {!Window} win
+ * @param {!Element} element
+ * @return {?RefreshManager}
+ */
+initRefreshManagerIfEligible_() {
+  let refreshInterval = 0;
+  this.refreshManager_ = this.refreshManager_ ||
+      // Not compatible with SRA
+      (!this.useSra &&
+       // Not compatible with container types except carousel and sticky-ad
+       !getEnclosingContainerTypes(this.element).filter(container =>
+         container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
+         container != ValidAdContainerTypes['AMP-STICKY-AD']).length &&
+       // Publisher must supply a refresh interval >= 30s
+       (refreshInterval = getPublisherSpecifiedRefreshInterval(
+           this.element, this.win, 'doubleclick')) &&]
+       new RefreshManager(this, {
+         visiblePercentageMin: 50,
+         continuousTimeMin: 1,
+       }, refreshInterval)) || null;
+}
+
 
 export class RefreshManager {
 
