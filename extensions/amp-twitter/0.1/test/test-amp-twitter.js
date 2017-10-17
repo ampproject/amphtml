@@ -16,7 +16,7 @@
 
 import '../amp-twitter';
 import {twitter} from '../../../../3p/twitter';
-
+import {cleanupTweetId_} from '../../../../3p/twitter';
 
 describes.realWin('amp-twitter', {
   amp: {
@@ -78,4 +78,46 @@ describes.realWin('amp-twitter', {
       expect(obj.unlayoutOnPause()).to.be.true;
     });
   });
+
+  describe('cleanupTweetId_', () => {
+    it('does not affect valid tweet ids', () => {
+      const good = '585110598171631616';
+
+      expect(cleanupTweetId_(good)).to.equal(tweetId);
+    });
+
+    it('does not affect valid tweet ids', () => {
+      const good = '20';
+
+      expect(cleanupTweetId_(good)).to.equal('20');
+    });
+
+    it('cleans up bad tweet id with query string at end', () => {
+      const bad = '585110598171631616?ref=twsrc%5Etfw';
+
+      expect(cleanupTweetId_(bad)).to.equal(tweetId);
+    });
+
+    it('cleans up bad tweet full Url', () => {
+      const bad = 'https://twitter.com/cramforce/status/585110598171631616' +
+            '?ref=twsrc%5Etfw&ref_url=https%3A%2F%2Fd-371701311371384053.amp' +
+            'project.net%2F1507685388117%2Fframe.html';
+
+      expect(cleanupTweetId_(bad)).to.equal(tweetId);
+    });
+
+    it('cleans up bad tweet Url with number in handle', () => {
+      const bad = 'https://twitter.com/cr123amforce/status/585110598171631616';
+
+      expect(cleanupTweetId_(bad)).to.equal(tweetId);
+    });
+
+    it('cleans up bad tweet Url with numer query string and Case', () => {
+      const bad = 'htTps://tWitter.com/cE123amforce/stAtus/585110598171631616' +
+        '?ref=twsrc%5Etfw';
+
+      expect(cleanupTweetId_(bad)).to.equal(tweetId);
+    });
+  });
+
 });
