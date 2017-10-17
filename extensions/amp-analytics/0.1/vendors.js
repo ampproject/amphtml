@@ -174,6 +174,12 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'bg': {
+    'transport': {
+      'iframe': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
+    },
+  },
+
   'burt': {
     'vars': {
       'trackingKey': 'ignore',
