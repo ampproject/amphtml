@@ -27,6 +27,6 @@ export function tripleliftIsA4AEnabled(win, element, useRemoteHtml) {
     return false;
   }
   let src;
-  return !!element.getAttribute('data-use-a4a') && !!(src =
+  return !useRemoteHtml && !!element.getAttribute('data-use-a4a') && !!(src =
     element.getAttribute('src')) && src.indexOf(SRC_PREFIX_) == 0;
 }
