@@ -41,14 +41,14 @@ Supported AMP video extensions issue various analytics events during their lifec
 See [the AMP Analytics component](../amp-analytics/amp-analytics.md) for details on *amp-analytics* configuration.
 
 
-### Video played trigger (`"on": "video-played"`)
+### Video play trigger (`"on": "video-play"`)
 
-The `video-played` trigger is fired when the video begins playing from a user clicking play or from autoplay beginning or resuming. Use these configurations to fire a request for this event.
+The `video-play` trigger is fired when the video begins playing from a user clicking play or from autoplay beginning or resuming. Use these configurations to fire a request for this event.
 
 ```javascript
 "triggers": {
-  "myVideoPlayed": {
-    "on": "video-played",
+  "myVideoPlay": {
+    "on": "video-play",
     "request": "event"
     "selector": "#myVideo",
   },
@@ -56,14 +56,14 @@ The `video-played` trigger is fired when the video begins playing from a user cl
 }
 ```
 
-### Video paused trigger (`"on": "video-paused"`)
+### Video pause trigger (`"on": "video-pause"`)
 
-The `video-paused` trigger is fired when the video stops playing from a user clicking pause, from autoplay pausing, or from the video reaching the end. Use these configurations to fire a request for this event.
+The `video-pause` trigger is fired when the video stops playing from a user clicking pause, from autoplay pausing, or from the video reaching the end. Use these configurations to fire a request for this event.
 
 ```javascript
 "triggers": {
-  "myVideoPaused": {
-    "on": "video-paused",
+  "myVideoPause": {
+    "on": "video-pause",
     "request": "event"
     "selector": "#myVideo",
   },
