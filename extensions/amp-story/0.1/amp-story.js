@@ -287,6 +287,20 @@ export class AmpStory extends AMP.BaseElement {
     const hostName = parseUrl(origin).hostname;
     const domains = hostName.split('.');
 
+    // Check all permutations of the domain to see if any level of the domain is
+    // whitelisted.  Taking the example of the whitelisted domain
+    // example.co.uk, if the page is served from www.example.co.uk/page.html:
+    //
+    //   www.example.co.uk => false
+    //   example.co.uk => true
+    //   co.uk => false
+    //   uk => false
+    //
+    // This is necessary, since we don't have any guarantees of which level of
+    // the domain is whitelisted.  For many domains (e.g. .com), the second
+    // level of the domain is likely to be whitelisted, whereas for others
+    // (e.g. .co.uk) the third level may be whitelisted.  Additionally, this
+    // allows subdomains to be whitelisted individually.
     return domains.some((unusedDomain, index) => {
       const domain = domains.slice(0, index + 1).join('.');
       const domainHash = stringHash32(domain.toLowerCase());
