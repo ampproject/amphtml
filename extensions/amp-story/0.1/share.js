@@ -47,13 +47,7 @@ const SHARE_LIST_TEMPLATE = {
             'class':
                 'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
           }),
-        },
-        {
-          tag: 'span',
           text: 'Get Link', // TODO(alanorozco): i18n
-          attrs: dict({
-            'class': 'i-amphtml-story-share-name',
-          }),
         },
       ],
     },
@@ -96,18 +90,12 @@ function buildProvider(doc, shareType, opt_params) {
           attrs: /** @type {!JsonObject} */ (Object.assign(
               dict({
                 'width': 48,
-                'height': 48,
+                'height': 66,
                 'class': 'i-amphtml-story-share-icon',
                 'type': shareType,
               }),
               buildProviderParams(opt_params))),
-        },
-        {
-          tag: 'span',
           text: SHARE_PROVIDER_NAME[shareType] || shareType,
-          attrs: dict({
-            'class': 'i-amphtml-story-share-name',
-          }),
         },
       ]));
 }
