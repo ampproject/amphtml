@@ -1041,7 +1041,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       forceExperimentBranch(impl.win, sfPreloadExpName, '21061135');
       impl.buildCallback();
       expect(isInExperiment(element, '21061135')).to.be.true;
-      expect(isInExperiment(element, '21061136')).to.be.false
+      expect(isInExperiment(element, '21061136')).to.be.false;
       expect(impl.getPreconnectUrls()).to.deep.equal(
           ['https://partner.googleadservices.com', SAFEFRAME_ORIGIN]);
     });
