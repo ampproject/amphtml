@@ -50,14 +50,10 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 
 /** @const @enum{string} */
 export const DOUBLECLICK_EXPERIMENT_FEATURE = {
-  HOLDBACK_EXTERNAL_CONTROL: '21060726',
-  HOLDBACK_EXTERNAL: '21060727',
   DELAYED_REQUEST_CONTROL: '21060728',
   DELAYED_REQUEST: '21060729',
   SRA_CONTROL: '117152666',
   SRA: '117152667',
-  HOLDBACK_INTERNAL_CONTROL: '2092613',
-  HOLDBACK_INTERNAL: '2092614',
   CANONICAL_CONTROL: '21060932',
   CANONICAL_EXPERIMENT: '21060933',
   CACHE_EXTENSION_INJECTION_CONTROL: '21060955',
@@ -76,9 +72,6 @@ export const DOUBLECLICK_UNCONDITIONED_EXPERIMENTS = {
 export const URL_EXPERIMENT_MAPPING = {
   '-1': MANUAL_EXPERIMENT_ID,
   '0': null,
-  // Holdback
-  '1': DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL_CONTROL,
-  '2': DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
   // Delay Request
   '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
   '4': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
@@ -186,21 +179,13 @@ export class DoubleclickA4aEligibility {
         dev().info(
             TAG,
             `url experiment selection ${urlExperimentId}: ${experimentId}.`);
-      } else {
-        experimentId = this.maybeSelectExperiment(win, element, [
-          DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
-          DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
-            DOUBLECLICK_A4A_EXPERIMENT_NAME);
       }
     }
     if (experimentId) {
       addExperimentIdToElement(experimentId, element);
       forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
     }
-    return ![DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
-      DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
-      DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
-    ].includes(experimentId);
+    return DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL != experimentId;
   }
 
   /**
