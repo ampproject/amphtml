@@ -17,6 +17,11 @@
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill'; // eslint-disable-line max-len
+import {
+  getEnclosingContainerTypes,
+  ValidAdContainerTypes,
+} from '../../../ads/google/a4a/utils';
+
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen
@@ -161,26 +166,32 @@ let refreshManagerIdCounter = 0;
  *      carousel and sticky ad).
  *   4. The publisher has provided an appropriate refresh interval (>= 30s).
  *
- * @param {!Window} win
- * @param {!Element} element
+ * @param {!./amp-a4a.AmpA4A} a4a
  * @return {?RefreshManager}
  */
-initRefreshManagerIfEligible_() {
-  let refreshInterval = 0;
-  this.refreshManager_ = this.refreshManager_ ||
-      // Not compatible with SRA
-      (!this.useSra &&
-       // Not compatible with container types except carousel and sticky-ad
-       !getEnclosingContainerTypes(this.element).filter(container =>
-         container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
-         container != ValidAdContainerTypes['AMP-STICKY-AD']).length &&
-       // Publisher must supply a refresh interval >= 30s
-       (refreshInterval = getPublisherSpecifiedRefreshInterval(
-           this.element, this.win, 'doubleclick')) &&]
-       new RefreshManager(this, {
-         visiblePercentageMin: 50,
-         continuousTimeMin: 1,
-       }, refreshInterval)) || null;
+export function getRefreshManagerForDoubleclickIfEligible(a4a) {
+  const refreshInterval = getPublisherSpecifiedRefreshInterval(
+      a4a.element, a4a.win, 'doubleclick');
+  if (!refreshInterval) {
+    return null;
+  }
+
+  if (a4a.useSra) {
+    user().warn(TAG, 'Refresh not compatible with SRA.');
+    return null;
+  }
+  if (getEnclosingContainerTypes(a4a.element).filter(container =>
+        container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
+        container != ValidAdContainerTypes['AMP-STICKY-AD']).length) {
+    user().warn(TAG, 'Refresh not compatible with ad-containers, except for ' +
+        'AMP-CAROUSEL and AMP-STICKY-AD');
+    return null;
+  }
+
+  return new RefreshManager(a4a, {
+    visiblePercentageMin: 50,
+    continuousTimeMin: 1,
+  }, refreshInterval);
 }
 
 

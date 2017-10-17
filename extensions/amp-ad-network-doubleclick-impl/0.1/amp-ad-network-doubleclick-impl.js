@@ -88,8 +88,7 @@ import {
 } from '../../../src/experiments';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {
-  getPublisherSpecifiedRefreshInterval,
-  getRefreshManagerIfEligible,
+  getRefreshManagerForDoubleclickIfEligible,
   RefreshManager,
   DATA_ATTR_NAME,
 } from '../../amp-a4a/0.1/refresh-manager';
@@ -857,7 +856,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       setStyles(this.element, {width: `${size.width}px`});
     }
 
-    this.refreshManager_ = getRefreshManagerIfEligible();
+    this.refreshManager_ = this.refreshManager_ ||
+        getRefreshManagerForDoubleclickIfEligible(this);
   }
 
   /**
