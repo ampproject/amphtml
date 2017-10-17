@@ -64,9 +64,9 @@ the `data-multi-size` attribute. Each size in the list must be a width followed
 by a lowercase 'x' followed by a height. Secondary sizes must not be larger than
 their corresponding dimensions specified by the `width` and `height` attributes,
 or the `data-override-width` and `data-override-height` attributes, if they are
-set. Further, the secondary sizes must not be smaller than 2/3rds of their
-primary size counterpart, unless `data-multi-size-validation` is explicitly set
-to false.
+set. Further, the secondary sizes must not be smaller than 2/3rds, in any of the
+two dimensions, of their primary size counterpart, unless 
+`data-multi-size-validation` is explicitly set to false.
 
 Examples:
 
