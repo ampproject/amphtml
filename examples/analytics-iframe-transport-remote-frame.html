@@ -26,6 +26,15 @@
           // be used by the amp-ad-exit of the creative which generated the
           // event.
           context.sendResponseToCreative({'collected-data': 'abc'});
+
+          // Optionally, you may request IntersectionObserver by calling
+          // context.observerIntersection().
+          context.observeIntersection(entries => {
+            entries.forEach(entry => {
+              console.log(`Intersection ratio ${entry.intersectionRatio} ` +
+                  `at time ${entry.time}`);
+            });
+          });
         });
       };
 
