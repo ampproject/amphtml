@@ -23,7 +23,6 @@
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
 import {
-  fastFetchDelayedRequestEnabled,
   identityEnabled,
 } from './adsense-a4a-config';
 import {
@@ -171,7 +170,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return fastFetchDelayedRequestEnabled(this.win);
+    return true;
   }
 
   /** @override */
