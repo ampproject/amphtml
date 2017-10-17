@@ -99,7 +99,7 @@ export class BaseCarousel extends AMP.BaseElement {
           this.element.getAttribute('data-next-button-aria-label'));
     } else {
       this.nextButton_.setAttribute('aria-label',
-          'Previous item in carousel');
+          'Next item in carousel');
     }
     this.nextButton_.setAttribute('tabindex', 0);
     this.nextButton_.onkeydown = event => {
