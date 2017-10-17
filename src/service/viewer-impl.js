@@ -377,27 +377,6 @@ export class Viewer {
       }
     });
 
-    // Replace URL if requested.
-    const replaceUrlParam = this.params_['replaceUrl'];
-    if (ampdoc.isSingleDoc() &&
-        replaceUrlParam &&
-        this.win.history.replaceState) {
-      try {
-        // The origin and source origin must match.
-        const url = parseUrl(this.win.location.href);
-        const replaceUrl = parseUrl(
-            removeFragment(replaceUrlParam) + this.win.location.hash);
-        if (url.origin == replaceUrl.origin &&
-            getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
-          this.win.history.replaceState({}, '', replaceUrl.href);
-          this.win.location.originalHref = url.href;
-          dev().fine(TAG_, 'replace url:' + replaceUrl.href);
-        }
-      } catch (e) {
-        dev().error(TAG_, 'replaceUrl failed', e);
-      }
-    }
-
     // Remove hash when we have an incoming click tracking string
     // (see impression.js).
     if (this.params_['click']) {
@@ -988,6 +967,33 @@ export class Viewer {
    */
   whenMessagingReady() {
     return this.messagingMaybePromise_;
+  }
+
+  /**
+   * Replace the
+   * @param {?string} newUrl
+   */
+  replaceUrl(newUrl) {
+    if (!newUrl ||
+        !this.ampdoc.isSingleDoc() ||
+        !this.win.history.replaceState) {
+      return;
+    }
+
+    try {
+      // The origin and source origin must match.
+      const url = parseUrl(this.win.location.href);
+      const replaceUrl = parseUrl(
+          removeFragment(newUrl) + this.win.location.hash);
+      if (url.origin == replaceUrl.origin &&
+          getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
+        this.win.history.replaceState({}, '', replaceUrl.href);
+        this.win.location.originalHref = url.href;
+        dev().fine(TAG_, 'replace url:' + replaceUrl.href);
+      }
+    } catch (e) {
+      dev().error(TAG_, 'replaceUrl failed', e);
+    }
   }
 }
 
