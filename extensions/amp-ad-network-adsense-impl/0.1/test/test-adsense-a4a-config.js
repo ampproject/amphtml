@@ -65,6 +65,19 @@ describe('adsense-a4a-config', () => {
       expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.false;
     });
 
+    it('should not enable a4a when useRemoteHtml is true', () => {
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html');
+      sandbox.stub(
+          urls, 'cdnProxyRegex',
+          /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/);
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('data-ad-client', 'ca-pub-somepub');
+      testFixture.doc.body.appendChild(elem);
+      const useRemoteHtml = true;
+      expect(adsenseIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.false;
+    });
+
     it('should not enable a4a when on a non-Google AMP cache', () => {
       mockWin.location = parseUrl(
           'https://amp.cloudflare.com/some/path/to/content.html');
