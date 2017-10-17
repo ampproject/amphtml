@@ -23,9 +23,12 @@ import {
 import {setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
+import {
+  IframeTransportIntersectionObserver,
+} from './iframe-transport-intersection-observer';
 
 /** @typedef {{
- *    frame: Element,
+ *    frame: !HTMLIFrameElement,
  *    sentinel: !string,
  *    usageCount: number,
  *    queue: IframeTransportMessageQueue,
@@ -44,8 +47,10 @@ export class IframeTransport {
    *     sendResponseToCreative(), it should be something that the recipient
    *     can use to identify the context of the message, e.g. the resourceID
    *     of a DOM element.
+   * @param {!Element} parent The HTML DOM node we're collecting metrics
+   *     on. Only used for IntersectionObserver.
    */
-  constructor(ampWin, type, config, id) {
+  constructor(ampWin, type, config, id, parent) {
     /** @private @const {!Window} */
     this.ampWin_ = ampWin;
 
@@ -55,11 +60,16 @@ export class IframeTransport {
     /** @private @const {string} */
     this.creativeId_ = id;
 
+    /** @private @const {!Element} */
+    this.parent_ = parent;
+
     dev().assert(config && config['iframe'],
         'Must supply iframe URL to constructor!');
     this.frameUrl_ = config['iframe'];
 
     this.processCrossDomainIframe();
+
+    this.intersectionObserver_ = null;
   }
 
   /**
@@ -81,6 +91,11 @@ export class IframeTransport {
       ++(frameData.usageCount);
     } else {
       frameData = this.createCrossDomainIframe();
+      // This must be done before attaching to the DOM.
+      // TODO(jonkeller): Need to handle/test case where requestor != frame
+      // creator
+      this.intersectionObserver_ = new IframeTransportIntersectionObserver(
+          this.ampWin_, this.parent_, frameData.frame);
       this.ampWin_.document.body.appendChild(frameData.frame);
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
@@ -116,12 +131,14 @@ export class IframeTransport {
       sentinel,
       type: this.type_,
     }));
-    const frame = createElementWithAttributes(this.ampWin_.document, 'iframe',
-        /** @type {!JsonObject} */ ({
-          sandbox: 'allow-scripts allow-same-origin',
-          name: frameName,
-          'data-amp-3p-sentinel': sentinel,
-        }));
+
+    const frame = /** @type {!HTMLIFrameElement} */
+        (createElementWithAttributes(this.ampWin_.document, 'iframe',
+            /** @type {!JsonObject} */ ({
+              sandbox: 'allow-scripts allow-same-origin',
+              name: frameName,
+              'data-amp-3p-sentinel': sentinel,
+            })));
     frame.sentinel = sentinel;
     setStyles(frame, {
       display: 'none',
@@ -130,9 +147,7 @@ export class IframeTransport {
     const frameData = /** @const {FrameData} */ ({
       frame,
       usageCount: 1,
-      queue: new IframeTransportMessageQueue(this.ampWin_,
-          /** @type {!HTMLIFrameElement} */
-          (frame)),
+      queue: new IframeTransportMessageQueue(this.ampWin_, frame),
     });
     IframeTransport.crossDomainIframes_[this.type_] = frameData;
     return frameData;
