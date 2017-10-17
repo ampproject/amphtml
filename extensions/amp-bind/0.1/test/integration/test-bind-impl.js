@@ -352,6 +352,17 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
+    it('should update value in addition to textContent for TextArea', () => {
+      const element = createElement(
+          env, container, '[text]="\'a\' + \'b\' + \'c\'"', 'textarea');
+      element.textContent = 'foo';
+      element.value = 'foo';
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(element.textContent).to.equal('abc');
+        expect(element.value).to.equal('abc');
+      });
+    });
+
     it('should support binding to CSS classes with strings', () => {
       const element = createElement(env, container, '[class]="[\'abc\']"');
       expect(toArray(element.classList)).to.deep.equal([]);
