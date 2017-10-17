@@ -41,7 +41,7 @@ describes.realWin('cloudflare-a4a-config', {
       src: '/ad.html',
       'data-cf-a4a': 'true',
     });
-    expect(cloudflareIsA4AEnabled(win, el)).to.be.true;
+    expect(cloudflareIsA4AEnabled(win, el, true)).to.be.true;
   });
 });
 

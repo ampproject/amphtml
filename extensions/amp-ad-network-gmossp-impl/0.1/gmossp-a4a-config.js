@@ -25,9 +25,13 @@ const GMOSSP_SRC_A4A_PREFIX_ = 'https://amp.sp.gmossp-sp.jp/_a4a/';
 /**
  * @param {!Window} win
  * @param {!Element} element
+ * @param {!boolean} useRemoteHtml
  * @returns {boolean}
  */
-export function gmosspIsA4AEnabled(win, element) {
+export function gmosspIsA4AEnabled(win, element, useRemoteHtml) {
+  if (useRemoteHtml) {
+    return false;
+  }
   const src = element.getAttribute('src');
   return !!element.getAttribute('data-use-a4a') && !!src &&
       (startsWith(src, GMOSSP_SRC_PREFIX_) ||

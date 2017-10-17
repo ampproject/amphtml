@@ -21,8 +21,11 @@ import {
   DFP_CANONICAL_FF_EXPERIMENT_NAME,
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
   DOUBLECLICK_EXPERIMENT_FEATURE,
+  DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME,
+  DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
   URL_EXPERIMENT_MAPPING,
   DoubleclickA4aEligibility,
+  resetForTesting,
 } from '../doubleclick-a4a-config';
 import {
   isInExperiment,
@@ -41,6 +44,7 @@ describe('doubleclick-a4a-config', () => {
   let testFixture;
 
   beforeEach(() => {
+    resetForTesting();
     sandbox = sinon.sandbox.create();
     mockWin = {
       location: parseUrl('https://nowhere.org/a/place/page.html?s=foo&q=bar'),
@@ -79,14 +83,6 @@ describe('doubleclick-a4a-config', () => {
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
     });
 
-    it('should not enable a4a when native crypto is not supported', () => {
-      sandbox.stub(DoubleclickA4aEligibility.prototype,
-          'supportsCrypto', () => false);
-      const elem = testFixture.doc.createElement('div');
-      testFixture.doc.body.appendChild(elem);
-      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
-    });
-
     it('should select into canonical AMP experiment when not on CDN', () => {
       sandbox.stub(DoubleclickA4aEligibility.prototype,
           'isCdnProxy', () => false);
@@ -99,8 +95,7 @@ describe('doubleclick-a4a-config', () => {
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
       ], DFP_CANONICAL_FF_EXPERIMENT_NAME) ;
-      expect(maybeSelectExperimentSpy.callCount).to.equal(1);
-
+      expect(maybeSelectExperimentSpy.callCount).to.equal(2);
     });
 
     it('should return false if no canonical AMP experiment branch', () => {
@@ -138,14 +133,14 @@ describe('doubleclick-a4a-config', () => {
       testFixture.doc.body.appendChild(elem);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-      expect(maybeSelectExperimentStub).to.be.calledOnce;
+      expect(maybeSelectExperimentStub).to.be.calledTwice;
     });
 
     it('should not enable if data-use-same-domain-rendering-until-deprecated',
         () => {
           const elem = testFixture.doc.createElement('div');
           elem.setAttribute(
-              'data-use-same-domain-rendering-until-deprecated', '');
+              'useSameDomainRenderingUntilDeprecated', '');
           testFixture.doc.body.appendChild(elem);
           expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
           expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
@@ -205,6 +200,43 @@ describe('doubleclick-a4a-config', () => {
       testFixture.doc.body.appendChild(elem);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal('2092613');
+    });
+
+    it('should only select once if put into unconditioned exp', () => {
+      sandbox.stub(DoubleclickA4aEligibility.prototype,
+          'isCdnProxy', () => false);
+      const elem = testFixture.doc.createElement('div');
+      testFixture.doc.body.appendChild(elem);
+      const maybeSelectExperimentStub = sandbox.stub(
+          DoubleclickA4aEligibility.prototype,
+          'maybeSelectExperiment').withArgs(
+          mockWin, elem, [
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME)
+            .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
+      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
+      expect(maybeSelectExperimentStub).to.be.calledOnce;
+    });
+    it('should only select once if put into unconditioned control', () => {
+      sandbox.stub(DoubleclickA4aEligibility.prototype,
+          'isCdnProxy', () => false);
+      const elem = testFixture.doc.createElement('div');
+      testFixture.doc.body.appendChild(elem);
+      const maybeSelectExperimentStub = sandbox.stub(
+          DoubleclickA4aEligibility.prototype,
+          'maybeSelectExperiment').withArgs(
+          mockWin, elem, [
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENT_NAME)
+            .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL);
+      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL);
+      expect(maybeSelectExperimentStub).to.be.calledOnce;
     });
   });
 });
