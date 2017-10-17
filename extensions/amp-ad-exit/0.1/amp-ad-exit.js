@@ -334,11 +334,13 @@ export class AmpAdExit extends AMP.BaseElement {
           }
           const responseMsg = deserializeMessage(getData(event));
           if (!responseMsg ||
-              responseMsg['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE ||
-              responseMsg['creativeId'] != this.ampAdResourceId_) {
+              responseMsg['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE) {
             return;
           }
           this.assertValidResponseMessage_(responseMsg, event.origin);
+          if (responseMsg['creativeId'] != this.ampAdResourceId_) {
+            return; // Valid message, but for different amp-ad-exit instance
+          }
           this.vendorResponses_[responseMsg['vendor']] = responseMsg['message'];
         });
   }
@@ -354,6 +356,10 @@ export class AmpAdExit extends AMP.BaseElement {
   assertValidResponseMessage_(responseMessage, eventOrigin) {
     user().assert(responseMessage['message'],
         'Received empty response from 3p analytics frame');
+    user().assert(
+        responseMessage['creativeId'],
+        'Received malformed message from 3p analytics frame: ' +
+        'creativeId missing');
     user().assert(responseMessage['vendor'],
         'Received malformed message from 3p analytics frame: ' +
         'vendor missing');
