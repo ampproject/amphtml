@@ -16,6 +16,7 @@
 import {Services} from '../../../src/services';
 import {isObject} from '../../../src/types';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
+import {scopedQuerySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 
@@ -29,35 +30,44 @@ import {dict} from './../../../src/utils/object';
 const SHARE_PROVIDER_NAME = dict({
   'gplus': 'Google+',
   'linkedin': 'LinkedIn',
+  'system': 'More',
   'whatsapp': 'WhatsApp',
 });
 
 
 /** @private @const {!./simple-template.ElementDef} */
-const SHARE_LIST_TEMPLATE = {
-  tag: 'ul',
-  attrs: dict({'class': 'i-amphtml-story-share-list'}),
-  children: [
-    {
-      tag: 'li',
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'class':
-                'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
-          }),
-        },
-        {
-          tag: 'span',
-          text: 'Get Link', // TODO(alanorozco): i18n
-          attrs: dict({
-            'class': 'i-amphtml-story-share-name',
-          }),
-        },
-      ],
-    },
-  ],
+const TEMPLATE = {
+  tag: 'div',
+  attrs: dict({'class': 'i-amphtml-story-share-widget'}),
+  children: [{
+    tag: 'ul',
+    attrs: dict({'class': 'i-amphtml-story-share-list'}),
+    children: [
+      {
+        tag: 'li',
+        children: [
+          {
+            tag: 'div',
+            attrs: dict({
+              'class':
+                  'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
+            }),
+          },
+          {
+            tag: 'span',
+            text: 'Get Link', // TODO(alanorozco): i18n
+            attrs: dict({
+              'class': 'i-amphtml-story-share-name',
+            }),
+          },
+        ],
+      },
+      {
+        tag: 'li',
+        attrs: dict({'class': 'i-amphtml-story-share-system'}),
+      },
+    ],
+  }],
 };
 
 
@@ -143,16 +153,40 @@ export class ShareWidget {
 
     this.ampdoc_ = ampdoc;
 
-    this.root_ = renderAsElement(this.win_.document, SHARE_LIST_TEMPLATE);
+    this.root_ = renderAsElement(this.win_.document, TEMPLATE);
 
-    this.maybeAddNativeShare_();
+    this.maybeAddSystemShareButton_();
 
     return this.root_;
   }
 
   /** @private */
-  maybeAddNativeShare_() {
-    // TODO(alanorozco): Implement
+  maybeAddSystemShareButton_() {
+    if (!this.isSystemShareSupported_()) {
+      // `amp-social-share` will hide `system` buttons when not supported, but
+      // we also need to avoid adding it for rendering reasons.
+      return;
+    }
+
+    const container = scopedQuerySelector(
+        dev().assertElement(this.root_),
+        '.i-amphtml-story-share-system');
+
+    container.appendChild(buildProvider(this.win_.document, 'system'));
+  }
+
+  /** @private */
+  // NOTE(alanorozco): This is a duplicate of the logic in the
+  // `amp-social-share` component.
+  isSystemShareSupported_() {
+    const viewer = Services.viewerForDoc(dev().assert(this.ampdoc_));
+    const platform = Services.platformFor(this.win_);
+
+    // Chrome exports navigator.share in WebView but does not implement it.
+    // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923
+    const isChromeWebview = viewer.isWebviewEmbedded() && platform.isChrome();
+
+    return ('share' in navigator) && !isChromeWebview;
   }
 
   /**
@@ -197,8 +231,13 @@ export class ShareWidget {
    * @private
    */
   add_(node) {
+    const list = dev().assert(this.root_).firstElementChild;
     const item = renderAsElement(this.win_.document, SHARE_ITEM_TEMPLATE);
+
     item.appendChild(node);
-    dev().assert(this.root_).appendChild(item);
+
+    // `lastElementChild` is the system share button container, which should
+    // always be last in list
+    list.insertBefore(item, list.lastElementChild);
   }
 }
