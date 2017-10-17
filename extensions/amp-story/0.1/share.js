@@ -194,6 +194,14 @@ export class ShareWidget {
     this.loadRequiredExtensions_();
 
     Object.keys(providers).forEach(type => {
+      if (type == 'system') {
+        user().warn('AMP-STORY',
+            '`system` is not a valid share provider type. Native sharing is ' +
+            'enabled by default and cannot be turned off.',
+            type);
+        return;
+      }
+
       if (isObject(providers[type])) {
         this.add_(buildProvider(this.win_.document, type,
             /** @type {!JsonObject} */ (providers[type])));
