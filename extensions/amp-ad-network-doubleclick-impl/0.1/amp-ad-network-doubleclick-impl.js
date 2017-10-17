@@ -857,7 +857,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 
     this.refreshManager_ = this.refreshManager_ ||
-        getRefreshManagerForDoubleclickIfEligible(this);
+        getRefreshManagerForDoubleclickIfEligible(this, this.useSra);
   }
 
   /**

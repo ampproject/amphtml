@@ -167,16 +167,17 @@ let refreshManagerIdCounter = 0;
  *   4. The publisher has provided an appropriate refresh interval (>= 30s).
  *
  * @param {!./amp-a4a.AmpA4A} a4a
+ * @param {boolean} useSra
  * @return {?RefreshManager}
  */
-export function getRefreshManagerForDoubleclickIfEligible(a4a) {
+export function getRefreshManagerForDoubleclickIfEligible(a4a, useSra) {
   const refreshInterval = getPublisherSpecifiedRefreshInterval(
       a4a.element, a4a.win, 'doubleclick');
   if (!refreshInterval) {
     return null;
   }
 
-  if (a4a.useSra) {
+  if (useSra) {
     user().warn(TAG, 'Refresh not compatible with SRA.');
     return null;
   }
