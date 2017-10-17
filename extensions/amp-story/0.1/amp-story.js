@@ -249,6 +249,19 @@ export class AmpStory extends AMP.BaseElement {
       }
     });
 
+    this.element.addEventListener(EventType.PAGE_PROGRESS, e => {
+      const pageId = e.detail.pageId;
+      const progress = e.detail.progress;
+
+      if (pageId !== this.activePage_.element.id) {
+        // Ignore progress update events from inactive pages.
+        return;
+      }
+
+      const pageIndex = this.getPageIndexById_(pageId);
+      this.systemLayer_.updateProgress(pageIndex, progress);
+    });
+
     this.element.addEventListener(EventType.REPLAY, () => {
       this.replay_();
     });
@@ -983,14 +996,32 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
+   * @param {string} id The ID of the page whose index should be retrieved.
+   * @return {number} The index of the page.
+   * @private
+   */
+  getPageIndexById_(id) {
+    const pageIndex = findIndex(this.pages_, page => page.element.id === id);
+
+    if (pageIndex < 0) {
+      user().error(pageIndex >= 0,
+        `Story refers to page "${id}", but no such page exists.`);
+    }
+
+    return pageIndex;
+  }
+
+
+  /**
    * @param {string} id The ID of the page to be retrieved.
-   * @return {!./amp-story-page.AmpStoryPage} Retrieves the page with the specified ID.
+   * @return {!./amp-story-page.AmpStoryPage} Retrieves the page with the
+   *     specified ID.
    * @private
    */
   getPageById_(id) {
-    const pageIndex = findIndex(this.pages_, page => page.element.id === id);
-    return user().assert(this.pages_[pageIndex],
-        `Story refers to page "${id}", but no such page exists.`);
+    const pageIndex = this.getPageIndexById_(id);
+    return dev().assert(this.pages_[pageIndex],
+        `Page at index ${pageIndex} exists, but is missing from the array.`);
   }
 
 

@@ -106,6 +106,13 @@ const LOAD_TIMEOUT_MS = 8000;
 const LOAD_TIMER_POLL_DELAY_MS = 250;
 
 
+/** @private @enum {!RegExp} */
+const TIME_REGEX = {
+  MILLISECONDS: /^(\d+)ms$/,
+  SECONDS: /^(\d+)s$/,
+};
+
+
 /** @private @const {string} */
 const TAG = 'amp-story-page';
 
@@ -462,15 +469,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   isVideoInterfaceVideo_(el) {
-    // TODO(#11533): Check whether the element has the
-    // i-amphtml-video-interface class, after #11015 from amphtml is merged
-    // into amphtml-story.
-    const tagName = el.tagName.toLowerCase();
-
-    return tagName === 'amp-video' || tagName === 'amp-youtube' ||
-        tagName === 'amp-3q-player' || tagName === 'amp-ima-video' ||
-        tagName === 'amp-ooyala-player' || tagName === 'amp-nexxtv-player' ||
-        tagName === 'amp-brid-player' || tagName === 'amp-dailymotion';
+    return el.classList.contains('i-amphtml-video-interface');
   }
 
 
@@ -478,19 +477,41 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Determines whether the specified element is a valid media element for auto-
    * advance.
    * @param {?Element} elOrNull
-   * @param {!function()} callback
    * @private
    */
-  onMediaElementComplete_(elOrNull, callback) {
+  addMediaElementListeners_(elOrNull) {
     const el = user().assertElement(elOrNull,
         'ID specified for automatic advance does not refer to any element' +
         `on page '${this.element.id}'.`);
-
     const mediaElement = this.getMediaElement_(el);
+
+    const callback = () => {
+      this.next(true /* opt_isAutomaticAdvance */);
+    };
+
     if (mediaElement) {
+      if (mediaElement.duration > 0) {
+        listenOnce(mediaElement, 'timeupdate', () => {
+          const progress = mediaElement.currentTime / mediaElement.duration;
+          this.emitProgress_(progress);
+        });
+      } else {
+        // We can't determine the progress; just show the whole page as having
+        // progressed.
+        this.emitProgress_(1);
+      }
       this.autoAdvanceUnlistenDef_ =
           listenOnce(mediaElement, 'ended', callback);
     } else if (this.isVideoInterfaceVideo_(el)) {
+      el.getImpl().then(video => {
+        let startMs = null;
+        const animationStepFn = () => {
+          const progress = video.getCurrentTime() / video.getDuration();
+          this.emitProgress_(progress);
+          this.win.requestAnimationFrame(animationStepFn);
+        };
+        this.win.requestAnimationFrame(animationStepFn);
+      });
       this.autoAdvanceUnlistenDef_ =
           listenOnce(el, VideoEvents.ENDED, callback, {capture: true});
     } else {
@@ -519,6 +540,16 @@ export class AmpStoryPage extends AMP.BaseElement {
           `Invalid automatic advance delay '${autoAdvanceAfter}' ` +
           `for page '${this.element.id}'.`);
 
+      let startMs = null;
+      const animationStepFn = timestampMs => {
+        if (!startMs) {
+          startMs = timestampMs;
+        }
+        const progress = (timestampMs - startMs) / delayMs;
+        this.emitProgress_(progress);
+        this.win.requestAnimationFrame(animationStepFn);
+      };
+      this.win.requestAnimationFrame(animationStepFn);
       const timeoutId = this.timer_.delay(
           () => this.next(true /* opt_isAutomaticAdvance */), delayMs);
       this.autoAdvanceUnlistenDef_ = () => {
@@ -535,10 +566,24 @@ export class AmpStoryPage extends AMP.BaseElement {
         return;
       }
 
-      this.onMediaElementComplete_(mediaElement, () => {
-        this.next(true /* opt_isAutomaticAdvance */);
-      });
+      this.addMediaElementListeners_(mediaElement);
     }
+  }
+
+
+  /**
+   * Emits an event indicating that the progress of the current page has changed
+   * to the specified value.
+   * @param {number} progress The progress from 0.0 to 1.0.
+   */
+  emitProgress_(progress) {
+    const payload = {
+      pageId: this.element.id,
+      progress: progress,
+    };
+    const eventInit = {bubbles: true};
+    dispatchCustom(this.win, this.element, EventType.PAGE_PROGRESS, payload,
+        eventInit);
   }
 
 
