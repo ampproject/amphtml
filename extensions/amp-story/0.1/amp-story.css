@@ -454,22 +454,45 @@ amp-story-grid-layer * {
 
 .i-amphtml-story-share-icon {
   box-sizing: border-box;
+  position: relative;
   width: 48px;
-  height: 48px;
-  padding: 8px;
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-  background-size: 32px 32px;
+  height: 66px;
+  padding: 56px 0 0 0;
+  background-color: transparent;
   display: block !important;
+  text-transform: capitalize;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  line-height: 10px;
+  font-size: 10px;
+  text-align: center;
 
   /* for svg backgrounds: */
-  background-position: center center;
+  background-position: 8px 8px;
+  background-size: 32px 32px;
   background-repeat: no-repeat;
 }
 
-.i-amphtml-story-share-icon:active {
-  background-color: rgba(255, 255, 255, 0.6);
+.i-amphtml-story-share-icon::before {
+  content: " ";
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.3);
+  width: 48px;
+  height: 48px;
+  position: absolute;
+  display: block;
+  top: 0;
+  left: 0;
+}
+
+.i-amphtml-story-share-icon:active,
+.i-amphtml-story-share-icon:focus {
   outline: none;
+  box-shadow: none;
+}
+
+.i-amphtml-story-share-icon:active::before {
+  background-color: rgba(255, 255, 255, 0.6);
 }
 
 .i-amphtml-story-share-icon[type=email] {
@@ -493,17 +516,6 @@ amp-story-grid-layer * {
 
 .i-amphtml-story-share-list > li:last-child {
   padding-right: 32px;
-}
-
-.i-amphtml-story-share-name {
-  display: block;
-  text-align: center;
-  text-transform: capitalize;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 400;
-  line-height: 10px;
-  font-size: 10px;
-  padding: 8px 0 0;
 }
 
 /**
