@@ -76,9 +76,8 @@ const TAG = 'amp-story';
 
 /** @type {!Array<string>} */
 const WHITELISTED_ORIGINS = [
-  '3210828456', '3451824873', '834917366', '4273375831', '750731789',
-  '3322156041', '878041739', '2199838184', '708478954', '142793127',
-  '2414533450',
+  '3451824873', '834917366', '4273375831', '750731789', '3322156041',
+  '878041739', '2199838184', '708478954', '142793127', '2414533450',
 ];
 
 
@@ -280,7 +279,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   isAmpStoryEnabled_() {
-    if (isExperimentOn(this.win, TAG)) {
+    if (isExperimentOn(this.win, TAG) || getMode().test || getMode().localDev) {
       return true;
     }
 
