@@ -17,6 +17,7 @@
 import {tryParseJson} from '../src/json';
 import {dev, user} from '../src/log';
 import {MessageType} from '../src/3p-frame-messaging';
+import {dict} from '../src/utils/object';
 import {IframeMessagingClient} from './iframe-messaging-client';
 
 /** @private @const {string} */
@@ -165,7 +166,7 @@ export class IframeTransportContext {
         MessageType.IFRAME_TRANSPORT_RESPONSE,
         /** @type {!JsonObject} */
         (Object.assign({message: data},
-            {creativeId:this.creativeId_, vendor:this.vendor_})));
+            {creativeId: this.creativeId_, vendor: this.vendor_})));
   }
 
   /**
@@ -174,7 +175,6 @@ export class IframeTransportContext {
    *     which the IntersectionObserver data should be passed.
    */
   observeIntersection(callback) {
-    // Send message to amp-analytics
     this.iframeMessagingClient_.registerCallback(
         MessageType.INTERSECTION_OBSERVER_EVENTS,
         eventData => {
@@ -183,8 +183,8 @@ export class IframeTransportContext {
             callback(/** @type {!JsonObject} */ (eventData['entries']));
           }
         });
-    this.iframeMessagingClient_.sendMessage(
+    this.iframeMessagingClient_./*OK*/sendMessage(
         MessageType.SEND_INTERSECTION_OBSERVER_EVENTS,
-        {creativeId: this.creativeId_});
+        dict({'creativeId': this.creativeId_}));
   }
 }
