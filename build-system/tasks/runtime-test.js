@@ -20,6 +20,8 @@ const gulp = require('gulp-help')(require('gulp'));
 const glob = require('glob');
 const Karma = require('karma').Server;
 const config = require('../config');
+const applyConfig = require('./prepend-global/index.js').applyConfig;
+const removeConfig = require('./prepend-global/index.js').removeConfig;
 const fs = require('fs');
 const path = require('path');
 const util = require('gulp-util');
@@ -33,6 +35,7 @@ const green = util.colors.green;
 const yellow = util.colors.yellow;
 const cyan = util.colors.cyan;
 const preTestTasks = argv.nobuild ? [] : (argv.unit ? ['css'] : ['build']);
+const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
 
 
 /**
@@ -154,6 +157,7 @@ function printArgvMessages() {
     if (!argv.compiled) {
       util.log(green('Running tests against unminified code.'));
     }
+    util.log(green('Setting the runtime\'s AMP_CONFIG to'), cyan(ampConfig));
     Object.keys(argv).forEach(arg => {
       const message = argvMessages[arg];
       if (message) {
@@ -163,6 +167,21 @@ function printArgvMessages() {
   }
 }
 
+/**
+ * Applies the prod or canary AMP_CONFIG to file.
+ * Called at the end of "gulp build" and "gulp dist --fortesting".
+ * @param {string} targetFile File to which the config is to be written.
+ * @return {Promise}
+ */
+function applyAmpConfig(targetFile) {
+  let configFile = 'build-system/global-configs/' + ampConfig + '-config.json';
+  if (fs.existsSync(targetFile)) {
+    return removeConfig(targetFile).then(() => {
+      return applyConfig(ampConfig, targetFile, configFile);
+    });
+  }
+  return Promise.resolve();
+}
 
 /**
  * Run tests.
@@ -171,6 +190,10 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
   if (!argv.nohelp) {
     printArgvMessages();
   }
+
+  applyAmpConfig('dist/amp.js');
+  applyAmpConfig('dist/v0.js');
+
 
   if (!argv.integration && process.env.AMPSAUCE_REPO) {
     console./* OK*/info('Deactivated for ampsauce repo');
@@ -357,5 +380,6 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
         'to Karma',
     'nohelp': '  Silence help messages that are printed prior to test run',
     'a4a': '  Runs all A4A tests',
+    'config': '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   },
 });

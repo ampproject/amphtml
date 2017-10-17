@@ -592,9 +592,7 @@ function enableLocalTesting(targetFile) {
   let config = (argv.config === 'canary') ? 'canary' : 'prod';
   let configFile = 'build-system/global-configs/' + config + '-config.json';
 
-  return Promise.resolve().then(() => {
-    return removeConfig(targetFile);
-  }).then(() => {
+  return removeConfig(targetFile).then(() => {
     return applyConfig(config, targetFile, configFile);
   }).then(() => {
     let AMP_CONFIG = {localDev: true};
@@ -1296,7 +1294,7 @@ function toPromise(readable) {
  */
 gulp.task('build', 'Builds the AMP library', build, {
   options: {
-    config: 'Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   }
 });
 gulp.task('check-all', 'Run through all presubmit checks', ['lint', 'dep-check', 'check-types', 'presubmit']);
@@ -1305,18 +1303,18 @@ gulp.task('css', 'Recompile css to build directory', compileCss);
 gulp.task('default', 'Same as "watch"', ['watch', 'serve']);
 gulp.task('dist', 'Build production binaries', dist, {
   options: {
-    pseudo_names: 'Compiles with readable names. ' +
+    pseudo_names: '  Compiles with readable names. ' +
         'Great for profiling and debugging production code.',
-    fortesting: 'Compiles production binaries for local testing',
-    config: 'Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-    minimal_set: 'Only compile files needed to load article.amp.html',
+    fortesting: '  Compiles production binaries for local testing',
+    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+    minimal_set: '  Only compile files needed to load article.amp.html',
   }
 });
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
 gulp.task('watch', 'Watches for changes in files, re-build', watch, {
   options: {
-    with_inabox: 'Also watch and build the amp-inabox.js binary.',
-    with_shadow: 'Also watch and build the amp-shadow.js binary.',
+    with_inabox: '  Also watch and build the amp-inabox.js binary.',
+    with_shadow: '  Also watch and build the amp-shadow.js binary.',
   }
 });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);

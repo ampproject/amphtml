@@ -200,9 +200,7 @@ function main() {
     filename = valueOrDefault(argv.prod,
         'build-system/global-configs/prod-config.json');
   }
-  return Promise.resolve().then(() => {
-    return removeConfig(target);
-  }).then(() => {
+  return removeConfig(target).then(() => {
     return applyConfig(config, target, filename, branch);
   });
 }
