@@ -24,7 +24,6 @@ import {dict} from './../../../src/utils/object';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
-import {scopedQuerySelector} from '../../../src/dom';
 
 
 /**
@@ -191,7 +190,7 @@ export class ShareWidget {
   copyUrlToClipboard_() {
     const url = Services.documentInfoForDoc(
         /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-            dev().assert(this.ampdoc_))).canonicalUrl;
+        dev().assert(this.ampdoc_))).canonicalUrl;
 
     if (!copyTextToClipboard(this.win_.document, url)) {
       Toast.show(this.win_, 'Could not copy link to clipboard :(');
