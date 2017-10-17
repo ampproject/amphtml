@@ -853,7 +853,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 
     this.refreshManager_ = this.refreshManager_ ||
-        getRefreshManager(this, this.useSra, () => {
+        getRefreshManager(this, () => {
           if (this.useSra) {
             user().warn(TAG, 'Refresh not compatible with SRA.');
             return false;

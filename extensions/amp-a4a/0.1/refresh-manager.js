@@ -160,12 +160,12 @@ let refreshManagerIdCounter = 0;
  * If any one of the conditions is not met, null will be returned.
  *
  * @param {!./amp-a4a.AmpA4A} a4a
- * @param {function():boolean=}
+ * @param {function():boolean=} opt_predicate
  * @return {?RefreshManager}
  */
 export function getRefreshManager(a4a, opt_predicate) {
-  const refreshInterval = getPublisherSpecifiedRefreshInterval(
-      a4a.element, a4a.win, a4a.element.getAttribute('type'));
+  const refreshInterval =
+      getPublisherSpecifiedRefreshInterval(a4a.element, a4a.win);
   if (!refreshInterval) {
     return null;
   }
