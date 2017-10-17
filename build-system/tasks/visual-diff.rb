@@ -269,6 +269,9 @@ def generateSnapshots(page, webpages)
   if ARGV.include? '--master'
     Percy::Capybara.snapshot(page, name: 'Blank page')
   end
+  log('verbose', 'Cleaning up existing AMP config')
+  removeCmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --remove"
+  system(removeCmd, :out=>OUT)
   for config in CONFIGS
     log('verbose', 'Switching to the ' + cyan("#{config}") + ' AMP config')
     configCmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --#{config}"

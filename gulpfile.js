@@ -562,12 +562,35 @@ function buildExtensionJs(path, name, version, options) {
 }
 
 /**
- * Enables runtime to be used for local testing. Called when fortesting is true.
+ * Prints a helpful message that lets the developer know how to switch configs.
+ * @param {string} command Command being run.
+ * @param {string} targetFile File to which the config is to be written.
  */
-function enableLocalTesting() {
+function printConfigHelp(command, targetFile) {
+  if (!process.env.TRAVIS) {
+    $$.util.log(
+        green('Building the runtime for local testing with the'),
+        cyan((argv.config === 'canary') ? 'canary' : 'prod'),
+        green('AMP config'));
+    $$.util.log(
+        green('You can specify which config to use by passing'),
+        cyan('--config=canary'), green('or'), cyan('--config=prod'),
+        green('to'), cyan(command));
+    $$.util.log(
+        green('After the build, you can switch configs with'),
+        cyan('gulp prepend-global --canary --target ' + targetFile),
+        green('or'), cyan('gulp prepend-global --prod --target ' + targetFile));
+  }
+}
+
+/**
+ * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
+ * Called at the end of "gulp build" and "gulp dist --fortesting".
+ * @param {string} targetFile File to which the config is to be written.
+ */
+function enableLocalTesting(targetFile) {
   let config = (argv.config === 'canary') ? 'canary' : 'prod';
   let configFile = 'build-system/global-configs/' + config + '-config.json';
-  let targetFile = 'dist/v0.js';
 
   return Promise.resolve().then(() => {
     return removeConfig(targetFile);
@@ -599,6 +622,7 @@ function enableLocalTesting() {
  */
 function build() {
   process.env.NODE_ENV = 'development';
+  printConfigHelp('gulp build', 'dist/amp.js')
   return compileCss().then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -609,6 +633,8 @@ function build() {
       buildExtensions({bundleOnlyIfListedInFiles: true}),
       compile(),
     ]);
+  }).then(() => {
+    return enableLocalTesting('dist/amp.js');
   });
 }
 
@@ -620,18 +646,7 @@ function dist() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   if (argv.fortesting) {
-    $$.util.log(
-        green('Building the runtime for local testing with the'),
-        cyan((argv.config === 'canary') ? 'canary' : 'prod'),
-        green('AMP config'));
-    $$.util.log(
-        green('You can specify which config to use by passing'),
-        cyan('--config=canary'), green('or'), cyan('--config=prod'),
-        green('to'), cyan('gulp dist --fortesting'));
-    $$.util.log(
-        green('After the build, you can switch configs with'),
-        cyan('gulp prepend-global --canary --target dist/v0.js'),
-        green('or'), cyan('gulp prepend-global --prod --target dist/v0.js'));
+    printConfigHelp('gulp dist --fortesting', 'dist/v0.js')
   }
   return compileCss().then(() => {
     return Promise.all([
@@ -653,7 +668,7 @@ function dist() {
     copyAliasExtensions();
   }).then(() => {
     if (argv.fortesting) {
-      return enableLocalTesting();
+      return enableLocalTesting('dist/v0.js');
     }
   });
 }
@@ -1279,7 +1294,11 @@ function toPromise(readable) {
 /**
  * Gulp tasks
  */
-gulp.task('build', 'Builds the AMP library', build);
+gulp.task('build', 'Builds the AMP library', build, {
+  options: {
+    config: 'Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  }
+});
 gulp.task('check-all', 'Run through all presubmit checks', ['lint', 'dep-check', 'check-types', 'presubmit']);
 gulp.task('check-types', 'Check JS types', checkTypes);
 gulp.task('css', 'Recompile css to build directory', compileCss);
@@ -1289,7 +1308,7 @@ gulp.task('dist', 'Build production binaries', dist, {
     pseudo_names: 'Compiles with readable names. ' +
         'Great for profiling and debugging production code.',
     fortesting: 'Compiles production binaries for local testing',
-    config: 'Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary" (used with "fortesting", defaults to "prod")',
+    config: 'Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
     minimal_set: 'Only compile files needed to load article.amp.html',
   }
 });
