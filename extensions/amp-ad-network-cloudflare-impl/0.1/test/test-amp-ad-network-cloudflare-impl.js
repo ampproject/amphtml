@@ -43,6 +43,16 @@ describes.realWin('cloudflare-a4a-config', {
     });
     expect(cloudflareIsA4AEnabled(win, el)).to.be.true;
   });
+
+  it('should not pass a4a config predicate when useRemoteHtml is true', () => {
+    const el = createElementWithAttributes(doc, 'amp-ad', {
+      'data-cf-network': 'cloudflare',
+      src: '/ad.html',
+      'data-cf-a4a': 'true',
+    });
+    const useRemoteHtml = true;
+    expect(cloudflareIsA4AEnabled(win, el, useRemoteHtml)).to.be.false;
+  });
 });
 
 describes.realWin('amp-ad-network-cloudflare-impl', {

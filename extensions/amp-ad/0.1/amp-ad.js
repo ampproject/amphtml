@@ -74,14 +74,14 @@ export class AmpAd extends AMP.BaseElement {
       const slotId = this.win.ampAdSlotIdCounter++;
       this.element.setAttribute('data-amp-slot-index', slotId);
 
+      const useRemoteHtml = (
+          !(adConfig[type] || {}).remoteHTMLDisabled &&
+            this.win.document.querySelector('meta[name=amp-3p-iframe-src]'));
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       // TODO(a4a-cam): Shorten this predicate.
       if (!a4aRegistry[type] ||
-          (!(adConfig[type] || {}).remoteHTMLDisabled &&
-          this.win.document.querySelector('meta[name=amp-3p-iframe-src]') &&
-          !this.element.getAttribute('rtc-config')) ||
           // Note that predicate execution may have side effects.
-          !a4aRegistry[type](this.win, this.element)) {
+          !a4aRegistry[type](this.win, this.element, useRemoteHtml)) {
         // Either this ad network doesn't support Fast Fetch, its Fast Fetch
         // implementation has explicitly opted not to handle this tag, or this
         // page uses remote.html which is inherently incompatible with Fast

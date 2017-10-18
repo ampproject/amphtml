@@ -46,6 +46,14 @@ describes.realWin('gmossp-a4a-config', {amp: false}, env => {
     });
     expect(gmosspIsA4AEnabled(win, element)).to.be.true;
   });
+  it('should fail a4a config predicate due to useRemoteHtml', () => {
+    const element = createElementWithAttributes(doc, 'amp-ad', {
+      src: 'https://amp.sp.gmossp-sp.jp/_a4a/ads/ssp.ad?space_id=33303&is_a4a=1',
+      'data-use-a4a': 'true',
+    });
+    const useRemoteHtml = true;
+    expect(gmosspIsA4AEnabled(win, element, useRemoteHtml)).to.be.false;
+  });
   it('should fail a4a config predicate due to missing use-a4a', () => {
     const element = createElementWithAttributes(doc, 'amp-ad', {
       src: 'https://sp.gmossp-sp.jp/ads/ssp.ad?space_id=33303&is_a4a=1',
