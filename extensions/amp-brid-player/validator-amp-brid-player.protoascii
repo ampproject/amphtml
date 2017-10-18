@@ -43,12 +43,17 @@ tags: {  # <amp-brid-player>
   }
   attrs: {
     name: "data-playlist"
-    mandatory_oneof: "['data-playlist', 'data-video']"
+    mandatory_oneof: "['data-playlist', 'data-video', 'data-outstream']"
     value_regex: "[0-9]+"
   }
   attrs: {
     name: "data-video"
-    mandatory_oneof: "['data-playlist', 'data-video']"
+    mandatory_oneof: "['data-playlist', 'data-video', 'data-outstream']"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "data-outstream"
+    mandatory_oneof: "['data-playlist', 'data-video', 'data-outstream']"
     value_regex: "[0-9]+"
   }
   attr_lists: "extended-amp-global"
