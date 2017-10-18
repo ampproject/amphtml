@@ -126,16 +126,15 @@ describe('iframe-transport-client', () => {
     window.onNewContextInstance = undefined;
   });
 
-  it('Sets listener and baseMessage properly', () => {
+  it('Sets listener, creativeId, and vendor properly', () => {
     const onNewContextInstanceSpy = sandbox.spy();
     window.onNewContextInstance = ctx => onNewContextInstanceSpy(ctx);
     const ctx = new IframeTransportContext(window,
       iframeTransportClient.iframeMessagingClient_,
       'my_creative', 'my_vendor');
     expect(ctx.listener_).to.be.null;
-    expect(ctx.baseMessage_).to.not.be.null;
-    expect(ctx.baseMessage_.creativeId).to.equal('my_creative');
-    expect(ctx.baseMessage_.vendor).to.equal('my_vendor');
+    expect(ctx.creativeId_).to.equal('my_creative');
+    expect(ctx.vendor_).to.equal('my_vendor');
     const listener1 = sandbox.spy();
     const listener2 = sandbox.spy();
     ctx.onAnalyticsEvent(listener1);
