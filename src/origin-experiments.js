@@ -43,9 +43,10 @@ export class OriginExperiments {
   }
 
   /** @return {!Promise<string>} */
-  signToken(version, json, privateKey) {
-    const config = stringToBytes(json);
-    const data = this.prepend_(version, config.length, config);
+  generateToken(version, json, privateKey) {
+    const config = stringToBytes(
+        typeof json == 'object' ? JSON.stringify(json) : json);
+    const data = this.prepend_(version, config);
     return this.sign_(data, privateKey).then(signature => {
       return this.append_(data, new Uint8Array(signature));
     });
@@ -99,10 +100,10 @@ export class OriginExperiments {
     });
   }
 
-  prepend_(version, length, config) {
+  prepend_(version, config) {
     const data = new Uint8Array(config.length + 5);
     data[0] = version;
-    new DataView(data.buffer).setUint32(1, length, false);
+    new DataView(data.buffer).setUint32(1, config.length, false);
     data.set(config, 5);
     return data;
   }

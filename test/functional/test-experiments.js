@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-// import {
-//   publicJwk,
-//   correctToken,
-//   tokenWithBadVersion,
-//   tokenWithBadConfigLength,
-//   tokenWithBadSignature,
-//   tokenWithExpiredExperiment,
-// } from './testdata-experiments';
 import {OriginExperiments} from '../../src/origin-experiments';
 import {Services} from '../../src/services';
 import {installCryptoService} from '../../src/service/crypto-impl';
+import {bytesToString} from '../../src/utils/bytes';
 import {
   enableExperimentsForOriginTrials,
   isCanary,
@@ -877,6 +870,56 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   let crypto;
 
   let warnStub;
+
+  let publicJwk;
+  let correctToken;
+  let tokenWithBadVersion;
+  let tokenWithExpiredExperiment;
+
+  let tokenWithBadConfigLength;
+  let tokenWithBadSignature;
+
+  before(() => {
+    const originExperiments = new OriginExperiments();
+    return originExperiments.generateKeys().then(keyPair => {
+      const {publicKey, privateKey} = keyPair;
+
+      const correctConfig = {
+        origin: 'https://www.google.com',
+        experiment: 'amp-expires-later',
+        expiration: 95617602000000,
+      };
+      const expiredConfig = {
+        origin: 'https://www.google.com',
+        experiment: 'amp-expired',
+        expiration: Date.now() - 1000, // 1s in the past.
+      };
+
+      return Promise.all([
+        originExperiments.generateToken(0, correctConfig, privateKey),
+        originExperiments.generateToken(42, correctConfig, privateKey),
+        originExperiments.generateToken(0, expiredConfig, privateKey),
+      ]).then(results => {
+        ([
+          correctToken,
+          tokenWithBadVersion,
+          tokenWithExpiredExperiment,
+         ] = results);
+
+        tokenWithBadSignature =
+            correctToken.slice(0, correctToken.length - 5);
+
+        const data = new Uint8Array(5);
+        data[0] = 0; // version.
+        new DataView(data.buffer).setUint32(1, 999, false); // config length.
+        tokenWithBadConfigLength = btoa(bytesToString(data));
+
+        return window.crypto.subtle.exportKey('jwk', publicKey);
+      }).then(jwk => {
+        publicJwk = jwk;
+      });
+    });
+  });
 
   beforeEach(() => {
     win = {

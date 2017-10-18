@@ -47,7 +47,7 @@ const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
 // experiment public key jwk.
 /** @type {!Promise<undefined>} */
 const originTrialsPromise = Promise.resolve();
-// const originTrialsPromise = enableExperimentsForOriginTrials(self, {});
+// const originTrialsPromise = enableExperimentsForOriginTrials(self);
 
 /**
  * @typedef {{
@@ -160,19 +160,19 @@ function enableExperimentsFromToken(win, token, crypto, key) {
  * Scan the page for origin trial tokens. Enable experiments detailed in the
  * tokens iff the token is well-formed. A token
  * @param {!Window} win
-  *@param {!Object} publicJwk Used for testing only.
+  *@param {!Object=} opt_publicJwk For testing only.
  * @return {!Promise<undefined>}
  */
-export function enableExperimentsForOriginTrials(win, publicJwk) {
+export function enableExperimentsForOriginTrials(win, opt_publicJwk) {
   const metas =
       win.document.head.querySelectorAll('meta[name="amp-experiment-token"]');
-  if (metas.length == 0 || Object.keys(publicJwk).length == 0) {
+  if (metas.length == 0 || !opt_publicJwk) {
     return Promise.resolve();
   }
   let crypto;
   return getServicePromise(win, 'crypto').then(c => {
     crypto = /** @type {!./service/crypto-impl.Crypto} */ (c);
-    return crypto.importPkcsKey(publicJwk);
+    return crypto.importPkcsKey(opt_publicJwk);
   }).then(key => {
     const tokenPromises = [];
     for (let i = 0; i < metas.length; i++) {
