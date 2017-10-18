@@ -69,6 +69,9 @@ startupChunk(self.document, function initial() {
   installPerformanceService(self);
   /** @const {!./service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
+  if (self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')) {
+    perf.addEnabledExperiment('no-boilerplate');
+  }
   fontStylesheetTimeout(self);
   perf.tick('is');
   installStylesForDoc(ampdoc, cssText, () => {
