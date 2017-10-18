@@ -247,7 +247,11 @@ export const adConfig = {
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   },
 
+  connatix: {
+    renderStartImplemented: true,
+  },
   contentad: {},
+
 
   criteo: {
     prefetch: 'https://static.criteo.net/js/ld/publishertag.js',
@@ -257,8 +261,6 @@ export const adConfig = {
   csa: {
     prefetch: 'https://www.google.com/adsense/search/ads.js',
   },
-
-  connatix: {},
 
   dable: {
     preconnect: [

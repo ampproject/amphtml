@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import {tryParseJson} from '../src/json.js';
  * @param {!Object} data
  */
 export function connatix(global, data) {
-  // ensure we have valid channel id
-  validateData(data, ['connatix', 'width', 'height']);
+
+  validateData(data, ['connatix']);
 
   // Because 3p's loadScript does not allow for data attributes,
   // we will write the JS tag ourselves.
@@ -35,20 +35,11 @@ export function connatix(global, data) {
       script.setAttribute(key, cnxData[key]);
     }
   }
-  function bindEvent(element, type, handler) {
-    if (element.addEventListener) {
-      element.addEventListener(type, handler, false);
-    } else {
-      document.documentElement.attachEvent('onpropertychange',function(event) {
-        if (event.propertyName == type) {
-          handler();
-        }
-      });
-    }
-  }
-  bindEvent(window, 'connatix_no_content', function() {
+
+  window.addEventListener('connatix_no_content',function() {
     window.context.noContentAvailable();
-  });
+  }, false);
+
   script.onload = global.context.renderStart;
   script.src = 'https://cdn.connatix.com/min/connatix.renderer.infeed.min.js';
   global.document.getElementById('c').appendChild(script);

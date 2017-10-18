@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,10 +22,14 @@ limitations under the License.
 <amp-ad width=320 height=140
       type="connatix"
       layout=responsive
-      data-connatix="{data-connatix-token:015b6863-7c89-4708-b3bd-e4f7a4c74d89}"
-  </amp-ad>
+      data-connatix="{data-connatix-token:755145ed-72aa-4a35-bc6e-d5dcfb8837d2}"
+</amp-ad>
 ```
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.For support contact contact@connatix.com
+For semantics of configuration, please see ad network documentation. For support contact contact@connatix.com
+
+Required parameter:
+
+- data-connatix
