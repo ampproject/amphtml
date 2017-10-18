@@ -18,7 +18,6 @@ limitations under the License.
 
 ## Example of Postquare's widget implementation
 
-### Basic
 
 ```html
   <amp-embed width="200" height="200"
@@ -35,9 +34,9 @@ limitations under the License.
 
 Supported parameters:
 
-- data-widgetIds *(**mandatory**)* - Widget ids 
-- data-websiteId *(**mandatory**)* - Website Id
-- data-publisherId *(**mandatory**)* - Publisher Id
-- data-url *(optional)* - Current none amp version URL
-- data-ampUrl *(optional)* - Current AMP page URL
-- data-styleCSS *(optional)* - Additional style
+- widgetIds *(**Required**)* - Widget ids 
+- websiteId *(**Required**)* - Website Id
+- publisherId *(**Required**)* - Publisher Id
+- url *(Optional)* - Current none amp version URL
+- ampUrl *(Optional)* - Current AMP page URL
+- styleCSS *(Optional)* - Additional style

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ export function postquare(global, data) {
 
   validateData(data, ['widgetids']);
 
-  (global._postquare = global._postquare || {
+  global._postquare = global._postquare || {
     viewId: global.context.pageViewId,
     widgetIds: data['widgetids'],
     websiteId: data['websiteid'],
@@ -34,14 +34,11 @@ export function postquare(global, data) {
     mode: data['mode'] || 1,
     style: data['stylecss'] || '',
     referrer: global.context.referrer,
-  });
+  };
 
-  if (data['mode'] == 100)
-  {
+  if (data['mode'] == 100) {
     loadScript(global, 'https://widget.engageya.com/pos_amp_loader.js');
-  }
-  else
-  {
+  } else {
     loadScript(global, 'https://widget.postquare.com/postquare_amp_loader.js');
   }
 }
