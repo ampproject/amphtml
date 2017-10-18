@@ -119,7 +119,7 @@ create your DOM structure and append it to the element. You can also
 read the attributes (e.g. width, height…) the user provided on your
 element in this callback.
 - **Warning**: Don't load remote resources during the buildCallback. This
-only circumvents the AMP resources manager, but it will also lead to
+not only circumvents the AMP resources manager, but it will also lead to
 higher data charges for users because all these resources will be loaded
 before layouting needs to happen.
 - **Warning 2**: Do the least needed work here, and don't build DOM that
@@ -131,8 +131,8 @@ is not needed at this point.
 - **Vsync Context**: None (Neither mutate nor measure)
 - **Override**: Sometimes, if your element will be loading remote
 resources.
-- **Usage**: Use to instruct AMP which hosts to preconnect to and which
-resources to preload/prefetch this allows AMP to delegate to the browser
+- **Usage**: Use to instruct AMP which hosts to preconnect to, and which
+resources to preload/prefetch; this allows AMP to delegate to the browser
 to get a performance boost by preconnecting, preloading and prefetching
 resources via preconnect service.
 - **Example Usage**: [Instagram uses this to
@@ -244,14 +244,14 @@ and when it goes out of it for finer control.
 ## Element styling
 
 You can write a stylesheet to style your element to provide a minimal
-visual appeal, your element structure should account for whether you
+visual appeal. Your element structure should account for whether you
 want users (publishers and developers using your element) to customize
 the default styling you're providing and allow for easy CSS classes
 and/or well-structure DOM elements.
 
 Element styles are loaded when the element script itself is included in
 an AMP doc. You tell AMP which CSS belongs to this element when
-registering the element, see next.
+registering the element (see below).
 
 Class names prefixed with `-amp-` are considered private and
 publishers are not allowed to use to customize (enforced by AMP
@@ -260,7 +260,7 @@ validator).
 ## Register element with AMP
 
 Once you have implemented your AMP element, you need to register it with
-AMP, all AMP extensions are prefixed with `amp-`. This is where you
+AMP; all AMP extensions are prefixed with `amp-`. This is where you
 tell AMP which class to use for this tag name and which CSS to load.
 
 ```javascript
@@ -325,16 +325,16 @@ exposes.
 
 AMP elements are usually discovered and scheduled by the AMP runtime
 automatically and managed through Resources. In some cases an AMP
-element might want to control and own when its sub-elements gets
+element might want to control and own when its sub-elements get
 scheduled and not leave that to the AMP runtime. An example to this is
-the &lt;amp-carousel&gt;, where it wants to schedule
+the &lt;amp-carousel&gt; component, where it wants to schedule
 preloading/pre-rendering or layouting of its cells based on the window
 the user is in.
 
 AMP provides a way for an element to control this by setting the owner
-on the element you want to control. For carousel example, carousel loops
+on the element you want to control. In the carousel example, the component loops
 over all its elements and sets itself as the owner of these elements.
-AMP runtime will not manage scheduling layouting for elements that have
+The AMP runtime will not manage scheduling layouting for elements that have
 owners.
 
 ```javascript

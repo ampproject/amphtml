@@ -25,9 +25,6 @@ import {
 import {createElementWithAttributes} from '../../../src/dom';
 import {cancellation, isCancellation} from '../../../src/error';
 import {
-  installAnchorClickInterceptor,
-} from '../../../src/anchor-click-interceptor';
-import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
 } from '../../../src/friendly-iframe-embed';
@@ -583,7 +580,8 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent();
-          return /** @type {!Promise<?string>} */(this.getAdUrl());
+          return /** @type {!Promise<?string>} */(
+              this.getAdUrl(this.tryExecuteRealTimeConfig_()));
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */
@@ -1010,9 +1008,10 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
+   * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
-  getAdUrl() {
+  getAdUrl(opt_rtcResponsesPromise) {
     throw new Error('getAdUrl not implemented!');
   }
 
@@ -1086,11 +1085,11 @@ export class AmpA4A extends AMP.BaseElement {
    * publisher page but prior to load (or ini-load for friendly frame AMP
    * creative render).  To be overridden by network implementations as needed.
    *
-   * @param {boolean} isVerifiedAmpCreative whether or not the creative was
-   *    verified as AMP and therefore given preferential treatment.
+   * @param {?CreativeMetaDataDef} creativeMetaData metadata if AMP creative,
+   *    null otherwise.
    */
-  onCreativeRender(isVerifiedAmpCreative) {
-    if (isVerifiedAmpCreative) {
+  onCreativeRender(creativeMetaData) {
+    if (creativeMetaData) {
       this.protectedEmitLifecycleEvent_('renderFriendlyEnd');
     }
   }
@@ -1258,9 +1257,6 @@ export class AmpA4A extends AMP.BaseElement {
           const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
               friendlyIframeEmbed.win.document;
           setStyle(frameDoc.body, 'visibility', 'visible');
-          // Capture phase click handlers on the ad.
-          installAnchorClickInterceptor(
-              this.getAmpDoc(), friendlyIframeEmbed.win);
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
           // Capture timing info for friendly iframe load completion.
@@ -1278,7 +1274,7 @@ export class AmpA4A extends AMP.BaseElement {
           protectFunctionWrapper(this.onCreativeRender, this, err => {
             dev().error(TAG, this.element.getAttribute('type'),
                 'Error executing onCreativeRender', err);
-          })(true);
+          })(creativeMetaData);
           // It's enough to wait for "ini-load" signal because in a FIE case
           // we know that the embed no longer consumes significant resources
           // after the initial load.
@@ -1319,7 +1315,7 @@ export class AmpA4A extends AMP.BaseElement {
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(TAG, this.element.getAttribute('type'),
           'Error executing onCreativeRender', err);
-    })(false);
+    })(null);
     return frameLoadPromise;
   }
 
@@ -1546,6 +1542,36 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {!Object<string, string|number>=} opt_extraVariables
    */
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
+
+  /**
+   * Attempts to execute Real Time Config, if the ad network has enabled it.
+   * If it is not supported by the network, but the publisher has included
+   * the rtc-config attribute on the amp-ad element, warn.
+   * @return {Promise<!Array<!rtcResponseDef>>|undefined}
+   */
+  tryExecuteRealTimeConfig_() {
+    if (!!AMP.maybeExecuteRealTimeConfig) {
+      try {
+        return AMP.maybeExecuteRealTimeConfig(
+            this, this.getCustomRealTimeConfigMacros_());
+      } catch (err) {
+        user().error(TAG, 'Could not perform Real Time Config.', err);
+      }
+    } else if (this.element.getAttribute('rtc-config')) {
+      user().error(TAG, 'RTC not supported for ad network ' +
+                   `${this.element.getAttribute('type')}`);
+    }
+  }
+
+  /**
+   * To be overriden by network impl. Should return a mapping of macro keys
+   * to values for substitution in publisher-specified URLs for RTC.
+   * @return {?Object<string,
+   *   !../../../src/service/variable-source.SyncResolverDef>}
+   */
+  getCustomRealTimeConfigMacros_() {
+    return null;
+  }
 
   /**
    * Whether preferential render should still be utilized if web crypto is unavailable,

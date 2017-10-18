@@ -22,7 +22,9 @@
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
-import {fastFetchDelayedRequestEnabled} from './adsense-a4a-config';
+import {
+  identityEnabled,
+} from './adsense-a4a-config';
 import {
   addExperimentIdToElement,
   isInManualExperiment,
@@ -38,11 +40,15 @@ import {
   maybeAppendErrorParameter,
   getEnclosingContainerTypes,
   ValidAdContainerTypes,
+  getIdentityToken,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
+import {
+  installAnchorClickInterceptor,
+} from '../../../src/anchor-click-interceptor';
 import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/string';
@@ -114,7 +120,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
 
-    /** @private {?Element} */
+    /**
+     * amp-analytics element generated based on this.ampAnalyticsConfig_
+     * @private {?Element}
+     */
     this.ampAnalyticsElement_ = null;
 
     /** @private {?string} */
@@ -133,6 +142,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * @private {?string}
      */
     this.autoFormat_ = null;
+
+    /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
+    this.identityTokenPromise_ = null;
   }
 
   /**
@@ -158,16 +170,19 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return fastFetchDelayedRequestEnabled(this.win);
+    return true;
   }
 
   /** @override */
   buildCallback() {
     super.buildCallback();
-
+    this.identityTokenPromise_ = identityEnabled(this.win) ?
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+        .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
+        Promise.resolve(
+          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
     this.autoFormat_ =
         this.element.getAttribute('data-auto-format') || '';
-
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
       addExperimentIdToElement(verifierEid, this.element);
@@ -257,9 +272,23 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (ampAutoAdsBranch) {
       experimentIds.push(ampAutoAdsBranch);
     }
-
-    return googleAdUrl(
-        this, ADSENSE_BASE_URL, startTime, parameters, experimentIds);
+    const identityPromise = Services.timerFor(this.win)
+        .timeoutPromise(1000, this.identityTokenPromise_)
+        .catch(unusedErr => {
+          // On error/timeout, proceed.
+          return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/(
+            {});
+        });
+    return identityPromise.then(identity => {
+      return googleAdUrl(
+          this, ADSENSE_BASE_URL, startTime, Object.assign(
+              {
+                adsid: identity.token || null,
+                jar: identity.jar || null,
+                pucrd: identity.pucrd || null,
+              },
+              parameters), experimentIds);
+    });
   }
 
   /** @override */
@@ -326,8 +355,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  onCreativeRender(isVerifiedAmpCreative) {
-    super.onCreativeRender(isVerifiedAmpCreative);
+  onCreativeRender(creativeMetaData) {
+    super.onCreativeRender(creativeMetaData);
+    if (creativeMetaData &&
+        !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
+      // Capture phase click handlers on the ad if amp-ad-exit not present
+      // (assume it will handle capture).
+      dev().assert(this.iframe);
+      installAnchorClickInterceptor(
+          this.getAmpDoc(), this.iframe.contentWindow);
+    }
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
       if (isReportingEnabled(this)) {
@@ -336,7 +373,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
             this.element,
             this.ampAnalyticsConfig_,
             this.qqid_,
-            isVerifiedAmpCreative,
+            !!creativeMetaData,
             this.lifecycleReporter_.getDeltaTime(),
             this.lifecycleReporter_.getInitTime());
       }

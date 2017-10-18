@@ -31,6 +31,7 @@ import {
   getNetworkId,
   CORRELATOR_CLEAR_EXP_BRANCHES,
   CORRELATOR_CLEAR_EXP_NAME,
+  SAFEFRAME_ORIGIN,
 } from '../amp-ad-network-doubleclick-impl';
 import {
   DFP_CANONICAL_FF_EXPERIMENT_NAME,
@@ -49,7 +50,6 @@ import {
   toggleExperiment,
   forceExperimentBranch,
 } from '../../../../src/experiments';
-import {Xhr} from '../../../../src/service/xhr-impl';
 import {VisibilityState} from '../../../../src/visibility-state';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
@@ -338,6 +338,68 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       // test/functional/test-analytics.js.
       // Just ensure extensions is loaded, and analytics element appended.
     });
+
+    it('should register click listener', () => {
+      impl.iframe = impl.win.document.createElement('iframe');
+      impl.win.document.body.appendChild(impl.iframe);
+      const adBody = impl.iframe.contentDocument.body;
+      let clickHandlerCalled = 0;
+
+      adBody.onclick = function(e) {
+        expect(e.defaultPrevented).to.be.false;
+        e.preventDefault();  // Make the test not actually navigate.
+        clickHandlerCalled++;
+      };
+      adBody.innerHTML = '<a ' +
+          'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
+          '<button id="target"><button></div>';
+      const button = adBody.querySelector('#target');
+      const a = adBody.querySelector('a');
+      const ev1 = new Event('click', {bubbles: true});
+      ev1.pageX = 10;
+      ev1.pageY = 20;
+      sandbox.stub(impl, 'getResource').returns(
+          {
+            getUpgradeDelayMs: () => 1,
+          });
+      impl.buildCallback();
+      impl.size_ = {width: 123, height: 456};
+      impl.onCreativeRender({customElementExtensions: []});
+      button.dispatchEvent(ev1);
+      expect(a.href).to.equal('https://f.co/?10,20,RANDOM');
+      expect(clickHandlerCalled).to.equal(1);
+    });
+
+    it('should not register click listener is amp-ad-exit', () => {
+      impl.iframe = impl.win.document.createElement('iframe');
+      impl.win.document.body.appendChild(impl.iframe);
+      const adBody = impl.iframe.contentDocument.body;
+      let clickHandlerCalled = 0;
+
+      adBody.onclick = function(e) {
+        expect(e.defaultPrevented).to.be.false;
+        e.preventDefault();  // Make the test not actually navigate.
+        clickHandlerCalled++;
+      };
+      adBody.innerHTML = '<a ' +
+          'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
+          '<button id="target"><button></div>';
+      const button = adBody.querySelector('#target');
+      const a = adBody.querySelector('a');
+      const ev1 = new Event('click', {bubbles: true});
+      ev1.pageX = 10;
+      ev1.pageY = 20;
+      sandbox.stub(impl, 'getResource').returns(
+          {
+            getUpgradeDelayMs: () => 1,
+          });
+      impl.buildCallback();
+      impl.size_ = {width: 123, height: 456};
+      impl.onCreativeRender({customElementExtensions: ['amp-ad-exit']});
+      button.dispatchEvent(ev1);
+      expect(a.href).to.equal('https://f.co/?CLICK_X,CLICK_Y,RANDOM');
+      expect(clickHandlerCalled).to.equal(1);
+    });
   });
 
   describe('#getAdUrl', () => {
@@ -461,54 +523,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
              // Ensure that "auto" doesn't appear anywhere here:
              expect(url).to.match(/sz=[0-9]+x[0-9]+/));
         });
-    it('should add RTC params if RTC is used', () => {
-      const rtcConf = createElementWithAttributes(
-          doc, 'script',
-          {type: 'application/json', id: 'amp-rtc'});
-      rtcConf.innerHTML = `{
-          "endpoint": "https://example-publisher.com/rtc/",
-          "sendAdRequestOnFailure": false
-          }`;
-      doc.head.appendChild(rtcConf);
-      const rtcResponse = {targeting: {age: '18-24'}};
-      const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
-      xhrMock.returns(
-          Promise.resolve({
-            redirected: false,
-            status: 200,
-            text: () => {
-              return Promise.resolve(JSON.stringify(rtcResponse));
-            },
-          })
-          );
-      new AmpAd(element).upgradeCallback();
-      return impl.getAdUrl().then(url => {
-        expect(url).to.match(/(\?|&)artc=[0-9]+(&|$)/);
-        expect(url).to.match(
-            /(\?|&)ard=example-publisher.com/);
-        expect(url).to.match(/(\?|&)ati=2(&|$)/);
-      });
-
-    });
-    it('should add param artc=-1 if RTC request times out', () => {
-      const rtcConf = createElementWithAttributes(
-          doc, 'script',
-          {type: 'application/json', id: 'amp-rtc'});
-      rtcConf.innerHTML = `{
-          "endpoint": "https://example-publisher.com/rtc/",
-          "sendAdRequestOnFailure": false
-          }`;
-      doc.head.appendChild(rtcConf);
-      const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
-      // never resolve this promise
-      const xhrResponse = new Promise(() => {});
-      xhrMock.returns(xhrResponse);
-      new AmpAd(element).upgradeCallback();
-      return impl.getAdUrl().catch(err => {
-        expect(err.message.match(/^timeout.*/)).to.be.ok;
-      });
-
-    });
     it('has correct format with height/width override',
         () => {
           element.setAttribute('data-override-width', '123');
@@ -596,6 +610,22 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.fromResumeCallback = true;
       impl.getAdUrl().then(url => {
         expect(url).to.match(/(\?|&)frc=1(&|$)/);
+      });
+    });
+    it('should include identity', () => {
+      forceExperimentBranch(impl.win, DOUBLECLICK_A4A_EXPERIMENT_NAME,
+          DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT);
+      // Force get identity result by overloading window variable.
+      const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
+        token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
+      });
+      impl.win['goog_identity_prom'] = Promise.resolve(token);
+      impl.buildCallback();
+      return impl.getAdUrl().then(url => {
+        [/(\?|&)adsid=abcdef(&|$)/,
+          /(\?|&)jar=some_jar(&|$)/,
+          /(\?|&)pucrd=some_pucrd(&|$)/].forEach(
+            regexp => expect(url).to.match(regexp));
       });
     });
   });
@@ -979,8 +1009,41 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should return true when in canonical non-SSL experiment', () => {
       forceExperimentBranch(impl.win, DFP_CANONICAL_FF_EXPERIMENT_NAME,
-          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT);
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT);
       expect(impl.shouldPreferentialRenderWithoutCrypto()).to.be.true;
+    });
+  });
+
+  describe('#disable safeframe preload experiment', () => {
+
+    const sfPreloadExpName = 'a4a-safeframe-preloading-off';
+
+    beforeEach(() => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        type: 'doubleclick',
+        height: '250',
+        width: '320',
+      });
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+    });
+
+    it('should not preload SafeFrame', () => {
+      forceExperimentBranch(impl.win, sfPreloadExpName, '21061136');
+      impl.buildCallback();
+      expect(isInExperiment(element, '21061135')).to.be.false;
+      expect(isInExperiment(element, '21061136')).to.be.true;
+      expect(impl.getPreconnectUrls()).to.deep.equal(
+          ['https://partner.googleadservices.com']);
+    });
+
+    it('should preload SafeFrame', () => {
+      forceExperimentBranch(impl.win, sfPreloadExpName, '21061135');
+      impl.buildCallback();
+      expect(isInExperiment(element, '21061135')).to.be.true;
+      expect(isInExperiment(element, '21061136')).to.be.false;
+      expect(impl.getPreconnectUrls()).to.deep.equal(
+          ['https://partner.googleadservices.com', SAFEFRAME_ORIGIN]);
     });
   });
 });

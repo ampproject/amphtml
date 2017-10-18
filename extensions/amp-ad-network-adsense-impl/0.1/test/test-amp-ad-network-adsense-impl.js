@@ -263,6 +263,68 @@ describes.realWin('amp-ad-network-adsense-impl', {
       // test/functional/test-analytics.js.
       // Just ensure extensions is loaded, and analytics element appended.
     });
+
+    it('should register click listener', () => {
+      impl.iframe = impl.win.document.createElement('iframe');
+      impl.win.document.body.appendChild(impl.iframe);
+      const adBody = impl.iframe.contentDocument.body;
+      let clickHandlerCalled = 0;
+
+      adBody.onclick = function(e) {
+        expect(e.defaultPrevented).to.be.false;
+        e.preventDefault();  // Make the test not actually navigate.
+        clickHandlerCalled++;
+      };
+      adBody.innerHTML = '<a ' +
+          'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
+          '<button id="target"><button></div>';
+      const button = adBody.querySelector('#target');
+      const a = adBody.querySelector('a');
+      const ev1 = new Event('click', {bubbles: true});
+      ev1.pageX = 10;
+      ev1.pageY = 20;
+      sandbox.stub(impl, 'getResource').returns(
+          {
+            getUpgradeDelayMs: () => 1,
+          });
+      impl.buildCallback();
+      impl.size_ = {width: 123, height: 456};
+      impl.onCreativeRender({customElementExtensions: []});
+      button.dispatchEvent(ev1);
+      expect(a.href).to.equal('https://f.co/?10,20,RANDOM');
+      expect(clickHandlerCalled).to.equal(1);
+    });
+
+    it('should not register click listener is amp-ad-exit', () => {
+      impl.iframe = impl.win.document.createElement('iframe');
+      impl.win.document.body.appendChild(impl.iframe);
+      const adBody = impl.iframe.contentDocument.body;
+      let clickHandlerCalled = 0;
+
+      adBody.onclick = function(e) {
+        expect(e.defaultPrevented).to.be.false;
+        e.preventDefault();  // Make the test not actually navigate.
+        clickHandlerCalled++;
+      };
+      adBody.innerHTML = '<a ' +
+          'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
+          '<button id="target"><button></div>';
+      const button = adBody.querySelector('#target');
+      const a = adBody.querySelector('a');
+      const ev1 = new Event('click', {bubbles: true});
+      ev1.pageX = 10;
+      ev1.pageY = 20;
+      sandbox.stub(impl, 'getResource').returns(
+          {
+            getUpgradeDelayMs: () => 1,
+          });
+      impl.buildCallback();
+      impl.size_ = {width: 123, height: 456};
+      impl.onCreativeRender({customElementExtensions: ['amp-ad-exit']});
+      button.dispatchEvent(ev1);
+      expect(a.href).to.equal('https://f.co/?CLICK_X,CLICK_Y,RANDOM');
+      expect(clickHandlerCalled).to.equal(1);
+    });
   });
 
   describe('centering', () => {
@@ -521,6 +583,23 @@ describes.realWin('amp-ad-network-adsense-impl', {
         });
       });
     });
+
+    it('should include identity', () => {
+      forceExperimentBranch(impl.win, ADSENSE_A4A_EXPERIMENT_NAME,
+          ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT);
+      // Force get identity result by overloading window variable.
+      const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
+        token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
+      });
+      impl.win['goog_identity_prom'] = Promise.resolve(token);
+      impl.buildCallback();
+      return impl.getAdUrl().then(url => {
+        [/(\?|&)adsid=abcdef(&|$)/,
+          /(\?|&)jar=some_jar(&|$)/,
+          /(\?|&)pucrd=some_pucrd(&|$)/].forEach(
+            regexp => expect(url).to.match(regexp));
+      });
+    });
   });
 
   describe('#unlayoutCallback', () => {
@@ -735,32 +814,9 @@ describes.realWin('amp-ad-network-adsense-impl', {
   });
 
   describe('#delayAdRequestEnabled', () => {
-    let impl;
-    beforeEach(() => {
-      impl = new AmpAdNetworkAdsenseImpl(
-        createElementWithAttributes(doc, 'amp-ad', {
-          type: 'adsense',
-        }));
-    });
-
-    [
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_CONTROL, {
-        layer: ADSENSE_A4A_EXPERIMENT_NAME,
-        result: true,
-      }],
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_EXTERNAL, {
-        layer: ADSENSE_A4A_EXPERIMENT_NAME,
-        result: false,
-      }],
-    ].forEach(item => {
-      it(`should return ${item[1].result} if in ${item[0]} experiment`, () => {
-        forceExperimentBranch(impl.win, item[1].layer, item[0]);
-        expect(impl.delayAdRequestEnabled()).to.equal(item[1].result);
-      });
-    });
-
-    it('should return true if not in any experiments', () => {
-      expect(impl.delayAdRequestEnabled()).to.be.true;
+    it('should return true', () => {
+      expect(AmpAdNetworkAdsenseImpl.prototype.delayAdRequestEnabled())
+          .to.be.true;
     });
   });
 });
