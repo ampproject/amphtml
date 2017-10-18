@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {isObject} from '../../../src/types';
-import {renderAsElement, renderSimpleTemplate} from './simple-template';
-import {scopedQuerySelector} from '../../../src/dom';
+import {Toast} from './toast';
+import {
+  copyTextToClipboard,
+  isCopyingToClipboardSupported,
+} from '../../../src/clipboard';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
+import {isObject} from '../../../src/types';
+import {listen} from '../../../src/event-helper';
+import {renderAsElement, renderSimpleTemplate} from './simple-template';
+import {scopedQuerySelector} from '../../../src/dom';
 
 
 /**
@@ -45,25 +51,6 @@ const TEMPLATE = {
     children: [
       {
         tag: 'li',
-        children: [
-          {
-            tag: 'div',
-            attrs: dict({
-              'class':
-                  'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
-            }),
-          },
-          {
-            tag: 'span',
-            text: 'Get Link', // TODO(alanorozco): i18n
-            attrs: dict({
-              'class': 'i-amphtml-story-share-name',
-            }),
-          },
-        ],
-      },
-      {
-        tag: 'li',
         attrs: dict({'class': 'i-amphtml-story-share-system'}),
       },
     ],
@@ -73,6 +60,17 @@ const TEMPLATE = {
 
 /** @private @const {!./simple-template.ElementDef} */
 const SHARE_ITEM_TEMPLATE = {tag: 'li'};
+
+
+/** @private @const {!./simple-template.ElementDef} */
+const LINK_SHARE_ITEM_TEMPLATE = {
+  tag: 'div',
+  attrs: dict({
+    'class':
+        'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
+  }),
+  text: 'Get Link', // TODO(alanorozco): i18n
+};
 
 
 /**
@@ -118,6 +116,30 @@ function buildProvider(doc, shareType, opt_params) {
 
 
 /**
+ * @param {!Document} doc
+ * @param {string} url
+ * @return {!Element}
+ */
+function buildCopySuccessfulToast(doc, url) {
+  return renderAsElement(doc, /** @type {!./simple-template.ElementDef} */ ({
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-copy-successful'}),
+    children: [
+      {
+        tag: 'div',
+        text: 'Link copied!', // TODO(alanorozco): i18n
+      },
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-story-copy-url'}),
+        text: url,
+      },
+    ],
+  }));
+}
+
+
+/**
  * Social share widget for story bookend.
  */
 export class ShareWidget {
@@ -149,9 +171,43 @@ export class ShareWidget {
 
     this.root_ = renderAsElement(this.win_.document, TEMPLATE);
 
+    this.maybeAddLinkShareButton_();
     this.maybeAddSystemShareButton_();
 
     return this.root_;
+  }
+
+  /** @private */
+  maybeAddLinkShareButton_() {
+    if (!isCopyingToClipboardSupported(this.win_.document)) {
+      return;
+    }
+
+    const linkShareButton =
+        renderAsElement(this.win_.document, LINK_SHARE_ITEM_TEMPLATE);
+
+    this.add_(linkShareButton);
+
+    // TODO(alanorozco): Listen for proper tap event (i.e. fastclick)
+    listen(linkShareButton, 'click', e => {
+      e.preventDefault();
+      this.copyUrlToClipboard_();
+    });
+  }
+
+  /** @private */
+  // TODO(alanorozco): i18n for toast.
+  copyUrlToClipboard_() {
+    const url = Services.documentInfoForDoc(
+        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
+        dev().assert(this.ampdoc_))).canonicalUrl;
+
+    if (!copyTextToClipboard(this.win_.document, url)) {
+      Toast.show(this.win_, 'Could not copy link to clipboard :(');
+      return;
+    }
+
+    Toast.show(this.win_, buildCopySuccessfulToast(this.win_.document, url));
   }
 
   /** @private */
