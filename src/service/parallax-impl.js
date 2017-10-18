@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-import {Observable} from '../observable';
 import {isExperimentOn} from '../experiments';
+import {getServiceForDoc} from '../service';
+import {Services} from '../services';
 import {registerServiceBuilderForDoc} from '../service';
 import {setStyles} from '../style';
 import {toArray} from '../types';
 import {user} from '../log';
-import {Services} from '../services';
+import {
+  installPositionObserverServiceForDoc,
+} from '../service/position-observer/position-observer-impl';
+import {
+  PositionObserverFidelity,
+} from '../service/position-observer/position-observer-worker';
 
 const ATTR = 'amp-fx-parallax';
 const EXPERIMENT = ATTR;
@@ -34,114 +40,21 @@ export class ParallaxService {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @private @const {!Observable} */
-    this.parallaxObservable_ = new Observable();
 
-    /** @private {number} */
-    this.previousScroll_ = 0;
+    this.ampdoc_ = ampdoc;
+    this.root_ = ampdoc.getRootNode();
 
-    this.installParallaxHandlers_(ampdoc.win);
+    installPositionObserverServiceForDoc(ampdoc);
+
+    this.scan_(ampdoc.win);
   }
 
-
   /**
-   * Constructs and installs scroll handlers on all [amp-fx-parallax] elements
-   * in the document.
-   * @param {!Window} global
    * @private
    */
-  installParallaxHandlers_(global) {
-    const doc = global.document;
-    const viewport = Services.viewportForDoc(doc);
-    const vsync = Services.vsyncFor(global);
-
-    const elements = toArray(doc.querySelectorAll(`[${ATTR}]`));
-    const parallaxElements = elements.map(
-        e => new ParallaxElement(e, this.transform_));
-    const mutate =
-        this.parallaxMutate_.bind(this, parallaxElements, viewport);
-
-    viewport.onScroll(() => vsync.mutate(mutate));
-    mutate(); // initialize the elements with the current scroll position
-  }
-
-  /**
-   * Update each [amp-fx-parallax] element with the new scroll position.
-   * Notify any listeners.
-   * @param {!Array<!ParallaxElement>} elements
-   * @param {!./viewport/viewport-impl.Viewport} viewport
-   * @private
-   */
-  parallaxMutate_(elements, viewport) {
-    const newScrollTop = viewport.getScrollTop();
-    const previousScrollTop = this.getPreviousScroll_();
-    const delta = previousScrollTop - newScrollTop;
-
-    elements.forEach(element => {
-      if (!element.shouldUpdate(viewport)) {
-        return;
-      }
-      element.update(delta);
-      this.setPreviousScroll_(newScrollTop);
-    });
-
-    this.fire_(newScrollTop);
-  }
-
-  /**
-   * Create a value for the CSS transform property given a position.
-   * @param {number} position
-   * @return {string}
-   */
-  transform_(position) {
-    return `translate3d(0,${position.toFixed(2)}px,0)`;
-  }
-
-  /**
-   * Get the previous scroll value.
-   * @return {number}
-   * @private
-   */
-  getPreviousScroll_() {
-    return this.previousScroll_;
-  }
-
-  /**
-   * Set the previous scroll value.
-   * @param {number} scroll
-   * @private
-   */
-  setPreviousScroll_(scroll) {
-    this.previousScroll_ = scroll;
-  }
-
-  /**
-   * Add listeners to parallax scroll events.
-   * @param {!function()} cb
-   * @private
-   * @visibleForTesting
-   */
-  addScrollListener_(cb) {
-    this.parallaxObservable_.add(cb);
-  }
-
-  /**
-   * Remove listeners from parallax scroll events.
-   * @param {!function()} cb
-   * @private
-   * @visibleForTesting
-   */
-  removeScrollListener_(cb) {
-    this.parallaxObservable_.remove(cb);
-  }
-
-  /**
-   * Alert listeners that a scroll has occurred.
-   * @param {number} scrollTop
-   * @private
-   */
-  fire_(scrollTop) {
-    this.parallaxObservable_.fire(scrollTop);
+  scan_() {
+    const elements = toArray(this.root_.querySelectorAll(`[${ATTR}]`));
+    elements.forEach(element => new ParallaxElement(element, this.ampdoc_));
   }
 }
 
@@ -151,55 +64,65 @@ export class ParallaxService {
 export class ParallaxElement {
   /**
    * @param {!Element} element The element to give a parallax effect.
-   * @param {!function(number):string} transform Computes the transform from the position.
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(element, transform) {
+  constructor(element, ampdoc) {
     const factor = element.getAttribute(ATTR);
+
+    /** @private{!../service/position-observer/position-observer-impl.PositionObserver} */
+    this.positionObserver_ = getServiceForDoc(ampdoc, 'position-observer');
+
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
+
+    this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!Element} */
     this.element_ = element;
-
-    /** @private @const {!function(number):string} */
-    this.transform_ = transform;
 
     /** @private @const {number} */
     this.factor_ = (factor ? parseFloat(factor) : 0.5) - 1;
 
     /** @private {number} */
     this.offset_ = 0;
+
+    this.previousPosition_ = null;
+
+    this.observe_();
   }
 
   /**
    * Apply the parallax effect to the offset given how much the page
    * has moved since the last frame.
-   * @param {number} delta The movement of the base layer e.g. the page.
    */
-  update(delta) {
+  update_(entry) {
+    // outside viewport or user has not scrolled yet
+    if (!entry.positionRect) {
+      return;
+    }
+
+    if (!this.previousPosition_) {
+      this.previousPosition_ = entry.positionRect.top;
+    }
+
+    const delta = this.previousPosition_ - entry.positionRect.top;
+    this.previousPosition_ = entry.positionRect.top;
     this.offset_ += delta * this.factor_;
-    setStyles(this.element_, {transform: this.transform_(this.offset_)});
+    this.vsync_.mutate(() => {
+      setStyles(this.element_,
+        {transform: `translateY(${-this.offset_.toFixed(0)}px)`}
+      );
+    });
   }
 
-  /**
-   * True if the element is in the viewport.
-   * @param {!./viewport/viewport-impl.Viewport} viewport
-   * @return {boolean}
-   */
-  shouldUpdate(viewport) {
-    const viewportRect = viewport.getRect();
-    const elementRect = viewport.getLayoutRect(this.element_);
-    elementRect.top -= viewportRect.top;
-    elementRect.bottom = elementRect.top + elementRect.height;
-    return this.isRectInView_(elementRect, viewportRect.height);
-  }
+  observe_() {
+    this.viewport_.onResize(() => {
+      this.initialPosition_ = null;
+      this.update_();
+    });
 
-  /**
-   * Check if a rectange is within the viewport.
-   * @param {!../layout-rect.LayoutRectDef} rect
-   * @param {number} viewportHeight
-   * @private
-   */
-  isRectInView_(rect, viewportHeight) {
-    return rect.bottom >= 0 && rect.top <= viewportHeight;
+    this.positionObserver_.observe(this.element_, PositionObserverFidelity.HIGH,
+        this.update_.bind(this)
+    );
   }
 }
 
@@ -207,8 +130,8 @@ export class ParallaxElement {
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
  */
 export function installParallaxForDoc(nodeOrDoc) {
-  const enabled = isExperimentOn(AMP.win, EXPERIMENT);
-  user().assert(enabled, `Experiment "${EXPERIMENT}" is disabled.`);
+  // const enabled = isExperimentOn(AMP.win, EXPERIMENT);
+  // user().assert(enabled, `Experiment "${EXPERIMENT}" is disabled.`);
   registerServiceBuilderForDoc(
       nodeOrDoc,
       'amp-fx-parallax',
