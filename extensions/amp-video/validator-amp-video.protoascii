@@ -49,6 +49,7 @@ tags: {  # <amp-video>
   }
   attrs: { name: "controlslist" }
   attrs: { name: "crossorigin" }
+  attrs: { name: "disableremoteplayback" }
   attrs: {
     name: "loop"
     value: ""
