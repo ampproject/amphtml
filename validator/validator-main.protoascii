@@ -3723,6 +3723,9 @@ attr_lists: {
       also_requires_attr: "validation-for"
     }
   }
+  # amp-fx-parallax specific attributes, see
+  # https://www.ampproject.org/docs/reference/components/amp-fx-parallax
+  attrs: { name: "amp-fx-parallax" }
   # <amp-bind>
   attrs: { name: "[aria-activedescendant]" }
   attrs: { name: "[aria-atomic]" }
