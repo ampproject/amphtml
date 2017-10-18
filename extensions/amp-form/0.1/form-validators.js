@@ -286,8 +286,10 @@ export class AbstractCustomValidator extends FormValidator {
   onInteraction(event) {
     const input = dev().assertElement(event.target);
     const shouldValidate = this.shouldValidateOnInteraction(input);
+    const isInvalid = input.checkValidity && !input.checkValidity();
+
     this.hideValidationFor(input);
-    if (shouldValidate && !input.checkValidity()) {
+    if (shouldValidate && isInvalid) {
       this.reportInput(input);
     }
   }
