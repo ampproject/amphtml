@@ -6,6 +6,7 @@
   "expAdsenseA4A": 0.01,
   "expDoubleclickA4A": 0.01,
   "expDfpCanonicalFf": 0.01,
+  "expUnconditionedCanonical": 0.01,
   "dbclk_a4a_viz_change": 0.02,
   "a4aProfilingRate": 0.1,
   "ad-type-custom": 1,
