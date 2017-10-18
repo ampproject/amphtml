@@ -16,8 +16,6 @@
 
 import {
   doubleclickIsA4AEnabled,
-  BETA_ATTRIBUTE,
-  BETA_EXPERIMENT_ID,
   DFP_CANONICAL_FF_EXPERIMENT_NAME,
   DFP_UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME,
   DOUBLECLICK_EXPERIMENT_FEATURE,
@@ -152,17 +150,6 @@ describe('doubleclick-a4a-config', () => {
           expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
         });
 
-    it('should honor beta over url experiment id', () => {
-      mockWin.location = parseUrl(
-          'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:2');
-      const elem = testFixture.doc.createElement('div');
-      elem.setAttribute(BETA_ATTRIBUTE, 'true');
-      testFixture.doc.body.appendChild(elem);
-      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          BETA_EXPERIMENT_ID);
-    });
-
     Object.keys(URL_EXPERIMENT_MAPPING).forEach(expFlagValue => {
       it(`exp flag=${expFlagValue} should set eid attribute`, () => {
         mockWin.location = parseUrl(
@@ -178,8 +165,6 @@ describe('doubleclick-a4a-config', () => {
           expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.be.ok;
           expect(isInExperiment(elem, URL_EXPERIMENT_MAPPING[expFlagValue]))
               .to.be.true;
-          // Should not be in beta.
-          expect(isInExperiment(elem, BETA_EXPERIMENT_ID)).to.be.false;
         }
       });
     });

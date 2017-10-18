@@ -86,12 +86,6 @@ export const URL_EXPERIMENT_MAPPING = {
   '10': DOUBLECLICK_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_EXP,
 };
 
-/** @const {string} */
-export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
-
-/** @const {string} */
-export const BETA_EXPERIMENT_ID = '2077831';
-
 /**
  * Class for checking whether a page/element is eligible for Fast Fetch.
  * Singleton class.
@@ -167,11 +161,6 @@ export class DoubleclickA4aEligibility {
         return false;
       }
     } else {
-      if (element.hasAttribute(BETA_ATTRIBUTE)) {
-        addExperimentIdToElement(BETA_EXPERIMENT_ID, element);
-        dev().info(TAG, `beta forced a4a selection ${element}`);
-        return true;
-      }
       experimentName = DOUBLECLICK_A4A_EXPERIMENT_NAME;
       // See if in holdback control/experiment.
       if (urlExperimentId != undefined) {
