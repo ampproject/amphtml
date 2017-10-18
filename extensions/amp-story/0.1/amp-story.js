@@ -58,6 +58,8 @@ import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
 import {urls} from '../../../src/config';
+import {getSourceOrigin, parseUrl} from '../../../src/url';
+import {stringHash32} from '../../../src/string';
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;
@@ -79,6 +81,13 @@ const DESKTOP_THRESHOLD = 768;
 
 /** @type {string} */
 const TAG = 'amp-story';
+
+/** @type {!Array<string>} */
+const WHITELISTED_ORIGINS = [
+  '3451824873', '834917366', '4273375831', '750731789', '3322156041',
+  '878041739', '2199838184', '708478954', '142793127', '2414533450',
+  '212690086',
+];
 
 
 /**
@@ -159,6 +168,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?function()} */
     this.boundOnResize_ = null;
   }
+
 
   /** @override */
   buildCallback() {
@@ -343,8 +353,40 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /** @private */
+  isAmpStoryEnabled_() {
+    if (isExperimentOn(this.win, TAG) || getMode().test || getMode().localDev) {
+      return true;
+    }
+
+    const origin = getSourceOrigin(this.win.location);
+    const hostName = parseUrl(origin).hostname;
+    const domains = hostName.split('.');
+
+    // Check all permutations of the domain to see if any level of the domain is
+    // whitelisted.  Taking the example of the whitelisted domain
+    // example.co.uk, if the page is served from www.example.co.uk/page.html:
+    //
+    //   www.example.co.uk => false
+    //   example.co.uk => true
+    //   co.uk => false
+    //   uk => false
+    //
+    // This is necessary, since we don't have any guarantees of which level of
+    // the domain is whitelisted.  For many domains (e.g. .com), the second
+    // level of the domain is likely to be whitelisted, whereas for others
+    // (e.g. .co.uk) the third level may be whitelisted.  Additionally, this
+    // allows subdomains to be whitelisted individually.
+    return domains.some((unusedDomain, index) => {
+      const domain = domains.slice(0, index + 1).join('.');
+      const domainHash = stringHash32(domain.toLowerCase());
+      return WHITELISTED_ORIGINS.includes(domainHash);
+    });
+  }
+
+
+  /** @private */
   assertAmpStoryExperiment_() {
-    if (!isExperimentOn(this.win, TAG)) {
+    if (!this.isAmpStoryEnabled_()) {
       const errorIconEl = this.win.document.createElement('div');
       errorIconEl.classList.add('i-amphtml-story-experiment-error-icon');
 

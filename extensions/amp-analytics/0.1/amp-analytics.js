@@ -181,7 +181,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   unlayoutCallback() {
     if (Services.viewerForDoc(this.getAmpDoc()).isVisible()) {
       // amp-analytics tag was just set to display:none. Page is still loaded.
-      return super.unlayoutCallback();
+      return false;
     }
 
     // Page was unloaded - free up owned resources.

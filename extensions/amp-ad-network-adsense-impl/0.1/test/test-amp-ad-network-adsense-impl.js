@@ -814,32 +814,9 @@ describes.realWin('amp-ad-network-adsense-impl', {
   });
 
   describe('#delayAdRequestEnabled', () => {
-    let impl;
-    beforeEach(() => {
-      impl = new AmpAdNetworkAdsenseImpl(
-        createElementWithAttributes(doc, 'amp-ad', {
-          type: 'adsense',
-        }));
-    });
-
-    [
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_CONTROL, {
-        layer: ADSENSE_A4A_EXPERIMENT_NAME,
-        result: true,
-      }],
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_EXTERNAL, {
-        layer: ADSENSE_A4A_EXPERIMENT_NAME,
-        result: false,
-      }],
-    ].forEach(item => {
-      it(`should return ${item[1].result} if in ${item[0]} experiment`, () => {
-        forceExperimentBranch(impl.win, item[1].layer, item[0]);
-        expect(impl.delayAdRequestEnabled()).to.equal(item[1].result);
-      });
-    });
-
-    it('should return true if not in any experiments', () => {
-      expect(impl.delayAdRequestEnabled()).to.be.true;
+    it('should return true', () => {
+      expect(AmpAdNetworkAdsenseImpl.prototype.delayAdRequestEnabled())
+          .to.be.true;
     });
   });
 });

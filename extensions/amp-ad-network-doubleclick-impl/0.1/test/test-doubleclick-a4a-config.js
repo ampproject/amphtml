@@ -19,7 +19,6 @@ import {
   BETA_ATTRIBUTE,
   BETA_EXPERIMENT_ID,
   DFP_CANONICAL_FF_EXPERIMENT_NAME,
-  DOUBLECLICK_A4A_EXPERIMENT_NAME,
   DOUBLECLICK_EXPERIMENT_FEATURE,
   URL_EXPERIMENT_MAPPING,
   DoubleclickA4aEligibility,
@@ -169,9 +168,8 @@ describe('doubleclick-a4a-config', () => {
             String(expFlagValue));
         const elem = testFixture.doc.createElement('div');
         testFixture.doc.body.appendChild(elem);
-        // Enabled for all but holdback
-        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.equal(
-            !['2'].includes(expFlagValue));
+        // Enabled for all
+        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
         if (expFlagValue == 0) {
           expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
         } else {
@@ -182,29 +180,6 @@ describe('doubleclick-a4a-config', () => {
           expect(isInExperiment(elem, BETA_EXPERIMENT_ID)).to.be.false;
         }
       });
-    });
-
-    it('should select random branch, holdback', () => {
-      mockWin.location = parseUrl(
-          'https://cdn.ampproject.org/some/path/to/content.html');
-      forceExperimentBranch(mockWin, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-          DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL);
-      const elem = testFixture.doc.createElement('div');
-      testFixture.doc.body.appendChild(elem);
-      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL);
-    });
-
-    it('should select random branch, control', () => {
-      mockWin.location = parseUrl(
-          'https://cdn.ampproject.org/some/path/to/content.html');
-      forceExperimentBranch(
-          mockWin, DOUBLECLICK_A4A_EXPERIMENT_NAME, '2092613');
-      const elem = testFixture.doc.createElement('div');
-      testFixture.doc.body.appendChild(elem);
-      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal('2092613');
     });
   });
 });
