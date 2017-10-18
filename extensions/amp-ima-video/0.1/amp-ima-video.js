@@ -16,7 +16,7 @@
 
 import {assertHttpsUrl} from '../../../src/url';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {ImaPlayerData} from './ima-player-data';
+import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -231,7 +231,7 @@ class AmpImaVideo extends AMP.BaseElement {
         }
         this.element.dispatchCustomEvent(videoEvent);
       } else if (videoEvent == ImaPlayerData.IMA_PLAYER_DATA) {
-          this.playerData_ = /** {ImaPlayerData} */eventData['data'];
+        this.playerData_ = /** @type {!ImaPlayerData} */(eventData['data']);
       }
     }
   }

@@ -16,8 +16,8 @@
 
 import {camelCaseToTitleCase, setStyle} from '../../src/style';
 import {
-  ImaPlayerData
-} from '../../extensions/amp-ima-video/0.1/ima-player-data';
+  ImaPlayerData,
+} from './ima-player-data';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
 import {tryParseJson} from '../../src/json';
@@ -172,7 +172,7 @@ let videoWidth, videoHeight;
 let imaSettings;
 
 // Player data used for video analytics.
-let playerData = new ImaPlayerData();
+const playerData = new ImaPlayerData();
 
 /**
  * Loads the IMA SDK library.
@@ -483,7 +483,7 @@ function changeIcon(element, name, fill = '#FFFFFF') {
 export function onClick(global) {
   playbackStarted = true;
   uiTicker = setInterval(uiTickerClick, 500);
-  playerDataTicker = setInterval(playerDataTick, 1000);
+  setInterval(playerDataTick, 1000);
   bigPlayDiv.removeEventListener(interactEvent, onClick);
   setStyle(bigPlayDiv, 'display', 'none');
   adDisplayContainer.initialize();
@@ -648,12 +648,10 @@ function playerDataTick() {
     playerData.update(videoPlayer);
     window.parent./*OK*/postMessage({
       event: ImaPlayerData.IMA_PLAYER_DATA,
-      data: playerData
+      data: playerData,
     }, '*');
   }
 }
-
-
 
 /**
  * Updates the video player UI.
