@@ -93,6 +93,11 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl = null;
   });
 
+  it('should start with height 0', () => {
+    impl.buildCallback();
+    expect(element.getAttribute('style')).to.match(/height: 0px/);
+  });
+
   it('should be fluid enabled', () => {
     expect(impl.isFluid_).to.be.true;
   });
