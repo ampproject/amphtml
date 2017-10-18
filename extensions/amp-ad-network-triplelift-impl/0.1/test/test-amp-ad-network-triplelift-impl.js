@@ -39,6 +39,14 @@ describes.realWin('triplelift-a4a-config', {amp: false}, env => {
     });
     expect(tripleliftIsA4AEnabled(win, element)).to.be.true;
   });
+  it('should fail a4a config predicate due to useRemoteHtml', () => {
+    const element = createElementWithAttributes(doc, 'amp-ad', {
+      src: 'https://ib.3lift.com/ttj?inv_code=ampforadstest_main_feed',
+      'data-use-a4a': 'true',
+    });
+    const useRemoteHtml = true;
+    expect(tripleliftIsA4AEnabled(win, element, useRemoteHtml)).to.be.false;
+  });
   it('should fail a4a config predicate due to missing use-a4a', () => {
     const element = createElementWithAttributes(doc, 'amp-ad', {
       src: 'https://ib.3lift.com/ttj?inv_code=ampforadstest_main_feed',
