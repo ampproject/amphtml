@@ -21,28 +21,46 @@ import {parseJson} from './json';
 /** @const {number} */
 const LENGTH_BYTES = 4;
 
+/**
+ * Generates, signs and verifies origin experiments.
+ */
 export class OriginExperiments {
-  constructor() {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @private {!Window} */
+    this.win_ = win;
+
+    /** @private {!Object} */
     this.algo_ = {
       name: 'RSASSA-PKCS1-v1_5',
       hash: {name: 'SHA-256'},
     };
+
+    /** @private {!SubtleCrypto} */
+    this.subtle_ = win.crypto.subtle;
   }
 
   /** @return {!Promise} */
   generateKeys() {
-    return crypto.subtle.generateKey(
-        /* algo */ {
-          name: 'RSASSA-PKCS1-v1_5',
-          modulusLength: 2048,
-          publicExponent: Uint8Array.of(1, 0, 1),
-          hash: {name: 'SHA-256'},
-        },
+    const generationAlgo = Object.assign({
+      modulusLength: 2048,
+      publicExponent: Uint8Array.of(1, 0, 1),
+    }, this.algo_);
+    return this.subtle_.generateKey(
+        generationAlgo,
         /* extractable */ true,
         /* keyUsages */ ['sign', 'verify']);
   }
 
-  /** @return {!Promise<string>} */
+  /**
+   * Generates an origin experiment token given a config json.
+   * @param {number} version
+   * @param {string} json
+   * @param {!CryptoKey} privateKey
+   * @return {!Promise<string>}
+   */
   generateToken(version, json, privateKey) {
     const config = stringToBytes(
         typeof json == 'object' ? JSON.stringify(json) : json);
@@ -52,7 +70,12 @@ export class OriginExperiments {
     });
   }
 
-  /** @return {!Promise<string>} */
+  /**
+   * Verifies an origin experiment token given a public key.
+   * @param {string} token
+   * @param {!CryptoKey} publicKey
+   * @return {!Promise}
+   */
   verifyToken(token, publicKey) {
     let i = 0;
     const bytes = stringToBytes(atob(token));
@@ -60,19 +83,22 @@ export class OriginExperiments {
     // Parse version.
     const version = bytes[i];
     if (version !== 0) {
-      return Promise.reject(`Unrecognized experiments token version: ${version}`);
+      return Promise.reject(`Unrecognized token version: ${version}`);
     }
     i += 1;
 
+    // Parse config length.
     const length = bytesToUInt32(bytes.subarray(i, i + LENGTH_BYTES));
     i += LENGTH_BYTES;
     if (length > bytes.length - i) {
-      return Promise.reject('Specified config length larger than token.');
+      return Promise.reject(`Unexpected config length: ${length}`);
     }
 
+    // Parse config itself.
     const configBytes = bytes.subarray(i, i + length);
     i += length;
 
+    // Parse unsigned data and its signature.
     const data = bytes.subarray(0, i);
     const signature = bytes.subarray(i);
 
@@ -84,9 +110,10 @@ export class OriginExperiments {
       const config = parseJson(configStr);
 
       const approvedOrigin = parseUrl(config['origin']).origin;
-      const sourceOrigin = getSourceOrigin(win.location);
+      const sourceOrigin = getSourceOrigin(this.win_.location);
       if (approvedOrigin !== sourceOrigin) {
-        throw new Error(`Config origin (${approvedOrigin}) does not match window (${sourceOrigin}).`);
+        throw new Error(`Config origin (${approvedOrigin}) does not match ` +
+            ` window (${sourceOrigin}).`);
       }
 
       const experimentId = config['experiment'];
@@ -100,6 +127,12 @@ export class OriginExperiments {
     });
   }
 
+  /**
+   * Returns a byte array: (version + config.length + config)
+   * @param {number} version
+   * @param {string} config
+   * @return {!Uint8Array}
+   */
   prepend_(version, config) {
     const data = new Uint8Array(config.length + 5);
     data[0] = version;
@@ -108,92 +141,35 @@ export class OriginExperiments {
     return data;
   }
 
+  /**
+   * Returns base64(data + signature).
+   * @param {!Uint8Array} data
+   * @param {!Uint8Array} signature
+   * @return {string}
+   */
   append_(data, signature) {
     const string = bytesToString(data) + bytesToString(signature);
     return btoa(string);
   }
 
+  /**
+   * Wraps SubtleCrypto.sign().
+   * @param {!Uint8Array} data
+   * @param {!CryptoKey} privateKey
+   * @return {!Promise}
+   */
   sign_(data, privateKey) {
-    return crypto.subtle.sign(this.algo_, privateKey, data);
+    return this.subtle_.sign(this.algo_, privateKey, data);
   }
 
+  /**
+   * Wraps SubtleCrypto.verify().
+   * @param {string} signature
+   * @param {!Uint8Array} data
+   * @param {!CryptoKey} publicKey
+   * @return {!Promise<boolean>}
+   */
   verify_(signature, data, publicKey) {
-    return crypto.subtle.verify(this.algo_, publicKey, signature, data);
+    return this.subtle_.verify(this.algo_, publicKey, signature, data);
   }
 }
-
-// const o = new OriginExperiments();
-
-// const correctConfig = {
-//   origin: 'https://www.google.com',
-//   experiment: 'amp-expires-later',
-//   expiration: 95617602000000,
-// };
-
-// const expiredConfig = {
-//   origin: 'https://www.google.com',
-//   experiment: 'amp-expired',
-//   expiration: 1232427600000,
-// };
-
-// const generatePromise = crypto.subtle.generateKey(
-//     /* algo */ {
-//       name: 'RSASSA-PKCS1-v1_5',
-//       modulusLength: 2048,
-//       publicExponent: Uint8Array.of(1, 0, 1),
-//       hash: {name: 'SHA-256'},
-//     },
-//     /* extractable */ true,
-//     /* keyUsages */ ['sign', 'verify']);
-
-// generatePromise.then(keyPair => {
-//   const {publicKey, privateKey} = keyPair;
-
-//   o.generateToken(0, correctConfig, privateKey).then(token => {
-//     console.log('Token', token);
-
-//     return o.verifyToken(token, publicKey);
-//   }).then(verified => {
-//     console.log('Verified', verified);
-//   })
-
-//   const correct = prepend(0, correctConfig.length, correctConfig);
-//   const badVersion = prepend(47, correctConfig.length, correctConfig);
-//   const badConfigLength = prepend(0, 999999, correctConfig);
-//   const expired = prepend(0, expiredConfig.length, expiredConfig);
-//   return Promise.all([
-//     crypto.subtle.exportKey('jwk', publicKey).then(JSON.stringify),
-//     signAndAppend(correct, privateKey),
-//     signAndAppend(badVersion, privateKey),
-//     signAndAppend(badConfigLength, privateKey),
-//     concatAndBtoa(correct, crypto.getRandomValues(new Uint8Array(256))),
-//     signAndAppend(expired, privateKey),
-//   ]).then(results => `/**
-// * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-// *
-// * Licensed under the Apache License, Version 2.0 (the "License");
-// * you may not use this file except in compliance with the License.
-// * You may obtain a copy of the License at
-// *
-// *      http://www.apache.org/licenses/LICENSE-2.0
-// *
-// * Unless required by applicable law or agreed to in writing, software
-// * distributed under the License is distributed on an "AS-IS" BASIS,
-// * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// * See the License for the specific language governing permissions and
-// * limitations under the License.
-// */
-// /* eslint-disable */
-// // Generated from generate-testdata-experiments.js_.
-// export const publicJwk = ${results[0]};
-// export const correctToken = '${results[1]}';
-// export const tokenWithBadVersion = '${results[2]}';
-// export const tokenWithBadConfigLength = '${results[3]}';
-// export const tokenWithBadSignature = '${results[4]}';
-// export const tokenWithExpiredExperiment = '${results[5]}';
-// `);
-// })
-// .then(copy)
-// .then(() => {
-//   console.log('Generated code copied to clipboard.');
-// });

@@ -880,7 +880,7 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   let tokenWithBadSignature;
 
   before(() => {
-    const originExperiments = new OriginExperiments();
+    const originExperiments = new OriginExperiments(window);
     return originExperiments.generateKeys().then(keyPair => {
       const {publicKey, privateKey} = keyPair;
 
