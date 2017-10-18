@@ -459,7 +459,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @param {!JsonObject} payload
    * @private
    */
-  receiveMessageForFluid_(payload) { debugger;
+  receiveMessageForFluid_(payload) {
     let newHeight;
     if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
       // TODO(levitzky) Add actual error handling here.
