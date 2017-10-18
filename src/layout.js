@@ -444,6 +444,7 @@ export function applyStaticLayout(element) {
     if (width) {
       setStyle(element, 'width', width);
     }
+    setStyle(element, 'height', 0);
   }
   return layout;
 }
