@@ -151,13 +151,9 @@ const managers = {};
 let refreshManagerIdCounter = 0;
 
 /**
- * Initializes a RefreshManager under the following conditions:
- *   2. SRA is not enabled.
- *   3. The slot is not inside an ad container (with the exception of
- *      carousel and sticky ad).
- *   4. The publisher has provided an appropriate refresh interval (>= 30s).
- *
- * If any one of the conditions is not met, null will be returned.
+ * Returns an instance of RefreshManager, if refresh is enabled on the page or
+ * slot. An optional predicate for eligibility may be passed. If refresh is not
+ * enabled, or fails the optional predicate, null will be returned.
  *
  * @param {!./amp-a4a.AmpA4A} a4a
  * @param {function():boolean=} opt_predicate
@@ -166,10 +162,7 @@ let refreshManagerIdCounter = 0;
 export function getRefreshManager(a4a, opt_predicate) {
   const refreshInterval =
       getPublisherSpecifiedRefreshInterval(a4a.element, a4a.win);
-  if (!refreshInterval) {
-    return null;
-  }
-  if (opt_predicate && !opt_predicate()) {
+  if (!refreshInterval || (opt_predicate && !opt_predicate())) {
     return null;
   }
   return new RefreshManager(a4a, {
