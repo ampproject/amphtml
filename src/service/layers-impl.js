@@ -255,7 +255,7 @@ export class LayoutLayers {
   scrolled_(element) {
     let layer = LayoutLayer.forOptional(element);
     if (layer) {
-      layer.updateScrollPosition();
+      layer.dirty();
     } else {
       layer = this.declareLayer_(element);
     }
@@ -291,6 +291,7 @@ export class LayoutLayer {
      */
     this.layers_ = [];
 
+    this.isDirty_ = false;
     this.scrollLeft_ = 0;
     this.scrollTop_ = 0;
 
@@ -420,10 +421,16 @@ export class LayoutLayer {
   }
 
   getScrollTop() {
+    if (this.isDirty_) {
+      this.updateScrollPosition_();
+    }
     return this.scrollTop_;
   }
 
   getScrollLeft() {
+    if (this.isDirty_) {
+      this.updateScrollPosition_();
+    }
     return this.scrollLeft_;
   }
 
@@ -453,13 +460,18 @@ export class LayoutLayer {
     });
   }
 
-  updateScrollPosition() {
+  dirty() {
+    this.isDirty_ = true;
+  }
+
+  updateScrollPosition_() {
+    this.isDirty_ = false;
     this.scrollLeft_ = this.root_.scrollLeft;
     this.scrollTop_ = this.root_.scrollTop;
   }
 
   remeasure() {
-    this.updateScrollPosition();
+    this.updateScrollPosition_();
 
     const layouts = this.layouts_;
     const relative = relativeScrolledPositionForChildren(this);
