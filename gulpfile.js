@@ -593,7 +593,7 @@ function enableLocalTesting(targetFile) {
   let configFile = 'build-system/global-configs/' + config + '-config.json';
 
   return removeConfig(targetFile).then(() => {
-    return applyConfig(config, targetFile, configFile);
+    return applyConfig(config, targetFile, configFile, /* opt_local */ true);
   }).then(() => {
     let AMP_CONFIG = {localDev: true};
     let herokuConfigFile = 'node_modules/AMP_CONFIG.json';
