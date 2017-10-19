@@ -41,6 +41,7 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'aria-labelledby',
   'controls',
   'crossorigin',
+  'disableremoteplayback',
   'poster',
   'controlsList',
 ];
