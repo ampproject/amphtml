@@ -71,6 +71,15 @@ const TRUSTED_VIEWER_HOSTS = [
 ];
 
 /**
+ * These domains are trusted for CORS impression requests
+ *
+ * @export {!Array<!RegExp>}
+ */
+const TRUSTED_REFERRER_HOSTS = [
+  /^t.co$/,
+];
+
+/**
  * An AMP representation of the Viewer. This class doesn't do any work itself
  * but instead delegates everything to the actual viewer. This class and the
  * actual Viewer are connected via "AMP.viewer" using three methods:
@@ -683,6 +692,19 @@ export class Viewer {
   }
 
   /**
+   * @param {string} referrer
+   * @return {boolean}
+   * @private
+   */
+  isTrustedReferrer_(referrer) {
+    const url = parseUrl(referrer);
+    if (url.protocol != 'https:') {
+      return false;
+    }
+    return TRUSTED_REFERRER_HOSTS.some(th => th.test(url.hostname));
+  }
+
+  /**
    * Returns an unconfirmed "referrer" URL that can be optionally customized by
    * the viewer. Consider using `getReferrerUrl()` instead, which returns the
    * promise that will yield the confirmed "referrer" URL.
@@ -709,6 +731,16 @@ export class Viewer {
    */
   isTrustedViewer() {
     return this.isTrustedViewer_;
+  }
+
+  /**
+   * Whether the referrer has been whitelisted for CORS impression
+   * @return {!Promise<boolean>}
+   */
+  isTrustedReferrer() {
+    return this.referrerUrl_.then(referrer =>{
+      return this.isTrustedReferrer_(referrer);
+    });
   }
 
   /**

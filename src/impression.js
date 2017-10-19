@@ -62,10 +62,15 @@ export function maybeTrackImpression(win) {
         dev().warn('IMPRESSION', error);
       });
 
-  Services.viewerForDoc(win.document).isTrustedViewer().then(isTrusted => {
+  const viewer = Services.viewerForDoc(win.document);
+  const isTrustedViewerPromise = viewer.isTrustedViewer();
+  const isTrustedReferrerPromise = viewer.isTrustedReferrer();
+  Promise.all([isTrustedViewerPromise, isTrustedReferrerPromise]).then(results => {
+    const isTrustedViewer = results[0];
+    const isTrustedReferrer = results[1];
     // Currently this feature is launched for trusted viewer, but still
     // experiment guarded for all AMP docs.
-    if (!isTrusted && !isExperimentOn(win, 'alp')) {
+    if (!isTrustedViewer && !isTrustedReferrer && !isExperimentOn(win, 'alp')) {
       resolveImpression();
       return;
     }
