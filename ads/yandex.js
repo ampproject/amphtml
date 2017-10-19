@@ -23,7 +23,7 @@ const renderTo = 'yandex_rtb';
  * @param {!Object} data
  */
 export function yandex(global, data) {
-  validateData(data, ['blockId'], ['data', 'isAdfox']);
+  validateData(data, ['blockId'], ['data', 'onRender', 'onError']);
 
   addToQueue(global, data);
   loadScript(global,
@@ -49,13 +49,17 @@ function addToQueue(global, data) {
       data: data.data,
       async: true,
       onRender: () => {
-        // Move adfox queue
-        if (data.isAdfox && global.Ya.adfoxCode.onRender) {
-          global.Ya.adfoxCode.onRender();
+        if (data.onRender) {
+          data.onRender();
         }
+        global.context.renderStart();
       },
     }, () => {
-      global.context.noContentAvailable();
+      if (data.onError) {
+        data.onError();
+      } else {
+        global.context.noContentAvailable();
+      }
     });
   });
 }
