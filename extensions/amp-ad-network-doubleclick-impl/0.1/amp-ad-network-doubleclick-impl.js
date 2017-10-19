@@ -88,7 +88,7 @@ import {
 } from '../../../src/experiments';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {
-  getPublisherSpecifiedRefreshInterval,
+  getRefreshManager,
   RefreshManager,
   DATA_ATTR_NAME,
 } from '../../amp-a4a/0.1/refresh-manager';
@@ -675,10 +675,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-
     const refreshInterval = Number(responseHeaders.get('amp-force-refresh'));
-    if (refreshInterval && !getPublisherSpecifiedRefreshInterval(
-        this.element, this.win, 'doubleclick')) {
+    if (refreshInterval) {
       this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
     }
 
@@ -761,20 +759,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.isFluid_) {
       this.registerListenerForFluid_();
     }
-    const frameLoadPromise = super.layoutCallback();
-    if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
-      user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
-    }
-    this.refreshManager_ = this.useSra ||
-        getEnclosingContainerTypes(this.element).filter(container =>
-            container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
-            container != ValidAdContainerTypes['AMP-STICKY-AD']).length
-            ? null
-            : this.refreshManager_ || new RefreshManager(this, {
-              visiblePercentageMin: 50,
-              continuousTimeMin: 1,
-            });
-    return frameLoadPromise;
+    return super.layoutCallback();
   }
 
   /** @override  */
@@ -881,6 +866,23 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.element.removeAttribute('height');
       setStyles(this.element, {width: `${size.width}px`});
     }
+
+    this.refreshManager_ = this.refreshManager_ ||
+        getRefreshManager(this, () => {
+          if (this.useSra) {
+            user().warn(TAG, 'Refresh not compatible with SRA.');
+            return false;
+          }
+          if (getEnclosingContainerTypes(this.element).filter(container =>
+                container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
+                container != ValidAdContainerTypes['AMP-STICKY-AD']).length) {
+            user().warn(TAG,
+                'Refresh not compatible with ad-containers, except for ' +
+                'AMP-CAROUSEL and AMP-STICKY-AD');
+            return false;
+          }
+          return true;
+        });
   }
 
   /**
@@ -1283,3 +1285,4 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
+
