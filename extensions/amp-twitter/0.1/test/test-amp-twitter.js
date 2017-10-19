@@ -97,7 +97,7 @@ describes.realWin('amp-twitter', {
       const bad2 = '123123junk123123';
       const bad3 = 'https://twitter.com/1cram2force/status?ref=';
       const bad4 = '<div>nonumber</div>';
-      const bad5 = 'AA585110598171631616?ref=twsrc%5Etfw';
+      const bad5 = 'aa585110598171631616?ref=twsrc%5etfw';
       const bad6 = '';
       const bad7 = '  ';
 
