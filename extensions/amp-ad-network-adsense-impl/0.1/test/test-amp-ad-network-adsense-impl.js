@@ -546,6 +546,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'width': '320',
         'height': '50',
         'data-experiment-id': '8675309',
+        'data-ad-slot': 'slotname_foo',
       }, doc, 'amp-ad');
       doc.body.appendChild(elem2);
       const elem3 = createAdsenseImplElement({
@@ -559,17 +560,16 @@ describes.realWin('amp-ad-network-adsense-impl', {
       const impl2 = new AmpAdNetworkAdsenseImpl(elem2);
       const impl3 = new AmpAdNetworkAdsenseImpl(elem3);
       toggleExperiment(impl1.win, 'as-use-attr-for-format', true);
-      //new AmpAd(elem1).upgradeCallback();
       return impl1.getAdUrl().then(adUrl1 => {
         expect(adUrl1).to.match(/pv=2/);
         expect(adUrl1).to.not.match(/prev_fmts/);
+        expect(adUrl1).to.not.match(/prev_slotnames/);
         expect(adUrl1).to.match(/ifi=1/);
-        //new AmpAd(elem2).upgradeCallback();
         return impl2.getAdUrl().then(adUrl2 => {
           expect(adUrl2).to.match(/pv=1/);
           expect(adUrl2).to.match(/prev_fmts=320x50/);
+          expect(adUrl2).to.not.match(/prev_slotnames/);
           expect(adUrl2).to.match(/ifi=2/);
-          //new AmpAd(elem3).upgradeCallback();
           return impl3.getAdUrl().then(adUrl3 => {
             expect(adUrl3).to.match(/pv=2/);
             // By some quirk of the test infrastructure, when this test
@@ -578,6 +578,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
             // test here is the number of previous formats.
             expect(adUrl3).to.match(
                 /prev_fmts=(320x50%2C320x50|320x50%2C0x0)/);
+            expect(adUrl3).to.match(/prev_slotnames=slotname_foo/);
             expect(adUrl3).to.match(/ifi=3/);
           });
         });
