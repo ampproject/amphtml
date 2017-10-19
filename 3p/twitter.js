@@ -116,7 +116,7 @@ export function cleanupTweetId_(tweetid) {
   // 2)
   // Handle malformed ids such as
   // 585110598171631616?ref_src
-  const match = tweetid.match(/(\d+)\?ref.*/);
+  const match = tweetid.match(/^(\d+)\?ref.*/);
   if (match) {
     return match[1];
   }
