@@ -22,6 +22,7 @@
  */
 
 import {OriginExperiments} from './origin-experiments';
+import {Services} from './services';
 import {bytesToUInt32, stringToBytes, utf8DecodeSync} from './utils/bytes';
 import {getCookie, setCookie} from './cookies';
 import {getServicePromise} from './service';
@@ -108,16 +109,13 @@ function verifyOriginExperimentToken(win, token, crypto, publicKey) {
  * @return {!Promise}
  */
 export function scanForOriginExperimentTokens(win, publicJwk) {
-  const head = win.document.head;
-  const metas = head.querySelectorAll('meta[name="amp-experiment-token"]');
+  const metas =
+      win.document.head.querySelectorAll('meta[name="amp-experiment-token"]');
   if (metas.length == 0) {
     return Promise.resolve();
   }
-  let crypto;
-  return getServicePromise(win, 'crypto').then(c => {
-    crypto = /** @type {!./service/crypto-impl.Crypto} */ (c);
-    return crypto.importPkcsKey(publicJwk);
-  }).then(publicKey => {
+  const crypto = Services.cryptoFor(win);
+  return crypto.importPkcsKey(publicJwk).then(publicKey => {
     const promises = [];
     for (let i = 0; i < metas.length; i++) {
       const meta = metas[i];
