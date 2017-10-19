@@ -65,7 +65,10 @@ export function maybeTrackImpression(win) {
   const viewer = Services.viewerForDoc(win.document);
   const isTrustedViewerPromise = viewer.isTrustedViewer();
   const isTrustedReferrerPromise = viewer.isTrustedReferrer();
-  Promise.all([isTrustedViewerPromise, isTrustedReferrerPromise]).then(results => {
+  Promise.all([
+    isTrustedViewerPromise,
+    isTrustedReferrerPromise,
+  ]).then(results => {
     const isTrustedViewer = results[0];
     const isTrustedReferrer = results[1];
     // Currently this feature is launched for trusted viewer, but still

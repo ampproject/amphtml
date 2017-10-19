@@ -738,7 +738,7 @@ export class Viewer {
    * @return {!Promise<boolean>}
    */
   isTrustedReferrer() {
-    return this.referrerUrl_.then(referrer =>{
+    return this.referrerUrl_.then(referrer => {
       return this.isTrustedReferrer_(referrer);
     });
   }
