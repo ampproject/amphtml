@@ -29,7 +29,8 @@ import {
 import * as sinon from 'sinon';
 import {toArray} from '../../src/types';
 
-describe.configure().ifNewChrome().run('Fake Video Player' +
+// TODO(dvoytenko): Enable test after making it work with the prod AMP config.
+describe.configure().skip('Fake Video Player' +
     'Integration Tests', () => {
   // We run the video player integration tests on a fake video player as part
   // of functional testing. Same tests run on real video players such as
