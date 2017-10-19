@@ -21,6 +21,7 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
+import {OriginExperiments} from './origin-experiments';
 import {bytesToUInt32, stringToBytes, utf8DecodeSync} from './utils/bytes';
 import {getCookie, setCookie} from './cookies';
 import {getServicePromise} from './service';
@@ -43,11 +44,12 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 /** @const {string} */
 const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
 
-//TODO(kmh287, #8331) Uncomment and replace empty object literal with real
-// experiment public key jwk.
-/** @type {!Promise<undefined>} */
+/** @const {!Promise<undefined>} */
 const originTrialsPromise = Promise.resolve();
 // const originTrialsPromise = enableExperimentsForOriginTrials(self);
+
+/** @private {!OriginExperiments} */
+let originExperiments;
 
 /**
  * @typedef {{
@@ -76,7 +78,6 @@ export function getBinaryType(win) {
       win.AMP_CONFIG.type : 'unknown';
 }
 
-
 /**
  * Enable experiments detailed in an origin trials token iff the token is
  * valid. A token is invalid if *
@@ -85,87 +86,32 @@ export function getBinaryType(win) {
  *   3. The experiments data was not signed with our private key
  * @param {!Window} win
  * @param {string} token
- * @param {!./service/crypto-impl.Crypto} crypto Crypto service
- * @param {!webCrypto.CryptoKey} key Public key used to verify the token's
- *    signature.
- * @return {!Promise<undefined>}
+ * @param {!./service/crypto-impl.Crypto} crypto
+ * @param {!webCrypto.CryptoKey} publicKey
+ * @return {!Promise}
  */
-function enableExperimentsFromToken(win, token, crypto, key) {
+function enableExperimentsFromToken(win, token, crypto, publicKey) {
   if (!crypto.isPkcsAvailable()) {
-    user().warn(TAG, 'Crypto is unavailable');
-    return Promise.resolve();
+    return Promise.reject(new Error('Crypto is unavailable'));
   }
-  /**
-   * token = encode64(version + length + config +
-   *    sign(version + length + config, private_key))
-   * version = 1 byte version of the token format (starting at 0x0)
-   */
-  let current = 0;
-  const bytes = stringToBytes(atob(token));
-  const version = bytes[current];
-  if (version !== 0) {
-    // Unrecognized version number
-    return Promise.reject(
-        new Error(`Unrecognized experiments token version: ${version}`));
+  if (!originExperiments) {
+    originExperiments = new OriginExperiments(win, crypto);
   }
-  current++;
-  /**
-   * Version 0:
-   * length = 4 bytes representing number of bytes in config
-   * config = string containing the experiment ID, origin URL, etc.
-   */
-  const bytesForConfigSize = 4;
-  const configSize =
-      bytesToUInt32(bytes.subarray(current, current + bytesForConfigSize));
-  current += bytesForConfigSize;
-  if (configSize > bytes.length - current) {
-    return Promise.reject(
-        new Error('Specified len extends past end of buffer'));
-  }
-  const configBytes = bytes.subarray(current, current + configSize);
-  current += configSize;
-  const signedBytes = bytes.subarray(0, current);
-  const signatureBytes = bytes.subarray(current);
-
-  return crypto.verifyPkcs(key, signatureBytes, signedBytes)
-      .then(verified => {
-        if (!verified) {
-          throw new Error('Failed to verify config signature');
-        }
-        const configStr = utf8DecodeSync(configBytes);
-        const config = parseJson(configStr);
-
-        const approvedOrigin = parseUrl(config['origin']).origin;
-        const sourceOrigin = getSourceOrigin(win.location);
-        if (approvedOrigin !== sourceOrigin) {
-          throw new Error('Config does not match current origin');
-        }
-
-        const experimentId = config['experiment'];
-        const expiration = config['expiration'];
-        const now = Date.now();
-        if (expiration >= now) {
-          toggleExperiment(win,
-              experimentId,
-              /* opt_on */ true,
-              /* opt_transientExperiment */ true);
-        } else {
-          throw new Error(`Experiment ${experimentId} has expired`);
-        }
-      });
+  return originExperiments.verifyToken(token, publicKey, win.location).then(experimentId => {
+    toggleExperiment(win, experimentId, /* opt_on */ true, /* opt_transientExperiment */ true);
+  });
 }
-
 
 /**
  * Scan the page for origin trial tokens. Enable experiments detailed in the
  * tokens iff the token is well-formed. A token
  * @param {!Window} win
-  *@param {!Object=} opt_publicJwk For testing only.
- * @return {!Promise<undefined>}
+ * @param {!Object=} opt_publicJwk For testing only.
+ * @return {!Promise}
  */
 export function enableExperimentsForOriginTrials(win, opt_publicJwk) {
-  const metas =
-      win.document.head.querySelectorAll('meta[name="amp-experiment-token"]');
+  const head = win.document.head;
+  const metas = head.querySelectorAll('meta[name="amp-experiment-token"]');
   if (metas.length == 0 || !opt_publicJwk) {
     return Promise.resolve();
   }
@@ -173,24 +119,20 @@ export function enableExperimentsForOriginTrials(win, opt_publicJwk) {
   return getServicePromise(win, 'crypto').then(c => {
     crypto = /** @type {!./service/crypto-impl.Crypto} */ (c);
     return crypto.importPkcsKey(opt_publicJwk);
-  }).then(key => {
-    const tokenPromises = [];
+  }).then(publicKey => {
+    const promises = [];
     for (let i = 0; i < metas.length; i++) {
       const meta = metas[i];
       const token = meta.getAttribute('content');
       if (token) {
-        const tokenPromise =
-            enableExperimentsFromToken(win, token, crypto, key)
-                .catch(err => {
-                  // Log message but do not prevent scans of other tokens.
-                  user().warn(TAG, err);
-                });
-        tokenPromises.push(tokenPromise);
+        const p = enableExperimentsFromToken(win, token, crypto, publicKey);
+        promises.push(p);
       } else {
-        user().warn(TAG, 'Unable to read experiments token');
+        const r = Promise.reject(new Error('Experiment token missing.'));
+        promises.push(r);
       }
     }
-    return Promise.all(tokenPromises);
+    return Promise.all(promises);
   });
 }
 

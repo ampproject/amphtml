@@ -15,7 +15,7 @@
  */
 
 import {bytesToString, bytesToUInt32, stringToBytes} from './utils/bytes';
-import {getSourceOrigin, parseQueryString, parseUrl} from './url';
+import {getSourceOrigin, parseUrl} from './url';
 import {parseJson} from './json';
 
 /** @const {number} */
@@ -27,10 +27,14 @@ const LENGTH_BYTES = 4;
 export class OriginExperiments {
   /**
    * @param {!Window} win
+   * @param {./service/crypto-impl.Crypto=} opt_crypto
    */
-  constructor(win) {
+  constructor(win, opt_crypto) {
     /** @private {!Window} */
     this.win_ = win;
+
+    /** @private {./service/crypto-impl.Crypto} */
+    this.crypto_ = opt_crypto;
 
     /** @private {!Object} */
     this.algo_ = {
@@ -38,12 +42,18 @@ export class OriginExperiments {
       hash: {name: 'SHA-256'},
     };
 
-    /** @private {!SubtleCrypto} */
-    this.subtle_ = win.crypto.subtle;
+    /** @private {SubtleCrypto} */
+    this.subtle_ = null;
+    if (win.crypto) {
+      this.subtle_ = win.crypto.subtle;
+    }
   }
 
   /** @return {!Promise} */
   generateKeys() {
+    if (!this.subtle_) {
+      return Promise.reject(new Error('Crypto is not supported.'));
+    }
     const generationAlgo = Object.assign({
       modulusLength: 2048,
       publicExponent: Uint8Array.of(1, 0, 1),
@@ -74,16 +84,19 @@ export class OriginExperiments {
    * Verifies an origin experiment token given a public key.
    * @param {string} token
    * @param {!CryptoKey} publicKey
-   * @return {!Promise}
+   * @param {!Location} location
+   * @return {!Promise<string>} If token is valid, resolves with the
+   *     experiment ID. Otherwise, reject with validation error.
    */
-  verifyToken(token, publicKey) {
+  verifyToken(token, publicKey, location) {
     let i = 0;
     const bytes = stringToBytes(atob(token));
 
     // Parse version.
     const version = bytes[i];
     if (version !== 0) {
-      return Promise.reject(`Unrecognized token version: ${version}`);
+      return Promise.reject(
+          new Error(`Unrecognized token version: ${version}`));
     }
     i += 1;
 
@@ -91,7 +104,7 @@ export class OriginExperiments {
     const length = bytesToUInt32(bytes.subarray(i, i + LENGTH_BYTES));
     i += LENGTH_BYTES;
     if (length > bytes.length - i) {
-      return Promise.reject(`Unexpected config length: ${length}`);
+      return Promise.reject(new Error(`Unexpected config length: ${length}`));
     }
 
     // Parse config itself.
@@ -104,25 +117,25 @@ export class OriginExperiments {
 
     return this.verify_(signature, data, publicKey).then(verified => {
       if (!verified) {
-        throw new Error('Failed to verify config signature.');
+        throw new Error('Failed to verify token signature.');
       }
       const configStr = bytesToString(configBytes);
       const config = parseJson(configStr);
 
       const approvedOrigin = parseUrl(config['origin']).origin;
-      const sourceOrigin = getSourceOrigin(this.win_.location);
+      const sourceOrigin = getSourceOrigin(location);
       if (approvedOrigin !== sourceOrigin) {
         throw new Error(`Config origin (${approvedOrigin}) does not match ` +
-            ` window (${sourceOrigin}).`);
+            `window (${sourceOrigin}).`);
       }
 
       const experimentId = config['experiment'];
       const expiration = config['expiration'];
       const now = Date.now();
       if (expiration >= now) {
-        return true;
+        return experimentId;
       } else {
-        throw new Error(`Experiment ${experimentId} has expired.`);
+        throw new Error(`Experiment "${experimentId}" has expired.`);
       }
     });
   }
@@ -159,17 +172,27 @@ export class OriginExperiments {
    * @return {!Promise}
    */
   sign_(data, privateKey) {
-    return this.subtle_.sign(this.algo_, privateKey, data);
+    if (this.subtle_) {
+      return this.subtle_.sign(this.algo_, privateKey, data);
+    } else {
+      return Promise.reject(new Error('Crypto is not supported.'));
+    }
   }
 
   /**
    * Wraps SubtleCrypto.verify().
-   * @param {string} signature
+   * @param {!Uint8Array} signature
    * @param {!Uint8Array} data
    * @param {!CryptoKey} publicKey
    * @return {!Promise<boolean>}
    */
   verify_(signature, data, publicKey) {
-    return this.subtle_.verify(this.algo_, publicKey, signature, data);
+    if (this.crypto_) {
+      return this.crypto_.verifyPkcs(publicKey, signature, data);
+    } else if (this.subtle_) {
+      return this.subtle_.verify(this.algo_, publicKey, signature, data);
+    } else {
+      return Promise.reject(new Error('Crypto is not supported.'));
+    }
   }
 }

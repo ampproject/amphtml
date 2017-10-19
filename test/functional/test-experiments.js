@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {FakeWindow} from '../../testing/fake-dom';
 import {OriginExperiments} from '../../src/origin-experiments';
 import {Services} from '../../src/services';
 import {installCryptoService} from '../../src/service/crypto-impl';
@@ -863,57 +864,55 @@ describe('experiment branch tests', () => {
   });
 });
 
-describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
-
+describe('Origin experiments', () => {
   let win;
   let sandbox;
-  let crypto;
-
-  let warnStub;
 
   let publicJwk;
-  let correctToken;
+  let token;
   let tokenWithBadVersion;
   let tokenWithExpiredExperiment;
-
   let tokenWithBadConfigLength;
   let tokenWithBadSignature;
 
   before(() => {
-    const originExperiments = new OriginExperiments(window);
+    // Generate test tokens.
+    const originExperiments = new OriginExperiments(new FakeWindow());
     return originExperiments.generateKeys().then(keyPair => {
       const {publicKey, privateKey} = keyPair;
 
-      const correctConfig = {
+      const config = {
         origin: 'https://www.google.com',
-        experiment: 'amp-expires-later',
-        expiration: 95617602000000,
+        experiment: 'foo',
+        expiration: Date.now() + 1000 * 1000, // 1000s in the future.
       };
-      const expiredConfig = {
+      const expired = {
         origin: 'https://www.google.com',
-        experiment: 'amp-expired',
+        experiment: 'expired',
         expiration: Date.now() - 1000, // 1s in the past.
       };
 
       return Promise.all([
-        originExperiments.generateToken(0, correctConfig, privateKey),
-        originExperiments.generateToken(42, correctConfig, privateKey),
-        originExperiments.generateToken(0, expiredConfig, privateKey),
+        originExperiments.generateToken(0, config, privateKey),
+        originExperiments.generateToken(42, config, privateKey),
+        originExperiments.generateToken(0, expired, privateKey),
       ]).then(results => {
         ([
-          correctToken,
+          token,
           tokenWithBadVersion,
           tokenWithExpiredExperiment,
          ] = results);
 
+        // Generate token with bad signature by truncating.
         tokenWithBadSignature =
-            correctToken.slice(0, correctToken.length - 5);
+            token.slice(0, token.length - 5);
 
+        // Generate token with bad config length by hand.
         const data = new Uint8Array(5);
-        data[0] = 0; // version.
-        new DataView(data.buffer).setUint32(1, 999, false); // config length.
+        new DataView(data.buffer).setUint32(1, 999, false); // 999 length.
         tokenWithBadConfigLength = btoa(bytesToString(data));
 
+        // Export public key as JWK for import in tests.
         return window.crypto.subtle.exportKey('jwk', publicKey);
       }).then(jwk => {
         publicJwk = jwk;
@@ -922,25 +921,10 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   });
 
   beforeEach(() => {
-    win = {
-      document: env.win.document,
-      location: {
-        href: 'https://www.google.com',
-      },
-      crypto: env.win.crypto,
-    };
-    sandbox = env.sandbox;
-
+    win = new FakeWindow();
     installCryptoService(win);
-    crypto = Services.cryptoFor(win);
 
-    warnStub = sandbox.stub(user(), 'warn');
-
-    // Ensure that tests don't appear to pass because fake window object
-    // doesn't have crypto when the window actually has it.
-    installCryptoService(env.win);
-    expect(Services.cryptoFor(env.win).isPkcsAvailable())
-        .to.equal(Services.cryptoFor(win).isPkcsAvailable());
+    sandbox = sinon.sandbox.create();
   });
 
   afterEach(() => {
@@ -948,140 +932,123 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   });
 
   function setupMetaTagWith(token) {
-    const meta = document.createElement('meta');
+    const meta = win.document.createElement('meta');
     meta.setAttribute('name', 'amp-experiment-token');
     meta.setAttribute('content', token);
     win.document.head.appendChild(meta);
   }
 
   it('should return false if no token is found', () => {
-    // No meta tag ever added
-    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    return expect(p).to.eventually.be.false;
+    const promise = isExperimentOnForOriginTrial(win, 'foo', publicJwk);
+    return expect(promise).to.eventually.be.false;
   });
 
   it('should return false if public key is not present', () => {
-    setupMetaTagWith(correctToken);
-    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    return expect(p).to.eventually.be.false;
+    setupMetaTagWith(token);
+
+    const promise = isExperimentOnForOriginTrial(win, 'foo', publicJwk);
+    return expect(promise).to.eventually.be.false;
   });
 
   it('should return false if crypto is unavailable', () => {
-    sandbox.stub(crypto, 'isPkcsAvailable').returns(false);
-    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    return expect(p).to.eventually.be.false;
+    sandbox.stub(Services.cryptoFor(win), 'isPkcsAvailable').returns(false);
+
+    const promise = isExperimentOnForOriginTrial(win, 'foo', publicJwk);
+    return expect(promise).to.eventually.be.false;
   });
 
   it('should throw for missing token', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
     setupMetaTagWith('');
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    }).then(result => {
-      expect(result).to.be.false;
-      expect(warnStub).to.have.been
-          .calledWith('experiments', 'Unable to read experiments token');
+
+    const promise = expect(enableExperimentsForOriginTrials(win, publicJwk))
+        .to.eventually.be.rejectedWith('Experiment token missing.');
+    return promise.then(() => {
+      expect(isExperimentOn(win, 'foo')).to.be.false;
     });
   });
 
   it('should throw for an unknown token version number', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
     setupMetaTagWith(tokenWithBadVersion);
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    }).then(result => {
-      expect(result).to.be.false;
-      expect(warnStub).to.have.been.calledWith(
-          'experiments',
-          sinon.match({
-            message: sinon.match(/Unrecognized experiments token version/),
-          }));
+
+    const promise = expect(enableExperimentsForOriginTrials(win, publicJwk))
+        .to.eventually.be.rejectedWith(/Unrecognized token version/);
+    return promise.then(() => {
+      expect(isExperimentOn(win, 'foo')).to.be.false;
     });
   });
 
   it('should throw if config length exceeds byte length', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
     setupMetaTagWith(tokenWithBadConfigLength);
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    }).then(result => {
-      expect(result).to.be.false;
-      expect(warnStub).to.have.been.calledWith(
-          'experiments',
-          sinon.match({message: 'Specified len extends past end of buffer'}));
+
+    const promise = expect(enableExperimentsForOriginTrials(win, publicJwk))
+        .to.eventually.be.rejectedWith('Unexpected config length: 999');
+    return promise.then(() => {
+      expect(isExperimentOn(win, 'foo')).to.be.false;
     });
   });
 
   it('should throw if signature cannot be verified', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
     setupMetaTagWith(tokenWithBadSignature);
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    }).then(result => {
-      expect(result).to.be.false;
-      expect(warnStub).to.have.been.calledWith(
-          'experiments',
-          sinon.match({message: 'Failed to verify config signature'}));
+
+    const promise = expect(enableExperimentsForOriginTrials(win, publicJwk))
+        .to.eventually.be.rejectedWith('Failed to verify token signature.');
+    return promise.then(() => {
+      expect(isExperimentOn(win, 'foo')).to.be.false;
     });
   });
 
   it('should throw if approved origin is not current origin', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
-    setupMetaTagWith(correctToken);
+    setupMetaTagWith(token);
     win.location.href = 'https://www.not-google.com';
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    }).then(result => {
-      expect(result).to.be.false;
-      expect(warnStub).to.have.been.calledWith(
-          'experiments',
-          sinon.match({message: 'Config does not match current origin'}));
+
+    const promise = expect(enableExperimentsForOriginTrials(win, publicJwk))
+        .to.eventually.be.rejectedWith(/does not match window/);
+    return promise.then(() => {
+      expect(isExperimentOn(win, 'foo')).to.be.false;
     });
   });
 
   it('should return false if requested experiment is not in config', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
-    setupMetaTagWith(correctToken);
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      const p =
-          isExperimentOnForOriginTrial(win, 'amp-not-in-config', publicJwk);
-      return expect(p).to.eventually.be.false;
+    setupMetaTagWith(token);
+    win.location.href = 'https://www.google.com';
+
+    const promise = expect(enableExperimentsForOriginTrials(win, publicJwk))
+        .to.eventually.be.fulfilled;
+    return promise.then(() => {
+      expect(isExperimentOn(win, 'bar')).to.be.false;
     });
   });
 
   it('should return false if trial has expired', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
     setupMetaTagWith(tokenWithExpiredExperiment);
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      return isExperimentOnForOriginTrial(win, 'amp-expired', publicJwk);
-    }).then(result => {
-      expect(result).to.be.false;
-      expect(warnStub).to.have.been.calledWith(
-          'experiments',
-          sinon.match({message: 'Experiment amp-expired has expired'}));
+    win.location.href = 'https://www.google.com';
+
+    const promise = expect(enableExperimentsForOriginTrials(win, publicJwk))
+        .to.eventually.be.rejectedWith('Experiment "expired" has expired.');
+    return promise.then(() => {
+      expect(isExperimentOn(win, 'foo')).to.be.false;
     });
   });
 
-  it('should return true for a well-formed token for an experiment ' +
-     'that has not yet expired', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
-    setupMetaTagWith(correctToken);
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      const p =
-          isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-      return expect(p).to.eventually.be.true;
+  it('should return true for a well-formed, unexpired token', () => {
+    setupMetaTagWith(token);
+    win.location.href = 'https://www.google.com';
+
+    const promise = expect(enableExperimentsForOriginTrials(win, publicJwk))
+        .to.eventually.be.fulfilled;
+    return promise.then(() => {
+      expect(isExperimentOn(win, 'foo')).to.be.true;
     });
   });
 
-  it('should return true for a correct token if the approved origin has ' +
-     'a trailing slash', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
-    setupMetaTagWith(correctToken);
+  it('should ignore trailing slash on location', () => {
+    setupMetaTagWith(token);
     win.location.href = 'https://www.google.com/';
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      const p =
-          isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-      return expect(p).to.eventually.be.true;
+
+    const promise = expect(enableExperimentsForOriginTrials(win, publicJwk))
+        .to.eventually.be.fulfilled;
+    return promise.then(() => {
+      expect(isExperimentOn(win, 'foo')).to.be.true;
     });
   });
 });
