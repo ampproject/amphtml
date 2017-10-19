@@ -22,6 +22,11 @@ import {parseJson} from './json';
 const LENGTH_BYTES = 4;
 
 /**
+ * @typedef {{name: string}}
+ */
+let AlgorithmDef;
+
+/**
  * Generates, signs and verifies origin experiments.
  */
 export class OriginExperiments {
@@ -33,16 +38,16 @@ export class OriginExperiments {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {./service/crypto-impl.Crypto} */
+    /** @private {./service/crypto-impl.Crypto|undefined} */
     this.crypto_ = opt_crypto;
 
-    /** @private {!Object} */
+    /** @private {AlgorithmDef} */
     this.algo_ = {
       name: 'RSASSA-PKCS1-v1_5',
       hash: {name: 'SHA-256'},
     };
 
-    /** @private {SubtleCrypto} */
+    /** @private {webCrypto.SubtleCrypto} */
     this.subtle_ = null;
     if (win.crypto) {
       this.subtle_ = win.crypto.subtle;
@@ -59,7 +64,7 @@ export class OriginExperiments {
       publicExponent: Uint8Array.of(1, 0, 1),
     }, this.algo_);
     return this.subtle_.generateKey(
-        generationAlgo,
+        /** @type {AlgorithmDef} */ (generationAlgo),
         /* extractable */ true,
         /* keyUsages */ ['sign', 'verify']);
   }
@@ -68,7 +73,7 @@ export class OriginExperiments {
    * Generates an origin experiment token given a config json.
    * @param {number} version
    * @param {string} json
-   * @param {!CryptoKey} privateKey
+   * @param {!webCrypto.CryptoKey} privateKey
    * @return {!Promise<string>}
    */
   generateToken(version, json, privateKey) {
@@ -83,12 +88,12 @@ export class OriginExperiments {
   /**
    * Verifies an origin experiment token given a public key.
    * @param {string} token
-   * @param {!CryptoKey} publicKey
    * @param {!Location} location
+   * @param {!webCrypto.CryptoKey} publicKey
    * @return {!Promise<string>} If token is valid, resolves with the
    *     experiment ID. Otherwise, reject with validation error.
    */
-  verifyToken(token, publicKey, location) {
+  verifyToken(token, location, publicKey) {
     let i = 0;
     const bytes = stringToBytes(atob(token));
 
@@ -143,7 +148,7 @@ export class OriginExperiments {
   /**
    * Returns a byte array: (version + config.length + config)
    * @param {number} version
-   * @param {string} config
+   * @param {!Uint8Array} config
    * @return {!Uint8Array}
    */
   prepend_(version, config) {
@@ -168,7 +173,7 @@ export class OriginExperiments {
   /**
    * Wraps SubtleCrypto.sign().
    * @param {!Uint8Array} data
-   * @param {!CryptoKey} privateKey
+   * @param {!webCrypto.CryptoKey} privateKey
    * @return {!Promise}
    */
   sign_(data, privateKey) {
@@ -183,8 +188,8 @@ export class OriginExperiments {
    * Wraps SubtleCrypto.verify().
    * @param {!Uint8Array} signature
    * @param {!Uint8Array} data
-   * @param {!CryptoKey} publicKey
-   * @return {!Promise<boolean>}
+   * @param {!webCrypto.CryptoKey} publicKey
+   * @return {!Promise}
    */
   verify_(signature, data, publicKey) {
     if (this.crypto_) {

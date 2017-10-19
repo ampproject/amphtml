@@ -46,7 +46,7 @@ const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
 
 /** @const {!Promise<undefined>} */
 const originTrialsPromise = Promise.resolve();
-// const originTrialsPromise = enableExperimentsForOriginTrials(self);
+// const originTrialsPromise = scanForOriginExperimentTokens(self);
 
 /** @private {!OriginExperiments} */
 let originExperiments;
@@ -79,57 +79,55 @@ export function getBinaryType(win) {
 }
 
 /**
- * Enable experiments detailed in an origin trials token iff the token is
- * valid. A token is invalid if *
- *   1. The token is malformed (e.g. non-existant version number)
- *   2. The token is not for this origin
- *   3. The experiments data was not signed with our private key
+ * Verifies a single origin experiment token and enables the corresponding
+ * experiment on success.
  * @param {!Window} win
  * @param {string} token
  * @param {!./service/crypto-impl.Crypto} crypto
  * @param {!webCrypto.CryptoKey} publicKey
- * @return {!Promise}
+ * @return {!Promise} Resolved if token is verified, otherwise rejected.
  */
-function enableExperimentsFromToken(win, token, crypto, publicKey) {
+function verifyOriginExperimentToken(win, token, crypto, publicKey) {
   if (!crypto.isPkcsAvailable()) {
     return Promise.reject(new Error('Crypto is unavailable'));
   }
   if (!originExperiments) {
     originExperiments = new OriginExperiments(win, crypto);
   }
-  return originExperiments.verifyToken(token, publicKey, win.location).then(experimentId => {
-    toggleExperiment(win, experimentId, /* opt_on */ true, /* opt_transientExperiment */ true);
+  const verify = originExperiments.verifyToken(token, win.location, publicKey);
+  return verify.then(experimentId => {
+    toggleExperiment(win, experimentId, true, /* transientExperiment */ true);
   });
 }
 
 /**
- * Scan the page for origin trial tokens. Enable experiments detailed in the
- * tokens iff the token is well-formed. A token
+ * Scan the page for origin experiment tokens, verifies them, and enables
+ * the corresponding experiments for verified tokens.
  * @param {!Window} win
- * @param {!Object=} opt_publicJwk For testing only.
+ * @param {!Object} publicJwk
  * @return {!Promise}
  */
-export function enableExperimentsForOriginTrials(win, opt_publicJwk) {
+export function scanForOriginExperimentTokens(win, publicJwk) {
   const head = win.document.head;
   const metas = head.querySelectorAll('meta[name="amp-experiment-token"]');
-  if (metas.length == 0 || !opt_publicJwk) {
+  if (metas.length == 0) {
     return Promise.resolve();
   }
   let crypto;
   return getServicePromise(win, 'crypto').then(c => {
     crypto = /** @type {!./service/crypto-impl.Crypto} */ (c);
-    return crypto.importPkcsKey(opt_publicJwk);
+    return crypto.importPkcsKey(publicJwk);
   }).then(publicKey => {
     const promises = [];
     for (let i = 0; i < metas.length; i++) {
       const meta = metas[i];
       const token = meta.getAttribute('content');
       if (token) {
-        const p = enableExperimentsFromToken(win, token, crypto, publicKey);
+        const p = verifyOriginExperimentToken(win, token, crypto, publicKey);
         promises.push(p);
       } else {
-        const r = Promise.reject(new Error('Experiment token missing.'));
-        promises.push(r);
+        const reject = Promise.reject(new Error('Experiment token missing.'));
+        promises.push(reject);
       }
     }
     return Promise.all(promises);
