@@ -243,7 +243,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('should not override publisher\'s refresh settings', () => {
-      impl.element.setAttribute(DATA_ATTR_NAME, '45');
+      impl.refreshManager_ = {refreshInterval_: '45'};
       impl.extractSize({
         get(name) {
           return name == 'amp-force-refresh' ? '30' : undefined;
@@ -252,7 +252,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           return !!this.get(name);
         },
       });
-      expect(impl.element.getAttribute(DATA_ATTR_NAME)).to.equal('45');
+      expect(impl.refreshManager_.refreshInterval_).to.equal('45');
     });
 
   });
