@@ -108,44 +108,15 @@ function valueOrDefault(value, defaultValue) {
   return defaultValue;
 }
 
-function main() {
-  const TESTING_HOST = process.env.AMP_TESTING_HOST;
-  const target = argv.target || TESTING_HOST;
-
-  if (!target) {
-    util.log(util.colors.red('Missing --target.'));
-    return;
-  }
-
-  if (argv.remove) {
-    return fs.readFileAsync(target)
-        .then(file => {
-          let contents = file.toString();
-          sanityCheck(contents);
-          const config =
-          /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
-          contents = contents.replace(config, '');
-          return writeTarget(target, contents, argv.dryrun);
-        });
-  }
-
-  if (!(argv.prod || argv.canary)) {
-    util.log(util.colors.red('One of --prod or --canary should be provided.'));
-    return;
-  }
-
-  const branch = argv.branch;
-  let filename = '';
-
-  // Prod by default.
-  if (argv.canary) {
-    filename = valueOrDefault(argv.canary,
-        'build-system/global-configs/canary-config.json');
-  } else {
-    filename = valueOrDefault(argv.prod,
-        'build-system/global-configs/prod-config.json');
-  }
-  return checkoutBranchConfigs(filename, branch)
+/**
+ * @param {string} config
+ * @param {string} target
+ * @param {string} filename
+ * @param {string} opt_branch
+ * @return {!Promise}
+ */
+function applyConfig(config, target, filename, opt_branch) {
+  return checkoutBranchConfigs(filename, opt_branch)
       .then(() => {
         return Promise.all([
           fs.readFileAsync(filename),
@@ -166,7 +137,72 @@ function main() {
       .then(fileString => {
         sanityCheck(fileString);
         return writeTarget(target, fileString, argv.dryrun);
+      })
+      .then(() => {
+        if (!process.env.TRAVIS) {
+          util.log('Wrote', util.colors.cyan(config), 'AMP config to',
+              util.colors.cyan(target));
+        }
       });
+}
+
+/**
+ * @param {string} target
+ * @return {!Promise}
+ */
+function removeConfig(target) {
+  return fs.readFileAsync(target)
+      .then(file => {
+        let contents = file.toString();
+        if (numConfigs(contents) == 0) {
+          util.log('No configs found in', util.colors.cyan(target));
+          return Promise.resolve();
+        }
+        sanityCheck(contents);
+        const config =
+        /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
+        contents = contents.replace(config, '');
+        return writeTarget(target, contents, argv.dryrun).then(() => {
+          if (!process.env.TRAVIS) {
+            util.log('Removed existing config from', util.colors.cyan(target));
+          }
+        });
+      });
+}
+
+function main() {
+  const TESTING_HOST = process.env.AMP_TESTING_HOST;
+  const target = argv.target || TESTING_HOST;
+
+  if (!target) {
+    util.log(util.colors.red('Missing --target.'));
+    return;
+  }
+
+  if (argv.remove) {
+    return removeConfig(target);
+  }
+
+  if (!(argv.prod || argv.canary)) {
+    util.log(util.colors.red('One of --prod or --canary should be provided.'));
+    return;
+  }
+
+  const branch = argv.branch;
+  let filename = '';
+
+  // Prod by default.
+  const config = argv.canary ? 'canary' : 'prod';
+  if (argv.canary) {
+    filename = valueOrDefault(argv.canary,
+        'build-system/global-configs/canary-config.json');
+  } else {
+    filename = valueOrDefault(argv.prod,
+        'build-system/global-configs/prod-config.json');
+  }
+  return removeConfig(target).then(() => {
+    return applyConfig(config, target, filename, branch);
+  });
 }
 
 gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
@@ -190,3 +226,5 @@ exports.writeTarget = writeTarget;
 exports.valueOrDefault = valueOrDefault;
 exports.sanityCheck = sanityCheck;
 exports.numConfigs = numConfigs;
+exports.removeConfig = removeConfig;
+exports.applyConfig = applyConfig;

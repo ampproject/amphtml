@@ -23,6 +23,8 @@ var buffer = require('vinyl-buffer');
 var closureCompile = require('./build-system/tasks/compile').closureCompile;
 var cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
 var jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
+var applyConfig = require('./build-system/tasks/prepend-global/index.js').applyConfig;
+var removeConfig = require('./build-system/tasks/prepend-global/index.js').removeConfig;
 var fs = require('fs-extra');
 var gulp = $$.help(require('gulp'));
 var lazypipe = require('lazypipe');
@@ -44,6 +46,11 @@ var hostname3p = argv.hostname3p || '3p.ampproject.net';
 // All declared extensions.
 var extensions = {};
 var extensionAliasFilePath = {};
+
+var green = $$.util.colors.green;
+var yellow = $$.util.colors.yellow;
+var red = $$.util.colors.red;
+var cyan = $$.util.colors.cyan;
 
 // Each extension and version must be listed individually here.
 declareExtension('amp-3q-player', '0.1', false);
@@ -203,10 +210,7 @@ function endBuildStep(stepName, targetName, startTime) {
     timeString += secs + '.' + ms + ' s)';
   }
   if (!process.env.TRAVIS) {
-    $$.util.log(
-        stepName,
-        $$.util.colors.cyan(targetName),
-        $$.util.colors.green(timeString));
+    $$.util.log(stepName, cyan(targetName), green(timeString));
   }
 }
 
@@ -390,9 +394,8 @@ function compileCss() {
   // Print a message that could help speed up local development.
   if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
     $$.util.log(
-        $$.util.colors.green('To skip building during future test runs, use',
-            $$.util.colors.cyan('--nobuild'), 'with your',
-            $$.util.colors.cyan('gulp test'), 'command.'));
+        green('To skip building during future test runs, use',
+        cyan('--nobuild'), 'with your', cyan('gulp test'), 'command.'));
   }
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
@@ -559,23 +562,56 @@ function buildExtensionJs(path, name, version, options) {
 }
 
 /**
- * Writes the AMP config to file if AMP_TESTING_HOST is set.
+ * Prints a helpful message that lets the developer know how to switch configs.
+ * @param {string} command Command being run.
+ * @param {string} targetFile File to which the config is to be written.
  */
-function writeAmpConfig() {
-  var TESTING_HOST = process.env.AMP_TESTING_HOST;
-  if (argv.fortesting && typeof TESTING_HOST == 'string') {
-    var AMP_CONFIG = {
-      thirdPartyFrameHost: TESTING_HOST,
-      thirdPartyFrameRegex: TESTING_HOST,
-      localDev: true,
-    };
-    AMP_CONFIG = Object.assign(AMP_CONFIG, JSON.parse(fs.readFileSync(
-        'build-system/global-configs/prod-config.json').toString()));
-    $$.util.log($$.util.colors.green('trying to write AMP_CONFIG.'));
-    fs.writeFileSync('node_modules/AMP_CONFIG.json',
-        JSON.stringify(AMP_CONFIG));
-    $$.util.log($$.util.colors.green('AMP_CONFIG written successfully.'));
+function printConfigHelp(command, targetFile) {
+  if (!process.env.TRAVIS) {
+    $$.util.log(
+        green('Building the runtime for local testing with the'),
+        cyan((argv.config === 'canary') ? 'canary' : 'prod'),
+        green('AMP config'));
+    $$.util.log(
+        green('You can specify which config to use by passing'),
+        cyan('--config=canary'), green('or'), cyan('--config=prod'),
+        green('to'), cyan(command));
+    $$.util.log(
+        green('After the build, you can switch configs with'),
+        cyan('gulp prepend-global --canary --target ' + targetFile),
+        green('or'), cyan('gulp prepend-global --prod --target ' + targetFile));
   }
+}
+
+/**
+ * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
+ * Called at the end of "gulp build" and "gulp dist --fortesting".
+ * @param {string} targetFile File to which the config is to be written.
+ */
+function enableLocalTesting(targetFile) {
+  let config = (argv.config === 'canary') ? 'canary' : 'prod';
+  let configFile = 'build-system/global-configs/' + config + '-config.json';
+
+  return removeConfig(targetFile).then(() => {
+    return applyConfig(config, targetFile, configFile);
+  }).then(() => {
+    let AMP_CONFIG = {localDev: true};
+    let herokuConfigFile = 'node_modules/AMP_CONFIG.json';
+    let TESTING_HOST = process.env.AMP_TESTING_HOST;
+    if (typeof TESTING_HOST == 'string') {
+      AMP_CONFIG = Object.assign(AMP_CONFIG, {
+        thirdPartyFrameHost: TESTING_HOST,
+        thirdPartyFrameRegex: TESTING_HOST,
+      });
+    }
+    AMP_CONFIG = Object.assign(
+        AMP_CONFIG, JSON.parse(fs.readFileSync(configFile).toString()));
+    fs.writeFileSync(herokuConfigFile, JSON.stringify(AMP_CONFIG));
+    if (!process.env.TRAVIS) {
+      $$.util.log('Wrote', cyan(config), 'AMP config to',
+          cyan(herokuConfigFile), 'for use with Heroku');
+    }
+  });
 }
 
 /**
@@ -584,7 +620,7 @@ function writeAmpConfig() {
  */
 function build() {
   process.env.NODE_ENV = 'development';
-  writeAmpConfig();
+  printConfigHelp('gulp build', 'dist/amp.js')
   return compileCss().then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -595,6 +631,8 @@ function build() {
       buildExtensions({bundleOnlyIfListedInFiles: true}),
       compile(),
     ]);
+  }).then(() => {
+    return enableLocalTesting('dist/amp.js');
   });
 }
 
@@ -604,8 +642,10 @@ function build() {
  */
 function dist() {
   process.env.NODE_ENV = 'production';
-  writeAmpConfig();
   cleanupBuildDir();
+  if (argv.fortesting) {
+    printConfigHelp('gulp dist --fortesting', 'dist/v0.js')
+  }
   return compileCss().then(() => {
     return Promise.all([
       compile(false, true, true),
@@ -624,6 +664,10 @@ function dist() {
     ]);
   }).then(() => {
     copyAliasExtensions();
+  }).then(() => {
+    if (argv.fortesting) {
+      return enableLocalTesting('dist/v0.js');
+    }
   });
 }
 
@@ -796,9 +840,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         && !(/integration|babel|amp-ad|lightbox|sidebar|analytics|app-banner/
             .test(srcFilename))) {
       $$.util.log(
-          'Skipping',
-          $$.util.colors.cyan(srcFilename),
-          'because of --minimal_set');
+          'Skipping', cyan(srcFilename), 'because of --minimal_set');
       return Promise.resolve();
     }
     const startTime = Date.now();
@@ -859,9 +901,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return toPromise(bundler.bundle()
       .on('error', function(err) {
         if (err instanceof SyntaxError) {
-          console.error($$.util.colors.red('Syntax error:', err.message));
+          console.error(red('Syntax error:', err.message));
         } else {
-          console.error($$.util.colors.red(err.message));
+          console.error(red(err.message));
         }
       })
       .pipe(lazybuild())
@@ -1250,24 +1292,29 @@ function toPromise(readable) {
 /**
  * Gulp tasks
  */
-gulp.task('build', 'Builds the AMP library', build);
+gulp.task('build', 'Builds the AMP library', build, {
+  options: {
+    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  }
+});
 gulp.task('check-all', 'Run through all presubmit checks', ['lint', 'dep-check', 'check-types', 'presubmit']);
 gulp.task('check-types', 'Check JS types', checkTypes);
 gulp.task('css', 'Recompile css to build directory', compileCss);
 gulp.task('default', 'Same as "watch"', ['watch', 'serve']);
 gulp.task('dist', 'Build production binaries', dist, {
   options: {
-    pseudo_names: 'Compiles with readable names. ' +
+    pseudo_names: '  Compiles with readable names. ' +
         'Great for profiling and debugging production code.',
-    fortesting: 'Compiles with `getMode().test` set to true',
-    minimal_set: 'Only compile files needed to load article.amp.html',
+    fortesting: '  Compiles production binaries for local testing',
+    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+    minimal_set: '  Only compile files needed to load article.amp.html',
   }
 });
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
 gulp.task('watch', 'Watches for changes in files, re-build', watch, {
   options: {
-    with_inabox: 'Also watch and build the amp-inabox.js binary.',
-    with_shadow: 'Also watch and build the amp-shadow.js binary.',
+    with_inabox: '  Also watch and build the amp-inabox.js binary.',
+    with_shadow: '  Also watch and build the amp-shadow.js binary.',
   }
 });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
