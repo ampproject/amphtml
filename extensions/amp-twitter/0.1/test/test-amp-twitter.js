@@ -96,10 +96,12 @@ describes.realWin('amp-twitter', {
       const bad1 = '<div>123</div>';
       const bad2 = '123123junk123123';
       const bad3 = 'https://twitter.com/1cram2force/status?ref=';
+      const bad4 = '<div>nonumber</div>';
 
       expect(cleanupTweetId_(bad1)).to.equal(bad1);
       expect(cleanupTweetId_(bad2)).to.equal(bad2);
       expect(cleanupTweetId_(bad3)).to.equal(bad3);
+      expect(cleanupTweetId_(bad4)).to.equal(bad4);
     });
 
     it('cleans up bad tweet id with ref query string at end', () => {
