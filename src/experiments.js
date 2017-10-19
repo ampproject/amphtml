@@ -45,9 +45,18 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 /** @const {string} */
 const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
 
-/** @const {!Promise<undefined>} */
-const originTrialsPromise = Promise.resolve();
-// const originTrialsPromise = scanForOriginExperimentTokens(self);
+/** @const {!JSONWebKey} */
+const ORIGIN_EXPERIMENTS_JWK = {
+  'alg': 'RS256',
+  'e': 'AQAB',
+  'ext': true,
+  'key_ops': ['verify'],
+  'kty': 'RSA',
+  'n': 'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ',
+};
+
+/** @type {?Promise} */
+let originExperimentsScanPromise;
 
 /** @private {!OriginExperiments} */
 let originExperiments;
@@ -105,7 +114,7 @@ function verifyOriginExperimentToken(win, token, crypto, publicKey) {
  * Scan the page for origin experiment tokens, verifies them, and enables
  * the corresponding experiments for verified tokens.
  * @param {!Window} win
- * @param {!Object} publicJwk
+ * @param {!webCrypto.JSONWebKey} publicJwk
  * @return {!Promise}
  */
 export function scanForOriginExperimentTokens(win, publicJwk) {
@@ -134,16 +143,19 @@ export function scanForOriginExperimentTokens(win, publicJwk) {
 }
 
 /**
- * Determines if the specified experiment is on or off for origin trials.
- * Callers should check if the experiment is already enabled before calling this
- * function.
- *
+ * Asynchronously checks the on/off state of an origin experiment ID.
+ * Triggers scan of origin experiment tokens on page on the first invocation.
  * @param {!Window} win
  * @param {string} experimentId
  * @return {!Promise<boolean>}
  */
-export function isExperimentOnForOriginTrial(win, experimentId) {
-  return originTrialsPromise.then(() => isExperimentOn(win, experimentId));
+export function isOriginExperimentOn(win, experimentId) {
+  if (!originExperimentsScanPromise) {
+    originExperimentsScanPromise =
+        scanForOriginExperimentTokens(win, ORIGIN_EXPERIMENTS_JWK);
+  }
+  return originExperimentsScanPromise.then(() =>
+      isExperimentOn(win, experimentId));
 }
 
 /**

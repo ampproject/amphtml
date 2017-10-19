@@ -23,7 +23,7 @@ import {
   scanForOriginExperimentTokens,
   isCanary,
   isExperimentOn,
-  isExperimentOnForOriginTrial,
+  isOriginExperimentOn,
   experimentToggles,
   toggleExperiment,
   resetExperimentTogglesForTesting,
@@ -944,21 +944,21 @@ describe('Origin experiments', () => {
   }
 
   it('should return false if no token is found', () => {
-    const promise = isExperimentOnForOriginTrial(win, 'foo', publicJwk);
+    const promise = isOriginExperimentOn(win, 'foo', publicJwk);
     return expect(promise).to.eventually.be.false;
   });
 
   it('should return false if public key is not present', () => {
     setupMetaTagWith(token);
 
-    const promise = isExperimentOnForOriginTrial(win, 'foo', publicJwk);
+    const promise = isOriginExperimentOn(win, 'foo', publicJwk);
     return expect(promise).to.eventually.be.false;
   });
 
   it('should return false if crypto is unavailable', () => {
     isPkcsAvailable.returns(false);
 
-    const promise = isExperimentOnForOriginTrial(win, 'foo', publicJwk);
+    const promise = isOriginExperimentOn(win, 'foo', publicJwk);
     return expect(promise).to.eventually.be.false;
   });
 
