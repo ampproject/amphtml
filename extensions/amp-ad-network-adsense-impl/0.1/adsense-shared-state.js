@@ -25,7 +25,7 @@ export class AdsenseSharedState {
 
   constructor() {
 
-    /** @private {!Array<!{id: string, format: string, client: string}>} */
+    /** @private {!Array<!{id: string, format: string, client: string, slotname: (string|undefined)}>} */
     this.previousSlots_ = [];
   }
 
@@ -36,19 +36,25 @@ export class AdsenseSharedState {
    * @param {string} format Format of the slot of form WxH.
    * @param {string} id A unique identifier for the slot.
    * @param {string} client The slot's ad client ID.
-   * @return !{{prevFmts: string, pv: number}} An object containing the
-   * state-dependent ad request URL parameters relevant for this slot.
+   * @param {string|undefined} slotname The slot's name if provided.
+   * @return !{{prevFmts: string, prevSlotnames: string, pv: number}} An object
+   *    containing the state-dependent ad request URL parameters relevant for
+   *    this slot.
    * */
-  addNewSlot(format, id, client) {
-    const result = {pv: 2, prevFmts: ''};
+  addNewSlot(format, id, client, slotname) {
+    const result = {pv: 2, prevFmts: '', prevSlotnames: ''};
     this.previousSlots_.forEach(slot => {
       dev().assert(slot.id != id);
       result.prevFmts += (result.prevFmts ? ',' : '') + slot.format;
+      if (slot.slotname) {
+        result.prevSlotnames +=
+            (result.prevSlotnames ? ',' : '') + slot.slotname;
+      }
       if (slot.client == client) {
         result.pv = 1;
       }
     });
-    this.previousSlots_.push({id, format, client});
+    this.previousSlots_.push({id, format, client, slotname});
     return result;
   }
 

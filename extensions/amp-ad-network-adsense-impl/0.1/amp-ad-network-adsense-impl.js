@@ -233,8 +233,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // dev().assert(slotId != undefined);
     const adk = this.adKey_(format);
     this.uniqueSlotId_ = slotId + adk;
+    const slotname = this.element.getAttribute('data-ad-slot');
     const sharedStateParams = sharedState.addNewSlot(
-        format, this.uniqueSlotId_, adClientId);
+        format, this.uniqueSlotId_, adClientId, slotname);
     const viewportSize = this.getViewport().getSize();
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     const enclosingContainers = getEnclosingContainerTypes(this.element);
@@ -246,7 +247,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       format,
       'w': this.size_.width,
       'h': this.size_.height,
-      'iu': this.element.getAttribute('data-ad-slot'),
+      'iu': slotname,
       'adtest': adTestOn ? 'on' : null,
       adk,
       'output': 'html',
@@ -260,6 +261,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'asnt': this.sentinel,
       'dff': computedStyle(this.win, this.element)['font-family'],
       'prev_fmts': sharedStateParams.prevFmts || null,
+      'prev_slotnames': sharedStateParams.prevSlotnames || null,
       'brdim': additionalDimensions(this.win, viewportSize),
       'ifi': this.win['ampAdGoogleIfiCounter']++,
       'rc': this.fromResumeCallback ? 1 : null,
