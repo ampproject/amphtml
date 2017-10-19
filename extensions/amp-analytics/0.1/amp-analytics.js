@@ -464,7 +464,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (inlineConfig['transport'] && inlineConfig['transport']['iframe']) {
       this.user().error(TAG, 'Inline configs are not allowed to ' +
           'specify transport iframe');
-      inlineConfig['transport']['iframe'] = undefined;
+      if (!getMode().localDev || getMode().test) {
+        inlineConfig['transport']['iframe'] = undefined;
+      }
     }
 
     if (this.remoteConfig_['transport'] &&
