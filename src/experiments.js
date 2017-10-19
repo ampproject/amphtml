@@ -25,6 +25,10 @@ import {OriginExperiments} from './origin-experiments';
 import {Services} from './services';
 import {getCookie, setCookie} from './cookies';
 import {parseQueryString} from './url';
+import {user} from './log';
+
+/** @const {string} */
+const TAG = 'experiments';
 
 /** @const {string} */
 const COOKIE_NAME = 'AMP_EXP';
@@ -137,8 +141,8 @@ export function scanForOriginExperimentTokens(win, publicJwk) {
 }
 
 /**
- * Asynchronously checks the on/off state of an origin experiment ID.
- * Triggers scan of origin experiment tokens on page on the first invocation.
+ * Asynchronously checks whether the specified origin experiment is on or off.
+ * On the first invocation, triggers scan of origin experiment tokens on page.
  * @param {!Window} win
  * @param {string} experimentId
  * @return {!Promise<boolean>}
@@ -148,8 +152,11 @@ export function isOriginExperimentOn(win, experimentId) {
     originExperimentsScanPromise =
         scanForOriginExperimentTokens(win, ORIGIN_EXPERIMENTS_PUBLIC_JWK);
   }
-  return originExperimentsScanPromise.then(() =>
-      isExperimentOn(win, experimentId));
+  return originExperimentsScanPromise.then(() => {
+    return isExperimentOn(win, experimentId);
+  }, error => {
+    user().error(TAG, error);
+  });
 }
 
 /**
