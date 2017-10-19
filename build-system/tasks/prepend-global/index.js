@@ -51,11 +51,12 @@ function sanityCheck(str) {
 
 /**
  * @param {string} filename
+ * @param {string} opt_local
  * @param {string=} opt_branch
  * @return {!Promise}
  */
-function checkoutBranchConfigs(filename, opt_branch) {
-  if (argv.local) {
+function checkoutBranchConfigs(filename, opt_local, opt_branch) {
+  if (opt_local) {
     return Promise.resolve();
   }
   const branch = opt_branch || 'origin/master';
@@ -112,11 +113,12 @@ function valueOrDefault(value, defaultValue) {
  * @param {string} config
  * @param {string} target
  * @param {string} filename
+ * @param {string} opt_local
  * @param {string} opt_branch
  * @return {!Promise}
  */
-function applyConfig(config, target, filename, opt_branch) {
-  return checkoutBranchConfigs(filename, opt_branch)
+function applyConfig(config, target, filename, opt_local, opt_branch) {
+  return checkoutBranchConfigs(filename, opt_local, opt_branch)
       .then(() => {
         return Promise.all([
           fs.readFileAsync(filename),
@@ -201,7 +203,7 @@ function main() {
         'build-system/global-configs/prod-config.json');
   }
   return removeConfig(target).then(() => {
-    return applyConfig(config, target, filename, branch);
+    return applyConfig(config, target, filename, argv.local, branch);
   });
 }
 

@@ -178,7 +178,8 @@ function applyAmpConfig(targetFile) {
       'build-system/global-configs/' + ampConfig + '-config.json';
   if (fs.existsSync(targetFile)) {
     return removeConfig(targetFile).then(() => {
-      return applyConfig(ampConfig, targetFile, configFile);
+      return applyConfig(
+          ampConfig, targetFile, configFile, /* opt_local */ true);
     });
   } else {
     return Promise.resolve();
