@@ -141,7 +141,7 @@ function applyConfig(config, target, filename, opt_branch) {
       .then(() => {
         if (!process.env.TRAVIS) {
           util.log('Wrote', util.colors.cyan(config), 'AMP config to',
-              util.colors.cyan(target), 'for local development / testing');
+              util.colors.cyan(target));
         }
       });
 }

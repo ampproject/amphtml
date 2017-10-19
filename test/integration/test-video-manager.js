@@ -29,7 +29,7 @@ import {
 import * as sinon from 'sinon';
 import {toArray} from '../../src/types';
 
-// TODO(dvoytenko): Enable test after making it work with the prod AMP config.
+// TODO(dvoytenko): These tests time out when run with the prod AMP config.
 describe.configure().skip('Fake Video Player' +
     'Integration Tests', () => {
   // We run the video player integration tests on a fake video player as part
