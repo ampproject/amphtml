@@ -23,7 +23,7 @@
 import {
   MANUAL_EXPERIMENT_ID,
   extractUrlExperimentId,
-  addExperimentIdToElement,
+  addExperimentIdsToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {supportsNativeCrypto} from '../../../ads/google/a4a/utils';
 import {
@@ -125,7 +125,7 @@ export class DoubleclickA4aEligibility {
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
         DFP_UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME);
     if (!!experimentId) {
-      addExperimentIdToElement(experimentId, element);
+      addExperimentIdsToElement(experimentId, element);
       forceExperimentBranch(
           win, DFP_CANONICAL_FF_EXPERIMENT_NAME, experimentId);
     }
@@ -171,7 +171,7 @@ export class DoubleclickA4aEligibility {
       }
     }
     if (experimentId) {
-      addExperimentIdToElement(experimentId, element);
+      addExperimentIdsToElement(experimentId, element);
       forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
     }
     return DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL != experimentId;
@@ -192,7 +192,7 @@ export class DoubleclickA4aEligibility {
       isTrafficEligible: () => true,
       branches: selectionBranches,
     };
-    randomlySelectUnsetExperiments(win, experimentInfoMap);
+    const expIds = randomlySelectUnsetExperiments(win, experimentInfoMap);
     return getExperimentBranch(win, experimentName);
   }
 }

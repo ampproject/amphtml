@@ -23,7 +23,7 @@
 import {
   MANUAL_EXPERIMENT_ID,
   extractUrlExperimentId,
-  addExperimentIdToElement,
+  addExperimentIdsToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 import {
@@ -78,7 +78,7 @@ export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
         TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
   }
   if (experimentId) {
-    addExperimentIdToElement(experimentId, element);
+    addExperimentIdsToElement(experimentId, element);
     forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, experimentId);
   }
   return true;

@@ -26,7 +26,7 @@ import {
   identityEnabled,
 } from './adsense-a4a-config';
 import {
-  addExperimentIdToElement,
+  addExperimentIdsToElement,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
@@ -185,7 +185,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this.element.getAttribute('data-auto-format') || '';
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
-      addExperimentIdToElement(verifierEid, this.element);
+      addExperimentIdsToElement(verifierEid, this.element);
     }
 
     if (this.isResponsive_()) {

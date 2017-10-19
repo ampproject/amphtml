@@ -40,7 +40,7 @@ import {
 } from '../doubleclick-a4a-config';
 import {
   isInExperiment,
-  addExperimentIdToElement,
+  addExperimentIdsToElement,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {
   QQID_HEADER,
@@ -442,7 +442,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('returns the right URL', () => {
       new AmpAd(element).upgradeCallback();
-      addExperimentIdToElement('12345678', element);
+      addExperimentIdsToElement('12345678', element);
       return impl.getAdUrl().then(url => {
         [
           /^https:\/\/securepubads\.g\.doubleclick\.net\/gampad\/ads/,
