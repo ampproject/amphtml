@@ -92,10 +92,21 @@ describes.realWin('amp-twitter', {
       expect(cleanupTweetId_(good)).to.equal('20');
     });
 
-    it('cleans up bad tweet id with query string at end', () => {
-      const bad = '585110598171631616?ref=twsrc%5Etfw';
+    it('does not pick up random numbers', () => {
+      const bad1 = '<div>123</div>';
+      const bad2 = '123123junk123123';
+      const bad3 = 'https://twitter.com/1cram2force/status?ref=';
 
-      expect(cleanupTweetId_(bad)).to.equal(tweetId);
+      expect(cleanupTweetId_(bad1)).to.equal(bad1);
+      expect(cleanupTweetId_(bad2)).to.equal(bad2);
+      expect(cleanupTweetId_(bad3)).to.equal(bad3);
+    });
+
+    it('cleans up bad tweet id with ref query string at end', () => {
+      const bad1 = '585110598171631616?ref=twsrc%5Etfw';
+      const bad2 = '585110598171631616?ref_src=twsrc%5Etfw';
+      expect(cleanupTweetId_(bad1)).to.equal(tweetId);
+      expect(cleanupTweetId_(bad2)).to.equal(tweetId);
     });
 
     it('cleans up bad tweet full Url', () => {
