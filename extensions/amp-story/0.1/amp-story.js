@@ -377,7 +377,7 @@ export class AmpStory extends AMP.BaseElement {
     // (e.g. .co.uk) the third level may be whitelisted.  Additionally, this
     // allows subdomains to be whitelisted individually.
     return domains.some((unusedDomain, index) => {
-      const domain = domains.slice(0, index + 1).join('.');
+      const domain = domains.slice(index, domains.length).join('.');
       const domainHash = stringHash32(domain.toLowerCase());
       return WHITELISTED_ORIGINS.includes(domainHash);
     });
