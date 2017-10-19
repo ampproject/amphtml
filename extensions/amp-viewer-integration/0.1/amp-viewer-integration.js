@@ -37,7 +37,6 @@ const APP = '__AMPHTML__';
  */
 const RequestNames = {
   CHANNEL_OPEN: 'channelOpen',
-  DISABLE_SCROLL: 'disableScroll',
   UNLOADED: 'unloaded',
 };
 
@@ -170,9 +169,6 @@ export class AmpViewerIntegration {
     listenOnce(
         this.win, 'unload', this.handleUnload_.bind(this, messaging));
 
-    messaging.registerHandler(
-        RequestNames.DISABLE_SCROLL, this.disableScrollHandler_.bind(this));
-
     if (viewer.hasCapability('swipe')) {
       this.initTouchHandler_(messaging);
     }
@@ -194,25 +190,6 @@ export class AmpViewerIntegration {
    */
   initTouchHandler_(messaging) {
     new TouchHandler(this.win, messaging);
-  }
-
-  /**
-   * Handles disableScroll requests from the viewer to disable scrolling by
-   * setting overflow: hidden.
-   * @param {string} type Unused.
-   * @param {*} payload True to disable scrolling.
-   * @param {boolean} awaitResponse
-   * @return {!Promise<?>|undefined}
-   * @private
-   */
-  disableScrollHandler_(type, payload, awaitResponse) {
-    const viewport = Services.viewportForDoc(this.win.document);
-    if (!!payload) {
-      viewport.disableScroll();
-    } else {
-      viewport.resetScroll();
-    }
-    return awaitResponse ? Promise.resolve({}) : undefined;
   }
 }
 
