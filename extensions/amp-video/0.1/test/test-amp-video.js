@@ -90,6 +90,7 @@ describes.realWin('amp-video', {
       'muted': '',
       'loop': '',
       'crossorigin': '',
+      'disableremoteplayback': '',
     }).then(v => {
       const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
@@ -100,6 +101,7 @@ describes.realWin('amp-video', {
       expect(video.hasAttribute('controls')).to.be.true;
       expect(video.hasAttribute('loop')).to.be.true;
       expect(video.hasAttribute('crossorigin')).to.be.true;
+      expect(video.hasAttribute('disableremoteplayback')).to.be.true;
       // autoplay is never propagated to the video element
       expect(video.hasAttribute('autoplay')).to.be.false;
       // muted is a deprecated attribute
