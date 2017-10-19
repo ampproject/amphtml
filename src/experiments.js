@@ -92,7 +92,7 @@ function verifyOriginExperimentToken(win, token, crypto, publicKey) {
     return Promise.reject(new Error('Crypto is unavailable'));
   }
   if (!originExperiments) {
-    originExperiments = new OriginExperiments(win, crypto);
+    originExperiments = new OriginExperiments(crypto);
   }
   const verify = originExperiments.verifyToken(token, win.location, publicKey);
   return verify.then(experimentId => {
@@ -126,6 +126,7 @@ export function scanForOriginExperimentTokens(win, publicJwk) {
         const p = verifyOriginExperimentToken(win, token, crypto, publicKey);
         promises.push(p);
       } else {
+        // TODO(choumx): Should continue verifying other tokens.
         const reject = Promise.reject(new Error('Experiment token missing.'));
         promises.push(reject);
       }

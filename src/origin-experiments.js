@@ -22,49 +22,28 @@ import {parseJson} from './json';
 const LENGTH_BYTES = 4;
 
 /**
- * @typedef {{name: string}}
- */
-let AlgorithmDef;
-
-/**
  * Generates, signs and verifies origin experiments.
  */
 export class OriginExperiments {
   /**
-   * @param {!Window} win
-   * @param {./service/crypto-impl.Crypto=} opt_crypto
+   * @param {!./service/crypto-impl.Crypto} crypto
    */
-  constructor(win, opt_crypto) {
-    /** @private {!Window} */
-    this.win_ = win;
-
-    /** @private {./service/crypto-impl.Crypto|undefined} */
-    this.crypto_ = opt_crypto;
-
-    /** @private {AlgorithmDef} */
-    this.algo_ = {
-      name: 'RSASSA-PKCS1-v1_5',
-      hash: {name: 'SHA-256'},
-    };
-
-    /** @private {webCrypto.SubtleCrypto} */
-    this.subtle_ = null;
-    if (win.crypto) {
-      this.subtle_ = win.crypto.subtle;
-    }
+  constructor(crypto) {
+    /** @private {!./service/crypto-impl.Crypto} */
+    this.crypto_ = crypto;
   }
 
-  /** @return {!Promise} */
+  /**
+   * Generates an RSA public/private key pair for signing and verifying.
+   * @return {!Promise}
+   */
   generateKeys() {
-    if (!this.subtle_) {
-      return Promise.reject(new Error('Crypto is not supported.'));
-    }
     const generationAlgo = Object.assign({
       modulusLength: 2048,
       publicExponent: Uint8Array.of(1, 0, 1),
-    }, this.algo_);
-    return this.subtle_.generateKey(
-        /** @type {AlgorithmDef} */ (generationAlgo),
+    }, this.crypto_.pkcsAlgo);
+    return this.crypto_.subtle.generateKey(
+        /** @type {{name: string}} */ (generationAlgo),
         /* extractable */ true,
         /* keyUsages */ ['sign', 'verify']);
   }
@@ -72,13 +51,12 @@ export class OriginExperiments {
   /**
    * Generates an origin experiment token given a config json.
    * @param {number} version
-   * @param {string} json
+   * @param {!JsonObject} json
    * @param {!webCrypto.CryptoKey} privateKey
    * @return {!Promise<string>}
    */
   generateToken(version, json, privateKey) {
-    const config = stringToBytes(
-        typeof json == 'object' ? JSON.stringify(json) : json);
+    const config = stringToBytes(JSON.stringify(json));
     const data = this.prepend_(version, config);
     return this.sign_(data, privateKey).then(signature => {
       return this.append_(data, new Uint8Array(signature));
@@ -124,9 +102,11 @@ export class OriginExperiments {
       if (!verified) {
         throw new Error('Failed to verify token signature.');
       }
+      // Convert config from bytes to JS object.
       const configStr = bytesToString(configBytes);
       const config = parseJson(configStr);
 
+      // Check token experiment origin against `location`.
       const approvedOrigin = parseUrl(config['origin']).origin;
       const sourceOrigin = getSourceOrigin(location);
       if (approvedOrigin !== sourceOrigin) {
@@ -134,10 +114,10 @@ export class OriginExperiments {
             `window (${sourceOrigin}).`);
       }
 
+      // Check token expiration date.
       const experimentId = config['experiment'];
       const expiration = config['expiration'];
-      const now = Date.now();
-      if (expiration >= now) {
+      if (expiration >= Date.now()) {
         return experimentId;
       } else {
         throw new Error(`Experiment "${experimentId}" has expired.`);
@@ -177,11 +157,7 @@ export class OriginExperiments {
    * @return {!Promise}
    */
   sign_(data, privateKey) {
-    if (this.subtle_) {
-      return this.subtle_.sign(this.algo_, privateKey, data);
-    } else {
-      return Promise.reject(new Error('Crypto is not supported.'));
-    }
+    return this.crypto_.subtle.sign(this.crypto_.pkcsAlgo, privateKey, data);
   }
 
   /**
@@ -189,15 +165,9 @@ export class OriginExperiments {
    * @param {!Uint8Array} signature
    * @param {!Uint8Array} data
    * @param {!webCrypto.CryptoKey} publicKey
-   * @return {!Promise}
+   * @return {!Promise<boolean>}
    */
   verify_(signature, data, publicKey) {
-    if (this.crypto_) {
-      return this.crypto_.verifyPkcs(publicKey, signature, data);
-    } else if (this.subtle_) {
-      return this.subtle_.verify(this.algo_, publicKey, signature, data);
-    } else {
-      return Promise.reject(new Error('Crypto is not supported.'));
-    }
+    return this.crypto_.verifyPkcs(publicKey, signature, data);
   }
 }

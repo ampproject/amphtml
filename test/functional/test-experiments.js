@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
 import {FakeWindow} from '../../testing/fake-dom';
 import {OriginExperiments} from '../../src/origin-experiments';
 import {Services} from '../../src/services';
-import {installCryptoService} from '../../src/service/crypto-impl';
 import {bytesToString} from '../../src/utils/bytes';
 import {
   scanForOriginExperimentTokens,
@@ -867,6 +867,7 @@ describe('experiment branch tests', () => {
 describe('Origin experiments', () => {
   let win;
   let sandbox;
+  let isPkcsAvailable;
 
   let publicJwk;
   let token;
@@ -875,9 +876,11 @@ describe('Origin experiments', () => {
   let tokenWithBadConfigLength;
   let tokenWithBadSignature;
 
-  // Generate test tokens once for all unit tests.
+  // Generate test tokens only once since it's slow.
   before(() => {
-    const originExperiments = new OriginExperiments(new FakeWindow());
+    const crypto = new Crypto(window);
+    const originExperiments = new OriginExperiments(crypto);
+
     return originExperiments.generateKeys().then(keyPair => {
       const {publicKey, privateKey} = keyPair;
 
@@ -921,10 +924,12 @@ describe('Origin experiments', () => {
   });
 
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+
     win = new FakeWindow();
     installCryptoService(win);
-
-    sandbox = sinon.sandbox.create();
+    const crypto = Services.cryptoFor(win);
+    isPkcsAvailable = sandbox.stub(crypto, 'isPkcsAvailable').returns(true);
   });
 
   afterEach(() => {
@@ -951,7 +956,7 @@ describe('Origin experiments', () => {
   });
 
   it('should return false if crypto is unavailable', () => {
-    sandbox.stub(Services.cryptoFor(win), 'isPkcsAvailable').returns(false);
+    isPkcsAvailable.returns(false);
 
     const promise = isExperimentOnForOriginTrial(win, 'foo', publicJwk);
     return expect(promise).to.eventually.be.false;
