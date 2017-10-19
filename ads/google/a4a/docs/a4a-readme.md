@@ -28,13 +28,13 @@ AMP Ads are designed to work on both AMP and Non-AMP webpages,  including deskto
 
 # Current status
 
-The AMP Ads format spec has been [released](https://github.com/google/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) and any creative developer can create AMP Ads. A number of ad providers are working on automatically converting ads to AMP Ads whenever possible. e.g. AdSense.
+The AMP Ads format spec has been [released](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) and any creative developer can create AMP Ads. A number of ad providers are working on automatically converting ads to AMP Ads whenever possible. e.g. AdSense.
 
 Here is how you can participate. If you are:
 
 ## Publishers
 
-If publishers want to serve their direct-sold ad formats they must create the ads in[ A4A format](https://github.com/google/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) (or use a creative agency), and deliver them using an AMP Ad supported ad server.
+If publishers want to serve their direct-sold ad formats they must create the ads in [A4A format](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) (or use a creative agency), and deliver them using an AMP Ad supported ad server.
 
 The following adservers support serving AMP Ads at the moment:
 1. DoubleClick for Publishers
