@@ -31,6 +31,10 @@ tags: {  # <amp-iframe>
   tag_name: "AMP-IFRAME"
   requires_extension: "amp-iframe"
   attrs: {
+    name: "allow"
+    value_regex: "geolocation|fullscreen|payment|transparency"
+  }
+  attrs: {
     name: "allowfullscreen"
     value: ""
   }

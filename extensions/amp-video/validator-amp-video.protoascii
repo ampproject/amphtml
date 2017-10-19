@@ -28,12 +28,9 @@ tags: {  # amp-video
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-video>
-  tag_name: "AMP-VIDEO"
-  # Typically we'd require the extension j/s, but for historical reasons
-  # many pages don't have it, so it ends up late loaded and we warn, instead
-  # of making this a validation error.
-  also_requires_tag_warning: "amp-video extension .js script"
+
+attr_lists: {
+  name: "amp-video-common"
   attrs: { name: "album" }
   attrs: { name: "alt" }
   attrs: { name: "artist" }
@@ -62,7 +59,6 @@ tags: {  # <amp-video>
     value: ""
   }
   attrs: { name: "placeholder" }
-  attrs: { name: "poster" }
   attrs: {
     name: "preload"
     value_regex: "(none|metadata|auto|)"
@@ -88,7 +84,41 @@ tags: {  # <amp-video>
   attrs: { name: "[preload]" }
   attrs: { name: "[src]" }
   attrs: { name: "[title]" }
+}
+
+tags: {  # <amp-video>
+  tag_name: "AMP-VIDEO"
+  # amp-story is disallowed_ancestor because the 'poster' attr is optional here.
+  disallowed_ancestor: "AMP-STORY"
+  # Typically we'd require the extension j/s, but for historical reasons
+  # many pages don't have it, so it ends up late loaded and we warn, instead
+  # of making this a validation error.
+  also_requires_tag_warning: "amp-video extension .js script"
+  attrs: { name: "poster" }
   attr_lists: "extended-amp-global"
+  attr_lists: "amp-video-common"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {  # <amp-video>
+  tag_name: "AMP-VIDEO"
+  spec_name: "amp-story >> amp-video"
+  mandatory_ancestor: "AMP-STORY"
+  requires_extension: "amp-video"
+  attrs: {
+    name: "poster"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  attr_lists: "amp-video-common"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
   amp_layout: {
     supported_layouts: FILL
