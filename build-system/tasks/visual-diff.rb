@@ -272,7 +272,7 @@ def generate_snapshots(page, webpages)
   log('verbose', 'Cleaning up existing AMP config')
   remove_cmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --remove"
   system(remove_cmd, :out => OUT)
-  CONFIGS.each {|config|
+  CONFIGS.each do |config|
     log('verbose', 'Switching to the ' + cyan("#{config}") + ' AMP config')
     config_cmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --#{config}"
     system(config_cmd, :out => OUT)
@@ -289,7 +289,7 @@ def generate_snapshots(page, webpages)
                           forbidden_css, loading_incomplete_css, loading_complete_css)
       Percy::Capybara.snapshot(page, name: name)
     end
-  }
+  end
 end
 
 
