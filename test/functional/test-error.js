@@ -32,6 +32,10 @@ import {
 } from '../../src/experiments';
 import * as sinon from 'sinon';
 import * as analytics from '../../src/analytics';
+import {
+  getMode,
+  getRtvVersionForTesting,
+} from '../../src/mode';
 
 describes.fakeWin('installErrorReporting', {}, env => {
   let sandbox;
@@ -194,7 +198,8 @@ describe('reportErrorToServer', () => {
     expect(query.m).to.equal('XYZ');
     expect(query.el).to.equal('FOO-BAR');
     expect(query.a).to.equal('0');
-    expect(query.v).to.equal('$internalRuntimeVersion$');
+    expect(query.v).to.equal(
+        getRtvVersionForTesting(window, getMode().localDev));
     expect(query.noAmp).to.equal('0');
   });
 
@@ -211,7 +216,8 @@ describe('reportErrorToServer', () => {
 
     expect(query.m).to.equal('XYZ');
     expect(query.a).to.equal('1');
-    expect(query.v).to.equal('$internalRuntimeVersion$');
+    expect(query.v).to.equal(
+        getRtvVersionForTesting(window, getMode().localDev));
   });
 
   it('reportError mark asserts without error object', () => {
@@ -227,7 +233,8 @@ describe('reportErrorToServer', () => {
 
     expect(query.m).to.equal('XYZ');
     expect(query.a).to.equal('1');
-    expect(query.v).to.equal('$internalRuntimeVersion$');
+    expect(query.v).to.equal(
+        getRtvVersionForTesting(window, getMode().localDev));
   });
 
   it('reportError marks 3p', () => {

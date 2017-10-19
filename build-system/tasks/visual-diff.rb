@@ -36,7 +36,7 @@ DEFAULT_WIDTHS = [375, 411, 1440]
 HOST = 'localhost'
 PORT = '8000'
 WEBSERVER_TIMEOUT_SECS = 15
-CONFIGS = ['prod', 'canary']
+CONFIGS = ['canary', 'prod']
 AMP_RUNTIME_FILE = 'dist/amp.js'
 BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status'
 BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5
@@ -269,6 +269,9 @@ def generateSnapshots(page, webpages)
   if ARGV.include? '--master'
     Percy::Capybara.snapshot(page, name: 'Blank page')
   end
+  log('verbose', 'Cleaning up existing AMP config')
+  removeCmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --remove"
+  system(removeCmd, :out=>OUT)
   for config in CONFIGS
     log('verbose', 'Switching to the ' + cyan("#{config}") + ' AMP config')
     configCmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --#{config}"
@@ -286,9 +289,6 @@ def generateSnapshots(page, webpages)
           forbidden_css, loading_incomplete_css, loading_complete_css)
       Percy::Capybara.snapshot(page, name: name)
     end
-    log('verbose', 'Switching back to the default AMP config')
-    removeCmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --remove"
-    system(removeCmd, :out=>OUT)
   end
 end
 
