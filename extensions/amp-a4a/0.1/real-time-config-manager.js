@@ -97,15 +97,14 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
   // url if it exists, and send the RTC request.
   Object.keys(rtcConfig['vendors'] || []).forEach(vendor => {
     const vendorObject = RTC_VENDORS[vendor.toLowerCase()];
-    const url = vendorObject ?
-          RTC_VENDORS[vendor.toLowerCase()].url : undefined;
+    const url = vendorObject ? vendorObject.url : '';
     if (!url) {
       return logAndAddErrorResponse_(promiseArray,
           RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor);
     }
     const validVendorMacros = {};
     Object.keys(rtcConfig['vendors'][vendor]).forEach(macro => {
-      if (vendorObject.macros.includes(macro)) {
+      if (vendorObject.macros && vendorObject.macros.includes(macro)) {
         validVendorMacros[macro] = rtcConfig['vendors'][vendor][macro];
       } else {
         user().warn(TAG, `Invalid macro: ${macro} for vendor: ${vendor}`);
