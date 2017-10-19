@@ -320,7 +320,7 @@ function runTests() {
   util.log(yellow(
       'Started test responses server on localhost:31862'));
 
-  let deferred = Promise.defer();
+  const deferred = Promise.defer();
   new Karma(c, function(exitCode) {
     server.emit('kill');
     if (exitCode) {
