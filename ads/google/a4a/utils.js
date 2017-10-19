@@ -34,7 +34,7 @@ import {
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
 
 /** @const {number} */
-const MAX_URL_LENGTH = 4096;
+const MAX_URL_LENGTH = 16384;
 
 /** @enum {string} */
 const AmpAdImplementation = {
