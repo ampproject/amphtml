@@ -23,15 +23,8 @@
 
 import {OriginExperiments} from './origin-experiments';
 import {Services} from './services';
-import {bytesToUInt32, stringToBytes, utf8DecodeSync} from './utils/bytes';
 import {getCookie, setCookie} from './cookies';
-import {getServicePromise} from './service';
-import {getSourceOrigin, parseQueryString, parseUrl} from './url';
-import {user} from './log';
-import {parseJson} from './json';
-
-/** @const {string} */
-const TAG = 'experiments';
+import {parseQueryString} from './url';
 
 /** @const {string} */
 const COOKIE_NAME = 'AMP_EXP';
@@ -46,19 +39,20 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
 
 /** @const {!JSONWebKey} */
-const ORIGIN_EXPERIMENTS_JWK = {
+const ORIGIN_EXPERIMENTS_PUBLIC_JWK = {
   'alg': 'RS256',
   'e': 'AQAB',
   'ext': true,
   'key_ops': ['verify'],
   'kty': 'RSA',
+  /*eslint "max-len": 0*/
   'n': 'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ',
 };
 
 /** @type {?Promise} */
 let originExperimentsScanPromise;
 
-/** @private {!OriginExperiments} */
+/** @private {?OriginExperiments} */
 let originExperiments;
 
 /**
@@ -152,7 +146,7 @@ export function scanForOriginExperimentTokens(win, publicJwk) {
 export function isOriginExperimentOn(win, experimentId) {
   if (!originExperimentsScanPromise) {
     originExperimentsScanPromise =
-        scanForOriginExperimentTokens(win, ORIGIN_EXPERIMENTS_JWK);
+        scanForOriginExperimentTokens(win, ORIGIN_EXPERIMENTS_PUBLIC_JWK);
   }
   return originExperimentsScanPromise.then(() =>
       isExperimentOn(win, experimentId));

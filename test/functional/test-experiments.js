@@ -34,7 +34,6 @@ import {
   getBinaryType,
 } from '../../src/experiments';
 import {createElementWithAttributes} from '../../src/dom';
-import {user} from '../../src/log';
 import * as sinon from 'sinon';
 
 describe('experimentToggles', () => {
@@ -900,15 +899,12 @@ describe('Origin experiments', () => {
         originExperiments.generateToken(42, config, privateKey),
         originExperiments.generateToken(0, expired, privateKey),
       ]).then(results => {
-        ([
-          token,
-          tokenWithBadVersion,
-          tokenWithExpiredExperiment,
-         ] = results);
+        token = results[0];
+        tokenWithBadVersion = results[1];
+        tokenWithExpiredExperiment = results[2];
 
         // Generate token with bad signature by truncating.
-        tokenWithBadSignature =
-            token.slice(0, token.length - 5);
+        tokenWithBadSignature = token.slice(0, token.length - 5);
 
         // Generate token with bad config length by hand.
         const data = new Uint8Array(5);
