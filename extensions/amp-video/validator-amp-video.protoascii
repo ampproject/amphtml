@@ -47,6 +47,10 @@ attr_lists: {
   attrs: { name: "controlslist" }
   attrs: { name: "crossorigin" }
   attrs: {
+    name: "disableremoteplayback"
+    value: ""
+  }
+  attrs: {
     name: "loop"
     value: ""
   }
