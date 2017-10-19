@@ -20,6 +20,8 @@ const gulp = require('gulp-help')(require('gulp'));
 const glob = require('glob');
 const Karma = require('karma').Server;
 const config = require('../config');
+const applyConfig = require('./prepend-global/index.js').applyConfig;
+const removeConfig = require('./prepend-global/index.js').removeConfig;
 const fs = require('fs');
 const path = require('path');
 const util = require('gulp-util');
@@ -33,6 +35,7 @@ const green = util.colors.green;
 const yellow = util.colors.yellow;
 const cyan = util.colors.cyan;
 const preTestTasks = argv.nobuild ? [] : (argv.unit ? ['css'] : ['build']);
+const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
 
 
 /**
@@ -154,6 +157,7 @@ function printArgvMessages() {
     if (!argv.compiled) {
       util.log(green('Running tests against unminified code.'));
     }
+    util.log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
     Object.keys(argv).forEach(arg => {
       const message = argvMessages[arg];
       if (message) {
@@ -163,15 +167,28 @@ function printArgvMessages() {
   }
 }
 
+/**
+ * Applies the prod or canary AMP config to file.
+ * Called at the end of "gulp build" and "gulp dist --fortesting".
+ * @param {string} targetFile File to which the config is to be written.
+ * @return {Promise}
+ */
+function applyAmpConfig(targetFile) {
+  const configFile =
+      'build-system/global-configs/' + ampConfig + '-config.json';
+  if (fs.existsSync(targetFile)) {
+    return removeConfig(targetFile).then(() => {
+      return applyConfig(ampConfig, targetFile, configFile);
+    });
+  } else {
+    return Promise.resolve();
+  }
+}
 
 /**
- * Run tests.
+ * Runs all the tests.
  */
-gulp.task('test', 'Runs tests', preTestTasks, function(done) {
-  if (!argv.nohelp) {
-    printArgvMessages();
-  }
-
+function runTests() {
   if (!argv.integration && process.env.AMPSAUCE_REPO) {
     console./* OK*/info('Deactivated for ampsauce repo');
   }
@@ -303,6 +320,7 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
   util.log(yellow(
       'Started test responses server on localhost:31862'));
 
+  const deferred = Promise.defer();
   new Karma(c, function(exitCode) {
     server.emit('kill');
     if (exitCode) {
@@ -311,7 +329,8 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
           yellow('Karma test failed with exit code', exitCode));
       process.exit(exitCode);
     } else {
-      done();
+      // TODO(rsimha-amp): Make sure the gulp task exits cleanly after this.
+      deferred.resolve();
     }
   }).on('run_start', function() {
     if (argv.saucelabs) {
@@ -333,6 +352,22 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
       console./* OK*/log(message);
     }
   }).start();
+  return deferred.promise;
+}
+
+/**
+ * Run tests after applying the prod / canary AMP config to the runtime.
+ */
+gulp.task('test', 'Runs tests', preTestTasks, function() {
+  if (!argv.nohelp) {
+    printArgvMessages();
+  }
+
+  return applyAmpConfig('dist/amp.js').then(() => {
+    return applyAmpConfig('dist/v0.js');
+  }).then(() => {
+    return runTests();
+  });
 }, {
   options: {
     'verbose': '  With logging enabled',
@@ -357,5 +392,6 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
         'to Karma',
     'nohelp': '  Silence help messages that are printed prior to test run',
     'a4a': '  Runs all A4A tests',
+    'config': '  Sets the runtime\'s AMP config to one of "prod" or "canary"',
   },
 });
