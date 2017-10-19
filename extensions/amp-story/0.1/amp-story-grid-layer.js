@@ -34,7 +34,13 @@ import {Layout} from '../../../src/layout';
  * @private @const {!Object<string, string>}
  */
 const SUPPORTED_CSS_GRID_ATTRIBUTES = {
+  'align-content': 'alignContent',
+  'align-items': 'alignItems',
+  'align-self': 'alignSelf',
   'grid-area': 'gridArea',
+  'justify-content': 'justifyContent',
+  'justify-items': 'justifyItems',
+  'justify-self': 'justifySelf',
 };
 
 /**
