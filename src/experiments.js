@@ -97,7 +97,7 @@ export function getBinaryType(win) {
  */
 function verifyOriginExperimentToken(win, token, crypto, publicKey) {
   if (!crypto.isPkcsAvailable()) {
-    return Promise.reject(new Error('Crypto is unavailable'));
+    return Promise.reject(new Error('Crypto is unavailable.'));
   }
   if (!originExperiments) {
     originExperiments = new OriginExperiments(crypto);
@@ -115,7 +115,7 @@ function verifyOriginExperimentToken(win, token, crypto, publicKey) {
  * @param {!webCrypto.JSONWebKey} publicJwk
  * @return {!Promise}
  */
-export function scanForOriginExperimentTokens(win, publicJwk) {
+function scanForOriginExperimentTokens(win, publicJwk) {
   const metas =
       win.document.head.querySelectorAll('meta[name="amp-experiment-token"]');
   if (metas.length == 0) {
@@ -145,10 +145,11 @@ export function scanForOriginExperimentTokens(win, publicJwk) {
  * On the first invocation, triggers scan of origin experiment tokens on page.
  * @param {!Window} win
  * @param {string} experimentId
+ * @param {boolean=} opt_forceScan
  * @return {!Promise<boolean>}
  */
-export function isOriginExperimentOn(win, experimentId) {
-  if (!originExperimentsScanPromise) {
+export function isOriginExperimentOn(win, experimentId, opt_forceScan) {
+  if (!originExperimentsScanPromise || opt_forceScan) {
     originExperimentsScanPromise =
         scanForOriginExperimentTokens(win, ORIGIN_EXPERIMENTS_PUBLIC_JWK);
   }
@@ -156,6 +157,7 @@ export function isOriginExperimentOn(win, experimentId) {
     return isExperimentOn(win, experimentId);
   }, error => {
     user().error(TAG, error);
+    return false;
   });
 }
 
