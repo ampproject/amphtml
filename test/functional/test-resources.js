@@ -1607,7 +1607,7 @@ describes.realWin('Resources scrollHeight', {
     sandbox.stub(resources.viewport_, 'getScrollHeight', () => {
       return 200;
     });
-    resources.viewport_.changed(/* relayoutAll */ true, /* velocity */ 0);
+    resources.viewport_.changed_(/* relayoutAll */ true, /* velocity */ 0);
     resources.doPass();
 
     expect(resources.maybeChangeHeight_).to.equal(false);
