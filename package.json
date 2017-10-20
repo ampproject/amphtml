@@ -12,7 +12,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ampproject/amphtml.git"
+    "url": "git+https://github.com/ampproject/amphtml.git"
   },
   "scripts": {
     "test": "gulp test && gulp ava",
@@ -63,10 +63,11 @@
     "formidable": "1.0.17",
     "fs-extra": "0.27.0",
     "glob": "7.1.2",
-    "gulp": "3.9.1",
+    "gulp": "^3.9.1",
     "gulp-ava": "0.18.0",
     "gulp-batch-replace": "0.0.0",
     "gulp-closure-compiler": "0.4.0",
+    "gulp-concat": "^2.6.1",
     "gulp-eslint": "3.0.1",
     "gulp-exec": "2.1.2",
     "gulp-file": "0.2.0",
@@ -74,11 +75,13 @@
     "gulp-help": "1.6.1",
     "gulp-if": "2.0.0",
     "gulp-intercept": "0.1.0",
+    "gulp-jshint": "^2.0.4",
     "gulp-load-plugins": "1.2.0",
-    "gulp-rename": "1.2.2",
+    "gulp-rename": "^1.2.2",
     "gulp-replace": "0.5.4",
+    "gulp-sass": "^3.1.0",
     "gulp-sourcemaps": "1.5.2",
-    "gulp-uglify": "2.0.1",
+    "gulp-uglify": "^2.0.1",
     "gulp-util": "3.0.7",
     "gulp-watch": "4.3.5",
     "gulp-webserver": "0.9.1",
@@ -87,6 +90,7 @@
     "is-running": "2.1.0",
     "jison": "0.4.18",
     "jsdom": "9.2.1",
+    "jshint": "^2.9.5",
     "json-stable-stringify": "1.0.1",
     "karma": "1.7.0",
     "karma-babel-preprocessor": "6.0.1",
@@ -139,5 +143,13 @@
     "concurrency": 5,
     "tap": true,
     "failFast": true
+  },
+  "bugs": {
+    "url": "https://github.com/ampproject/amphtml/issues"
+  },
+  "homepage": "https://github.com/ampproject/amphtml#readme",
+  "directories": {
+    "example": "examples",
+    "test": "test"
   }
 }
