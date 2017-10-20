@@ -160,6 +160,7 @@ import {outbrain} from '../ads/outbrain';
 import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
+import {pubexchange} from '../ads/pubexchange';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
@@ -213,6 +214,7 @@ const AMP_EMBED_ALLOWED = {
   mywidget: true,
   outbrain: true,
   plista: true,
+  pubexchange: true,
   smartclip: true,
   smi2: true,
   taboola: true,
@@ -329,6 +331,7 @@ register('outbrain', outbrain);
 register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
+register('pubexchange', pubexchange);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
