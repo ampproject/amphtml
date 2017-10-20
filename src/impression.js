@@ -115,7 +115,7 @@ function handleReplaceUrl(win) {
   }
 
   // request async replaceUrl is viewer support getReplaceUrl.
-  return viewer.sendMessageAwaitResponse('getReplaceUrl', undefined)
+  return viewer.sendMessageAwaitResponse('getReplaceUrl', /* data */ undefined)
       .then(response => {
         if (!response || typeof response != 'object') {
           dev().warn('IMPRESSION', 'get invalid replaceUrl response');

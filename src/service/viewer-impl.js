@@ -970,7 +970,7 @@ export class Viewer {
   }
 
   /**
-   * Replace the
+   * Replace the document url with the viewer provided new replaceUrl.
    * @param {?string} newUrl
    */
   replaceUrl(newUrl) {
