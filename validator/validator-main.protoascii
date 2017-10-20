@@ -233,7 +233,7 @@ tags: {
                  "([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|"
                  "https://cloud\\.typography\\.com/"
                  "[0-9]*/[0-9]*/css/fonts\\.css|"
-		 "https://fast\\.fonts\\.net/.*|"
+                 "https://fast\\.fonts\\.net/.*|"
                  "https://fonts\\.googleapis\\.com/css\\?.*|"
                  "https://fonts\\.googleapis\\.com/icon\\?.*|"
                  "https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|"
