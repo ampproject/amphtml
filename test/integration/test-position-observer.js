@@ -37,7 +37,7 @@ config.run('amp-position-observer', function() {
   `;
 
   const extensions = ['amp-animation', 'amp-position-observer'];
-  const experiments = ['amp-animation', 'amp-position-observer'];
+  const experiments = ['amp-animation'];
 
   const scrollboundBody = `
     <amp-animation id="anim" layout="nodisplay">
