@@ -460,6 +460,22 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
 
+    // Do NOT allow inline or remote config to use 'transport: iframe'
+    if (inlineConfig['transport'] && inlineConfig['transport']['iframe']) {
+      this.user().error(TAG, 'Inline configs are not allowed to ' +
+          'specify transport iframe');
+      if (!getMode().localDev || getMode().test) {
+        inlineConfig['transport']['iframe'] = undefined;
+      }
+    }
+
+    if (this.remoteConfig_['transport'] &&
+        this.remoteConfig_['transport']['iframe']) {
+      this.user().error(TAG, 'Remote configs are not allowed to ' +
+          'specify transport iframe');
+      this.remoteConfig_['transport']['iframe'] = undefined;
+    }
+
     this.mergeObjects_(defaultConfig, config);
     this.mergeObjects_((typeConfig || {}), config, /* predefined */ true);
     this.mergeObjects_(inlineConfig, config);
