@@ -26,10 +26,10 @@ export function pubexchange(global, data) {
   validateData(data, ['publication','moduleid','modulenum']);
 
   (global.PUBX = global.PUBX || {
-    pub: data["publication"],
-    modNum: data["modulenum"],
-    modId: data["moduleid"],
-    test: data["test"]
+    pub: data['publication'],
+    modNum: data['modulenum'],
+    modId: data['moduleid'],
+    test: data['test'],
   });
 
   // load the Outbrain AMP JS file
