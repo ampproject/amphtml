@@ -54,7 +54,7 @@ const ORIGIN_EXPERIMENTS_PUBLIC_JWK = /** @type {!webCrypto.JsonWebKey} */ ({
 });
 
 /** @type {?Promise} */
-let originExperimentsScanPromise;
+let originExperimentsPromise;
 
 /** @private {?OriginExperiments} */
 let originExperiments;
@@ -88,17 +88,18 @@ export function getBinaryType(win) {
 
 /**
  * Verifies a single origin experiment token and enables the corresponding
- * experiment on success.
+ * experiment on success. If token verification fails, a user error is logged.
  * @param {!Window} win
  * @param {string} token
  * @param {!./service/crypto-impl.Crypto} crypto
  * @param {!webCrypto.CryptoKey} publicKey
- * @return {!Promise} Resolved if token is verified, otherwise rejected.
+ * @return {!Promise}
  * @private
  */
 function verifyOriginExperimentToken(win, token, crypto, publicKey) {
   if (!crypto.isPkcsAvailable()) {
-    return Promise.reject(new Error('Crypto is unavailable.'));
+    user().error(TAG, 'Crypto is unavailable.');
+    return Promise.resolve();
   }
   if (!originExperiments) {
     originExperiments = new OriginExperiments(crypto);
@@ -106,6 +107,8 @@ function verifyOriginExperimentToken(win, token, crypto, publicKey) {
   const verify = originExperiments.verifyToken(token, win.location, publicKey);
   return verify.then(experimentId => {
     toggleExperiment(win, experimentId, true, /* transientExperiment */ true);
+  }, error => {
+    user().error(TAG, 'Failed to verify experiment token:' + error);
   });
 }
 
@@ -133,9 +136,7 @@ function scanForOriginExperimentTokens(win, publicJwk) {
         const p = verifyOriginExperimentToken(win, token, crypto, publicKey);
         promises.push(p);
       } else {
-        // TODO(choumx): Should continue verifying other tokens.
-        const reject = Promise.reject(new Error('Experiment token missing.'));
-        promises.push(reject);
+        user().error(TAG, 'Missing content for experiment token.');
       }
     }
     return Promise.all(promises);
@@ -147,20 +148,15 @@ function scanForOriginExperimentTokens(win, publicJwk) {
  * On the first invocation, triggers scan of origin experiment tokens on page.
  * @param {!Window} win
  * @param {string} experimentId
- * @param {boolean=} opt_forceScan
+ * @param {boolean=} opt_forceScan Forces rescan of page for experiment tokens.
  * @return {!Promise<boolean>}
  */
 export function isOriginExperimentOn(win, experimentId, opt_forceScan) {
-  if (!originExperimentsScanPromise || opt_forceScan) {
-    originExperimentsScanPromise =
+  if (!originExperimentsPromise || opt_forceScan) {
+    originExperimentsPromise =
         scanForOriginExperimentTokens(win, ORIGIN_EXPERIMENTS_PUBLIC_JWK);
   }
-  return originExperimentsScanPromise.then(() => {
-    return isExperimentOn(win, experimentId);
-  }, error => {
-    user().error(TAG, error);
-    return false;
-  });
+  return originExperimentsPromise.then(() => isExperimentOn(win, experimentId));
 }
 
 /**

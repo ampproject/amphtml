@@ -69,7 +69,7 @@ export class OriginExperiments {
    * @param {!Location} location
    * @param {!webCrypto.CryptoKey} publicKey
    * @return {!Promise<string>} If token is valid, resolves with the
-   *     experiment ID. Otherwise, reject with validation error.
+   *     experiment ID. Otherwise, rejects with validation error.
    */
   verifyToken(token, location, publicKey) {
     let i = 0;
