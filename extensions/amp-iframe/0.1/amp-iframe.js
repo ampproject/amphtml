@@ -611,8 +611,16 @@ export class AmpIframe extends AMP.BaseElement {
           }
           return;
         }
+        const data = getData(e);
+        let sanitizedData;
+        try {
+          sanitizedData = JSON.parse(JSON.stringify(data));
+        } catch (e) {
+          user().error(TAG_, 'Message may only contain JSON data.');
+          return;
+        }
         const event =
-            createCustomEvent(this.win, 'amp-iframe:message', getData(e));
+            createCustomEvent(this.win, 'amp-iframe:message', sanitizedData);
         const actionService = Services.actionServiceForDoc(this.getAmpDoc());
         actionService.trigger(this.element, 'message', event, ActionTrust.HIGH);
       };
