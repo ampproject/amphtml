@@ -1603,6 +1603,20 @@ describes.realWin('Resources scrollHeight', {
     expect(viewerSendMessageStub).to.not.be.called;
   });
 
+  it('should send scrollHeight to viewer if viewport resizes', () => {
+    sandbox.stub(resources.viewport_, 'getScrollHeight', () => {
+      return 200;
+    });
+    resources.viewport_.changed_(/* relayoutAll */ true, /* velocity */ 0);
+    resources.doPass();
+
+    expect(resources.maybeChangeHeight_).to.equal(false);
+    expect(resources.scrollHeight_).to.equal(200);
+    expect(viewerSendMessageStub).to.be.calledOnce;
+    expect(viewerSendMessageStub.lastCall.args[0]).to.equal('documentHeight');
+    expect(viewerSendMessageStub.lastCall.args[1].height).to.equal(200);
+    expect(viewerSendMessageStub.lastCall.args[2]).to.equal(true);
+  });
 
 });
 
