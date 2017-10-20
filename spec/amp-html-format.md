@@ -256,6 +256,8 @@ The following @-rules are allowed in stylesheets:
 
 Authors may add custom styles to a document using a single `<style amp-custom>` tag in the head of the document.
 
+In addition, a single `<style amp-keyframes>` tag can be used for `@keyframes` declarations in the end of the document. See [Keyframes stylesheet](#keyframes-stylesheet) section for more details.
+
 #### Selectors
 
 The following restrictions apply to selectors in author style sheets:
@@ -285,6 +287,28 @@ In the following examples `<property>` needs to be in the whitelist above.
 
 #### Maximum size
 It is a validation error if the author stylesheet is larger than 50,000 bytes.
+
+### Keyframes stylesheet
+
+In addition to `<style amp-custom>`, authors may also add `<style amp-keyframes>` tag.
+
+The `<style amp-keyframes>` tag restrictions:
+ 1. May only be placed as the last child of the document's `<body>` element.
+ 2. May only contain `@keyframes`, `@media`, `@supports` rules and their combination.
+ 3. May not be larger than 200,000 bytes.
+
+Example:
+
+```html
+<style amp-keyframes>
+@keyframes anim1 {}
+
+@media (min-width: 600px) {
+  @keyframes anim1 {}
+}
+</style>
+</body>
+```
 
 ### Custom fonts
 
