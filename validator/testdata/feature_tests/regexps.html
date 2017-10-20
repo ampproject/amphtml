@@ -38,6 +38,15 @@
   <script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-latest.js"> Only whitespace is allowed here. </script>
 
   <!--
+  href value_regex: "https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css"
+  The first example is valid, the second example is invalid.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.materialdesignicons.com/2.0.46/css/.../materialdesignicons.min.css">
+
+  <!--
   href value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|https://fast\\.fonts\\.net/.*"
   The first two examples are valid, the third example is invalid.
   -->
