@@ -56,6 +56,7 @@ describes.realWin('amp-analytics', {
   let viewer;
 
   const jsonMockResponses = {
+    'invalidConfig': '{"transport": {"iframe": "fake.com"}}',
     'config1': '{"vars": {"title": "remote"}}',
     'https://foo/Test%20Title': '{"vars": {"title": "magic"}}',
   };
@@ -466,6 +467,22 @@ describes.realWin('amp-analytics', {
         expect(errorSpy).to.be.calledWith('AmpAnalytics <unknown id>',
             'Inline or remote config should not ' +
             'overwrite vendor transport settings');
+      });
+    });
+
+    it('should not allow override transport iframe', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/${bar}'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+        'transport': {'iframe': 'fake.com'},
+      }, {'type': 'xyz'});
+      analytics.predefinedConfig_ = {
+        'xyz': {
+          'requests': {'foo': '/bar', 'bar': 'foobar'},
+        },
+      };
+      return analytics.layoutCallback().then(() => {
+        expect(analytics.config_['transport']['iframe']).to.be.undefined;
       });
     });
 
@@ -924,6 +941,19 @@ describes.realWin('amp-analytics', {
     });
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/remote');
+    });
+  });
+
+  it('ignore transport iframe from remote config', () => {
+    const analytics = getAnalyticsTag({
+      'vars': {'title': 'local'},
+      'requests': {'foo': 'https://example.com/${title}'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
+    }, {
+      'config': 'invalidConfig',
+    });
+    return waitForSendRequest(analytics).then(() => {
+      expect(analytics.config_['transport']['iframe']).to.be.undefined;
     });
   });
 
