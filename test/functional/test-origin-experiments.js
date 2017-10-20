@@ -73,7 +73,7 @@ describe('OriginExperiments', () => {
     const verify = originExperiments.verifyToken(
         tokenWithBadVersion, 'https://origin.com', publicKey);
     return expect(verify)
-        .to.eventually.be.rejectedWith(/Unrecognized token version/);
+        .to.eventually.be.rejectedWith('Unrecognized token version: 42');
   });
 
   it('should throw if config length exceeds byte length', () => {
@@ -107,14 +107,12 @@ describe('OriginExperiments', () => {
   it('should return true for a well-formed, unexpired token', () => {
     const verify = originExperiments.verifyToken(
         token, 'https://origin.com', publicKey);
-    return expect(verify)
-        .to.eventually.be.fulfilled;
+    return expect(verify).to.eventually.be.fulfilled;
   });
 
   it('should ignore trailing slash on location', () => {
     const verify = originExperiments.verifyToken(
         token, 'https://origin.com/', publicKey);
-    return expect(verify)
-        .to.eventually.be.fulfilled;
+    return expect(verify).to.eventually.be.fulfilled;
   });
 });

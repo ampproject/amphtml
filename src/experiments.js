@@ -42,8 +42,8 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 /** @const {string} */
 const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
 
-/** @const {!JSONWebKey} */
-const ORIGIN_EXPERIMENTS_PUBLIC_JWK = {
+/** @const {!webCrypto.JsonWebKey} */
+const ORIGIN_EXPERIMENTS_PUBLIC_JWK = /** @type {!webCrypto.JsonWebKey} */ ({
   'alg': 'RS256',
   'e': 'AQAB',
   'ext': true,
@@ -51,7 +51,7 @@ const ORIGIN_EXPERIMENTS_PUBLIC_JWK = {
   'kty': 'RSA',
   /*eslint "max-len": 0*/
   'n': 'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ',
-};
+});
 
 /** @type {?Promise} */
 let originExperimentsScanPromise;
@@ -94,6 +94,7 @@ export function getBinaryType(win) {
  * @param {!./service/crypto-impl.Crypto} crypto
  * @param {!webCrypto.CryptoKey} publicKey
  * @return {!Promise} Resolved if token is verified, otherwise rejected.
+ * @private
  */
 function verifyOriginExperimentToken(win, token, crypto, publicKey) {
   if (!crypto.isPkcsAvailable()) {
@@ -112,8 +113,9 @@ function verifyOriginExperimentToken(win, token, crypto, publicKey) {
  * Scan the page for origin experiment tokens, verifies them, and enables
  * the corresponding experiments for verified tokens.
  * @param {!Window} win
- * @param {!webCrypto.JSONWebKey} publicJwk
+ * @param {!webCrypto.JsonWebKey} publicJwk
  * @return {!Promise}
+ * @private
  */
 function scanForOriginExperimentTokens(win, publicJwk) {
   const metas =
