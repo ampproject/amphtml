@@ -229,14 +229,16 @@ tags: {
   attrs: {
     name: "href"
     mandatory: true
-    value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|"
-                 "https://fonts\\.googleapis\\.com/icon\\?.*|"
-                 "https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|"
-                 "https://fast\\.fonts\\.net/.*|"
-                 "https://maxcdn\\.bootstrapcdn\\.com/font-awesome/"
-                 "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
+    value_regex: "https://cdn\\.materialdesignicons\\.com/"
+                 "([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|"
                  "https://cloud\\.typography\\.com/"
                  "[0-9]*/[0-9]*/css/fonts\\.css|"
+                 "https://fast\\.fonts\\.net/.*|"
+                 "https://fonts\\.googleapis\\.com/css\\?.*|"
+                 "https://fonts\\.googleapis\\.com/icon\\?.*|"
+                 "https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|"
+                 "https://maxcdn\\.bootstrapcdn\\.com/font-awesome/"
+                 "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
                  "https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css"
   }
   attrs: {
