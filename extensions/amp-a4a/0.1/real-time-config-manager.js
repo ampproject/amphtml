@@ -107,7 +107,7 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
       if (vendorObject.macros && vendorObject.macros.includes(macro)) {
         validVendorMacros[macro] = rtcConfig['vendors'][vendor][macro];
       } else {
-        user().warn(TAG, `Invalid macro: ${macro} for vendor: ${vendor}`);
+        user().warn(TAG, `Unknown macro: ${macro} for vendor: ${vendor}`);
       }
     });
     // The ad network defined macros override vendor defined/pub specifed.
