@@ -212,7 +212,10 @@ export class Resources {
     this.viewport_.onChanged(event => {
       this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
-      this.relayoutAll_ = this.relayoutAll_ || event.relayoutAll;
+      if (event.relayoutAll) {
+        this.relayoutAll_ = true;
+        this.maybeChangeHeight_ = true;
+      }
       this.schedulePass();
     });
     this.viewport_.onScroll(() => {
