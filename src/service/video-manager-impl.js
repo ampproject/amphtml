@@ -18,7 +18,7 @@
 import {ActionTrust} from '../action-trust';
 import {VideoSessionManager} from './video-session-manager';
 import {removeElement, scopedQuerySelector, isRTL} from '../dom';
-import {listen, listenOncePromise} from '../event-helper';
+import {listen, listenOncePromise, getData} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
@@ -239,7 +239,8 @@ export class VideoManager {
    */
   maybeInstallVisibilityObserver_(entry) {
     listen(entry.video.element, VideoEvents.VISIBILITY, details => {
-      if (details && details.data && details.data.visible) {
+      const data = getData(details);
+      if (data && data['visible'] == true) {
         entry.updateVisibility(/* opt_forceVisible */ true);
       } else {
         entry.updateVisibility();
@@ -1761,7 +1762,7 @@ class VideoEntry {
   /**
    * Called by all possible events that might change the visibility of the video
    * such as scrolling or {@link ../video-interface.VideoEvents#VISIBILITY}.
-   * @param {boolean} opt_forceVisible
+   * @param {?boolean=} opt_forceVisible
    * @package
    */
   updateVisibility(opt_forceVisible) {
@@ -1769,7 +1770,7 @@ class VideoEntry {
 
     // Measure if video is now in viewport and what percentage of it is visible.
     const measure = () => {
-      if (opt_forceVisible) {
+      if (opt_forceVisible == true) {
         this.isVisible_ = true;
       } else {
         // Calculate what percentage of the video is in viewport.
