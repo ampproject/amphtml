@@ -16,7 +16,8 @@
 import {CSS} from '../../../build/amp-poool-0.1.css';
 import {Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
-export class AmpPoool extends AMP.BaseElement {
+
+class AmpPoool extends AMP.BaseElement {
 
     /** @param {!AmpElement} element */
     constructor(element) {
