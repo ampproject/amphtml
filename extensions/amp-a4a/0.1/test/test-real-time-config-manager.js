@@ -249,6 +249,25 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         urls, vendors, customMacros, inflatedUrls, rtcCalloutResponses,
         calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
     });
+    it('should ignore bad macros for vendor urls', () => {
+      const vendors = {
+        'fAkeVeNdOR': {'slot_id=SLOT_ID': 0, PAGE_ID: 1},
+      };
+      const inflatedUrls = [
+        'https://www.fake.qqq/?slot_id=SLOT_ID&page_id=1&foo_id=FOO_ID',
+      ];
+      const rtcCalloutResponses = generateCalloutResponses(1);
+      const expectedRtcArray = [];
+      for (let i = 0; i < 1; i++) {
+        expectedRtcArray.push(
+            rtcEntry(rtcCalloutResponses[i],
+                Object.keys(vendors)[0].toLowerCase()));
+      }
+      const calloutCount = 1;
+      return executeTest({
+        vendors, inflatedUrls, rtcCalloutResponses,
+        calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
+    });
     it('should favor publisher URLs over vendor URLs', () => {
       const urls = generateUrls(3,2);
       const vendors = {
