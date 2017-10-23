@@ -56,6 +56,7 @@ const EXCLUDE_INI_LOAD = ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL'];
  *   html: string,
  *   extensionIds: (?Array<string>|undefined),
  *   fonts: (?Array<string>|undefined),
+ *   cspEnabled: boolean,
  * }}
  */
 export let FriendlyIframeSpec;
@@ -265,6 +266,12 @@ function mergeHtml(spec) {
       result.push(
           `<link href="${escapeHtml(font)}" rel="stylesheet" type="text/css">`);
     });
+  }
+
+  // Load CSP
+  if (spec.cspEnabled) {
+    result.push('<meta http-equiv=Content-Security-Policy ' +
+      'content="script-src "none";object-src "none";child-src "none">');
   }
 
   // Postambule.

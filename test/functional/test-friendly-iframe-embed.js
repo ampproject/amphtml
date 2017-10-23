@@ -434,6 +434,18 @@ describe('friendly-iframe-embed', () => {
           + '<base href="https://acme.org/embed1">'
           + 'content');
     });
+
+    it('should insert CSP', () => {
+      spec.html = '<html><head></head><body></body></html>';
+      spec.cspEnabled = true;
+      const html = mergeHtmlForTesting(spec);
+      expect(html).to.equal(
+          '<html><head><base href="https://acme.org/embed1">' +
+          '<meta http-equiv=Content-Security-Policy ' +
+          'content="script-src \'none\';object-src \'none\';' +
+          'child-src \'none\'">' +
+          '</head><body></body></html>');
+    });
   });
 
   describe('child document ready and loaded states', () => {
