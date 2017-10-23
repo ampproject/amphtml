@@ -69,14 +69,14 @@ export class OriginExperiments {
    *     experiment ID. Otherwise, rejects with validation error.
    */
   verifyToken(token, location, publicKey) {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       let i = 0;
       const bytes = stringToBytes(atob(token));
 
       // Parse version.
       const version = bytes[i];
       if (version !== 0) {
-        reject(new Error(`Unrecognized token version: ${version}`));
+        throw new Error(`Unrecognized token version: ${version}`);
       }
       i += 1;
 
@@ -84,7 +84,7 @@ export class OriginExperiments {
       const length = new DataView(bytes.buffer).getUint32(i);
       i += 4; // Number of bytes in Uint32 config length.
       if (length > bytes.length - i) {
-        reject(new Error(`Unexpected config length: ${length}`));
+        throw new Error(`Unexpected config length: ${length}`);
       }
 
       // Parse config itself.
@@ -95,9 +95,9 @@ export class OriginExperiments {
       const data = bytes.subarray(0, i);
       const signature = bytes.subarray(i);
 
-      this.verify_(signature, data, publicKey).then(verified => {
+      resolve(this.verify_(signature, data, publicKey).then(verified => {
         if (!verified) {
-          reject(new Error('Failed to verify token signature.'));
+          throw new Error('Failed to verify token signature.');
         }
         // Convert config from bytes to JS object.
         const configStr = bytesToString(configBytes);
@@ -107,19 +107,19 @@ export class OriginExperiments {
         const approvedOrigin = parseUrl(config['origin']).origin;
         const sourceOrigin = getSourceOrigin(location);
         if (approvedOrigin !== sourceOrigin) {
-          reject(new Error(`Config origin (${approvedOrigin}) does not match ` +
-              `window (${sourceOrigin}).`));
+          throw new Error(`Config origin (${approvedOrigin}) does not match ` +
+              `window (${sourceOrigin}).`);
         }
 
         // Check token expiration date.
         const experimentId = config['experiment'];
         const expiration = config['expiration'];
         if (expiration >= Date.now()) {
-          resolve(experimentId);
+          return experimentId;
         } else {
-          reject(new Error(`Experiment "${experimentId}" has expired.`));
+          throw new Error(`Experiment "${experimentId}" has expired.`);
         }
-      });
+      }));
     });
   }
 
