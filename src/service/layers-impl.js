@@ -21,7 +21,6 @@ import {Services} from '../services';
 import {registerServiceBuilderForDoc} from '../service';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
-const LAYOUT_LAYER_PROP = '__AMP_LAYER';
 const EMPTY = [];
 
 /**
@@ -122,8 +121,8 @@ export class LayoutLayers {
     }, /* TODO */{capture: true, passive: true});
     win.addEventListener('resize', () => this.onResize_());
 
-    this.declareLayer_(this.document_.documentElement);
-    this.declareLayer_(getScrollingElement(this.document_));
+    this.declareLayer(this.document_.documentElement);
+    this.declareLayer(getScrollingElement(this.document_));
   }
 
   add(element) {
@@ -204,7 +203,7 @@ export class LayoutLayers {
    * @param {!Element} element A regular or AMP Element
    */
   remeasure(element) {
-    const layer = LayoutLayer.getParentLayer(element);
+    const layer = LayoutElement.getParentLayer(element);
     if (layer) {
       layer.remeasure();
     }
@@ -222,7 +221,7 @@ export class LayoutLayers {
   // }
 
   /**
-   * Eagerly creates a LayoutLayer for the element.
+   * Eagerly creates a Layer for the element.
    * @param {!Element} element
    */
   declareLayer(element) {
@@ -230,27 +229,27 @@ export class LayoutLayers {
   }
 
   /**
-   * Eagerly creates a LayoutLayer for the element.
+   * Eagerly creates a Layer for the element.
    * @param {!Element} element
-   * @return {!LayoutLayer}
+   * @return {!LayoutElement}
    */
   declareLayer_(element) {
-    let layer = LayoutLayer.forOptional(element);
-    if (!layer) {
-      layer = new LayoutLayer(element);
-    }
+    const layer = LayoutElement.forOptional(element) ||
+        new LayoutElement(element);
+    layer.declareLayer();
     return layer;
   }
 
   onResize_() {
     const scroller = getScrollingElement(this.document_);
-    LayoutLayer.for(scroller).dispose(/* opt_deep */ true);
+    // TODO
+    LayoutElement.for(scroller).dispose(/* opt_deep */ true);
   }
 
   scrolled_(element) {
-    let layer = LayoutLayer.forOptional(element);
+    const layer = LayoutElement.forOptional(element);
     if (layer) {
-      layer.dirty();
+      layer.requestScrollRemeasure();
     } else {
       layer = this.declareLayer_(element);
     }
@@ -265,252 +264,6 @@ export class LayoutLayers {
   }
 }
 
-export class LayoutLayer {
-  constructor(element) {
-    /** @private @const {!Element} */
-    this.root_ = element;
-
-    const scroller = getScrollingElement(element);
-    this.isRootLayer_ = element === scroller || !scroller.contains(element);
-
-    this.layout_ = LayoutElement.forOptional(element) ||
-        new LayoutElement(element);
-
-    /**
-     * Holds all children AMP Elements, so we can quickly remeasure.
-     * @const @private {!Array<!LayoutElement>}
-     */
-    this.layouts_ = [];
-
-    /**
-     * Holds all children Layers, so we can quickly remeasure.
-     * @const @private {!Array<!LayoutLayer>}
-     */
-    this.layers_ = [];
-
-    this.isDirty_ = false;
-    this.scrollLeft_ = 0;
-    this.scrollTop_ = 0;
-
-    const parent = LayoutLayer.getParentLayer(element);
-    /** @private {?LayoutLayer} */
-    this.parentLayer_ = parent;
-    if (parent) {
-      parent.layers_.push(this);
-      parent.transfer_(this);
-    }
-
-    element[LAYOUT_LAYER_PROP] = this;
-    this.remeasure();
-
-    /**
-     * A penalty applied to elements in this layer, so that they are classified as "less important" than elements in other layers.
-     * This is so element's inside a closed sidebar layer are "less important" than visible content elements.
-     * This penalty may change dynamically.
-     *
-     * @private @type {number}
-     */
-    // this.priorityPenalty_ = 0;
-  }
-
-  /**
-   * Gets the element's LayoutLayer instance.
-   * @param {!Element}
-   * @return {!LayoutLayer}
-   */
-  static for(element) {
-    return dev().assert(LayoutLayer.forOptional(element));
-  }
-
-  /**
-   * Gets the element's LayoutLayer instance, if the element is a layer.
-   * @param {!Element}
-   * @return {?LayoutLayer}
-   */
-  static forOptional(element) {
-    return element[LAYOUT_LAYER_PROP];
-  }
-
-  /**
-   * Finds the element's parent layer
-   * If the element is itself a layer, it returns the layer's parent layer.
-   * @param {!Element}
-   * @return {?LayoutLayer}
-   */
-  static getParentLayer(element) {
-    const layout = LayoutElement.forOptional(element);
-    if (layout) {
-      return layout.getParentLayer();
-    }
-
-    let last = element;
-    for (let el = last.parentNode; el; last = el, el = el.parentNode) {
-      const layer = LayoutLayer.forOptional(el);
-      if (layer) {
-        return layer;
-      }
-    }
-    if (last.nodeType !== Node.DOCUMENT_NODE) {
-      throw dev().createError('element is not in the DOM tree');
-    }
-    return null;
-  }
-
-  add(element) {
-    dev().assert(this.contains(element));
-
-    const layout = LayoutElement.for(element);
-    this.layouts_.push(layout);
-  }
-
-  remove(element) {
-    const layout = LayoutElement.for(element);
-    dev().assert(layout.getParentLayer() === this);
-    const i = this.layouts_.indexOf(layout);
-    if (i > -1) {
-      this.layouts_.splice(i, 1);
-    }
-
-    const layer = LayoutLayer.forOptional(element);
-    if (layer) {
-      dev().assert(layer.getParentLayer() === this);
-      layer.dispose();
-    }
-  }
-
-  /**
-   * The layer's cached parent layer.
-   * @return {?LayoutLayer}
-   */
-  getParentLayer() {
-    return this.parentLayer_;
-  }
-
-  /**
-   * Removes this layer from the layer tree. All child elements will inherit
-   * this layer's parent as their new containing layer.
-   *
-   * This is necessary when the screen size changes (or other similar events
-   * happen), because CSS styles may change. We'll need to recompute layers
-   * lazily after this happens.
-   */
-  dispose(opt_deep) {
-    // Done before transferring this layer to avoid a recursive iteration issue.
-    const layers = opt_deep ? this.layers_.slice() : EMPTY;
-
-    if (!this.isRootLayer_) {
-      this.root_[LAYOUT_LAYER_PROP] = null;
-      this.transfer_(this.getParentLayer());
-    }
-
-    for (let i = 0; i < layers.length; i++) {
-      layers[i].dispose(opt_deep);
-    }
-  }
-
-  contains(element) {
-    const root = this.root_;
-    return root !== element && root.contains(element);
-  }
-
-  getOffsetFromParent() {
-    return this.layout_.getOffsetFromParent();
-  }
-
-  getScrollTop() {
-    if (this.isDirty_) {
-      this.updateScrollPosition_();
-    }
-    return this.scrollTop_;
-  }
-
-  getScrollLeft() {
-    if (this.isDirty_) {
-      this.updateScrollPosition_();
-    }
-    return this.scrollLeft_;
-  }
-
-  transfer_(layer) {
-    // An optimization if we know that the new layer definitely contains
-    // everything in this layer.
-    const contained = layer.contains(this.root_);
-
-    filterSplice(this.layouts_, layout => {
-      if (contained || layer.contains(layout.element_)) {
-        layout.parentLayer_ = layer;
-        layer.layouts_.push(layout);
-        return false;
-      }
-
-      return true;
-    });
-
-    filterSplice(this.layers_, l => {
-      if (contained || layer.contains(l.root_)) {
-        layer.layers_.push(l);
-        l.parentLayer_ = layer;
-        return false;
-      }
-
-      return true;
-    });
-  }
-
-  dirty() {
-    this.isDirty_ = true;
-  }
-
-  updateScrollPosition_() {
-    this.isDirty_ = false;
-    this.scrollLeft_ = this.root_.scrollLeft;
-    this.scrollTop_ = this.root_.scrollTop;
-  }
-
-  remeasure() {
-    this.updateScrollPosition_();
-
-    const layouts = this.layouts_;
-    const relative = relativeScrolledPositionForChildren(this);
-    for (let i = 0; i < layouts.length; i++) {
-      layouts[i].remeasure(relative);
-    }
-
-    const layers = this.layers_;
-    for (let i = 0; i < layers.length; i++) {
-      layers[i].remeasure();
-    }
-  }
-
-  getScrolledPosition(opt_parent) {
-    return this.layout_.getScrolledPosition(opt_parent);
-  }
-
-  getOffsetPosition(opt_parent) {
-    return this.layout_.getOffsetPosition(opt_parent);
-  }
-
-  /**
-   * TODO we can make this smarter by passing in a viewport.
-   * If this layer is not in viewport, skip it.
-   * If child layer is not in viewport, skip it.
-   */
-  // getElements(opt_collected) {
-    // const collected = opt_collected || [];
-    // const layouts = this.layouts_;
-    // for (let i = 0; i < layouts.length; i++) {
-      // collected.push(layouts[i].element_);
-    // }
-
-    // const layers = this.layers_;
-    // for (let i = 0; i < layouts.length; i++) {
-      // layouts[i].getElements(collected);
-    // }
-
-    // return collected;
-  // }
-}
-
 export class LayoutElement {
   constructor(element) {
     /**
@@ -518,14 +271,24 @@ export class LayoutElement {
      */
     this.element_ = element;
 
-    const parent = LayoutLayer.getParentLayer(element);
-    this.parentLayer_ = parent;
+    const parent = LayoutElement.getParentLayer(element);
+    // It's important that the parent layer is retrieved before setting the
+    // layout prop.
+    element[LAYOUT_PROP] = this;
 
+    this.needsRemeasure_ = true;
     this.size_ = SizeWh(0, 0);
     this.position_ = PositionLt(0, 0);
 
-    element[LAYOUT_PROP] = this;
+    this.isLayer_ = false;
+    this.isRootLayer_ = false;
+    this.needsScrollRemeasure_ = false;
+    this.scrollLeft_ = 0;
+    this.scrollTop_ = 0;
 
+    this.children_ = [];
+
+    this.parentLayer_ = parent;
     if (parent) {
       parent.add(element);
     }
@@ -547,6 +310,32 @@ export class LayoutElement {
    */
   static forOptional(element) {
     return element[LAYOUT_PROP];
+  }
+
+  /**
+   * Finds the element's parent layer
+   * If the element is itself a layer, it returns the layer's parent layer.
+   * @param {!Element}
+   * @return {?LayoutElement}
+   */
+  static getParentLayer(element) {
+    const layout = LayoutElement.forOptional(element);
+    if (layout) {
+      return layout.getParentLayer();
+    }
+
+    let last = element;
+    for (let el = last.parentNode; el; last = el, el = el.parentNode) {
+      const layout = LayoutElement.forOptional(el);
+      if (layout && layout.isLayer()) {
+        return layout;
+      }
+    }
+
+    if (last.nodeType !== Node.DOCUMENT_NODE) {
+      throw dev().createError('element is not in the DOM tree');
+    }
+    return null;
   }
 
   /**
@@ -631,15 +420,99 @@ export class LayoutElement {
       return layout.getOffsetFromParent();
     }
 
-    const parent = LayoutLayer.getParentLayer(element);
+    const parent = LayoutElement.getParentLayer(element);
     return LayoutElement.getOffsetPosition(element,
-        parent ? parent.root_ : undefined);
+        parent ? parent.element_ : undefined);
+  }
+
+  contains(element) {
+    const root = this.element_;
+    return root !== element && root.contains(element);
+  }
+
+  add(child) {
+    dev().assert(this.isLayer());
+    dev().assert(this.contains(child));
+
+    const layout = LayoutElement.for(child);
+    this.children_.push(layout);
+  }
+
+  remove(child) {
+    dev().assert(this.isLayer());
+
+    const layout = LayoutElement.for(child);
+    dev().assert(layout.getParentLayer() === this);
+    layout.dispose();
+
+    const i = this.children_.indexOf(layout);
+    if (i > -1) {
+      this.children_.splice(i, 1);
+    }
+  }
+
+  isLayer() {
+    return this.isLayer_;
+  }
+
+  declareLayer() {
+    this.isLayer_ = true;
+    this.needsRemeasure_ = true;
+    this.needsScrollRemeasure_ = true;
+
+    const element = this.element_;
+    const scroller = getScrollingElement(element);
+    this.isRootLayer_ = element === scroller || !scroller.contains(element);
+
+    const parent = this.getParentLayer();
+    if (parent) {
+      parent.transfer_(this);
+    }
+  }
+
+  /**
+   * This is necessary when the screen size changes (or other similar events
+   * happen), because CSS styles may change. We'll need to recompute layers
+   * lazily after this happens.
+   */
+  undeclareLayer() {
+    if (!this.isLayer_) {
+      return;
+    }
+
+    if (this.isRootLayer_) {
+      const children = this.children_;
+      // Note that children's length will increase as each child moves its
+      // children to this layer.
+      for (let i = 0; i < children.length; i++) {
+        children[i].undeclareLayer(opt_deep);
+      }
+    } else {
+      this.isLayer_ = false;
+      this.transfer_(this.getParentLayer());
+    }
+  }
+
+  transfer_(layer) {
+    // An optimization if we know that the new layer definitely contains
+    // everything in this layer.
+    const contained = layer.contains(this.root_);
+
+    filterSplice(this.children_, layout => {
+      if (contained || layer.contains(layout.element_)) {
+        layout.parentLayer_ = layer;
+        layer.children_.push(layout);
+        return false;
+      }
+
+      return true;
+    });
   }
 
   /**
    * Gets the element's parent layer. If this element is itself a layer, it
    * returns the layer's parent.
-   * @return {?LayoutLayer}
+   * @return {?LayoutElement}
    */
   getParentLayer() {
     return this.parentLayer_;
@@ -650,6 +523,7 @@ export class LayoutElement {
    * @return {!SizeDef}
    */
   getSize() {
+    this.remeasure();
     return this.size_;
   }
 
@@ -659,7 +533,18 @@ export class LayoutElement {
    * @return {!PositionDef}
    */
   getOffsetFromParent() {
+    this.remeasure();
     return this.position_;
+  }
+
+  getScrollTop() {
+    this.updateScrollPosition_();
+    return this.scrollTop_;
+  }
+
+  getScrollLeft() {
+    this.updateScrollPosition_();
+    return this.scrollLeft_;
   }
 
   /**
@@ -674,7 +559,7 @@ export class LayoutElement {
     let y = position.top;
 
     let last;
-    const stopAt = opt_parent ? LayoutLayer.getParentLayer(opt_parent) : null;
+    const stopAt = opt_parent ? LayoutElement.getParentLayer(opt_parent) : null;
     for (let p = this.getParentLayer(); p !== stopAt; p = p.getParentLayer()) {
 
       x -= p.getScrollLeft();
@@ -703,7 +588,7 @@ export class LayoutElement {
     let y = position.top;
 
     let last;
-    const stopAt = opt_parent ? LayoutLayer.getParentLayer(opt_parent) : null;
+    const stopAt = opt_parent ? LayoutElement.getParentLayer(opt_parent) : null;
     for (let p = this.getParentLayer(); p !== stopAt; p = p.getParentLayer()) {
       if (last) {
         const position = last.getOffsetFromParent();
@@ -716,7 +601,32 @@ export class LayoutElement {
     return PositionLt(x, y);
   }
 
-  remeasure(opt_relativeTo) {
+  requestRemeasure() {
+    this.needsRemeasure_ = true;
+  }
+
+  requestScrollRemeasure() {
+    this.needsScrollRemeasure_ = true;
+  }
+
+  remeasure() {
+    if (!this.needsRemeasure_) {
+      return;
+    }
+
+    let last;
+    let layer = this;
+    while (layer && layer.needsRemeasure_) {
+      last = layer;
+      layer = layer.getParentLayer();
+    }
+    last.remeasure_();
+  }
+
+  remeasure_(opt_relativeTo) {
+    this.updateScrollPosition_();
+    this.needsRemeasure_ = false;
+
     let relative = opt_relativeTo;
     if (!relative) {
       const parent = this.getParentLayer();
@@ -724,17 +634,36 @@ export class LayoutElement {
           relativeScrolledPositionForChildren(parent) :
           PositionLt(0, 0);
     }
+
     const box = this.element_.getBoundingClientRect();
     this.size_ = SizeWh(box.width, box.height);
     this.position_ = PositionLt(
         box.left - relative.left,
         box.top - relative.top
     );
+
+    const children = this.children_;
+    if (children.length) {
+      const relative = relativeScrolledPositionForChildren(this);
+      for (let i = 0; i < children.length; i++) {
+        // TODO(@jridgewell): We can probably optimize this if this layer
+        // didn't change at all.
+        children[i].remeasure_(relative);
+      }
+    }
+  }
+
+  updateScrollPosition_() {
+    if (this.isLayer_ && this.needsScrollRemeasure_) {
+      this.needsScrollRemeasure_ = false;
+      this.scrollLeft_ = this.root_.scrollLeft;
+      this.scrollTop_ = this.root_.scrollTop;
+    }
   }
 }
 
 /**
- * @param {!LayoutLayer} layer
+ * @param {!LayoutElement} layer
  * @return {!PositionLt}
  */
 function relativeScrolledPositionForChildren(layer) {
