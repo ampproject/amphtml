@@ -25,7 +25,6 @@ import {toggle, computedStyle} from '../style';
 import {AmpEvents} from '../amp-events';
 import {toWin} from '../types';
 import {Layout} from '../layout';
-import {Services} from '../services';
 import {isExperimentOn} from '../experiments';
 
 const TAG = 'Resource';

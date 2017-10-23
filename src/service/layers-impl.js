@@ -21,7 +21,6 @@ import {Services} from '../services';
 import {registerServiceBuilderForDoc} from '../service';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
-const EMPTY = [];
 
 /**
  * The Size of an element.
@@ -176,21 +175,27 @@ export class LayoutLayers {
     return layoutRectLtwh(
         left,
         top,
-        Math.max(Math.min(left + size.width, parentSize.width) - left, 0),
-        Math.max(Math.min(top + size.height, parentSize.height) - top, 0)
+        Math.max(Math.min(left + size.width, parentWidth) - left, 0),
+        Math.max(Math.min(top + size.height, parentHeight) - top, 0)
     );
   }
 
   getScrolledPosition(element, opt_parent) {
-    return LayoutElement.getScrolledPosition(element, opt_parent);
+    const layout = LayoutElement.forOptional(element) ||
+        new LayoutElement(element);
+    return layout.getScrolledPosition(opt_parent);
   }
 
   getOffsetPosition(element, opt_parent) {
-    return LayoutElement.getOffsetPosition(element, opt_parent);
+    const layout = LayoutElement.forOptional(element) ||
+        new LayoutElement(element);
+    return layout.getOffsetPosition(opt_parent);
   }
 
   getSize(element) {
-    return LayoutElement.getSize(element);
+    const layout = LayoutElement.forOptional(element) ||
+        new LayoutElement(element);
+    return layout.getSize(element);
   }
 
   /**
@@ -242,16 +247,15 @@ export class LayoutLayers {
 
   onResize_() {
     const scroller = getScrollingElement(this.document_);
-    // TODO
-    LayoutElement.for(scroller).dispose(/* opt_deep */ true);
+    LayoutElement.for(scroller).undeclareLayer();
   }
 
   scrolled_(element) {
-    const layer = LayoutElement.forOptional(element);
-    if (layer) {
-      layer.requestScrollRemeasure();
+    let layout = LayoutElement.forOptional(element);
+    if (layout && layout.isLayer()) {
+      layout.requestScrollRemeasure();
     } else {
-      layer = this.declareLayer_(element);
+      layout = this.declareLayer_(element);
     }
 
     if (this.onScroll_) {
@@ -338,93 +342,6 @@ export class LayoutElement {
     return null;
   }
 
-  /**
-   * Calculates the LayoutRectDef of element relative to opt_parent
-   * (or viewport), taking into account scroll positions.
-   *
-   * @param {!Element} element
-   * @param {Element=} opt_parent
-   * @return {!LayoutRectDef}
-   */
-  static getScrolledPosition(element, opt_parent) {
-    // 4 cases:
-    //   1. AmpElement, AmpElement
-    //   2. AmpElement, Element
-    //   3. Element, AmpElement
-    //   4. Element, Element
-    const layout = LayoutElement.forOptional(element);
-    if (layout) {
-      return layout.getScrolledPosition(opt_parent);
-    }
-
-    const box = element.getBoundingClientRect();
-    if (!opt_parent) {
-      return PositionLt(box.left, box.top);
-    }
-
-    const relative = LayoutElement.getScrolledPosition(opt_parent);
-    return PositionLt(
-      box.left - relative.left,
-      box.top - relative.top
-    );
-  }
-
-  /**
-   * Calculates the LayoutRectDef of element relative to opt_parent
-   * (or viewport), ignoring any scroll positions.
-   *
-   * @param {!Element} element
-   * @param {Element=} opt_parent
-   * @return {!LayoutRectDef}
-   */
-  static getOffsetPosition(element, opt_parent) {
-    // 4 cases:
-    //   1. AmpElement, AmpElement
-    //   2. AmpElement, Element
-    //   3. Element, AmpElement
-    //   4. Element, Element
-    const layout = LayoutElement.forOptional(element);
-    if (layout) {
-      return layout.getOffsetPosition(opt_parent);
-    }
-
-    // There's no equivalent DOM method, so it has to be a for-loop.
-    let x = 0;
-    let y = 0;
-    for (let el = element; opt_parent ? opt_parent.contains(el) : el;
-        el = el.offsetParent) {
-      x += el.offsetLeft;
-      y += el.offsetTop;
-    }
-    return PositionLt(x, y);
-  }
-
-  /**
-   * Calculates the size of element.
-   *
-   * @param {!Element} element
-   * @return {!{width: number, height: number}}
-   */
-  static getSize(element) {
-    const layout = LayoutElement.forOptional(element);
-    if (layout) {
-      return layout.getSize();
-    }
-
-    return SizeWh(box.clientWidth, box.clientHeight);
-  }
-
-  static getOffsetFromParent(element) {
-    const layout = LayoutElement.forOptional(element);
-    if (layout) {
-      return layout.getOffsetFromParent();
-    }
-
-    const parent = LayoutElement.getParentLayer(element);
-    return LayoutElement.getOffsetPosition(element,
-        parent ? parent.element_ : undefined);
-  }
-
   contains(element) {
     const root = this.element_;
     return root !== element && root.contains(element);
@@ -485,7 +402,7 @@ export class LayoutElement {
       // Note that children's length will increase as each child moves its
       // children to this layer.
       for (let i = 0; i < children.length; i++) {
-        children[i].undeclareLayer(opt_deep);
+        children[i].undeclareLayer();
       }
     } else {
       this.isLayer_ = false;
@@ -496,7 +413,7 @@ export class LayoutElement {
   transfer_(layer) {
     // An optimization if we know that the new layer definitely contains
     // everything in this layer.
-    const contained = layer.contains(this.root_);
+    const contained = layer.contains(this.element_);
 
     filterSplice(this.children_, layout => {
       if (contained || layer.contains(layout.element_)) {
@@ -523,7 +440,9 @@ export class LayoutElement {
    * @return {!SizeDef}
    */
   getSize() {
-    this.remeasure();
+    if (this.needsRemeasure_) {
+      this.remeasure();
+    }
     return this.size_;
   }
 
@@ -533,7 +452,9 @@ export class LayoutElement {
    * @return {!PositionDef}
    */
   getOffsetFromParent() {
-    this.remeasure();
+    if (this.needsRemeasure_) {
+      this.remeasure();
+    }
     return this.position_;
   }
 
@@ -610,15 +531,12 @@ export class LayoutElement {
   }
 
   remeasure() {
-    if (!this.needsRemeasure_) {
-      return;
-    }
-
-    let last;
+    let last = this;
     let layer = this;
-    while (layer && layer.needsRemeasure_) {
-      last = layer;
-      layer = layer.getParentLayer();
+    for (let layer = this; layer; layer = layer.getParentLayer()) {
+      if (layer.needsRemeasure_) {
+        last = layer;
+      }
     }
     last.remeasure_();
   }
@@ -656,8 +574,8 @@ export class LayoutElement {
   updateScrollPosition_() {
     if (this.isLayer_ && this.needsScrollRemeasure_) {
       this.needsScrollRemeasure_ = false;
-      this.scrollLeft_ = this.root_.scrollLeft;
-      this.scrollTop_ = this.root_.scrollTop;
+      this.scrollLeft_ = this.element_.scrollLeft;
+      this.scrollTop_ = this.element_.scrollTop;
     }
   }
 }
@@ -668,9 +586,12 @@ export class LayoutElement {
  */
 function relativeScrolledPositionForChildren(layer) {
   const position = layer.getScrolledPosition();
+  if (layer.isRootLayer_) {
+    return position;
+  }
   return PositionLt(
-    position.left - layer.getScrollLeft(),
-    position.top - layer.getScrollTop()
+      position.left - layer.getScrollLeft(),
+      position.top - layer.getScrollTop()
   );
 }
 

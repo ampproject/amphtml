@@ -39,7 +39,6 @@ import {reportError} from './error';
 import {setStyle} from './style';
 import * as dom from './dom';
 import {toWin} from './types';
-import {LayoutElement} from './service/layers-impl';
 import {isExperimentOn} from './experiments';
 
 const TAG = 'CustomElement';
