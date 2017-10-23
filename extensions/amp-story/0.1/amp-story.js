@@ -82,11 +82,6 @@ const DESKTOP_THRESHOLD = 768;
 /** @type {string} */
 const TAG = 'amp-story';
 
-/** @type {!Array<string>} */
-const WHITELISTED_ORIGINS = [
-  
-];
-
 
 /**
  * @param {!Element} el
@@ -358,12 +353,6 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /** @private */
-  getOriginWhitelist_() {
-    return ;
-  }
-
-
-  /** @private */
   isAmpStoryEnabled_() {
     if (isExperimentOn(this.win, TAG) || getMode().test || getMode().localDev) {
       return true;
@@ -384,7 +373,12 @@ export class AmpStory extends AMP.BaseElement {
   }
 
 
-  /** @private */
+  /**
+   * @param {string} origin The origin to check.
+   * @return {boolean} Whether the specified origin is whitelisted to use the
+   *     amp-story extension.
+   * @private
+   */
   isOriginWhitelisted_(origin) {
     const hostName = parseUrl(origin).hostname;
     const domains = hostName.split('.');
