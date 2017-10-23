@@ -116,6 +116,8 @@ export class ViewportBindingIosEmbedWrapper_ {
       get: () => body,
     });
 
+    Services.layersForDoc(body).declareLayer(this.wrapper_);
+
     // TODO(dvoytenko): test if checkAndFixIosScrollfreezeBug is required.
 
     // Make sure the scroll position is adjusted correctly.

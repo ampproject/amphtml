@@ -96,7 +96,7 @@ function getScrollingElement(nodeOrDoc) {
     }
   }
 
-  return this.scrollingElement_ = s;
+  return scrollingElement = s;
 }
 
 export class LayoutLayers {
@@ -122,8 +122,8 @@ export class LayoutLayers {
     }, /* TODO */{capture: true, passive: true});
     win.addEventListener('resize', () => this.onResize_());
 
-    this.declareLayer_(this.document_.documentElement, /* opt_root */ true);
-    // this.declareLayer_(this.getScrollingElement(), [> opt_root <] true);
+    this.declareLayer_(this.document_.documentElement);
+    this.declareLayer_(getScrollingElement(this.document_));
   }
 
   add(element) {
@@ -131,11 +131,7 @@ export class LayoutLayers {
       return;
     }
 
-    const layout = new LayoutElement(element);
-    const parent = layout.getParentLayer();
-    if (parent) {
-      parent.add(element);
-    }
+    new LayoutElement(element);
   }
 
   remove(element) {
@@ -236,13 +232,12 @@ export class LayoutLayers {
   /**
    * Eagerly creates a LayoutLayer for the element.
    * @param {!Element} element
-   * @param {boolean=} opt_root
    * @return {!LayoutLayer}
    */
-  declareLayer_(element, opt_root) {
+  declareLayer_(element) {
     let layer = LayoutLayer.forOptional(element);
     if (!layer) {
-      layer = new LayoutLayer(element, opt_root);
+      layer = new LayoutLayer(element);
     }
     return layer;
   }
@@ -271,13 +266,15 @@ export class LayoutLayers {
 }
 
 export class LayoutLayer {
-  constructor(element, opt_root) {
+  constructor(element) {
     /** @private @const {!Element} */
-    // TODO Should create the LayoutElement for this.
     this.root_ = element;
 
-    /** @private const {boolean} */
-    this.isRoot_ = !!opt_root;
+    const scroller = getScrollingElement(element);
+    this.isRootLayer_ = element === scroller || !scroller.contains(element);
+
+    this.layout_ = LayoutElement.forOptional(element) ||
+        new LayoutElement(element);
 
     /**
      * Holds all children AMP Elements, so we can quickly remeasure.
@@ -401,7 +398,7 @@ export class LayoutLayer {
     // Done before transferring this layer to avoid a recursive iteration issue.
     const layers = opt_deep ? this.layers_.slice() : EMPTY;
 
-    if (!this.isRoot_) {
+    if (!this.isRootLayer_) {
       this.root_[LAYOUT_LAYER_PROP] = null;
       this.transfer_(this.getParentLayer());
     }
@@ -417,7 +414,7 @@ export class LayoutLayer {
   }
 
   getOffsetFromParent() {
-    return LayoutElement.getOffsetFromParent(this.root_);
+    return this.layout_.getOffsetFromParent();
   }
 
   getScrollTop() {
@@ -486,11 +483,11 @@ export class LayoutLayer {
   }
 
   getScrolledPosition(opt_parent) {
-    return LayoutElement.getScrolledPosition(this.root_, opt_parent);
+    return this.layout_.getScrolledPosition(opt_parent);
   }
 
   getOffsetPosition(opt_parent) {
-    return LayoutElement.getOffsetPosition(this.root_, opt_parent);
+    return this.layout_.getOffsetPosition(opt_parent);
   }
 
   /**
@@ -521,12 +518,17 @@ export class LayoutElement {
      */
     this.element_ = element;
 
-    this.parentLayer_ = LayoutLayer.getParentLayer(element);
+    const parent = LayoutLayer.getParentLayer(element);
+    this.parentLayer_ = parent;
 
     this.size_ = SizeWh(0, 0);
     this.position_ = PositionLt(0, 0);
 
     element[LAYOUT_PROP] = this;
+
+    if (parent) {
+      parent.add(element);
+    }
   }
 
   /**
@@ -737,10 +739,6 @@ export class LayoutElement {
  */
 function relativeScrolledPositionForChildren(layer) {
   const position = layer.getScrolledPosition();
-  const root = layer.root_;
-  if (root === getScrollingElement(root)) {
-    return position;
-  }
   return PositionLt(
     position.left - layer.getScrollLeft(),
     position.top - layer.getScrollTop()
