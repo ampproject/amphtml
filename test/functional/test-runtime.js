@@ -1002,6 +1002,19 @@ describes.realWin('runtime multidoc', {
           .to.contain('.custom');
     });
 
+    it('should import keyframes style', () => {
+      const styleEl = win.document.createElement('style');
+      styleEl.setAttribute('amp-keyframes', '');
+      styleEl.textContent = '.keyframes{}';
+      importDoc.head.appendChild(styleEl);
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      const shadowRoot = getShadowRoot(hostElement);
+      expect(shadowRoot.querySelector('style[amp-custom]')).to.not.exist;
+      expect(shadowRoot.querySelector('style[amp-keyframes]')).to.exist;
+      expect(shadowRoot.querySelector('style[amp-keyframes]').textContent)
+          .to.contain('.keyframes');
+    });
+
     it('should ignore runtime extension', () => {
       extensionsMock.expects('preloadExtension').never();
 
