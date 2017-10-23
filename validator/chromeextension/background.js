@@ -184,7 +184,7 @@ function updateTab(tab) {
           if (response && response.fromAmpCache && response.ampHref) {
             handleAmpCache(tab.id, response.ampHref);
           } else if (response && response.isAmp) {
-            validateUrlFromTab(tab);
+            validateUrlFromTab(tab, response.userAgent);
           } else if (response && !response.isAmp && response.ampHref) {
              handleAmpLink(tab.id, response.ampHref);
           }
@@ -238,10 +238,14 @@ function updateTabStatus(tabId, iconPrefix, title, text, color) {
  * extension's icons with pass/fail.
  *
  * @param {Tab} tab The Tab which triggered the event.
+ * @param {userAgent} string Tab's current user agent
  */
-function validateUrlFromTab(tab) {
+function validateUrlFromTab(tab, userAgent) {
   var xhr = new XMLHttpRequest();
   xhr.open('GET', tab.url, true);
+  // We can't set the User-Agent header directly, but we can set this header
+  //   and let the onBeforeSendHeaders handler rename it for us
+  xhr.setRequestHeader('X-AMPValidator-UA', userAgent);
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4) {
       const doc = xhr.responseText;
@@ -255,6 +259,7 @@ function validateUrlFromTab(tab) {
     }
   };
   xhr.send();
+  console.log('sent');
 }
 
 /**
@@ -288,3 +293,29 @@ chrome.tabs.onReplaced.addListener(function(addedTabId, removedTabId) {
     updateTab(tab);
   });
 });
+
+  var filter = {urls: ["<all_urls>"], types: ["xmlhttprequest"], tabId: -1};
+  console.log(filter);
+
+  chrome.webRequest.onBeforeSendHeaders.addListener(
+    function(details) {
+      var changed = false;
+      headers = details.requestHeaders;
+      for (i = 0; i < headers.length; i++) {
+        if (headers[i].name == "X-AMPValidator-UA") {
+          //headers[i].name = 'User-Agent';
+          console.log('thats a bingo');
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        console.log(details);
+      }
+      //return {requestHeaders: headers};
+    },
+    filter,
+    ["requestHeaders", "blocking"]
+  );
+
+
