@@ -30,6 +30,20 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 7:30 PM, October 23, 2017 UTC
+
+Validator version 256
+Rules version 501
+
+Includes:
+ - Add `allow=geolocation` attributes to <amp-iframe>
+ - Allow feflood for SVGs
+ - #11433 amp-user-notification
+ - Size limit 200k bytes, allow specific at-rules for style[keyframes]
+ - #11122 amp-gwd-animation
+ - #11543 Allow viewport-fit meta viewport content property
+ - amp-story changes
+
 ### 9:00 PM, October 10, 2017 UTC
 
 Validator version 253
