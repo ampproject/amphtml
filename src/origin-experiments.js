@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import {bytesToString, bytesToUInt32, stringToBytes} from './utils/bytes';
+import {bytesToString, stringToBytes} from './utils/bytes';
 import {getSourceOrigin, parseUrl} from './url';
 import {parseJson} from './json';
-
-/** @const {number} */
-const LENGTH_BYTES = 4;
 
 /**
  * Generates, signs and verifies origin experiments.
@@ -72,56 +69,57 @@ export class OriginExperiments {
    *     experiment ID. Otherwise, rejects with validation error.
    */
   verifyToken(token, location, publicKey) {
-    let i = 0;
-    const bytes = stringToBytes(atob(token));
+    return new Promise((resolve, reject) => {
+      let i = 0;
+      const bytes = stringToBytes(atob(token));
 
-    // Parse version.
-    const version = bytes[i];
-    if (version !== 0) {
-      return Promise.reject(
-          new Error(`Unrecognized token version: ${version}`));
-    }
-    i += 1;
-
-    // Parse config length.
-    const length = bytesToUInt32(bytes.subarray(i, i + LENGTH_BYTES));
-    i += LENGTH_BYTES;
-    if (length > bytes.length - i) {
-      return Promise.reject(new Error(`Unexpected config length: ${length}`));
-    }
-
-    // Parse config itself.
-    const configBytes = bytes.subarray(i, i + length);
-    i += length;
-
-    // Parse unsigned data and its signature.
-    const data = bytes.subarray(0, i);
-    const signature = bytes.subarray(i);
-
-    return this.verify_(signature, data, publicKey).then(verified => {
-      if (!verified) {
-        throw new Error('Failed to verify token signature.');
+      // Parse version.
+      const version = bytes[i];
+      if (version !== 0) {
+        reject(new Error(`Unrecognized token version: ${version}`));
       }
-      // Convert config from bytes to JS object.
-      const configStr = bytesToString(configBytes);
-      const config = parseJson(configStr);
+      i += 1;
 
-      // Check token experiment origin against `location`.
-      const approvedOrigin = parseUrl(config['origin']).origin;
-      const sourceOrigin = getSourceOrigin(location);
-      if (approvedOrigin !== sourceOrigin) {
-        throw new Error(`Config origin (${approvedOrigin}) does not match ` +
-            `window (${sourceOrigin}).`);
+      // Parse config length.
+      const length = new DataView(bytes.buffer).getUint32(i);
+      i += 4; // Number of bytes in Uint32 config length.
+      if (length > bytes.length - i) {
+        reject(new Error(`Unexpected config length: ${length}`));
       }
 
-      // Check token expiration date.
-      const experimentId = config['experiment'];
-      const expiration = config['expiration'];
-      if (expiration >= Date.now()) {
-        return experimentId;
-      } else {
-        throw new Error(`Experiment "${experimentId}" has expired.`);
-      }
+      // Parse config itself.
+      const configBytes = bytes.subarray(i, i + length);
+      i += length;
+
+      // Parse unsigned data and its signature.
+      const data = bytes.subarray(0, i);
+      const signature = bytes.subarray(i);
+
+      this.verify_(signature, data, publicKey).then(verified => {
+        if (!verified) {
+          reject(new Error('Failed to verify token signature.'));
+        }
+        // Convert config from bytes to JS object.
+        const configStr = bytesToString(configBytes);
+        const config = parseJson(configStr);
+
+        // Check token experiment origin against `location`.
+        const approvedOrigin = parseUrl(config['origin']).origin;
+        const sourceOrigin = getSourceOrigin(location);
+        if (approvedOrigin !== sourceOrigin) {
+          reject(new Error(`Config origin (${approvedOrigin}) does not match ` +
+              `window (${sourceOrigin}).`));
+        }
+
+        // Check token expiration date.
+        const experimentId = config['experiment'];
+        const expiration = config['expiration'];
+        if (expiration >= Date.now()) {
+          resolve(experimentId);
+        } else {
+          reject(new Error(`Experiment "${experimentId}" has expired.`));
+        }
+      });
     });
   }
 
@@ -134,6 +132,7 @@ export class OriginExperiments {
   prepend_(version, config) {
     const data = new Uint8Array(config.length + 5);
     data[0] = version;
+    // Insert config length into bytes 1 through 5.
     new DataView(data.buffer).setUint32(1, config.length, false);
     data.set(config, 5);
     return data;
