@@ -82,13 +82,6 @@ const DESKTOP_THRESHOLD = 768;
 /** @type {string} */
 const TAG = 'amp-story';
 
-/** @type {!Array<string>} */
-const WHITELISTED_ORIGINS = [
-  '3451824873', '834917366', '4273375831', '750731789', '3322156041',
-  '878041739', '2199838184', '708478954', '142793127', '2414533450',
-  '212690086',
-];
-
 
 /**
  * @param {!Element} el
@@ -167,6 +160,13 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?function()} */
     this.boundOnResize_ = null;
+
+    /** @private @const {!Array<string>} */
+    this.originWhitelist_ = [
+      '3451824873', '834917366', '4273375831', '750731789', '3322156041',
+      '878041739', '2199838184', '708478954', '142793127', '2414533450',
+      '212690086',
+    ];
   }
 
 
@@ -359,6 +359,27 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const origin = getSourceOrigin(this.win.location);
+    return this.isOriginWhitelisted_(origin);
+  }
+
+
+  /**
+   * @param {string} domain The domain part of the origin, to be hashed.
+   * @return {string} The hashed origin.
+   * @private
+   */
+  hashOrigin_(domain) {
+    return stringHash32(domain.toLowerCase());
+  }
+
+
+  /**
+   * @param {string} origin The origin to check.
+   * @return {boolean} Whether the specified origin is whitelisted to use the
+   *     amp-story extension.
+   * @private
+   */
+  isOriginWhitelisted_(origin) {
     const hostName = parseUrl(origin).hostname;
     const domains = hostName.split('.');
 
@@ -377,9 +398,9 @@ export class AmpStory extends AMP.BaseElement {
     // (e.g. .co.uk) the third level may be whitelisted.  Additionally, this
     // allows subdomains to be whitelisted individually.
     return domains.some((unusedDomain, index) => {
-      const domain = domains.slice(0, index + 1).join('.');
-      const domainHash = stringHash32(domain.toLowerCase());
-      return WHITELISTED_ORIGINS.includes(domainHash);
+      const domain = domains.slice(index, domains.length).join('.');
+      const domainHash = this.hashOrigin_(domain);
+      return this.originWhitelist_.includes(domainHash);
     });
   }
 
