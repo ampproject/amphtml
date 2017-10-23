@@ -71,8 +71,8 @@ export function maybeTrackImpression(win) {
   ]).then(results => {
     const isTrustedViewer = results[0];
     const isTrustedReferrer = results[1];
-    // Currently this feature is launched for trusted viewer, but still
-    // experiment guarded for all AMP docs.
+    // Currently this feature is launched for trusted viewer and trusted referrer,
+    // but still experiment guarded for all AMP docs.
     if (!isTrustedViewer && !isTrustedReferrer && !isExperimentOn(win, 'alp')) {
       resolveImpression();
       return;

@@ -1117,11 +1117,13 @@ describe('Viewer', () => {
       test('https://t.cn/asdf', false);
     });
 
-    it('should return true for whitelisted hosts', () => {
-      windowApi.document.referrer = 'https://t.co/docref';
-      const viewer = new Viewer(ampdoc);
-      return viewer.isTrustedReferrer().then(isTrusted => {
-        expect(isTrusted).to.equal(true);
+    describe('isTrustedReferrer', () => {
+      it('should return true for whitelisted hosts', () => {
+        windowApi.document.referrer = 'https://t.co/docref';
+        const viewer = new Viewer(ampdoc);
+        return viewer.isTrustedReferrer().then(isTrusted => {
+          expect(isTrusted).to.equal(true);
+        });
       });
     });
 
