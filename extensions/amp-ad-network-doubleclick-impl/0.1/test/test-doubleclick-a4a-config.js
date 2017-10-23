@@ -70,6 +70,35 @@ describe('doubleclick-a4a-config', () => {
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
     });
 
+    it('should disable Fast Fetch if useRemoteHtml is true and no RTC', () => {
+      // Ensure no selection in order to very experiment attribute.
+      sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
+          .returns(null);
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html');
+      const elem = testFixture.doc.createElement('div');
+      testFixture.doc.body.appendChild(elem);
+      const useRemoteHtml = true;
+      expect(
+          doubleclickIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.false;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
+    });
+
+    it('should use Fast Fetch if useRemoteHtml is true and RTC is set', () => {
+      // Ensure no selection in order to very experiment attribute.
+      sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
+          .returns(null);
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html');
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('rtc-config', '{"urls": ["https://www.foo.com/"]}');
+      testFixture.doc.body.appendChild(elem);
+      const useRemoteHtml = true;
+      expect(
+          doubleclickIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.true;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
+    });
+
     it('should enable a4a when native crypto is supported', () => {
       forceExperimentBranch(mockWin, DFP_CANONICAL_FF_EXPERIMENT_NAME,
           DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT);
