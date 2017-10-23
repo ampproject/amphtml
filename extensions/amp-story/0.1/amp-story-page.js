@@ -34,9 +34,7 @@ import {renderSimpleTemplate} from './simple-template';
 import {dev, user} from '../../../src/log';
 import {EventType, dispatch, dispatchCustom} from './events';
 import {PageElement} from './page-element';
-import {isFiniteNumber} from '../../../src/types';
-import {VideoEvents} from '../../../src/video-interface';
-import {listenOnce} from '../../../src/event-helper';
+import {AdvancementConfig} from './page-advancement';
 import {dict} from '../../../src/utils/object';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
@@ -106,13 +104,6 @@ const LOAD_TIMEOUT_MS = 8000;
 const LOAD_TIMER_POLL_DELAY_MS = 250;
 
 
-/** @private @enum {!RegExp} */
-const TIME_REGEX = {
-  MILLISECONDS: /^(\d+)ms$/,
-  SECONDS: /^(\d+)s$/,
-};
-
-
 /** @private @const {string} */
 const TAG = 'amp-story-page';
 
@@ -151,6 +142,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?UnlistenDef} */
     this.autoAdvanceUnlistenDef_ = null;
+
+    /** @private {!PageAdvancementMode} */
+    this.advancement_ = AdvancementConfig.forElement(this.element);
   }
 
 
@@ -176,6 +170,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.markMediaElementsWithPreload_();
     this.maybeCreateAnimationManager_();
     this.initializeLoading_();
+    this.advancement_.addAdvanceListener(() => this.next(true));
+    this.advancement_.addProgressListener(progress => this.emitProgress_(progress));
   }
 
 
@@ -231,9 +227,9 @@ export class AmpStoryPage extends AMP.BaseElement {
   onPageVisible_() {
     this.markPageAsLoaded_();
     this.maybeApplyFirstAnimationFrame();
-    this.maybeScheduleAutoAdvance_();
     this.updateAudioIcon_();
     this.playAllMedia_();
+    this.advancement_.start();
     this.reportDevModeErrors_();
   }
 
@@ -420,10 +416,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       pageElement.pauseCallback();
     });
 
-    if (this.autoAdvanceUnlistenDef_) {
-      this.autoAdvanceUnlistenDef_();
-      this.autoAdvanceUnlistenDef_ = null;
-    }
+    this.advancement_.stop();
 
     if (this.animationManager_) {
       this.animationManager_.cancelAll();
@@ -440,28 +433,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /**
-   * Gets an HTMLMediaElement from an element that wraps it.
-   * @param {!Element} el An element that wraps an HTMLMediaElement.
-   * @return {?Element} The underlying HTMLMediaElement, if one exists.
-   * @private
-   */
-  getMediaElement_(el) {
-    const tagName = el.tagName.toLowerCase();
-
-    if (el instanceof HTMLMediaElement) {
-      return el;
-    } else if (el.hasAttribute('background-audio') &&
-        (tagName === 'amp-story' || tagName === 'amp-story-page')) {
-      return scopedQuerySelector(el, '.i-amphtml-story-background-audio');
-    } else if (tagName === 'amp-audio') {
-      return scopedQuerySelector(el, 'audio');
-    }
-
-    return null;
-  }
-
-
-  /**
    * Determines whether a given element implements the video interface.
    * @param {!Element} el The element to test
    * @return {boolean} true, if the specified element implements the video
@@ -469,55 +440,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   isVideoInterfaceVideo_(el) {
-    return el.classList.contains('i-amphtml-video-interface');
-  }
-
-
-  /**
-   * Determines whether the specified element is a valid media element for auto-
-   * advance.
-   * @param {?Element} elOrNull
-   * @private
-   */
-  addMediaElementListeners_(elOrNull) {
-    const el = user().assertElement(elOrNull,
-        'ID specified for automatic advance does not refer to any element' +
-        `on page '${this.element.id}'.`);
-    const mediaElement = this.getMediaElement_(el);
-
-    const callback = () => {
-      this.next(true /* opt_isAutomaticAdvance */);
-    };
-
-    if (mediaElement) {
-      if (mediaElement.duration > 0) {
-        listenOnce(mediaElement, 'timeupdate', () => {
-          const progress = mediaElement.currentTime / mediaElement.duration;
-          this.emitProgress_(progress);
-        });
-      } else {
-        // We can't determine the progress; just show the whole page as having
-        // progressed.
-        this.emitProgress_(1);
-      }
-      this.autoAdvanceUnlistenDef_ =
-          listenOnce(mediaElement, 'ended', callback);
-    } else if (this.isVideoInterfaceVideo_(el)) {
-      el.getImpl().then(video => {
-        let startMs = null;
-        const animationStepFn = () => {
-          const progress = video.getCurrentTime() / video.getDuration();
-          this.emitProgress_(progress);
-          this.win.requestAnimationFrame(animationStepFn);
-        };
-        this.win.requestAnimationFrame(animationStepFn);
-      });
-      this.autoAdvanceUnlistenDef_ =
-          listenOnce(el, VideoEvents.ENDED, callback, {capture: true});
-    } else {
-      user().error(TAG, `Element with ID ${el.id} is not a media element ` +
-          'supported for automatic advancement.');
-    }
+    return ;
   }
 
 
@@ -526,47 +449,16 @@ export class AmpStoryPage extends AMP.BaseElement {
    * duration, after which next() will be invoked.
    * @private
    */
-  maybeScheduleAutoAdvance_() {
-    const autoAdvanceAfter = this.element.getAttribute('auto-advance-after');
-
-    if (!autoAdvanceAfter) {
-      return;
-    }
-
-    const delayMs = timeStrToMillis(autoAdvanceAfter);
-
-    if (delayMs) {
-      user().assert(isFiniteNumber(delayMs) && delayMs > 0,
-          `Invalid automatic advance delay '${autoAdvanceAfter}' ` +
-          `for page '${this.element.id}'.`);
-
-      let startMs = null;
-      const animationStepFn = timestampMs => {
-        if (!startMs) {
-          startMs = timestampMs;
-        }
-        const progress = (timestampMs - startMs) / delayMs;
-        this.emitProgress_(progress);
-        this.win.requestAnimationFrame(animationStepFn);
-      };
-      this.win.requestAnimationFrame(animationStepFn);
-      const timeoutId = this.timer_.delay(
-          () => this.next(true /* opt_isAutomaticAdvance */), delayMs);
-      this.autoAdvanceUnlistenDef_ = () => {
-        this.timer_.cancel(timeoutId);
-      };
-    } else {
-      let mediaElement;
-      try {
-        mediaElement = scopedQuerySelector(
-            this.element, `#${autoAdvanceAfter}`);
-      } catch (e) {
-        user().error(TAG, `Malformed ID '${autoAdvanceAfter}' for automatic ` +
-            `advance on page '${this.element.id}'.`);
+  scheduleAdvancement_() {
+    switch (this.advancementMode_) {
+      case PageAdvancementMode.MANUAL:
         return;
-      }
-
-      this.addMediaElementListeners_(mediaElement);
+      case PageAdvancementMode.TIME_BASED:
+        this.scheduleTimeBasedAutoAdvance_();
+        break;
+      case PageAdvancementMode.MEDIA_BASED:
+        this.scheduleMediaBasedAutoAdvance_();
+        break;
     }
   }
 
