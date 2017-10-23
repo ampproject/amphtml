@@ -84,9 +84,7 @@ const TAG = 'amp-story';
 
 /** @type {!Array<string>} */
 const WHITELISTED_ORIGINS = [
-  '3451824873', '834917366', '4273375831', '750731789', '3322156041',
-  '878041739', '2199838184', '708478954', '142793127', '2414533450',
-  '212690086',
+  
 ];
 
 
@@ -167,6 +165,13 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?function()} */
     this.boundOnResize_ = null;
+
+    /** @private @const {!Array<string>} */
+    this.originWhitelist_ = [
+      '3451824873', '834917366', '4273375831', '750731789', '3322156041',
+      '878041739', '2199838184', '708478954', '142793127', '2414533450',
+      '212690086',
+    ];
   }
 
 
@@ -353,12 +358,34 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /** @private */
+  getOriginWhitelist_() {
+    return ;
+  }
+
+
+  /** @private */
   isAmpStoryEnabled_() {
     if (isExperimentOn(this.win, TAG) || getMode().test || getMode().localDev) {
       return true;
     }
 
     const origin = getSourceOrigin(this.win.location);
+    return this.isOriginWhitelisted_(origin);
+  }
+
+
+  /**
+   * @param {string} domain The domain part of the origin, to be hashed.
+   * @return {string} The hashed origin.
+   * @private
+   */
+  hashOrigin_(domain) {
+    return stringHash32(domain.toLowerCase());
+  }
+
+
+  /** @private */
+  isOriginWhitelisted_(origin) {
     const hostName = parseUrl(origin).hostname;
     const domains = hostName.split('.');
 
@@ -378,8 +405,8 @@ export class AmpStory extends AMP.BaseElement {
     // allows subdomains to be whitelisted individually.
     return domains.some((unusedDomain, index) => {
       const domain = domains.slice(index, domains.length).join('.');
-      const domainHash = stringHash32(domain.toLowerCase());
-      return WHITELISTED_ORIGINS.includes(domainHash);
+      const domainHash = this.hashOrigin_(domain);
+      return this.originWhitelist_.includes(domainHash);
     });
   }
 
