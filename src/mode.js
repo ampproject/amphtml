@@ -76,7 +76,7 @@ function getMode_(win) {
   const AMP_CONFIG_3P_FRAME_HOST = self.AMP_CONFIG &&
       self.AMP_CONFIG.thirdPartyFrameHost;
 
-  const isLocalDev = IS_DEV && !!(
+  const isLocalDev = IS_DEV && !!(win.location.hostname == 'localhost' ||
       (FORCE_LOCALDEV && win.location.hostname == AMP_CONFIG_3P_FRAME_HOST) ||
       (win.location.ancestorOrigins && win.location.ancestorOrigins[0] &&
         startsWith(win.location.ancestorOrigins[0], 'http://localhost:'))) &&
