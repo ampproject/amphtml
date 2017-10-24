@@ -154,7 +154,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
         violationEvent => {
           dev().warn('FIE', 'security policy violation', violationEvent);
         });
-  }
+  };
   let loadedPromise;
   if (isSrcdocSupported()) {
     iframe.srcdoc = html;
