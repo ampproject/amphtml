@@ -613,15 +613,59 @@ describes.realWin('Events', {amp: 1}, env => {
             {timerSpec: {interval: 1}}, handler);
       }).to.not.throw();
 
+       const clickTracker = new ClickEventTracker(root);
        expect(() => {
          tracker.add(analyticsElement, 'timer',
              {
 	       timerSpec: {
-	         onSpec: {on: 'click'},
-	         offSpec: {on: 'click'},
+	         startSpec: {on: 'click', selector: '.target'},
+	         stopSpec: {on: 'click', selector: '.target'},
 	         interval:1}
-	     }, handler);
+	     }, handler, function(config) { return clickTracker; });
        }).to.not.throw();
+    });
+
+    it('timers start and stop by tracking different events', () => {
+      const fn1 = sandbox.stub();
+      const clickTracker = new ClickEventTracker(root);
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 1,
+	startSpec: {on: 'click', selector: '.target'},
+	stopSpec: {on: 'click', selector: '.target'}
+      }}, fn1, function(config) { return clickTracker; });
+      expect(fn1).to.have.not.been.called;
+
+      clock.tick(5 * 1000); // 5 seconds
+      expect(fn1).to.have.not.been.called;
+
+      target.click(); // Start timer.
+      expect(fn1).to.be.calledOnce;
+      expect(fn1.args[0][0]).to.be.instanceOf(AnalyticsEvent);
+      expect(fn1.args[0][0].target).to.equal(root.getRootElement());
+      expect(fn1.args[0][0].type).to.equal('timer');
+      target.click(); // Stop timer.
+
+      const fn2 = sandbox.stub();
+      const customTracker = new CustomEventTracker(root);
+      const getElementSpy = sandbox.spy(root, 'getElement');
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 1,
+	startSpec: {on: 'custom-event-start', selector: '.target'},
+	stopSpec: {on: 'custom-event-stop', selector: '.target'}
+      }}, fn2, function(config) { return customTracker; });
+      expect(fn2).to.have.not.been.called;
+      customTracker.trigger(new AnalyticsEvent(target, 'custom-event-start'));
+      return getElementSpy.returnValues[1].then(() => {
+        expect(fn2).to.be.calledOnce;
+        expect(fn2.args[0][0]).to.be.instanceOf(AnalyticsEvent);
+        expect(fn2.args[0][0].target).to.equal(root.getRootElement());
+        expect(fn2.args[0][0].type).to.equal('timer');
+        customTracker.trigger(new AnalyticsEvent(target, 'custom-event-stop'));
+
+        clock.tick(5 * 1000); // 5 seconds
+        expect(fn1).to.have.callCount(1);
+        expect(fn2).to.have.callCount(1);
+      });
     });
 
     it('only fires when the timer interval exceeds the minimum', () => {
