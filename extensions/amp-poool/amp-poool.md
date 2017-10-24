@@ -45,8 +45,8 @@ limitations under the License.
   layout="responsive"
   width="150"
   height="80"
-  init="Your personal key : XXXXX-XXXXX-XXXXX-XXXXX"
-  page-view="premium">
+  data-init="Your personal key : XXXXX-XXXXX-XXXXX-XXXXX"
+  data-page-view="premium">
 </amp-poool>
 ```
 
@@ -63,16 +63,16 @@ For more informations, check our [documentation](https://dev.poool.fr/doc/sdk).
   layout="responsive"
   width="150"
   height="80"
-  init="Your personal key : XXXXX-XXXXX-XXXXX-XXXXX"
-  page-view="premium"
-  debug="true"
-  mode="excerpt"
-  percent="80"
-  post-container="#need-poool-custom"
-  force-widget="gift"
-  main-color="#ffc400"
-  background-color="#ffc400"
-  brand-logo="https://cdn.poool.fr/uploads/57ffab6c756a8cf24356d0c2/sudouest.jpg">
+  data-init="Your personal key : XXXXX-XXXXX-XXXXX-XXXXX"
+  data-page-view="premium"
+  data-debug="true"
+  data-poool-mode="excerpt"
+  data-poool="80"
+  data-post-container="#need-poool-custom"
+  data-force-widget="gift"
+  data-main-color="#ffc400"
+  data-background-color="#ffc400"
+  data-brand-logo="https://cdn.poool.fr/uploads/57ffab6c756a8cf24356d0c2/sudouest.jpg">
 </amp-poool>
 ```
 
@@ -82,7 +82,7 @@ Find the attribute you want to change.
 
 Example :
 - You read the doc and decide to change "force_widget" config variable.
-- Just set a new attribute in your amp-poool tag : force-widget="video".
+- Just set a new attribute in your amp-poool tag : data-force-widget="video".
 - **Notice that you have to set amp-poool tag attribute with "-" symbol instead of "_" one.**
 
 
@@ -92,20 +92,20 @@ To learn more about events, please check our [documentation](https://dev.poool.f
 First, add an attribute named "events" to your amp-poool tag. His value has to be a json script id.
 Check the following example :
 
-Update your amp-poool tag with "events" attribute. "poool-custom-events" is the json script id.
+Update your amp-poool tag with "data-events" attribute. "poool-custom-events" is the json script id.
 
 ```html
 <amp-poool
   layout="responsive"
   width="150"
   height="80"
-  init="Your personal key : XXXXX-XXXXX-XXXXX-XXXXX"
-  page-view="premium"
-  debug="true"
-  mode="excerpt"
-  percent="80"
-  post-container="#need-poool-custom"
-  events="poool-custom-events">
+  data-init="Your personal key : XXXXX-XXXXX-XXXXX-XXXXX"
+  data-page-view="premium"
+  data-debug="true"
+  data-poool-mode="excerpt"
+  data-poool="80"
+  data-post-container="#need-poool-custom"
+  data-events="poool-custom-events">
 </amp-poool>
 ```
 

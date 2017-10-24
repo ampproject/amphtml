@@ -31,17 +31,17 @@ class AmpPoool extends AMP.BaseElement {
     /** @override */
     buildCallback() {
         // Check if required parameter init (bundle-id) isn't missing
-        const bundle_id = user().assert(this.element.getAttribute('init'),
+        const bundle_id = user().assert(this.element.getAttribute('data-init'),
             'The init attribute is required for <amp-poool> %s',
             this.element);
 
         // Check if required parameter page-view (page-type) isn't missing
-        const page_type = user().assert(this.element.getAttribute('page-view'),
+        const page_type = user().assert(this.element.getAttribute('data-page-view'),
             'The page_view attribute is required for <amp-poool> %s',
             this.element);
 
         // Assign poool conversion variable
-        const conversion = this.element.getAttribute("conversion");
+        const conversion = this.element.getAttribute("data-conversion");
 
         // Create a div with "poool-widget" id to display it
         this.container_.id = "poool-widget";
@@ -69,36 +69,36 @@ class AmpPoool extends AMP.BaseElement {
         `;
 
         // Add config values
-        updatePoool("config", "debug", this.element.getAttribute('debug'), script, true);
-        updatePoool("config", "mode", this.element.getAttribute('mode'), script);
-        updatePoool("config", "percent", this.element.getAttribute('percent'), script, true);
-        updatePoool("config", "post_container", this.element.getAttribute('post-container'), script);
-        updatePoool("config", "widget_container", this.element.getAttribute('widget-container'), script);
-        updatePoool("config", "force_widget", this.element.getAttribute('force-widget'), script);
-        updatePoool("config", "subscription_url", this.element.getAttribute('subscription-url'), script);
-        updatePoool("config", "newsletter_name", this.element.getAttribute('newsletter-name'), script);
-        updatePoool("config", "newsletter_id", this.element.getAttribute('newsletter-id'), script, true);
-        updatePoool("config", "login_url", this.element.getAttribute('login-url'), script);
-        updatePoool("config", "user_is_premium", this.element.getAttribute('user-is-premium'), script, true);
-        updatePoool("config", "video_primary_mode", this.element.getAttribute('video-primary-mode'), script);
-        updatePoool("config", "video_client", this.element.getAttribute('video-client'), script);
-        updatePoool("config", "popover_enabled", this.element.getAttribute('popover-enabled'), script, true);
-        updatePoool("config", "alternative_enabled", this.element.getAttribute('alternative-enabled'), script, true);
-        updatePoool("config", "alternative_widget", this.element.getAttribute('alternative-widget'), script);
-        updatePoool("config", "adblock_enabled", this.element.getAttribute('adblock-enabled'), script, true);
-        updatePoool("config", "vast", this.element.getAttribute('vast'), script);
-        updatePoool("config", "mobile_vast", this.element.getAttribute('mobile-vast'), script);
-        updatePoool("config", "custom_segment", this.element.getAttribute('custom-segment'), script);
+        updatePoool("config", "debug", this.element.getAttribute('data-debug'), script, true);
+        updatePoool("config", "mode", this.element.getAttribute('data-poool-mode'), script);
+        updatePoool("config", "percent", this.element.getAttribute('data-poool'), script, true);
+        updatePoool("config", "post_container", this.element.getAttribute('data-post-container'), script);
+        updatePoool("config", "widget_container", this.element.getAttribute('data-widget-container'), script);
+        updatePoool("config", "force_widget", this.element.getAttribute('data-force-widget'), script);
+        updatePoool("config", "subscription_url", this.element.getAttribute('data-subscription-url'), script);
+        updatePoool("config", "newsletter_name", this.element.getAttribute('data-newsletter-name'), script);
+        updatePoool("config", "newsletter_id", this.element.getAttribute('data-newsletter-id'), script, true);
+        updatePoool("config", "login_url", this.element.getAttribute('data-login-url'), script);
+        updatePoool("config", "user_is_premium", this.element.getAttribute('data-user-is-premium'), script, true);
+        updatePoool("config", "video_primary_mode", this.element.getAttribute('data-video-primary-mode'), script);
+        updatePoool("config", "video_client", this.element.getAttribute('data-video-client'), script);
+        updatePoool("config", "popover_enabled", this.element.getAttribute('data-popover-enabled'), script, true);
+        updatePoool("config", "alternative_enabled", this.element.getAttribute('data-alternative-enabled'), script, true);
+        updatePoool("config", "alternative_widget", this.element.getAttribute('data-alternative-widget'), script);
+        updatePoool("config", "adblock_enabled", this.element.getAttribute('data-adblock-enabled'), script, true);
+        updatePoool("config", "vast", this.element.getAttribute('data-vast'), script);
+        updatePoool("config", "mobile_vast", this.element.getAttribute('data-mobile-vast'), script);
+        updatePoool("config", "custom_segment", this.element.getAttribute('data-custom-segment'), script);
 
         // Add style values
-        updatePoool("style", "main_color", this.element.getAttribute("main-color"), script);
-        updatePoool("style", "background_color", this.element.getAttribute("background-color"), script);
-        updatePoool("style", "brand_logo", this.element.getAttribute("brand-logo"), script);
-        updatePoool("style", "brand_cover", this.element.getAttribute("brand-cover"), script);
+        updatePoool("style", "main_color", this.element.getAttribute("data-main-color"), script);
+        updatePoool("style", "background_color", this.element.getAttribute("data-background-color"), script);
+        updatePoool("style", "brand_logo", this.element.getAttribute("data-brand-logo"), script);
+        updatePoool("style", "brand_cover", this.element.getAttribute("data-brand-cover"), script);
 
 
         // Add event values
-        var events = this.win.document.getElementById(this.element.getAttribute("events"));
+        var events = this.win.document.getElementById(this.element.getAttribute("data-events"));
 
         // Only if publisher want to set events
         if(events) {
@@ -116,7 +116,7 @@ class AmpPoool extends AMP.BaseElement {
         }
 
         // End poool tag with action values
-        updatePoool("send", "email", this.element.getAttribute("email"), script);
+        updatePoool("send", "email", this.element.getAttribute("data-email"), script);
         if(conversion){
             script.innerHTML += "poool('send', 'conversion');\n"
         }
