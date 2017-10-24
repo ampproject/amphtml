@@ -19,7 +19,7 @@ import {user} from '../../../src/log';
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
  * @param {string} time
- * @return {number=}
+ * @return {number|undefined}
  */
 export function timeStrToMillis(time) {
   const match = time.toLowerCase().match(/^([0-9\.]+)\s*(s|ms)$/);
