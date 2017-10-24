@@ -222,6 +222,12 @@ export class SystemLayer {
         this.onUnmuteAudioClick_(e);
       }
     });
+
+    this.win_.addEventListener('keyup', e => {
+      if (!this.closeBookendBtn_.hasAttribute('hidden')) {
+        this.onCloseBookendClick_(e);
+      }
+    });
   }
 
 
