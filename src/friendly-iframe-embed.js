@@ -56,6 +56,7 @@ const EXCLUDE_INI_LOAD = ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL'];
  *   html: string,
  *   extensionIds: (?Array<string>|undefined),
  *   fonts: (?Array<string>|undefined),
+ *   cspEnabled: boolean,
  * }}
  */
 export let FriendlyIframeSpec;
@@ -145,16 +146,27 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     // Chrome does not reflect the iframe readystate.
     iframe.readyState = 'complete';
   };
+  const registerViolationListener = () => {
+    if (!spec.cspEnabled) {
+      return;
+    }
+    iframe.contentWindow.addEventListener('securitypolicyviolation',
+        violationEvent => {
+          dev().warn('FIE', 'security policy violation', violationEvent);
+        });
+  };
   let loadedPromise;
   if (isSrcdocSupported()) {
     iframe.srcdoc = html;
     loadedPromise = loadPromise(iframe);
     container.appendChild(iframe);
+    registerViolationListener();
   } else {
     iframe.src = 'about:blank';
     container.appendChild(iframe);
     const childDoc = iframe.contentWindow.document;
     childDoc.open();
+    registerViolationListener();
     childDoc.write(html);
     // With document.write, `iframe.onload` arrives almost immediately, thus
     // we need to wait for child's `window.onload`.
@@ -265,6 +277,12 @@ function mergeHtml(spec) {
       result.push(
           `<link href="${escapeHtml(font)}" rel="stylesheet" type="text/css">`);
     });
+  }
+
+  // Load CSP
+  if (spec.cspEnabled) {
+    result.push('<meta http-equiv=Content-Security-Policy ' +
+      'content="script-src \'none\';object-src \'none\';child-src \'none\'">');
   }
 
   // Postambule.
