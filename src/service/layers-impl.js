@@ -125,7 +125,9 @@ export class LayoutLayers {
   }
 
   add(element) {
-    if (LayoutElement.forOptional(element)) {
+    const layout = LayoutElement.forOptional(element);
+    if (layout) {
+      layout.refreshParentLayer();
       return;
     }
 
@@ -292,6 +294,7 @@ export class LayoutElement {
 
     this.children_ = [];
 
+    /** @type {LayoutElement} */
     this.parentLayer_ = parent;
     if (parent) {
       parent.add(element);
@@ -320,12 +323,15 @@ export class LayoutElement {
    * Finds the element's parent layer
    * If the element is itself a layer, it returns the layer's parent layer.
    * @param {!Element}
+   * @param {opt_force=} Whether to force a re-lookup
    * @return {?LayoutElement}
    */
-  static getParentLayer(element) {
-    const layout = LayoutElement.forOptional(element);
-    if (layout) {
-      return layout.getParentLayer();
+  static getParentLayer(element, opt_force) {
+    if (!opt_force) {
+      const layout = LayoutElement.forOptional(element);
+      if (layout) {
+        return layout.getParentLayer();
+      }
     }
 
     let last = element;
@@ -360,7 +366,7 @@ export class LayoutElement {
 
     const layout = LayoutElement.for(child);
     dev().assert(layout.getParentLayer() === this);
-    layout.dispose();
+    layout.undeclareLayer();
 
     const i = this.children_.indexOf(layout);
     if (i > -1) {
@@ -433,6 +439,22 @@ export class LayoutElement {
    */
   getParentLayer() {
     return this.parentLayer_;
+  }
+
+  refreshParentLayer() {
+    const element = this.element_;
+    const oldParent = this.getParentLayer();
+    const parent = LayoutElement.getParentLayer(element, true);
+    if (parent === oldParent) {
+      return;
+    }
+    if (oldParent) {
+      oldParent.remove(element);
+    }
+    if (parent) {
+      parent.add(element);
+    }
+
   }
 
   /**
