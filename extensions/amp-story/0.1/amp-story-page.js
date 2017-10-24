@@ -41,7 +41,7 @@ import {dict} from '../../../src/utils/object';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
-
+import {timeStrToMillis} from './utils';
 
 
 /** @private @const {!Array<!./simple-template.ElementDef>} */
@@ -520,12 +520,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    let delayMs;
-    if (TIME_REGEX.MILLISECONDS.test(autoAdvanceAfter)) {
-      delayMs = Number(TIME_REGEX.MILLISECONDS.exec(autoAdvanceAfter)[1]);
-    } else if (TIME_REGEX.SECONDS.test(autoAdvanceAfter)) {
-      delayMs = Number(TIME_REGEX.SECONDS.exec(autoAdvanceAfter)[1]) * 1000;
-    }
+    const delayMs = timeStrToMillis(autoAdvanceAfter);
 
     if (delayMs) {
       user().assert(isFiniteNumber(delayMs) && delayMs > 0,
