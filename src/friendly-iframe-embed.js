@@ -146,21 +146,27 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     // Chrome does not reflect the iframe readystate.
     iframe.readyState = 'complete';
   };
+  const registerViolationListener = () => {
+    if (!spec.cspEnabled) {
+      return;
+    }
+    iframe.contentWindow.addEventListener('securitypolicyviolation',
+        violationEvent => {
+          dev().warn('FIE', 'security policy violation', violationEvent);
+        });
+  }
   let loadedPromise;
   if (isSrcdocSupported()) {
     iframe.srcdoc = html;
     loadedPromise = loadPromise(iframe);
     container.appendChild(iframe);
+    registerViolationListener();
   } else {
     iframe.src = 'about:blank';
     container.appendChild(iframe);
     const childDoc = iframe.contentWindow.document;
-    if (spec.cspEnabled) {
-      childDoc.addEventListener('securitypolicyviolation', violationEvent => {
-        dev().warn('FIE', 'security policy violation', violationEvent);
-      });
-    }
     childDoc.open();
+    registerViolationListener();
     childDoc.write(html);
     // With document.write, `iframe.onload` arrives almost immediately, thus
     // we need to wait for child's `window.onload`.
