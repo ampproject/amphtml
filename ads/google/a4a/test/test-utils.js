@@ -380,7 +380,6 @@ describe('Google A4A utils', () => {
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
         impl.win.AMP_CONFIG = {type: 'production'};
-        impl.win.AMP_MODE = {test: false, localDev: true};
         impl.win.location.hash = 'foo,deid=123456,bar';
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
