@@ -224,7 +224,7 @@ export class SystemLayer {
     });
 
     this.win_.addEventListener('keyup', e => {
-      if (!this.closeBookendBtn_.hasAttribute('hidden')) {
+      if (!this.closeBookendBtn_.hasAttribute('hidden') && e.key == 'Escape') {
         this.onCloseBookendClick_(e);
       }
     });

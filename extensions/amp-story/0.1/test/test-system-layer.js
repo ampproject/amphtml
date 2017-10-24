@@ -83,10 +83,12 @@ describes.fakeWin('amp-story system layer', {}, env => {
     const rootMock = {addEventListener: sandbox.spy()};
 
     sandbox.stub(systemLayer, 'root_', rootMock);
+    sandbox.stub(systemLayer, 'win_', rootMock);
 
     systemLayer.addEventHandlers_();
 
     expect(rootMock.addEventListener).to.have.been.calledWith('click');
+    expect(rootMock.addEventListener).to.have.been.calledWith('keyup');
   });
 
   it('should dispatch EXIT_FULLSCREEN when button is clicked', () => {
