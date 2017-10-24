@@ -26,7 +26,7 @@ discipline.
     type="revjet"
     data-tag="tag3777"
     data-key="705"
-    data-opts='{delivery_method: "banner"}'>
+    data-opts='{"delivery_method": "banner"}'>
 </amp-ad>
 ```
 

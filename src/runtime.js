@@ -726,10 +726,15 @@ class MultidocManager {
             if (n.hasAttribute('amp-boilerplate')) {
               // Ignore.
               dev().fine(TAG, '- ignore boilerplate style: ', n);
-            } else {
+            } else if (n.hasAttribute('amp-custom')) {
               installStylesForDoc(ampdoc, n.textContent,
                   /* callback */ null,
                   /* isRuntimeCss */ false, 'amp-custom');
+              dev().fine(TAG, '- import style: ', n);
+            } else if (n.hasAttribute('amp-keyframes')) {
+              installStylesForDoc(ampdoc, n.textContent,
+                  /* callback */ null,
+                  /* isRuntimeCss */ false, 'amp-keyframes');
               dev().fine(TAG, '- import style: ', n);
             }
             break;
