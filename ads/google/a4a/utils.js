@@ -229,6 +229,8 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'ish': win != win.top ? viewportSize.height : null,
           'art': art == '0' ? null : art,
           'vis': visibilityStateCodes[visibilityState] || '0',
+          'debug_experiment_id': (getMode().localDev &&
+              (/,?deid=(\d+)/i.exec(win.location.hash) || [])[1]) || null,
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?
