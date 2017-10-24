@@ -555,9 +555,15 @@ export class LayoutElement {
 
     const box = this.element_.getBoundingClientRect();
     this.size_ = SizeWh(box.width, box.height);
+
+    let {left, top} = box;
+    if (this.isRootLayer_) {
+      left += this.getScrollLeft();
+      top += this.getScrollTop();
+    }
     this.position_ = PositionLt(
-        box.left - relative.left,
-        box.top - relative.top
+        left - relative.left,
+        top - relative.top
     );
 
     const children = this.children_;
@@ -586,9 +592,6 @@ export class LayoutElement {
  */
 function relativeScrolledPositionForChildren(layer) {
   const position = layer.getScrolledPosition();
-  if (layer.isRootLayer_) {
-    return position;
-  }
   return PositionLt(
       position.left - layer.getScrollLeft(),
       position.top - layer.getScrollTop()
