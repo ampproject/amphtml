@@ -172,7 +172,7 @@ function handleClickUrl(win) {
   }).then(response => {
     applyResponse(win, response);
   }).catch(err => {
-    user().warn('Error on request clickUrl: ', err);
+    user().warn('IMPRESSION', 'Error on request clickUrl: ', err);
   });
 }
 
@@ -180,7 +180,7 @@ function handleClickUrl(win) {
  * Send the url to ad server and wait for its response
  * @param {!Window} win
  * @param {string} clickUrl
- * @return {!Promise<!JsonObject>}
+ * @return {!Promise<?JsonObject>}
  */
 function invoke(win, clickUrl) {
   if (getMode().localDev && !getMode().test) {
@@ -203,9 +203,13 @@ function invoke(win, clickUrl) {
  * parse the response back from ad server
  * Set for analytics purposes
  * @param {!Window} win
- * @param {!JsonObject} response
+ * @param {?JsonObject} response
  */
 function applyResponse(win, response) {
+  if (!response) {
+    return;
+  }
+
   const adLocation = response['location'];
   const adTracking = response['tracking_url'];
 
