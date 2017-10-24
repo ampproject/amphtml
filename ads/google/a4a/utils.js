@@ -20,6 +20,7 @@ import {makeCorrelator} from '../correlator';
 import {getBinaryType} from '../../../src/experiments';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {dict} from '../../../src/utils/object';
 import {parseUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
