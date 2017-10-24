@@ -106,14 +106,6 @@ const LOAD_TIMEOUT_MS = 8000;
 const LOAD_TIMER_POLL_DELAY_MS = 250;
 
 
-
-/** @private @enum {!RegExp} */
-const TIME_REGEX = {
-  MILLISECONDS: /^(\d+)ms$/,
-  SECONDS: /^(\d+)s$/,
-};
-
-
 /** @private @const {string} */
 const TAG = 'amp-story-page';
 
