@@ -31,16 +31,22 @@ describes.realWin('amp-poool', {
   });
 
   function getPoool(bundle_id, type, force_widget, debug, main_color, background_color) {
+    const article = doc.createElement('div');
+    article.id = "need-poool-custom";
+    article.setAttribute("data-poool", 80);
+    article.setAttribute("data-poool-mode", "excerpt");
+    article.innerHTML = "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>";
+    doc.body.appendChild(article);
 
     const ampPoool = doc.createElement('amp-poool');
     ampPoool.setAttribute('height', 400);
     ampPoool.setAttribute('width', 400);
-    ampPoool.setAttribute('init', bundle_id);
-    ampPoool.setAttribute('page-view', type);
-    ampPoool.setAttribute('debug', debug);
-    ampPoool.setAttribute('force-widget', force_widget);
-    ampPoool.setAttribute('main-color', main_color);
-    ampPoool.setAttribute('background-color', background_color);
+    ampPoool.setAttribute('data-init', bundle_id);
+    ampPoool.setAttribute('data-page-view', type);
+    ampPoool.setAttribute('data-debug', debug);
+    ampPoool.setAttribute('data-force-widget', force_widget);
+    ampPoool.setAttribute('data-main-color', main_color);
+    ampPoool.setAttribute('data-background-color', background_color);
 
     doc.body.appendChild(ampPoool);
     return ampPoool.build().then(() => {
@@ -51,8 +57,8 @@ describes.realWin('amp-poool', {
   it('should return undefined when needed attributes aren\'t given', () => {
     return getPoool()
         .then(ampPoool => {
-          expect(ampPoool.getAttribute('init')).to.equal("undefined");
-          expect(ampPoool.getAttribute('page-view')).to.equal("undefined");
+          expect(ampPoool.getAttribute('data-init')).to.equal("undefined");
+          expect(ampPoool.getAttribute('data-page-view')).to.equal("undefined");
         });
   });
 
@@ -62,32 +68,32 @@ describes.realWin('amp-poool', {
           const _poool = ampPoool.firstChild;
           expect(_poool).to.not.be.null;
           expect(_poool.id).to.equal('poool-widget');
-          expect(ampPoool.getAttribute('init')).to.not.be.null;
-          expect(ampPoool.getAttribute('page-view')).to.not.be.null;
+          expect(ampPoool.getAttribute('data-init')).to.not.be.null;
+          expect(ampPoool.getAttribute('data-page-view')).to.not.be.null;
         });
   });
 
   it('verifies needed attributes presence', () => {
     return getPoool('ZRGA3EYZ4GRBTSHREG345HGGZRTHZEGEH', 'premium')
         .then(ampPoool => {
-          expect(ampPoool.getAttribute('init')).to.equal("ZRGA3EYZ4GRBTSHREG345HGGZRTHZEGEH");
-          expect(ampPoool.getAttribute('page-view')).to.equal("premium");
+          expect(ampPoool.getAttribute('data-init')).to.equal("ZRGA3EYZ4GRBTSHREG345HGGZRTHZEGEH");
+          expect(ampPoool.getAttribute('data-page-view')).to.equal("premium");
         });
   });
 
-  it('tests poool-widget with additional config variables', () => {
+  it('tests amp-poool with additional config variables', () => {
     return getPoool('ZRGA3EYZ4GRBTSHREG345HGGZRTHZEGEH', 'premium', 'question', true)
         .then(ampPoool => {
-          expect(ampPoool.getAttribute('debug')).to.equal("true");
-          expect(ampPoool.getAttribute('force-widget')).to.equal("question");
+          expect(ampPoool.getAttribute('data-debug')).to.equal("true");
+          expect(ampPoool.getAttribute('data-force-widget')).to.equal("question");
         });
   });
 
-  it('tests poool-widget with additional style variables', () => {
+  it('tests amp-poool with additional style variables', () => {
     return getPoool('ZRGA3EYZ4GRBTSHREG345HGGZRTHZEGEH', 'premium', 'question', true, '#000', '#123')
         .then(ampPoool => {
-          expect(ampPoool.getAttribute('main-color')).to.equal('#000');
-          expect(ampPoool.getAttribute('background-color')).to.equal('#123');
+          expect(ampPoool.getAttribute('data-main-color')).to.equal('#000');
+          expect(ampPoool.getAttribute('data-background-color')).to.equal('#123');
         });
   });
 });
