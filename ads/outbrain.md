@@ -24,8 +24,7 @@ limitations under the License.
   <amp-embed width="100" height="100"
              type="outbrain"
              layout="responsive"
-             data-widgetIds="AMP_1,AMP_2"
-             data-testMode="true">
+             data-widgetIds="AMP_1,AMP_2">
   </amp-embed>
 ```
 
@@ -36,5 +35,4 @@ The above code must be accompanied by AMP-enabled widgets delivered by Outbrain�
 - widgetIds *(**mandatory**)* - Widget Id/s Provided by Account Manager.
 - htmlURL *(optional)* - The URL of the standard html version of the page.
 - ampURL *(optional)* - The URL of the AMP version of the page.
-- testMode *(optional)* - Pass the parameter with the “true” value while testing the AMP pages. 
 - styleFile *(optional)* - Provide publisher an option to pass CSS file in order to inherit the design for the AMP displayed widget. **Consult with Account Manager regarding CSS options**.
