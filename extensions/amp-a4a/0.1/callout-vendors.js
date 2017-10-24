@@ -20,7 +20,14 @@
 //       otherwise the vendor endpoint will not be used.        //
 //                                                              //
 //////////////////////////////////////////////////////////////////
-/** @const {!Object<string, string>} */
+/** @typedef {{
+    url: string,
+    macros: Array<string>}} */
+let RtcVendorDef;
+/** @const {!Object<string, RtcVendorDef>} */
 export const RTC_VENDORS = {
-  'fakevendor': 'https://www.fake.qqq/?slot_id=SLOT_ID&page_id=PAGE_ID&foo_id=FOO_ID',
+  'fakevendor': {
+    url: 'https://www.fake.qqq/?slot_id=SLOT_ID&page_id=PAGE_ID&foo_id=FOO_ID',
+    macros: ['SLOT_ID', 'PAGE_ID', 'FOO_ID'],
+  },
 };

@@ -104,6 +104,10 @@ If present, the video will automatically loop back to the start upon reaching th
 
 Required if a `track` resource is hosted on a different origin than the document.
 
+##### disableremoteplayback
+
+Determines whether the media element is allowed to have a remote playback UI such as Chromecast or AirPlay.
+
 ##### muted (deprecated)
 
 The `muted` attribute is deprecated and no longer has any effect. The `autoplay` attribute automatically controls the mute behavior.
