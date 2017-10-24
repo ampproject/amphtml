@@ -147,6 +147,7 @@ function handleClickUrl(win) {
   /** @const {string|undefined} */
   const clickUrl = viewer.getParam('click');
 
+
   if (!clickUrl) {
     return Promise.resolve();
   }
@@ -170,6 +171,8 @@ function handleClickUrl(win) {
     return invoke(win, dev().assertString(clickUrl));
   }).then(response => {
     applyResponse(win, response);
+  }).catch(err => {
+    user().warn('Error on request clickUrl: ', err);
   });
 }
 
@@ -187,7 +190,13 @@ function invoke(win, clickUrl) {
     credentials: 'include',
     // All origins are allows to send these requests.
     requireAmpResponseSourceOrigin: false,
-  }).then(res => res.json());
+  }).then(res => {
+    // Treat 204 no content response specially
+    if (res.status == 204) {
+      return null;
+    }
+    return res.json();
+  });
 }
 
 /**
