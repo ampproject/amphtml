@@ -322,6 +322,7 @@ export class AmpAdExit extends AMP.BaseElement {
    */
   init3pResponseListener_() {
     if (getMode().runtime == 'inabox') {
+      // TODO(jonkeller): Remove this once #11436 is resolved.
       return;
     }
     this.ampAdResourceId_ = this.ampAdResourceId_ ||
