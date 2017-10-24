@@ -572,6 +572,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  postquare: {},
+
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   },
