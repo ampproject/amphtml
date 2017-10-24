@@ -316,7 +316,7 @@ describe('amp-a4a', () => {
       });
     });
 
-    it('populate postAdResponseExperimentFeatures', () => {
+    it('populates postAdResponseExperimentFeatures', () => {
       adResponse.headers[EXPERIMENT_FEATURE_HEADER_NAME] =
           `foo=bar,bad,${CSP_ENABLED_EXP_NAME}=true`;
       a4a.buildCallback();

@@ -77,7 +77,10 @@ export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
 /** @type {string} @visibleForTesting */
 export const EXPERIMENT_FEATURE_HEADER_NAME = 'amp-ff-exps';
 
-/** @type {string} @visibleForTesting */
+/**
+ * Controls if Content Security Policy is enabled for FIE render.
+ * @type {string} @visibleForTesting
+ */
 export const CSP_ENABLED_EXP_NAME = 'csp_enabled';
 
 /** @type {string} */
@@ -624,11 +627,11 @@ export class AmpA4A extends AMP.BaseElement {
             fetchResponse.headers.get(EXPERIMENT_FEATURE_HEADER_NAME).split(',')
               .forEach(pair => {
                 const parts = pair.split('=');
-                if (parts.length == 2 && parts[0]) {
-                  this.postAdResponseExperimentFeatures[parts[0]] = parts[1];
-                } else {
+                if (parts.length != 2 || !parts[0]) {
                   dev().warn(TAG, `invalid experiment feature ${pair}`);
+                  return;
                 }
+                this.postAdResponseExperimentFeatures[parts[0]] = parts[1];
               });
             this.cspEnabled_ =
               this.postAdResponseExperimentFeatures[CSP_ENABLED_EXP_NAME] ==

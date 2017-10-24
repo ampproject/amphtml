@@ -155,6 +155,11 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     iframe.src = 'about:blank';
     container.appendChild(iframe);
     const childDoc = iframe.contentWindow.document;
+    if (spec.cspEnabled) {
+      childDoc.addEventListener('securitypolicyviolation', violationEvent => {
+        dev().warn('FIE', 'security policy violation', violationEvent);
+      });
+    }
     childDoc.open();
     childDoc.write(html);
     // With document.write, `iframe.onload` arrives almost immediately, thus
@@ -271,7 +276,7 @@ function mergeHtml(spec) {
   // Load CSP
   if (spec.cspEnabled) {
     result.push('<meta http-equiv=Content-Security-Policy ' +
-      'content="script-src "none";object-src "none";child-src "none">');
+      'content="script-src \'none\';object-src \'none\';child-src \'none\'">');
   }
 
   // Postambule.

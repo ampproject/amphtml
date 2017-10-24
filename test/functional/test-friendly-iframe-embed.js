@@ -438,13 +438,24 @@ describe('friendly-iframe-embed', () => {
     it('should insert CSP', () => {
       spec.html = '<html><head></head><body></body></html>';
       spec.cspEnabled = true;
-      const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
+      expect(mergeHtmlForTesting(spec)).to.equal(
           '<html><head><base href="https://acme.org/embed1">' +
           '<meta http-equiv=Content-Security-Policy ' +
           'content="script-src \'none\';object-src \'none\';' +
           'child-src \'none\'">' +
           '</head><body></body></html>');
+      spec.html = '<html>foo';
+      expect(mergeHtmlForTesting(spec)).to.equal(
+          '<html><base href="https://acme.org/embed1">' +
+          '<meta http-equiv=Content-Security-Policy ' +
+          'content="script-src \'none\';object-src \'none\';' +
+          'child-src \'none\'">foo');
+      spec.html = '<body>foo';
+      expect(mergeHtmlForTesting(spec)).to.equal(
+          '<base href="https://acme.org/embed1">' +
+          '<meta http-equiv=Content-Security-Policy ' +
+          'content="script-src \'none\';object-src \'none\';' +
+          'child-src \'none\'"><body>foo');
     });
   });
 
