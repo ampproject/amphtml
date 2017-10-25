@@ -21,6 +21,7 @@ import {Services} from '../../../src/services';
 import {ProgressBar} from './progress-bar';
 import {getMode} from '../../../src/mode';
 import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui'; // eslint-disable-line max-len
+import {KeyCodes} from '../../../src/utils/key-codes';
 
 
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
@@ -215,11 +216,18 @@ export class SystemLayer {
       if (target.matches(`.${FULLSCREEN_CLASS}, .${FULLSCREEN_CLASS} *`)) {
         this.onExitFullScreenClick_(e);
       } else if (target.matches(`.${CLOSE_CLASS}, .${CLOSE_CLASS} *`)) {
-        this.onCloseBookendClick_(e);
+        this.onCloseBookend_(e);
       } else if (target.matches(`.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
         this.onMuteAudioClick_(e);
       } else if (target.matches(`.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
         this.onUnmuteAudioClick_(e);
+      }
+    });
+
+    this.win_.addEventListener('keyup', e => {
+      if (!this.closeBookendBtn_.hasAttribute('hidden')
+          && e.keyCode == KeyCodes.ESCAPE) {
+        this.onCloseBookend_(e);
       }
     });
   }
@@ -272,7 +280,7 @@ export class SystemLayer {
    * @param {!Event} e
    * @private
    */
-  onCloseBookendClick_(e) {
+  onCloseBookend_(e) {
     this.dispatch_(EventType.CLOSE_BOOKEND, e);
   }
 
