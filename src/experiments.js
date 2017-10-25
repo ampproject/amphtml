@@ -432,15 +432,24 @@ function selectRandomItem(arr) {
  *     selection state.
  * @param {!Object<string, !ExperimentInfo>} experiments  Set of experiments to
  *     configure for this page load.
+ * @return {!Array<string>} A list of the selected experiments' IDs. This list
+ *     contains experiment IDs that might have been previously set for the given
+ *     Experiment.
  * @visibleForTesting
  */
 export function randomlySelectUnsetExperiments(win, experiments) {
   win.experimentBranches = win.experimentBranches || {};
+  const selectedExperiments = [];
   for (const experimentName in experiments) {
     // Skip experimentName if it is not a key of experiments object or if it
     // has already been populated by some other property.
-    if (!experiments.hasOwnProperty(experimentName) ||
-        win.experimentBranches.hasOwnProperty(experimentName)) {
+    if (!experiments.hasOwnProperty(experimentName)) {
+      continue;
+    }
+    if (win.experimentBranches.hasOwnProperty(experimentName)) {
+      if (win.experimentBranches[experimentName]) {
+        selectedExperiments.push(win.experimentBranches[experimentName]);
+      }
       continue;
     }
 
@@ -450,15 +459,19 @@ export function randomlySelectUnsetExperiments(win, experiments) {
       continue;
     }
 
-    // If we're in the experiment, but we haven't already forced a specific
-    // experiment branch (e.g., via a test setup), then randomize the branch
-    // choice.
-    if (!win.experimentBranches[experimentName] &&
-        isExperimentOn(win, experimentName)) {
+    if (win.experimentBranches[experimentName]) {
+      selectedExperiments.push(win.experimentBranches[experimentName]);
+    } else if (isExperimentOn(win, experimentName)) {
+      // If we're in the experiment, but we haven't already forced a specific
+      // experiment branch (e.g., via a test setup), then randomize the branch
+      // choice.
       const branches = experiments[experimentName].branches;
-      win.experimentBranches[experimentName] = selectRandomItem(branches);
+      const selectedExperiment = selectRandomItem(branches);
+      win.experimentBranches[experimentName] = selectedExperiment;
+      selectedExperiments.push(selectedExperiment);
     }
   }
+  return selectedExperiments;
 }
 
 /**

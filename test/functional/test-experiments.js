@@ -638,7 +638,7 @@ describe('experiment branch tests', () => {
     it('handles empty experiments list', () => {
       // Opt out of experiment.
       toggleExperiment(sandbox.win, 'testExperimentId', false, true);
-      randomlySelectUnsetExperiments(sandbox.win, {});
+      expect(randomlySelectUnsetExperiments(sandbox.win, {})).to.be.empty;
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
           'experiment is on').to.be.false;
       expect(sandbox.win.experimentBranches).to.be.empty;
@@ -647,7 +647,8 @@ describe('experiment branch tests', () => {
     it('handles experiment not diverted path', () => {
       // Opt out of experiment.
       toggleExperiment(sandbox.win, 'testExperimentId', false, true);
-      randomlySelectUnsetExperiments(sandbox.win, testExperimentSet);
+      expect(randomlySelectUnsetExperiments(sandbox.win, testExperimentSet))
+          .to.be.empty;
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
           'experiment is on').to.be.false;
       expect(getExperimentBranch(sandbox.win,
@@ -660,7 +661,8 @@ describe('experiment branch tests', () => {
       // force the control branch to be chosen by making the accurate PRNG
       // return a value < 0.5.
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.3);
-      randomlySelectUnsetExperiments(sandbox.win, testExperimentSet);
+      expect(randomlySelectUnsetExperiments(sandbox.win, testExperimentSet))
+          .to.deep.equal(['branch1_id']);
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
           'experiment is on').to.be.true;
       expect(getExperimentBranch(sandbox.win, 'testExperimentId')).to.equal(
@@ -673,7 +675,8 @@ describe('experiment branch tests', () => {
       // Force the experiment branch to be chosen by making the accurate PRNG
       // return a value > 0.5.
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.6);
-      randomlySelectUnsetExperiments(sandbox.win, testExperimentSet);
+      expect(randomlySelectUnsetExperiments(sandbox.win, testExperimentSet))
+          .to.deep.equal(['branch2_id']);
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
           'experiment is on').to.be.true;
       expect(getExperimentBranch(sandbox.win, 'testExperimentId')).to.equal(
@@ -690,7 +693,8 @@ describe('experiment branch tests', () => {
         },
       };
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
-      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(randomlySelectUnsetExperiments(sandbox.win, experimentInfo))
+          .to.deep.equal(['0_0']);
       expect(isExperimentOn(sandbox.win, 'expt_0')).to.be.true;
       expect(getExperimentBranch(sandbox.win, 'expt_0')).to.equal('0_0');
     });
@@ -705,7 +709,8 @@ describe('experiment branch tests', () => {
         },
       };
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
-      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(randomlySelectUnsetExperiments(sandbox.win, experimentInfo))
+          .to.be.empty;
       expect(isExperimentOn(sandbox.win, 'expt_0')).to.be.true;
       expect(getExperimentBranch(sandbox.win, 'expt_0')).to.be.null;
     });
@@ -719,7 +724,8 @@ describe('experiment branch tests', () => {
         },
       };
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
-      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(randomlySelectUnsetExperiments(sandbox.win, experimentInfo))
+          .to.be.empty;
       expect(isExperimentOn(sandbox.win, 'expt_0')).to.be.true;
       expect(getExperimentBranch(sandbox.win, 'expt_0')).to.be.null;
     });
@@ -736,13 +742,15 @@ describe('experiment branch tests', () => {
       };
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
 
-      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(randomlySelectUnsetExperiments(sandbox.win, experimentInfo))
+          .to.be.empty;
       expect(isExperimentOn(sandbox.win, 'expt_0')).to.be.true;
       expect(getExperimentBranch(sandbox.win, 'expt_0')).to.be.null;
 
       sandbox.win.trafficEligible = true;
 
-      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(randomlySelectUnsetExperiments(sandbox.win, experimentInfo))
+          .to.be.empty;
       expect(isExperimentOn(sandbox.win, 'expt_0')).to.be.true;
       expect(getExperimentBranch(sandbox.win, 'expt_0')).to.be.null;
     });
@@ -769,7 +777,8 @@ describe('experiment branch tests', () => {
         // expt_3 omitted.
       };
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.6);
-      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(randomlySelectUnsetExperiments(sandbox.win, experimentInfo))
+          .to.deep.equal(['0_e', '2_e']);
       expect(isExperimentOn(sandbox.win, 'expt_0'),
           'expt_0 is on').to.be.true;
       expect(isExperimentOn(sandbox.win, 'expt_1'),
@@ -796,7 +805,8 @@ describe('experiment branch tests', () => {
         },
       };
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.7);
-      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(randomlySelectUnsetExperiments(sandbox.win, experimentInfo))
+          .to.deep.equal(['0_3']);
       expect(isExperimentOn(sandbox.win, 'expt_0'),
           'expt_0 is on').to.be.true;
       expect(getExperimentBranch(sandbox.win, 'expt_0')).to.equal(
@@ -825,7 +835,8 @@ describe('experiment branch tests', () => {
       };
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.7);
       RANDOM_NUMBER_GENERATORS.accuratePrng.onSecondCall().returns(0.3);
-      randomlySelectUnsetExperiments(sandbox.win, experimentInfo);
+      expect(randomlySelectUnsetExperiments(sandbox.win, experimentInfo))
+          .to.deep.equal(['0_3', '2_1']);
       expect(isExperimentOn(sandbox.win, 'expt_0'),
           'expt_0 is on').to.be.true;
       expect(isExperimentOn(sandbox.win, 'expt_1'),
@@ -857,8 +868,10 @@ describe('experiment branch tests', () => {
         },
       };
       toggleExperiment(sandbox.win, 'fooExpt', false, true);
-      randomlySelectUnsetExperiments(sandbox.win, exptAInfo);
-      randomlySelectUnsetExperiments(sandbox.win, exptBInfo);
+      expect(randomlySelectUnsetExperiments(sandbox.win, exptAInfo))
+          .to.be.empty;
+      expect(randomlySelectUnsetExperiments(sandbox.win, exptBInfo))
+          .to.be.empty;
       // Even though we tried to set up a second time, using a config
       // parameter that should ensure that the experiment was activated, the
       // experiment framework should evaluate each experiment only once per

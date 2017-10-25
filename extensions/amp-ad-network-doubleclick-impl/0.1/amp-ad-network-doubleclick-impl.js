@@ -93,7 +93,7 @@ import {
   DATA_ATTR_NAME,
 } from '../../amp-a4a/0.1/refresh-manager';
 import {
-  addExperimentIdToElement,
+  addExperimentIdsToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
 import '../../amp-a4a/0.1/real-time-config-manager';
@@ -390,7 +390,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
     const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
     if (verifierEid) {
-      addExperimentIdToElement(verifierEid, this.element);
+      addExperimentIdsToElement(verifierEid, this.element);
     }
     if (this.win['dbclk_a4a_viz_change']) {
       // Only create one per page but ensure all slots get experiment
@@ -399,7 +399,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (expId) {
         // If experiment was already selected, add to element to ensure it is
         // included in request.
-        addExperimentIdToElement(expId, this.element);
+        addExperimentIdsToElement(expId, this.element);
       }
       return;
     }
@@ -412,12 +412,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       isTrafficEligible: () => true,
       branches: ['21061135', '21061136'],
     };
-    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-    const sfPreloadExpId = getExperimentBranch(this.win, sfPreloadExpName);
-    if (sfPreloadExpId) {
-      addExperimentIdToElement(sfPreloadExpId, this.element);
-      this.preloadSafeframe_ = sfPreloadExpId == '21061135';
-    }
+    const sfPreloadExpId =
+        randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    addExperimentIdsToElement(sfPreloadExpId, this.element);
+    this.preloadSafeframe_ =
+        sfPreloadExpId[0] && sfPreloadExpId[0] == '21061135';
 
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.onVisibilityChanged(() => {
@@ -436,20 +435,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         isTrafficEligible: () => true,
         branches: ['22302764','22302765'],
       };
-      randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-      const expId = getExperimentBranch(this.win, CORRELATOR_CLEAR_EXP_NAME);
-      if (expId) {
-        // Adding to experiment id will cause it to be included in subsequent ad
-        // requests.
-        addExperimentIdToElement(expId, this.element);
-        if (expId === CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT) {
-          // TODO(keithwrightbos) - do not clear if at least one slot on the page
-          // is an AMP creative that survived unlayoutCallback in order to
-          // ensure competitive exclusion/roadblocking.  Note this only applies
-          // to non-backfill inventory.
-          dev().info(TAG, 'resetting page correlator');
-          this.win.ampAdPageCorrelator = null;
-        }
+      const expId =
+          randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+      // Adding to experiment id will cause it to be included in subsequent ad
+      // requests.
+      addExperimentIdsToElement(expId, this.element);
+      if (expId[0] && expId[0] === CORRELATOR_CLEAR_EXP_BRANCHES.EXPERIMENT) {
+        // TODO(keithwrightbos) - do not clear if at least one slot on the page
+        // is an AMP creative that survived unlayoutCallback in order to
+        // ensure competitive exclusion/roadblocking.  Note this only applies
+        // to non-backfill inventory.
+        dev().info(TAG, 'resetting page correlator');
+        this.win.ampAdPageCorrelator = null;
       }
     });
   }

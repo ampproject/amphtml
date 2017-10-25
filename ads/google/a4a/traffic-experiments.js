@@ -113,7 +113,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
     // else serve Delayed Fetch.
     const selectedBranch = getExperimentBranch(win, experimentName);
     if (selectedBranch) {
-      addExperimentIdToElement(selectedBranch, element);
+      addExperimentIdsToElement(selectedBranch, element);
       const perf = Services.performanceForOrNull(win);
       if (perf) {
         perf.addEnabledExperiment(experimentName + '-' + selectedBranch);
@@ -307,17 +307,19 @@ export function validateExperimentIds(idList) {
 }
 
 /**
- * Adds a single experimentID to an element iff it's a valid experiment ID.
+ * Adds all valid experiment IDs from a list to the given element.
  *
- * @param {!string} experimentId  ID to add to the element.
+ * @param {string|!Array<string>} experimentIds  ID to add to the element.
  * @param element Element to add the experiment ID to.
  */
-export function addExperimentIdToElement(experimentId, element) {
+export function addExperimentIdsToElement(experimentIds, element) {
+  experimentIds = typeof experimentIds == 'string' ?
+      [experimentIds] : experimentIds;
   const currentEids = element.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (currentEids && validateExperimentIds(parseExperimentIds(currentEids))) {
     element.setAttribute(EXPERIMENT_ATTRIBUTE,
-        mergeExperimentIds([experimentId], currentEids));
+        mergeExperimentIds(experimentIds, currentEids));
   } else {
-    element.setAttribute(EXPERIMENT_ATTRIBUTE, experimentId);
+    element.setAttribute(EXPERIMENT_ATTRIBUTE, experimentIds.join());
   }
 }
