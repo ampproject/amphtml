@@ -655,17 +655,49 @@ describes.realWin('Events', {amp: 1}, env => {
       }}, fn2, function(config) { return customTracker; });
       expect(fn2).to.have.not.been.called;
       customTracker.trigger(new AnalyticsEvent(target, 'custom-event-start'));
-      return getElementSpy.returnValues[1].then(() => {
+
+      expect(getElementSpy.returnValues.length).to.equal(1);
+      return getElementSpy.returnValues[0].then(() => {
         expect(fn2).to.be.calledOnce;
         expect(fn2.args[0][0]).to.be.instanceOf(AnalyticsEvent);
         expect(fn2.args[0][0].target).to.equal(root.getRootElement());
         expect(fn2.args[0][0].type).to.equal('timer');
         customTracker.trigger(new AnalyticsEvent(target, 'custom-event-stop'));
 
-        clock.tick(5 * 1000); // 5 seconds
-        expect(fn1).to.have.callCount(1);
-        expect(fn2).to.have.callCount(1);
+        expect(getElementSpy.returnValues.length).to.equal(2);
+	getElementSpy.returnValues[1].then(() => {
+          clock.tick(5 * 1000); // 5 seconds
+          expect(fn1).to.have.callCount(1);
+          expect(fn2).to.have.callCount(1);
+	});
       });
+    });
+
+    it('timers started and stopped by the same event on the same target do not'
+        + ' have race condition problems', () => {
+      const fn1 = sandbox.stub();
+      const clickTracker = new ClickEventTracker(root);
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 1,
+	startSpec: {on: 'click', selector: '.target'},
+	stopSpec: {on: 'click', selector: '.target'}
+      }}, fn1, function(config) { return clickTracker; });
+      expect(fn1).to.have.not.been.called;
+
+      target.click(); // Start timer.
+      expect(fn1).to.be.calledOnce;
+      target.click(); // Stop timer.
+      target.click(); // Start timer.
+      target.click(); // Stop timer.
+      clock.tick(5);
+      target.click(); // Start timer.
+      target.click(); // Stop timer.
+      target.click(); // Start timer.
+      target.click(); // Stop timer.
+      target.click(); // Start timer.
+
+      clock.tick(3 * 1000); // 3 seconds
+      expect(fn1).to.have.callCount(8); // 5 timer starts + 3.005 seconds
     });
 
     it('only fires when the timer interval exceeds the minimum', () => {

@@ -437,7 +437,9 @@ export class TimerEventTracker extends EventTracker {
        CALL_IMMEDIATE: 4,
        UNLISTEN_START: 5,
        UNLISTEN_STOP: 6,
-       CAN_RESTART: 7
+       CAN_RESTART: 7,
+       START_BUILDER: 8,
+       STOP_BUILDER: 9
     };
   }
 
@@ -493,20 +495,57 @@ export class TimerEventTracker extends EventTracker {
       this.trackers_[timerId][TIMER_PARAMS_.CAN_RESTART] = true;
       const startTracker = trackerProvider(timerStart);
       user().assert(startTracker, 'Cannot track timer start');
-      const unlistenStart = startTracker.add(context, timerStart['on'],
-          timerStart, this.startTimer_.bind(this, timerId, eventType, listener),
+      const startTrackerBuilder = startTracker.add.bind(startTracker, context,
+          timerStart['on'], timerStart,
+          this.handleTimerToggle_.bind(this, timerId, eventType, listener),
           trackerProvider);
+      this.trackers_[timerId][TIMER_PARAMS_.START_BUILDER] =
+          startTrackerBuilder;
+      const unlistenStart = startTrackerBuilder();
       this.trackers_[timerId][TIMER_PARAMS_.UNLISTEN_START] = unlistenStart;
       const stopTracker = timerStop ? trackerProvider(timerStop) : null;
-      if (stopTracker) {
-        const unlistenStop = stopTracker.add(context, timerStop['on'],
-            timerStop, this.stopTimer_.bind(this, timerId), trackerProvider);
-        this.trackers_[timerId][TIMER_PARAMS_.UNLISTEN_STOP] = unlistenStop;
+      if (!!stopTracker) {
+        const stopTrackerBuilder = stopTracker.add.bind(stopTracker, context,
+            timerStop['on'], timerStop,
+            this.handleTimerToggle_.bind(this, timerId, eventType, listener),
+            trackerProvider);
+	this.trackers_[timerId][TIMER_PARAMS_.STOP_BUILDER] =
+            stopTrackerBuilder;
       }
+
     }
     return () => {
       this.removeTracker_(timerId);
     };
+  }
+
+  /**
+   * Toggles which listeners are active depending on timer state, so no race
+   * conditions can occur in the case where the timer starts and stops on the
+   * same event type from the same target.
+   * @param {string} timerId
+   * @param {string} eventType
+   * @param {function(!AnalyticsEvent)} listener
+   * @private
+   */
+  handleTimerToggle_(timerId, eventType, listener) {
+    const timerSpec = this.trackers_[timerId];
+    if (!!timerSpec[TIMER_PARAMS_.INTERVAL_ID]) {
+      // Stop timer and listen for start.
+      this.stopTimer_(timerId);
+      if (!!timerSpec[TIMER_PARAMS_.START_BUILDER]) {
+        const unlistenStart = timerSpec[TIMER_PARAMS_.START_BUILDER]();
+        this.trackers_[timerId][TIMER_PARAMS_.UNLISTEN_START] = unlistenStart;
+      }
+    } else {
+      // Start timer and listen for stop.
+      this.startTimer_(timerId, eventType, listener);
+      if (!!timerSpec[TIMER_PARAMS_.STOP_BUILDER]) {
+        const unlistenStop =
+            timerSpec[TIMER_PARAMS_.STOP_BUILDER]();
+        this.trackers_[timerId][TIMER_PARAMS_.UNLISTEN_STOP] = unlistenStop;
+      }
+    }
   }
 
   /**
@@ -518,7 +557,7 @@ export class TimerEventTracker extends EventTracker {
    */
   startTimer_(timerId, eventType, listener) {
     const timerSpec = this.trackers_[timerId];
-    if (timerSpec[TIMER_PARAMS_.INTERVAL_ID]) {
+    if (!!timerSpec[TIMER_PARAMS_.INTERVAL_ID]) {
       return; // Timer already running.
     }
     const win = this.root.ampdoc.win;
@@ -526,13 +565,15 @@ export class TimerEventTracker extends EventTracker {
       listener(this.createEvent_(eventType));
     }, timerSpec[TIMER_PARAMS_.INTERVAL_LENGTH] * 1000);
     this.trackers_[timerId][TIMER_PARAMS_.INTERVAL_ID] = intervalId;
-    win.setTimeout(() => {
-      if (this.isRestartableTimer_(timerId)) {
-        this.stopTimer_(timerId);
-      } else {
+    if (!!timerSpec[TIMER_PARAMS_.UNLISTEN_START]) {
+      timerSpec[TIMER_PARAMS_.UNLISTEN_START]();
+      delete this.trackers_[timerId][TIMER_PARAMS_.UNLISTEN_START];
+    }
+    if (!this.isRestartableTimer_(timerId)) {
+      win.setTimeout(() => {
         this.removeTracker_(timerId);
-      }
-    }, timerSpec[TIMER_PARAMS_.MAX_TIMER_LENGTH] * 1000);
+      }, timerSpec[TIMER_PARAMS_.MAX_TIMER_LENGTH] * 1000);
+    }
     if (timerSpec[TIMER_PARAMS_.CALL_IMMEDIATE]) {
       listener(this.createEvent_(eventType));
     }
@@ -549,6 +590,10 @@ export class TimerEventTracker extends EventTracker {
     const win = this.root.ampdoc.win;
     win.clearInterval(this.trackers_[timerId][TIMER_PARAMS_.INTERVAL_ID]);
     delete this.trackers_[timerId][TIMER_PARAMS_.INTERVAL_ID];
+    if (!!this.trackers_[timerId][TIMER_PARAMS_.UNLISTEN_STOP]) {
+      this.trackers_[timerId][TIMER_PARAMS.UNLISTEN_STOP]();
+      delete this.trackers_[timerId][TIMER_PARAMS_.UNLISTEN_STOP];
+    }
   }
 
   /**
@@ -574,12 +619,12 @@ export class TimerEventTracker extends EventTracker {
    * @private
    */
   removeTracker_(timerId) {
-    if (this.trackers_[timerId]) {
+    if (!!this.trackers_[timerId]) {
       this.stopTimer_(timerId);
-      if (this.trackers_[timerId][TIMER_PARAMS_.UNLISTEN_START]) {
+      if (!!this.trackers_[timerId][TIMER_PARAMS_.UNLISTEN_START]) {
         this.trackers_[timerId][TIMER_PARAMS_.UNLISTEN_START]();
       }
-      if (this.trackers_[timerId][TIMER_PARAMS_.UNLISTEN_STOP]) {
+      if (!!this.trackers_[timerId][TIMER_PARAMS_.UNLISTEN_STOP]) {
         this.trackers_[timerId][TIMER_PARAMS_.UNLISTEN_STOP]();
       }
       delete this.trackers_[timerId];
