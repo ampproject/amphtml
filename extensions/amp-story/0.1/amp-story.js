@@ -79,6 +79,16 @@ const FULLSCREEN_THRESHOLD = 1024;
 /** @private @const {number} */
 const DESKTOP_THRESHOLD = 768;
 
+/**
+ * @private @const {string}
+ */
+const AUDIO_MUTED_ATTRIBUTE = 'muted';
+
+/**
+ * @private @const {string}
+ */
+const AUDIO_UNMUTED_ATTRIBUTE = 'unmuted';
+
 /** @type {string} */
 const TAG = 'amp-story';
 
@@ -190,6 +200,9 @@ export class AmpStory extends AMP.BaseElement {
 
     this.navigationState_.observe(stateChangeEvent =>
         this.variableService_.onStateChange(stateChangeEvent));
+
+    // Add muted attribute to `amp-story` in beginning.
+    this.toggleMutedAttribute_(true);
 
     upgradeBackgroundAudio(this.element);
 
@@ -1003,7 +1016,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   mute_() {
     this.audioManager_.muteAll();
-    this.element.removeAttribute('unmuted');
+    this.toggleMutedAttribute_(true);
   }
 
   /**
@@ -1012,7 +1025,22 @@ export class AmpStory extends AMP.BaseElement {
    */
   unmute_() {
     this.audioManager_.unmuteAll();
-    this.element.setAttribute('unmuted', '');
+    this.toggleMutedAttribute_(false);
+  }
+
+  /**
+   * Toggles mute or unmute attribute on element.
+   * @param {boolean} isMuted
+   * @private
+   */
+  toggleMutedAttribute_(isMuted) {
+    if (isMuted) {
+      this.element.setAttribute(AUDIO_MUTED_ATTRIBUTE, '');
+      this.element.removeAttribute(AUDIO_UNMUTED_ATTRIBUTE);
+    } else {
+      this.element.setAttribute(AUDIO_UNMUTED_ATTRIBUTE, '');
+      this.element.removeAttribute(AUDIO_MUTED_ATTRIBUTE);
+    }
   }
 
   /**
