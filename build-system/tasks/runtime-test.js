@@ -321,7 +321,8 @@ function runTests() {
   util.log(yellow(
       'Started test responses server on localhost:31862'));
 
-  const deferred = Promise.defer();
+  let resolver;
+  const deferred = new Promise(resolverIn => {resolver = resolverIn;});
   new Karma(c, function(exitCode) {
     server.emit('kill');
     if (exitCode) {
@@ -331,7 +332,7 @@ function runTests() {
       process.exit(exitCode);
     } else {
       // TODO(rsimha-amp): Make sure the gulp task exits cleanly after this.
-      deferred.resolve();
+      resolver();
     }
   }).on('run_start', function() {
     if (argv.saucelabs) {
@@ -353,7 +354,7 @@ function runTests() {
       console./* OK*/log(message);
     }
   }).start();
-  return deferred.promise;
+  return deferred;
 }
 
 /**
