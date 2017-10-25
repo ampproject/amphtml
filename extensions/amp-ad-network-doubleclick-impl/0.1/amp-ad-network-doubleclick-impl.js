@@ -27,6 +27,7 @@ import {
   DEFAULT_SAFEFRAME_VERSION,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
+import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
 import {
   experimentFeatureEnabled,
@@ -669,6 +670,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @private
    */
   rewriteRtcKeys_(response, callout) {
+    // Only perform this substitution for vendor-defined URLs.
+    if (!RTC_VENDORS[callout]) {
+      return response;
+    }
     const newResponse = {};
     let newKey;
     Object.keys(response).forEach(key => {
