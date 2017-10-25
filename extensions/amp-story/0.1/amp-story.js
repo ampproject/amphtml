@@ -1003,7 +1003,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   mute_() {
     this.audioManager_.muteAll();
-    this.element.classList.remove('unmuted');
+    this.element.removeAttribute('unmuted');
   }
 
   /**
@@ -1012,7 +1012,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   unmute_() {
     this.audioManager_.unmuteAll();
-    this.element.classList.add('unmuted');
+    this.element.setAttribute('unmuted', '');
   }
 
   /**
