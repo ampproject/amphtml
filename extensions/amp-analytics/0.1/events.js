@@ -602,7 +602,7 @@ export class TimerEventTracker extends EventTracker {
    * @private
    */
   isRestartableTimer_(timerId) {
-    return !!this.trackers_[timerId][TIMER_PARAMS_.CAN_RESTART];
+    return this.trackers_[timerId][TIMER_PARAMS_.CAN_RESTART];
   }
 
   /**

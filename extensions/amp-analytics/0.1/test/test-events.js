@@ -666,6 +666,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
         expect(getElementSpy.returnValues.length).to.equal(2);
 	getElementSpy.returnValues[1].then(() => {
+	  // Timers have genuinely stopped.
           clock.tick(5 * 1000); // 5 seconds
           expect(fn1).to.have.callCount(1);
           expect(fn2).to.have.callCount(1);
