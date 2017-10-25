@@ -649,7 +649,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           if (rtcResponse.response[key]) {
             this.jsonTargeting_[key] =
                 !!this.jsonTargeting_[key] ?
-                deepMerge(this.jsonTargeting_[key], rtcResponse.response[key]) :
+                deepMerge(this.jsonTargeting_[key],
+                    this.rewriteRtcKeys_(rtcResponse.response[key],
+                        rtcResponse.callout)) :
                 rtcResponse.response[key];
           }
         });
@@ -658,20 +660,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
   }
 
-
-function rewriteRtcKeys(response, vendor) {
-  if (!response) {
-    return null;
+  /**
+   * Appends the callout value to the keys of response to prevent a collision
+   * case caused by multiple vendors returning the same keys.
+   * @param {!Object<string, string>} response
+   * @param {!string} callout
+   * @return {!Object<string, string>}
+   * @private
+   */
+  rewriteRtcKeys_(response, callout) {
+    const newResponse = {};
+    let newKey;
+    Object.keys(response).forEach(key => {
+      newResponse[key + '_' + callout] = response[key];
+    });
+    return newResponse;
   }
-
-  const newResponse = {};
-  let newKey;
-  Object.keys(response).forEach(key => {
-    newKey = key + '_' + vendor;
-    newResponse[newKey] = response[key];
-  });
-  return newResponse;
-}
 
   /** @override */
   onNetworkFailure(error, adUrl) {
