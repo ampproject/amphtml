@@ -24,6 +24,8 @@ import {
   SAFEFRAME_VERSION_HEADER,
   protectFunctionWrapper,
   assignAdUrlToError,
+  EXPERIMENT_FEATURE_HEADER_NAME,
+  CSP_ENABLED_EXP_NAME,
 } from '../amp-a4a';
 import {
   AMP_SIGNATURE_HEADER,
@@ -311,6 +313,22 @@ describe('amp-a4a', () => {
         expect(child).to.be.ok;
         expect(child).to.be.visible;
         expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
+      });
+    });
+
+    it('populates postAdResponseExperimentFeatures', () => {
+      adResponse.headers[EXPERIMENT_FEATURE_HEADER_NAME] =
+          `foo=bar,bad,${CSP_ENABLED_EXP_NAME}=true`;
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        const child = a4aElement.querySelector('iframe[srcdoc]');
+        expect(child).to.be.ok;
+        expect(child.srcdoc.indexOf('meta http-equiv=Content-Security-Policy'))
+            .to.not.equal(-1);
+        expect(a4a.postAdResponseExperimentFeatures).to.jsonEqual({
+          foo: 'bar', [CSP_ENABLED_EXP_NAME]: 'true',
+        });
       });
     });
 
