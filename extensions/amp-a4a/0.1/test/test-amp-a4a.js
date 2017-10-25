@@ -27,21 +27,12 @@ import {
   EXPERIMENT_FEATURE_HEADER_NAME,
   CSP_ENABLED_EXP_NAME,
 } from '../amp-a4a';
-import {
-  AMP_SIGNATURE_HEADER,
-  LEGACY_VERIFIER_EID,
-  NEW_VERIFIER_EID,
-  VERIFIER_EXP_NAME,
-  signatureVerifierFor,
-} from '../legacy-signature-verifier';
-import {VerificationStatus} from '../signature-verifier';
+import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {utf8EncodeSync} from '../../../../src/utils/bytes';
 import {Signals} from '../../../../src/utils/signals';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {cancellation} from '../../../../src/error';
-import {forceExperimentBranch} from '../../../../src/experiments';
 import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
@@ -93,7 +84,7 @@ describe('amp-a4a', () => {
       },
       body: validCSSAmp.reserialized,
     };
-    adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
+    adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signatureHeader;
   });
 
   afterEach(() => {
@@ -332,26 +323,8 @@ describe('amp-a4a', () => {
       });
     });
 
-    it('for A4A friendly iframe rendering case with legacy verifier', () => {
+    it('for A4A friendly iframe rendering case', () => {
       expect(a4a.friendlyIframeEmbed_).to.not.exist;
-      forceExperimentBranch(
-          fixture.win, VERIFIER_EXP_NAME, LEGACY_VERIFIER_EID);
-      a4a.buildCallback();
-      a4a.onLayoutMeasure();
-      return a4a.layoutCallback().then(() => {
-        const child = a4aElement.querySelector('iframe[srcdoc]');
-        expect(child).to.be.ok;
-        expect(child).to.be.visible;
-        const a4aBody = child.contentDocument.body;
-        expect(a4aBody).to.be.ok;
-        expect(a4aBody).to.be.visible;
-        expect(a4a.friendlyIframeEmbed_).to.exist;
-      });
-    });
-
-    it('for A4A friendly iframe rendering case with new verifier', () => {
-      expect(a4a.friendlyIframeEmbed_).to.not.exist;
-      forceExperimentBranch(fixture.win, VERIFIER_EXP_NAME, NEW_VERIFIER_EID);
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -1755,103 +1728,6 @@ describe('amp-a4a', () => {
           expect(suffix).to.be.undefined;
           throw new Error('test fail within error fn');
         })('world')).to.be.undefined;
-      });
-    });
-
-    describe('verifySignature_', () => {
-      let stubVerifySignature;
-      let a4a;
-      beforeEach(() => {
-        return createIframePromise().then(fixture => {
-          forceExperimentBranch(
-              fixture.win, VERIFIER_EXP_NAME, LEGACY_VERIFIER_EID);
-          setupForAdTesting(fixture);
-          const a4aElement = createA4aElement(fixture.doc);
-          a4a = new MockA4AImpl(a4aElement);
-          a4a.buildCallback();
-          stubVerifySignature =
-              sandbox.stub(signatureVerifierFor(a4a.win), 'verifySignature_');
-        });
-      });
-
-      it('properly handles all failures', () => {
-        // Multiple providers with multiple keys each that all fail validation
-        signatureVerifierFor(a4a.win).keys_ = (() => {
-          const providers = [];
-          for (let i = 0; i < 10; i++) {
-            const signingServiceName = `test-service${i}`;
-            providers[i] = Promise.resolve({signingServiceName, keys: [
-              Promise.resolve({signingServiceName}),
-              Promise.resolve({signingServiceName}),
-            ]});
-          }
-          return providers;
-        })();
-        stubVerifySignature.returns(Promise.resolve(false));
-        const headers = new Headers();
-        headers.set(AMP_SIGNATURE_HEADER, 'some_sig');
-        return signatureVerifierFor(a4a.win).verify(
-            utf8EncodeSync('some_creative'), headers, () => {})
-            .then(status => {
-              expect(status).to.equal(
-                  VerificationStatus.ERROR_SIGNATURE_MISMATCH);
-              expect(stubVerifySignature).to.be.callCount(20);
-            });
-      });
-
-      it('properly handles multiple keys for one provider', () => {
-        // Single provider with first key fails but second key passes validation
-        const signingServiceName = 'test-service';
-        signatureVerifierFor(a4a.win).keys_ = [
-          Promise.resolve({signingServiceName, keys: [
-            Promise.resolve({signingServiceName: '1'}),
-            Promise.resolve({signingServiceName: '2'}),
-          ]}),
-        ];
-        const creative = 'some_creative';
-        const headers = new Headers();
-        headers.set(AMP_SIGNATURE_HEADER, 'some_sig');
-        stubVerifySignature.onCall(0).returns(Promise.resolve(false));
-        stubVerifySignature.onCall(1).returns(Promise.resolve(true));
-        return signatureVerifierFor(a4a.win).verify(
-            utf8EncodeSync(creative), headers, () => {})
-            .then(status => {
-              expect(stubVerifySignature).to.be.calledTwice;
-              expect(status).to.equal(VerificationStatus.OK);
-            });
-      });
-
-      it('properly stops verification at first valid key', () => {
-        // Single provider where first key fails, second passes, and third
-        // never calls verifySignature.
-        const signingServiceName = 'test-service';
-        let keyInfoResolver;
-        signatureVerifierFor(a4a.win).keys_ = [
-          Promise.resolve({signingServiceName, keys: [
-            Promise.resolve({}),
-            Promise.resolve({}),
-            new Promise(resolver => {
-              keyInfoResolver = resolver;
-            }),
-          ]}),
-        ];
-        const creative = 'some_creative';
-        const headers = new Headers();
-        headers.set(AMP_SIGNATURE_HEADER, 'some_signature');
-        stubVerifySignature.onCall(0).returns(Promise.resolve(false));
-        stubVerifySignature.onCall(1).returns(Promise.resolve(true));
-
-        // From testing have found that need to yield prior to calling last
-        // key info resolver to ensure previous keys have had a chance to
-        // execute.
-        setTimeout(() => {keyInfoResolver({}); }, 0);
-
-        return signatureVerifierFor(a4a.win).verify(
-            utf8EncodeSync(creative), headers, () => {})
-            .then(status => {
-              expect(stubVerifySignature).to.be.calledTwice;
-              expect(status).to.equal(VerificationStatus.OK);
-            });
       });
     });
   });

@@ -19,6 +19,9 @@ import {Services} from '../../../src/services';
 import {isArray} from '../../../src/types';
 import {base64DecodeToBytes} from '../../../src/utils/base64';
 
+/** @visibleForTesting */
+export const AMP_SIGNATURE_HEADER = 'AMP-Fast-Fetch-Signature';
+
 /**
  * The result of an attempt to verify a Fast Fetch signature. The different
  * error statuses are used for reporting errors to the ad network.
@@ -57,43 +60,6 @@ export const VerificationStatus = {
   CRYPTO_UNAVAILABLE: 4,
 
 };
-
-/**
- * A window-level object that encapsulates the logic for obtaining public keys
- * from Fast Fetch signing services and cryptographically verifying signatures
- * of AMP creatives.
- *
- * Unlike an AMP service, a signature verifier is **stateful**. It maintains a
- * cache of all public keys that it has previously downloaded and imported.
- *
- * This interface is to facilitate the transition between the legacy Fast Fetch
- * signature scheme and the new one specified in #7618.
- *
- * @interface
- */
-export class ISignatureVerifier {
-  /**
-   * Fetches and imports the public keyset for the named signing service.
-   *
-   * @param {string} unusedSigningServiceName
-   */
-  loadKeyset(unusedSigningServiceName) {}
-
-  /**
-   * Extracts a cryptographic signature from `headers` and attempts to verify
-   * that it's the correct cryptographic signature for `creative`.
-   *
-   * As a precondition, `loadKeyset` must have already been called on the
-   * signing service that was used.
-   *
-   * @param {!ArrayBuffer} unusedCreative
-   * @param {!Headers} unusedHeaders
-   * @param {function(string, !Object)} unusedLifecycleCallback called for each
-   *     AMP lifecycle event triggered during verification
-   * @return {!Promise<!VerificationStatus>}
-   */
-  verify(unusedCreative, unusedHeaders, unusedLifecycleCallback) {}
-}
 
 /**
  * A window-level object that encapsulates the logic for obtaining public keys
@@ -204,13 +170,12 @@ export class SignatureVerifier {
    * @return {!Promise<!VerificationStatus>}
    */
   verify(creative, headers, lifecycleCallback) {
-    const signatureHeader = 'AMP-Fast-Fetch-Signature';
     const signatureFormat =
         /^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):([A-Za-z0-9+/]{341}[AQgw]==)$/;
-    if (!headers.has(signatureHeader)) {
+    if (!headers.has(AMP_SIGNATURE_HEADER)) {
       return Promise.resolve(VerificationStatus.UNVERIFIED);
     }
-    const headerValue = headers.get(signatureHeader);
+    const headerValue = headers.get(AMP_SIGNATURE_HEADER);
     const match = signatureFormat.exec(headerValue);
     if (!match) {
       // TODO(@taymonbeal, #9274): replace this with real error reporting
