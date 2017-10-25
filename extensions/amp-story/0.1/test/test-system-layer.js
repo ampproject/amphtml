@@ -98,7 +98,7 @@ describes.fakeWin('amp-story system layer', {}, env => {
 
   it('should dispatch CLOSE_BOOKEND when button is clicked', () => {
     expectEventTransform(
-        e => systemLayer.onCloseBookendClick_(e), EventType.CLOSE_BOOKEND);
+        e => systemLayer.onCloseBookend_(e), EventType.CLOSE_BOOKEND);
   });
 
   it('should hide exit fullscreen button when not in fullscreen', () => {
