@@ -41,8 +41,14 @@ export class Crypto {
       }
     }
 
-    /** @private @const {?webCrypto.SubtleCrypto} */
-    this.subtle_ = subtle;
+    /** @const {{name: string}} */
+    this.pkcsAlgo = {
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: {name: 'SHA-256'},
+    };
+
+    /** @const {?webCrypto.SubtleCrypto} */
+    this.subtle = subtle;
 
     /** @private @const {boolean} */
     this.isLegacyWebkit_ = isLegacyWebkit;
@@ -63,14 +69,14 @@ export class Crypto {
       input = stringToBytes(input);
     }
 
-    if (!this.subtle_ || this.polyfillPromise_) {
+    if (!this.subtle || this.polyfillPromise_) {
       // means native Crypto API is not available or failed before.
       return (this.polyfillPromise_ || this.loadPolyfill_())
           .then(polyfill => polyfill.sha384(input));
     }
 
     try {
-      return this.subtle_.digest({name: 'SHA-384'}, input)
+      return this.subtle.digest({name: 'SHA-384'}, input)
           /** @param {?} buffer */
           .then(buffer => new Uint8Array(buffer),
           e => {
@@ -143,7 +149,7 @@ export class Crypto {
    * @return {boolean} whether Web Cryptography is available
    */
   isPkcsAvailable() {
-    return Boolean(this.subtle_) && this.win_['isSecureContext'] !== false;
+    return Boolean(this.subtle) && this.win_['isSecureContext'] !== false;
   }
 
   /**
@@ -157,16 +163,13 @@ export class Crypto {
    */
   importPkcsKey(jwk) {
     dev().assert(this.isPkcsAvailable());
+    // Safari 10 and earlier want this as an ArrayBufferView.
+    const keyData = this.isLegacyWebkit_
+        ? utf8EncodeSync(JSON.stringify(/** @type {!JsonObject} */ (jwk)))
+        : /** @type {!webCrypto.JsonWebKey} */ (jwk);
     return /** @type {!Promise<!webCrypto.CryptoKey>} */ (
-        this.subtle_.importKey(
-            'jwk',
-            this.isLegacyWebkit_ ?
-                // Safari 10 and earlier want this as an ArrayBufferView.
-                utf8EncodeSync(JSON.stringify(
-                    /** @type {!JsonObject} */ (jwk))) :
-                /** @type {!webCrypto.JsonWebKey} */ (jwk),
-            {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, true,
-            ['verify']));
+      this.subtle.importKey('jwk', keyData, this.pkcsAlgo, true, ['verify'])
+    );
   }
 
   /**
@@ -181,9 +184,9 @@ export class Crypto {
    */
   verifyPkcs(key, signature, data) {
     dev().assert(this.isPkcsAvailable());
-    return /** @type {!Promise<boolean>} */ (this.subtle_.verify(
-        {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, key, signature,
-        data));
+    return /** @type {!Promise<boolean>} */ (
+      this.subtle.verify(this.pkcsAlgo, key, signature, data)
+    );
   }
 
   /**
@@ -197,7 +200,7 @@ export class Crypto {
   sha1(input) {
     dev().assert(this.isPkcsAvailable());
     return /** @type {!Promise<!ArrayBuffer>} */ (
-        this.subtle_.digest({name: 'SHA-1'}, input));
+        this.subtle.digest({name: 'SHA-1'}, input));
   }
 }
 
