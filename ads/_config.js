@@ -250,6 +250,7 @@ export const adConfig = {
   connatix: {
     renderStartImplemented: true,
   },
+
   contentad: {},
 
 

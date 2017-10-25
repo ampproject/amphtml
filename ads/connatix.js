@@ -36,11 +36,14 @@ export function connatix(global, data) {
     }
   }
 
-  window.addEventListener('connatix_no_content',function() {
+  window.addEventListener('connatix_no_content', function() {
     window.context.noContentAvailable();
   }, false);
 
-  script.onload = global.context.renderStart;
+  script.onload = () => {
+    global.context.renderStart();
+  };
+
   script.src = 'https://cdn.connatix.com/min/connatix.renderer.infeed.min.js';
   global.document.getElementById('c').appendChild(script);
 }
