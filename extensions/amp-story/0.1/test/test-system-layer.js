@@ -91,9 +91,15 @@ describes.fakeWin('amp-story system layer', {}, env => {
     expect(rootMock.addEventListener).to.have.been.calledWith('keyup');
   });
 
-  it('should dispatch EXIT_FULLSCREEN when button is clicked', () => {
+  it('should dispatch EXIT_FULLSCREEN when exit button is clicked', () => {
     expectEventTransform(
         e => systemLayer.onExitFullScreenClick_(e), EventType.EXIT_FULLSCREEN);
+  });
+
+  it('should dispatch ENTER_FULLSCREEN when enter button is clicked', () => {
+    expectEventTransform(
+        e => systemLayer.onEnterFullScreenClick_(e), EventType.ENTER_FULLSCREEN
+    );
   });
 
   it('should dispatch CLOSE_BOOKEND when button is clicked', () => {
@@ -101,25 +107,35 @@ describes.fakeWin('amp-story system layer', {}, env => {
         e => systemLayer.onCloseBookend_(e), EventType.CLOSE_BOOKEND);
   });
 
-  it('should hide exit fullscreen button when not in fullscreen', () => {
-    const button = win.document.createElement('button');
+  it('should hide exit and show enter fullscreen button when not in fullscreen',
+      () => {
+        const exitButton = win.document.createElement('button');
+        const enterButton = win.document.createElement('button');
 
-    sandbox.stub(systemLayer, 'exitFullScreenBtn_', button);
+        sandbox.stub(systemLayer, 'exitFullScreenBtn_', exitButton);
+        sandbox.stub(systemLayer, 'enterFullScreenBtn_', enterButton);
 
-    systemLayer.setInFullScreen(false);
+        systemLayer.setInFullScreen(false);
 
-    expect(button.hasAttribute('hidden')).to.be.true;
-  });
+        expect(exitButton.hasAttribute('hidden')).to.be.true;
+        expect(enterButton.hasAttribute('hidden')).to.be.false;
+      }
+  );
 
-  it('should show exit fullscreen button when in fullscreen', () => {
-    const button = win.document.createElement('button');
+  it('should show exit and hide enter fullscreen button when in fullscreen',
+      () => {
+        const exitButton = win.document.createElement('button');
+        const enterButton = win.document.createElement('button');
 
-    sandbox.stub(systemLayer, 'exitFullScreenBtn_', button);
+        sandbox.stub(systemLayer, 'exitFullScreenBtn_', exitButton);
+        sandbox.stub(systemLayer, 'enterFullScreenBtn_', enterButton);
 
-    systemLayer.setInFullScreen(true);
+        systemLayer.setInFullScreen(true);
 
-    expect(button.hasAttribute('hidden')).to.be.false;
-  });
+        expect(exitButton.hasAttribute('hidden')).to.be.false;
+        expect(enterButton.hasAttribute('hidden')).to.be.true;
+      }
+  );
 
   it('should set the active page index', () => {
     [0, 1, 2, 3, 4].forEach(index => {
