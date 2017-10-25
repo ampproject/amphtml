@@ -471,7 +471,7 @@ export class AnalyticsGroup {
    * Provides the tracker for the given config.
    *
    * @param {!JsonObject} config
-   * @return {EventTracker} tracker
+   * @return {./events.EventTracker} tracker
    * @private
    */
   getTracker_(config) {
