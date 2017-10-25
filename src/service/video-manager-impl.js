@@ -838,8 +838,6 @@ class VideoEntry {
       // Only muted videos are allowed to autoplay
       this.video.mute();
 
-      //
-
       if (this.video.isInteractive()) {
         this.autoplayInteractiveVideoBuilt_();
       }
