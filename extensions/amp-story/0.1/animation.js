@@ -30,7 +30,7 @@ import {
   KeyframesDef,
   StoryAnimationPresetDef,
 } from './animation-types';
-
+import {timeStrToMillis} from './utils';
 
 /** const {string} */
 const ANIMATE_IN_ATTRIBUTE_NAME = 'animate-in';
@@ -40,34 +40,8 @@ const ANIMATE_IN_DURATION_ATTRIBUTE_NAME = 'animate-in-duration';
 const ANIMATE_IN_DELAY_ATTRIBUTE_NAME = 'animate-in-delay';
 /** const {string} */
 const ANIMATE_IN_AFTER_ATTRIBUTE_NAME = 'animate-in-after';
-
-
 /** const {string} */
 const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
-
-
-// This does not match what's in amp-animation, but that shouldn't matter since
-// the format here is a subset.
-// TODO: Extract from amp-animation
-/**
- * @param {string} time
- * @return {number}
- */
-function timeStrToMillis(time) {
-  const match = time.match(/^([0-9\.]+)\s*(s|ms)$/);
-
-  const num = match[1];
-  const units = match[2];
-
-  user().assert(
-      match &&
-          match.length == 3 &&
-          (units == 's' || units == 'ms'),
-      'Invalid time string %s', time);
-
-  return units == 's' ? parseFloat(num) * 1000 : parseInt(num, 10);
-}
-
 
 /**
  * @param {!Object<string, *>} frameDef
