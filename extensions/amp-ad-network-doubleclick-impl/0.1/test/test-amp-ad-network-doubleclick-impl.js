@@ -18,13 +18,13 @@ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
+  signatureVerifierFor,
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {DATA_ATTR_NAME} from '../../../amp-a4a/0.1/refresh-manager';
-import {VerificationStatus} from '../../../amp-a4a/0.1/signature-verifier';
 import {
   AMP_SIGNATURE_HEADER,
-  signatureVerifierFor,
-} from '../../../amp-a4a/0.1/legacy-signature-verifier';
+  VerificationStatus,
+} from '../../../amp-a4a/0.1/signature-verifier';
 import {Services} from '../../../../src/services';
 import {
   AmpAdNetworkDoubleclickImpl,

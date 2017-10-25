@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AMP_SIGNATURE_HEADER} from '../legacy-signature-verifier';
+import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {createIframePromise} from '../../../../testing/iframe';
@@ -98,8 +98,10 @@ describe('integration test: a4a', () => {
       fixture = f;
       fetchMock = new FetchMock(fixture.win);
       for (const serviceName in signingServerURLs) {
-        fetchMock.getOnce(
-            signingServerURLs[serviceName], validCSSAmp.publicKeyset);
+        fetchMock.getOnce(signingServerURLs[serviceName], {
+          body: validCSSAmp.publicKeyset,
+          headers: {'Content-Type': 'application/jwk-set+json'},
+        });
       }
       fetchMock.getOnce(
           TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
@@ -108,7 +110,7 @@ describe('integration test: a4a', () => {
         headers: {'AMP-Access-Control-Allow-Source-Origin': 'about:srcdoc'},
         body: validCSSAmp.reserialized,
       };
-      adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
+      adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signatureHeader;
       installDocService(fixture.win, /* isSingleDoc */ true);
       installCryptoService(fixture.win);
       upgradeOrRegisterElement(fixture.win, 'amp-a4a', MockA4AImpl);

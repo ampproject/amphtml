@@ -21,15 +21,13 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
 import {
   identityEnabled,
 } from './adsense-a4a-config';
 import {
-  addExperimentIdToElement,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '../../../src/experiments';
 import {
   additionalDimensions,
   googleAdUrl,
@@ -183,10 +181,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
     this.autoFormat_ =
         this.element.getAttribute('data-auto-format') || '';
-    const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
-    if (verifierEid) {
-      addExperimentIdToElement(verifierEid, this.element);
-    }
 
     if (this.isResponsive_()) {
       // Attempt to resize to the correct height. The width should already be
