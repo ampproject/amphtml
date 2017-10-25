@@ -24,7 +24,7 @@ import {user} from '../../../src/log';
 export function timeStrToMillis(time) {
   const match = time.toLowerCase().match(/^([0-9\.]+)\s*(s|ms)$/);
   if (!match) {
-    return;
+    return NaN;
   }
 
   const num = match[1];

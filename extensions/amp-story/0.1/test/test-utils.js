@@ -18,15 +18,33 @@ import {timeStrToMillis} from '../utils';
 
 describes.fakeWin('amp-story utils', {}, () => {
   describe('timeStrToMillis', () => {
-    it('should return millis for a string', () => {
-      const millisForSeconds = timeStrToMillis('1s');
-      const millisForMS = timeStrToMillis('100ms');
-      expect(millisForSeconds).to.equal(1000);
-      expect(millisForMS).to.equal(100);
+    it('should return millis for a milliseconds string', () => {
+      const millis = timeStrToMillis('100ms');
+
+      expect(millis).to.equal(100);
     });
+
+    it('should return millis for a seconds string', () => {
+      const millisForSeconds = timeStrToMillis('1s');
+
+      expect(millisForSeconds).to.equal(1000);
+    });
+
+    it('should return millis for a decimal seconds string', () => {
+      const millisForSeconds = timeStrToMillis('1.64s');
+
+      expect(millisForSeconds).to.equal(1640);
+    });
+
+    it('should return millis for a uppercase string', () => {
+      const millisForSeconds = timeStrToMillis('2.5S');
+
+      expect(millisForSeconds).to.equal(2500);
+    });
+
     it('should return undefined for invalid types', () => {
       const convertedMillis = timeStrToMillis('10kg');
-      expect(convertedMillis).to.be.undefined;
+      expect(convertedMillis).to.be.NaN;
     });
   });
 });
