@@ -100,7 +100,7 @@ describe('integration test: a4a', () => {
       for (const serviceName in signingServerURLs) {
         fetchMock.getOnce(signingServerURLs[serviceName], {
           body: validCSSAmp.publicKeyset,
-          headers: {'Content-Type': 'application/jwk-set+json'}
+          headers: {'Content-Type': 'application/jwk-set+json'},
         });
       }
       fetchMock.getOnce(
