@@ -63,8 +63,8 @@ cssnano = cssnano({
  */
 exports.jsifyCssAsync = function(filename) {
   const css = fs.readFileSync(filename, 'utf8');
-  const transformers = [cssprefixer, cssnano];
-  return postcss(transformers).use(postcssImport).process(css.toString(), {
+  const transformers = [postcssImport, cssprefixer, cssnano];
+  return postcss(transformers).process(css.toString(), {
     'from': filename,
   }).then(function(result) {
     result.warnings().forEach(function(warn) {
