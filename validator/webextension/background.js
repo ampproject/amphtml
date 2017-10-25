@@ -14,21 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
+window.browser = window.browser || window.chrome;
+
 var globals = {};
 globals.ampCacheBgcolor = "#ffffff";
 globals.ampCacheIconPrefix = "amp-link";
-globals.ampCacheTitle = chrome.i18n.getMessage("pageFromAmpCacheTitle");
+globals.ampCacheTitle = browser.i18n.getMessage("pageFromAmpCacheTitle");
 globals.ampPopup = "amp-validator.build.html";
 globals.invalidAmpBgcolor = "#8b0000";
 globals.invalidAmpIconPrefix = "invalid";
-globals.invalidAmpTitle = chrome.i18n.getMessage("pageFailsValidationTitle");
+globals.invalidAmpTitle = browser.i18n.getMessage("pageFailsValidationTitle");
 globals.linkToAmpBgColor = "#ffffff";
 globals.linkToAmpIconPrefix = "amp-link";
-globals.linkToAmpTitle = chrome.i18n.getMessage("pageHasAmpAltTitle");
+globals.linkToAmpTitle = browser.i18n.getMessage("pageHasAmpAltTitle");
 globals.tabToUrl = {};
 globals.validAmpBgcolor = "#ffd700";
 globals.validAmpIconPrefix = "valid";
-globals.validAmpTitle = chrome.i18n.getMessage("pagePassesValidationTitle");
+globals.validAmpTitle = browser.i18n.getMessage("pagePassesValidationTitle");
 
 /**
  * Format a hex value (HTML colors such as #ffffff) as an RGBA.
@@ -99,11 +101,11 @@ function handleAmpCache(tabId, ampHref) {
   updateTabStatus(
       tabId, globals.ampCacheIconPrefix, globals.ampCacheTitle,
       '' /*text*/, globals.ampCacheBgcolor);
-  chrome.browserAction.onClicked.addListener(
+  browser.browserAction.onClicked.addListener(
       function loadAmpHref(tab) {
         if (tab.id == tabId) {
-          chrome.browserAction.onClicked.removeListener(loadAmpHref);
-          chrome.tabs.sendMessage(tab.id,
+          browser.browserAction.onClicked.removeListener(loadAmpHref);
+          browser.tabs.sendMessage(tab.id,
               {'loadAmp': true, 'ampHref': ampHref});
         }
       }
@@ -134,11 +136,11 @@ function handleAmpLink(tabId, ampHref) {
   updateTabStatus(
       tabId, globals.linkToAmpIconPrefix, globals.linkToAmpTitle,
       '' /*text*/, globals.linkToAmpBgColor);
-  chrome.browserAction.onClicked.addListener(
+  browser.browserAction.onClicked.addListener(
       function loadAmpHref(tab) {
         if (tab.id == tabId) {
-          chrome.browserAction.onClicked.removeListener(loadAmpHref);
-          chrome.tabs.sendMessage(tab.id,
+          browser.browserAction.onClicked.removeListener(loadAmpHref);
+          browser.tabs.sendMessage(tab.id,
               {'loadAmp': true, 'ampHref': ampHref});
         }
       }
@@ -151,7 +153,7 @@ function handleAmpLink(tabId, ampHref) {
  * @param {integer} tabId ID of a tab.
  * @param {!Object<!ValidationResult>} validationResult
  */
-function handleAmpPass(tabId, validationResult) {
+function handleAmpPass(tabId, validationResult, canonicalCorrectlyLinksToAmp) {
   var badgeTitle = '';
   var numWarnings = getNumberOfWarnings(validationResult.errors);
   if (numWarnings > 0) badgeTitle = numWarnings.toString();
@@ -179,14 +181,14 @@ function isForbiddenUrl(url) {
  */
 function updateTab(tab) {
   if (!isForbiddenUrl(tab.url))
-    chrome.tabs.sendMessage(
+    browser.tabs.sendMessage(
         tab.id, {'getAmpDetails': true}, function(response) {
           if (response && response.fromAmpCache && response.ampHref) {
             handleAmpCache(tab.id, response.ampHref);
           } else if (response && response.isAmp) {
-            validateUrlFromTab(tab);
+            validateUrlFromTab(tab, response.canonicalHref);
           } else if (response && !response.isAmp && response.ampHref) {
-             handleAmpLink(tab.id, response.ampHref);
+            handleAmpLink(tab.id, response.ampHref);
           }
         }
     );
@@ -199,9 +201,9 @@ function updateTab(tab) {
  */
 function updateTabPopup(tabId) {
   // Verify tab still exists
-  chrome.tabs.get(tabId, function(tab) {
-    if (!chrome.runtime.lastError) {
-      chrome.browserAction.setPopup({tabId: tabId, popup: globals.ampPopup});
+  browser.tabs.get(tabId, function(tab) {
+    if (!browser.runtime.lastError) {
+      browser.browserAction.setPopup({tabId: tabId, popup: globals.ampPopup});
     }
   });
 }
@@ -217,17 +219,17 @@ function updateTabPopup(tabId) {
  */
 function updateTabStatus(tabId, iconPrefix, title, text, color) {
   // Verify tab still exists
-  chrome.tabs.get(tabId, function(tab) {
-    if (!chrome.runtime.lastError) {
-      chrome.browserAction.setIcon({path: {"19": iconPrefix + "-128.png",
+  browser.tabs.get(tabId, function(tab) {
+    if (!browser.runtime.lastError) {
+      browser.browserAction.setIcon({path: {"19": iconPrefix + "-128.png",
                                            "38": iconPrefix + "-38.png"},
                                     tabId: tabId});
       if (title !== undefined)
-        chrome.browserAction.setTitle({title: title, tabId: tabId});
+        browser.browserAction.setTitle({title: title, tabId: tabId});
       if (text !== undefined)
-        chrome.browserAction.setBadgeText({text: text, tabId: tabId});
+        browser.browserAction.setBadgeText({text: text, tabId: tabId});
       if (color !== undefined)
-        chrome.browserAction.setBadgeBackgroundColor(
+        browser.browserAction.setBadgeBackgroundColor(
             {color: hex2rgba(color), tabId: tabId});
     }
   });
@@ -239,18 +241,50 @@ function updateTabStatus(tabId, iconPrefix, title, text, color) {
  *
  * @param {Tab} tab The Tab which triggered the event.
  */
-function validateUrlFromTab(tab) {
+function validateUrlFromTab(tab, canonicalHref) {
   var xhr = new XMLHttpRequest();
   xhr.open('GET', tab.url, true);
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4) {
       const doc = xhr.responseText;
       const validationResult = amp.validator.validateString(doc);
-      window.sessionStorage.setItem(tab.url, JSON.stringify(validationResult));
-      if (validationResult.status == 'PASS') {
-        handleAmpPass(tab.id, validationResult);
+      // If there exists a corresponding non-AMP document, check if it links
+      // back to the AMP document and then report on the AMP document's validity
+      if (tab.url.replace(/\.html?$/, '') !== canonicalHref.replace(/\.html?$/, '')) {
+        checkIfCanonicalLinksToAmp(tab.url, canonicalHref, function(
+            canonicalCorrectlyLinksToAmp) {
+          if (!canonicalCorrectlyLinksToAmp) {
+            validationResult.status = 'PASS';
+            validationResult.errors.push({
+              category: null,
+              code: 'DOCUMENT_TOO_COMPLEX',
+              col: 'N/A',
+              dataAmpReportTestValue: null,
+              line: 'N/A',
+              params: [],
+              severity: 'WARNING',
+              specUrl: 'https://www.ampproject.org/docs/guides/discovery',
+              canonicalHref: canonicalHref
+            });
+          }
+          window.sessionStorage.setItem(tab.url,
+              JSON.stringify(validationResult));
+          if (validationResult.status == 'PASS') {
+            handleAmpPass(tab.id, validationResult,
+                canonicalCorrectlyLinksToAmp);
+          } else {
+            handleAmpFail(tab.id, validationResult);
+          }
+        });
+      // Else if there is just an AMP document, report on its validity
       } else {
-        handleAmpFail(tab.id, validationResult);
+        window.sessionStorage.setItem(tab.url, JSON.stringify(
+            validationResult));
+        if (validationResult.status == 'PASS') {
+          handleAmpPass(tab.id, validationResult, true);
+        } else {
+          handleAmpFail(tab.id, validationResult);
+        }
       }
     }
   };
@@ -258,16 +292,46 @@ function validateUrlFromTab(tab) {
 }
 
 /**
+ * Fetches the content of the canonical URL, checks if a link to the AMP HTML
+ * document exists, and if so, whether it is the same as the actual AMP URL
+ *
+ * @param {string} ampUrlShould The AMP URL that is the expected one.
+ * @param {string} canonicalUrl The canonical URL to be checked.
+ */
+function checkIfCanonicalLinksToAmp(ampUrlShould, canonicalUrl, callback) {
+  var xhr = new XMLHttpRequest();
+  xhr.onload = function() {
+    var doc = this.responseXML;
+    var ampHtmlLink = doc.querySelector('link[rel="amphtml"]');
+    if (ampHtmlLink && ampHtmlLink.href) {
+      // The "is"
+      var ampBaseUrlIs = ampHtmlLink.href.substring(0,
+          ampHtmlLink.href.lastIndexOf('/') + 1);
+      var ampUrlIs = new URL(ampHtmlLink.href, ampBaseUrlIs).toString();
+      // The "should"
+      var ampBaseUrlShould = ampUrlShould.substring(0,
+          ampUrlShould.lastIndexOf('/') + 1);
+      ampUrlShould = new URL(ampUrlShould, ampBaseUrlShould).toString();
+      return callback(ampUrlShould === ampUrlIs);
+    }
+    return callback(false);
+  }
+  xhr.open('GET', canonicalUrl);
+  xhr.responseType = 'document';
+  xhr.send();
+}
+
+/**
  * Listen for a new tab being created.
  */
-chrome.tabs.onCreated.addListener(function(tab) {
+browser.tabs.onCreated.addListener(function(tab) {
   updateTab(tab);
 });
 
 /**
  * Listen for a tab being changed.
  */
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+browser.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
   globals.tabToUrl[tabId] = tab.url;
   updateTab(tab);
 });
@@ -275,16 +339,16 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 /**
  * Listen for a tab being removed.
  */
-chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
+browser.tabs.onRemoved.addListener(function(tabId, removeInfo) {
   window.sessionStorage.removeItem(globals.tabToUrl[tabId]);
 });
 
 /**
  * Listen for a tab being replaced (due to prerendering or instant).
  */
-chrome.tabs.onReplaced.addListener(function(addedTabId, removedTabId) {
+browser.tabs.onReplaced.addListener(function(addedTabId, removedTabId) {
   window.sessionStorage.removeItem(globals.tabToUrl[removedTabId]);
-  chrome.tabs.get(addedTabId, function(tab) {
+  browser.tabs.get(addedTabId, function(tab) {
     updateTab(tab);
   });
 });
