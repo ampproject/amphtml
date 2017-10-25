@@ -15,7 +15,7 @@
  */
 
 import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {
   calculateEntryPointScriptUrl,
@@ -23,6 +23,9 @@ import {
 import {setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
+
+/** @private @const {string} */
+const TAG_ = 'amp-analytics.IframeTransport';
 
 /** @typedef {{
  *    frame: Element,
@@ -59,6 +62,9 @@ export class IframeTransport {
         'Must supply iframe URL to constructor!');
     this.frameUrl_ = config['iframe'];
 
+    /** @private @const PerformanceObserver */
+    this.longTaskObserver_ = null;
+
     this.processCrossDomainIframe();
   }
 
@@ -82,6 +88,7 @@ export class IframeTransport {
     } else {
       frameData = this.createCrossDomainIframe();
       this.ampWin_.document.body.appendChild(frameData.frame);
+      this.createLongTaskObserver_();
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
   }
@@ -136,6 +143,40 @@ export class IframeTransport {
     });
     IframeTransport.crossDomainIframes_[this.type_] = frameData;
     return frameData;
+  }
+
+  createLongTaskObserver_() {
+    if (this.longTaskObserver_ || typeof PerformanceObserver == 'undefined') {
+      return;
+    }
+    // TODO(jonkeller): Re-enable linter after
+    // https://github.com/sindresorhus/globals/pull/120 merges
+    // eslint-disable-next-line no-undef
+    this.longTaskObserver_ = new PerformanceObserver(entryList => {
+      if (!entryList) {
+        return;
+      }
+      entryList.getEntries().forEach(entry => {
+        if (entry && entry['entryType'] == 'longtask') {
+          if (entry['name'] == 'cross-origin-descendant' ||
+              entry['name'] == 'multiple-contexts' ||
+              (getMode().localDev &&
+              entry['name'] == 'same-origin-descendant')) {
+            user().warn(TAG_, `${this.type_} frame took ${entry.duration}ms`);
+            if (entry.attribution) {
+              entry.attribution.forEach(attrib => {
+                user().warn(TAG_,
+                  `  Name: ${attrib.name} Src: ${attrib.containerSrc}` +
+                  `StartTime: ${attrib.startTime}`);
+              });
+            }
+          } else if (entry['name'] != 'unknown') {
+            user().warn(TAG_, `${entry['name']} took ${entry.duration}ms`);
+          }
+        }
+      });
+    });
+    this.longTaskObserver_.observe({entryTypes: ['longtask']});
   }
 
   /**
