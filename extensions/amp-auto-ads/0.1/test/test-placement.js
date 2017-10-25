@@ -42,6 +42,10 @@ describes.realWin('placement', {
     doc.body.appendChild(container);
   });
 
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   describe('getAdElement', () => {
     it('should get ad Element when ad placed', () => {
       const anchor = doc.createElement('div');
