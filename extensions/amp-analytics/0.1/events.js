@@ -424,6 +424,9 @@ export class TimerEventTracker extends EventTracker {
     /** @const @private {!Object<number, Object>} */
     this.trackers_ = {};
 
+    /** @private {number} */
+    this.timerIdSequence_ = 1;
+
     /**
      * Timer event param names.
      * @const
@@ -482,7 +485,7 @@ export class TimerEventTracker extends EventTracker {
     user().assert((!timerStart && !timerStop) || typeof timerStop == 'object',
         'Bad timer stop specification');
 
-    const timerId = this.getTrackedTimerKeys().length;
+    const timerId = this.generateTimerId_();
     const timerParams = {};
     timerParams[TIMER_PARAMS_.INTERVAL_LENGTH] = interval;
     timerParams[TIMER_PARAMS_.MAX_TIMER_LENGTH] = maxTimerLength;
@@ -517,6 +520,14 @@ export class TimerEventTracker extends EventTracker {
     return () => {
       this.removeTracker_(timerId);
     };
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  generateTimerId_() {
+    return ++this.timerIdSequence_;
   }
 
   /**
