@@ -27,7 +27,6 @@ import {
   DEFAULT_SAFEFRAME_VERSION,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
 import {
   experimentFeatureEnabled,
   DOUBLECLICK_EXPERIMENT_FEATURE,
@@ -388,10 +387,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
         Promise.resolve(
             /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
-    const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
-    if (verifierEid) {
-      addExperimentIdToElement(verifierEid, this.element);
-    }
     if (this.win['dbclk_a4a_viz_change']) {
       // Only create one per page but ensure all slots get experiment
       // selection.
@@ -1285,4 +1280,3 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
-

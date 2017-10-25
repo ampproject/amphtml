@@ -188,20 +188,6 @@ export class Crypto {
       this.subtle.verify(this.pkcsAlgo, key, signature, data)
     );
   }
-
-  /**
-   * Returns the SHA-1 hash of the input array in a number array. As a
-   * precondition, `isPkcsAvailable()` must be `true` (there's no polyfill
-   * because only Fast Fetch uses this).
-   *
-   * @param {!Uint8Array} input
-   * @return {!Promise<!ArrayBuffer>}
-   */
-  sha1(input) {
-    dev().assert(this.isPkcsAvailable());
-    return /** @type {!Promise<!ArrayBuffer>} */ (
-        this.subtle.digest({name: 'SHA-1'}, input));
-  }
 }
 
 /**

@@ -325,10 +325,13 @@ export class AmpAdExit extends AMP.BaseElement {
       // TODO(jonkeller): Remove this once #11436 is resolved.
       return;
     }
-    this.ampAdResourceId_ = this.ampAdResourceId_ ||
-        user().assert(this.getAmpAdResourceId_(),
-            `${TAG}: No friendly parent amp-ad element was found for ` +
-            'amp-ad-exit; not in inabox case.');
+    this.ampAdResourceId_ = this.ampAdResourceId_ || this.getAmpAdResourceId_();
+    if (!this.ampAdResourceId_) {
+      user().warn(TAG,
+          'No friendly parent amp-ad element was found for amp-ad-exit; ' +
+          'not in inabox case.');
+      return;
+    }
     dev().assert(!this.unlisten_, 'Unlistener should not already exist.');
     this.unlisten_ = listen(this.getAmpDoc().win, 'message',
         event => {
