@@ -534,7 +534,7 @@ export class TimerEventTracker extends EventTracker {
    * Toggles which listeners are active depending on timer state, so no race
    * conditions can occur in the case where the timer starts and stops on the
    * same event type from the same target.
-   * @param {string} timerId
+   * @param {number} timerId
    * @param {string} eventType
    * @param {function(!AnalyticsEvent)} listener
    * @private
@@ -562,10 +562,9 @@ export class TimerEventTracker extends EventTracker {
   }
 
   /**
-   * @param {string} timerId
+   * @param {number} timerId
    * @param {string} eventType
    * @param {function(!AnalyticsEvent)} listener
-   * @return {string}
    * @private
    */
   startTimer_(timerId, eventType, listener) {
@@ -593,7 +592,7 @@ export class TimerEventTracker extends EventTracker {
   }
 
   /**
-   * @param {string} timerId
+   * @param {number} timerId
    * @private
    */
   stopTimer_(timerId) {
@@ -604,13 +603,13 @@ export class TimerEventTracker extends EventTracker {
     win.clearInterval(this.trackers_[timerId][this.TIMER_PARAMS_.INTERVAL_ID]);
     delete this.trackers_[timerId][this.TIMER_PARAMS_.INTERVAL_ID];
     if (!!this.trackers_[timerId][this.TIMER_PARAMS_.UNLISTEN_STOP]) {
-      this.trackers_[timerId][this.TIMER_PARAMS.UNLISTEN_STOP]();
+      this.trackers_[timerId][this.TIMER_PARAMS_.UNLISTEN_STOP]();
       delete this.trackers_[timerId][this.TIMER_PARAMS_.UNLISTEN_STOP];
     }
   }
 
   /**
-   * @param {string} timerId
+   * @param {number} timerId
    * @return {boolean}
    * @private
    */
