@@ -613,16 +613,16 @@ describes.realWin('Events', {amp: 1}, env => {
             {timerSpec: {interval: 1}}, handler);
       }).to.not.throw();
 
-       const clickTracker = new ClickEventTracker(root);
-       expect(() => {
-         tracker.add(analyticsElement, 'timer',
-             {
-	       timerSpec: {
-	         startSpec: {on: 'click', selector: '.target'},
-	         stopSpec: {on: 'click', selector: '.target'},
-	         interval:1}
-	     }, handler, function(config) { return clickTracker; });
-       }).to.not.throw();
+      const clickTracker = new ClickEventTracker(root);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer',
+            {
+	      timerSpec: {
+	        startSpec: {on: 'click', selector: '.target'},
+	        stopSpec: {on: 'click', selector: '.target'},
+	        interval: 1},
+	    }, handler, function(unused) { return clickTracker; });
+      }).to.not.throw();
     });
 
     it('timers start and stop by tracking different events', () => {
@@ -630,9 +630,9 @@ describes.realWin('Events', {amp: 1}, env => {
       const clickTracker = new ClickEventTracker(root);
       tracker.add(analyticsElement, 'timer', {timerSpec: {
         interval: 1,
-	startSpec: {on: 'click', selector: '.target'},
-	stopSpec: {on: 'click', selector: '.target'}
-      }}, fn1, function(config) { return clickTracker; });
+        startSpec: {on: 'click', selector: '.target'},
+        stopSpec: {on: 'click', selector: '.target'},
+      }}, fn1, function(unused) { return clickTracker; });
       expect(fn1).to.have.not.been.called;
 
       clock.tick(5 * 1000); // 5 seconds
@@ -650,9 +650,9 @@ describes.realWin('Events', {amp: 1}, env => {
       const getElementSpy = sandbox.spy(root, 'getElement');
       tracker.add(analyticsElement, 'timer', {timerSpec: {
         interval: 1,
-	startSpec: {on: 'custom-event-start', selector: '.target'},
-	stopSpec: {on: 'custom-event-stop', selector: '.target'}
-      }}, fn2, function(config) { return customTracker; });
+        startSpec: {on: 'custom-event-start', selector: '.target'},
+        stopSpec: {on: 'custom-event-stop', selector: '.target'},
+      }}, fn2, function(unused) { return customTracker; });
       expect(fn2).to.have.not.been.called;
       customTracker.trigger(new AnalyticsEvent(target, 'custom-event-start'));
 
@@ -670,7 +670,7 @@ describes.realWin('Events', {amp: 1}, env => {
           clock.tick(5 * 1000); // 5 seconds
           expect(fn1).to.have.callCount(1);
           expect(fn2).to.have.callCount(1);
-	});
+        });
       });
     });
 
@@ -680,9 +680,9 @@ describes.realWin('Events', {amp: 1}, env => {
       const clickTracker = new ClickEventTracker(root);
       tracker.add(analyticsElement, 'timer', {timerSpec: {
         interval: 1,
-	startSpec: {on: 'click', selector: '.target'},
-	stopSpec: {on: 'click', selector: '.target'}
-      }}, fn1, function(config) { return clickTracker; });
+        startSpec: {on: 'click', selector: '.target'},
+        stopSpec: {on: 'click', selector: '.target'},
+      }}, fn1, function(unused) { return clickTracker; });
       expect(fn1).to.have.not.been.called;
 
       target.click(); // Start timer.
