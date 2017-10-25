@@ -119,7 +119,7 @@
     "postcss": "5.2.10",
     "postcss-import": "9.1.0",
     "pretty-bytes": "2.0.1",
-    "request": "2.73.0",
+    "request": "2.81.0",
     "rimraf": "2.5.1",
     "shuffle-seed": "1.1.6",
     "sinon": "2.1.0",
