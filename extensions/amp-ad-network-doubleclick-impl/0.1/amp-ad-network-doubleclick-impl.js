@@ -659,6 +659,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
 
+function rewriteRtcKeys(response, vendor) {
+  if (!response) {
+    return null;
+  }
+
+  const newResponse = {};
+  let newKey;
+  Object.keys(response).forEach(key => {
+    newKey = key + '_' + vendor;
+    newResponse[newKey] = response[key];
+  });
+  return newResponse;
+}
+
   /** @override */
   onNetworkFailure(error, adUrl) {
     dev().info(TAG, 'network error, attempt adding of error parameter', error);
@@ -1285,4 +1299,3 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
-

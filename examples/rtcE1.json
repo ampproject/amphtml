@@ -1,0 +1,3 @@
+{
+  "targeting": {"hb_pb_vendor1":["1.00"], "hb_cu_vendor1": ["http://localhost:8000/examples/rtc-vendor-1.html"]}
+}
