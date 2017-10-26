@@ -182,6 +182,9 @@ export class AmpStory extends AMP.BaseElement {
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
       this.getAmpDoc().win.document.documentElement.classList
           .add('i-amphtml-story-standalone');
+
+      // Lock body to prevent overflow.
+      this.lockBody_();
     }
 
     this.element.appendChild(
@@ -200,9 +203,6 @@ export class AmpStory extends AMP.BaseElement {
     this.toggleMutedAttribute_(true);
 
     upgradeBackgroundAudio(this.element);
-
-    // Lock body to prevent overflow.
-    this.lockBody_();
 
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_);
