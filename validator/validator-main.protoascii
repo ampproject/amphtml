@@ -967,7 +967,7 @@ tags: {
     max_bytes: 200000
     # TODO(chenshay): This should be an ampproject url that explains the
     # situation more fully.
-    max_bytes_spec_url: "https://github.com/ampproject/amphtml/issues/9625"
+    max_bytes_spec_url: "https://www.ampproject.org/docs/reference/spec#keyframes-stylesheet"
     css_spec: {
       at_rule_spec: {
         name: 'keyframes'
