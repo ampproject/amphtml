@@ -17,17 +17,9 @@
 import {AmpAnimation} from '../amp-animation';
 import {WebAnimationRunner} from '../web-animations';
 import {WebAnimationPlayState} from '../web-animation-types';
-import {toggleExperiment} from '../../../../src/experiments';
+
 
 describes.sandboxed('AmpAnimation', {}, () => {
-
-  beforeEach(() => {
-    toggleExperiment(window, 'amp-animation', true);
-  });
-
-  afterEach(() => {
-    toggleExperiment(window, 'amp-animation', false);
-  });
 
   function createAnimInWindow(win, attrs, config) {
     const element = win.document.createElement('amp-animation');
