@@ -19,6 +19,7 @@ import {scopedQuerySelector} from '../../../src/dom';
 import {listenOnce} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
+import {closest} from '../../../src/dom';
 
 
 /** @private @enum {!RegExp} */
@@ -27,40 +28,43 @@ const TIME_REGEX = {
   SECONDS: /^(\d+)s$/,
 };
 
+/** @private @const {number} */
+const NEXT_SCREEN_AREA_RATIO = 0.75;
 
 /** @const {number} */
 const POLL_INTERVAL_MS = 250;
 
 
-/**
- * @param {string} autoAdvanceStr 
- * @return {?number} The delay before the page should automatically advance to
- *     the next page, or null if the page will not advance based on time.
- * @private
- */
-function getAutoAdvanceDelayMs(autoAdvanceStr) {
-  if (TIME_REGEX.MILLISECONDS.test(autoAdvanceStr)) {
-    return Number(TIME_REGEX.MILLISECONDS.exec(autoAdvanceStr)[1]);
-  } else if (TIME_REGEX.SECONDS.test(autoAdvanceStr)) {
-    return Number(TIME_REGEX.SECONDS.exec(autoAdvanceStr)[1]) * 1000;
-  }
-
-  return null;
+/** @const {function(?AdvancementConfig): boolean} */
+function isNonNull(advancementConfig) {
+  return advancementConfig !== null;
 }
+
+/**
+ * @param {!Element} el
+ * @return {boolean}
+ */
+function hasTapAction(el) {
+  // There are better ways to determine this, but they're all bound to action
+  // service race conditions. This is good enough for our use case.
+  return el.hasAttribute('on') &&
+      !!el.getAttribute('on').match(/(^|;)\s*tap\s*:/);
+}
+
 
 /**
  * 
  */
 export class AdvancementConfig {
   constructor(win) {
-    /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(win);
-
     /** @private @const {!Array<!>} */
     this.progressListeners_ = [];
 
     /** @private @const {!Array<!>} */
     this.advanceListeners_ = [];
+
+    /** @private @const {!Array<!>} */
+    this.previousListeners_ = [];
 
     /** @private {boolean} */
     this.isRunning_ = false;
@@ -74,6 +78,10 @@ export class AdvancementConfig {
     this.advanceListeners_.push(advanceListener);
   }
 
+  addPreviousListener(previousListener) {
+    this.previousListeners_.push(previousListener);
+  }
+
   start() {
     this.isRunning_ = true;
   }
@@ -82,17 +90,23 @@ export class AdvancementConfig {
     this.isRunning_ = false;
   }
 
+  /**
+   * @return {boolean}
+   * @protected
+   */
   isRunning() {
     return this.isRunning_;
   }
 
   /**
-   * @return @protected {number}
+   * @return {number}
+   * @protected
    */
   getProgress() {
     return 1;
   }
 
+  /** @protected */
   onProgressUpdate() {
     const progress = this.getProgress();
     this.progressListeners_.forEach(progressListener => {
@@ -100,46 +114,175 @@ export class AdvancementConfig {
     });
   }
 
+  /** @protected */
   onAdvance() {
     this.advanceListeners_.forEach(advanceListener => {
       advanceListener();
     });
   }
 
+  /** @protected */
+  onPrevious() {
+    this.previousListeners_.forEach(previousListener => {
+      previousListener();
+    });
+  }
+
 
   /**
    * @param {!Element} rootElement 
-   * @return {!AdvancementConfig} 
+   * @return {?AdvancementConfig} 
    */
   static forElement(rootElement) {
     const win = rootElement.ownerDocument.defaultView;
     const autoAdvanceStr = rootElement.getAttribute('auto-advance-after');
 
-    if (!autoAdvanceStr) {
-      return new ManualAdvancement(win);
+    const supportedAdvancementModes = [
+      new ManualAdvancement(rootElement),
+      TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootElement),
+      MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootElement),
+    ].filter(isNonNull);
+
+    if (supportedAdvancementModes.length === 1) {
+      return supportedAdvancementModes[0];
     }
 
-    const delayMs = getAutoAdvanceDelayMs(autoAdvanceStr);
-    if (delayMs !== null) {
-      user().assert(isFiniteNumber(delayMs) && delayMs > 0,
-          `Invalid automatic advance delay '${autoAdvanceStr}' ` +
-          `for page '${rootElement.id}'.`);
-
-      return new TimeBasedAdvancement(win, delayMs);
-    }
-
-    return new MediaBasedAdvancement(win, user().assertElement(
-        scopedQuerySelector(rootElement, `#${autoAdvanceStr}`),
-        'ID specified for automatic advance does not refer to any element ' +
-        `on page '${rootElement.id}'.`));
+    return new MultipleAdvancementConfig(supportedAdvancementModes);
   }
 }
 
-class ManualAdvancement extends AdvancementConfig {}
+class MultipleAdvancementConfig extends AdvancementConfig {
+  constructor(advancementModes) {
+    super();
 
+    /** @private @const {!Array<!AdvancementConfig>} */
+    this.advancementModes_ = advancementModes;
+  }
+
+  addProgressListener(progressListener) {
+    this.advancementModes_.forEach(advancementMode => {
+      advancementMode.addProgressListener(progressListener);
+    });
+  }
+
+  addAdvanceListener(advanceListener) {
+    this.advancementModes_.forEach(advancementMode => {
+      advancementMode.addAdvanceListener(advanceListener);
+    });
+  }
+
+  addPreviousListener(previousListener) {
+    this.advancementModes_.forEach(advancementMode => {
+      advancementMode.addPreviousListener(previousListener);
+    });
+  }
+
+  start() {
+    super.start();
+    this.advancementModes_.forEach(advancementMode => {
+      advancementMode.start();
+    });
+  }
+
+  stop() {
+    super.stop();
+    this.advancementModes_.forEach(advancementMode => {
+      advancementMode.stop();
+    });
+  }
+}
+
+
+/**
+ * Always provides a progress of 1.0.  Advances when the user taps the rightmost
+ * 75% of the screen; triggers the previous listener when the user taps the
+ * leftmost 25% of the screen.
+ */
+class ManualAdvancement extends AdvancementConfig {
+  constructor(element) {
+    super();
+    this.element_ = element;
+    this.clickListener_ = this.maybePerformSystemNavigation_.bind(this);
+  }
+
+
+  /** @override */
+  start() {
+    super.start();
+    this.element_.addEventListener('click', this.clickListener_, true);
+  }
+
+
+  /** @override */
+  stop() {
+    super.stop();
+    this.element_.removeEventListener('click', this.clickListener_, true);
+  }
+
+
+  /** @override */
+  getProgress() {
+    return 1.0;
+  }
+
+
+  /**
+   * Determines whether a click should be used for navigation.  Navigate should
+   * occur unless the click is on the system layer, or on an element that
+   * defines on="tap:..."
+   * @param {!Event} e 'click' event.
+   * @return {boolean} true, if the click should be used for navigation.
+   * @private
+   */
+  isNavigationalClick_(e) {
+    return !closest(dev().assertElement(e.target), el => {
+      return hasTapAction(el);
+    }, /* opt_stopAt */ this.element_);
+  }
+
+
+  /**
+   * Performs a system navigation if it is determined that the specified event
+   * was a click intended for navigation.
+   * @param {!Event} event 'click' event
+   * @private
+   */
+  maybePerformSystemNavigation_(event) {
+    if (!this.isNavigationalClick_(event)) {
+      // If the system doesn't need to handle this click, then we can simply
+      // return and let the event propagate as it would have otherwise.
+      return;
+    }
+
+    event.stopPropagation();
+
+    // TODO(newmuis): This will need to be flipped for RTL.
+    const elRect = this.element_.getBoundingClientRect();
+    const offsetLeft = elRect.x;
+    const offsetWidth = elRect.width;
+    const nextScreenAreaMin = offsetLeft +
+        ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
+    const nextScreenAreaMax = offsetLeft + offsetWidth;
+
+    if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
+      this.onAdvance();
+    } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
+      this.onPrevious();
+    }
+  }
+}
+
+
+/**
+ * Provides progress and advancement based on a fixed duration of time,
+ * specified in either seconds or milliseconds.
+ */
 class TimeBasedAdvancement extends AdvancementConfig {
   constructor(win, delayMs) {
-    super(win);
+    super();
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(win);
 
     /** @private @const {number} */
     this.delayMs_ = delayMs;
@@ -196,11 +339,66 @@ class TimeBasedAdvancement extends AdvancementConfig {
 
     return Math.min(Math.max(progress, 0), 1);
   }
+
+
+  /**
+   * @param {string} autoAdvanceStr 
+   * @return {?number} The delay before the page should automatically advance to
+   *     the next page, or null if the page will not advance based on time.
+   * @private
+   */
+  static getAutoAdvanceDelayMs_(autoAdvanceStr) {
+    if (TIME_REGEX.MILLISECONDS.test(autoAdvanceStr)) {
+      return Number(TIME_REGEX.MILLISECONDS.exec(autoAdvanceStr)[1]);
+    } else if (TIME_REGEX.SECONDS.test(autoAdvanceStr)) {
+      return Number(TIME_REGEX.SECONDS.exec(autoAdvanceStr)[1]) * 1000;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * 
+   * @param {string} autoAdvanceStr 
+   * @return {?AdvancementConfig}
+   */
+  static fromAutoAdvanceString(autoAdvanceStr, win, rootElement) {
+    if (!autoAdvanceStr) {
+      return null;
+    }
+
+    const delayMs = TimeBasedAdvancement.getAutoAdvanceDelayMs_(autoAdvanceStr);
+    if (delayMs === null) {
+      return null;
+    }
+
+    user().assert(isFiniteNumber(delayMs) && delayMs > 0,
+        `Invalid automatic advance delay '${autoAdvanceStr}' ` +
+        `for page '${rootElement.id}'.`);
+
+    return new TimeBasedAdvancement(win, delayMs);
+  }
 }
 
+
+/**
+ * Provides progress and advances pages based on the completion percentage of
+ * playback of an HTMLMediaElement or a video that implements the AMP
+ * video-interface.
+ *
+ * These are combined into a single AdvancementConfig implementation because we
+ * may not know at build time whether a video implements the AMP
+ * video-interface, since that is dependent on the amp-video buildCallback
+ * having been executed before the amp-story-page buildCallback, which is not
+ * guaranteed.
+ */
 class MediaBasedAdvancement extends AdvancementConfig {
   constructor(win, element) {
-    super(win);
+    super();
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(win);
 
     /** @private @const {!Element} */
     this.element_ = element;
@@ -310,5 +508,15 @@ class MediaBasedAdvancement extends AdvancementConfig {
     }
 
     return super.getProgress();
+  }
+
+
+  static fromAutoAdvanceString(autoAdvanceStr, win, rootElement) {
+    const element = user().assertElement(
+        scopedQuerySelector(rootElement, `#${autoAdvanceStr}`),
+        'ID specified for automatic advance does not refer to any ' +
+        `element on page '${rootElement.id}'.`);
+
+    return new MediaBasedAdvancement(win, element);
   }
 }
