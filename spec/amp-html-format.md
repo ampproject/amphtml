@@ -295,7 +295,7 @@ In addition to the `<style amp-custom>`, authors may also add the `<style amp-ke
 The following restrictions apply to the `<style amp-keyframes>` tag:
  1. May only be placed as the last child of the document's `<body>` element.
  2. May only contain `@keyframes`, `@media`, `@supports` rules and their combination.
- 3. May not be larger than 200,000 bytes.
+ 3. May not be larger than 500,000 bytes.
 
 The reason the `<style amp-keyframes>` tag exists is because keyframes rules are often bulky even for moderately complicated animations, which leads to slow CSS parsing and first contentful paint. But such rules often exceed the size limit imposed on `<style amp-custom>`. Putting such keyframes declarations at the bottom of the document in the `<style amp-keyframes>` allows them to exceed size limitations. And since keyframes are not render-blocking, it also avoids blocking first contentful paint to parse them.
 
