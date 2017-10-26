@@ -40,7 +40,6 @@ import {Services} from '../../../src/services';
 import {relatedArticlesFromJson} from './related-articles';
 import {ShareWidget} from './share';
 import {
-  closest,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -939,8 +938,7 @@ export class AmpStory extends AMP.BaseElement {
     const pageIndex = findIndex(this.pages_, page => page.element.id === id);
 
     if (pageIndex < 0) {
-      user().error(pageIndex >= 0,
-        `Story refers to page "${id}", but no such page exists.`);
+      user().error(`Story refers to page "${id}", but no such page exists.`);
     }
 
     return pageIndex;

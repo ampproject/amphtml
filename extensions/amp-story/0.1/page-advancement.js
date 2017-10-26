@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import {dev, user} from '../../../src/log';
-import {isFiniteNumber} from '../../../src/types';
 import {scopedQuerySelector} from '../../../src/dom';
 import {listenOnce} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
@@ -37,13 +36,13 @@ const POLL_INTERVAL_MS = 250;
  */
 export class AdvancementConfig {
   constructor() {
-    /** @private @const {!Array<!>} */
+    /** @private @const {!Array<function(number)>} */
     this.progressListeners_ = [];
 
-    /** @private @const {!Array<!>} */
+    /** @private @const {!Array<function()>} */
     this.advanceListeners_ = [];
 
-    /** @private @const {!Array<!>} */
+    /** @private @const {!Array<function()>} */
     this.previousListeners_ = [];
 
     /** @private {boolean} */
@@ -61,7 +60,7 @@ export class AdvancementConfig {
   }
 
   /**
-   * @param {function(number)} progressListener A function that handles when a
+   * @param {function()} advanceListener A function that handles when a
    *     page should be advanced.
    */
   addAdvanceListener(advanceListener) {
@@ -69,7 +68,7 @@ export class AdvancementConfig {
   }
 
   /**
-   * @param {function(number)} progressListener A function that handles when a
+   * @param {function()} previousListener A function that handles when a
    *     page should go back to the previous page.
    */
   addPreviousListener(previousListener) {
@@ -130,7 +129,7 @@ export class AdvancementConfig {
 
   /**
    * Provides an AdvancementConfig object for the specified amp-story-page.
-   * @param {!AmpStoryPage} page
+   * @param {!./amp-story-page.AmpStoryPage} page
    * @return {!AdvancementConfig}
    */
   static forPage(page) {
@@ -140,7 +139,7 @@ export class AdvancementConfig {
 
     const supportedAdvancementModes = [
       new ManualAdvancement(rootEl),
-      TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
+      TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win),
       MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
     ].filter(x => x !== null);
 
@@ -318,7 +317,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
   }
 
   /**
-   * @return {number} 
+   * @return {number} The current timestamp, in milliseconds.
    * @private
    */
   getCurrentTimestampMs_() {
@@ -368,17 +367,17 @@ class TimeBasedAdvancement extends AdvancementConfig {
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.
    */
-  static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
+  static fromAutoAdvanceString(autoAdvanceStr, win) {
     if (!autoAdvanceStr) {
       return null;
     }
 
     const delayMs = timeStrToMillis(autoAdvanceStr);
-    if (isNaN(delayMs)) {
+    if (delayMs === undefined || isNaN(delayMs)) {
       return null;
     }
 
-    return new TimeBasedAdvancement(win, delayMs);
+    return new TimeBasedAdvancement(win, Number(delayMs));
   }
 }
 
@@ -407,7 +406,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
     /** @private {?Element} */
     this.mediaElement_ = null;
 
-    /** @private {?VideoInterface} */
+    /** @private {?../../../src/video-interface.VideoInterface} */
     this.video_ = null;
   }
 
@@ -453,7 +452,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
     }
 
     if (!this.mediaElement_) {
-      this.mediaElement_ = this.getMediaElement_(this.element_);
+      this.mediaElement_ = this.getMediaElement_();
     }
 
     if (this.mediaElement_) {
@@ -467,8 +466,10 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
   /** @private */
   startHtmlMediaElement_() {
-    listenOnce(this.mediaElement_, 'ended', () => this.onAdvance());
-    listenOnce(this.mediaElement_, 'timeupdate', () => this.onProgressUpdate());
+    const mediaElement = dev().assertElement(this.mediaElement_,
+        'Media element was unspecified.');
+    listenOnce(mediaElement, 'ended', () => this.onAdvance());
+    listenOnce(mediaElement, 'timeupdate', () => this.onProgressUpdate());
   }
 
   /** @private */

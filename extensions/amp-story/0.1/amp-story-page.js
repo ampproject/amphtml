@@ -31,12 +31,12 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {upgradeBackgroundAudio} from './audio';
 import {renderSimpleTemplate} from './simple-template';
-import {dev, user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {EventType, dispatch, dispatchCustom} from './events';
 import {PageElement} from './page-element';
 import {AdvancementConfig} from './page-advancement';
 import {dict} from '../../../src/utils/object';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 
@@ -142,7 +142,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?UnlistenDef} */
     this.autoAdvanceUnlistenDef_ = null;
 
-    /** @private {!PageAdvancementMode} */
+    /** @private {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
   }
 
@@ -434,37 +434,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /**
-   * Determines whether a given element implements the video interface.
-   * @param {!Element} el The element to test
-   * @return {boolean} true, if the specified element implements the video
-   *     interface.
-   * @private
-   */
-  isVideoInterfaceVideo_(el) {
-    return ;
-  }
-
-
-  /**
-   * If the auto-advance-after property is set, a timer is set for that
-   * duration, after which next() will be invoked.
-   * @private
-   */
-  scheduleAdvancement_() {
-    switch (this.advancementMode_) {
-      case PageAdvancementMode.MANUAL:
-        return;
-      case PageAdvancementMode.TIME_BASED:
-        this.scheduleTimeBasedAutoAdvance_();
-        break;
-      case PageAdvancementMode.MEDIA_BASED:
-        this.scheduleMediaBasedAutoAdvance_();
-        break;
-    }
-  }
-
-
-  /**
    * Emits an event indicating that the progress of the current page has changed
    * to the specified value.
    * @param {number} progress The progress from 0.0 to 1.0.
@@ -472,7 +441,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   emitProgress_(progress) {
     const payload = {
       pageId: this.element.id,
-      progress: progress,
+      progress,
     };
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.PAGE_PROGRESS, payload,
