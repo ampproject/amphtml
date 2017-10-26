@@ -84,11 +84,6 @@ const DESKTOP_THRESHOLD = 768;
  */
 const AUDIO_MUTED_ATTRIBUTE = 'muted';
 
-/**
- * @private @const {string}
- */
-const AUDIO_UNMUTED_ATTRIBUTE = 'unmuted';
-
 /** @type {string} */
 const TAG = 'amp-story';
 
@@ -1036,9 +1031,7 @@ export class AmpStory extends AMP.BaseElement {
   toggleMutedAttribute_(isMuted) {
     if (isMuted) {
       this.element.setAttribute(AUDIO_MUTED_ATTRIBUTE, '');
-      this.element.removeAttribute(AUDIO_UNMUTED_ATTRIBUTE);
     } else {
-      this.element.setAttribute(AUDIO_UNMUTED_ATTRIBUTE, '');
       this.element.removeAttribute(AUDIO_MUTED_ATTRIBUTE);
     }
   }
