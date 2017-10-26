@@ -15,8 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {signatureVerifierFor} from './legacy-signature-verifier';
-import {VerificationStatus} from './signature-verifier';
+import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
   is3pThrottled,
   getAmpAdRenderOutsideViewport,
@@ -52,6 +51,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {signingServerURLs} from '../../../ads/_a4a-config';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -73,6 +73,15 @@ export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
 
 /** @type {string} @visibleForTesting */
 export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
+
+/** @type {string} @visibleForTesting */
+export const EXPERIMENT_FEATURE_HEADER_NAME = 'amp-ff-exps';
+
+/**
+ * Controls if Content Security Policy is enabled for FIE render.
+ * @type {string} @visibleForTesting
+ */
+export const CSP_ENABLED_EXP_NAME = 'csp_enabled';
 
 /** @type {string} */
 const TAG = 'amp-a4a';
@@ -309,6 +318,16 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.releaseType_ = getBinaryTypeNumericalCode(getBinaryType(this.win)) ||
         '-1';
+
+    /**
+     * Mapping of feature name to value extracted from ad response header
+     * amp-ff-exps with comma separated pairs of '=' separated key/value.
+     * @type {!Object<string,string>}
+     */
+    this.postAdResponseExperimentFeatures = {};
+
+    /** @private {boolean} whether CSP for FIE is enabled */
+    this.cspEnabled_ = false;
   }
 
   /** @override */
@@ -602,6 +621,21 @@ export class AmpA4A extends AMP.BaseElement {
           // assuming ad url or creative exist.
           if (!fetchResponse) {
             return null;
+          }
+          if (fetchResponse.headers && fetchResponse.headers.has(
+              EXPERIMENT_FEATURE_HEADER_NAME)) {
+            fetchResponse.headers.get(EXPERIMENT_FEATURE_HEADER_NAME).split(',')
+              .forEach(pair => {
+                const parts = pair.split('=');
+                if (parts.length != 2 || !parts[0]) {
+                  dev().warn(TAG, `invalid experiment feature ${pair}`);
+                  return;
+                }
+                this.postAdResponseExperimentFeatures[parts[0]] = parts[1];
+              });
+            this.cspEnabled_ =
+              this.postAdResponseExperimentFeatures[CSP_ENABLED_EXP_NAME] ==
+                'true';
           }
           // If the response has response code 204, or arrayBuffer is null,
           // collapse it.
@@ -960,6 +994,8 @@ export class AmpA4A extends AMP.BaseElement {
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
         this.getNonAmpCreativeRenderingMethod();
+    this.postAdResponseExperimentFeatures = {};
+    this.cspEnabled_ = false;
   }
 
   /**
@@ -1245,6 +1281,7 @@ export class AmpA4A extends AMP.BaseElement {
           html: creativeMetaData.minifiedCreative,
           extensionIds: creativeMetaData.customElementExtensions || [],
           fonts: fontsArray,
+          cspEnabled: this.cspEnabled_,
         }, embedWin => {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
               new A4AVariableSource(this.getAmpDoc(), embedWin));
@@ -1624,3 +1661,21 @@ export function assignAdUrlToError(error, adUrl) {
   (error.args || (error.args = {}))['au'] =
     adUrl.substring(adQueryIdx + 1, adQueryIdx + 251);
 };
+
+/**
+ * Returns the signature verifier for the given window. Lazily creates it if it
+ * doesn't already exist.
+ *
+ * This ensures that only one signature verifier exists per window, which allows
+ * multiple Fast Fetch ad slots on a page (even ones from different ad networks)
+ * to share the same cached public keys.
+ *
+ * @param {!Window} win
+ * @return {!SignatureVerifier}
+ * @visibleForTesting
+ */
+export function signatureVerifierFor(win) {
+  const propertyName = 'AMP_FAST_FETCH_SIGNATURE_VERIFIER_';
+  return win[propertyName] ||
+      (win[propertyName] = new SignatureVerifier(win, signingServerURLs));
+}

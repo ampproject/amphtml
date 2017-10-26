@@ -22,10 +22,6 @@ limitations under the License.
     <td>Animation component</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; no validations yet.</div><div>Work in progress.</div></td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js">&lt;/script></code></td>
   </tr>

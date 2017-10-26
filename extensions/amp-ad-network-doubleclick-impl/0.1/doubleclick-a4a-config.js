@@ -130,7 +130,8 @@ export class DoubleclickA4aEligibility {
           win, DFP_CANONICAL_FF_EXPERIMENT_NAME, experimentId);
     }
 
-    if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
+    if ((useRemoteHtml && !element.getAttribute('rtc-config')) ||
+        'useSameDomainRenderingUntilDeprecated' in element.dataset ||
         element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
       return false;
     }

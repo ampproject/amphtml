@@ -30,6 +30,7 @@ describe('impression', () => {
   let viewer;
   let xhr;
   let isTrustedViewer;
+  let isTrustedReferrer;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -48,6 +49,9 @@ describe('impression', () => {
     isTrustedViewer = false;
     sandbox.stub(viewer, 'isTrustedViewer', () => {
       return Promise.resolve(isTrustedViewer);
+    });
+    sandbox.stub(viewer, 'isTrustedReferrer', () => {
+      return Promise.resolve(isTrustedReferrer);
     });
     resetTrackImpressionPromiseForTesting();
   });
@@ -141,6 +145,24 @@ describe('impression', () => {
     it('should invoke click URL in trusted viewer', function* () {
       toggleExperiment(window, 'alp', false);
       isTrustedViewer = true;
+      viewer.getParam.withArgs('click').returns('https://www.example.com');
+      maybeTrackImpression(window);
+      expect(xhr.fetchJson).to.have.not.been.called;
+      yield macroTask();
+      expect(xhr.fetchJson).to.be.calledOnce;
+      const url = xhr.fetchJson.lastCall.args[0];
+      const params = xhr.fetchJson.lastCall.args[1];
+      expect(url).to.equal('https://www.example.com');
+      expect(params).to.jsonEqual({
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: false,
+      });
+    });
+
+    it('should invoke click URL for trusted referrer', function* () {
+      toggleExperiment(window, 'alp', false);
+      isTrustedViewer = false;
+      isTrustedReferrer = true;
       viewer.getParam.withArgs('click').returns('https://www.example.com');
       maybeTrackImpression(window);
       expect(xhr.fetchJson).to.have.not.been.called;

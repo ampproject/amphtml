@@ -62,10 +62,18 @@ export function maybeTrackImpression(win) {
         dev().warn('IMPRESSION', error);
       });
 
-  Services.viewerForDoc(win.document).isTrustedViewer().then(isTrusted => {
-    // Currently this feature is launched for trusted viewer, but still
-    // experiment guarded for all AMP docs.
-    if (!isTrusted && !isExperimentOn(win, 'alp')) {
+  const viewer = Services.viewerForDoc(win.document);
+  const isTrustedViewerPromise = viewer.isTrustedViewer();
+  const isTrustedReferrerPromise = viewer.isTrustedReferrer();
+  Promise.all([
+    isTrustedViewerPromise,
+    isTrustedReferrerPromise,
+  ]).then(results => {
+    const isTrustedViewer = results[0];
+    const isTrustedReferrer = results[1];
+    // Currently this feature is launched for trusted viewer and trusted referrer,
+    // but still experiment guarded for all AMP docs.
+    if (!isTrustedViewer && !isTrustedReferrer && !isExperimentOn(win, 'alp')) {
       resolveImpression();
       return;
     }
@@ -115,7 +123,7 @@ function handleReplaceUrl(win) {
   }
 
   // request async replaceUrl is viewer support getReplaceUrl.
-  return viewer.sendMessageAwaitResponse('getReplaceUrl', undefined)
+  return viewer.sendMessageAwaitResponse('getReplaceUrl', /* data */ undefined)
       .then(response => {
         if (!response || typeof response != 'object') {
           dev().warn('IMPRESSION', 'get invalid replaceUrl response');
