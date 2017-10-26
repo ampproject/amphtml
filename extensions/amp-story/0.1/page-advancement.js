@@ -275,7 +275,7 @@ class ManualAdvancement extends AdvancementConfig {
     event.stopPropagation();
 
     // TODO(newmuis): This will need to be flipped for RTL.
-    const elRect = this.element_.getBoundingClientRect();
+    const elRect = this.element_./*OK*/getBoundingClientRect();
     const offsetLeft = elRect.x;
     const offsetWidth = elRect.width;
     const nextScreenAreaMin = offsetLeft +
