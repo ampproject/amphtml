@@ -22,7 +22,6 @@ import {childElementByTag} from '../../../src/dom';
 import {getFriendlyIframeEmbedOptional}
     from '../../../src/friendly-iframe-embed';
 import {getParentWindowFrameElement} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
 import {installWebAnimations} from 'web-animations-js/web-animations.install';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
@@ -74,9 +73,6 @@ export class AmpAnimation extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const ampdoc = this.getAmpDoc();
-
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment "${TAG}" is disabled.`);
 
     // TODO(dvoytenko): Remove once we support direct parent visibility.
     user().assert(
