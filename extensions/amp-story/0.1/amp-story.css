@@ -163,8 +163,8 @@ amp-story[standalone]:fullscreen {
   display: none;
 }
 
-.audio-playing.unmuted .i-amphtml-story-mute-audio-control,
-.audio-playing:not(.unmuted) .i-amphtml-story-unmute-audio-control {
+.audio-playing:not([muted]) .i-amphtml-story-mute-audio-control,
+.audio-playing[muted] .i-amphtml-story-unmute-audio-control {
   display: block;
 }
 
