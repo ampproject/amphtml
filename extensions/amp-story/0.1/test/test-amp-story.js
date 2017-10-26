@@ -316,6 +316,8 @@ describes.realWin('amp-story', {
     expect(pages[0].hasAttribute('active')).to.be.false;
     expect(pages[1].hasAttribute('active')).to.be.true;
   });
+
+  // TODO(prateekbh): Add test for lock body once amp-story tests are enabled.
 });
 
 
