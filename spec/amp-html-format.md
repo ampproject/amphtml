@@ -256,6 +256,8 @@ The following @-rules are allowed in stylesheets:
 
 Authors may add custom styles to a document using a single `<style amp-custom>` tag in the head of the document.
 
+`@keyframes` rules are allowed in the `<style amp-custom>`. However, if they are too many of them, it's recommended to place them in the additional `<style amp-keyframes>` tag, which must be located at the end of the AMP document. For details, see the [Keyframes stylesheet](#keyframes-stylesheet) section of this document.
+
 #### Selectors
 
 The following restrictions apply to selectors in author style sheets:
@@ -285,6 +287,30 @@ In the following examples `<property>` needs to be in the whitelist above.
 
 #### Maximum size
 It is a validation error if the author stylesheet is larger than 50,000 bytes.
+
+### Keyframes stylesheet
+
+In addition to the `<style amp-custom>`, authors may also add the `<style amp-keyframes>` tag, which is allowed specifically for keyframes animations.
+
+The following restrictions apply to the `<style amp-keyframes>` tag:
+ 1. May only be placed as the last child of the document's `<body>` element.
+ 2. May only contain `@keyframes`, `@media`, `@supports` rules and their combination.
+ 3. May not be larger than 200,000 bytes.
+
+The reason the `<style amp-keyframes>` tag exists is because keyframes rules are often bulky even for moderately complicated animations, which leads to slow CSS parsing and first contentful paint. But such rules often exceed the size limit imposed on `<style amp-custom>`. Putting such keyframes declarations at the bottom of the document in the `<style amp-keyframes>` allows them to exceed size limitations. And since keyframes are not render-blocking, it also avoids blocking first contentful paint to parse them.
+
+Example:
+
+```html
+<style amp-keyframes>
+@keyframes anim1 {}
+
+@media (min-width: 600px) {
+  @keyframes anim1 {}
+}
+</style>
+</body>
+```
 
 ### Custom fonts
 
