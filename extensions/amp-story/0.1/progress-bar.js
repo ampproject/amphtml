@@ -115,7 +115,7 @@ export class ProgressBar {
         this.updateProgress(i, 0.0);
       } else {
         // The active page manages its own progress by firing PAGE_PROGRESS
-        // events to amp-story.  As such, its progress is not set here.
+        // events to amp-story.
         this.updateProgress(i, 0.0);
       }
     }
