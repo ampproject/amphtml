@@ -451,7 +451,7 @@ export class TimerEventTracker extends EventTracker {
    * @return {!Array<number>}
    */
   getTrackedTimerKeys() {
-    return Object.keys(this.trackers_);
+    return /** @type {!Array<number>} */ (Object.keys(this.trackers_));
   }
 
   /** @override */
