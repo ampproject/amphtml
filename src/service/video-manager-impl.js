@@ -18,7 +18,7 @@
 import {ActionTrust} from '../action-trust';
 import {VideoSessionManager} from './video-session-manager';
 import {removeElement, scopedQuerySelector, isRTL} from '../dom';
-import {listen, listenOncePromise, getData} from '../event-helper';
+import {getData, listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
