@@ -460,7 +460,8 @@ class MediaBasedAdvancement extends AdvancementConfig {
       return;
     }
 
-    user().error(`Element with ID ${this.element_.id} is not a media element ` +
+    user().error('AMP-STORY-PAGE',
+        `Element with ID ${this.element_.id} is not a media element ` +
         'supported for automatic advancement.');
   }
 
