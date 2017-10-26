@@ -20,14 +20,15 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 238
+min_validator_revision_required: 246
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 456
+spec_file_revision: 503
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
+script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 
 # Validator extensions.
 # =====================
@@ -228,13 +229,17 @@ tags: {
   attrs: {
     name: "href"
     mandatory: true
-    value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|"
+    value_regex: "https://cdn\\.materialdesignicons\\.com/"
+                 "([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|"
+                 "https://cloud\\.typography\\.com/"
+                 "[0-9]*/[0-9]*/css/fonts\\.css|"
+                 "https://fast\\.fonts\\.net/.*|"
+                 "https://fonts\\.googleapis\\.com/css\\?.*|"
                  "https://fonts\\.googleapis\\.com/icon\\?.*|"
                  "https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|"
-                 "https://fast\\.fonts\\.net/.*|"
                  "https://maxcdn\\.bootstrapcdn\\.com/font-awesome/"
                  "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
-                 "https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css"
+                 "https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css"
   }
   attrs: {
     name: "rel"
@@ -333,6 +338,7 @@ tags: {
       properties: { name: "maximum-scale" }
       properties: { name: "shrink-to-fit" }
       properties: { name: "user-scalable" }
+      properties: { name: "viewport-fit" }
     }
   }
   attrs: {
@@ -940,6 +946,64 @@ tags: {
     cdata_regex: "\\s*body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\\s*"
   }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "STYLE"
+  spec_name: "style[amp-keyframes]"
+  unique: true
+  mandatory_parent: "BODY"
+  mandatory_last_child: true
+  attrs: {
+     name: "amp-keyframes"
+     value: ""
+     mandatory: true
+     dispatch_key: NAME_DISPATCH
+  }
+  # We'll need the cdata in the future and will get rid of this.
+  # But for now we require an empty tag.
+  cdata: {
+    max_bytes: 200000
+    # TODO(chenshay): This should be an ampproject url that explains the
+    # situation more fully.
+    max_bytes_spec_url: "https://www.ampproject.org/docs/reference/spec#keyframes-stylesheet"
+    css_spec: {
+      at_rule_spec: {
+        name: 'keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'media'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'supports'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-moz-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-o-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-webkit-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '$DEFAULT'  # matches if none of the above match
+        type: PARSE_AS_ERROR
+      }
+      validate_keyframes: true
+      allowed_declarations: "offset-distance"
+      allowed_declarations: "opacity"
+      allowed_declarations: "transform"
+      allowed_declarations: "visibility"
+    }
+  }
 }
 
 # 4.3 Sections
@@ -1795,6 +1859,7 @@ attr_lists: {
   attrs: { name: "text-decoration" }
   attrs: { name: "text-rendering" }
   attrs: { name: "unicode-bidi" }
+  attrs: { name: "vector-effect" }
   attrs: { name: "visibility" }
   attrs: { name: "word-spacing" }
   attrs: { name: "writing-mode" }
@@ -2377,6 +2442,15 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  tag_name: "FEFLOOD"
+  mandatory_ancestor: "SVG"
+  attr_lists: "svg-style-attr"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-filter-primitive-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
+}
+tags: {
   tag_name: "FEGAUSSIANBLUR"
   mandatory_ancestor: "SVG"
   attrs: { name: "edgemode" }
@@ -2671,6 +2745,8 @@ tags {
   attrs: {
     name: "submitting"
     mandatory: true
+    # Avoid triggering errors for non-form divs.
+    dispatch_key: NAME_DISPATCH
   }
 }
 tags {
@@ -2681,6 +2757,8 @@ tags {
   attrs: {
     name: "submit-success"
     mandatory: true
+    # Avoid triggering errors for non-form divs.
+    dispatch_key: NAME_DISPATCH
   }
 }
 tags {
@@ -2691,6 +2769,8 @@ tags {
   attrs: {
     name: "submit-error"
     mandatory: true
+    # Avoid triggering errors for non-form divs.
+    dispatch_key: NAME_DISPATCH
   }
 }
 attr_lists: {
@@ -3302,8 +3382,6 @@ attr_lists: {
 }
 tags: {  # <amp-img>
   tag_name: "AMP-IMG"
-  # <amp-img> is whitelisted for <amp-sidebar>, otherwise:
-  # disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
@@ -3326,7 +3404,6 @@ tags: {  # <amp-img>
 }
 tags: {  # <amp-pixel>
   tag_name: "AMP-PIXEL"
-  disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
     name: "referrerpolicy"
     value: "no-referrer"
@@ -3649,7 +3726,43 @@ attr_lists: {
     }
   }
   # <amp-bind>
+  attrs: { name: "[aria-activedescendant]" }
+  attrs: { name: "[aria-atomic]" }
+  attrs: { name: "[aria-autocomplete]" }
+  attrs: { name: "[aria-busy]" }
+  attrs: { name: "[aria-checked]" }
+  attrs: { name: "[aria-controls]" }
+  attrs: { name: "[aria-describedby]" }
+  attrs: { name: "[aria-disabled]" }
+  attrs: { name: "[aria-dropeffect]" }
+  attrs: { name: "[aria-expanded]" }
+  attrs: { name: "[aria-flowto]" }
+  attrs: { name: "[aria-grabbed]" }
+  attrs: { name: "[aria-haspopup]" }
+  attrs: { name: "[aria-hidden]" }
+  attrs: { name: "[aria-invalid]" }
+  attrs: { name: "[aria-label]" }
+  attrs: { name: "[aria-labelledby]" }
+  attrs: { name: "[aria-level]" }
+  attrs: { name: "[aria-live]" }
+  attrs: { name: "[aria-multiline]" }
+  attrs: { name: "[aria-multiselectable]" }
+  attrs: { name: "[aria-orientation]" }
+  attrs: { name: "[aria-owns]" }
+  attrs: { name: "[aria-posinset]" }
+  attrs: { name: "[aria-pressed]" }
+  attrs: { name: "[aria-readonly]" }
+  attrs: { name: "[aria-relevant]" }
+  attrs: { name: "[aria-required]" }
+  attrs: { name: "[aria-selected]" }
+  attrs: { name: "[aria-setsize]" }
+  attrs: { name: "[aria-sort]" }
+  attrs: { name: "[aria-valuemax]" }
+  attrs: { name: "[aria-valuemin]" }
+  attrs: { name: "[aria-valuenow]" }
+  attrs: { name: "[aria-valuetext]" }
   attrs: { name: "[class]" }
+  attrs: { name: "[hidden]" }
   attrs: { name: "[text]" }
 }
 
@@ -3680,95 +3793,112 @@ error_specificity { code: MANDATORY_ATTR_MISSING specificity: 20 }
 error_specificity { code: MANDATORY_ONEOF_ATTR_MISSING specificity: 21 }
 error_specificity { code: DUPLICATE_UNIQUE_TAG specificity: 22 }
 error_specificity { code: DUPLICATE_UNIQUE_TAG_WARNING specificity: 23 }
-error_specificity { code: STYLESHEET_TOO_LONG_OLD_VARIANT specificity: 24 }
-error_specificity { code: STYLESHEET_TOO_LONG specificity: 25 }
-error_specificity { code: CSS_SYNTAX specificity: 26 }
-error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 27 }
+error_specificity { code: STYLESHEET_TOO_LONG specificity: 24 }
+error_specificity { code: CSS_SYNTAX specificity: 25 }
+error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 26 }
 error_specificity {
-  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 28
+  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 27
 }
-error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 29 }
-error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 30 }
-error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 31 }
-error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 32 }
-error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 33 }
-error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 34 }
+error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 28 }
+error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 29 }
+error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 30 }
+error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 31 }
+error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 32 }
+error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 33 }
 error_specificity {
-  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 35
+  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 34
 }
-error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 36 }
-error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 37 }
-error_specificity { code: DEV_MODE_ENABLED specificity: 38 }
-error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 39 }
-error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 40 }
-error_specificity { code: DUPLICATE_DIMENSION specificity: 41 }
-error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 42 }
-error_specificity { code: MISSING_URL specificity: 43 }
-error_specificity { code: DISALLOWED_DOMAIN specificity: 44 }
-error_specificity { code: INVALID_URL_PROTOCOL specificity: 45 }
-error_specificity { code: INVALID_URL specificity: 46 }
-error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 47 }
-error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 48 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 49 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 50 }
-error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 51 }
+error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 35 }
+error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 36 }
+error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 37 }
+error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 38 }
+error_specificity { code: DUPLICATE_DIMENSION specificity: 39 }
+error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 40 }
+error_specificity { code: MISSING_URL specificity: 41 }
+error_specificity { code: DISALLOWED_DOMAIN specificity: 42 }
+error_specificity { code: INVALID_URL_PROTOCOL specificity: 43 }
+error_specificity { code: INVALID_URL specificity: 44 }
+error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 45 }
+error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 46 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 47 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 48 }
+error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 49 }
 error_specificity {
-  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 52
+  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 50
 }
-error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 53 }
-error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 54 }
-error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 55 }
-error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 56 }
-error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 57 }
+error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 51 }
+error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 52 }
+error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 53 }
+error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 54 }
+error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 55 }
 error_specificity {
-  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 58
+  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 56
 }
-error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 59 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 60 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 61 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 62 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 63 }
-error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 64 }
-error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 65 }
-error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 66 }
-error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 67 }
+error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 57 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 58 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 59 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 60 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 61 }
+error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 62 }
+error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 63 }
+error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 64 }
+error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 65 }
 error_specificity {
-  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 68
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 66
 }
-error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 69 }
-error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 70 }
-error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 71 }
+error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 67 }
+error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 68 }
+error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 69 }
 error_specificity {
   code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR
-  specificity: 72
+  specificity: 70
 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 73 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 71 }
 error_specificity {
   code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
-  specificity: 74
+  specificity: 72
 }
 error_specificity {
   code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
-  specificity: 75
+  specificity: 73
 }
 error_specificity {
   code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
-  specificity: 76
+  specificity: 74
 }
 error_specificity {
   code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
-  specificity: 76
+  specificity: 74
 }
 error_specificity {
   code: BASE_TAG_MUST_PRECEED_ALL_URLS
-  specificity: 77
+  specificity: 75
 }
-error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 100 }
-error_specificity { code: DEPRECATED_ATTR specificity: 101 }
-error_specificity { code: DEPRECATED_TAG specificity: 102 }
+error_specificity { code: DISALLOWED_SCRIPT_TAG specificity: 100 }
+error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 101 }
+error_specificity { code: DEPRECATED_ATTR specificity: 102 }
+error_specificity { code: DEPRECATED_TAG specificity: 103 }
 error_specificity { code: DISALLOWED_MANUFACTURED_BODY specificity: 104 }
-
-
+error_specificity { code: DOCUMENT_TOO_COMPLEX specificity: 105 }
+error_specificity { code: INCORRECT_MIN_NUM_CHILD_TAGS specificity: 106 }
+error_specificity { code: TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS specificity: 107 }
+error_specificity { code: MANDATORY_LAST_CHILD_TAG specificity: 108 }
+error_specificity {
+  code: CSS_SYNTAX_INVALID_PROPERTY
+  specificity: 109
+}
+error_specificity {
+  code: CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS
+  specificity: 110
+}
+error_specificity {
+  code: CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME
+  specificity: 111
+}
+error_specificity {
+  code: CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME
+  specificity: 112
+}
 # Error formats
 error_formats {
   code: UNKNOWN_CODE
@@ -3818,6 +3948,10 @@ error_formats {
   format: "The tag '%1' is disallowed except in specific forms."
 }
 error_formats {
+  code: DISALLOWED_SCRIPT_TAG
+  format: "Only AMP runtime 'script' tags are allowed, and only in the document head."
+}
+error_formats {
   code: DISALLOWED_ATTR
   format: "The attribute '%1' may not appear in tag '%2'."
 }
@@ -3852,11 +3986,6 @@ error_formats {
   code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT
   format: "Inconsistent units for width and height in tag '%1' - "
           "width is specified in '%2' whereas height is specified in '%3'."
-}
-error_formats {
-  code: STYLESHEET_TOO_LONG_OLD_VARIANT
-  format: "The author stylesheet specified in tag 'style amp-custom' is too "
-          "long - we saw %1 bytes whereas the limit is %2 bytes."
 }
 error_formats {
   code: STYLESHEET_TOO_LONG
@@ -3933,11 +4062,6 @@ error_formats {
   format: "The attribute '%1' in tag '%2' is deprecated - use '%3' instead."
 }
 error_formats {
-  code: DEV_MODE_ENABLED
-  format: "The attribute '%1' in tag '%2' enables the development mode. "
-          "Please remove, this feature is obsolete."
-}
-error_formats {
   code: MUTUALLY_EXCLUSIVE_ATTRS
   format: "Mutually exclusive attributes encountered in tag '%1' - "
           "pick one of %2."
@@ -3990,6 +4114,19 @@ error_formats {
   format: "Tag '%1' must have %2 child tags - saw %3 child tags."
 }
 error_formats {
+  code: INCORRECT_MIN_NUM_CHILD_TAGS
+  format: "Tag '%1' must have a minimum of %2 child tags - saw %3 child tags."
+}
+error_formats {
+  code: TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS
+  format: "Tag '%1' is not allowed to have any sibling tags ('%2' should only"
+  " have 1 child)."
+}
+error_formats {
+  code: MANDATORY_LAST_CHILD_TAG
+  format: "Tag '%1', if present, must be the last child of tag '%2'."
+}
+error_formats {
   code: DISALLOWED_CHILD_TAG_NAME
   format: "Tag '%1' is disallowed as child of tag '%2'. "
           "Child tag must be one of %3."
@@ -4037,6 +4174,10 @@ error_formats {
   code: MISSING_REQUIRED_EXTENSION
   format: "The tag '%1' requires including the '%2' extension JavaScript."
 }
+error_formats {
+  code: DOCUMENT_TOO_COMPLEX
+  format: "The document is too complex."
+}
 
 # CSS Errors. All of these use %1 for the tag name (in practice 'style'
 # by default).
@@ -4068,6 +4209,26 @@ error_formats {
   code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE
   format: "CSS syntax error in tag '%1' - end of stylesheet encountered "
           "in prelude of a qualified rule."
+}
+error_formats {
+  code: CSS_SYNTAX_INVALID_PROPERTY
+  format: "CSS syntax error in tag '%1' - invalid property '%2'. The only "
+          "allowed properties are '%3'."
+}
+error_formats {
+  code: CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS
+  format: "CSS syntax error in tag '%1' - qualified rule '%2' has no "
+          "declarations."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME
+  format: "CSS syntax error in tag '%1' - qualified rule '%2' must be located "
+          "inside of a keyframe."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME
+  format: "CSS syntax error in tag '%1' - keyframe inside keyframe is not "
+          "allowed."
 }
 error_formats {
   code: CSS_SYNTAX_INVALID_DECLARATION

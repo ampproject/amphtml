@@ -249,35 +249,6 @@ def GenValidatorGeneratedLightAmpJs(out_dir):
   logging.info('... done')
 
 
-def GenValidatorGeneratedMd(out_dir):
-  """Calls validator_gen_md to generate validator-generated.md.
-
-  Args:
-    out_dir: directory name of the output directory. Must not have slashes,
-      dots, etc.
-  """
-  logging.info('entering ...')
-  assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
-
-  # These imports happen late, within this method because they don't necessarily
-  # exist when the module starts running, and the ones that probably do
-  # are checked by CheckPrereqs.
-  from google.protobuf import text_format
-  from dist import validator_pb2
-  import validator_gen_md
-  out = []
-  validator_gen_md.GenerateValidatorGeneratedMd(
-      specfile='%s/validator.protoascii' % out_dir,
-      validator_pb2=validator_pb2,
-      text_format=text_format,
-      out=out)
-  out.append('')
-  f = open('%s/validator-generated.md' % out_dir, 'w')
-  f.write('\n'.join(out))
-  f.close()
-  logging.info('... done')
-
-
 def CompileWithClosure(js_files, closure_entry_points, output_file):
   """Compiles the arguments with the Closure compiler for transpilation to ES5.
 
@@ -314,10 +285,11 @@ def CompileValidatorMinified(out_dir):
       js_files=[
           'engine/htmlparser.js', 'engine/parse-css.js',
           'engine/parse-srcset.js', 'engine/parse-url.js',
-          'engine/tokenize-css.js', '%s/validator-generated.js' % out_dir,
+          'engine/tokenize-css.js',
+          '%s/validator-generated.js' % out_dir,
           'engine/validator-in-browser.js', 'engine/validator.js',
-          'engine/amp4ads-parse-css.js', 'engine/dom-walker.js',
-          'engine/htmlparser-interface.js'
+          'engine/amp4ads-parse-css.js', 'engine/keyframes-parse-css.js',
+          'engine/dom-walker.js', 'engine/htmlparser-interface.js'
       ],
       closure_entry_points=[
           'amp.validator.validateString',
@@ -400,10 +372,12 @@ def CompileValidatorTestMinified(out_dir):
       js_files=[
           'engine/htmlparser.js', 'engine/parse-css.js',
           'engine/parse-srcset.js', 'engine/parse-url.js',
-          'engine/tokenize-css.js', '%s/validator-generated.js' % out_dir,
+          'engine/tokenize-css.js',
+          '%s/validator-generated.js' % out_dir,
           'engine/validator-in-browser.js', 'engine/validator.js',
-          'engine/amp4ads-parse-css.js', 'engine/htmlparser-interface.js',
-          'engine/dom-walker.js', 'engine/validator_test.js'
+          'engine/amp4ads-parse-css.js', 'engine/keyframes-parse-css.js',
+          'engine/htmlparser-interface.js', 'engine/dom-walker.js',
+          'engine/validator_test.js'
       ],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator_test_minified.js' % out_dir)
@@ -422,10 +396,12 @@ def CompileValidatorLightTestMinified(out_dir):
       js_files=[
           'engine/htmlparser.js', 'engine/parse-css.js',
           'engine/parse-srcset.js', 'engine/parse-url.js',
-          'engine/tokenize-css.js', '%s/validator-generated-light-amp.js' %
-          out_dir, 'engine/validator-in-browser.js', 'engine/validator.js',
-          'engine/amp4ads-parse-css.js', 'engine/htmlparser-interface.js',
-          'engine/dom-walker.js', 'engine/validator-light_test.js'
+          'engine/tokenize-css.js',
+          '%s/validator-generated-light-amp.js' % out_dir,
+          'engine/validator-in-browser.js', 'engine/validator.js',
+          'engine/amp4ads-parse-css.js', 'engine/keyframes-parse-css.js',
+          'engine/htmlparser-interface.js', 'engine/dom-walker.js',
+          'engine/validator-light_test.js'
       ],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator-light_test_minified.js' % out_dir)
@@ -510,6 +486,27 @@ def CompileAmp4AdsParseCssTestMinified(out_dir):
   logging.info('... success')
 
 
+def CompileKeyframesParseCssTestMinified(out_dir):
+  """Runs closure compiler for keyframes-parse-css_test.js.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+  """
+  logging.info('entering ...')
+  CompileWithClosure(
+      js_files=[
+          'engine/keyframes-parse-css_test.js', 'engine/parse-css.js',
+          'engine/parse-url.js', 'engine/keyframes-parse-css.js',
+          'engine/tokenize-css.js', 'engine/css-selectors.js',
+          'engine/json-testutil.js',
+          '%s/validator-generated.js' % out_dir
+      ],
+      closure_entry_points=['parse_css.KeyframesParseCssTest'],
+      output_file='%s/keyframes-parse-css_test_minified.js' % out_dir)
+  logging.info('... success')
+
+
 def CompileParseSrcsetTestMinified(out_dir):
   """Runs closure compiler for parse-srcset_test.js.
 
@@ -555,6 +552,7 @@ def GenerateTestRunner(out_dir):
              require('./parse-css_test_minified');
              require('./parse-url_test_minified');
              require('./amp4ads-parse-css_test_minified');
+             require('./keyframes-parse-css_test_minified');
              require('./parse-srcset_test_minified');
              jasmine.onComplete(function (passed) {
                  process.exit(passed ? 0 : 1);
@@ -581,7 +579,8 @@ def RunTests(out_dir, nodejs_cmd):
 def Main():
   """The main method, which executes all build steps and runs the tests."""
   logging.basicConfig(
-      format='[[%(filename)s %(funcName)s]] - %(message)s', level=logging.INFO)
+      format='[[%(filename)s %(funcName)s]] - %(message)s',
+      level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
   nodejs_cmd = GetNodeJsCmd()
   CheckPrereqs()
   InstallNodeDependencies()
@@ -590,7 +589,6 @@ def Main():
   GenValidatorPb2Py(out_dir='dist')
   GenValidatorGeneratedJs(out_dir='dist')
   GenValidatorGeneratedLightAmpJs(out_dir='dist')
-  GenValidatorGeneratedMd(out_dir='dist')
   CompileValidatorMinified(out_dir='dist')
   RunSmokeTest(out_dir='dist', nodejs_cmd=nodejs_cmd)
   RunIndexTest(nodejs_cmd=nodejs_cmd)
@@ -600,6 +598,7 @@ def Main():
   CompileParseCssTestMinified(out_dir='dist')
   CompileParseUrlTestMinified(out_dir='dist')
   CompileAmp4AdsParseCssTestMinified(out_dir='dist')
+  CompileKeyframesParseCssTestMinified(out_dir='dist')
   CompileParseSrcsetTestMinified(out_dir='dist')
   GenerateTestRunner(out_dir='dist')
   RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)

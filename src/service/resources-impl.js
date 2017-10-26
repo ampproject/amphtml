@@ -184,7 +184,7 @@ export class Resources {
     /** @private {boolean} */
     this.isCurrentlyBuildingPendingResources_ = false;
 
-    /** @private @const {!./viewport-impl.Viewport} */
+    /** @private @const {!./viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
@@ -212,7 +212,10 @@ export class Resources {
     this.viewport_.onChanged(event => {
       this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
-      this.relayoutAll_ = this.relayoutAll_ || event.relayoutAll;
+      if (event.relayoutAll) {
+        this.relayoutAll_ = true;
+        this.maybeChangeHeight_ = true;
+      }
       this.schedulePass();
     });
     this.viewport_.onScroll(() => {
@@ -449,7 +452,7 @@ export class Resources {
 
   /**
    * Returns the viewport instance
-   * @return {!./viewport-impl.Viewport}
+   * @return {!./viewport/viewport-impl.Viewport}
    */
   getViewport() {
     return this.viewport_;
@@ -524,13 +527,8 @@ export class Resources {
     if (this.isRuntimeOn_ || this.isBuildOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
-        resource.build();
-        if (scheduleWhenBuilt && !resource.isBlacklisted()) {
-          // TODO(dvoytenko): Consider removing "blacklisted" resources
-          // altogether from the list of resources.
-          this.schedulePass();
-        }
-      } else if (!resource.element.isBuilt()) {
+        this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
+      } else if (!resource.isBuilt() && !resource.isBuilding()) {
         if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
           this.pendingBuildResources_.push(resource);
@@ -564,7 +562,6 @@ export class Resources {
    * @private
    */
   buildReadyResourcesUnsafe_(scheduleWhenBuilt = true) {
-    let builtElementsCount = 0;
     // This will loop over all current pending resources and those that
     // get added by other resources build-cycle, this will make sure all
     // elements get a chance to be built.
@@ -576,16 +573,28 @@ export class Resources {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
-        resource.build();
-        if (!resource.isBlacklisted()) {
-          builtElementsCount++;
-        }
+        this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
       }
     }
+  }
 
-    if (scheduleWhenBuilt && builtElementsCount > 0) {
-      this.schedulePass();
+  /**
+   * @param {!Resource} resource
+   * @param {boolean} schedulePass
+   * @return {?Promise}
+   * @private
+   */
+  buildResourceUnsafe_(resource, schedulePass) {
+    const promise = resource.build();
+    if (!promise || !schedulePass) {
+      return promise;
     }
+    return promise.then(() => this.schedulePass(), error => {
+      // Build failed: remove the resource. No other state changes are
+      // needed.
+      this.removeResource_(resource);
+      throw error;
+    });
   }
 
   /**
@@ -611,9 +620,11 @@ export class Resources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
-    resource.pauseOnRemove();
-    if (opt_disconnect) {
-      resource.disconnect();
+    if (resource.isBuilt()) {
+      resource.pauseOnRemove();
+      if (opt_disconnect) {
+        resource.disconnect();
+      }
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'element removed:', resource.debugid);
@@ -665,7 +676,7 @@ export class Resources {
         return;
       }
       if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
-        promises.push(resource.element.whenBuilt().then(() => {
+        promises.push(resource.whenBuilt().then(() => {
           resource.measure();
           if (!resource.isDisplayed()) {
             return;
@@ -1332,7 +1343,7 @@ export class Resources {
     let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT && !r.isBlacklisted()) {
+      if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true,
             /* scheduleWhenBuilt */ false);
       }
@@ -1834,7 +1845,7 @@ export class Resources {
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
       if (resource.getState() == ResourceState.NOT_BUILT) {
-        resource.element.whenBuilt().then(() => {
+        resource.whenBuilt().then(() => {
           this.measureAndScheduleIfAllowed_(resource, layout,
               parentResource.getPriority());
         });

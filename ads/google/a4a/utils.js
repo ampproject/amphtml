@@ -17,12 +17,12 @@
 import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
-import {isCanary} from '../../../src/experiments';
+import {getBinaryType} from '../../../src/experiments';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {isProxyOrigin, parseUrl} from '../../../src/url';
+import {dict} from '../../../src/utils/object';
+import {parseUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {
@@ -34,7 +34,7 @@ import {
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
 
 /** @const {number} */
-const MAX_URL_LENGTH = 4096;
+const MAX_URL_LENGTH = 16384;
 
 /** @enum {string} */
 const AmpAdImplementation = {
@@ -48,6 +48,17 @@ export const ValidAdContainerTypes = {
   'AMP-FX-FLYING-CARPET': 'fc',
   'AMP-LIGHTBOX': 'lb',
   'AMP-STICKY-AD': 'sa',
+};
+
+/**
+ * See `VisibilityState` enum.
+ * @const {!Object<string, string>}
+ */
+const visibilityStateCodes = {
+  'visible': '1',
+  'hidden': '2',
+  'prerender': '3',
+  'unloaded': '5',
 };
 
 /** @const {string} */
@@ -78,7 +89,7 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 /**
  * Check whether Google Ads supports the A4A rendering pathway is valid for the
  * environment by ensuring native crypto support and page originated in the
- * the {@code cdn.ampproject.org} CDN <em>or</em> we must be running in local
+ * {@code cdn.ampproject.org} CDN <em>or</em> we must be running in local
  * dev mode.
  *
  * @param {!Window} win  Host window for the ad.
@@ -86,16 +97,20 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
  *   pathway.
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
-  const supportsNativeCrypto = win.crypto &&
-      (win.crypto.subtle || win.crypto.webkitSubtle);
-  // Note: Theoretically, isProxyOrigin is the right way to do this, b/c it
-  // will be kept up to date with known proxies.  However, it doesn't seem to
-  // be compatible with loading the example files from localhost.  To hack
-  // around that, just say that we're A4A eligible if we're in local dev
-  // mode, regardless of origin path.
-  return supportsNativeCrypto &&
-      (isProxyOrigin(win.location) || getMode(win).localDev ||
-       getMode(win).test);
+  const googleCdnProxyRegex =
+        /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+  return supportsNativeCrypto(win) && (
+      !!googleCdnProxyRegex.test(win.location.origin) ||
+        getMode(win).localDev || getMode(win).test);
+}
+
+/**
+ * Checks whether native crypto is supported for win.
+ * @param {!Window} win  Host window for the ad.
+ * @returns {boolean} Whether native crypto is supported.
+ */
+export function supportsNativeCrypto(win) {
+  return win.crypto && (win.crypto.subtle || win.crypto.webkitSubtle);
 }
 
 /**
@@ -139,9 +154,6 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   const slotRect = a4a.getPageLayoutBox();
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
-  const pfx = enclosingContainers.includes(
-      ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) ||
-      enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
   let eids = adElement.getAttribute('data-experiment-id');
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
@@ -153,7 +165,6 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
     'adx': slotRect.left,
     'ady': slotRect.top,
     'oid': '2',
-    'pfx': pfx ? '1' : '0',
     'act': enclosingContainers.length ? enclosingContainers.join() : null,
   };
 }
@@ -180,30 +191,31 @@ export function groupAmpAdsByType(win, type, groupFn) {
 
 /**
  * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} doc
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {number} startTime
- * @param {string=} output default is 'html'
  * @return {!Promise<!Object<string,null|number|string>>}
  */
-export function googlePageParameters(win, doc, startTime, output = 'html') {
-  const referrerPromise = Services.viewerForDoc(doc).getReferrerUrl();
-  return getOrCreateAdCid(doc, 'AMP_ECID_GOOGLE', '_ga')
+export function googlePageParameters(win, nodeOrDoc, startTime) {
+  const referrerPromise = Services.viewerForDoc(nodeOrDoc).getReferrerUrl();
+  return getOrCreateAdCid(nodeOrDoc, 'AMP_ECID_GOOGLE', '_ga')
       .then(clientId => referrerPromise.then(referrer => {
-        const documentInfo = Services.documentInfoForDoc(doc);
+        const documentInfo = Services.documentInfoForDoc(nodeOrDoc);
         // Read by GPT for GA/GPT integration.
         win.gaGlobal = win.gaGlobal ||
         {cid: clientId, hid: documentInfo.pageViewId};
         const screen = win.screen;
-        const viewport = Services.viewportForDoc(doc);
+        const viewport = Services.viewportForDoc(nodeOrDoc);
         const viewportRect = viewport.getRect();
         const viewportSize = viewport.getSize();
+        const visibilityState = Services.viewerForDoc(nodeOrDoc)
+            .getVisibilityState();
+        const art = getBinaryTypeNumericalCode(getBinaryType(win));
         return {
           'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
           'd_imp': '1',
-          'c': getCorrelator(win, clientId),
+          'c': getCorrelator(win, clientId, nodeOrDoc),
           'dt': startTime,
-          output,
           'biw': viewportRect.width,
           'bih': viewportRect.height,
           'u_aw': screen ? screen.availWidth : null,
@@ -215,7 +227,10 @@ export function googlePageParameters(win, doc, startTime, output = 'html') {
           'u_his': getHistoryLength(win),
           'isw': win != win.top ? viewportSize.width : null,
           'ish': win != win.top ? viewportSize.height : null,
-          'art': isCanary(win) ? '2' : null,
+          'art': art == '0' ? null : art,
+          'vis': visibilityStateCodes[visibilityState] || '0',
+          'debug_experiment_id':
+              (/,?deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?
@@ -430,16 +445,6 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
             'continuousTimeMin': 1000,
           },
         },
-        'continuousVisibleIniLoad': {
-          'on': 'ini-load',
-          'selector': 'amp-ad',
-          'selectionMethod': 'closest',
-        },
-        'continuousVisibleRenderStart': {
-          'on': 'render-start',
-          'selector': 'amp-ad',
-          'selectionMethod': 'closest',
-        },
       },
     });
 
@@ -513,14 +518,22 @@ export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
       `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
   deltaTime = Math.round(deltaTime);
   const isAmpSuffix = isVerifiedAmpCreative ? 'Friendly' : 'CrossDomain';
+  config['triggers']['continuousVisibleIniLoad'] = {
+    'on': 'ini-load',
+    'selector': 'amp-ad',
+    'selectionMethod': 'closest',
+    'request': 'iniLoadCsi',
+  };
+  config['triggers']['continuousVisibleRenderStart'] = {
+    'on': 'render-start',
+    'selector': 'amp-ad',
+    'selectionMethod': 'closest',
+    'request': 'renderStartCsi',
+  };
   config['requests']['iniLoadCsi'] = baseCsiUrl +
       `&met.a4a.${slotId}=iniLoadCsi${isAmpSuffix}.${deltaTime}`;
   config['requests']['renderStartCsi'] = baseCsiUrl +
       `&met.a4a.${slotId}=renderStartCsi${isAmpSuffix}.${deltaTime}`;
-  config['triggers']['continuousVisibleIniLoad']['request'] =
-      'iniLoadCsi';
-  config['triggers']['continuousVisibleRenderStart']['request'] =
-      'renderStartCsi';
 
   // Add CSI ping for visibility.
   config['requests']['visibilityCsi'] = baseCsiUrl +
@@ -570,3 +583,107 @@ export function maybeAppendErrorParameter(adUrl, parameterValue) {
   dev().assert(modifiedAdUrl.length <= MAX_URL_LENGTH);
   return modifiedAdUrl;
 }
+
+/**
+ * Returns a numerical code representing the binary type.
+ * @param {string} type
+ * @return {?string}
+ */
+export function getBinaryTypeNumericalCode(type) {
+  return {
+    'production': '0',
+    'control': '1',
+    'canary': '2',
+  }[type] || null;
+}
+
+/** @const {!RegExp} */
+const IDENTITY_DOMAIN_REGEXP_ = /\.google\.(?:com?\.)?[a-z]{2,3}$/;
+
+/** @typedef {{
+      token: (string|undefined),
+      jar: (string|undefined),
+      pucrd: (string|undefined),
+      freshLifetimeSecs: (number|undefined),
+      validLifetimeSecs: (number|undefined),
+      fetchTimeMs: (number|undefined)
+   }} */
+export let IdentityToken;
+
+/**
+ * @param {!Window} win
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!Promise<!IdentityToken>}
+ */
+export function getIdentityToken(win, nodeOrDoc) {
+  win['goog_identity_prom'] = win['goog_identity_prom'] ||
+      executeIdentityTokenFetch(win, nodeOrDoc);
+  return /** @type {!Promise<!IdentityToken>} */(win['goog_identity_prom']);
+};
+
+/**
+ * @param {!Window} win
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {number=} redirectsRemaining (default 1)
+ * @param {string=} domain
+ * @param {number=} startTime
+ * @return {!Promise<!IdentityToken>}
+ */
+function executeIdentityTokenFetch(win, nodeOrDoc, redirectsRemaining = 1,
+    domain = undefined, startTime = Date.now()) {
+  const url = getIdentityTokenRequestUrl(win, nodeOrDoc, domain);
+  return Services.xhrFor(win).fetchJson(url, {
+    mode: 'cors',
+    method: 'GET',
+    ampCors: false,
+    credentials: 'include',
+  }).then(res => res.json())
+      .then(obj => {
+        const token = obj['newToken'];
+        const jar = obj['1p_jar'] || '';
+        const pucrd = obj['pucrd'] || '';
+        const freshLifetimeSecs =
+            parseInt(obj['freshLifetimeSecs'] || '', 10) || 3600;
+        const validLifetimeSecs =
+            parseInt(obj['validLifetimeSecs'] || '', 10) || 86400;
+        const altDomain = obj['altDomain'];
+        const fetchTimeMs = Date.now() - startTime;
+        if (IDENTITY_DOMAIN_REGEXP_.test(altDomain)) {
+          if (!redirectsRemaining--) {
+            // Max redirects, log?
+            return {fetchTimeMs};
+          }
+          return executeIdentityTokenFetch(
+              win, nodeOrDoc, redirectsRemaining, altDomain, startTime);
+        } else if (freshLifetimeSecs > 0 && validLifetimeSecs > 0 &&
+            typeof token == 'string') {
+          return {token, jar, pucrd, freshLifetimeSecs, validLifetimeSecs,
+            fetchTimeMs};
+        }
+        // returning empty
+        return {fetchTimeMs};
+      })
+      .catch(unusedErr => {
+        // TODO log?
+        return {};
+      });
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {string=} domain
+ * @return {string} url
+ * @visibleForTesting
+ */
+export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
+  if (!domain && win != win.top && win.location.ancestorOrigins) {
+    const matches = IDENTITY_DOMAIN_REGEXP_.exec(
+        win.location.ancestorOrigins[win.location.ancestorOrigins.length - 1]);
+    domain = (matches && matches[0]) || undefined;
+  }
+  domain = domain || '.google.com';
+  const canonical =
+    parseUrl(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl).hostname;
+  return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
+};

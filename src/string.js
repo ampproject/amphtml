@@ -24,12 +24,30 @@ function toUpperCase(_match, character) {
 }
 
 /**
- * @param {string} name Attribute name with dashes
- * @return {string} Dashes removed and character after to upper case.
+ * @param {string} match
+ * @return {string}
+ */
+function prependDashAndToLowerCase(match) {
+  return '-' + match.toLowerCase();
+}
+
+/**
+ * @param {string} name Attribute name containing dashes.
+ * @return {string} Dashes removed and successive character sent to upper case.
  * visibleForTesting
  */
 export function dashToCamelCase(name) {
   return name.replace(/-([a-z])/g, toUpperCase);
+}
+
+/**
+ * Converts a string that is in camelCase to one that is in dash-case.
+ *
+ * @param {string} string The string to convert.
+ * @return {string} The string in dash-case.
+ */
+export function camelCaseToDash(string) {
+  return string.replace(/(?!^)[A-Z]/g, prependDashAndToLowerCase);
 }
 
 /**

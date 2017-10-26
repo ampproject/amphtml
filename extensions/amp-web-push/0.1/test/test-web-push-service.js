@@ -18,13 +18,13 @@ import {WindowMessenger} from '../window-messenger';
 import {AmpWebPushHelperFrame} from '../amp-web-push-helper-frame';
 import {WebPushService} from '../web-push-service';
 import {WebPushWidgetVisibilities} from '../amp-web-push-widget';
-import {TAG, NotificationPermission} from '../vars';
-import {toggleExperiment} from '../../../../src/experiments';
+import {NotificationPermission} from '../vars';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
-import * as sinon from 'sinon';
+import * as mode from '../../../../src/mode';
 
 const FAKE_IFRAME_URL =
   '//ads.localhost:9876/test/fixtures/served/iframe-stub.html#';
+
 
 describes.realWin('web-push-service environment support', {
   amp: true,
@@ -32,12 +32,7 @@ describes.realWin('web-push-service environment support', {
   let webPush;
 
   beforeEach(() => {
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
-  });
-
-  afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
   });
 
   it('should report supported environment', () => {
@@ -73,6 +68,107 @@ describes.realWin('web-push-service environment support', {
     });
     expect(webPush.environmentSupportsWebPush()).to.eq(false);
   });
+
+  it('an unsupported environment should prevent initializing', () => {
+    // Cause push to not be supported on this environment
+    Object.defineProperty(env.win, 'PushManager', {
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value: undefined,
+    });
+    // Should not error out
+    return webPush.start().should.eventually.be
+        .rejectedWith(/Web push is not supported/);
+  });
+});
+
+describes.fakeWin('web-push-service environment support', {
+  amp: true,
+}, env => {
+  it('should not support HTTP location', () => {
+    env.ampdoc.win.location.resetHref('http://site.com/');
+    sandbox.stub(mode, 'getMode', () => {
+      return {development: false, test: false};
+    });
+    expect(env.ampdoc.win.location.href).to.be.equal(
+        'http://site.com/');
+    const webPush = new WebPushService(env.ampdoc);
+    sandbox./*OK*/stub(
+        webPush,
+        'arePushRelatedApisSupported_',
+        () => true
+    );
+    expect(webPush.environmentSupportsWebPush()).to.eq(false);
+  });
+});
+
+describes.fakeWin('web-push-service environment support', {
+  amp: true,
+}, env => {
+  it('should support localhost HTTP location', () => {
+    env.ampdoc.win.location.resetHref('http://localhost/');
+    expect(env.ampdoc.win.location.href).to.be.equal(
+        'http://localhost/');
+    const webPush = new WebPushService(env.ampdoc);
+    sandbox./*OK*/stub(
+        webPush,
+        'arePushRelatedApisSupported_',
+        () => true
+    );
+    expect(webPush.environmentSupportsWebPush()).to.eq(true);
+  });
+});
+
+describes.fakeWin('web-push-service environment support', {
+  amp: true,
+}, env => {
+  it('should support localhost HTTP location with port', () => {
+    env.ampdoc.win.location.resetHref('http://localhost:8000/');
+    const webPush = new WebPushService(env.ampdoc);
+    sandbox./*OK*/stub(
+        webPush,
+        'arePushRelatedApisSupported_',
+        () => true
+    );
+    expect(env.ampdoc.win.location.href).to.be.equal(
+        'http://localhost:8000/');
+    expect(webPush.environmentSupportsWebPush()).to.eq(true);
+  });
+});
+
+describes.fakeWin('web-push-service environment support', {
+  amp: true,
+}, env => {
+  it('should support 127.0.0.1 HTTP location', () => {
+    env.ampdoc.win.location.resetHref('http://127.0.0.1/');
+    const webPush = new WebPushService(env.ampdoc);
+    sandbox./*OK*/stub(
+        webPush,
+        'arePushRelatedApisSupported_',
+        () => true
+    );
+    expect(env.ampdoc.win.location.href).to.be.equal(
+        'http://127.0.0.1/');
+    expect(webPush.environmentSupportsWebPush()).to.eq(true);
+  });
+});
+
+describes.fakeWin('web-push-service environment support', {
+  amp: true,
+}, env => {
+  it('should support 127.0.0.1 HTTP location with port', () => {
+    env.ampdoc.win.location.resetHref('http://localhost:9000/');
+    const webPush = new WebPushService(env.ampdoc);
+    sandbox./*OK*/stub(
+        webPush,
+        'arePushRelatedApisSupported_',
+        () => true
+    );
+    expect(env.ampdoc.win.location.href).to.be.equal(
+        'http://localhost:9000/');
+    expect(webPush.environmentSupportsWebPush()).to.eq(true);
+  });
 });
 
 describes.realWin('web-push-service helper frame messaging', {
@@ -81,7 +177,6 @@ describes.realWin('web-push-service helper frame messaging', {
   let webPush;
   const webPushConfig = {};
   let iframeWindow = null;
-  let sandbox = null;
 
   function setDefaultConfigParams_() {
     webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] =
@@ -124,14 +219,7 @@ describes.realWin('web-push-service helper frame messaging', {
 
   beforeEach(() => {
     setDefaultConfigParams_();
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
-    sandbox.restore();
   });
 
   it('should create helper iframe on document', () => {
@@ -150,13 +238,13 @@ describes.realWin('web-push-service helper frame messaging', {
   });
 });
 
+
 describes.realWin('web-push-service widget visibilities', {
   amp: true,
 }, env => {
   let webPush;
   const webPushConfig = {};
   let iframeWindow = null;
-  let sandbox = null;
 
   function setDefaultConfigParams_() {
     webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] =
@@ -199,14 +287,7 @@ describes.realWin('web-push-service widget visibilities', {
 
   beforeEach(() => {
     setDefaultConfigParams_();
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
-    sandbox.restore();
   });
 
   it('should show blocked widget if permission query returns blocked', () => {
@@ -216,10 +297,21 @@ describes.realWin('web-push-service widget visibilities', {
 
       sandbox./*OK*/stub(
           webPush,
-          'queryNotificationPermission',
+          'isQuerySupported_',
+          () => Promise.resolve(true)
+      );
+
+      sandbox./*OK*/stub(
+          webPush,
+          'getCanonicalFrameStorageValue_',
           () => Promise.resolve(NotificationPermission.DENIED)
       );
 
+      sandbox./*OK*/stub(
+          webPush,
+          'doesWidgetCategoryMarkupExist_',
+          () => true
+      );
       // We've mocked default notification permissions
       return webPush.updateWidgetVisibilities();
     }).then(() => {
@@ -328,6 +420,73 @@ describes.realWin('web-push-service widget visibilities', {
     });
   });
 
+  it('service worker URLs should match except for query params', () => {
+    // Identical URLs
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/worker-a.js?a=1&b=2'
+      )
+    ).to.eq(true);
+
+    // Identical URLs except URL to test is allowed to have more than the
+    // first's query params
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/worker-a.js?a=1&b=2&c=3&d=4'
+      )
+    ).to.eq(true);
+
+    // URL to test is missing one of the first URL's query params
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/worker-a.js?a=1&c=3&d=4'
+      )
+    ).to.eq(false);
+
+    // URL to test is missing all query params
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/worker-a.js'
+      )
+    ).to.eq(false);
+
+    // URL to test has the wrong scheme
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'http://site.com/worker-a.js?a=1&b=2'
+      )
+    ).to.eq(false);
+
+    // URL to test has the wrong hostname
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://another-site.com/worker-a.js?a=1&b=2'
+      )
+    ).to.eq(false);
+
+    // URL to test has the wrong port
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site:8000.com/worker-a.js?a=1&b=2'
+      )
+    ).to.eq(false);
+
+    // URL to test has the wrong pathname
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/another-worker-b.js?a=1&b=2'
+      )
+    ).to.eq(false);
+  });
+
   it('should forward amp-web-push-subscription-state message to SW', done => {
     let iframeWindowControllerMock = null;
 
@@ -366,7 +525,6 @@ describes.realWin('web-push-service subscribing', {
   let webPush;
   const webPushConfig = {};
   let iframeWindow = null;
-  let sandbox = null;
 
   function setDefaultConfigParams_() {
     webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] =
@@ -409,14 +567,7 @@ describes.realWin('web-push-service subscribing', {
 
   beforeEach(() => {
     setDefaultConfigParams_();
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
-    sandbox.restore();
   });
 
   it('should register service worker', () => {
@@ -519,7 +670,6 @@ describes.realWin('web-push-service unsubscribing', {
   let webPush;
   const webPushConfig = {};
   let iframeWindow = null;
-  let sandbox = null;
 
   function setDefaultConfigParams_() {
     webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] =
@@ -562,14 +712,7 @@ describes.realWin('web-push-service unsubscribing', {
 
   beforeEach(() => {
     setDefaultConfigParams_();
-    toggleExperiment(env.win, TAG, true);
     webPush = new WebPushService(env.ampdoc);
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
-    sandbox.restore();
   });
 
   it('should forward amp-web-push-unsubscribe message to SW', done => {

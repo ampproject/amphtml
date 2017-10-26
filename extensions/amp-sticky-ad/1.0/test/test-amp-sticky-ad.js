@@ -50,7 +50,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
     });
 
     it('should listen to scroll event', () => {
-      expect(impl.scrollUnlisten_).to.be.function;
+      expect(impl.scrollUnlisten_).to.be.a('function');
     });
 
     it('should not build when scrollTop not greater than 1', () => {

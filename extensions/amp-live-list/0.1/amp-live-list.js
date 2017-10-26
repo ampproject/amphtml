@@ -112,7 +112,7 @@ export class AmpLiveList extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?../../../src/service/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
     /** @private {?LiveListManager} */

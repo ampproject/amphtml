@@ -14,11 +14,13 @@
  * the License.
  */
 
-export const EXPERIMENT = 'amp-web-push';
 export const TAG = 'amp-web-push';
 export const CONFIG_TAG = TAG;
 export const SERVICE_TAG = TAG + '-service';
 export const WIDGET_TAG = TAG + '-widget';
+export const StorageKeys = {
+  NOTIFICATION_PERMISSION: 'amp-web-push-notification-permission',
+};
 
 /** @enum {string} */
 export const NotificationPermission = {

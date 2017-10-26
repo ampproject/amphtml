@@ -24,7 +24,7 @@ import {
     useAnalyticsInSandbox,
     CustomEventReporterBuilder,
 } from '../../src/extension-analytics';
-import {createAmpElementProto} from '../../src/custom-element';
+import {registerElement} from '../../src/service/custom-element-registry';
 import {Services} from '../../src/services';
 import {BaseElement} from '../../src/base-element';
 import {macroTask} from '../../testing/yield';
@@ -39,13 +39,19 @@ describes.realWin('extension-analytics', {
   let win;
 
   describe('insertAnalyticsElement', () => {
+    let sandbox;
     class MockInstrumentation {
     };
 
     beforeEach(() => {
+      sandbox = sinon.sandbox.create();
       timer = Services.timerFor(env.win);
       ampdoc = env.ampdoc;
       win = env.win;
+    });
+
+    afterEach(() => {
+      sandbox.restore();
     });
 
     it('should create analytics element if analytics is installed', () => {
@@ -85,9 +91,16 @@ describes.realWin('extension-analytics', {
   describe('CustomEventReporterBuilder', () => {
     let builder;
     let parent;
+    let sandbox;
+
     beforeEach(() => {
+      sandbox = sinon.sandbox.create();
       parent = document.createElement('div');
       builder = new CustomEventReporterBuilder(parent);
+    });
+
+    afterEach(() => {
+      sandbox.restore();
     });
 
     it('track event with one request', () => {
@@ -156,7 +169,7 @@ describes.realWin('extension-analytics', {
         whenSignal: () => {return Promise.resolve();},
       };};
       const reporter = builder.track('test', 'fake.com').build();
-      expect(reporter.trigger).to.be.defined;
+      expect(reporter.trigger).to.exist;
     });
   });
 
@@ -172,7 +185,8 @@ describes.realWin('extension-analytics', {
       triggerEventForTarget(nodeOrDoc, eventType, opt_vars) {
         triggerEventSpy(nodeOrDoc, eventType, opt_vars);
       }
-        }
+    }
+
     beforeEach(() => {
       ampdoc = env.ampdoc;
       sandbox = sinon.sandbox.create();
@@ -183,15 +197,18 @@ describes.realWin('extension-analytics', {
             // Force instantiation
       getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
 
-      env.win.document.registerElement('amp-test', {
-        prototype: createAmpElementProto(env.win, 'amp-test', BaseElement),
-      });
+      registerElement(env.win, 'amp-test', BaseElement);
       parentEle = env.win.document.createElement('amp-test');
       parentEle.setAttribute('layout', 'nodisplay');
       env.win.document.body.appendChild(parentEle);
-      parentEle.build();
+      const buildPromise = parentEle.build();
       builder = new CustomEventReporterBuilder(parentEle);
       reporter = builder.track('test', 'fake.com').build();
+      return buildPromise;
+    });
+
+    afterEach(() => {
+      sandbox.restore();
     });
 
     it('replace eventType with new name', function* () {
@@ -263,14 +280,12 @@ describes.realWin('extension-analytics', {
           buildCallback() {
             useAnalyticsInSandbox(this.element, promise);
           }
-                }
-        env.win.document.registerElement('amp-test', {
-          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
-        });
+        }
+        registerElement(env.win, 'amp-test', TestElement);
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
-        parentEle.build();
+        return parentEle.build();
       });
 
       it('should insert analytics after LOAD_START', function* () {
@@ -321,14 +336,12 @@ describes.realWin('extension-analytics', {
             useAnalyticsInSandbox(this.element, promise);
             return super.layoutCallback();
           }
-                }
-        env.win.document.registerElement('amp-test', {
-          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
-        });
+        }
+        registerElement(env.win, 'amp-test', TestElement);
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
-        parentEle.build();
+        return parentEle.build();
       });
 
       it('should insert and remove analytics', function* () {
@@ -355,14 +368,12 @@ describes.realWin('extension-analytics', {
           unlayoutCallback() {
             return true;
           }
-                }
-        env.win.document.registerElement('amp-test', {
-          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
-        });
+        }
+        registerElement(env.win, 'amp-test', TestElement);
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
-        parentEle.build();
+        return parentEle.build();
       });
 
       it('should NOT insert analytics when relayout', function* () {
@@ -404,14 +415,12 @@ describes.realWin('extension-analytics', {
           unlayoutCallback() {
             return true;
           }
-                }
-        env.win.document.registerElement('amp-test', {
-          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
-        });
+        }
+        registerElement(env.win, 'amp-test', TestElement);
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
-        parentEle.build();
+        return parentEle.build();
       });
 
       it('should insert analytics when relayout', function* () {

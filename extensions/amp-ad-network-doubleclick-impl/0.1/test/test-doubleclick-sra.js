@@ -139,6 +139,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
       element1.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
       sandbox.stub(impl1, 'generateAdKey_').withArgs('50x320').returns('13579');
       impl1.populateAdUrlState();
+      impl1.identityToken =
+          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
+            token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
+          });
       const targeting2 = {
         cookieOptOut: 1,
         categoryExclusions: 'food',
@@ -169,6 +173,11 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         adtest: 'on',
         tfcd: 'some_tfcd',
         eid: MANUAL_EXPERIMENT_ID,
+        output: 'ldjh',
+        impl: 'fifs',
+        adsid: 'abcdef',
+        jar: 'some_jar',
+        pucrd: 'some_pucrd',
       });
     });
   });
@@ -205,7 +214,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
       const xhrWithArgs = xhrMock.withArgs(
           sinon.match(
               new RegExp('^https:\/\/securepubads\\.g\\.doubleclick\\.net' +
-            `\/gampad\/ads\\?iu_parts=${iuParts}&enc_prev_ius=`)),
+            '\/gampad\/ads\\?output=ldjh&impl=fifs&iu_parts=' +
+            `${iuParts}&enc_prev_ius=`)),
           {
             mode: 'cors',
             method: 'GET',

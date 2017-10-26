@@ -174,6 +174,24 @@ This notification should ALWAYS show on every page visit.
 </amp-user-notification>
 ```
 
+##### enctype (optional)
+
+By default, this is set to `application/json;charset=utf-8`. But you can set it to `application/x-www-form-urlencoded`, AMP will send the post dismiss request using this content type instead.
+
+Example:
+```html
+<amp-user-notification
+      layout=nodisplay
+      id="amp-user-notification7"
+      enctype="application/x-www-form-urlencoded"
+      data-persist-dismissal="false"
+      data-show-if-href="https://example.com/api/shouldShow?timestamp=TIMESTAMP"
+      data-dismiss-href="https://example.com/api/echo/post">
+This notification should ALWAYS show - if shouldShow endpoint response was true.
+<a href="#learn-more">Learn more.</a>
+<button on="tap:amp-user-notification7.dismiss">Dismiss</button>
+</amp-user-notification>
+
 ## JSON Fields
 
 - `elementId` (string): The HTML ID used on the `amp-user-notification` element.

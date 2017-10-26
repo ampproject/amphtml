@@ -29,7 +29,6 @@ tags: {  # amp-user-notification
 tags: {  # <amp-user-notification>
   html_format: AMP
   tag_name: "AMP-USER-NOTIFICATION"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-user-notification"
   attr_lists: "extended-amp-global"
   amp_layout: {
@@ -52,5 +51,9 @@ tags: {  # <amp-user-notification>
       allow_relative: false
       allow_empty: false
     }
+  }
+  attrs: {
+    name: "enctype"
+    value: "application/x-www-form-urlencoded"
   }
 }

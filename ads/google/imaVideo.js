@@ -15,6 +15,9 @@
  */
 
 import {camelCaseToTitleCase, setStyle} from '../../src/style';
+import {
+  ImaPlayerData,
+} from './ima-player-data';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
 import {tryParseJson} from '../../src/json';
@@ -168,12 +171,14 @@ let videoWidth, videoHeight;
 // IMASettings provided via <script> tag in parent element.
 let imaSettings;
 
+// Player data used for video analytics.
+const playerData = new ImaPlayerData();
+
 /**
  * Loads the IMA SDK library.
  */
 function getIma(global, cb) {
   loadScript(global, 'https://imasdk.googleapis.com/js/sdkloader/ima3.js', cb);
-  //loadScript(global, 'https://storage.googleapis.com/gvabox/sbusolits/h5/debug/ima3.js', cb);
 }
 
 /**
@@ -322,6 +327,8 @@ export function imaVideo(global, data) {
   setStyle(videoPlayer, 'background-color', 'black');
   videoPlayer.setAttribute('poster', data.poster);
   videoPlayer.setAttribute('playsinline', true);
+  videoPlayer.setAttribute(
+      'controlsList', 'nodownload nofullscreen noremoteplayback');
   if (data.src) {
     const sourceElement = document.createElement('source');
     sourceElement.setAttribute('src', data.src);
@@ -476,6 +483,7 @@ function changeIcon(element, name, fill = '#FFFFFF') {
 export function onClick(global) {
   playbackStarted = true;
   uiTicker = setInterval(uiTickerClick, 500);
+  setInterval(playerDataTick, 1000);
   bigPlayDiv.removeEventListener(interactEvent, onClick);
   setStyle(bigPlayDiv, 'display', 'none');
   adDisplayContainer.initialize();
@@ -519,6 +527,8 @@ export function playAds(global) {
 export function onContentEnded() {
   contentComplete = true;
   adsLoader.contentComplete();
+  window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
+  window.parent./*OK*/postMessage({event: VideoEvents.ENDED}, '*');
 }
 
 /**
@@ -555,7 +565,14 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
  */
 export function onAdsLoaderError() {
   adRequestFailed = true;
-  playVideo();
+  // Send this message to trigger auto-play for failed pre-roll requests -
+  // failing to load an ad is just as good as loading one as far as starting
+  // playback is concerned because our content will be ready to play.
+  window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
+  if (playbackStarted) {
+    videoPlayer.addEventListener(interactEvent, showControls);
+    playVideo();
+  }
 }
 
 /**
@@ -564,9 +581,11 @@ export function onAdsLoaderError() {
  * @visibleForTesting
  */
 export function onAdError() {
+  window.parent./*OK*/postMessage({event: VideoEvents.AD_END}, '*');
   if (adsManager) {
     adsManager.destroy();
   }
+  videoPlayer.addEventListener(interactEvent, showControls);
   playVideo();
 }
 
@@ -585,6 +604,7 @@ export function onContentPauseRequested(global) {
     adsManagerHeightOnLoad = null;
   }
   adsActive = true;
+  window.parent./*OK*/postMessage({event: VideoEvents.AD_START}, '*');
   videoPlayer.removeEventListener(interactEvent, showControls);
   setStyle(adContainerDiv, 'display', 'block');
   videoPlayer.removeEventListener('ended', onContentEnded);
@@ -600,6 +620,7 @@ export function onContentPauseRequested(global) {
 export function onContentResumeRequested() {
   adsActive = false;
   videoPlayer.addEventListener(interactEvent, showControls);
+  window.parent./*OK*/postMessage({event: VideoEvents.AD_END}, '*');
   if (!contentComplete) {
     // CONTENT_RESUME will fire after post-rolls as well, and we don't want to
     // resume content in that case.
@@ -613,6 +634,23 @@ export function onContentResumeRequested() {
  */
 function uiTickerClick() {
   updateUi(videoPlayer.currentTime, videoPlayer.duration);
+}
+
+/**
+ *  Called when our player data timer goes off. Sends a message to the parent
+ *  iframe to update the player data.
+ */
+function playerDataTick() {
+  // Skip while ads are active in case of custom playback. No harm done for
+  // non-custom playback because content won't be progressing while ads are
+  // playing.
+  if (videoPlayer && !adsActive) {
+    playerData.update(videoPlayer);
+    window.parent./*OK*/postMessage({
+      event: ImaPlayerData.IMA_PLAYER_DATA,
+      data: playerData,
+    }, '*');
+  }
 }
 
 /**
@@ -769,6 +807,7 @@ export function pauseVideo(event) {
   if (event && event.type == 'webkitendfullscreen') {
     // Video was paused because we exited fullscreen.
     videoPlayer.removeEventListener('webkitendfullscreen', pauseVideo);
+    fullscreen = false;
   }
 }
 
@@ -800,7 +839,7 @@ function onFullscreenClick(global) {
       fullscreenHeight = window.screen.height;
       requestFullscreen.call(global.document.documentElement);
     } else {
-      // Figure out how to make iPhone fullscren work here - I've got nothing.
+      // Use native fullscreen (iPhone)
       videoPlayer.webkitEnterFullscreen();
       // Pause the video when we leave fullscreen. iPhone does this
       // automatically, but we still use pauseVideo as an event handler to
@@ -1067,6 +1106,7 @@ export function setHideControlsTimeoutForTesting(newTimeout) {
  *
  * @constant {!Object<string, string>}
  */
+// TODO(aghassemi, #9216): Use video-interface.js
 const VideoEvents = {
   /**
    * load
@@ -1097,6 +1137,17 @@ const VideoEvents = {
   PAUSE: 'pause',
 
   /**
+   * ended
+   *
+   * Fired when the video ends.
+   *
+   * This event should be fired in addition to `pause` when video ends.
+   *
+   * @event ended
+   */
+  ENDED: 'ended',
+
+  /**
    * muted
    *
    * Fired when the video is muted.
@@ -1110,7 +1161,7 @@ const VideoEvents = {
    *
    * Fired when the video is unmuted.
    *
-   * @event pause
+   * @event unmuted
    */
   UNMUTED: 'unmuted',
 
@@ -1133,4 +1184,27 @@ const VideoEvents = {
    * @event reload
    */
   RELOAD: 'reloaded',
+  /**
+   * pre/mid/post Ad start
+   *
+   * Fired when an Ad starts playing.
+   *
+   * This is used to remove any overlay shims during Ad play during autoplay
+   * or minimized-to-corner version of the player.
+   *
+   * @event ad_start
+   */
+  AD_START: 'ad_start',
+
+  /**
+   * pre/mid/post Ad ends
+   *
+   * Fired when an Ad ends playing.
+   *
+   * This is used to restore any overlay shims during Ad play during autoplay
+   * or minimized-to-corner version of the player.
+   *
+   * @event ad_end
+   */
+  AD_END: 'ad_end',
 };

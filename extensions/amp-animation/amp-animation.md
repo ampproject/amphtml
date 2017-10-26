@@ -22,10 +22,6 @@ limitations under the License.
     <td>Animation component</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; no validations yet.</div><div>Work in progress.</div></td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js">&lt;/script></code></td>
   </tr>
@@ -657,7 +653,7 @@ For instance:
 - `pause` - Pauses the currently running animation.
 - `resume` - Resumes the currently running animation.
 - `togglePause` - Toggles pause/resume actions.
-- `seekTo` - Pauses the animation and seeks to the point of time specified by the `time` argument in milliseconds.
+- `seekTo` - Pauses the animation and seeks to the point of time specified by the `time` argument in milliseconds or `percent` argument as a percentage point in the timeline.
 - `reverse` - Reverses the animation.
 - `finish` - Finishes the animation.
 - `cancel` - Cancels the animation.

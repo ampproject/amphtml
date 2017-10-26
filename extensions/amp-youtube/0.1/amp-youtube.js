@@ -159,7 +159,8 @@ class AmpYoutube extends AMP.BaseElement {
     if ('autoplay' in params) {
       // Autoplay is managed by video manager, do not pass it to YouTube.
       delete params['autoplay'];
-      user().error('AMP-YOUTUBE', 'Use autoplay attribute instead of ' +
+      this.user().error(
+          'AMP-YOUTUBE', 'Use autoplay attribute instead of ' +
           'data-param-autoplay');
     }
 
@@ -306,9 +307,12 @@ class AmpYoutube extends AMP.BaseElement {
     if (data['event'] == 'infoDelivery' &&
         data['info'] && data['info']['playerState'] !== undefined) {
       this.playerState_ = data['info']['playerState'];
-      if (this.playerState_ == PlayerStates.PAUSED ||
-          this.playerState_ == PlayerStates.ENDED) {
+      if (this.playerState_ == PlayerStates.PAUSED) {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+      } else if (this.playerState_ == PlayerStates.ENDED) {
+        // YT does not fire pause and ended together.
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        this.element.dispatchCustomEvent(VideoEvents.ENDED);
       } else if (this.playerState_ == PlayerStates.PLAYING) {
         this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       }
@@ -495,6 +499,9 @@ class AmpYoutube extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-youtube', AmpYoutube);
+
+AMP.extension('amp-youtube', '0.1', AMP => {
+  AMP.registerElement('amp-youtube', AmpYoutube);
+});

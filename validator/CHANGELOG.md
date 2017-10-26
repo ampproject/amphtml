@@ -30,6 +30,91 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 7:30 PM, October 23, 2017 UTC
+
+Validator version 256
+Rules version 501
+
+Includes:
+ - Add `allow=geolocation` attributes to <amp-iframe>
+ - Allow feflood for SVGs
+ - #11433 amp-user-notification
+ - Size limit 200k bytes, allow specific at-rules for style[keyframes]
+ - #11122 amp-gwd-animation
+ - #11543 Allow viewport-fit meta viewport content property
+ - amp-story changes
+
+### 9:00 PM, October 10, 2017 UTC
+
+Validator version 253
+Rules version 493
+
+Includes:
+ - Amp-Story required extension
+ - amp-story-grid-layer template attribute is mandatory
+
+### 8:00 PM, October 4, 2017 UTC
+
+Validator version 252
+Rules version 491
+
+Inclues:
+ - Initial `<amp-story>` rules
+ - Update to descendant whitelist for `<amp-story-grid-layer>`
+ - #11299 amp-vk extension to embed vk.com Poll and Post
+ - #11333 Propagate controlsList from amp-video to video
+
+### 3:15 PM, September 26, 2017 UTC
+
+Validator Version 251
+Spec Version 485
+
+Includes:
+ - Cleanup. Remove DEV/PROD_MODE.
+ - Remove SYTLESHEET_TOO_LONG_OLD_VARIANT error code.
+ - Provide a more descriptive error message for our most common AMP error.
+ - #11236 add single-item and max-items to amp-list
+ - #11070 remove amp-sidebar restrictions
+ - #10583, amp-gfycat autoplay
+
+### 9:00 PM, September 6, 2017 UTC
+
+Validator Version 248
+Spec Version 474
+
+Includes:
+ - #11087
+
+### 11:00 PM, August 30, 2017 UTC
+
+Validator Version 246
+Spec Version 473
+
+Includes:
+ - `<amp-position-observer>` #10818
+ - amp-audio/video changes #10757, #10930, #10936
+ - Sibling tag rules
+ - #10965 and #10976
+
+### 7:00 PM, August 23, 2017 UTC
+
+Validator Version 245
+Spec Version 466
+
+Includes:
+ - Whitelist `use.typekit.net` font provider #10888 & #10889
+ - `<amp-web-push>` element #10468
+ - `<form custom-validation-reporting="interact-and-submit">` attribute #10782
+ - `<amp-sidebar>` changes #10749
+
+### 11:00 PM, August 14, 2017 UTC
+
+Validator Version 244
+Spec Version 458
+
+Includes:
+ - `<amp-video crossorigin>` attribute #10635
+
 ### 9:00 PM, July 27, 2017 UTC
 
 Validator Version 244
@@ -56,7 +141,7 @@ Includes:
  - Disallow duplicate `<body>` tags.
  - Allow `<amp-animation>` in AMP4ADS documents #10093
  - amp-bind extension rules to no longer require `<amp-state>` #10159
- 
+
 ### 9:00 PM, June 26, 2017 UTC
 
 Validator Version 239
@@ -107,7 +192,7 @@ Spec Version 427
 Includes:
 
  - Disallow amp-embed as child of amp-app-banner
- 
+
 ### 6:00 PM, June 7, 2017 UTC
 
 Validator Version 232
@@ -136,7 +221,7 @@ Includes:
  - style attributes in SVG tags
  - #8782 amp-ima-video
 
- 
+
 ### 10:00 PM, May 8, 2017 UTC
 
 First Release in Changelog. No release notes.

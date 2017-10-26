@@ -23,11 +23,12 @@ import {
 import {
   USER_ERROR_SENTINEL,
   isUserErrorMessage,
+  isUserErrorEmbed,
   duplicateErrorIfNecessary,
   dev,
 } from './log';
 import {isProxyOrigin} from './url';
-import {isCanary, experimentTogglesOrNull} from './experiments';
+import {isCanary, experimentTogglesOrNull, getBinaryType} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {startsWith} from './string';
 import {urls} from './config';
@@ -43,10 +44,18 @@ const CANCELLED = 'CANCELLED';
 
 
 /**
- * The threshold for throttled errors. Currently at 0.1%.
+ * The threshold for errors throttled because nothing can be done about
+ * them, but we'd still like to report the rough number.
  * @const {number}
  */
-const THROTTLED_ERROR_THRESHOLD = 1e-3;
+const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.001;
+
+/**
+ * The threshold for errors throttled because nothing can be done about
+ * them, but we'd still like to report the rough number.
+ * @const {number}
+ */
+const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
 
 
 /**
@@ -97,7 +106,8 @@ let detectedJsEngine;
  */
 export function reportErrorForWin(win, error, opt_associatedElement) {
   reportError(error, opt_associatedElement);
-  if (error && isUserErrorMessage(error.message) && !!win) {
+  if (error && !!win && isUserErrorMessage(error.message)
+      && !isUserErrorEmbed(error.message)) {
     reportErrorToAnalytics(/** @type {!Error} */(error), win);
   }
 }
@@ -303,6 +313,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
     return;
   }
 
+  const throttleBase = Math.random();
   // We throttle load errors and generic "Script error." errors
   // that have no information and thus cannot be acted upon.
   if (isLoadErrorMessage(message) ||
@@ -311,20 +322,24 @@ export function getErrorReportUrl(message, filename, line, col, error,
     message == 'Script error.') {
     expected = true;
 
-    // Throttle load errors.
-    if (Math.random() > THROTTLED_ERROR_THRESHOLD) {
+    if (throttleBase > NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD) {
       return;
     }
   }
 
   const isUserError = isUserErrorMessage(message);
 
+  // Only report a subset of user errors.
+  if (isUserError && throttleBase > USER_ERROR_THROTTLE_THRESHOLD) {
+    return;
+  }
+
   // This is the App Engine app in
   // ../tools/errortracker
   // It stores error reports via https://cloud.google.com/error-reporting/
   // for analyzing production issues.
   let url = urls.errorReporting +
-      '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
+      '?v=' + getMode().rtvVersion +
       '&noAmp=' + (hasNonAmpJs ? 1 : 0) +
       '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
       '&a=' + (isUserError ? 1 : 0);
@@ -343,9 +358,14 @@ export function getErrorReportUrl(message, filename, line, col, error,
   }
   url += '&rt=' + runtime;
 
+  // TODO(erwinm): Remove ca when all systems read `bt` instead of `ca` to
+  // identify js binary type.
   if (isCanary(self)) {
     url += '&ca=1';
   }
+  // Pass binary type.
+  url += '&bt=' + getBinaryType(self);
+
   if (self.location.ancestorOrigins && self.location.ancestorOrigins[0]) {
     url += '&or=' + encodeURIComponent(self.location.ancestorOrigins[0]);
   }
@@ -374,7 +394,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
   url += `&jse=${detectedJsEngine}`;
 
   const exps = [];
-  const experiments = experimentTogglesOrNull();
+  const experiments = experimentTogglesOrNull(self);
   for (const exp in experiments) {
     const on = experiments[exp];
     exps.push(`${exp}=${on ? '1' : '0'}`);

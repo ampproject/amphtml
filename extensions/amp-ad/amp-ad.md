@@ -91,7 +91,7 @@ If provided, requires confirming the [amp-user-notification](https://www.ampproj
 
 ##### data-loading-strategy (optional)
 
-Instructs the ad to start loading when it is within the given number of viewports away (specified as a float value in the range of [0, 3]) from the current viewport. Use a smaller value to gain higher degree of viewability, with the risk of generating fewer views. If the attribute is not used, the default value is 3. If the attribute is used but the value is left blank, then a float value is assigned by the system, which optimizes for viewability without drastically impacting the views.
+Instructs the ad to start loading when the ad is within the given number of viewports away from the current viewport. You must specify a float value in the range of [0, 3]. By default, the value is 3. Use a smaller value to gain a higher degree of viewability (i.e., increase the chance that an ad, once loaded, will be seen) but with the risk of generating fewer impressions (i.e., fewer ads loaded). If the attribute is used but the value is left blank, then a float value is assigned by the system, which optimizes for viewability without drastically impacting the impressions.
 
 ##### common attributes
 
@@ -199,6 +199,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [ADITION](../../ads/adition.md)
 - [Adman](../../ads/adman.md)
 - [AdmanMedia](../../ads/admanmedia.md)
+- [AdOcean](../../ads/adocean.md)
 - [AdReactor](../../ads/adreactor.md)
 - [AdSense](../../ads/google/adsense.md)
 - [AdsNative](../../ads/adsnative.md)
@@ -226,6 +227,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [CSA](../../ads/google/csa.md)
 - [CxenseDisplay](../../ads/eas.md)
 - [Dianomi](../../ads/dianomi.md)
+- [Directadvert](../../ads/directadvert.md)
 - [DistroScale](../../ads/distroscale.md)
 - [Dot and Media](../../ads/dotandads.md)
 - [Doubleclick](../../ads/google/doubleclick.md)
@@ -280,6 +282,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Rambler&Co](../../ads/capirs.md)
 - [Relap](../../ads/relap.md)
 - [Revcontent](../../ads/revcontent.md)
+- [RevJet](../../ads/revjet.md)
 - [Rubicon Project](../../ads/rubicon.md)
 - [Sharethrough](../../ads/sharethrough.md)
 - [Sklik](../../ads/sklik.md)
@@ -303,6 +306,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Yahoo](../../ads/yahoo.md)
 - [YahooJP](../../ads/yahoojp.md)
 - [Yandex](../../ads/yandex.md)
+- [Yengo](../../ads/yengo.md)
 - [Yieldbot](../../ads/yieldbot.md)
 - [Yieldmo](../../ads/yieldmo.md)
 - [Yieldone](../../ads/yieldone.md)
@@ -315,5 +319,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Dable](../../ads/dable.md)
 - [Engageya](../../ads/engageya.md)
 - [Outbrain](../../ads/outbrain.md)
+- [Postquare](../../ads/postquare.md)
+- [Smi2](../../ads/smi2.md)
 - [Taboola](../../ads/taboola.md)
 - [ZergNet](../../ads/zergnet.md)

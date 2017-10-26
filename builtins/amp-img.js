@@ -16,9 +16,8 @@
 
 import {BaseElement} from '../src/base-element';
 import {isLayoutSizeDefined} from '../src/layout';
-import {registerElement} from '../src/custom-element';
-import {srcsetFromElement} from '../src/srcset';
-import {user} from '../src/log';
+import {registerElement} from '../src/service/custom-element-registry';
+import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -48,12 +47,21 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    if (mutations['src'] !== undefined || mutations['srcset'] !== undefined) {
+    let mutated = false;
+    if (mutations['srcset'] !== undefined) {
+      // `srcset` mutations take precedence over `src` mutations.
       this.srcset_ = srcsetFromElement(this.element);
-      // This element may not have been laid out yet.
-      if (this.img_) {
-        this.updateImageSrc_();
-      }
+      mutated = true;
+    } else if (mutations['src'] !== undefined) {
+      // If only `src` is mutated, then ignore the existing `srcset` attribute
+      // value (may be set automatically as cache optimization).
+      this.srcset_ = srcsetFromSrc(this.element.getAttribute('src'));
+      mutated = true;
+    }
+
+    // This element may not have been laid out yet.
+    if (mutated && this.img_) {
+      this.updateImageSrc_();
     }
 
     if (this.img_) {
@@ -115,6 +123,7 @@ export class AmpImg extends BaseElement {
     }
 
     this.img_ = new Image();
+    this.img_.setAttribute('async', '');
     if (this.element.id) {
       this.img_.setAttribute('amp-img-id', this.element.id);
     }
@@ -123,7 +132,8 @@ export class AmpImg extends BaseElement {
     // only read "Graphic" when using only 'alt'.
     if (this.element.getAttribute('role') == 'img') {
       this.element.removeAttribute('role');
-      user().error('AMP-IMG', 'Setting role=img on amp-img elements breaks ' +
+      this.user().error(
+          'AMP-IMG', 'Setting role=img on amp-img elements breaks ' +
         'screen readers please just set alt or ARIA attributes, they will ' +
         'be correctly propagated for the underlying <img> element.');
     }
@@ -174,7 +184,11 @@ export class AmpImg extends BaseElement {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
-    const src = this.srcset_.select(this.getLayoutWidth(), this.getDpr()).url;
+    const src = this.srcset_.select(
+        // The width should never be 0, but we fall back to the screen width
+        // just in case.
+        this.getViewport().getWidth() || this.win.screen.width,
+        this.getDpr()).url;
     if (src == this.img_.getAttribute('src')) {
       return Promise.resolve();
     }

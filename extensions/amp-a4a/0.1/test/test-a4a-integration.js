@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AMP_SIGNATURE_HEADER} from '../legacy-signature-verifier';
+import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {createIframePromise} from '../../../../testing/iframe';
@@ -24,15 +24,20 @@ import {
 import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {adConfig} from '../../../../ads/_config';
-import {a4aRegistry} from '../../../../ads/_a4a-config';
+import {getA4ARegistry} from '../../../../ads/_a4a-config';
 import {signingServerURLs} from '../../../../ads/_a4a-config';
 import {
     resetScheduledElementForTesting,
     upgradeOrRegisterElement,
-} from '../../../../src/custom-element';
+} from '../../../../src/service/custom-element-registry';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {loadPromise} from '../../../../src/event-helper';
 import * as sinon from 'sinon';
+// Need the following side-effect import because in actual production code,
+// Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
+// always available for them. However, when we test an impl in isolation,
+// AmpAd is not loaded already, so we need to load it separately.
+import '../../../amp-ad/0.1/amp-ad';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
 // (e.g., XHR requests and interfaces to ad network-specific code), but
@@ -83,17 +88,20 @@ describe('integration test: a4a', () => {
   let fetchMock;
   let adResponse;
   let a4aElement;
+  let a4aRegistry;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    a4aRegistry = getA4ARegistry();
     adConfig['mock'] = {};
     a4aRegistry['mock'] = () => {return true;};
     return createIframePromise().then(f => {
       fixture = f;
       fetchMock = new FetchMock(fixture.win);
       for (const serviceName in signingServerURLs) {
-        fetchMock.getOnce(
-            signingServerURLs[serviceName],
-            `{"keys":[${validCSSAmp.publicKey}]}`);
+        fetchMock.getOnce(signingServerURLs[serviceName], {
+          body: validCSSAmp.publicKeyset,
+          headers: {'Content-Type': 'application/jwk-set+json'},
+        });
       }
       fetchMock.getOnce(
           TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
@@ -102,7 +110,7 @@ describe('integration test: a4a', () => {
         headers: {'AMP-Access-Control-Allow-Source-Origin': 'about:srcdoc'},
         body: validCSSAmp.reserialized,
       };
-      adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
+      adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signatureHeader;
       installDocService(fixture.win, /* isSingleDoc */ true);
       installCryptoService(fixture.win);
       upgradeOrRegisterElement(fixture.win, 'amp-a4a', MockA4AImpl);
@@ -154,7 +162,7 @@ describe('integration test: a4a', () => {
       expect(error.message).to.contain.string('Testing network error');
       expect(error.message).to.contain.string('AMP-A4A-');
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
-      expect(forceCollapseStub).to.be.notCalled;
+      expect(forceCollapseStub).to.not.be.called;
     });
   });
 

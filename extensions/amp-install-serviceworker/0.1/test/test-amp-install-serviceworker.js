@@ -86,7 +86,7 @@ describes.realWin('amp-install-serviceworker', {
   it('should be ok without service worker.', () => {
     const install = doc.createElement('amp-install-serviceworker');
     const implementation = install.implementation_;
-    expect(implementation).to.be.defined;
+    expect(implementation).to.exist;
     install.setAttribute('src', 'https://example.com/sw.js');
     implementation.win = {
       location: {
@@ -102,7 +102,7 @@ describes.realWin('amp-install-serviceworker', {
   it('should do nothing with non-matching origins', () => {
     const install = doc.createElement('amp-install-serviceworker');
     const implementation = install.implementation_;
-    expect(implementation).to.be.defined;
+    expect(implementation).to.exist;
     install.setAttribute('src', 'https://other-origin.com/sw.js');
     const p = new Promise(() => {});
     implementation.win = {
@@ -124,7 +124,7 @@ describes.realWin('amp-install-serviceworker', {
   it('should do nothing on proxy without iframe URL', () => {
     const install = doc.createElement('amp-install-serviceworker');
     const implementation = install.implementation_;
-    expect(implementation).to.be.defined;
+    expect(implementation).to.exist;
     install.setAttribute('src', 'https://cdn.ampproject.org/sw.js');
     let calledSrc;
     const p = new Promise(() => {});
@@ -227,10 +227,10 @@ describes.realWin('amp-install-serviceworker', {
         expect(deferredMutate).to.be.undefined;
         expect(iframe).to.be.undefined;
         clock.tick(1);
-        expect(deferredMutate).to.not.be.undefined;
+        expect(deferredMutate).to.exist;
         expect(iframe).to.be.undefined;
         deferredMutate();
-        expect(iframe).to.not.be.undefined;
+        expect(iframe).to.exist;
         expect(calledSrc).to.undefined;
         expect(install.style.display).to.equal('none');
         expect(iframe.tagName).to.equal('IFRAME');

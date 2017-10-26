@@ -22,9 +22,20 @@ import * as sinon from 'sinon';
 
 describe('amp-img', () => {
   let sandbox;
+  let screenWidth;
+  let windowWidth;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    screenWidth = 320;
+    windowWidth = 320;
+    sandbox.stub(BaseElement.prototype, 'isInViewport')
+        .returns(true);
+    sandbox.stub(BaseElement.prototype, 'getViewport', () => {
+      return {
+        getWidth: () => windowWidth,
+      };
+    });
   });
 
   afterEach(() => {
@@ -32,10 +43,12 @@ describe('amp-img', () => {
   });
 
   function getImg(attributes, children) {
-    sandbox.stub(BaseElement.prototype, 'isInViewport')
-        .returns(true);
     return createIframePromise().then(iframe => {
       installImg(iframe.win);
+      Object.defineProperty(iframe.win.screen, 'width', {
+        get: () => screenWidth,
+      });
+
       const img = iframe.doc.createElement('amp-img');
       for (const key in attributes) {
         img.setAttribute(key, attributes[key]);
@@ -66,6 +79,7 @@ describe('amp-img', () => {
       expect(img.getAttribute('alt')).to.equal('An image');
       expect(img.getAttribute('title')).to.equal('Image title');
       expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+      expect(img.hasAttribute('async')).to.be.true;
     });
   });
 
@@ -98,6 +112,8 @@ describe('amp-img', () => {
   });
 
   it('should load an img with srcset', () => {
+    windowWidth = 320;
+    screenWidth = 4000;
     return getImg({
       srcset: 'bad.jpg 2000w, /examples/img/sample.jpg 1000w',
       width: 300,
@@ -106,6 +122,40 @@ describe('amp-img', () => {
       const img = ampImg.querySelector('img');
       expect(img.tagName).to.equal('IMG');
       expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
+      expect(img.hasAttribute('referrerpolicy')).to.be.false;
+    });
+  });
+
+  it('should load larger image on larger screen', () => {
+    windowWidth = 3000;
+    screenWidth = 300;
+    return getImg({
+      srcset: '/examples/img/sample.jpg?large 2000w, ' +
+          '/examples/img/small.jpg?small 1000w',
+      width: 300,
+      height: 200,
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.tagName).to.equal('IMG');
+      expect(img.getAttribute('src')).to.equal(
+          '/examples/img/sample.jpg?large');
+      expect(img.hasAttribute('referrerpolicy')).to.be.false;
+    });
+  });
+
+  it('should fall back to screen width for srcset', () => {
+    windowWidth = 0;
+    screenWidth = 3000;
+    return getImg({
+      srcset: '/examples/img/sample.jpg?large 2000w, ' +
+          '/examples/img/small.jpg?small 1000w',
+      width: 300,
+      height: 200,
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.tagName).to.equal('IMG');
+      expect(img.getAttribute('src')).to.equal(
+          '/examples/img/sample.jpg?large');
       expect(img.hasAttribute('referrerpolicy')).to.be.false;
     });
   });
@@ -126,6 +176,30 @@ describe('amp-img', () => {
     });
   });
 
+  it('should handle attribute mutations', () => {
+    return getImg({
+      src: 'test.jpg',
+      srcset: 'large.jpg 2000w, small.jpg 1000w',
+      width: 300,
+      height: 200,
+    }).then(ampImg => {
+      const impl = ampImg.implementation_;
+
+      ampImg.setAttribute('srcset', 'mutated-srcset.jpg 500w');
+      ampImg.setAttribute('src', 'mutated-src.jpg');
+
+      // `srcset` mutation should take precedence over `src` mutation.
+      impl.mutatedAttributesCallback({
+        srcset: 'mutated-srcset.jpg 1000w',
+        src: 'mutated-src.jpg',
+      });
+      expect(impl.img_.getAttribute('src')).to.equal('mutated-srcset.jpg');
+
+      // `src` mutation should override existing `srcset` attribute.
+      impl.mutatedAttributesCallback({src: 'mutated-src.jpg'});
+      expect(impl.img_.getAttribute('src')).to.equal('mutated-src.jpg');
+    });
+  });
 
   describe('#fallback on initial load', () => {
     let el;
@@ -149,6 +223,11 @@ describe('amp-img', () => {
           mutate(fn) {
             fn();
           },
+        };
+      };
+      impl.getViewport = function() {
+        return {
+          getWidth: () => windowWidth,
         };
       };
     });
@@ -183,6 +262,27 @@ describe('amp-img', () => {
         expect(errorSpy).to.be.calledOnce;
         expect(toggleSpy).to.be.calledOnce;
         expect(toggleSpy.firstCall.args[0]).to.be.true;
+        expect(toggleElSpy.firstCall.args[0]).to.be.true;
+      });
+    });
+
+    it('should hide child placeholder elements if loading fails', () => {
+      sandbox.stub(impl, 'loadPromise').returns(Promise.reject());
+      const errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
+      const toggleSpy = sandbox.spy(impl, 'toggleFallback');
+      const togglePlaceholderSpy = sandbox.spy(impl, 'togglePlaceholder');
+      impl.buildCallback();
+      expect(errorSpy).to.have.not.been.called;
+      expect(toggleSpy).to.have.not.been.called;
+      expect(togglePlaceholderSpy).to.have.not.been.called;
+      expect(toggleElSpy).to.have.not.been.called;
+
+      return impl.layoutCallback().catch(() => {
+        expect(errorSpy).to.be.calledOnce;
+        expect(toggleSpy).to.be.calledOnce;
+        expect(toggleSpy.firstCall.args[0]).to.be.true;
+        expect(togglePlaceholderSpy).to.be.calledOnce;
+        expect(togglePlaceholderSpy.firstCall.args[0]).to.be.false;
         expect(toggleElSpy.firstCall.args[0]).to.be.true;
       });
     });
@@ -279,7 +379,6 @@ describe('amp-img', () => {
         });
       });
     });
-
   });
 
   it('should respect noprerender attribute', () => {

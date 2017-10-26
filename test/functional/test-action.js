@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../src/action-trust';
 import {
+  ActionInvocation,
   ActionService,
   DeferredEvent,
   OBJECT_STRING_ARGS_KEY,
@@ -424,6 +425,27 @@ describe('ActionService parseAction', () => {
   });
 });
 
+describe('ActionService setActions', () => {
+  it('should set actions', () => {
+    const action = actionService();
+    const element = document.createElement('div');
+    element.setAttribute('on', 'event1:action1');
+
+    // Invoke findAction_ once at the start to cache the actions.
+    action.findAction_(element, 'event1');
+
+    // Reset the actions with a new actions string.
+    action.setActions(element, 'event2:action2');
+
+    // `on` attribute should reflect the new action defs.
+    expect(element.getAttribute('on')).to.equal('event2:action2');
+
+    // Action cache should have been cleared.
+    expect(action.findAction_(element, 'event1')).to.be.null;
+    expect(action.findAction_(element, 'event2')).to.be.not.null;
+  });
+});
+
 describe('Action parseActionMap', () => {
 
   it('should parse with a single action', () => {
@@ -599,8 +621,8 @@ describe('Action method', () => {
 
 
   it('should invoke on the AMP element', () => {
-    action.invoke_(execElement, 'method1', /* args */ null,
-        'source1', 'event1');
+    action.invoke_(new ActionInvocation(execElement, 'method1', /* args */ null,
+        'source1', 'event1'));
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
     expect(inv.target).to.equal(execElement);
@@ -611,8 +633,8 @@ describe('Action method', () => {
   });
 
   it('should invoke on the AMP element with args', () => {
-    action.invoke_(execElement, 'method1', {'key1': 11},
-        'source1', 'event1');
+    action.invoke_(new ActionInvocation(execElement, 'method1', {'key1': 11},
+        'source1', 'event1'));
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
     expect(inv.target).to.equal(execElement);
@@ -624,16 +646,16 @@ describe('Action method', () => {
 
   it('should not allow invoke on non-AMP and non-whitelisted element', () => {
     expect(() => {
-      action.invoke_(document.createElement('img'), 'method1', /* args */ null,
-          'source1', 'event1');
+      action.invoke_(new ActionInvocation(document.createElement('img'),
+          'method1', /* args */ null, 'source1', 'event1'));
     }).to.throw(/Target element does not support provided action/);
     expect(onEnqueue).to.have.not.been.called;
   });
 
   it('should not allow invoke on unresolved AMP element', () => {
     expect(() => {
-      action.invoke_({tagName: 'amp-img'}, 'method1', /* args */ null,
-          'source1', 'event1');
+      action.invoke_(new ActionInvocation(document.createElement('amp-foo'),
+          'method1', /* args */ null, 'source1', 'event1'));
     }).to.throw(/Unrecognized AMP element/);
     expect(onEnqueue).to.have.not.been.called;
   });
@@ -675,8 +697,8 @@ describe('installActionHandler', () => {
     const handlerSpy = sandbox.spy();
     const target = document.createElement('form');
     action.installActionHandler(target, handlerSpy);
-    action.invoke_(target, 'submit', /* args */ null,
-        'button', 'tap', ActionTrust.HIGH);
+    action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
+        'button', 'tap', ActionTrust.HIGH));
     expect(handlerSpy).to.be.calledOnce;
     const callArgs = handlerSpy.getCall(0).args[0];
     expect(callArgs.target).to.be.equal(target);
@@ -691,12 +713,12 @@ describe('installActionHandler', () => {
     const target = document.createElement('form');
     action.installActionHandler(target, handlerSpy, ActionTrust.HIGH);
 
-    action.invoke_(target, 'submit', /* args */ null,
-        'button', 'tap', ActionTrust.LOW);
+    action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
+        'button', 'tap', ActionTrust.LOW));
     expect(handlerSpy).to.not.be.called;
 
-    action.invoke_(target, 'submit', /* args */ null,
-        'button', 'tap', ActionTrust.HIGH);
+    action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
+        'button', 'tap', ActionTrust.HIGH));
     expect(handlerSpy).to.be.calledOnce;
   });
 });
@@ -713,17 +735,15 @@ describe('Multiple handlers action method', () => {
     onEnqueue1 = sandbox.spy();
     onEnqueue2 = sandbox.spy();
     targetElement = document.createElement('target');
-    const id1 = 'elementFoo';
-    const id2 = 'elementBar';
-    targetElement.setAttribute('on', `tap:${id1}.method1,${id2}.method2`);
+    targetElement.setAttribute('on', 'tap:foo.method1,bar.method2');
     parent = document.createElement('parent');
     child = document.createElement('child');
     parent.appendChild(targetElement);
     targetElement.appendChild(child);
     document.body.appendChild(parent);
 
-    execElement1 = createExecElement(id1, onEnqueue1);
-    execElement2 = createExecElement(id2, onEnqueue2);
+    execElement1 = createExecElement('foo', onEnqueue1);
+    execElement2 = createExecElement('bar', onEnqueue2);
 
     parent.appendChild(execElement1);
     parent.appendChild(execElement2);
@@ -741,6 +761,50 @@ describe('Multiple handlers action method', () => {
         targetElement);
     assertInvocation(onEnqueue2.getCall(0).args[0], execElement2, 'method2',
         targetElement);
+  });
+
+  it('should chain asynchronous actions', () => {
+    let resolveAbc;
+    const promiseAbc = new Promise(resolve => { resolveAbc = resolve; });
+    const abc = sandbox.stub().returns(promiseAbc);
+    action.addGlobalTarget('ABC', abc);
+
+    let resolveXyz;
+    const promiseXyz = new Promise(resolve => { resolveXyz = resolve; });
+    const xyz = sandbox.stub().returns(promiseXyz);
+    action.addGlobalTarget('XYZ', xyz);
+
+    const element = document.createElement('target');
+    element.setAttribute('on',
+        'tap:ABC.abc, foo.method1, XYZ.xyz, bar.method2');
+    parent.appendChild(element);
+
+    action.trigger(element, 'tap', null);
+
+    expect(abc).calledOnce;
+    expect(onEnqueue1).to.not.have.been.called;
+    expect(xyz).to.not.have.been.called;
+    expect(onEnqueue2).to.not.have.been.called;
+
+    // Invocation of chained actions are branched on promiseAbc/promiseXyz,
+    // so wait for macro-task to ensure all queued promises are resolved.
+    const macroTask = () => new Promise(resolve => setTimeout(resolve, 0));
+
+    resolveAbc();
+    return macroTask().then(() => {
+      expect(abc).calledOnce;
+      expect(onEnqueue1).calledOnce;
+      expect(xyz).calledOnce;
+      expect(onEnqueue2).to.not.have.been.called;
+
+      resolveXyz();
+      return macroTask();
+    }).then(() => {
+      expect(abc).calledOnce;
+      expect(onEnqueue1).calledOnce;
+      expect(xyz).calledOnce;
+      expect(onEnqueue2).calledOnce;
+    });
   });
 });
 
@@ -777,8 +841,10 @@ describe('Action interceptor', () => {
   });
 
   it('should queue actions', () => {
-    action.invoke_(target, 'method1', /* args */ null, 'source1', 'event1');
-    action.invoke_(target, 'method2', /* args */ null, 'source2', 'event2');
+    action.invoke_(new ActionInvocation(target, 'method1', /* args */ null,
+        'source1', 'event1'));
+    action.invoke_(new ActionInvocation(target, 'method2', /* args */ null,
+        'source2', 'event2'));
 
     const queue = getQueue();
     expect(Array.isArray(queue)).to.be.true;
@@ -798,10 +864,10 @@ describe('Action interceptor', () => {
   });
 
   it('should dequeue actions after handler set', () => {
-    action.invoke_(target, 'method1', /* args */ null, 'source1', 'event1',
-        ActionTrust.HIGH);
-    action.invoke_(target, 'method2', /* args */ null, 'source2', 'event2',
-        ActionTrust.HIGH);
+    action.invoke_(new ActionInvocation(target, 'method1', /* args */ null,
+        'source1', 'event1', ActionTrust.HIGH));
+    action.invoke_(new ActionInvocation(target, 'method2', /* args */ null,
+        'source2', 'event2', ActionTrust.HIGH));
 
     expect(Array.isArray(getQueue())).to.be.true;
     expect(getActionHandler()).to.be.undefined;
@@ -809,7 +875,7 @@ describe('Action interceptor', () => {
 
     const handler = sandbox.spy();
     action.installActionHandler(target, handler);
-    expect(getActionHandler()).to.not.be.undefined;
+    expect(getActionHandler()).to.exist;
     expect(handler).to.have.not.been.called;
 
     clock.tick(10);
@@ -827,8 +893,8 @@ describe('Action interceptor', () => {
     expect(inv1.source).to.equal('source2');
     expect(inv1.event).to.equal('event2');
 
-    action.invoke_(target, 'method3', /* args */ null, 'source3', 'event3',
-        ActionTrust.HIGH);
+    action.invoke_(new ActionInvocation(target, 'method3', /* args */ null,
+        'source3', 'event3', ActionTrust.HIGH));
     expect(handler).to.have.callCount(3);
     const inv2 = handler.getCall(2).args[0];
     expect(inv2.target).to.equal(target);
@@ -863,13 +929,13 @@ describe('Action common handler', () => {
     action.addGlobalMethodHandler('action1', action1);
     action.addGlobalMethodHandler('action2', action2);
 
-    action.invoke_(target, 'action1', /* args */ null, 'source1', 'event1',
-        ActionTrust.HIGH);
+    action.invoke_(new ActionInvocation(target, 'action1', /* args */ null,
+        'source1', 'event1', ActionTrust.HIGH));
     expect(action1).to.be.calledOnce;
     expect(action2).to.have.not.been.called;
 
-    action.invoke_(target, 'action2', /* args */ null, 'source2', 'event2',
-        ActionTrust.HIGH);
+    action.invoke_(new ActionInvocation(target, 'action2', /* args */ null,
+        'source2', 'event2', ActionTrust.HIGH));
     expect(action2).to.be.calledOnce;
     expect(action1).to.be.calledOnce;
 
@@ -880,12 +946,12 @@ describe('Action common handler', () => {
     const handler = sandbox.spy();
     action.addGlobalMethodHandler('foo', handler, ActionTrust.HIGH);
 
-    action.invoke_(target, 'foo', /* args */ null, 'source1', 'event1',
-        ActionTrust.LOW);
+    action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
+        'source1', 'event1', ActionTrust.LOW));
     expect(handler).to.not.be.called;
 
-    action.invoke_(target, 'foo', /* args */ null, 'source1', 'event1',
-        ActionTrust.HIGH);
+    action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
+        'source1', 'event1', ActionTrust.HIGH));
     expect(handler).to.be.calledOnce;
   });
 });
@@ -1021,13 +1087,15 @@ describes.fakeWin('Core events', {amp: true}, env => {
     const handler = window.document.addEventListener.getCall(3).args[1];
     const element = document.createElement('input');
     element.setAttribute('type', 'checkbox');
+    element.setAttribute('value', 'foo');
     element.checked = true;
     const event = {target: element};
     handler(event);
     expect(action.trigger).to.have.been.calledWith(
         element,
         'change',
-        sinon.match(object => object.detail.checked));
+        sinon.match(object =>
+            object.detail.checked && object.detail.value == 'foo'));
   });
 
   it('should trigger change event for <input type="range"> elements', () => {
@@ -1043,8 +1111,9 @@ describes.fakeWin('Core events', {amp: true}, env => {
         element,
         'change',
         sinon.match(e => {
-          const detail = e.detail;
-          return detail.min == 0 && detail.max == 10 && detail.value == 5;
+          const {min, max, value, valueAsNumber} = e.detail;
+          return min === '0' && max === '10' && value === '5'
+              && valueAsNumber === 5;
         }));
   });
 
@@ -1078,6 +1147,22 @@ describes.fakeWin('Core events', {amp: true}, env => {
         sinon.match(object => {
           const detail = object.detail;
           return detail.value == 'qux';
+        }));
+  });
+
+  it('should trigger change event with details for <textarea> elements', () => {
+    const handler = window.document.addEventListener.getCall(3).args[1];
+    const element = document.createElement('textarea');
+    element.value = 'foo';
+    const event = {target: element};
+    handler(event);
+
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'change',
+        sinon.match(object => {
+          const detail = object.detail;
+          return detail.value == 'foo';
         }));
   });
 

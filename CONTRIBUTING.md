@@ -4,9 +4,10 @@ The AMP HTML project strongly encourages technical [contributions](https://www.a
 
 We hope you'll become an ongoing participant in our open source community but we also welcome one-off contributions for the issues you're particularly passionate about.
 
+**If you have questions about using AMP or are encountering problems using AMP on your site please visit our [support page](SUPPORT.md) for help.**
+
 - [Reporting issues with AMP](#reporting-issues-with-amp)
   * [Bugs](#bugs)
-  * [Questions about AMP](#questions-about-amp)
   * [Suggestions and feature requests](#suggestions-and-feature-requests)
 - [Contributing code](#contributing-code)
   * [Tips for new open source contributors](#tips-for-new-open-source-contributors)
@@ -29,12 +30,6 @@ If you find a bug in AMP, please [file a GitHub issue](https://github.com/amppro
 
 The best bug reports provide a detailed description of the issue (including screenshots if possible), step-by-step instructions for predictably reproducing the issue, and possibly even a working example that demonstrates the issue.
 
-### Questions about AMP
-
-Questions about how to use AMP or other general questions about AMP should be asked on [Stack Overflow under the AMP HTML tag](http://stackoverflow.com/questions/tagged/amp-html) instead of filing an issue here.
-
-Questions and issues related to Google Search should be asked on [Google's AMP forum](https://goo.gl/utQ1KZ).
-
 ### Suggestions and feature requests
 
 The AMP Project is meant to evolve with feedback.  The project and its users appreciate your thoughts on ways to improve the design or features.
@@ -55,9 +50,9 @@ If you are new to contributing to an open source project, Git/GitHub, etc. welco
 
 The [Getting Started End-to-End Guide](contributing/getting-started-e2e.md) provides step-by-step instructions for everything from creating a GitHub account to getting your code reviewed and merged.  Even if you've never contributed to an open source project before you'll soon be building AMP, making improvements and seeing your code live across the web.
 
-The community has created a list of [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) specifically for new contributors to the project.  Feel free to find one of the [unclaimed Great First Issues](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aopen%20label%3A%22Great%20First%20Issue%22%20-label%3A%22GFI%20Claimed!%22) that interests you, claim it by adding a comment to it and jump in!
+The community has created a list of [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue) specifically for new contributors to the project.  Feel free to find one of the [unclaimed Good First Issues](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aopen%20label%3A%22good%20first%20issue%22%20-label%3A%22GFI%20Claimed!%22) that interests you, claim it by adding a comment to it and jump in!
 
-If you're interested in helping out but can't find a Great First Issue that matches your skills/interests, [sign up for our Slack](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) and then reach out in the [#welcome-contributors channel](https://amphtml.slack.com/messages/welcome-contributors/) or send a Direct Message to [mrjoro](https://amphtml.slack.com/team/mrjoro/).
+If you're interested in helping out but can't find a Good First Issue that matches your skills/interests, [sign up for our Slack](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) and then reach out in the [#welcome-contributors channel](https://amphtml.slack.com/messages/welcome-contributors/) or send a Direct Message to [mrjoro](https://amphtml.slack.com/team/mrjoro/).
 
 If you run into any problems we have plenty of people who are willing to help; see the [How to get help](contributing/getting-started-e2e.md#how-to-get-help) section of the Getting Started guide.
 
@@ -93,7 +88,7 @@ Because Extended Components may have significant impact on AMP HTML performance,
 In particular we strive to design the overall component set, so that a large number of use cases can be composed from them. Instead of creating a new component it may thus be a better solution to combine existing components to a similar effect.
 
 We have a few additional resources that provide an introduction to contributing extended components:
-* ["Building an AMP Extension"](https://docs.google.com/document/d/19o7eDta6oqPGF4RQ17LvZ9CHVQN53whN-mCIeIMM8Qk/edit) has a detailed description of how to build an AMP component.
+* ["Building an AMP Extension"](contributing/building-an-amp-extension.md) has a detailed description of how to build an AMP component.
 * ["Creating your first AMP Component" codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/#0) provides a quick overview of the steps you need to go through to create a component with examples you can modify for your component.
 * The ["Building a new AMP component" talk at AMP Conf 2017](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) provides an introduction to contributing AMP components.
 

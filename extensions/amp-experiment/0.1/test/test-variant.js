@@ -17,12 +17,9 @@
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {allocateVariant} from '../variant';
 import {stubService, stubServiceForDoc} from '../../../../testing/test-helper';
-import * as sinon from 'sinon';
 
 
-describe('allocateVariant', () => {
-
-  let sandbox;
+describes.sandboxed('allocateVariant', {}, () => {
   let fakeWin;
   let ampdoc;
   let getCidStub;
@@ -45,16 +42,11 @@ describe('allocateVariant', () => {
     fakeWin.document.defaultView = fakeWin;
     ampdoc = new AmpDocSingle(fakeWin);
 
-    sandbox = sinon.sandbox.create();
     getCidStub = stubService(sandbox, fakeWin, 'cid', 'get');
     uniformStub = stubService(sandbox, fakeWin, 'crypto', 'uniform');
     getParamStub = stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getParam');
     getNotificationStub = stubService(
         sandbox, fakeWin, 'userNotificationManager', 'getNotification');
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should throw for invalid config', () => {

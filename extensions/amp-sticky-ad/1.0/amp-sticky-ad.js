@@ -37,7 +37,7 @@ class AmpStickyAd extends AMP.BaseElement {
     /** @private {?Element} */
     this.ad_ = null;
 
-    /** @private {?../../../src/service/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
     /** @private {boolean} */

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
 import {reportError} from '../../src/error';
@@ -56,12 +55,6 @@ const EXPERIMENTS = [
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'README.md#amp-dev-channel',
-  },
-  {
-    id: 'amp-web-push',
-    name: 'Enable AMP web push',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-web-push/0.1/amp-web-push.md',
   },
   {
     id: 'ad-type-custom',
@@ -112,6 +105,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
+    id: 'amp-gwd-animation',
+    name: 'AMP GWD Animation',
+    spec: 'https://github.com/ampproject/amphtml/issues/9949',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11238',
+  },
+  {
     id: 'no-auth-in-prerender',
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
@@ -157,12 +156,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
   {
-    id: 'amp-fresh',
-    name: 'Guaranteed minimum freshness on sections of a page',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
-  },
-  {
     id: 'amp-playbuzz',
     name: 'AMP extension for playbuzz items (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/6106',
@@ -186,8 +179,13 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
   {
+    id: 'font-display-swap',
+    name: 'Use font-display: swap as the default for fonts.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
+  },
+  {
     id: 'amp-animation',
-    name: 'High-performing keyframe animations in AMP.',
+    name: 'High-performing keyframe animations in AMP (launched).',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-animation/amp-animation.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
@@ -266,6 +264,23 @@ const EXPERIMENTS = [
     id: 'disable-rtc',
     name: 'Disable AMP RTC',
     spec: 'https://github.com/ampproject/amphtml/issues/8551',
+  },
+  {
+    id: 'inabox-position-api',
+    name: 'Position API for foreign iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/10995',
+  },
+  {
+    id: 'amp-story',
+    name: 'Visual storytelling in AMP',
+    spec: 'https://github.com/ampproject/amphtml/issues/11329',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
+  },
+  {
+    id: 'amp-story-desktop',
+    name: 'A responsive desktop experience for the amp-story component',
+    spec: 'https://github.com/ampproject/amphtml/issues/11714',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
   },
 ];
 

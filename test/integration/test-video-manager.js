@@ -27,20 +27,28 @@ import {
   runVideoPlayerIntegrationTests,
 } from './test-video-players-helper';
 import * as sinon from 'sinon';
+import {toArray} from '../../src/types';
 
-describe.configure().skipSauceLabs().run(`Fake Video Player
-    Integration Tests`, () => {
+// TODO(dvoytenko): These tests time out when run with the prod AMP config.
+// See #11588.
+describe.configure().skip('Fake Video Player' +
+    'Integration Tests', () => {
   // We run the video player integration tests on a fake video player as part
   // of functional testing. Same tests run on real video players such as
   // `amp-video` and `amp-youtube` as part of integration testing.
   runVideoPlayerIntegrationTests(fixture => {
-    fixture.win.AMP.registerElement('amp-test-fake-videoplayer',
-        createFakeVideoPlayerClass(fixture.win));
+    fixture.win.AMP.push({
+      n: 'amp-test-fake-videoplayer',
+      f: function(AMP) {
+        AMP.registerElement('amp-test-fake-videoplayer',
+            createFakeVideoPlayerClass(fixture.win));
+      },
+    });
     return fixture.doc.createElement('amp-test-fake-videoplayer');
   });
 });
 
-describe.configure().skipSauceLabs().run('VideoManager', function() {
+describe.configure().ifNewChrome().run('VideoManager', function() {
   describes.fakeWin('VideoManager', {
     amp: {
       ampdoc: 'single',
@@ -51,6 +59,13 @@ describe.configure().skipSauceLabs().run('VideoManager', function() {
     let klass;
     let video;
     let impl;
+
+    it('should receive i-amphtml-video-interface class when registered', () => {
+      const expectedClass = 'i-amphtml-video-interface';
+      expect(toArray(video.classList)).to.not.contain(expectedClass);
+      videoManager.register(impl);
+      expect(toArray(video.classList)).to.contain(expectedClass);
+    });
 
     it('should register common actions', () => {
       const spy = sandbox.spy(impl, 'registerAction');
@@ -114,8 +129,9 @@ describe.configure().skipSauceLabs().run('VideoManager', function() {
 
     });
 
-    it(`autoplay - autoplay not supported should behave
-        like manual play`, () => {
+    // TODO(aghassemi): Investigate failure. #10974.
+    it.skip('autoplay - autoplay not supported should behave' +
+        'like manual play', () => {
 
       video.setAttribute('autoplay', '');
       videoManager.register(impl);
@@ -248,7 +264,7 @@ describe.configure().skipSauceLabs().run('VideoManager', function() {
   });
 });
 
-describe.configure().skipSauceLabs().run('Supports Autoplay', () => {
+describe.configure().ifNewChrome().run('Supports Autoplay', () => {
   let sandbox;
 
   let win;

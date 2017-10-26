@@ -22,7 +22,7 @@ import {
 } from './dom';
 import {dev} from './log';
 import {dict} from './utils/object';
-import {isArray} from './types';
+import {isArray, toWin} from './types';
 import {triggerAnalyticsEvent} from './analytics';
 
 /**
@@ -55,8 +55,9 @@ export function insertAnalyticsElement(
   if (loadAnalytics) {
     // Get Extensions service and force load analytics extension.
     const extensions =
-        Services.extensionsFor(parentElement.ownerDocument.defaultView);
-    extensions./*OK*/loadExtension('amp-analytics');
+        Services.extensionsFor(toWin(parentElement.ownerDocument.defaultView));
+    const ampdoc = Services.ampdoc(parentElement);
+    extensions./*OK*/installExtensionForDoc(ampdoc, 'amp-analytics');
   } else {
     Services.analyticsForDocOrNull(parentElement).then(analytics => {
       dev().assert(analytics);

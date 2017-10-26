@@ -85,6 +85,15 @@ export class Services {
   }
 
   /**
+   * Returns the AmpDoc for the specified context node.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!./service/ampdoc-impl.AmpDoc}
+   */
+  static ampdoc(nodeOrDoc) {
+    return getAmpdoc(nodeOrDoc);
+  }
+
+  /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @param {boolean=} loadAnalytics
    * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
@@ -93,7 +102,8 @@ export class Services {
     if (loadAnalytics) {
       // Get Extensions service and force load analytics extension.
       const ampdoc = getAmpdoc(nodeOrDoc);
-      Services.extensionsFor(ampdoc.win)./*OK*/loadExtension('amp-analytics');
+      Services.extensionsFor(ampdoc.win)./*OK*/installExtensionForDoc(
+          ampdoc, 'amp-analytics');
     }
     return (/** @type {!Promise<
               !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
@@ -250,6 +260,29 @@ export class Services {
   }
 
   /**
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService>}
+   */
+  static storyVariableServiceForOrNull(win) {
+    return (
+        /** @type {!Promise<
+         * ?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService
+         * >} */ (
+            getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
+                true)));
+  }
+
+  /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>}
+   */
+  static webAnimationServiceFor(nodeOrDoc) {
+    return (/** @type {
+        !Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>} */
+        (getElementServiceForDoc(nodeOrDoc, 'web-animation', 'amp-animation')));
+  }
+
+  /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<!./service/storage-impl.Storage>}
    */
@@ -348,10 +381,10 @@ export class Services {
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-impl.Viewport}
    */
   static viewportForDoc(nodeOrDoc) {
-    return /** @type {!./service/viewport-impl.Viewport} */ (
+    return /** @type {!./service/viewport/viewport-impl.Viewport} */ (
         getServiceForDoc(nodeOrDoc, 'viewport'));
   }
 

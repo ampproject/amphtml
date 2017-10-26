@@ -98,8 +98,10 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
  * @param {!Object<string, *>} styles
  */
 export function setImportantStyles(element, styles) {
-  element.style.cssText +=
-      Object.keys(styles).map(k => `${k}:${styles[k]}!important;`).join('');
+  for (const k in styles) {
+    element.style.setProperty(
+        getVendorJsPropertyName(styles, k), styles[k].toString(), 'important');
+  }
 }
 
 
@@ -115,7 +117,8 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
   const propertyName = getVendorJsPropertyName(element.style, property,
       opt_bypassCache);
   if (propertyName) {
-    element.style[propertyName] = opt_units ? value + opt_units : value;
+    element.style[propertyName] =
+        /** @type {string} */ (opt_units ? value + opt_units : value);
   }
 }
 

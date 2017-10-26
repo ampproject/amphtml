@@ -107,7 +107,7 @@ export class AmpList extends AMP.BaseElement {
         const items = isArray(src) ? src : [src];
         this.renderItems_(items);
       } else {
-        user().error(TAG, 'Unexpected "src" type: ' + src);
+        this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
     } else if (state !== undefined) {
       const items = isArray(state) ? state : [state];
@@ -147,9 +147,21 @@ export class AmpList extends AMP.BaseElement {
   fetchList_() {
     const itemsExpr = this.element.getAttribute('items') || 'items';
     return this.fetch_(itemsExpr).then(items => {
+      if (this.element.hasAttribute('single-item')) {
+        user().assert(typeof items !== 'undefined' ,
+            'Response must contain an arrary or object at "%s". %s',
+            itemsExpr, this.element);
+        if (!isArray(items)) {
+          items = [items];
+        }
+      }
       user().assert(isArray(items),
           'Response must contain an array at "%s". %s',
           itemsExpr, this.element);
+      const maxLen = parseInt(this.element.getAttribute('max-items'), 10);
+      if (maxLen < items.length) {
+        items = items.slice(0, maxLen);
+      }
       return this.renderItems_(items);
     }, error => {
       throw user().createError('Error fetching amp-list', error);
@@ -219,4 +231,7 @@ export class AmpList extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-list', AmpList);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpList);
+});
