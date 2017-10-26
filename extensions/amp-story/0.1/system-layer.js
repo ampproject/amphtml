@@ -28,7 +28,9 @@ const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 
-const FULLSCREEN_CLASS = 'i-amphtml-story-exit-fullscreen';
+const ENTER_FULLSCREEN_CLASS = 'i-amphtml-story-enter-fullscreen';
+
+const EXIT_FULLSCREEN_CLASS = 'i-amphtml-story-exit-fullscreen';
 
 const CLOSE_CLASS = 'i-amphtml-story-bookend-close';
 
@@ -79,7 +81,15 @@ const TEMPLATE = {
           tag: 'div',
           attrs: dict({
             'role': 'button',
-            'class': FULLSCREEN_CLASS + ' i-amphtml-story-button',
+            'class': ENTER_FULLSCREEN_CLASS + ' i-amphtml-story-button',
+            'hidden': true,
+          }),
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': EXIT_FULLSCREEN_CLASS + ' i-amphtml-story-button',
             'hidden': true,
           }),
         },
@@ -139,6 +149,9 @@ export class SystemLayer {
     this.exitFullScreenBtn_ = null;
 
     /** @private {?Element} */
+    this.enterFullScreenBtn_ = null;
+
+    /** @private {?Element} */
     this.closeBookendBtn_ = null;
 
     /** @private {?Element} */
@@ -184,6 +197,9 @@ export class SystemLayer {
     this.exitFullScreenBtn_ =
         this.root_.querySelector('.i-amphtml-story-exit-fullscreen');
 
+    this.enterFullScreenBtn_ =
+        this.root_.querySelector('.i-amphtml-story-enter-fullscreen');
+
     this.closeBookendBtn_ =
         this.root_.querySelector('.i-amphtml-story-bookend-close');
 
@@ -213,8 +229,12 @@ export class SystemLayer {
     this.root_.addEventListener('click', e => {
       const target = dev().assertElement(e.target);
 
-      if (target.matches(`.${FULLSCREEN_CLASS}, .${FULLSCREEN_CLASS} *`)) {
+      if (target.matches(
+          `.${EXIT_FULLSCREEN_CLASS}, .${EXIT_FULLSCREEN_CLASS} *`)) {
         this.onExitFullScreenClick_(e);
+      } else if (target.matches(
+          `.${ENTER_FULLSCREEN_CLASS}, .${ENTER_FULLSCREEN_CLASS} *`)) {
+        this.onEnterFullScreenClick_(e);
       } else if (target.matches(`.${CLOSE_CLASS}, .${CLOSE_CLASS} *`)) {
         this.onCloseBookend_(e);
       } else if (target.matches(`.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
@@ -245,6 +265,7 @@ export class SystemLayer {
    */
   setInFullScreen(inFullScreen) {
     this.toggleExitFullScreenBtn_(inFullScreen);
+    this.toggleEnterFullScreenBtn_(inFullScreen);
   }
 
   /**
@@ -256,6 +277,17 @@ export class SystemLayer {
         Services.vsyncFor(this.win_),
         dev().assertElement(this.exitFullScreenBtn_),
         /* opt_isHidden */ !isEnabled);
+  }
+
+  /**
+   * @param {boolean} isEnabled
+   * @private
+   */
+  toggleEnterFullScreenBtn_(isEnabled) {
+    toggleHiddenAttribute(
+        Services.vsyncFor(this.win_),
+        dev().assertElement(this.enterFullScreenBtn_),
+        /* opt_isHidden */ isEnabled);
   }
 
   /**
@@ -274,6 +306,14 @@ export class SystemLayer {
    */
   onExitFullScreenClick_(e) {
     this.dispatch_(EventType.EXIT_FULLSCREEN, e);
+  }
+
+  /**
+   * @param {!Event} e
+   * @private
+   */
+  onEnterFullScreenClick_(e) {
+    this.dispatch_(EventType.ENTER_FULLSCREEN, e);
   }
 
   /**

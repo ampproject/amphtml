@@ -215,6 +215,10 @@ export class AmpStory extends AMP.BaseElement {
       this.exitFullScreen_(/* opt_explicitUserAction */ true);
     });
 
+    this.element.addEventListener(EventType.ENTER_FULLSCREEN, () => {
+      this.enterFullScreen_();
+    });
+
     this.element.addEventListener(EventType.CLOSE_BOOKEND, () => {
       this.hideBookend_();
     });
