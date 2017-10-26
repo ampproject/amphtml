@@ -20,13 +20,8 @@ import {listenOnce} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest} from '../../../src/dom';
+import {timeStrToMillis} from './utils';
 
-
-/** @private @enum {!RegExp} */
-const TIME_REGEX = {
-  MILLISECONDS: /^(\d+)ms$/,
-  SECONDS: /^(\d+)s$/,
-};
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;
@@ -130,17 +125,17 @@ export class AdvancementConfig {
 
 
   /**
-   * @param {!Element} rootElement 
+   * @param {!Element} rootEl 
    * @return {?AdvancementConfig} 
    */
-  static forElement(rootElement) {
-    const win = rootElement.ownerDocument.defaultView;
-    const autoAdvanceStr = rootElement.getAttribute('auto-advance-after');
+  static forElement(rootEl) {
+    const win = rootEl.ownerDocument.defaultView;
+    const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
 
     const supportedAdvancementModes = [
-      new ManualAdvancement(rootElement),
-      TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootElement),
-      MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootElement),
+      new ManualAdvancement(rootEl),
+      TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
+      MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
     ].filter(isNonNull);
 
     if (supportedAdvancementModes.length === 1) {
@@ -342,40 +337,19 @@ class TimeBasedAdvancement extends AdvancementConfig {
 
 
   /**
-   * @param {string} autoAdvanceStr 
-   * @return {?number} The delay before the page should automatically advance to
-   *     the next page, or null if the page will not advance based on time.
-   * @private
-   */
-  static getAutoAdvanceDelayMs_(autoAdvanceStr) {
-    if (TIME_REGEX.MILLISECONDS.test(autoAdvanceStr)) {
-      return Number(TIME_REGEX.MILLISECONDS.exec(autoAdvanceStr)[1]);
-    } else if (TIME_REGEX.SECONDS.test(autoAdvanceStr)) {
-      return Number(TIME_REGEX.SECONDS.exec(autoAdvanceStr)[1]) * 1000;
-    }
-
-    return null;
-  }
-
-
-  /**
    * 
    * @param {string} autoAdvanceStr 
    * @return {?AdvancementConfig}
    */
-  static fromAutoAdvanceString(autoAdvanceStr, win, rootElement) {
+  static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
     if (!autoAdvanceStr) {
       return null;
     }
 
-    const delayMs = TimeBasedAdvancement.getAutoAdvanceDelayMs_(autoAdvanceStr);
-    if (delayMs === null) {
+    const delayMs = timeStrToMillis(autoAdvanceStr);
+    if (isNaN(delayMs)) {
       return null;
     }
-
-    user().assert(isFiniteNumber(delayMs) && delayMs > 0,
-        `Invalid automatic advance delay '${autoAdvanceStr}' ` +
-        `for page '${rootElement.id}'.`);
 
     return new TimeBasedAdvancement(win, delayMs);
   }
@@ -511,12 +485,17 @@ class MediaBasedAdvancement extends AdvancementConfig {
   }
 
 
-  static fromAutoAdvanceString(autoAdvanceStr, win, rootElement) {
-    const element = user().assertElement(
-        scopedQuerySelector(rootElement, `#${autoAdvanceStr}`),
-        'ID specified for automatic advance does not refer to any ' +
-        `element on page '${rootElement.id}'.`);
+  static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
+    try {
+      const element = scopedQuerySelector(rootEl, `#${autoAdvanceStr}`);
 
-    return new MediaBasedAdvancement(win, element);
+      if (!element) {
+        return null;
+      }
+
+      return new MediaBasedAdvancement(win, element);
+    } catch (e) {
+      return null;
+    }
   }
 }

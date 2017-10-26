@@ -39,7 +39,6 @@ import {dict} from '../../../src/utils/object';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
-import {timeStrToMillis} from './utils';
 
 
 /** @private @const {!Array<!./simple-template.ElementDef>} */
