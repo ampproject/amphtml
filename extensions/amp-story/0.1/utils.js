@@ -39,3 +39,16 @@ export function timeStrToMillis(time) {
   return units == 's' ? parseFloat(num) * 1000 : parseInt(num, 10);
 }
 
+
+/**
+ * Determines whether the specified element has an action for its on="tap:..."
+ * handler.
+ * @param {!Element} el
+ * @return {boolean}
+ */
+export function hasTapAction(el) {
+  // There are better ways to determine this, but they're all bound to action
+  // service race conditions. This is good enough for our use case.
+  return el.hasAttribute('on') &&
+      !!el.getAttribute('on').match(/(^|;)\s*tap\s*:/);
+}

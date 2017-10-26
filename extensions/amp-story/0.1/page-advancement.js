@@ -20,7 +20,7 @@ import {listenOnce} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest} from '../../../src/dom';
-import {timeStrToMillis} from './utils';
+import {hasTapAction, timeStrToMillis} from './utils';
 
 
 /** @private @const {number} */
@@ -30,28 +30,13 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 const POLL_INTERVAL_MS = 250;
 
 
-/** @const {function(?AdvancementConfig): boolean} */
-function isNonNull(advancementConfig) {
-  return advancementConfig !== null;
-}
-
 /**
- * @param {!Element} el
- * @return {boolean}
- */
-function hasTapAction(el) {
-  // There are better ways to determine this, but they're all bound to action
-  // service race conditions. This is good enough for our use case.
-  return el.hasAttribute('on') &&
-      !!el.getAttribute('on').match(/(^|;)\s*tap\s*:/);
-}
-
-
-/**
- * 
+ * Base class for the AdvancementConfig.  By default, does nothing other than
+ * tracking its internal state when started/stopped, and listeners will never be
+ * invoked.
  */
 export class AdvancementConfig {
-  constructor(win) {
+  constructor() {
     /** @private @const {!Array<!>} */
     this.progressListeners_ = [];
 
@@ -65,22 +50,42 @@ export class AdvancementConfig {
     this.isRunning_ = false;
   }
 
+  /**
+   * @param {function(number)} progressListener A function that handles when the
+   *     progress of the current page has been updated.  It accepts a number
+   *     between 0.0 and 1.0 as its only argument, that represents the current
+   *     progress.
+   */
   addProgressListener(progressListener) {
     this.progressListeners_.push(progressListener);
   }
 
+  /**
+   * @param {function(number)} progressListener A function that handles when a
+   *     page should be advanced.
+   */
   addAdvanceListener(advanceListener) {
     this.advanceListeners_.push(advanceListener);
   }
 
+  /**
+   * @param {function(number)} progressListener A function that handles when a
+   *     page should go back to the previous page.
+   */
   addPreviousListener(previousListener) {
     this.previousListeners_.push(previousListener);
   }
 
+  /**
+   * Invoked when the advancement configuration should begin taking effect.
+   */
   start() {
     this.isRunning_ = true;
   }
 
+  /**
+   * Invoked when the advancement configuration should cease taking effect.
+   */
   stop() {
     this.isRunning_ = false;
   }
@@ -123,12 +128,13 @@ export class AdvancementConfig {
     });
   }
 
-
   /**
-   * @param {!Element} rootEl 
-   * @return {?AdvancementConfig} 
+   * Provides an AdvancementConfig object for the specified amp-story-page.
+   * @param {!AmpStoryPage} page
+   * @return {!AdvancementConfig}
    */
-  static forElement(rootEl) {
+  static forPage(page) {
+    const rootEl = page.element;
     const win = rootEl.ownerDocument.defaultView;
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
 
@@ -136,7 +142,11 @@ export class AdvancementConfig {
       new ManualAdvancement(rootEl),
       TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
       MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
-    ].filter(isNonNull);
+    ].filter(x => x !== null);
+
+    if (supportedAdvancementModes.length === 0) {
+      return new AdvancementConfig();
+    }
 
     if (supportedAdvancementModes.length === 1) {
       return supportedAdvancementModes[0];
@@ -146,7 +156,17 @@ export class AdvancementConfig {
   }
 }
 
+
+/**
+ * An AdvancementConfig implementation that composes multiple other
+ * AdvancementConfig implementations by simply delegating all of its calls to
+ * an array of underlying advancement modes.
+ */
 class MultipleAdvancementConfig extends AdvancementConfig {
+  /**
+   * @param {!Array<!AdvancementConfig>} advancementModes A list of
+   *     AdvancementConfigs to which all calls should be delegated.
+   */
   constructor(advancementModes) {
     super();
 
@@ -154,24 +174,28 @@ class MultipleAdvancementConfig extends AdvancementConfig {
     this.advancementModes_ = advancementModes;
   }
 
+  /** @override */
   addProgressListener(progressListener) {
     this.advancementModes_.forEach(advancementMode => {
       advancementMode.addProgressListener(progressListener);
     });
   }
 
+  /** @override */
   addAdvanceListener(advanceListener) {
     this.advancementModes_.forEach(advancementMode => {
       advancementMode.addAdvanceListener(advanceListener);
     });
   }
 
+  /** @override */
   addPreviousListener(previousListener) {
     this.advancementModes_.forEach(advancementMode => {
       advancementMode.addPreviousListener(previousListener);
     });
   }
 
+  /** @override */
   start() {
     super.start();
     this.advancementModes_.forEach(advancementMode => {
@@ -179,6 +203,7 @@ class MultipleAdvancementConfig extends AdvancementConfig {
     });
   }
 
+  /** @override */
   stop() {
     super.stop();
     this.advancementModes_.forEach(advancementMode => {
@@ -194,12 +219,15 @@ class MultipleAdvancementConfig extends AdvancementConfig {
  * leftmost 25% of the screen.
  */
 class ManualAdvancement extends AdvancementConfig {
+  /**
+   * @param {!Element} element The element that, when clicked, can cause
+   *     advancing to the next page or going back to the previous.
+   */
   constructor(element) {
     super();
     this.element_ = element;
-    this.clickListener_ = this.maybePerformSystemNavigation_.bind(this);
+    this.clickListener_ = this.maybePerformNavigation_.bind(this);
   }
-
 
   /** @override */
   start() {
@@ -207,19 +235,16 @@ class ManualAdvancement extends AdvancementConfig {
     this.element_.addEventListener('click', this.clickListener_, true);
   }
 
-
   /** @override */
   stop() {
     super.stop();
     this.element_.removeEventListener('click', this.clickListener_, true);
   }
 
-
   /** @override */
   getProgress() {
     return 1.0;
   }
-
 
   /**
    * Determines whether a click should be used for navigation.  Navigate should
@@ -235,14 +260,13 @@ class ManualAdvancement extends AdvancementConfig {
     }, /* opt_stopAt */ this.element_);
   }
 
-
   /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
    * @private
    */
-  maybePerformSystemNavigation_(event) {
+  maybePerformNavigation_(event) {
     if (!this.isNavigationalClick_(event)) {
       // If the system doesn't need to handle this click, then we can simply
       // return and let the event propagate as it would have otherwise.
@@ -273,6 +297,10 @@ class ManualAdvancement extends AdvancementConfig {
  * specified in either seconds or milliseconds.
  */
 class TimeBasedAdvancement extends AdvancementConfig {
+  /**
+   * @param {!Window} win The Window object.
+   * @param {number} delayMs The duration to wait before advancing.
+   */
   constructor(win, delayMs) {
     super();
 
@@ -289,7 +317,6 @@ class TimeBasedAdvancement extends AdvancementConfig {
     this.timeoutId_ = null;
   }
 
-
   /**
    * @return {number} 
    * @private
@@ -297,7 +324,6 @@ class TimeBasedAdvancement extends AdvancementConfig {
   getCurrentTimestampMs_() {
     return Date.now();
   }
-
 
   /** @override */
   start() {
@@ -312,7 +338,6 @@ class TimeBasedAdvancement extends AdvancementConfig {
     });
   }
 
-
   /** @override */
   stop() {
     super.stop();
@@ -321,7 +346,6 @@ class TimeBasedAdvancement extends AdvancementConfig {
       this.timer_.cancel(this.timeoutId_);
     }
   }
-
 
   /** @override */
   getProgress() {
@@ -335,11 +359,14 @@ class TimeBasedAdvancement extends AdvancementConfig {
     return Math.min(Math.max(progress, 0), 1);
   }
 
-
   /**
-   * 
-   * @param {string} autoAdvanceStr 
-   * @return {?AdvancementConfig}
+   * Gets an instance of TimeBasedAdvancement based on the value of the
+   * auto-advance string (from the 'auto-advance-after' attribute on the page).
+   * @param {string} autoAdvanceStr The value of the auto-advance-after
+   *     attribute.
+   * @return {?AdvancementConfig} An AdvancementConfig, if time-based
+   *     auto-advance is supported for the specified auto-advance string; null
+   *     otherwise.
    */
   static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
     if (!autoAdvanceStr) {
@@ -384,7 +411,6 @@ class MediaBasedAdvancement extends AdvancementConfig {
     this.video_ = null;
   }
 
-
   /**
    * Determines whether the element for auto advancement implements the video
    * interface.
@@ -395,7 +421,6 @@ class MediaBasedAdvancement extends AdvancementConfig {
   isVideoInterfaceVideo_() {
     return this.element_.classList.contains('i-amphtml-video-interface');
   }
-
 
   /**
    * Gets an HTMLMediaElement from an element that wraps it.
@@ -417,7 +442,6 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
     return null;
   }
-
 
   /** @override */
   start() {
@@ -441,18 +465,20 @@ class MediaBasedAdvancement extends AdvancementConfig {
         'supported for automatic advancement.');
   }
 
-
+  /** @private */
   startHtmlMediaElement_() {
     listenOnce(this.mediaElement_, 'ended', () => this.onAdvance());
     listenOnce(this.mediaElement_, 'timeupdate', () => this.onProgressUpdate());
   }
 
+  /** @private */
   startVideoInterfaceElement_() {
     this.element_.getImpl().then(video => {
       this.video_ = video;
     });
 
-    listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(), {capture: true});
+    listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(),
+        {capture: true});
 
     this.timer_.poll(POLL_INTERVAL_MS, () => {
       this.onProgressUpdate();
@@ -460,12 +486,13 @@ class MediaBasedAdvancement extends AdvancementConfig {
     });
   }
 
-
   /** @override */
   stop() {
+    // We don't need to explicitly stop the polling or media events listed
+    // above, since they are already bound to either the playback of the media
+    // on the page, or the isRunning state of this AdvancementConfig.
     super.stop();
   }
-
 
   /** @override */
   getProgress() {
@@ -484,7 +511,15 @@ class MediaBasedAdvancement extends AdvancementConfig {
     return super.getProgress();
   }
 
-
+  /**
+   * Gets an instance of MediaBasedAdvancement based on the value of the
+   * auto-advance string (from the 'auto-advance-after' attribute on the page).
+   * @param {string} autoAdvanceStr The value of the auto-advance-after
+   *     attribute.
+   * @return {?AdvancementConfig} An AdvancementConfig, if media-element-based
+   *     auto-advance is supported for the specified auto-advance string; null
+   *     otherwise.
+   */
   static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
     try {
       const element = scopedQuerySelector(rootEl, `#${autoAdvanceStr}`);

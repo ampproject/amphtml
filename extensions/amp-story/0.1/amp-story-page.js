@@ -143,7 +143,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.autoAdvanceUnlistenDef_ = null;
 
     /** @private {!PageAdvancementMode} */
-    this.advancement_ = AdvancementConfig.forElement(this.element);
+    this.advancement_ = AdvancementConfig.forPage(this);
   }
 
 
@@ -171,7 +171,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.initializeLoading_();
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_.addAdvanceListener(() => this.next(true));
-    this.advancement_.addProgressListener(progress => this.emitProgress_(progress));
+    this.advancement_
+        .addProgressListener(progress => this.emitProgress_(progress));
   }
 
 
