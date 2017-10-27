@@ -1201,7 +1201,8 @@ export class AmpA4A extends AMP.BaseElement {
     // Haven't rendered yet, so try rendering via one of our
     // cross-domain iframe solutions.
     let renderPromise = Promise.resolve(false);
-    if (this.experimentalNonAmpCreativeRenderMethod_ !=
+    if (this.experimentalNonAmpCreativeRenderMethod_ &&
+        this.experimentalNonAmpCreativeRenderMethod_ !=
         XORIGIN_MODE.CLIENT_CACHE &&
         this.creativeBody_) {
       renderPromise = this.renderViaNameAttrOfXOriginIframe_(

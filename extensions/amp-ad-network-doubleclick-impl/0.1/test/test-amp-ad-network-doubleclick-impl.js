@@ -156,9 +156,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   });
 
 
-  describe('#extractSize', () => {
+  describe('#processResponseHeaders', () => {
     let preloadExtensionSpy;
-    const size = {width: 200, height: 50};
 
     beforeEach(() => {
       element = createElementWithAttributes(doc, 'amp-ad', {
@@ -169,26 +168,25 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
       impl = new AmpAdNetworkDoubleclickImpl(element);
       sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
-      impl.size_ = size;
       const extensions = Services.extensionsFor(impl.win);
       preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
     });
 
     it('should not load amp-analytics without an analytics header', () => {
-      expect(impl.extractSize({
+      impl.processResponseHeaders({
         get() {
           return undefined;
         },
         has() {
           return false;
         },
-      })).to.deep.equal(size);
+      });
       expect(preloadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
     });
 
     it('should load amp-analytics with an analytics header', () => {
       const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
-      expect(impl.extractSize({
+      impl.processResponseHeaders({
         get(name) {
           switch (name) {
             case 'X-AmpAnalytics':
@@ -200,7 +198,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         has(name) {
           return !!this.get(name);
         },
-      })).to.deep.equal(size);
+      });
       expect(preloadExtensionSpy.withArgs('amp-analytics')).to.be.called;
       // exact value of ampAnalyticsConfig covered in
       // ads/google/test/test-utils.js
@@ -209,7 +207,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     it('should load delayed impression amp-pixels', () => {
       const fireDelayedImpressionsSpy =
           sandbox.spy(impl, 'fireDelayedImpressions');
-      expect(impl.extractSize({
+      impl.processResponseHeaders({
         get(name) {
           switch (name) {
             case 'X-AmpImps':
@@ -223,7 +221,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         has(name) {
           return !!this.get(name);
         },
-      })).to.deep.equal(size);
+      });
       expect(fireDelayedImpressionsSpy.withArgs(
           'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
       expect(fireDelayedImpressionsSpy.withArgs(
@@ -231,7 +229,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('should initialize refresh manager', () => {
-      impl.extractSize({
+      impl.processResponseHeaders({
         get(name) {
           return name == 'amp-force-refresh' ? '30' : undefined;
         },
@@ -244,7 +242,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should not override publisher\'s refresh settings', () => {
       impl.refreshManager_ = {refreshInterval_: '45'};
-      impl.extractSize({
+      impl.processResponseHeaders({
         get(name) {
           return name == 'amp-force-refresh' ? '30' : undefined;
         },
@@ -254,7 +252,40 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
       expect(impl.refreshManager_.refreshInterval_).to.equal('45');
     });
+  });
 
+describe('#extractSize', () => {
+    beforeEach(() => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+        'layout': 'fixed',
+      });
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
+      impl.size_ = {width: 200, height: 50};
+    });
+    it('should return default size', () => {
+      expect(impl.extractSize({
+        get() {
+          return undefined;
+        },
+        has() {
+          return false;
+        },
+      })).to.deep.equal(impl.size_);
+    });
+    it('should return size from header', () => {
+      expect(impl.extractSize({
+        get(prop) {
+          return prop == CREATIVE_SIZE_HEADER ? '300x100' : undefined;
+        },
+        has(prop) {
+          return prop == CREATIVE_SIZE_HEADER;
+        },
+      })).to.deep.equal({width: 300, height: 100});
+    });
   });
 
   describe('#onCreativeRender', () => {
