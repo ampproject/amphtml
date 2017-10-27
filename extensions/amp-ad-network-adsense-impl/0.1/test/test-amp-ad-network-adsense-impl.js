@@ -136,7 +136,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
   });
 
-  describe('#extractSize', () => {
+  describe('#responseHeaders', () => {
     let preloadExtensionSpy;
 
     beforeEach(() => {
@@ -153,7 +153,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
 
     it('without analytics', () => {
-      impl.extractSize({
+      impl.processResponseHeaders({
         get() {
           return undefined;
         },
@@ -166,7 +166,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
     it('with analytics', () => {
       const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
-      impl.extractSize({
+      impl.processResponseHeaders({
         get(name) {
           switch (name) {
             case 'X-AmpAnalytics':

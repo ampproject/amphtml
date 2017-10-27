@@ -294,7 +294,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  extractSize(responseHeaders) {
+  processResponseHeaders(responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
@@ -303,6 +303,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
+  }
+
+  /** @override */
+  extractSize(unusedResponseHeaders) {
     return this.size_;
   }
 
