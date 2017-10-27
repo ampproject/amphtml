@@ -301,6 +301,7 @@ is demonstrated desire for it.
   <tr><td>amp-ad-exit</td></tr>
   <tr><td>amp-analytics</td></tr>
   <tr><td>amp-anim</td></tr>
+  <tr><td>amp-animation</td></tr>
   <tr><td>amp-audio</td></tr>
   <tr><td>amp-carousel</td></tr>
   <tr><td>amp-fit-text</td></tr>
@@ -308,6 +309,7 @@ is demonstrated desire for it.
   <tr><td>amp-form</td></tr>
   <tr><td>amp-img</td></tr>
   <tr><td>amp-pixel</td></tr>
+  <tr><td>amp-position-observer</td></tr>
   <tr><td>amp-social-share</td></tr>
   <tr><td>amp-video</td></tr>
   <tr><td>amp-youtube</td></tr>
