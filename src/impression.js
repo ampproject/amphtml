@@ -147,6 +147,7 @@ function handleClickUrl(win) {
   /** @const {string|undefined} */
   const clickUrl = viewer.getParam('click');
 
+
   if (!clickUrl) {
     return Promise.resolve();
   }
@@ -170,6 +171,8 @@ function handleClickUrl(win) {
     return invoke(win, dev().assertString(clickUrl));
   }).then(response => {
     applyResponse(win, response);
+  }).catch(err => {
+    user().warn('IMPRESSION', 'Error on request clickUrl: ', err);
   });
 }
 
@@ -177,7 +180,7 @@ function handleClickUrl(win) {
  * Send the url to ad server and wait for its response
  * @param {!Window} win
  * @param {string} clickUrl
- * @return {!Promise<!JsonObject>}
+ * @return {!Promise<?JsonObject>}
  */
 function invoke(win, clickUrl) {
   if (getMode().localDev && !getMode().test) {
@@ -187,16 +190,26 @@ function invoke(win, clickUrl) {
     credentials: 'include',
     // All origins are allows to send these requests.
     requireAmpResponseSourceOrigin: false,
-  }).then(res => res.json());
+  }).then(res => {
+    // Treat 204 no content response specially
+    if (res.status == 204) {
+      return null;
+    }
+    return res.json();
+  });
 }
 
 /**
  * parse the response back from ad server
  * Set for analytics purposes
  * @param {!Window} win
- * @param {!JsonObject} response
+ * @param {?JsonObject} response
  */
 function applyResponse(win, response) {
+  if (!response) {
+    return;
+  }
+
   const adLocation = response['location'];
   const adTracking = response['tracking_url'];
 
