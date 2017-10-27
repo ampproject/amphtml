@@ -165,14 +165,14 @@ class AmpAccordion extends AMP.BaseElement {
    * Toggles section expanded or closed.
    * @private
    */
-  toggle_(section, opt_force) {
+  toggle_(section, opt_forceExpand) {
     const sectionComponents = section.children;
     const header = sectionComponents[0];
     const content = sectionComponents[1];
     const contentId = content.getAttribute('id');
     const isSectionClosedAfterClick = section.hasAttribute('expanded');
     this.mutateElement(() => {
-      if (section.hasAttribute('expanded') || !opt_force) {
+      if (section.hasAttribute('expanded') || !opt_forceExpand) {
         section.removeAttribute('expanded');
         header.setAttribute('aria-expanded', 'false');
       } else {
