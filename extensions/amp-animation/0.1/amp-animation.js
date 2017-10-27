@@ -86,11 +86,11 @@ export class AmpAnimation extends AMP.BaseElement {
     // TODO(dvoytenko): Remove once we support direct parent visibility.
     if (trigger == 'visibility') {
       user().assert(
-        this.element.parentNode == this.element.ownerDocument.body ||
-        this.element.parentNode == ampdoc.getBody(),
-        `${TAG} is only allowed as a direct child of <body> element` +
-        ' when trigger is visibility.' +
-        ' This restriction will be removed soon.');
+          this.element.parentNode == this.element.ownerDocument.body ||
+          this.element.parentNode == ampdoc.getBody(),
+          `${TAG} is only allowed as a direct child of <body> element` +
+          ' when trigger is visibility.' +
+          ' This restriction will be removed soon.');
     }
 
     // Parse config.
