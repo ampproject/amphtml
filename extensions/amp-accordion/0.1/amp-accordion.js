@@ -162,15 +162,12 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /**
-   * Handles accordion header activation, through clicks or enter/space presses.
-   * @param {!Event} event 'click' or 'keydown' event.
+   * Toggles section expanded or closed.
    * @private
    */
-  onHeaderPicked_(event) {
-    event.preventDefault();
-    const header = dev().assertElement(event.currentTarget);
-    const section = header.parentElement;
+  toggle_(section, opt_force) {
     const sectionComponents = section.children;
+    const header = sectionComponents[0];
     const content = sectionComponents[1];
     const contentId = content.getAttribute('id');
     const isSectionClosedAfterClick = section.hasAttribute('expanded');
@@ -185,6 +182,18 @@ class AmpAccordion extends AMP.BaseElement {
     }, section);
     this.currentState_[contentId] = !isSectionClosedAfterClick;
     this.setSessionState_();
+  }
+
+  /**
+   * Handles accordion header activation, through clicks or enter/space presses.
+   * @param {!Event} event 'click' or 'keydown' event.
+   * @private
+   */
+  onHeaderPicked_(event) {
+    event.preventDefault();
+    const header = dev().assertElement(event.currentTarget);
+    const section = header.parentElement;
+    this.toggle_(section);
   }
 
   /**
