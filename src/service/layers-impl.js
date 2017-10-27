@@ -19,6 +19,7 @@ import {dev} from '../log';
 import {filterSplice} from '../utils/array';
 import {Services} from '../services';
 import {registerServiceBuilderForDoc} from '../service';
+import {computedStyle} from '../style';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
 
@@ -109,6 +110,8 @@ export class LayoutLayers {
     /** @const {!Document} */
     this.document_ = win.document;
 
+    this.layouts_ = [];
+
     // TODO: figure out fixed layer
 
     this.document_.addEventListener('scroll', event => {
@@ -125,13 +128,13 @@ export class LayoutLayers {
   }
 
   add(element) {
-    const layout = LayoutElement.forOptional(element);
-    if (layout) {
-      layout.refreshParentLayer();
-      return;
+    // TODO keep track of all elements
+    let layout = LayoutElement.forOptional(element);
+    if (!layout) {
+      layout = new LayoutElement(element);
     }
-
-    new LayoutElement(element);
+    this.layouts_.push(layout);
+    return layout;
   }
 
   remove(element) {
@@ -140,6 +143,10 @@ export class LayoutLayers {
     dev().assert(parent);
 
     parent.remove(element);
+    const index = this.layouts_.indexOf(layout);
+    if (index > -1) {
+      this.layouts_.splice(index, 1);
+    }
   }
 
   /**
@@ -183,20 +190,17 @@ export class LayoutLayers {
   }
 
   getScrolledPosition(element, opt_parent) {
-    const layout = LayoutElement.forOptional(element) ||
-        new LayoutElement(element);
+    const layout = this.add(element);
     return layout.getScrolledPosition(opt_parent);
   }
 
   getOffsetPosition(element, opt_parent) {
-    const layout = LayoutElement.forOptional(element) ||
-        new LayoutElement(element);
+    const layout = this.add(element);
     return layout.getOffsetPosition(opt_parent);
   }
 
   getSize(element) {
-    const layout = LayoutElement.forOptional(element) ||
-        new LayoutElement(element);
+    const layout = this.add(element);
     return layout.getSize(element);
   }
 
@@ -241,15 +245,18 @@ export class LayoutLayers {
    * @return {!LayoutElement}
    */
   declareLayer_(element) {
-    const layer = LayoutElement.forOptional(element) ||
-        new LayoutElement(element);
-    layer.declareLayer();
-    return layer;
+    const layout = this.add(element);
+    layout.declareLayer();
+    return layout;
   }
 
   onResize_() {
-    const scroller = getScrollingElement(this.document_);
-    LayoutElement.for(scroller).undeclareLayer();
+    const layouts = this.layouts_;
+    for (let i = 0; i < layouts.length; i++) {
+      const layout = layouts[i];
+      layout.undeclareLayer();
+      layout.forgetParentLayer();
+    }
   }
 
   scrolled_(element) {
@@ -272,15 +279,14 @@ export class LayoutLayers {
 
 export class LayoutElement {
   constructor(element) {
+    element[LAYOUT_PROP] = this;
     /**
      * @private @const {!Element}
      */
     this.element_ = element;
 
-    const parent = LayoutElement.getParentLayer(element);
-    // It's important that the parent layer is retrieved before setting the
-    // layout prop.
-    element[LAYOUT_PROP] = this;
+    /** @type {?LayoutElement|undefined} */
+    this.parentLayer_ = undefined;
 
     this.needsRemeasure_ = true;
     this.size_ = SizeWh(0, 0);
@@ -293,12 +299,6 @@ export class LayoutElement {
     this.scrollTop_ = 0;
 
     this.children_ = [];
-
-    /** @type {LayoutElement} */
-    this.parentLayer_ = parent;
-    if (parent) {
-      parent.add(element);
-    }
   }
 
   /**
@@ -334,13 +334,30 @@ export class LayoutElement {
       }
     }
 
+    const win = element.ownerDocument.defaultView;
+    if (computedStyle(win, element).position == 'fixed') {
+      return null;
+    }
+
     let last = element;
-    for (let el = last.parentNode; el; last = el, el = el.parentNode) {
+    let op = element.offsetParent;
+    for (let el = last.parentNode; el; el = el.parentNode) {
       const layout = LayoutElement.forOptional(el);
       if (layout && layout.isLayer()) {
         return layout;
       }
+
+      // now check to see if offsetParent is a fixed layer
+      if (el === op) {
+        if (computedStyle(win, op).position == 'fixed') {
+          return op;
+        }
+        op = op.offsetParent;
+      }
+
+      last = el;
     }
+
 
     if (last.nodeType !== Node.DOCUMENT_NODE) {
       throw dev().createError('element is not in the DOM tree');
@@ -366,8 +383,9 @@ export class LayoutElement {
 
     const layout = LayoutElement.for(child);
     dev().assert(layout.getParentLayer() === this);
-    layout.undeclareLayer();
 
+    layout.undeclareLayer();
+    layout.forgetParentLayer();
     const i = this.children_.indexOf(layout);
     if (i > -1) {
       this.children_.splice(i, 1);
@@ -399,21 +417,12 @@ export class LayoutElement {
    * lazily after this happens.
    */
   undeclareLayer() {
-    if (!this.isLayer_) {
+    if (!this.isLayer_ || this.isRootLayer_) {
       return;
     }
 
-    if (this.isRootLayer_) {
-      const children = this.children_;
-      // Note that children's length will increase as each child moves its
-      // children to this layer.
-      for (let i = 0; i < children.length; i++) {
-        children[i].undeclareLayer();
-      }
-    } else {
-      this.isLayer_ = false;
-      this.transfer_(this.getParentLayer());
-    }
+    this.isLayer_ = false;
+    this.transfer_(this.getParentLayer());
   }
 
   transfer_(layer) {
@@ -438,23 +447,18 @@ export class LayoutElement {
    * @return {?LayoutElement}
    */
   getParentLayer() {
+    if (this.parentLayer_ === undefined) {
+      const parent = LayoutElement.getParentLayer(this.element_, true);
+      this.parentLayer_ = parent;
+      if (parent) {
+        parent.add(this.element_);
+      }
+    }
     return this.parentLayer_;
   }
 
-  refreshParentLayer() {
-    const element = this.element_;
-    const oldParent = this.getParentLayer();
-    const parent = LayoutElement.getParentLayer(element, true);
-    if (parent === oldParent) {
-      return;
-    }
-    if (oldParent) {
-      oldParent.remove(element);
-    }
-    if (parent) {
-      parent.add(element);
-    }
-
+  forgetParentLayer() {
+    this.parentLayer_ = undefined;
   }
 
   /**
