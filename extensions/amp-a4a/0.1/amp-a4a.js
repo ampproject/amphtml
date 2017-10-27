@@ -631,7 +631,6 @@ export class AmpA4A extends AMP.BaseElement {
             return Promise.reject(NO_CONTENT_RESPONSE);
           }
 
-          // ##
           this.processResponseHeaders(fetchResponse.headers);
 
           // Note: Resolving a .then inside a .then because we need to capture

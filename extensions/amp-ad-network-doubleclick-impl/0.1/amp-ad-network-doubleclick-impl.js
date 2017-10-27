@@ -356,9 +356,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {string} */
     this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
-
-    /** @private {?string} */
-    this.nonAmpRenderingMethod_ = null;
   }
 
   /** @override */
