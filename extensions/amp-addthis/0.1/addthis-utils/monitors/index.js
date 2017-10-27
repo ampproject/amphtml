@@ -13,18 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {addParamsToUrl} from '../../../../src/url';
-
-import {COOKIELESS_API_SERVER} from '../constants';
-import {pixelDrop} from './pixel';
-
-export const callPRender = ({data, ampDoc}) => {
-  const url = addParamsToUrl(`${COOKIELESS_API_SERVER}/live/prender`, data);
-
-  if (ampDoc.win.navigator.sendBeacon) {
-    ampDoc.win.navigator.sendBeacon(url, '{}');
-  }
-  else {
-    pixelDrop(url, ampDoc);
-  }
-};
+export {ScrollMonitor} from './scroll-monitor';
+export {ClickMonitor} from './click-monitor';
+export {DwellMonitor} from './dwell-monitor';
+export {ActiveToolsMonitor} from './active-tools-monitor';

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 import {createElementWithAttributes} from '../../../../src/dom';
-import {dict} from '../../../src/utils/object';
-import {parseUrl} from '../../../src/url';
-import {setStyles} from '../../../src/style';
+import {dict} from '../../../../src/utils/object';
+import {parseUrl} from '../../../../src/url';
+import {setStyles} from '../../../../src/style';
+import {addParamsToUrl} from '../../../../src/url';
+import {Services} from '../../../../src/services';
 
-import {callPRender} from './prender';
+import {COOKIELESS_API_SERVER} from '../constants';
 
 const RE_IFRAME = /#iframe$/;
 const pixelatorFrameTitle = 'Pxltr Frame';
@@ -32,10 +34,9 @@ const groupPixelsByTime = pixelList => {
   // Clean delay value; if it's empty/doesn't exist, default to [0]
   const cleanedPixels = pixelList.map(pixel => {
     const {delay} = pixel;
-    return {
-      ...pixel,
+    return Object.assign({}, pixel, {
       delay: Array.isArray(delay) && delay.length ? delay : [0],
-    };
+    });
   });
 
   const delayMap = cleanedPixels
@@ -61,7 +62,7 @@ const groupPixelsByTime = pixelList => {
   }));
 };
 
-export const pixelDrop = (url, ampDoc) => {
+const pixelDrop = (url, ampDoc) => {
   const doc = ampDoc.win.document;
   const ampPixel = createElementWithAttributes(
       doc,
@@ -122,7 +123,7 @@ const dropPixelatorPixel = (url, ampDoc) => {
  * @param  {Array<Pixel>}    pixels
  * @param  {String}     options.sid - session (view) id
  */
-export const dropPixelGroups = (pixels, {sid, ampDoc}) => {
+const dropPixelGroups = (pixels, {sid, ampDoc}) => {
   const pixelGroups = groupPixelsByTime(pixels);
   pixelGroups.forEach(({delay, pixels}) => {
     setTimeout(() => {
@@ -130,14 +131,44 @@ export const dropPixelGroups = (pixels, {sid, ampDoc}) => {
         dropPixelatorPixel(pixel.url, ampDoc);
         return pixel.id;
       });
-
       const data = {
         delay,
         ids: pids.join('-'),
         sid,
       };
+      const url = addParamsToUrl(`${COOKIELESS_API_SERVER}/live/prender`, data);
 
-      callPRender({data, ampDoc});
+      if (ampDoc.win.navigator.sendBeacon) {
+        ampDoc.win.navigator.sendBeacon(url, '{}');
+      } else {
+        pixelDrop(url, ampDoc);
+      }
     }, delay * 1000);
   });
+};
+
+const callPixelEndpoint = ({ampDoc, endpoint, data}) => {
+  const url = addParamsToUrl(endpoint, data);
+
+  Services.xhrFor(ampDoc.win).fetchJson(url, {
+    mode: 'cors',
+    method: 'GET',
+    // This should be cacheable across publisher domains, so don't append
+    // __amp_source_origin to the URL.
+    ampCors: false,
+    credentials: 'include',
+  }).then(res => res.json()).then(json => {
+    const {pixels = []} = json;
+    if (pixels.length > 0) {
+      dropPixelGroups(pixels, {
+        sid: data.sid,
+        ampDoc,
+      });
+    }
+  });
+};
+
+export {
+  pixelDrop,
+  callPixelEndpoint,
 };
