@@ -172,7 +172,7 @@ class AmpAccordion extends AMP.BaseElement {
     const contentId = content.getAttribute('id');
     const isSectionClosedAfterClick = section.hasAttribute('expanded');
     this.mutateElement(() => {
-      if (section.hasAttribute('expanded')) {
+      if (section.hasAttribute('expanded') || !opt_force) {
         section.removeAttribute('expanded');
         header.setAttribute('aria-expanded', 'false');
       } else {
