@@ -15,9 +15,11 @@
  */
 
 export const CONFIGURATION_EVENT = 'addthis.amp.configuration';
-export const ORIGIN = 'https://client-dev.clearspring.local';
+export const SHARE_EVENT = 'addthis.share';
+export const ORIGIN = 'https://s7.addthis.com';
 export const API_SERVER = 'https://m.addthis.com';
 export const COOKIELESS_API_SERVER = 'https://m.addthisedge.com';
+export const SHARECOUNTER_SERVER = 'https://api-public.addthis.com';
 export const ICON_SIZE = '32';
 export const ALT_TEXT = 'AddThis Website Tools';
 export const SHARE_CONFIG_KEYS = [
@@ -51,4 +53,3 @@ export const AT_CONFIG_KEYS = [
 export const RE_ALPHA = /[A-Z]/gi;
 export const RE_NONALPHA = /[^a-zA-Z]/g;
 export const RE_WHITESPACE = /\s/g;
-
