@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {RTC_ERROR_ENUM} from '../../../amp-a4a/0.1/real-time-config-manager';
+import {RTC_VENDORS} from '../../../amp-a4a/0.1/callout-vendors';
 import {
   AmpAdNetworkDoubleclickImpl,
 } from '../amp-ad-network-doubleclick-impl';
@@ -85,22 +86,47 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
     });
 
     it('should properly merge RTC responses from vendors', () => {
+      RTC_VENDORS['fakevendor2'] = {
+        'url': 'https://fakevendor2.biz',
+      };
       const rtcResponseArray = [
         {response: {targeting: {'a': [1,2,3], 'b': {c: 'd'}}},
           callout: 'fakevendor', rtcTime: 100},
         {response: {targeting: {'a': 'foo', 'b': {e: 'f'}}},
           callout: 'www.exampleB.com', rtcTime: 500},
+        {response: {targeting: {'a': 'bar'}},
+          callout: 'fakevendor2', rtcTime: 100},
       ];
       const expectedParams = {
-        ati: '2,2',
-        artc: '100,500',
-        ard: 'fakevendor,www.exampleB.com',
+        ati: '2,2,2',
+        artc: '100,500,100',
+        ard: 'fakevendor,www.exampleB.com,fakevendor2',
       };
       const expectedJsonTargeting = {
         targeting: {
           'a': 'foo', 'b': {e: 'f'}, 'a_fakevendor': [1,2,3],
-          'b_fakevendor': {c: 'd'}},
+          'b_fakevendor': {c: 'd'}, 'a_fakevendor2': 'bar'},
       };
+      testMergeRtcResponses(
+          rtcResponseArray, expectedParams, expectedJsonTargeting);
+    });
+
+    it('should properly merge into existing json', () => {
+      element.setAttribute('json', '{"targeting":{"a":"foo"}}');
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const rtcResponseArray = [
+        {response: {targeting: {'a': [1,2,3]}},
+          callout: 'fakevendor', rtcTime: 100},
+      ];
+      const expectedParams = {
+        ati: '2',
+        artc: '100',
+        ard: 'fakevendor',
+      };
+      const expectedJsonTargeting = {
+        targeting: {'a': 'foo', 'a_fakevendor': [1,2,3]}};
       testMergeRtcResponses(
           rtcResponseArray, expectedParams, expectedJsonTargeting);
     });
