@@ -83,6 +83,7 @@ function getConfig() {
       ] : [
         // With --saucelabs_lite, unit tests are run on this set of browsers.
         // Only browsers that support chai-as-promised may be included below.
+        // TODO(rsimha-amp): Add more browsers to this list. #6039.
         'SL_Chrome_latest',
       ],
     });
