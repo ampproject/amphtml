@@ -130,8 +130,8 @@ There are 3 ways to monetize videos in AMP with video ads:
 
 3. If you use a video player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
 When using `amp-iframe` approach:
- - Make sure there is a poster if loading the player in the first viewport. [Details](https://www.ampproject.org/docs/reference/components/amp-iframe#iframe-with-placeholder).
- - Video and poster must be served over HTTPS.
+    * Make sure there is a poster if loading the player in the first viewport. [Details](https://www.ampproject.org/docs/reference/components/amp-iframe#iframe-with-placeholder).
+    * Video and poster must be served over HTTPS.
 
 
 ## Running ads from a custom domain
