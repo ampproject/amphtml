@@ -84,6 +84,27 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
           rtcResponseArray, expectedParams, expectedJsonTargeting);
     });
 
+    it('should properly merge RTC responses from vendors', () => {
+      const rtcResponseArray = [
+        {response: {targeting: {'a': [1,2,3], 'b': {c: 'd'}}},
+          callout: 'fakevendor', rtcTime: 100},
+        {response: {targeting: {'a': 'foo', 'b': {e: 'f'}}},
+          callout: 'www.exampleB.com', rtcTime: 500},
+      ];
+      const expectedParams = {
+        ati: '2,2',
+        artc: '100,500',
+        ard: 'fakevendor,www.exampleB.com',
+      };
+      const expectedJsonTargeting = {
+        targeting: {
+          'a': 'foo', 'b': {e: 'f'}, 'a_fakevendor': [1,2,3],
+          'b_fakevendor': {c: 'd'}},
+      };
+      testMergeRtcResponses(
+          rtcResponseArray, expectedParams, expectedJsonTargeting);
+    });
+
     it('should only add params for callouts that were actually sent', () => {
       const rtcResponseArray = [
         {error: RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE,
