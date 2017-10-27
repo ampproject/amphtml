@@ -336,6 +336,7 @@ export class LayoutElement {
 
     const win = element.ownerDocument.defaultView;
     if (computedStyle(win, element).position == 'fixed') {
+      LayoutLayers.declareLayer(element);
       return null;
     }
 
@@ -350,6 +351,7 @@ export class LayoutElement {
       // now check to see if offsetParent is a fixed layer
       if (el === op) {
         if (computedStyle(win, op).position == 'fixed') {
+          LayoutLayers.declareLayer(op);
           return op;
         }
         op = op.offsetParent;
