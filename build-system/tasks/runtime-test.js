@@ -84,7 +84,6 @@ function getConfig() {
         // With --saucelabs_lite, unit tests are run on this set of browsers.
         // Only browsers that support chai-as-promised may be included below.
         'SL_Chrome_latest',
-        'SL_Chrome_45',
       ],
     });
   }
@@ -351,7 +350,7 @@ function runTests() {
   }).on('run_start', function() {
     if (argv.saucelabs || argv.saucelabs_lite) {
       console./* OK*/log(green(
-          'Running tests in parallel on', c.browsers.length, 'browsers...'));
+          'Running tests in parallel on', c.browsers.length, 'browser(s)...'));
     }
   }).on('browser_complete', function(browser) {
     if (argv.saucelabs || argv.saucelabs_lite) {
