@@ -29,6 +29,7 @@ globals.tabToUrl = {};
 globals.validAmpBgcolor = "#ffd700";
 globals.validAmpIconPrefix = "valid";
 globals.validAmpTitle = chrome.i18n.getMessage("pagePassesValidationTitle");
+globals.userAgentHeader = 'X-AMPValidator-UA';
 
 /**
  * Format a hex value (HTML colors such as #ffffff) as an RGBA.
@@ -245,9 +246,26 @@ function validateUrlFromTab(tab, userAgent) {
   xhr.open('GET', tab.url, true);
   // We can't set the User-Agent header directly, but we can set this header
   //   and let the onBeforeSendHeaders handler rename it for us
-  xhr.setRequestHeader('X-AMPValidator-UA', userAgent);
+  // Add the listener now. It'll be removed after the request is made.
+  //   It's not possible to set filters on the listener to only capture our
+  //   traffic, so this approach will interfere as little as possible with the
+  //   99.9% of requests which aren't for AMP validation.
+  chrome.webRequest.onBeforeSendHeaders.addListener(
+    updateSendHeadersUserAgent,
+    {urls: [tab.url], types: ["xmlhttprequest"], tabId: -1},
+    ["requestHeaders", "blocking"]
+  );
+
+  // Add the temporary header to the request
+  xhr.setRequestHeader(globals.userAgentHeader, userAgent);
+
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4) {
+      // The request is complete; remove our temporary listener
+      chrome.webRequest.onBeforeSendHeaders.removeListener(
+        updateSendHeadersUserAgent
+      );
+
       const doc = xhr.responseText;
       const validationResult = amp.validator.validateString(doc);
       window.sessionStorage.setItem(tab.url, JSON.stringify(validationResult));
@@ -259,7 +277,44 @@ function validateUrlFromTab(tab, userAgent) {
     }
   };
   xhr.send();
-  console.log('sent');
+}
+
+/**
+ * Event handler which gets called for onBeforeSendHeaders
+ * (developer.chrome.com/extensions/webRequest#event-onBeforeSendHeaders) and
+ * updates the User-Agent header to the value that's been specified. Handler listers
+ * @param  {!Object<OnBeforeSendHeadersDetails>} details Details object as
+ *   defined by Chrome
+ * @return {Object<HttpHeaders>} Object with HttpHeaders value
+ *   (https://developer.chrome.com/extensions/webRequest#type-HttpHeaders)
+ */
+function updateSendHeadersUserAgent(details) {
+  let newUa,
+    headers = details.requestHeaders;
+
+  // Using var instead of let keeps the index in scope for later
+  for (var i = 0; i < headers.length; i++) {
+    if (headers[i].name === globals.userAgentHeader) {
+      // Found a header with our internal User Agent Header
+      newUa = headers[i].value;
+      break;
+    }
+  }
+
+  if (newUa) {
+    // We previously found our UA header. Delete that by the index.
+    headers.splice(i, 1);
+
+    // And then update the actual User-Agent header
+    for (i = 0; i < headers.length; i++) {
+      if (headers[i].name == 'User-Agent') {
+        headers[i].value = newUa;
+        break;
+      }
+    }
+
+    return {requestHeaders: headers};
+  }
 }
 
 /**
@@ -293,29 +348,3 @@ chrome.tabs.onReplaced.addListener(function(addedTabId, removedTabId) {
     updateTab(tab);
   });
 });
-
-  var filter = {urls: ["<all_urls>"], types: ["xmlhttprequest"], tabId: -1};
-  console.log(filter);
-
-  chrome.webRequest.onBeforeSendHeaders.addListener(
-    function(details) {
-      var changed = false;
-      headers = details.requestHeaders;
-      for (i = 0; i < headers.length; i++) {
-        if (headers[i].name == "X-AMPValidator-UA") {
-          //headers[i].name = 'User-Agent';
-          console.log('thats a bingo');
-          changed = true;
-        }
-      }
-
-      if (changed) {
-        console.log(details);
-      }
-      //return {requestHeaders: headers};
-    },
-    filter,
-    ["requestHeaders", "blocking"]
-  );
-
-
