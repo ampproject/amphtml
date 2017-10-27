@@ -158,8 +158,8 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'a_fakevendor': '1',
         'b_fakevendor': '2',
       };
-      expect(impl.rewriteRtcKeys_(response, 'fakevendor')
-            ).to.deep.equal(rewrittenResponse);
+      expect(impl.rewriteRtcKeys_(response, 'fakevendor'))
+          .to.deep.equal(rewrittenResponse);
     });
 
     it('should not rewrite key names if custom url callout', () => {
@@ -167,8 +167,8 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'a': '1',
         'b': '2',
       };
-      expect(impl.rewriteRtcKeys_(response, 'www.customurl.biz')
-            ).to.deep.equal(response);
+      expect(impl.rewriteRtcKeys_(response, 'www.customurl.biz'))
+          .to.deep.equal(response);
     });
   });
 });

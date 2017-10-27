@@ -643,12 +643,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (rtcResponse.response) {
         ['targeting', 'categoryExclusions'].forEach(key => {
           if (rtcResponse.response[key]) {
+            const rewrittenResponse = this.rewriteRtcKeys_(
+                rtcResponse.response[key],
+                rtcResponse.callout);
             this.jsonTargeting_[key] =
                 !!this.jsonTargeting_[key] ?
                 deepMerge(this.jsonTargeting_[key],
-                    this.rewriteRtcKeys_(rtcResponse.response[key],
-                        rtcResponse.callout)) :
-                rtcResponse.response[key];
+                    rewrittenResponse) :
+                rewrittenResponse;
           }
         });
       }
@@ -670,9 +672,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return response;
     }
     const newResponse = {};
-    let newKey;
     Object.keys(response).forEach(key => {
-      newResponse[key + '_' + callout] = response[key];
+      newResponse[`${key}_${callout}`] = response[key];
     });
     return newResponse;
   }
