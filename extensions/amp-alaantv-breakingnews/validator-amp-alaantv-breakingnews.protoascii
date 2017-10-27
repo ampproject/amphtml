@@ -21,8 +21,6 @@ tags: {  # amp-alaantv-breakingnews
         name: "amp-alaantv-breakingnews"
         allowed_versions: "0.1"
         allowed_versions: "latest"
-        requires_usage: DEPRECATED_WARNING
-        deprecated_allow_duplicates: true
     }
     attr_lists: "common-extension-attrs"
 }
@@ -30,15 +28,15 @@ tags: {  # <amp-alaantv-breakingnews>
     html_format: AMP
     tag_name: "AMP-ALAANTV-BREAKINGNEWS"
     requires_extension: "amp-alaantv-breakingnews"
+    attrs: {
+            name: "animation"
+            value_regex: "(rtl|ltr)"
+        }
     attrs: { name: "credentials" }
+    attrs: { name: "data-poll-interval" }
     attrs: { name: "items" }
     attrs: { name: "max-items" }
     attrs: { name: "single-item" }
-    attrs: { name: "data-poll-interval" }
-    attrs: {
-        name: "animation"
-        value_regex: "(rtl|ltr)"
-    }
     attrs: {
         name: "src"
         mandatory: true
