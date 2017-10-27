@@ -202,7 +202,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'fAkeVeNdOR': {SLOT_ID: 1, PAGE_ID: 2},
       };
       const inflatedUrls = [
-        'https://www.fake.qqq/?slot_id=1&page_id=3&foo_id=4',
+        'https://localhost:8000/examples/rtcE1.json?slot_id=1&page_id=3&foo_id=4',
       ];
       const rtcCalloutResponses = [
         {'response1': {'fooArray': ['foo']}},
@@ -229,7 +229,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'https://www.1.com/',
         'https://www.2.com/?slot_id=1',
         'https://www.3.com/?slot_id=1&page_id=2',
-        'https://www.fake.qqq/?slot_id=1&page_id=2&foo_id=3',
+        'https://localhost:8000/examples/rtcE1.json?slot_id=1&page_id=2&foo_id=3',
       ];
       const rtcCalloutResponses = generateCalloutResponses(5);
       const customMacros = {
@@ -254,7 +254,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'fAkeVeNdOR': {'slot_id=SLOT_ID': 0, PAGE_ID: 1},
       };
       const inflatedUrls = [
-        'https://www.fake.qqq/?slot_id=SLOT_ID&page_id=1&foo_id=FOO_ID',
+        'https://localhost:8000/examples/rtcE1.json?slot_id=SLOT_ID&page_id=1&foo_id=FOO_ID',
       ];
       const rtcCalloutResponses = generateCalloutResponses(1);
       const expectedRtcArray = [];
@@ -279,7 +279,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'https://www.2.com/',
         'https://www.3.com/?slot_id=1',
         'https://www.4.com/?slot_id=1&page_id=2',
-        'https://www.fake.qqq/?slot_id=1&page_id=2&foo_id=3',
+        'https://localhost:8000/examples/rtcE1.json?slot_id=1&page_id=2&foo_id=3',
       ];
       const rtcCalloutResponses = generateCalloutResponses(6);
       const customMacros = {
@@ -320,6 +320,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     });
 
     it('should not send an RTC callout to an insecure url', () => {
+      env.win.AMP_MODE.test = false;
+      env.win.AMP_MODE.localdev = false;
       const urls = [
         'https://www.1.com/',
         'https://www.2.com',
