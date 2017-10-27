@@ -198,12 +198,16 @@ export const classifyPage = (pageInfo, metaElements) => {
   return bitmask;
 };
 
-export const classifyReferrer = (parsedReferrer, parsedHref) => {
+export const classifyReferrer = (
+  referrerString,
+  parsedReferrer,
+  parsedHref
+) => {
   // The default is a direct view.
   let bitmask = REFERRER_BITS.DIRECT;
 
   // If there was a referrer, try to categorize it
-  if (parsedReferrer) {
+  if (referrerString && parsedReferrer) {
     // Compare domain only (SLD + TLD)
     if (parsedReferrer.host === parsedHref.host) {
       bitmask |= REFERRER_BITS.ON_DOMAIN;
@@ -212,7 +216,7 @@ export const classifyReferrer = (parsedReferrer, parsedHref) => {
     }
 
     // Run some naive checks to see if visitor came from a search.
-    if (isSearchUrl(referrer)) {
+    if (isSearchUrl(referrerString)) {
       bitmask |= REFERRER_BITS.SEARCH;
     }
   }

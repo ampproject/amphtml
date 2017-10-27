@@ -36,23 +36,45 @@ import {user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {Services} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
+import {listen} from '../../../src/event-helper';
 
 import {ConfigManager} from './config-manager';
+import {PostMessageDispatcher} from './post-message-dispatcher';
 import {
   AT_CONFIG_KEYS,
   SHARE_CONFIG_KEYS,
   ORIGIN,
   API_SERVER,
   COOKIELESS_API_SERVER,
+  SHARECOUNTER_SERVER,
   ICON_SIZE,
   ALT_TEXT,
+  CONFIGURATION_EVENT,
+  SHARE_EVENT,
 } from './constants';
 import {callLojson} from './addthis-utils/lojson';
+import {callEng} from './addthis-utils/eng';
+import {callPjson} from './addthis-utils/pjson';
+import {
+  ScrollMonitor,
+  DwellMonitor,
+  ClickMonitor,
+  ActiveToolsMonitor,
+} from './addthis-utils/monitors';
 
-// This `configManager` will be shared by all AmpAddThis elements on a page, to prevent unnecessary
-// HTTP requests, get accurate analytics, etc.
+// The following items will be shared by all AmpAddThis elements on a page, to prevent unnecessary
+// HTTP requests, get accurate analytics, etc., and hence are defined outside of the class.
 const configManager = new ConfigManager();
+const scrollMonitor = new ScrollMonitor();
+const dwellMonitor = new DwellMonitor();
+const clickMonitor = new ClickMonitor();
+const activeToolsMonitor = new ActiveToolsMonitor();
 
+// `shouldRegisterView` is a shared flag that should be true only for the first built element on the
+// page, to prevent registering more than one view per page.
+let shouldRegisterView = true;
+
+// Redirection to prevent eslint issues.
 export function getConfigManager() {
   return configManager;
 }
@@ -78,6 +100,9 @@ class AmpAddThis extends AMP.BaseElement {
     /** @private {string} */
     this.canonicalTitle_ = '';
 
+    /** @private {string} */
+    this.referrer_ = '';
+
     /** @private {(?Object<string, string>|null)} */
     this.shareConfig_ = null;
 
@@ -93,7 +118,10 @@ class AmpAddThis extends AMP.BaseElement {
     this.preconnect.url(ORIGIN, opt_onLayout);
     this.preconnect.url(API_SERVER, opt_onLayout);
     this.preconnect.url(COOKIELESS_API_SERVER, opt_onLayout);
+    this.preconnect.url(SHARECOUNTER_SERVER, opt_onLayout);
+    // Images, etc.:
     this.preconnect.url('https://cache.addthiscdn.com', opt_onLayout);
+    this.preconnect.url('https://su.addthis.com', opt_onLayout);
   }
 
   /**
@@ -126,16 +154,36 @@ class AmpAddThis extends AMP.BaseElement {
     this.shareConfig_ = this.getShareConfig_();
     this.atConfig_ = this.getATConfig_(ampDoc);
 
-    // Register pageview
-    const viewer = Services.viewerForDoc(ampDoc);
-    viewer.whenFirstVisible().then(() => callLojson({
-      loc: parseUrl(this.canonicalUrl_),
-      title: this.canonicalTitle_,
-      pubId: this.pubId_,
-      atConfig: this.atConfig_,
-      referrer: viewer.getReferrerUrl(),
-      ampDoc,
-    }));
+    if (shouldRegisterView) {
+      // Register pageview (and setup analytics), only for the first
+      // amp-addthis element on the page
+      shouldRegisterView = false;
+
+      const viewer = Services.viewerForDoc(ampDoc);
+      const loc = parseUrl(this.canonicalUrl_);
+
+      viewer.whenFirstVisible()
+          .then(() => viewer.getReferrerUrl())
+          .then(referrer => {
+            this.referrer_ = referrer;
+
+            callLojson({
+              loc,
+              title: this.canonicalTitle_,
+              pubId: this.pubId_,
+              atConfig: this.atConfig_,
+              referrer,
+              ampDoc,
+            });
+
+            dwellMonitor.startForDoc(ampDoc);
+            scrollMonitor.startForDoc(ampDoc);
+            clickMonitor.startForDoc(ampDoc);
+          });
+
+      // Only the component that registers the page view listens for x-frame events.
+      this.setupListeners_({ampDoc, loc, pubId: this.pubId_});
+    }
   }
 
   createPlaceholderCallback() {
@@ -194,9 +242,10 @@ class AmpAddThis extends AMP.BaseElement {
       pubId: this.pubId_,
       widgetId: this.widgetId_,
       shareConfig: this.shareConfig_,
+      atConfig: this.atConfig_,
       iframe,
       iframeLoadPromise,
-      win: this.win,
+      activeToolsMonitor,
     });
 
     return iframeLoadPromise;
@@ -260,6 +309,46 @@ class AmpAddThis extends AMP.BaseElement {
       }
       return config;
     }, {});
+  }
+
+  setupListeners_({ampDoc, loc, pubId}) {
+    // Send "engagement" analytics on page hide.
+    listen(ampDoc.win, 'pagehide', () => callEng({
+      monitors: {
+        dwellMonitor,
+        scrollMonitor,
+        clickMonitor,
+        activeToolsMonitor,
+      },
+      ampDoc,
+      loc,
+      pubId,
+    }));
+
+    const postMessageDispatcher = new PostMessageDispatcher(ampDoc.win);
+    const pmHandler = postMessageDispatcher.handleAddThisMessage.bind(
+        postMessageDispatcher
+    );
+
+    listen(ampDoc.win, 'message', pmHandler);
+
+    // Trigger "pjson" call when a share occurs.
+    postMessageDispatcher.on(SHARE_EVENT, data => callPjson({
+      data,
+      loc,
+      pubId,
+      ampDoc,
+      title: this.canonicalTitle_,
+      atConfig: this.atConfig_,
+      referrer: this.referrer_,
+    }));
+
+    // Dispatch the configuration to the configManager on a
+    // CONFIGURATION_EVENT.
+    postMessageDispatcher.on(
+        CONFIGURATION_EVENT,
+        configManager.receiveConfiguration.bind(configManager)
+    );
   }
 }
 

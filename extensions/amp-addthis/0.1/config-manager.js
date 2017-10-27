@@ -13,11 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {isObject} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
-import {getData, listen} from '../../../src/event-helper';
-import {startsWith} from '../../../src/string';
 import {dict} from '../../../src/utils/object';
 
 import {CONFIGURATION_EVENT, ORIGIN} from './constants';
@@ -31,23 +26,6 @@ const RequestStatus = {
   REQUESTED: 1,
   COMPLETED: 2,
 };
-
-/**
- * Utility method to parse out the data from the supplied `postMessage` event.
- */
-function getMessageData(event) {
-  const data = getData(event);
-
-  if (isObject(data)) {
-    return data;
-  }
-
-  if (typeof data === 'string' && startsWith(data, '{')) {
-    return tryParseJson(data);
-  }
-
-  return undefined;
-}
 
 /**
  * The ConfigManager manages requests for publishers' dashboard configurations from addthis.com,
@@ -73,57 +51,56 @@ export class ConfigManager {
      * @private
      */
     this.configProviderIframes_ = [];
-
-    /**
-     * @type {function():void|null}
-     * @private
-     */
-    this.removeMessageListener_ = null;
-
-    /**
-     * Flag; only a single request should register as a page view.
-     * @type {boolean}
-     * @private
-     */
-    this.registerView_ = true;
   }
 
   /**
    * Store the configuration received for the provided pubId, mark the request for the config as
    * completed, and broadcast the config to relevant iframes.
-   * @private
    */
-  receiveConfiguration_({config, pubId}) {
+  receiveConfiguration({config, pubId, source}) {
+    // Check that the configuration event is coming from an iframe that
+    // should be providing configuration information.
+    const isProviderIframe = this.configProviderIframes_.some(iframe => {
+      return iframe.contentWindow === source;
+    });
+
+    if (!isProviderIframe) {
+      return;
+    }
+
     const pubData = this.dataForPubId_[pubId];
     pubData.config = config;
     pubData.requestStatus = RequestStatus.COMPLETED;
     const {iframeData} = pubData;
+
     iframeData.forEach(iframeDatum => {
-      const {iframe, widgetId, shareConfig} = iframeDatum;
-      this.sendConfiguration_({iframe, widgetId, pubId, shareConfig});
+      const {iframe, widgetId, shareConfig, atConfig} = iframeDatum;
+      this.sendConfiguration_({iframe, widgetId, pubId, shareConfig, atConfig});
     });
   }
 
   /** @private */
-  sendConfiguration_({iframe, widgetId, pubId, shareConfig}) {
+  sendConfiguration_({iframe, widgetId, pubId, shareConfig, atConfig}) {
     const pubData = this.dataForPubId_[pubId];
     const dashboardConfig = pubData.config;
     const configRequestStatus = pubData.requestStatus;
     const jsonToSend = dict({
       'event': CONFIGURATION_EVENT,
       'shareConfig': shareConfig,
+      'atConfig': atConfig,
       'pubId': pubId,
       'widgetId': widgetId,
       'configRequestStatus': configRequestStatus,
       'dashboardConfig': dashboardConfig,
-      'registerView': this.registerView_,
     });
 
-    iframe.contentWindow./*OK*/postMessage(JSON.stringify(jsonToSend), ORIGIN);
-
-    if (this.registerView_) {
-      this.registerView_ = false;
+    if (dashboardConfig &&
+        dashboardConfig.widgets &&
+        Object.keys(dashboardConfig.widgets).length > 0) {
+      this.activeToolsMonitor_.record({widget: dashboardConfig});
     }
+
+    iframe.contentWindow./*OK*/postMessage(JSON.stringify(jsonToSend), ORIGIN);
 
     if (configRequestStatus === RequestStatus.NOT_REQUESTED) {
       // If a config for this pubId has not been requested yet, then this iframe will be the one
@@ -134,40 +111,21 @@ export class ConfigManager {
   }
 
   /**
-   * Handles messages posted from amp-addthis iframes, ensuring the correct origin, and ensuring
-   * that the iframe is one that is expected to provide configuration information.
-   * @private
-   */
-  handleAddThisMessage_(event) {
-    if (event.origin !== ORIGIN || !getData(event)) {
-      return;
-    }
-
-    const isProviderIframe = this.configProviderIframes_.some(iframe => {
-      return iframe.contentWindow === event.source;
-    });
-
-    if (!isProviderIframe) {
-      return;
-    }
-
-    const data = getMessageData(event) || {};
-
-    if (data.event === CONFIGURATION_EVENT) {
-      this.receiveConfiguration_(data);
-    }
-  }
-
-  /**
    * Register relevant data with the configuration manager and prepare request/response cycle
    * between frames.
    * @param {{pubId:!string, widgetId:!string, iframe:!Element, iframeLoadPromise:!Promise, win:!EventTarget, shareConfig:(JsonObject|undefined)}} param
    */
-  register({pubId, widgetId, iframe, iframeLoadPromise, win, shareConfig}) {
-    if (!this.removeMessageListener_) {
-      this.removeMessageListener_ = listen(
-          win, 'message', this.handleAddThisMessage_.bind(this)
-      );
+  register({
+    pubId,
+    widgetId,
+    iframe,
+    iframeLoadPromise,
+    shareConfig,
+    atConfig,
+    activeToolsMonitor,
+  }) {
+    if (!this.activeToolsMonitor_) {
+      this.activeToolsMonitor_ = activeToolsMonitor;
     }
 
     if (!this.dataForPubId_[pubId]) {
@@ -184,31 +142,25 @@ export class ConfigManager {
       pubData.iframeData = [];
     }
 
-    pubData.iframeData.push({iframe, shareConfig, widgetId});
+    pubData.iframeData.push({iframe, shareConfig, atConfig, widgetId});
 
     iframeLoadPromise.then(() => this.sendConfiguration_({
       iframe,
       pubId,
       widgetId,
       shareConfig,
+      atConfig,
     }));
   }
 
   /**
-   * Relinquish as many element references as possible and remove listeners when applicable.
+   * Relinquish as many element references as possible.
    * @param {{pubId:string, iframe:Element}} param
    */
   unregister({pubId, iframe}) {
     this.configProviderIframes_ = this.configProviderIframes_.filter(
         providerFrame => providerFrame !== iframe
     );
-
-    if (this.configProviderIframes_.length === 0 &&
-        this.removeMessageListener_) {
-      // If there aren't any provider iframes left, there will be no messages to receive.
-      this.removeMessageListener_();
-      this.removeMessageListener_ = null;
-    }
 
     const pubData = this.dataForPubId_[pubId] || {};
 
