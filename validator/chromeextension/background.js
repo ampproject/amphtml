@@ -242,8 +242,10 @@ function updateTabStatus(tabId, iconPrefix, title, text, color) {
  * @param {userAgent} string Tab's current user agent
  */
 function validateUrlFromTab(tab, userAgent) {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', tab.url, true);
+  var xhr = new XMLHttpRequest(),
+    url = tab.url.split('#')[0];
+
+  xhr.open('GET', url, true);
   // We can't set the User-Agent header directly, but we can set this header
   //   and let the onBeforeSendHeaders handler rename it for us
   // Add the listener now. It'll be removed after the request is made.
@@ -252,7 +254,7 @@ function validateUrlFromTab(tab, userAgent) {
   //   99.9% of requests which aren't for AMP validation.
   chrome.webRequest.onBeforeSendHeaders.addListener(
     updateSendHeadersUserAgent,
-    {urls: [tab.url], types: ["xmlhttprequest"], tabId: -1},
+    {urls: [url], types: ["xmlhttprequest"], tabId: -1},
     ["requestHeaders", "blocking"]
   );
 
@@ -268,7 +270,7 @@ function validateUrlFromTab(tab, userAgent) {
 
       const doc = xhr.responseText;
       const validationResult = amp.validator.validateString(doc);
-      window.sessionStorage.setItem(tab.url, JSON.stringify(validationResult));
+      window.sessionStorage.setItem(url, JSON.stringify(validationResult));
       if (validationResult.status == 'PASS') {
         handleAmpPass(tab.id, validationResult);
       } else {
