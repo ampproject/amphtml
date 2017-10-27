@@ -24,7 +24,6 @@ import {
   AmpA4A,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
-  DEFAULT_SAFEFRAME_VERSION,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
@@ -104,6 +103,13 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
 
+/** @const {string} */
+export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
+/** @const {string} */
+export const DEFAULT_SAFEFRAME_VERSION = '1-0-13';
+/** @const {string} @visibleForTesting */
+export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
+
 /** @private @enum {number} */
 const RTC_ATI_ENUM = {
   RTC_SUCCESS: 2,
@@ -131,9 +137,6 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
  * @visibileForTesting
  */
 export const TFCD = 'tagForChildDirectedTreatment';
-
-/** @const {string} */
-export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 
 /** @private {?Promise} */
 let sraRequests = null;
@@ -350,6 +353,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {boolean} */
     this.preloadSafeframe_ = true;
+
+    /** @private {string} */
+    this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
+
+    /** @private {?string} */
+    this.nonAmpRenderingMethod_ = null;
   }
 
   /** @override */
@@ -661,7 +670,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  extractSize(responseHeaders) {
+  processResponseHeaders(responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
@@ -681,6 +690,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
       this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
     }
+
+    const safeframeVersionHeader =
+        responseHeaders.get(SAFEFRAME_VERSION_HEADER);
+    if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
+        safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
+      this.safeframeVersion_ = safeframeVersionHeader;
+      this.preconnect.preload(this.getSafeframePath_());
+    }
+
+    // Ensure that extractSize is called appropriately.
+    super.processResponseHeaders(responseHeaders);
+  }
+
+  /** @override */
+  extractSize(responseHeaders) {
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);
@@ -1105,6 +1129,23 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
+  preconnectCallback(unusedOnLayout) {
+    if (this.isFluid_) {
+      this.preconnect.preload(this.getSafeframePath_());
+    }
+  }
+
+  /**
+   * @return {string} full url to safeframe implementation.
+   * @private
+   */
+  getSafeframePath_() {
+    return SAFEFRAME_ORIGIN + '/safeframe/' +
+        `${this.safeframeVersion_}/html/container.html`;
+  }
+
+
+  /** @override */
   getNonAmpCreativeRenderingMethod(headerValue) {
     return this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
         super.getNonAmpCreativeRenderingMethod(headerValue);
@@ -1146,7 +1187,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       attributes['metadata'] = JSON.stringify(
           dict({
             'shared': {
-              'sf_ver': this.safeframeVersion,
+              'sf_ver': this.safeframeVersion_,
               'ck_on': 1,
               'flash_ver': '26.0.0',
             },
@@ -1178,6 +1219,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!Object.keys(fluidListeners).length) {
       this.win.removeEventListener('message', fluidMessageListener_);
     }
+  }
+
+  /** @override */
+  getXOriginIframeAttributes(contextMetadata, creative) {
+    return this.isFluid_ ?
+        dict({
+          'src': this.getSafeframePath_() + '?n=0',
+          'name': `${this.safeframeVersion_};${creative.length};${creative}` +
+              `${JSON.stringify(contextMetadata)}`,
+        }) : super.getXOriginIframeAttributes(contextMetadata, creative);
   }
 }
 

@@ -59,20 +59,11 @@ const METADATA_STRINGS = [
   '<script type="application/json" amp-ad-metadata>',
   '<script type=application/json amp-ad-metadata>'];
 
-// TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
-// acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
-// cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
-/** @type {string} */
-export const DEFAULT_SAFEFRAME_VERSION = '1-0-13';
-
 /** @const {string} */
 export const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
 
 /** @type {string} @visibleForTesting */
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
-
-/** @type {string} @visibleForTesting */
-export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
 
 /** @type {string} @visibleForTesting */
 export const EXPERIMENT_FEATURE_HEADER_NAME = 'amp-ff-exps';
@@ -300,9 +291,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.fromResumeCallback = false;
 
-    /** @protected {string} */
-    this.safeframeVersion = DEFAULT_SAFEFRAME_VERSION;
-
     /**
      * @protected {boolean} Indicates whether the ad is currently in the
      *    process of being refreshed.
@@ -449,7 +437,6 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    this.preconnect.preload(this.getSafeframePath_());
     this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
     const preconnect = this.getPreconnectUrls();
 
@@ -643,20 +630,10 @@ export class AmpA4A extends AMP.BaseElement {
             this.forceCollapse();
             return Promise.reject(NO_CONTENT_RESPONSE);
           }
-          // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
-          // an acceptable solution to the 'Safari on iOS doesn't fetch
-          // iframe src from cache' issue.  See
-          // https://github.com/ampproject/amphtml/issues/5614
-          const method = this.getNonAmpCreativeRenderingMethod(
-              fetchResponse.headers.get(RENDERING_TYPE_HEADER));
-          this.experimentalNonAmpCreativeRenderMethod_ = method;
-          const safeframeVersionHeader =
-            fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
-          if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
-              safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
-            this.safeframeVersion = safeframeVersionHeader;
-            this.preconnect.preload(this.getSafeframePath_());
-          }
+
+          // ##
+          this.processResponseHeaders(fetchResponse.headers);
+
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
           // and one of which isn't.  If we just return
@@ -692,8 +669,6 @@ export class AmpA4A extends AMP.BaseElement {
             return Promise.resolve();
           }
           const {bytes, headers} = responseParts;
-          const size = this.extractSize(responseParts.headers);
-          this.creativeSize_ = size || this.creativeSize_;
           if (this.experimentalNonAmpCreativeRenderMethod_ !=
               XORIGIN_MODE.CLIENT_CACHE &&
               bytes) {
@@ -1098,6 +1073,17 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
+   */
+  processResponseHeaders(responseHeaders) {
+    this.experimentalNonAmpCreativeRenderMethod_ =
+        this.getNonAmpCreativeRenderingMethod(
+            responseHeaders.get(RENDERING_TYPE_HEADER));
+    this.creativeSize_ =
+        this.extractSize(responseHeaders) || this.creativeSize_;
+  }
+
+  /**
    * Forces the UI Handler to collapse this slot.
    * @visibleForTesting
    */
@@ -1215,10 +1201,9 @@ export class AmpA4A extends AMP.BaseElement {
         /* ignoreStack */ true);
     // Haven't rendered yet, so try rendering via one of our
     // cross-domain iframe solutions.
-    const method = this.experimentalNonAmpCreativeRenderMethod_;
     let renderPromise = Promise.resolve(false);
-    if ((method == XORIGIN_MODE.SAFEFRAME ||
-         method == XORIGIN_MODE.NAMEFRAME) &&
+    if (this.experimentalNonAmpCreativeRenderMethod_ !=
+        XORIGIN_MODE.CLIENT_CACHE &&
         this.creativeBody_) {
       renderPromise = this.renderViaNameAttrOfXOriginIframe_(
           this.creativeBody_);
@@ -1393,11 +1378,6 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaNameAttrOfXOriginIframe_(creativeBody) {
-    /** @type {string} */
-    const method = this.experimentalNonAmpCreativeRenderMethod_;
-    dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
-        method == XORIGIN_MODE.NAMEFRAME,
-        'Unrecognized A4A cross-domain rendering mode: %s', method);
     this.protectedEmitLifecycleEvent_('renderSafeFrameStart', {
       'isAmpCreative': this.isVerifiedAmpCreative_,
       'releaseType': this.releaseType_,
@@ -1405,39 +1385,25 @@ export class AmpA4A extends AMP.BaseElement {
     const checkStillCurrent = this.verifyStillCurrent();
     return utf8Decode(creativeBody).then(creative => {
       checkStillCurrent();
-      let srcPath;
-      let name = '';
-      switch (method) {
-        case XORIGIN_MODE.SAFEFRAME:
-          srcPath = this.getSafeframePath_() + '?n=0';
-          break;
-        case XORIGIN_MODE.NAMEFRAME:
-          srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
-          // Name will be set for real below in nameframe case.
-          break;
-        default:
-          // Shouldn't be able to get here, but...  Because of the assert, above,
-          // we can only get here in non-dev mode, so give user feedback.
-          user().error('A4A', 'A4A received unrecognized cross-domain name'
-              + ' attribute iframe rendering mode request: %s.  Unable to'
-              + ' render a creative for'
-              + ' slot %s.', method, this.element.getAttribute('id'));
-          return Promise.reject('Unrecognized rendering mode request');
-      }
       // TODO(bradfrizzell): change name of function and var
-      let contextMetadata = getContextMetadata(
+      const contextMetadata = getContextMetadata(
           this.win, this.element, this.sentinel,
           this.getAdditionalContextMetadata());
-      // TODO(bradfrizzell) Clean up name assigning.
-      if (method == XORIGIN_MODE.NAMEFRAME) {
-        contextMetadata['creative'] = creative;
-        name = JSON.stringify(contextMetadata);
-      } else if (method == XORIGIN_MODE.SAFEFRAME) {
-        contextMetadata = JSON.stringify(contextMetadata);
-        name = `${this.safeframeVersion};${creative.length};${creative}` +
-            `${contextMetadata}`;
-      }
-      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
+      return this.iframeRenderHelper_(
+          this.getXOriginIframeAttributes(contextMetadata, creative));
+    });
+  }
+
+  /**
+   * @param {!JsonObject<string, string>} contextMetadata
+   * @param {string} creative Raw creative byte string.
+   * @return {!JsonObject<string, string>}
+   */
+  getXOriginIframeAttributes(contextMetadata, creative) {
+    contextMetadata['creative'] = creative;
+    return dict({
+      'src': getDefaultBootstrapBaseUrl(this.win, 'nameframe'),
+      'name': JSON.stringify(contextMetadata),
     });
   }
 
@@ -1547,15 +1513,6 @@ export class AmpA4A extends AMP.BaseElement {
         Services.viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
       });
     });
-  }
-
-  /**
-   * @return {string} full url to safeframe implementation.
-   * @private
-   */
-  getSafeframePath_() {
-    return 'https://tpc.googlesyndication.com/safeframe/' +
-      `${this.safeframeVersion}/html/container.html`;
   }
 
   /**
