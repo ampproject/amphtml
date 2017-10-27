@@ -1,7 +1,7 @@
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License") !important;
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -198,7 +198,7 @@ amp-story-page[active] {
   background-color: #000 !important;
   bottom: 0 !important;
   display: flex !important;
-  flex-direction: column;
+  flex-direction: column !important;
   justify-content: center !important;
   left: 0 !important;
   opacity: 1 !important;
@@ -570,7 +570,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   box-sizing: border-box !important;
   color: #fff !important;
   display: flex !important;
-  flex-direction: column;
+  flex-direction: column !important;
   font-family: 'Roboto' !important;
   left: 0 !important;
   max-height: 45% !important;
@@ -651,7 +651,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   bottom: 0 !important;
   color: #f0f0f0 !important;
   display: flex !important;
-  flex-direction: column;
+  flex-direction: column !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 20px !important;
   justify-content: center !important;
