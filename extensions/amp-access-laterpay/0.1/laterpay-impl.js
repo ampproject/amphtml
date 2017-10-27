@@ -61,7 +61,6 @@ let LaterpayConfigDef;
  *   purchase_type: !string,
  *   purchase_url: !string,
  *   title: !string,
- *   tp_title: !string,
  *   validity_unit: !string,
  *   validity_value: !number
  * }}
@@ -301,7 +300,7 @@ export class LaterpayVendor {
     }
     this.renderTextBlock_('header');
     const listContainer = this.createElement_('ul');
-    this.purchaseConfig_['premiumcontent']['tp_title'] =
+    this.purchaseConfig_['premiumcontent']['title'] =
       this.i18n_['premiumContentTitle'];
     this.purchaseConfig_['premiumcontent']['description'] =
         this.getArticleTitle_();
@@ -382,13 +381,13 @@ export class LaterpayVendor {
   createPurchaseOption_(option) {
     const li = this.createElement_('li');
     const control = this.createElement_('label');
-    control.for = option['tp_title'];
+    control.for = option['title'];
     control.appendChild(this.createRadioControl_(option));
     const metadataContainer = this.createElement_('div');
     metadataContainer.className = TAG + '-metadata';
     const title = this.createElement_('span');
     title.className = TAG + '-title';
-    title.textContent = option['tp_title'];
+    title.textContent = option['title'];
     metadataContainer.appendChild(title);
     const description = this.createElement_('p');
     description.className = TAG + '-description';
@@ -409,7 +408,7 @@ export class LaterpayVendor {
     const radio = this.createElement_('input');
     radio.name = 'purchaseOption';
     radio.type = 'radio';
-    radio.id = option['tp_title'];
+    radio.id = option['title'];
     radio.value = option['purchase_url'];
     const purchaseType = option['purchase_type'] === 'ppu' ?
       'payLater' :
