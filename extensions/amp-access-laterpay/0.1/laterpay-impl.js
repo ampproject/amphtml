@@ -24,8 +24,20 @@ import {removeChildren} from '../../../src/dom';
 import {Services} from '../../../src/services';
 
 const TAG = 'amp-access-laterpay';
-const CONFIG_URL = 'https://connector.laterpay.net';
-const SANDBOX_CONFIG_URL = 'https://connector.sandbox.laterpaytest.net';
+
+const CONFIG_URLS = {
+  live: {
+    eu: 'https://connector.laterpay.net',
+    us: 'https://connector.uselaterpay.com',
+  },
+  sandbox: {
+    eu: 'https://connector.sandbox.laterpaytest.net',
+    us: 'https://connector.sandbox.uselaterpaytest.com',
+  },
+};
+
+const DEFAULT_REGION = 'eu';
+
 const CONFIG_BASE_PATH = '/api/public/amp?' +
                          'article_url=CANONICAL_URL' +
                          '&amp_reader_id=READER_ID' +
@@ -49,6 +61,7 @@ const DEFAULT_MESSAGES = {
  *   scrollToTopAfterAuth: (boolean|undefined),
  *   locale: (string|undefined),
  *   localeMessages: (Object|undefined),
+ *   region: (string|undefined),
  *   sandbox: (boolean|undefined),
  * }}
  */
@@ -157,15 +170,16 @@ export class LaterpayVendor {
    * @return {!string}
    */
   getConfigUrl_() {
+    const region = this.laterpayConfig_['region'] || DEFAULT_REGION;
     if (
       (getMode().localDev || getMode().development) &&
       this.laterpayConfig_['configUrl']
     ) {
       return this.laterpayConfig_['configUrl'];
     } else if (this.laterpayConfig_['sandbox']) {
-      return SANDBOX_CONFIG_URL;
+      return CONFIG_URLS.sandbox[region];
     } else {
-      return CONFIG_URL;
+      return CONFIG_URLS.live[region];
     }
   }
 

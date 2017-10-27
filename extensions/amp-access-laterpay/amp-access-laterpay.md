@@ -109,6 +109,11 @@ The following values can be set in the `laterpay` config object:
     <td>If true, scrolls the page to the top after the authorization process is successful. This can be helpful if the place where you show the dialog is further below in the page and the user could be confused by their current scroll position after returning to the page.</td>
   </tr>
   <tr>
+    <td><code>region</code></td>
+    <td>string</td>
+    <td>Specify if you are on the <code>eu</code> or <code>us</code> <a href="https://connectormwi.laterpay.net/docs/regions-environments-locales.html">LaterPay region</a>.</td>
+  </tr>
+  <tr>
     <td><code>sandbox</code></td>
     <td>boolean</td>
     <td>Only needed if you are using the sandbox mode to test out your server configuration. You also need to use AMP's <a href="https://www.ampproject.org/docs/reference/spec#amp-runtime">development mode</a>.</td>
