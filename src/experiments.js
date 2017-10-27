@@ -166,9 +166,6 @@ export function isOriginExperimentOn(win, experimentId, opt_forceScan) {
  * @return {boolean}
  */
 export function isExperimentOn(win, experimentId) {
-  if (experimentId === 'layers') {
-    return true;
-  }
   const toggles = experimentToggles(win);
   return !!toggles[experimentId];
 }
