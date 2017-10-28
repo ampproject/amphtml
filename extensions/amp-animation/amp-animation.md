@@ -606,7 +606,7 @@ These functions can be combined with `calc()`, `var()` and other CSS expressions
 
 The `num()` function returns a number representation of a CSS value. For instance:
  - `num(11px)` yields `11`;
- - `num(110ms)` yields `100`;
+ - `num(110ms)` yields `110`;
  - etc.
 
 For instance, the following expression calculates the delay in seconds proportional to the element's width:

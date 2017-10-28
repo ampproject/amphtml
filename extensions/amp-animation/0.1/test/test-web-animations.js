@@ -674,11 +674,13 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     const request = scan({
       target: target2,
       duration: 'calc(1s * num(width()) / 10)',
+      delay: 'calc(1ms * num(width()) / 10)',
       keyframes: {
         transform: ['none', 'rotateX(calc(1rad * num(width()) / 20))']
       },
     })[0];
     expect(request.timing.duration).to.equal(11000);
+    expect(request.timing.delay).to.equal(11);
     expect(request.keyframes.transform[1]).to.equal('rotatex(5.5rad)');
   });
 
