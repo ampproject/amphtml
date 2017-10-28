@@ -59,9 +59,18 @@ class AmpAccordion extends AMP.BaseElement {
     this.sessionId_ = this.getSessionStorageKey_();
     this.currentState_ = this.getSessionState_();
 
-    this.registerAction('toggle', this.toggle_.bind(this));
-    this.registerAction('expand', this.toggle_.bind(this, null, true));
-    this.registerAction('collapse', this.toggle_.bind(this, null, false));  
+    this.registerAction('toggle', invocation => {
+      const sectionEl = document.getElementById(invocation.args['section']);
+      this.toggle_(sectionEl);
+    });
+    this.registerAction('expand', invocation => {
+      const sectionEl = document.getElementById(invocation.args['section']);
+      this.expand_(sectionEl);
+    });
+    this.registerAction('collapse', invocation => {
+      const sectionEl = document.getElementById(invocation.args['section']);
+      this.collapse_(sectionEl);
+    });
 
     const sections = this.getRealChildren();
     sections.forEach((section, index) => {
@@ -166,17 +175,15 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /**
-   * Toggles section expanded or closed.
+   * Toggles section between expanded or collapsed.
    * @private
    */
   toggle_(section, opt_forceExpand) {
-    console.log('opt_forceExpand', opt_forceExpand);
     const sectionComponents = section.children;
     const header = sectionComponents[0];
     const content = sectionComponents[1];
     const contentId = content.getAttribute('id');
     const isSectionClosedAfterClick = section.hasAttribute('expanded');
-    console.log(typeof opt_forceExpand !== 'undefined' && opt_forceExpand);
     this.mutateElement(() => {
       if (typeof opt_forceExpand !== 'undefined' && opt_forceExpand) {
         section.setAttribute('expanded', '');
@@ -194,6 +201,22 @@ class AmpAccordion extends AMP.BaseElement {
     }, section);
     this.currentState_[contentId] = !isSectionClosedAfterClick;
     this.setSessionState_();
+  }
+
+  /**
+   * Force expands the accordion.
+   * @private
+   */
+  expand_(section) {
+    this.toggle_(section, true)
+  }
+  
+  /**
+   * Force collapses the accordion.
+   * @private
+   */
+  collapse_(section) {
+    this.toggle_(section, false)
   }
 
   /**
