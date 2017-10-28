@@ -59,6 +59,10 @@ class AmpAccordion extends AMP.BaseElement {
     this.sessionId_ = this.getSessionStorageKey_();
     this.currentState_ = this.getSessionState_();
 
+    this.registerAction('toggle', this.toggle_.bind(this));
+    this.registerAction('expand', this.toggle_.bind(this, null, true));
+    this.registerAction('collapse', this.toggle_.bind(this, null, false));  
+
     const sections = this.getRealChildren();
     sections.forEach((section, index) => {
       user().assert(
@@ -166,13 +170,21 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   toggle_(section, opt_forceExpand) {
+    console.log('opt_forceExpand', opt_forceExpand);
     const sectionComponents = section.children;
     const header = sectionComponents[0];
     const content = sectionComponents[1];
     const contentId = content.getAttribute('id');
     const isSectionClosedAfterClick = section.hasAttribute('expanded');
+    console.log(typeof opt_forceExpand !== 'undefined' && opt_forceExpand);
     this.mutateElement(() => {
-      if (section.hasAttribute('expanded') || !opt_forceExpand) {
+      if (typeof opt_forceExpand !== 'undefined' && opt_forceExpand) {
+        section.setAttribute('expanded', '');
+        header.setAttribute('aria-expanded', 'true');
+      } else if (typeof opt_forceExpand !== 'undefined' && !opt_forceExpand) {
+        section.removeAttribute('expanded');
+        header.setAttribute('aria-expanded', 'false');
+      } else if (section.hasAttribute('expanded')) {
         section.removeAttribute('expanded');
         header.setAttribute('aria-expanded', 'false');
       } else {
