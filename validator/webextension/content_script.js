@@ -14,8 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
+
+window.browser = window.browser || window.chrome;
+
 var globals = {};
 globals.amphtmlRegex = new RegExp('(^\s*)amphtml(\s*$)');
+globals.canonicalRegex = new RegExp('(^\s*)canonical(\s*$)');
 globals.ampCaches = [
   {
     'getAmpHref': function() {
@@ -77,6 +81,31 @@ function getAmpHtmlLinkHref() {
 }
 
 /**
+ * Returns the canonical link
+ *
+ * @return {string}
+ * @private
+ */
+function getCanonicalLinkHref() {
+  var canonicalLinkHref = '';
+  var headLinks = document.head.getElementsByTagName('link');
+  if (headLinks.length > 0) {
+    for (var index in headLinks) {
+      var link = headLinks[index];
+      if (link instanceof HTMLLinkElement &&
+          link.hasAttribute('rel') &&
+          globals.canonicalRegex.test(link.getAttribute('rel')) &&
+          link.hasAttribute('href')) {
+            canonicalLinkHref = new URL(link.getAttribute('href'),
+                document.baseURI).toString();
+            break;
+      }
+    }
+  }
+  return canonicalLinkHref;
+}
+
+/**
  * Determine if the page is from an AMP Cache.
  *
  * @return {boolean}
@@ -114,15 +143,20 @@ function isAmpDocument() {
  *
  * Requests for loadAmp and has ampHref, then redirects the browser to ampHref.
  */
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.getAmpDetails) {
     const isAmp = isAmpDocument();
     const fromAmpCache = isAmpCache();
     var ampHref = '';
+    var canonicalHref = '';
     if (!isAmp) ampHref = getAmpHtmlLinkHref();
+    if (isAmp) canonicalHref = getCanonicalLinkHref();
     if (fromAmpCache) ampHref = getAmpCacheHref();
     sendResponse({
-      'isAmp': isAmp, 'fromAmpCache': fromAmpCache, 'ampHref': ampHref,
+      'isAmp': isAmp,
+      'fromAmpCache': fromAmpCache,
+      'ampHref': ampHref,
+      'canonicalHref': canonicalHref
     });
   }
   if (request.loadAmp && request.ampHref) {

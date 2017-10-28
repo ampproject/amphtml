@@ -48,5 +48,14 @@
         "content": "$1"
       }
     }
+  },
+  "warningCanonicalDoesntLinkToAMP": {
+    "message": "The canonical URL $canonicalHref$ does not link back to this AMP document.",
+    "description": "Warning shown if the canonical (non-AMP) document does not link to the AMP document",
+    "placeholders": {
+      "canonicalHref": {
+        "content": "$1"
+      }
+    }
   }
 }
