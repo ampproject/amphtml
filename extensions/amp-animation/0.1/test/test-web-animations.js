@@ -676,7 +676,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       duration: 'calc(1s * num(width()) / 10)',
       delay: 'calc(1ms * num(width()) / 10)',
       keyframes: {
-        transform: ['none', 'rotateX(calc(1rad * num(width()) / 20))']
+        transform: ['none', 'rotateX(calc(1rad * num(width()) / 20))'],
       },
     })[0];
     expect(request.timing.duration).to.equal(11000);

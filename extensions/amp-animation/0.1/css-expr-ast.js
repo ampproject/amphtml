@@ -725,7 +725,7 @@ export class CssNumConvertNode extends CssNode {
 
   /** @override */
   calc(context, normalize) {
-    let value = this.value_.resolve(context, normalize);
+    const value = this.value_.resolve(context, normalize);
     if (value == null) {
       return null;
     }
