@@ -60,16 +60,37 @@ class AmpAccordion extends AMP.BaseElement {
     this.currentState_ = this.getSessionState_();
 
     this.registerAction('toggle', invocation => {
-      const sectionEl = document.getElementById(invocation.args['section']);
-      this.toggle_(sectionEl);
+      if (invocation.args) {
+        const sectionEl = document.getElementById(invocation.args['section']);
+        this.toggle_(sectionEl);
+      } else {
+        const accordionEl = document.getElementById(invocation.target.id);
+        for (let i = 0; i < accordionEl.children.length; i++) {
+          this.toggle_(accordionEl.children[i]);
+        }
+      }
     });
     this.registerAction('expand', invocation => {
-      const sectionEl = document.getElementById(invocation.args['section']);
-      this.expand_(sectionEl);
+      if (invocation.args) {
+        const sectionEl = document.getElementById(invocation.args['section']);
+        this.expand_(sectionEl);
+      } else {
+        const accordionEl = document.getElementById(invocation.target.id);
+        for (let i = 0; i < accordionEl.children.length; i++) {
+          this.expand_(accordionEl.children[i]);
+        }
+      }
     });
     this.registerAction('collapse', invocation => {
-      const sectionEl = document.getElementById(invocation.args['section']);
-      this.collapse_(sectionEl);
+      if (invocation.args) {
+        const sectionEl = document.getElementById(invocation.args['section']);
+        this.collapse_(sectionEl);
+      } else {
+        const accordionEl = document.getElementById(invocation.target.id);
+        for (let i = 0; i < accordionEl.children.length; i++) {
+          this.collapse_(accordionEl.children[i]);
+        }
+      }
     });
 
     const sections = this.getRealChildren();
