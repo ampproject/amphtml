@@ -586,6 +586,9 @@ const forbiddenTerms = {
       'dist.3p/current/integration.js',
     ],
   },
+  '\\.defer\\(\\)': {
+    message: 'Promise.defer() is deprecated and should not be used.',
+  },
 };
 
 const ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded' +
