@@ -583,7 +583,11 @@ export function user(opt_element) {
  */
 function getUserLogger(suffix) {
   if (!logConstructor) {
-    throw new Error('failed to call initLogConstructor');
+    if (getMode().test || getMode().localDev) {
+      initLogConstructor();
+    } else {
+      throw new Error('failed to call initLogConstructor');
+    }
   }
   return new logConstructor(self, mode => {
     const logNum = parseInt(mode.log, 10);
@@ -609,7 +613,11 @@ export function dev() {
     return logs.dev;
   }
   if (!logConstructor) {
-    throw new Error('failed to call initLogConstructor');
+    if (getMode().test || getMode().localDev) {
+      initLogConstructor();
+    } else {
+      throw new Error('failed to call initLogConstructor');
+    }
   }
   return logs.dev = new logConstructor(self, mode => {
     const logNum = parseInt(mode.log, 10);
