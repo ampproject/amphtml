@@ -21,3 +21,8 @@
 .i-amphtml-story-grid-template-thirds {
   padding: 32px;
 }
+
+amp-story-grid-layer {
+  padding: 68px 32px 32px !important; /* 44 + 24 */
+}
+

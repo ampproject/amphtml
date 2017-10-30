@@ -266,7 +266,6 @@ amp-story-grid-layer {
   position: absolute !important;
   right: 0 !important;
   top: 0 !important;
-  padding: 68px 32px 32px !important; /* 44 + 24 */
   z-index: 2 !important;
 }
 
@@ -375,7 +374,7 @@ amp-story-grid-layer * {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 300 !important;
   font-size: 16px !important;
-  color: #ffff !important;
+  color: #fff !important;
   line-height: 1.4;
   margin: 0 0 8px !important;
 }
