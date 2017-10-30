@@ -2329,6 +2329,7 @@ tags: {
   attrs: { name: "cx" }
   attrs: { name: "cy" }
   attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "fr" }
   attrs: { name: "fx" }
   attrs: { name: "fy" }
   attrs: { name: "gradientunits" }
