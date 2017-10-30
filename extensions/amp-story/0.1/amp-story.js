@@ -45,7 +45,6 @@ import {
   isFullscreenElement,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-  removeChildren,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {once} from '../../../src/utils/function';
