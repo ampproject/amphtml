@@ -94,7 +94,7 @@ export class IframeTransportMessageQueue {
    * creative) is sending it.
    */
   enqueue(event) {
-    dev().assert(TAG_, event && event.transportId && event.message,
+    dev().assert(event && event.transportId && event.message,
         'Attempted to enqueue malformed message for: ' +
         event.transportId);
     this.pendingEvents_.push(event);
