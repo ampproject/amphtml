@@ -53,7 +53,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {AudioManager, upgradeBackgroundAudio} from './audio';
-import {setStyle, setStyles} from '../../../src/style';
+import {setStyle, setStyles, setImportantStyles} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
@@ -182,6 +182,9 @@ export class AmpStory extends AMP.BaseElement {
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
       this.getAmpDoc().win.document.documentElement.classList
           .add('i-amphtml-story-standalone');
+
+      // Lock body to prevent overflow.
+      this.lockBody_();
     }
 
     this.element.appendChild(
@@ -291,6 +294,17 @@ export class AmpStory extends AMP.BaseElement {
 
     this.element.addEventListener(EventType.DEV_LOG_ENTRIES_AVAILABLE, e => {
       this.systemLayer_.logAll(e.detail);
+    });
+  }
+
+  /** @private */
+  lockBody_() {
+    const document = this.win.document;
+    setImportantStyles(document.documentElement, {
+      'overflow': 'hidden',
+    });
+    setImportantStyles(document.body, {
+      'overflow': 'hidden',
     });
   }
 

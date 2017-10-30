@@ -32,6 +32,7 @@ describes.realWin('amp-story', {
 
   let win;
   let element;
+  let story;
 
   function appendEmptyPage(container, opt_active) {
     const page = document.createElement('amp-story-page');
@@ -71,6 +72,7 @@ describes.realWin('amp-story', {
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
 
+    story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
     // sandbox.stub(element.implementation_, 'triggerActiveEventForPage_', NOOP);
@@ -315,6 +317,15 @@ describes.realWin('amp-story', {
 
     expect(pages[0].hasAttribute('active')).to.be.false;
     expect(pages[1].hasAttribute('active')).to.be.true;
+  });
+
+  // TODO(prateekbh): Add test for lock body once amp-story tests are enabled.
+  it('lock body when amp-story is initialized', () => {
+    story.lockBody_();
+    expect(win.document.body.style.getPropertyValue('overflow'))
+        .to.be.equal('hidden');
+    expect(win.document.documentElement.style.getPropertyValue('overflow'))
+        .to.be.equal('hidden');
   });
 });
 
