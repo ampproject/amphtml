@@ -527,8 +527,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     } else {
       let mediaElement;
       try {
-        mediaElement = scopedQuerySelector(
-            this.element, `#${autoAdvanceAfter}`);
+        mediaElement =
+            this.win.document.getElementById(`${autoAdvanceAfter}`);
       } catch (e) {
         user().error(TAG, `Malformed ID '${autoAdvanceAfter}' for automatic ` +
             `advance on page '${this.element.id}'.`);
