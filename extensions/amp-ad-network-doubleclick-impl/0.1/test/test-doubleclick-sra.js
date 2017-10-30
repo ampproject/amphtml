@@ -342,14 +342,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           }
           expect(impl.iframe).to.be.ok;
           const name = impl.iframe.getAttribute('name');
-          if (isSra) {
-            // Expect safeframe.
-            expect(name).to.match(
-                new RegExp(`^\\d+-\\d+-\\d+;\\d+;${creative}`));
-          } else {
-            // Expect nameframe render.
-            expect(JSON.parse(name).creative).to.equal(creative);
-          }
+          expect(name).to.match(
+              new RegExp(`^\\d+-\\d+-\\d+;\\d+;${creative}`));
         });
       };
       Object.keys(grouping).forEach(networkId => {

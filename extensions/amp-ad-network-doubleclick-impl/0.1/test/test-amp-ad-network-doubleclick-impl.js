@@ -18,14 +18,11 @@ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
-  signatureVerifierFor,
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {DATA_ATTR_NAME} from '../../../amp-a4a/0.1/refresh-manager';
-import {
-  AMP_SIGNATURE_HEADER,
-  VerificationStatus,
-} from '../../../amp-a4a/0.1/signature-verifier';
+import {AMP_SIGNATURE_HEADER} from '../../../amp-a4a/0.1/signature-verifier';
 import {Services} from '../../../../src/services';
+import {utf8Encode} from '../../../../src/utils/bytes';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
@@ -745,23 +742,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   });
 
   describe('#multi-size', () => {
-    const arrayBuffer = () => Promise.resolve({
-      byteLength: 256,
-    });
-
-    /**
-     * Calling this function ensures that the enclosing test will behave as if
-     * it has an AMP creative.
-     */
-    function stubForAmpCreative() {
-      sandbox.stub(
-          signatureVerifierFor(impl.win), 'verify',
-          () => Promise.resolve(VerificationStatus.OK));
-    }
-
     function mockSendXhrRequest() {
       return {
-        arrayBuffer,
+        arrayBuffer: () => utf8Encode('hello, world!'),
         headers: {
           get(prop) {
             switch (prop) {
@@ -829,7 +812,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('amp creative - should force iframe to match size of creative', () => {
-      stubForAmpCreative();
       sandbox.stub(impl, 'sendXhrRequest', mockSendXhrRequest);
       impl.buildCallback();
       impl.onLayoutMeasure();
@@ -854,7 +836,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('amp creative - should force iframe to match size of slot', () => {
-      stubForAmpCreative();
       sandbox.stub(impl, 'sendXhrRequest', () => null);
       sandbox.stub(impl, 'renderViaCachedContentIframe_',
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
@@ -887,7 +868,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('should issue an ad request even with bad multi-size data attr', () => {
-      stubForAmpCreative();
       sandbox.stub(impl, 'sendXhrRequest', mockSendXhrRequest);
       impl.element.setAttribute('data-multi-size', '201x50');
       impl.buildCallback();

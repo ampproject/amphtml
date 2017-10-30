@@ -356,6 +356,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {string} */
     this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
+
+    /** @private {string} */
+    this.nonAmpRenderingMethod_ = XORIGIN_MODE.SAFEFRAME;
   }
 
   /** @override */
@@ -1142,8 +1145,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getNonAmpCreativeRenderingMethod(headerValue) {
-    return this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
-        super.getNonAmpCreativeRenderingMethod(headerValue);
+    return (this.nonAmpRenderingMethod_ =
+        headerValue && !(this.isFluid_ || this.useSra) ?
+        super.getNonAmpCreativeRenderingMethod(headerValue) :
+        XORIGIN_MODE.SAFEFRAME);
   }
 
   /** @override */
@@ -1218,7 +1223,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getXOriginIframeAttributes(contextMetadata, creative) {
-    return this.isFluid_ ?
+    return this.nonAmpRenderingMethod_ == XORIGIN_MODE.SAFEFRAME ?
         dict({
           'src': this.getSafeframePath_() + '?n=0',
           'name': `${this.safeframeVersion_};${creative.length};${creative}` +
