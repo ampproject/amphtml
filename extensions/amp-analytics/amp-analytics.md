@@ -441,7 +441,7 @@ Use the scroll trigger (`"on": "scroll"`) to fire a request under certain condit
 
 ##### Timer trigger
 Use the timer trigger (`"on": "timer"`) to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
-  - `timerSpec` Specification for triggers of type `timer`. The timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
+  - `timerSpec` Specification for triggers of type `timer`. The unless a `startSpec` is specified, the timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
     - `maxTimerLength` Maximum duration for which the timer will fire, in seconds.
     - `immediate` trigger timer immediately or not. Boolean, defaults to true
@@ -455,6 +455,30 @@ Use the timer trigger (`"on": "timer"`) to fire a request on a regular time inte
       "maxTimerLength": 600
     },
     "request": "pagetime"
+  }
+}
+```
+
+To configure a timer which times user events use:
+    - `startSpec` Specification for triggering when a timer starts. Use the value of `on` and `selector` to track specific events.
+    - `stopSpec` Specification for triggering when a timer stops. Must also have a `startSpec` to be valid.
+
+```javascript
+"triggers": {
+  "videoPlayTimer": {
+    "on": "timer",
+    "timerSpec": {
+      "interval": 5,
+      "startSpec": {
+        "on": "video-play",
+        "selector": "amp-video"
+      },
+      "stopSpec": {
+        "on": "video-pause",
+        "selector": "amp-video"
+      }
+    },
+    "request": "videoRequest"
   }
 }
 ```
