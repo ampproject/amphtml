@@ -668,6 +668,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   processResponseHeaders(responseHeaders) {
+    super.processResponseHeaders(responseHeaders);
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
@@ -695,9 +696,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.safeframeVersion_ = safeframeVersionHeader;
       this.preconnect.preload(this.getSafeframePath_());
     }
-
-    // Ensure that extractSize is called appropriately.
-    super.processResponseHeaders(responseHeaders);
   }
 
   /** @override */
