@@ -646,7 +646,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
 
 /** Experiment disabled  */
 .i-amphtml-story-experiment-error {
-  align-items: center;
+  align-items: center !important;
   align-content: center;
   background-color: #222 !important;
   bottom: 0 !important;
@@ -679,12 +679,12 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   border-radius: 8px !important;
   color: #f0f0f0 !important;
   cursor: pointer !important;
-  font-size: 20px;
+  font-size: 20px !important;
   font-family: 'Roboto', sans-serif !important;
   margin: 16px 0 0 !important;
-  outline: none;
+  outline: none !important;
   padding: 8px 32px !important;
-  text-transform: uppercase;
+  text-transform: uppercase !important;
   width: 50% !important;
 }
 
