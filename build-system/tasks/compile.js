@@ -24,6 +24,7 @@ const replace = require('gulp-replace');
 const util = require('gulp-util');
 const internalRuntimeVersion = require('../internal-version').VERSION;
 const internalRuntimeToken = require('../internal-version').TOKEN;
+const shortenLicense = require('../shorten-license');
 const rimraf = require('rimraf');
 
 const isProdBuild = !!argv.type;
@@ -145,12 +146,16 @@ function compile(entryModuleFilenames, outputDir,
       // Currently needed for crypto.js and visibility.js.
       // Should consider refactoring.
       'extensions/amp-analytics/**/*.js',
+      // Needed for WebAnimationService
+      'extensions/amp-animation/**/*.js',
       // For amp-bind in the web worker (ww.js).
       'extensions/amp-bind/**/*.js',
       // Needed to access form impl from other extensions
       'extensions/amp-form/**/*.js',
       // Needed for AccessService
       'extensions/amp-access/**/*.js',
+      // Needed for AmpStoryVariableService
+      'extensions/amp-story/**/*.js',
       // Needed to access UserNotificationManager from other extensions
       'extensions/amp-user-notification/**/*.js',
       'src/*.js',
@@ -341,6 +346,7 @@ function compile(entryModuleFilenames, outputDir,
         .pipe(rename(outputFilename))
         .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
         .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
+        .pipe(shortenLicense())
         .pipe(gulp.dest(outputDir))
         .on('end', function() {
           gulp.src(intermediateFilename + '.map')

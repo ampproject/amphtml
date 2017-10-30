@@ -60,7 +60,7 @@ function getConfig() {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
     return Object.assign({}, karmaDefault, {
-      reporters: ['dots', 'saucelabs', 'mocha'],
+      reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
       browsers: argv.oldchrome
           ? ['SL_Chrome_45']
           : [
@@ -74,6 +74,7 @@ function getConfig() {
             // 'SL_iOS_8_4', // Disabled due to flakiness and low market share
             'SL_iOS_9_1',
             'SL_iOS_10_0',
+            'SL_iOS_11_0',
             'SL_IE_11',
           ],
     });
@@ -187,7 +188,6 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
 
   if (argv.testnames) {
     c.reporters = ['mocha'];
-    c.mochaReporter.output = 'full';
   }
 
   // Exclude chai-as-promised from sauce labs runs.
@@ -196,8 +196,9 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
 
   if (argv.files) {
     c.files = c.files.concat(config.commonTestPaths, argv.files);
-    c.reporters = argv.saucelabs ? ['dots', 'saucelabs', 'mocha'] : ['mocha'];
-    c.mochaReporter.output = argv.saucelabs ? 'minimal' : 'full';
+    if (!argv.saucelabs) {
+      c.reporters = ['mocha'];
+    }
   } else if (argv.integration) {
     c.files = c.files.concat(config.integrationTestPaths);
   } else if (argv.unit) {
@@ -227,6 +228,12 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
     c.files = c.files.concat(config.commonTestPaths.concat(testFiles));
   } else {
     c.files = c.files.concat(config.testPaths);
+  }
+
+  // Include a simple passing test for sauce labs runs. This is done because
+  // running zero tests on a sauce labs browser throws an error. See #11494.
+  if (argv.saucelabs) {
+    c.files = c.files.concat(config.simpleTestPath);
   }
 
   // c.client is available in test browser via window.parent.karma.config
@@ -305,6 +312,25 @@ gulp.task('test', 'Runs tests', preTestTasks, function(done) {
       process.exit(exitCode);
     } else {
       done();
+    }
+  }).on('run_start', function() {
+    if (argv.saucelabs) {
+      console./* OK*/log(green(
+          'Running tests in parallel on', c.browsers.length, 'browsers...'));
+    }
+  }).on('browser_complete', function(browser) {
+    if (argv.saucelabs) {
+      const result = browser.lastResult;
+      let message = '\n' + browser.name + ': ';
+      message += 'Executed ' + (result.success + result.failed) +
+          ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
+      if (result.failed === 0) {
+        message += util.colors.green('SUCCESS');
+      } else {
+        message += util.colors.red(result.failed + ' FAILED');
+      }
+      message += '\n';
+      console./* OK*/log(message);
     }
   }).start();
 }, {

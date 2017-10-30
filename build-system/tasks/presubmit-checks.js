@@ -325,6 +325,7 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
+      'src/impression.js',
     ],
   },
   // Privacy sensitive
@@ -408,6 +409,8 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'testing/fake-dom.js',
+      'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
+      'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
     ],
   },
   'sessionStorage': {

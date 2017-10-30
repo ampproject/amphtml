@@ -149,6 +149,12 @@ export class Viewer {
     /** @private {?function()} */
     this.whenFirstVisibleResolve_ = null;
 
+    /** @private {?Promise} */
+    this.nextVisiblePromise_ = null;
+
+    /** @private {?function()} */
+    this.nextVisibleResolve_ = null;
+
     /** @private {?time} */
     this.firstVisibleTime_ = null;
 
@@ -371,27 +377,6 @@ export class Viewer {
       }
     });
 
-    // Replace URL if requested.
-    const replaceUrlParam = this.params_['replaceUrl'];
-    if (ampdoc.isSingleDoc() &&
-        replaceUrlParam &&
-        this.win.history.replaceState) {
-      try {
-        // The origin and source origin must match.
-        const url = parseUrl(this.win.location.href);
-        const replaceUrl = parseUrl(
-            removeFragment(replaceUrlParam) + this.win.location.hash);
-        if (url.origin == replaceUrl.origin &&
-            getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
-          this.win.history.replaceState({}, '', replaceUrl.href);
-          this.win.location.originalHref = url.href;
-          dev().fine(TAG_, 'replace url:' + replaceUrl.href);
-        }
-      } catch (e) {
-        dev().error(TAG_, 'replaceUrl failed', e);
-      }
-    }
-
     // Remove hash when we have an incoming click tracking string
     // (see impression.js).
     if (this.params_['click']) {
@@ -426,6 +411,7 @@ export class Viewer {
       this.lastVisibleTime_ = now;
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
+      this.whenNextVisibleResolve_();
     }
     this.visibilityObservable_.fire();
   }
@@ -483,6 +469,14 @@ export class Viewer {
    */
   isEmbedded() {
     return this.isEmbedded_;
+  }
+
+  /**
+   * Whether the document is embedded in a webview.
+   * @return {boolean}
+   */
+  isWebviewEmbedded() {
+    return this.isWebviewEmbedded_;
   }
 
   /**
@@ -595,11 +589,42 @@ export class Viewer {
 
   /**
    * Returns a Promise that only ever resolved when the current
-   * AMP document becomes visible.
+   * AMP document first becomes visible.
    * @return {!Promise}
    */
   whenFirstVisible() {
     return this.whenFirstVisiblePromise_;
+  }
+
+  /**
+   * Returns a Promise that resolve when current doc becomes visible.
+   * The promise resolves immediately if doc is already visible.
+   * @return {!Promise}
+   */
+  whenNextVisible() {
+    if (this.isVisible()) {
+      return Promise.resolve();
+    }
+
+    if (this.nextVisiblePromise_) {
+      return this.nextVisiblePromise_;
+    }
+
+    return this.nextVisiblePromise_ = new Promise(resolve => {
+      this.nextVisibleResolve_ = resolve;
+    });
+  }
+
+  /**
+   * Helper method to be called on visiblity change
+   * @private
+   */
+  whenNextVisibleResolve_() {
+    if (this.nextVisibleResolve_) {
+      this.nextVisibleResolve_();
+      this.nextVisibleResolve_ = null;
+      this.nextVisiblePromise_ = null;
+    }
   }
 
   /**
@@ -942,6 +967,33 @@ export class Viewer {
    */
   whenMessagingReady() {
     return this.messagingMaybePromise_;
+  }
+
+  /**
+   * Replace the
+   * @param {?string} newUrl
+   */
+  replaceUrl(newUrl) {
+    if (!newUrl ||
+        !this.ampdoc.isSingleDoc() ||
+        !this.win.history.replaceState) {
+      return;
+    }
+
+    try {
+      // The origin and source origin must match.
+      const url = parseUrl(this.win.location.href);
+      const replaceUrl = parseUrl(
+          removeFragment(newUrl) + this.win.location.hash);
+      if (url.origin == replaceUrl.origin &&
+          getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
+        this.win.history.replaceState({}, '', replaceUrl.href);
+        this.win.location.originalHref = url.href;
+        dev().fine(TAG_, 'replace url:' + replaceUrl.href);
+      }
+    } catch (e) {
+      dev().error(TAG_, 'replaceUrl failed', e);
+    }
   }
 }
 

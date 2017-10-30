@@ -75,20 +75,26 @@
       layout="responsive"
       width="150"
       height="80"
-      init="ZRGA3EYZ4GRBTSHREG345HGGZRTHZEGEH"
-      page-view="premium"
-      debug="true"
-      mode="excerpt"
-      percent="80"
-      post-container="#need-poool-custom"
-      force-widget="gift"
-      main-color="#ffc400"
-      background-color="#ffc400"
-      brand-logo="https://cdn.poool.fr/uploads/57ffab6c756a8cf24356d0c2/sudouest.jpg"
-      on-lock="function(){console.log('Locked !');}"
-      on-release="function(e){console.log('Released with widget ' + e.widget);}">
+      data-init="ZRGA3EYZ4GRBTSHREG345HGGZRTHZEGEH"
+      data-page-view="premium"
+      data-debug="true"
+      data-poool-mode="excerpt"
+      data-poool="80"
+      data-post-container="#need-poool-custom"
+      data-force-widget="gift"
+      data-main-color="#ffc400"
+      data-background-color="#ffc400"
+      data-brand-logo="https://cdn.poool.fr/uploads/57ffab6c756a8cf24356d0c2/sudouest.jpg"
+      data-events="poool-custom-events">
     </amp-poool>
   </div>
 
+    <script id="poool-custom-events" type="application/ld+json">
+        {
+            "on_lock": "function() { console.log('Content Locked !'); }",
+            "on_release": "function(e) { console.log('Released with widget ' + e.widget + ' !'); console.log('Enjoy your premium article !'); }",
+            "on_adblock": "function() { console.log('An adblocker has been detected !');}"
+        }
+    </script>
 </body>
 </html>

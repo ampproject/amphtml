@@ -86,6 +86,7 @@ declareExtension('amp-fx-flying-carpet', '0.1', true);
 declareExtension('amp-fx-parallax', '0.1', false);
 declareExtension('amp-gfycat', '0.1', false);
 declareExtension('amp-gist', '0.1', false);
+declareExtension('amp-gwd-animation', '0.1', true);
 declareExtension('amp-hulu', '0.1', false);
 declareExtension('amp-iframe', '0.1', false);
 declareExtension('amp-ima-video', '0.1', false);
@@ -412,7 +413,7 @@ function compileCss() {
   })
   .then(() => {
     return buildExtensions({
-      bundleOnlyIfListedInFiles: true,
+      bundleOnlyIfListedInFiles: false,
       compileOnlyCss: true
     });
   });

@@ -75,10 +75,11 @@ export class AmpAd extends AMP.BaseElement {
       this.element.setAttribute('data-amp-slot-index', slotId);
 
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
+      // TODO(a4a-cam): Shorten this predicate.
       if (!a4aRegistry[type] ||
           (!(adConfig[type] || {}).remoteHTMLDisabled &&
           this.win.document.querySelector('meta[name=amp-3p-iframe-src]') &&
-          !this.win.document.getElementById('amp-rtc')) ||
+          !this.element.getAttribute('rtc-config')) ||
           // Note that predicate execution may have side effects.
           !a4aRegistry[type](this.win, this.element)) {
         // Either this ad network doesn't support Fast Fetch, its Fast Fetch

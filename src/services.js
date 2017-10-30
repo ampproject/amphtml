@@ -260,6 +260,29 @@ export class Services {
   }
 
   /**
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService>}
+   */
+  static storyVariableServiceForOrNull(win) {
+    return (
+        /** @type {!Promise<
+         * ?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService
+         * >} */ (
+            getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
+                true)));
+  }
+
+  /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>}
+   */
+  static webAnimationServiceFor(nodeOrDoc) {
+    return (/** @type {
+        !Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>} */
+        (getElementServiceForDoc(nodeOrDoc, 'web-animation', 'amp-animation')));
+  }
+
+  /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<!./service/storage-impl.Storage>}
    */

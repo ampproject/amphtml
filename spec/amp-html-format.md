@@ -274,10 +274,6 @@ These CSS properties are permanently banned:
 - `behavior`
 - `-moz-binding`
 
-The following properties are currently blacklisted due to performance concerns:
-
-- `filter`
-
 AMP only allows transitions and animations of properties that can be GPU accelerated in common browsers. We currently whitelist: `opacity`, `transform` (also `-vendorPrefix-transform`).
 
 In the following examples `<property>` needs to be in the whitelist above.

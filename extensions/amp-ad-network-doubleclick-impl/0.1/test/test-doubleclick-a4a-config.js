@@ -19,7 +19,6 @@ import {
   BETA_ATTRIBUTE,
   BETA_EXPERIMENT_ID,
   DFP_CANONICAL_FF_EXPERIMENT_NAME,
-  DOUBLECLICK_A4A_EXPERIMENT_NAME,
   DOUBLECLICK_EXPERIMENT_FEATURE,
   URL_EXPERIMENT_MAPPING,
   DoubleclickA4aEligibility,
@@ -103,24 +102,6 @@ describe('doubleclick-a4a-config', () => {
 
     });
 
-    it('should select into non-SSL canonical AMP experiment when not on CDN',
-        () => {
-          sandbox.stub(DoubleclickA4aEligibility.prototype,
-              'isCdnProxy', () => false);
-          sandbox.stub(DoubleclickA4aEligibility.prototype,
-              'supportsCrypto', () => false);
-          const maybeSelectExperimentSpy = sandbox.spy(
-              DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment');
-          const elem = testFixture.doc.createElement('div');
-          testFixture.doc.body.appendChild(elem);
-          doubleclickIsA4AEnabled(mockWin, elem);
-          expect(maybeSelectExperimentSpy).to.be.calledWith(mockWin, elem, [
-            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_CONTROL,
-            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_HTTP_EXPERIMENT,
-          ], DFP_CANONICAL_FF_EXPERIMENT_NAME) ;
-          expect(maybeSelectExperimentSpy.callCount).to.equal(1);
-        });
-
     it('should return false if no canonical AMP experiment branch', () => {
       forceExperimentBranch(mockWin, DFP_CANONICAL_FF_EXPERIMENT_NAME, null);
       sandbox.stub(DoubleclickA4aEligibility.prototype,
@@ -187,9 +168,8 @@ describe('doubleclick-a4a-config', () => {
             String(expFlagValue));
         const elem = testFixture.doc.createElement('div');
         testFixture.doc.body.appendChild(elem);
-        // Enabled for all but holdback & sfg.
-        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.equal(
-            !['2', '5', '6'].includes(expFlagValue));
+        // Enabled for all
+        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
         if (expFlagValue == 0) {
           expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
         } else {
@@ -200,29 +180,6 @@ describe('doubleclick-a4a-config', () => {
           expect(isInExperiment(elem, BETA_EXPERIMENT_ID)).to.be.false;
         }
       });
-    });
-
-    it('should select random branch, holdback', () => {
-      mockWin.location = parseUrl(
-          'https://cdn.ampproject.org/some/path/to/content.html');
-      forceExperimentBranch(mockWin, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-          DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL);
-      const elem = testFixture.doc.createElement('div');
-      testFixture.doc.body.appendChild(elem);
-      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL);
-    });
-
-    it('should select random branch, control', () => {
-      mockWin.location = parseUrl(
-          'https://cdn.ampproject.org/some/path/to/content.html');
-      forceExperimentBranch(
-          mockWin, DOUBLECLICK_A4A_EXPERIMENT_NAME, '2092613');
-      const elem = testFixture.doc.createElement('div');
-      testFixture.doc.body.appendChild(elem);
-      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal('2092613');
     });
   });
 });

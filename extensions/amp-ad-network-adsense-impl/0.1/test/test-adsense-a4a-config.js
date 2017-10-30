@@ -19,7 +19,7 @@ import {
   ADSENSE_A4A_EXPERIMENT_NAME,
   ADSENSE_EXPERIMENT_FEATURE,
   URL_EXPERIMENT_MAPPING,
-  fastFetchDelayedRequestEnabled,
+  identityEnabled,
 } from '../adsense-a4a-config';
 import {
   isInExperiment,
@@ -86,9 +86,8 @@ describe('adsense-a4a-config', () => {
         const elem = testFixture.doc.createElement('div');
         elem.setAttribute('data-ad-client', 'ca-pub-somepub');
         testFixture.doc.body.appendChild(elem);
-        // Enabled for all but holdback & sfg.
-        expect(adsenseIsA4AEnabled(mockWin, elem)).to.equal(
-            expFlagValue != '2');
+        // Enabled for all
+        expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.true;
         if (expFlagValue == 0) {
           expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
         } else {
@@ -98,53 +97,27 @@ describe('adsense-a4a-config', () => {
         }
       });
     });
-
-    it('should select random branch, holdback', () => {
-      mockWin.location = parseUrl(
-          'https://cdn.ampproject.org/some/path/to/content.html');
-      forceExperimentBranch(mockWin, ADSENSE_A4A_EXPERIMENT_NAME,
-          ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL);
-      const elem = testFixture.doc.createElement('div');
-      elem.setAttribute('data-ad-client', 'ca-pub-somepub');
-      testFixture.doc.body.appendChild(elem);
-      expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.false;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL);
-    });
-
-    it('should select random branch, control', () => {
-      mockWin.location = parseUrl(
-          'https://cdn.ampproject.org/some/path/to/content.html');
-      forceExperimentBranch(
-          mockWin, ADSENSE_A4A_EXPERIMENT_NAME, '2092615');
-      const elem = testFixture.doc.createElement('div');
-      elem.setAttribute('data-ad-client', 'ca-pub-somepub');
-      testFixture.doc.body.appendChild(elem);
-      expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.true;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal('2092615');
-    });
   });
 
-  describe('#fastFetchDelayedRequestEnabled', () => {
+  describe('#identityEnabled', () => {
     [
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_CONTROL, {
-        layer: ADSENSE_A4A_EXPERIMENT_NAME,
-        result: true,
-      }],
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_EXTERNAL, {
+      [ADSENSE_EXPERIMENT_FEATURE.IDENTITY_CONTROL, {
         layer: ADSENSE_A4A_EXPERIMENT_NAME,
         result: false,
+      }],
+      [ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT, {
+        layer: ADSENSE_A4A_EXPERIMENT_NAME,
+        result: true,
       }],
     ].forEach(item => {
       it(`should return ${item[1].result} if in ${item[0]} experiment`, () => {
         forceExperimentBranch(mockWin, item[1].layer, item[0]);
-        expect(fastFetchDelayedRequestEnabled(mockWin)).to.equal(
-            item[1].result);
+        expect(identityEnabled(mockWin)).to.equal(item[1].result);
       });
     });
 
-    it('should return true if not in any experiments', () => {
-      expect(fastFetchDelayedRequestEnabled(mockWin)).to.be.true;
+    it('should return false if not in any experiments', () => {
+      expect(identityEnabled(mockWin)).to.be.false;
     });
   });
 });

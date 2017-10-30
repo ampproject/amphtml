@@ -31,6 +31,7 @@ import {user} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {isFiniteNumber} from '../../../src/types';
 import {clamp} from '../../../src/utils/math';
+import {WebAnimationService} from './web-animation-service';
 
 const TAG = 'amp-animation';
 const POLYFILLED = '__AMP_WA';
@@ -72,11 +73,15 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const ampdoc = this.getAmpDoc();
+
     user().assert(isExperimentOn(this.win, TAG),
         `Experiment "${TAG}" is disabled.`);
 
     // TODO(dvoytenko): Remove once we support direct parent visibility.
-    user().assert(this.element.parentNode == this.element.ownerDocument.body,
+    user().assert(
+        this.element.parentNode == this.element.ownerDocument.body ||
+        this.element.parentNode == ampdoc.getBody(),
         `${TAG} is only allowed as a direct child of <body> element.` +
         ' This restriction will be removed soon.');
 
@@ -124,7 +129,6 @@ export class AmpAnimation extends AMP.BaseElement {
         /* delay */ 50);
 
     // Visibility.
-    const ampdoc = this.getAmpDoc();
     const frameElement = getParentWindowFrameElement(this.element, ampdoc.win);
     const embed =
         frameElement ? getFriendlyIframeEmbedOptional(frameElement) : null;
@@ -510,4 +514,5 @@ function ensurePolyfillInstalled(win) {
 
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerElement(TAG, AmpAnimation);
+  AMP.registerServiceForDoc('web-animation', WebAnimationService);
 });

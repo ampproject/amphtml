@@ -72,17 +72,9 @@ describes.realWin('web-push-permission-dialog', {
   it('should detect opened as popup', () => {
     return setupPermissionDialogFrame().then(() => {
       sandbox./*OK*/stub(iframeWindow, 'opener', true);
-      sandbox./*OK*/stub(
-          iframeWindow._ampWebPushPermissionDialog,
-          'requestNotificationPermission',
-          () => Promise.resolve()
-      );
-      const spy = sandbox./*OK*/spy(
-          iframeWindow._ampWebPushPermissionDialog,
-          'isCurrentDialogPopup'
-      );
-      iframeWindow._ampWebPushPermissionDialog.run();
-      expect(spy.returned(true)).to.eq(true);
+      const isCurrentDialogPopup =
+        iframeWindow._ampWebPushPermissionDialog.isCurrentDialogPopup();
+      expect(isCurrentDialogPopup).to.eq(true);
     });
   });
 
@@ -141,38 +133,6 @@ describes.realWin('web-push-permission-dialog', {
     });
   });
 
-  it('should close popup, when opened as popup', () => {
-    let closeStub = null;
-    return setupPermissionDialogFrame().then(() => {
-      sandbox./*OK*/stub(
-          iframeWindow._ampWebPushPermissionDialog,
-          'isCurrentDialogPopup', () => true
-      );
-      sandbox./*OK*/stub(
-          iframeWindow._ampWebPushPermissionDialog,
-          'requestNotificationPermission',
-          () => Promise.resolve()
-      );
-      closeStub = sandbox./*OK*/stub(
-          iframeWindow,
-          'close',
-          null);
-      sandbox./*OK*/stub(
-          iframeWindow.Notification,
-          'requestPermission',
-          () => Promise.resolve('default')
-      );
-      sandbox./*OK*/stub(
-          iframeWindow._ampWebPushPermissionDialog.ampMessenger_,
-          'send',
-          () => Promise.resolve([{closeFrame: true}])
-      );
-      return iframeWindow._ampWebPushPermissionDialog.run();
-    }).then(() => {
-      expect(closeStub.calledOnce).to.eq(true);
-    });
-  });
-
   it('should redirect back to original site, when redirected', () => {
     let spy = null;
     return setupPermissionDialogFrame().then(() => {
@@ -200,6 +160,78 @@ describes.realWin('web-push-permission-dialog', {
       return iframeWindow._ampWebPushPermissionDialog.run();
     }).then(() => {
       expect(spy.withArgs('https://another-site.com').calledOnce).to.eq(true);
+    });
+  });
+
+  it('should hide preload section and show postload section', () => {
+    return setupPermissionDialogFrame().then(() => {
+      const preTestString = '<div id="preload"/><div id="postload"/>';
+      iframeWindow.document.body.innerHTML = preTestString;
+      iframeWindow._ampWebPushPermissionDialog.showPostloadSection_();
+      const document = iframeWindow.document;
+      const preloadDom = document.querySelector('#preload');
+      const postloadDom = document.querySelector('#postload');
+      expect(preloadDom.classList.contains('invisible')).to.eq(true);
+      expect(postloadDom.classList.contains('invisible')).to.eq(false);
+    });
+  });
+
+  it('should show target permission section', () => {
+    return setupPermissionDialogFrame().then(() => {
+      Object.defineProperty(iframeWindow.Notification, 'permission', {
+        enumerable: false,
+        configurable: false,
+        writable: false,
+        value: 'granted',
+      });
+      const preTestString =
+        '<div permission="default"/>' +
+        '<div permission="granted"/>' +
+        '<div permission="denied"/>';
+      iframeWindow.document.body.innerHTML = preTestString;
+      iframeWindow._ampWebPushPermissionDialog.showTargetPermissionSection_();
+      const document = iframeWindow.document;
+      const defaultElement = document.querySelector('[permission=default]');
+      const grantedElement = document.querySelector('[permission=granted]');
+      const deniedElement = document.querySelector('[permission=denied]');
+      expect(defaultElement.classList.contains('invisible')).to.eq(true);
+      expect(grantedElement.classList.contains('invisible')).to.eq(false);
+      expect(deniedElement.classList.contains('invisible')).to.eq(true);
+    });
+  });
+
+  it('should store notification permission', () => {
+    return setupPermissionDialogFrame().then(() => {
+      expect(localStorage.getItem('amp-web-push-notification-permission'))
+          .to.eq(null);
+
+      Object.defineProperty(iframeWindow.Notification, 'permission', {
+        enumerable: false,
+        configurable: false,
+        writable: false,
+        value: 'granted',
+      });
+
+      iframeWindow._ampWebPushPermissionDialog.storeNotificationPermission_();
+      expect(localStorage.getItem('amp-web-push-notification-permission'))
+          .to.eq('granted');
+    });
+  });
+
+  it('clicking close icon should attempt to close dialog', () => {
+    let spy = null;
+    return setupPermissionDialogFrame().then(() => {
+      const preTestString = '<div id="close"/>';
+      iframeWindow.document.body.innerHTML = preTestString;
+      iframeWindow._ampWebPushPermissionDialog.onCloseIconClick_();
+      const document = iframeWindow.document;
+      const closeElement = document.querySelector('#close');
+      spy = sandbox./*OK*/spy(
+          iframeWindow._ampWebPushPermissionDialog,
+          'closeDialog'
+      );
+      closeElement.click();
+      expect(spy.calledOnce).to.eq(true);
     });
   });
 });
