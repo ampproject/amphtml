@@ -20,8 +20,6 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
   AmpA4A,
   RENDERING_TYPE_HEADER,
-  DEFAULT_SAFEFRAME_VERSION,
-  SAFEFRAME_VERSION_HEADER,
   protectFunctionWrapper,
   assignAdUrlToError,
   EXPERIMENT_FEATURE_HEADER_NAME,
@@ -169,28 +167,6 @@ describe('amp-a4a', () => {
         '<html ⚡4ads>');
     expect(element).to.be.visible;
     expect(friendlyChild).to.be.visible;
-  }
-
-  // Checks that element is an amp-ad that is rendered via SafeFrame.
-  function verifySafeFrameRender(element, sfVersion) {
-    expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
-    expect(element).to.be.visible;
-    expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
-    const safeFrameUrl = 'https://tpc.googlesyndication.com/safeframe/' +
-      sfVersion + '/html/container.html';
-    const child = element.querySelector(`iframe[src^="${safeFrameUrl}"][name]`);
-    expect(child).to.be.ok;
-    const name = child.getAttribute('name');
-    expect(name).to.match(/[^;]+;\d+;[\s\S]+/);
-    const re = /^([^;]+);(\d+);([\s\S]*)$/;
-    const match = re.exec(name);
-    expect(match).to.be.ok;
-    const contentLength = Number(match[2]);
-    const rest = match[3];
-    expect(rest.length > contentLength).to.be.true;
-    const data = JSON.parse(rest.substr(contentLength));
-    expect(data).to.be.ok;
-    verifyContext(data._context);
   }
 
   function verifyContext(context) {
@@ -593,95 +569,6 @@ describe('amp-a4a', () => {
                   });
                 });
           });
-    });
-
-    describe('#renderViaSafeFrame', () => {
-      beforeEach(() => {
-        // If rendering type is safeframe, we SHOULD attach a SafeFrame.
-        adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
-        a4a.onLayoutMeasure();
-      });
-
-      it('should attach a SafeFrame when header is set', () => {
-        return a4a.layoutCallback().then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
-          verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
-          expect(fetchMock.called('ad')).to.be.true;
-        });
-      });
-
-      it('should use safeframe version header value', () => {
-        a4a.safeframeVersion = '1-2-3';
-        return a4a.layoutCallback().then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
-          verifySafeFrameRender(a4aElement, '1-2-3');
-          expect(fetchMock.called('ad')).to.be.true;
-        });
-      });
-
-      it('should make only one SafeFrame even if onLayoutMeasure called ' +
-          'multiple times', () => {
-        a4a.onLayoutMeasure();
-        a4a.onLayoutMeasure();
-        a4a.onLayoutMeasure();
-        a4a.onLayoutMeasure();
-        return a4a.layoutCallback().then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
-          verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
-          expect(fetchMock.called('ad')).to.be.true;
-        });
-      });
-
-      ['', 'client_cache', 'nameframe', 'some_random_thing'].forEach(
-          headerVal => {
-            it(`should not attach a SafeFrame when header is ${headerVal}`,
-                () => {
-                  // If rendering type is anything but safeframe, we SHOULD NOT attach a
-                  // SafeFrame.
-                  adResponse.headers[RENDERING_TYPE_HEADER] = headerVal;
-                  a4a.onLayoutMeasure();
-                  return a4a.layoutCallback().then(() => {
-                    // Force vsync system to run all queued tasks, so that
-                    // DOM mutations are actually completed before testing.
-                    a4a.vsync_.runScheduledTasks_();
-                    const safeframeUrl = 'https://tpc.googlesyndication.com/safeframe/' +
-                      DEFAULT_SAFEFRAME_VERSION + '/html/container.html';
-                    const safeChild = a4aElement.querySelector(
-                        `iframe[src^="${safeframeUrl}"]`);
-                    expect(safeChild).to.not.be.ok;
-                    if (headerVal != 'nameframe') {
-                      const unsafeChild = a4aElement.querySelector('iframe');
-                      expect(unsafeChild).to.be.ok;
-                      expect(unsafeChild.getAttribute('src')).to.have.string(
-                          TEST_URL);
-                    }
-                    expect(fetchMock.called('ad')).to.be.true;
-                  });
-                });
-          });
-
-      it('should reset state to null on unlayoutCallback', () => {
-        return a4a.layoutCallback().then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
-          expect(a4a.experimentalNonAmpCreativeRenderMethod_)
-              .to.equal('safeframe');
-          a4a.unlayoutCallback();
-          // QUESTION TO REVIEWERS: Do we really need the vsync.mutate in
-          // AmpA4A.unlayoutCallback?  We have an open question there about
-          // whether it's necessary or perhaps hazardous.  Feedback welcome.
-          a4a.vsync_.runScheduledTasks_();
-          expect(a4a.experimentalNonAmpCreativeRenderMethod_).to.be.null;
-          expect(fetchMock.called('ad')).to.be.true;
-        });
-      });
     });
   });
 
@@ -1310,34 +1197,6 @@ describe('amp-a4a', () => {
           });
         });
       });
-
-      it('should process safeframe version header properly', () => {
-        adResponse.headers[SAFEFRAME_VERSION_HEADER] = '1-2-3';
-        adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
-        delete adResponse.headers['AMP-Fast-Fetch-Signature'];
-        delete adResponse.headers[AMP_SIGNATURE_HEADER];
-        return createIframePromise().then(fixture => {
-          setupForAdTesting(fixture);
-          fetchMock.getOnce(
-              TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
-              () => adResponse, {name: 'ad'});
-          const doc = fixture.doc;
-          const a4aElement = createA4aElement(doc);
-          const a4a = new MockA4AImpl(a4aElement);
-          a4a.buildCallback();
-          a4a.onLayoutMeasure();
-          return a4a.adPromise_.then(() => {
-            expect(fetchMock.called('ad')).to.be.true;
-            return a4a.layoutCallback().then(() => {
-              verifySafeFrameRender(a4aElement, '1-2-3');
-              // Verify preload to safeframe with header version.
-              expect(doc.querySelector('link[rel=preload]' +
-                '[href="https://tpc.googlesyndication.com/safeframe/' +
-                '1-2-3/html/container.html"]')).to.be.ok;
-            });
-          });
-        });
-      });
     });
 
     describe('delay request experiment', () => {
@@ -1395,29 +1254,6 @@ describe('amp-a4a', () => {
         });
       });
     });
-    it('should ignore invalid safeframe version header', () => {
-      adResponse.headers[SAFEFRAME_VERSION_HEADER] = 'some-bad-item';
-      adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
-      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
-      delete adResponse.headers[AMP_SIGNATURE_HEADER];
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        fetchMock.getOnce(
-            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
-            {name: 'ad'});
-        const doc = fixture.doc;
-        const a4aElement = createA4aElement(doc);
-        const a4a = new MockA4AImpl(a4aElement);
-        a4a.buildCallback();
-        a4a.onLayoutMeasure();
-        return a4a.adPromise_.then(() => {
-          expect(fetchMock.called('ad')).to.be.true;
-          return a4a.layoutCallback().then(() => {
-            verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
-          });
-        });
-      });
-    });
     // TODO(tdrl): Go through case analysis in amp-a4a.js#onLayoutMeasure and
     // add one test for each case / ensure that all cases are covered.
   });
@@ -1429,20 +1265,16 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
-        //a4a.config = {};
         a4a.buildCallback();
         a4a.preconnectCallback(false);
         const preconnects = doc.querySelectorAll('link[rel=preconnect]');
-        expect(preconnects).to.have.lengthOf(3);
-        // SafeFrame origin.
-        expect(preconnects[0]).to.have.property(
-            'href', 'https://tpc.googlesyndication.com/');
+        expect(preconnects).to.have.lengthOf(2);
         // NameFrame origin (in testing mode).  Use a substring match here to
         // be agnostic about localhost server port.
-        expect(preconnects[1]).to.have.property('href')
+        expect(preconnects[0]).to.have.property('href')
             .that.has.string('http://ads.localhost');
         // AdSense origin.
-        expect(preconnects[2]).to.have.property(
+        expect(preconnects[1]).to.have.property(
             'href', 'https://googleads.g.doubleclick.net/');
       });
     });

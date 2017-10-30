@@ -1225,6 +1225,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               `${JSON.stringify(contextMetadata)}`,
         }) : super.getXOriginIframeAttributes(contextMetadata, creative);
   }
+
+  /** @override */
+  forceNonAmpRenderingMethod() {
+    return this.isFluid_;
+  }
 }
 
 

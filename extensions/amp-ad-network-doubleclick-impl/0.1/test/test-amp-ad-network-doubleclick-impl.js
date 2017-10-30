@@ -254,7 +254,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
   });
 
-describe('#extractSize', () => {
+  describe('#extractSize', () => {
     beforeEach(() => {
       element = createElementWithAttributes(doc, 'amp-ad', {
         'width': '200',

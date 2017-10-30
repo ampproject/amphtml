@@ -886,7 +886,7 @@ export class AmpA4A extends AMP.BaseElement {
         this.protectedEmitLifecycleEvent_('iframeAlreadyExists');
         return Promise.resolve();
       }
-      if (!creativeMetaData) {
+      if (!creativeMetaData || this.forceNonAmpRenderingMethod()) {
         // Non-AMP creative case, will verify ad url existence.
         return this.renderNonAmpCreative_();
       }
@@ -1590,6 +1590,14 @@ export class AmpA4A extends AMP.BaseElement {
     }
     return Services.platformFor(this.win).isIos() ?
         XORIGIN_MODE.SAFEFRAME : null;
+  }
+
+  /**
+   * This function may be overriden by an implementing network to force the use
+   * of a non-AMP rendering method when so desired.
+   */
+  forceNonAmpRenderingMethod() {
+    return false;
   }
 
   /**
