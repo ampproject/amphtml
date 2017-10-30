@@ -17,7 +17,7 @@
 const FINAL_URL_RE = /^(data|https)\:/i;
 const DEG_TO_RAD = 2 * Math.PI / 360;
 const GRAD_TO_RAD = Math.PI / 200;
-const VAR_CSS_RE = /(calc|var|url|rand|index|width|height)\(/i;
+const VAR_CSS_RE = /(calc|var|url|rand|index|width|height|num)\(/i;
 const NORM_CSS_RE = /\d(%|em|rem|vw|vh|vmin|vmax|s|deg|grad)/i;
 const INFINITY_RE = /^(infinity|infinite)$/i;
 
@@ -695,6 +695,50 @@ export class CssDimSizeNode extends CssNode {
         context.getElementSize(this.selector_, this.selectionMethod_) :
         context.getCurrentElementSize();
     return new CssLengthNode(getDimSide(this.dim_, size), 'px');
+  }
+}
+
+
+/**
+ * AMP-specific `num()` function. Format is `num(value)`. Returns a numeric
+ * representation of the value. E.g. `11px` -> 11, `12em` -> 12, `10s` -> 10.
+ */
+export class CssNumConvertNode extends CssNode {
+  /**
+   * @param {!CssNode} value
+   */
+  constructor(value) {
+    super();
+    /** @const @private */
+    this.value_ = value;
+  }
+
+  /** @override */
+  css() {
+    throw noCss();
+  }
+
+  /** @override */
+  isConst() {
+    return false;
+  }
+
+  /** @override */
+  calc(context, normalize) {
+    const value = this.value_.resolve(context, normalize);
+    if (value == null) {
+      return null;
+    }
+    let num;
+    if (value instanceof CssNumericNode) {
+      num = value.num_;
+    } else {
+      num = parseFloat(value.css());
+    }
+    if (num == null || isNaN(num)) {
+      return null;
+    }
+    return new CssNumberNode(num);
   }
 }
 
