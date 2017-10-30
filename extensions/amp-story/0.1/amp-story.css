@@ -15,7 +15,7 @@
  */
 
 @import './amp-story-desktop.css';
-
+@import './amp-story-user-overridable.css';
 
 /** Common */
 amp-story, amp-story-page, amp-story-grid-layer {
@@ -302,27 +302,13 @@ amp-story-grid-layer * {
 }
 
 .i-amphtml-story-grid-template-vertical {
-  align-content: start !important;
   grid-auto-flow: row !important;
-  grid-gap: 16px !important;
   grid-template-columns: 100% !important;
-  justify-content: stretch !important;
-  justify-items: start !important;
-  padding: 32px !important;
-}
-
-.i-amphtml-story-grid-template-vertical > * {
-  width: 100% !important;
 }
 
 .i-amphtml-story-grid-template-horizontal {
-  align-content: stretch !important;
-  align-items: start !important;
   grid-auto-flow: column !important;
-  grid-gap: 16px !important;
   grid-template-rows: 100% !important;
-  justify-content: start !important;
-  padding: 32px !important;
 }
 
 .i-amphtml-story-grid-template-thirds {
@@ -330,7 +316,6 @@ amp-story-grid-layer * {
   grid-template-areas: "upper-third"
                        "middle-third"
                        "lower-third" !important;
-  padding: 32px !important;
 }
 
 /** Bookend */

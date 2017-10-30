@@ -1,0 +1,23 @@
+.i-amphtml-story-grid-template-vertical {
+  align-content: start;
+  grid-gap: 16px;
+  justify-content: stretch;
+  justify-items: start;
+  padding: 32px;
+}
+
+.i-amphtml-story-grid-template-vertical > * {
+  width: 100%;
+}
+
+.i-amphtml-story-grid-template-horizontal {
+  align-content: stretch;
+  align-items: start;
+  grid-gap: 16px;
+  justify-content: start;
+  padding: 32px;
+}
+
+.i-amphtml-story-grid-template-thirds {
+  padding: 32px;
+}
