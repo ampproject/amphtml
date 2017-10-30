@@ -354,7 +354,6 @@ const forbiddenTerms = {
       'build-system/test-server.js',
       'src/cookies.js',
       'src/service/cid-impl.js',
-      'extensions/amp-analytics/0.1/vendors.js',
       'testing/fake-dom.js',
     ],
   },
@@ -585,6 +584,9 @@ const forbiddenTerms = {
       'ads/google/imaVideo.js',
       'dist.3p/current/integration.js',
     ],
+  },
+  '\\.defer\\(\\)': {
+    message: 'Promise.defer() is deprecated and should not be used.',
   },
 };
 

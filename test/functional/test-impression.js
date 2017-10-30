@@ -22,6 +22,7 @@ import {
 import {toggleExperiment} from '../../src/experiments';
 import {Services} from '../../src/services';
 import {macroTask} from '../../testing/yield';
+import {user} from '../../src/log';
 import * as sinon from 'sinon';
 
 describe('impression', () => {
@@ -31,6 +32,7 @@ describe('impression', () => {
   let xhr;
   let isTrustedViewer;
   let isTrustedReferrer;
+  let warnStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -40,6 +42,7 @@ describe('impression', () => {
     xhr = Services.xhrFor(window);
     expect(xhr.fetchJson).to.exist;
     const stub = sandbox.stub(xhr, 'fetchJson');
+    warnStub = sandbox.stub(user(), 'warn');
     stub.returns(Promise.resolve({
       json() {
         return Promise.resolve(null);
@@ -199,6 +202,31 @@ describe('impression', () => {
       maybeTrackImpression(window);
       yield macroTask();
       expect(window.location.href).to.equal(prevHref);
+    });
+
+    it('should resolve if get no content response', function* () {
+      toggleExperiment(window, 'alp', true);
+      viewer.getParam.withArgs('click').returns('https://www.example.com');
+      xhr.fetchJson.returns(Promise.resolve({
+        // No-content response
+        status: 204,
+      }));
+      maybeTrackImpression(window);
+      return getTrackImpressionPromise().then(() => {
+        expect(warnStub).to.not.be.called;
+      });
+    });
+
+    it('should still resolve on request error', function* () {
+      toggleExperiment(window, 'alp', true);
+      viewer.getParam.withArgs('click').returns('https://www.example.com');
+      xhr.fetchJson.returns(Promise.resolve({
+        status: 404,
+      }));
+      maybeTrackImpression(window);
+      return getTrackImpressionPromise().then(() => {
+        expect(warnStub).to.be.calledOnce;
+      });
     });
 
     it('should resolve trackImpressionPromise if resolve click', () => {

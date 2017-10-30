@@ -27,6 +27,7 @@ import {
   DEFAULT_SAFEFRAME_VERSION,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
+import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
   experimentFeatureEnabled,
   DOUBLECLICK_EXPERIMENT_FEATURE,
@@ -642,10 +643,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (rtcResponse.response) {
         ['targeting', 'categoryExclusions'].forEach(key => {
           if (rtcResponse.response[key]) {
+            const rewrittenResponse = this.rewriteRtcKeys_(
+                rtcResponse.response[key],
+                rtcResponse.callout);
             this.jsonTargeting_[key] =
                 !!this.jsonTargeting_[key] ?
-                deepMerge(this.jsonTargeting_[key], rtcResponse.response[key]) :
-                rtcResponse.response[key];
+                deepMerge(this.jsonTargeting_[key],
+                    rewrittenResponse) :
+                rewrittenResponse;
           }
         });
       }
@@ -653,6 +658,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
   }
 
+  /**
+   * Appends the callout value to the keys of response to prevent a collision
+   * case caused by multiple vendors returning the same keys.
+   * @param {!Object<string, string>} response
+   * @param {!string} callout
+   * @return {!Object<string, string>}
+   * @private
+   */
+  rewriteRtcKeys_(response, callout) {
+    // Only perform this substitution for vendor-defined URLs.
+    if (!RTC_VENDORS[callout]) {
+      return response;
+    }
+    const newResponse = {};
+    Object.keys(response).forEach(key => {
+      newResponse[`${key}_${callout}`] = response[key];
+    });
+    return newResponse;
+  }
 
   /** @override */
   onNetworkFailure(error, adUrl) {
