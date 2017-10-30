@@ -74,13 +74,6 @@ export class AmpAnimation extends AMP.BaseElement {
   buildCallback() {
     const ampdoc = this.getAmpDoc();
 
-    // TODO(dvoytenko): Remove once we support direct parent visibility.
-    user().assert(
-        this.element.parentNode == this.element.ownerDocument.body ||
-        this.element.parentNode == ampdoc.getBody(),
-        `${TAG} is only allowed as a direct child of <body> element.` +
-        ' This restriction will be removed soon.');
-
     // Trigger.
     const trigger = this.element.getAttribute('trigger');
     if (trigger) {
@@ -88,6 +81,16 @@ export class AmpAnimation extends AMP.BaseElement {
           trigger == 'visibility',
           'Only allowed value for "trigger" is "visibility": %s',
           this.element);
+    }
+
+    // TODO(dvoytenko): Remove once we support direct parent visibility.
+    if (trigger == 'visibility') {
+      user().assert(
+          this.element.parentNode == this.element.ownerDocument.body ||
+          this.element.parentNode == ampdoc.getBody(),
+          `${TAG} is only allowed as a direct child of <body> element` +
+          ' when trigger is visibility.' +
+          ' This restriction will be removed soon.');
     }
 
     // Parse config.
