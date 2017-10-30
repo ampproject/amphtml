@@ -354,7 +354,6 @@ const forbiddenTerms = {
       'build-system/test-server.js',
       'src/cookies.js',
       'src/service/cid-impl.js',
-      'extensions/amp-analytics/0.1/vendors.js',
       'testing/fake-dom.js',
     ],
   },
