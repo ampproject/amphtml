@@ -58,7 +58,7 @@ export class AmpStoryBackground {
   }
 
   /**
-   * Update the background and move the previous background behind the new one.
+   * Update the background with new background image URL.
    * @param {string} newUrl
    */
   setBackground(newUrl) {
@@ -70,17 +70,23 @@ export class AmpStoryBackground {
     this.rotateActiveBackground_();
   }
 
+  /**
+   * Removes background image from page background.
+   */
   removeBackground() {
     resetStyles(this.hidden_, ['background-image']);
     this.rotateActiveBackground_();
   }
 
+  /**
+   * Rotates the classes on page background to bring the new bacground in foreground.
+   * @private
+   */
   rotateActiveBackground_() {
     const newHidden = this.active_;
     this.active_ = this.hidden_;
     this.hidden_ = newHidden;
     this.active_.classList.add('active');
     this.hidden_.classList.remove('active');
-    //this.container_.appendChild(this.active_);
   }
 }

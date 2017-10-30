@@ -714,7 +714,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Get the URL of the given page's background resource.
    * @param {!Element} pageElement
-   * @return {string} The URL of the background resource
+   * @return {?string} The URL of the background resource
    */
   getBackgroundUrl_(pageElement) {
     const fillElement =
