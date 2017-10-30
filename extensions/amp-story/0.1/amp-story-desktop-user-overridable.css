@@ -1,0 +1,13 @@
+.i-amphtml-story-background {
+  background-color: transparent;
+}
+
+[desktop] amp-story-page {
+  border-radius: 3px;
+}
+
+[desktop] amp-story-page {
+  max-height: 736px;
+  max-width: 338px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, .4);
+}
