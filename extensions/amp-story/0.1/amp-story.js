@@ -45,11 +45,12 @@ import {
   isFullscreenElement,
   scopedQuerySelector,
   scopedQuerySelectorAll,
+  removeChildren,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {once} from '../../../src/utils/function';
 import {debounce} from '../../../src/utils/rate-limit';
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {AudioManager, upgradeBackgroundAudio} from './audio';
 import {setStyle, setStyles, setImportantStyles} from '../../../src/style';
@@ -374,7 +375,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   isAmpStoryEnabled_() {
-    if (isExperimentOn(this.win, TAG) || getMode().test || getMode().localDev) {
+    if (isExperimentOn(this.win, TAG) || getMode().test) {
       return true;
     }
 
@@ -427,28 +428,39 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   assertAmpStoryExperiment_() {
-    if (!this.isAmpStoryEnabled_()) {
-      const errorIconEl = this.win.document.createElement('div');
-      errorIconEl.classList.add('i-amphtml-story-experiment-error-icon');
-
-      const errorMsgEl = this.win.document.createElement('span');
-      errorMsgEl.textContent = 'You must enable the amp-story experiment to ' +
-          'view this content.';
-
-      const experimentsLinkEl = this.win.document.createElement('a');
-      experimentsLinkEl.href = `${urls.cdn}/experiments.html`;
-      experimentsLinkEl.textContent = 'Enable or disable your experiments on ' +
-          'the experiments dashboard.';
-
-      const errorEl = this.win.document.createElement('div');
-      errorEl.classList.add('i-amphtml-story-experiment-error');
-      errorEl.appendChild(errorIconEl);
-      errorEl.appendChild(errorMsgEl);
-      errorEl.appendChild(experimentsLinkEl);
-      this.element.appendChild(errorEl);
-
-      user().error(TAG, 'enable amp-story experiment');
+    if (this.isAmpStoryEnabled_()) {
+      return;
     }
+
+    const errorIconEl = this.win.document.createElement('div');
+    errorIconEl.classList.add('i-amphtml-story-experiment-error-icon');
+
+    const errorMsgEl = this.win.document.createElement('span');
+    errorMsgEl.textContent = 'You must enable the amp-story experiment to ' +
+        'view this content.';
+
+    const experimentsLinkEl = this.win.document.createElement('button');
+    experimentsLinkEl.textContent = 'Enable';
+    experimentsLinkEl.addEventListener('click', () => {
+      this.enableAmpStoryExperiment_();
+    });
+
+    const errorEl = this.win.document.createElement('div');
+    errorEl.classList.add('i-amphtml-story-experiment-error');
+    errorEl.appendChild(errorIconEl);
+    errorEl.appendChild(errorMsgEl);
+    errorEl.appendChild(experimentsLinkEl);
+    this.element.appendChild(errorEl);
+
+    user().error(TAG, 'enable amp-story experiment');
+  }
+
+
+  /** @private */
+  enableAmpStoryExperiment_() {
+    toggleExperiment(this.win, 'amp-story', true);
+    toggleExperiment(this.win, 'dev-channel', true);
+    this.win.location.reload();
   }
 
 

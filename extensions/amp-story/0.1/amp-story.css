@@ -646,6 +646,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
 
 /** Experiment disabled  */
 .i-amphtml-story-experiment-error {
+  align-items: center;
   align-content: center;
   background-color: #222 !important;
   bottom: 0 !important;
@@ -672,8 +673,25 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   width: 64px;
 }
 
-.i-amphtml-story-experiment-error a {
+.i-amphtml-story-experiment-error button {
+  background-color: transparent !important;
+  border: 1px solid #f0f0f0 !important;
+  border-radius: 8px !important;
   color: #f0f0f0 !important;
+  cursor: pointer !important;
+  font-size: 20px;
+  font-family: 'Roboto', sans-serif !important;
+  margin: 16px 0 0 !important;
+  outline: none;
+  padding: 8px 32px !important;
+  text-transform: uppercase;
+  width: 50% !important;
+}
+
+.i-amphtml-story-experiment-error button:active,
+.i-amphtml-story-experiment-error button:focus {
+  background-color: #f0f0f0 !important;
+  color: #222 !important;
 }
 
 .i-amphtml-story-unmute-audio-control {
