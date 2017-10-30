@@ -500,7 +500,7 @@ function createErrorVargs(var_args) {
  * whether the original error designation is a user error or a dev error.
  * @param {...*} var_args
  */
-export function rethrowAsync(var_args) {
+export function rethrowAsync(var_args) { return;
   const error = createErrorVargs.apply(null, arguments);
   setTimeout(() => {
     // reportError is installed globally per window in the entry point.

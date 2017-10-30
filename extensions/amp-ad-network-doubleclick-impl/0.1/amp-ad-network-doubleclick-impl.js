@@ -1228,7 +1228,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'gutData': JSON.stringify(dict({
         'events': [{
           'timestamp': new Date().getTime(),
-          'slotId': this.element.getAttribute('data-slot'),
+          'slotid': this.element.getAttribute('data-slot'),
           'messageId': 4,
         }],
         'slots': [{
