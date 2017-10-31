@@ -588,6 +588,9 @@ const forbiddenTerms = {
   '\\.defer\\(\\)': {
     message: 'Promise.defer() is deprecated and should not be used.',
   },
+  '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': {  // eslint-disable-line max-len
+    message: 'TAG is not an argument to assert(). Will cause false positives.',
+  },
 };
 
 const ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded' +
