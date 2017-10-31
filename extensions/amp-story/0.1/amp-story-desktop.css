@@ -378,11 +378,6 @@ amp-story-page.i-amphtml-story-page-shown {
  bottom: 0;
 }
 
-[desktop] .i-amphtml-story-page-progress-bar {
-  margin: 0 2px;
-  overflow: hidden;
-}
-
 [desktop] .i-amphtml-story-page-progress-bar:first-child,
 [desktop] .i-amphtml-story-page-progress-bar:first-child .i-amphtml-story-page-progress-value {
   border-radius: 50px 0 0 50px;
