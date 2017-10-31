@@ -170,7 +170,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.maybeCreateAnimationManager_();
     this.initializeLoading_();
     this.advancement_.addPreviousListener(() => this.previous());
-    this.advancement_.addAdvanceListener(() => this.next(/* opt_isAutomaticAdvance */ true));
+    this.advancement_
+        .addAdvanceListener(() => this.next(/* opt_isAutomaticAdvance */ true));
     this.advancement_
         .addProgressListener(progress => this.emitProgress_(progress));
   }
