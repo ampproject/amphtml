@@ -42,8 +42,12 @@ export const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 export const DFP_CANONICAL_FF_EXPERIMENT_NAME = 'expDfpCanonicalFf';
 
 /** @const {string} */
-export const DFP_UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME =
+export const UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME =
     'expUnconditionedCanonical';
+
+/** @const {string} */
+export const UNCONDITIONED_IDENTITY_EXPERIMENT_NAME =
+    'expUnconditionedDfpIdentity';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -113,6 +117,18 @@ export class DoubleclickA4aEligibility {
     return googleCdnProxyRegex.test(win.location.origin);
   }
 
+  unconditionedExperimentSelection(win, element) {
+    let experimentId = this.maybeSelectExperiment(
+        win, element,[DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
+        UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME);
+    if (!!experimentId) {
+      addExperimentIdToElement(experimentId, element);
+      forceExperimentBranch(
+          win, UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME, experimentId);
+    }
+  }
+
   /** Whether Fast Fetch is enabled
    * @param {!Window} win
    * @param {!Element} element
@@ -120,15 +136,7 @@ export class DoubleclickA4aEligibility {
    * @return {boolean}
    */
   isA4aEnabled(win, element, useRemoteHtml) {
-    let experimentId = this.maybeSelectExperiment(
-        win, element,[DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
-          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
-        DFP_UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME);
-    if (!!experimentId) {
-      addExperimentIdToElement(experimentId, element);
-      forceExperimentBranch(
-          win, DFP_CANONICAL_FF_EXPERIMENT_NAME, experimentId);
-    }
+    let experimentId = this.unconditionedExperimentSelection(win, element);
 
     if ((useRemoteHtml && !element.getAttribute('rtc-config')) ||
         'useSameDomainRenderingUntilDeprecated' in element.dataset ||
@@ -144,12 +152,12 @@ export class DoubleclickA4aEligibility {
           (getMode(win).localDev || getMode(win).test)) {
         experimentId = MANUAL_EXPERIMENT_ID;
       } else {
+        let e;
         // For unconditioned canonical experiment, in the experiment branch
         // we allow Fast Fetch on non-CDN pages, but in the control we do not.
-        if ([DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
-          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP,
-        ].includes(experimentId)) {
-          return experimentId ==
+        if (e = getExperimentBranch(
+            win, UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME)) {
+          return e ==
               DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP;
         }
         experimentId = this.maybeSelectExperiment(win, element, [
